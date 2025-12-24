@@ -5,6 +5,9 @@ import morgan from 'morgan';
 import compression from 'compression';
 import dotenv from 'dotenv';
 
+// Import routes
+import authRoutes from './routes/auth.js';
+
 // Load environment variables
 dotenv.config();
 
@@ -73,8 +76,57 @@ app.get('/api', (req, res) => {
   });
 });
 
-// API routes (will be added in Day 4+)
-// app.use('/api/auth', authRoutes);
+// Auth routes
+app.use('/api/auth', authRoutes);
+
+// Test routes for authentication
+import { authenticate, authorize } from './middleware/auth.js';
+
+// Test protected route
+app.get('/api/test/protected', authenticate, (req, res) => {
+  res.json({
+    message: 'Access granted! You are authenticated.',
+    user: req.user
+  });
+});
+
+// Test role-based route
+app.get('/api/test/player-only', 
+  authenticate, 
+  authorize('PLAYER'), 
+  (req, res) => {
+    res.json({
+      message: 'Player-only content accessed successfully!',
+      user: req.user
+    });
+  }
+);
+
+// Test organizer-only route
+app.get('/api/test/organizer-only', 
+  authenticate, 
+  authorize('ORGANIZER'), 
+  (req, res) => {
+    res.json({
+      message: 'Organizer-only content accessed successfully!',
+      user: req.user
+    });
+  }
+);
+
+// Test admin-only route
+app.get('/api/test/admin-only', 
+  authenticate, 
+  authorize('ADMIN'), 
+  (req, res) => {
+    res.json({
+      message: 'Admin-only content accessed successfully!',
+      user: req.user
+    });
+  }
+);
+
+// API routes (will be added in later days)
 // app.use('/api/tournaments', tournamentRoutes);
 // app.use('/api/registrations', registrationRoutes);
 // app.use('/api/matches', matchRoutes);

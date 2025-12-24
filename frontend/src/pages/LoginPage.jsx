@@ -1,33 +1,76 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
-function LoginPage() {
+const LoginPage = () => {
   const [formData, setFormData] = useState({
     email: '',
-    password: ''
-  })
-  const [isLoading, setIsLoading] = useState(false)
+    password: '',
+  });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
-    })
-  }
+      [e.target.name]: e.target.value,
+    });
+    setError(''); // Clear error on input change
+  };
+
+  const validateForm = () => {
+    if (!formData.email || !formData.password) {
+      setError('All fields are required');
+      return false;
+    }
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setError('Invalid email format');
+      return false;
+    }
+    
+    return true;
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setIsLoading(true)
+    e.preventDefault();
     
-    // TODO: Implement login logic (Day 4-5)
-    console.log('Login attempt:', formData)
+    if (!validateForm()) return;
     
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false)
-      alert('Login functionality will be implemented in Day 4-5!')
-    }, 1000)
-  }
+    setLoading(true);
+    setError('');
+    
+    try {
+      const user = await login(formData.email, formData.password);
+      
+      // Redirect based on role
+      switch (user.role) {
+        case 'PLAYER':
+          navigate('/dashboard');
+          break;
+        case 'ORGANIZER':
+          navigate('/organizer/dashboard');
+          break;
+        case 'UMPIRE':
+          navigate('/umpire/dashboard');
+          break;
+        case 'ADMIN':
+          navigate('/admin/dashboard');
+          break;
+        default:
+          navigate('/');
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      setError(err.response?.data?.error || 'Login failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -49,6 +92,12 @@ function LoginPage() {
         {/* Login Form */}
         <div className="card">
           <div className="card-body">
+            {error && (
+              <div className="alert-error mb-6">
+                {error}
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Email Field */}
               <div>
@@ -59,6 +108,7 @@ function LoginPage() {
                   id="email"
                   name="email"
                   type="email"
+                  autoComplete="email"
                   required
                   className="input"
                   placeholder="Enter your email"
@@ -76,6 +126,7 @@ function LoginPage() {
                   id="password"
                   name="password"
                   type="password"
+                  autoComplete="current-password"
                   required
                   className="input"
                   placeholder="Enter your password"
@@ -107,10 +158,10 @@ function LoginPage() {
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={isLoading}
+                disabled={loading}
                 className="btn-primary w-full btn-lg"
               >
-                {isLoading ? (
+                {loading ? (
                   <>
                     <span className="spinner mr-2"></span>
                     Signing in...
@@ -136,18 +187,18 @@ function LoginPage() {
         {/* Demo Credentials */}
         <div className="card bg-gray-50">
           <div className="card-body">
-            <h3 className="text-sm font-medium text-gray-700 mb-2">Demo Credentials (Day 1)</h3>
+            <h3 className="text-sm font-medium text-gray-700 mb-2">Demo Credentials</h3>
             <div className="text-xs text-gray-500 space-y-1">
-              <p><strong>Player:</strong> player@matchify.com / password123</p>
-              <p><strong>Organizer:</strong> organizer@matchify.com / password123</p>
-              <p><strong>Umpire:</strong> umpire@matchify.com / password123</p>
+              <p><strong>Player:</strong> testplayer@matchify.com / password123</p>
+              <p><strong>Organizer:</strong> testorganizer@matchify.com / password123</p>
+              <p><strong>Umpire:</strong> umpire@test.com / password123</p>
               <p><strong>Admin:</strong> admin@matchify.com / password123</p>
             </div>
           </div>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default LoginPage
+export default LoginPage;

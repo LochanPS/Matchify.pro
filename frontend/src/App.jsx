@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
+import Navbar from './components/Navbar'
 import ProtectedRoute from './components/ProtectedRoute'
 import RoleRoute from './components/RoleRoute'
 import HomePage from './pages/HomePage'
@@ -14,6 +15,7 @@ function App() {
   return (
     <AuthProvider>
       <div className="min-h-screen bg-gray-50">
+        <Navbar />
         <Routes>
           {/* Public routes */}
           <Route path="/" element={<HomePage />} />

@@ -31,30 +31,49 @@ api.interceptors.response.use(
       const refreshToken = localStorage.getItem('refreshToken');
       if (refreshToken) {
         try {
+          console.log('🔄 Attempting to refresh token...');
           const response = await axios.post(`${API_BASE_URL}/auth/refresh-token`, {
             refreshToken
           });
           
           const { accessToken, refreshToken: newRefreshToken } = response.data;
+          
+          // Update stored tokens
           localStorage.setItem('accessToken', accessToken);
           localStorage.setItem('refreshToken', newRefreshToken);
           
+          // Update the authorization header for future requests
+          api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+          
           // Retry original request with new token
           originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+          
+          console.log('✅ Token refreshed successfully');
           return api(originalRequest);
         } catch (refreshError) {
+          console.error('❌ Token refresh failed:', refreshError);
           // Refresh failed, redirect to login
           localStorage.removeItem('accessToken');
           localStorage.removeItem('refreshToken');
           localStorage.removeItem('user');
-          window.location.href = '/login';
+          
+          // Only redirect if we're not already on login/register pages
+          if (!window.location.pathname.includes('/login') && 
+              !window.location.pathname.includes('/register')) {
+            window.location.href = '/login';
+          }
         }
       } else {
+        console.log('❌ No refresh token available');
         // No refresh token, redirect to login
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('user');
-        window.location.href = '/login';
+        
+        if (!window.location.pathname.includes('/login') && 
+            !window.location.pathname.includes('/register')) {
+          window.location.href = '/login';
+        }
       }
     }
     return Promise.reject(error);

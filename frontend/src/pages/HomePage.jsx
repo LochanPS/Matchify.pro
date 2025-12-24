@@ -1,34 +1,28 @@
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 function HomePage() {
+  const { user } = useAuth();
+
+  const getDashboardLink = () => {
+    if (!user) return '/login';
+    
+    switch (user.role) {
+      case 'PLAYER':
+        return '/dashboard';
+      case 'ORGANIZER':
+        return '/organizer/dashboard';
+      case 'UMPIRE':
+        return '/umpire/dashboard';
+      case 'ADMIN':
+        return '/admin/dashboard';
+      default:
+        return '/dashboard';
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50">
-      {/* Navigation */}
-      <nav className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-2">
-              <span className="text-2xl">🎾</span>
-              <span className="text-xl font-bold text-gradient">MATCHIFY</span>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Link
-                to="/login"
-                className="btn-secondary"
-              >
-                Login
-              </Link>
-              <Link
-                to="/register"
-                className="btn-primary"
-              >
-                Register
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
-
       {/* Hero Section */}
       <div className="relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
@@ -52,18 +46,34 @@ function HomePage() {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Link
-                to="/register"
-                className="btn-primary btn-lg shadow-glow"
-              >
-                🚀 Start Playing
-              </Link>
-              <Link
-                to="/login"
-                className="btn-secondary btn-lg"
-              >
-                Already a Player?
-              </Link>
+              {user ? (
+                <>
+                  <Link
+                    to={getDashboardLink()}
+                    className="btn-primary btn-lg shadow-glow"
+                  >
+                    🏆 Go to Dashboard
+                  </Link>
+                  <div className="text-sm text-gray-600">
+                    Welcome back, <span className="font-medium">{user.name}</span>!
+                  </div>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/register"
+                    className="btn-primary btn-lg shadow-glow"
+                  >
+                    🚀 Get Started
+                  </Link>
+                  <Link
+                    to="/login"
+                    className="btn-secondary btn-lg"
+                  >
+                    Sign In
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -173,7 +183,7 @@ function HomePage() {
         </div>
       </footer>
     </div>
-  )
+  );
 }
 
-export default HomePage
+export default HomePage;

@@ -1,0 +1,487 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// 1. USERS TABLE
+// ============================================
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  password      String
+  name          String
+  phone         String   @unique
+  role          Role     @default(PLAYER)
+  profilePhoto  String?
+  city          String?
+  state         String?
+  country       String   @default("India")
+  dateOfBirth   DateTime?
+  gender        Gender?
+
+  // Wallet
+  walletBalance Float    @default(0)
+
+  // Stats (for players)
+  totalPoints   Int      @default(0)
+  tournamentsPlayed Int  @default(0)
+  matchesWon    Int      @default(0)
+  matchesLost   Int      @default(0)
+
+  // Account status
+  isActive      Boolean  @default(true)
+  isSuspended   Boolean  @default(false)
+  suspendedUntil DateTime?
+  suspensionReason String?
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  tournaments        Tournament[]
+  registrations      Registration[]
+  partnerRegistrations Registration[] @relation("PartnerRegistrations")
+  matchesAsPlayer1   Match[] @relation("Player1Matches")
+  matchesAsPlayer2   Match[] @relation("Player2Matches")
+  matchesAsUmpire    Match[] @relation("UmpireMatches")
+  walletTransactions WalletTransaction[]
+  pointsLog          MatchifyPointsLog[]
+  notifications      Notification[]
+  auditLogs          AuditLog[]
+
+  @@index([email])
+  @@index([phone])
+  @@index([role])
+}
+
+enum Role {
+  PLAYER
+  ORGANIZER
+  UMPIRE
+  ADMIN
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+// ============================================
+// 2. TOURNAMENTS TABLE
+// ============================================
+model Tournament {
+  id              String   @id @default(uuid())
+  organizerId     String
+  organizer       User     @relation(fields: [organizerId], references: [id])
+
+  // Basic Info
+  name            String
+  description     String?  @db.Text
+
+  // Location
+  venue           String
+  address         String
+  city            String
+  state           String
+  zone            String   // North, South, East, West, Central
+  country         String   @default("India")
+
+  // Dates
+  startDate       DateTime
+  endDate         DateTime
+  registrationOpen DateTime
+  registrationClose DateTime
+
+  // Settings
+  privacyMode     PrivacyMode @default(PUBLIC)
+  status          TournamentStatus @default(DRAFT)
+  maxParticipants Int?
+
+  // Courts
+  totalCourts     Int      @default(1)
+
+  // Timing
+  matchStartTime  String   // e.g., "08:00"
+  matchEndTime    String   // e.g., "18:00"
+
+  // Cancellation
+  cancelledAt     DateTime?
+  cancellationReason String?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  posters         TournamentPoster[]
+  categories      Category[]
+  registrations   Registration[]
+
+  @@index([organizerId])
+  @@index([city])
+  @@index([state])
+  @@index([status])
+  @@index([startDate])
+}
+
+enum PrivacyMode {
+  PUBLIC
+  PRIVATE
+}
+
+enum TournamentStatus {
+  DRAFT
+  PUBLISHED
+  REGISTRATION_OPEN
+  REGISTRATION_CLOSED
+  ONGOING
+  COMPLETED
+  CANCELLED
+}
+
+// ============================================
+// 3. TOURNAMENT POSTERS TABLE
+// ============================================
+model TournamentPoster {
+  id            String   @id @default(uuid())
+  tournamentId  String
+  tournament    Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+
+  imageUrl      String
+  displayOrder  Int      @default(0)
+
+  createdAt     DateTime @default(now())
+
+  @@index([tournamentId])
+}
+
+// ============================================
+// 4. CATEGORIES TABLE
+// ============================================
+model Category {
+  id            String   @id @default(uuid())
+  tournamentId  String
+  tournament    Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+
+  name          String   // e.g., "Men's Singles U-19"
+  format        Format
+  ageGroup      String?  // e.g., "U-19", "Open", "35+"
+  gender        CategoryGender?
+
+  entryFee      Float
+  drawFormat    DrawFormat @default(SINGLE_ELIMINATION)
+
+  // Limits
+  maxEntries    Int?
+  currentEntries Int     @default(0)
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  registrations Registration[]
+  draws         Draw[]
+  matches       Match[]
+
+  @@index([tournamentId])
+}
+
+enum Format {
+  SINGLES
+  DOUBLES
+}
+
+enum CategoryGender {
+  MALE
+  FEMALE
+  MIXED
+}
+
+enum DrawFormat {
+  SINGLE_ELIMINATION
+  ROUND_ROBIN
+}
+
+// ============================================
+// 5. REGISTRATIONS TABLE
+// ============================================
+model Registration {
+  id            String   @id @default(uuid())
+
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+
+  tournamentId  String
+  tournament    Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+
+  categoryId    String
+  category      Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  // For doubles
+  partnerId     String?
+  partner       User?    @relation("PartnerRegistrations", fields: [partnerId], references: [id])
+  partnerStatus PartnerStatus @default(PENDING)
+
+  // Payment
+  amount        Float
+  paidViaWallet Float    @default(0)
+  paidViaGateway Float   @default(0)
+  paymentStatus PaymentStatus @default(PENDING)
+  razorpayOrderId String?
+  razorpayPaymentId String?
+
+  // Status
+  status        RegistrationStatus @default(PENDING)
+
+  // Cancellation
+  cancelledAt   DateTime?
+  refundAmount  Float?
+  refundedAt    DateTime?
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([userId])
+  @@index([tournamentId])
+  @@index([categoryId])
+  @@unique([userId, categoryId]) // One registration per user per category
+}
+
+enum PartnerStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum RegistrationStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+// ============================================
+// 6. WALLET TRANSACTIONS TABLE
+// ============================================
+model WalletTransaction {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+
+  type          TransactionType
+  amount        Float
+  balanceBefore Float
+  balanceAfter  Float
+
+  description   String
+
+  // Payment gateway (for top-ups)
+  razorpayOrderId String?
+  razorpayPaymentId String?
+
+  createdAt     DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+enum TransactionType {
+  TOPUP
+  DEBIT          // For tournament registration
+  REFUND         // For cancellations
+  CREDIT         // Admin adjustments
+}
+
+// ============================================
+// 7. DRAWS TABLE (Seeding Info)
+// ============================================
+model Draw {
+  id            String   @id @default(uuid())
+  categoryId    String
+  category      Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  participantId String   // User ID (singles) or Registration ID (doubles)
+  participantType ParticipantType
+
+  seed          Int      // Seed number (1, 2, 3, ...)
+  seedScore     Float    // Calculated seed score
+
+  // Points breakdown
+  totalPoints   Int      @default(0)
+  tournamentsPlayed Int  @default(0)
+  recentPerformance Float @default(1.0) // Multiplier
+
+  createdAt     DateTime @default(now())
+
+  @@index([categoryId])
+  @@unique([categoryId, seed])
+}
+
+enum ParticipantType {
+  SINGLE
+  DOUBLE
+}
+
+// ============================================
+// 8. MATCHES TABLE
+// ============================================
+model Match {
+  id            String   @id @default(uuid())
+  categoryId    String
+  category      Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  // Match details
+  round         String   // e.g., "Round 1", "Quarter Final", "Semi Final", "Final"
+  matchNumber   Int
+  courtNumber   Int?
+
+  // Participants
+  player1Id     String?
+  player1       User?    @relation("Player1Matches", fields: [player1Id], references: [id])
+
+  player2Id     String?
+  player2       User?    @relation("Player2Matches", fields: [player2Id], references: [id])
+
+  // For doubles (store partner IDs in JSON or separate table)
+  player1PartnerId String?
+  player2PartnerId String?
+
+  // Umpire
+  umpireId      String?
+  umpire        User?    @relation("UmpireMatches", fields: [umpireId], references: [id])
+
+  // Score (stored as JSON)
+  scoreJson     Json?    // { sets: [{ player1: 21, player2: 19 }, ...] }
+
+  // Winner
+  winnerId      String?
+
+  // Status
+  status        MatchStatus @default(SCHEDULED)
+
+  // Timing
+  scheduledAt   DateTime?
+  startedAt     DateTime?
+  completedAt   DateTime?
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([categoryId])
+  @@index([status])
+}
+
+enum MatchStatus {
+  SCHEDULED
+  LIVE
+  COMPLETED
+  WALKOVER
+  CANCELLED
+}
+
+// ============================================
+// 9. MATCHIFY POINTS LOG
+// ============================================
+model MatchifyPointsLog {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+
+  matchId       String?
+  tournamentStage String // e.g., "Round 1", "Final"
+
+  points        Int      // Points awarded (50, 100, 200, 500)
+  reason        String   // e.g., "Won Quarter Final"
+
+  createdAt     DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+// ============================================
+// 10. NOTIFICATIONS TABLE
+// ============================================
+model Notification {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+
+  type          NotificationType
+  title         String
+  message       String   @db.Text
+
+  // Related entities
+  relatedId     String?  // Tournament ID, Match ID, etc.
+
+  isRead        Boolean  @default(false)
+  readAt        DateTime?
+
+  createdAt     DateTime @default(now())
+
+  @@index([userId])
+  @@index([isRead])
+}
+
+enum NotificationType {
+  REGISTRATION_CONFIRMED
+  PARTNER_INVITE
+  PARTNER_ACCEPTED
+  PARTNER_DECLINED
+  DRAW_PUBLISHED
+  MATCH_ASSIGNED
+  MATCH_STARTING
+  TOURNAMENT_CANCELLED
+  SUSPENSION_NOTICE
+}
+
+// ============================================
+// 11. ADMIN INVITES TABLE
+// ============================================
+model AdminInvite {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  token         String   @unique
+  oneTimePassword String
+
+  expiresAt     DateTime
+  acceptedAt    DateTime?
+  revokedAt     DateTime?
+
+  createdById   String
+  createdAt     DateTime @default(now())
+
+  @@index([email])
+  @@index([token])
+}
+
+// ============================================
+// 12. AUDIT LOGS TABLE (Immutable)
+// ============================================
+model AuditLog {
+  id            String   @id @default(uuid())
+  adminId       String
+  admin         User     @relation(fields: [adminId], references: [id])
+
+  action        String   // e.g., "SUSPEND_USER", "CANCEL_TOURNAMENT"
+  targetType    String   // e.g., "User", "Tournament"
+  targetId      String
+
+  details       Json?    // Additional context
+
+  createdAt     DateTime @default(now())
+
+  @@index([adminId])
+  @@index([createdAt])
+}

@@ -17,7 +17,7 @@ router.post('/register', async (req, res) => {
     const {
       email,
       password,
-      role,
+      roles, // Now accepts array of roles
       name,
       phone,
       dateOfBirth,
@@ -27,9 +27,9 @@ router.post('/register', async (req, res) => {
     } = req.body;
 
     // Validation
-    if (!email || !password || !role || !name) {
+    if (!email || !password || !name) {
       return res.status(400).json({
-        error: 'Missing required fields: email, password, role, name'
+        error: 'Missing required fields: email, password, name'
       });
     }
 
@@ -48,12 +48,20 @@ router.post('/register', async (req, res) => {
       });
     }
 
-    // Validate role
+    // Process roles
     const validRoles = ['PLAYER', 'ORGANIZER', 'UMPIRE'];
-    if (!validRoles.includes(role)) {
-      return res.status(400).json({
-        error: 'Invalid role. Must be PLAYER, ORGANIZER, or UMPIRE'
-      });
+    let userRoles = ['PLAYER']; // Default
+    
+    if (roles && Array.isArray(roles)) {
+      userRoles = roles.filter(r => validRoles.includes(r));
+      if (userRoles.length === 0) {
+        userRoles = ['PLAYER']; // Fallback to PLAYER if no valid roles
+      }
+    } else if (roles && typeof roles === 'string') {
+      // Handle single role as string (backward compatibility)
+      if (validRoles.includes(roles)) {
+        userRoles = [roles];
+      }
     }
 
     // Validate gender if provided
@@ -90,6 +98,9 @@ router.post('/register', async (req, res) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 12);
 
+    // Determine initial wallet balance based on role
+    const initialBalance = role === 'ORGANIZER' ? 25 : 0;
+
     // Create user
     const user = await prisma.user.create({
       data: {
@@ -101,7 +112,8 @@ router.post('/register', async (req, res) => {
         dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
         city,
         state,
-        gender
+        gender,
+        walletBalance: initialBalance
       }
     });
 
@@ -181,6 +193,15 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({
         error: 'Invalid email or password'
       });
+    }
+
+    // Give 25 free credits to organizers on first login if they have 0 balance
+    if (user.role === 'ORGANIZER' && user.walletBalance === 0) {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { walletBalance: 25 }
+      });
+      user.walletBalance = 25;
     }
 
     // Generate tokens

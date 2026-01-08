@@ -1,0 +1,248 @@
+### 🎾 MATCHIFY - DAY 15 TOURNAMENT BACKEND TESTS
+### Tournament Creation & Poster Upload Testing
+
+@baseUrl = http://localhost:5000/api
+@organizerToken = YOUR_ORGANIZER_JWT_TOKEN_HERE
+@tournamentId = YOUR_TOURNAMENT_ID_HERE
+
+### ============================================
+### TEST 1: Create Tournament (Valid Data)
+### ============================================
+POST {{baseUrl}}/tournaments
+Authorization: Bearer {{organizerToken}}
+Content-Type: application/json
+
+{
+  "name": "Bangalore Open Badminton Championship 2025",
+  "description": "Annual open badminton tournament featuring multiple categories for players of all skill levels. Cash prizes and trophies for winners.",
+  "venue": "Kanteerava Indoor Stadium",
+  "address": "Kasturba Road, Sampangi Rama Nagar",
+  "city": "Bangalore",
+  "state": "Karnataka",
+  "pincode": "560001",
+  "zone": "South",
+  "country": "India",
+  "format": "both",
+  "privacy": "public",
+  "registrationOpenDate": "2025-01-20T00:00:00.000Z",
+  "registrationCloseDate": "2025-02-10T23:59:59.000Z",
+  "startDate": "2025-02-15T08:00:00.000Z",
+  "endDate": "2025-02-17T18:00:00.000Z"
+}
+
+### Expected Response: 201 Created
+### {
+###   "success": true,
+###   "message": "Tournament created successfully",
+###   "tournament": {
+###     "id": "uuid-here",
+###     "name": "Bangalore Open Badminton Championship 2025",
+###     "city": "Bangalore",
+###     "startDate": "2025-02-15T08:00:00.000Z",
+###     "status": "draft"
+###   }
+### }
+
+### ============================================
+### TEST 2: Create Tournament (Invalid Zone)
+### ============================================
+POST {{baseUrl}}/tournaments
+Authorization: Bearer {{organizerToken}}
+Content-Type: application/json
+
+{
+  "name": "Test Tournament",
+  "description": "This is a test tournament with invalid zone",
+  "venue": "Test Venue",
+  "address": "Test Address",
+  "city": "Mumbai",
+  "state": "Maharashtra",
+  "pincode": "400001",
+  "zone": "InvalidZone",
+  "format": "singles",
+  "registrationOpenDate": "2025-01-20T00:00:00.000Z",
+  "registrationCloseDate": "2025-02-10T23:59:59.000Z",
+  "startDate": "2025-02-15T08:00:00.000Z",
+  "endDate": "2025-02-17T18:00:00.000Z"
+}
+
+### Expected Response: 400 Bad Request
+### {
+###   "success": false,
+###   "errors": ["Invalid zone. Must be: North, South, East, West, Central, or Northeast"]
+### }
+
+### ============================================
+### TEST 3: Create Tournament (Invalid Dates)
+### ============================================
+POST {{baseUrl}}/tournaments
+Authorization: Bearer {{organizerToken}}
+Content-Type: application/json
+
+{
+  "name": "Test Tournament",
+  "description": "This is a test tournament with invalid dates",
+  "venue": "Test Venue",
+  "address": "Test Address",
+  "city": "Delhi",
+  "state": "Delhi",
+  "pincode": "110001",
+  "zone": "North",
+  "format": "doubles",
+  "registrationOpenDate": "2025-02-10T00:00:00.000Z",
+  "registrationCloseDate": "2025-02-09T23:59:59.000Z",
+  "startDate": "2025-02-15T08:00:00.000Z",
+  "endDate": "2025-02-17T18:00:00.000Z"
+}
+
+### Expected Response: 400 Bad Request
+### {
+###   "success": false,
+###   "errors": ["Registration close date must be after registration open date"]
+### }
+
+### ============================================
+### TEST 4: Create Tournament (Short Description)
+### ============================================
+POST {{baseUrl}}/tournaments
+Authorization: Bearer {{organizerToken}}
+Content-Type: application/json
+
+{
+  "name": "Test Tournament",
+  "description": "Too short",
+  "venue": "Test Venue",
+  "address": "Test Address",
+  "city": "Chennai",
+  "state": "Tamil Nadu",
+  "pincode": "600001",
+  "zone": "South",
+  "format": "both",
+  "registrationOpenDate": "2025-01-20T00:00:00.000Z",
+  "registrationCloseDate": "2025-02-10T23:59:59.000Z",
+  "startDate": "2025-02-15T08:00:00.000Z",
+  "endDate": "2025-02-17T18:00:00.000Z"
+}
+
+### Expected Response: 400 Bad Request
+### {
+###   "success": false,
+###   "errors": ["Description must be at least 20 characters"]
+### }
+
+### ============================================
+### TEST 5: Create Tournament (Non-Organizer)
+### ============================================
+### Note: Use a PLAYER token instead of organizer token
+POST {{baseUrl}}/tournaments
+Authorization: Bearer YOUR_PLAYER_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "name": "Test Tournament",
+  "description": "This should fail because user is not an organizer",
+  "venue": "Test Venue",
+  "address": "Test Address",
+  "city": "Kolkata",
+  "state": "West Bengal",
+  "pincode": "700001",
+  "zone": "East",
+  "format": "singles",
+  "registrationOpenDate": "2025-01-20T00:00:00.000Z",
+  "registrationCloseDate": "2025-02-10T23:59:59.000Z",
+  "startDate": "2025-02-15T08:00:00.000Z",
+  "endDate": "2025-02-17T18:00:00.000Z"
+}
+
+### Expected Response: 403 Forbidden
+### {
+###   "success": false,
+###   "error": "Only organizers can create tournaments"
+### }
+
+### ============================================
+### TEST 6: Upload Tournament Posters
+### ============================================
+### Note: This is a multipart/form-data request
+### You'll need to use Postman or Thunder Client for file uploads
+### 
+### POST {{baseUrl}}/tournaments/{{tournamentId}}/posters
+### Authorization: Bearer {{organizerToken}}
+### Content-Type: multipart/form-data
+### 
+### Form Data:
+### - posters: [file1.jpg]
+### - posters: [file2.jpg]
+### - posters: [file3.jpg]
+
+### Expected Response: 201 Created
+### {
+###   "success": true,
+###   "message": "3 poster(s) uploaded successfully",
+###   "posters": [
+###     {
+###       "id": "poster-uuid-1",
+###       "tournamentId": "tournament-uuid",
+###       "imageUrl": "https://res.cloudinary.com/...",
+###       "publicId": "matchify/tournaments/.../poster1",
+###       "displayOrder": 0,
+###       "createdAt": "2025-01-15T10:30:00.000Z"
+###     }
+###   ]
+### }
+
+### ============================================
+### TEST 7: Upload Posters (No Files)
+### ============================================
+POST {{baseUrl}}/tournaments/{{tournamentId}}/posters
+Authorization: Bearer {{organizerToken}}
+Content-Type: multipart/form-data
+
+### Expected Response: 400 Bad Request
+### {
+###   "success": false,
+###   "error": "No files uploaded"
+### }
+
+### ============================================
+### TEST 8: Upload Posters (Wrong Organizer)
+### ============================================
+### Note: Use a different organizer's token
+POST {{baseUrl}}/tournaments/{{tournamentId}}/posters
+Authorization: Bearer DIFFERENT_ORGANIZER_TOKEN
+Content-Type: multipart/form-data
+
+### Expected Response: 403 Forbidden
+### {
+###   "success": false,
+###   "error": "Only the tournament organizer can upload posters"
+### }
+
+### ============================================
+### TEST 9: Upload Posters (Tournament Not Found)
+### ============================================
+POST {{baseUrl}}/tournaments/invalid-tournament-id/posters
+Authorization: Bearer {{organizerToken}}
+Content-Type: multipart/form-data
+
+### Expected Response: 404 Not Found
+### {
+###   "success": false,
+###   "error": "Tournament not found"
+### }
+
+### ============================================
+### TESTING CHECKLIST
+### ============================================
+### [ ] Tournament creation with valid data → 201 response
+### [ ] Tournament creation with invalid zone → 400 error
+### [ ] Tournament creation with invalid dates → 400 error
+### [ ] Tournament creation with short description → 400 error
+### [ ] Tournament creation by non-organizer → 403 error
+### [ ] Poster upload with 3 images → 201 response
+### [ ] Poster upload with no files → 400 error
+### [ ] Poster upload by wrong organizer → 403 error
+### [ ] Poster upload for non-existent tournament → 404 error
+### [ ] Verify posters stored in database with correct displayOrder
+### [ ] Verify posters uploaded to Cloudinary
+### [ ] Verify tournament status is 'draft' after creation

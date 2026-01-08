@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -9,7 +10,7 @@ const RegisterPage = () => {
     phone: '',
     password: '',
     confirmPassword: '',
-    role: 'PLAYER', // Default role
+    roles: ['PLAYER'], // Default role - now an array for multi-role
     city: '',
     state: '',
     country: 'India',
@@ -17,6 +18,8 @@ const RegisterPage = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   
   const { register } = useAuth();
   const navigate = useNavigate();
@@ -29,10 +32,26 @@ const RegisterPage = () => {
     setError('');
   };
 
+  // Toggle role selection (multi-role support)
+  const handleRoleToggle = (role) => {
+    setFormData(prev => ({
+      ...prev,
+      roles: prev.roles.includes(role)
+        ? prev.roles.filter(r => r !== role)
+        : [...prev.roles, role]
+    }));
+  };
+
   const validateForm = () => {
     // Required fields
     if (!formData.name || !formData.email || !formData.password) {
       setError('Name, email, and password are required');
+      return false;
+    }
+
+    // At least one role must be selected
+    if (formData.roles.length === 0) {
+      setError('Please select at least one role');
       return false;
     }
 
@@ -88,15 +107,16 @@ const RegisterPage = () => {
 
       const user = await register(dataToSend);
       
-      // Redirect based on role
-      switch (user.role) {
-        case 'PLAYER':
+      // Redirect based on first role
+      const firstRole = user.roles[0].toLowerCase();
+      switch (firstRole) {
+        case 'player':
           navigate('/dashboard');
           break;
-        case 'ORGANIZER':
+        case 'organizer':
           navigate('/organizer/dashboard');
           break;
-        case 'UMPIRE':
+        case 'umpire':
           navigate('/umpire/dashboard');
           break;
         default:
@@ -116,6 +136,12 @@ const RegisterPage = () => {
     UMPIRE: 'Score matches, officiate games, and ensure fair play'
   };
 
+  const roleIcons = {
+    PLAYER: '🏸',
+    ORGANIZER: '📋',
+    UMPIRE: '⚖️'
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-2xl w-full space-y-8">
@@ -123,10 +149,10 @@ const RegisterPage = () => {
         <div className="text-center">
           <Link to="/" className="inline-flex items-center space-x-2 mb-8">
             <span className="text-3xl">🎾</span>
-            <span className="text-2xl font-bold text-gradient">MATCHIFY</span>
+            <span className="text-2xl font-bold text-gradient">Matchify.pro</span>
           </Link>
           <h2 className="text-3xl font-bold text-gray-900 mb-2">
-            Join Matchify
+            Join Matchify.pro
           </h2>
           <p className="text-gray-600">
             Create your account and start playing
@@ -143,30 +169,45 @@ const RegisterPage = () => {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Role Selection */}
+              {/* Multi-Role Selection */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-3">
-                  I want to join as
+                  Select Roles (can select multiple)
                 </label>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {['PLAYER', 'ORGANIZER', 'UMPIRE'].map((role) => (
-                    <button
+                    <label
                       key={role}
-                      type="button"
-                      onClick={() => setFormData({ ...formData, role })}
-                      className={`p-4 border-2 rounded-lg text-left transition ${
-                        formData.role === role
+                      className={`p-4 border-2 rounded-lg cursor-pointer transition ${
+                        formData.roles.includes(role)
                           ? 'border-primary-600 bg-primary-50'
                           : 'border-gray-300 hover:border-primary-400'
                       }`}
                     >
-                      <div className="font-medium text-gray-900 mb-1">{role}</div>
-                      <div className="text-xs text-gray-600">
-                        {roleDescriptions[role]}
+                      <div className="flex items-start">
+                        <input
+                          type="checkbox"
+                          checked={formData.roles.includes(role)}
+                          onChange={() => handleRoleToggle(role)}
+                          className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded mt-1"
+                        />
+                        <div className="ml-3">
+                          <div className="font-medium text-gray-900 mb-1">
+                            {roleIcons[role]} {role}
+                          </div>
+                          <div className="text-xs text-gray-600">
+                            {roleDescriptions[role]}
+                          </div>
+                        </div>
                       </div>
-                    </button>
+                    </label>
                   ))}
                 </div>
+                {formData.roles.length > 1 && (
+                  <p className="mt-2 text-sm text-green-600">
+                    ✓ You can switch between roles after logging in
+                  </p>
+                )}
               </div>
 
               {/* Name */}
@@ -274,31 +315,57 @@ const RegisterPage = () => {
                   <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
                     Password *
                   </label>
-                  <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    className="input"
-                    placeholder="Create a strong password"
-                    required
-                  />
+                  <div className="relative">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      id="password"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      className="input pr-10"
+                      placeholder="Create a strong password"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+                    >
+                      {showPassword ? (
+                        <EyeSlashIcon className="h-5 w-5" />
+                      ) : (
+                        <EyeIcon className="h-5 w-5" />
+                      )}
+                    </button>
+                  </div>
                 </div>
                 <div>
                   <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
                     Confirm Password *
                   </label>
-                  <input
-                    type="password"
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    className="input"
-                    placeholder="Confirm your password"
-                    required
-                  />
+                  <div className="relative">
+                    <input
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      className="input pr-10"
+                      placeholder="Confirm your password"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+                    >
+                      {showConfirmPassword ? (
+                        <EyeSlashIcon className="h-5 w-5" />
+                      ) : (
+                        <EyeIcon className="h-5 w-5" />
+                      )}
+                    </button>
+                  </div>
                 </div>
               </div>
 

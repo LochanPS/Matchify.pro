@@ -1,33 +1,183 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
+import { NotificationProvider } from './contexts/NotificationContext'
 import Navbar from './components/Navbar'
 import ProtectedRoute from './components/ProtectedRoute'
 import RoleRoute from './components/RoleRoute'
 import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
+import ProfilePage from './pages/ProfilePage'
+import WalletPage from './pages/WalletPage'
+import Wallet from './pages/Wallet'
+import Credits from './pages/Credits'
+import TournamentsPage from './pages/TournamentsPage'
+import TournamentDetailPage from './pages/TournamentDetailPage'
+import TournamentDiscoveryPage from './pages/TournamentDiscoveryPage'
+import CreateTournament from './pages/CreateTournament'
+import EditTournament from './pages/EditTournament'
+import DrawPage from './pages/DrawPage'
+import TournamentRegistrationPage from './pages/TournamentRegistrationPage'
+import MyRegistrationsPage from './pages/MyRegistrationsPage'
+import PartnerConfirmationPage from './pages/PartnerConfirmationPage'
+import OrganizerDashboardPage from './pages/OrganizerDashboardPage'
+import TournamentManagementPage from './pages/TournamentManagementPage'
+import ManageCategoriesPage from './pages/ManageCategoriesPage'
 import PlayerDashboard from './pages/PlayerDashboard'
 import OrganizerDashboard from './pages/OrganizerDashboard'
 import UmpireDashboard from './pages/UmpireDashboard'
+import UmpireScoring from './pages/UmpireScoring'
 import AdminDashboard from './pages/AdminDashboard'
+import Leaderboard from './pages/Leaderboard'
+import MyPoints from './pages/MyPoints'
+import ScoringConsolePage from './pages/ScoringConsolePage'
+import MatchListPage from './pages/MatchListPage'
+import SpectatorViewPage from './pages/SpectatorViewPage'
+import LiveTournamentDashboard from './pages/LiveTournamentDashboard'
+import LiveMatches from './pages/LiveMatches'
+import LiveMatchDetail from './pages/LiveMatchDetail'
+import OrganizerTournamentHistory from './pages/OrganizerTournamentHistory'
+import TournamentCategoryDetails from './pages/TournamentCategoryDetails'
+import AdminInvites from './pages/AdminInvites'
+import AcceptInvite from './pages/AcceptInvite'
+import AdminLayout from './pages/admin/AdminLayout'
+import AdminDashboardPage from './pages/admin/AdminDashboardPage'
+import UserManagementPage from './pages/admin/UserManagementPage'
+import InviteManagementPage from './pages/admin/InviteManagementPage'
+import AuditLogsPage from './pages/admin/AuditLogsPage'
 
 function App() {
   return (
     <AuthProvider>
-      <div className="min-h-screen bg-gray-50">
-        <Navbar />
-        <Routes>
-          {/* Public routes */}
+      <NotificationProvider>
+        <div className="min-h-screen bg-gray-50">
+          <Navbar />
+          <Routes>
+            {/* Public routes */}
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/tournaments" element={<TournamentDiscoveryPage />} />
+          <Route path="/tournaments/:id" element={<TournamentDetailPage />} />
+          <Route path="/tournaments/:tournamentId/draws/:categoryId?" element={<DrawPage />} />
+          <Route path="/leaderboard" element={<Leaderboard />} />
+          
+          {/* Invite acceptance (public) */}
+          <Route path="/invite/accept/:token" element={<AcceptInvite />} />
+          
+          {/* Scoring routes */}
+          <Route path="/matches" element={<MatchListPage />} />
+          <Route path="/matches/live" element={<LiveMatches />} />
+          <Route path="/matches/:matchId/live" element={<LiveMatchDetail />} />
+          <Route path="/watch/:matchId" element={<SpectatorViewPage />} />
+          <Route path="/tournament/:tournamentId/live" element={<LiveTournamentDashboard />} />
+          <Route path="/scoring/:matchId" element={
+            <ProtectedRoute>
+              <RoleRoute allowedRoles={['UMPIRE', 'ORGANIZER']} blockAdmin={true}>
+                <ScoringConsolePage />
+              </RoleRoute>
+            </ProtectedRoute>
+          } />
+          
+          {/* Partner confirmation (public) */}
+          <Route path="/partner/confirm/:token" element={<PartnerConfirmationPage />} />
+          
+          {/* Registration routes */}
+          <Route
+            path="/tournaments/:id/register"
+            element={
+              <ProtectedRoute>
+                <RoleRoute allowedRoles={['PLAYER', 'ORGANIZER', 'UMPIRE']} blockAdmin={true}>
+                  <TournamentRegistrationPage />
+                </RoleRoute>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/registrations"
+            element={
+              <ProtectedRoute>
+                <RoleRoute allowedRoles={['PLAYER', 'ORGANIZER', 'UMPIRE']} blockAdmin={true}>
+                  <MyRegistrationsPage />
+                </RoleRoute>
+              </ProtectedRoute>
+            }
+          />
           
           {/* Protected routes */}
+          <Route
+            path="/tournaments/create"
+            element={
+              <ProtectedRoute>
+                <RoleRoute allowedRoles={['ORGANIZER']} blockAdmin={true}>
+                  <CreateTournament />
+                </RoleRoute>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/tournaments/:id/categories"
+            element={
+              <ProtectedRoute>
+                <RoleRoute allowedRoles={['ORGANIZER']} blockAdmin={true}>
+                  <ManageCategoriesPage />
+                </RoleRoute>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/tournaments/:id/edit"
+            element={
+              <ProtectedRoute>
+                <RoleRoute allowedRoles={['ORGANIZER']} blockAdmin={true}>
+                  <EditTournament />
+                </RoleRoute>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/wallet"
+            element={
+              <ProtectedRoute>
+                <Wallet />
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/credits"
+            element={
+              <ProtectedRoute>
+                <Credits />
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/my-points"
+            element={
+              <ProtectedRoute>
+                <RoleRoute allowedRoles={['PLAYER', 'ORGANIZER', 'UMPIRE']} blockAdmin={true}>
+                  <MyPoints />
+                </RoleRoute>
+              </ProtectedRoute>
+            }
+          />
+          
           <Route
             path="/dashboard"
             element={
               <ProtectedRoute>
-                <RoleRoute allowedRoles={['PLAYER']}>
+                <RoleRoute allowedRoles={['PLAYER']} blockAdmin={true}>
                   <PlayerDashboard />
                 </RoleRoute>
               </ProtectedRoute>
@@ -38,8 +188,41 @@ function App() {
             path="/organizer/dashboard"
             element={
               <ProtectedRoute>
-                <RoleRoute allowedRoles={['ORGANIZER']}>
+                <RoleRoute allowedRoles={['ORGANIZER']} blockAdmin={true}>
                   <OrganizerDashboard />
+                </RoleRoute>
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/organizer/history"
+            element={
+              <ProtectedRoute>
+                <RoleRoute allowedRoles={['ORGANIZER']} blockAdmin={true}>
+                  <OrganizerTournamentHistory />
+                </RoleRoute>
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/organizer/categories/:categoryId"
+            element={
+              <ProtectedRoute>
+                <RoleRoute allowedRoles={['ORGANIZER']} blockAdmin={true}>
+                  <TournamentCategoryDetails />
+                </RoleRoute>
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/organizer/tournaments/:id"
+            element={
+              <ProtectedRoute>
+                <RoleRoute allowedRoles={['ORGANIZER']} blockAdmin={true}>
+                  <TournamentManagementPage />
                 </RoleRoute>
               </ProtectedRoute>
             }
@@ -49,8 +232,19 @@ function App() {
             path="/umpire/dashboard"
             element={
               <ProtectedRoute>
-                <RoleRoute allowedRoles={['UMPIRE']}>
+                <RoleRoute allowedRoles={['UMPIRE']} blockAdmin={true}>
                   <UmpireDashboard />
+                </RoleRoute>
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/umpire/scoring/:matchId"
+            element={
+              <ProtectedRoute>
+                <RoleRoute allowedRoles={['UMPIRE']} blockAdmin={true}>
+                  <UmpireScoring />
                 </RoleRoute>
               </ProtectedRoute>
             }
@@ -67,10 +261,30 @@ function App() {
             }
           />
           
+          <Route
+            path="/admin/invites"
+            element={
+              <ProtectedRoute>
+                <RoleRoute allowedRoles={['ADMIN']}>
+                  <AdminInvites />
+                </RoleRoute>
+              </ProtectedRoute>
+            }
+          />
+          
+          {/* New Admin Panel Routes */}
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route path="dashboard" element={<AdminDashboardPage />} />
+            <Route path="users" element={<UserManagementPage />} />
+            <Route path="invites" element={<InviteManagementPage />} />
+            <Route path="audit-logs" element={<AuditLogsPage />} />
+          </Route>
+          
           {/* Catch all route */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
+      </NotificationProvider>
     </AuthProvider>
   )
 }

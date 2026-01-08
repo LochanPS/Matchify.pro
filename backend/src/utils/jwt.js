@@ -1,8 +1,8 @@
 import jwt from 'jsonwebtoken';
 
-const generateAccessToken = (userId, role) => {
+const generateAccessToken = (userId, roles) => {
   return jwt.sign(
-    { userId, role },
+    { userId, roles }, // Now includes roles array
     process.env.JWT_SECRET,
     { expiresIn: process.env.JWT_EXPIRE }
   );

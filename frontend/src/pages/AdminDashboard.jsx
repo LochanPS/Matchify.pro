@@ -54,12 +54,21 @@ const AdminDashboard = () => {
 
               {/* Coming Soon Features */}
               <div className="mt-8 grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div className="card cursor-pointer hover:shadow-lg transition" onClick={() => window.location.href = '/admin/invites'}>
+                  <div className="card-body text-center">
+                    <div className="text-3xl mb-2">📧</div>
+                    <h3 className="font-semibold">User Invites</h3>
+                    <p className="text-sm text-gray-600">Invite new users</p>
+                    <div className="mt-2 text-xs text-green-600 font-semibold">Available Now</div>
+                  </div>
+                </div>
+                
                 <div className="card">
                   <div className="card-body text-center">
                     <div className="text-3xl mb-2">👥</div>
                     <h3 className="font-semibold">User Management</h3>
                     <p className="text-sm text-gray-600">Manage all users</p>
-                    <div className="mt-2 text-xs text-gray-500">Coming in Day 26-28</div>
+                    <div className="mt-2 text-xs text-gray-500">Coming Soon</div>
                   </div>
                 </div>
                 
@@ -68,16 +77,7 @@ const AdminDashboard = () => {
                     <div className="text-3xl mb-2">🏆</div>
                     <h3 className="font-semibold">Tournament Oversight</h3>
                     <p className="text-sm text-gray-600">Monitor all tournaments</p>
-                    <div className="mt-2 text-xs text-gray-500">Coming in Day 29-31</div>
-                  </div>
-                </div>
-                
-                <div className="card">
-                  <div className="card-body text-center">
-                    <div className="text-3xl mb-2">💰</div>
-                    <h3 className="font-semibold">Financial Reports</h3>
-                    <p className="text-sm text-gray-600">View financial data</p>
-                    <div className="mt-2 text-xs text-gray-500">Coming in Day 32-34</div>
+                    <div className="mt-2 text-xs text-gray-500">Coming Soon</div>
                   </div>
                 </div>
                 
@@ -86,7 +86,7 @@ const AdminDashboard = () => {
                     <div className="text-3xl mb-2">📊</div>
                     <h3 className="font-semibold">Analytics</h3>
                     <p className="text-sm text-gray-600">Platform analytics</p>
-                    <div className="mt-2 text-xs text-gray-500">Coming in Day 35-37</div>
+                    <div className="mt-2 text-xs text-gray-500">Coming Soon</div>
                   </div>
                 </div>
               </div>

@@ -7,44 +7,412 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Simplified User model for authentication testing
 model User {
-  id            String   @id @default(uuid())
-  email         String   @unique
-  password      String
-  name          String
-  phone         String?  @unique
-  role          String   @default("PLAYER") // PLAYER, ORGANIZER, UMPIRE, ADMIN
-  profilePhoto  String?
-  city          String?
-  state         String?
-  country       String   @default("India")
-  dateOfBirth   DateTime?
-  gender        String?  // MALE, FEMALE, OTHER
-
-  // Wallet
-  walletBalance Float    @default(0)
-
-  // Stats (for players)
-  totalPoints   Int      @default(0)
-  tournamentsPlayed Int  @default(0)
-  matchesWon    Int      @default(0)
-  matchesLost   Int      @default(0)
-
-  // Account status
-  isActive      Boolean  @default(true)
-  isVerified    Boolean  @default(false)
-  isSuspended   Boolean  @default(false)
-  suspendedUntil DateTime?
-  suspensionReason String?
-
-  // Auth tokens
-  refreshToken  String?
-
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id                   String              @id @default(uuid())
+  email                String              @unique
+  password             String
+  name                 String
+  phone                String?             @unique
+  roles                String              @default("PLAYER") // Will store comma-separated roles
+  profilePhoto         String?
+  city                 String?
+  state                String?
+  country              String              @default("India")
+  dateOfBirth          DateTime?
+  gender               String?
+  walletBalance        Float               @default(0)
+  totalPoints          Int                 @default(0)
+  tournamentsPlayed    Int                 @default(0)
+  matchesWon           Int                 @default(0)
+  matchesLost          Int                 @default(0)
+  isActive             Boolean             @default(true)
+  isVerified           Boolean             @default(false)
+  isSuspended          Boolean             @default(false)
+  suspendedUntil       DateTime?
+  suspensionReason     String?
+  refreshToken         String?
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+  
+  // Profile relations
+  playerProfile        PlayerProfile?
+  organizerProfile     OrganizerProfile?
+  umpireProfile        UmpireProfile?
+  
+  // Existing relations
+  adminInvites         AdminInvite[]
+  adminAuditLogs       AuditLog[]          @relation("AdminAuditLogs")
+  notifications        Notification[]      @relation("UserNotifications")
+  partnerRegistrations Registration[]      @relation("PartnerRegistrations")
+  registrations        Registration[]
+  tournaments          Tournament[]
+  walletTransactions   WalletTransaction[]
+  umpiredMatches       Match[]             @relation("UmpireMatches")
+  matchifyCredits      MatchifyCredits?
 
   @@index([email])
   @@index([phone])
-  @@index([role])
+  @@index([roles])
+}
+
+model PlayerProfile {
+  id                String   @id @default(uuid())
+  userId            String   @unique
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  matchifyPoints    Int      @default(0)
+  tournamentsPlayed Int      @default(0)
+  matchesWon        Int      @default(0)
+  matchesLost       Int      @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model OrganizerProfile {
+  id                   String   @id @default(uuid())
+  userId               String   @unique
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization         String?
+  tournamentsOrganized Int      @default(0)
+  totalRevenue         Float    @default(0)
+  rating               Float?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+model UmpireProfile {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  matchesUmpired  Int      @default(0)
+  certification   String?
+  rating          Float?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model WalletTransaction {
+  id                String   @id @default(uuid())
+  userId            String
+  type              String
+  amount            Float
+  balanceBefore     Float
+  balanceAfter      Float
+  description       String
+  referenceId       String?
+  paymentGateway    String?
+  razorpayOrderId   String?
+  razorpayPaymentId String?
+  razorpaySignature String?
+  status            String   @default("PENDING")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([type])
+}
+
+model Tournament {
+  id                    String             @id @default(uuid())
+  organizerId           String
+  name                  String
+  description           String
+  venue                 String
+  address               String
+  city                  String
+  state                 String
+  pincode               String
+  zone                  String
+  country               String             @default("India")
+  registrationOpenDate  DateTime
+  registrationCloseDate DateTime
+  startDate             DateTime
+  endDate               DateTime
+  format                String
+  privacy               String             @default("public")
+  status                String             @default("draft")
+  totalCourts           Int?
+  matchStartTime        String?
+  matchEndTime          String?
+  matchDuration         Int?
+  totalRegistrations    Int                @default(0)
+  totalRevenue          Float              @default(0)
+  paymentQRUrl          String?
+  paymentQRPublicId     String?
+  upiId                 String?
+  accountHolderName     String?
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+  categories            Category[]
+  draws                 Draw[]
+  matches               Match[]
+  registrations         Registration[]
+  organizer             User               @relation(fields: [organizerId], references: [id])
+  posters               TournamentPoster[]
+
+  @@index([city, state, status])
+  @@index([startDate, registrationCloseDate])
+  @@index([organizerId])
+}
+
+model TournamentPoster {
+  id           String     @id @default(uuid())
+  tournamentId String
+  imageUrl     String
+  publicId     String
+  displayOrder Int        @default(0)
+  createdAt    DateTime   @default(now())
+  tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+
+  @@index([tournamentId, displayOrder])
+}
+
+model Category {
+  id                String         @id @default(uuid())
+  tournamentId      String
+  name              String
+  format            String
+  ageGroup          String?
+  gender            String
+  entryFee          Float
+  maxParticipants   Int?
+  scoringFormat     String         @default("21x3")
+  registrationCount Int            @default(0)
+  status            String         @default("open")
+  prizeWinner       Float?
+  prizeRunnerUp     Float?
+  prizeSemiFinalist Float?
+  prizeDescription  String?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  tournament        Tournament     @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  draws             Draw[]
+  matches           Match[]
+  registrations     Registration[]
+
+  @@index([tournamentId, format, gender])
+}
+
+model Registration {
+  id                 String     @id @default(uuid())
+  userId             String
+  tournamentId       String
+  categoryId         String
+  partnerId          String?
+  partnerEmail       String?
+  partnerConfirmed   Boolean    @default(false)
+  amountTotal        Float
+  amountWallet       Float      @default(0)
+  amountRazorpay     Float      @default(0)
+  razorpayOrderId    String?
+  razorpayPaymentId  String?
+  razorpaySignature  String?
+  status             String     @default("pending")
+  paymentStatus      String     @default("pending")
+  cancelledAt        DateTime?
+  cancellationReason String?
+  refundAmount       Float?
+  refundStatus       String?
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+  partnerToken       String?
+  partner            User?      @relation("PartnerRegistrations", fields: [partnerId], references: [id])
+  category           Category   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  tournament         Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  user               User       @relation(fields: [userId], references: [id])
+
+  @@unique([userId, categoryId])
+  @@index([userId])
+  @@index([tournamentId])
+  @@index([categoryId])
+  @@index([partnerId])
+}
+
+model Notification {
+  id        String    @id @default(uuid())
+  userId    String
+  type      String    // REGISTRATION_CONFIRMED, PARTNER_INVITATION, etc.
+  title     String
+  message   String
+  data      String?   // JSON string for additional context
+  read      Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  readAt    DateTime?
+  user      User      @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([read])
+  @@index([createdAt(sort: Desc)])
+}
+
+model Draw {
+  id           String     @id @default(uuid())
+  tournamentId String
+  categoryId   String
+  format       String
+  bracketJson  String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  category     Category   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+
+  @@unique([tournamentId, categoryId])
+  @@index([tournamentId])
+  @@index([categoryId])
+}
+
+model Match {
+  id             String     @id @default(uuid())
+  tournamentId   String
+  categoryId     String
+  round          Int
+  matchNumber    Int
+  courtNumber    Int?
+  player1Id      String?
+  player2Id      String?
+  team1Player1Id String?
+  team1Player2Id String?
+  team2Player1Id String?
+  team2Player2Id String?
+  player1Seed    Int?
+  player2Seed    Int?
+  parentMatchId  String?
+  winnerPosition String?
+  umpireId       String?
+  scheduledTime  DateTime?
+  status         String     @default("PENDING")
+  winnerId       String?
+  scoreJson      String?
+  startedAt      DateTime?
+  completedAt    DateTime?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  parentMatch    Match?     @relation("MatchProgression", fields: [parentMatchId], references: [id])
+  childMatches   Match[]    @relation("MatchProgression")
+  category       Category   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  tournament     Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  umpire         User?      @relation("UmpireMatches", fields: [umpireId], references: [id])
+
+  @@index([tournamentId, categoryId])
+  @@index([status])
+  @@index([round])
+  @@index([umpireId])
+}
+
+model ScoreCorrectionRequest {
+  id             String    @id @default(uuid())
+  matchId        String
+  umpireId       String
+  correctionType String
+  details        String
+  proposedScore  String
+  status         String    @default("pending")
+  reviewedBy     String?
+  reviewedAt     DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([matchId])
+  @@index([umpireId])
+  @@index([status])
+}
+
+model AdminInvite {
+  id              String    @id @default(uuid())
+  email           String
+  role            String
+  token           String    @unique
+  oneTimePassword String    @map("one_time_password")
+  invitedBy       String
+  status          String    @default("pending")
+  expiresAt       DateTime
+  acceptedAt      DateTime?
+  revokedAt       DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  inviter         User      @relation(fields: [invitedBy], references: [id])
+
+  @@index([email])
+  @@index([status])
+  @@index([token])
+  @@map("admin_invites")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  adminId    String
+  action     String
+  entityType String
+  entityId   String?
+  details    String
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+  admin      User     @relation("AdminAuditLogs", fields: [adminId], references: [id])
+
+  @@index([adminId])
+  @@index([action])
+  @@index([entityType])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+
+model SmsLog {
+  id           String   @id @default(uuid())
+  phoneNumber  String   // E.164 format (+91XXXXXXXXXX)
+  templateName String
+  message      String
+  status       String   // sent, failed, delivered, undelivered
+  twilioSid    String?  // Twilio message SID
+  error        String?
+  createdAt    DateTime @default(now())
+
+  @@index([phoneNumber, createdAt])
+  @@index([status, createdAt])
+  @@map("sms_logs")
+}
+
+// ============================================
+// MATCHIFY CREDITS SYSTEM (RBI Compliant)
+// ============================================
+
+model MatchifyCredits {
+  id              String              @id @default(uuid())
+  userId          String              @unique
+  balance         Float               @default(0)
+  lifetimeEarned  Float               @default(0)
+  lifetimeUsed    Float               @default(0)
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  user            User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions    CreditTransaction[]
+
+  @@index([userId])
+  @@map("matchify_credits")
+}
+
+model CreditTransaction {
+  id              String          @id @default(uuid())
+  creditsId       String
+  type            String          // ADMIN_GRANT, PROMOTIONAL, PLATFORM_FEE_DEDUCTION, EXPIRED, ADJUSTMENT
+  amount          Float           // Positive for credits, negative for deductions
+  balanceBefore   Float
+  balanceAfter    Float
+  description     String
+  referenceId     String?         // Tournament ID, Admin ID, etc.
+  referenceType   String?         // TOURNAMENT, ADMIN, PROMOTION
+  grantedBy       String?         // Admin user ID who granted credits
+  expiresAt       DateTime?       // Optional expiry for promotional credits
+  status          String          @default("COMPLETED") // COMPLETED, EXPIRED, REVERSED
+  createdAt       DateTime        @default(now())
+  credits         MatchifyCredits @relation(fields: [creditsId], references: [id], onDelete: Cascade)
+
+  @@index([creditsId])
+  @@index([type])
+  @@index([createdAt])
+  @@index([status])
+  @@map("credit_transactions")
 }

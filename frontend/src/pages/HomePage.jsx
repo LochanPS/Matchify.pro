@@ -7,7 +7,11 @@ function HomePage() {
   const getDashboardLink = () => {
     if (!user) return '/login';
     
-    switch (user.role) {
+    // Support both array (new) and string (old) role formats
+    const userRoles = Array.isArray(user.roles) ? user.roles : [user.role];
+    const primaryRole = userRoles[0];
+    
+    switch (primaryRole) {
       case 'PLAYER':
         return '/dashboard';
       case 'ORGANIZER':

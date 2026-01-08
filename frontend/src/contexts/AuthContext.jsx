@@ -9,10 +9,10 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     // Check if user is logged in on mount
-    const accessToken = localStorage.getItem('accessToken');
+    const token = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
     
-    if (accessToken && storedUser) {
+    if (token && storedUser) {
       try {
         setUser(JSON.parse(storedUser));
       } catch (error) {
@@ -25,11 +25,10 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await api.post('/auth/login', { email, password });
-      const { user: userData, accessToken, refreshToken } = response.data;
+      const response = await api.post('/multi-auth/login', { email, password });
+      const { user: userData, token } = response.data;
       
-      localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('refreshToken', refreshToken);
+      localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(userData));
       setUser(userData);
       
@@ -41,11 +40,10 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     try {
-      const response = await api.post('/auth/register', userData);
-      const { user: newUser, accessToken, refreshToken } = response.data;
+      const response = await api.post('/multi-auth/register', userData);
+      const { user: newUser, token } = response.data;
       
-      localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('refreshToken', refreshToken);
+      localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(newUser));
       setUser(newUser);
       
@@ -57,15 +55,11 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      const refreshToken = localStorage.getItem('refreshToken');
-      if (refreshToken) {
-        await api.post('/auth/logout', { refreshToken });
-      }
+      // No need to call logout endpoint for simple token auth
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('token');
       localStorage.removeItem('user');
       setUser(null);
     }
@@ -76,6 +70,14 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('user', JSON.stringify(updatedUser));
   };
 
+  const switchRole = (newRole) => {
+    if (user) {
+      const updatedUser = { ...user, currentRole: newRole };
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+    }
+  };
+
   return (
     <AuthContext.Provider value={{ 
       user, 
@@ -83,6 +85,7 @@ export const AuthProvider = ({ children }) => {
       register, 
       logout, 
       updateUser,
+      switchRole,
       loading 
     }}>
       {children}

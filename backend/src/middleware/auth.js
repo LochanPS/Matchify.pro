@@ -49,11 +49,15 @@ const authenticate = async (req, res, next) => {
       });
     }
 
-    // Attach user to request
+    // Attach user to request - support multi-role
+    const userRoles = user.roles ? user.roles.split(',') : ['PLAYER'];
+    
     req.user = {
       id: user.id,
+      userId: user.id, // For compatibility with roleAuth middleware
       email: user.email,
-      role: user.role,
+      role: userRoles[0], // Primary role for backward compatibility
+      roles: userRoles, // All roles for multi-role support
       name: user.name,
       isVerified: user.isVerified
     };
@@ -67,7 +71,7 @@ const authenticate = async (req, res, next) => {
   }
 };
 
-// Role-based authorization
+// Role-based authorization - support multi-role
 const authorize = (...roles) => {
   return (req, res, next) => {
     if (!req.user) {
@@ -76,7 +80,11 @@ const authorize = (...roles) => {
       });
     }
 
-    if (!roles.includes(req.user.role)) {
+    // Check if user has ANY of the required roles
+    const userRoles = req.user.roles || [req.user.role];
+    const hasRole = roles.some(role => userRoles.includes(role));
+
+    if (!hasRole) {
       return res.status(403).json({
         error: `Access denied. Required role: ${roles.join(' or ')}`
       });
@@ -104,10 +112,13 @@ const optionalAuth = async (req, res, next) => {
     });
 
     if (user && user.isActive && !user.isSuspended) {
+      const userRoles = user.roles ? user.roles.split(',') : ['PLAYER'];
       req.user = {
         id: user.id,
+        userId: user.id,
         email: user.email,
-        role: user.role,
+        role: userRoles[0],
+        roles: userRoles,
         name: user.name,
         isVerified: user.isVerified
       };
@@ -122,4 +133,39 @@ const optionalAuth = async (req, res, next) => {
   }
 };
 
-export { authenticate, authorize, optionalAuth };
+// Require admin role - support multi-role
+const requireAdmin = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({
+      success: false,
+      message: 'Authentication required'
+    });
+  }
+
+  const userRoles = req.user.roles || [req.user.role];
+  if (!userRoles.includes('ADMIN')) {
+    return res.status(403).json({
+      success: false,
+      message: 'Access denied. Admin privileges required.',
+    });
+  }
+
+  next();
+};
+
+// Prevent admins from accessing non-admin features - support multi-role
+const preventAdminAccess = (req, res, next) => {
+  const userRoles = req.user?.roles || [req.user?.role];
+  if (req.user && userRoles.includes('ADMIN')) {
+    return res.status(403).json({
+      success: false,
+      message: 'Admins cannot access this feature. Please use your personal account.',
+      suggestion: 'Create a separate player/organizer account for non-admin activities',
+      userRole: req.user.role
+    });
+  }
+
+  next();
+};
+
+export { authenticate, authorize, optionalAuth, requireAdmin, preventAdminAccess };

@@ -1,0 +1,40 @@
+<div style="background: #dc2626; color: white; padding: 15px; text-align: center; font-weight: bold; font-size: 18px; border-radius: 8px 8px 0 0;">
+  ⚠️ MATCH STARTING SOON - 15 MINUTES
+</div>
+
+<div style="background: #fff; padding: 30px; border: 3px solid #dc2626; border-top: none; border-radius: 0 0 8px 8px;">
+  <h2>Hi {{playerName}},</h2>
+  <p><strong>Your match is about to begin!</strong> Please head to your assigned court immediately.</p>
+  
+  <div style="background: #fef2f2; padding: 20px; border-radius: 8px; margin: 20px 0;">
+    <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #fee2e2;">
+      <span style="font-weight: bold; color: #991b1b;">Court Number:</span>
+      <span><strong>Court {{courtNumber}}</strong></span>
+    </div>
+    <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #fee2e2;">
+      <span style="font-weight: bold; color: #991b1b;">Opponent:</span>
+      <span>{{opponentName}}</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; padding: 10px 0;">
+      <span style="font-weight: bold; color: #991b1b;">Scheduled Time:</span>
+      <span>{{matchTime}}</span>
+    </div>
+  </div>
+  
+  <p><strong>⏰ Time remaining: 15 minutes</strong></p>
+  
+  <p>Make sure you have:</p>
+  <ul>
+    <li>✅ Your racket and shuttlecocks</li>
+    <li>✅ Water bottle</li>
+    <li>✅ Warmed up properly</li>
+  </ul>
+  
+  <a href="{{matchUrl}}" style="display: inline-block; background: #dc2626; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; margin-top: 20px;">
+    View Match Details
+  </a>
+  
+  <p style="margin-top: 20px; color: #666; font-size: 14px;">
+    <em>This is a time-sensitive notification. Please check your email regularly on tournament day.</em>
+  </p>
+</div>

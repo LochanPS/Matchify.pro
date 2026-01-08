@@ -1,0 +1,14 @@
+<div style="background: white; border-left: 4px solid #3b82f6; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+  <h3>Hi {{userName}},</h3>
+  <p>{{message}}</p>
+  
+  {{#if actionUrl}}
+  <a href="{{actionUrl}}" style="display: inline-block; background: #3b82f6; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; margin-top: 15px;">
+    View Details
+  </a>
+  {{/if}}
+  
+  <p style="color: #666; font-size: 14px; margin-top: 20px;">
+    - Matchify Team
+  </p>
+</div>

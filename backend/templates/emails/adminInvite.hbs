@@ -1,0 +1,30 @@
+<h2>🔐 Admin Invitation</h2>
+
+<p>Hi there,</p>
+
+<p>You've been invited to join <strong>Matchify.pro</strong> as an Administrator.</p>
+
+<div class="info-box">
+    <h3>Invitation Details</h3>
+    <p><strong>Invited by:</strong> {{invitedBy}}</p>
+    <p><strong>Role:</strong> Platform Administrator</p>
+    <p><strong>Expires:</strong> {{expiryDate}}</p>
+</div>
+
+<p><strong>Your One-Time Password:</strong></p>
+<div style="background: #f8f9fa; padding: 20px; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 2px; border-radius: 5px; margin: 20px 0;">
+    {{oneTimePassword}}
+</div>
+
+<a href="{{acceptUrl}}" class="button">Accept Invitation</a>
+
+<p><strong>⚠️ Important:</strong></p>
+<ul>
+    <li>This invitation expires in {{expiryHours}} hours</li>
+    <li>The password can only be used once</li>
+    <li>Do not share this email</li>
+</ul>
+
+<p>If you did not expect this invitation, please ignore this email.</p>
+
+<p>Best regards,<br>Team Matchify</p>

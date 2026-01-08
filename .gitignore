@@ -10,6 +10,14 @@ yarn-error.log*
 .env.development.local
 .env.test.local
 .env.production.local
+.env.production
+backend/.env
+frontend/.env
+
+# Database (SQLite for development)
+*.db
+*.db-journal
+prisma/dev.db
 
 # Logs
 logs
@@ -70,3 +78,7 @@ Thumbs.db
 # Temporary files
 .tmp/
 .temp/
+
+# Test files
+*.test.js
+*.spec.js

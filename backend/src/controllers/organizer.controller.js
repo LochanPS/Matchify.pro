@@ -470,6 +470,14 @@ export const approveRegistration = async (req, res) => {
       },
     });
 
+    // Send notification to the player
+    await createNotification({
+      userId: registration.userId,
+      type: 'REGISTRATION_CONFIRMED',
+      title: 'Registration Confirmed! 🎉',
+      message: `Your registration for "${registration.category.name}" in "${registration.tournament.name}" has been approved. You're all set to compete!`,
+    });
+
     res.json({
       success: true,
       message: `Registration approved for ${registration.user.name}`,
@@ -627,6 +635,298 @@ export const removeRegistration = async (req, res) => {
     res.status(500).json({
       success: false,
       error: 'Failed to remove registration',
+    });
+  }
+};
+
+
+// GET /api/organizer/cancellation-requests - Get all cancellation requests for organizer's tournaments
+export const getCancellationRequests = async (req, res) => {
+  try {
+    const organizerId = req.user.id;
+
+    // Get all tournaments owned by this organizer
+    const tournaments = await prisma.tournament.findMany({
+      where: { organizerId },
+      select: { id: true },
+    });
+
+    const tournamentIds = tournaments.map(t => t.id);
+
+    // Get all cancellation requests for these tournaments
+    const cancellationRequests = await prisma.registration.findMany({
+      where: {
+        tournamentId: { in: tournamentIds },
+        status: 'cancellation_requested',
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+          },
+        },
+        tournament: {
+          select: {
+            id: true,
+            name: true,
+            startDate: true,
+          },
+        },
+        category: {
+          select: {
+            id: true,
+            name: true,
+            format: true,
+            gender: true,
+          },
+        },
+      },
+      orderBy: { refundRequestedAt: 'desc' },
+    });
+
+    res.json({
+      success: true,
+      count: cancellationRequests.length,
+      requests: cancellationRequests,
+    });
+  } catch (error) {
+    console.error('Get cancellation requests error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch cancellation requests',
+    });
+  }
+};
+
+// PUT /api/organizer/registrations/:id/approve-refund - Approve refund request
+export const approveRefund = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const organizerId = req.user.id;
+
+    // Find registration and verify organizer owns the tournament
+    const registration = await prisma.registration.findUnique({
+      where: { id },
+      include: {
+        tournament: true,
+        user: { select: { id: true, name: true, email: true } },
+        category: { select: { id: true, name: true } },
+      },
+    });
+
+    if (!registration) {
+      return res.status(404).json({
+        success: false,
+        error: 'Registration not found',
+      });
+    }
+
+    if (registration.tournament.organizerId !== organizerId) {
+      return res.status(403).json({
+        success: false,
+        error: 'Not authorized to manage this registration',
+      });
+    }
+
+    if (registration.status !== 'cancellation_requested') {
+      return res.status(400).json({
+        success: false,
+        error: 'This registration does not have a pending cancellation request',
+      });
+    }
+
+    // Update registration - mark as cancelled with approved refund
+    const updatedRegistration = await prisma.registration.update({
+      where: { id },
+      data: {
+        status: 'cancelled',
+        refundStatus: 'approved',
+        refundProcessedAt: new Date(),
+        cancelledAt: new Date(),
+        paymentStatus: 'refunded',
+      },
+    });
+
+    // Decrement category registration count
+    await prisma.category.update({
+      where: { id: registration.category.id },
+      data: { registrationCount: { decrement: 1 } },
+    });
+
+    // Send notification to the player
+    await createNotification({
+      userId: registration.userId,
+      type: 'REFUND_APPROVED',
+      title: 'Refund Approved! 💰',
+      message: `Your refund request for "${registration.category.name}" in "${registration.tournament.name}" has been approved. Amount: ₹${registration.amountTotal}. The organizer will process the refund to your UPI ID: ${registration.refundUpiId}`,
+      data: {
+        registrationId: registration.id,
+        tournamentId: registration.tournamentId,
+        tournamentName: registration.tournament.name,
+        categoryName: registration.category.name,
+        amount: registration.amountTotal,
+      },
+    });
+
+    res.json({
+      success: true,
+      message: `Refund approved for ${registration.user.name}. Amount: ₹${registration.amountTotal}`,
+      registration: updatedRegistration,
+    });
+  } catch (error) {
+    console.error('Approve refund error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to approve refund',
+    });
+  }
+};
+
+// PUT /api/organizer/registrations/:id/reject-refund - Reject refund request
+export const rejectRefund = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { reason } = req.body;
+    const organizerId = req.user.id;
+
+    if (!reason || reason.trim().length < 5) {
+      return res.status(400).json({
+        success: false,
+        error: 'Please provide a reason for rejecting the refund',
+      });
+    }
+
+    // Find registration and verify organizer owns the tournament
+    const registration = await prisma.registration.findUnique({
+      where: { id },
+      include: {
+        tournament: true,
+        user: { select: { id: true, name: true, email: true } },
+        category: { select: { name: true } },
+      },
+    });
+
+    if (!registration) {
+      return res.status(404).json({
+        success: false,
+        error: 'Registration not found',
+      });
+    }
+
+    if (registration.tournament.organizerId !== organizerId) {
+      return res.status(403).json({
+        success: false,
+        error: 'Not authorized to manage this registration',
+      });
+    }
+
+    if (registration.status !== 'cancellation_requested') {
+      return res.status(400).json({
+        success: false,
+        error: 'This registration does not have a pending cancellation request',
+      });
+    }
+
+    // Update registration - reject refund but keep registration active
+    const updatedRegistration = await prisma.registration.update({
+      where: { id },
+      data: {
+        status: 'confirmed', // Restore to confirmed status
+        refundStatus: 'rejected',
+        refundRejectionReason: reason.trim(),
+        refundProcessedAt: new Date(),
+      },
+    });
+
+    // Send notification to the player
+    await createNotification({
+      userId: registration.userId,
+      type: 'REFUND_REJECTED',
+      title: 'Refund Request Rejected',
+      message: `Your refund request for "${registration.category.name}" in "${registration.tournament.name}" has been rejected. Reason: ${reason.trim()}. Your registration remains active.`,
+    });
+
+    res.json({
+      success: true,
+      message: `Refund rejected for ${registration.user.name}`,
+      registration: updatedRegistration,
+    });
+  } catch (error) {
+    console.error('Reject refund error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to reject refund',
+    });
+  }
+};
+
+// PUT /api/organizer/registrations/:id/complete-refund - Mark refund as completed (money sent)
+export const completeRefund = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const organizerId = req.user.id;
+
+    // Find registration and verify organizer owns the tournament
+    const registration = await prisma.registration.findUnique({
+      where: { id },
+      include: {
+        tournament: true,
+        user: { select: { id: true, name: true, email: true } },
+        category: { select: { name: true } },
+      },
+    });
+
+    if (!registration) {
+      return res.status(404).json({
+        success: false,
+        error: 'Registration not found',
+      });
+    }
+
+    if (registration.tournament.organizerId !== organizerId) {
+      return res.status(403).json({
+        success: false,
+        error: 'Not authorized to manage this registration',
+      });
+    }
+
+    if (registration.refundStatus !== 'approved') {
+      return res.status(400).json({
+        success: false,
+        error: 'Refund must be approved before marking as completed',
+      });
+    }
+
+    // Update registration - mark refund as completed
+    const updatedRegistration = await prisma.registration.update({
+      where: { id },
+      data: {
+        refundStatus: 'completed',
+        refundProcessedAt: new Date(),
+      },
+    });
+
+    // Send notification to the player
+    await createNotification({
+      userId: registration.userId,
+      type: 'REFUND_COMPLETED',
+      title: 'Refund Sent! ✅',
+      message: `Your refund of ₹${registration.amountTotal} for "${registration.category.name}" in "${registration.tournament.name}" has been sent to your UPI ID: ${registration.refundUpiId}. Please check your account.`,
+    });
+
+    res.json({
+      success: true,
+      message: `Refund completed for ${registration.user.name}. Amount: ₹${registration.amountTotal}`,
+      registration: updatedRegistration,
+    });
+  } catch (error) {
+    console.error('Complete refund error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to complete refund',
     });
   }
 };

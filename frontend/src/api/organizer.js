@@ -50,3 +50,27 @@ export const removeRegistration = async (registrationId, reason) => {
   const response = await api.delete(`/organizer/registrations/${registrationId}`, { data: { reason } });
   return response.data;
 };
+
+// Get all cancellation requests for organizer's tournaments
+export const getCancellationRequests = async () => {
+  const response = await api.get('/organizer/cancellation-requests');
+  return response.data;
+};
+
+// Approve a refund request
+export const approveRefund = async (registrationId) => {
+  const response = await api.put(`/organizer/registrations/${registrationId}/approve-refund`);
+  return response.data;
+};
+
+// Reject a refund request
+export const rejectRefund = async (registrationId, reason) => {
+  const response = await api.put(`/organizer/registrations/${registrationId}/reject-refund`, { reason });
+  return response.data;
+};
+
+// Mark refund as completed
+export const completeRefund = async (registrationId) => {
+  const response = await api.put(`/organizer/registrations/${registrationId}/complete-refund`);
+  return response.data;
+};

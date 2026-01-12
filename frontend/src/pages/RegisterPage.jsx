@@ -1,20 +1,28 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { 
+  EyeIcon, 
+  EyeSlashIcon, 
+  EnvelopeIcon, 
+  LockClosedIcon, 
+  UserIcon,
+  PhoneIcon,
+  ArrowRightIcon,
+  CheckCircleIcon,
+  SparklesIcon
+} from '@heroicons/react/24/outline';
+import { Zap, Trophy, Users, Rocket, Star, Gift } from 'lucide-react';
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    alternateEmail: '',
     phone: '',
     password: '',
     confirmPassword: '',
-    roles: ['PLAYER'], // Default role - now an array for multi-role
-    city: '',
-    state: '',
-    country: 'India',
-    gender: '',
+    roles: ['PLAYER'],
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -23,16 +31,14 @@ const RegisterPage = () => {
   
   const { register } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectUrl = searchParams.get('redirect');
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
     setError('');
   };
 
-  // Toggle role selection (multi-role support)
   const handleRoleToggle = (role) => {
     setFormData(prev => ({
       ...prev,
@@ -42,381 +48,370 @@ const RegisterPage = () => {
     }));
   };
 
-  const validateForm = () => {
-    // Required fields
-    if (!formData.name || !formData.email || !formData.password) {
-      setError('Name, email, and password are required');
-      return false;
-    }
-
-    // At least one role must be selected
-    if (formData.roles.length === 0) {
-      setError('Please select at least one role');
-      return false;
-    }
-
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-      setError('Invalid email format');
-      return false;
-    }
-
-    // Phone validation (if provided)
-    if (formData.phone) {
-      const phoneRegex = /^[+]?[0-9]{10,15}$/;
-      if (!phoneRegex.test(formData.phone.replace(/\s/g, ''))) {
-        setError('Invalid phone number format');
-        return false;
-      }
-    }
-
-    // Password strength
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters');
-      return false;
-    }
-
-    // Password match
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
-      return false;
-    }
-
-    return true;
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!validateForm()) return;
+    if (!formData.name || !formData.email || !formData.password || !formData.phone) {
+      setError('Name, email, phone, and password are required');
+      return;
+    }
+    if (!/^[0-9]{10}$/.test(formData.phone)) {
+      setError('Please enter a valid 10-digit phone number');
+      return;
+    }
+    if (formData.alternateEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.alternateEmail)) {
+      setError('Please enter a valid alternate email address');
+      return;
+    }
+    if (formData.roles.length === 0) {
+      setError('Please select at least one role');
+      return;
+    }
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
+    }
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
     
     setLoading(true);
     setError('');
     
     try {
       const { confirmPassword, ...dataToSend } = formData;
-      
-      // Clean up phone number
-      if (dataToSend.phone) {
-        dataToSend.phone = dataToSend.phone.replace(/\s/g, '');
-        if (!dataToSend.phone.startsWith('+')) {
-          dataToSend.phone = '+91' + dataToSend.phone;
-        }
-      }
-
       const user = await register(dataToSend);
       
-      // Redirect based on first role
+      if (redirectUrl) {
+        navigate(redirectUrl);
+        return;
+      }
+      
       const firstRole = user.roles[0].toLowerCase();
       switch (firstRole) {
-        case 'player':
-          navigate('/dashboard');
-          break;
-        case 'organizer':
-          navigate('/organizer/dashboard');
-          break;
-        case 'umpire':
-          navigate('/umpire/dashboard');
-          break;
-        default:
-          navigate('/');
+        case 'player': navigate('/dashboard'); break;
+        case 'organizer': navigate('/organizer/dashboard'); break;
+        case 'umpire': navigate('/umpire/dashboard'); break;
+        default: navigate('/');
       }
     } catch (err) {
-      console.error('Registration error:', err);
       setError(err.response?.data?.error || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  const roleDescriptions = {
-    PLAYER: 'Participate in tournaments, track your progress, and compete with other players',
-    ORGANIZER: 'Create and manage tournaments, handle registrations, and organize events',
-    UMPIRE: 'Score matches, officiate games, and ensure fair play'
-  };
-
-  const roleIcons = {
-    PLAYER: '🏸',
-    ORGANIZER: '📋',
-    UMPIRE: '⚖️'
-  };
+  const roles = [
+    { id: 'PLAYER', icon: '🏸', title: 'Player', desc: 'Compete in tournaments', color: 'purple' },
+    { id: 'ORGANIZER', icon: '📋', title: 'Organizer', desc: 'Host tournaments', color: 'amber' },
+    { id: 'UMPIRE', icon: '⚖️', title: 'Umpire', desc: 'Officiate matches', color: 'cyan' },
+  ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-2xl w-full space-y-8">
-        {/* Header */}
-        <div className="text-center">
-          <Link to="/" className="inline-flex items-center space-x-2 mb-8">
-            <span className="text-3xl">🎾</span>
-            <span className="text-2xl font-bold text-gradient">Matchify.pro</span>
-          </Link>
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">
-            Join Matchify.pro
-          </h2>
-          <p className="text-gray-600">
-            Create your account and start playing
-          </p>
+    <div className="min-h-screen flex bg-slate-900">
+      {/* Left Side - Branding with exciting effects */}
+      <div className="hidden lg:flex lg:w-2/5 relative overflow-hidden">
+        {/* Animated gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-purple-900/50 to-slate-900"></div>
+        
+        {/* Animated blobs */}
+        <div className="absolute inset-0">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-screen filter blur-3xl opacity-30 animate-pulse"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-emerald-500 rounded-full mix-blend-screen filter blur-3xl opacity-30 animate-pulse animation-delay-2000"></div>
+          <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-pink-500 rounded-full mix-blend-screen filter blur-3xl opacity-20 animate-pulse animation-delay-4000"></div>
         </div>
 
-        {/* Registration Form */}
-        <div className="card">
-          <div className="card-body">
-            {error && (
-              <div className="alert-error mb-6">
-                {error}
-              </div>
-            )}
+        {/* Grid pattern overlay */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
+        
+        <div className="relative z-10 flex flex-col justify-center items-center w-full p-12">
+          {/* Logo with glow effect */}
+          <div className="relative mb-8">
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-400 to-cyan-500 rounded-3xl blur-2xl opacity-50 animate-pulse"></div>
+            <div className="relative w-28 h-28 bg-gradient-to-br from-emerald-400 via-green-500 to-teal-600 rounded-3xl flex items-center justify-center shadow-2xl shadow-emerald-500/50 transform hover:scale-105 transition-transform">
+              <span className="text-6xl">🏸</span>
+            </div>
+          </div>
+          
+          {/* Brand name with gradient */}
+          <h1 className="text-5xl font-black mb-4">
+            <span className="bg-gradient-to-r from-white via-purple-200 to-white bg-clip-text text-transparent">MATCHIFY</span>
+            <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">.pro</span>
+          </h1>
+          
+          <p className="text-xl text-white/60 text-center max-w-md mb-4">
+            Join India's fastest growing badminton community
+          </p>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Multi-Role Selection */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">
-                  Select Roles (can select multiple)
-                </label>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {['PLAYER', 'ORGANIZER', 'UMPIRE'].map((role) => (
-                    <label
-                      key={role}
-                      className={`p-4 border-2 rounded-lg cursor-pointer transition ${
-                        formData.roles.includes(role)
-                          ? 'border-primary-600 bg-primary-50'
-                          : 'border-gray-300 hover:border-primary-400'
-                      }`}
-                    >
-                      <div className="flex items-start">
-                        <input
-                          type="checkbox"
-                          checked={formData.roles.includes(role)}
-                          onChange={() => handleRoleToggle(role)}
-                          className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded mt-1"
-                        />
-                        <div className="ml-3">
-                          <div className="font-medium text-gray-900 mb-1">
-                            {roleIcons[role]} {role}
-                          </div>
-                          <div className="text-xs text-gray-600">
-                            {roleDescriptions[role]}
-                          </div>
-                        </div>
-                      </div>
-                    </label>
-                  ))}
-                </div>
-                {formData.roles.length > 1 && (
-                  <p className="mt-2 text-sm text-green-600">
-                    ✓ You can switch between roles after logging in
-                  </p>
-                )}
+          {/* Exciting tagline */}
+          <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 border border-emerald-500/30 rounded-full mb-10">
+            <Rocket className="w-5 h-5 text-emerald-400 animate-bounce" />
+            <span className="text-emerald-300 font-medium">Start Your Journey Today!</span>
+          </div>
+          
+          {/* Benefits with glowing effects */}
+          <div className="space-y-4 w-full max-w-xs">
+            {[
+              { icon: <Gift className="w-5 h-5" />, text: '₹10 welcome bonus', color: 'text-amber-400' },
+              { icon: <Star className="w-5 h-5" />, text: 'Free to join', color: 'text-purple-400' },
+              { icon: <Users className="w-5 h-5" />, text: 'Multiple roles supported', color: 'text-cyan-400' },
+              { icon: <Trophy className="w-5 h-5" />, text: 'Track your progress', color: 'text-pink-400' },
+            ].map((item, i) => (
+              <div key={i} className="flex items-center gap-3 p-3 bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-xl hover:border-white/20 transition-all group">
+                <span className={`${item.color} group-hover:scale-110 transition-transform`}>{item.icon}</span>
+                <span className="text-white/70 group-hover:text-white transition-colors">{item.text}</span>
               </div>
+            ))}
+          </div>
+        </div>
+      </div>
 
-              {/* Name */}
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                  Full Name *
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  className="input"
-                  placeholder="Enter your full name"
-                  required
-                />
+      {/* Right Side - Register Form with dark theme */}
+      <div className="w-full lg:w-3/5 flex items-center justify-center p-6 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 overflow-y-auto relative">
+        {/* Subtle background effects */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl"></div>
+        
+        <div className="w-full max-w-xl py-8 relative z-10">
+          {/* Mobile Logo */}
+          <div className="lg:hidden text-center mb-8">
+            <Link to="/" className="inline-flex items-center gap-3">
+              <div className="w-14 h-14 bg-gradient-to-br from-emerald-400 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/30">
+                <span className="text-3xl">🏸</span>
               </div>
+              <span className="text-2xl font-bold text-white">MATCHIFY<span className="text-emerald-400">.pro</span></span>
+            </Link>
+          </div>
 
-              {/* Email & Phone */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                    Email Address *
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="input"
-                    placeholder="your@email.com"
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                    Phone Number
-                  </label>
-                  <input
-                    type="tel"
-                    id="phone"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    className="input"
-                    placeholder="9876543210"
-                  />
-                </div>
-              </div>
+          {/* Welcome text with gradient */}
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-emerald-500/10 border border-emerald-500/30 rounded-full mb-4">
+              <SparklesIcon className="w-4 h-4 text-emerald-400 animate-pulse" />
+              <span className="text-emerald-300 text-sm font-medium">Join the Champions!</span>
+            </div>
+            <h2 className="text-4xl font-bold text-white mb-2">Create Account</h2>
+            <p className="text-gray-400">Start your badminton journey today</p>
+          </div>
 
-              {/* Location & Gender */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-2">
-                    City
-                  </label>
-                  <input
-                    type="text"
-                    id="city"
-                    name="city"
-                    value={formData.city}
-                    onChange={handleChange}
-                    className="input"
-                    placeholder="Bangalore"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="state" className="block text-sm font-medium text-gray-700 mb-2">
-                    State
-                  </label>
-                  <input
-                    type="text"
-                    id="state"
-                    name="state"
-                    value={formData.state}
-                    onChange={handleChange}
-                    className="input"
-                    placeholder="Karnataka"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="gender" className="block text-sm font-medium text-gray-700 mb-2">
-                    Gender
-                  </label>
-                  <select
-                    id="gender"
-                    name="gender"
-                    value={formData.gender}
-                    onChange={handleChange}
-                    className="input"
+          {error && (
+            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm flex items-center gap-2">
+              <span className="text-lg">⚠️</span>
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Role Selection */}
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-3">Select Your Role(s)</label>
+              <div className="grid grid-cols-3 gap-3">
+                {roles.map((role) => (
+                  <button
+                    key={role.id}
+                    type="button"
+                    onClick={() => handleRoleToggle(role.id)}
+                    className={`relative p-4 rounded-xl border-2 transition-all ${
+                      formData.roles.includes(role.id)
+                        ? 'border-purple-500 bg-purple-500/10 shadow-lg shadow-purple-500/20'
+                        : 'border-white/10 bg-slate-800/50 hover:border-white/20'
+                    }`}
                   >
-                    <option value="">Select Gender</option>
-                    <option value="MALE">Male</option>
-                    <option value="FEMALE">Female</option>
-                    <option value="OTHER">Other</option>
-                  </select>
+                    {formData.roles.includes(role.id) && (
+                      <CheckCircleIcon className="absolute top-2 right-2 w-5 h-5 text-purple-400" />
+                    )}
+                    <div className="text-2xl mb-2">{role.icon}</div>
+                    <p className="font-semibold text-white text-sm">{role.title}</p>
+                    <p className="text-xs text-gray-500">{role.desc}</p>
+                  </button>
+                ))}
+              </div>
+              {formData.roles.length > 1 && (
+                <p className="mt-2 text-xs text-purple-400 flex items-center gap-1">
+                  <CheckCircleIcon className="w-4 h-4" />
+                  You can switch between roles anytime
+                </p>
+              )}
+            </div>
+
+            {/* Name */}
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Full Name</label>
+              <div className="relative group">
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-cyan-500/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
+                <div className="relative">
+                  <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 group-focus-within:text-purple-400 transition-colors" />
+                  <input
+                    name="name"
+                    type="text"
+                    required
+                    className="w-full pl-12 pr-4 py-4 bg-slate-800/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                    placeholder="Your full name"
+                    value={formData.name}
+                    onChange={handleChange}
+                  />
                 </div>
               </div>
+            </div>
 
-              {/* Password */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                    Password *
-                  </label>
+            {/* Email & Phone */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Email</label>
+                <div className="relative group">
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-cyan-500/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
                   <div className="relative">
+                    <EnvelopeIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 group-focus-within:text-purple-400 transition-colors" />
                     <input
-                      type={showPassword ? 'text' : 'password'}
-                      id="password"
+                      name="email"
+                      type="email"
+                      required
+                      className="w-full pl-12 pr-4 py-4 bg-slate-800/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                      placeholder="you@example.com"
+                      value={formData.email}
+                      onChange={handleChange}
+                    />
+                  </div>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Phone Number <span className="text-red-400">*</span>
+                </label>
+                <div className="relative group">
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-cyan-500/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
+                  <div className="relative">
+                    <PhoneIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 group-focus-within:text-purple-400 transition-colors" />
+                    <input
+                      name="phone"
+                      type="tel"
+                      required
+                      maxLength={10}
+                      className="w-full pl-12 pr-4 py-4 bg-slate-800/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                      placeholder="9876543210"
+                      value={formData.phone}
+                      onChange={handleChange}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Alternate Email */}
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Alternate Email <span className="text-gray-500 text-xs font-normal">(Optional)</span>
+              </label>
+              <div className="relative group">
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-cyan-500/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
+                <div className="relative">
+                  <EnvelopeIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 group-focus-within:text-purple-400 transition-colors" />
+                  <input
+                    name="alternateEmail"
+                    type="email"
+                    className="w-full pl-12 pr-4 py-4 bg-slate-800/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                    placeholder="Optional alternate email"
+                    value={formData.alternateEmail}
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Passwords */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Password</label>
+                <div className="relative group">
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-cyan-500/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
+                  <div className="relative">
+                    <LockClosedIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 group-focus-within:text-purple-400 transition-colors" />
+                    <input
                       name="password"
+                      type={showPassword ? 'text' : 'password'}
+                      required
+                      className="w-full pl-12 pr-12 py-4 bg-slate-800/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                      placeholder="••••••••"
                       value={formData.password}
                       onChange={handleChange}
-                      className="input pr-10"
-                      placeholder="Create a strong password"
-                      required
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-purple-400 transition-colors"
                     >
-                      {showPassword ? (
-                        <EyeSlashIcon className="h-5 w-5" />
-                      ) : (
-                        <EyeIcon className="h-5 w-5" />
-                      )}
+                      {showPassword ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
                     </button>
                   </div>
                 </div>
-                <div>
-                  <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                    Confirm Password *
-                  </label>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Confirm Password</label>
+                <div className="relative group">
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-cyan-500/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
                   <div className="relative">
+                    <LockClosedIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 group-focus-within:text-purple-400 transition-colors" />
                     <input
-                      type={showConfirmPassword ? 'text' : 'password'}
-                      id="confirmPassword"
                       name="confirmPassword"
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      required
+                      className="w-full pl-12 pr-12 py-4 bg-slate-800/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                      placeholder="••••••••"
                       value={formData.confirmPassword}
                       onChange={handleChange}
-                      className="input pr-10"
-                      placeholder="Confirm your password"
-                      required
                     />
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-purple-400 transition-colors"
                     >
-                      {showConfirmPassword ? (
-                        <EyeSlashIcon className="h-5 w-5" />
-                      ) : (
-                        <EyeIcon className="h-5 w-5" />
-                      )}
+                      {showConfirmPassword ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
                     </button>
                   </div>
                 </div>
               </div>
+            </div>
 
-              {/* Terms & Conditions */}
-              <div className="flex items-center">
-                <input
-                  id="terms"
-                  name="terms"
-                  type="checkbox"
-                  required
-                  className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-                />
-                <label htmlFor="terms" className="ml-2 block text-sm text-gray-700">
-                  I agree to the{' '}
-                  <a href="#" className="text-primary-600 hover:text-primary-500 font-medium">
-                    Terms of Service
-                  </a>{' '}
-                  and{' '}
-                  <a href="#" className="text-primary-600 hover:text-primary-500 font-medium">
-                    Privacy Policy
-                  </a>
-                </label>
-              </div>
+            {/* Terms */}
+            <label className="flex items-start gap-3 cursor-pointer group">
+              <input type="checkbox" required className="w-5 h-5 rounded border-white/20 bg-slate-800 text-purple-500 focus:ring-purple-500 focus:ring-offset-0 mt-0.5" />
+              <span className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors">
+                I agree to the <a href="#" className="text-purple-400 hover:text-purple-300">Terms of Service</a> and <a href="#" className="text-purple-400 hover:text-purple-300">Privacy Policy</a>
+              </span>
+            </label>
 
-              {/* Submit Button */}
+            {/* Exciting submit button */}
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 via-cyan-500 to-emerald-500 rounded-xl blur-lg opacity-70 group-hover:opacity-100 transition-opacity animate-pulse"></div>
               <button
                 type="submit"
                 disabled={loading}
-                className="btn-primary w-full btn-lg"
+                className="relative w-full py-4 bg-gradient-to-r from-emerald-500 via-cyan-500 to-emerald-500 bg-size-200 bg-pos-0 hover:bg-pos-100 text-white font-bold rounded-xl shadow-2xl shadow-emerald-500/30 hover:shadow-emerald-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-lg"
               >
                 {loading ? (
                   <>
-                    <span className="spinner mr-2"></span>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                     Creating account...
                   </>
                 ) : (
-                  'Create Account'
+                  <>
+                    <Rocket className="w-5 h-5" />
+                    Let's Get Started!
+                    <ArrowRightIcon className="w-5 h-5" />
+                  </>
                 )}
               </button>
-            </form>
-          </div>
-        </div>
+            </div>
+          </form>
 
-        {/* Sign In Link */}
-        <div className="text-center">
-          <p className="text-gray-600">
-            Already have an account?{' '}
-            <Link to="/login" className="text-primary-600 hover:text-primary-500 font-medium">
-              Sign in here
-            </Link>
-          </p>
+          <div className="mt-8 text-center">
+            <p className="text-gray-400">
+              Already have an account?{' '}
+              <Link to={redirectUrl ? `/login?redirect=${encodeURIComponent(redirectUrl)}` : '/login'} className="text-transparent bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text font-bold hover:from-purple-300 hover:to-cyan-300 transition-all">
+                Sign in here
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
     </div>

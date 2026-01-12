@@ -127,7 +127,7 @@ const LiveMatchDetail = () => {
       <div className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <button 
-            onClick={() => navigate('/matches/live')}
+            onClick={() => navigate(-1)}
             className="text-gray-600 hover:text-gray-900 flex items-center"
           >
             ← Back to Live Matches

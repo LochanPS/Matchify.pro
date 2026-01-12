@@ -200,7 +200,7 @@ const getDraw = async (req, res) => {
         tournament: draw.tournament,
         category: draw.category,
         format: draw.format,
-        bracket: JSON.parse(draw.bracketJson),
+        bracketJson: JSON.parse(draw.bracketJson),
         createdAt: draw.createdAt
       }
     });
@@ -266,8 +266,362 @@ const deleteDraw = async (req, res) => {
   }
 };
 
+/**
+ * Get registered players for a category (for draw assignment)
+ * GET /api/tournaments/:tournamentId/categories/:categoryId/players
+ */
+const getCategoryPlayers = async (req, res) => {
+  try {
+    const { tournamentId, categoryId } = req.params;
+
+    // Get confirmed registrations for this category
+    const registrations = await prisma.registration.findMany({
+      where: {
+        tournamentId,
+        categoryId,
+        status: 'confirmed'
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true
+          }
+        }
+      },
+      orderBy: { createdAt: 'asc' }
+    });
+
+    const players = registrations.map((reg, index) => ({
+      id: reg.user.id,
+      registrationId: reg.id,
+      name: reg.user.name,
+      email: reg.user.email,
+      phone: reg.user.phone,
+      seed: index + 1
+    }));
+
+    res.json({
+      success: true,
+      players,
+      totalCount: players.length
+    });
+  } catch (error) {
+    console.error('Get category players error:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch players' });
+  }
+};
+
+/**
+ * Assign players to draw slots
+ * PUT /api/draws/:drawId/assign-players
+ */
+const assignPlayersToDraw = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { tournamentId, categoryId, assignments } = req.body;
+    // assignments: [{ slot: 1, playerId: 'xxx', playerName: 'John' }, ...]
+
+    // Verify tournament and ownership
+    const tournament = await prisma.tournament.findUnique({ where: { id: tournamentId } });
+    if (!tournament || tournament.organizerId !== userId) {
+      return res.status(403).json({ success: false, error: 'Unauthorized' });
+    }
+
+    // Get existing draw
+    const draw = await prisma.draw.findUnique({
+      where: { tournamentId_categoryId: { tournamentId, categoryId } }
+    });
+
+    if (!draw) {
+      return res.status(404).json({ success: false, error: 'Draw not found' });
+    }
+
+    // Parse bracket
+    let bracketJson = typeof draw.bracketJson === 'string' ? JSON.parse(draw.bracketJson) : draw.bracketJson;
+
+    // Build a map of playerId -> slot from assignments (each player can only be in ONE slot)
+    const playerSlotMap = {};
+    assignments.forEach(({ slot, playerId, playerName }) => {
+      playerSlotMap[playerId] = { slot, playerName };
+    });
+
+    // Apply assignments to bracket - CLEAR ALL FIRST, then assign
+    if (bracketJson.format === 'KNOCKOUT' && bracketJson.rounds) {
+      const firstRound = bracketJson.rounds[0];
+      
+      // First, clear all slots in first round
+      firstRound.matches.forEach((match, idx) => {
+        match.player1 = { id: null, name: `Slot ${idx * 2 + 1}`, seed: idx * 2 + 1 };
+        match.player2 = { id: null, name: `Slot ${idx * 2 + 2}`, seed: idx * 2 + 2 };
+      });
+      
+      // Then assign players to their slots (each player only once)
+      Object.entries(playerSlotMap).forEach(([playerId, { slot, playerName }]) => {
+        const matchIndex = Math.floor((slot - 1) / 2);
+        const playerPosition = (slot - 1) % 2 === 0 ? 'player1' : 'player2';
+        if (firstRound.matches[matchIndex]) {
+          firstRound.matches[matchIndex][playerPosition] = {
+            id: playerId,
+            name: playerName,
+            seed: slot
+          };
+        }
+      });
+      
+      bracketJson.totalParticipants = Object.keys(playerSlotMap).length;
+    } else if (bracketJson.format === 'ROUND_ROBIN' || bracketJson.format === 'ROUND_ROBIN_KNOCKOUT') {
+      // First clear all participants
+      let slotCounter = 0;
+      bracketJson.groups.forEach(group => {
+        group.participants.forEach((participant, idx) => {
+          const slotNum = slotCounter + 1;
+          group.participants[idx] = { 
+            id: null, 
+            name: `Slot ${slotNum}`, 
+            seed: slotNum, 
+            played: 0, 
+            wins: 0, 
+            losses: 0, 
+            points: 0 
+          };
+          slotCounter++;
+        });
+      });
+      
+      // Then assign players
+      slotCounter = 0;
+      bracketJson.groups.forEach(group => {
+        group.participants.forEach((participant, idx) => {
+          const slotNum = slotCounter + 1;
+          const assignment = assignments.find(a => a.slot === slotNum);
+          if (assignment) {
+            group.participants[idx] = {
+              ...participant,
+              id: assignment.playerId,
+              name: assignment.playerName
+            };
+          }
+          slotCounter++;
+        });
+      });
+    }
+
+    // Save updated draw
+    const updatedDraw = await prisma.draw.update({
+      where: { tournamentId_categoryId: { tournamentId, categoryId } },
+      data: { bracketJson: JSON.stringify(bracketJson), updatedAt: new Date() }
+    });
+
+    // Update Match records with player assignments (for knockout format)
+    if (bracketJson.format === 'KNOCKOUT') {
+      // Get all matches for this category (round 1)
+      const matches = await prisma.match.findMany({
+        where: { tournamentId, categoryId, round: 1 },
+        orderBy: { matchNumber: 'asc' }
+      });
+
+      // First clear all player assignments in round 1
+      for (const match of matches) {
+        await prisma.match.update({
+          where: { id: match.id },
+          data: { player1Id: null, player2Id: null, player1Seed: null, player2Seed: null }
+        });
+      }
+
+      // Then assign players to their slots
+      for (const assignment of assignments) {
+        const matchIndex = Math.floor((assignment.slot - 1) / 2);
+        const playerPosition = (assignment.slot - 1) % 2 === 0 ? 'player1Id' : 'player2Id';
+        const seedPosition = (assignment.slot - 1) % 2 === 0 ? 'player1Seed' : 'player2Seed';
+        
+        if (matches[matchIndex]) {
+          await prisma.match.update({
+            where: { id: matches[matchIndex].id },
+            data: {
+              [playerPosition]: assignment.playerId,
+              [seedPosition]: assignment.slot
+            }
+          });
+        }
+      }
+    }
+
+    res.json({
+      success: true,
+      message: 'Players assigned successfully',
+      draw: { ...updatedDraw, bracketJson }
+    });
+  } catch (error) {
+    console.error('Assign players error:', error);
+    res.status(500).json({ success: false, error: 'Failed to assign players' });
+  }
+};
+
+/**
+ * Create configured draw with flexible format options
+ * POST /api/draws/create
+ */
+const createConfiguredDraw = async (req, res) => {
+  try {
+    const userId = req.user.id || req.user.userId;
+    const { tournamentId, categoryId, format, bracketSize, numberOfGroups, playersPerGroup, advanceFromGroup } = req.body;
+
+    // Verify tournament and ownership
+    const tournament = await prisma.tournament.findUnique({ where: { id: tournamentId } });
+    if (!tournament) {
+      return res.status(404).json({ success: false, error: 'Tournament not found' });
+    }
+    if (tournament.organizerId !== userId) {
+      return res.status(403).json({ success: false, error: 'Only the organizer can create draws' });
+    }
+
+    // Verify category
+    const category = await prisma.category.findUnique({ where: { id: categoryId } });
+    if (!category || category.tournamentId !== tournamentId) {
+      return res.status(404).json({ success: false, error: 'Category not found' });
+    }
+
+    // Generate bracket based on format
+    let bracketJson;
+    const size = bracketSize || category.maxParticipants || 32;
+
+    if (format === 'KNOCKOUT') {
+      bracketJson = generateKnockoutBracket(size);
+    } else if (format === 'ROUND_ROBIN') {
+      bracketJson = generateRoundRobinBracket(size, numberOfGroups || 1);
+    } else if (format === 'ROUND_ROBIN_KNOCKOUT') {
+      bracketJson = generateGroupsKnockoutBracket(size, numberOfGroups || 4, advanceFromGroup || 2);
+    } else {
+      bracketJson = generateKnockoutBracket(size);
+    }
+
+    // Upsert draw
+    const draw = await prisma.draw.upsert({
+      where: { tournamentId_categoryId: { tournamentId, categoryId } },
+      update: { format, bracketJson: JSON.stringify(bracketJson), updatedAt: new Date() },
+      create: { tournamentId, categoryId, format, bracketJson: JSON.stringify(bracketJson) }
+    });
+
+    // Create Match records for knockout format
+    if (format === 'KNOCKOUT' && bracketJson.rounds) {
+      // Delete existing matches for this category first
+      await prisma.match.deleteMany({
+        where: { tournamentId, categoryId }
+      });
+
+      // Create match records
+      const matchRecords = [];
+      let globalMatchNum = 1;
+      
+      for (let roundIdx = 0; roundIdx < bracketJson.rounds.length; roundIdx++) {
+        const round = bracketJson.rounds[roundIdx];
+        for (let matchIdx = 0; matchIdx < round.matches.length; matchIdx++) {
+          const match = round.matches[matchIdx];
+          matchRecords.push({
+            tournamentId,
+            categoryId,
+            round: roundIdx + 1,
+            matchNumber: globalMatchNum++,
+            player1Id: match.player1?.id || null,
+            player2Id: match.player2?.id || null,
+            player1Seed: match.player1?.seed || null,
+            player2Seed: match.player2?.seed || null,
+            status: 'PENDING'
+          });
+        }
+      }
+
+      if (matchRecords.length > 0) {
+        await prisma.match.createMany({ data: matchRecords });
+      }
+    }
+
+    res.status(201).json({
+      success: true,
+      message: 'Draw created successfully',
+      draw: { ...draw, bracketJson }
+    });
+  } catch (error) {
+    console.error('Create configured draw error:', error);
+    res.status(500).json({ success: false, error: 'Failed to create draw' });
+  }
+};
+
+// Helper: Generate knockout bracket
+function generateKnockoutBracket(size) {
+  const bracketSize = Math.pow(2, Math.ceil(Math.log2(Math.max(2, size))));
+  const numRounds = Math.log2(bracketSize);
+  const rounds = [];
+
+  for (let round = 0; round < numRounds; round++) {
+    const numMatches = bracketSize / Math.pow(2, round + 1);
+    const matches = [];
+    for (let i = 0; i < numMatches; i++) {
+      if (round === 0) {
+        matches.push({
+          matchNumber: i + 1,
+          player1: { id: null, name: `Slot ${i * 2 + 1}`, seed: i * 2 + 1 },
+          player2: { id: null, name: `Slot ${i * 2 + 2}`, seed: i * 2 + 2 },
+          score1: null, score2: null, winner: null
+        });
+      } else {
+        matches.push({
+          matchNumber: i + 1,
+          player1: { id: null, name: 'TBD', seed: null },
+          player2: { id: null, name: 'TBD', seed: null },
+          score1: null, score2: null, winner: null
+        });
+      }
+    }
+    rounds.push({ roundNumber: round + 1, matches });
+  }
+
+  return { format: 'KNOCKOUT', bracketSize, totalParticipants: 0, rounds };
+}
+
+// Helper: Generate round robin bracket with groups
+function generateRoundRobinBracket(size, numberOfGroups) {
+  const playersPerGroup = Math.ceil(size / numberOfGroups);
+  const groups = [];
+
+  for (let g = 0; g < numberOfGroups; g++) {
+    const participants = [];
+    for (let p = 0; p < playersPerGroup; p++) {
+      const slotNum = g * playersPerGroup + p + 1;
+      if (slotNum <= size) {
+        participants.push({ id: null, name: `Slot ${slotNum}`, seed: slotNum, played: 0, wins: 0, losses: 0, points: 0 });
+      }
+    }
+    groups.push({ groupName: String.fromCharCode(65 + g), participants });
+  }
+
+  return { format: 'ROUND_ROBIN', bracketSize: size, numberOfGroups, groups };
+}
+
+// Helper: Generate groups + knockout bracket
+function generateGroupsKnockoutBracket(size, numberOfGroups, advanceFromGroup) {
+  const groupData = generateRoundRobinBracket(size, numberOfGroups);
+  const knockoutSize = numberOfGroups * advanceFromGroup;
+  const knockoutData = generateKnockoutBracket(knockoutSize);
+
+  return {
+    format: 'ROUND_ROBIN_KNOCKOUT',
+    bracketSize: size,
+    numberOfGroups,
+    advanceFromGroup,
+    groups: groupData.groups,
+    knockout: knockoutData
+  };
+}
+
 export {
   generateDraw,
   getDraw,
-  deleteDraw
+  deleteDraw,
+  createConfiguredDraw,
+  getCategoryPlayers,
+  assignPlayersToDraw
 };

@@ -3,17 +3,19 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
 model User {
   id                   String              @id @default(uuid())
   email                String              @unique
+  alternateEmail       String?
   password             String
   name                 String
   phone                String?             @unique
   roles                String              @default("PLAYER") // Will store comma-separated roles
+  umpireCode           String?             @unique // Unique umpire code like #123ABCD
   profilePhoto         String?
   city                 String?
   state                String?
@@ -49,6 +51,7 @@ model User {
   walletTransactions   WalletTransaction[]
   umpiredMatches       Match[]             @relation("UmpireMatches")
   matchifyCredits      MatchifyCredits?
+  tournamentUmpires    TournamentUmpire[]  @relation("TournamentUmpires")
 
   @@index([email])
   @@index([phone])
@@ -75,6 +78,10 @@ model OrganizerProfile {
   tournamentsOrganized Int      @default(0)
   totalRevenue         Float    @default(0)
   rating               Float?
+  // Saved payment details for quick tournament creation
+  savedUpiId           String?
+  savedAccountHolder   String?
+  savedPaymentQRUrl    String?
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 }
@@ -151,10 +158,24 @@ model Tournament {
   registrations         Registration[]
   organizer             User               @relation(fields: [organizerId], references: [id])
   posters               TournamentPoster[]
+  umpires               TournamentUmpire[]
 
   @@index([city, state, status])
   @@index([startDate, registrationCloseDate])
   @@index([organizerId])
+}
+
+model TournamentUmpire {
+  id           String     @id @default(uuid())
+  tournamentId String
+  umpireId     String
+  addedAt      DateTime   @default(now())
+  tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  umpire       User       @relation("TournamentUmpires", fields: [umpireId], references: [id], onDelete: Cascade)
+
+  @@unique([tournamentId, umpireId])
+  @@index([tournamentId])
+  @@index([umpireId])
 }
 
 model TournamentPoster {
@@ -178,6 +199,7 @@ model Category {
   gender            String
   entryFee          Float
   maxParticipants   Int?
+  tournamentFormat  String         @default("KNOCKOUT") // KNOCKOUT or ROUND_ROBIN
   scoringFormat     String         @default("21x3")
   registrationCount Int            @default(0)
   status            String         @default("open")
@@ -209,12 +231,18 @@ model Registration {
   razorpayOrderId    String?
   razorpayPaymentId  String?
   razorpaySignature  String?
-  status             String     @default("pending")
-  paymentStatus      String     @default("pending")
+  paymentScreenshot  String?    // Screenshot of payment for organizer verification
+  status             String     @default("pending") // pending, confirmed, cancelled, cancellation_requested
+  paymentStatus      String     @default("pending") // pending, submitted, verified, rejected
   cancelledAt        DateTime?
   cancellationReason String?
+  refundUpiId        String?    // Player's UPI ID for refund
+  refundQrCode       String?    // Player's QR code image for refund
   refundAmount       Float?
-  refundStatus       String?
+  refundStatus       String?    // pending, approved, rejected, completed
+  refundRequestedAt  DateTime?
+  refundProcessedAt  DateTime?
+  refundRejectionReason String?
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
   partnerToken       String?

@@ -48,8 +48,8 @@ const CategoriesStep = ({ formData, updateFormData, onNext, onPrev }) => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">Tournament Categories</h2>
-        <p className="text-gray-600 mt-1">Define the categories players can register for</p>
+        <h2 className="text-2xl font-bold text-white">Tournament Categories</h2>
+        <p className="text-gray-400 mt-1">Define the categories players can register for</p>
       </div>
 
       {!showForm ? (
@@ -57,7 +57,7 @@ const CategoriesStep = ({ formData, updateFormData, onNext, onPrev }) => {
           {/* Add Category Button */}
           <button
             onClick={() => setShowForm(true)}
-            className="w-full border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-blue-500 hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 text-gray-600 hover:text-blue-600"
+            className="w-full border-2 border-dashed border-white/20 rounded-xl p-6 hover:border-purple-500/50 hover:bg-purple-500/10 transition-colors flex items-center justify-center gap-2 text-gray-400 hover:text-purple-400"
           >
             <PlusIcon className="h-6 w-6" />
             <span className="font-medium">Add Category</span>
@@ -66,59 +66,59 @@ const CategoriesStep = ({ formData, updateFormData, onNext, onPrev }) => {
           {/* Categories List */}
           {formData.categories.length > 0 && (
             <div className="space-y-4">
-              <h3 className="font-medium text-gray-900">
+              <h3 className="font-medium text-white">
                 Added Categories ({formData.categories.length})
               </h3>
               
               {formData.categories.map((category, index) => (
                 <div
                   key={index}
-                  className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors"
+                  className="border border-white/10 bg-slate-700/30 rounded-xl p-4 hover:border-purple-500/30 transition-colors"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <h4 className="font-semibold text-gray-900 mb-2">
+                      <h4 className="font-semibold text-white mb-2">
                         {category.name}
                       </h4>
                       
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm text-gray-600">
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm text-gray-400">
                         <div>
-                          <span className="font-medium">Format:</span> {category.format}
+                          <span className="font-medium text-gray-300">Format:</span> {category.format}
                         </div>
                         <div>
-                          <span className="font-medium">Gender:</span> {category.gender}
+                          <span className="font-medium text-gray-300">Gender:</span> {category.gender}
                         </div>
                         {category.ageGroup && (
                           <div>
-                            <span className="font-medium">Age:</span> {category.ageGroup}
+                            <span className="font-medium text-gray-300">Age:</span> {category.ageGroup}
                           </div>
                         )}
                         <div>
-                          <span className="font-medium">Entry Fee:</span> ₹{category.entryFee}
+                          <span className="font-medium text-gray-300">Entry Fee:</span> ₹{category.entryFee}
                         </div>
                         {category.maxParticipants && (
                           <div>
-                            <span className="font-medium">Max Players:</span> {category.maxParticipants}
+                            <span className="font-medium text-gray-300">Max Players:</span> {category.maxParticipants}
                           </div>
                         )}
                         <div>
-                          <span className="font-medium">Scoring:</span> {category.scoringFormat}
+                          <span className="font-medium text-gray-300">Scoring:</span> {category.scoringFormat}
                         </div>
                       </div>
                       
                       {/* Prize Info */}
                       {(category.prizeWinner || category.prizeRunnerUp || category.prizeSemiFinalist) && (
-                        <div className="mt-3 pt-3 border-t border-gray-100">
-                          <span className="text-xs font-medium text-green-700 bg-green-50 px-2 py-1 rounded">💰 Cash Prize</span>
+                        <div className="mt-3 pt-3 border-t border-white/10">
+                          <span className="text-xs font-medium text-emerald-400 bg-emerald-500/20 px-2 py-1 rounded-lg">💰 Cash Prize</span>
                           <div className="flex flex-wrap gap-3 mt-2 text-sm">
                             {category.prizeWinner && (
-                              <span className="text-green-600">🥇 Winner: ₹{category.prizeWinner}</span>
+                              <span className="text-emerald-400">🥇 Winner: ₹{category.prizeWinner}</span>
                             )}
                             {category.prizeRunnerUp && (
-                              <span className="text-blue-600">🥈 Runner-up: ₹{category.prizeRunnerUp}</span>
+                              <span className="text-blue-400">🥈 Runner-up: ₹{category.prizeRunnerUp}</span>
                             )}
                             {category.prizeSemiFinalist && (
-                              <span className="text-orange-600">🥉 Semi-finalist: ₹{category.prizeSemiFinalist}</span>
+                              <span className="text-orange-400">🥉 Semi-finalist: ₹{category.prizeSemiFinalist}</span>
                             )}
                           </div>
                           {category.prizeDescription && (
@@ -131,14 +131,14 @@ const CategoriesStep = ({ formData, updateFormData, onNext, onPrev }) => {
                     <div className="flex items-center gap-2 ml-4">
                       <button
                         onClick={() => handleEditCategory(index)}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        className="p-2 text-purple-400 hover:bg-purple-500/20 rounded-lg transition-colors"
                         title="Edit category"
                       >
                         <PencilIcon className="h-5 w-5" />
                       </button>
                       <button
                         onClick={() => handleDeleteCategory(index)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
                         title="Delete category"
                       >
                         <TrashIcon className="h-5 w-5" />
@@ -151,9 +151,9 @@ const CategoriesStep = ({ formData, updateFormData, onNext, onPrev }) => {
           )}
 
           {/* Info Box */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h4 className="font-medium text-blue-900 mb-2">Category Guidelines:</h4>
-            <ul className="text-sm text-blue-800 space-y-1">
+          <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl p-4">
+            <h4 className="font-medium text-purple-300 mb-2">Category Guidelines:</h4>
+            <ul className="text-sm text-gray-400 space-y-1">
               <li>• Create separate categories for different formats (singles/doubles)</li>
               <li>• Consider age groups (U-15, U-19, Open, 35+, etc.)</li>
               <li>• Set appropriate entry fees for each category</li>
@@ -162,19 +162,19 @@ const CategoriesStep = ({ formData, updateFormData, onNext, onPrev }) => {
           </div>
 
           {/* Navigation */}
-          <div className="flex justify-between pt-6 border-t">
+          <div className="flex justify-between pt-6 border-t border-white/10">
             <button
               onClick={onPrev}
-              className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+              className="px-6 py-3 bg-slate-700 text-gray-300 rounded-xl hover:bg-slate-600 transition-colors font-medium"
             >
               ← Back
             </button>
             <button
               onClick={handleNext}
               disabled={formData.categories.length === 0}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:bg-gray-300 disabled:cursor-not-allowed"
+              className="px-6 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-xl hover:shadow-lg hover:shadow-purple-500/25 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Next: Review →
+              Next: Payment QR →
             </button>
           </div>
         </>

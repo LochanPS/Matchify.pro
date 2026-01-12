@@ -2,10 +2,81 @@ import express from 'express';
 import { PrismaClient } from '@prisma/client';
 import { authenticate } from '../middleware/auth.js';
 import { getOrganizerHistory, getCategoryDetails, getCancellationLogs } from '../controllers/tournamentHistory.controller.js';
-import { getTournamentRegistrations, getTournamentAnalytics, exportParticipants, approveRegistration, rejectRegistration, removeRegistration } from '../controllers/organizer.controller.js';
+import { getTournamentRegistrations, getTournamentAnalytics, exportParticipants, approveRegistration, rejectRegistration, removeRegistration, getCancellationRequests, approveRefund, rejectRefund, completeRefund } from '../controllers/organizer.controller.js';
 
 const router = express.Router();
 const prisma = new PrismaClient();
+
+// GET /organizer/payment-details - Get saved payment details
+router.get('/payment-details', authenticate, async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const profile = await prisma.organizerProfile.findUnique({
+      where: { userId },
+      select: {
+        savedUpiId: true,
+        savedAccountHolder: true,
+        savedPaymentQRUrl: true,
+      }
+    });
+
+    if (!profile) {
+      return res.json({
+        success: true,
+        data: { upiId: null, accountHolderName: null, paymentQRUrl: null }
+      });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        upiId: profile.savedUpiId,
+        accountHolderName: profile.savedAccountHolder,
+        paymentQRUrl: profile.savedPaymentQRUrl,
+      }
+    });
+  } catch (error) {
+    console.error('Get payment details error:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch payment details' });
+  }
+});
+
+// PUT /organizer/payment-details - Save payment details
+router.put('/payment-details', authenticate, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { upiId, accountHolderName, paymentQRUrl } = req.body;
+
+    const profile = await prisma.organizerProfile.upsert({
+      where: { userId },
+      update: {
+        savedUpiId: upiId || null,
+        savedAccountHolder: accountHolderName || null,
+        savedPaymentQRUrl: paymentQRUrl || null,
+      },
+      create: {
+        userId,
+        savedUpiId: upiId || null,
+        savedAccountHolder: accountHolderName || null,
+        savedPaymentQRUrl: paymentQRUrl || null,
+      }
+    });
+
+    res.json({
+      success: true,
+      message: 'Payment details saved successfully',
+      data: {
+        upiId: profile.savedUpiId,
+        accountHolderName: profile.savedAccountHolder,
+        paymentQRUrl: profile.savedPaymentQRUrl,
+      }
+    });
+  } catch (error) {
+    console.error('Save payment details error:', error);
+    res.status(500).json({ success: false, error: 'Failed to save payment details' });
+  }
+});
 
 // GET /organizer/dashboard - Dashboard statistics
 router.get('/dashboard', authenticate, async (req, res) => {
@@ -164,8 +235,88 @@ router.get('/tournaments/:id/analytics', authenticate, getTournamentAnalytics);
 router.get('/tournaments/:id/export', authenticate, exportParticipants);
 
 // Registration management routes
+router.get('/registrations/:id', authenticate, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const organizerId = req.user.id;
+
+    const registration = await prisma.registration.findUnique({
+      where: { id },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            city: true,
+            state: true,
+          },
+        },
+        partner: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+        category: {
+          select: {
+            id: true,
+            name: true,
+            format: true,
+            gender: true,
+            entryFee: true,
+          },
+        },
+        tournament: {
+          select: {
+            id: true,
+            name: true,
+            organizerId: true,
+            startDate: true,
+            city: true,
+            state: true,
+          },
+        },
+      },
+    });
+
+    if (!registration) {
+      return res.status(404).json({
+        success: false,
+        error: 'Registration not found',
+      });
+    }
+
+    // Verify organizer owns the tournament
+    if (registration.tournament.organizerId !== organizerId) {
+      return res.status(403).json({
+        success: false,
+        error: 'Not authorized to view this registration',
+      });
+    }
+
+    res.json({
+      success: true,
+      registration,
+    });
+  } catch (error) {
+    console.error('Get registration error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch registration',
+    });
+  }
+});
 router.put('/registrations/:id/approve', authenticate, approveRegistration);
 router.put('/registrations/:id/reject', authenticate, rejectRegistration);
 router.delete('/registrations/:id', authenticate, removeRegistration);
+
+// Cancellation/Refund management routes
+router.get('/cancellation-requests', authenticate, getCancellationRequests);
+router.put('/registrations/:id/approve-refund', authenticate, approveRefund);
+router.put('/registrations/:id/reject-refund', authenticate, rejectRefund);
+router.put('/registrations/:id/complete-refund', authenticate, completeRefund);
 
 export default router;

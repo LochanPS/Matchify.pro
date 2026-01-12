@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { profileAPI } from '../api/profile';
 import ImageUpload from '../components/common/ImageUpload';
@@ -6,8 +7,16 @@ import ProfileStats from '../components/profile/ProfileStats';
 import PasswordModal from '../components/profile/PasswordModal';
 import { formatDateIndian, formatDateLongIndian } from '../utils/dateFormat';
 import { Edit2, Save, X, Key, Phone, Mail, MapPin, User, AlertTriangle } from 'lucide-react';
+import {
+  UserCircleIcon,
+  PencilSquareIcon,
+  KeyIcon,
+  CheckBadgeIcon,
+  ArrowLeftIcon
+} from '@heroicons/react/24/outline';
 
 export default function ProfilePage() {
+  const navigate = useNavigate();
   const { user, updateUser } = useAuth();
   const [profile, setProfile] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -83,7 +92,6 @@ export default function ProfilePage() {
     }
   };
 
-  // Check if name or DOB is being set for the first time
   const needsConfirmation = () => {
     const settingName = !profile?.name && formData.name;
     const settingDOB = !profile?.dateOfBirth && formData.dateOfBirth;
@@ -91,7 +99,6 @@ export default function ProfilePage() {
   };
 
   const handleSave = async () => {
-    // If setting name or DOB for first time, show confirmation
     if (needsConfirmation()) {
       setPendingData(formData);
       setShowConfirmModal(true);
@@ -112,32 +119,16 @@ export default function ProfilePage() {
     setSuccess('');
     
     try {
-      // Only send fields that can be edited
       const cleanedData = {};
-      
-      // Name can only be set if currently empty
-      if (!profile?.name && dataToSave.name) {
-        cleanedData.name = dataToSave.name;
-      }
-      
-      // DOB can only be set if currently empty
-      if (!profile?.dateOfBirth && dataToSave.dateOfBirth) {
-        cleanedData.dateOfBirth = dataToSave.dateOfBirth;
-      }
-      
-      // These fields can always be edited
-      if (dataToSave.phone) {
-        cleanedData.phone = dataToSave.phone.replace(/^\+91/, '').replace(/\s/g, '');
-      }
+      if (!profile?.name && dataToSave.name) cleanedData.name = dataToSave.name;
+      if (!profile?.dateOfBirth && dataToSave.dateOfBirth) cleanedData.dateOfBirth = dataToSave.dateOfBirth;
+      if (dataToSave.phone) cleanedData.phone = dataToSave.phone.replace(/^\+91/, '').replace(/\s/g, '');
       if (dataToSave.gender) cleanedData.gender = dataToSave.gender;
       if (dataToSave.city !== undefined) cleanedData.city = dataToSave.city;
       if (dataToSave.state !== undefined) cleanedData.state = dataToSave.state;
       if (dataToSave.country !== undefined) cleanedData.country = dataToSave.country;
       
-      console.log('Sending profile data:', cleanedData);
-      
       const updatedUser = await profileAPI.updateProfile(cleanedData);
-      console.log('Profile updated:', updatedUser);
       setProfile(updatedUser);
       updateUser(updatedUser);
       setIsEditing(false);
@@ -145,7 +136,6 @@ export default function ProfilePage() {
       setTimeout(() => setSuccess(''), 3000);
     } catch (error) {
       console.error('Failed to update profile:', error);
-      console.error('Error response:', error.response?.data);
       const errorMsg = error.response?.data?.error || 
                        error.response?.data?.details?.map(d => d.message).join(', ') ||
                        'Failed to update profile. Please try again.';
@@ -174,39 +164,41 @@ export default function ProfilePage() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // Check if field can be edited (only if currently empty)
   const canEditName = !profile?.name;
   const canEditDOB = !profile?.dateOfBirth;
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading profile...</p>
+          <div className="w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="text-gray-500 mt-4 font-medium">Loading profile...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Success/Error Messages */}
-        {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-            {error}
-          </div>
-        )}
-        {success && (
-          <div className="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
-            {success}
-          </div>
-        )}
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      {/* Hero Header */}
+      <div className="relative bg-gradient-to-r from-slate-900 via-purple-900 to-slate-900 overflow-hidden">
+        <div className="absolute inset-0">
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+        </div>
+        
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          {/* Back Button */}
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2 text-white/70 hover:text-white mb-6 transition-colors group"
+          >
+            <ArrowLeftIcon className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
+            <span>Back</span>
+          </button>
 
-        {/* Header */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <div className="flex flex-col lg:flex-row items-center gap-6">
+          <div className="flex flex-col lg:flex-row items-center gap-8">
+            {/* Profile Photo */}
             <div className="flex-shrink-0">
               <ImageUpload
                 currentImage={profile?.profilePhoto}
@@ -215,37 +207,39 @@ export default function ProfilePage() {
               />
             </div>
 
+            {/* Profile Info */}
             <div className="flex-1 text-center lg:text-left">
-              <h1 className="text-3xl font-bold text-gray-800">{profile?.name || 'No Name Set'}</h1>
-              <div className="flex items-center justify-center lg:justify-start gap-2 mt-2">
+              <h1 className="text-3xl font-bold text-white mb-2">{profile?.name || 'No Name Set'}</h1>
+              <div className="flex items-center justify-center lg:justify-start gap-2 mb-4">
                 <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${
-                  profile?.role === 'PLAYER' ? 'bg-green-100 text-green-800' :
-                  profile?.role === 'ORGANIZER' ? 'bg-blue-100 text-blue-800' :
-                  profile?.role === 'UMPIRE' ? 'bg-purple-100 text-purple-800' :
-                  'bg-red-100 text-red-800'
+                  profile?.role === 'PLAYER' ? 'bg-green-500/20 text-green-300 border border-green-500/30' :
+                  profile?.role === 'ORGANIZER' ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' :
+                  profile?.role === 'UMPIRE' ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' :
+                  'bg-red-500/20 text-red-300 border border-red-500/30'
                 }`}>
                   {profile?.role}
                 </span>
                 {profile?.isVerified && (
-                  <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                    ✓ Verified
+                  <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full bg-green-500/20 text-green-300 border border-green-500/30">
+                    <CheckBadgeIcon className="w-4 h-4" />
+                    Verified
                   </span>
                 )}
               </div>
               
-              <div className="flex flex-wrap gap-4 mt-4 justify-center lg:justify-start">
-                <div className="flex items-center gap-2 text-gray-600">
+              <div className="flex flex-wrap gap-4 justify-center lg:justify-start text-white/60">
+                <div className="flex items-center gap-2">
                   <Mail size={16} />
                   <span>{profile?.email}</span>
                 </div>
                 {profile?.phone && (
-                  <div className="flex items-center gap-2 text-gray-600">
+                  <div className="flex items-center gap-2">
                     <Phone size={16} />
                     <span>{profile?.phone}</span>
                   </div>
                 )}
                 {(profile?.city || profile?.state) && (
-                  <div className="flex items-center gap-2 text-gray-600">
+                  <div className="flex items-center gap-2">
                     <MapPin size={16} />
                     <span>{[profile?.city, profile?.state].filter(Boolean).join(', ')}</span>
                   </div>
@@ -253,21 +247,22 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <div className="flex gap-2">
+            {/* Action Buttons */}
+            <div className="flex gap-3">
               {!isEditing ? (
                 <>
                   <button
                     onClick={() => setIsEditing(true)}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 transition"
+                    className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:shadow-lg hover:scale-105 transition-all flex items-center gap-2 font-medium"
                   >
-                    <Edit2 size={16} />
+                    <PencilSquareIcon className="w-5 h-5" />
                     Edit Profile
                   </button>
                   <button
                     onClick={() => setShowPasswordModal(true)}
-                    className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 flex items-center gap-2 transition"
+                    className="px-5 py-2.5 bg-white/10 backdrop-blur-sm text-white rounded-xl border border-white/20 hover:bg-white/20 transition-all flex items-center gap-2 font-medium"
                   >
-                    <Key size={16} />
+                    <KeyIcon className="w-5 h-5" />
                     Password
                   </button>
                 </>
@@ -276,16 +271,16 @@ export default function ProfilePage() {
                   <button
                     onClick={handleSave}
                     disabled={saving}
-                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2 disabled:bg-gray-400 transition"
+                    className="px-5 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:shadow-lg hover:scale-105 transition-all flex items-center gap-2 font-medium disabled:opacity-50"
                   >
-                    <Save size={16} />
+                    <Save size={18} />
                     {saving ? 'Saving...' : 'Save'}
                   </button>
                   <button
                     onClick={handleCancel}
-                    className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 flex items-center gap-2 transition"
+                    className="px-5 py-2.5 bg-white/10 backdrop-blur-sm text-white rounded-xl border border-white/20 hover:bg-white/20 transition-all flex items-center gap-2 font-medium"
                   >
-                    <X size={16} />
+                    <X size={18} />
                     Cancel
                   </button>
                 </>
@@ -293,19 +288,37 @@ export default function ProfilePage() {
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 -mt-8">
+        {/* Success/Error Messages */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl text-red-700 flex items-center gap-3">
+            <span className="text-xl">⚠️</span>
+            {error}
+          </div>
+        )}
+        {success && (
+          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-2xl text-green-700 flex items-center gap-3">
+            <span className="text-xl">✅</span>
+            {success}
+          </div>
+        )}
 
         {/* Edit Form */}
         {isEditing && (
-          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
-              <User size={20} />
-              Edit Profile Information
-            </h2>
+          <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-6 mb-8">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
+                <User className="w-5 h-5 text-white" />
+              </div>
+              <h2 className="text-lg font-bold text-white">Edit Profile Information</h2>
+            </div>
             
             {/* Notice about permanent fields */}
-            <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-              <p className="text-sm text-amber-700 flex items-center gap-2">
-                <AlertTriangle size={16} />
+            <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-amber-700">
                 <strong>Important:</strong> Name and Date of Birth can only be set once and cannot be changed later.
               </p>
             </div>
@@ -317,24 +330,24 @@ export default function ProfilePage() {
                   Full Name {!canEditName && <span className="text-gray-400">(locked)</span>}
                 </label>
                 {canEditName ? (
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-blue-50"
-                    placeholder="Enter your full name (one-time only)"
-                  />
+                  <>
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 bg-blue-50 border border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      placeholder="Enter your full name (one-time only)"
+                    />
+                    <p className="text-xs text-blue-600 mt-1">⚠️ This can only be set once</p>
+                  </>
                 ) : (
                   <input
                     type="text"
                     value={profile?.name || ''}
                     disabled
-                    className="w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-100 text-gray-400 cursor-not-allowed"
                   />
-                )}
-                {canEditName && (
-                  <p className="text-xs text-blue-600 mt-1">⚠️ This can only be set once</p>
                 )}
               </div>
 
@@ -344,23 +357,23 @@ export default function ProfilePage() {
                   Date of Birth {!canEditDOB && <span className="text-gray-400">(locked)</span>}
                 </label>
                 {canEditDOB ? (
-                  <input
-                    type="date"
-                    name="dateOfBirth"
-                    value={formData.dateOfBirth}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-blue-50"
-                  />
+                  <>
+                    <input
+                      type="date"
+                      name="dateOfBirth"
+                      value={formData.dateOfBirth}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 bg-blue-50 border border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    />
+                    <p className="text-xs text-blue-600 mt-1">⚠️ This can only be set once</p>
+                  </>
                 ) : (
                   <input
                     type="text"
                     value={profile?.dateOfBirth ? formatDateIndian(profile.dateOfBirth) : 'Not provided'}
                     disabled
-                    className="w-full px-4 py-2 border border-gray-200 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-100 text-gray-400 cursor-not-allowed"
                   />
-                )}
-                {canEditDOB && (
-                  <p className="text-xs text-blue-600 mt-1">⚠️ This can only be set once</p>
                 )}
               </div>
 
@@ -371,7 +384,7 @@ export default function ProfilePage() {
                   name="phone"
                   value={formData.phone}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                   placeholder="Enter your phone number"
                 />
               </div>
@@ -382,7 +395,7 @@ export default function ProfilePage() {
                   name="gender"
                   value={formData.gender}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                 >
                   <option value="">Select Gender</option>
                   <option value="MALE">Male</option>
@@ -398,7 +411,7 @@ export default function ProfilePage() {
                   name="city"
                   value={formData.city}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                   placeholder="Enter your city"
                 />
               </div>
@@ -410,7 +423,7 @@ export default function ProfilePage() {
                   name="state"
                   value={formData.state}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                   placeholder="Enter your state"
                 />
               </div>
@@ -422,7 +435,7 @@ export default function ProfilePage() {
                   name="country"
                   value={formData.country}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                   placeholder="Enter your country"
                 />
               </div>
@@ -442,38 +455,39 @@ export default function ProfilePage() {
 
       {/* Confirmation Modal for Name/DOB */}
       {showConfirmModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center">
-                <AlertTriangle className="text-amber-600" size={24} />
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-14 h-14 bg-amber-100 rounded-2xl flex items-center justify-center">
+                <AlertTriangle className="text-amber-600" size={28} />
               </div>
-              <h3 className="text-xl font-bold text-gray-900">Confirm Your Details</h3>
+              <h3 className="text-xl font-bold text-white">Confirm Your Details</h3>
             </div>
             
-            <p className="text-gray-600 mb-4">
+            <p className="text-gray-400 mb-4">
               Please verify the following information. <strong>Once saved, these fields cannot be changed.</strong>
             </p>
 
-            <div className="bg-gray-50 rounded-lg p-4 mb-6 space-y-3">
+            <div className="bg-gray-50 rounded-xl p-4 mb-6 space-y-3">
               {!profile?.name && pendingData?.name && (
                 <div>
                   <p className="text-sm text-gray-500">Full Name</p>
-                  <p className="font-semibold text-gray-900">{pendingData.name}</p>
+                  <p className="font-semibold text-white">{pendingData.name}</p>
                 </div>
               )}
               {!profile?.dateOfBirth && pendingData?.dateOfBirth && (
                 <div>
                   <p className="text-sm text-gray-500">Date of Birth</p>
-                  <p className="font-semibold text-gray-900">
+                  <p className="font-semibold text-white">
                     {formatDateLongIndian(pendingData.dateOfBirth)}
                   </p>
                 </div>
               )}
             </div>
 
-            <p className="text-sm text-amber-600 mb-6">
-              ⚠️ Are you sure this information is correct?
+            <p className="text-sm text-amber-600 mb-6 flex items-center gap-2">
+              <AlertTriangle size={16} />
+              Are you sure this information is correct?
             </p>
 
             <div className="flex gap-3">
@@ -482,13 +496,13 @@ export default function ProfilePage() {
                   setShowConfirmModal(false);
                   setPendingData(null);
                 }}
-                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+                className="flex-1 px-4 py-3 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-all font-medium"
               >
                 Go Back & Edit
               </button>
               <button
                 onClick={handleConfirmSave}
-                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:shadow-lg transition-all font-medium"
               >
                 Yes, Confirm & Save
               </button>

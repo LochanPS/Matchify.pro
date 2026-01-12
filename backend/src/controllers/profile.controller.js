@@ -2,8 +2,22 @@ import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import cloudinary from '../config/cloudinary.js';
 import { updateProfileSchema, changePasswordSchema, profilePhotoSchema } from '../validators/profile.validator.js';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const prisma = new PrismaClient();
+
+// Check if Cloudinary is properly configured
+const isCloudinaryConfigured = () => {
+  return process.env.CLOUDINARY_CLOUD_NAME && 
+         process.env.CLOUDINARY_API_KEY && 
+         process.env.CLOUDINARY_API_SECRET &&
+         process.env.CLOUDINARY_CLOUD_NAME !== 'your-cloudinary-cloud-name';
+};
 
 // GET /profile - Fetch own profile
 export const getProfile = async (req, res) => {
@@ -229,47 +243,87 @@ export const uploadProfilePhoto = async (req, res) => {
       select: { profilePhoto: true }
     });
 
-    // Delete old photo from Cloudinary if exists
-    if (user.profilePhoto) {
-      try {
-        // Extract public_id from Cloudinary URL
-        const urlParts = user.profilePhoto.split('/');
-        const publicIdWithExtension = urlParts[urlParts.length - 1];
-        const publicId = `matchify/profiles/${publicIdWithExtension.split('.')[0]}`;
-        await cloudinary.uploader.destroy(publicId);
-      } catch (deleteError) {
-        console.warn('Failed to delete old profile photo:', deleteError.message);
-        // Continue with upload even if deletion fails
-      }
-    }
+    let photoUrl;
 
-    // Upload to Cloudinary
-    const result = await new Promise((resolve, reject) => {
-      cloudinary.uploader.upload_stream(
-        {
-          folder: 'matchify/profiles',
-          public_id: `user_${userId}_${Date.now()}`,
-          transformation: [
-            { width: 400, height: 400, crop: 'fill', gravity: 'face' },
-            { quality: 'auto', fetch_format: 'auto' }
-          ],
-          allowed_formats: ['jpg', 'jpeg', 'png', 'webp']
-        },
-        (error, result) => {
-          if (error) {
-            console.error('Cloudinary upload error:', error);
-            reject(error);
-          } else {
-            resolve(result);
-          }
+    // Check if Cloudinary is configured
+    if (isCloudinaryConfigured()) {
+      // Delete old photo from Cloudinary if exists
+      if (user.profilePhoto && user.profilePhoto.includes('cloudinary')) {
+        try {
+          const urlParts = user.profilePhoto.split('/');
+          const publicIdWithExtension = urlParts[urlParts.length - 1];
+          const publicId = `matchify/profiles/${publicIdWithExtension.split('.')[0]}`;
+          await cloudinary.uploader.destroy(publicId);
+        } catch (deleteError) {
+          console.warn('Failed to delete old profile photo:', deleteError.message);
         }
-      ).end(req.file.buffer);
-    });
+      }
+
+      // Upload to Cloudinary
+      const result = await new Promise((resolve, reject) => {
+        cloudinary.uploader.upload_stream(
+          {
+            folder: 'matchify/profiles',
+            public_id: `user_${userId}_${Date.now()}`,
+            transformation: [
+              { width: 400, height: 400, crop: 'fill', gravity: 'face' },
+              { quality: 'auto', fetch_format: 'auto' }
+            ],
+            allowed_formats: ['jpg', 'jpeg', 'png', 'webp']
+          },
+          (error, result) => {
+            if (error) {
+              console.error('Cloudinary upload error:', error);
+              reject(error);
+            } else {
+              resolve(result);
+            }
+          }
+        ).end(req.file.buffer);
+      });
+      
+      photoUrl = result.secure_url;
+    } else {
+      // Fallback: Save to local uploads folder
+      console.log('Cloudinary not configured, using local storage');
+      
+      const uploadsDir = path.join(__dirname, '../../uploads/profiles');
+      
+      // Create uploads directory if it doesn't exist
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+      }
+
+      // Delete old local photo if exists
+      if (user.profilePhoto && user.profilePhoto.includes('/uploads/profiles/')) {
+        try {
+          const oldFileName = user.profilePhoto.split('/uploads/profiles/')[1];
+          const oldFilePath = path.join(uploadsDir, oldFileName);
+          if (fs.existsSync(oldFilePath)) {
+            fs.unlinkSync(oldFilePath);
+          }
+        } catch (deleteError) {
+          console.warn('Failed to delete old local photo:', deleteError.message);
+        }
+      }
+
+      // Generate unique filename
+      const fileExtension = req.file.mimetype.split('/')[1];
+      const fileName = `user_${userId}_${Date.now()}.${fileExtension}`;
+      const filePath = path.join(uploadsDir, fileName);
+
+      // Write file to disk
+      fs.writeFileSync(filePath, req.file.buffer);
+
+      // Generate URL for the uploaded file
+      const baseUrl = process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 5000}`;
+      photoUrl = `${baseUrl}/uploads/profiles/${fileName}`;
+    }
 
     // Update user with new photo URL
     const updatedUser = await prisma.user.update({
       where: { id: userId },
-      data: { profilePhoto: result.secure_url },
+      data: { profilePhoto: photoUrl },
       select: {
         id: true,
         profilePhoto: true,
@@ -367,14 +421,25 @@ export const deleteProfilePhoto = async (req, res) => {
       return res.status(400).json({ error: 'No profile photo to delete' });
     }
 
-    // Delete photo from Cloudinary
+    // Delete photo from storage
     try {
-      const urlParts = user.profilePhoto.split('/');
-      const publicIdWithExtension = urlParts[urlParts.length - 1];
-      const publicId = `matchify/profiles/${publicIdWithExtension.split('.')[0]}`;
-      await cloudinary.uploader.destroy(publicId);
+      if (user.profilePhoto.includes('cloudinary') && isCloudinaryConfigured()) {
+        // Delete from Cloudinary
+        const urlParts = user.profilePhoto.split('/');
+        const publicIdWithExtension = urlParts[urlParts.length - 1];
+        const publicId = `matchify/profiles/${publicIdWithExtension.split('.')[0]}`;
+        await cloudinary.uploader.destroy(publicId);
+      } else if (user.profilePhoto.includes('/uploads/profiles/')) {
+        // Delete local file
+        const fileName = user.profilePhoto.split('/uploads/profiles/')[1];
+        const uploadsDir = path.join(__dirname, '../../uploads/profiles');
+        const filePath = path.join(uploadsDir, fileName);
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
+      }
     } catch (deleteError) {
-      console.warn('Failed to delete photo from Cloudinary:', deleteError.message);
+      console.warn('Failed to delete photo from storage:', deleteError.message);
     }
 
     // Update user to remove photo URL

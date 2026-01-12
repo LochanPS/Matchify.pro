@@ -63,6 +63,42 @@ router.get('/unread-count', authenticate, async (req, res) => {
 });
 
 /**
+ * GET /api/notifications/:id
+ * Get a single notification by ID
+ */
+router.get('/:id', authenticate, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { id } = req.params;
+
+    const notification = await prisma.notification.findFirst({
+      where: {
+        id,
+        userId,
+      },
+    });
+
+    if (!notification) {
+      return res.status(404).json({
+        success: false,
+        message: 'Notification not found',
+      });
+    }
+
+    res.json({
+      success: true,
+      notification,
+    });
+  } catch (error) {
+    console.error('Error fetching notification:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch notification',
+    });
+  }
+});
+
+/**
  * PUT /api/notifications/:id/read
  * Mark notification as read
  */

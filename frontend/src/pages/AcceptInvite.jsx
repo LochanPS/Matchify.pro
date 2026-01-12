@@ -1,6 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { 
+  Mail, 
+  User, 
+  Lock, 
+  Phone, 
+  MapPin, 
+  Shield, 
+  CheckCircle, 
+  AlertTriangle,
+  ArrowRight,
+  Sparkles
+} from 'lucide-react';
 
 const AcceptInvite = () => {
   const { token } = useParams();
@@ -10,6 +22,7 @@ const AcceptInvite = () => {
   const [inviteData, setInviteData] = useState(null);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   
   const [formData, setFormData] = useState({
     oneTimePassword: '',
@@ -46,7 +59,6 @@ const AcceptInvite = () => {
     e.preventDefault();
     setError('');
 
-    // Validation
     if (!formData.oneTimePassword || formData.oneTimePassword.length !== 8) {
       setError('Please enter the 8-character one-time password from your email');
       return;
@@ -78,8 +90,7 @@ const AcceptInvite = () => {
       );
 
       if (response.data.success) {
-        alert('Account created successfully! You can now login.');
-        navigate('/login');
+        setShowSuccessModal(true);
       }
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to create account');
@@ -88,12 +99,25 @@ const AcceptInvite = () => {
     }
   };
 
+  const getRoleBadge = (role) => {
+    const badges = {
+      ADMIN: 'bg-red-500/20 text-red-400 border border-red-500/30',
+      ORGANIZER: 'badge-info',
+      UMPIRE: 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
+    };
+    return badges[role] || badges.ORGANIZER;
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Verifying invite...</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500/20 rounded-full blur-3xl animate-blob"></div>
+          <div className="absolute top-40 -left-40 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl animate-blob animation-delay-2000"></div>
+        </div>
+        <div className="relative text-center">
+          <div className="spinner-premium mx-auto mb-4"></div>
+          <p className="text-gray-400">Verifying invite...</p>
         </div>
       </div>
     );
@@ -101,14 +125,19 @@ const AcceptInvite = () => {
 
   if (error && !inviteData) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
-          <div className="text-6xl mb-4">❌</div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Invalid Invite</h2>
-          <p className="text-gray-600 mb-6">{error}</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-red-500/10 rounded-full blur-3xl"></div>
+        </div>
+        <div className="relative glass-card-dark max-w-md w-full p-8 text-center">
+          <div className="w-20 h-20 bg-gradient-to-br from-red-500/20 to-rose-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <AlertTriangle className="w-10 h-10 text-red-400" />
+          </div>
+          <h2 className="text-2xl font-bold text-white mb-2">Invalid Invite</h2>
+          <p className="text-gray-400 mb-6">{error}</p>
           <button
             onClick={() => navigate('/login')}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+            className="btn-premium w-full"
           >
             Go to Login
           </button>
@@ -118,155 +147,226 @@ const AcceptInvite = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="max-w-md w-full">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
+      {/* Animated Background */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl animate-blob"></div>
+        <div className="absolute top-40 -left-40 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl animate-blob animation-delay-2000"></div>
+        <div className="absolute bottom-40 right-40 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl animate-blob animation-delay-4000"></div>
+      </div>
+
+      <div className="relative max-w-md w-full">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="text-6xl mb-4">🎾</div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome to Matchify.pro</h1>
-          <p className="text-gray-600">Create your account to get started</p>
+          <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-2xl shadow-blue-500/30">
+            <Sparkles className="w-10 h-10 text-white" />
+          </div>
+          <h1 className="text-3xl font-bold text-white mb-2">Welcome to Matchify.pro</h1>
+          <p className="text-gray-400">Create your account to get started</p>
         </div>
 
         {/* Invite Info Card */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-          <h3 className="font-semibold text-blue-900 mb-2">Invitation Details</h3>
-          <div className="text-sm text-blue-800 space-y-1">
-            <p><strong>Email:</strong> {inviteData?.email}</p>
-            <p><strong>Role:</strong> {inviteData?.role}</p>
-            <p><strong>Invited by:</strong> {inviteData?.invitedBy}</p>
-            <p><strong>Expires:</strong> {new Date(inviteData?.expiresAt).toLocaleDateString()}</p>
+        <div className="glass-card-dark p-4 mb-6">
+          <h3 className="font-semibold text-white mb-3 flex items-center gap-2">
+            <Mail className="w-4 h-4 text-blue-400" />
+            Invitation Details
+          </h3>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-gray-400 text-sm">Email</span>
+              <span className="text-white text-sm">{inviteData?.email}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-gray-400 text-sm">Role</span>
+              <span className={`badge ${getRoleBadge(inviteData?.role)}`}>{inviteData?.role}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-gray-400 text-sm">Invited by</span>
+              <span className="text-white text-sm">{inviteData?.invitedBy}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-gray-400 text-sm">Expires</span>
+              <span className="text-white text-sm">{new Date(inviteData?.expiresAt).toLocaleDateString('en-IN')}</span>
+            </div>
           </div>
         </div>
 
         {/* Form */}
-        <div className="bg-white rounded-lg shadow-lg p-8">
+        <div className="glass-card-dark p-6">
           {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm">
+            <div className="mb-4 alert-error text-sm flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 flex-shrink-0" />
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit}>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
                 One-Time Password *
               </label>
-              <input
-                type="text"
-                value={formData.oneTimePassword}
-                onChange={(e) => setFormData({ ...formData, oneTimePassword: e.target.value.toUpperCase() })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-lg tracking-widest text-center"
-                placeholder="A1B2C3D4"
-                maxLength={8}
-                required
-                style={{ letterSpacing: '0.5em' }}
-              />
+              <div className="relative">
+                <Shield className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                <input
+                  type="text"
+                  value={formData.oneTimePassword}
+                  onChange={(e) => setFormData({ ...formData, oneTimePassword: e.target.value.toUpperCase() })}
+                  className="input-premium pl-10 font-mono text-lg tracking-widest text-center"
+                  placeholder="A1B2C3D4"
+                  maxLength={8}
+                  required
+                />
+              </div>
               <p className="mt-1 text-xs text-gray-500">
                 Enter the 8-character code from your invitation email
               </p>
             </div>
 
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
                 Full Name *
               </label>
-              <input
-                type="text"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="John Doe"
-                required
-              />
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="input-premium pl-10"
+                  placeholder="John Doe"
+                  required
+                />
+              </div>
             </div>
 
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
                 Password *
               </label>
-              <input
-                type="password"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Minimum 6 characters"
-                required
-              />
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                <input
+                  type="password"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  className="input-premium pl-10"
+                  placeholder="Minimum 6 characters"
+                  required
+                />
+              </div>
             </div>
 
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
                 Confirm Password *
               </label>
-              <input
-                type="password"
-                value={formData.confirmPassword}
-                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Re-enter password"
-                required
-              />
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                <input
+                  type="password"
+                  value={formData.confirmPassword}
+                  onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                  className="input-premium pl-10"
+                  placeholder="Re-enter password"
+                  required
+                />
+              </div>
             </div>
 
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
                 Phone Number
               </label>
-              <input
-                type="tel"
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="+91 9876543210"
-              />
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                <input
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  className="input-premium pl-10"
+                  placeholder="+91 9876543210"
+                />
+              </div>
             </div>
 
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                City
-              </label>
-              <input
-                type="text"
-                value={formData.city}
-                onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Mumbai"
-              />
-            </div>
-
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                State
-              </label>
-              <input
-                type="text"
-                value={formData.state}
-                onChange={(e) => setFormData({ ...formData, state: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Maharashtra"
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  City
+                </label>
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                  <input
+                    type="text"
+                    value={formData.city}
+                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                    className="input-premium pl-10"
+                    placeholder="Mumbai"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  State
+                </label>
+                <input
+                  type="text"
+                  value={formData.state}
+                  onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+                  className="input-premium"
+                  placeholder="Maharashtra"
+                />
+              </div>
             </div>
 
             <button
               type="submit"
-              className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold disabled:opacity-50"
+              className="btn-premium w-full flex items-center justify-center gap-2 mt-6"
               disabled={submitting}
             >
-              {submitting ? 'Creating Account...' : 'Create Account'}
+              {submitting ? (
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <>
+                  Create Account
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
             </button>
           </form>
 
-          <div className="mt-6 text-center text-sm text-gray-600">
+          <div className="mt-6 text-center text-sm text-gray-400">
             Already have an account?{' '}
             <button
               onClick={() => navigate('/login')}
-              className="text-blue-600 hover:text-blue-700 font-medium"
+              className="text-blue-400 hover:text-blue-300 font-medium transition-colors"
             >
               Login here
             </button>
           </div>
         </div>
       </div>
+
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="modal-overlay">
+          <div className="modal-content max-w-md animate-scale-in text-center">
+            <div className="w-20 h-20 bg-gradient-to-br from-emerald-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-500/30">
+              <CheckCircle className="w-10 h-10 text-white" />
+            </div>
+            <h3 className="text-2xl font-bold text-white mb-2">Account Created!</h3>
+            <p className="text-gray-400 mb-6">
+              Your account has been created successfully. You can now login with your credentials.
+            </p>
+            <button
+              onClick={() => navigate('/login')}
+              className="btn-premium w-full"
+            >
+              Go to Login
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

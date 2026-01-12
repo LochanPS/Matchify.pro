@@ -1,9 +1,11 @@
 import React, { useEffect } from 'react';
-import { X, CheckCheck, Trash2, Bell } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { X, CheckCheck, Trash2, Bell, ChevronRight } from 'lucide-react';
 import { useNotifications } from '../contexts/NotificationContext';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow, format } from 'date-fns';
 
 const NotificationDropdown = ({ onClose }) => {
+  const navigate = useNavigate();
   const {
     notifications,
     loading,
@@ -22,6 +24,8 @@ const NotificationDropdown = ({ onClose }) => {
       REGISTRATION_CONFIRMED: '✅',
       REGISTRATION_REJECTED: '❌',
       REGISTRATION_REMOVED: '🚫',
+      REGISTRATION_PENDING: '⏳',
+      PAYMENT_VERIFICATION_REQUIRED: '💳',
       PARTNER_INVITATION: '🤝',
       PARTNER_ACCEPTED: '👍',
       PARTNER_DECLINED: '👎',
@@ -30,23 +34,114 @@ const NotificationDropdown = ({ onClose }) => {
       MATCH_STARTING_SOON: '⏰',
       TOURNAMENT_CANCELLED: '❌',
       REFUND_PROCESSED: '💰',
+      REFUND_APPROVED: '💰',
+      REFUND_REJECTED: '❌',
       TOURNAMENT_REMINDER: '📅',
       POINTS_AWARDED: '🏆',
       ACCOUNT_SUSPENDED: '⚠️',
+      CANCELLATION_REQUEST: '🔴',
     };
     return icons[type] || '🔔';
   };
 
+  // Get navigation path based on notification type and data
+  const getNotificationPath = (notification) => {
+    const data = notification.data ? JSON.parse(notification.data) : {};
+    const type = notification.type;
+
+    switch (type) {
+      case 'CANCELLATION_REQUEST':
+        // Navigate to dedicated cancellation request page
+        if (data.registrationId) {
+          return `/organizer/cancellation/${data.registrationId}`;
+        }
+        if (data.tournamentId) {
+          return `/organizer/tournaments/${data.tournamentId}?tab=refunds`;
+        }
+        return '/organizer/dashboard';
+
+      case 'PAYMENT_VERIFICATION_REQUIRED':
+      case 'REGISTRATION_PENDING':
+        // Navigate to tournament management page for organizer
+        if (data.tournamentId) {
+          return `/organizer/tournaments/${data.tournamentId}`;
+        }
+        return '/organizer/dashboard';
+      
+      case 'REGISTRATION_CONFIRMED':
+      case 'REGISTRATION_REJECTED':
+      case 'REGISTRATION_REMOVED':
+      case 'REFUND_APPROVED':
+      case 'REFUND_REJECTED':
+        // Navigate to player's registrations
+        return '/registrations';
+      
+      case 'PARTNER_INVITATION':
+        // Navigate to partner confirmation page
+        if (data.token) {
+          return `/partner/confirm/${data.token}`;
+        }
+        return '/registrations';
+      
+      case 'PARTNER_ACCEPTED':
+      case 'PARTNER_DECLINED':
+        return '/registrations';
+      
+      case 'DRAW_PUBLISHED':
+        if (data.tournamentId) {
+          return `/tournaments/${data.tournamentId}/draws`;
+        }
+        return '/tournaments';
+      
+      case 'MATCH_ASSIGNED':
+      case 'MATCH_STARTING_SOON':
+        if (data.matchId && data.tournamentId) {
+          return `/tournaments/${data.tournamentId}/matches/${data.matchId}`;
+        }
+        if (data.tournamentId) {
+          return `/tournaments/${data.tournamentId}`;
+        }
+        return '/tournaments';
+      
+      case 'TOURNAMENT_CANCELLED':
+      case 'TOURNAMENT_REMINDER':
+        if (data.tournamentId) {
+          return `/tournaments/${data.tournamentId}`;
+        }
+        return '/tournaments';
+      
+      case 'REFUND_PROCESSED':
+        return '/wallet';
+      
+      case 'POINTS_AWARDED':
+        return '/points';
+      
+      default:
+        return null;
+    }
+  };
+
+  const handleNotificationClick = (notification) => {
+    // Mark as read
+    if (!notification.read) {
+      markAsRead(notification.id);
+    }
+    
+    // Always navigate to the notification detail page
+    onClose();
+    navigate(`/notifications/${notification.id}`);
+  };
+
   return (
-    <div className="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-xl border border-gray-200 z-50 max-h-[600px] overflow-hidden flex flex-col">
+    <div className="absolute right-0 mt-2 w-96 bg-slate-800 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 z-50 max-h-[600px] overflow-hidden flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200">
-        <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
+      <div className="flex items-center justify-between p-4 border-b border-white/10">
+        <h3 className="text-lg font-semibold text-white">Notifications</h3>
         <div className="flex items-center space-x-2">
           {notifications.some(n => !n.read) && (
             <button
               onClick={markAllAsRead}
-              className="text-sm text-blue-600 hover:text-blue-700 flex items-center"
+              className="text-sm text-purple-400 hover:text-purple-300 flex items-center transition-colors"
             >
               <CheckCheck className="w-4 h-4 mr-1" />
               Mark all read
@@ -54,9 +149,9 @@ const NotificationDropdown = ({ onClose }) => {
           )}
           <button
             onClick={onClose}
-            className="p-1 hover:bg-gray-100 rounded"
+            className="p-1 hover:bg-white/10 rounded-lg transition-colors"
           >
-            <X className="w-5 h-5 text-gray-500" />
+            <X className="w-5 h-5 text-gray-400" />
           </button>
         </div>
       </div>
@@ -64,70 +159,84 @@ const NotificationDropdown = ({ onClose }) => {
       {/* Notifications List */}
       <div className="overflow-y-auto flex-1">
         {loading ? (
-          <div className="p-8 text-center text-gray-500">
-            Loading notifications...
+          <div className="p-8 text-center">
+            <div className="w-8 h-8 border-3 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <p className="text-gray-400 mt-3">Loading notifications...</p>
           </div>
         ) : notifications.length === 0 ? (
-          <div className="p-8 text-center text-gray-500">
-            <Bell className="w-12 h-12 mx-auto mb-2 text-gray-300" />
-            <p>No notifications yet</p>
+          <div className="p-8 text-center">
+            <Bell className="w-12 h-12 mx-auto mb-2 text-gray-600" />
+            <p className="text-gray-400">No notifications yet</p>
           </div>
         ) : (
-          <div className="divide-y divide-gray-100">
-            {notifications.map((notification) => (
-              <div
-                key={notification.id}
-                className={`p-4 hover:bg-gray-50 transition cursor-pointer ${
-                  !notification.read ? 'bg-blue-50' : ''
-                }`}
-                onClick={() => {
-                  if (!notification.read) {
-                    markAsRead(notification.id);
-                  }
-                }}
-              >
-                <div className="flex items-start space-x-3">
-                  <span className="text-2xl flex-shrink-0">
-                    {getNotificationIcon(notification.type)}
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900">
-                      {notification.title}
-                    </p>
-                    <p className="text-sm text-gray-600 mt-1">
-                      {notification.message}
-                    </p>
-                    <p className="text-xs text-gray-400 mt-2">
-                      {formatDistanceToNow(new Date(notification.createdAt), {
-                        addSuffix: true,
-                      })}
-                    </p>
+          <div className="divide-y divide-white/5">
+            {notifications.map((notification) => {
+              const hasAction = getNotificationPath(notification) !== null;
+              return (
+                <div
+                  key={notification.id}
+                  className={`p-4 hover:bg-white/5 transition cursor-pointer ${
+                    !notification.read ? 'bg-purple-500/10 border-l-2 border-purple-500' : ''
+                  }`}
+                  onClick={() => handleNotificationClick(notification)}
+                >
+                  <div className="flex items-start space-x-3">
+                    <span className="text-2xl flex-shrink-0">
+                      {getNotificationIcon(notification.type)}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-white">
+                        {notification.title}
+                      </p>
+                      <p className="text-sm text-gray-400 mt-1">
+                        {notification.message}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-2 flex items-center gap-2">
+                        <span>
+                          {formatDistanceToNow(new Date(notification.createdAt), {
+                            addSuffix: true,
+                          })}
+                        </span>
+                        <span className="text-gray-600">•</span>
+                        <span>
+                          {format(new Date(notification.createdAt), 'dd/MM/yyyy, h:mm a')}
+                        </span>
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      {hasAction && (
+                        <ChevronRight className="w-4 h-4 text-gray-500" />
+                      )}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteNotification(notification.id);
+                        }}
+                        className="p-1 hover:bg-red-500/20 rounded-lg transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4 text-gray-500 hover:text-red-400" />
+                      </button>
+                    </div>
                   </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      deleteNotification(notification.id);
-                    }}
-                    className="flex-shrink-0 p-1 hover:bg-gray-200 rounded"
-                  >
-                    <Trash2 className="w-4 h-4 text-gray-400" />
-                  </button>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
 
       {/* Footer */}
       {notifications.length > 0 && (
-        <div className="p-3 border-t border-gray-200 text-center">
-          <a
-            href="/notifications"
-            className="text-sm text-blue-600 hover:text-blue-700"
+        <div className="p-3 border-t border-white/10 text-center">
+          <button
+            onClick={() => {
+              onClose();
+              navigate('/notifications');
+            }}
+            className="text-sm text-purple-400 hover:text-purple-300 font-medium transition-colors"
           >
             View all notifications
-          </a>
+          </button>
         </div>
       )}
     </div>

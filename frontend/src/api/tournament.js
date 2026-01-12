@@ -132,4 +132,30 @@ export const tournamentAPI = {
     );
     return response.data;
   },
+
+  // Umpire management (organizer only)
+  addUmpireByCode: async (tournamentId, umpireCode) => {
+    const response = await axios.post(
+      `${API_URL}/tournaments/${tournamentId}/umpires`,
+      { umpireCode },
+      { headers: getAuthHeader() }
+    );
+    return response.data;
+  },
+
+  getTournamentUmpires: async (tournamentId) => {
+    const response = await axios.get(
+      `${API_URL}/tournaments/${tournamentId}/umpires`,
+      { headers: getAuthHeader() }
+    );
+    return response.data;
+  },
+
+  removeUmpire: async (tournamentId, umpireId) => {
+    const response = await axios.delete(
+      `${API_URL}/tournaments/${tournamentId}/umpires/${umpireId}`,
+      { headers: getAuthHeader() }
+    );
+    return response.data;
+  },
 };

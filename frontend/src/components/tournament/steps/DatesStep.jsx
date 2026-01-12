@@ -77,86 +77,86 @@ const DatesStep = ({ formData, updateMultipleFields, onNext, onPrev }) => {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-900">Tournament Dates</h2>
-      <p className="text-gray-600">Set up your tournament timeline</p>
+      <h2 className="text-2xl font-bold text-white">Tournament Dates</h2>
+      <p className="text-gray-400">Set up your tournament timeline</p>
 
       {/* Registration Period */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <h3 className="font-semibold text-blue-900 mb-4">Registration Period</h3>
+      <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl p-4">
+        <h3 className="font-semibold text-purple-300 mb-4">Registration Period</h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-300 mb-1">
               Registration Opens <span className="text-red-500">*</span>
             </label>
             <input
               type="datetime-local"
               value={formatDateForInput(formData.registrationOpenDate)}
               onChange={(e) => updateFormData('registrationOpenDate', e.target.value)}
-              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
-                errors.registrationOpenDate ? 'border-red-500' : 'border-gray-300'
+              className={`w-full px-4 py-3 bg-slate-700/50 border rounded-xl text-white focus:ring-2 focus:ring-purple-500 transition-all ${
+                errors.registrationOpenDate ? 'border-red-500' : 'border-white/10'
               }`}
             />
             {errors.registrationOpenDate && (
-              <p className="mt-1 text-sm text-red-500">{errors.registrationOpenDate}</p>
+              <p className="mt-1 text-sm text-red-400">{errors.registrationOpenDate}</p>
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-300 mb-1">
               Registration Closes <span className="text-red-500">*</span>
             </label>
             <input
               type="datetime-local"
               value={formatDateForInput(formData.registrationCloseDate)}
               onChange={(e) => updateFormData('registrationCloseDate', e.target.value)}
-              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
-                errors.registrationCloseDate ? 'border-red-500' : 'border-gray-300'
+              className={`w-full px-4 py-3 bg-slate-700/50 border rounded-xl text-white focus:ring-2 focus:ring-purple-500 transition-all ${
+                errors.registrationCloseDate ? 'border-red-500' : 'border-white/10'
               }`}
             />
             {errors.registrationCloseDate && (
-              <p className="mt-1 text-sm text-red-500">{errors.registrationCloseDate}</p>
+              <p className="mt-1 text-sm text-red-400">{errors.registrationCloseDate}</p>
             )}
           </div>
         </div>
       </div>
 
       {/* Tournament Period */}
-      <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-        <h3 className="font-semibold text-green-900 mb-4">Tournament Period</h3>
+      <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4">
+        <h3 className="font-semibold text-emerald-300 mb-4">Tournament Period</h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-300 mb-1">
               Tournament Starts <span className="text-red-500">*</span>
             </label>
             <input
               type="datetime-local"
               value={formatDateForInput(formData.startDate)}
               onChange={(e) => updateFormData('startDate', e.target.value)}
-              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
-                errors.startDate ? 'border-red-500' : 'border-gray-300'
+              className={`w-full px-4 py-3 bg-slate-700/50 border rounded-xl text-white focus:ring-2 focus:ring-purple-500 transition-all ${
+                errors.startDate ? 'border-red-500' : 'border-white/10'
               }`}
             />
             {errors.startDate && (
-              <p className="mt-1 text-sm text-red-500">{errors.startDate}</p>
+              <p className="mt-1 text-sm text-red-400">{errors.startDate}</p>
             )}
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-300 mb-1">
               Tournament Ends <span className="text-red-500">*</span>
             </label>
             <input
               type="datetime-local"
               value={formatDateForInput(formData.endDate)}
               onChange={(e) => updateFormData('endDate', e.target.value)}
-              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
-                errors.endDate ? 'border-red-500' : 'border-gray-300'
+              className={`w-full px-4 py-3 bg-slate-700/50 border rounded-xl text-white focus:ring-2 focus:ring-purple-500 transition-all ${
+                errors.endDate ? 'border-red-500' : 'border-white/10'
               }`}
             />
             {errors.endDate && (
-              <p className="mt-1 text-sm text-red-500">{errors.endDate}</p>
+              <p className="mt-1 text-sm text-red-400">{errors.endDate}</p>
             )}
           </div>
         </div>
@@ -164,9 +164,9 @@ const DatesStep = ({ formData, updateMultipleFields, onNext, onPrev }) => {
 
       {/* Date Summary */}
       {formData.startDate && formData.endDate && (
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-          <h4 className="font-medium text-gray-900 mb-2">Timeline Summary</h4>
-          <div className="space-y-1 text-sm text-gray-600">
+        <div className="bg-slate-700/30 border border-white/10 rounded-xl p-4">
+          <h4 className="font-medium text-white mb-2">Timeline Summary</h4>
+          <div className="space-y-1 text-sm text-gray-400">
             <p>• Registration window: {
               formData.registrationOpenDate && formData.registrationCloseDate
                 ? `${Math.ceil((new Date(formData.registrationCloseDate) - new Date(formData.registrationOpenDate)) / (1000 * 60 * 60 * 24))} days`
@@ -180,16 +180,16 @@ const DatesStep = ({ formData, updateMultipleFields, onNext, onPrev }) => {
       )}
 
       {/* Navigation */}
-      <div className="flex justify-between pt-6 border-t">
+      <div className="flex justify-between pt-6 border-t border-white/10">
         <button
           onClick={onPrev}
-          className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+          className="px-6 py-3 bg-slate-700 text-gray-300 rounded-xl hover:bg-slate-600 transition-colors font-medium"
         >
           ← Back
         </button>
         <button
           onClick={handleNext}
-          className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+          className="px-6 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-xl hover:shadow-lg hover:shadow-purple-500/25 transition-all font-semibold"
         >
           Next: Posters →
         </button>

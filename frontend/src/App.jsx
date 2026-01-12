@@ -1,7 +1,8 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
-import { AuthProvider } from './contexts/AuthContext'
+import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { NotificationProvider } from './contexts/NotificationContext'
 import Navbar from './components/Navbar'
+import ProfileCompletionModal from './components/ProfileCompletionModal'
 import ProtectedRoute from './components/ProtectedRoute'
 import RoleRoute from './components/RoleRoute'
 import HomePage from './pages/HomePage'
@@ -16,6 +17,7 @@ import TournamentDetailPage from './pages/TournamentDetailPage'
 import TournamentDiscoveryPage from './pages/TournamentDiscoveryPage'
 import CreateTournament from './pages/CreateTournament'
 import EditTournament from './pages/EditTournament'
+import ViewDrawsPage from './pages/ViewDrawsPage'
 import DrawPage from './pages/DrawPage'
 import TournamentRegistrationPage from './pages/TournamentRegistrationPage'
 import MyRegistrationsPage from './pages/MyRegistrationsPage'
@@ -27,12 +29,14 @@ import PlayerDashboard from './pages/PlayerDashboard'
 import OrganizerDashboard from './pages/OrganizerDashboard'
 import UmpireDashboard from './pages/UmpireDashboard'
 import UmpireScoring from './pages/UmpireScoring'
+import MatchScoringPage from './pages/MatchScoringPage'
 import AdminDashboard from './pages/AdminDashboard'
 import Leaderboard from './pages/Leaderboard'
 import MyPoints from './pages/MyPoints'
 import ScoringConsolePage from './pages/ScoringConsolePage'
 import MatchListPage from './pages/MatchListPage'
 import SpectatorViewPage from './pages/SpectatorViewPage'
+import ConductMatchPage from './pages/ConductMatchPage'
 import LiveTournamentDashboard from './pages/LiveTournamentDashboard'
 import LiveMatches from './pages/LiveMatches'
 import LiveMatchDetail from './pages/LiveMatchDetail'
@@ -40,19 +44,33 @@ import OrganizerTournamentHistory from './pages/OrganizerTournamentHistory'
 import TournamentCategoryDetails from './pages/TournamentCategoryDetails'
 import AdminInvites from './pages/AdminInvites'
 import AcceptInvite from './pages/AcceptInvite'
+import NotificationsPage from './pages/NotificationsPage'
 import AdminLayout from './pages/admin/AdminLayout'
 import AdminDashboardPage from './pages/admin/AdminDashboardPage'
 import UserManagementPage from './pages/admin/UserManagementPage'
 import InviteManagementPage from './pages/admin/InviteManagementPage'
 import AuditLogsPage from './pages/admin/AuditLogsPage'
+import CancellationRequestPage from './pages/CancellationRequestPage'
+import NotificationDetailPage from './pages/NotificationDetailPage'
+import RefundIssuePage from './pages/RefundIssuePage'
 
-function App() {
+// Inner component that can access AuthContext
+function AppContent() {
+  const { user, showProfileCompletion, completeProfile } = useAuth();
+
   return (
-    <AuthProvider>
-      <NotificationProvider>
-        <div className="min-h-screen bg-gray-50">
-          <Navbar />
-          <Routes>
+    <div className="min-h-screen bg-gray-50">
+      <Navbar />
+      
+      {/* Profile Completion Modal - shows when user has incomplete profile */}
+      {showProfileCompletion && user && (
+        <ProfileCompletionModal
+          user={user}
+          onComplete={completeProfile}
+        />
+      )}
+      
+      <Routes>
             {/* Public routes */}
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
@@ -75,6 +93,15 @@ function App() {
             <ProtectedRoute>
               <RoleRoute allowedRoles={['UMPIRE', 'ORGANIZER']} blockAdmin={true}>
                 <ScoringConsolePage />
+              </RoleRoute>
+            </ProtectedRoute>
+          } />
+          
+          {/* Conduct Match Page - for organizers to assign umpire and start match */}
+          <Route path="/match/:matchId/conduct" element={
+            <ProtectedRoute>
+              <RoleRoute allowedRoles={['ORGANIZER']} blockAdmin={true}>
+                <ConductMatchPage />
               </RoleRoute>
             </ProtectedRoute>
           } />
@@ -136,6 +163,10 @@ function App() {
             }
           />
           <Route
+            path="/tournaments/:id/draws"
+            element={<ViewDrawsPage />}
+          />
+          <Route
             path="/profile"
             element={
               <ProtectedRoute>
@@ -158,6 +189,33 @@ function App() {
             element={
               <ProtectedRoute>
                 <Credits />
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/notifications"
+            element={
+              <ProtectedRoute>
+                <NotificationsPage />
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/notifications/:notificationId"
+            element={
+              <ProtectedRoute>
+                <NotificationDetailPage />
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/refund-issue/:registrationId"
+            element={
+              <ProtectedRoute>
+                <RefundIssuePage />
               </ProtectedRoute>
             }
           />
@@ -229,6 +287,17 @@ function App() {
           />
           
           <Route
+            path="/organizer/cancellation/:registrationId"
+            element={
+              <ProtectedRoute>
+                <RoleRoute allowedRoles={['ORGANIZER']} blockAdmin={true}>
+                  <CancellationRequestPage />
+                </RoleRoute>
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
             path="/umpire/dashboard"
             element={
               <ProtectedRoute>
@@ -245,6 +314,17 @@ function App() {
               <ProtectedRoute>
                 <RoleRoute allowedRoles={['UMPIRE']} blockAdmin={true}>
                   <UmpireScoring />
+                </RoleRoute>
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/match/:matchId/score"
+            element={
+              <ProtectedRoute>
+                <RoleRoute allowedRoles={['UMPIRE', 'ORGANIZER']} blockAdmin={true}>
+                  <MatchScoringPage />
                 </RoleRoute>
               </ProtectedRoute>
             }
@@ -284,9 +364,17 @@ function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <NotificationProvider>
+        <AppContent />
       </NotificationProvider>
     </AuthProvider>
-  )
+  );
 }
 
 export default App

@@ -10,13 +10,7 @@ async function checkNotifications() {
     });
     
     console.log('Recent Notifications:', JSON.stringify(notifications, null, 2));
-    
-    // Also check users
-    const users = await prisma.user.findMany({
-      select: { id: true, email: true, name: true }
-    });
-    console.log('\nUsers:', JSON.stringify(users, null, 2));
-    
+    console.log('\nTotal count:', notifications.length);
   } catch (error) {
     console.error('Error:', error);
   } finally {

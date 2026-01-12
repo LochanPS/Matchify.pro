@@ -17,6 +17,7 @@ const NotificationType = {
   TOURNAMENT_REMINDER: 'TOURNAMENT_REMINDER',
   POINTS_AWARDED: 'POINTS_AWARDED',
   ACCOUNT_SUSPENDED: 'ACCOUNT_SUSPENDED',
+  UMPIRE_ADDED: 'UMPIRE_ADDED',
 };
 
 class NotificationService {
@@ -153,6 +154,14 @@ class NotificationService {
 
         case NotificationType.ACCOUNT_SUSPENDED:
           // Email already sent in suspension flow
+          break;
+
+        case NotificationType.UMPIRE_ADDED:
+          await emailService.sendQuickNotification(
+            user,
+            `🎾 Exciting news! You've been selected as an official umpire for "${data.tournamentName}" by ${data.organizerName || 'the tournament organizer'}. Your expertise in officiating will help ensure fair play and smooth matches. Log in to Matchify.pro to view the tournament details and prepare for your upcoming assignments. Thank you for being part of our officiating team!`,
+            data.tournamentId ? `/tournaments/${data.tournamentId}` : null
+          );
           break;
 
         default:

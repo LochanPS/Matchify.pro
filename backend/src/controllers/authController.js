@@ -3,10 +3,48 @@ import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
+/**
+ * Generate unique umpire code
+ * Format: #123ABCD (# + 3 numbers + 4 letters)
+ */
+async function generateUmpireCode() {
+  const numbers = '0123456789';
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  let isUnique = false;
+  let code = '';
+  
+  while (!isUnique) {
+    // Generate 3 random numbers
+    let numPart = '';
+    for (let i = 0; i < 3; i++) {
+      numPart += numbers.charAt(Math.floor(Math.random() * numbers.length));
+    }
+    
+    // Generate 4 random letters
+    let letterPart = '';
+    for (let i = 0; i < 4; i++) {
+      letterPart += letters.charAt(Math.floor(Math.random() * letters.length));
+    }
+    
+    code = '#' + numPart + letterPart;
+    
+    // Check if code already exists
+    const existing = await prisma.user.findUnique({
+      where: { umpireCode: code }
+    });
+    
+    if (!existing) {
+      isUnique = true;
+    }
+  }
+  
+  return code;
+}
+
 // REGISTER - Support multiple roles
 export const register = async (req, res) => {
   try {
-    const { email, password, name, phone, roles } = req.body;
+    const { email, password, name, phone, alternateEmail, roles } = req.body;
 
     // Validate roles - default to PLAYER if none provided
     const validRoles = ['PLAYER', 'ORGANIZER', 'UMPIRE'];
@@ -18,18 +56,21 @@ export const register = async (req, res) => {
       userRoles.push('PLAYER'); // Fallback to PLAYER
     }
 
+    // Validate phone number is required
+    if (!phone) {
+      return res.status(400).json({ error: 'Phone number is required' });
+    }
+
     // Check if user exists by email
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
       return res.status(400).json({ error: 'User with this email already exists' });
     }
 
-    // Check if phone already exists (if provided)
-    if (phone) {
-      const existingPhone = await prisma.user.findUnique({ where: { phone } });
-      if (existingPhone) {
-        return res.status(400).json({ error: 'User with this phone number already exists' });
-      }
+    // Check if phone already exists
+    const existingPhone = await prisma.user.findUnique({ where: { phone } });
+    if (existingPhone) {
+      return res.status(400).json({ error: 'User with this phone number already exists' });
     }
 
     // Hash password
@@ -42,7 +83,8 @@ export const register = async (req, res) => {
         email,
         password: hashedPassword,
         name,
-        phone: phone || null,
+        phone,
+        alternateEmail: alternateEmail || null,
         roles: userRoles.join(','),
         walletBalance: 10, // Welcome bonus
       },
@@ -94,6 +136,15 @@ export const register = async (req, res) => {
         id: user.id,
         email: user.email,
         name: user.name,
+        phone: user.phone,
+        city: user.city,
+        state: user.state,
+        country: user.country,
+        gender: user.gender,
+        dateOfBirth: user.dateOfBirth,
+        profilePhoto: user.profilePhoto,
+        walletBalance: user.walletBalance,
+        totalPoints: user.totalPoints,
         roles: userRoles,
       },
     });
@@ -108,7 +159,7 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Find user
+    // Find user with all profile fields
     const user = await prisma.user.findUnique({
       where: { email },
       include: {
@@ -150,6 +201,16 @@ export const login = async (req, res) => {
         id: user.id,
         email: user.email,
         name: user.name,
+        phone: user.phone,
+        city: user.city,
+        state: user.state,
+        country: user.country,
+        gender: user.gender,
+        dateOfBirth: user.dateOfBirth,
+        profilePhoto: user.profilePhoto,
+        walletBalance: user.walletBalance,
+        totalPoints: user.totalPoints,
+        umpireCode: user.umpireCode,
         roles: userRoles,
         profiles: {
           player: user.playerProfile,
@@ -170,7 +231,8 @@ export const addRole = async (req, res) => {
     const { role } = req.body;
     const userId = req.user.userId; // From JWT middleware
 
-    const validRoles = ['PLAYER', 'ORGANIZER', 'UMPIRE'];
+    // Only PLAYER and UMPIRE are valid roles now (ORGANIZER is merged with PLAYER)
+    const validRoles = ['PLAYER', 'UMPIRE'];
     if (!validRoles.includes(role)) {
       return res.status(400).json({ error: 'Invalid role' });
     }
@@ -199,7 +261,7 @@ export const addRole = async (req, res) => {
 
     // Add role
     const newRoles = [...currentRoles, role];
-    const updatedUser = await prisma.user.update({
+    let updatedUser = await prisma.user.update({
       where: { id: userId },
       data: {
         roles: newRoles.join(','),
@@ -218,7 +280,7 @@ export const addRole = async (req, res) => {
       
       // Add 10 Matchify credits for new organizers
       const currentBalance = user.walletBalance || 0;
-      await prisma.user.update({
+      updatedUser = await prisma.user.update({
         where: { id: user.id },
         data: { walletBalance: currentBalance + 10 },
       });
@@ -235,14 +297,58 @@ export const addRole = async (req, res) => {
         },
       });
     } else if (role === 'UMPIRE' && !user.umpireProfile) {
+      // Generate unique umpire code
+      const umpireCode = await generateUmpireCode();
+      
+      // Update user with umpire code
+      updatedUser = await prisma.user.update({
+        where: { id: user.id },
+        data: { umpireCode },
+      });
+      
       await prisma.umpireProfile.create({
         data: { userId: user.id },
       });
     }
 
+    // Fetch the complete updated user
+    const fullUser = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        phone: true,
+        roles: true,
+        umpireCode: true,
+        profilePhoto: true,
+        city: true,
+        state: true,
+        country: true,
+        dateOfBirth: true,
+        gender: true,
+        totalPoints: true,
+        tournamentsPlayed: true,
+        matchesWon: true,
+        matchesLost: true,
+        walletBalance: true,
+        isActive: true,
+        isVerified: true,
+        createdAt: true,
+      }
+    });
+
+    // Parse roles for frontend
+    const userRoles = fullUser.roles ? fullUser.roles.split(',') : ['PLAYER'];
+
     res.json({
       message: 'Role added successfully',
       roles: newRoles,
+      user: {
+        ...fullUser,
+        roles: userRoles,
+        currentRole: role // Set the new role as current
+      }
     });
   } catch (error) {
     console.error('Add role error:', error);

@@ -13,6 +13,9 @@ import {
   getCategories,
   updateCategory,
   deleteCategory,
+  addUmpireByCode,
+  getTournamentUmpires,
+  removeUmpire,
 } from '../controllers/tournament.controller.js';
 import { authenticate, preventAdminAccess } from '../middleware/auth.js';
 
@@ -49,5 +52,10 @@ router.put('/:id/payment-info', updatePaymentInfo);
 router.post('/:id/categories', createCategory);
 router.put('/:id/categories/:categoryId', updateCategory);
 router.delete('/:id/categories/:categoryId', deleteCategory);
+
+// Umpire routes (organizer only)
+router.get('/:id/umpires', getTournamentUmpires);
+router.post('/:id/umpires', addUmpireByCode);
+router.delete('/:id/umpires/:umpireId', removeUmpire);
 
 export default router;

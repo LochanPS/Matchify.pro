@@ -400,10 +400,374 @@ const getBracket = async (req, res) => {
   }
 };
 
+/**
+ * Create a match for a tournament category
+ * POST /api/tournaments/:tournamentId/categories/:categoryId/matches
+ */
+const createMatch = async (req, res) => {
+  try {
+    const { tournamentId, categoryId } = req.params;
+    const { matchNumber, round, player1Id, player2Id } = req.body;
+    const userId = req.user.id;
+
+    // Verify tournament exists and user is organizer
+    const tournament = await prisma.tournament.findUnique({
+      where: { id: tournamentId },
+      select: { id: true, organizerId: true, name: true }
+    });
+
+    if (!tournament) {
+      return res.status(404).json({ success: false, error: 'Tournament not found' });
+    }
+
+    if (tournament.organizerId !== userId) {
+      return res.status(403).json({ success: false, error: 'Only the organizer can create matches' });
+    }
+
+    // Check if match already exists
+    const existingMatch = await prisma.match.findFirst({
+      where: {
+        tournamentId,
+        categoryId,
+        matchNumber: parseInt(matchNumber),
+        round: parseInt(round)
+      }
+    });
+
+    if (existingMatch) {
+      // Return existing match
+      const player1 = existingMatch.player1Id
+        ? await prisma.user.findUnique({ where: { id: existingMatch.player1Id }, select: { id: true, name: true } })
+        : null;
+      const player2 = existingMatch.player2Id
+        ? await prisma.user.findUnique({ where: { id: existingMatch.player2Id }, select: { id: true, name: true } })
+        : null;
+      const umpire = existingMatch.umpireId
+        ? await prisma.user.findUnique({ where: { id: existingMatch.umpireId }, select: { id: true, name: true, email: true } })
+        : null;
+
+      return res.json({
+        success: true,
+        match: {
+          ...existingMatch,
+          player1,
+          player2,
+          umpire
+        },
+        created: false
+      });
+    }
+
+    // Create new match
+    const match = await prisma.match.create({
+      data: {
+        tournamentId,
+        categoryId,
+        matchNumber: parseInt(matchNumber),
+        round: parseInt(round),
+        player1Id: player1Id || null,
+        player2Id: player2Id || null,
+        status: 'PENDING'
+      }
+    });
+
+    // Get player details
+    const player1 = match.player1Id
+      ? await prisma.user.findUnique({ where: { id: match.player1Id }, select: { id: true, name: true } })
+      : null;
+    const player2 = match.player2Id
+      ? await prisma.user.findUnique({ where: { id: match.player2Id }, select: { id: true, name: true } })
+      : null;
+
+    res.status(201).json({
+      success: true,
+      match: {
+        ...match,
+        player1,
+        player2,
+        umpire: null
+      },
+      created: true
+    });
+
+  } catch (error) {
+    console.error('Create match error:', error);
+    res.status(500).json({ success: false, error: 'Failed to create match' });
+  }
+};
+
 export {
   getMatches,
   getMatch,
   updateMatchResult,
   assignCourt,
-  getBracket
+  getBracket,
+  startMatch,
+  updateLiveScore,
+  endMatch,
+  getUmpireMatches,
+  assignUmpire,
+  createMatch
+};
+
+/**
+ * Start a match (set status to IN_PROGRESS)
+ * PUT /api/matches/:matchId/start
+ */
+const startMatch = async (req, res) => {
+  try {
+    const { matchId } = req.params;
+    const userId = req.user.id;
+
+    const match = await prisma.match.findUnique({
+      where: { id: matchId },
+      include: { tournament: true }
+    });
+
+    if (!match) {
+      return res.status(404).json({ success: false, error: 'Match not found' });
+    }
+
+    // Check authorization (organizer, assigned umpire, or any umpire role)
+    const isOrganizer = match.tournament.organizerId === userId;
+    const isAssignedUmpire = match.umpireId === userId;
+    const hasUmpireRole = req.user.roles?.includes('umpire') || req.user.role === 'UMPIRE';
+
+    if (!isOrganizer && !isAssignedUmpire && !hasUmpireRole) {
+      return res.status(403).json({ success: false, error: 'Not authorized to start this match' });
+    }
+
+    // Initialize score structure for badminton (best of 3 sets, 21 points each)
+    const initialScore = {
+      sets: [{ player1: 0, player2: 0 }],
+      currentSet: 0,
+      matchConfig: {
+        pointsPerSet: 21,
+        setsToWin: 2,
+        maxSets: 3
+      }
+    };
+
+    const updatedMatch = await prisma.match.update({
+      where: { id: matchId },
+      data: {
+        status: 'IN_PROGRESS',
+        startedAt: new Date(),
+        scoreJson: JSON.stringify(initialScore),
+        umpireId: match.umpireId || userId // Assign current user as umpire if not assigned
+      }
+    });
+
+    res.json({
+      success: true,
+      message: 'Match started',
+      match: { ...updatedMatch, score: initialScore }
+    });
+  } catch (error) {
+    console.error('Start match error:', error);
+    res.status(500).json({ success: false, error: 'Failed to start match' });
+  }
+};
+
+/**
+ * Update live score during match
+ * PUT /api/matches/:matchId/score
+ */
+const updateLiveScore = async (req, res) => {
+  try {
+    const { matchId } = req.params;
+    const { score } = req.body;
+    const userId = req.user.id;
+
+    const match = await prisma.match.findUnique({
+      where: { id: matchId },
+      include: { tournament: true }
+    });
+
+    if (!match) {
+      return res.status(404).json({ success: false, error: 'Match not found' });
+    }
+
+    // Check authorization
+    const isOrganizer = match.tournament.organizerId === userId;
+    const isAssignedUmpire = match.umpireId === userId;
+    const hasUmpireRole = req.user.roles?.includes('umpire') || req.user.role === 'UMPIRE';
+
+    if (!isOrganizer && !isAssignedUmpire && !hasUmpireRole) {
+      return res.status(403).json({ success: false, error: 'Not authorized to update score' });
+    }
+
+    if (match.status !== 'IN_PROGRESS') {
+      return res.status(400).json({ success: false, error: 'Match is not in progress' });
+    }
+
+    const updatedMatch = await prisma.match.update({
+      where: { id: matchId },
+      data: { scoreJson: JSON.stringify(score) }
+    });
+
+    res.json({
+      success: true,
+      match: { ...updatedMatch, score }
+    });
+  } catch (error) {
+    console.error('Update live score error:', error);
+    res.status(500).json({ success: false, error: 'Failed to update score' });
+  }
+};
+
+/**
+ * End match and declare winner
+ * PUT /api/matches/:matchId/end
+ */
+const endMatch = async (req, res) => {
+  try {
+    const { matchId } = req.params;
+    const { winnerId, finalScore } = req.body;
+    const userId = req.user.id;
+
+    const match = await prisma.match.findUnique({
+      where: { id: matchId },
+      include: { tournament: true }
+    });
+
+    if (!match) {
+      return res.status(404).json({ success: false, error: 'Match not found' });
+    }
+
+    // Check authorization
+    const isOrganizer = match.tournament.organizerId === userId;
+    const isAssignedUmpire = match.umpireId === userId;
+    const hasUmpireRole = req.user.roles?.includes('umpire') || req.user.role === 'UMPIRE';
+
+    if (!isOrganizer && !isAssignedUmpire && !hasUmpireRole) {
+      return res.status(403).json({ success: false, error: 'Not authorized to end this match' });
+    }
+
+    // Validate winner
+    if (winnerId !== match.player1Id && winnerId !== match.player2Id) {
+      return res.status(400).json({ success: false, error: 'Winner must be a match participant' });
+    }
+
+    const updatedMatch = await prisma.match.update({
+      where: { id: matchId },
+      data: {
+        status: 'COMPLETED',
+        winnerId,
+        scoreJson: JSON.stringify(finalScore),
+        completedAt: new Date()
+      }
+    });
+
+    // Update bracket - advance winner to next match
+    if (match.parentMatchId && match.winnerPosition) {
+      const updateData = match.winnerPosition === 'player1'
+        ? { player1Id: winnerId }
+        : { player2Id: winnerId };
+      
+      await prisma.match.update({
+        where: { id: match.parentMatchId },
+        data: updateData
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Match completed',
+      match: { ...updatedMatch, score: finalScore }
+    });
+  } catch (error) {
+    console.error('End match error:', error);
+    res.status(500).json({ success: false, error: 'Failed to end match' });
+  }
+};
+
+/**
+ * Get matches assigned to umpire
+ * GET /api/umpire/matches
+ */
+const getUmpireMatches = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const matches = await prisma.match.findMany({
+      where: {
+        OR: [
+          { umpireId: userId },
+          { status: 'PENDING' } // Show all pending matches for umpires to pick
+        ]
+      },
+      include: {
+        tournament: { select: { id: true, name: true } },
+        category: { select: { id: true, name: true } }
+      },
+      orderBy: [{ status: 'asc' }, { scheduledTime: 'asc' }]
+    });
+
+    // Get player details
+    const matchesWithPlayers = await Promise.all(
+      matches.map(async (match) => {
+        const player1 = match.player1Id
+          ? await prisma.user.findUnique({
+              where: { id: match.player1Id },
+              select: { id: true, name: true }
+            })
+          : null;
+        const player2 = match.player2Id
+          ? await prisma.user.findUnique({
+              where: { id: match.player2Id },
+              select: { id: true, name: true }
+            })
+          : null;
+
+        return {
+          ...match,
+          player1: player1 || { name: 'TBD' },
+          player2: player2 || { name: 'TBD' },
+          score: match.scoreJson ? JSON.parse(match.scoreJson) : null
+        };
+      })
+    );
+
+    res.json({ success: true, matches: matchesWithPlayers });
+  } catch (error) {
+    console.error('Get umpire matches error:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch matches' });
+  }
+};
+
+/**
+ * Assign umpire to match
+ * PUT /api/matches/:matchId/umpire
+ */
+const assignUmpire = async (req, res) => {
+  try {
+    const { matchId } = req.params;
+    const { umpireId } = req.body;
+    const userId = req.user.id;
+
+    const match = await prisma.match.findUnique({
+      where: { id: matchId },
+      include: { tournament: true }
+    });
+
+    if (!match) {
+      return res.status(404).json({ success: false, error: 'Match not found' });
+    }
+
+    // Only organizer can assign umpires
+    if (match.tournament.organizerId !== userId) {
+      return res.status(403).json({ success: false, error: 'Only organizer can assign umpires' });
+    }
+
+    const updatedMatch = await prisma.match.update({
+      where: { id: matchId },
+      data: { umpireId }
+    });
+
+    res.json({ success: true, message: 'Umpire assigned', match: updatedMatch });
+  } catch (error) {
+    console.error('Assign umpire error:', error);
+    res.status(500).json({ success: false, error: 'Failed to assign umpire' });
+  }
 };

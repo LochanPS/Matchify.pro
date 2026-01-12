@@ -4,7 +4,7 @@ import { sendPartnerInvitation, sendPartnerAccepted, sendPartnerDeclined } from 
 const prisma = new PrismaClient();
 
 // Create notification
-const createNotification = async ({ userId, type, title, message }) => {
+const createNotification = async ({ userId, type, title, message, data }) => {
   try {
     const notification = await prisma.notification.create({
       data: {
@@ -12,6 +12,7 @@ const createNotification = async ({ userId, type, title, message }) => {
         type,
         title,
         message,
+        data: data ? JSON.stringify(data) : null,
       },
     });
     return notification;

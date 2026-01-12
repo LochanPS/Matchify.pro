@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Coins, Download, Gift, TrendingUp, TrendingDown, Info } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Coins, Download, Gift, TrendingUp, TrendingDown, Info, Sparkles, ArrowRight } from 'lucide-react';
+import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import axios from 'axios';
 import { formatDateIndian } from '../utils/dateFormat';
 
 const Credits = () => {
+  const navigate = useNavigate();
   const [summary, setSummary] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -19,13 +22,11 @@ const Credits = () => {
       setLoading(true);
       const token = localStorage.getItem('token');
       
-      // Fetch summary
       const summaryRes = await axios.get('http://localhost:5000/api/credits/summary', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setSummary(summaryRes.data.data);
 
-      // Fetch transactions
       const transactionsRes = await axios.get(
         `http://localhost:5000/api/credits/transactions?page=${page}&limit=20`,
         { headers: { Authorization: `Bearer ${token}` } }
@@ -90,63 +91,96 @@ const Credits = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="text-gray-500 mt-4 font-medium">Loading credits...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-6xl mx-auto px-4">
-        
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-            <Coins className="w-8 h-8 text-emerald-600" />
-            Matchify Credits
-          </h1>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      {/* Hero Header */}
+      <div className="relative bg-gradient-to-r from-slate-900 via-amber-900 to-slate-900 overflow-hidden">
+        <div className="absolute inset-0">
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-amber-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-orange-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
         </div>
+        
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          {/* Back Button */}
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2 text-white/70 hover:text-white mb-6 transition-colors group"
+          >
+            <ArrowLeftIcon className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
+            <span>Back</span>
+          </button>
 
-        {/* Info Banner */}
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 flex items-start gap-3">
-          <Info className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-          <div className="text-sm text-blue-800">
-            <p className="font-medium mb-1">About Matchify Credits</p>
-            <p>Credits are promotional rewards that can only be used for platform fees (like tournament creation). 
-            Entry fees for tournaments must be paid via Razorpay. Credits cannot be withdrawn or transferred.</p>
+          <div className="flex items-center gap-5">
+            <div className="w-16 h-16 bg-gradient-to-br from-amber-400 via-yellow-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-amber-500/30">
+              <Coins className="w-8 h-8 text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-white">Matchify Credits</h1>
+              <p className="text-white/60">Promotional rewards for platform fees</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 -mt-6">
+        {/* Balance Card */}
+        <div className="bg-gradient-to-br from-amber-500 via-orange-500 to-red-500 rounded-2xl p-8 text-white shadow-2xl shadow-orange-500/30 mb-8 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2"></div>
+          
+          <div className="relative flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <Sparkles className="w-5 h-5 text-amber-200" />
+                <p className="text-amber-100 text-sm font-medium">Available Credits</p>
+              </div>
+              <p className="text-5xl font-bold">₹{summary?.balance?.toFixed(2) || '0.00'}</p>
+              <p className="text-amber-200 text-sm mt-2">Use for platform fees only</p>
+            </div>
+            <div className="flex gap-4">
+              <div className="bg-white/20 backdrop-blur-sm rounded-xl px-5 py-4">
+                <p className="text-amber-100 text-xs font-medium mb-1">Lifetime Earned</p>
+                <p className="text-2xl font-bold">₹{summary?.lifetimeEarned?.toFixed(2) || '0.00'}</p>
+              </div>
+              <div className="bg-white/20 backdrop-blur-sm rounded-xl px-5 py-4">
+                <p className="text-amber-100 text-xs font-medium mb-1">Lifetime Used</p>
+                <p className="text-2xl font-bold">₹{summary?.lifetimeUsed?.toFixed(2) || '0.00'}</p>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Balance Card */}
-        <div className="bg-gradient-to-br from-emerald-600 to-emerald-800 rounded-2xl p-8 text-white shadow-xl mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-emerald-100 text-sm mb-2">Available Credits</p>
-              <p className="text-5xl font-bold">₹{summary?.balance?.toFixed(2) || '0.00'}</p>
-              <p className="text-emerald-200 text-sm mt-2">Use for platform fees only</p>
-            </div>
-            <div className="text-right">
-              <div className="bg-white/20 rounded-lg px-4 py-2 mb-2">
-                <p className="text-emerald-100 text-xs">Lifetime Earned</p>
-                <p className="text-xl font-semibold">₹{summary?.lifetimeEarned?.toFixed(2) || '0.00'}</p>
-              </div>
-              <div className="bg-white/20 rounded-lg px-4 py-2">
-                <p className="text-emerald-100 text-xs">Lifetime Used</p>
-                <p className="text-xl font-semibold">₹{summary?.lifetimeUsed?.toFixed(2) || '0.00'}</p>
-              </div>
-            </div>
+        {/* Info Banner */}
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-5 mb-8 flex items-start gap-4">
+          <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+            <Info className="w-5 h-5 text-blue-600" />
+          </div>
+          <div>
+            <p className="font-semibold text-blue-900 mb-1">About Matchify Credits</p>
+            <p className="text-sm text-blue-700">
+              Credits are promotional rewards that can only be used for platform fees (like tournament creation). 
+              Entry fees for tournaments must be paid via organizer's QR code. Credits cannot be withdrawn or transferred.
+            </p>
           </div>
         </div>
 
         {/* Transaction History */}
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">Credit History</h2>
+        <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl shadow-xl shadow-gray-200/50 border border-white/10 overflow-hidden">
+          <div className="p-6 border-b border-white/10 flex items-center justify-between">
+            <h2 className="text-xl font-bold text-white">Credit History</h2>
             {transactions.length > 0 && (
               <button
                 onClick={exportToCSV}
-                className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                className="flex items-center gap-2 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 rounded-xl transition-all text-sm font-medium text-gray-700"
               >
                 <Download className="w-4 h-4" />
                 Export CSV
@@ -155,47 +189,51 @@ const Credits = () => {
           </div>
 
           {transactions.length === 0 ? (
-            <div className="text-center py-12 text-gray-500">
-              <Coins className="w-16 h-16 mx-auto mb-4 opacity-30" />
-              <p className="text-lg">No credit transactions yet</p>
-              <p className="text-sm mt-2">Credits will appear here when granted by admin</p>
+            <div className="p-16 text-center">
+              <div className="w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <Coins className="w-10 h-10 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2">No credit transactions yet</h3>
+              <p className="text-gray-500">Credits will appear here when granted by admin</p>
             </div>
           ) : (
             <>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b border-gray-200">
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Date</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Type</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Description</th>
-                      <th className="text-right py-3 px-4 text-sm font-semibold text-gray-600">Amount</th>
-                      <th className="text-right py-3 px-4 text-sm font-semibold text-gray-600">Balance</th>
+                    <tr className="bg-gray-50">
+                      <th className="text-left py-4 px-6 text-sm font-semibold text-gray-400">Date</th>
+                      <th className="text-left py-4 px-6 text-sm font-semibold text-gray-400">Type</th>
+                      <th className="text-left py-4 px-6 text-sm font-semibold text-gray-400">Description</th>
+                      <th className="text-right py-4 px-6 text-sm font-semibold text-gray-400">Amount</th>
+                      <th className="text-right py-4 px-6 text-sm font-semibold text-gray-400">Balance</th>
                     </tr>
                   </thead>
                   <tbody>
                     {transactions.map((transaction) => (
-                      <tr key={transaction.id} className="border-b border-gray-100 hover:bg-gray-50">
-                        <td className="py-4 px-4 text-sm text-gray-600">
+                      <tr key={transaction.id} className="border-t border-white/10 hover:bg-gray-50 transition-colors">
+                        <td className="py-4 px-6 text-sm text-gray-400">
                           {formatDateIndian(transaction.createdAt)}
                         </td>
-                        <td className="py-4 px-4">
-                          <div className="flex items-center gap-2">
-                            {getTransactionIcon(transaction.type)}
+                        <td className="py-4 px-6">
+                          <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center">
+                              {getTransactionIcon(transaction.type)}
+                            </div>
                             <span className="text-sm font-medium text-gray-700">
                               {getTransactionLabel(transaction.type)}
                             </span>
                           </div>
                         </td>
-                        <td className="py-4 px-4 text-sm text-gray-600 max-w-xs truncate">
+                        <td className="py-4 px-6 text-sm text-gray-400 max-w-xs truncate">
                           {transaction.description}
                         </td>
-                        <td className={`py-4 px-4 text-sm font-semibold text-right ${
+                        <td className={`py-4 px-6 text-sm font-bold text-right ${
                           transaction.amount > 0 ? 'text-green-600' : 'text-red-600'
                         }`}>
                           {transaction.amount > 0 ? '+' : ''}₹{Math.abs(transaction.amount).toFixed(2)}
                         </td>
-                        <td className="py-4 px-4 text-sm text-gray-700 text-right font-medium">
+                        <td className="py-4 px-6 text-sm text-gray-700 text-right font-semibold">
                           ₹{transaction.balanceAfter.toFixed(2)}
                         </td>
                       </tr>
@@ -206,21 +244,21 @@ const Credits = () => {
 
               {/* Pagination */}
               {totalPages > 1 && (
-                <div className="flex items-center justify-center gap-2 mt-6">
+                <div className="flex items-center justify-center gap-3 p-6 border-t border-white/10">
                   <button
                     onClick={() => setPage(p => Math.max(1, p - 1))}
                     disabled={page === 1}
-                    className="px-4 py-2 border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                    className="px-5 py-2.5 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed font-medium text-gray-700 transition-all"
                   >
                     Previous
                   </button>
-                  <span className="px-4 py-2 text-sm text-gray-600">
+                  <span className="px-4 py-2 text-sm text-gray-400 font-medium">
                     Page {page} of {totalPages}
                   </span>
                   <button
                     onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                     disabled={page === totalPages}
-                    className="px-4 py-2 border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                    className="px-5 py-2.5 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed font-medium text-gray-700 transition-all"
                   >
                     Next
                   </button>
@@ -231,34 +269,34 @@ const Credits = () => {
         </div>
 
         {/* How Credits Work */}
-        <div className="mt-8 bg-white rounded-xl shadow-lg p-6">
-          <h3 className="text-lg font-bold text-gray-900 mb-4">How Matchify Credits Work</h3>
+        <div className="mt-8 bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl shadow-xl shadow-gray-200/50 border border-white/10 p-8">
+          <h3 className="text-xl font-bold text-white mb-6">How Matchify Credits Work</h3>
           <div className="grid md:grid-cols-3 gap-6">
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                <Gift className="w-4 h-4 text-green-600" />
+            <div className="flex items-start gap-4 p-5 bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl">
+              <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-emerald-500 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-green-500/20">
+                <Gift className="w-6 h-6 text-white" />
               </div>
               <div>
-                <p className="font-medium text-gray-800">Earn Credits</p>
-                <p className="text-sm text-gray-600">Receive promotional credits from Matchify.pro for special offers and rewards</p>
+                <p className="font-semibold text-white mb-1">Earn Credits</p>
+                <p className="text-sm text-gray-400">Receive promotional credits from Matchify.pro for special offers and rewards</p>
               </div>
             </div>
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                <Coins className="w-4 h-4 text-blue-600" />
+            <div className="flex items-start gap-4 p-5 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-blue-500/20">
+                <Coins className="w-6 h-6 text-white" />
               </div>
               <div>
-                <p className="font-medium text-gray-800">Use for Platform Fees</p>
-                <p className="text-sm text-gray-600">Apply credits towards tournament creation fees and other platform charges</p>
+                <p className="font-semibold text-white mb-1">Use for Platform Fees</p>
+                <p className="text-sm text-gray-400">Apply credits towards tournament creation fees and other platform charges</p>
               </div>
             </div>
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
-                <Info className="w-4 h-4 text-orange-600" />
+            <div className="flex items-start gap-4 p-5 bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl">
+              <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-amber-500 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-orange-500/20">
+                <Info className="w-6 h-6 text-white" />
               </div>
               <div>
-                <p className="font-medium text-gray-800">Important Note</p>
-                <p className="text-sm text-gray-600">Credits cannot be used for entry fees, withdrawn, or transferred to others</p>
+                <p className="font-semibold text-white mb-1">Important Note</p>
+                <p className="text-sm text-gray-400">Credits cannot be used for entry fees, withdrawn, or transferred to others</p>
               </div>
             </div>
           </div>

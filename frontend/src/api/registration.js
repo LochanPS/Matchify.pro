@@ -9,12 +9,27 @@ const getAuthHeader = () => {
 };
 
 export const registrationAPI = {
-  // Register for tournament
+  // Register for tournament (legacy - without screenshot)
   createRegistration: async (registrationData) => {
     const response = await axios.post(
       `${API_URL}/registrations`,
       registrationData,
       { headers: getAuthHeader() }
+    );
+    return response.data;
+  },
+
+  // Register for tournament with payment screenshot
+  createRegistrationWithScreenshot: async (formData) => {
+    const response = await axios.post(
+      `${API_URL}/registrations/with-screenshot`,
+      formData,
+      { 
+        headers: {
+          ...getAuthHeader(),
+          'Content-Type': 'multipart/form-data'
+        }
+      }
     );
     return response.data;
   },
@@ -29,7 +44,7 @@ export const registrationAPI = {
     return response.data;
   },
 
-  // Cancel registration
+  // Cancel registration (legacy - simple cancel)
   cancelRegistration: async (id) => {
     const response = await axios.delete(
       `${API_URL}/registrations/${id}`,
@@ -38,11 +53,26 @@ export const registrationAPI = {
     return response.data;
   },
 
-  // Verify payment (if needed in future)
-  verifyPayment: async (id, paymentData) => {
+  // Cancel registration with details (reason, UPI ID, QR code)
+  cancelRegistrationWithDetails: async (id, formData) => {
+    const response = await axios.post(
+      `${API_URL}/registrations/${id}/cancel`,
+      formData,
+      { 
+        headers: {
+          ...getAuthHeader(),
+          'Content-Type': 'multipart/form-data'
+        }
+      }
+    );
+    return response.data;
+  },
+
+  // Verify payment (organizer)
+  verifyPayment: async (id, status) => {
     const response = await axios.post(
       `${API_URL}/registrations/${id}/verify-payment`,
-      paymentData,
+      { status },
       { headers: getAuthHeader() }
     );
     return response.data;

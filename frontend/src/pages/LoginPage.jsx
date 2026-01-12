@@ -1,47 +1,31 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { EyeIcon, EyeSlashIcon, EnvelopeIcon, LockClosedIcon, ArrowRightIcon, SparklesIcon } from '@heroicons/react/24/outline';
+import { Zap, Trophy, Users, MapPin } from 'lucide-react';
 
 const LoginPage = () => {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  });
+  const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   
   const { login } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirectUrl = searchParams.get('redirect');
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-    setError(''); // Clear error on input change
-  };
-
-  const validateForm = () => {
-    if (!formData.email || !formData.password) {
-      setError('All fields are required');
-      return false;
-    }
-    
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-      setError('Invalid email format');
-      return false;
-    }
-    
-    return true;
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setError('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!validateForm()) return;
+    if (!formData.email || !formData.password) {
+      setError('All fields are required');
+      return;
+    }
     
     setLoading(true);
     setError('');
@@ -49,29 +33,22 @@ const LoginPage = () => {
     try {
       const user = await login(formData.email, formData.password);
       
-      // Get first role from roles array (multi-role support)
+      if (redirectUrl) {
+        navigate(redirectUrl);
+        return;
+      }
+      
       const userRoles = Array.isArray(user.roles) ? user.roles : [user.role];
       const primaryRole = userRoles[0];
       
-      // Redirect based on primary role
       switch (primaryRole) {
-        case 'PLAYER':
-          navigate('/dashboard');
-          break;
-        case 'ORGANIZER':
-          navigate('/organizer/dashboard');
-          break;
-        case 'UMPIRE':
-          navigate('/umpire/dashboard');
-          break;
-        case 'ADMIN':
-          navigate('/admin/dashboard');
-          break;
-        default:
-          navigate('/');
+        case 'PLAYER': navigate('/dashboard'); break;
+        case 'ORGANIZER': navigate('/organizer/dashboard'); break;
+        case 'UMPIRE': navigate('/umpire/dashboard'); break;
+        case 'ADMIN': navigate('/admin/dashboard'); break;
+        default: navigate('/');
       }
     } catch (err) {
-      console.error('Login error:', err);
       setError(err.response?.data?.error || 'Login failed. Please try again.');
     } finally {
       setLoading(false);
@@ -79,139 +56,210 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        {/* Header */}
-        <div className="text-center">
-          <Link to="/" className="inline-flex items-center space-x-2 mb-8">
-            <span className="text-3xl">🎾</span>
-            <span className="text-2xl font-bold text-gradient">MATCHIFY</span>
-          </Link>
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">
-            Welcome Back!
-          </h2>
-          <p className="text-gray-600">
-            Sign in to your account to continue
-          </p>
+    <div className="min-h-screen flex bg-slate-900">
+      {/* Left Side - Branding with exciting effects */}
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
+        {/* Animated gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-purple-900/50 to-slate-900"></div>
+        
+        {/* Animated blobs */}
+        <div className="absolute inset-0">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-screen filter blur-3xl opacity-30 animate-pulse"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-500 rounded-full mix-blend-screen filter blur-3xl opacity-30 animate-pulse animation-delay-2000"></div>
+          <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-pink-500 rounded-full mix-blend-screen filter blur-3xl opacity-20 animate-pulse animation-delay-4000"></div>
         </div>
 
-        {/* Login Form */}
-        <div className="card">
-          <div className="card-body">
-            {error && (
-              <div className="alert-error mb-6">
-                {error}
-              </div>
-            )}
+        {/* Grid pattern overlay */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
+        
+        <div className="relative z-10 flex flex-col justify-center items-center w-full p-12">
+          {/* Logo with glow effect */}
+          <div className="relative mb-8">
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-400 to-cyan-500 rounded-3xl blur-2xl opacity-50 animate-pulse"></div>
+            <div className="relative w-28 h-28 bg-gradient-to-br from-emerald-400 via-green-500 to-teal-600 rounded-3xl flex items-center justify-center shadow-2xl shadow-emerald-500/50 transform hover:scale-105 transition-transform">
+              <span className="text-6xl">🏸</span>
+            </div>
+          </div>
+          
+          {/* Brand name with gradient */}
+          <h1 className="text-6xl font-black mb-4">
+            <span className="bg-gradient-to-r from-white via-purple-200 to-white bg-clip-text text-transparent">MATCHIFY</span>
+            <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">.pro</span>
+          </h1>
+          
+          <p className="text-xl text-white/60 text-center max-w-md mb-4">
+            India's Premier Badminton Tournament Platform
+          </p>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Email Field */}
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                  Email Address
-                </label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  className="input"
-                  placeholder="Enter your email"
-                  value={formData.email}
-                  onChange={handleChange}
-                />
+          {/* Exciting tagline */}
+          <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-full mb-12">
+            <SparklesIcon className="w-5 h-5 text-purple-400 animate-pulse" />
+            <span className="text-purple-300 font-medium">Where Champions Are Made</span>
+            <SparklesIcon className="w-5 h-5 text-pink-400 animate-pulse" />
+          </div>
+          
+          {/* Stats with glowing cards */}
+          <div className="grid grid-cols-3 gap-6 w-full max-w-md">
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl blur-lg opacity-0 group-hover:opacity-50 transition-opacity"></div>
+              <div className="relative bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-4 text-center hover:border-purple-500/50 transition-all">
+                <Users className="w-6 h-6 text-purple-400 mx-auto mb-2" />
+                <p className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">1000+</p>
+                <p className="text-white/50 text-sm">Players</p>
               </div>
+            </div>
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-br from-amber-500 to-orange-500 rounded-2xl blur-lg opacity-0 group-hover:opacity-50 transition-opacity"></div>
+              <div className="relative bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-4 text-center hover:border-amber-500/50 transition-all">
+                <Trophy className="w-6 h-6 text-amber-400 mx-auto mb-2" />
+                <p className="text-3xl font-bold bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent">50+</p>
+                <p className="text-white/50 text-sm">Tournaments</p>
+              </div>
+            </div>
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-2xl blur-lg opacity-0 group-hover:opacity-50 transition-opacity"></div>
+              <div className="relative bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-4 text-center hover:border-cyan-500/50 transition-all">
+                <MapPin className="w-6 h-6 text-cyan-400 mx-auto mb-2" />
+                <p className="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">25+</p>
+                <p className="text-white/50 text-sm">Cities</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-              {/* Password Field */}
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                  Password
-                </label>
+      {/* Right Side - Login Form with dark theme */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 relative overflow-hidden">
+        {/* Subtle background effects */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl"></div>
+        
+        <div className="w-full max-w-md relative z-10">
+          {/* Mobile Logo */}
+          <div className="lg:hidden text-center mb-8">
+            <Link to="/" className="inline-flex items-center gap-3">
+              <div className="w-14 h-14 bg-gradient-to-br from-emerald-400 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/30">
+                <span className="text-3xl">🏸</span>
+              </div>
+              <span className="text-2xl font-bold text-white">MATCHIFY<span className="text-emerald-400">.pro</span></span>
+            </Link>
+          </div>
+
+          {/* Welcome text with gradient */}
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-purple-500/10 border border-purple-500/30 rounded-full mb-4">
+              <Zap className="w-4 h-4 text-purple-400" />
+              <span className="text-purple-300 text-sm font-medium">Ready to Play?</span>
+            </div>
+            <h2 className="text-4xl font-bold text-white mb-2">Welcome Back!</h2>
+            <p className="text-gray-400">Sign in to continue your journey</p>
+          </div>
+
+          {error && (
+            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm flex items-center gap-2">
+              <span className="text-lg">⚠️</span>
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
+              <div className="relative group">
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-cyan-500/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
                 <div className="relative">
+                  <EnvelopeIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 group-focus-within:text-purple-400 transition-colors z-10" />
                   <input
-                    id="password"
+                    name="email"
+                    type="email"
+                    required
+                    autoComplete="email"
+                    className="w-full pl-12 pr-4 py-4 bg-slate-800 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all [&:-webkit-autofill]:bg-slate-800 [&:-webkit-autofill]:text-white [&:-webkit-autofill]:[-webkit-text-fill-color:white] [&:-webkit-autofill]:[-webkit-box-shadow:0_0_0_1000px_rgb(30,41,59)_inset] [&:-webkit-autofill]:border-white/10"
+                    placeholder="you@example.com"
+                    value={formData.email}
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Password</label>
+              <div className="relative group">
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-cyan-500/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
+                <div className="relative">
+                  <LockClosedIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 group-focus-within:text-purple-400 transition-colors z-10" />
+                  <input
                     name="password"
                     type={showPassword ? 'text' : 'password'}
-                    autoComplete="current-password"
                     required
-                    className="input pr-10"
-                    placeholder="Enter your password"
+                    autoComplete="current-password"
+                    className="w-full pl-12 pr-12 py-4 bg-slate-800 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all [&:-webkit-autofill]:bg-slate-800 [&:-webkit-autofill]:text-white [&:-webkit-autofill]:[-webkit-text-fill-color:white] [&:-webkit-autofill]:[-webkit-box-shadow:0_0_0_1000px_rgb(30,41,59)_inset] [&:-webkit-autofill]:border-white/10"
+                    placeholder="••••••••"
                     value={formData.password}
                     onChange={handleChange}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-purple-400 transition-colors z-10"
                   >
-                    {showPassword ? (
-                      <EyeSlashIcon className="h-5 w-5" />
-                    ) : (
-                      <EyeIcon className="h-5 w-5" />
-                    )}
+                    {showPassword ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
                   </button>
                 </div>
               </div>
+            </div>
 
-              {/* Remember Me & Forgot Password */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <input
-                    id="remember-me"
-                    name="remember-me"
-                    type="checkbox"
-                    className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-                  />
-                  <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
-                    Remember me
-                  </label>
-                </div>
-                <div className="text-sm">
-                  <a href="#" className="text-primary-600 hover:text-primary-500 font-medium">
-                    Forgot password?
-                  </a>
-                </div>
-              </div>
+            <div className="flex items-center justify-between">
+              <label className="flex items-center gap-2 cursor-pointer group">
+                <input type="checkbox" className="w-4 h-4 rounded border-white/20 bg-slate-800 text-purple-500 focus:ring-purple-500 focus:ring-offset-0" />
+                <span className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors">Remember me</span>
+              </label>
+              <a href="#" className="text-sm text-purple-400 hover:text-purple-300 font-medium transition-colors">Forgot password?</a>
+            </div>
 
-              {/* Submit Button */}
+            {/* Exciting submit button */}
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-pink-500 to-cyan-500 rounded-xl blur-lg opacity-70 group-hover:opacity-100 transition-opacity animate-pulse"></div>
               <button
                 type="submit"
                 disabled={loading}
-                className="btn-primary w-full btn-lg"
+                className="relative w-full py-4 bg-gradient-to-r from-purple-600 via-pink-500 to-purple-600 bg-size-200 bg-pos-0 hover:bg-pos-100 text-white font-bold rounded-xl shadow-2xl shadow-purple-500/30 hover:shadow-purple-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-lg"
               >
                 {loading ? (
                   <>
-                    <span className="spinner mr-2"></span>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                     Signing in...
                   </>
                 ) : (
-                  'Sign In'
+                  <>
+                    <Zap className="w-5 h-5" />
+                    Let's Go!
+                    <ArrowRightIcon className="w-5 h-5" />
+                  </>
                 )}
               </button>
-            </form>
+            </div>
+          </form>
+
+          <div className="mt-8 text-center">
+            <p className="text-gray-400">
+              Don't have an account?{' '}
+              <Link to={redirectUrl ? `/register?redirect=${encodeURIComponent(redirectUrl)}` : '/register'} className="text-transparent bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text font-bold hover:from-purple-300 hover:to-cyan-300 transition-all">
+                Create one now
+              </Link>
+            </p>
           </div>
-        </div>
 
-        {/* Sign Up Link */}
-        <div className="text-center">
-          <p className="text-gray-600">
-            Don't have an account?{' '}
-            <Link to="/register" className="text-primary-600 hover:text-primary-500 font-medium">
-              Create one now
-            </Link>
-          </p>
-        </div>
-
-        {/* Demo Credentials */}
-        <div className="card bg-gray-50">
-          <div className="card-body">
-            <h3 className="text-sm font-medium text-gray-700 mb-2">Demo Credentials</h3>
+          {/* Demo Credentials with dark theme */}
+          <div className="mt-8 p-4 bg-slate-800/50 backdrop-blur-sm rounded-xl border border-white/10">
+            <p className="text-xs font-medium text-gray-400 mb-2 flex items-center gap-2">
+              <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+              Demo Credentials
+            </p>
             <div className="text-xs text-gray-500 space-y-1">
-              <p><strong>Player:</strong> testplayer@matchify.com / password123</p>
-              <p><strong>Organizer:</strong> testorganizer@matchify.com / password123</p>
-              <p><strong>Umpire:</strong> umpire@test.com / password123</p>
-              <p><strong>Admin:</strong> admin@matchify.com / password123</p>
+              <p><span className="text-purple-400">Player:</span> testplayer@matchify.com / password123</p>
+              <p><span className="text-cyan-400">Organizer:</span> testorganizer@matchify.com / password123</p>
             </div>
           </div>
         </div>

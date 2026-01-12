@@ -19,10 +19,24 @@ const RoleRoute = ({ children, allowedRoles, blockAdmin = false }) => {
     return <Navigate to="/login" replace />;
   }
 
-  // Get user roles - support both array (new) and string (old) formats
-  const userRoles = Array.isArray(user.roles) 
-    ? user.roles 
-    : (user.role ? [user.role] : []);
+  // Get user roles - support array, comma-separated string, and single role formats
+  const getUserRoles = () => {
+    if (Array.isArray(user.roles)) {
+      return user.roles;
+    }
+    if (typeof user.roles === 'string' && user.roles.includes(',')) {
+      return user.roles.split(',').map(r => r.trim());
+    }
+    if (typeof user.roles === 'string') {
+      return [user.roles];
+    }
+    if (user.role) {
+      return [user.role];
+    }
+    return [];
+  };
+  
+  const userRoles = getUserRoles();
 
   // Block admins from accessing non-admin features
   if (blockAdmin && userRoles.includes('ADMIN')) {
@@ -70,7 +84,14 @@ const RoleRoute = ({ children, allowedRoles, blockAdmin = false }) => {
   }
 
   // Check if user has ANY of the allowed roles
-  const hasAllowedRole = allowedRoles.some(role => userRoles.includes(role));
+  // PLAYER role now includes ORGANIZER capabilities
+  const hasAllowedRole = allowedRoles.some(role => {
+    if (role === 'ORGANIZER') {
+      // PLAYER can access ORGANIZER routes
+      return userRoles.includes('PLAYER') || userRoles.includes('ORGANIZER');
+    }
+    return userRoles.includes(role);
+  });
 
   if (!hasAllowedRole) {
     return (

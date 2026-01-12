@@ -9,6 +9,7 @@ import PostersStep from '../components/tournament/steps/PostersStep';
 import CategoriesStep from '../components/tournament/steps/CategoriesStep';
 import PaymentQRStep from '../components/tournament/steps/PaymentQRStep';
 import ReviewStep from '../components/tournament/steps/ReviewStep';
+import { Trophy, Save, X, AlertTriangle, CheckCircle, Sparkles, ArrowLeft } from 'lucide-react';
 
 const CreateTournament = () => {
   const navigate = useNavigate();
@@ -34,10 +35,8 @@ const CreateTournament = () => {
   const [error, setError] = useState(null);
   const [showExitModal, setShowExitModal] = useState(false);
 
-  // Check if form has data worth saving
   const hasFormData = formData.name || formData.description || formData.venue || formData.city;
 
-  // Handle browser back/close with beforeunload
   useEffect(() => {
     const handleBeforeUnload = (e) => {
       if (hasFormData) {
@@ -60,7 +59,6 @@ const CreateTournament = () => {
     setError(null);
 
     try {
-      // Step 1: Create tournament with basic info and dates
       const tournamentData = {
         name: formData.name,
         description: formData.description,
@@ -82,7 +80,6 @@ const CreateTournament = () => {
       const createResponse = await tournamentAPI.createTournament(tournamentData);
       const tournamentId = createResponse.tournament.id;
 
-      // Step 2: Upload posters if any
       if (formData.posters.length > 0) {
         const posterFiles = formData.posters.filter(p => p.file).map(p => p.file);
         if (posterFiles.length > 0) {
@@ -90,7 +87,6 @@ const CreateTournament = () => {
         }
       }
 
-      // Step 3: Create categories
       if (formData.categories && formData.categories.length > 0) {
         for (const category of formData.categories) {
           await tournamentAPI.createCategory(tournamentId, {
@@ -109,7 +105,6 @@ const CreateTournament = () => {
         }
       }
 
-      // Step 4: Upload payment QR if any
       if (formData.paymentQR?.file) {
         await tournamentAPI.uploadPaymentQR(
           tournamentId,
@@ -124,10 +119,8 @@ const CreateTournament = () => {
         });
       }
 
-      // Clear the draft after successful creation
       clearDraft();
 
-      // Success! Navigate to tournament detail page
       navigate(`/tournaments/${tournamentId}`, {
         state: { 
           message: 'Tournament created successfully! Categories and details have been saved.',
@@ -220,93 +213,118 @@ const CreateTournament = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Create New Tournament</h1>
-            <p className="text-gray-600 mt-2">
-              Fill in the details to create your badminton tournament
-            </p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      {/* Hero Header */}
+      <div className="relative bg-gradient-to-r from-slate-900 via-emerald-900 to-slate-900 overflow-hidden">
+        <div className="absolute inset-0">
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-teal-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+        </div>
+        
+        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+          {/* Back Button with Halo Effect */}
+          <div className="relative inline-block mb-4">
+            <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/30 to-teal-500/30 blur-lg rounded-xl"></div>
+            <button
+              onClick={() => hasFormData ? setShowExitModal(true) : navigate(-1)}
+              className="relative flex items-center gap-2 px-4 py-2 bg-slate-800/80 border border-emerald-500/30 rounded-xl text-emerald-400 hover:text-emerald-300 hover:border-emerald-500/50 transition-all group"
+            >
+              <ArrowLeft className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
+              <span className="font-medium">Back</span>
+            </button>
           </div>
-          <div className="flex items-center gap-3">
-            {hasFormData && (
-              <span className="flex items-center gap-1 text-sm text-green-600">
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-                Auto-saved
-              </span>
-            )}
-            {hasFormData && (
-              <button
-                onClick={() => setShowExitModal(true)}
-                className="text-gray-500 hover:text-gray-700 text-sm"
-              >
-                Save & Exit
-              </button>
-            )}
+
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-5">
+              <div className="w-14 h-14 bg-gradient-to-br from-emerald-400 via-teal-500 to-cyan-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-emerald-500/30">
+                <Trophy className="w-7 h-7 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-white">Create New Tournament</h1>
+                <p className="text-white/60 text-sm">Fill in the details to create your badminton tournament</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              {hasFormData && (
+                <div className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
+                  <CheckCircle className="w-4 h-4 text-emerald-400" />
+                  <span className="text-sm text-white/80 font-medium">Auto-saved</span>
+                </div>
+              )}
+              {hasFormData && (
+                <button
+                  onClick={() => setShowExitModal(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-xl border border-white/20 text-white/80 hover:text-white transition-all text-sm font-medium"
+                >
+                  <Save className="w-4 h-4" />
+                  Save & Exit
+                </button>
+              )}
+            </div>
           </div>
         </div>
+      </div>
 
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 -mt-4">
         {/* Error Message */}
         {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
-            <div className="flex items-start">
-              <svg className="h-5 w-5 text-red-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-              </svg>
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-red-800">Error creating tournament</h3>
-                <p className="text-sm text-red-700 mt-1">{error}</p>
-              </div>
+          <div className="mb-6 bg-gradient-to-r from-red-50 to-rose-50 border border-red-200 rounded-2xl p-5 flex items-start gap-4">
+            <div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center flex-shrink-0">
+              <AlertTriangle className="w-5 h-5 text-red-600" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-red-800 mb-1">Error creating tournament</h3>
+              <p className="text-sm text-red-700">{error}</p>
             </div>
           </div>
         )}
 
         {/* Stepper */}
-        <TournamentStepper
-          currentStep={currentStep}
-          goToStep={goToStep}
-          completedSteps={completedSteps}
-        />
+        <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl shadow-xl shadow-gray-200/50 border border-white/10 p-6 mb-6">
+          <TournamentStepper
+            currentStep={currentStep}
+            goToStep={goToStep}
+            completedSteps={completedSteps}
+          />
+        </div>
 
         {/* Step Content */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 md:p-8">
+        <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl shadow-xl shadow-gray-200/50 border border-white/10 p-6 md:p-8">
           {renderStep()}
         </div>
 
         {/* Help Text */}
-        <div className="mt-6 text-center text-sm text-gray-500">
-          <p>Your progress is automatically saved. You can continue later from your dashboard.</p>
+        <div className="mt-6 text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-50 rounded-xl">
+            <Sparkles className="w-4 h-4 text-emerald-600" />
+            <span className="text-sm text-emerald-700 font-medium">Your progress is automatically saved. You can continue later from your dashboard.</span>
+          </div>
         </div>
       </div>
 
       {/* Exit Confirmation Modal */}
       {showExitModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl shadow-2xl max-w-md w-full p-6 animate-in fade-in zoom-in duration-200">
             <div className="text-center mb-6">
-              <div className="mx-auto w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
+              <div className="mx-auto w-14 h-14 bg-gradient-to-br from-amber-100 to-orange-100 rounded-2xl flex items-center justify-center mb-4">
+                <AlertTriangle className="w-7 h-7 text-amber-600" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <h3 className="text-xl font-bold text-white mb-2">
                 Save Tournament Draft?
               </h3>
-              <p className="text-gray-600">
+              <p className="text-gray-400">
                 Would you like to save your progress as a draft to continue later?
               </p>
             </div>
 
             {formData.name && (
-              <div className="bg-gray-50 rounded-lg p-3 mb-6">
-                <p className="text-sm text-gray-600">
-                  <span className="font-medium">Tournament:</span> {formData.name || 'Untitled'}
+              <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 mb-6 border border-white/10">
+                <p className="text-sm text-gray-700">
+                  <span className="font-semibold">Tournament:</span> {formData.name || 'Untitled'}
                 </p>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 mt-1">
                   Step {currentStep} of 6 • {completedSteps.length} steps completed
                 </p>
               </div>
@@ -315,19 +333,20 @@ const CreateTournament = () => {
             <div className="space-y-3">
               <button
                 onClick={handleSaveAndExit}
-                className="w-full py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                className="w-full py-3.5 px-4 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl hover:shadow-lg hover:shadow-emerald-500/30 transition-all font-semibold flex items-center justify-center gap-2"
               >
+                <Save className="w-5 h-5" />
                 Save as Draft & Exit
               </button>
               <button
                 onClick={handleDiscardAndExit}
-                className="w-full py-3 px-4 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors font-medium"
+                className="w-full py-3.5 px-4 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors font-semibold"
               >
                 Discard & Exit
               </button>
               <button
                 onClick={() => setShowExitModal(false)}
-                className="w-full py-3 px-4 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                className="w-full py-3.5 px-4 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-semibold"
               >
                 Continue Editing
               </button>

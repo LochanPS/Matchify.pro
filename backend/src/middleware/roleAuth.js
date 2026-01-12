@@ -27,6 +27,13 @@ export const requireRole = (requiredRole) => {
     // Check if roles is array and includes required role
     const roles = Array.isArray(req.user.roles) ? req.user.roles : [req.user.roles];
     
+    // PLAYER role now includes ORGANIZER capabilities
+    if (requiredRole === 'ORGANIZER') {
+      if (roles.includes('PLAYER') || roles.includes('ORGANIZER')) {
+        return next();
+      }
+    }
+    
     if (!roles.includes(requiredRole)) {
       return res.status(403).json({ error: `Requires ${requiredRole} role` });
     }
@@ -43,7 +50,14 @@ export const requireAnyRole = (requiredRoles) => {
     }
 
     const roles = Array.isArray(req.user.roles) ? req.user.roles : [req.user.roles];
-    const hasRole = requiredRoles.some(role => roles.includes(role));
+    
+    // PLAYER role now includes ORGANIZER capabilities
+    const hasRole = requiredRoles.some(role => {
+      if (role === 'ORGANIZER') {
+        return roles.includes('PLAYER') || roles.includes('ORGANIZER');
+      }
+      return roles.includes(role);
+    });
     
     if (!hasRole) {
       return res.status(403).json({ error: `Requires one of: ${requiredRoles.join(', ')}` });

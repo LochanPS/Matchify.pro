@@ -55,6 +55,8 @@ app.use(helmet({
 const allowedOrigins = [
   FRONTEND_URL,
   'http://localhost:5173',
+  'http://localhost:5174',
+  'http://localhost:5175',
   'http://localhost:3000',
   process.env.CORS_ORIGIN
 ].filter(Boolean);
@@ -87,6 +89,13 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Compression middleware
 app.use(compression());
+
+// Static file serving for uploads
+import path from 'path';
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Logging middleware
 if (process.env.NODE_ENV === 'development') {
@@ -172,7 +181,8 @@ app.use('/api/credits', creditsRoutes);
 app.use('/api', drawRoutes);
 
 // Match routes (both old and new multi-role)
-app.use('/api/matches', matchRoutes);
+app.use('/api', matchRoutes);  // For tournament-related match routes
+app.use('/api/matches', matchRoutes);  // For /matches/:matchId routes
 app.use('/api/multi-matches', multiRoleMatchRoutes);
 
 // Points and leaderboard routes

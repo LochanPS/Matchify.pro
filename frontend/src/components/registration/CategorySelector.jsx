@@ -1,8 +1,13 @@
 import { CheckCircleIcon } from '@heroicons/react/24/solid';
-import { CircleIcon } from 'lucide-react';
+import { CircleIcon, CheckCheck } from 'lucide-react';
 
-export default function CategorySelector({ categories, selectedCategories, onSelectionChange }) {
+export default function CategorySelector({ categories, selectedCategories, onSelectionChange, alreadyRegisteredCategories = [] }) {
   const handleToggle = (categoryId) => {
+    // Don't allow toggling already registered categories
+    if (alreadyRegisteredCategories.includes(categoryId)) {
+      return;
+    }
+    
     if (selectedCategories.includes(categoryId)) {
       onSelectionChange(selectedCategories.filter(id => id !== categoryId));
     } else {
@@ -12,24 +17,24 @@ export default function CategorySelector({ categories, selectedCategories, onSel
 
   const getFormatBadge = (format) => {
     const colors = {
-      singles: 'bg-blue-100 text-blue-800',
-      doubles: 'bg-purple-100 text-purple-800',
+      singles: 'bg-blue-500/20 text-blue-300 border border-blue-500/30',
+      doubles: 'bg-purple-500/20 text-purple-300 border border-purple-500/30',
     };
-    return colors[format] || 'bg-gray-100 text-gray-800';
+    return colors[format] || 'bg-gray-500/20 text-gray-300 border border-gray-500/30';
   };
 
   const getGenderBadge = (gender) => {
     const colors = {
-      men: 'bg-cyan-100 text-cyan-800',
-      women: 'bg-pink-100 text-pink-800',
-      mixed: 'bg-green-100 text-green-800',
+      men: 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30',
+      women: 'bg-pink-500/20 text-pink-300 border border-pink-500/30',
+      mixed: 'bg-green-500/20 text-green-300 border border-green-500/30',
     };
-    return colors[gender] || 'bg-gray-100 text-gray-800';
+    return colors[gender] || 'bg-gray-500/20 text-gray-300 border border-gray-500/30';
   };
 
   if (!categories || categories.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500">
+      <div className="text-center py-8 text-gray-400">
         No categories available for this tournament
       </div>
     );
@@ -37,49 +42,61 @@ export default function CategorySelector({ categories, selectedCategories, onSel
 
   return (
     <div className="space-y-3">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">
+      <h3 className="text-lg font-semibold text-white mb-4">
         Select Categories
       </h3>
       
       {categories.map((category) => {
         const isSelected = selectedCategories.includes(category.id);
+        const isAlreadyRegistered = alreadyRegisteredCategories.includes(category.id);
         
         return (
           <div
             key={category.id}
             onClick={() => handleToggle(category.id)}
             className={`
-              relative flex items-start p-4 border-2 rounded-lg cursor-pointer transition-all
-              ${isSelected 
-                ? 'border-primary-500 bg-primary-50' 
-                : 'border-gray-200 bg-white hover:border-gray-300'
+              relative flex items-start p-4 border-2 rounded-xl transition-all
+              ${isAlreadyRegistered 
+                ? 'border-green-500/50 bg-green-500/10 cursor-not-allowed opacity-75' 
+                : isSelected 
+                  ? 'border-purple-500 bg-purple-500/10 shadow-lg shadow-purple-500/20 cursor-pointer' 
+                  : 'border-white/10 bg-slate-700/50 hover:border-white/20 cursor-pointer'
               }
             `}
           >
             <div className="flex items-center h-5">
-              {isSelected ? (
-                <CheckCircleIcon className="h-6 w-6 text-primary-600" />
+              {isAlreadyRegistered ? (
+                <CheckCheck className="h-6 w-6 text-green-400" />
+              ) : isSelected ? (
+                <CheckCircleIcon className="h-6 w-6 text-purple-400" />
               ) : (
-                <div className="h-6 w-6 rounded-full border-2 border-gray-300" />
+                <div className="h-6 w-6 rounded-full border-2 border-gray-500" />
               )}
             </div>
             
             <div className="ml-3 flex-1">
               <div className="flex items-center justify-between">
                 <div>
-                  <label className="font-medium text-gray-900 cursor-pointer">
+                  <label className={`font-medium cursor-pointer ${isAlreadyRegistered ? 'text-green-300' : 'text-white'}`}>
                     {category.name}
                   </label>
                   {category.ageGroup && (
-                    <span className="ml-2 text-sm text-gray-500">
+                    <span className="ml-2 text-sm text-gray-400">
                       ({category.ageGroup})
                     </span>
                   )}
                 </div>
                 <div className="text-right">
-                  <div className="text-lg font-bold text-gray-900">
-                    ₹{category.entryFee}
-                  </div>
+                  {isAlreadyRegistered ? (
+                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-500/20 text-green-300 rounded-full text-sm font-semibold border border-green-500/30">
+                      <CheckCheck className="w-4 h-4" />
+                      Already Registered
+                    </span>
+                  ) : (
+                    <div className="text-lg font-bold text-white">
+                      ₹{category.entryFee}
+                    </div>
+                  )}
                 </div>
               </div>
               
@@ -91,14 +108,14 @@ export default function CategorySelector({ categories, selectedCategories, onSel
                   {category.gender}
                 </span>
                 {category.maxParticipants && (
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-gray-400">
                     Max: {category.maxParticipants} players
                   </span>
                 )}
               </div>
               
-              {category.format === 'doubles' && isSelected && (
-                <div className="mt-2 text-sm text-primary-600 font-medium">
+              {category.format === 'doubles' && isSelected && !isAlreadyRegistered && (
+                <div className="mt-2 text-sm text-purple-400 font-medium">
                   ⚠️ Partner email required for doubles category
                 </div>
               )}
@@ -108,7 +125,7 @@ export default function CategorySelector({ categories, selectedCategories, onSel
       })}
       
       {selectedCategories.length === 0 && (
-        <p className="text-sm text-gray-500 text-center mt-4">
+        <p className="text-sm text-gray-400 text-center mt-4">
           Select at least one category to continue
         </p>
       )}

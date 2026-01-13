@@ -320,11 +320,13 @@ const EditTournament = () => {
                   <div className="bg-slate-700/30 rounded-xl p-4 border border-white/5">
                     {newQRPreview ? (
                       <div className="relative">
-                        <img
-                          src={newQRPreview}
-                          alt="New Payment QR"
-                          className="w-full max-w-[180px] mx-auto h-auto object-contain rounded-lg bg-white p-2"
-                        />
+                        <div className="p-3 bg-slate-800/50 border border-white/10 rounded-xl mx-auto max-w-[200px]">
+                          <img
+                            src={newQRPreview}
+                            alt="New Payment QR"
+                            className="w-full max-w-[180px] mx-auto h-auto object-contain rounded-lg"
+                          />
+                        </div>
                         <button
                           onClick={removeNewQR}
                           className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1.5 hover:bg-red-600 transition-colors shadow-lg"
@@ -334,14 +336,16 @@ const EditTournament = () => {
                         <p className="text-center text-sm text-amber-400 mt-3 font-medium">New QR (not saved yet)</p>
                       </div>
                     ) : tournament.paymentQRUrl ? (
-                      <img
-                        src={tournament.paymentQRUrl.startsWith('/uploads') 
-                          ? `http://localhost:5000${tournament.paymentQRUrl}` 
-                          : tournament.paymentQRUrl
-                        }
-                        alt="Payment QR"
-                        className="w-full max-w-[180px] mx-auto h-auto object-contain rounded-lg bg-white p-2"
-                      />
+                      <div className="p-3 bg-slate-800/50 border border-white/10 rounded-xl mx-auto max-w-[200px]">
+                        <img
+                          src={tournament.paymentQRUrl.startsWith('/uploads') 
+                            ? `http://localhost:5000${tournament.paymentQRUrl}` 
+                            : tournament.paymentQRUrl
+                          }
+                          alt="Payment QR"
+                          className="w-full max-w-[180px] mx-auto h-auto object-contain rounded-lg"
+                        />
+                      </div>
                     ) : (
                       <div className="text-center py-8">
                         <QrCode className="w-12 h-12 text-gray-500 mx-auto mb-2" />

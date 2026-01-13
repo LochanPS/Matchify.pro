@@ -1,27 +1,46 @@
 // Badminton scoring rules
 
-const RULES = {
+// Default rules (can be overridden by match config)
+const DEFAULT_RULES = {
   pointsToWinGame: 21,
-  pointsToWinSet: 2, // Best of 3 sets
+  setsToWin: 2, // Best of 3 sets
+  maxSets: 3,
   deucePoint: 20,
   maxDeuceDifference: 2,
   maxPointsInGame: 30, // If 29-29, next point wins
+  extension: true, // Allow deuce/extension
 };
 
 /**
  * Check if a game (set) is complete
+ * @param {number} score1 - Player 1 score
+ * @param {number} score2 - Player 2 score
+ * @param {object} config - Match config (optional)
  */
-function isGameComplete(score1, score2) {
-  // Normal win (21+ with 2 point lead)
-  if (score1 >= RULES.pointsToWinGame && score1 - score2 >= RULES.maxDeuceDifference) {
+function isGameComplete(score1, score2, config = {}) {
+  const pointsToWin = config.pointsPerSet || DEFAULT_RULES.pointsToWinGame;
+  const extension = config.extension !== undefined ? config.extension : DEFAULT_RULES.extension;
+  const maxPoints = extension ? (pointsToWin + 9) : pointsToWin; // e.g., 30 for 21-point game, or exact points if no extension
+  const deucePoint = pointsToWin - 1; // e.g., 20 for 21-point game, 29 for 30-point game
+  
+  // If no extension, first to reach points wins
+  if (!extension) {
+    if (score1 >= pointsToWin || score2 >= pointsToWin) {
+      return true;
+    }
+    return false;
+  }
+  
+  // Normal win (pointsToWin+ with 2 point lead)
+  if (score1 >= pointsToWin && score1 - score2 >= DEFAULT_RULES.maxDeuceDifference) {
     return true;
   }
-  if (score2 >= RULES.pointsToWinGame && score2 - score1 >= RULES.maxDeuceDifference) {
+  if (score2 >= pointsToWin && score2 - score1 >= DEFAULT_RULES.maxDeuceDifference) {
     return true;
   }
   
-  // Golden point (30 wins)
-  if (score1 === RULES.maxPointsInGame || score2 === RULES.maxPointsInGame) {
+  // Golden point (maxPoints wins)
+  if (score1 === maxPoints || score2 === maxPoints) {
     return true;
   }
   
@@ -30,9 +49,12 @@ function isGameComplete(score1, score2) {
 
 /**
  * Get winner of a game
+ * @param {number} score1 - Player 1 score
+ * @param {number} score2 - Player 2 score
+ * @param {object} config - Match config (optional)
  */
-function getGameWinner(score1, score2) {
-  if (!isGameComplete(score1, score2)) {
+function getGameWinner(score1, score2, config = {}) {
+  if (!isGameComplete(score1, score2, config)) {
     return null;
   }
   return score1 > score2 ? 'player1' : 'player2';
@@ -40,39 +62,52 @@ function getGameWinner(score1, score2) {
 
 /**
  * Check if match is complete
+ * @param {array} sets - Array of completed sets
+ * @param {object} config - Match config (optional)
  */
-function isMatchComplete(sets) {
+function isMatchComplete(sets, config = {}) {
+  const setsToWin = config.setsToWin || DEFAULT_RULES.setsToWin;
+  
   const player1Wins = sets.filter(set => set.winner === 'player1').length;
   const player2Wins = sets.filter(set => set.winner === 'player2').length;
   
-  // Best of 3: First to win 2 sets
-  return player1Wins === 2 || player2Wins === 2;
+  return player1Wins >= setsToWin || player2Wins >= setsToWin;
 }
 
 /**
  * Get match winner
+ * @param {array} sets - Array of completed sets
+ * @param {object} config - Match config (optional)
  */
-function getMatchWinner(sets) {
-  if (!isMatchComplete(sets)) {
+function getMatchWinner(sets, config = {}) {
+  if (!isMatchComplete(sets, config)) {
     return null;
   }
   
+  const setsToWin = config.setsToWin || DEFAULT_RULES.setsToWin;
   const player1Wins = sets.filter(set => set.winner === 'player1').length;
-  return player1Wins === 2 ? 'player1' : 'player2';
+  return player1Wins >= setsToWin ? 'player1' : 'player2';
 }
 
 /**
  * Validate score update
+ * @param {number} currentScore - Current score
+ * @param {number} newScore - New score
+ * @param {object} config - Match config (optional)
  */
-function validateScoreUpdate(currentScore, newScore) {
+function validateScoreUpdate(currentScore, newScore, config = {}) {
+  const pointsToWin = config.pointsPerSet || DEFAULT_RULES.pointsToWinGame;
+  const extension = config.extension !== undefined ? config.extension : DEFAULT_RULES.extension;
+  const maxPoints = extension ? (pointsToWin + 9) : pointsToWin;
+  
   // Can only increment by 1
   if (newScore !== currentScore + 1) {
     return { valid: false, error: 'Score can only increment by 1' };
   }
   
-  // Cannot exceed 30
-  if (newScore > RULES.maxPointsInGame) {
-    return { valid: false, error: 'Score cannot exceed 30' };
+  // Cannot exceed max points
+  if (newScore > maxPoints) {
+    return { valid: false, error: `Score cannot exceed ${maxPoints}` };
   }
   
   return { valid: true };
@@ -87,7 +122,7 @@ function determineServer(totalPoints, initialServer) {
 }
 
 export {
-  RULES,
+  DEFAULT_RULES,
   isGameComplete,
   getGameWinner,
   isMatchComplete,

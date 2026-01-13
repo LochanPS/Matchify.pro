@@ -1,5 +1,5 @@
 import express from 'express';
-import { getMatches, getMatch, updateMatchResult, assignCourt, getBracket, startMatch, updateLiveScore, endMatch, getUmpireMatches, assignUmpire, createMatch } from '../controllers/match.controller.js';
+import { getMatches, getMatch, updateMatchResult, assignCourt, getBracket, startMatch, updateLiveScore, endMatch, getUmpireMatches, assignUmpire, createMatch, undoPoint, setMatchConfig, pauseMatchTimer, resumeMatchTimer } from '../controllers/match.controller.js';
 import { authenticate, preventAdminAccess } from '../middleware/auth.js';
 import { optionalAuth } from '../middleware/optionalAuth.js';
 
@@ -58,6 +58,13 @@ router.put(
   endMatch
 );
 
+// Undo last point (umpire/organizer)
+router.put(
+  '/matches/:matchId/undo',
+  authenticate,
+  undoPoint
+);
+
 // Update match result (organizer/umpire only, block admins)
 router.put(
   '/matches/:matchId/result',
@@ -79,6 +86,27 @@ router.put(
   '/matches/:matchId/umpire',
   authenticate,
   assignUmpire
+);
+
+// Set match scoring config (umpire/organizer)
+router.put(
+  '/matches/:matchId/config',
+  authenticate,
+  setMatchConfig
+);
+
+// Pause match timer (umpire/organizer)
+router.put(
+  '/matches/:matchId/timer/pause',
+  authenticate,
+  pauseMatchTimer
+);
+
+// Resume match timer (umpire/organizer)
+router.put(
+  '/matches/:matchId/timer/resume',
+  authenticate,
+  resumeMatchTimer
 );
 
 export default router;

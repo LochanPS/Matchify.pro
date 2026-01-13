@@ -3,6 +3,19 @@ import matchService from '../services/match.service.js';
 
 const prisma = new PrismaClient();
 
+// Helper function to format duration in milliseconds to readable string
+const formatDuration = (ms) => {
+  const seconds = Math.floor(ms / 1000);
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+  
+  if (hours > 0) {
+    return `${hours}h ${minutes}m ${secs}s`;
+  }
+  return `${minutes}m ${secs}s`;
+};
+
 /**
  * Get all matches for a tournament category
  * GET /api/tournaments/:tournamentId/categories/:categoryId/matches
@@ -67,6 +80,13 @@ const getMatches = async (req, res) => {
             })
           : null;
 
+        const umpire = match.umpireId
+          ? await prisma.user.findUnique({
+              where: { id: match.umpireId },
+              select: { id: true, name: true, email: true }
+            })
+          : null;
+
         return {
           id: match.id,
           round: match.round,
@@ -80,6 +100,8 @@ const getMatches = async (req, res) => {
           status: match.status,
           score: match.scoreJson ? JSON.parse(match.scoreJson) : null,
           winner,
+          winnerId: match.winnerId,
+          umpire,
           startedAt: match.startedAt,
           completedAt: match.completedAt
         };
@@ -507,7 +529,11 @@ export {
   endMatch,
   getUmpireMatches,
   assignUmpire,
-  createMatch
+  createMatch,
+  undoPoint,
+  setMatchConfig,
+  pauseMatchTimer,
+  resumeMatchTimer
 };
 
 /**
@@ -521,7 +547,10 @@ const startMatch = async (req, res) => {
 
     const match = await prisma.match.findUnique({
       where: { id: matchId },
-      include: { tournament: true }
+      include: { 
+        tournament: true,
+        category: true
+      }
     });
 
     if (!match) {
@@ -537,14 +566,79 @@ const startMatch = async (req, res) => {
       return res.status(403).json({ success: false, error: 'Not authorized to start this match' });
     }
 
-    // Initialize score structure for badminton (best of 3 sets, 21 points each)
+    // Check if there's a pre-saved config from the umpire
+    let pointsPerSet = 21;
+    let maxSets = 3;
+    let setsToWin = 2;
+    let extension = true;
+
+    // First check if config was pre-saved via setMatchConfig
+    if (match.scoreJson) {
+      try {
+        const existingScore = JSON.parse(match.scoreJson);
+        if (existingScore.matchConfig) {
+          pointsPerSet = existingScore.matchConfig.pointsPerSet || 21;
+          maxSets = existingScore.matchConfig.maxSets || 3;
+          setsToWin = existingScore.matchConfig.setsToWin || Math.ceil(maxSets / 2);
+          extension = existingScore.matchConfig.extension !== undefined ? existingScore.matchConfig.extension : true;
+          console.log('Using pre-saved match config:', existingScore.matchConfig);
+        }
+      } catch (e) {
+        // If parsing fails, use category defaults
+      }
+    }
+    
+    // If no pre-saved config, parse from category scoring format
+    if (!match.scoreJson && match.category?.scoringFormat) {
+      const scoringFormat = match.category.scoringFormat;
+      
+      // Try parsing "NxM" format (e.g., "21x3", "30x1")
+      const nxmMatch = scoringFormat.match(/(\d+)x(\d+)/);
+      if (nxmMatch) {
+        pointsPerSet = parseInt(nxmMatch[1]);
+        maxSets = parseInt(nxmMatch[2]);
+        setsToWin = Math.ceil(maxSets / 2);
+      } else {
+        // Try parsing "N games to M pts" format (e.g., "1 games to 30 pts", "3 games to 21 pts")
+        const gamesMatch = scoringFormat.match(/(\d+)\s*games?\s*to\s*(\d+)\s*pts?/i);
+        if (gamesMatch) {
+          maxSets = parseInt(gamesMatch[1]);
+          pointsPerSet = parseInt(gamesMatch[2]);
+          setsToWin = Math.ceil(maxSets / 2);
+        }
+      }
+      
+      // Check for no extension flag
+      if (scoringFormat.toLowerCase().includes('noext') || 
+          scoringFormat.toLowerCase().includes('no-ext') ||
+          scoringFormat.toLowerCase().includes('no ext') ||
+          scoringFormat.toLowerCase().includes('no extension')) {
+        extension = false;
+      }
+    }
+
+    console.log(`Match config: ${pointsPerSet} points, ${maxSets} sets, extension: ${extension}`);
+
+    // Initialize score structure based on category settings
     const initialScore = {
       sets: [{ player1: 0, player2: 0 }],
       currentSet: 0,
+      currentScore: { player1: 0, player2: 0 },
+      currentServer: 'player1',
+      history: [],
       matchConfig: {
-        pointsPerSet: 21,
-        setsToWin: 2,
-        maxSets: 3
+        pointsPerSet,
+        setsToWin,
+        maxSets,
+        extension
+      },
+      // Timer tracking
+      timer: {
+        startedAt: new Date().toISOString(),
+        pausedAt: null,
+        totalPausedTime: 0, // in milliseconds
+        isPaused: false,
+        pauseHistory: [] // Array of {pausedAt, resumedAt, duration}
       }
     };
 
@@ -554,14 +648,16 @@ const startMatch = async (req, res) => {
         status: 'IN_PROGRESS',
         startedAt: new Date(),
         scoreJson: JSON.stringify(initialScore),
-        umpireId: match.umpireId || userId // Assign current user as umpire if not assigned
+        umpireId: match.umpireId || userId
       }
     });
 
     res.json({
       success: true,
       message: 'Match started',
-      match: { ...updatedMatch, score: initialScore }
+      match: { ...updatedMatch, score: initialScore },
+      matchConfig: initialScore.matchConfig,
+      timer: initialScore.timer
     });
   } catch (error) {
     console.error('Start match error:', error);
@@ -570,13 +666,13 @@ const startMatch = async (req, res) => {
 };
 
 /**
- * Update live score during match
+ * Update live score during match (add point)
  * PUT /api/matches/:matchId/score
  */
 const updateLiveScore = async (req, res) => {
   try {
     const { matchId } = req.params;
-    const { score } = req.body;
+    const { player, score } = req.body;
     const userId = req.user.id;
 
     const match = await prisma.match.findUnique({
@@ -597,22 +693,41 @@ const updateLiveScore = async (req, res) => {
       return res.status(403).json({ success: false, error: 'Not authorized to update score' });
     }
 
-    if (match.status !== 'IN_PROGRESS') {
+    if (match.status !== 'IN_PROGRESS' && match.status !== 'ONGOING') {
       return res.status(400).json({ success: false, error: 'Match is not in progress' });
     }
 
-    const updatedMatch = await prisma.match.update({
-      where: { id: matchId },
-      data: { scoreJson: JSON.stringify(score) }
-    });
+    // If player is provided, add a point using scoring logic
+    if (player) {
+      // Import scoring service functions
+      const { addPoint } = await import('../services/scoringService.js');
+      const result = await addPoint(matchId, player);
+      
+      return res.json({
+        success: true,
+        score: result.scoreData,
+        matchComplete: result.matchComplete,
+        winner: result.winner
+      });
+    }
 
-    res.json({
-      success: true,
-      match: { ...updatedMatch, score }
-    });
+    // If raw score is provided, update directly (for corrections)
+    if (score) {
+      const updatedMatch = await prisma.match.update({
+        where: { id: matchId },
+        data: { scoreJson: JSON.stringify(score) }
+      });
+
+      return res.json({
+        success: true,
+        match: { ...updatedMatch, score }
+      });
+    }
+
+    return res.status(400).json({ success: false, error: 'Either player or score must be provided' });
   } catch (error) {
     console.error('Update live score error:', error);
-    res.status(500).json({ success: false, error: 'Failed to update score' });
+    res.status(500).json({ success: false, error: error.message || 'Failed to update score' });
   }
 };
 
@@ -649,18 +764,58 @@ const endMatch = async (req, res) => {
       return res.status(400).json({ success: false, error: 'Winner must be a match participant' });
     }
 
+    // Get existing score data to preserve timer info
+    let scoreData = match.scoreJson ? JSON.parse(match.scoreJson) : {};
+    
+    // Merge final score with existing data (preserve timer)
+    const mergedScore = {
+      ...scoreData,
+      ...finalScore,
+      matchConfig: scoreData.matchConfig || finalScore.matchConfig
+    };
+
+    // Finalize timer
+    if (mergedScore.timer) {
+      mergedScore.timer.endedAt = new Date().toISOString();
+      mergedScore.timer.isPaused = false;
+      
+      // Calculate total match duration (excluding paused time)
+      const startTime = new Date(mergedScore.timer.startedAt).getTime();
+      const endTime = new Date().getTime();
+      const totalTime = endTime - startTime;
+      mergedScore.timer.totalDuration = totalTime - (mergedScore.timer.totalPausedTime || 0);
+      mergedScore.timer.totalDurationFormatted = formatDuration(mergedScore.timer.totalDuration);
+    }
+
     const updatedMatch = await prisma.match.update({
       where: { id: matchId },
       data: {
         status: 'COMPLETED',
         winnerId,
-        scoreJson: JSON.stringify(finalScore),
+        scoreJson: JSON.stringify(mergedScore),
         completedAt: new Date()
       }
     });
 
-    // Update bracket - advance winner to next match
-    if (match.parentMatchId && match.winnerPosition) {
+    // Determine the loser
+    const loserId = winnerId === match.player1Id ? match.player2Id : match.player1Id;
+
+    // Check if this is the final match (round 1 and no parent match)
+    const isFinal = match.round === 1 && !match.parentMatchId;
+
+    if (isFinal) {
+      // Update category with winner and runner-up
+      await prisma.category.update({
+        where: { id: match.categoryId },
+        data: {
+          winnerId: winnerId,
+          runnerUpId: loserId,
+          status: 'completed'
+        }
+      });
+      console.log(`Finals completed! Winner: ${winnerId}, Runner-up: ${loserId}`);
+    } else if (match.parentMatchId && match.winnerPosition) {
+      // Update bracket - advance winner to next match
       const updateData = match.winnerPosition === 'player1'
         ? { player1Id: winnerId }
         : { player2Id: winnerId };
@@ -669,12 +824,15 @@ const endMatch = async (req, res) => {
         where: { id: match.parentMatchId },
         data: updateData
       });
+      console.log(`Winner ${winnerId} advanced to next round`);
     }
 
     res.json({
       success: true,
-      message: 'Match completed',
-      match: { ...updatedMatch, score: finalScore }
+      message: isFinal ? 'Finals completed! Category winner recorded.' : 'Match completed',
+      match: { ...updatedMatch, score: mergedScore },
+      isFinal,
+      categoryWinner: isFinal ? winnerId : null
     });
   } catch (error) {
     console.error('End match error:', error);
@@ -769,5 +927,296 @@ const assignUmpire = async (req, res) => {
   } catch (error) {
     console.error('Assign umpire error:', error);
     res.status(500).json({ success: false, error: 'Failed to assign umpire' });
+  }
+};
+
+/**
+ * Undo last point
+ * PUT /api/matches/:matchId/undo
+ */
+const undoPoint = async (req, res) => {
+  try {
+    const { matchId } = req.params;
+    const userId = req.user.id;
+
+    const match = await prisma.match.findUnique({
+      where: { id: matchId },
+      include: { tournament: true }
+    });
+
+    if (!match) {
+      return res.status(404).json({ success: false, error: 'Match not found' });
+    }
+
+    // Check authorization
+    const isOrganizer = match.tournament.organizerId === userId;
+    const isAssignedUmpire = match.umpireId === userId;
+    const hasUmpireRole = req.user.roles?.includes('umpire') || req.user.role === 'UMPIRE';
+
+    if (!isOrganizer && !isAssignedUmpire && !hasUmpireRole) {
+      return res.status(403).json({ success: false, error: 'Not authorized to undo points' });
+    }
+
+    if (!match.scoreJson) {
+      return res.status(400).json({ success: false, error: 'No score to undo' });
+    }
+
+    let scoreData = JSON.parse(match.scoreJson);
+    const matchConfig = scoreData.matchConfig || {
+      pointsPerSet: 21,
+      setsToWin: 2,
+      maxSets: 3,
+      extension: true
+    };
+
+    if (!scoreData.history || scoreData.history.length === 0) {
+      return res.status(400).json({ success: false, error: 'No history to undo' });
+    }
+
+    // Remove last point from history
+    const lastPoint = scoreData.history.pop();
+
+    // If we're undoing into a previous set
+    if (lastPoint.set < scoreData.currentSet) {
+      // Remove last completed set
+      scoreData.sets.pop();
+      scoreData.currentSet = lastPoint.set;
+    }
+
+    // Restore previous score
+    if (scoreData.history.length > 0) {
+      const previousPoint = scoreData.history[scoreData.history.length - 1];
+      scoreData.currentScore = { ...previousPoint.score };
+    } else {
+      scoreData.currentScore = { player1: 0, player2: 0 };
+    }
+
+    // Update match
+    const updatedMatch = await prisma.match.update({
+      where: { id: matchId },
+      data: {
+        scoreJson: JSON.stringify(scoreData),
+        status: 'IN_PROGRESS', // In case match was completed
+        winnerId: null,
+        completedAt: null
+      }
+    });
+
+    res.json({
+      success: true,
+      message: 'Point undone',
+      score: scoreData
+    });
+  } catch (error) {
+    console.error('Undo point error:', error);
+    res.status(500).json({ success: false, error: 'Failed to undo point' });
+  }
+};
+
+/**
+ * Set match scoring configuration
+ * PUT /api/matches/:matchId/config
+ */
+const setMatchConfig = async (req, res) => {
+  try {
+    const { matchId } = req.params;
+    const { pointsPerSet, maxSets, setsToWin, extension } = req.body;
+    const userId = req.user.id;
+
+    const match = await prisma.match.findUnique({
+      where: { id: matchId },
+      include: { tournament: true }
+    });
+
+    if (!match) {
+      return res.status(404).json({ success: false, error: 'Match not found' });
+    }
+
+    // Check authorization - organizer or umpire can set config
+    const isOrganizer = match.tournament.organizerId === userId;
+    const isAssignedUmpire = match.umpireId === userId;
+    const hasUmpireRole = req.user.roles?.includes('umpire') || req.user.role === 'UMPIRE';
+
+    if (!isOrganizer && !isAssignedUmpire && !hasUmpireRole) {
+      return res.status(403).json({ success: false, error: 'Not authorized to set match config' });
+    }
+
+    // Only allow config change before match starts
+    if (match.status !== 'PENDING' && match.status !== 'READY') {
+      return res.status(400).json({ success: false, error: 'Cannot change config after match has started' });
+    }
+
+    // Build the match config
+    const matchConfig = {
+      pointsPerSet: pointsPerSet || 21,
+      maxSets: maxSets || 3,
+      setsToWin: setsToWin || Math.ceil((maxSets || 3) / 2),
+      extension: extension !== undefined ? extension : true
+    };
+
+    // Store config in a temporary field or in scoreJson
+    // We'll store it in scoreJson as initial config
+    const initialScore = {
+      sets: [],
+      currentSet: 1,
+      currentScore: { player1: 0, player2: 0 },
+      currentServer: 'player1',
+      history: [],
+      matchConfig
+    };
+
+    const updatedMatch = await prisma.match.update({
+      where: { id: matchId },
+      data: {
+        scoreJson: JSON.stringify(initialScore)
+      }
+    });
+
+    res.json({
+      success: true,
+      message: 'Match config saved',
+      matchConfig
+    });
+  } catch (error) {
+    console.error('Set match config error:', error);
+    res.status(500).json({ success: false, error: 'Failed to set match config' });
+  }
+};
+
+/**
+ * Pause match timer
+ * PUT /api/matches/:matchId/timer/pause
+ */
+const pauseMatchTimer = async (req, res) => {
+  try {
+    const { matchId } = req.params;
+    const userId = req.user.id;
+
+    const match = await prisma.match.findUnique({
+      where: { id: matchId },
+      include: { tournament: true }
+    });
+
+    if (!match) {
+      return res.status(404).json({ success: false, error: 'Match not found' });
+    }
+
+    // Check authorization
+    const isOrganizer = match.tournament.organizerId === userId;
+    const isAssignedUmpire = match.umpireId === userId;
+    const hasUmpireRole = req.user.roles?.includes('umpire') || req.user.role === 'UMPIRE';
+
+    if (!isOrganizer && !isAssignedUmpire && !hasUmpireRole) {
+      return res.status(403).json({ success: false, error: 'Not authorized to pause timer' });
+    }
+
+    if (match.status !== 'IN_PROGRESS' && match.status !== 'ONGOING') {
+      return res.status(400).json({ success: false, error: 'Match is not in progress' });
+    }
+
+    let scoreData = match.scoreJson ? JSON.parse(match.scoreJson) : {};
+    
+    // Initialize timer if not exists
+    if (!scoreData.timer) {
+      scoreData.timer = {
+        startedAt: match.startedAt?.toISOString() || new Date().toISOString(),
+        pausedAt: null,
+        totalPausedTime: 0,
+        isPaused: false,
+        pauseHistory: []
+      };
+    }
+
+    if (scoreData.timer.isPaused) {
+      return res.status(400).json({ success: false, error: 'Timer is already paused' });
+    }
+
+    // Pause the timer
+    scoreData.timer.pausedAt = new Date().toISOString();
+    scoreData.timer.isPaused = true;
+
+    const updatedMatch = await prisma.match.update({
+      where: { id: matchId },
+      data: { scoreJson: JSON.stringify(scoreData) }
+    });
+
+    res.json({
+      success: true,
+      message: 'Timer paused',
+      timer: scoreData.timer
+    });
+  } catch (error) {
+    console.error('Pause timer error:', error);
+    res.status(500).json({ success: false, error: 'Failed to pause timer' });
+  }
+};
+
+/**
+ * Resume match timer
+ * PUT /api/matches/:matchId/timer/resume
+ */
+const resumeMatchTimer = async (req, res) => {
+  try {
+    const { matchId } = req.params;
+    const userId = req.user.id;
+
+    const match = await prisma.match.findUnique({
+      where: { id: matchId },
+      include: { tournament: true }
+    });
+
+    if (!match) {
+      return res.status(404).json({ success: false, error: 'Match not found' });
+    }
+
+    // Check authorization
+    const isOrganizer = match.tournament.organizerId === userId;
+    const isAssignedUmpire = match.umpireId === userId;
+    const hasUmpireRole = req.user.roles?.includes('umpire') || req.user.role === 'UMPIRE';
+
+    if (!isOrganizer && !isAssignedUmpire && !hasUmpireRole) {
+      return res.status(403).json({ success: false, error: 'Not authorized to resume timer' });
+    }
+
+    if (match.status !== 'IN_PROGRESS' && match.status !== 'ONGOING') {
+      return res.status(400).json({ success: false, error: 'Match is not in progress' });
+    }
+
+    let scoreData = match.scoreJson ? JSON.parse(match.scoreJson) : {};
+
+    if (!scoreData.timer || !scoreData.timer.isPaused) {
+      return res.status(400).json({ success: false, error: 'Timer is not paused' });
+    }
+
+    // Calculate pause duration
+    const pausedAt = new Date(scoreData.timer.pausedAt);
+    const resumedAt = new Date();
+    const pauseDuration = resumedAt.getTime() - pausedAt.getTime();
+
+    // Add to pause history
+    scoreData.timer.pauseHistory.push({
+      pausedAt: scoreData.timer.pausedAt,
+      resumedAt: resumedAt.toISOString(),
+      duration: pauseDuration
+    });
+
+    // Update total paused time
+    scoreData.timer.totalPausedTime += pauseDuration;
+    scoreData.timer.pausedAt = null;
+    scoreData.timer.isPaused = false;
+
+    const updatedMatch = await prisma.match.update({
+      where: { id: matchId },
+      data: { scoreJson: JSON.stringify(scoreData) }
+    });
+
+    res.json({
+      success: true,
+      message: 'Timer resumed',
+      timer: scoreData.timer
+    });
+  } catch (error) {
+    console.error('Resume timer error:', error);
+    res.status(500).json({ success: false, error: 'Failed to resume timer' });
   }
 };

@@ -286,6 +286,9 @@ const DrawPage = () => {
 
   const isOrganizer = user?.id === tournament?.organizerId;
   const drawNotGenerated = !bracket && activeCategory;
+  
+  // Check if any match has been played (completed or in progress)
+  const hasPlayedMatches = matches.some(m => m.status === 'COMPLETED' || m.status === 'IN_PROGRESS');
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
@@ -328,8 +331,14 @@ const DrawPage = () => {
                       Assign Players
                     </button>
                     <button
-                      onClick={() => setShowDeleteModal(true)}
-                      className="px-5 py-3 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl shadow-lg shadow-red-500/30 hover:shadow-red-500/50 hover:scale-105 transition-all flex items-center gap-2 font-semibold"
+                      onClick={() => !hasPlayedMatches && setShowDeleteModal(true)}
+                      disabled={hasPlayedMatches}
+                      title={hasPlayedMatches ? 'Cannot delete draw - matches have been played' : 'Delete Draw'}
+                      className={`px-5 py-3 rounded-xl shadow-lg transition-all flex items-center gap-2 font-semibold ${
+                        hasPlayedMatches 
+                          ? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50' 
+                          : 'bg-gradient-to-r from-red-500 to-rose-600 text-white shadow-red-500/30 hover:shadow-red-500/50 hover:scale-105'
+                      }`}
                     >
                       <Trash2 className="w-5 h-5" />
                       Delete Draw
@@ -337,8 +346,14 @@ const DrawPage = () => {
                   </>
                 )}
                 <button
-                  onClick={() => setShowConfigModal(true)}
-                  className="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl shadow-lg shadow-amber-500/30 hover:shadow-amber-500/50 hover:scale-105 transition-all flex items-center gap-2 font-semibold"
+                  onClick={() => !hasPlayedMatches && setShowConfigModal(true)}
+                  disabled={hasPlayedMatches && bracket}
+                  title={hasPlayedMatches && bracket ? 'Cannot edit draw - matches have been played' : (bracket ? 'Edit Draw' : 'Create Draw')}
+                  className={`px-6 py-3 rounded-xl shadow-lg transition-all flex items-center gap-2 font-semibold ${
+                    hasPlayedMatches && bracket
+                      ? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50'
+                      : 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-amber-500/30 hover:shadow-amber-500/50 hover:scale-105'
+                  }`}
                 >
                   {bracket ? <Settings className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
                   {bracket ? 'Edit Draw' : 'Create Draw'}
@@ -346,6 +361,14 @@ const DrawPage = () => {
               </div>
             )}
           </div>
+          
+          {/* Warning message when draw is locked */}
+          {hasPlayedMatches && isOrganizer && (
+            <div className="mt-4 px-4 py-3 bg-amber-500/10 border border-amber-500/30 rounded-xl flex items-center gap-3">
+              <span className="text-amber-400">🔒</span>
+              <span className="text-amber-300 text-sm">Draw is locked because matches have been played. You cannot delete or edit the draw.</span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -473,6 +496,7 @@ const DrawPage = () => {
         <AssignPlayersModal
           bracket={bracket}
           players={categoryPlayers}
+          matches={matches}
           loading={loadingPlayers}
           onClose={() => setShowAssignModal(false)}
           onSave={assignPlayers}
@@ -513,6 +537,8 @@ const DrawDisplay = ({ bracket, matches, user, isOrganizer, onAssignUmpire, acti
 const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire }) => {
   if (!data?.rounds) return <p className="text-gray-400 text-center p-8">No bracket data</p>;
 
+  const totalRounds = data.rounds.length;
+
   const getRoundName = (idx, total) => {
     const r = total - idx;
     if (r === 1) return 'Final';
@@ -524,9 +550,13 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire }) =
   // Check if user can score matches (organizer or umpire)
   const canScore = isOrganizer || user?.roles?.includes('umpire') || user?.role === 'UMPIRE';
 
-  // Find match record by round and match number
-  const findMatch = (roundIdx, matchNum) => {
-    return matches.find(m => m.round === roundIdx + 1 && m.matchNumber === matchNum);
+  // Find match record by round number (database round) and match number
+  // Database: round 1 = Final, round 2 = Semi, etc.
+  // Display: index 0 = first round, last index = Final
+  // So display index i corresponds to database round (totalRounds - i)
+  const findMatch = (displayIdx, matchNum) => {
+    const dbRound = totalRounds - displayIdx;
+    return matches.find(m => m.round === dbRound && m.matchNumber === matchNum);
   };
 
   // Open scoring page in new tab
@@ -534,9 +564,17 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire }) =
     window.open(`/match/${matchId}/score`, '_blank');
   };
 
+  // Find the final match and winner (Final is the last display index, which is round 1 in DB)
+  const finalDisplayIdx = totalRounds - 1;
+  const finalMatch = data.rounds[finalDisplayIdx]?.matches[0];
+  const finalDbMatch = findMatch(finalDisplayIdx, 1);
+  const categoryWinner = finalDbMatch?.winnerId 
+    ? (finalDbMatch.winnerId === finalMatch?.player1?.id ? finalMatch?.player1 : finalMatch?.player2)
+    : null;
+
   return (
     <div className="overflow-x-auto p-6">
-      <div className="flex gap-8 min-w-max">
+      <div className="flex gap-8 min-w-max items-start">
         {data.rounds.map((round, ri) => (
           <div key={ri} className="flex flex-col min-w-[220px]">
             <h4 className="text-sm font-bold text-amber-400 text-center mb-4 uppercase tracking-wider">
@@ -604,8 +642,8 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire }) =
                       )}
                     </div>
                     
-                    {/* Umpire Badge - Always show for organizer */}
-                    {isOrganizer && (
+                    {/* Umpire Badge - Show for organizer only if match is not completed */}
+                    {isOrganizer && !isCompleted && (
                       <div 
                         onClick={() => {
                           // Pass both dbMatch (if exists) and bracket match data
@@ -663,6 +701,50 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire }) =
             </div>
           </div>
         ))}
+
+        {/* Winner Display - Show after finals with halo effect */}
+        {categoryWinner && (
+          <div className="flex flex-col min-w-[220px]">
+            <h4 className="text-sm font-bold text-amber-400 text-center mb-4 uppercase tracking-wider">
+              🏆 Champion
+            </h4>
+            <div 
+              className="relative flex flex-col items-center justify-center p-6"
+              style={{ paddingTop: finalDisplayIdx > 0 ? `${Math.pow(2, finalDisplayIdx) * 20}px` : 0 }}
+            >
+              {/* Halo Effect */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-40 h-40 bg-amber-500/30 rounded-full blur-3xl animate-pulse"></div>
+              </div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-32 h-32 bg-yellow-400/20 rounded-full blur-2xl animate-pulse animation-delay-500"></div>
+              </div>
+              
+              {/* Winner Card */}
+              <div className="relative bg-gradient-to-br from-amber-500/20 via-yellow-500/10 to-orange-500/20 border-2 border-amber-400 rounded-2xl p-6 text-center shadow-2xl shadow-amber-500/30">
+                {/* Trophy Icon */}
+                <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-full flex items-center justify-center shadow-lg shadow-amber-500/50">
+                  <span className="text-3xl">🏆</span>
+                </div>
+                
+                {/* Winner Name */}
+                <h3 className="text-xl font-bold text-amber-300 mb-1">
+                  {categoryWinner.name}
+                </h3>
+                <p className="text-amber-400/70 text-sm font-medium">
+                  Category Winner
+                </p>
+                
+                {/* Decorative Stars */}
+                <div className="flex justify-center gap-1 mt-3">
+                  <span className="text-amber-400 animate-pulse">⭐</span>
+                  <span className="text-amber-300 animate-pulse animation-delay-200">⭐</span>
+                  <span className="text-amber-400 animate-pulse animation-delay-400">⭐</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -1025,34 +1107,42 @@ const SlotCard = ({ slot, assigned, canAccept, onSlotClick, onRemove, playerLabe
 };
 
 // Compact Slot Card for two-column layout
-const CompactSlotCard = ({ slot, assigned, canAccept, onSlotClick, onRemove, playerLabel }) => {
+const CompactSlotCard = ({ slot, assigned, canAccept, onSlotClick, onRemove, playerLabel, locked }) => {
   return (
     <div
-      onClick={onSlotClick}
+      onClick={locked ? undefined : onSlotClick}
       className={`px-2 py-1.5 rounded-lg border transition-all ${
-        assigned
-          ? 'border-emerald-500/50 bg-emerald-500/10 border-solid'
-          : canAccept
-            ? 'border-purple-500 bg-purple-500/10 border-dashed cursor-pointer hover:bg-purple-500/20'
-            : 'border-white/10 bg-slate-800/30 border-dashed'
+        locked
+          ? 'border-amber-500/30 bg-amber-500/5 cursor-not-allowed'
+          : assigned
+            ? 'border-emerald-500/50 bg-emerald-500/10 border-solid'
+            : canAccept
+              ? 'border-purple-500 bg-purple-500/10 border-dashed cursor-pointer hover:bg-purple-500/20'
+              : 'border-white/10 bg-slate-800/30 border-dashed'
       }`}
     >
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0 flex-1">
           <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
-            assigned ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-700/50 text-gray-500'
+            locked
+              ? 'bg-amber-500/20 text-amber-400'
+              : assigned 
+                ? 'bg-emerald-500/20 text-emerald-400' 
+                : 'bg-slate-700/50 text-gray-500'
           }`}>
             {playerLabel}
           </span>
           {assigned ? (
-            <span className="text-white font-medium text-sm truncate">{assigned.playerName}</span>
+            <span className={`font-medium text-sm truncate ${locked ? 'text-amber-300' : 'text-white'}`}>
+              {assigned.playerName}
+            </span>
           ) : (
             <span className={`text-xs truncate ${canAccept ? 'text-purple-400' : 'text-gray-500'}`}>
               {canAccept ? 'Click to assign' : 'Empty'}
             </span>
           )}
         </div>
-        {assigned && (
+        {assigned && !locked && (
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -1063,15 +1153,31 @@ const CompactSlotCard = ({ slot, assigned, canAccept, onSlotClick, onRemove, pla
             <X className="w-3 h-3 text-red-400" />
           </button>
         )}
+        {locked && (
+          <span className="text-amber-500 text-xs">🔒</span>
+        )}
       </div>
     </div>
   );
 };
 
 // Assign Players Modal
-const AssignPlayersModal = ({ bracket, players, loading, onClose, onSave, saving }) => {
+const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSave, saving }) => {
   const [assignments, setAssignments] = useState({});  // { slot: { playerId, playerName } }
   const [selectedPlayer, setSelectedPlayer] = useState(null);  // Currently selected player
+
+  // Get total rounds for round mapping
+  const totalRounds = bracket?.rounds?.length || 1;
+
+  // Check if a match is locked (completed or in progress)
+  const isMatchLocked = (matchIndex) => {
+    // First round matches in display = highest round number in DB
+    // Display index 0 = DB round (totalRounds)
+    const dbRound = totalRounds;
+    const matchNum = matchIndex + 1;
+    const dbMatch = matches?.find(m => m.round === dbRound && m.matchNumber === matchNum);
+    return dbMatch?.status === 'COMPLETED' || dbMatch?.status === 'IN_PROGRESS';
+  };
 
   // Get total slots from bracket
   const getSlots = () => {
@@ -1080,15 +1186,20 @@ const AssignPlayersModal = ({ bracket, players, loading, onClose, onSave, saving
     const slots = [];
     if (bracket.format === 'KNOCKOUT' && bracket.rounds?.[0]) {
       bracket.rounds[0].matches.forEach((match, idx) => {
+        const locked = isMatchLocked(idx);
         slots.push({
           slot: idx * 2 + 1,
           currentPlayer: match.player1?.id ? match.player1 : null,
-          label: `Match ${match.matchNumber} - Player 1`
+          label: `Match ${match.matchNumber} - Player 1`,
+          matchIndex: idx,
+          locked
         });
         slots.push({
           slot: idx * 2 + 2,
           currentPlayer: match.player2?.id ? match.player2 : null,
-          label: `Match ${match.matchNumber} - Player 2`
+          label: `Match ${match.matchNumber} - Player 2`,
+          matchIndex: idx,
+          locked
         });
       });
     } else if (bracket.groups) {
@@ -1098,7 +1209,8 @@ const AssignPlayersModal = ({ bracket, players, loading, onClose, onSave, saving
           slots.push({
             slot: slotNum,
             currentPlayer: p.id ? p : null,
-            label: `Group ${String.fromCharCode(65 + gi)} - Position ${pi + 1}`
+            label: `Group ${String.fromCharCode(65 + gi)} - Position ${pi + 1}`,
+            locked: false // Round robin groups don't lock individual slots
           });
           slotNum++;
         });
@@ -1139,14 +1251,18 @@ const AssignPlayersModal = ({ bracket, players, loading, onClose, onSave, saving
   // Click on a slot to assign selected player
   const handleSlotClick = (targetSlot) => {
     if (!selectedPlayer) return;
+    if (targetSlot.locked) return; // Don't allow changes to locked slots
     
     // Create new assignments object
     const newAssignments = { ...assignments };
     
-    // Remove this player from any existing slot
+    // Remove this player from any existing slot (only if that slot is not locked)
     Object.keys(newAssignments).forEach(slotKey => {
       if (newAssignments[slotKey]?.playerId === selectedPlayer.id) {
-        delete newAssignments[slotKey];
+        const slot = slots.find(s => s.slot === parseInt(slotKey));
+        if (!slot?.locked) {
+          delete newAssignments[slotKey];
+        }
       }
     });
     
@@ -1161,6 +1277,9 @@ const AssignPlayersModal = ({ bracket, players, loading, onClose, onSave, saving
   };
 
   const handleRemoveAssignment = (slotNum) => {
+    const slot = slots.find(s => s.slot === slotNum);
+    if (slot?.locked) return; // Don't allow removal from locked slots
+    
     const newAssignments = { ...assignments };
     delete newAssignments[slotNum];
     setAssignments(newAssignments);
@@ -1288,7 +1407,17 @@ const AssignPlayersModal = ({ bracket, players, loading, onClose, onSave, saving
               </h3>
               {assignedCount > 0 && (
                 <button
-                  onClick={() => setAssignments({})}
+                  onClick={() => {
+                    // Only clear unlocked slots
+                    const newAssignments = {};
+                    Object.entries(assignments).forEach(([slotKey, data]) => {
+                      const slot = slots.find(s => s.slot === parseInt(slotKey));
+                      if (slot?.locked) {
+                        newAssignments[slotKey] = data;
+                      }
+                    });
+                    setAssignments(newAssignments);
+                  }}
                   className="text-xs text-red-400 hover:text-red-300 hover:bg-red-500/10 px-2 py-1 rounded-lg transition-colors"
                 >
                   Clear All
@@ -1302,13 +1431,29 @@ const AssignPlayersModal = ({ bracket, players, loading, onClose, onSave, saving
                 const slot1 = slots[matchIndex * 2];
                 const slot2 = slots[matchIndex * 2 + 1];
                 const matchNum = matchIndex + 1;
+                const isMatchLocked = slot1?.locked || slot2?.locked;
                 
                 return (
-                  <div key={matchIndex} className="bg-slate-700/30 rounded-xl border border-white/10 overflow-hidden">
+                  <div key={matchIndex} className={`bg-slate-700/30 rounded-xl border overflow-hidden ${
+                    isMatchLocked ? 'border-amber-500/30 bg-amber-500/5' : 'border-white/10'
+                  }`}>
                     {/* Match Header - Compact */}
-                    <div className="px-3 py-1.5 bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-b border-white/10 flex items-center gap-2">
-                      <span className="w-5 h-5 bg-purple-500/30 rounded flex items-center justify-center text-purple-300 text-xs font-bold">{matchNum}</span>
-                      <span className="text-purple-300 font-semibold text-xs">Match {matchNum}</span>
+                    <div className={`px-3 py-1.5 border-b border-white/10 flex items-center gap-2 ${
+                      isMatchLocked 
+                        ? 'bg-gradient-to-r from-amber-500/20 to-orange-500/20' 
+                        : 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20'
+                    }`}>
+                      <span className={`w-5 h-5 rounded flex items-center justify-center text-xs font-bold ${
+                        isMatchLocked ? 'bg-amber-500/30 text-amber-300' : 'bg-purple-500/30 text-purple-300'
+                      }`}>{matchNum}</span>
+                      <span className={`font-semibold text-xs ${isMatchLocked ? 'text-amber-300' : 'text-purple-300'}`}>
+                        Match {matchNum}
+                      </span>
+                      {isMatchLocked && (
+                        <span className="ml-auto px-1.5 py-0.5 bg-amber-500/20 text-amber-400 text-[10px] font-bold rounded">
+                          🔒 LOCKED
+                        </span>
+                      )}
                     </div>
                     
                     {/* Players Container - Compact */}
@@ -1318,10 +1463,11 @@ const AssignPlayersModal = ({ bracket, players, loading, onClose, onSave, saving
                         <CompactSlotCard 
                           slot={slot1}
                           assigned={getAssignedPlayer(slot1.slot)}
-                          canAccept={selectedPlayer && !getAssignedPlayer(slot1.slot)}
-                          onSlotClick={() => selectedPlayer && !getAssignedPlayer(slot1.slot) && handleSlotClick(slot1)}
-                          onRemove={() => handleRemoveAssignment(slot1.slot)}
+                          canAccept={selectedPlayer && !getAssignedPlayer(slot1.slot) && !slot1.locked}
+                          onSlotClick={() => selectedPlayer && !getAssignedPlayer(slot1.slot) && !slot1.locked && handleSlotClick(slot1)}
+                          onRemove={() => !slot1.locked && handleRemoveAssignment(slot1.slot)}
                           playerLabel="P1"
+                          locked={slot1.locked}
                         />
                       )}
                       
@@ -1337,10 +1483,11 @@ const AssignPlayersModal = ({ bracket, players, loading, onClose, onSave, saving
                         <CompactSlotCard 
                           slot={slot2}
                           assigned={getAssignedPlayer(slot2.slot)}
-                          canAccept={selectedPlayer && !getAssignedPlayer(slot2.slot)}
-                          onSlotClick={() => selectedPlayer && !getAssignedPlayer(slot2.slot) && handleSlotClick(slot2)}
-                          onRemove={() => handleRemoveAssignment(slot2.slot)}
+                          canAccept={selectedPlayer && !getAssignedPlayer(slot2.slot) && !slot2.locked}
+                          onSlotClick={() => selectedPlayer && !getAssignedPlayer(slot2.slot) && !slot2.locked && handleSlotClick(slot2)}
+                          onRemove={() => !slot2.locked && handleRemoveAssignment(slot2.slot)}
                           playerLabel="P2"
+                          locked={slot2.locked}
                         />
                       )}
                     </div>

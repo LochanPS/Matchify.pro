@@ -63,10 +63,11 @@ const Navbar = () => {
     else if (typeof user.roles === 'string') roles = user.roles.split(',').map(r => r.trim());
     else if (user.role) roles = [user.role];
     
-    // Filter out ORGANIZER - it's merged with PLAYER
-    // If user has ORGANIZER, they should see PLAYER instead
-    roles = roles.filter(r => r !== 'ORGANIZER');
-    if (!roles.includes('PLAYER')) roles.unshift('PLAYER'); // Ensure PLAYER is always there
+    // Normalize role names to uppercase
+    roles = roles.map(r => r.toUpperCase());
+    
+    // Ensure PLAYER is always there as base role
+    if (!roles.includes('PLAYER')) roles.unshift('PLAYER');
     return roles;
   };
 
@@ -76,6 +77,7 @@ const Navbar = () => {
     // Navigate to appropriate dashboard
     switch (role) {
       case 'PLAYER': navigate('/dashboard'); break;
+      case 'ORGANIZER': navigate('/organizer/dashboard'); break;
       case 'UMPIRE': navigate('/umpire/dashboard'); break;
       case 'ADMIN': navigate('/admin/dashboard'); break;
       default: navigate('/dashboard'); break;
@@ -111,18 +113,17 @@ const Navbar = () => {
     }
   };
 
-  const getAllRoles = () => ['PLAYER', 'UMPIRE'];
+  const getAllRoles = () => ['PLAYER', 'ORGANIZER', 'UMPIRE'];
   
   const getMissingRoles = () => {
     const currentRoles = getAvailableRoles();
-    // Filter out ORGANIZER from current roles since it's merged with PLAYER
     return getAllRoles().filter(role => !currentRoles.includes(role));
   };
 
   const getRoleColor = (role) => {
     switch (role) {
       case 'PLAYER': return { bg: 'bg-blue-500/20', text: 'text-blue-400', hover: 'hover:bg-blue-500/30', dot: 'bg-blue-500' };
-      case 'ORGANIZER': return { bg: 'bg-blue-500/20', text: 'text-blue-400', hover: 'hover:bg-blue-500/30', dot: 'bg-blue-500' }; // Same as PLAYER
+      case 'ORGANIZER': return { bg: 'bg-green-500/20', text: 'text-green-400', hover: 'hover:bg-green-500/30', dot: 'bg-green-500' };
       case 'UMPIRE': return { bg: 'bg-orange-500/20', text: 'text-orange-400', hover: 'hover:bg-orange-500/30', dot: 'bg-orange-500' };
       case 'ADMIN': return { bg: 'bg-red-500/20', text: 'text-red-400', hover: 'hover:bg-red-500/30', dot: 'bg-red-500' };
       default: return { bg: 'bg-gray-500/20', text: 'text-gray-400', hover: 'hover:bg-gray-500/30', dot: 'bg-gray-500' };
@@ -133,7 +134,7 @@ const Navbar = () => {
     const role = getCurrentRole();
     switch (role) {
       case 'PLAYER': return '/dashboard';
-      case 'ORGANIZER': return '/dashboard'; // Organizer also goes to player dashboard
+      case 'ORGANIZER': return '/organizer/dashboard';
       case 'UMPIRE': return '/umpire/dashboard';
       case 'ADMIN': return '/admin/dashboard';
       default: return '/';
@@ -147,13 +148,12 @@ const Navbar = () => {
   };
 
   const isOrganizer = () => {
-    // All PLAYER users can organize tournaments now
     const roles = getAvailableRoles();
-    return roles.includes('PLAYER') || roles.includes('ORGANIZER');
+    return roles.includes('ORGANIZER');
   };
 
   const currentRole = getCurrentRole();
-  const roleColors = getRoleColor(currentRole === 'ORGANIZER' ? 'PLAYER' : currentRole);
+  const roleColors = getRoleColor(currentRole);
   const availableRoles = getAvailableRoles();
 
   return (

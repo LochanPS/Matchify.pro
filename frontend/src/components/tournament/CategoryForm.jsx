@@ -220,7 +220,7 @@ const CategoryForm = ({ initialData, onSave, onCancel }) => {
 
       <div>
         <label className="block text-sm font-medium text-gray-300 mb-2">Tournament Format *</label>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <button
             type="button"
             onClick={() => handleChange('tournamentFormat', 'KNOCKOUT')}
@@ -243,6 +243,17 @@ const CategoryForm = ({ initialData, onSave, onCancel }) => {
             </div>
             <p className="text-sm text-gray-400">Everyone plays everyone. Winner by most wins.</p>
           </button>
+          <button
+            type="button"
+            onClick={() => handleChange('tournamentFormat', 'ROUND_ROBIN_KNOCKOUT')}
+            className={`p-4 border-2 rounded-xl text-left transition-all ${formData.tournamentFormat === 'ROUND_ROBIN_KNOCKOUT' ? 'border-emerald-500 bg-emerald-500/20' : 'border-white/10 hover:border-white/20 bg-slate-700/30'}`}
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <span className="text-2xl">⚡</span>
+              <span className="font-semibold text-white">Round Robin + Knockout</span>
+            </div>
+            <p className="text-sm text-gray-400">Group stage first, then knockout finals.</p>
+          </button>
         </div>
       </div>
 
@@ -252,15 +263,15 @@ const CategoryForm = ({ initialData, onSave, onCancel }) => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">🥇 Winner Prize (₹)</label>
-            <input type="number" value={formData.prizeWinner} onChange={(e) => handleChange('prizeWinner', e.target.value)} min="0" step="100" placeholder="e.g., 5000" className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 transition-all" />
+            <input type="number" value={formData.prizeWinner} onChange={(e) => handleChange('prizeWinner', e.target.value)} min="0" step="1" placeholder="e.g., 5000" className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 transition-all" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">🥈 Runner-up Prize (₹)</label>
-            <input type="number" value={formData.prizeRunnerUp} onChange={(e) => handleChange('prizeRunnerUp', e.target.value)} min="0" step="100" placeholder="e.g., 3000" className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 transition-all" />
+            <input type="number" value={formData.prizeRunnerUp} onChange={(e) => handleChange('prizeRunnerUp', e.target.value)} min="0" step="1" placeholder="e.g., 3000" className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 transition-all" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">🥉 Semi-finalist Prize (₹)</label>
-            <input type="number" value={formData.prizeSemiFinalist} onChange={(e) => handleChange('prizeSemiFinalist', e.target.value)} min="0" step="100" placeholder="e.g., 1000" className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 transition-all" />
+            <input type="number" value={formData.prizeSemiFinalist} onChange={(e) => handleChange('prizeSemiFinalist', e.target.value)} min="0" step="1" placeholder="e.g., 1000" className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 transition-all" />
           </div>
         </div>
         <div className="mt-4">

@@ -971,6 +971,7 @@ const updateCategory = async (req, res) => {
       gender,
       entryFee,
       maxParticipants,
+      tournamentFormat,
       scoringFormat,
       status,
       prizeWinner,
@@ -997,6 +998,7 @@ const updateCategory = async (req, res) => {
     }
     if (entryFee !== undefined) updateData.entryFee = parseFloat(entryFee);
     if (maxParticipants !== undefined) updateData.maxParticipants = maxParticipants ? parseInt(maxParticipants) : null;
+    if (tournamentFormat !== undefined) updateData.tournamentFormat = tournamentFormat;
     if (scoringFormat !== undefined) updateData.scoringFormat = scoringFormat;
     if (status !== undefined) updateData.status = status;
 

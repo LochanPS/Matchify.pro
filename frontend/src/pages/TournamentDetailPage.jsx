@@ -528,7 +528,39 @@ const TournamentDetailPage = () => {
               
               {tournament.categories && tournament.categories.length > 0 ? (
                 <div className="space-y-4">
-                  {tournament.categories.map((category) => (
+                  {tournament.categories.map((category) => {
+                    // Parse scoring format for display
+                    const getScoringDisplay = () => {
+                      const format = category.scoringFormat || '21x3';
+                      
+                      // Try parsing "3 games to 21 pts" format
+                      const match1 = format.match(/(\d+)\s*games?\s*to\s*(\d+)/i);
+                      if (match1) {
+                        return { points: match1[2], sets: match1[1] };
+                      }
+                      
+                      // Try parsing "21x3" format
+                      const match2 = format.match(/(\d+)x(\d+)/);
+                      if (match2) {
+                        return { points: match2[1], sets: match2[2] };
+                      }
+                      
+                      return { points: '21', sets: '3' };
+                    };
+                    const scoring = getScoringDisplay();
+                    
+                    // Get tournament format display
+                    const getFormatDisplay = () => {
+                      switch (category.tournamentFormat) {
+                        case 'KNOCKOUT': return { label: 'Knockout', icon: '🏆', color: 'amber' };
+                        case 'ROUND_ROBIN': return { label: 'Round Robin', icon: '🔄', color: 'purple' };
+                        case 'ROUND_ROBIN_KNOCKOUT': return { label: 'Round Robin + Knockout', icon: '⚡', color: 'emerald' };
+                        default: return { label: 'Knockout', icon: '🏆', color: 'amber' };
+                      }
+                    };
+                    const formatInfo = getFormatDisplay();
+                    
+                    return (
                     <div
                       key={category.id}
                       className="border border-white/10 rounded-2xl p-5 hover:border-purple-500/50 hover:shadow-[0_0_20px_rgba(168,85,247,0.2)] transition-all bg-slate-700/50"
@@ -555,6 +587,27 @@ const TournamentDetailPage = () => {
                                 Max {category.maxParticipants}
                               </span>
                             )}
+                          </div>
+                          
+                          {/* Tournament Format & Scoring Info */}
+                          <div className="mt-3 pt-3 border-t border-white/10">
+                            <div className="flex flex-wrap gap-4 text-sm">
+                              {/* Tournament Format */}
+                              <div className="flex items-center gap-2">
+                                <span className={`px-2 py-1 rounded-lg text-xs font-semibold ${
+                                  formatInfo.color === 'amber' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
+                                  formatInfo.color === 'purple' ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' :
+                                  'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                                }`}>
+                                  {formatInfo.icon} {formatInfo.label}
+                                </span>
+                              </div>
+                              {/* Scoring Format */}
+                              <div className="flex items-center gap-2 text-gray-400">
+                                <span className="text-xs">🎯</span>
+                                <span className="text-xs font-medium">{scoring.points} pts × {scoring.sets} {parseInt(scoring.sets) === 1 ? 'set' : 'sets'}</span>
+                              </div>
+                            </div>
                           </div>
                           
                           {(category.prizeWinner || category.prizeRunnerUp || category.prizeSemiFinalist) && (
@@ -591,7 +644,8 @@ const TournamentDetailPage = () => {
                         </div>
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="text-center py-10">

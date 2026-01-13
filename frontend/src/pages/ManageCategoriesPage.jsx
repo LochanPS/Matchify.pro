@@ -291,7 +291,10 @@ const ManageCategoriesPage = () => {
                         {/* Prize Info */}
                         {(category.prizeWinner || category.prizeRunnerUp || category.prizeSemiFinalist) && (
                           <div className="mt-4 pt-4 border-t border-white/10">
-                            <span className="badge badge-success text-xs mb-2">💰 Cash Prize</span>
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="text-amber-400">✨</span>
+                              <span className="text-xs font-semibold text-amber-400">Cash Prize</span>
+                            </div>
                             <div className="flex flex-wrap gap-3 mt-2 text-sm">
                               {category.prizeWinner && (
                                 <span className="text-amber-400">🥇 Winner: ₹{category.prizeWinner}</span>

@@ -877,13 +877,15 @@ export default function TournamentManagementPage() {
 
               {/* QR Code */}
               {refundQrModal.url && (
-                <div className="bg-slate-900/50 rounded-xl p-4">
+                <div className="bg-slate-900/80 border border-white/10 rounded-xl p-4">
                   <p className="text-sm font-medium text-gray-400 mb-3 text-center">Player's Payment QR Code</p>
-                  <img
-                    src={refundQrModal.url}
-                    alt="Refund QR Code"
-                    className="w-full max-w-xs mx-auto rounded-xl shadow-lg"
-                  />
+                  <div className="p-3 bg-slate-800/50 border border-white/5 rounded-xl mx-auto max-w-xs">
+                    <img
+                      src={refundQrModal.url}
+                      alt="Refund QR Code"
+                      className="w-full rounded-lg shadow-lg"
+                    />
+                  </div>
                 </div>
               )}
             </div>

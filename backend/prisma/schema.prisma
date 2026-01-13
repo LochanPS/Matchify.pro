@@ -203,6 +203,8 @@ model Category {
   scoringFormat     String         @default("21x3")
   registrationCount Int            @default(0)
   status            String         @default("open")
+  winnerId          String?        // Winner of the category (set after finals)
+  runnerUpId        String?        // Runner-up of the category
   prizeWinner       Float?
   prizeRunnerUp     Float?
   prizeSemiFinalist Float?

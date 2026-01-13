@@ -338,15 +338,17 @@ export default function TournamentRegistrationPage() {
                   {/* QR Code */}
                   {tournament.paymentQRUrl && (
                     <div className="flex justify-center mb-6">
-                      <div className="p-2 bg-slate-700/50 border border-white/10 rounded-2xl">
-                        <img 
-                          src={tournament.paymentQRUrl.startsWith('/uploads') 
-                            ? `http://localhost:5000${tournament.paymentQRUrl}` 
-                            : tournament.paymentQRUrl
-                          } 
-                          alt="Payment QR Code" 
-                          className="w-64 h-64 object-contain rounded-xl"
-                        />
+                      <div className="p-4 bg-slate-900/80 border border-white/10 rounded-2xl shadow-lg shadow-purple-500/10">
+                        <div className="p-3 bg-slate-800/50 rounded-xl border border-white/5">
+                          <img 
+                            src={tournament.paymentQRUrl.startsWith('/uploads') 
+                              ? `http://localhost:5000${tournament.paymentQRUrl}` 
+                              : tournament.paymentQRUrl
+                            } 
+                            alt="Payment QR Code" 
+                            className="w-64 h-64 object-contain rounded-lg"
+                          />
+                        </div>
                       </div>
                     </div>
                   )}

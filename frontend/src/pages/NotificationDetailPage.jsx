@@ -604,12 +604,14 @@ export default function NotificationDetailPage() {
               {isCancellationRequest && registration.refundQrCode && (
                 <div className="mt-4">
                   <p className="text-sm font-medium text-gray-400 mb-2">Player's Payment QR Code</p>
-                  <div className="p-4 bg-slate-700/50 border border-white/10 rounded-xl inline-block">
-                    <img
-                      src={getImageUrl(registration.refundQrCode)}
-                      alt="Refund QR Code"
-                      className="max-w-xs rounded-lg shadow-md"
-                    />
+                  <div className="p-4 bg-slate-900/80 border border-white/10 rounded-xl inline-block">
+                    <div className="p-3 bg-slate-800/50 border border-white/5 rounded-xl">
+                      <img
+                        src={getImageUrl(registration.refundQrCode)}
+                        alt="Refund QR Code"
+                        className="max-w-xs rounded-lg shadow-md"
+                      />
+                    </div>
                   </div>
                 </div>
               )}

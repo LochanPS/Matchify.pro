@@ -114,7 +114,7 @@ class MatchService {
    * Get match by ID with full details
    */
   async getMatchById(matchId) {
-    return await prisma.match.findUnique({
+    const match = await prisma.match.findUnique({
       where: { id: matchId },
       include: {
         tournament: {
@@ -133,6 +133,37 @@ class MatchService {
         childMatches: true
       }
     });
+
+    if (!match) return null;
+
+    // Fetch player details
+    const player1 = match.player1Id
+      ? await prisma.user.findUnique({
+          where: { id: match.player1Id },
+          select: { id: true, name: true, email: true, profilePhoto: true }
+        })
+      : null;
+
+    const player2 = match.player2Id
+      ? await prisma.user.findUnique({
+          where: { id: match.player2Id },
+          select: { id: true, name: true, email: true, profilePhoto: true }
+        })
+      : null;
+
+    const umpire = match.umpireId
+      ? await prisma.user.findUnique({
+          where: { id: match.umpireId },
+          select: { id: true, name: true, email: true, profilePhoto: true }
+        })
+      : null;
+
+    return {
+      ...match,
+      player1,
+      player2,
+      umpire
+    };
   }
 
   /**

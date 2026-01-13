@@ -21,7 +21,7 @@ export const getTournamentMatches = async (tournamentId, filters = {}) => {
 // Start match
 export const startMatch = async (matchId) => {
   const token = localStorage.getItem('token');
-  const response = await axios.post(
+  const response = await axios.put(
     `${API_URL}/matches/${matchId}/start`,
     {},
     { headers: { Authorization: `Bearer ${token}` } }
@@ -32,7 +32,7 @@ export const startMatch = async (matchId) => {
 // Add point to player
 export const addPoint = async (matchId, player) => {
   const token = localStorage.getItem('token');
-  const response = await axios.post(
+  const response = await axios.put(
     `${API_URL}/matches/${matchId}/score`,
     { player },
     { headers: { Authorization: `Bearer ${token}` } }
@@ -43,8 +43,30 @@ export const addPoint = async (matchId, player) => {
 // Undo last point
 export const undoLastPoint = async (matchId) => {
   const token = localStorage.getItem('token');
-  const response = await axios.post(
+  const response = await axios.put(
     `${API_URL}/matches/${matchId}/undo`,
+    {},
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  return response.data;
+};
+
+// Pause match timer
+export const pauseTimer = async (matchId) => {
+  const token = localStorage.getItem('token');
+  const response = await axios.put(
+    `${API_URL}/matches/${matchId}/timer/pause`,
+    {},
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  return response.data;
+};
+
+// Resume match timer
+export const resumeTimer = async (matchId) => {
+  const token = localStorage.getItem('token');
+  const response = await axios.put(
+    `${API_URL}/matches/${matchId}/timer/resume`,
     {},
     { headers: { Authorization: `Bearer ${token}` } }
   );

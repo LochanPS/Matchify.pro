@@ -790,6 +790,34 @@ select:-moz-autofill:focus {
   color: #ffffff !important;
 }
 
+/* ===== NUMBER INPUT SPINNER DARK THEME ===== */
+/* Style the number input spinner buttons for dark theme */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+}
+
+/* Custom number input with dark styled buttons */
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* For browsers that support it, add custom spinner styling */
+@supports (-webkit-appearance: none) {
+  input[type="number"].dark-spinner::-webkit-inner-spin-button,
+  input[type="number"].dark-spinner::-webkit-outer-spin-button {
+    -webkit-appearance: inner-spin-button;
+    appearance: auto;
+    opacity: 1;
+    background: #334155;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+}
+
 /* ===== PAGE LAYOUTS ===== */
 .page-container {
   @apply min-h-screen bg-gray-50;
@@ -937,6 +965,18 @@ select:focus {
 
 .animation-delay-4000 {
   animation-delay: 4s;
+}
+
+.animation-delay-200 {
+  animation-delay: 0.2s;
+}
+
+.animation-delay-400 {
+  animation-delay: 0.4s;
+}
+
+.animation-delay-500 {
+  animation-delay: 0.5s;
 }
 
 /* Live Indicator */

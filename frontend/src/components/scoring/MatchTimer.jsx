@@ -1,25 +1,56 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, Play, Pause } from 'lucide-react';
+import { Clock, Play, Pause, Calendar } from 'lucide-react';
 
-const MatchTimer = ({ matchStatus, startedAt, onPause, onResume, isPaused }) => {
-  const [duration, setDuration] = useState(0);
+const MatchTimer = ({ 
+  matchStatus, 
+  timer,
+  onPause, 
+  onResume, 
+  isPaused,
+  disabled = false 
+}) => {
+  const [displayTime, setDisplayTime] = useState(0);
+  const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
-    if (matchStatus !== 'ONGOING' || isPaused) {
+    if (matchStatus !== 'ONGOING' && matchStatus !== 'IN_PROGRESS') {
+      setDisplayTime(0);
       return;
     }
 
-    const interval = setInterval(() => {
-      if (startedAt) {
-        const start = new Date(startedAt).getTime();
-        const now = Date.now();
-        const diff = Math.floor((now - start) / 1000);
-        setDuration(diff);
+    // Calculate elapsed time function
+    const calculateElapsed = () => {
+      if (!timer?.startedAt) return 0;
+      
+      const startTime = new Date(timer.startedAt).getTime();
+      const now = Date.now();
+      const totalPausedTime = timer.totalPausedTime || 0;
+      
+      // Calculate elapsed time minus paused time
+      let elapsed = now - startTime - totalPausedTime;
+      
+      // If currently paused, subtract time since pause started
+      if (isPaused && timer.pausedAt) {
+        const pauseStart = new Date(timer.pausedAt).getTime();
+        elapsed -= (now - pauseStart);
       }
+      
+      return Math.max(0, Math.floor(elapsed / 1000));
+    };
+
+    // Set initial value immediately
+    setDisplayTime(calculateElapsed());
+
+    // Only update if not paused
+    if (isPaused) return;
+
+    const interval = setInterval(() => {
+      setCurrentTime(new Date());
+      setDisplayTime(calculateElapsed());
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [matchStatus, startedAt, isPaused]);
+  }, [matchStatus, timer, isPaused]);
 
   const formatTime = (seconds) => {
     const hours = Math.floor(seconds / 3600);
@@ -29,22 +60,46 @@ const MatchTimer = ({ matchStatus, startedAt, onPause, onResume, isPaused }) => 
     if (hours > 0) {
       return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     }
-    return `${minutes}:${secs.toString().padStart(2, '0')}`;
+    return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  if (matchStatus !== 'ONGOING') {
+  const formatStartTime = (dateString) => {
+    if (!dateString) return '--:--';
+    const date = new Date(dateString);
+    return date.toLocaleTimeString('en-US', { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      hour12: true 
+    });
+  };
+
+  if (matchStatus !== 'ONGOING' && matchStatus !== 'IN_PROGRESS') {
     return null;
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-4">
+    <div className="bg-slate-800/50 border border-white/10 rounded-xl p-4">
+      {/* Start Time Display */}
+      <div className="flex items-center justify-center gap-2 mb-3 text-gray-400 text-sm">
+        <Calendar className="w-4 h-4" />
+        <span>Started at {formatStartTime(timer?.startedAt)}</span>
+      </div>
+
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Clock className="w-5 h-5 text-gray-600" />
+          <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+            isPaused 
+              ? 'bg-amber-500/20 border border-amber-500/30' 
+              : 'bg-emerald-500/20 border border-emerald-500/30'
+          }`}>
+            <Clock className={`w-6 h-6 ${isPaused ? 'text-amber-400' : 'text-emerald-400'}`} />
+          </div>
           <div>
-            <p className="text-sm text-gray-600">Match Duration</p>
-            <p className="text-2xl font-bold text-gray-900 font-mono">
-              {formatTime(duration)}
+            <p className="text-sm text-gray-400">Match Duration</p>
+            <p className={`text-3xl font-bold font-mono ${
+              isPaused ? 'text-amber-400' : 'text-white'
+            }`}>
+              {formatTime(displayTime)}
             </p>
           </div>
         </div>
@@ -53,26 +108,41 @@ const MatchTimer = ({ matchStatus, startedAt, onPause, onResume, isPaused }) => 
           {!isPaused ? (
             <button
               onClick={onPause}
-              className="flex items-center gap-2 px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition"
+              disabled={disabled}
+              className="flex items-center gap-2 px-5 py-3 bg-amber-500/20 border border-amber-500/30 text-amber-400 rounded-xl hover:bg-amber-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Pause className="w-4 h-4" />
-              <span>Pause</span>
+              <Pause className="w-5 h-5" />
+              <span className="font-semibold">Pause</span>
             </button>
           ) : (
             <button
               onClick={onResume}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+              disabled={disabled}
+              className="flex items-center gap-2 px-5 py-3 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 rounded-xl hover:bg-emerald-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Play className="w-4 h-4" />
-              <span>Resume</span>
+              <Play className="w-5 h-5" />
+              <span className="font-semibold">Resume</span>
             </button>
           )}
         </div>
       </div>
       
       {isPaused && (
-        <div className="mt-3 p-2 bg-yellow-50 border border-yellow-200 rounded text-center">
-          <p className="text-sm text-yellow-800 font-semibold">⏸️ Match Paused</p>
+        <div className="mt-4 p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-center">
+          <p className="text-amber-300 font-semibold flex items-center justify-center gap-2">
+            <Pause className="w-4 h-4" />
+            Timer Paused
+          </p>
+        </div>
+      )}
+
+      {/* Pause History */}
+      {timer?.pauseHistory && timer.pauseHistory.length > 0 && (
+        <div className="mt-4 pt-3 border-t border-white/10">
+          <p className="text-xs text-gray-500 mb-2">Pause History ({timer.pauseHistory.length} pauses)</p>
+          <div className="text-xs text-gray-400">
+            Total paused: {formatTime(Math.floor((timer.totalPausedTime || 0) / 1000))}
+          </div>
         </div>
       )}
     </div>

@@ -12,14 +12,21 @@ const prisma = new PrismaClient();
 
 /**
  * Initialize match score
+ * @param {object} config - Match config (optional)
  */
-function initializeScore() {
+function initializeScore(config = {}) {
   return {
     sets: [],
     currentSet: 1,
     currentScore: { player1: 0, player2: 0 },
     currentServer: 'player1', // Default, will be randomized
     history: [], // Point-by-point history
+    matchConfig: config.matchConfig || {
+      pointsPerSet: 21,
+      setsToWin: 2,
+      maxSets: 3,
+      extension: true
+    }
   };
 }
 
@@ -41,12 +48,21 @@ async function addPoint(matchId, player) {
 
   // Get current score or initialize
   let scoreData = match.scoreJson ? JSON.parse(match.scoreJson) : initializeScore();
+  
+  // Get match config from score data
+  const matchConfig = scoreData.matchConfig || {
+    pointsPerSet: 21,
+    setsToWin: 2,
+    maxSets: 3,
+    extension: true
+  };
 
   // Validate score update
   const currentPlayerScore = scoreData.currentScore[player];
   const validation = validateScoreUpdate(
     currentPlayerScore,
-    currentPlayerScore + 1
+    currentPlayerScore + 1,
+    matchConfig
   );
 
   if (!validation.valid) {
@@ -68,9 +84,9 @@ async function addPoint(matchId, player) {
   const totalPoints = scoreData.currentScore.player1 + scoreData.currentScore.player2;
   scoreData.currentServer = determineServer(totalPoints, scoreData.currentServer);
 
-  // Check if game is complete
-  if (isGameComplete(scoreData.currentScore.player1, scoreData.currentScore.player2)) {
-    const winner = getGameWinner(scoreData.currentScore.player1, scoreData.currentScore.player2);
+  // Check if game is complete (using match config)
+  if (isGameComplete(scoreData.currentScore.player1, scoreData.currentScore.player2, matchConfig)) {
+    const winner = getGameWinner(scoreData.currentScore.player1, scoreData.currentScore.player2, matchConfig);
     
     // Save set result
     scoreData.sets.push({
@@ -79,9 +95,9 @@ async function addPoint(matchId, player) {
       winner,
     });
 
-    // Check if match is complete
-    if (isMatchComplete(scoreData.sets)) {
-      const matchWinner = getMatchWinner(scoreData.sets);
+    // Check if match is complete (using match config)
+    if (isMatchComplete(scoreData.sets, matchConfig)) {
+      const matchWinner = getMatchWinner(scoreData.sets, matchConfig);
       
       // Determine actual winner ID
       const winnerId = matchWinner === 'player1' ? match.player1Id : match.player2Id;

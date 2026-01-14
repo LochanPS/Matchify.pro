@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { tournamentAPI } from '../api/tournament';
 import { registrationAPI } from '../api/registration';
+import { getImageUrl } from '../utils/imageUrl';
 import CategorySelector from '../components/registration/CategorySelector';
 import PaymentSummary from '../components/registration/PaymentSummary';
 import { ArrowLeftIcon, UserGroupIcon, CameraIcon, CheckCircleIcon, XMarkIcon, ClockIcon } from '@heroicons/react/24/outline';
@@ -341,10 +342,7 @@ export default function TournamentRegistrationPage() {
                       <div className="p-4 bg-slate-900/80 border border-white/10 rounded-2xl shadow-lg shadow-purple-500/10">
                         <div className="p-3 bg-slate-800/50 rounded-xl border border-white/5">
                           <img 
-                            src={tournament.paymentQRUrl.startsWith('/uploads') 
-                              ? `http://localhost:5000${tournament.paymentQRUrl}` 
-                              : tournament.paymentQRUrl
-                            } 
+                            src={getImageUrl(tournament.paymentQRUrl)} 
                             alt="Payment QR Code" 
                             className="w-64 h-64 object-contain rounded-lg"
                           />

@@ -3,6 +3,8 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { tournamentAPI } from '../api/tournament';
 import { useAuth } from '../contexts/AuthContext';
 import { formatDateLongIndian, formatDateTimeIndian } from '../utils/dateFormat';
+import { getImageUrl } from '../utils/imageUrl';
+import api from '../utils/api';
 import {
   MapPinIcon,
   CalendarIcon,
@@ -241,18 +243,9 @@ const TournamentDetailPage = () => {
     
     try {
       setPublishing(true);
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/tournaments/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ status: 'published' })
-      });
+      const response = await api.put(`/tournaments/${id}`, { status: 'published' });
       
-      const data = await response.json();
-      if (data.success) {
+      if (response.data.success) {
         setTournament({ ...tournament, status: 'published' });
         setPublishResultModal({
           type: 'success',
@@ -263,7 +256,7 @@ const TournamentDetailPage = () => {
         setPublishResultModal({
           type: 'error',
           title: 'Publication Failed',
-          message: data.error || 'Failed to publish tournament. Please try again.'
+          message: response.data.error || 'Failed to publish tournament. Please try again.'
         });
       }
     } catch (err) {
@@ -281,20 +274,11 @@ const TournamentDetailPage = () => {
   const handleDelete = async (reason) => {
     try {
       setDeleting(true);
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/tournaments/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ reason })
-      });
+      const response = await api.delete(`/tournaments/${id}`, { data: { reason } });
       
-      const data = await response.json();
-      if (data.success) {
+      if (response.data.success) {
         setShowDeleteModal(false);
-        const notifiedCount = data.notifiedParticipants || 0;
+        const notifiedCount = response.data.notifiedParticipants || 0;
         if (notifiedCount > 0) {
           setDeleteResultModal({
             type: 'success',
@@ -403,9 +387,7 @@ const TournamentDetailPage = () => {
               <div className="w-full md:w-80 flex-shrink-0">
                 <div className="rounded-2xl overflow-hidden shadow-2xl border-4 border-white/20">
                   <img
-                    src={tournament.posters[selectedPoster].imageUrl.startsWith('/uploads') 
-                      ? `http://localhost:5000${tournament.posters[selectedPoster].imageUrl}` 
-                      : tournament.posters[selectedPoster].imageUrl}
+                    src={getImageUrl(tournament.posters[selectedPoster].imageUrl)}
                     alt={tournament.name}
                     className="w-full h-64 md:h-80 object-cover"
                   />
@@ -421,9 +403,7 @@ const TournamentDetailPage = () => {
                         }`}
                       >
                         <img 
-                          src={poster.imageUrl.startsWith('/uploads') 
-                            ? `http://localhost:5000${poster.imageUrl}` 
-                            : poster.imageUrl} 
+                          src={getImageUrl(poster.imageUrl)} 
                           alt={`Poster ${index + 1}`} 
                           className="w-full h-full object-cover" 
                         />

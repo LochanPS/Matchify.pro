@@ -17,7 +17,7 @@ export default function TournamentCategoryDetails() {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/organizer/categories/${categoryId}/details`,
+        `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/organizer/categories/${categoryId}/details`,
         {
           headers: { Authorization: `Bearer ${token}` }
         }

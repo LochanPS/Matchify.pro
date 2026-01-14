@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import { PlusIcon, TrashIcon, PencilIcon } from '@heroicons/react/24/outline';
+import { AlertTriangle, X, CheckCircle } from 'lucide-react';
 import CategoryForm from '../CategoryForm';
 
 const CategoriesStep = ({ formData, updateFormData, onNext, onPrev }) => {
   const [showForm, setShowForm] = useState(false);
   const [editingIndex, setEditingIndex] = useState(null);
+  const [deleteModal, setDeleteModal] = useState(null);
+  const [alertModal, setAlertModal] = useState(null);
 
   const handleAddCategory = (category) => {
     if (editingIndex !== null) {
@@ -26,15 +29,20 @@ const CategoriesStep = ({ formData, updateFormData, onNext, onPrev }) => {
   };
 
   const handleDeleteCategory = (index) => {
-    if (confirm('Are you sure you want to delete this category?')) {
-      const newCategories = formData.categories.filter((_, i) => i !== index);
+    setDeleteModal({ index, name: formData.categories[index].name });
+  };
+
+  const confirmDelete = () => {
+    if (deleteModal) {
+      const newCategories = formData.categories.filter((_, i) => i !== deleteModal.index);
       updateFormData('categories', newCategories);
+      setDeleteModal(null);
     }
   };
 
   const handleNext = () => {
     if (formData.categories.length === 0) {
-      alert('Please add at least one category');
+      setAlertModal({ type: 'error', message: 'Please add at least one category' });
       return;
     }
     onNext();
@@ -187,6 +195,88 @@ const CategoriesStep = ({ formData, updateFormData, onNext, onPrev }) => {
           onSave={handleAddCategory}
           onCancel={handleCancelForm}
         />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className="relative w-full max-w-md">
+            <div className="absolute -inset-2 bg-gradient-to-r from-red-500 via-rose-500 to-red-500 rounded-3xl blur-xl opacity-50"></div>
+            <div className="relative bg-slate-800 rounded-2xl border border-white/10 overflow-hidden">
+              <div className="p-6 border-b border-white/10">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-red-500/20 rounded-lg">
+                      <AlertTriangle className="w-5 h-5 text-red-400" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-white">Delete Category</h3>
+                  </div>
+                  <button onClick={() => setDeleteModal(null)} className="p-2 hover:bg-white/10 rounded-lg transition-colors">
+                    <X className="w-5 h-5 text-gray-400" />
+                  </button>
+                </div>
+              </div>
+              <div className="p-6 space-y-4">
+                <p className="text-gray-300">
+                  Are you sure you want to delete the category <span className="font-semibold text-white">"{deleteModal.name}"</span>?
+                </p>
+                <p className="text-sm text-gray-400">
+                  This action cannot be undone.
+                </p>
+              </div>
+              <div className="p-6 bg-slate-900/50 border-t border-white/10 flex gap-3">
+                <button
+                  onClick={() => setDeleteModal(null)}
+                  className="flex-1 px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl transition-colors font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmDelete}
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 text-white rounded-xl transition-colors font-medium"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Alert Modal */}
+      {alertModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className="relative w-full max-w-sm">
+            <div className={`absolute -inset-2 bg-gradient-to-r ${alertModal.type === 'success' ? 'from-emerald-500 to-teal-500' : 'from-red-500 to-rose-500'} rounded-3xl blur-xl opacity-50`}></div>
+            <div className="relative bg-slate-800 rounded-2xl border border-white/10 overflow-hidden">
+              <div className="p-6 text-center">
+                <div className={`w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center ${alertModal.type === 'success' ? 'bg-emerald-500/20' : 'bg-red-500/20'}`}>
+                  {alertModal.type === 'success' ? (
+                    <CheckCircle className="w-8 h-8 text-emerald-400" />
+                  ) : (
+                    <AlertTriangle className="w-8 h-8 text-red-400" />
+                  )}
+                </div>
+                <h3 className={`text-lg font-semibold ${alertModal.type === 'success' ? 'text-emerald-400' : 'text-red-400'}`}>
+                  {alertModal.type === 'success' ? 'Success!' : 'Error'}
+                </h3>
+                <p className="text-gray-300 mt-2">{alertModal.message}</p>
+              </div>
+              <div className="p-4 bg-slate-900/50 border-t border-white/10">
+                <button
+                  onClick={() => setAlertModal(null)}
+                  className={`w-full px-4 py-3 rounded-xl font-medium transition-colors ${
+                    alertModal.type === 'success'
+                      ? 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white'
+                      : 'bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 text-white'
+                  }`}
+                >
+                  OK
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, AlertTriangle } from 'lucide-react';
+import { X, AlertTriangle, CheckCircle } from 'lucide-react';
 import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -10,6 +10,7 @@ const ScoreCorrectionModal = ({ matchId, currentScore, onClose, onSuccess }) => 
   const [proposedScore, setProposedScore] = useState(JSON.stringify(currentScore, null, 2));
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const [successModal, setSuccessModal] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -41,9 +42,7 @@ const ScoreCorrectionModal = ({ matchId, currentScore, onClose, onSuccess }) => 
       );
 
       if (response.data.success) {
-        alert('✅ Correction request submitted! Admin will review it shortly.');
-        if (onSuccess) onSuccess();
-        onClose();
+        setSuccessModal(true);
       }
     } catch (err) {
       console.error('Error submitting correction:', err);
@@ -51,6 +50,12 @@ const ScoreCorrectionModal = ({ matchId, currentScore, onClose, onSuccess }) => 
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleSuccessClose = () => {
+    setSuccessModal(false);
+    if (onSuccess) onSuccess();
+    onClose();
   };
 
   return (
@@ -160,6 +165,32 @@ const ScoreCorrectionModal = ({ matchId, currentScore, onClose, onSuccess }) => 
           </div>
         </form>
       </div>
+
+      {/* Success Modal */}
+      {successModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className="relative w-full max-w-sm">
+            <div className="absolute -inset-2 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-3xl blur-xl opacity-50"></div>
+            <div className="relative bg-slate-800 rounded-2xl border border-white/10 overflow-hidden">
+              <div className="p-6 text-center">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center bg-emerald-500/20">
+                  <CheckCircle className="w-8 h-8 text-emerald-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-emerald-400">Request Submitted!</h3>
+                <p className="text-gray-300 mt-2">Correction request submitted! Admin will review it shortly.</p>
+              </div>
+              <div className="p-4 bg-slate-900/50 border-t border-white/10">
+                <button
+                  onClick={handleSuccessClose}
+                  className="w-full px-4 py-3 rounded-xl font-medium transition-colors bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white"
+                >
+                  OK
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

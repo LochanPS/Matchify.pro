@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Wallet as WalletIcon, Download, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
-import axios from 'axios';
+import api from '../utils/api';
 import TransactionTable from '../components/wallet/TransactionTable';
 
 const Wallet = () => {
@@ -20,17 +20,11 @@ const Wallet = () => {
   const fetchWalletData = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
       
-      const balanceRes = await axios.get('http://localhost:5000/api/wallet/balance', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const balanceRes = await api.get('/wallet/balance');
       setBalance(balanceRes.data.balance);
 
-      const transactionsRes = await axios.get(
-        `http://localhost:5000/api/wallet/transactions?page=${page}&limit=20`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const transactionsRes = await api.get(`/wallet/transactions?page=${page}&limit=20`);
       setTransactions(transactionsRes.data.data.transactions);
       setTotalPages(transactionsRes.data.data.pagination.totalPages);
       

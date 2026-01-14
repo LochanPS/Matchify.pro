@@ -365,7 +365,8 @@ function TournamentCard({ tournament, navigate, index }) {
     const posterUrl = tournament.posters[0].imageUrl;
     // If it's a local URL (starts with /uploads), prepend the API base URL
     if (posterUrl.startsWith('/uploads')) {
-      return `http://localhost:5000${posterUrl}`;
+      const baseUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+      return `${baseUrl}${posterUrl}`;
     }
     return posterUrl;
   };

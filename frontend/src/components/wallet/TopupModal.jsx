@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { X, Wallet } from 'lucide-react';
-import axios from 'axios';
+import api from '../../utils/api';
 
 const TopUpModal = ({ onClose, onSuccess }) => {
   const [amount, setAmount] = useState('');
@@ -53,11 +53,7 @@ const TopUpModal = ({ onClose, onSuccess }) => {
       const token = localStorage.getItem('token');
 
       // Create Razorpay order
-      const orderRes = await axios.post(
-        'http://localhost:5000/api/wallet/topup',
-        { amount: topUpAmount },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const orderRes = await api.post('/wallet/topup', { amount: topUpAmount });
 
       const { orderId, razorpayKey } = orderRes.data.data;
 
@@ -72,15 +68,11 @@ const TopUpModal = ({ onClose, onSuccess }) => {
         handler: async function (response) {
           try {
             // Verify payment
-            await axios.post(
-              'http://localhost:5000/api/wallet/topup/verify',
-              {
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature
-              },
-              { headers: { Authorization: `Bearer ${token}` } }
-            );
+            await api.post('/wallet/topup/verify', {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature
+            });
 
             showAlertModal('Top-up successful! ✅', 'success');
             setTimeout(() => {

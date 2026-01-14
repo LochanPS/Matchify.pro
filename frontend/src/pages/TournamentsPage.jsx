@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { tournamentAPI } from '../api/tournament';
+import { getImageUrl } from '../utils/imageUrl';
 import { 
   MagnifyingGlassIcon,
   MapPinIcon,
@@ -235,9 +236,7 @@ const TournamentsPage = () => {
                     <div className={`h-48 bg-gradient-to-br ${getCardGradient(index)} relative overflow-hidden`}>
                       {tournament.posters?.[0] ? (
                         <img 
-                          src={tournament.posters[0].imageUrl.startsWith('/uploads') 
-                            ? `http://localhost:5000${tournament.posters[0].imageUrl}` 
-                            : tournament.posters[0].imageUrl} 
+                          src={getImageUrl(tournament.posters[0].imageUrl)} 
                           alt={tournament.name} 
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
                         />

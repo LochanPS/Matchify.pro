@@ -41,7 +41,8 @@ import {
 const getImageUrl = (url) => {
   if (!url) return null;
   if (url.startsWith('/uploads')) {
-    return `http://localhost:5000${url}`;
+    const baseUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+    return `${baseUrl}${url}`;
   }
   return url;
 };

@@ -12,6 +12,7 @@ import {
   CheckCircle
 } from 'lucide-react';
 import { tournamentAPI } from '../api/tournament';
+import api from '../utils/api';
 import CategoryForm from '../components/tournament/CategoryForm';
 
 const ManageCategoriesPage = () => {
@@ -48,27 +49,17 @@ const ManageCategoriesPage = () => {
   const handleAddCategory = async (categoryData) => {
     try {
       setSaving(true);
-      const token = localStorage.getItem('token');
       
-      const response = await fetch(`http://localhost:5000/api/tournaments/${id}/categories`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(categoryData)
-      });
-
-      const data = await response.json();
+      const response = await api.post(`/tournaments/${id}/categories`, categoryData);
       
-      if (data.success) {
-        setCategories([...categories, data.category]);
+      if (response.data.success) {
+        setCategories([...categories, response.data.category]);
         setShowForm(false);
         setEditingCategory(null);
         setSuccessMessage('Category added successfully!');
         setTimeout(() => setSuccessMessage(''), 3000);
       } else {
-        setError(data.errors?.join(', ') || data.error || 'Failed to add category');
+        setError(response.data.errors?.join(', ') || response.data.error || 'Failed to add category');
       }
     } catch (err) {
       console.error('Error adding category:', err);
@@ -81,27 +72,17 @@ const ManageCategoriesPage = () => {
   const handleUpdateCategory = async (categoryData) => {
     try {
       setSaving(true);
-      const token = localStorage.getItem('token');
       
-      const response = await fetch(`http://localhost:5000/api/tournaments/${id}/categories/${editingCategory.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(categoryData)
-      });
-
-      const data = await response.json();
+      const response = await api.put(`/tournaments/${id}/categories/${editingCategory.id}`, categoryData);
       
-      if (data.success) {
-        setCategories(categories.map(c => c.id === editingCategory.id ? data.category : c));
+      if (response.data.success) {
+        setCategories(categories.map(c => c.id === editingCategory.id ? response.data.category : c));
         setShowForm(false);
         setEditingCategory(null);
         setSuccessMessage('Category updated successfully!');
         setTimeout(() => setSuccessMessage(''), 3000);
       } else {
-        setError(data.error || 'Failed to update category');
+        setError(response.data.error || 'Failed to update category');
       }
     } catch (err) {
       console.error('Error updating category:', err);
@@ -113,18 +94,9 @@ const ManageCategoriesPage = () => {
 
   const handleDeleteCategory = async (categoryId) => {
     try {
-      const token = localStorage.getItem('token');
+      const response = await api.delete(`/tournaments/${id}/categories/${categoryId}`);
       
-      const response = await fetch(`http://localhost:5000/api/tournaments/${id}/categories/${categoryId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      const data = await response.json();
-      
-      if (data.success) {
+      if (response.data.success) {
         setCategories(categories.filter(c => c.id !== categoryId));
         setConfirmModal(null);
         setSuccessMessage('Category deleted successfully!');

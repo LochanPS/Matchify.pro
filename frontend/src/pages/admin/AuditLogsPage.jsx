@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { AlertTriangle, CheckCircle, X } from 'lucide-react';
 import adminService from '../../services/adminService';
 import AuditLogTable from '../../components/admin/AuditLogTable';
 
@@ -13,6 +14,7 @@ const AuditLogsPage = () => {
   });
   const [pagination, setPagination] = useState({ page: 1, limit: 50, total: 0, totalPages: 1 });
   const [exporting, setExporting] = useState(false);
+  const [alertModal, setAlertModal] = useState(null);
 
   useEffect(() => {
     fetchLogs();
@@ -63,9 +65,9 @@ const AuditLogsPage = () => {
         startDate: filters.startDate || undefined,
         endDate: filters.endDate || undefined
       });
-      alert('Audit logs exported successfully!');
+      setAlertModal({ type: 'success', message: 'Audit logs exported successfully!' });
     } catch (err) {
-      alert('Failed to export audit logs');
+      setAlertModal({ type: 'error', message: 'Failed to export audit logs' });
     } finally {
       setExporting(false);
     }
@@ -206,6 +208,42 @@ const AuditLogsPage = () => {
             </div>
           )}
         </>
+      )}
+
+      {/* Alert Modal */}
+      {alertModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className="relative w-full max-w-sm">
+            <div className={`absolute -inset-2 bg-gradient-to-r ${alertModal.type === 'success' ? 'from-emerald-500 to-teal-500' : 'from-red-500 to-rose-500'} rounded-3xl blur-xl opacity-50`}></div>
+            <div className="relative bg-slate-800 rounded-2xl border border-white/10 overflow-hidden">
+              <div className="p-6 text-center">
+                <div className={`w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center ${alertModal.type === 'success' ? 'bg-emerald-500/20' : 'bg-red-500/20'}`}>
+                  {alertModal.type === 'success' ? (
+                    <CheckCircle className="w-8 h-8 text-emerald-400" />
+                  ) : (
+                    <AlertTriangle className="w-8 h-8 text-red-400" />
+                  )}
+                </div>
+                <h3 className={`text-lg font-semibold ${alertModal.type === 'success' ? 'text-emerald-400' : 'text-red-400'}`}>
+                  {alertModal.type === 'success' ? 'Success!' : 'Error'}
+                </h3>
+                <p className="text-gray-300 mt-2">{alertModal.message}</p>
+              </div>
+              <div className="p-4 bg-slate-900/50 border-t border-white/10">
+                <button
+                  onClick={() => setAlertModal(null)}
+                  className={`w-full px-4 py-3 rounded-xl font-medium transition-colors ${
+                    alertModal.type === 'success'
+                      ? 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white'
+                      : 'bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 text-white'
+                  }`}
+                >
+                  OK
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Coins, Download, Gift, TrendingUp, TrendingDown, Info, Sparkles, ArrowRight } from 'lucide-react';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
-import axios from 'axios';
+import api from '../utils/api';
 import { formatDateIndian } from '../utils/dateFormat';
 
 const Credits = () => {
@@ -20,17 +20,11 @@ const Credits = () => {
   const fetchCreditsData = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
       
-      const summaryRes = await axios.get('http://localhost:5000/api/credits/summary', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const summaryRes = await api.get('/credits/summary');
       setSummary(summaryRes.data.data);
 
-      const transactionsRes = await axios.get(
-        `http://localhost:5000/api/credits/transactions?page=${page}&limit=20`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const transactionsRes = await api.get(`/credits/transactions?page=${page}&limit=20`);
       setTransactions(transactionsRes.data.data.transactions);
       setTotalPages(transactionsRes.data.data.pagination.totalPages);
       

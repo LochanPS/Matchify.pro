@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { tournamentAPI } from '../api/tournament';
 import { useAuth } from '../contexts/AuthContext';
+import { getImageUrl } from '../utils/imageUrl';
 import { 
   ArrowLeft, 
   Layers, 
@@ -346,10 +347,7 @@ const EditTournament = () => {
                     ) : tournament.paymentQRUrl ? (
                       <div className="p-3 bg-slate-800/50 border border-white/10 rounded-xl mx-auto max-w-[200px]">
                         <img
-                          src={tournament.paymentQRUrl.startsWith('/uploads') 
-                            ? `http://localhost:5000${tournament.paymentQRUrl}` 
-                            : tournament.paymentQRUrl
-                          }
+                          src={getImageUrl(tournament.paymentQRUrl)}
                           alt="Payment QR"
                           className="w-full max-w-[180px] mx-auto h-auto object-contain rounded-lg"
                         />

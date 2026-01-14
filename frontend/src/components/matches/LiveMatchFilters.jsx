@@ -11,7 +11,7 @@ const LiveMatchFilters = ({ filters, onFilterChange }) => {
 
   const fetchTournaments = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/tournaments`, {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/tournaments`, {
         params: { status: 'ongoing' }
       });
       setTournaments(response.data.tournaments || []);

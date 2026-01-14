@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { AlertTriangle, CheckCircle, X, UserX, UserCheck } from 'lucide-react';
 import adminService from '../../services/adminService';
 import UserDetailsModal from '../../components/admin/UserDetailsModal';
 
@@ -18,6 +19,8 @@ const UserManagementPage = () => {
   const [suspendModal, setSuspendModal] = useState(null);
   const [suspendReason, setSuspendReason] = useState('');
   const [suspendDuration, setSuspendDuration] = useState('7');
+  const [alertModal, setAlertModal] = useState(null);
+  const [unsuspendModal, setUnsuspendModal] = useState(null);
 
   useEffect(() => {
     fetchUsers();
@@ -50,31 +53,35 @@ const UserManagementPage = () => {
 
   const handleSuspend = async () => {
     if (!suspendReason.trim() || suspendReason.length < 10) {
-      alert('Please provide a reason (at least 10 characters)');
+      setAlertModal({ type: 'error', message: 'Please provide a reason (at least 10 characters)' });
       return;
     }
 
     try {
       await adminService.suspendUser(suspendModal.id, suspendReason, parseInt(suspendDuration));
-      alert('User suspended successfully');
+      setAlertModal({ type: 'success', message: 'User suspended successfully' });
       setSuspendModal(null);
       setSuspendReason('');
       setSuspendDuration('7');
       fetchUsers();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to suspend user');
+      setAlertModal({ type: 'error', message: err.response?.data?.message || 'Failed to suspend user' });
     }
   };
 
   const handleUnsuspend = async (userId) => {
-    if (!confirm('Are you sure you want to unsuspend this user?')) return;
+    setUnsuspendModal({ userId });
+  };
 
+  const confirmUnsuspend = async () => {
     try {
-      await adminService.unsuspendUser(userId);
-      alert('User unsuspended successfully');
+      await adminService.unsuspendUser(unsuspendModal.userId);
+      setAlertModal({ type: 'success', message: 'User unsuspended successfully' });
+      setUnsuspendModal(null);
       fetchUsers();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to unsuspend user');
+      setAlertModal({ type: 'error', message: err.response?.data?.message || 'Failed to unsuspend user' });
+      setUnsuspendModal(null);
     }
   };
 
@@ -360,6 +367,84 @@ const UserManagementPage = () => {
               >
                 Suspend User
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Unsuspend Confirmation Modal */}
+      {unsuspendModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className="relative w-full max-w-md">
+            <div className="absolute -inset-2 bg-gradient-to-r from-green-500 via-emerald-500 to-green-500 rounded-3xl blur-xl opacity-50"></div>
+            <div className="relative bg-slate-800 rounded-2xl border border-white/10 overflow-hidden">
+              <div className="p-6 border-b border-white/10">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-green-500/20 rounded-lg">
+                      <UserCheck className="w-5 h-5 text-green-400" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-white">Unsuspend User</h3>
+                  </div>
+                  <button onClick={() => setUnsuspendModal(null)} className="p-2 hover:bg-white/10 rounded-lg transition-colors">
+                    <X className="w-5 h-5 text-gray-400" />
+                  </button>
+                </div>
+              </div>
+              <div className="p-6 space-y-4">
+                <p className="text-gray-300">Are you sure you want to unsuspend this user?</p>
+                <p className="text-sm text-gray-400">They will regain full access to their account.</p>
+              </div>
+              <div className="p-6 bg-slate-900/50 border-t border-white/10 flex gap-3">
+                <button
+                  onClick={() => setUnsuspendModal(null)}
+                  className="flex-1 px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl transition-colors font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmUnsuspend}
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-xl transition-colors font-medium"
+                >
+                  Unsuspend
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Alert Modal */}
+      {alertModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className="relative w-full max-w-sm">
+            <div className={`absolute -inset-2 bg-gradient-to-r ${alertModal.type === 'success' ? 'from-emerald-500 to-teal-500' : 'from-red-500 to-rose-500'} rounded-3xl blur-xl opacity-50`}></div>
+            <div className="relative bg-slate-800 rounded-2xl border border-white/10 overflow-hidden">
+              <div className="p-6 text-center">
+                <div className={`w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center ${alertModal.type === 'success' ? 'bg-emerald-500/20' : 'bg-red-500/20'}`}>
+                  {alertModal.type === 'success' ? (
+                    <CheckCircle className="w-8 h-8 text-emerald-400" />
+                  ) : (
+                    <AlertTriangle className="w-8 h-8 text-red-400" />
+                  )}
+                </div>
+                <h3 className={`text-lg font-semibold ${alertModal.type === 'success' ? 'text-emerald-400' : 'text-red-400'}`}>
+                  {alertModal.type === 'success' ? 'Success!' : 'Error'}
+                </h3>
+                <p className="text-gray-300 mt-2">{alertModal.message}</p>
+              </div>
+              <div className="p-4 bg-slate-900/50 border-t border-white/10">
+                <button
+                  onClick={() => setAlertModal(null)}
+                  className={`w-full px-4 py-3 rounded-xl font-medium transition-colors ${
+                    alertModal.type === 'success'
+                      ? 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white'
+                      : 'bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 text-white'
+                  }`}
+                >
+                  OK
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -1,14 +1,28 @@
 import Razorpay from 'razorpay';
 import crypto from 'crypto';
 
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET,
-});
+// Only initialize Razorpay if credentials are provided
+let razorpay = null;
+if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
+  razorpay = new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID,
+    key_secret: process.env.RAZORPAY_KEY_SECRET,
+  });
+  console.log('✅ Razorpay initialized');
+} else {
+  console.log('⚠️ Razorpay not configured - wallet top-up via Razorpay disabled');
+}
 
 class RazorpayService {
+  isEnabled() {
+    return razorpay !== null;
+  }
+
   // Create order for wallet top-up
   async createOrder(amount, userId) {
+    if (!razorpay) {
+      throw new Error('Razorpay is not configured');
+    }
     try {
       const options = {
         amount: Math.round(amount * 100), // Convert to paise and ensure integer
@@ -30,6 +44,7 @@ class RazorpayService {
 
   // Verify payment signature
   verifyPaymentSignature(orderId, paymentId, signature) {
+    if (!process.env.RAZORPAY_KEY_SECRET) return false;
     const text = `${orderId}|${paymentId}`;
     const generated_signature = crypto
       .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
@@ -41,6 +56,7 @@ class RazorpayService {
 
   // Verify webhook signature
   verifyWebhookSignature(webhookBody, webhookSignature) {
+    if (!process.env.RAZORPAY_WEBHOOK_SECRET) return false;
     const expectedSignature = crypto
       .createHmac('sha256', process.env.RAZORPAY_WEBHOOK_SECRET)
       .update(webhookBody)
@@ -51,6 +67,9 @@ class RazorpayService {
 
   // Fetch payment details
   async getPaymentDetails(paymentId) {
+    if (!razorpay) {
+      throw new Error('Razorpay is not configured');
+    }
     try {
       return await razorpay.payments.fetch(paymentId);
     } catch (error) {
@@ -61,6 +80,9 @@ class RazorpayService {
 
   // Create refund
   async createRefund(paymentId, amount, notes = {}) {
+    if (!razorpay) {
+      throw new Error('Razorpay is not configured');
+    }
     try {
       const refundData = {
         amount: Math.round(amount * 100), // Convert to paise

@@ -58,6 +58,7 @@ app.use(helmet({
 // CORS configuration
 const allowedOrigins = [
   FRONTEND_URL,
+  'https://matchify-pro.vercel.app',
   'http://localhost:5173',
   'http://localhost:5174',
   'http://localhost:5175',
@@ -70,13 +71,18 @@ app.use(cors({
     // Allow requests with no origin (mobile apps, curl, etc.)
     if (!origin) return callback(null, true);
     
-    // Check if origin is allowed
-    if (allowedOrigins.some(allowed => origin.startsWith(allowed.replace(/\/$/, '')))) {
+    // Check if origin is in allowed list
+    if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
     
     // Allow Vercel preview deployments
     if (origin.includes('.vercel.app')) {
+      return callback(null, true);
+    }
+    
+    // Allow Render deployments
+    if (origin.includes('.onrender.com')) {
       return callback(null, true);
     }
     

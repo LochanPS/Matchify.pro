@@ -6,16 +6,29 @@ let io = null;
  * Initialize Socket.IO server
  */
 export function initializeSocket(server) {
-  const allowedOrigins = [
-    process.env.FRONTEND_URL,
-    'https://matchify-pro.vercel.app',
-    'http://localhost:5173',
-    'http://localhost:3000'
-  ].filter(Boolean);
-
   io = new Server(server, {
     cors: {
-      origin: allowedOrigins,
+      origin: function(origin, callback) {
+        // Allow requests with no origin
+        if (!origin) return callback(null, true);
+        
+        // Allow all Vercel deployments
+        if (origin.includes('.vercel.app')) {
+          return callback(null, true);
+        }
+        
+        // Allow localhost
+        if (origin.includes('localhost')) {
+          return callback(null, true);
+        }
+        
+        // Allow configured frontend URL
+        if (process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL) {
+          return callback(null, true);
+        }
+        
+        callback(null, true); // Allow all for now
+      },
       methods: ['GET', 'POST'],
       credentials: true
     }

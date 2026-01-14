@@ -245,45 +245,53 @@ const EditTournament = () => {
                   <label className="block text-sm font-medium text-gray-300 mb-2">
                     Registration Opens
                   </label>
-                  <input
-                    type="datetime-local"
-                    value={formData.registrationOpenDate}
-                    onChange={(e) => handleChange('registrationOpenDate', e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
-                  />
+                  <div className="datetime-input-wrapper">
+                    <input
+                      type="datetime-local"
+                      value={formData.registrationOpenDate}
+                      onChange={(e) => handleChange('registrationOpenDate', e.target.value)}
+                      className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/30 transition-all"
+                    />
+                  </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
                     Registration Closes
                   </label>
-                  <input
-                    type="datetime-local"
-                    value={formData.registrationCloseDate}
-                    onChange={(e) => handleChange('registrationCloseDate', e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
-                  />
+                  <div className="datetime-input-wrapper">
+                    <input
+                      type="datetime-local"
+                      value={formData.registrationCloseDate}
+                      onChange={(e) => handleChange('registrationCloseDate', e.target.value)}
+                      className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/30 transition-all"
+                    />
+                  </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
                     Tournament Starts
                   </label>
-                  <input
-                    type="datetime-local"
-                    value={formData.startDate}
-                    onChange={(e) => handleChange('startDate', e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
-                  />
+                  <div className="datetime-input-wrapper">
+                    <input
+                      type="datetime-local"
+                      value={formData.startDate}
+                      onChange={(e) => handleChange('startDate', e.target.value)}
+                      className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/30 transition-all"
+                    />
+                  </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
                     Tournament Ends
                   </label>
-                  <input
-                    type="datetime-local"
-                    value={formData.endDate}
-                    onChange={(e) => handleChange('endDate', e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
-                  />
+                  <div className="datetime-input-wrapper">
+                    <input
+                      type="datetime-local"
+                      value={formData.endDate}
+                      onChange={(e) => handleChange('endDate', e.target.value)}
+                      className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/30 transition-all"
+                    />
+                  </div>
                 </div>
               </div>
               
@@ -291,7 +299,7 @@ const EditTournament = () => {
                 <button
                   onClick={handleSaveDates}
                   disabled={saving}
-                  className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl hover:shadow-lg hover:shadow-blue-500/25 transition-all font-semibold disabled:opacity-50"
+                  className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-xl hover:shadow-lg hover:shadow-purple-500/25 transition-all font-semibold disabled:opacity-50"
                 >
                   {saving ? (
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

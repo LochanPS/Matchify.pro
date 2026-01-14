@@ -269,13 +269,16 @@ const CreateTournament = () => {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 -mt-4">
         {/* Error Message */}
         {error && (
-          <div className="mb-6 bg-gradient-to-r from-red-50 to-rose-50 border border-red-200 rounded-2xl p-5 flex items-start gap-4">
-            <div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center flex-shrink-0">
-              <AlertTriangle className="w-5 h-5 text-red-600" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-red-800 mb-1">Error creating tournament</h3>
-              <p className="text-sm text-red-700">{error}</p>
+          <div className="relative mb-6 group">
+            <div className="absolute -inset-1 bg-gradient-to-r from-red-500/30 to-rose-500/30 rounded-2xl blur-lg opacity-70"></div>
+            <div className="relative bg-red-500/10 border border-red-500/30 rounded-2xl p-5 flex items-start gap-4">
+              <div className="w-10 h-10 bg-red-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                <AlertTriangle className="w-5 h-5 text-red-400" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-red-400 mb-1">Error creating tournament</h3>
+                <p className="text-sm text-red-300/80">{error}</p>
+              </div>
             </div>
           </div>
         )}

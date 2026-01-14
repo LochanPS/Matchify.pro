@@ -20,6 +20,8 @@ const TransactionHistory = ({ onRefresh }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [filterType, setFilterType] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
 
   const transactionTypes = [
     { value: '', label: 'All Transactions' },
@@ -67,65 +69,65 @@ const TransactionHistory = ({ onRefresh }) => {
 
   const handleFilterChange = (newFilter) => {
     setFilterType(newFilter);
-    setCurrentPage(1); // Reset to first page when filter changes
+    setCurrentPage(1);
   };
 
   const getTransactionIcon = (type, status) => {
     if (status === 'PENDING') {
-      return <ClockIcon className="h-5 w-5 text-yellow-600" />;
+      return <ClockIcon className="h-5 w-5 text-amber-400" />;
     }
     if (status === 'FAILED') {
-      return <XCircleIcon className="h-5 w-5 text-red-600" />;
+      return <XCircleIcon className="h-5 w-5 text-red-400" />;
     }
 
     switch (type) {
       case 'TOPUP':
-        return <ArrowUpIcon className="h-5 w-5 text-green-600" />;
+        return <ArrowUpIcon className="h-5 w-5 text-emerald-400" />;
       case 'REGISTRATION_FEE':
-        return <ArrowDownIcon className="h-5 w-5 text-red-600" />;
+        return <ArrowDownIcon className="h-5 w-5 text-red-400" />;
       case 'REFUND':
-        return <CheckCircleIcon className="h-5 w-5 text-blue-600" />;
+        return <CheckCircleIcon className="h-5 w-5 text-blue-400" />;
       case 'ADMIN_CREDIT':
-        return <ArrowUpIcon className="h-5 w-5 text-purple-600" />;
+        return <ArrowUpIcon className="h-5 w-5 text-purple-400" />;
       case 'ADMIN_DEBIT':
-        return <ArrowDownIcon className="h-5 w-5 text-orange-600" />;
+        return <ArrowDownIcon className="h-5 w-5 text-orange-400" />;
       default:
-        return <ClockIcon className="h-5 w-5 text-gray-600" />;
+        return <ClockIcon className="h-5 w-5 text-gray-400" />;
     }
   };
 
   const getTransactionColor = (type, status) => {
-    if (status === 'PENDING') return 'bg-yellow-100';
-    if (status === 'FAILED') return 'bg-red-100';
+    if (status === 'PENDING') return 'bg-amber-500/20';
+    if (status === 'FAILED') return 'bg-red-500/20';
 
     switch (type) {
       case 'TOPUP':
-        return 'bg-green-100';
+        return 'bg-emerald-500/20';
       case 'REGISTRATION_FEE':
-        return 'bg-red-100';
+        return 'bg-red-500/20';
       case 'REFUND':
-        return 'bg-blue-100';
+        return 'bg-blue-500/20';
       case 'ADMIN_CREDIT':
-        return 'bg-purple-100';
+        return 'bg-purple-500/20';
       case 'ADMIN_DEBIT':
-        return 'bg-orange-100';
+        return 'bg-orange-500/20';
       default:
-        return 'bg-gray-100';
+        return 'bg-slate-700/50';
     }
   };
 
   const getStatusBadge = (status) => {
     const statusConfig = {
-      COMPLETED: { color: 'bg-green-100 text-green-800', label: 'Completed' },
-      PENDING: { color: 'bg-yellow-100 text-yellow-800', label: 'Pending' },
-      FAILED: { color: 'bg-red-100 text-red-800', label: 'Failed' },
-      REFUNDED: { color: 'bg-blue-100 text-blue-800', label: 'Refunded' },
+      COMPLETED: { color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30', label: 'Completed' },
+      PENDING: { color: 'bg-amber-500/20 text-amber-400 border-amber-500/30', label: 'Pending' },
+      FAILED: { color: 'bg-red-500/20 text-red-400 border-red-500/30', label: 'Failed' },
+      REFUNDED: { color: 'bg-blue-500/20 text-blue-400 border-blue-500/30', label: 'Refunded' },
     };
 
     const config = statusConfig[status] || statusConfig.PENDING;
     
     return (
-      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.color}`}>
+      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${config.color}`}>
         {config.label}
       </span>
     );
@@ -152,16 +154,15 @@ const TransactionHistory = ({ onRefresh }) => {
 
   const exportToCSV = async () => {
     try {
-      // Get all transactions for export (not just current page)
       const allTransactionsResponse = await walletAPI.getTransactions(1, 1000, filterType || null);
       const allTransactions = allTransactionsResponse.data.transactions;
 
       if (allTransactions.length === 0) {
-        alert('No transactions to export');
+        setAlertMessage('No transactions to export');
+        setShowAlert(true);
         return;
       }
 
-      // Prepare CSV data
       const headers = ['Date', 'Type', 'Description', 'Amount', 'Balance After', 'Status', 'Reference ID'];
       const csvRows = [
         headers.join(','),
@@ -176,7 +177,6 @@ const TransactionHistory = ({ onRefresh }) => {
         ].join(','))
       ];
 
-      // Create and download CSV
       const csvContent = csvRows.join('\n');
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement('a');
@@ -192,25 +192,26 @@ const TransactionHistory = ({ onRefresh }) => {
       }
     } catch (error) {
       console.error('Error exporting CSV:', error);
-      alert('Failed to export transactions. Please try again.');
+      setAlertMessage('Failed to export transactions. Please try again.');
+      setShowAlert(true);
     }
   };
 
   if (loading && transactions.length === 0) {
     return (
-      <div className="bg-white rounded-lg shadow-sm border">
+      <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl">
         <div className="p-6">
           <div className="animate-pulse">
-            <div className="h-6 bg-gray-200 rounded w-1/4 mb-4"></div>
+            <div className="h-6 bg-slate-700 rounded w-1/4 mb-4"></div>
             <div className="space-y-3">
               {[...Array(5)].map((_, i) => (
                 <div key={i} className="flex items-center space-x-4">
-                  <div className="h-10 w-10 bg-gray-200 rounded-lg"></div>
+                  <div className="h-10 w-10 bg-slate-700 rounded-xl"></div>
                   <div className="flex-1">
-                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                    <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                    <div className="h-4 bg-slate-700 rounded w-3/4 mb-2"></div>
+                    <div className="h-3 bg-slate-700 rounded w-1/2"></div>
                   </div>
-                  <div className="h-4 bg-gray-200 rounded w-20"></div>
+                  <div className="h-4 bg-slate-700 rounded w-20"></div>
                 </div>
               ))}
             </div>
@@ -221,22 +222,26 @@ const TransactionHistory = ({ onRefresh }) => {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border">
+    <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden relative">
       {/* Header with Filters */}
-      <div className="p-6 border-b">
+      <div className="p-6 border-b border-white/10">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-gray-900">Transaction History</h2>
+          <h2 className="text-xl font-semibold text-white">Transaction History</h2>
           <div className="flex items-center gap-3">
             <button
               onClick={exportToCSV}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-300 bg-slate-700/50 border border-white/10 rounded-xl hover:bg-slate-700 hover:text-white transition-all"
             >
               <ArrowDownTrayIcon className="h-4 w-4" />
               Export CSV
             </button>
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+              className={`flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-xl transition-all ${
+                showFilters 
+                  ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' 
+                  : 'text-gray-300 bg-slate-700/50 border border-white/10 hover:bg-slate-700'
+              }`}
             >
               <FunnelIcon className="h-4 w-4" />
               Filter
@@ -246,16 +251,16 @@ const TransactionHistory = ({ onRefresh }) => {
 
         {/* Filter Options */}
         {showFilters && (
-          <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+          <div className="mt-4 p-4 bg-slate-700/30 border border-white/5 rounded-xl">
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
               {transactionTypes.map((type) => (
                 <button
                   key={type.value}
                   onClick={() => handleFilterChange(type.value)}
-                  className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  className={`px-3 py-2 text-sm font-medium rounded-xl transition-all ${
                     filterType === type.value
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-white text-gray-700 hover:bg-gray-100 border'
+                      ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white'
+                      : 'bg-slate-700/50 text-gray-300 hover:bg-slate-700 border border-white/10'
                   }`}
                 >
                   {type.label}
@@ -267,45 +272,45 @@ const TransactionHistory = ({ onRefresh }) => {
       </div>
 
       {/* Transaction List */}
-      <div className="divide-y">
+      <div className="divide-y divide-white/5">
         {error ? (
           <div className="p-6 text-center">
-            <div className="text-red-600 mb-4">{error}</div>
+            <div className="text-red-400 mb-4">{error}</div>
             <button
               onClick={fetchTransactions}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+              className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-4 py-2 rounded-xl hover:shadow-lg hover:shadow-purple-500/25 transition-all"
             >
               Retry
             </button>
           </div>
         ) : transactions.length === 0 ? (
           <div className="p-12 text-center">
-            <div className="text-gray-400 mb-4">
+            <div className="text-gray-500 mb-4">
               <ClockIcon className="h-12 w-12 mx-auto" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No transactions found</h3>
-            <p className="text-gray-500">
+            <h3 className="text-lg font-medium text-white mb-2">No transactions found</h3>
+            <p className="text-gray-400">
               {filterType ? 'No transactions match your filter criteria.' : 'Your transaction history will appear here.'}
             </p>
           </div>
         ) : (
           <>
             {transactions.map((transaction) => (
-              <div key={transaction.id} className="p-6 hover:bg-gray-50 transition-colors">
+              <div key={transaction.id} className="p-6 hover:bg-white/5 transition-colors">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
-                    <div className={`p-2 rounded-lg ${getTransactionColor(transaction.type, transaction.status)}`}>
+                    <div className={`p-2 rounded-xl ${getTransactionColor(transaction.type, transaction.status)}`}>
                       {getTransactionIcon(transaction.type, transaction.status)}
                     </div>
                     <div className="ml-4">
-                      <p className="font-medium text-gray-900">{transaction.description}</p>
+                      <p className="font-medium text-white">{transaction.description}</p>
                       <div className="flex items-center gap-3 mt-1">
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-gray-400">
                           {formatDate(transaction.createdAt)}
                         </p>
                         {getStatusBadge(transaction.status)}
                         {transaction.referenceId && (
-                          <span className="text-xs text-gray-400">
+                          <span className="text-xs text-gray-500">
                             Ref: {transaction.referenceId.slice(-8)}
                           </span>
                         )}
@@ -314,7 +319,7 @@ const TransactionHistory = ({ onRefresh }) => {
                   </div>
                   <div className="text-right">
                     <p className={`font-semibold text-lg ${
-                      transaction.amount > 0 ? 'text-green-600' : 'text-red-600'
+                      transaction.amount > 0 ? 'text-emerald-400' : 'text-red-400'
                     }`}>
                       {transaction.amount > 0 ? '+' : ''}{formatCurrency(transaction.amount)}
                     </p>
@@ -331,9 +336,9 @@ const TransactionHistory = ({ onRefresh }) => {
 
       {/* Pagination */}
       {pagination && pagination.totalPages > 1 && (
-        <div className="p-6 border-t bg-gray-50">
+        <div className="p-6 border-t border-white/10 bg-slate-800/30">
           <div className="flex items-center justify-between">
-            <div className="text-sm text-gray-700">
+            <div className="text-sm text-gray-400">
               Showing {((pagination.page - 1) * pagination.limit) + 1} to{' '}
               {Math.min(pagination.page * pagination.limit, pagination.total)} of{' '}
               {pagination.total} transactions
@@ -342,7 +347,7 @@ const TransactionHistory = ({ onRefresh }) => {
               <button
                 onClick={() => handlePageChange(pagination.page - 1)}
                 disabled={!pagination.hasPrev || loading}
-                className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-300 bg-slate-700/50 border border-white/10 rounded-xl hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 <ChevronLeftIcon className="h-4 w-4" />
                 Previous
@@ -358,10 +363,10 @@ const TransactionHistory = ({ onRefresh }) => {
                       key={pageNum}
                       onClick={() => handlePageChange(pageNum)}
                       disabled={loading}
-                      className={`px-3 py-2 text-sm font-medium rounded-lg ${
+                      className={`px-3 py-2 text-sm font-medium rounded-xl transition-all ${
                         pageNum === pagination.page
-                          ? 'bg-blue-600 text-white'
-                          : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                          ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white'
+                          : 'text-gray-300 bg-slate-700/50 border border-white/10 hover:bg-slate-700'
                       } disabled:opacity-50 disabled:cursor-not-allowed`}
                     >
                       {pageNum}
@@ -373,7 +378,7 @@ const TransactionHistory = ({ onRefresh }) => {
               <button
                 onClick={() => handlePageChange(pagination.page + 1)}
                 disabled={!pagination.hasNext || loading}
-                className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-300 bg-slate-700/50 border border-white/10 rounded-xl hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 Next
                 <ChevronRightIcon className="h-4 w-4" />
@@ -385,8 +390,26 @@ const TransactionHistory = ({ onRefresh }) => {
 
       {/* Loading Overlay */}
       {loading && transactions.length > 0 && (
-        <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="absolute inset-0 bg-slate-900/75 flex items-center justify-center">
+          <div className="w-10 h-10 border-4 border-purple-600 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      )}
+
+      {/* Alert Modal */}
+      {showAlert && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="relative bg-slate-800 border border-white/10 rounded-2xl p-6 max-w-sm w-full text-center">
+            <div className="w-16 h-16 bg-amber-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="text-3xl">⚠️</span>
+            </div>
+            <p className="text-white mb-6">{alertMessage}</p>
+            <button
+              onClick={() => setShowAlert(false)}
+              className="w-full bg-gradient-to-r from-purple-500 to-indigo-600 text-white py-3 rounded-xl font-medium hover:shadow-lg hover:shadow-purple-500/25 transition-all"
+            >
+              OK
+            </button>
+          </div>
         </div>
       )}
     </div>

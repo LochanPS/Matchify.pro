@@ -19,6 +19,7 @@ import drawRoutes from './routes/draw.routes.js';
 import matchRoutes from './routes/match.routes.js';
 import pointsRoutes from './routes/points.routes.js';
 import adminRoutes from './routes/admin.routes.js';
+import superAdminRoutes from './routes/superAdmin.routes.js';
 import smsRoutes from './routes/sms.routes.js';
 import creditsRoutes from './routes/credits.routes.js';
 
@@ -26,6 +27,9 @@ import creditsRoutes from './routes/credits.routes.js';
 import multiRoleAuthRoutes from './routes/multiRoleAuth.routes.js';
 import multiRoleTournamentRoutes from './routes/multiRoleTournament.routes.js';
 import multiRoleMatchRoutes from './routes/multiRoleMatch.routes.js';
+
+// Import middleware
+import { authenticate, authorize } from './middleware/auth.js';
 
 // Import services
 import { initEmailService } from './services/email.service.js';
@@ -171,6 +175,9 @@ app.use('/api/organizer', organizerRoutes);
 // Admin routes
 app.use('/api/admin', adminRoutes);
 
+// Super Admin routes (for ADMIN@gmail.com)
+app.use('/api/super-admin', authenticate, superAdminRoutes);
+
 // SMS routes
 app.use('/api/sms', smsRoutes);
 
@@ -189,7 +196,6 @@ app.use('/api/multi-matches', multiRoleMatchRoutes);
 app.use('/api', pointsRoutes);
 
 // Test routes for authentication
-import { authenticate, authorize } from './middleware/auth.js';
 
 // Test protected route
 app.get('/api/test/protected', authenticate, (req, res) => {

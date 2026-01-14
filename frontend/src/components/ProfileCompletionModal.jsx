@@ -552,7 +552,7 @@ export default function ProfileCompletionModal({ user, onComplete }) {
     if (!query) return text;
     return text.split(new RegExp(`(${query})`, 'gi')).map((part, i) => (
       part.toLowerCase() === query.toLowerCase() ? (
-        <span key={i} className="font-bold text-blue-600">{part}</span>
+        <span key={i} className="font-bold text-purple-400">{part}</span>
       ) : (
         <span key={i}>{part}</span>
       )
@@ -560,31 +560,40 @@ export default function ProfileCompletionModal({ user, onComplete }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-white">
-          <h2 className="text-2xl font-bold">Complete Your Profile</h2>
-          <p className="text-blue-100 mt-1">
-            Please provide your details to continue
-          </p>
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      {/* Halo effect background */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <div className="w-[500px] h-[500px] bg-gradient-to-r from-purple-500/30 via-indigo-500/30 to-purple-500/30 rounded-full blur-3xl"></div>
+      </div>
+      
+      <div className="relative bg-slate-800 border border-white/10 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden max-h-[90vh] overflow-y-auto">
+        {/* Header with gradient */}
+        <div className="relative bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 p-6 text-white overflow-hidden">
+          <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:20px_20px]"></div>
+          <div className="relative">
+            <h2 className="text-2xl font-bold">Complete Your Profile</h2>
+            <p className="text-purple-200 mt-1">
+              Please provide your details to continue
+            </p>
+          </div>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-6 space-y-5">
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+            <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm flex items-center gap-2">
+              <span>⚠️</span>
               {error}
             </div>
           )}
 
           {/* Phone */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Phone Number <span className="text-red-500">*</span>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Phone Number <span className="text-red-400">*</span>
             </label>
             <div className="flex">
-              <span className="inline-flex items-center px-3 bg-gray-100 border border-r-0 border-gray-300 rounded-l-lg text-gray-600">
+              <span className="inline-flex items-center px-4 bg-slate-700/50 border border-white/10 border-r-0 rounded-l-xl text-gray-400 font-medium">
                 +91
               </span>
               <input
@@ -592,7 +601,7 @@ export default function ProfileCompletionModal({ user, onComplete }) {
                 value={formData.phone}
                 onChange={(e) => handleChange('phone', e.target.value.replace(/\D/g, '').slice(0, 10))}
                 placeholder="9876543210"
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-r-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="flex-1 px-4 py-3 bg-slate-700/50 border border-white/10 rounded-r-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                 required
               />
             </div>
@@ -600,8 +609,8 @@ export default function ProfileCompletionModal({ user, onComplete }) {
 
           {/* City - Searchable Autocomplete */}
           <div className="relative">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              City <span className="text-red-500">*</span>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              City <span className="text-red-400">*</span>
             </label>
             <input
               ref={cityInputRef}
@@ -610,7 +619,7 @@ export default function ProfileCompletionModal({ user, onComplete }) {
               onChange={(e) => handleCityInputChange(e.target.value)}
               onFocus={() => cityInput.trim() && setShowCitySuggestions(filteredCities.length > 0)}
               placeholder="Type to search city..."
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
               autoComplete="off"
             />
             
@@ -618,62 +627,64 @@ export default function ProfileCompletionModal({ user, onComplete }) {
             {showCitySuggestions && filteredCities.length > 0 && (
               <div 
                 ref={citySuggestionsRef}
-                className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto"
+                className="absolute z-10 w-full mt-2 bg-slate-800 border border-white/10 rounded-xl shadow-2xl max-h-48 overflow-y-auto"
               >
                 {filteredCities.map((city) => (
                   <button
                     key={city}
                     type="button"
                     onClick={() => handleCitySelect(city)}
-                    className={`w-full px-4 py-2 text-left hover:bg-blue-50 transition-colors flex items-center justify-between ${
-                      formData.city === city ? 'bg-blue-100 text-blue-700 font-medium' : 'text-gray-700'
+                    className={`w-full px-4 py-3 text-left hover:bg-purple-500/20 transition-colors flex items-center justify-between ${
+                      formData.city === city ? 'bg-purple-500/20 text-purple-400 font-medium' : 'text-gray-300'
                     }`}
                   >
                     <span>{highlightMatch(city, cityInput)}</span>
-                    <span className="text-xs text-gray-400">{CITY_STATE_MAP[city]}</span>
+                    <span className="text-xs text-gray-500">{CITY_STATE_MAP[city]}</span>
                   </button>
                 ))}
               </div>
             )}
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-2 text-xs text-gray-500">
               Type to see suggestions or enter your city name
             </p>
           </div>
 
           {/* State - Searchable Autocomplete */}
           <div className="relative">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              State <span className="text-red-500">*</span>
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              State <span className="text-red-400">*</span>
             </label>
-            <input
-              ref={stateInputRef}
-              type="text"
-              value={stateInput}
-              onChange={(e) => handleStateInputChange(e.target.value)}
-              onFocus={() => setShowStateSuggestions(true)}
-              placeholder="Type to search state..."
-              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                formData.state ? 'border-green-500 bg-green-50' : 'border-gray-300'
-              }`}
-              autoComplete="off"
-            />
-            {formData.state && (
-              <span className="absolute right-3 top-9 text-green-600">✓</span>
-            )}
+            <div className="relative">
+              <input
+                ref={stateInputRef}
+                type="text"
+                value={stateInput}
+                onChange={(e) => handleStateInputChange(e.target.value)}
+                onFocus={() => setShowStateSuggestions(true)}
+                placeholder="Type to search state..."
+                className={`w-full px-4 py-3 bg-slate-700/50 border rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${
+                  formData.state ? 'border-emerald-500/50' : 'border-white/10'
+                }`}
+                autoComplete="off"
+              />
+              {formData.state && (
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-emerald-400">✓</span>
+              )}
+            </div>
             
             {/* State Suggestions Dropdown */}
             {showStateSuggestions && filteredStates.length > 0 && (
               <div 
                 ref={stateSuggestionsRef}
-                className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto"
+                className="absolute z-10 w-full mt-2 bg-slate-800 border border-white/10 rounded-xl shadow-2xl max-h-48 overflow-y-auto"
               >
                 {filteredStates.map((state) => (
                   <button
                     key={state}
                     type="button"
                     onClick={() => handleStateSelect(state)}
-                    className={`w-full px-4 py-2 text-left hover:bg-blue-50 transition-colors ${
-                      formData.state === state ? 'bg-blue-100 text-blue-700 font-medium' : 'text-gray-700'
+                    className={`w-full px-4 py-3 text-left hover:bg-purple-500/20 transition-colors ${
+                      formData.state === state ? 'bg-purple-500/20 text-purple-400 font-medium' : 'text-gray-300'
                     }`}
                   >
                     {highlightMatch(state, stateInput)}
@@ -685,21 +696,21 @@ export default function ProfileCompletionModal({ user, onComplete }) {
 
           {/* Gender */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Gender <span className="text-red-500">*</span>
+            <label className="block text-sm font-medium text-gray-300 mb-3">
+              Gender <span className="text-red-400">*</span>
             </label>
             <div className="flex gap-4">
               {['Male', 'Female', 'Other'].map(g => (
-                <label key={g} className="flex items-center gap-2 cursor-pointer">
+                <label key={g} className="flex items-center gap-2 cursor-pointer group">
                   <input
                     type="radio"
                     name="gender"
                     value={g.toLowerCase()}
                     checked={formData.gender === g.toLowerCase()}
                     onChange={(e) => handleChange('gender', e.target.value)}
-                    className="w-4 h-4 text-blue-600"
+                    className="w-4 h-4 text-purple-500 bg-slate-700 border-white/20 focus:ring-purple-500 focus:ring-offset-0"
                   />
-                  <span className="text-gray-700">{g}</span>
+                  <span className="text-gray-300 group-hover:text-white transition-colors">{g}</span>
                 </label>
               ))}
             </div>
@@ -707,7 +718,7 @@ export default function ProfileCompletionModal({ user, onComplete }) {
 
           {/* Date of Birth */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-300 mb-2">
               Date of Birth
             </label>
             <input
@@ -715,20 +726,30 @@ export default function ProfileCompletionModal({ user, onComplete }) {
               value={formData.dateOfBirth}
               onChange={(e) => handleChange('dateOfBirth', e.target.value)}
               max={new Date().toISOString().split('T')[0]}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all [color-scheme:dark]"
             />
           </div>
 
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 transition-all"
-          >
-            {loading ? 'Saving...' : 'Save & Continue'}
-          </button>
+          {/* Submit Button with halo effect */}
+          <div className="relative group pt-2">
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500 via-indigo-500 to-purple-500 rounded-xl blur-lg opacity-50 group-hover:opacity-75 transition-opacity"></div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="relative w-full py-4 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 text-white font-bold rounded-xl hover:shadow-lg hover:shadow-purple-500/30 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+            >
+              {loading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Saving...
+                </>
+              ) : (
+                'Save & Continue'
+              )}
+            </button>
+          </div>
 
-          <p className="text-xs text-gray-500 text-center">
+          <p className="text-xs text-gray-500 text-center pt-2">
             This information helps organizers contact you and ensures fair tournament categorization.
           </p>
         </form>

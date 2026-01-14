@@ -1,8 +1,11 @@
 import { useState, useRef } from 'react';
 import { PhotoIcon, XMarkIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline';
+import { AlertTriangle, ImageIcon, X, Image } from 'lucide-react';
 
 const PostersStep = ({ formData, updateFormData, onNext, onPrev }) => {
   const [dragActive, setDragActive] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [alertModal, setAlertModal] = useState(null);
   const fileInputRef = useRef(null);
 
   const handleDrag = (e) => {
@@ -33,7 +36,7 @@ const PostersStep = ({ formData, updateFormData, onNext, onPrev }) => {
     const imageFiles = files.filter(file => file.type.startsWith('image/'));
     
     if (formData.posters.length + imageFiles.length > 5) {
-      alert('Maximum 5 posters allowed');
+      setAlertModal({ type: 'error', message: 'Maximum 5 posters allowed' });
       return;
     }
 
@@ -48,7 +51,6 @@ const PostersStep = ({ formData, updateFormData, onNext, onPrev }) => {
 
   const removePoster = (index) => {
     const newPosters = formData.posters.filter((_, i) => i !== index);
-    // If we removed the primary poster, make the first one primary
     if (formData.posters[index].isPrimary && newPosters.length > 0) {
       newPosters[0].isPrimary = true;
     }
@@ -65,9 +67,7 @@ const PostersStep = ({ formData, updateFormData, onNext, onPrev }) => {
 
   const handleNext = () => {
     if (formData.posters.length === 0) {
-      if (confirm('Are you sure you want to continue without posters? You can add them later.')) {
-        onNext();
-      }
+      setShowConfirmModal(true);
     } else {
       onNext();
     }
@@ -135,14 +135,12 @@ const PostersStep = ({ formData, updateFormData, onNext, onPrev }) => {
                   className="w-full h-48 object-cover"
                 />
                 
-                {/* Primary Badge */}
                 {poster.isPrimary && (
                   <div className="absolute top-2 left-2 bg-purple-600 text-white text-xs px-2 py-1 rounded-lg">
                     Primary
                   </div>
                 )}
 
-                {/* Actions Overlay */}
                 <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-opacity flex items-center justify-center gap-2">
                   {!poster.isPrimary && (
                     <button
@@ -191,6 +189,90 @@ const PostersStep = ({ formData, updateFormData, onNext, onPrev }) => {
           Next: Categories →
         </button>
       </div>
+
+      {/* Confirm Modal - No Posters */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className="relative w-full max-w-md">
+            <div className="absolute -inset-2 bg-gradient-to-r from-purple-500 via-indigo-500 to-purple-500 rounded-3xl blur-xl opacity-50"></div>
+            <div className="relative bg-slate-800 rounded-2xl border border-white/10 overflow-hidden">
+              <div className="p-6 border-b border-white/10">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-amber-500/20 rounded-lg">
+                      <Image className="w-5 h-5 text-amber-400" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-white">No Posters Added</h3>
+                  </div>
+                  <button onClick={() => setShowConfirmModal(false)} className="p-2 hover:bg-white/10 rounded-lg transition-colors">
+                    <X className="w-5 h-5 text-gray-400" />
+                  </button>
+                </div>
+              </div>
+              <div className="p-6 space-y-4">
+                <div className="flex items-center gap-4 p-4 bg-slate-700/50 rounded-xl">
+                  <div className="p-3 bg-purple-500/20 rounded-xl">
+                    <Image className="w-8 h-8 text-purple-400" />
+                  </div>
+                  <div>
+                    <p className="text-white font-medium">Continue without posters?</p>
+                    <p className="text-sm text-gray-400 mt-1">You can add them later from the tournament dashboard.</p>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-400">
+                  Posters help attract more participants to your tournament. We recommend adding at least one poster.
+                </p>
+              </div>
+              <div className="p-6 bg-slate-900/50 border-t border-white/10 flex gap-3">
+                <button
+                  onClick={() => setShowConfirmModal(false)}
+                  className="flex-1 px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl transition-colors font-medium"
+                >
+                  Add Posters
+                </button>
+                <button
+                  onClick={() => { setShowConfirmModal(false); onNext(); }}
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white rounded-xl transition-colors font-medium"
+                >
+                  Continue Anyway
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Alert Modal */}
+      {alertModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className="relative w-full max-w-sm">
+            <div className={`absolute -inset-2 bg-gradient-to-r ${alertModal.type === 'success' ? 'from-emerald-500 to-teal-500' : 'from-red-500 to-rose-500'} rounded-3xl blur-xl opacity-50`}></div>
+            <div className="relative bg-slate-800 rounded-2xl border border-white/10 overflow-hidden">
+              <div className="p-6 text-center">
+                <div className={`w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center ${alertModal.type === 'success' ? 'bg-emerald-500/20' : 'bg-red-500/20'}`}>
+                  <AlertTriangle className={`w-8 h-8 ${alertModal.type === 'success' ? 'text-emerald-400' : 'text-red-400'}`} />
+                </div>
+                <h3 className={`text-lg font-semibold ${alertModal.type === 'success' ? 'text-emerald-400' : 'text-red-400'}`}>
+                  {alertModal.type === 'success' ? 'Success!' : 'Error'}
+                </h3>
+                <p className="text-gray-300 mt-2">{alertModal.message}</p>
+              </div>
+              <div className="p-4 bg-slate-900/50 border-t border-white/10">
+                <button
+                  onClick={() => setAlertModal(null)}
+                  className={`w-full px-4 py-3 rounded-xl font-medium transition-colors ${
+                    alertModal.type === 'success'
+                      ? 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white'
+                      : 'bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 text-white'
+                  }`}
+                >
+                  OK
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

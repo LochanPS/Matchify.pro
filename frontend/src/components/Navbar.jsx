@@ -1,9 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
-import { createPortal } from 'react-dom';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import NotificationBell from './NotificationBell';
-import api from '../utils/api';
 import { 
   ChevronDown, 
   Plus, 
@@ -14,20 +12,16 @@ import {
   Menu, 
   X,
   Trophy,
-  LayoutDashboard,
-  UserPlus
+  LayoutDashboard
 } from 'lucide-react';
 
 const Navbar = () => {
-  const { user, logout, switchRole, updateUser } = useAuth();
+  const { user, logout, switchRole } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showRoleMenu, setShowRoleMenu] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
-  const [showAddRoleModal, setShowAddRoleModal] = useState(false);
-  const [addingRole, setAddingRole] = useState(false);
-  const [addRoleError, setAddRoleError] = useState('');
   const userMenuRef = useRef(null);
   const roleMenuRef = useRef(null);
 
@@ -84,42 +78,6 @@ const Navbar = () => {
     }
   };
 
-  const handleAddRole = async (role) => {
-    setAddingRole(true);
-    setAddRoleError('');
-    try {
-      const response = await api.post('/multi-auth/add-role', { role });
-      if (response.data.user) {
-        // The backend already sets currentRole to the new role
-        // Update user with the complete response including new roles
-        updateUser(response.data.user);
-        setShowAddRoleModal(false);
-        setAddRoleError('');
-        setShowRoleMenu(false);
-        
-        // Navigate to appropriate dashboard for the new role
-        switch (role) {
-          case 'PLAYER': navigate('/dashboard'); break;
-          case 'ORGANIZER': navigate('/organizer/dashboard'); break;
-          case 'UMPIRE': navigate('/umpire/dashboard'); break;
-          case 'ADMIN': navigate('/admin/dashboard'); break;
-        }
-      }
-    } catch (error) {
-      console.error('Error adding role:', error);
-      setAddRoleError(error.response?.data?.error || 'Failed to add role. Please try again.');
-    } finally {
-      setAddingRole(false);
-    }
-  };
-
-  const getAllRoles = () => ['PLAYER', 'ORGANIZER', 'UMPIRE'];
-  
-  const getMissingRoles = () => {
-    const currentRoles = getAvailableRoles();
-    return getAllRoles().filter(role => !currentRoles.includes(role));
-  };
-
   const getRoleColor = (role) => {
     switch (role) {
       case 'PLAYER': return { bg: 'bg-blue-500/20', text: 'text-blue-400', hover: 'hover:bg-blue-500/30', dot: 'bg-blue-500' };
@@ -155,6 +113,43 @@ const Navbar = () => {
   const currentRole = getCurrentRole();
   const roleColors = getRoleColor(currentRole);
   const availableRoles = getAvailableRoles();
+
+  // If user is admin, show simplified admin navbar
+  if (user?.isAdmin) {
+    return (
+      <header className="sticky top-0 z-50 bg-gradient-to-r from-purple-900/95 via-slate-900/95 to-indigo-900/95 backdrop-blur-lg border-b border-purple-500/20 shadow-lg shadow-black/20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center gap-4">
+              <Link to="/admin/dashboard" className="flex items-center gap-3">
+                <div className="relative">
+                  <div className="absolute -inset-1 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-xl blur opacity-60"></div>
+                  <div className="relative w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center">
+                    <span className="text-white font-bold text-lg">🛡️</span>
+                  </div>
+                </div>
+                <div>
+                  <span className="text-xl font-bold text-white">MATCHIFY</span>
+                  <span className="text-xl font-bold text-amber-400">.PRO</span>
+                  <span className="ml-2 text-xs bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded-full border border-purple-500/30">ADMIN</span>
+                </div>
+              </Link>
+            </div>
+            <div className="flex items-center gap-4">
+              <span className="text-gray-400 text-sm">Logged in as <span className="text-purple-400 font-medium">Super Admin</span></span>
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 px-4 py-2 bg-purple-500/20 text-purple-400 rounded-xl border border-purple-500/30 hover:bg-purple-500/30 transition-all text-sm font-medium"
+              >
+                <LogOut className="w-4 h-4" />
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+    );
+  }
 
   return (
     <header className="sticky top-0 z-50 bg-slate-900/95 backdrop-blur-lg border-b border-white/10 shadow-lg shadow-black/20">
@@ -261,31 +256,6 @@ const Navbar = () => {
                           </button>
                         );
                       })}
-                      
-                      {/* Add Role Option */}
-                      {getMissingRoles().length > 0 && (
-                        <>
-                          <div className="border-t border-white/10 my-2"></div>
-                          <div className="px-4 py-2 text-xs text-gray-400 font-semibold uppercase tracking-wider">Add New Role</div>
-                          {getMissingRoles().map((role) => {
-                            const colors = getRoleColor(role);
-                            return (
-                              <button
-                                key={role}
-                                onClick={() => {
-                                  setShowRoleMenu(false);
-                                  setShowAddRoleModal(true);
-                                }}
-                                className="w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-purple-500/20 text-purple-400 transition-colors"
-                              >
-                                <UserPlus className="w-4 h-4" />
-                                <span className="font-medium">Become {role.charAt(0) + role.slice(1).toLowerCase()}</span>
-                                <Plus className="w-4 h-4 ml-auto" />
-                              </button>
-                            );
-                          })}
-                        </>
-                      )}
                     </div>
                   )}
                 </div>
@@ -429,16 +399,6 @@ const Navbar = () => {
                     </button>
                   );
                 })}
-                {/* Add Role Button for Mobile */}
-                {getMissingRoles().length > 0 && (
-                  <button
-                    onClick={() => { setShowMobileMenu(false); setShowAddRoleModal(true); }}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 transition-colors"
-                  >
-                    <UserPlus className="w-4 h-4" />
-                    Add Role
-                  </button>
-                )}
               </div>
             </div>
 
@@ -485,124 +445,8 @@ const Navbar = () => {
         </div>
       )}
 
-      {/* Add Role Modal - Using Portal to render outside header */}
-      {showAddRoleModal && createPortal(
-        <AddRoleModal
-          isOpen={showAddRoleModal}
-          onClose={() => { setShowAddRoleModal(false); setAddRoleError(''); }}
-          missingRoles={getMissingRoles()}
-          onAddRole={handleAddRole}
-          addingRole={addingRole}
-          getRoleColor={getRoleColor}
-          error={addRoleError}
-        />,
-        document.body
-      )}
-
     </header>
   );
-};
-
-// Add Role Modal Component - Rendered outside header for proper z-index
-const AddRoleModal = ({ isOpen, onClose, missingRoles, onAddRole, addingRole, getRoleColor, error }) => {
-  if (!isOpen) return null;
-
-  const roleInfo = {
-    PLAYER: { icon: '🏸', desc: 'Compete in tournaments and track your progress' },
-    ORGANIZER: { icon: '📋', desc: 'Create and manage badminton tournaments' },
-    UMPIRE: { icon: '⚖️', desc: 'Officiate matches and manage scoring' }
-  };
-
-  return (
-    <div 
-      className="fixed inset-0 z-[9999] overflow-y-auto"
-      aria-labelledby="modal-title" 
-      role="dialog" 
-      aria-modal="true"
-    >
-      {/* Backdrop */}
-      <div 
-        className="fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity"
-        onClick={onClose}
-      ></div>
-
-      {/* Modal Container */}
-      <div className="fixed inset-0 flex items-center justify-center p-4">
-        <div 
-          className="relative bg-slate-800 border border-white/10 rounded-2xl shadow-2xl max-w-md w-full p-6 transform transition-all"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/* Header */}
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl font-bold text-white">Add New Role</h3>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-white/10 rounded-xl transition-colors"
-            >
-              <X className="w-5 h-5 text-gray-400" />
-            </button>
-          </div>
-          
-          <p className="text-gray-400 mb-6">
-            Expand your Matchify experience by adding a new role to your account.
-          </p>
-
-          {/* Error Message */}
-          {error && (
-            <div className="mb-4 p-4 bg-red-500/20 border border-red-500/30 rounded-xl">
-              <p className="text-sm text-red-400 font-medium">{error}</p>
-            </div>
-          )}
-
-          {/* Role Options */}
-          <div className="space-y-3">
-            {missingRoles.map((role) => {
-              const colors = getRoleColor(role);
-              return (
-                <button
-                  key={role}
-                  onClick={() => onAddRole(role)}
-                  disabled={addingRole}
-                  className="w-full flex items-center gap-4 p-4 rounded-xl border-2 border-white/10 hover:border-emerald-500/50 hover:bg-emerald-500/10 transition-all text-left disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <div className={`w-14 h-14 ${colors.bg} rounded-xl flex items-center justify-center text-2xl shadow-sm`}>
-                    {roleInfo[role]?.icon}
-                  </div>
-                  <div className="flex-1">
-                    <p className={`font-bold ${colors.text}`}>{role}</p>
-                    <p className="text-sm text-gray-400">{roleInfo[role]?.desc}</p>
-                  </div>
-                  <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center">
-                    <Plus className="w-5 h-5 text-gray-400" />
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Loading State */}
-          {addingRole && (
-            <div className="mt-6 flex items-center justify-center gap-3 py-3 bg-emerald-500/20 rounded-xl">
-              <div className="w-5 h-5 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></div>
-              <span className="text-emerald-400 font-medium">Adding role...</span>
-            </div>
-          )}
-
-          {/* Footer */}
-          <div className="mt-6 pt-4 border-t border-white/10">
-            <p className="text-xs text-gray-500 text-center">
-              You can switch between roles anytime from the role badge in the navbar.
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Wrapper component that includes the modal
-const NavbarWithModal = () => {
-  return <Navbar />;
 };
 
 // NavLink Component

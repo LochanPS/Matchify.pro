@@ -204,18 +204,27 @@ const CategoryForm = ({ initialData, onSave, onCancel }) => {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">Max Participants</label>
-        <input
-          type="number"
-          value={formData.maxParticipants}
+        <label className="block text-sm font-medium text-gray-300 mb-2">Max Participants (Draw Size)</label>
+        <select
+          value={formData.maxParticipants || ''}
           onChange={(e) => handleChange('maxParticipants', e.target.value)}
-          min="2"
-          step="1"
-          placeholder="Leave empty for unlimited"
-          className={`w-full px-4 py-3 bg-slate-700/50 border rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 transition-all ${errors.maxParticipants ? 'border-red-500' : 'border-white/10'}`}
-        />
+          className={`w-full px-4 py-3 bg-slate-700/50 border rounded-xl text-white focus:ring-2 focus:ring-purple-500 transition-all ${errors.maxParticipants ? 'border-red-500' : 'border-white/10'}`}
+        >
+          <option value="">Unlimited</option>
+          <option value="2">2 Participants</option>
+          <option value="4">4 Participants</option>
+          <option value="8">8 Participants</option>
+          <option value="16">16 Participants</option>
+          <option value="32">32 Participants</option>
+          <option value="64">64 Participants</option>
+          <option value="128">128 Participants</option>
+          <option value="256">256 Participants</option>
+          <option value="512">512 Participants</option>
+          <option value="1024">1024 Participants</option>
+          <option value="2048">2048 Participants</option>
+        </select>
         {errors.maxParticipants && <p className="text-red-400 text-sm mt-1">{errors.maxParticipants}</p>}
-        <p className="text-xs text-gray-500 mt-1">Optional - Limit registrations (e.g., 32 or 64 for bracket)</p>
+        <p className="text-xs text-gray-500 mt-1">Select draw size for bracket tournaments</p>
       </div>
 
       <div>

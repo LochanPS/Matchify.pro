@@ -30,37 +30,43 @@ export default function ProfileStats({ stats, user }) {
       icon: Trophy,
       label: 'Tournaments',
       value: user?.tournamentsPlayed || 0,
-      color: 'bg-yellow-100 text-yellow-600',
+      color: 'bg-amber-500/20 text-amber-400',
+      glow: 'group-hover:shadow-amber-500/20',
     },
     {
       icon: Target,
       label: 'Matches Won',
       value: user?.matchesWon || 0,
-      color: 'bg-green-100 text-green-600',
+      color: 'bg-emerald-500/20 text-emerald-400',
+      glow: 'group-hover:shadow-emerald-500/20',
     },
     {
       icon: Award,
       label: 'Matches Lost',
       value: user?.matchesLost || 0,
-      color: 'bg-red-100 text-red-600',
+      color: 'bg-red-500/20 text-red-400',
+      glow: 'group-hover:shadow-red-500/20',
     },
     {
       icon: TrendingUp,
       label: 'Total Points',
       value: user?.totalPoints || 0,
-      color: 'bg-blue-100 text-blue-600',
+      color: 'bg-blue-500/20 text-blue-400',
+      glow: 'group-hover:shadow-blue-500/20',
     },
     {
       icon: RupeeIcon,
       label: 'Wallet Balance',
       value: `₹${user?.walletBalance || 0}`,
-      color: 'bg-purple-100 text-purple-600',
+      color: 'bg-purple-500/20 text-purple-400',
+      glow: 'group-hover:shadow-purple-500/20',
     },
     {
       icon: Calendar,
       label: 'Member Since',
       value: formatDate(user?.createdAt),
-      color: 'bg-indigo-100 text-indigo-600',
+      color: 'bg-indigo-500/20 text-indigo-400',
+      glow: 'group-hover:shadow-indigo-500/20',
     },
   ];
 
@@ -72,34 +78,47 @@ export default function ProfileStats({ stats, user }) {
     <div className="space-y-6">
       {/* Win Rate Highlight */}
       {totalMatches > 0 && (
-        <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg p-6 text-center">
-          <h3 className="text-lg font-semibold mb-2">Win Rate</h3>
-          <div className="text-4xl font-bold">{winRate}%</div>
-          <p className="text-blue-100">Based on {totalMatches} matches played</p>
+        <div className="relative">
+          {/* Halo Effect */}
+          <div className="absolute -inset-1 bg-gradient-to-r from-purple-500/30 via-indigo-500/30 to-purple-500/30 rounded-2xl blur-xl"></div>
+          <div className="relative bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-2xl p-6 text-center border border-white/10">
+            <h3 className="text-lg font-semibold mb-2 text-white/90">Win Rate</h3>
+            <div className="text-5xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">{winRate}%</div>
+            <p className="text-purple-200 mt-2">Based on {totalMatches} matches played</p>
+          </div>
         </div>
       )}
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         {statCards.map((stat, idx) => (
-          <div key={idx} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-            <div className={`inline-flex p-3 rounded-lg ${stat.color} mb-3`}>
-              <stat.icon size={24} />
+          <div 
+            key={idx} 
+            className={`group bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-5 hover:border-white/20 hover:shadow-lg ${stat.glow} transition-all duration-300`}
+          >
+            <div className={`inline-flex p-3 rounded-xl ${stat.color} mb-3`}>
+              <stat.icon size={22} />
             </div>
-            <p className="text-2xl font-bold text-gray-800">{stat.value}</p>
-            <p className="text-sm text-gray-600">{stat.label}</p>
+            <p className="text-2xl font-bold text-white">{stat.value}</p>
+            <p className="text-sm text-gray-400">{stat.label}</p>
           </div>
         ))}
       </div>
 
       {/* Additional Info for New Users */}
       {totalMatches === 0 && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
-          <Trophy className="mx-auto text-blue-500 mb-3" size={48} />
-          <h3 className="text-lg font-semibold text-blue-900 mb-2">Ready to Start Playing?</h3>
-          <p className="text-blue-700">
-            Join your first tournament to start building your badminton profile and earn points!
-          </p>
+        <div className="relative">
+          {/* Halo Effect */}
+          <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-blue-500/20 rounded-2xl blur-xl"></div>
+          <div className="relative bg-slate-800/50 backdrop-blur-sm border border-blue-500/30 rounded-2xl p-6 text-center">
+            <div className="w-16 h-16 mx-auto bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mb-4">
+              <Trophy className="text-white" size={32} />
+            </div>
+            <h3 className="text-lg font-semibold text-white mb-2">Ready to Start Playing?</h3>
+            <p className="text-gray-400">
+              Join your first tournament to start building your badminton profile and earn points!
+            </p>
+          </div>
         </div>
       )}
     </div>

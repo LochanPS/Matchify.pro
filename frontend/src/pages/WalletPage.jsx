@@ -32,7 +32,6 @@ const WalletPage = () => {
       setWalletData(response.data);
     } catch (err) {
       console.error('Error fetching wallet data:', err);
-      // Don't show alert, just set error state
       setError(err.response?.data?.error || 'Failed to load wallet data');
     } finally {
       setLoading(false);
@@ -55,20 +54,23 @@ const WalletPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="text-gray-400 mt-4 font-medium">Loading wallet...</p>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="text-red-600 text-lg mb-4">{error}</div>
+          <div className="text-red-400 text-lg mb-4">{error}</div>
           <button
             onClick={fetchWalletData}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+            className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-6 py-3 rounded-xl hover:shadow-lg hover:shadow-purple-500/25 transition-all font-medium"
           >
             Retry
           </button>
@@ -78,79 +80,82 @@ const WalletPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">My Wallet</h1>
-          <p className="text-gray-600 mt-2">
+          <h1 className="text-3xl font-bold text-white">My Wallet</h1>
+          <p className="text-gray-400 mt-2">
             Manage your tournament funds and view transaction history
           </p>
         </div>
 
-        {/* Wallet Balance Card */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-8 text-white mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-blue-100 text-sm font-medium">Current Balance</p>
-              <p className="text-4xl font-bold mt-2">
-                {formatCurrency(walletData?.currentBalance || 0)}
-              </p>
-              <p className="text-blue-100 text-sm mt-2">
-                Available for tournament registrations
-              </p>
-            </div>
-            <div className="text-right">
-              <CreditCardIcon className="h-16 w-16 text-blue-200 mb-4" />
-              <button
-                onClick={() => setShowTopupModal(true)}
-                className="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors flex items-center gap-2"
-              >
-                <PlusIcon className="h-5 w-5" />
-                Add Money
-              </button>
+        {/* Wallet Balance Card with Halo */}
+        <div className="relative mb-8">
+          <div className="absolute -inset-1 bg-gradient-to-r from-purple-500/30 via-indigo-500/30 to-purple-500/30 rounded-2xl blur-xl"></div>
+          <div className="relative bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl p-8 text-white border border-white/10">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-purple-200 text-sm font-medium">Current Balance</p>
+                <p className="text-5xl font-bold mt-2 bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">
+                  {formatCurrency(walletData?.currentBalance || 0)}
+                </p>
+                <p className="text-purple-200 text-sm mt-2">
+                  Available for tournament registrations
+                </p>
+              </div>
+              <div className="text-right">
+                <CreditCardIcon className="h-16 w-16 text-purple-300/50 mb-4" />
+                <button
+                  onClick={() => setShowTopupModal(true)}
+                  className="bg-white/20 backdrop-blur-sm text-white px-6 py-3 rounded-xl font-semibold hover:bg-white/30 transition-all flex items-center gap-2 border border-white/20"
+                >
+                  <PlusIcon className="h-5 w-5" />
+                  Add Money
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-lg p-6 shadow-sm border">
+          <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:border-white/20 transition-all">
             <div className="flex items-center">
-              <div className="bg-green-100 p-3 rounded-lg">
-                <ArrowUpIcon className="h-6 w-6 text-green-600" />
+              <div className="bg-emerald-500/20 p-3 rounded-xl">
+                <ArrowUpIcon className="h-6 w-6 text-emerald-400" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Added</p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-sm font-medium text-gray-400">Total Added</p>
+                <p className="text-2xl font-bold text-white">
                   {formatCurrency(walletData?.totalTopups || 0)}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg p-6 shadow-sm border">
+          <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:border-white/20 transition-all">
             <div className="flex items-center">
-              <div className="bg-red-100 p-3 rounded-lg">
-                <ArrowDownIcon className="h-6 w-6 text-red-600" />
+              <div className="bg-red-500/20 p-3 rounded-xl">
+                <ArrowDownIcon className="h-6 w-6 text-red-400" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Spent</p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-sm font-medium text-gray-400">Total Spent</p>
+                <p className="text-2xl font-bold text-white">
                   {formatCurrency(walletData?.totalSpent || 0)}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg p-6 shadow-sm border">
+          <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:border-white/20 transition-all">
             <div className="flex items-center">
-              <div className="bg-blue-100 p-3 rounded-lg">
-                <CheckCircleIcon className="h-6 w-6 text-blue-600" />
+              <div className="bg-blue-500/20 p-3 rounded-xl">
+                <CheckCircleIcon className="h-6 w-6 text-blue-400" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Refunds</p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-sm font-medium text-gray-400">Total Refunds</p>
+                <p className="text-2xl font-bold text-white">
                   {formatCurrency(walletData?.totalRefunds || 0)}
                 </p>
               </div>
@@ -160,35 +165,33 @@ const WalletPage = () => {
 
         {/* Recent Transactions Preview */}
         {walletData?.recentTransactions && walletData.recentTransactions.length > 0 && (
-          <div className="bg-white rounded-lg shadow-sm border mb-8">
-            <div className="p-6 border-b">
-              <h2 className="text-xl font-semibold text-gray-900">Recent Transactions</h2>
+          <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl mb-8 overflow-hidden">
+            <div className="p-6 border-b border-white/10">
+              <h2 className="text-xl font-semibold text-white">Recent Transactions</h2>
             </div>
-            <div className="divide-y">
+            <div className="divide-y divide-white/5">
               {walletData.recentTransactions.slice(0, 3).map((transaction) => (
-                <div key={transaction.id} className="p-6 flex items-center justify-between">
+                <div key={transaction.id} className="p-6 flex items-center justify-between hover:bg-white/5 transition-colors">
                   <div className="flex items-center">
-                    <div className={`p-2 rounded-lg ${
-                      transaction.type === 'TOPUP' ? 'bg-green-100' :
-                      transaction.type === 'REGISTRATION_FEE' ? 'bg-red-100' :
-                      transaction.type === 'REFUND' ? 'bg-blue-100' :
-                      'bg-gray-100'
+                    <div className={`p-2 rounded-xl ${
+                      transaction.type === 'TOPUP' ? 'bg-emerald-500/20' :
+                      transaction.type === 'REGISTRATION_FEE' ? 'bg-red-500/20' :
+                      transaction.type === 'REFUND' ? 'bg-blue-500/20' :
+                      'bg-slate-700/50'
                     }`}>
                       {transaction.type === 'TOPUP' ? (
-                        <ArrowUpIcon className={`h-5 w-5 ${
-                          transaction.type === 'TOPUP' ? 'text-green-600' : 'text-gray-600'
-                        }`} />
+                        <ArrowUpIcon className="h-5 w-5 text-emerald-400" />
                       ) : transaction.type === 'REGISTRATION_FEE' ? (
-                        <ArrowDownIcon className="h-5 w-5 text-red-600" />
+                        <ArrowDownIcon className="h-5 w-5 text-red-400" />
                       ) : transaction.type === 'REFUND' ? (
-                        <CheckCircleIcon className="h-5 w-5 text-blue-600" />
+                        <CheckCircleIcon className="h-5 w-5 text-blue-400" />
                       ) : (
-                        <ClockIcon className="h-5 w-5 text-gray-600" />
+                        <ClockIcon className="h-5 w-5 text-gray-400" />
                       )}
                     </div>
                     <div className="ml-4">
-                      <p className="font-medium text-gray-900">{transaction.description}</p>
-                      <p className="text-sm text-gray-500">
+                      <p className="font-medium text-white">{transaction.description}</p>
+                      <p className="text-sm text-gray-400">
                         {new Date(transaction.createdAt).toLocaleDateString('en-IN', {
                           year: 'numeric',
                           month: 'short',
@@ -201,7 +204,7 @@ const WalletPage = () => {
                   </div>
                   <div className="text-right">
                     <p className={`font-semibold ${
-                      transaction.amount > 0 ? 'text-green-600' : 'text-red-600'
+                      transaction.amount > 0 ? 'text-emerald-400' : 'text-red-400'
                     }`}>
                       {transaction.amount > 0 ? '+' : ''}{formatCurrency(transaction.amount)}
                     </p>

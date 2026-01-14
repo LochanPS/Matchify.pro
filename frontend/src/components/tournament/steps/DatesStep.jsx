@@ -81,83 +81,97 @@ const DatesStep = ({ formData, updateMultipleFields, onNext, onPrev }) => {
       <p className="text-gray-400">Set up your tournament timeline</p>
 
       {/* Registration Period */}
-      <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl p-4">
-        <h3 className="font-semibold text-purple-300 mb-4">Registration Period</h3>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">
-              Registration Opens <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="datetime-local"
-              value={formatDateForInput(formData.registrationOpenDate)}
-              onChange={(e) => updateFormData('registrationOpenDate', e.target.value)}
-              className={`w-full px-4 py-3 bg-slate-700/50 border rounded-xl text-white focus:ring-2 focus:ring-purple-500 transition-all ${
-                errors.registrationOpenDate ? 'border-red-500' : 'border-white/10'
-              }`}
-            />
-            {errors.registrationOpenDate && (
-              <p className="mt-1 text-sm text-red-400">{errors.registrationOpenDate}</p>
-            )}
-          </div>
+      <div className="relative group">
+        <div className="absolute -inset-1 bg-gradient-to-r from-purple-500/20 to-indigo-500/20 rounded-2xl blur-lg opacity-50 group-hover:opacity-70 transition-opacity"></div>
+        <div className="relative bg-purple-500/10 border border-purple-500/30 rounded-xl p-4">
+          <h3 className="font-semibold text-purple-300 mb-4">Registration Period</h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Registration Opens <span className="text-red-500">*</span>
+              </label>
+              <div className="datetime-input-wrapper">
+                <input
+                  type="datetime-local"
+                  value={formatDateForInput(formData.registrationOpenDate)}
+                  onChange={(e) => updateFormData('registrationOpenDate', e.target.value)}
+                  className={`w-full px-4 py-3 bg-slate-700/50 border rounded-xl text-white focus:ring-2 focus:ring-purple-500 transition-all ${
+                    errors.registrationOpenDate ? 'border-red-500' : 'border-white/10'
+                  }`}
+                />
+              </div>
+              {errors.registrationOpenDate && (
+                <p className="mt-1 text-sm text-red-400">{errors.registrationOpenDate}</p>
+              )}
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">
-              Registration Closes <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="datetime-local"
-              value={formatDateForInput(formData.registrationCloseDate)}
-              onChange={(e) => updateFormData('registrationCloseDate', e.target.value)}
-              className={`w-full px-4 py-3 bg-slate-700/50 border rounded-xl text-white focus:ring-2 focus:ring-purple-500 transition-all ${
-                errors.registrationCloseDate ? 'border-red-500' : 'border-white/10'
-              }`}
-            />
-            {errors.registrationCloseDate && (
-              <p className="mt-1 text-sm text-red-400">{errors.registrationCloseDate}</p>
-            )}
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Registration Closes <span className="text-red-500">*</span>
+              </label>
+              <div className="datetime-input-wrapper">
+                <input
+                  type="datetime-local"
+                  value={formatDateForInput(formData.registrationCloseDate)}
+                  onChange={(e) => updateFormData('registrationCloseDate', e.target.value)}
+                  className={`w-full px-4 py-3 bg-slate-700/50 border rounded-xl text-white focus:ring-2 focus:ring-purple-500 transition-all ${
+                    errors.registrationCloseDate ? 'border-red-500' : 'border-white/10'
+                  }`}
+                />
+              </div>
+              {errors.registrationCloseDate && (
+                <p className="mt-1 text-sm text-red-400">{errors.registrationCloseDate}</p>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
       {/* Tournament Period */}
-      <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4">
-        <h3 className="font-semibold text-emerald-300 mb-4">Tournament Period</h3>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">
-              Tournament Starts <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="datetime-local"
-              value={formatDateForInput(formData.startDate)}
-              onChange={(e) => updateFormData('startDate', e.target.value)}
-              className={`w-full px-4 py-3 bg-slate-700/50 border rounded-xl text-white focus:ring-2 focus:ring-purple-500 transition-all ${
-                errors.startDate ? 'border-red-500' : 'border-white/10'
-              }`}
-            />
-            {errors.startDate && (
-              <p className="mt-1 text-sm text-red-400">{errors.startDate}</p>
-            )}
-          </div>
+      <div className="relative group">
+        <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 rounded-2xl blur-lg opacity-50 group-hover:opacity-70 transition-opacity"></div>
+        <div className="relative bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4">
+          <h3 className="font-semibold text-emerald-300 mb-4">Tournament Period</h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Tournament Starts <span className="text-red-500">*</span>
+              </label>
+              <div className="datetime-input-wrapper">
+                <input
+                  type="datetime-local"
+                  value={formatDateForInput(formData.startDate)}
+                  onChange={(e) => updateFormData('startDate', e.target.value)}
+                  className={`w-full px-4 py-3 bg-slate-700/50 border rounded-xl text-white focus:ring-2 focus:ring-purple-500 transition-all ${
+                    errors.startDate ? 'border-red-500' : 'border-white/10'
+                  }`}
+                />
+              </div>
+              {errors.startDate && (
+                <p className="mt-1 text-sm text-red-400">{errors.startDate}</p>
+              )}
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">
-              Tournament Ends <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="datetime-local"
-              value={formatDateForInput(formData.endDate)}
-              onChange={(e) => updateFormData('endDate', e.target.value)}
-              className={`w-full px-4 py-3 bg-slate-700/50 border rounded-xl text-white focus:ring-2 focus:ring-purple-500 transition-all ${
-                errors.endDate ? 'border-red-500' : 'border-white/10'
-              }`}
-            />
-            {errors.endDate && (
-              <p className="mt-1 text-sm text-red-400">{errors.endDate}</p>
-            )}
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Tournament Ends <span className="text-red-500">*</span>
+              </label>
+              <div className="datetime-input-wrapper">
+                <input
+                  type="datetime-local"
+                  value={formatDateForInput(formData.endDate)}
+                  onChange={(e) => updateFormData('endDate', e.target.value)}
+                  className={`w-full px-4 py-3 bg-slate-700/50 border rounded-xl text-white focus:ring-2 focus:ring-purple-500 transition-all ${
+                    errors.endDate ? 'border-red-500' : 'border-white/10'
+                  }`}
+                />
+              </div>
+              {errors.endDate && (
+                <p className="mt-1 text-sm text-red-400">{errors.endDate}</p>
+              )}
+            </div>
           </div>
         </div>
       </div>

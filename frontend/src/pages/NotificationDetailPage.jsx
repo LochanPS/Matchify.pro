@@ -584,7 +584,7 @@ export default function NotificationDetailPage() {
                   <CreditCard className="w-5 h-5 text-green-400" />
                   <div>
                     <p className="text-sm text-green-400">Amount Paid</p>
-                    <p className="font-bold text-green-300 text-xl">₹{registration.amountTotal}</p>
+                    <p className="font-bold text-green-300 text-xl">₹{notification?.data ? (JSON.parse(notification.data).amount || registration.amountTotal) : registration.amountTotal}</p>
                   </div>
                 </div>
               </div>

@@ -20,6 +20,21 @@ const authenticate = async (req, res, next) => {
     // Verify token
     const decoded = verifyAccessToken(token);
 
+    // Check if this is a super admin token
+    if (decoded.isAdmin && decoded.userId === 'admin') {
+      req.user = {
+        id: 'admin',
+        userId: 'admin',
+        email: decoded.email,
+        role: 'ADMIN',
+        roles: ['ADMIN'],
+        name: 'Super Admin',
+        isAdmin: true,
+        isVerified: true
+      };
+      return next();
+    }
+
     // Get user from database
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId }
@@ -59,7 +74,8 @@ const authenticate = async (req, res, next) => {
       role: userRoles[0], // Primary role for backward compatibility
       roles: userRoles, // All roles for multi-role support
       name: user.name,
-      isVerified: user.isVerified
+      isVerified: user.isVerified,
+      isAdmin: false
     };
 
     next();

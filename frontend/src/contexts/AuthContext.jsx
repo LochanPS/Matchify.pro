@@ -76,6 +76,11 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('user', JSON.stringify(userData));
       setUser(userData);
       
+      // Don't show profile completion for admin
+      if (userData.isAdmin) {
+        return userData;
+      }
+      
       // Check if profile is incomplete after login
       if (!isProfileComplete(userData)) {
         setShowProfileCompletion(true);

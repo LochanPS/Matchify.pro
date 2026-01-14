@@ -41,20 +41,13 @@ async function generateUmpireCode() {
   return code;
 }
 
-// REGISTER - Support multiple roles
+// REGISTER - All users get all three roles automatically
 export const register = async (req, res) => {
   try {
-    const { email, password, name, phone, alternateEmail, roles } = req.body;
+    const { email, password, name, phone, alternateEmail } = req.body;
 
-    // Validate roles - default to PLAYER if none provided
-    const validRoles = ['PLAYER', 'ORGANIZER', 'UMPIRE'];
-    let userRoles = roles && Array.isArray(roles) 
-      ? roles.filter(role => validRoles.includes(role)) 
-      : ['PLAYER'];
-    
-    if (userRoles.length === 0) {
-      userRoles.push('PLAYER'); // Fallback to PLAYER
-    }
+    // All users automatically get all three roles
+    const userRoles = ['PLAYER', 'ORGANIZER', 'UMPIRE'];
 
     // Validate phone number is required
     if (!phone) {
@@ -76,7 +69,10 @@ export const register = async (req, res) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user with roles (stored as comma-separated string for SQLite)
+    // Generate unique umpire code for all users
+    const umpireCode = await generateUmpireCode();
+
+    // Create user with all three roles
     // All new users get ₹10 welcome bonus
     const user = await prisma.user.create({
       data: {
@@ -86,6 +82,7 @@ export const register = async (req, res) => {
         phone,
         alternateEmail: alternateEmail || null,
         roles: userRoles.join(','),
+        umpireCode, // All users get umpire code
         walletBalance: 10, // Welcome bonus
       },
     });
@@ -103,24 +100,18 @@ export const register = async (req, res) => {
       },
     });
 
-    // Create role-specific profiles
-    if (userRoles.includes('PLAYER')) {
-      await prisma.playerProfile.create({
-        data: { userId: user.id },
-      });
-    }
+    // Create all role-specific profiles
+    await prisma.playerProfile.create({
+      data: { userId: user.id },
+    });
     
-    if (userRoles.includes('ORGANIZER')) {
-      await prisma.organizerProfile.create({
-        data: { userId: user.id },
-      });
-    }
+    await prisma.organizerProfile.create({
+      data: { userId: user.id },
+    });
     
-    if (userRoles.includes('UMPIRE')) {
-      await prisma.umpireProfile.create({
-        data: { userId: user.id },
-      });
-    }
+    await prisma.umpireProfile.create({
+      data: { userId: user.id },
+    });
 
     // Generate JWT with all roles
     const token = jwt.sign(
@@ -145,6 +136,7 @@ export const register = async (req, res) => {
         profilePhoto: user.profilePhoto,
         walletBalance: user.walletBalance,
         totalPoints: user.totalPoints,
+        umpireCode: user.umpireCode,
         roles: userRoles,
       },
     });
@@ -154,10 +146,36 @@ export const register = async (req, res) => {
   }
 };
 
+// ADMIN CREDENTIALS (hardcoded for security)
+const ADMIN_EMAIL = 'ADMIN@gmail.com';
+const ADMIN_PASSWORD = 'ADMIN@123(123)';
+
 // LOGIN - Return all roles
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
+
+    // Check for admin login
+    if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+      // Generate admin JWT
+      const token = jwt.sign(
+        { userId: 'admin', email: ADMIN_EMAIL, roles: ['ADMIN'], isAdmin: true },
+        process.env.JWT_SECRET,
+        { expiresIn: '7d' }
+      );
+
+      return res.json({
+        message: 'Admin login successful',
+        token,
+        user: {
+          id: 'admin',
+          email: ADMIN_EMAIL,
+          name: 'Super Admin',
+          roles: ['ADMIN'],
+          isAdmin: true,
+        },
+      });
+    }
 
     // Find user with all profile fields
     const user = await prisma.user.findUnique({
@@ -173,9 +191,14 @@ export const login = async (req, res) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    // Check if suspended
+    // Check if suspended - return detailed message
     if (user.isSuspended) {
-      return res.status(403).json({ error: 'Account suspended' });
+      return res.status(403).json({ 
+        error: 'Account suspended',
+        isSuspended: true,
+        suspensionReason: user.suspensionReason || 'Violation of Matchify.pro terms of service',
+        message: `Your account has been suspended. Reason: ${user.suspensionReason || 'Violation of terms of service'}. Please contact support if you believe this is a mistake.`
+      });
     }
 
     // Verify password
@@ -189,7 +212,7 @@ export const login = async (req, res) => {
 
     // Generate JWT with all roles
     const token = jwt.sign(
-      { userId: user.id, email: user.email, roles: userRoles },
+      { userId: user.id, email: user.email, roles: userRoles, isAdmin: false },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
@@ -212,6 +235,7 @@ export const login = async (req, res) => {
         totalPoints: user.totalPoints,
         umpireCode: user.umpireCode,
         roles: userRoles,
+        isAdmin: false,
         profiles: {
           player: user.playerProfile,
           organizer: user.organizerProfile,

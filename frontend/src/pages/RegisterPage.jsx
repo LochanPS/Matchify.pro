@@ -22,7 +22,6 @@ const RegisterPage = () => {
     phone: '',
     password: '',
     confirmPassword: '',
-    roles: ['PLAYER'],
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -37,15 +36,6 @@ const RegisterPage = () => {
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     setError('');
-  };
-
-  const handleRoleToggle = (role) => {
-    setFormData(prev => ({
-      ...prev,
-      roles: prev.roles.includes(role)
-        ? prev.roles.filter(r => r !== role)
-        : [...prev.roles, role]
-    }));
   };
 
   const handleSubmit = async (e) => {
@@ -63,12 +53,26 @@ const RegisterPage = () => {
       setError('Please enter a valid alternate email address');
       return;
     }
-    if (formData.roles.length === 0) {
-      setError('Please select at least one role');
+    // Password validation
+    const password = formData.password;
+    const hasUppercase = /[A-Z]/.test(password);
+    const numberCount = (password.match(/[0-9]/g) || []).length;
+    const hasSymbol = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+    
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters');
       return;
     }
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters');
+    if (!hasUppercase) {
+      setError('Password must contain at least one uppercase letter (A-Z)');
+      return;
+    }
+    if (numberCount < 2) {
+      setError('Password must contain at least two numbers (0-9)');
+      return;
+    }
+    if (!hasSymbol) {
+      setError('Password must contain at least one symbol (!@#$%^&*...)');
       return;
     }
     if (formData.password !== formData.confirmPassword) {
@@ -81,20 +85,15 @@ const RegisterPage = () => {
     
     try {
       const { confirmPassword, ...dataToSend } = formData;
-      const user = await register(dataToSend);
+      await register(dataToSend);
       
       if (redirectUrl) {
         navigate(redirectUrl);
         return;
       }
       
-      const firstRole = user.roles[0].toLowerCase();
-      switch (firstRole) {
-        case 'player': navigate('/dashboard'); break;
-        case 'organizer': navigate('/organizer/dashboard'); break;
-        case 'umpire': navigate('/umpire/dashboard'); break;
-        default: navigate('/');
-      }
+      // Default to player dashboard
+      navigate('/dashboard');
     } catch (err) {
       setError(err.response?.data?.error || 'Registration failed. Please try again.');
     } finally {
@@ -102,10 +101,11 @@ const RegisterPage = () => {
     }
   };
 
+  // All three roles that every user gets
   const roles = [
-    { id: 'PLAYER', icon: '🏸', title: 'Player', desc: 'Compete in tournaments', color: 'purple' },
-    { id: 'ORGANIZER', icon: '📋', title: 'Organizer', desc: 'Host tournaments', color: 'amber' },
-    { id: 'UMPIRE', icon: '⚖️', title: 'Umpire', desc: 'Officiate matches', color: 'cyan' },
+    { id: 'PLAYER', icon: '🏸', title: 'Player', desc: 'Compete in tournaments', color: 'blue' },
+    { id: 'ORGANIZER', icon: '📋', title: 'Organizer', desc: 'Host tournaments', color: 'green' },
+    { id: 'UMPIRE', icon: '⚖️', title: 'Umpire', desc: 'Officiate matches', color: 'orange' },
   ];
 
   return (
@@ -202,36 +202,28 @@ const RegisterPage = () => {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Role Selection */}
+            {/* All Roles Included - Informational */}
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-3">Select Your Role(s)</label>
+              <label className="block text-sm font-medium text-gray-300 mb-3">
+                You'll Get All 3 Roles <span className="text-emerald-400">✓</span>
+              </label>
               <div className="grid grid-cols-3 gap-3">
                 {roles.map((role) => (
-                  <button
+                  <div
                     key={role.id}
-                    type="button"
-                    onClick={() => handleRoleToggle(role.id)}
-                    className={`relative p-4 rounded-xl border-2 transition-all ${
-                      formData.roles.includes(role.id)
-                        ? 'border-purple-500 bg-purple-500/10 shadow-lg shadow-purple-500/20'
-                        : 'border-white/10 bg-slate-800/50 hover:border-white/20'
-                    }`}
+                    className="relative p-4 rounded-xl border-2 border-emerald-500/50 bg-emerald-500/10 shadow-lg shadow-emerald-500/10"
                   >
-                    {formData.roles.includes(role.id) && (
-                      <CheckCircleIcon className="absolute top-2 right-2 w-5 h-5 text-purple-400" />
-                    )}
+                    <CheckCircleIcon className="absolute top-2 right-2 w-5 h-5 text-emerald-400" />
                     <div className="text-2xl mb-2">{role.icon}</div>
                     <p className="font-semibold text-white text-sm">{role.title}</p>
                     <p className="text-xs text-gray-500">{role.desc}</p>
-                  </button>
+                  </div>
                 ))}
               </div>
-              {formData.roles.length > 1 && (
-                <p className="mt-2 text-xs text-purple-400 flex items-center gap-1">
-                  <CheckCircleIcon className="w-4 h-4" />
-                  You can switch between roles anytime
-                </p>
-              )}
+              <p className="mt-2 text-xs text-emerald-400 flex items-center gap-1">
+                <CheckCircleIcon className="w-4 h-4" />
+                Switch between roles anytime from your dashboard
+              </p>
             </div>
 
             {/* Name */}
@@ -343,6 +335,18 @@ const RegisterPage = () => {
                       {showPassword ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
                     </button>
                   </div>
+                </div>
+                {/* Password requirements */}
+                <div className="mt-2 space-y-1">
+                  <p className={`text-xs flex items-center gap-1 ${/[A-Z]/.test(formData.password) ? 'text-emerald-400' : 'text-gray-500'}`}>
+                    <span>{/[A-Z]/.test(formData.password) ? '✓' : '○'}</span> One uppercase letter
+                  </p>
+                  <p className={`text-xs flex items-center gap-1 ${(formData.password.match(/[0-9]/g) || []).length >= 2 ? 'text-emerald-400' : 'text-gray-500'}`}>
+                    <span>{(formData.password.match(/[0-9]/g) || []).length >= 2 ? '✓' : '○'}</span> Two numbers
+                  </p>
+                  <p className={`text-xs flex items-center gap-1 ${/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(formData.password) ? 'text-emerald-400' : 'text-gray-500'}`}>
+                    <span>{/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(formData.password) ? '✓' : '○'}</span> One symbol (!@#$...)
+                  </p>
                 </div>
               </div>
               <div>

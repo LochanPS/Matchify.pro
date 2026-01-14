@@ -293,13 +293,13 @@ export default function ProfilePage() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 -mt-8">
         {/* Success/Error Messages */}
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl text-red-700 flex items-center gap-3">
+          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-2xl text-red-400 flex items-center gap-3">
             <span className="text-xl">⚠️</span>
             {error}
           </div>
         )}
         {success && (
-          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-2xl text-green-700 flex items-center gap-3">
+          <div className="mb-6 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl text-emerald-400 flex items-center gap-3">
             <span className="text-xl">✅</span>
             {success}
           </div>
@@ -316,9 +316,9 @@ export default function ProfilePage() {
             </div>
             
             {/* Notice about permanent fields */}
-            <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3">
-              <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-amber-700">
+            <div className="mb-6 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-amber-300">
                 <strong>Important:</strong> Name and Date of Birth can only be set once and cannot be changed later.
               </p>
             </div>
@@ -326,8 +326,8 @@ export default function ProfilePage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Name Field */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Full Name {!canEditName && <span className="text-gray-400">(locked)</span>}
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Full Name {!canEditName && <span className="text-gray-500">(locked)</span>}
                 </label>
                 {canEditName ? (
                   <>
@@ -336,25 +336,25 @@ export default function ProfilePage() {
                       name="name"
                       value={formData.name}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 bg-blue-50 border border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      className="w-full px-4 py-3 bg-blue-500/10 border border-blue-500/30 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                       placeholder="Enter your full name (one-time only)"
                     />
-                    <p className="text-xs text-blue-600 mt-1">⚠️ This can only be set once</p>
+                    <p className="text-xs text-blue-400 mt-1">⚠️ This can only be set once</p>
                   </>
                 ) : (
                   <input
                     type="text"
                     value={profile?.name || ''}
                     disabled
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-100 text-gray-400 cursor-not-allowed"
+                    className="w-full px-4 py-3 border border-white/5 rounded-xl bg-slate-700/30 text-gray-500 cursor-not-allowed"
                   />
                 )}
               </div>
 
               {/* Date of Birth Field */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Date of Birth {!canEditDOB && <span className="text-gray-400">(locked)</span>}
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Date of Birth {!canEditDOB && <span className="text-gray-500">(locked)</span>}
                 </label>
                 {canEditDOB ? (
                   <>
@@ -363,79 +363,79 @@ export default function ProfilePage() {
                       name="dateOfBirth"
                       value={formData.dateOfBirth}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 bg-blue-50 border border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      className="w-full px-4 py-3 bg-blue-500/10 border border-blue-500/30 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all [color-scheme:dark]"
                     />
-                    <p className="text-xs text-blue-600 mt-1">⚠️ This can only be set once</p>
+                    <p className="text-xs text-blue-400 mt-1">⚠️ This can only be set once</p>
                   </>
                 ) : (
                   <input
                     type="text"
                     value={profile?.dateOfBirth ? formatDateIndian(profile.dateOfBirth) : 'Not provided'}
                     disabled
-                    className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-100 text-gray-400 cursor-not-allowed"
+                    className="w-full px-4 py-3 border border-white/5 rounded-xl bg-slate-700/30 text-gray-500 cursor-not-allowed"
                   />
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Phone Number</label>
                 <input
                   type="tel"
                   name="phone"
                   value={formData.phone}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                   placeholder="Enter your phone number"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Gender</label>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Gender</label>
                 <select
                   name="gender"
                   value={formData.gender}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                 >
-                  <option value="">Select Gender</option>
-                  <option value="MALE">Male</option>
-                  <option value="FEMALE">Female</option>
-                  <option value="OTHER">Other</option>
+                  <option value="" className="bg-slate-800">Select Gender</option>
+                  <option value="MALE" className="bg-slate-800">Male</option>
+                  <option value="FEMALE" className="bg-slate-800">Female</option>
+                  <option value="OTHER" className="bg-slate-800">Other</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">City</label>
+                <label className="block text-sm font-medium text-gray-300 mb-2">City</label>
                 <input
                   type="text"
                   name="city"
                   value={formData.city}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                   placeholder="Enter your city"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">State</label>
+                <label className="block text-sm font-medium text-gray-300 mb-2">State</label>
                 <input
                   type="text"
                   name="state"
                   value={formData.state}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                   placeholder="Enter your state"
                 />
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Country</label>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Country</label>
                 <input
                   type="text"
                   name="country"
                   value={formData.country}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                   placeholder="Enter your country"
                 />
               </div>
@@ -456,56 +456,67 @@ export default function ProfilePage() {
       {/* Confirmation Modal for Name/DOB */}
       {showConfirmModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-14 h-14 bg-amber-100 rounded-2xl flex items-center justify-center">
-                <AlertTriangle className="text-amber-600" size={28} />
+          {/* Halo Effect */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="w-96 h-96 bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-amber-500/20 rounded-full blur-3xl"></div>
+          </div>
+          
+          <div className="relative bg-slate-800 border border-white/10 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
+            {/* Header with gradient */}
+            <div className="relative bg-gradient-to-r from-amber-500 to-orange-600 px-6 py-5">
+              <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0wIDBoNDB2NDBIMHoiLz48cGF0aCBkPSJNMjAgMjBtLTEgMGExIDEgMCAxIDAgMiAwYTEgMSAwIDEgMCAtMiAwIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMSkiLz48L2c+PC9zdmc+')] opacity-30"></div>
+              <div className="relative flex items-center gap-4">
+                <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+                  <AlertTriangle className="text-white" size={24} />
+                </div>
+                <h3 className="text-xl font-bold text-white">Confirm Your Details</h3>
               </div>
-              <h3 className="text-xl font-bold text-white">Confirm Your Details</h3>
             </div>
             
-            <p className="text-gray-400 mb-4">
-              Please verify the following information. <strong>Once saved, these fields cannot be changed.</strong>
-            </p>
+            <div className="p-6">
+              <p className="text-gray-300 mb-4">
+                Please verify the following information. <strong className="text-amber-400">Once saved, these fields cannot be changed.</strong>
+              </p>
 
-            <div className="bg-gray-50 rounded-xl p-4 mb-6 space-y-3">
-              {!profile?.name && pendingData?.name && (
-                <div>
-                  <p className="text-sm text-gray-500">Full Name</p>
-                  <p className="font-semibold text-white">{pendingData.name}</p>
-                </div>
-              )}
-              {!profile?.dateOfBirth && pendingData?.dateOfBirth && (
-                <div>
-                  <p className="text-sm text-gray-500">Date of Birth</p>
-                  <p className="font-semibold text-white">
-                    {formatDateLongIndian(pendingData.dateOfBirth)}
-                  </p>
-                </div>
-              )}
-            </div>
+              <div className="bg-slate-700/50 border border-white/10 rounded-xl p-4 mb-6 space-y-3">
+                {!profile?.name && pendingData?.name && (
+                  <div>
+                    <p className="text-sm text-gray-400">Full Name</p>
+                    <p className="font-semibold text-white">{pendingData.name}</p>
+                  </div>
+                )}
+                {!profile?.dateOfBirth && pendingData?.dateOfBirth && (
+                  <div>
+                    <p className="text-sm text-gray-400">Date of Birth</p>
+                    <p className="font-semibold text-white">
+                      {formatDateLongIndian(pendingData.dateOfBirth)}
+                    </p>
+                  </div>
+                )}
+              </div>
 
-            <p className="text-sm text-amber-600 mb-6 flex items-center gap-2">
-              <AlertTriangle size={16} />
-              Are you sure this information is correct?
-            </p>
+              <p className="text-sm text-amber-400 mb-6 flex items-center gap-2 bg-amber-500/10 border border-amber-500/30 rounded-xl p-3">
+                <AlertTriangle size={16} />
+                Are you sure this information is correct?
+              </p>
 
-            <div className="flex gap-3">
-              <button
-                onClick={() => {
-                  setShowConfirmModal(false);
-                  setPendingData(null);
-                }}
-                className="flex-1 px-4 py-3 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-all font-medium"
-              >
-                Go Back & Edit
-              </button>
-              <button
-                onClick={handleConfirmSave}
-                className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:shadow-lg transition-all font-medium"
-              >
-                Yes, Confirm & Save
-              </button>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowConfirmModal(false);
+                    setPendingData(null);
+                  }}
+                  className="flex-1 px-4 py-3 bg-slate-700/50 border border-white/10 text-gray-300 rounded-xl hover:bg-slate-700 hover:text-white transition-all font-medium"
+                >
+                  Go Back & Edit
+                </button>
+                <button
+                  onClick={handleConfirmSave}
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl hover:shadow-lg hover:shadow-amber-500/25 transition-all font-medium"
+                >
+                  Yes, Confirm & Save
+                </button>
+              </div>
             </div>
           </div>
         </div>

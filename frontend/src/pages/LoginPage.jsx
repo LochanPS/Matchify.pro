@@ -2,13 +2,14 @@ import { useState } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { EyeIcon, EyeSlashIcon, EnvelopeIcon, LockClosedIcon, ArrowRightIcon, SparklesIcon } from '@heroicons/react/24/outline';
-import { Zap, Trophy, Users, MapPin } from 'lucide-react';
+import { Zap, Trophy, Users, MapPin, Ban, X, AlertTriangle } from 'lucide-react';
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [bannedModal, setBannedModal] = useState(null);
   
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -49,7 +50,15 @@ const LoginPage = () => {
         default: navigate('/');
       }
     } catch (err) {
-      setError(err.response?.data?.error || 'Login failed. Please try again.');
+      // Check if user is banned
+      if (err.response?.status === 403 && err.response?.data?.isSuspended) {
+        setBannedModal({
+          reason: err.response.data.suspensionReason || 'Violation of terms of service',
+          message: err.response.data.message
+        });
+      } else {
+        setError(err.response?.data?.error || 'Login failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -264,6 +273,53 @@ const LoginPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Banned User Modal */}
+      {bannedModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className="relative w-full max-w-md">
+            <div className="absolute -inset-2 bg-gradient-to-r from-red-500 via-rose-500 to-red-500 rounded-3xl blur-xl opacity-60"></div>
+            <div className="relative bg-slate-800 rounded-2xl border border-red-500/30 overflow-hidden">
+              <div className="p-6 border-b border-white/10 bg-red-500/10">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 bg-red-500/20 rounded-full flex items-center justify-center">
+                    <Ban className="w-7 h-7 text-red-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-red-400">Account Suspended</h3>
+                    <p className="text-sm text-gray-400">Your Matchify.pro account has been suspended</p>
+                  </div>
+                </div>
+              </div>
+              <div className="p-6 space-y-4">
+                <div className="p-4 bg-slate-700/50 rounded-xl border border-white/10">
+                  <p className="text-sm text-gray-400 mb-2">Reason for suspension:</p>
+                  <p className="text-white font-medium">{bannedModal.reason}</p>
+                </div>
+                <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl">
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-amber-400 font-medium text-sm">What can you do?</p>
+                      <p className="text-sm text-gray-400 mt-1">
+                        If you believe this suspension is a mistake, please contact our support team at <span className="text-purple-400">support@matchify.pro</span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="p-6 bg-slate-900/50 border-t border-white/10">
+                <button
+                  onClick={() => setBannedModal(null)}
+                  className="w-full px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl transition-colors font-medium"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

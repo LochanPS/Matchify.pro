@@ -11,13 +11,21 @@ export const useWebSocket = () => {
   return context;
 };
 
+// Get WebSocket URL from API URL
+const getWebSocketUrl = () => {
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+  // Remove /api suffix for WebSocket connection
+  return apiUrl.replace('/api', '');
+};
+
 export const WebSocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
     // Connect to backend WebSocket server
-    const socketInstance = io(import.meta.env.VITE_API_URL || 'http://localhost:5000', {
+    const wsUrl = getWebSocketUrl();
+    const socketInstance = io(wsUrl, {
       autoConnect: true,
       reconnection: true,
       reconnectionAttempts: 5,

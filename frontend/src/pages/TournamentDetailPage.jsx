@@ -485,6 +485,17 @@ const TournamentDetailPage = () => {
                 </div>
 
                 <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 bg-amber-500/20 border border-amber-500/30 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <CalendarIcon className="h-6 w-6 text-amber-400" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-white">Tournament Schedule</p>
+                    <p className="text-gray-400">Start: {formatDate(tournament.startDate)}</p>
+                    <p className="text-gray-400">End: {formatDate(tournament.endDate)}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
                   <div className="w-12 h-12 bg-blue-500/20 border border-blue-500/30 rounded-xl flex items-center justify-center flex-shrink-0">
                     <ClockIcon className="h-6 w-6 text-blue-400" />
                   </div>

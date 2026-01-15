@@ -310,51 +310,57 @@ const CreateTournament = () => {
 
       {/* Exit Confirmation Modal */}
       {showExitModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl shadow-2xl max-w-md w-full p-6 animate-in fade-in zoom-in duration-200">
-            <div className="text-center mb-6">
-              <div className="mx-auto w-14 h-14 bg-gradient-to-br from-amber-100 to-orange-100 rounded-2xl flex items-center justify-center mb-4">
-                <AlertTriangle className="w-7 h-7 text-amber-600" />
-              </div>
-              <h3 className="text-xl font-bold text-white mb-2">
-                Save Tournament Draft?
-              </h3>
-              <p className="text-gray-400">
-                Would you like to save your progress as a draft to continue later?
-              </p>
-            </div>
-
-            {formData.name && (
-              <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl p-4 mb-6 border border-white/10">
-                <p className="text-sm text-gray-700">
-                  <span className="font-semibold">Tournament:</span> {formData.name || 'Untitled'}
-                </p>
-                <p className="text-sm text-gray-500 mt-1">
-                  Step {currentStep} of 6 • {completedSteps.length} steps completed
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="relative bg-slate-800/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl max-w-md w-full p-8 animate-in fade-in zoom-in duration-200">
+            {/* Halo effect */}
+            <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 rounded-2xl blur-xl opacity-30 animate-pulse"></div>
+            
+            {/* Content */}
+            <div className="relative">
+              <div className="text-center mb-6">
+                <div className="mx-auto w-16 h-16 bg-gradient-to-br from-amber-500/20 to-orange-500/20 rounded-2xl flex items-center justify-center mb-4 border border-amber-500/30">
+                  <AlertTriangle className="w-8 h-8 text-amber-400" />
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-2">
+                  Save Tournament Draft?
+                </h3>
+                <p className="text-gray-400">
+                  Would you like to save your progress as a draft to continue later?
                 </p>
               </div>
-            )}
 
-            <div className="space-y-3">
-              <button
-                onClick={handleSaveAndExit}
-                className="w-full py-3.5 px-4 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl hover:shadow-lg hover:shadow-emerald-500/30 transition-all font-semibold flex items-center justify-center gap-2"
-              >
-                <Save className="w-5 h-5" />
-                Save as Draft & Exit
-              </button>
-              <button
-                onClick={handleDiscardAndExit}
-                className="w-full py-3.5 px-4 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors font-semibold"
-              >
-                Discard & Exit
-              </button>
-              <button
-                onClick={() => setShowExitModal(false)}
-                className="w-full py-3.5 px-4 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-semibold"
-              >
-                Continue Editing
-              </button>
+              {formData.name && (
+                <div className="bg-slate-700/50 backdrop-blur-sm rounded-xl p-4 mb-6 border border-white/10">
+                  <p className="text-sm text-gray-300">
+                    <span className="font-semibold text-white">Tournament:</span> {formData.name || 'Untitled'}
+                  </p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Step {currentStep} of 6 • {completedSteps.length} steps completed
+                  </p>
+                </div>
+              )}
+
+              <div className="space-y-3">
+                <button
+                  onClick={handleSaveAndExit}
+                  className="w-full py-3.5 px-4 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl hover:shadow-lg hover:shadow-emerald-500/50 transition-all font-semibold flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  <Save className="w-5 h-5" />
+                  Save as Draft & Exit
+                </button>
+                <button
+                  onClick={handleDiscardAndExit}
+                  className="w-full py-3.5 px-4 bg-red-500/10 text-red-400 rounded-xl hover:bg-red-500/20 border border-red-500/30 transition-all font-semibold hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  Discard & Exit
+                </button>
+                <button
+                  onClick={() => setShowExitModal(false)}
+                  className="w-full py-3.5 px-4 border border-white/10 text-gray-300 rounded-xl hover:bg-white/5 transition-all font-semibold hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  Continue Editing
+                </button>
+              </div>
             </div>
           </div>
         </div>

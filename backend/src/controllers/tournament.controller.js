@@ -304,10 +304,11 @@ const getTournaments = async (req, res) => {
     }
 
     // Registration open filter
+    // Note: Since dates are stored as strings, we need to convert current time to string format for comparison
     if (registrationOpen === 'true') {
       const now = new Date();
-      baseFilters.registrationOpenDate = { lte: now };
-      baseFilters.registrationCloseDate = { gte: now };
+      // For string date comparison, we'll filter in memory after fetching
+      // This is a limitation of storing dates as strings
       baseFilters.status = { in: ['draft', 'published'] }; // Only show upcoming tournaments
     }
 
@@ -402,10 +403,11 @@ const getTournaments = async (req, res) => {
       const maxFee = fees.length > 0 ? Math.max(...fees) : 0;
 
       // Calculate registration status
+      // Dates are stored as strings, convert to Date for comparison
       const now = new Date();
-      const isRegistrationOpen = 
-        new Date(tournament.registrationOpenDate) <= now &&
-        new Date(tournament.registrationCloseDate) >= now;
+      const regOpenDate = new Date(tournament.registrationOpenDate);
+      const regCloseDate = new Date(tournament.registrationCloseDate);
+      const isRegistrationOpen = regOpenDate <= now && regCloseDate >= now;
 
       return {
         ...tournament,
@@ -416,10 +418,16 @@ const getTournaments = async (req, res) => {
       };
     });
 
+    // Apply registration open filter in memory if needed
+    let filteredTournaments = tournamentsWithPricing;
+    if (registrationOpen === 'true') {
+      filteredTournaments = tournamentsWithPricing.filter(t => t.isRegistrationOpen);
+    }
+
     res.json({
       success: true,
       data: {
-        tournaments: tournamentsWithPricing,
+        tournaments: filteredTournaments,
         pagination: {
           total,
           page: parseInt(page),

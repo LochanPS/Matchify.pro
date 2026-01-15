@@ -39,14 +39,19 @@ const createRegistration = async (req, res) => {
     }
 
     // Check if registration is open
+    // Dates are stored as strings like "2026-01-15T11:30"
+    // Convert to Date objects for comparison
     const now = new Date();
-    if (now < new Date(tournament.registrationOpenDate)) {
+    const regOpenDate = new Date(tournament.registrationOpenDate);
+    const regCloseDate = new Date(tournament.registrationCloseDate);
+    
+    if (now < regOpenDate) {
       return res.status(400).json({
         success: false,
         error: 'Registration has not opened yet',
       });
     }
-    if (now > new Date(tournament.registrationCloseDate)) {
+    if (now > regCloseDate) {
       return res.status(400).json({
         success: false,
         error: 'Registration is closed',
@@ -321,7 +326,8 @@ const cancelRegistration = async (req, res) => {
 
     // Check if cancellation is allowed (before tournament starts)
     const now = new Date();
-    if (now >= new Date(registration.tournament.startDate)) {
+    const tournamentStartDate = new Date(registration.tournament.startDate);
+    if (now >= tournamentStartDate) {
       return res.status(400).json({
         success: false,
         error: 'Cannot cancel after tournament has started',
@@ -417,14 +423,19 @@ const createRegistrationWithScreenshot = async (req, res) => {
     }
 
     // Check if registration is open
+    // Dates are stored as strings like "2026-01-15T11:30"
+    // Convert to Date objects for comparison
     const now = new Date();
-    if (now < new Date(tournament.registrationOpenDate)) {
+    const regOpenDate = new Date(tournament.registrationOpenDate);
+    const regCloseDate = new Date(tournament.registrationCloseDate);
+    
+    if (now < regOpenDate) {
       return res.status(400).json({
         success: false,
         error: 'Registration has not opened yet',
       });
     }
-    if (now > new Date(tournament.registrationCloseDate)) {
+    if (now > regCloseDate) {
       return res.status(400).json({
         success: false,
         error: 'Registration is closed',

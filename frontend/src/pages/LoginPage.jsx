@@ -259,18 +259,6 @@ const LoginPage = () => {
               </Link>
             </p>
           </div>
-
-          {/* Demo Credentials with dark theme */}
-          <div className="mt-8 p-4 bg-slate-800/50 backdrop-blur-sm rounded-xl border border-white/10">
-            <p className="text-xs font-medium text-gray-400 mb-2 flex items-center gap-2">
-              <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-              Demo Credentials
-            </p>
-            <div className="text-xs text-gray-500 space-y-1">
-              <p><span className="text-purple-400">Player:</span> testplayer@matchify.com / password123</p>
-              <p><span className="text-cyan-400">Organizer:</span> testorganizer@matchify.com / password123</p>
-            </div>
-          </div>
         </div>
       </div>
 

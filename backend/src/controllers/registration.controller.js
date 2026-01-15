@@ -39,19 +39,32 @@ const createRegistration = async (req, res) => {
     }
 
     // Check if registration is open
-    // Dates are stored as strings like "2026-01-15T11:30"
-    // Convert to Date objects for comparison
+    // Dates are stored as strings like "2026-01-15T11:30" (no timezone)
+    // We need to compare them as-is without timezone conversion
     const now = new Date();
-    const regOpenDate = new Date(tournament.registrationOpenDate);
-    const regCloseDate = new Date(tournament.registrationCloseDate);
     
-    if (now < regOpenDate) {
+    // Get current time in ISO format without timezone: "2026-01-15T11:30"
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const currentTimeString = `${year}-${month}-${day}T${hours}:${minutes}`;
+    
+    console.log('🕐 Registration Check:', {
+      currentTime: currentTimeString,
+      registrationOpen: tournament.registrationOpenDate,
+      registrationClose: tournament.registrationCloseDate,
+      isOpen: currentTimeString >= tournament.registrationOpenDate && currentTimeString <= tournament.registrationCloseDate
+    });
+    
+    if (currentTimeString < tournament.registrationOpenDate) {
       return res.status(400).json({
         success: false,
         error: 'Registration has not opened yet',
       });
     }
-    if (now > regCloseDate) {
+    if (currentTimeString > tournament.registrationCloseDate) {
       return res.status(400).json({
         success: false,
         error: 'Registration is closed',
@@ -423,19 +436,32 @@ const createRegistrationWithScreenshot = async (req, res) => {
     }
 
     // Check if registration is open
-    // Dates are stored as strings like "2026-01-15T11:30"
-    // Convert to Date objects for comparison
+    // Dates are stored as strings like "2026-01-15T11:30" (no timezone)
+    // We need to compare them as-is without timezone conversion
     const now = new Date();
-    const regOpenDate = new Date(tournament.registrationOpenDate);
-    const regCloseDate = new Date(tournament.registrationCloseDate);
     
-    if (now < regOpenDate) {
+    // Get current time in ISO format without timezone: "2026-01-15T11:30"
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const currentTimeString = `${year}-${month}-${day}T${hours}:${minutes}`;
+    
+    console.log('🕐 Registration Check (Screenshot):', {
+      currentTime: currentTimeString,
+      registrationOpen: tournament.registrationOpenDate,
+      registrationClose: tournament.registrationCloseDate,
+      isOpen: currentTimeString >= tournament.registrationOpenDate && currentTimeString <= tournament.registrationCloseDate
+    });
+    
+    if (currentTimeString < tournament.registrationOpenDate) {
       return res.status(400).json({
         success: false,
         error: 'Registration has not opened yet',
       });
     }
-    if (now > regCloseDate) {
+    if (currentTimeString > tournament.registrationCloseDate) {
       return res.status(400).json({
         success: false,
         error: 'Registration is closed',

@@ -403,11 +403,18 @@ const getTournaments = async (req, res) => {
       const maxFee = fees.length > 0 ? Math.max(...fees) : 0;
 
       // Calculate registration status
-      // Dates are stored as strings, convert to Date for comparison
+      // Dates are stored as strings, compare as strings to avoid timezone issues
       const now = new Date();
-      const regOpenDate = new Date(tournament.registrationOpenDate);
-      const regCloseDate = new Date(tournament.registrationCloseDate);
-      const isRegistrationOpen = regOpenDate <= now && regCloseDate >= now;
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const currentTimeString = `${year}-${month}-${day}T${hours}:${minutes}`;
+      
+      const isRegistrationOpen = 
+        currentTimeString >= tournament.registrationOpenDate && 
+        currentTimeString <= tournament.registrationCloseDate;
 
       return {
         ...tournament,

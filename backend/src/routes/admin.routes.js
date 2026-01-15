@@ -51,6 +51,7 @@ router.get('/users', authenticate, requireAdmin, AdminController.getUsers);
 router.get('/users/:id', authenticate, requireAdmin, AdminController.getUserDetails);
 router.post('/users/:id/suspend', authenticate, requireAdmin, AdminController.suspendUser);
 router.post('/users/:id/unsuspend', authenticate, requireAdmin, AdminController.unsuspendUser);
+router.delete('/users/clear-all', authenticate, requireAdmin, AdminController.clearAllUsers);
 
 // Tournament Management (Admin only)
 router.get('/tournaments', authenticate, requireAdmin, AdminController.getTournaments);

@@ -324,6 +324,173 @@ class AdminController {
   }
 
   /**
+   * DELETE /admin/users/clear-all - Clear all users from database (DANGEROUS)
+   */
+  static async clearAllUsers(req, res) {
+    try {
+      const adminId = req.user.userId;
+      const { confirmPassword } = req.body;
+
+      // Require admin password confirmation
+      if (confirmPassword !== 'ADMIN@123(123)') {
+        return res.status(403).json({
+          success: false,
+          message: 'Invalid admin password confirmation',
+        });
+      }
+
+      console.log('🗑️  Starting user cleanup...');
+
+      // Delete all data in order (respecting foreign key constraints)
+      const deletions = {};
+
+      try {
+        const creditTransactions = await prisma.creditTransaction.deleteMany({});
+        deletions.creditTransactions = creditTransactions.count;
+      } catch (e) {
+        console.log('⚠️  Credit transactions table not found');
+      }
+
+      try {
+        const credits = await prisma.matchifyCredits.deleteMany({});
+        deletions.matchifyCredits = credits.count;
+      } catch (e) {
+        console.log('⚠️  Matchify credits table not found');
+      }
+
+      try {
+        const corrections = await prisma.scoreCorrectionRequest.deleteMany({});
+        deletions.scoreCorrectionRequests = corrections.count;
+      } catch (e) {
+        console.log('⚠️  Score correction requests table not found');
+      }
+
+      try {
+        const matches = await prisma.match.deleteMany({});
+        deletions.matches = matches.count;
+      } catch (e) {
+        console.log('⚠️  Matches table not found');
+      }
+
+      try {
+        const draws = await prisma.draw.deleteMany({});
+        deletions.draws = draws.count;
+      } catch (e) {
+        console.log('⚠️  Draws table not found');
+      }
+
+      try {
+        const registrations = await prisma.registration.deleteMany({});
+        deletions.registrations = registrations.count;
+      } catch (e) {
+        console.log('⚠️  Registrations table not found');
+      }
+
+      try {
+        const categories = await prisma.category.deleteMany({});
+        deletions.categories = categories.count;
+      } catch (e) {
+        console.log('⚠️  Categories table not found');
+      }
+
+      try {
+        const posters = await prisma.tournamentPoster.deleteMany({});
+        deletions.tournamentPosters = posters.count;
+      } catch (e) {
+        console.log('⚠️  Tournament posters table not found');
+      }
+
+      try {
+        const tournamentUmpires = await prisma.tournamentUmpire.deleteMany({});
+        deletions.tournamentUmpires = tournamentUmpires.count;
+      } catch (e) {
+        console.log('⚠️  Tournament umpires table not found');
+      }
+
+      try {
+        const tournaments = await prisma.tournament.deleteMany({});
+        deletions.tournaments = tournaments.count;
+      } catch (e) {
+        console.log('⚠️  Tournaments table not found');
+      }
+
+      try {
+        const notifications = await prisma.notification.deleteMany({});
+        deletions.notifications = notifications.count;
+      } catch (e) {
+        console.log('⚠️  Notifications table not found');
+      }
+
+      try {
+        const walletTransactions = await prisma.walletTransaction.deleteMany({});
+        deletions.walletTransactions = walletTransactions.count;
+      } catch (e) {
+        console.log('⚠️  Wallet transactions table not found');
+      }
+
+      try {
+        const auditLogs = await prisma.auditLog.deleteMany({});
+        deletions.auditLogs = auditLogs.count;
+      } catch (e) {
+        console.log('⚠️  Audit logs table not found');
+      }
+
+      try {
+        const adminInvites = await prisma.adminInvite.deleteMany({});
+        deletions.adminInvites = adminInvites.count;
+      } catch (e) {
+        console.log('⚠️  Admin invites table not found');
+      }
+
+      try {
+        const smsLogs = await prisma.smsLog.deleteMany({});
+        deletions.smsLogs = smsLogs.count;
+      } catch (e) {
+        console.log('⚠️  SMS logs table not found');
+      }
+
+      try {
+        const playerProfiles = await prisma.playerProfile.deleteMany({});
+        deletions.playerProfiles = playerProfiles.count;
+      } catch (e) {
+        console.log('⚠️  Player profiles table not found');
+      }
+
+      try {
+        const organizerProfiles = await prisma.organizerProfile.deleteMany({});
+        deletions.organizerProfiles = organizerProfiles.count;
+      } catch (e) {
+        console.log('⚠️  Organizer profiles table not found');
+      }
+
+      try {
+        const umpireProfiles = await prisma.umpireProfile.deleteMany({});
+        deletions.umpireProfiles = umpireProfiles.count;
+      } catch (e) {
+        console.log('⚠️  Umpire profiles table not found');
+      }
+
+      const users = await prisma.user.deleteMany({});
+      deletions.users = users.count;
+
+      console.log('✨ Database cleanup complete!');
+
+      res.json({
+        success: true,
+        message: 'All users and related data cleared successfully',
+        deletions,
+      });
+    } catch (error) {
+      console.error('Clear all users error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to clear users',
+        error: error.message,
+      });
+    }
+  }
+
+  /**
    * GET /admin/tournaments - Get all tournaments with filters
    */
   static async getTournaments(req, res) {

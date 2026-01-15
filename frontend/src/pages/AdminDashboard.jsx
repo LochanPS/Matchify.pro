@@ -251,7 +251,7 @@ export default function AdminDashboard() {
                     <div>
                       <p className="text-gray-400">Blocked Users</p>
                       <p className="text-3xl font-bold text-white">{stats.blockedUsers}</p>
-                      <p className="text-sm text-red-400">Currently suspended</p>
+                      <p className="text-sm text-red-400">Currently blocked</p>
                     </div>
                   </div>
                 </div>

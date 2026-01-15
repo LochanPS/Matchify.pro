@@ -53,6 +53,15 @@ const EditTournament = () => {
       const response = await tournamentAPI.getTournament(id);
       const t = response.data;
       
+      console.log('📋 Fetched tournament data:', {
+        id: t.id,
+        name: t.name,
+        hasQR: !!t.paymentQRUrl,
+        qrUrl: t.paymentQRUrl,
+        upiId: t.upiId,
+        accountHolder: t.accountHolderName
+      });
+      
       if (user?.id !== t.organizerId) {
         navigate(`/tournaments/${id}`);
         return;

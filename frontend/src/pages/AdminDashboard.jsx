@@ -319,17 +319,17 @@ export default function AdminDashboard() {
                   <table className="w-full">
                     <thead>
                       <tr className="bg-slate-900/50 border-b border-white/10">
-                        <th className="text-left px-4 py-3 text-gray-400 font-medium">User</th>
-                        <th className="text-left px-4 py-3 text-gray-400 font-medium hidden md:table-cell">Email</th>
-                        <th className="text-left px-4 py-3 text-gray-400 font-medium hidden lg:table-cell">Stats</th>
-                        <th className="text-left px-4 py-3 text-gray-400 font-medium">Status</th>
-                        <th className="text-right px-4 py-3 text-gray-400 font-medium">Actions</th>
+                        <th className="text-left px-4 py-3 text-gray-300 font-semibold">User</th>
+                        <th className="text-left px-4 py-3 text-gray-300 font-semibold hidden md:table-cell">Email</th>
+                        <th className="text-left px-4 py-3 text-gray-300 font-semibold hidden lg:table-cell">Stats</th>
+                        <th className="text-left px-4 py-3 text-gray-300 font-semibold">Status</th>
+                        <th className="text-right px-4 py-3 text-gray-300 font-semibold">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       {filteredUsers.length === 0 ? (
                         <tr>
-                          <td colSpan="5" className="px-4 py-8 text-center text-gray-500">No users found</td>
+                          <td colSpan="5" className="px-4 py-8 text-center text-gray-300">No users found</td>
                         </tr>
                       ) : (
                         filteredUsers.map((u, idx) => (
@@ -347,12 +347,12 @@ export default function AdminDashboard() {
                                   )}
                                 </div>
                                 <div>
-                                  <p className="text-white font-medium">{u.name || 'Unknown'}</p>
-                                  <p className="text-xs text-gray-400 md:hidden">{u.email}</p>
+                                  <p className="text-white font-semibold">{u.name || 'Unknown'}</p>
+                                  <p className="text-sm text-gray-300 md:hidden">{u.email}</p>
                                 </div>
                               </div>
                             </td>
-                            <td className="px-4 py-3 text-gray-400 hidden md:table-cell">{u.email}</td>
+                            <td className="px-4 py-3 text-gray-200 hidden md:table-cell">{u.email}</td>
                             <td className="px-4 py-3 hidden lg:table-cell">
                               <div className="flex gap-3 text-xs">
                                 <span className="px-2 py-1 bg-purple-500/20 text-purple-400 rounded">🏆 {u.tournamentsPlayed || 0}</span>
@@ -400,7 +400,7 @@ export default function AdminDashboard() {
                     </tbody>
                   </table>
                 </div>
-                <div className="px-4 py-3 bg-slate-900/50 border-t border-white/10 text-sm text-gray-400">
+                <div className="px-4 py-3 bg-slate-900/50 border-t border-white/10 text-sm text-gray-300">
                   Showing {filteredUsers.length} of {users.length} users
                 </div>
               </div>

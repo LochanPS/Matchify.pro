@@ -533,7 +533,7 @@ const DrawDisplay = ({ bracket, matches, user, isOrganizer, onAssignUmpire, acti
   return <KnockoutDisplay data={bracket} matches={matches} user={user} isOrganizer={isOrganizer} onAssignUmpire={onAssignUmpire} />;
 };
 
-// Knockout Display - PYRAMID LAYOUT
+// Knockout Display - HORIZONTAL PYRAMID (LEFT TO RIGHT)
 const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire }) => {
   if (!data?.rounds) return <p className="text-gray-400 text-center p-8">No bracket data</p>;
 
@@ -562,37 +562,33 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire }) =
     window.open(`/match/${matchId}/score`, '_blank');
   };
 
-  // Calculate pyramid positions - Final at TOP, earlier rounds below
+  // Calculate horizontal pyramid positions - Round 1 LEFT, Final RIGHT
   const calculatePositions = () => {
     const positions = [];
     const CARD_WIDTH = 280;
     const CARD_HEIGHT = 180;
-    const BASE_SPACING = 320; // Horizontal spacing at the widest level
-    const VERTICAL_GAP = 250; // Vertical gap between rounds
+    const HORIZONTAL_GAP = 350; // Gap between rounds (left to right)
+    const BASE_VERTICAL_SPACING = 220; // Vertical spacing for first round
     
-    // Reverse rounds: Final (1 match) first, then Semi (2), Quarter (4), etc.
-    const reversedRounds = [...data.rounds].reverse();
-    
-    reversedRounds.forEach((round, roundIndex) => {
+    data.rounds.forEach((round, roundIndex) => {
       const matchCount = round.matches.length;
       
-      // Y position: Final at top (100), each round goes down
-      const y = roundIndex * VERTICAL_GAP + 100;
+      // X position: moves right with each round
+      const x = roundIndex * HORIZONTAL_GAP + 100;
       
-      // Horizontal spacing: wider at bottom, narrower at top
-      // Calculate based on how many rounds from bottom
-      const roundsFromBottom = reversedRounds.length - roundIndex - 1;
-      const spacing = BASE_SPACING / Math.pow(2, roundsFromBottom);
+      // Vertical spacing: increases with each round (pyramid effect)
+      // First round has tight spacing, final has matches far apart vertically
+      const verticalSpacing = BASE_VERTICAL_SPACING * Math.pow(2, roundIndex);
       
-      // Total width for this round
-      const totalWidth = (matchCount - 1) * spacing;
+      // Total height for this round
+      const totalHeight = (matchCount - 1) * verticalSpacing;
       
-      // Starting X (centered)
-      const startX = -totalWidth / 2;
+      // Starting Y (centered vertically)
+      const startY = -totalHeight / 2;
       
       round.matches.forEach((match, matchIndex) => {
-        const x = startX + (matchIndex * spacing);
-        const displayIdx = data.rounds.length - 1 - roundIndex;
+        const y = startY + (matchIndex * verticalSpacing);
+        const displayIdx = roundIndex;
         
         positions.push({
           match,
@@ -613,38 +609,38 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire }) =
   const positions = calculatePositions();
   
   // Calculate SVG dimensions
-  const minX = Math.min(...positions.map(p => p.x)) - 200;
-  const maxX = Math.max(...positions.map(p => p.x)) + 200;
-  const minY = 0;
-  const maxY = Math.max(...positions.map(p => p.y)) + 300;
+  const minX = 0;
+  const maxX = Math.max(...positions.map(p => p.x)) + 400;
+  const minY = Math.min(...positions.map(p => p.y)) - 150;
+  const maxY = Math.max(...positions.map(p => p.y)) + 250;
   
   const viewBoxWidth = maxX - minX;
   const viewBoxHeight = maxY - minY;
 
-  // Draw connector lines from bottom matches UP to top
+  // Draw connector lines from left matches to right (parent matches)
   const drawConnectors = () => {
     const lines = [];
     
     positions.forEach((pos) => {
-      // Find parent match (one round up/earlier in array)
-      const parentRoundIndex = pos.roundIndex - 1;
-      if (parentRoundIndex >= 0) {
+      // Find parent match (next round to the right)
+      const parentRoundIndex = pos.roundIndex + 1;
+      if (parentRoundIndex < data.rounds.length) {
         const parentPositions = positions.filter(p => p.roundIndex === parentRoundIndex);
         const parentIndex = Math.floor(pos.matchIndex / 2);
         const parentPos = parentPositions[parentIndex];
         
         if (parentPos) {
-          const startX = pos.x;
-          const startY = pos.y - 20;
-          const endX = parentPos.x;
-          const endY = parentPos.y + 200;
+          const startX = pos.x + 280; // Right edge of current card
+          const startY = pos.y + 90; // Middle of card
+          const endX = parentPos.x; // Left edge of parent card
+          const endY = parentPos.y + 90; // Middle of parent card
           
-          const midY = (startY + endY) / 2;
+          const midX = (startX + endX) / 2;
           
           lines.push(
             <path
               key={`line-${pos.roundIndex}-${pos.matchIndex}`}
-              d={`M ${startX} ${startY} Q ${startX} ${midY}, ${(startX + endX) / 2} ${midY} T ${endX} ${endY}`}
+              d={`M ${startX} ${startY} L ${midX} ${startY} L ${midX} ${endY} L ${endX} ${endY}`}
               stroke="rgba(168, 85, 247, 0.3)"
               strokeWidth="2"
               fill="none"
@@ -658,14 +654,13 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire }) =
   };
 
   return (
-    <div className="relative py-12">
-      <div className="flex justify-center">
+    <div className="relative py-12 overflow-x-auto">
+      <div className="flex justify-center min-w-max">
         <svg
-          width="100%"
+          width={viewBoxWidth}
           height={viewBoxHeight}
           viewBox={`${minX} ${minY} ${viewBoxWidth} ${viewBoxHeight}`}
-          className="max-w-full"
-          style={{ minHeight: '800px' }}
+          className="mx-auto"
         >
           {/* Connector lines */}
           <g>{drawConnectors()}</g>
@@ -681,23 +676,34 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire }) =
               
               const cardWidth = 280;
               const cardHeight = 180;
-              const x = pos.x - cardWidth / 2;
+              const x = pos.x;
               const y = pos.y;
 
               return (
                 <g key={`${pos.roundIndex}-${pos.matchIndex}`} transform={`translate(${x}, ${y})`}>
-                  {/* Card background */}
+                  {/* Card background with glow effect */}
+                  <defs>
+                    <filter id={`glow-${pos.roundIndex}-${pos.matchIndex}`} x="-50%" y="-50%" width="200%" height="200%">
+                      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                      <feMerge>
+                        <feMergeNode in="coloredBlur"/>
+                        <feMergeNode in="SourceGraphic"/>
+                      </feMerge>
+                    </filter>
+                  </defs>
+                  
                   <rect
                     width={cardWidth}
                     height={cardHeight}
                     rx="12"
-                    fill="rgba(51, 65, 85, 0.9)"
-                    stroke={isLive ? '#10b981' : isCompleted ? '#f59e0b' : 'rgba(255, 255, 255, 0.1)'}
+                    fill="rgba(51, 65, 85, 0.95)"
+                    stroke={isLive ? '#10b981' : isCompleted ? '#f59e0b' : 'rgba(168, 85, 247, 0.4)'}
                     strokeWidth="2"
+                    filter={isLive || isCompleted ? `url(#glow-${pos.roundIndex}-${pos.matchIndex})` : 'none'}
                   />
 
                   {/* Round name header */}
-                  <rect width={cardWidth} height="30" rx="12" fill="rgba(30, 41, 59, 0.8)" />
+                  <rect width={cardWidth} height="30" rx="12" fill="rgba(30, 41, 59, 0.9)" />
                   <text x={cardWidth / 2} y="20" textAnchor="middle" fill="#fbbf24" fontSize="12" fontWeight="700">
                     {pos.roundName}
                   </text>

@@ -40,21 +40,24 @@ const createRegistration = async (req, res) => {
 
     // Check if registration is open
     // Dates are stored as strings like "2026-01-15T11:30" (no timezone)
-    // We need to compare them as-is without timezone conversion
+    // Convert server time to IST (India Standard Time, UTC+5:30) for comparison
     const now = new Date();
     
-    // Get current time in ISO format without timezone: "2026-01-15T11:30"
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
+    // Convert UTC to IST by adding 5 hours 30 minutes
+    const istOffset = 5.5 * 60 * 60 * 1000; // 5.5 hours in milliseconds
+    const istTime = new Date(now.getTime() + istOffset);
+    
+    // Get IST time in ISO format without timezone: "2026-01-15T11:30"
+    const year = istTime.getUTCFullYear();
+    const month = String(istTime.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(istTime.getUTCDate()).padStart(2, '0');
+    const hours = String(istTime.getUTCHours()).padStart(2, '0');
+    const minutes = String(istTime.getUTCMinutes()).padStart(2, '0');
     const currentTimeString = `${year}-${month}-${day}T${hours}:${minutes}`;
     
-    console.log('🕐 Registration Check:', {
-      serverTime: now.toISOString(),
-      serverTimeLocal: currentTimeString,
-      serverTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    console.log('🕐 Registration Check (IST):', {
+      serverTimeUTC: now.toISOString(),
+      serverTimeIST: currentTimeString,
       registrationOpen: tournament.registrationOpenDate,
       registrationClose: tournament.registrationCloseDate,
       comparison: {
@@ -344,9 +347,18 @@ const cancelRegistration = async (req, res) => {
     }
 
     // Check if cancellation is allowed (before tournament starts)
+    // Convert server time to IST for comparison
     const now = new Date();
-    const tournamentStartDate = new Date(registration.tournament.startDate);
-    if (now >= tournamentStartDate) {
+    const istOffset = 5.5 * 60 * 60 * 1000;
+    const istTime = new Date(now.getTime() + istOffset);
+    const year = istTime.getUTCFullYear();
+    const month = String(istTime.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(istTime.getUTCDate()).padStart(2, '0');
+    const hours = String(istTime.getUTCHours()).padStart(2, '0');
+    const minutes = String(istTime.getUTCMinutes()).padStart(2, '0');
+    const currentTimeString = `${year}-${month}-${day}T${hours}:${minutes}`;
+    
+    if (currentTimeString >= registration.tournament.startDate) {
       return res.status(400).json({
         success: false,
         error: 'Cannot cancel after tournament has started',
@@ -443,21 +455,24 @@ const createRegistrationWithScreenshot = async (req, res) => {
 
     // Check if registration is open
     // Dates are stored as strings like "2026-01-15T11:30" (no timezone)
-    // We need to compare them as-is without timezone conversion
+    // Convert server time to IST (India Standard Time, UTC+5:30) for comparison
     const now = new Date();
     
-    // Get current time in ISO format without timezone: "2026-01-15T11:30"
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
+    // Convert UTC to IST by adding 5 hours 30 minutes
+    const istOffset = 5.5 * 60 * 60 * 1000; // 5.5 hours in milliseconds
+    const istTime = new Date(now.getTime() + istOffset);
+    
+    // Get IST time in ISO format without timezone: "2026-01-15T11:30"
+    const year = istTime.getUTCFullYear();
+    const month = String(istTime.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(istTime.getUTCDate()).padStart(2, '0');
+    const hours = String(istTime.getUTCHours()).padStart(2, '0');
+    const minutes = String(istTime.getUTCMinutes()).padStart(2, '0');
     const currentTimeString = `${year}-${month}-${day}T${hours}:${minutes}`;
     
-    console.log('🕐 Registration Check (Screenshot):', {
-      serverTime: now.toISOString(),
-      serverTimeLocal: currentTimeString,
-      serverTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    console.log('🕐 Registration Check (Screenshot - IST):', {
+      serverTimeUTC: now.toISOString(),
+      serverTimeIST: currentTimeString,
       registrationOpen: tournament.registrationOpenDate,
       registrationClose: tournament.registrationCloseDate,
       comparison: {

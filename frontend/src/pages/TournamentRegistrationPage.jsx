@@ -339,14 +339,20 @@ export default function TournamentRegistrationPage() {
                   {/* QR Code */}
                   {tournament.paymentQRUrl && (
                     <div className="flex justify-center mb-6">
-                      <div className="p-4 bg-slate-900/80 border border-white/10 rounded-2xl shadow-lg shadow-purple-500/10">
-                        <div className="p-3 bg-slate-800/50 rounded-xl border border-white/5">
+                      <div className="relative p-6 bg-white rounded-2xl shadow-2xl">
+                        <div className="absolute -inset-1 bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 rounded-2xl blur opacity-30"></div>
+                        <div className="relative bg-white p-4 rounded-xl">
                           <img 
                             src={getImageUrl(tournament.paymentQRUrl)} 
                             alt="Payment QR Code" 
-                            className="w-64 h-64 object-contain rounded-lg"
+                            className="w-64 h-64 object-contain"
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256"><rect width="256" height="256" fill="%23ddd"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="%23999">QR Code</text></svg>';
+                            }}
                           />
                         </div>
+                        <p className="text-center text-gray-700 text-sm mt-3 font-medium">Scan to Pay</p>
                       </div>
                     </div>
                   )}

@@ -494,6 +494,28 @@ const TournamentDetailPage = () => {
                     <p className="text-sm text-gray-400">Closes: {formatDateTime(tournament.registrationCloseDate)}</p>
                   </div>
                 </div>
+
+                {/* Shuttle Information */}
+                {(tournament.shuttleType || tournament.shuttleBrand) && (
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 bg-emerald-500/20 border border-emerald-500/30 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <span className="text-2xl">🏸</span>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-white">Shuttle Information</p>
+                      {tournament.shuttleType && (
+                        <p className="text-gray-400">
+                          Type: <span className="text-white font-medium">{tournament.shuttleType}</span>
+                        </p>
+                      )}
+                      {tournament.shuttleBrand && (
+                        <p className="text-gray-400">
+                          Brand: <span className="text-white font-medium">{tournament.shuttleBrand}</span>
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 

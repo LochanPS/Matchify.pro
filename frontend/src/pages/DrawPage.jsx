@@ -1,3 +1,21 @@
+/**
+ * DrawPage - Tournament Bracket Display
+ * 
+ * STANDARD BRACKET LAYOUT RULE:
+ * ALL knockout brackets MUST use HORIZONTAL LEFT-TO-RIGHT pyramid layout:
+ * - Round 1 (most matches) on the LEFT
+ * - Quarter Finals in the middle-left
+ * - Semi Finals in the middle-right
+ * - Final (single match) on the RIGHT
+ * - Vertical spacing increases with each round (pyramid effect)
+ * - Connector lines flow from left to right
+ * 
+ * This applies to:
+ * 1. Pure KNOCKOUT tournaments
+ * 2. ROUND_ROBIN_KNOCKOUT (knockout stage after groups)
+ * 3. All bracket sizes (2, 4, 8, 16, 32, 64, 128 players)
+ */
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { drawAPI } from '../api/draw';
@@ -528,12 +546,27 @@ const DrawDisplay = ({ bracket, matches, user, isOrganizer, onAssignUmpire, acti
     return <RoundRobinDisplay data={bracket} />;
   }
   if (format === 'ROUND_ROBIN_KNOCKOUT') {
-    return <GroupsKnockoutDisplay data={bracket} />;
+    return <GroupsKnockoutDisplay 
+      data={bracket} 
+      matches={matches} 
+      user={user} 
+      isOrganizer={isOrganizer} 
+      onAssignUmpire={onAssignUmpire} 
+    />;
   }
-  return <KnockoutDisplay data={bracket} matches={matches} user={user} isOrganizer={isOrganizer} onAssignUmpire={onAssignUmpire} />;
+  // Default: Pure knockout (horizontal left-to-right layout)
+  return <KnockoutDisplay 
+    data={bracket} 
+    matches={matches} 
+    user={user} 
+    isOrganizer={isOrganizer} 
+    onAssignUmpire={onAssignUmpire} 
+  />;
 };
 
 // Knockout Display - HORIZONTAL PYRAMID (LEFT TO RIGHT)
+// STANDARD LAYOUT: Round 1 → Quarters → Semis → Final (left to right)
+// This layout is used for ALL knockout brackets regardless of size or format
 const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire }) => {
   if (!data?.rounds) return <p className="text-gray-400 text-center p-8">No bracket data</p>;
 
@@ -834,7 +867,8 @@ const RoundRobinDisplay = ({ data }) => {
 };
 
 // Groups + Knockout Display
-const GroupsKnockoutDisplay = ({ data }) => {
+// Stage 1: Round Robin groups, Stage 2: Knockout bracket (horizontal left-to-right)
+const GroupsKnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire }) => {
   return (
     <div className="space-y-8 p-6">
       {/* Group Stage */}
@@ -851,9 +885,15 @@ const GroupsKnockoutDisplay = ({ data }) => {
         <div>
           <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-3">
             <span className="px-3 py-1 bg-amber-500/20 text-amber-400 rounded-lg text-sm font-semibold">Stage 2</span>
-            Knockout Stage
+            Knockout Stage (Horizontal Bracket)
           </h3>
-          <KnockoutDisplay data={data.knockout} />
+          <KnockoutDisplay 
+            data={data.knockout} 
+            matches={matches} 
+            user={user} 
+            isOrganizer={isOrganizer} 
+            onAssignUmpire={onAssignUmpire}
+          />
         </div>
       )}
     </div>

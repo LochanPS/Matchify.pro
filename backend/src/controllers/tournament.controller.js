@@ -146,10 +146,13 @@ const createTournament = async (req, res) => {
     }
 
     // Date validations
-    const regOpen = new Date(registrationOpenDate);
-    const regClose = new Date(registrationCloseDate);
-    const start = new Date(startDate);
-    const end = new Date(endDate);
+    // datetime-local sends format like "2026-01-15T14:00" without timezone
+    // We need to append 'Z' to treat it as UTC, or parse it correctly for IST
+    // The user selects time in IST, so we store it as-is in the database
+    const regOpen = new Date(registrationOpenDate + ':00.000Z'); // Append seconds and Z for UTC
+    const regClose = new Date(registrationCloseDate + ':00.000Z');
+    const start = new Date(startDate + ':00.000Z');
+    const end = new Date(endDate + ':00.000Z');
     const now = new Date();
     
     // Set now to start of current minute for fair comparison

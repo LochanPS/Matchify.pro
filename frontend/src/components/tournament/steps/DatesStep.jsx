@@ -65,10 +65,8 @@ const DatesStep = ({ formData, updateMultipleFields, onNext, onPrev }) => {
     if (typeof dateString === 'string' && dateString.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/)) {
       return dateString.slice(0, 16);
     }
-    // Parse the UTC date string and format it WITHOUT timezone conversion
-    // The date from DB is in UTC, but we want to display it as-is (not convert to local)
-    const isoString = new Date(dateString).toISOString(); // e.g., "2026-01-15T08:30:00.000Z"
-    return isoString.slice(0, 16); // Return "2026-01-15T08:30"
+    // For any other format, return as is (dates are now stored as strings)
+    return dateString;
   };
 
   return (

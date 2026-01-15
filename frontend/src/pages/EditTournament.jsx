@@ -77,9 +77,11 @@ const EditTournament = () => {
 
   const formatDateForInput = (dateString) => {
     if (!dateString) return '';
-    // Parse the UTC date string and format it WITHOUT timezone conversion
-    const isoString = new Date(dateString).toISOString(); // e.g., "2026-01-15T08:30:00.000Z"
-    return isoString.slice(0, 16); // Return "2026-01-15T08:30"
+    // Dates are now stored as strings, return as is
+    if (typeof dateString === 'string' && dateString.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/)) {
+      return dateString.slice(0, 16);
+    }
+    return dateString;
   };
 
   const handleChange = (field, value) => {

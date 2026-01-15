@@ -133,10 +133,10 @@ model Tournament {
   pincode               String
   zone                  String
   country               String             @default("India")
-  registrationOpenDate  DateTime
-  registrationCloseDate DateTime
-  startDate             DateTime
-  endDate               DateTime
+  registrationOpenDate  String             // Store as string to avoid timezone conversion
+  registrationCloseDate String             // Store as string to avoid timezone conversion
+  startDate             String             // Store as string to avoid timezone conversion
+  endDate               String             // Store as string to avoid timezone conversion
   format                String
   privacy               String             @default("public")
   status                String             @default("draft")

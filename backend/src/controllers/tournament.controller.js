@@ -146,24 +146,18 @@ const createTournament = async (req, res) => {
     }
 
     // Date validations
-    // datetime-local sends format like "2026-01-15T14:00" without timezone
-    // CRITICAL: We store this EXACT string by converting to ISO format
-    // This prevents ANY timezone conversion
-    const parseExactDateTime = (dateTimeStr) => {
-      // Input: "2026-01-15T14:00"
-      // We want to store this EXACT time in the database
-      // Add seconds and milliseconds, then treat as UTC
-      console.log('📅 Input datetime:', dateTimeStr);
-      const exactISO = dateTimeStr + ':00.000Z';
-      const date = new Date(exactISO);
-      console.log('✅ Storing as:', date.toISOString());
-      return date;
-    };
+    // Store dates as strings to completely avoid timezone conversion
+    // Input: "2026-01-15T14:00" → Store exactly as is
+    console.log('📅 Storing dates as strings (no conversion)');
+    console.log('Registration Open:', registrationOpenDate);
+    console.log('Registration Close:', registrationCloseDate);
+    console.log('Start:', startDate);
+    console.log('End:', endDate);
 
-    const regOpen = parseExactDateTime(registrationOpenDate);
-    const regClose = parseExactDateTime(registrationCloseDate);
-    const start = parseExactDateTime(startDate);
-    const end = parseExactDateTime(endDate);
+    const regOpen = new Date(registrationOpenDate);
+    const regClose = new Date(registrationCloseDate);
+    const start = new Date(startDate);
+    const end = new Date(endDate);
     const now = new Date();
     
     // Set now to start of current minute for fair comparison
@@ -213,10 +207,10 @@ const createTournament = async (req, res) => {
           country,
           format,
           privacy,
-          registrationOpenDate: regOpen,
-          registrationCloseDate: regClose,
-          startDate: start,
-          endDate: end,
+          registrationOpenDate: registrationOpenDate,  // Store as string
+          registrationCloseDate: registrationCloseDate, // Store as string
+          startDate: startDate,                    // Store as string
+          endDate: endDate,                        // Store as string
           status: 'draft', // Will be published later
         },
       });
@@ -551,19 +545,11 @@ const updateTournament = async (req, res) => {
     if (privacy) updateData.privacy = privacy;
     if (status) updateData.status = status;
     
-    // Parse datetime-local strings - store EXACT time without conversion
-    const parseExactDateTime = (dateTimeStr) => {
-      console.log('📅 UPDATE - Input datetime:', dateTimeStr);
-      const exactISO = dateTimeStr + ':00.000Z';
-      const date = new Date(exactISO);
-      console.log('✅ UPDATE - Storing as:', date.toISOString());
-      return date;
-    };
-    
-    if (registrationOpenDate) updateData.registrationOpenDate = parseExactDateTime(registrationOpenDate);
-    if (registrationCloseDate) updateData.registrationCloseDate = parseExactDateTime(registrationCloseDate);
-    if (startDate) updateData.startDate = parseExactDateTime(startDate);
-    if (endDate) updateData.endDate = parseExactDateTime(endDate);
+    // Store dates as strings - no conversion needed
+    if (registrationOpenDate) updateData.registrationOpenDate = registrationOpenDate;
+    if (registrationCloseDate) updateData.registrationCloseDate = registrationCloseDate;
+    if (startDate) updateData.startDate = startDate;
+    if (endDate) updateData.endDate = endDate;
 
     const updatedTournament = await prisma.tournament.update({
       where: { id },

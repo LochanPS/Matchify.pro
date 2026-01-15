@@ -65,14 +65,10 @@ const DatesStep = ({ formData, updateMultipleFields, onNext, onPrev }) => {
     if (typeof dateString === 'string' && dateString.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/)) {
       return dateString.slice(0, 16);
     }
-    // Convert to local datetime format without timezone conversion
-    const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
+    // Parse the UTC date string and format it WITHOUT timezone conversion
+    // The date from DB is in UTC, but we want to display it as-is (not convert to local)
+    const isoString = new Date(dateString).toISOString(); // e.g., "2026-01-15T08:30:00.000Z"
+    return isoString.slice(0, 16); // Return "2026-01-15T08:30"
   };
 
   return (

@@ -71,6 +71,8 @@ const CreateTournament = () => {
         country: formData.country,
         format: formData.format,
         privacy: formData.privacy,
+        shuttleType: formData.shuttleType || null,
+        shuttleBrand: formData.shuttleBrand || null,
         registrationOpenDate: formData.registrationOpenDate,
         registrationCloseDate: formData.registrationCloseDate,
         startDate: formData.startDate,

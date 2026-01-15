@@ -144,6 +144,8 @@ model Tournament {
   matchStartTime        String?
   matchEndTime          String?
   matchDuration         Int?
+  shuttleType           String?            // "PLASTIC" or "FEATHER"
+  shuttleBrand          String?            // Brand name like "Yonex", "Li-Ning", etc.
   totalRegistrations    Int                @default(0)
   totalRevenue          Float              @default(0)
   paymentQRUrl          String?

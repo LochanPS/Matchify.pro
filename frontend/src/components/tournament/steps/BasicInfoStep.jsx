@@ -225,6 +225,38 @@ const BasicInfoStep = ({ formData, updateFormData, onNext }) => {
         </div>
       </div>
 
+      {/* Shuttle Information - 2 columns */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-1">
+            Shuttle Type <span className="text-gray-500">(Optional)</span>
+          </label>
+          <select
+            value={formData.shuttleType || ''}
+            onChange={(e) => updateFormData('shuttleType', e.target.value)}
+            className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-purple-500 transition-all"
+          >
+            <option value="">Select Shuttle Type</option>
+            <option value="FEATHER">Feather Shuttle</option>
+            <option value="PLASTIC">Plastic Shuttle</option>
+          </select>
+          <p className="mt-1 text-xs text-gray-500">Type of shuttlecock used in the tournament</p>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-1">
+            Shuttle Brand <span className="text-gray-500">(Optional)</span>
+          </label>
+          <input
+            type="text"
+            value={formData.shuttleBrand || ''}
+            onChange={(e) => updateFormData('shuttleBrand', e.target.value)}
+            placeholder="e.g., Yonex, Li-Ning, Victor"
+            className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 transition-all"
+          />
+          <p className="mt-1 text-xs text-gray-500">Brand name of the shuttlecock</p>
+        </div>
+      </div>
+
       {/* Venue */}
       <div>
         <label className="block text-sm font-medium text-gray-300 mb-1">

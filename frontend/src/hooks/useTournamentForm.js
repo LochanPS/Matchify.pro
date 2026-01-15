@@ -66,6 +66,8 @@ export const useTournamentForm = (existingDraftId = null) => {
     venue: '',
     address: '',
     pincode: '',
+    shuttleType: '',
+    shuttleBrand: '',
     
     // Step 2: Dates
     registrationOpenDate: '',

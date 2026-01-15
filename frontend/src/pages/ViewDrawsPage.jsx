@@ -37,19 +37,32 @@ const ViewDrawsPage = () => {
   const isOrganizer = user?.id === tournament?.organizerId;
 
   useEffect(() => {
-    fetchTournamentData();
+    try {
+      fetchTournamentData();
+    } catch (err) {
+      console.error('Error in fetchTournamentData effect:', err);
+      setError('Failed to initialize page: ' + err.message);
+      setLoading(false);
+    }
   }, [id]);
 
   useEffect(() => {
-    if (selectedCategory) {
-      fetchDraw(selectedCategory.id);
+    try {
+      if (selectedCategory) {
+        fetchDraw(selectedCategory.id);
+      }
+    } catch (err) {
+      console.error('Error in fetchDraw effect:', err);
+      setError('Failed to load draw: ' + err.message);
     }
   }, [selectedCategory]);
 
   const fetchTournamentData = async () => {
     try {
       setLoading(true);
+      setError(null);
       const response = await tournamentAPI.getTournament(id);
+      console.log('Tournament data:', response.data);
       setTournament(response.data);
       setCategories(response.data.categories || []);
       if (response.data.categories?.length > 0) {
@@ -57,7 +70,7 @@ const ViewDrawsPage = () => {
       }
     } catch (err) {
       console.error('Error fetching tournament:', err);
-      setError('Failed to load tournament');
+      setError('Failed to load tournament: ' + (err.response?.data?.error || err.message));
     } finally {
       setLoading(false);
     }

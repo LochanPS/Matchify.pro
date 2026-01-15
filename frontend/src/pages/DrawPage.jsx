@@ -533,7 +533,7 @@ const DrawDisplay = ({ bracket, matches, user, isOrganizer, onAssignUmpire, acti
   return <KnockoutDisplay data={bracket} matches={matches} user={user} isOrganizer={isOrganizer} onAssignUmpire={onAssignUmpire} />;
 };
 
-// Knockout Display
+// Knockout Display - PYRAMID LAYOUT
 const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire }) => {
   if (!data?.rounds) return <p className="text-gray-400 text-center p-8">No bracket data</p>;
 
@@ -551,9 +551,6 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire }) =
   const canScore = isOrganizer || user?.roles?.includes('umpire') || user?.role === 'UMPIRE';
 
   // Find match record by round number (database round) and match number
-  // Database: round 1 = Final, round 2 = Semi, etc.
-  // Display: index 0 = first round, last index = Final
-  // So display index i corresponds to database round (totalRounds - i)
   const findMatch = (displayIdx, matchNum) => {
     if (!matches || !Array.isArray(matches)) return null;
     const dbRound = totalRounds - displayIdx;
@@ -565,187 +562,220 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire }) =
     window.open(`/match/${matchId}/score`, '_blank');
   };
 
-  // Find the final match and winner (Final is the last display index, which is round 1 in DB)
-  const finalDisplayIdx = totalRounds - 1;
-  const finalMatch = data.rounds[finalDisplayIdx]?.matches[0];
-  const finalDbMatch = findMatch(finalDisplayIdx, 1);
-  const categoryWinner = finalDbMatch?.winnerId 
-    ? (finalDbMatch.winnerId === finalMatch?.player1?.id ? finalMatch?.player1 : finalMatch?.player2)
-    : null;
+  // Calculate pyramid positions - Final at TOP, earlier rounds below
+  const calculatePositions = () => {
+    const positions = [];
+    const CARD_WIDTH = 280;
+    const CARD_HEIGHT = 180;
+    const BASE_SPACING = 320; // Horizontal spacing at the widest level
+    const VERTICAL_GAP = 250; // Vertical gap between rounds
+    
+    // Reverse rounds: Final (1 match) first, then Semi (2), Quarter (4), etc.
+    const reversedRounds = [...data.rounds].reverse();
+    
+    reversedRounds.forEach((round, roundIndex) => {
+      const matchCount = round.matches.length;
+      
+      // Y position: Final at top (100), each round goes down
+      const y = roundIndex * VERTICAL_GAP + 100;
+      
+      // Horizontal spacing: wider at bottom, narrower at top
+      // Calculate based on how many rounds from bottom
+      const roundsFromBottom = reversedRounds.length - roundIndex - 1;
+      const spacing = BASE_SPACING / Math.pow(2, roundsFromBottom);
+      
+      // Total width for this round
+      const totalWidth = (matchCount - 1) * spacing;
+      
+      // Starting X (centered)
+      const startX = -totalWidth / 2;
+      
+      round.matches.forEach((match, matchIndex) => {
+        const x = startX + (matchIndex * spacing);
+        const displayIdx = data.rounds.length - 1 - roundIndex;
+        
+        positions.push({
+          match,
+          x,
+          y,
+          roundIndex,
+          matchIndex,
+          displayIdx,
+          roundName: getRoundName(displayIdx, data.rounds.length),
+          matchCount
+        });
+      });
+    });
+    
+    return positions;
+  };
+
+  const positions = calculatePositions();
+  
+  // Calculate SVG dimensions
+  const minX = Math.min(...positions.map(p => p.x)) - 200;
+  const maxX = Math.max(...positions.map(p => p.x)) + 200;
+  const minY = 0;
+  const maxY = Math.max(...positions.map(p => p.y)) + 300;
+  
+  const viewBoxWidth = maxX - minX;
+  const viewBoxHeight = maxY - minY;
+
+  // Draw connector lines from bottom matches UP to top
+  const drawConnectors = () => {
+    const lines = [];
+    
+    positions.forEach((pos) => {
+      // Find parent match (one round up/earlier in array)
+      const parentRoundIndex = pos.roundIndex - 1;
+      if (parentRoundIndex >= 0) {
+        const parentPositions = positions.filter(p => p.roundIndex === parentRoundIndex);
+        const parentIndex = Math.floor(pos.matchIndex / 2);
+        const parentPos = parentPositions[parentIndex];
+        
+        if (parentPos) {
+          const startX = pos.x;
+          const startY = pos.y - 20;
+          const endX = parentPos.x;
+          const endY = parentPos.y + 200;
+          
+          const midY = (startY + endY) / 2;
+          
+          lines.push(
+            <path
+              key={`line-${pos.roundIndex}-${pos.matchIndex}`}
+              d={`M ${startX} ${startY} Q ${startX} ${midY}, ${(startX + endX) / 2} ${midY} T ${endX} ${endY}`}
+              stroke="rgba(168, 85, 247, 0.3)"
+              strokeWidth="2"
+              fill="none"
+            />
+          );
+        }
+      }
+    });
+    
+    return lines;
+  };
 
   return (
-    <div className="overflow-x-auto p-6">
-      <div className="flex gap-8 min-w-max items-start">
-        {data.rounds.map((round, ri) => (
-          <div key={ri} className="flex flex-col min-w-[220px]">
-            <h4 className="text-sm font-bold text-amber-400 text-center mb-4 uppercase tracking-wider">
-              {getRoundName(ri, data.rounds.length)}
-            </h4>
-            <div className="flex flex-col justify-around flex-1 gap-4" style={{ paddingTop: ri > 0 ? `${Math.pow(2, ri) * 20}px` : 0 }}>
-              {round.matches.map((match, mi) => {
-                const dbMatch = findMatch(ri, mi + 1);
-                const hasPlayers = match.player1?.id && match.player2?.id;
-                const isLive = dbMatch?.status === 'IN_PROGRESS';
-                const isCompleted = dbMatch?.status === 'COMPLETED';
-                
-                return (
-                  <div 
-                    key={mi} 
-                    className={`bg-slate-700/50 border rounded-xl p-3 transition-all ${
-                      isLive ? 'border-emerald-500 shadow-lg shadow-emerald-500/20' : 
-                      isCompleted ? 'border-amber-500/50' : 'border-white/10 hover:border-purple-500/50'
-                    }`}
-                    style={{ marginBottom: ri > 0 ? `${Math.pow(2, ri) * 40}px` : 0 }}
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs text-gray-500">Match {match.matchNumber}</span>
-                      <div className="flex items-center gap-1">
-                        {dbMatch?.umpire && (
-                          <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 text-xs font-medium rounded-full flex items-center gap-1">
-                            <Gavel className="w-3 h-3" />
-                            {dbMatch.umpire.name?.split(' ')[0] || 'Umpire'}
-                          </span>
-                        )}
-                        {isLive && (
-                          <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-xs font-semibold rounded-full animate-pulse">
-                            LIVE
-                          </span>
-                        )}
-                        {isCompleted && (
-                          <span className="px-2 py-0.5 bg-amber-500/20 text-amber-400 text-xs font-semibold rounded-full">
-                            DONE
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <div className={`px-3 py-2 rounded-lg mb-2 text-sm font-medium ${
-                      match.winner === 1 || dbMatch?.winnerId === match.player1?.id 
-                        ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' 
-                        : 'bg-slate-600/50 text-white'
-                    }`}>
-                      {match.player1?.name || 'TBD'}
-                      {(match.score1 !== null || dbMatch?.score?.sets) && (
-                        <span className="float-right font-bold">
-                          {dbMatch?.score?.sets ? dbMatch.score.sets.map(s => s.player1).join('-') : match.score1}
-                        </span>
-                      )}
-                    </div>
-                    <div className={`px-3 py-2 rounded-lg text-sm font-medium ${
-                      match.winner === 2 || dbMatch?.winnerId === match.player2?.id 
-                        ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' 
-                        : 'bg-slate-600/50 text-white'
-                    }`}>
-                      {match.player2?.name || 'TBD'}
-                      {(match.score2 !== null || dbMatch?.score?.sets) && (
-                        <span className="float-right font-bold">
-                          {dbMatch?.score?.sets ? dbMatch.score.sets.map(s => s.player2).join('-') : match.score2}
-                        </span>
-                      )}
-                    </div>
-                    
-                    {/* Umpire Badge - Show for organizer only if match is not completed */}
-                    {isOrganizer && !isCompleted && (
-                      <div 
-                        onClick={() => {
-                          // Pass both dbMatch (if exists) and bracket match data
-                          const bracketMatchData = {
-                            matchNumber: match.matchNumber,
-                            round: ri + 1,
-                            player1: match.player1,
-                            player2: match.player2
-                          };
-                          onAssignUmpire(dbMatch, bracketMatchData);
-                        }}
-                        className="mt-2 px-3 py-2 rounded-lg flex items-center gap-2 transition-all cursor-pointer hover:bg-blue-500/20 bg-slate-600/30 border border-white/5"
-                      >
-                        <div className={`w-6 h-6 rounded-md flex items-center justify-center ${
-                          dbMatch?.umpire ? 'bg-emerald-500/20' : 'bg-blue-500/20'
-                        }`}>
-                          <Gavel className={`w-3.5 h-3.5 ${dbMatch?.umpire ? 'text-emerald-400' : 'text-blue-400'}`} />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          {dbMatch?.umpire ? (
-                            <span className="text-xs text-emerald-300 font-medium truncate block">
-                              {dbMatch.umpire.name}
-                            </span>
-                          ) : (
-                            <span className="text-xs text-gray-400">
-                              Add Umpire
-                            </span>
-                          )}
-                        </div>
-                        <span className="text-[10px] text-blue-400">
-                          {dbMatch?.umpire ? '✎' : '+'}
-                        </span>
-                      </div>
-                    )}
-                    
-                    {/* Action Buttons */}
-                    {(canScore && dbMatch && hasPlayers && !isCompleted) && (
-                      <div className="flex gap-2 mt-2">
-                        {/* Score Button */}
-                        <button
-                          onClick={() => openScoring(dbMatch.id)}
-                          className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-1 ${
-                            isLive 
-                              ? 'bg-emerald-500 text-white hover:bg-emerald-600' 
-                              : 'bg-purple-500/20 text-purple-300 hover:bg-purple-500/30'
-                          }`}
-                        >
-                          {isLive ? '📊 Continue' : '🎯 Score'}
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        ))}
+    <div className="relative py-12">
+      <div className="flex justify-center">
+        <svg
+          width="100%"
+          height={viewBoxHeight}
+          viewBox={`${minX} ${minY} ${viewBoxWidth} ${viewBoxHeight}`}
+          className="max-w-full"
+          style={{ minHeight: '800px' }}
+        >
+          {/* Connector lines */}
+          <g>{drawConnectors()}</g>
 
-        {/* Winner Display - Show after finals with halo effect */}
-        {categoryWinner && (
-          <div className="flex flex-col min-w-[220px]">
-            <h4 className="text-sm font-bold text-amber-400 text-center mb-4 uppercase tracking-wider">
-              🏆 Champion
-            </h4>
-            <div 
-              className="relative flex flex-col items-center justify-center p-6"
-              style={{ paddingTop: finalDisplayIdx > 0 ? `${Math.pow(2, finalDisplayIdx) * 20}px` : 0 }}
-            >
-              {/* Halo Effect */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-40 h-40 bg-amber-500/30 rounded-full blur-3xl animate-pulse"></div>
-              </div>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-32 h-32 bg-yellow-400/20 rounded-full blur-2xl animate-pulse animation-delay-500"></div>
-              </div>
+          {/* Match cards */}
+          <g>
+            {positions.map((pos) => {
+              const match = pos.match;
+              const dbMatch = findMatch(pos.displayIdx, pos.matchIndex + 1);
+              const hasPlayers = match.player1?.id && match.player2?.id;
+              const isLive = dbMatch?.status === 'IN_PROGRESS';
+              const isCompleted = dbMatch?.status === 'COMPLETED';
               
-              {/* Winner Card */}
-              <div className="relative bg-gradient-to-br from-amber-500/20 via-yellow-500/10 to-orange-500/20 border-2 border-amber-400 rounded-2xl p-6 text-center shadow-2xl shadow-amber-500/30">
-                {/* Trophy Icon */}
-                <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-full flex items-center justify-center shadow-lg shadow-amber-500/50">
-                  <span className="text-3xl">🏆</span>
-                </div>
-                
-                {/* Winner Name */}
-                <h3 className="text-xl font-bold text-amber-300 mb-1">
-                  {categoryWinner.name}
-                </h3>
-                <p className="text-amber-400/70 text-sm font-medium">
-                  Category Winner
-                </p>
-                
-                {/* Decorative Stars */}
-                <div className="flex justify-center gap-1 mt-3">
-                  <span className="text-amber-400 animate-pulse">⭐</span>
-                  <span className="text-amber-300 animate-pulse animation-delay-200">⭐</span>
-                  <span className="text-amber-400 animate-pulse animation-delay-400">⭐</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+              const cardWidth = 280;
+              const cardHeight = 180;
+              const x = pos.x - cardWidth / 2;
+              const y = pos.y;
+
+              return (
+                <g key={`${pos.roundIndex}-${pos.matchIndex}`} transform={`translate(${x}, ${y})`}>
+                  {/* Card background */}
+                  <rect
+                    width={cardWidth}
+                    height={cardHeight}
+                    rx="12"
+                    fill="rgba(51, 65, 85, 0.9)"
+                    stroke={isLive ? '#10b981' : isCompleted ? '#f59e0b' : 'rgba(255, 255, 255, 0.1)'}
+                    strokeWidth="2"
+                  />
+
+                  {/* Round name header */}
+                  <rect width={cardWidth} height="30" rx="12" fill="rgba(30, 41, 59, 0.8)" />
+                  <text x={cardWidth / 2} y="20" textAnchor="middle" fill="#fbbf24" fontSize="12" fontWeight="700">
+                    {pos.roundName}
+                  </text>
+
+                  {/* Match number */}
+                  <text x="12" y="50" fill="#9ca3af" fontSize="11" fontWeight="600">
+                    Match {match.matchNumber}
+                  </text>
+
+                  {/* Status badges */}
+                  {isLive && (
+                    <>
+                      <rect x={cardWidth - 60} y="35" width="50" height="20" rx="10" fill="rgba(16, 185, 129, 0.2)" stroke="rgba(16, 185, 129, 0.5)" strokeWidth="1" />
+                      <text x={cardWidth - 35} y="49" textAnchor="middle" fill="#10b981" fontSize="10" fontWeight="700">LIVE</text>
+                    </>
+                  )}
+                  {isCompleted && !isLive && (
+                    <>
+                      <rect x={cardWidth - 65} y="35" width="55" height="20" rx="10" fill="rgba(245, 158, 11, 0.2)" stroke="rgba(245, 158, 11, 0.5)" strokeWidth="1" />
+                      <text x={cardWidth - 37.5} y="49" textAnchor="middle" fill="#f59e0b" fontSize="10" fontWeight="700">DONE</text>
+                    </>
+                  )}
+
+                  {/* Player 1 */}
+                  <g transform="translate(0, 60)">
+                    <rect
+                      width={cardWidth}
+                      height="50"
+                      fill={match.winner === 1 || dbMatch?.winnerId === match.player1?.id ? 'rgba(168, 85, 247, 0.2)' : 'transparent'}
+                    />
+                    <text x="12" y="30" fill={match.winner === 1 || dbMatch?.winnerId === match.player1?.id ? '#ffffff' : '#d1d5db'} fontSize="14" fontWeight="600">
+                      {(match.player1?.name || 'TBD').substring(0, 22)}
+                    </text>
+                    {(match.winner === 1 || dbMatch?.winnerId === match.player1?.id) && (
+                      <text x={cardWidth - 40} y="30" fill="#fbbf24" fontSize="18">👑</text>
+                    )}
+                  </g>
+
+                  {/* Divider */}
+                  <line x1="12" y1="110" x2={cardWidth - 12} y2="110" stroke="rgba(255, 255, 255, 0.1)" strokeWidth="1" />
+
+                  {/* Player 2 */}
+                  <g transform="translate(0, 110)">
+                    <rect
+                      width={cardWidth}
+                      height="50"
+                      fill={match.winner === 2 || dbMatch?.winnerId === match.player2?.id ? 'rgba(168, 85, 247, 0.2)' : 'transparent'}
+                    />
+                    <text x="12" y="30" fill={match.winner === 2 || dbMatch?.winnerId === match.player2?.id ? '#ffffff' : '#d1d5db'} fontSize="14" fontWeight="600">
+                      {(match.player2?.name || 'TBD').substring(0, 22)}
+                    </text>
+                    {(match.winner === 2 || dbMatch?.winnerId === match.player2?.id) && (
+                      <text x={cardWidth - 40} y="30" fill="#fbbf24" fontSize="18">👑</text>
+                    )}
+                  </g>
+
+                  {/* Umpire/Score button overlay */}
+                  {isOrganizer && !isCompleted && (
+                    <g
+                      onClick={() => {
+                        const bracketMatchData = {
+                          matchNumber: match.matchNumber,
+                          round: pos.displayIdx + 1,
+                          player1: match.player1,
+                          player2: match.player2
+                        };
+                        onAssignUmpire(dbMatch, bracketMatchData);
+                      }}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <rect x="10" y="165" width={cardWidth - 20} height="10" rx="5" fill="rgba(59, 130, 246, 0.3)" />
+                    </g>
+                  )}
+                </g>
+              );
+            })}
+          </g>
+        </svg>
       </div>
     </div>
   );

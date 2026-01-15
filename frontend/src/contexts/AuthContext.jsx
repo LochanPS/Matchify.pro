@@ -34,17 +34,15 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       // Silently handle profile fetch errors - user data from login is sufficient
       console.log('Profile fetch skipped or failed:', error.message);
-      return null;
-    }
-  };
+      
       // If token is invalid, clear storage
       if (error.response?.status === 401) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         setUser(null);
       }
+      return null;
     }
-    return null;
   };
 
   useEffect(() => {

@@ -354,10 +354,30 @@ export default function AdminDashboard() {
                             </td>
                             <td className="px-4 py-3 text-gray-200 hidden md:table-cell">{u.email}</td>
                             <td className="px-4 py-3 hidden lg:table-cell">
-                              <div className="flex gap-3 text-xs">
-                                <span className="px-2 py-1 bg-purple-500/20 text-purple-400 rounded">🏆 {u.tournamentsPlayed || 0}</span>
-                                <span className="px-2 py-1 bg-emerald-500/20 text-emerald-400 rounded">✓ {u.matchesWon || 0}</span>
-                                <span className="px-2 py-1 bg-amber-500/20 text-amber-400 rounded">⭐ {u.totalPoints || 0}</span>
+                              <div className="flex gap-2 text-xs">
+                                {/* Tournaments Badge with Halo */}
+                                <div className="relative group">
+                                  <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500 to-violet-600 rounded-lg blur opacity-30 group-hover:opacity-60 transition duration-300"></div>
+                                  <span className="relative px-3 py-1.5 bg-slate-800 border border-purple-500/30 text-purple-400 rounded-lg font-semibold flex items-center gap-1.5">
+                                    🏆 {u.tournamentsPlayed || 0}
+                                  </span>
+                                </div>
+                                
+                                {/* Matches Won Badge with Halo */}
+                                <div className="relative group">
+                                  <div className="absolute -inset-0.5 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-lg blur opacity-30 group-hover:opacity-60 transition duration-300"></div>
+                                  <span className="relative px-3 py-1.5 bg-slate-800 border border-emerald-500/30 text-emerald-400 rounded-lg font-semibold flex items-center gap-1.5">
+                                    ✓ {u.matchesWon || 0}
+                                  </span>
+                                </div>
+                                
+                                {/* Points Badge with Halo */}
+                                <div className="relative group">
+                                  <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500 to-orange-600 rounded-lg blur opacity-30 group-hover:opacity-60 transition duration-300"></div>
+                                  <span className="relative px-3 py-1.5 bg-slate-800 border border-amber-500/30 text-amber-400 rounded-lg font-semibold flex items-center gap-1.5">
+                                    ⭐ {u.totalPoints || 0}
+                                  </span>
+                                </div>
                               </div>
                             </td>
                             <td className="px-4 py-3">

@@ -555,6 +555,7 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire }) =
   // Display: index 0 = first round, last index = Final
   // So display index i corresponds to database round (totalRounds - i)
   const findMatch = (displayIdx, matchNum) => {
+    if (!matches || !Array.isArray(matches)) return null;
     const dbRound = totalRounds - displayIdx;
     return matches.find(m => m.round === dbRound && m.matchNumber === matchNum);
   };

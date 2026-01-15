@@ -348,11 +348,11 @@ export default function AdminDashboard() {
                                 </div>
                                 <div>
                                   <p className="text-white font-medium">{u.name || 'Unknown'}</p>
-                                  <p className="text-xs text-gray-500 md:hidden">{u.email}</p>
+                                  <p className="text-xs text-gray-400 md:hidden">{u.email}</p>
                                 </div>
                               </div>
                             </td>
-                            <td className="px-4 py-3 text-gray-300 hidden md:table-cell">{u.email}</td>
+                            <td className="px-4 py-3 text-gray-400 hidden md:table-cell">{u.email}</td>
                             <td className="px-4 py-3 hidden lg:table-cell">
                               <div className="flex gap-3 text-xs">
                                 <span className="px-2 py-1 bg-purple-500/20 text-purple-400 rounded">🏆 {u.tournamentsPlayed || 0}</span>

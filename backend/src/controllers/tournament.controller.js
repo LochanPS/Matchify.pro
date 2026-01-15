@@ -147,12 +147,21 @@ const createTournament = async (req, res) => {
 
     // Date validations
     // datetime-local sends format like "2026-01-15T14:00" without timezone
-    // We need to append 'Z' to treat it as UTC, or parse it correctly for IST
-    // The user selects time in IST, so we store it as-is in the database
-    const regOpen = new Date(registrationOpenDate + ':00.000Z'); // Append seconds and Z for UTC
-    const regClose = new Date(registrationCloseDate + ':00.000Z');
-    const start = new Date(startDate + ':00.000Z');
-    const end = new Date(endDate + ':00.000Z');
+    // We need to parse it as a local datetime string, not as UTC
+    // Split the datetime string and create date in local timezone
+    const parseLocalDateTime = (dateTimeStr) => {
+      // Format: "2026-01-15T14:00"
+      const [datePart, timePart] = dateTimeStr.split('T');
+      const [year, month, day] = datePart.split('-').map(Number);
+      const [hours, minutes] = timePart.split(':').map(Number);
+      // Create date in local timezone (IST for India)
+      return new Date(year, month - 1, day, hours, minutes, 0, 0);
+    };
+
+    const regOpen = parseLocalDateTime(registrationOpenDate);
+    const regClose = parseLocalDateTime(registrationCloseDate);
+    const start = parseLocalDateTime(startDate);
+    const end = parseLocalDateTime(endDate);
     const now = new Date();
     
     // Set now to start of current minute for fair comparison
@@ -539,11 +548,19 @@ const updateTournament = async (req, res) => {
     if (format) updateData.format = format;
     if (privacy) updateData.privacy = privacy;
     if (status) updateData.status = status;
-    // Fix timezone issue: append Z to treat datetime-local input as UTC
-    if (registrationOpenDate) updateData.registrationOpenDate = new Date(registrationOpenDate + ':00.000Z');
-    if (registrationCloseDate) updateData.registrationCloseDate = new Date(registrationCloseDate + ':00.000Z');
-    if (startDate) updateData.startDate = new Date(startDate + ':00.000Z');
-    if (endDate) updateData.endDate = new Date(endDate + ':00.000Z');
+    
+    // Parse datetime-local strings as local timezone dates
+    const parseLocalDateTime = (dateTimeStr) => {
+      const [datePart, timePart] = dateTimeStr.split('T');
+      const [year, month, day] = datePart.split('-').map(Number);
+      const [hours, minutes] = timePart.split(':').map(Number);
+      return new Date(year, month - 1, day, hours, minutes, 0, 0);
+    };
+    
+    if (registrationOpenDate) updateData.registrationOpenDate = parseLocalDateTime(registrationOpenDate);
+    if (registrationCloseDate) updateData.registrationCloseDate = parseLocalDateTime(registrationCloseDate);
+    if (startDate) updateData.startDate = parseLocalDateTime(startDate);
+    if (endDate) updateData.endDate = parseLocalDateTime(endDate);
 
     const updatedTournament = await prisma.tournament.update({
       where: { id },

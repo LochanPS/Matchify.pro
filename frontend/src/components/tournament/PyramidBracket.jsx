@@ -61,23 +61,28 @@ const PyramidBracket = ({ matches, categoryName, format }) => {
     }
   };
 
-  // Calculate pyramid positions
+  // Calculate pyramid positions - TRUE PYRAMID: Final at top, earlier rounds below
   const calculatePositions = () => {
     const positions = [];
     const MATCH_HEIGHT = 120;
-    const BASE_SPACING = 160;
-    const VERTICAL_GAP = 180;
+    const BASE_SPACING = 200; // Horizontal spacing at the base
+    const VERTICAL_GAP = 200; // Vertical gap between rounds
     
-    sortedRounds.forEach((roundNumber, roundIndex) => {
+    // Reverse the rounds so Final (round with 1 match) is first
+    const reversedRounds = [...sortedRounds].reverse();
+    
+    reversedRounds.forEach((roundNumber, roundIndex) => {
       const roundMatches = roundsData[roundNumber];
       const matchCount = roundMatches.length;
       
-      // Calculate vertical position (top to bottom: Final at top)
+      // Calculate vertical position - Final at top (y=100), each round goes down
       const y = roundIndex * VERTICAL_GAP + 100;
       
       // Calculate horizontal spacing for this round
-      // Each round doubles the spacing from the previous
-      const spacing = BASE_SPACING * Math.pow(2, roundIndex);
+      // More matches = tighter spacing to fit in pyramid shape
+      // The spacing decreases as we go up (fewer matches = wider spacing)
+      const roundsFromTop = reversedRounds.length - roundIndex - 1;
+      const spacing = BASE_SPACING * Math.pow(0.5, roundsFromTop);
       
       // Calculate total width needed for this round
       const totalWidth = (matchCount - 1) * spacing;
@@ -95,7 +100,8 @@ const PyramidBracket = ({ matches, categoryName, format }) => {
           y,
           roundIndex,
           matchIndex,
-          roundName: getRoundName(roundNumber, matchCount)
+          roundName: getRoundName(roundNumber, matchCount),
+          matchCount
         });
       });
     });
@@ -114,26 +120,27 @@ const PyramidBracket = ({ matches, categoryName, format }) => {
   const viewBoxWidth = maxX - minX;
   const viewBoxHeight = maxY - minY;
 
-  // Draw connector lines
+  // Draw connector lines - from lower rounds UP to higher rounds
   const drawConnectors = () => {
     const lines = [];
     
     positions.forEach((pos, idx) => {
-      // Find child matches (matches in the next round that this match feeds into)
-      const nextRoundIndex = pos.roundIndex - 1;
-      if (nextRoundIndex >= 0) {
-        const nextRoundPositions = positions.filter(p => p.roundIndex === nextRoundIndex);
+      // Find parent match (match in the previous round that this match feeds into)
+      // In pyramid: we go from bottom (many matches) to top (1 match)
+      const prevRoundIndex = pos.roundIndex - 1;
+      if (prevRoundIndex >= 0) {
+        const prevRoundPositions = positions.filter(p => p.roundIndex === prevRoundIndex);
         
-        // This match feeds into the match at position floor(matchIndex / 2) in next round
-        const childIndex = Math.floor(pos.matchIndex / 2);
-        const childPos = nextRoundPositions[childIndex];
+        // This match feeds into the match at position floor(matchIndex / 2) in previous round
+        const parentIndex = Math.floor(pos.matchIndex / 2);
+        const parentPos = prevRoundPositions[parentIndex];
         
-        if (childPos) {
-          // Draw line from this match to child match
+        if (parentPos) {
+          // Draw line from this match (bottom) to parent match (top)
           const startX = pos.x;
-          const startY = pos.y + 60; // Bottom of current match
-          const endX = childPos.x;
-          const endY = childPos.y - 20; // Top of child match
+          const startY = pos.y - 20; // Top of current match
+          const endX = parentPos.x;
+          const endY = parentPos.y + 120; // Bottom of parent match
           
           // Calculate control points for smooth curve
           const midY = (startY + endY) / 2;

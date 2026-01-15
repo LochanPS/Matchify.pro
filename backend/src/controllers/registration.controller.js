@@ -52,9 +52,15 @@ const createRegistration = async (req, res) => {
     const currentTimeString = `${year}-${month}-${day}T${hours}:${minutes}`;
     
     console.log('🕐 Registration Check:', {
-      currentTime: currentTimeString,
+      serverTime: now.toISOString(),
+      serverTimeLocal: currentTimeString,
+      serverTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       registrationOpen: tournament.registrationOpenDate,
       registrationClose: tournament.registrationCloseDate,
+      comparison: {
+        currentVsOpen: `${currentTimeString} >= ${tournament.registrationOpenDate} = ${currentTimeString >= tournament.registrationOpenDate}`,
+        currentVsClose: `${currentTimeString} <= ${tournament.registrationCloseDate} = ${currentTimeString <= tournament.registrationCloseDate}`,
+      },
       isOpen: currentTimeString >= tournament.registrationOpenDate && currentTimeString <= tournament.registrationCloseDate
     });
     
@@ -449,9 +455,15 @@ const createRegistrationWithScreenshot = async (req, res) => {
     const currentTimeString = `${year}-${month}-${day}T${hours}:${minutes}`;
     
     console.log('🕐 Registration Check (Screenshot):', {
-      currentTime: currentTimeString,
+      serverTime: now.toISOString(),
+      serverTimeLocal: currentTimeString,
+      serverTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       registrationOpen: tournament.registrationOpenDate,
       registrationClose: tournament.registrationCloseDate,
+      comparison: {
+        currentVsOpen: `${currentTimeString} >= ${tournament.registrationOpenDate} = ${currentTimeString >= tournament.registrationOpenDate}`,
+        currentVsClose: `${currentTimeString} <= ${tournament.registrationCloseDate} = ${currentTimeString <= tournament.registrationCloseDate}`,
+      },
       isOpen: currentTimeString >= tournament.registrationOpenDate && currentTimeString <= tournament.registrationCloseDate
     });
     

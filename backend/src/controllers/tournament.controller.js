@@ -147,24 +147,23 @@ const createTournament = async (req, res) => {
 
     // Date validations
     // datetime-local sends format like "2026-01-15T14:00" without timezone
-    // We need to parse it as a local datetime string, not as UTC
-    // Split the datetime string and create date in local timezone
-    const parseLocalDateTime = (dateTimeStr) => {
-      // Format: "2026-01-15T14:00"
-      console.log('📅 Parsing datetime:', dateTimeStr);
-      const [datePart, timePart] = dateTimeStr.split('T');
-      const [year, month, day] = datePart.split('-').map(Number);
-      const [hours, minutes] = timePart.split(':').map(Number);
-      // Create date in local timezone (IST for India)
-      const parsedDate = new Date(year, month - 1, day, hours, minutes, 0, 0);
-      console.log('✅ Parsed as:', parsedDate.toISOString(), '(will be stored in DB)');
-      return parsedDate;
+    // CRITICAL: We store this EXACT string by converting to ISO format
+    // This prevents ANY timezone conversion
+    const parseExactDateTime = (dateTimeStr) => {
+      // Input: "2026-01-15T14:00"
+      // We want to store this EXACT time in the database
+      // Add seconds and milliseconds, then treat as UTC
+      console.log('📅 Input datetime:', dateTimeStr);
+      const exactISO = dateTimeStr + ':00.000Z';
+      const date = new Date(exactISO);
+      console.log('✅ Storing as:', date.toISOString());
+      return date;
     };
 
-    const regOpen = parseLocalDateTime(registrationOpenDate);
-    const regClose = parseLocalDateTime(registrationCloseDate);
-    const start = parseLocalDateTime(startDate);
-    const end = parseLocalDateTime(endDate);
+    const regOpen = parseExactDateTime(registrationOpenDate);
+    const regClose = parseExactDateTime(registrationCloseDate);
+    const start = parseExactDateTime(startDate);
+    const end = parseExactDateTime(endDate);
     const now = new Date();
     
     // Set now to start of current minute for fair comparison
@@ -552,21 +551,19 @@ const updateTournament = async (req, res) => {
     if (privacy) updateData.privacy = privacy;
     if (status) updateData.status = status;
     
-    // Parse datetime-local strings as local timezone dates
-    const parseLocalDateTime = (dateTimeStr) => {
-      console.log('📅 UPDATE - Parsing datetime:', dateTimeStr);
-      const [datePart, timePart] = dateTimeStr.split('T');
-      const [year, month, day] = datePart.split('-').map(Number);
-      const [hours, minutes] = timePart.split(':').map(Number);
-      const parsedDate = new Date(year, month - 1, day, hours, minutes, 0, 0);
-      console.log('✅ UPDATE - Parsed as:', parsedDate.toISOString());
-      return parsedDate;
+    // Parse datetime-local strings - store EXACT time without conversion
+    const parseExactDateTime = (dateTimeStr) => {
+      console.log('📅 UPDATE - Input datetime:', dateTimeStr);
+      const exactISO = dateTimeStr + ':00.000Z';
+      const date = new Date(exactISO);
+      console.log('✅ UPDATE - Storing as:', date.toISOString());
+      return date;
     };
     
-    if (registrationOpenDate) updateData.registrationOpenDate = parseLocalDateTime(registrationOpenDate);
-    if (registrationCloseDate) updateData.registrationCloseDate = parseLocalDateTime(registrationCloseDate);
-    if (startDate) updateData.startDate = parseLocalDateTime(startDate);
-    if (endDate) updateData.endDate = parseLocalDateTime(endDate);
+    if (registrationOpenDate) updateData.registrationOpenDate = parseExactDateTime(registrationOpenDate);
+    if (registrationCloseDate) updateData.registrationCloseDate = parseExactDateTime(registrationCloseDate);
+    if (startDate) updateData.startDate = parseExactDateTime(startDate);
+    if (endDate) updateData.endDate = parseExactDateTime(endDate);
 
     const updatedTournament = await prisma.tournament.update({
       where: { id },

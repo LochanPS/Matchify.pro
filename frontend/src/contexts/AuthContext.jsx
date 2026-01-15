@@ -32,7 +32,11 @@ export const AuthProvider = ({ children }) => {
         return freshUser;
       }
     } catch (error) {
-      console.error('Error fetching user profile:', error);
+      // Silently handle profile fetch errors - user data from login is sufficient
+      console.log('Profile fetch skipped or failed:', error.message);
+      return null;
+    }
+  };
       // If token is invalid, clear storage
       if (error.response?.status === 401) {
         localStorage.removeItem('token');

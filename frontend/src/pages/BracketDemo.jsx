@@ -1,6 +1,9 @@
+import { useState } from 'react';
 import TournamentBracket from '../components/tournament/TournamentBracket';
+import PyramidBracket from '../components/tournament/PyramidBracket';
 
 const BracketDemo = () => {
+  const [viewMode, setViewMode] = useState('pyramid'); // 'linear' or 'pyramid'
   // Sample data for demonstration
   const sampleMatches = [
     // Round of 16 (Round 1)
@@ -224,11 +227,43 @@ const BracketDemo = () => {
 
   return (
     <div className="min-h-screen">
-      <TournamentBracket
-        matches={sampleMatches}
-        categoryName="Men's Singles - Open Category"
-        format="SINGLES"
-      />
+      {/* View Toggle */}
+      <div className="fixed top-4 right-4 z-50 flex gap-2 bg-slate-800/90 backdrop-blur-xl border border-white/10 rounded-xl p-2">
+        <button
+          onClick={() => setViewMode('pyramid')}
+          className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+            viewMode === 'pyramid'
+              ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg'
+              : 'text-gray-400 hover:text-white hover:bg-white/5'
+          }`}
+        >
+          🏔️ Pyramid View
+        </button>
+        <button
+          onClick={() => setViewMode('linear')}
+          className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+            viewMode === 'linear'
+              ? 'bg-gradient-to-r from-purple-500 to-indigo-600 text-white shadow-lg'
+              : 'text-gray-400 hover:text-white hover:bg-white/5'
+          }`}
+        >
+          ➡️ Linear View
+        </button>
+      </div>
+
+      {viewMode === 'pyramid' ? (
+        <PyramidBracket
+          matches={sampleMatches}
+          categoryName="Men's Singles - Open Category"
+          format="SINGLES"
+        />
+      ) : (
+        <TournamentBracket
+          matches={sampleMatches}
+          categoryName="Men's Singles - Open Category"
+          format="SINGLES"
+        />
+      )}
     </div>
   );
 };

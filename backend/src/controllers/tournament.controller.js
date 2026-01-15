@@ -539,10 +539,11 @@ const updateTournament = async (req, res) => {
     if (format) updateData.format = format;
     if (privacy) updateData.privacy = privacy;
     if (status) updateData.status = status;
-    if (registrationOpenDate) updateData.registrationOpenDate = new Date(registrationOpenDate);
-    if (registrationCloseDate) updateData.registrationCloseDate = new Date(registrationCloseDate);
-    if (startDate) updateData.startDate = new Date(startDate);
-    if (endDate) updateData.endDate = new Date(endDate);
+    // Fix timezone issue: append Z to treat datetime-local input as UTC
+    if (registrationOpenDate) updateData.registrationOpenDate = new Date(registrationOpenDate + ':00.000Z');
+    if (registrationCloseDate) updateData.registrationCloseDate = new Date(registrationCloseDate + ':00.000Z');
+    if (startDate) updateData.startDate = new Date(startDate + ':00.000Z');
+    if (endDate) updateData.endDate = new Date(endDate + ':00.000Z');
 
     const updatedTournament = await prisma.tournament.update({
       where: { id },

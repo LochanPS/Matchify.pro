@@ -175,6 +175,8 @@ export const blockUser = async (req, res) => {
     const { userId } = req.params;
     const { reason } = req.body;
 
+    console.log('🚫 Blocking user:', { userId, reason });
+
     const user = await prisma.user.update({
       where: { id: userId },
       data: {
@@ -190,14 +192,17 @@ export const blockUser = async (req, res) => {
         type: 'ACCOUNT_SUSPENDED',
         title: 'Account Suspended',
         message: `Your Matchify.pro account has been suspended. Reason: ${reason || 'Violation of terms of service'}. If you believe this is a mistake, please contact support.`,
-        data: {
+        data: JSON.stringify({
           reason: reason || 'Violation of terms of service',
           suspendedAt: new Date().toISOString()
-        }
+        })
       }
     });
 
+    console.log('✅ User blocked successfully:', user.email);
+
     res.json({ 
+      success: true,
       message: 'User blocked successfully',
       user: {
         id: user.id,
@@ -208,8 +213,8 @@ export const blockUser = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error blocking user:', error);
-    res.status(500).json({ error: 'Failed to block user' });
+    console.error('❌ Error blocking user:', error);
+    res.status(500).json({ success: false, error: 'Failed to block user', details: error.message });
   }
 };
 
@@ -217,6 +222,8 @@ export const blockUser = async (req, res) => {
 export const unblockUser = async (req, res) => {
   try {
     const { userId } = req.params;
+
+    console.log('✅ Unblocking user:', userId);
 
     const user = await prisma.user.update({
       where: { id: userId },
@@ -233,13 +240,16 @@ export const unblockUser = async (req, res) => {
         type: 'ACCOUNT_REINSTATED',
         title: 'Account Reinstated',
         message: 'Your Matchify.pro account has been reinstated. You can now access all features again. Welcome back!',
-        data: {
+        data: JSON.stringify({
           reinstatedAt: new Date().toISOString()
-        }
+        })
       }
     });
 
+    console.log('✅ User unblocked successfully:', user.email);
+
     res.json({ 
+      success: true,
       message: 'User unblocked successfully',
       user: {
         id: user.id,
@@ -249,8 +259,8 @@ export const unblockUser = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error unblocking user:', error);
-    res.status(500).json({ error: 'Failed to unblock user' });
+    console.error('❌ Error unblocking user:', error);
+    res.status(500).json({ success: false, error: 'Failed to unblock user', details: error.message });
   }
 };
 

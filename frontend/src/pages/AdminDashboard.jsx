@@ -33,6 +33,7 @@ export default function AdminDashboard() {
   const [alertModal, setAlertModal] = useState(null);
   const [academies, setAcademies] = useState([]);
   const [academyFilter, setAcademyFilter] = useState('pending');
+  const [viewingScreenshot, setViewingScreenshot] = useState(null);
 
   useEffect(() => {
     if (!user?.isAdmin) { navigate('/login'); return; }
@@ -575,9 +576,13 @@ export default function AdminDashboard() {
                       </div>
                       <div className="flex flex-col gap-2">
                         {academy.paymentScreenshot && (
-                          <a href={academy.paymentScreenshot} target="_blank" rel="noopener noreferrer" className="p-2 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 transition-colors" title="View Payment">
+                          <button 
+                            onClick={() => setViewingScreenshot(academy.paymentScreenshot)}
+                            className="p-2 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 transition-colors" 
+                            title="View Payment"
+                          >
                             <Eye className="w-5 h-5" />
-                          </a>
+                          </button>
                         )}
                         {academy.status === 'pending' && (
                           <>
@@ -631,6 +636,48 @@ export default function AdminDashboard() {
           </div>
         )}
       </div>
+
+      {/* Payment Screenshot Modal */}
+      {viewingScreenshot && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="relative w-full max-w-2xl">
+            {/* Halo effect */}
+            <div className="absolute -inset-2 bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500 rounded-3xl blur-xl opacity-50"></div>
+            <div className="relative bg-slate-800 rounded-2xl border border-white/10 overflow-hidden">
+              <div className="p-4 border-b border-white/10 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-500/20 rounded-lg">
+                    <Eye className="w-5 h-5 text-blue-400" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-white">Payment Screenshot</h3>
+                </div>
+                <button 
+                  onClick={() => setViewingScreenshot(null)} 
+                  className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5 text-gray-400" />
+                </button>
+              </div>
+              <div className="p-4">
+                <img 
+                  src={viewingScreenshot} 
+                  alt="Payment Screenshot" 
+                  className="w-full max-h-[70vh] object-contain rounded-lg"
+                />
+              </div>
+              <div className="p-4 bg-slate-900/50 border-t border-white/10">
+                <button
+                  onClick={() => setViewingScreenshot(null)}
+                  className="w-full px-4 py-3 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-xl transition-colors font-medium flex items-center justify-center gap-2"
+                >
+                  <ChevronRight className="w-4 h-4 rotate-180" />
+                  Back
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Block User Modal */}
       {showBlockModal && selectedUser && (

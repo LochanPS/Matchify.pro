@@ -615,33 +615,41 @@ export default function TournamentManagementPage() {
             {confirmModal.type === 'approve' && (
               <>
                 <div className="text-center mb-6">
-                  <div className="w-16 h-16 bg-gradient-to-br from-emerald-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-500/30">
-                    <CheckCircle className="w-8 h-8 text-white" />
+                  <div className="w-20 h-20 bg-gradient-to-br from-purple-500 via-pink-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-2xl shadow-purple-500/50 animate-pulse">
+                    <CheckCircle className="w-10 h-10 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold text-white mb-2">Approve Registration?</h3>
-                  <p className="text-gray-400">
-                    Approve <span className="text-emerald-400 font-medium">{confirmModal.registration.user.name}</span>'s registration.
-                  </p>
+                  <h3 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 mb-3">
+                    Approve {confirmModal.registration.user.name}'s registration
+                  </h3>
                 </div>
-                <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 mb-6">
-                  <p className="text-sm text-emerald-300 font-medium mb-2">This confirms:</p>
-                  <ul className="text-sm text-emerald-200/80 space-y-1">
-                    <li>✓ Payment of ₹{confirmModal.registration.amountTotal} received</li>
-                    <li>✓ Player added to tournament</li>
-                    <li>✓ Confirmation notification sent</li>
+                <div className="bg-gradient-to-br from-purple-500/10 via-pink-500/10 to-indigo-500/10 border border-purple-500/30 rounded-xl p-5 mb-6 backdrop-blur-sm">
+                  <p className="text-base text-purple-300 font-semibold mb-3">This confirms:</p>
+                  <ul className="text-base text-gray-300 space-y-2">
+                    <li className="flex items-center gap-2">
+                      <span className="text-green-400">✓</span>
+                      <span>Payment of <span className="text-purple-400 font-semibold">₹{confirmModal.registration.amountTotal}</span> received</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-green-400">✓</span>
+                      <span>Player added to tournament</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-green-400">✓</span>
+                      <span>Confirmation notification sent</span>
+                    </li>
                   </ul>
                 </div>
                 <div className="flex gap-3">
                   <button
                     onClick={() => setConfirmModal(null)}
-                    className="flex-1 py-3 px-4 bg-white/10 text-white rounded-xl hover:bg-white/20 transition-colors font-medium"
+                    className="flex-1 py-3 px-4 bg-slate-700/50 text-gray-300 rounded-xl hover:bg-slate-700 transition-all font-medium border border-white/10"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={() => handleApprove(confirmModal.registration.id)}
                     disabled={actionLoading}
-                    className="flex-1 py-3 px-4 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-xl hover:shadow-lg hover:shadow-emerald-500/30 transition-all font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+                    className="flex-1 py-3 px-4 bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-600 text-white rounded-xl hover:shadow-2xl hover:shadow-purple-500/50 transition-all font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
                   >
                     {actionLoading ? (
                       <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />

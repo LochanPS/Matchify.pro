@@ -5,7 +5,8 @@ import { superAdminAPI } from '../api/superAdmin';
 import {
   Shield, Users, Trophy, CreditCard, LogOut, Search,
   ChevronRight, Activity, TrendingUp, Calendar, AlertTriangle,
-  Ban, CheckCircle, Eye, Trash2, RefreshCw, X, Zap, Crown, Bell, Building2
+  Ban, CheckCircle, Eye, Trash2, RefreshCw, X, Zap, Crown, Bell, Building2,
+  MapPin, Phone, Mail, Globe, Info
 } from 'lucide-react';
 import NotificationBell from '../components/NotificationBell';
 
@@ -557,77 +558,255 @@ export default function AdminDashboard() {
                 <p className="text-gray-400">No {academyFilter} academies</p>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-6">
                 {academies.filter(a => a.status === academyFilter).map(academy => (
-                  <div key={academy.id} className="bg-slate-800/50 rounded-xl border border-white/10 p-5">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <h3 className="text-lg font-bold text-white mb-1">{academy.name}</h3>
-                        <p className="text-gray-400 text-sm mb-2">{academy.city}, {academy.state}</p>
-                        <div className="flex flex-wrap gap-2 mb-3">
+                  <div key={academy.id} className="relative group">
+                    {/* Halo effect */}
+                    <div className={`absolute -inset-1 bg-gradient-to-r ${
+                      academy.status === 'pending' ? 'from-amber-500/30 via-orange-500/30 to-amber-500/30' :
+                      academy.status === 'approved' ? 'from-emerald-500/30 via-teal-500/30 to-emerald-500/30' :
+                      'from-red-500/30 via-rose-500/30 to-red-500/30'
+                    } rounded-2xl blur-lg opacity-40 group-hover:opacity-60 transition-opacity`}></div>
+                    
+                    <div className="relative bg-slate-800/80 backdrop-blur-sm rounded-2xl border border-white/10 overflow-hidden">
+                      {/* Header */}
+                      <div className={`p-5 border-b border-white/10 bg-gradient-to-r ${
+                        academy.status === 'pending' ? 'from-amber-500/10 to-orange-500/10' :
+                        academy.status === 'approved' ? 'from-emerald-500/10 to-teal-500/10' :
+                        'from-red-500/10 to-rose-500/10'
+                      }`}>
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center gap-4">
+                            <div className={`w-14 h-14 rounded-xl flex items-center justify-center text-2xl ${
+                              academy.status === 'pending' ? 'bg-amber-500/20' :
+                              academy.status === 'approved' ? 'bg-emerald-500/20' :
+                              'bg-red-500/20'
+                            }`}>
+                              🏫
+                            </div>
+                            <div>
+                              <h3 className="text-xl font-bold text-white">{academy.name}</h3>
+                              <p className="text-gray-400 flex items-center gap-1 mt-1">
+                                <MapPin className="w-4 h-4" />
+                                {academy.city}, {academy.state} - {academy.pincode}
+                              </p>
+                            </div>
+                          </div>
+                          <span className={`px-3 py-1.5 rounded-full text-sm font-semibold capitalize ${
+                            academy.status === 'pending' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
+                            academy.status === 'approved' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
+                            'bg-red-500/20 text-red-400 border border-red-500/30'
+                          }`}>
+                            {academy.status === 'pending' ? '⏳ Pending' : academy.status === 'approved' ? '✅ Approved' : '❌ Rejected'}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Details Grid */}
+                      <div className="p-5 border-b border-white/10">
+                        <h4 className="text-sm font-semibold text-gray-400 mb-3 flex items-center gap-2">
+                          <Users className="w-4 h-4" />
+                          Contact Information
+                        </h4>
+                        <div className="grid md:grid-cols-3 gap-3">
+                          <div className="flex items-center gap-3 p-3 bg-slate-700/50 border border-white/10 rounded-xl">
+                            <Phone className="w-5 h-5 text-blue-400" />
+                            <div>
+                              <p className="text-xs text-gray-500">Phone</p>
+                              <p className="text-white font-medium">{academy.phone || '-'}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3 p-3 bg-slate-700/50 border border-white/10 rounded-xl">
+                            <Mail className="w-5 h-5 text-purple-400" />
+                            <div>
+                              <p className="text-xs text-gray-500">Email</p>
+                              <p className="text-white font-medium truncate">{academy.email || academy.submittedByEmail || '-'}</p>
+                            </div>
+                          </div>
+                          {academy.website && (
+                            <div className="flex items-center gap-3 p-3 bg-slate-700/50 border border-white/10 rounded-xl">
+                              <Globe className="w-5 h-5 text-cyan-400" />
+                              <div>
+                                <p className="text-xs text-gray-500">Website</p>
+                                <a href={academy.website} target="_blank" rel="noopener noreferrer" className="text-cyan-400 font-medium hover:underline truncate block">{academy.website}</a>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Address */}
+                      <div className="p-5 border-b border-white/10">
+                        <h4 className="text-sm font-semibold text-gray-400 mb-3 flex items-center gap-2">
+                          <MapPin className="w-4 h-4" />
+                          Full Address
+                        </h4>
+                        <div className="p-3 bg-slate-700/50 border border-white/10 rounded-xl">
+                          <p className="text-white">{academy.address}, {academy.city}, {academy.state} - {academy.pincode}</p>
+                        </div>
+                      </div>
+
+                      {/* Sports */}
+                      <div className="p-5 border-b border-white/10">
+                        <h4 className="text-sm font-semibold text-gray-400 mb-3 flex items-center gap-2">
+                          <Trophy className="w-4 h-4" />
+                          Sports Offered
+                        </h4>
+                        <div className="flex flex-wrap gap-2">
                           {academy.sports?.map(sport => (
-                            <span key={sport} className="px-2 py-1 bg-purple-500/20 text-purple-300 text-xs rounded-lg">{sport}</span>
+                            <span key={sport} className="px-3 py-1.5 bg-purple-500/20 text-purple-300 rounded-lg font-medium border border-purple-500/30">
+                              {sport}
+                            </span>
                           ))}
                         </div>
-                        <div className="text-sm text-gray-500">
-                          <p>Phone: {academy.phone}</p>
-                          <p>Email: {academy.submittedByEmail || academy.email || '-'}</p>
+                      </div>
+
+                      {/* Sport Details */}
+                      {academy.sportDetails && Object.keys(academy.sportDetails).length > 0 && (
+                        <div className="p-5 border-b border-white/10">
+                          <h4 className="text-sm font-semibold text-gray-400 mb-3 flex items-center gap-2">
+                            <Activity className="w-4 h-4" />
+                            Facility Details
+                          </h4>
+                          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+                            {Object.entries(academy.sportDetails).map(([key, value]) => (
+                              <div key={key} className="flex items-center gap-3 p-3 bg-indigo-500/10 border border-indigo-500/30 rounded-xl">
+                                <div className="w-8 h-8 bg-indigo-500/20 rounded-lg flex items-center justify-center">
+                                  <Zap className="w-4 h-4 text-indigo-400" />
+                                </div>
+                                <div>
+                                  <p className="text-xs text-indigo-400">{key.replace(/_/g, ' ')}</p>
+                                  <p className="text-white font-semibold">{value}</p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Description */}
+                      {academy.description && (
+                        <div className="p-5 border-b border-white/10">
+                          <h4 className="text-sm font-semibold text-gray-400 mb-3 flex items-center gap-2">
+                            <Info className="w-4 h-4" />
+                            Description
+                          </h4>
+                          <div className="p-3 bg-slate-700/50 border border-white/10 rounded-xl">
+                            <p className="text-gray-300">{academy.description}</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Photos */}
+                      {academy.photos && academy.photos.length > 0 && (
+                        <div className="p-5 border-b border-white/10">
+                          <h4 className="text-sm font-semibold text-gray-400 mb-3 flex items-center gap-2">
+                            <Eye className="w-4 h-4" />
+                            Academy Photos ({academy.photos.length})
+                          </h4>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            {academy.photos.slice(0, 4).map((photo, idx) => (
+                              <img 
+                                key={idx} 
+                                src={photo} 
+                                alt={`Academy photo ${idx + 1}`} 
+                                className="w-full h-24 object-cover rounded-lg border border-white/10 cursor-pointer hover:opacity-80 transition-opacity"
+                                onClick={() => setViewingScreenshot(photo)}
+                              />
+                            ))}
+                            {academy.photos.length > 4 && (
+                              <div className="w-full h-24 bg-slate-700/50 border border-white/10 rounded-lg flex items-center justify-center text-gray-400">
+                                +{academy.photos.length - 4} more
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Payment Section */}
+                      <div className="p-5 border-b border-white/10">
+                        <h4 className="text-sm font-semibold text-gray-400 mb-3 flex items-center gap-2">
+                          <CreditCard className="w-4 h-4" />
+                          Payment Details
+                        </h4>
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-3 p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl">
+                            <CreditCard className="w-5 h-5 text-emerald-400" />
+                            <div>
+                              <p className="text-xs text-emerald-400">Registration Fee</p>
+                              <p className="text-emerald-300 font-bold text-xl">₹200</p>
+                            </div>
+                          </div>
+                          {academy.paymentScreenshot && (
+                            <button 
+                              onClick={() => setViewingScreenshot(academy.paymentScreenshot)}
+                              className="flex items-center gap-2 px-4 py-3 bg-blue-500/20 text-blue-400 rounded-xl hover:bg-blue-500/30 transition-colors border border-blue-500/30"
+                            >
+                              <Eye className="w-5 h-5" />
+                              View Payment Screenshot
+                            </button>
+                          )}
                         </div>
                       </div>
-                      <div className="flex flex-col gap-2">
-                        {academy.paymentScreenshot && (
-                          <button 
-                            onClick={() => setViewingScreenshot(academy.paymentScreenshot)}
-                            className="p-2 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 transition-colors" 
-                            title="View Payment"
-                          >
-                            <Eye className="w-5 h-5" />
-                          </button>
-                        )}
-                        {academy.status === 'pending' && (
-                          <>
-                            <button
-                              onClick={async () => {
-                                try {
-                                  await fetch(`/api/academies/admin/${academy.id}/approve`, {
-                                    method: 'POST',
-                                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-                                  });
-                                  setAcademies(prev => prev.map(a => a.id === academy.id ? { ...a, status: 'approved' } : a));
-                                  setAlertModal({ type: 'success', message: 'Academy approved!' });
-                                } catch (e) {
-                                  setAlertModal({ type: 'error', message: 'Failed to approve' });
-                                }
-                              }}
-                              className="p-2 bg-emerald-500/20 text-emerald-400 rounded-lg hover:bg-emerald-500/30 transition-colors"
-                              title="Approve"
-                            >
-                              <CheckCircle className="w-5 h-5" />
-                            </button>
-                            <button
-                              onClick={async () => {
-                                const reason = prompt('Rejection reason:');
-                                if (!reason) return;
-                                try {
-                                  await fetch(`/api/academies/admin/${academy.id}/reject`, {
-                                    method: 'POST',
-                                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}`, 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ reason })
-                                  });
-                                  setAcademies(prev => prev.map(a => a.id === academy.id ? { ...a, status: 'rejected' } : a));
-                                  setAlertModal({ type: 'success', message: 'Academy rejected' });
-                                } catch (e) {
-                                  setAlertModal({ type: 'error', message: 'Failed to reject' });
-                                }
-                              }}
-                              className="p-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors"
-                              title="Reject"
-                            >
-                              <X className="w-5 h-5" />
-                            </button>
-                          </>
-                        )}
+
+                      {/* Submitted Info */}
+                      <div className="p-5 border-b border-white/10 bg-slate-900/30">
+                        <div className="flex items-center gap-3 text-sm text-gray-400">
+                          <Calendar className="w-4 h-4" />
+                          <span>Submitted by: <span className="text-white font-medium">{academy.submittedByEmail || 'Unknown'}</span></span>
+                          {academy.createdAt && (
+                            <>
+                              <span className="text-gray-600">•</span>
+                              <span>on {new Date(academy.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                            </>
+                          )}
+                        </div>
                       </div>
+
+                      {/* Action Buttons */}
+                      {academy.status === 'pending' && (
+                        <div className="p-5 bg-slate-900/50 flex gap-3">
+                          <button
+                            onClick={async () => {
+                              try {
+                                await fetch(`/api/academies/admin/${academy.id}/approve`, {
+                                  method: 'POST',
+                                  headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                                });
+                                setAcademies(prev => prev.map(a => a.id === academy.id ? { ...a, status: 'approved' } : a));
+                                setAlertModal({ type: 'success', message: `${academy.name} has been approved successfully!` });
+                              } catch (e) {
+                                setAlertModal({ type: 'error', message: 'Failed to approve academy' });
+                              }
+                            }}
+                            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white rounded-xl transition-colors font-semibold"
+                          >
+                            <CheckCircle className="w-5 h-5" />
+                            Approve Academy
+                          </button>
+                          <button
+                            onClick={async () => {
+                              const reason = prompt('Please provide a reason for rejection:');
+                              if (!reason) return;
+                              try {
+                                await fetch(`/api/academies/admin/${academy.id}/reject`, {
+                                  method: 'POST',
+                                  headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}`, 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ reason })
+                                });
+                                setAcademies(prev => prev.map(a => a.id === academy.id ? { ...a, status: 'rejected' } : a));
+                                setAlertModal({ type: 'success', message: `${academy.name} has been rejected` });
+                              } catch (e) {
+                                setAlertModal({ type: 'error', message: 'Failed to reject academy' });
+                              }
+                            }}
+                            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 text-white rounded-xl transition-colors font-semibold"
+                          >
+                            <X className="w-5 h-5" />
+                            Reject Academy
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}

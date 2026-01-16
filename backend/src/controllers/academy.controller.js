@@ -157,27 +157,42 @@ export const createAcademy = async (req, res) => {
 };
 
 
-// Get all approved academies (public) - excludes blocked
+// Get all approved academies (public)
 export const getAcademies = async (req, res) => {
   try {
     const { search, city, sport, page = 1, limit = 20 } = req.query;
 
     const where = { 
-      status: 'approved',
-      isBlocked: false  // Don't show blocked academies
+      status: 'approved'
     };
+
+    // Only add isBlocked filter if the field exists
+    try {
+      where.OR = undefined; // Reset OR first
+      where.isBlocked = false;
+    } catch (e) {
+      // isBlocked field might not exist yet
+    }
 
     if (city) {
       where.city = { contains: city, mode: 'insensitive' };
     }
 
     if (search) {
-      where.OR = [
-        { name: { contains: search, mode: 'insensitive' } },
-        { city: { contains: search, mode: 'insensitive' } },
-        { state: { contains: search, mode: 'insensitive' } }
+      where.AND = [
+        { status: 'approved' },
+        {
+          OR: [
+            { name: { contains: search, mode: 'insensitive' } },
+            { city: { contains: search, mode: 'insensitive' } },
+            { state: { contains: search, mode: 'insensitive' } }
+          ]
+        }
       ];
+      delete where.status; // Remove duplicate
     }
+
+    console.log('Fetching academies with where:', JSON.stringify(where));
 
     const academies = await prisma.academy.findMany({
       where,
@@ -185,6 +200,8 @@ export const getAcademies = async (req, res) => {
       skip: (parseInt(page) - 1) * parseInt(limit),
       take: parseInt(limit)
     });
+
+    console.log(`Found ${academies.length} academies`);
 
     // Filter by sport if specified
     let filteredAcademies = academies;

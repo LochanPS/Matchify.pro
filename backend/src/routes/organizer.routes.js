@@ -139,21 +139,20 @@ router.get('/dashboard', authenticate, async (req, res) => {
       }
     });
 
-    // Revenue stats
-    const revenueStats = await prisma.registration.groupBy({
-      by: ['tournamentId'],
+    // Revenue stats - count ALL confirmed registrations regardless of payment status
+    const confirmedRegistrations = await prisma.registration.findMany({
       where: {
         tournament: {
           organizerId
         },
-        paymentStatus: 'completed'
+        status: 'confirmed' // Count all confirmed registrations
       },
-      _sum: {
+      select: {
         amountTotal: true
       }
     });
 
-    const totalRevenue = revenueStats.reduce((sum, stat) => sum + (stat._sum.amountTotal || 0), 0);
+    const totalRevenue = confirmedRegistrations.reduce((sum, reg) => sum + (reg.amountTotal || 0), 0);
 
     // Tournament stats breakdown
     const tournamentsByStatus = await prisma.tournament.groupBy({

@@ -116,32 +116,79 @@ const Navbar = () => {
   const roleColors = getRoleColor(currentRole);
   const availableRoles = getAvailableRoles();
 
-  // If user is admin, show simplified admin navbar
+  // If user is admin, use the same navbar style as regular users
   if (user?.isAdmin) {
     return (
-      <header className="sticky top-0 z-50 bg-gradient-to-r from-purple-900/95 via-slate-900/95 to-indigo-900/95 backdrop-blur-lg border-b border-purple-500/20 shadow-lg shadow-black/20">
+      <header className="sticky top-0 z-50 bg-slate-900/95 backdrop-blur-lg border-b border-white/10 shadow-lg shadow-black/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-4">
-              <Link to="/admin/dashboard" className="flex items-center gap-3">
-                <div className="relative">
-                  <div className="absolute -inset-1 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-xl blur opacity-60"></div>
-                  <div className="relative w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center">
-                    <span className="text-white font-bold text-lg">🛡️</span>
+            <div className="flex items-center gap-8">
+              {/* Logo - Same as regular users */}
+              <Link to="/admin/dashboard" className="flex items-center justify-center group">
+                <div className="relative flex items-center gap-2">
+                  <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-14 h-14 bg-green-500/50 blur-xl rounded-full opacity-80 group-hover:opacity-100 transition-all duration-300"></div>
+                  <div className="relative h-11 w-12 flex-shrink-0 group-hover:scale-110 transition-all duration-300">
+                    <svg viewBox="0 0 120 140" className="w-full h-full drop-shadow-[0_0_12px_rgba(34,197,94,0.8)]">
+                      <defs>
+                        <linearGradient id="shieldFillAdmin" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#22c55e" />
+                          <stop offset="50%" stopColor="#16a34a" />
+                          <stop offset="100%" stopColor="#15803d" />
+                        </linearGradient>
+                      </defs>
+                      <path d="M60 8 L110 25 L110 70 Q110 115 60 132 Q10 115 10 70 L10 25 Z" fill="url(#shieldFillAdmin)" stroke="#4ade80" strokeWidth="3"/>
+                      <text x="60" y="85" textAnchor="middle" fill="#166534" fontSize="55" fontWeight="900" fontFamily="Arial Black, sans-serif">M</text>
+                      <ellipse cx="105" cy="18" rx="12" ry="16" fill="#3b82f6" stroke="#60a5fa" strokeWidth="1.5" transform="rotate(45, 105, 18)"/>
+                      <line x1="105" y1="28" x2="115" y2="45" stroke="#6366f1" strokeWidth="3" strokeLinecap="round"/>
+                      <line x1="98" y1="12" x2="112" y2="24" stroke="#93c5fd" strokeWidth="0.8"/>
+                      <line x1="100" y1="8" x2="110" y2="28" stroke="#93c5fd" strokeWidth="0.8"/>
+                      <line x1="96" y1="18" x2="114" y2="18" stroke="#93c5fd" strokeWidth="0.8"/>
+                      <ellipse cx="118" cy="48" rx="4" ry="3" fill="#ec4899"/>
+                      <path d="M118 45 L115 38 M118 45 L118 36 M118 45 L121 38" stroke="#f9a8d4" strokeWidth="1.5" fill="none"/>
+                    </svg>
+                  </div>
+                  <div className="relative flex items-baseline">
+                    <span className="text-xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-green-300 via-green-400 to-green-500 drop-shadow-[0_0_10px_rgba(34,197,94,0.6)]">
+                      MATCHIFY
+                    </span>
+                    <span className="text-xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-amber-300 via-amber-400 to-amber-500 drop-shadow-[0_0_10px_rgba(245,158,11,0.6)]">
+                      .PRO
+                    </span>
                   </div>
                 </div>
-                <div>
-                  <span className="text-xl font-bold text-white">MATCHIFY</span>
-                  <span className="text-xl font-bold text-amber-400">.PRO</span>
-                  <span className="ml-2 text-xs bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded-full border border-purple-500/30">ADMIN</span>
-                </div>
               </Link>
+
+              {/* Admin Navigation */}
+              <nav className="hidden md:flex items-center gap-1">
+                <NavLink to="/admin/dashboard" active={location.pathname === '/admin/dashboard'}>
+                  <LayoutDashboard className="w-4 h-4" />
+                  Dashboard
+                </NavLink>
+                <NavLink to="/tournaments" active={isActiveLink('/tournaments')}>
+                  <Trophy className="w-4 h-4" />
+                  Tournaments
+                </NavLink>
+                <NavLink to="/academies" active={isActiveLink('/academies')}>
+                  <Search className="w-4 h-4" />
+                  Academies
+                </NavLink>
+              </nav>
             </div>
-            <div className="flex items-center gap-4">
-              <span className="text-gray-400 text-sm">Logged in as <span className="text-purple-400 font-medium">Super Admin</span></span>
+
+            <div className="flex items-center gap-3">
+              {/* Admin Badge */}
+              <div className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-red-500/20 text-red-400 text-sm font-semibold border border-red-500/30">
+                <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></span>
+                ADMIN
+              </div>
+
+              {/* Notifications */}
+              <NotificationBell />
+
+              {/* Logout */}
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-2 px-4 py-2 bg-purple-500/20 text-purple-400 rounded-xl border border-purple-500/30 hover:bg-purple-500/30 transition-all text-sm font-medium"
+                className="flex items-center gap-2 px-4 py-2 bg-slate-800 text-gray-300 rounded-xl border border-white/10 hover:bg-slate-700 transition-all text-sm font-medium"
               >
                 <LogOut className="w-4 h-4" />
                 Logout

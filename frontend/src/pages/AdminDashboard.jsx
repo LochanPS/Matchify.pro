@@ -7,7 +7,7 @@ import {
   ChevronRight, Activity, TrendingUp, Calendar, AlertTriangle,
   Ban, CheckCircle, Eye, Trash2, RefreshCw, X, Zap, Crown, Bell, Building2
 } from 'lucide-react';
-import NotificationBell from '../components/NotificationBell';
+import Navbar from '../components/Navbar';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -168,46 +168,9 @@ export default function AdminDashboard() {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/10 to-slate-900">
-      {/* Animated background elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-        <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
-      </div>
-
-      {/* Header */}
-      <div className="relative z-10 bg-slate-900/50 backdrop-blur-sm border-b border-white/5">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="relative">
-                <div className="absolute -inset-1 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-xl blur opacity-60"></div>
-                <div className="relative bg-gradient-to-br from-purple-500 to-indigo-600 p-2.5 rounded-xl">
-                  <Shield className="w-6 h-6 text-white" />
-                </div>
-              </div>
-              <div>
-                <h1 className="text-xl font-bold bg-gradient-to-r from-purple-400 via-indigo-400 to-emerald-400 bg-clip-text text-transparent">
-                  Admin Control Center
-                </h1>
-                <p className="text-xs text-gray-400">Manage users, tournaments & more</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <NotificationBell />
-              <span className="text-gray-400 text-sm hidden sm:block">Logged in as <span className="text-purple-400 font-medium">Super Admin</span></span>
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-2 px-4 py-2 bg-red-500/20 text-red-400 rounded-xl border border-red-500/30 hover:bg-red-500/30 transition-all text-sm font-medium"
-              >
-                <LogOut className="w-4 h-4" />
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      {/* Use regular Navbar */}
+      <Navbar />
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 py-6">
         {/* Tab Navigation */}

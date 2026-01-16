@@ -364,6 +364,11 @@ export default function NotificationDetailPage() {
       TOURNAMENT_REMINDER: { icon: '📅', color: 'blue', title: 'Tournament Reminder' },
       POINTS_AWARDED: { icon: '🏆', color: 'yellow', title: 'Points Awarded' },
       CANCELLATION_REQUEST: { icon: '🔴', color: 'orange', title: 'Cancellation Request' },
+      ACADEMY_SUBMISSION: { icon: '🏢', color: 'purple', title: 'New Academy Submission' },
+      ACADEMY_APPROVED: { icon: '🎉', color: 'green', title: 'Academy Approved' },
+      ACADEMY_REJECTED: { icon: '❌', color: 'red', title: 'Academy Rejected' },
+      ACADEMY_BLOCKED: { icon: '⚠️', color: 'orange', title: 'Academy Blocked' },
+      ACADEMY_UNBLOCKED: { icon: '🎉', color: 'green', title: 'Academy Restored' },
     };
     return styles[type] || { icon: '🔔', color: 'gray', title: 'Notification' };
   };
@@ -527,6 +532,100 @@ export default function NotificationDetailPage() {
               </h3>
               <div className="p-4 bg-orange-500/10 border border-orange-500/30 rounded-xl">
                 <p className="text-orange-300">{data.reason}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Academy Submission Details (for admin) */}
+          {notification.type === 'ACADEMY_SUBMISSION' && (
+            <div className="p-6 border-b border-white/10">
+              <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                <Trophy className="w-5 h-5 text-purple-400" />
+                Academy Details
+              </h3>
+              <div className="grid md:grid-cols-2 gap-4 mb-4">
+                {data.academyName && (
+                  <div className="flex items-center gap-3 p-4 bg-slate-700/50 border border-white/10 rounded-xl">
+                    <Info className="w-5 h-5 text-purple-400" />
+                    <div>
+                      <p className="text-sm text-gray-400">Academy Name</p>
+                      <p className="font-semibold text-white">{data.academyName}</p>
+                    </div>
+                  </div>
+                )}
+                {(data.city || data.state) && (
+                  <div className="flex items-center gap-3 p-4 bg-slate-700/50 border border-white/10 rounded-xl">
+                    <MapPin className="w-5 h-5 text-blue-400" />
+                    <div>
+                      <p className="text-sm text-gray-400">Location</p>
+                      <p className="font-semibold text-white">{data.city}, {data.state}</p>
+                    </div>
+                  </div>
+                )}
+                {data.phone && (
+                  <div className="flex items-center gap-3 p-4 bg-slate-700/50 border border-white/10 rounded-xl">
+                    <Phone className="w-5 h-5 text-green-400" />
+                    <div>
+                      <p className="text-sm text-gray-400">Phone</p>
+                      <p className="font-semibold text-white">{data.phone}</p>
+                    </div>
+                  </div>
+                )}
+                {data.email && (
+                  <div className="flex items-center gap-3 p-4 bg-slate-700/50 border border-white/10 rounded-xl">
+                    <Mail className="w-5 h-5 text-cyan-400" />
+                    <div>
+                      <p className="text-sm text-gray-400">Email</p>
+                      <p className="font-semibold text-white">{data.email}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              {/* Payment Screenshot */}
+              {data.paymentScreenshot && (
+                <div className="mt-4">
+                  <h4 className="text-sm font-semibold text-gray-400 mb-3 flex items-center gap-2">
+                    <CreditCard className="w-4 h-4" />
+                    Payment Screenshot (₹200)
+                  </h4>
+                  <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl">
+                    <img
+                      src={data.paymentScreenshot}
+                      alt="Payment Screenshot"
+                      className="max-w-full max-h-96 rounded-lg shadow-md cursor-pointer hover:opacity-90 transition-opacity mx-auto"
+                      onClick={() => window.open(data.paymentScreenshot, '_blank')}
+                    />
+                    <p className="text-xs text-emerald-400 mt-3 text-center">Click to view full size</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Action Button to go to Admin Dashboard */}
+              <div className="mt-6">
+                <button
+                  onClick={() => navigate('/admin')}
+                  className="w-full px-4 py-3 bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white rounded-xl transition-colors font-medium"
+                >
+                  Go to Admin Dashboard to Approve/Reject
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Academy Rejection Reason (for academy owner) */}
+          {notification.type === 'ACADEMY_REJECTED' && data.reason && (
+            <div className="p-6 border-b border-white/10">
+              <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-red-400" />
+                Reason for Rejection
+              </h3>
+              <div className="relative p-5 rounded-2xl overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-red-500/30 via-rose-500/30 to-red-500/30 blur-xl"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 to-rose-500/10 rounded-2xl"></div>
+                <div className="relative bg-red-500/10 border-2 border-red-500/40 rounded-xl p-4 shadow-lg shadow-red-500/20">
+                  <p className="text-red-200 text-lg font-medium">{data.reason}</p>
+                </div>
               </div>
             </div>
           )}

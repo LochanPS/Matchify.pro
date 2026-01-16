@@ -162,37 +162,10 @@ export const getAcademies = async (req, res) => {
   try {
     const { search, city, sport, page = 1, limit = 20 } = req.query;
 
-    const where = { 
-      status: 'approved'
-    };
+    // Simple query - just get approved academies
+    let where = { status: 'approved' };
 
-    // Only add isBlocked filter if the field exists
-    try {
-      where.OR = undefined; // Reset OR first
-      where.isBlocked = false;
-    } catch (e) {
-      // isBlocked field might not exist yet
-    }
-
-    if (city) {
-      where.city = { contains: city, mode: 'insensitive' };
-    }
-
-    if (search) {
-      where.AND = [
-        { status: 'approved' },
-        {
-          OR: [
-            { name: { contains: search, mode: 'insensitive' } },
-            { city: { contains: search, mode: 'insensitive' } },
-            { state: { contains: search, mode: 'insensitive' } }
-          ]
-        }
-      ];
-      delete where.status; // Remove duplicate
-    }
-
-    console.log('Fetching academies with where:', JSON.stringify(where));
+    console.log('Fetching approved academies...');
 
     const academies = await prisma.academy.findMany({
       where,
@@ -201,14 +174,31 @@ export const getAcademies = async (req, res) => {
       take: parseInt(limit)
     });
 
-    console.log(`Found ${academies.length} academies`);
+    console.log(`Found ${academies.length} approved academies`);
+
+    // Filter by city if specified
+    let filteredAcademies = academies;
+    if (city) {
+      filteredAcademies = filteredAcademies.filter(a => 
+        a.city?.toLowerCase().includes(city.toLowerCase())
+      );
+    }
+
+    // Filter by search if specified
+    if (search) {
+      const searchLower = search.toLowerCase();
+      filteredAcademies = filteredAcademies.filter(a => 
+        a.name?.toLowerCase().includes(searchLower) ||
+        a.city?.toLowerCase().includes(searchLower) ||
+        a.state?.toLowerCase().includes(searchLower)
+      );
+    }
 
     // Filter by sport if specified
-    let filteredAcademies = academies;
     if (sport) {
-      filteredAcademies = academies.filter(a => {
+      filteredAcademies = filteredAcademies.filter(a => {
         try {
-          const sports = JSON.parse(a.sports);
+          const sports = JSON.parse(a.sports || '[]');
           return sports.includes(sport);
         } catch {
           return false;

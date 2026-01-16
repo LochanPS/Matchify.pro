@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
-import { AlertTriangle, CheckCircle, X, UserX, UserCheck } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { AlertTriangle, CheckCircle, X, UserX, UserCheck, ArrowLeft } from 'lucide-react';
 import adminService from '../../services/adminService';
 import UserDetailsModal from '../../components/admin/UserDetailsModal';
 
 const UserManagementPage = () => {
+  const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -87,6 +89,15 @@ const UserManagementPage = () => {
 
   return (
     <div className="p-8">
+      {/* Back Button */}
+      <button
+        onClick={() => navigate(-1)}
+        className="flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors group"
+      >
+        <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+        <span>Back</span>
+      </button>
+
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">User Management</h1>

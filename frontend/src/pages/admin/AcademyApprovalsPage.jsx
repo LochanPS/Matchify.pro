@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Building2, CheckCircle, XCircle, Eye, MapPin, Phone, Mail, Image, Loader2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Building2, CheckCircle, XCircle, Eye, MapPin, Phone, Mail, Image, Loader2, ArrowLeft } from 'lucide-react';
 import api from '../../api/axios';
 
 const AcademyApprovalsPage = () => {
+  const navigate = useNavigate();
   const [academies, setAcademies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedAcademy, setSelectedAcademy] = useState(null);
@@ -62,6 +64,15 @@ const AcademyApprovalsPage = () => {
 
   return (
     <div className="p-6">
+      {/* Back Button */}
+      <button
+        onClick={() => navigate(-1)}
+        className="flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors group"
+      >
+        <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+        <span>Back</span>
+      </button>
+
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-white flex items-center gap-3">

@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
-import { AlertTriangle, CheckCircle, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { AlertTriangle, CheckCircle, X, ArrowLeft } from 'lucide-react';
 import adminService from '../../services/adminService';
 import AuditLogTable from '../../components/admin/AuditLogTable';
 
 const AuditLogsPage = () => {
+  const navigate = useNavigate();
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
@@ -75,6 +77,15 @@ const AuditLogsPage = () => {
 
   return (
     <div className="p-8">
+      {/* Back Button */}
+      <button
+        onClick={() => navigate(-1)}
+        className="flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors group"
+      >
+        <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+        <span>Back</span>
+      </button>
+
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <div>

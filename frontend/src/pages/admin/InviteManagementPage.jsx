@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import adminService from '../../services/adminService';
 import InviteForm from '../../components/admin/InviteForm';
 import InviteList from '../../components/admin/InviteList';
 
 const InviteManagementPage = () => {
+  const navigate = useNavigate();
   const [invites, setInvites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState(''); // '', 'pending', 'accepted', 'expired', 'revoked'
@@ -41,6 +44,15 @@ const InviteManagementPage = () => {
 
   return (
     <div className="p-8">
+      {/* Back Button */}
+      <button
+        onClick={() => navigate(-1)}
+        className="flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors group"
+      >
+        <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+        <span>Back</span>
+      </button>
+
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Invite Management</h1>

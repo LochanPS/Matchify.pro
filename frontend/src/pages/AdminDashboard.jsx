@@ -176,6 +176,15 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 py-6">
+        {/* Back Button */}
+        <button
+          onClick={() => navigate('/')}
+          className="flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors group"
+        >
+          <ChevronRight className="w-5 h-5 rotate-180 group-hover:-translate-x-1 transition-transform" />
+          <span>Back to Home</span>
+        </button>
+
         {/* Tab Navigation */}
         <div className="flex gap-2 mb-6 bg-slate-800/50 p-1.5 rounded-xl border border-white/10 w-fit">
           {[

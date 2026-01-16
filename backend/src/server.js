@@ -22,6 +22,7 @@ import adminRoutes from './routes/admin.routes.js';
 import superAdminRoutes from './routes/superAdmin.routes.js';
 import smsRoutes from './routes/sms.routes.js';
 import creditsRoutes from './routes/credits.routes.js';
+import academyRoutes from './routes/academy.routes.js';
 
 // Import multi-role routes
 import multiRoleAuthRoutes from './routes/multiRoleAuth.routes.js';
@@ -189,6 +190,9 @@ app.use('/api/sms', smsRoutes);
 
 // Credits routes (RBI-compliant Matchify Credits)
 app.use('/api/credits', creditsRoutes);
+
+// Academy routes
+app.use('/api/academies', academyRoutes);
 
 // Draw routes
 app.use('/api', drawRoutes);

@@ -7,6 +7,7 @@ const Sidebar = () => {
     { path: '/admin/dashboard', icon: '📊', label: 'Dashboard' },
     { path: '/admin/users', icon: '👥', label: 'User Management' },
     { path: '/admin/invites', icon: '✉️', label: 'Admin Invites' },
+    { path: '/admin/academies', icon: '🏢', label: 'Academy Approvals' },
     { path: '/admin/audit-logs', icon: '📋', label: 'Audit Logs' },
   ];
 

@@ -51,9 +51,12 @@ import UserManagementPage from './pages/admin/UserManagementPage'
 import BracketDemo from './pages/BracketDemo'
 import InviteManagementPage from './pages/admin/InviteManagementPage'
 import AuditLogsPage from './pages/admin/AuditLogsPage'
+import AcademyApprovalsPage from './pages/admin/AcademyApprovalsPage'
 import CancellationRequestPage from './pages/CancellationRequestPage'
 import NotificationDetailPage from './pages/NotificationDetailPage'
 import RefundIssuePage from './pages/RefundIssuePage'
+import SearchAcademiesPage from './pages/SearchAcademiesPage'
+import AddAcademyPage from './pages/AddAcademyPage'
 
 // Inner component that can access AuthContext
 function AppContent() {
@@ -77,6 +80,8 @@ function AppContent() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/tournaments" element={<TournamentDiscoveryPage />} />
+          <Route path="/academies" element={<SearchAcademiesPage />} />
+          <Route path="/academies/add" element={<AddAcademyPage />} />
           <Route path="/tournaments/:id" element={<TournamentDetailPage />} />
           <Route path="/tournaments/:tournamentId/draws/:categoryId?" element={<DrawPage />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
@@ -362,6 +367,7 @@ function AppContent() {
             <Route path="users" element={<UserManagementPage />} />
             <Route path="invites" element={<InviteManagementPage />} />
             <Route path="audit-logs" element={<AuditLogsPage />} />
+            <Route path="academies" element={<AcademyApprovalsPage />} />
           </Route>
           
           {/* Catch all route */}

@@ -448,3 +448,41 @@ model CreditTransaction {
   @@index([status])
   @@map("credit_transactions")
 }
+
+
+// ============================================
+// ACADEMY LISTING SYSTEM
+// ============================================
+
+model Academy {
+  id                String          @id @default(uuid())
+  name              String
+  address           String
+  city              String
+  state             String
+  pincode           String?
+  sports            String          // JSON array of sports
+  sportDetails      String          // JSON object with sport-specific details
+  description       String?
+  phone             String
+  email             String?
+  website           String?
+  photos            String?         // JSON array of photo URLs
+  paymentScreenshot String          // Cloudinary URL of payment screenshot
+  status            String          @default("pending") // pending, approved, rejected
+  rejectionReason   String?
+  submittedBy       String?         // User ID who submitted (optional, can be guest)
+  submittedByName   String?         // Name of submitter
+  submittedByEmail  String?         // Email of submitter
+  submittedByPhone  String?         // Phone of submitter
+  reviewedBy        String?         // Admin who reviewed
+  reviewedAt        DateTime?
+  isVerified        Boolean         @default(false)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@index([status])
+  @@index([city, state])
+  @@index([createdAt])
+  @@map("academies")
+}

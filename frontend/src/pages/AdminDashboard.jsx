@@ -5,8 +5,9 @@ import { superAdminAPI } from '../api/superAdmin';
 import {
   Shield, Users, Trophy, CreditCard, LogOut, Search,
   ChevronRight, Activity, TrendingUp, Calendar, AlertTriangle,
-  Ban, CheckCircle, Eye, Trash2, RefreshCw, X, Zap, Crown
+  Ban, CheckCircle, Eye, Trash2, RefreshCw, X, Zap, Crown, Bell, Building2
 } from 'lucide-react';
+import NotificationBell from '../components/NotificationBell';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -30,6 +31,8 @@ export default function AdminDashboard() {
   const [tournamentToDelete, setTournamentToDelete] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [alertModal, setAlertModal] = useState(null);
+  const [academies, setAcademies] = useState([]);
+  const [academyFilter, setAcademyFilter] = useState('pending');
 
   useEffect(() => {
     if (!user?.isAdmin) { navigate('/login'); return; }
@@ -39,14 +42,18 @@ export default function AdminDashboard() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [statsRes, usersRes, tournamentsRes] = await Promise.all([
+      const [statsRes, usersRes, tournamentsRes, academiesRes] = await Promise.all([
         superAdminAPI.getStats().catch(() => ({ data: { stats: {} } })),
         superAdminAPI.getUsers({ limit: 100 }).catch(() => ({ data: { users: [] } })),
-        superAdminAPI.getTournaments({ limit: 100 }).catch(() => ({ data: { tournaments: [] } }))
+        superAdminAPI.getTournaments({ limit: 100 }).catch(() => ({ data: { tournaments: [] } })),
+        fetch('/api/academies/admin/pending', {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        }).then(r => r.json()).catch(() => ({ data: { academies: [] } }))
       ]);
       setStats(prev => ({ ...prev, ...statsRes.data.stats }));
       setUsers(usersRes.data.users || []);
       setTournaments(tournamentsRes.data.tournaments || []);
+      setAcademies(academiesRes.data?.academies || []);
     } catch (err) { setError('Failed to load data'); }
     finally { setLoading(false); }
   };
@@ -172,18 +179,31 @@ export default function AdminDashboard() {
       {/* Header */}
       <div className="relative z-10 bg-slate-900/50 backdrop-blur-sm border-b border-white/5">
         <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center gap-4">
-            <div className="relative">
-              <div className="absolute -inset-1 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-xl blur opacity-60"></div>
-              <div className="relative bg-gradient-to-br from-purple-500 to-indigo-600 p-2.5 rounded-xl">
-                <Shield className="w-6 h-6 text-white" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <div className="absolute -inset-1 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-xl blur opacity-60"></div>
+                <div className="relative bg-gradient-to-br from-purple-500 to-indigo-600 p-2.5 rounded-xl">
+                  <Shield className="w-6 h-6 text-white" />
+                </div>
+              </div>
+              <div>
+                <h1 className="text-xl font-bold bg-gradient-to-r from-purple-400 via-indigo-400 to-emerald-400 bg-clip-text text-transparent">
+                  Admin Control Center
+                </h1>
+                <p className="text-xs text-gray-400">Manage users, tournaments & more</p>
               </div>
             </div>
-            <div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-purple-400 via-indigo-400 to-emerald-400 bg-clip-text text-transparent">
-                Admin Control Center
-              </h1>
-              <p className="text-xs text-gray-400">Manage users, tournaments & more</p>
+            <div className="flex items-center gap-4">
+              <NotificationBell />
+              <span className="text-gray-400 text-sm hidden sm:block">Logged in as <span className="text-purple-400 font-medium">Super Admin</span></span>
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 px-4 py-2 bg-red-500/20 text-red-400 rounded-xl border border-red-500/30 hover:bg-red-500/30 transition-all text-sm font-medium"
+              >
+                <LogOut className="w-4 h-4" />
+                Logout
+              </button>
             </div>
           </div>
         </div>
@@ -195,7 +215,8 @@ export default function AdminDashboard() {
           {[
             { id: 'dashboard', label: 'Dashboard', icon: Activity },
             { id: 'users', label: 'Users', icon: Users },
-            { id: 'tournaments', label: 'Tournaments', icon: Trophy }
+            { id: 'tournaments', label: 'Tournaments', icon: Trophy },
+            { id: 'academies', label: 'Academies', icon: Building2, badge: academies.length }
           ].map(tab => (
             <button
               key={tab.id}
@@ -208,6 +229,9 @@ export default function AdminDashboard() {
             >
               <tab.icon className="w-4 h-4" />
               {tab.label}
+              {tab.badge > 0 && (
+                <span className="ml-1 px-1.5 py-0.5 bg-red-500 text-white text-xs rounded-full">{tab.badge}</span>
+              )}
             </button>
           ))}
         </div>
@@ -539,6 +563,110 @@ export default function AdminDashboard() {
             <div className="text-sm text-gray-400 text-center">
               Showing {filteredTournaments.length} of {tournaments.length} tournaments
             </div>
+          </div>
+        )}
+
+        {/* Academies Tab */}
+        {activeTab === 'academies' && (
+          <div className="space-y-4">
+            {/* Filter */}
+            <div className="flex gap-2">
+              {['pending', 'approved', 'rejected'].map(filter => (
+                <button
+                  key={filter}
+                  onClick={() => setAcademyFilter(filter)}
+                  className={`px-4 py-2 rounded-lg font-medium transition-all capitalize ${
+                    academyFilter === filter
+                      ? filter === 'pending' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                      : filter === 'approved' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                      : 'bg-red-500/20 text-red-400 border border-red-500/30'
+                      : 'bg-slate-800/50 text-gray-400 border border-white/10 hover:bg-white/5'
+                  }`}
+                >
+                  {filter}
+                </button>
+              ))}
+            </div>
+
+            {/* Academies List */}
+            {academies.filter(a => a.status === academyFilter).length === 0 ? (
+              <div className="text-center py-12 bg-slate-800/50 rounded-xl border border-white/10">
+                <Building2 className="w-12 h-12 text-gray-600 mx-auto mb-3" />
+                <p className="text-gray-400">No {academyFilter} academies</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {academies.filter(a => a.status === academyFilter).map(academy => (
+                  <div key={academy.id} className="bg-slate-800/50 rounded-xl border border-white/10 p-5">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <h3 className="text-lg font-bold text-white mb-1">{academy.name}</h3>
+                        <p className="text-gray-400 text-sm mb-2">{academy.city}, {academy.state}</p>
+                        <div className="flex flex-wrap gap-2 mb-3">
+                          {academy.sports?.map(sport => (
+                            <span key={sport} className="px-2 py-1 bg-purple-500/20 text-purple-300 text-xs rounded-lg">{sport}</span>
+                          ))}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          <p>Phone: {academy.phone}</p>
+                          <p>Email: {academy.submittedByEmail || academy.email || '-'}</p>
+                        </div>
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        {academy.paymentScreenshot && (
+                          <a href={academy.paymentScreenshot} target="_blank" rel="noopener noreferrer" className="p-2 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 transition-colors" title="View Payment">
+                            <Eye className="w-5 h-5" />
+                          </a>
+                        )}
+                        {academy.status === 'pending' && (
+                          <>
+                            <button
+                              onClick={async () => {
+                                try {
+                                  await fetch(`/api/academies/admin/${academy.id}/approve`, {
+                                    method: 'POST',
+                                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                                  });
+                                  setAcademies(prev => prev.map(a => a.id === academy.id ? { ...a, status: 'approved' } : a));
+                                  setAlertModal({ type: 'success', message: 'Academy approved!' });
+                                } catch (e) {
+                                  setAlertModal({ type: 'error', message: 'Failed to approve' });
+                                }
+                              }}
+                              className="p-2 bg-emerald-500/20 text-emerald-400 rounded-lg hover:bg-emerald-500/30 transition-colors"
+                              title="Approve"
+                            >
+                              <CheckCircle className="w-5 h-5" />
+                            </button>
+                            <button
+                              onClick={async () => {
+                                const reason = prompt('Rejection reason:');
+                                if (!reason) return;
+                                try {
+                                  await fetch(`/api/academies/admin/${academy.id}/reject`, {
+                                    method: 'POST',
+                                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}`, 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ reason })
+                                  });
+                                  setAcademies(prev => prev.map(a => a.id === academy.id ? { ...a, status: 'rejected' } : a));
+                                  setAlertModal({ type: 'success', message: 'Academy rejected' });
+                                } catch (e) {
+                                  setAlertModal({ type: 'error', message: 'Failed to reject' });
+                                }
+                              }}
+                              className="p-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors"
+                              title="Reject"
+                            >
+                              <X className="w-5 h-5" />
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { superAdminAPI } from '../api/superAdmin';
+import api from '../api/axios';
 import {
   Shield, Users, Trophy, CreditCard, LogOut, Search,
   ChevronRight, Activity, TrendingUp, Calendar, AlertTriangle,
@@ -51,14 +52,12 @@ export default function AdminDashboard() {
         superAdminAPI.getStats().catch(() => ({ data: { stats: {} } })),
         superAdminAPI.getUsers({ limit: 100 }).catch(() => ({ data: { users: [] } })),
         superAdminAPI.getTournaments({ limit: 100 }).catch(() => ({ data: { tournaments: [] } })),
-        fetch('/api/academies/admin/all', {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-        }).then(r => r.json()).catch(() => ({ data: { academies: [] } }))
+        api.get('/academies/admin/all').catch(() => ({ data: { data: { academies: [] } } }))
       ]);
       setStats(prev => ({ ...prev, ...statsRes.data.stats }));
       setUsers(usersRes.data.users || []);
       setTournaments(tournamentsRes.data.tournaments || []);
-      setAcademies(academiesRes.data?.academies || []);
+      setAcademies(academiesRes.data?.data?.academies || academiesRes.data?.academies || []);
     } catch (err) { setError('Failed to load data'); }
     finally { setLoading(false); }
   };
@@ -819,10 +818,7 @@ export default function AdminDashboard() {
                           <button
                             onClick={async () => {
                               try {
-                                await fetch(`/api/academies/admin/${academy.id}/approve`, {
-                                  method: 'POST',
-                                  headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-                                });
+                                await api.post(`/academies/admin/${academy.id}/approve`);
                                 setAcademies(prev => prev.map(a => a.id === academy.id ? { ...a, status: 'approved' } : a));
                                 setAlertModal({ type: 'success', message: `🎉 "${academy.name}" has been approved! The academy owner has been notified and their listing is now live on Matchify.pro` });
                               } catch (e) {
@@ -910,11 +906,7 @@ export default function AdminDashboard() {
                       return;
                     }
                     try {
-                      await fetch(`/api/academies/admin/${academyToReject.id}/reject`, {
-                        method: 'POST',
-                        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}`, 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ reason: rejectAcademyReason })
-                      });
+                      await api.post(`/academies/admin/${academyToReject.id}/reject`, { reason: rejectAcademyReason });
                       setAcademies(prev => prev.map(a => a.id === academyToReject.id ? { ...a, status: 'rejected' } : a));
                       setAlertModal({ type: 'success', message: `"${academyToReject.name}" has been rejected. The academy owner has been notified with the reason for rejection.` });
                       setShowRejectAcademyModal(false);

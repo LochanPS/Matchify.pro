@@ -824,9 +824,9 @@ export default function AdminDashboard() {
                                   headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
                                 });
                                 setAcademies(prev => prev.map(a => a.id === academy.id ? { ...a, status: 'approved' } : a));
-                                setAlertModal({ type: 'success', message: `${academy.name} has been approved successfully!` });
+                                setAlertModal({ type: 'success', message: `🎉 "${academy.name}" has been approved! The academy owner has been notified and their listing is now live on Matchify.pro` });
                               } catch (e) {
-                                setAlertModal({ type: 'error', message: 'Failed to approve academy' });
+                                setAlertModal({ type: 'error', message: 'Failed to approve academy. Please try again.' });
                               }
                             }}
                             className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white rounded-xl transition-colors font-semibold"
@@ -916,7 +916,7 @@ export default function AdminDashboard() {
                         body: JSON.stringify({ reason: rejectAcademyReason })
                       });
                       setAcademies(prev => prev.map(a => a.id === academyToReject.id ? { ...a, status: 'rejected' } : a));
-                      setAlertModal({ type: 'success', message: `${academyToReject.name} has been rejected` });
+                      setAlertModal({ type: 'success', message: `"${academyToReject.name}" has been rejected. The academy owner has been notified with the reason for rejection.` });
                       setShowRejectAcademyModal(false);
                       setAcademyToReject(null);
                       setRejectAcademyReason('');

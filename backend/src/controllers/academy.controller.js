@@ -271,15 +271,20 @@ export const approveAcademy = async (req, res) => {
       }
     });
 
-    // Notify submitter
+    // Notify submitter with proper Matchify message
     if (academy.submittedBy) {
       await prisma.notification.create({
         data: {
           userId: academy.submittedBy,
           type: 'ACADEMY_APPROVED',
-          title: '✅ Academy Approved!',
-          message: `Your academy "${academy.name}" has been approved and is now live on Matchify.pro!`,
-          data: JSON.stringify({ academyId: id })
+          title: '🎉 Congratulations! Your Academy is Now Live',
+          message: `Great news! Your academy "${academy.name}" has been approved and is now listed on Matchify.pro. Players can now discover your academy and connect with you. Thank you for being part of the Matchify community!`,
+          data: JSON.stringify({ 
+            academyId: id,
+            academyName: academy.name,
+            city: academy.city,
+            state: academy.state
+          })
         }
       });
     }
@@ -308,30 +313,38 @@ export const rejectAcademy = async (req, res) => {
       return res.status(400).json({ success: false, error: 'Academy is not pending approval' });
     }
 
+    const rejectionReason = reason || 'Payment verification failed';
+
     const updatedAcademy = await prisma.academy.update({
       where: { id },
       data: {
         status: 'rejected',
-        rejectionReason: reason || 'Payment not verified',
+        rejectionReason: rejectionReason,
         reviewedBy: req.user?.id || 'admin',
         reviewedAt: new Date()
       }
     });
 
-    // Notify submitter
+    // Notify submitter with proper Matchify message including reason
     if (academy.submittedBy) {
       await prisma.notification.create({
         data: {
           userId: academy.submittedBy,
           type: 'ACADEMY_REJECTED',
-          title: '❌ Academy Submission Rejected',
-          message: `Your academy "${academy.name}" was not approved. Reason: ${reason || 'Payment not verified'}`,
-          data: JSON.stringify({ academyId: id, reason })
+          title: '❌ Academy Submission Not Approved',
+          message: `We're sorry, but your academy "${academy.name}" could not be approved at this time.\n\n📋 Reason: ${rejectionReason}\n\nIf you believe this was a mistake or would like to resubmit with the correct information, please submit a new application. For any questions, contact us at support@matchify.pro`,
+          data: JSON.stringify({ 
+            academyId: id, 
+            academyName: academy.name,
+            reason: rejectionReason,
+            city: academy.city,
+            state: academy.state
+          })
         }
       });
     }
 
-    console.log(`❌ Academy rejected: ${id} - ${academy.name}`);
+    console.log(`❌ Academy rejected: ${id} - ${academy.name} - Reason: ${rejectionReason}`);
     res.json({ success: true, message: 'Academy rejected', data: { academy: updatedAcademy } });
 
   } catch (error) {
@@ -413,25 +426,31 @@ export const blockAcademy = async (req, res) => {
       return res.status(400).json({ success: false, error: 'Academy is already blocked' });
     }
 
+    const blockReason = reason || 'Violation of community guidelines';
+
     const updatedAcademy = await prisma.academy.update({
       where: { id },
       data: {
         isBlocked: true,
-        blockReason: reason || 'Blocked by admin',
+        blockReason: blockReason,
         blockedAt: new Date(),
         blockedBy: req.user?.id || 'admin'
       }
     });
 
-    // Notify submitter
+    // Notify submitter with proper Matchify message
     if (academy.submittedBy) {
       await prisma.notification.create({
         data: {
           userId: academy.submittedBy,
           type: 'ACADEMY_BLOCKED',
-          title: '🚫 Academy Blocked',
-          message: `Your academy "${academy.name}" has been blocked. Reason: ${reason || 'Violation of terms'}`,
-          data: JSON.stringify({ academyId: id, reason })
+          title: '⚠️ Academy Listing Suspended',
+          message: `Your academy "${academy.name}" has been temporarily suspended from Matchify.pro.\n\n📋 Reason: ${blockReason}\n\nYour academy will not be visible to players until this issue is resolved. If you believe this was a mistake, please contact us at support@matchify.pro`,
+          data: JSON.stringify({ 
+            academyId: id, 
+            academyName: academy.name,
+            reason: blockReason 
+          })
         }
       });
     }
@@ -469,15 +488,18 @@ export const unblockAcademy = async (req, res) => {
       }
     });
 
-    // Notify submitter
+    // Notify submitter with proper Matchify message
     if (academy.submittedBy) {
       await prisma.notification.create({
         data: {
           userId: academy.submittedBy,
           type: 'ACADEMY_UNBLOCKED',
-          title: '✅ Academy Unblocked',
-          message: `Your academy "${academy.name}" has been unblocked and is now visible again on Matchify.pro!`,
-          data: JSON.stringify({ academyId: id })
+          title: '🎉 Academy Listing Restored',
+          message: `Great news! Your academy "${academy.name}" has been restored and is now visible again on Matchify.pro. Players can once again discover and connect with your academy. Thank you for your patience!`,
+          data: JSON.stringify({ 
+            academyId: id,
+            academyName: academy.name
+          })
         }
       });
     }

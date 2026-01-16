@@ -88,6 +88,7 @@ const AddAcademyPage = () => {
   
   const [formData, setFormData] = useState(defaultFormData);
   const [photos, setPhotos] = useState([]);
+  const [academyQrCode, setAcademyQrCode] = useState(null);
   const [paymentScreenshot, setPaymentScreenshot] = useState(null);
   const [errors, setErrors] = useState({});
 
@@ -189,6 +190,17 @@ const AddAcademyPage = () => {
     setPhotos(prev => prev.filter((_, i) => i !== index));
   };
 
+  const handleAcademyQrUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setAcademyQrCode({ file, preview: event.target.result });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handlePaymentScreenshot = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -247,6 +259,10 @@ const AddAcademyPage = () => {
       photos.forEach((photo) => {
         submitData.append('photos', photo.file);
       });
+      
+      if (academyQrCode) {
+        submitData.append('academyQrCode', academyQrCode.file);
+      }
       
       submitData.append('paymentScreenshot', paymentScreenshot.file);
       
@@ -667,6 +683,41 @@ const AddAcademyPage = () => {
                 />
               </label>
             </div>
+          </div>
+
+          {/* Academy QR Code */}
+          <div className="mb-6">
+            <label className="block text-sm text-gray-400 mb-2">
+              Your Academy's Payment QR Code (optional)
+            </label>
+            <p className="text-xs text-gray-500 mb-3">Upload your UPI/Payment QR code so players can pay you directly</p>
+            {academyQrCode ? (
+              <div className="relative w-fit">
+                <img 
+                  src={academyQrCode.preview} 
+                  alt="Academy QR Code" 
+                  className="w-48 h-48 object-contain bg-white rounded-xl p-2"
+                />
+                <button
+                  type="button"
+                  onClick={() => setAcademyQrCode(null)}
+                  className="absolute -top-2 -right-2 p-1 bg-red-500 rounded-full text-white shadow-lg"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <label className="flex flex-col items-center justify-center w-48 h-48 border-2 border-dashed border-gray-600 rounded-xl cursor-pointer hover:border-purple-500 transition-colors">
+                <CreditCard className="w-8 h-8 text-gray-500 mb-2" />
+                <span className="text-gray-400 text-sm text-center px-2">Upload QR Code</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAcademyQrUpload}
+                  className="hidden"
+                />
+              </label>
+            )}
           </div>
 
           {/* Price Info */}

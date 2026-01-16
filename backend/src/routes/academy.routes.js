@@ -36,6 +36,7 @@ router.post('/',
   optionalAuth,
   upload.fields([
     { name: 'paymentScreenshot', maxCount: 1 },
+    { name: 'academyQrCode', maxCount: 1 },
     { name: 'photos', maxCount: 20 }
   ]),
   createAcademy

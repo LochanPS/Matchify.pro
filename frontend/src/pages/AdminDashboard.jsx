@@ -6,7 +6,7 @@ import {
   Shield, Users, Trophy, CreditCard, LogOut, Search,
   ChevronRight, Activity, TrendingUp, Calendar, AlertTriangle,
   Ban, CheckCircle, Eye, Trash2, RefreshCw, X, Zap, Crown, Bell, Building2,
-  MapPin, Phone, Mail, Globe, Info
+  MapPin, Phone, Mail, Globe, Info, QrCode
 } from 'lucide-react';
 import NotificationBell from '../components/NotificationBell';
 
@@ -719,6 +719,36 @@ export default function AdminDashboard() {
                                 +{academy.photos.length - 4} more
                               </div>
                             )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Academy QR Code */}
+                      {academy.academyQrCode && (
+                        <div className="p-5 border-b border-white/10">
+                          <h4 className="text-sm font-semibold text-gray-400 mb-3 flex items-center gap-2">
+                            <QrCode className="w-4 h-4" />
+                            Academy's Payment QR Code
+                          </h4>
+                          <div className="flex items-start gap-4">
+                            <div className="bg-white p-3 rounded-xl">
+                              <img 
+                                src={academy.academyQrCode} 
+                                alt="Academy QR Code" 
+                                className="w-40 h-40 object-contain cursor-pointer hover:opacity-80 transition-opacity"
+                                onClick={() => setViewingScreenshot(academy.academyQrCode)}
+                              />
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-gray-400 text-sm mb-2">This is the academy's own payment QR code for receiving payments from players.</p>
+                              <button 
+                                onClick={() => setViewingScreenshot(academy.academyQrCode)}
+                                className="flex items-center gap-2 px-4 py-2 bg-purple-500/20 text-purple-400 rounded-lg hover:bg-purple-500/30 transition-colors border border-purple-500/30 text-sm"
+                              >
+                                <Eye className="w-4 h-4" />
+                                View Full Size
+                              </button>
+                            </div>
                           </div>
                         </div>
                       )}

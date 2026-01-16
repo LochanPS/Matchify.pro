@@ -468,6 +468,7 @@ model Academy {
   email             String?
   website           String?
   photos            String?         // JSON array of photo URLs
+  academyQrCode     String?         // Academy's own QR code for payments
   paymentScreenshot String          // Cloudinary URL of payment screenshot
   status            String          @default("pending") // pending, approved, rejected
   rejectionReason   String?

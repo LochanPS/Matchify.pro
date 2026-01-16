@@ -63,6 +63,22 @@ export const createAcademy = async (req, res) => {
       }
     }
 
+    // Upload academy QR code to Cloudinary
+    let academyQrCodeUrl = null;
+    if (req.files?.academyQrCode?.[0]) {
+      const result = await new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          { folder: 'matchify/academy-qrcodes' },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+        uploadStream.end(req.files.academyQrCode[0].buffer);
+      });
+      academyQrCodeUrl = result.secure_url;
+    }
+
 
     // Get submitter info from authenticated user or request body
     const submittedBy = req.user?.id || null;
@@ -85,6 +101,7 @@ export const createAcademy = async (req, res) => {
         email: email || null,
         website: website || null,
         photos: JSON.stringify(photoUrls),
+        academyQrCode: academyQrCodeUrl,
         paymentScreenshot: paymentScreenshotUrl,
         status: 'pending',
         submittedBy,

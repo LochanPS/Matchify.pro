@@ -7,7 +7,7 @@ import {
   ChevronRight, Activity, TrendingUp, Calendar, AlertTriangle,
   Ban, CheckCircle, Eye, Trash2, RefreshCw, X, Zap, Crown, Bell, Building2
 } from 'lucide-react';
-import Navbar from '../components/Navbar';
+import NotificationBell from '../components/NotificationBell';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -169,8 +169,6 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      {/* Use regular Navbar */}
-      <Navbar />
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 py-6">
         {/* Tab Navigation */}

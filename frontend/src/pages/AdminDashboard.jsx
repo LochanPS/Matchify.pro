@@ -51,7 +51,7 @@ export default function AdminDashboard() {
         superAdminAPI.getStats().catch(() => ({ data: { stats: {} } })),
         superAdminAPI.getUsers({ limit: 100 }).catch(() => ({ data: { users: [] } })),
         superAdminAPI.getTournaments({ limit: 100 }).catch(() => ({ data: { tournaments: [] } })),
-        fetch('/api/academies/admin/pending', {
+        fetch('/api/academies/admin/all', {
           headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         }).then(r => r.json()).catch(() => ({ data: { academies: [] } }))
       ]);
@@ -191,7 +191,7 @@ export default function AdminDashboard() {
             { id: 'dashboard', label: 'Dashboard', icon: Activity },
             { id: 'users', label: 'Users', icon: Users },
             { id: 'tournaments', label: 'Tournaments', icon: Trophy },
-            { id: 'academies', label: 'Academies', icon: Building2, badge: academies.length }
+            { id: 'academies', label: 'Academies', icon: Building2, badge: academies.filter(a => a.status === 'pending').length }
           ].map(tab => (
             <button
               key={tab.id}

@@ -1,7 +1,5 @@
 import express from 'express';
 import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
 import { PrismaClient } from '@prisma/client';
 import {
   createRegistration,
@@ -15,50 +13,9 @@ import { authenticate, preventAdminAccess } from '../middleware/auth.js';
 const router = express.Router();
 const prisma = new PrismaClient();
 
-// Configure multer for payment screenshot uploads
-const screenshotStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadDir = 'uploads/payment-screenshots';
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, 'payment-' + uniqueSuffix + path.extname(file.originalname));
-  }
-});
-
-// Configure multer for refund QR code uploads
-const refundQrStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadDir = 'uploads/refund-qr';
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-    cb(null, uploadDir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, 'refund-qr-' + uniqueSuffix + path.extname(file.originalname));
-  }
-});
-
-const uploadScreenshot = multer({
-  storage: screenshotStorage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
-  fileFilter: (req, file, cb) => {
-    if (file.mimetype.startsWith('image/')) {
-      cb(null, true);
-    } else {
-      cb(new Error('Only image files are allowed'), false);
-    }
-  }
-});
-
-const uploadRefundQr = multer({
-  storage: refundQrStorage,
+// Configure multer for memory storage (Cloudinary upload)
+const upload = multer({
+  storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
   fileFilter: (req, file, cb) => {
     if (file.mimetype.startsWith('image/')) {
@@ -77,7 +34,7 @@ router.use(preventAdminAccess);
 router.post('/', createRegistration);
 
 // POST /api/registrations/with-screenshot - Register with payment screenshot
-router.post('/with-screenshot', uploadScreenshot.single('paymentScreenshot'), createRegistrationWithScreenshot);
+router.post('/with-screenshot', upload.single('paymentScreenshot'), createRegistrationWithScreenshot);
 
 // GET /api/registrations/my - Get user's registrations
 router.get('/my', getMyRegistrations);
@@ -282,9 +239,9 @@ router.put('/:id/report-refund-issue', async (req, res) => {
 });
 
 // POST /api/registrations/:id/cancel - Cancel registration with reason and UPI details
-router.post('/:id/cancel', uploadRefundQr.single('refundQrCode'), cancelRegistration);
+router.post('/:id/cancel', upload.single('refundQrCode'), cancelRegistration);
 
 // DELETE /api/registrations/:id - Cancel registration (legacy - redirect to POST)
-router.delete('/:id', uploadRefundQr.single('refundQrCode'), cancelRegistration);
+router.delete('/:id', upload.single('refundQrCode'), cancelRegistration);
 
 export default router;

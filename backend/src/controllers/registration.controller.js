@@ -365,8 +365,43 @@ const cancelRegistration = async (req, res) => {
       });
     }
 
-    // Create QR code URL if uploaded
-    const qrCodeUrl = qrCodeFile ? `/uploads/refund-qr/${qrCodeFile.filename}` : null;
+    // Upload QR code to Cloudinary if provided
+    let qrCodeUrl = null;
+    if (qrCodeFile) {
+      const cloudinary = (await import('../config/cloudinary.js')).default;
+      
+      const isCloudinaryConfigured = process.env.CLOUDINARY_CLOUD_NAME && 
+                                      process.env.CLOUDINARY_API_KEY && 
+                                      process.env.CLOUDINARY_API_SECRET &&
+                                      !process.env.CLOUDINARY_CLOUD_NAME.includes('your-');
+
+      if (isCloudinaryConfigured) {
+        try {
+          const result = await new Promise((resolve, reject) => {
+            const uploadStream = cloudinary.uploader.upload_stream(
+              {
+                folder: `matchify/refund-qr/${registration.tournamentId}`,
+                transformation: [
+                  { width: 500, height: 500, crop: 'limit' },
+                  { quality: 'auto:good' },
+                ],
+              },
+              (error, result) => {
+                if (error) reject(error);
+                else resolve(result);
+              }
+            );
+            uploadStream.end(qrCodeFile.buffer);
+          });
+
+          qrCodeUrl = result.secure_url;
+          console.log('✅ Refund QR uploaded to Cloudinary:', qrCodeUrl);
+        } catch (cloudinaryError) {
+          console.error('❌ Cloudinary upload failed for refund QR:', cloudinaryError.message);
+          // Continue without QR code - it's optional
+        }
+      }
+    }
 
     // Update registration with cancellation request
     await prisma.registration.update({
@@ -529,8 +564,52 @@ const createRegistrationWithScreenshot = async (req, res) => {
       categories.push(category);
     }
 
-    // Create screenshot URL
-    const screenshotUrl = `/uploads/payment-screenshots/${screenshotFile.filename}`;
+    // Upload screenshot to Cloudinary
+    let screenshotUrl = null;
+    const cloudinary = (await import('../config/cloudinary.js')).default;
+    
+    // Check if Cloudinary is configured
+    const isCloudinaryConfigured = process.env.CLOUDINARY_CLOUD_NAME && 
+                                    process.env.CLOUDINARY_API_KEY && 
+                                    process.env.CLOUDINARY_API_SECRET &&
+                                    !process.env.CLOUDINARY_CLOUD_NAME.includes('your-');
+
+    if (isCloudinaryConfigured) {
+      try {
+        // Upload to Cloudinary
+        const result = await new Promise((resolve, reject) => {
+          const uploadStream = cloudinary.uploader.upload_stream(
+            {
+              folder: `matchify/payment-screenshots/${tournamentId}`,
+              transformation: [
+                { width: 1200, height: 1600, crop: 'limit' },
+                { quality: 'auto:good' },
+              ],
+            },
+            (error, result) => {
+              if (error) reject(error);
+              else resolve(result);
+            }
+          );
+          uploadStream.end(screenshotFile.buffer);
+        });
+
+        screenshotUrl = result.secure_url;
+        console.log('✅ Screenshot uploaded to Cloudinary:', screenshotUrl);
+      } catch (cloudinaryError) {
+        console.error('❌ Cloudinary upload failed:', cloudinaryError.message);
+        return res.status(500).json({
+          success: false,
+          error: 'Failed to upload payment screenshot. Please try again.',
+        });
+      }
+    } else {
+      console.error('❌ Cloudinary not configured - cannot upload screenshot');
+      return res.status(500).json({
+        success: false,
+        error: 'Image upload service not configured. Please contact support.',
+      });
+    }
 
     // Create registrations with screenshot
     const registrations = [];

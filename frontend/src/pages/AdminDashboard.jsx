@@ -35,6 +35,9 @@ export default function AdminDashboard() {
   const [academies, setAcademies] = useState([]);
   const [academyFilter, setAcademyFilter] = useState('pending');
   const [viewingScreenshot, setViewingScreenshot] = useState(null);
+  const [showRejectAcademyModal, setShowRejectAcademyModal] = useState(false);
+  const [academyToReject, setAcademyToReject] = useState(null);
+  const [rejectAcademyReason, setRejectAcademyReason] = useState('');
 
   useEffect(() => {
     if (!user?.isAdmin) { navigate('/login'); return; }
@@ -823,20 +826,10 @@ export default function AdminDashboard() {
                             Approve Academy
                           </button>
                           <button
-                            onClick={async () => {
-                              const reason = prompt('Please provide a reason for rejection:');
-                              if (!reason) return;
-                              try {
-                                await fetch(`/api/academies/admin/${academy.id}/reject`, {
-                                  method: 'POST',
-                                  headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}`, 'Content-Type': 'application/json' },
-                                  body: JSON.stringify({ reason })
-                                });
-                                setAcademies(prev => prev.map(a => a.id === academy.id ? { ...a, status: 'rejected' } : a));
-                                setAlertModal({ type: 'success', message: `${academy.name} has been rejected` });
-                              } catch (e) {
-                                setAlertModal({ type: 'error', message: 'Failed to reject academy' });
-                              }
+                            onClick={() => {
+                              setAcademyToReject(academy);
+                              setRejectAcademyReason('');
+                              setShowRejectAcademyModal(true);
                             }}
                             className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 text-white rounded-xl transition-colors font-semibold"
                           >
@@ -853,6 +846,85 @@ export default function AdminDashboard() {
           </div>
         )}
       </div>
+
+      {/* Reject Academy Modal */}
+      {showRejectAcademyModal && academyToReject && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className="relative w-full max-w-md">
+            {/* Halo effect */}
+            <div className="absolute -inset-2 bg-gradient-to-r from-red-500 via-rose-500 to-red-500 rounded-3xl blur-xl opacity-50"></div>
+            <div className="relative bg-slate-800 rounded-2xl border border-white/10 overflow-hidden">
+              <div className="p-6 border-b border-white/10">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-red-500/20 rounded-lg">
+                      <X className="w-5 h-5 text-red-400" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-white">Reject Academy</h3>
+                  </div>
+                  <button 
+                    onClick={() => { setShowRejectAcademyModal(false); setAcademyToReject(null); setRejectAcademyReason(''); }} 
+                    className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                  >
+                    <X className="w-5 h-5 text-gray-400" />
+                  </button>
+                </div>
+              </div>
+              <div className="p-6 space-y-4">
+                <div className="p-4 bg-slate-700/50 rounded-xl">
+                  <p className="text-sm text-gray-400">Academy to reject:</p>
+                  <p className="text-white font-semibold mt-1">{academyToReject.name}</p>
+                  <p className="text-sm text-gray-500">{academyToReject.city}, {academyToReject.state}</p>
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-400 mb-2">Reason for rejection <span className="text-red-400">*</span></label>
+                  <textarea
+                    value={rejectAcademyReason}
+                    onChange={(e) => setRejectAcademyReason(e.target.value)}
+                    placeholder="Enter reason for rejection..."
+                    rows={3}
+                    className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500/50 resize-none"
+                  />
+                </div>
+              </div>
+              <div className="p-6 bg-slate-900/50 border-t border-white/10 flex gap-3">
+                <button
+                  onClick={() => { setShowRejectAcademyModal(false); setAcademyToReject(null); setRejectAcademyReason(''); }}
+                  className="flex-1 px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={async () => {
+                    if (!rejectAcademyReason.trim()) {
+                      setAlertModal({ type: 'error', message: 'Please provide a reason for rejection' });
+                      return;
+                    }
+                    try {
+                      await fetch(`/api/academies/admin/${academyToReject.id}/reject`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}`, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ reason: rejectAcademyReason })
+                      });
+                      setAcademies(prev => prev.map(a => a.id === academyToReject.id ? { ...a, status: 'rejected' } : a));
+                      setAlertModal({ type: 'success', message: `${academyToReject.name} has been rejected` });
+                      setShowRejectAcademyModal(false);
+                      setAcademyToReject(null);
+                      setRejectAcademyReason('');
+                    } catch (e) {
+                      setAlertModal({ type: 'error', message: 'Failed to reject academy' });
+                    }
+                  }}
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 text-white rounded-xl transition-colors font-medium flex items-center justify-center gap-2"
+                >
+                  <X className="w-4 h-4" />
+                  Reject Academy
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Payment Screenshot Modal */}
       {viewingScreenshot && (

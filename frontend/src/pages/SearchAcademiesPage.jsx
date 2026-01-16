@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, MapPin, Phone, Mail, Globe, Star, Users, Award, Filter, X, Calendar } from 'lucide-react';
+import { Search, MapPin, Phone, Mail, Globe, Star, Users, Award, Filter, X, Calendar, ArrowLeft, QrCode, Building2 } from 'lucide-react';
 import api from '../api/axios';
 
 const SearchAcademiesPage = () => {
@@ -9,8 +9,9 @@ const SearchAcademiesPage = () => {
   const [selectedCity, setSelectedCity] = useState('');
   const [selectedSport, setSelectedSport] = useState('');
   const [showFilters, setShowFilters] = useState(false);
-  const [cities] = useState(['Mumbai', 'Delhi', 'Bangalore', 'Chennai', 'Hyderabad', 'Pune', 'Kolkata']);
-  const [sports] = useState(['Badminton', 'Tennis', 'Table Tennis', 'Squash']);
+  const [selectedAcademy, setSelectedAcademy] = useState(null);
+  const [cities] = useState(['Mumbai', 'Delhi', 'Bangalore', 'Chennai', 'Hyderabad', 'Pune', 'Kolkata', 'Bengaluru Urban']);
+  const [sports] = useState(['Badminton', 'Tennis', 'Table Tennis', 'Squash', 'Swimming', 'Cricket', 'Football', 'Basketball']);
 
   useEffect(() => {
     fetchAcademies();
@@ -54,6 +55,166 @@ const SearchAcademiesPage = () => {
     const matchesSport = !selectedSport || academy.sports?.includes(selectedSport);
     return matchesSearch && matchesCity && matchesSport;
   });
+
+  // Academy Detail View
+  if (selectedAcademy) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-emerald-600 to-teal-600 py-8 px-4">
+          <div className="max-w-4xl mx-auto">
+            <button
+              onClick={() => setSelectedAcademy(null)}
+              className="flex items-center gap-2 text-white/80 hover:text-white mb-4 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              Back to Academies
+            </button>
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center">
+                <Building2 className="w-8 h-8 text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-white">{selectedAcademy.name}</h1>
+                <p className="text-white/80 flex items-center gap-2 mt-1">
+                  <MapPin className="w-4 h-4" />
+                  {selectedAcademy.city}, {selectedAcademy.state}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="max-w-4xl mx-auto px-4 py-8 -mt-4">
+          <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-white/10 overflow-hidden">
+            {/* Sports */}
+            <div className="p-6 border-b border-white/10">
+              <h3 className="text-sm font-semibold text-gray-400 mb-3">Sports Offered</h3>
+              <div className="flex flex-wrap gap-2">
+                {selectedAcademy.sports?.map(sport => (
+                  <span key={sport} className="px-3 py-1.5 bg-emerald-500/20 text-emerald-300 rounded-lg font-medium border border-emerald-500/30">
+                    {sport}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Contact Info */}
+            <div className="p-6 border-b border-white/10">
+              <h3 className="text-sm font-semibold text-gray-400 mb-3">Contact Information</h3>
+              <div className="grid md:grid-cols-2 gap-4">
+                {selectedAcademy.phone && (
+                  <div className="flex items-center gap-3 p-3 bg-slate-700/50 rounded-xl">
+                    <Phone className="w-5 h-5 text-blue-400" />
+                    <div>
+                      <p className="text-xs text-gray-500">Phone</p>
+                      <a href={`tel:${selectedAcademy.phone}`} className="text-white font-medium hover:text-emerald-400">{selectedAcademy.phone}</a>
+                    </div>
+                  </div>
+                )}
+                {selectedAcademy.email && (
+                  <div className="flex items-center gap-3 p-3 bg-slate-700/50 rounded-xl">
+                    <Mail className="w-5 h-5 text-purple-400" />
+                    <div>
+                      <p className="text-xs text-gray-500">Email</p>
+                      <a href={`mailto:${selectedAcademy.email}`} className="text-white font-medium hover:text-emerald-400">{selectedAcademy.email}</a>
+                    </div>
+                  </div>
+                )}
+                {selectedAcademy.website && (
+                  <div className="flex items-center gap-3 p-3 bg-slate-700/50 rounded-xl">
+                    <Globe className="w-5 h-5 text-cyan-400" />
+                    <div>
+                      <p className="text-xs text-gray-500">Website</p>
+                      <a href={selectedAcademy.website} target="_blank" rel="noopener noreferrer" className="text-cyan-400 font-medium hover:underline">{selectedAcademy.website}</a>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Address */}
+            <div className="p-6 border-b border-white/10">
+              <h3 className="text-sm font-semibold text-gray-400 mb-3">Address</h3>
+              <div className="p-3 bg-slate-700/50 rounded-xl">
+                <p className="text-white">{selectedAcademy.address}, {selectedAcademy.city}, {selectedAcademy.state} {selectedAcademy.pincode && `- ${selectedAcademy.pincode}`}</p>
+              </div>
+            </div>
+
+            {/* Facility Details */}
+            {selectedAcademy.sportDetails && Object.keys(selectedAcademy.sportDetails).length > 0 && (
+              <div className="p-6 border-b border-white/10">
+                <h3 className="text-sm font-semibold text-gray-400 mb-3">Facility Details</h3>
+                <div className="grid md:grid-cols-2 gap-3">
+                  {Object.entries(selectedAcademy.sportDetails).map(([key, value]) => (
+                    <div key={key} className="flex items-center gap-3 p-3 bg-indigo-500/10 border border-indigo-500/30 rounded-xl">
+                      <div className="w-8 h-8 bg-indigo-500/20 rounded-lg flex items-center justify-center">
+                        <Award className="w-4 h-4 text-indigo-400" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-indigo-400">{key}</p>
+                        <p className="text-white font-semibold">{value}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Description */}
+            {selectedAcademy.description && (
+              <div className="p-6 border-b border-white/10">
+                <h3 className="text-sm font-semibold text-gray-400 mb-3">About</h3>
+                <p className="text-gray-300">{selectedAcademy.description}</p>
+              </div>
+            )}
+
+            {/* Photos */}
+            {selectedAcademy.photos && selectedAcademy.photos.length > 0 && (
+              <div className="p-6 border-b border-white/10">
+                <h3 className="text-sm font-semibold text-gray-400 mb-3">Photos</h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  {selectedAcademy.photos.map((photo, idx) => (
+                    <img 
+                      key={idx} 
+                      src={photo} 
+                      alt={`Academy photo ${idx + 1}`} 
+                      className="w-full h-32 object-cover rounded-lg border border-white/10"
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Academy QR Code for Payments */}
+            {selectedAcademy.academyQrCode && (
+              <div className="p-6 border-b border-white/10">
+                <h3 className="text-sm font-semibold text-gray-400 mb-3 flex items-center gap-2">
+                  <QrCode className="w-4 h-4" />
+                  Payment QR Code
+                </h3>
+                <div className="flex items-start gap-6">
+                  <div className="bg-white p-4 rounded-xl">
+                    <img 
+                      src={selectedAcademy.academyQrCode} 
+                      alt="Academy Payment QR Code" 
+                      className="w-48 h-48 object-contain"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-gray-400 mb-3">Scan this QR code to make payments directly to the academy.</p>
+                    <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl">
+                      <p className="text-emerald-400 text-sm">💡 Use any UPI app to scan and pay</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
@@ -176,7 +337,7 @@ const SearchAcademiesPage = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredAcademies.map((academy, index) => (
-              <AcademyCard key={academy.id} academy={academy} index={index} />
+              <AcademyCard key={academy.id} academy={academy} index={index} onClick={() => setSelectedAcademy(academy)} />
             ))}
           </div>
         )}
@@ -185,7 +346,7 @@ const SearchAcademiesPage = () => {
   );
 };
 
-const AcademyCard = ({ academy, index }) => {
+const AcademyCard = ({ academy, index, onClick }) => {
   // Gradient backgrounds matching the tournament cards
   const gradients = [
     'bg-gradient-to-br from-purple-600 via-purple-500 to-indigo-600',
@@ -195,7 +356,10 @@ const AcademyCard = ({ academy, index }) => {
   const gradient = gradients[index % gradients.length];
 
   return (
-    <div className="bg-[#1a1f2e] rounded-2xl overflow-hidden hover:ring-2 hover:ring-emerald-500/50 transition-all duration-300 group">
+    <div 
+      onClick={onClick}
+      className="bg-[#1a1f2e] rounded-2xl overflow-hidden hover:ring-2 hover:ring-emerald-500/50 transition-all duration-300 group cursor-pointer"
+    >
       {/* Card Header with Gradient */}
       <div className={`relative h-44 ${gradient} p-5`}>
         {/* Verified Badge */}

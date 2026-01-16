@@ -157,12 +157,15 @@ export const createAcademy = async (req, res) => {
 };
 
 
-// Get all approved academies (public)
+// Get all approved academies (public) - excludes blocked
 export const getAcademies = async (req, res) => {
   try {
     const { search, city, sport, page = 1, limit = 20 } = req.query;
 
-    const where = { status: 'approved' };
+    const where = { 
+      status: 'approved',
+      isBlocked: false  // Don't show blocked academies
+    };
 
     if (city) {
       where.city = { contains: city, mode: 'insensitive' };
@@ -362,5 +365,128 @@ export const getAcademyById = async (req, res) => {
   } catch (error) {
     console.error('Error fetching academy:', error);
     res.status(500).json({ success: false, error: 'Failed to fetch academy' });
+  }
+};
+
+
+// Get all academies for admin (includes blocked)
+export const getAllAcademiesAdmin = async (req, res) => {
+  try {
+    const { status, isBlocked } = req.query;
+    
+    const where = {};
+    if (status) where.status = status;
+    if (isBlocked !== undefined) where.isBlocked = isBlocked === 'true';
+
+    const academies = await prisma.academy.findMany({
+      where,
+      orderBy: { createdAt: 'desc' }
+    });
+
+    const formattedAcademies = academies.map(a => ({
+      ...a,
+      sports: JSON.parse(a.sports || '[]'),
+      sportDetails: JSON.parse(a.sportDetails || '{}'),
+      photos: JSON.parse(a.photos || '[]')
+    }));
+
+    res.json({ success: true, data: { academies: formattedAcademies } });
+
+  } catch (error) {
+    console.error('Error fetching all academies:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch academies' });
+  }
+};
+
+// Block academy (admin only)
+export const blockAcademy = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { reason } = req.body;
+
+    const academy = await prisma.academy.findUnique({ where: { id } });
+    if (!academy) {
+      return res.status(404).json({ success: false, error: 'Academy not found' });
+    }
+
+    if (academy.isBlocked) {
+      return res.status(400).json({ success: false, error: 'Academy is already blocked' });
+    }
+
+    const updatedAcademy = await prisma.academy.update({
+      where: { id },
+      data: {
+        isBlocked: true,
+        blockReason: reason || 'Blocked by admin',
+        blockedAt: new Date(),
+        blockedBy: req.user?.id || 'admin'
+      }
+    });
+
+    // Notify submitter
+    if (academy.submittedBy) {
+      await prisma.notification.create({
+        data: {
+          userId: academy.submittedBy,
+          type: 'ACADEMY_BLOCKED',
+          title: '🚫 Academy Blocked',
+          message: `Your academy "${academy.name}" has been blocked. Reason: ${reason || 'Violation of terms'}`,
+          data: JSON.stringify({ academyId: id, reason })
+        }
+      });
+    }
+
+    console.log(`🚫 Academy blocked: ${id} - ${academy.name}`);
+    res.json({ success: true, message: 'Academy blocked successfully', data: { academy: updatedAcademy } });
+
+  } catch (error) {
+    console.error('Error blocking academy:', error);
+    res.status(500).json({ success: false, error: 'Failed to block academy' });
+  }
+};
+
+// Unblock academy (admin only)
+export const unblockAcademy = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const academy = await prisma.academy.findUnique({ where: { id } });
+    if (!academy) {
+      return res.status(404).json({ success: false, error: 'Academy not found' });
+    }
+
+    if (!academy.isBlocked) {
+      return res.status(400).json({ success: false, error: 'Academy is not blocked' });
+    }
+
+    const updatedAcademy = await prisma.academy.update({
+      where: { id },
+      data: {
+        isBlocked: false,
+        blockReason: null,
+        blockedAt: null,
+        blockedBy: null
+      }
+    });
+
+    // Notify submitter
+    if (academy.submittedBy) {
+      await prisma.notification.create({
+        data: {
+          userId: academy.submittedBy,
+          type: 'ACADEMY_UNBLOCKED',
+          title: '✅ Academy Unblocked',
+          message: `Your academy "${academy.name}" has been unblocked and is now visible again on Matchify.pro!`,
+          data: JSON.stringify({ academyId: id })
+        }
+      });
+    }
+
+    console.log(`✅ Academy unblocked: ${id} - ${academy.name}`);
+    res.json({ success: true, message: 'Academy unblocked successfully', data: { academy: updatedAcademy } });
+
+  } catch (error) {
+    console.error('Error unblocking academy:', error);
+    res.status(500).json({ success: false, error: 'Failed to unblock academy' });
   }
 };

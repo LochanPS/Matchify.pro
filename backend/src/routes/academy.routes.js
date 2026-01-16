@@ -5,8 +5,11 @@ import {
   createAcademy,
   getAcademies,
   getPendingAcademies,
+  getAllAcademiesAdmin,
   approveAcademy,
   rejectAcademy,
+  blockAcademy,
+  unblockAcademy,
   getAcademyById
 } from '../controllers/academy.controller.js';
 
@@ -43,7 +46,10 @@ router.post('/',
 );
 
 // Admin routes
+router.get('/admin/all', authenticate, getAllAcademiesAdmin);
 router.post('/admin/:id/approve', authenticate, approveAcademy);
 router.post('/admin/:id/reject', authenticate, rejectAcademy);
+router.post('/admin/:id/block', authenticate, blockAcademy);
+router.post('/admin/:id/unblock', authenticate, unblockAcademy);
 
 export default router;

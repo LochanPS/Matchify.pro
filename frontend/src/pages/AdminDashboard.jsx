@@ -533,8 +533,8 @@ export default function AdminDashboard() {
         {activeTab === 'academies' && (
           <div className="space-y-4">
             {/* Filter */}
-            <div className="flex gap-2">
-              {['pending', 'approved', 'rejected'].map(filter => (
+            <div className="flex flex-wrap gap-2">
+              {['pending', 'approved', 'rejected', 'blocked'].map(filter => (
                 <button
                   key={filter}
                   onClick={() => setAcademyFilter(filter)}
@@ -542,6 +542,7 @@ export default function AdminDashboard() {
                     academyFilter === filter
                       ? filter === 'pending' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
                       : filter === 'approved' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                      : filter === 'blocked' ? 'bg-gray-500/20 text-gray-400 border border-gray-500/30'
                       : 'bg-red-500/20 text-red-400 border border-red-500/30'
                       : 'bg-slate-800/50 text-gray-400 border border-white/10 hover:bg-white/5'
                   }`}
@@ -552,17 +553,18 @@ export default function AdminDashboard() {
             </div>
 
             {/* Academies List */}
-            {academies.filter(a => a.status === academyFilter).length === 0 ? (
+            {academies.filter(a => academyFilter === 'blocked' ? a.isBlocked : (a.status === academyFilter && !a.isBlocked)).length === 0 ? (
               <div className="text-center py-12 bg-slate-800/50 rounded-xl border border-white/10">
                 <Building2 className="w-12 h-12 text-gray-600 mx-auto mb-3" />
                 <p className="text-gray-400">No {academyFilter} academies</p>
               </div>
             ) : (
               <div className="space-y-6">
-                {academies.filter(a => a.status === academyFilter).map(academy => (
+                {academies.filter(a => academyFilter === 'blocked' ? a.isBlocked : (a.status === academyFilter && !a.isBlocked)).map(academy => (
                   <div key={academy.id} className="relative group">
                     {/* Halo effect */}
                     <div className={`absolute -inset-1 bg-gradient-to-r ${
+                      academy.isBlocked ? 'from-gray-500/30 via-slate-500/30 to-gray-500/30' :
                       academy.status === 'pending' ? 'from-amber-500/30 via-orange-500/30 to-amber-500/30' :
                       academy.status === 'approved' ? 'from-emerald-500/30 via-teal-500/30 to-emerald-500/30' :
                       'from-red-500/30 via-rose-500/30 to-red-500/30'
@@ -592,13 +594,19 @@ export default function AdminDashboard() {
                               </p>
                             </div>
                           </div>
-                          <span className={`px-3 py-1.5 rounded-full text-sm font-semibold capitalize ${
-                            academy.status === 'pending' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
-                            academy.status === 'approved' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
-                            'bg-red-500/20 text-red-400 border border-red-500/30'
-                          }`}>
-                            {academy.status === 'pending' ? '⏳ Pending' : academy.status === 'approved' ? '✅ Approved' : '❌ Rejected'}
-                          </span>
+                          <div className="flex flex-col gap-2 items-end">
+                            <span className={`px-3 py-1.5 rounded-full text-sm font-semibold capitalize ${
+                              academy.isBlocked ? 'bg-gray-500/20 text-gray-400 border border-gray-500/30' :
+                              academy.status === 'pending' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
+                              academy.status === 'approved' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
+                              'bg-red-500/20 text-red-400 border border-red-500/30'
+                            }`}>
+                              {academy.isBlocked ? '🚫 Blocked' : academy.status === 'pending' ? '⏳ Pending' : academy.status === 'approved' ? '✅ Approved' : '❌ Rejected'}
+                            </span>
+                            {academy.isBlocked && academy.blockReason && (
+                              <p className="text-xs text-gray-500 max-w-[200px] text-right">Reason: {academy.blockReason}</p>
+                            )}
+                          </div>
                         </div>
                       </div>
 

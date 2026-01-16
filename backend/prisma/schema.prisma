@@ -471,6 +471,10 @@ model Academy {
   academyQrCode     String?         // Academy's own QR code for payments
   paymentScreenshot String          // Cloudinary URL of payment screenshot
   status            String          @default("pending") // pending, approved, rejected
+  isBlocked         Boolean         @default(false)     // Admin can block academies
+  blockReason       String?         // Reason for blocking
+  blockedAt         DateTime?       // When it was blocked
+  blockedBy         String?         // Admin who blocked
   rejectionReason   String?
   submittedBy       String?         // User ID who submitted (optional, can be guest)
   submittedByName   String?         // Name of submitter

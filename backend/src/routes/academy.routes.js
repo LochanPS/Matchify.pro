@@ -10,6 +10,7 @@ import {
   rejectAcademy,
   blockAcademy,
   unblockAcademy,
+  deleteAcademy,
   getAcademyById
 } from '../controllers/academy.controller.js';
 
@@ -51,5 +52,6 @@ router.post('/admin/:id/approve', authenticate, approveAcademy);
 router.post('/admin/:id/reject', authenticate, rejectAcademy);
 router.post('/admin/:id/block', authenticate, blockAcademy);
 router.post('/admin/:id/unblock', authenticate, unblockAcademy);
+router.delete('/admin/:id', authenticate, deleteAcademy);
 
 export default router;

@@ -470,11 +470,15 @@ model Academy {
   photos            String?         // JSON array of photo URLs
   academyQrCode     String?         // Academy's own QR code for payments
   paymentScreenshot String          // Cloudinary URL of payment screenshot
-  status            String          @default("pending") // pending, approved, rejected
+  status            String          @default("pending") // pending, approved, rejected, deleted
   isBlocked         Boolean         @default(false)     // Admin can block academies
   blockReason       String?         // Reason for blocking
   blockedAt         DateTime?       // When it was blocked
   blockedBy         String?         // Admin who blocked
+  isDeleted         Boolean         @default(false)     // Soft delete flag
+  deletedAt         DateTime?       // When it was deleted
+  deletedBy         String?         // Admin who deleted
+  deletionReason    String?         // Reason for deletion
   rejectionReason   String?
   submittedBy       String?         // User ID who submitted (optional, can be guest)
   submittedByName   String?         // Name of submitter
@@ -489,5 +493,6 @@ model Academy {
   @@index([status])
   @@index([city, state])
   @@index([createdAt])
+  @@index([isDeleted])
   @@map("academies")
 }

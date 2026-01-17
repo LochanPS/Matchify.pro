@@ -34,11 +34,17 @@ export default function AdminDashboard() {
   const [actionLoading, setActionLoading] = useState(false);
   const [alertModal, setAlertModal] = useState(null);
   const [academies, setAcademies] = useState([]);
-  const [academyFilter, setAcademyFilter] = useState('pending');
+  const [academyFilter, setAcademyFilter] = useState('all');
   const [viewingScreenshot, setViewingScreenshot] = useState(null);
   const [showRejectAcademyModal, setShowRejectAcademyModal] = useState(false);
   const [academyToReject, setAcademyToReject] = useState(null);
   const [rejectAcademyReason, setRejectAcademyReason] = useState('');
+  const [showDeleteAcademyModal, setShowDeleteAcademyModal] = useState(false);
+  const [academyToDelete, setAcademyToDelete] = useState(null);
+  const [deleteAcademyReason, setDeleteAcademyReason] = useState('');
+  const [showBlockAcademyModal, setShowBlockAcademyModal] = useState(false);
+  const [academyToBlock, setAcademyToBlock] = useState(null);
+  const [blockAcademyReason, setBlockAcademyReason] = useState('');
   const [expandedAcademy, setExpandedAcademy] = useState(null);
 
   useEffect(() => {
@@ -575,35 +581,64 @@ export default function AdminDashboard() {
         {/* Academies Tab */}
         {activeTab === 'academies' && (
           <div className="space-y-4">
-            {/* Filter */}
-            <div className="flex flex-wrap gap-2">
-              {['pending', 'approved', 'rejected', 'blocked'].map(filter => (
-                <button
-                  key={filter}
-                  onClick={() => { setAcademyFilter(filter); setExpandedAcademy(null); }}
-                  className={`px-4 py-2 rounded-lg font-medium transition-all capitalize ${
-                    academyFilter === filter
-                      ? filter === 'pending' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                      : filter === 'approved' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                      : filter === 'blocked' ? 'bg-gray-500/20 text-gray-400 border border-gray-500/30'
-                      : 'bg-red-500/20 text-red-400 border border-red-500/30'
-                      : 'bg-slate-800/50 text-gray-400 border border-white/10 hover:bg-white/5'
-                  }`}
-                >
-                  {filter}
-                </button>
-              ))}
+            {/* Filter and Refresh */}
+            <div className="flex flex-wrap gap-2 items-center justify-between">
+              <div className="flex flex-wrap gap-2">
+                {['all', 'pending', 'approved', 'rejected', 'blocked', 'deleted'].map(filter => (
+                  <button
+                    key={filter}
+                    onClick={() => { setAcademyFilter(filter); setExpandedAcademy(null); }}
+                    className={`px-4 py-2 rounded-lg font-medium transition-all capitalize ${
+                      academyFilter === filter
+                        ? filter === 'all' ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
+                        : filter === 'pending' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                        : filter === 'approved' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                        : filter === 'blocked' ? 'bg-gray-500/20 text-gray-400 border border-gray-500/30'
+                        : filter === 'deleted' ? 'bg-slate-500/20 text-slate-400 border border-slate-500/30'
+                        : 'bg-red-500/20 text-red-400 border border-red-500/30'
+                        : 'bg-slate-800/50 text-gray-400 border border-white/10 hover:bg-white/5'
+                    }`}
+                  >
+                    {filter}
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={async () => {
+                  try {
+                    const academiesRes = await api.get('/academies/admin/all');
+                    setAcademies(academiesRes.data?.data?.academies || academiesRes.data?.academies || []);
+                    setAlertModal({ type: 'success', message: 'Academy list refreshed!' });
+                  } catch (e) {
+                    setAlertModal({ type: 'error', message: 'Failed to refresh academy list' });
+                  }
+                }}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg transition-all border border-blue-500/30"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Refresh
+              </button>
             </div>
 
             {/* Academies List - Minimalist Compact Cards */}
-            {academies.filter(a => academyFilter === 'blocked' ? a.isBlocked : (a.status === academyFilter && !a.isBlocked)).length === 0 ? (
+            {academies.filter(a => {
+              if (academyFilter === 'all') return !a.isDeleted;
+              if (academyFilter === 'deleted') return a.isDeleted;
+              if (academyFilter === 'blocked') return a.isBlocked && !a.isDeleted;
+              return a.status === academyFilter && !a.isBlocked && !a.isDeleted;
+            }).length === 0 ? (
               <div className="text-center py-12 bg-slate-800/50 rounded-xl border border-white/10">
                 <Building2 className="w-12 h-12 text-gray-600 mx-auto mb-3" />
                 <p className="text-gray-400">No {academyFilter} academies</p>
               </div>
             ) : (
               <div className="space-y-3">
-                {academies.filter(a => academyFilter === 'blocked' ? a.isBlocked : (a.status === academyFilter && !a.isBlocked)).map(academy => (
+                {academies.filter(a => {
+                  if (academyFilter === 'all') return !a.isDeleted;
+                  if (academyFilter === 'deleted') return a.isDeleted;
+                  if (academyFilter === 'blocked') return a.isBlocked && !a.isDeleted;
+                  return a.status === academyFilter && !a.isBlocked && !a.isDeleted;
+                }).map(academy => (
                   <div key={academy.id} className="bg-slate-800/80 rounded-xl border border-white/10 overflow-hidden">
                     {/* Compact Header - Click to Expand */}
                     <div 
@@ -613,6 +648,7 @@ export default function AdminDashboard() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3 flex-1 min-w-0">
                           <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-lg flex-shrink-0 ${
+                            academy.isDeleted ? 'bg-slate-500/20' :
                             academy.isBlocked ? 'bg-gray-500/20' :
                             academy.status === 'pending' ? 'bg-amber-500/20' :
                             academy.status === 'approved' ? 'bg-emerald-500/20' :
@@ -627,12 +663,13 @@ export default function AdminDashboard() {
                         </div>
                         <div className="flex items-center gap-3 flex-shrink-0">
                           <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                            academy.isDeleted ? 'bg-slate-500/20 text-slate-400' :
                             academy.isBlocked ? 'bg-gray-500/20 text-gray-400' :
                             academy.status === 'pending' ? 'bg-amber-500/20 text-amber-400' :
                             academy.status === 'approved' ? 'bg-emerald-500/20 text-emerald-400' :
                             'bg-red-500/20 text-red-400'
                           }`}>
-                            {academy.isBlocked ? 'Blocked' : academy.status === 'pending' ? 'Pending' : academy.status === 'approved' ? 'Live' : 'Rejected'}
+                            {academy.isDeleted ? 'Deleted' : academy.isBlocked ? 'Blocked' : academy.status === 'pending' ? 'Pending' : academy.status === 'approved' ? 'Live' : 'Rejected'}
                           </span>
                           <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform ${expandedAcademy === academy.id ? 'rotate-90' : ''}`} />
                         </div>
@@ -699,37 +736,86 @@ export default function AdminDashboard() {
                         </div>
 
                         {/* Action Buttons */}
-                        {academy.status === 'pending' && (
-                          <div className="p-4 bg-slate-900/50 border-t border-white/10 flex gap-2">
+                        <div className="p-4 bg-slate-900/50 border-t border-white/10 flex gap-2">
+                          {academy.status === 'pending' && (
+                            <>
+                              <button
+                                onClick={async () => {
+                                  try {
+                                    await api.post(`/academies/admin/${academy.id}/approve`);
+                                    setAcademies(prev => prev.map(a => a.id === academy.id ? { ...a, status: 'approved' } : a));
+                                    setAlertModal({ type: 'success', message: `"${academy.name}" approved!` });
+                                    setExpandedAcademy(null);
+                                  } catch (e) {
+                                    setAlertModal({ type: 'error', message: 'Failed to approve academy' });
+                                  }
+                                }}
+                                className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors text-sm font-medium"
+                              >
+                                <CheckCircle className="w-4 h-4" />
+                                Approve
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setAcademyToReject(academy);
+                                  setRejectAcademyReason('');
+                                  setShowRejectAcademyModal(true);
+                                }}
+                                className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors text-sm font-medium"
+                              >
+                                <X className="w-4 h-4" />
+                                Reject
+                              </button>
+                            </>
+                          )}
+                          
+                          {/* Block/Unblock Button for Approved Academies */}
+                          {academy.status === 'approved' && !academy.isBlocked && (
+                            <button
+                              onClick={() => {
+                                setAcademyToBlock(academy);
+                                setBlockAcademyReason('');
+                                setShowBlockAcademyModal(true);
+                              }}
+                              className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm font-medium"
+                            >
+                              <Ban className="w-4 h-4" />
+                              Block
+                            </button>
+                          )}
+                          
+                          {/* Unblock Button for Blocked Academies */}
+                          {academy.isBlocked && (
                             <button
                               onClick={async () => {
                                 try {
-                                  await api.post(`/academies/admin/${academy.id}/approve`);
-                                  setAcademies(prev => prev.map(a => a.id === academy.id ? { ...a, status: 'approved' } : a));
-                                  setAlertModal({ type: 'success', message: `"${academy.name}" approved!` });
+                                  await api.post(`/academies/admin/${academy.id}/unblock`);
+                                  setAcademies(prev => prev.map(a => a.id === academy.id ? { ...a, isBlocked: false } : a));
+                                  setAlertModal({ type: 'success', message: `"${academy.name}" has been unblocked` });
                                   setExpandedAcademy(null);
                                 } catch (e) {
-                                  setAlertModal({ type: 'error', message: 'Failed to approve academy' });
+                                  setAlertModal({ type: 'error', message: 'Failed to unblock academy' });
                                 }
                               }}
                               className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors text-sm font-medium"
                             >
                               <CheckCircle className="w-4 h-4" />
-                              Approve
+                              Unblock
                             </button>
-                            <button
-                              onClick={() => {
-                                setAcademyToReject(academy);
-                                setRejectAcademyReason('');
-                                setShowRejectAcademyModal(true);
-                              }}
-                              className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors text-sm font-medium"
-                            >
-                              <X className="w-4 h-4" />
-                              Reject
-                            </button>
-                          </div>
-                        )}
+                          )}
+                          
+                          {/* Delete Button - Always Available */}
+                          <button
+                            onClick={() => {
+                              setAcademyToDelete(academy);
+                              setDeleteAcademyReason('');
+                              setShowDeleteAcademyModal(true);
+                            }}
+                            className="flex items-center justify-center gap-2 px-3 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-colors text-sm font-medium border border-red-500/30"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -808,6 +894,209 @@ export default function AdminDashboard() {
                 >
                   <X className="w-4 h-4" />
                   Reject Academy
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Academy Modal */}
+      {showDeleteAcademyModal && academyToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className="relative w-full max-w-md">
+            {/* Halo effect */}
+            <div className="absolute -inset-2 bg-gradient-to-r from-red-600 via-rose-600 to-red-600 rounded-3xl blur-xl opacity-50"></div>
+            <div className="relative bg-slate-800 rounded-2xl border border-white/10 overflow-hidden">
+              <div className="p-6 border-b border-white/10">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-red-500/20 rounded-lg">
+                      <Trash2 className="w-5 h-5 text-red-400" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-white">Delete Academy</h3>
+                  </div>
+                  <button 
+                    onClick={() => { setShowDeleteAcademyModal(false); setAcademyToDelete(null); setDeleteAcademyReason(''); }} 
+                    className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                  >
+                    <X className="w-5 h-5 text-gray-400" />
+                  </button>
+                </div>
+              </div>
+              <div className="p-6 space-y-4">
+                <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-red-400 font-semibold mb-1">⚠️ Permanent Action</p>
+                      <p className="text-sm text-gray-300">This will permanently delete the academy from Matchify.pro. This action cannot be undone.</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-4 bg-slate-700/50 rounded-xl">
+                  <p className="text-sm text-gray-400">Academy to delete:</p>
+                  <p className="text-white font-semibold mt-1">{academyToDelete.name}</p>
+                  <p className="text-sm text-gray-500">{academyToDelete.city}, {academyToDelete.state}</p>
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-400 mb-2">Reason for deletion <span className="text-red-400">*</span></label>
+                  <textarea
+                    value={deleteAcademyReason}
+                    onChange={(e) => setDeleteAcademyReason(e.target.value)}
+                    placeholder="Enter reason for deletion (will be sent to academy owner)..."
+                    rows={3}
+                    className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500/50 resize-none"
+                  />
+                </div>
+              </div>
+              <div className="p-6 bg-slate-900/50 border-t border-white/10 flex gap-3">
+                <button
+                  onClick={() => { setShowDeleteAcademyModal(false); setAcademyToDelete(null); setDeleteAcademyReason(''); }}
+                  className="flex-1 px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={async () => {
+                    if (!deleteAcademyReason.trim()) {
+                      setAlertModal({ type: 'error', message: 'Please provide a reason for deletion' });
+                      return;
+                    }
+                    try {
+                      const response = await api.delete(`/academies/admin/${academyToDelete.id}`, { 
+                        data: { reason: deleteAcademyReason } 
+                      });
+                      
+                      if (response.data.success) {
+                        // Refresh the entire academy list from server to get accurate data
+                        try {
+                          const academiesRes = await api.get('/academies/admin/all');
+                          setAcademies(academiesRes.data?.data?.academies || academiesRes.data?.academies || []);
+                        } catch (refreshError) {
+                          console.error('Failed to refresh academies:', refreshError);
+                          // Fallback: update local state
+                          setAcademies(prev => prev.map(a => 
+                            a.id === academyToDelete.id 
+                              ? { ...a, isDeleted: true, deletedAt: new Date(), deletionReason: deleteAcademyReason, status: 'deleted' } 
+                              : a
+                          ));
+                        }
+                        setAlertModal({ type: 'success', message: `"${academyToDelete.name}" has been moved to deleted academies. The academy owner has been notified.` });
+                        setShowDeleteAcademyModal(false);
+                        setAcademyToDelete(null);
+                        setDeleteAcademyReason('');
+                        setExpandedAcademy(null);
+                      }
+                    } catch (e) {
+                      console.error('Delete error:', e);
+                      const errorMsg = e.response?.data?.error || e.message || 'Failed to delete academy';
+                      if (e.response?.status === 404) {
+                        setAlertModal({ type: 'error', message: 'This academy no longer exists in the database. Refreshing the list...' });
+                        // Refresh the academy list
+                        try {
+                          const academiesRes = await api.get('/academies/admin/all');
+                          setAcademies(academiesRes.data?.data?.academies || academiesRes.data?.academies || []);
+                        } catch (refreshError) {
+                          console.error('Failed to refresh:', refreshError);
+                        }
+                      } else {
+                        setAlertModal({ type: 'error', message: `Failed to delete academy: ${errorMsg}` });
+                      }
+                      setShowDeleteAcademyModal(false);
+                      setAcademyToDelete(null);
+                      setDeleteAcademyReason('');
+                    }
+                  }}
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white rounded-xl transition-colors font-medium flex items-center justify-center gap-2"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Delete Permanently
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Block Academy Modal */}
+      {showBlockAcademyModal && academyToBlock && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className="relative w-full max-w-md">
+            {/* Halo effect */}
+            <div className="absolute -inset-2 bg-gradient-to-r from-gray-500 via-gray-600 to-gray-500 rounded-3xl blur-xl opacity-50"></div>
+            <div className="relative bg-slate-800 rounded-2xl border border-white/10 overflow-hidden">
+              <div className="p-6 border-b border-white/10">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-gray-500/20 rounded-lg">
+                      <Ban className="w-5 h-5 text-gray-400" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-white">Block Academy</h3>
+                  </div>
+                  <button 
+                    onClick={() => { setShowBlockAcademyModal(false); setAcademyToBlock(null); setBlockAcademyReason(''); }} 
+                    className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                  >
+                    <X className="w-5 h-5 text-gray-400" />
+                  </button>
+                </div>
+              </div>
+              <div className="p-6 space-y-4">
+                <div className="p-4 bg-gray-500/10 border border-gray-500/30 rounded-xl">
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle className="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-gray-300 font-semibold mb-1">⚠️ Block Academy</p>
+                      <p className="text-sm text-gray-400">This will hide the academy from public view on Matchify.pro. You can unblock it later.</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-4 bg-slate-700/50 rounded-xl">
+                  <p className="text-sm text-gray-400">Academy to block:</p>
+                  <p className="text-white font-semibold mt-1">{academyToBlock.name}</p>
+                  <p className="text-sm text-gray-500">{academyToBlock.city}, {academyToBlock.state}</p>
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-400 mb-2">Reason for blocking <span className="text-gray-400">*</span></label>
+                  <textarea
+                    value={blockAcademyReason}
+                    onChange={(e) => setBlockAcademyReason(e.target.value)}
+                    placeholder="Enter reason for blocking (will be sent to academy owner)..."
+                    rows={3}
+                    className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500/50 resize-none"
+                  />
+                </div>
+              </div>
+              <div className="p-6 bg-slate-900/50 border-t border-white/10 flex gap-3">
+                <button
+                  onClick={() => { setShowBlockAcademyModal(false); setAcademyToBlock(null); setBlockAcademyReason(''); }}
+                  className="flex-1 px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={async () => {
+                    if (!blockAcademyReason.trim()) {
+                      setAlertModal({ type: 'error', message: 'Please provide a reason for blocking' });
+                      return;
+                    }
+                    try {
+                      await api.post(`/academies/admin/${academyToBlock.id}/block`, { reason: blockAcademyReason });
+                      setAcademies(prev => prev.map(a => a.id === academyToBlock.id ? { ...a, isBlocked: true, blockReason: blockAcademyReason } : a));
+                      setAlertModal({ type: 'success', message: `"${academyToBlock.name}" has been blocked. The academy owner has been notified.` });
+                      setShowBlockAcademyModal(false);
+                      setAcademyToBlock(null);
+                      setBlockAcademyReason('');
+                      setExpandedAcademy(null);
+                    } catch (e) {
+                      setAlertModal({ type: 'error', message: 'Failed to block academy. Please try again.' });
+                    }
+                  }}
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white rounded-xl transition-colors font-medium flex items-center justify-center gap-2"
+                >
+                  <Ban className="w-4 h-4" />
+                  Block Academy
                 </button>
               </div>
             </div>

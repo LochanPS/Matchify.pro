@@ -392,11 +392,12 @@ export const getAcademyById = async (req, res) => {
 // Get all academies for admin (includes blocked)
 export const getAllAcademiesAdmin = async (req, res) => {
   try {
-    const { status, isBlocked } = req.query;
+    const { status, isBlocked, isDeleted } = req.query;
     
     const where = {};
     if (status) where.status = status;
     if (isBlocked !== undefined) where.isBlocked = isBlocked === 'true';
+    if (isDeleted !== undefined) where.isDeleted = isDeleted === 'true';
 
     const academies = await prisma.academy.findMany({
       where,
@@ -517,5 +518,67 @@ export const unblockAcademy = async (req, res) => {
   } catch (error) {
     console.error('Error unblocking academy:', error);
     res.status(500).json({ success: false, error: 'Failed to unblock academy' });
+  }
+};
+
+// Delete academy (admin only)
+export const deleteAcademy = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { reason } = req.body;
+    const adminId = req.user?.id || 'admin';
+
+    console.log(`🔍 Delete academy request - ID: ${id}, Reason: ${reason}`);
+
+    const academy = await prisma.academy.findUnique({ where: { id } });
+    
+    if (!academy) {
+      console.log(`❌ Academy not found: ${id}`);
+      return res.status(404).json({ success: false, error: 'Academy not found' });
+    }
+
+    console.log(`✅ Academy found: ${academy.name}`);
+
+    const deletionReason = reason || 'Removed by administrator';
+
+    // Soft delete - mark as deleted instead of removing from database
+    await prisma.academy.update({
+      where: { id },
+      data: {
+        isDeleted: true,
+        deletedAt: new Date(),
+        deletedBy: adminId,
+        deletionReason: deletionReason,
+        status: 'deleted'
+      }
+    });
+    console.log(`✅ Academy soft deleted (moved to deleted list)`);
+
+    // Notify submitter with proper Matchify message including reason
+    if (academy.submittedBy) {
+      await prisma.notification.create({
+        data: {
+          userId: academy.submittedBy,
+          type: 'ACADEMY_DELETED',
+          title: '🗑️ Academy Listing Removed from Matchify.pro',
+          message: `Your academy "${academy.name}" has been permanently removed from Matchify.pro.\n\n📋 Reason: ${deletionReason}\n\nIf you have any questions about this action, please contact us at support@matchify.pro`,
+          data: JSON.stringify({ 
+            academyName: academy.name,
+            city: academy.city,
+            state: academy.state,
+            reason: deletionReason
+          })
+        }
+      });
+      console.log(`✅ Notification sent to academy owner`);
+    }
+
+    console.log(`🗑️ Academy deleted: ${id} - ${academy.name} - Reason: ${deletionReason}`);
+    res.json({ success: true, message: 'Academy deleted successfully' });
+
+  } catch (error) {
+    console.error('❌ Error deleting academy:', error);
+    console.error('Error stack:', error.stack);
+    res.status(500).json({ success: false, error: 'Failed to delete academy' });
   }
 };

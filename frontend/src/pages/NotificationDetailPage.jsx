@@ -369,6 +369,7 @@ export default function NotificationDetailPage() {
       ACADEMY_REJECTED: { icon: '❌', color: 'red', title: 'Academy Rejected' },
       ACADEMY_BLOCKED: { icon: '⚠️', color: 'orange', title: 'Academy Blocked' },
       ACADEMY_UNBLOCKED: { icon: '🎉', color: 'green', title: 'Academy Restored' },
+      ACADEMY_DELETED: { icon: '🗑️', color: 'red', title: 'Academy Deleted' },
     };
     return styles[type] || { icon: '🔔', color: 'gray', title: 'Notification' };
   };

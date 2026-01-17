@@ -39,6 +39,7 @@ export default function AdminDashboard() {
   const [showRejectAcademyModal, setShowRejectAcademyModal] = useState(false);
   const [academyToReject, setAcademyToReject] = useState(null);
   const [rejectAcademyReason, setRejectAcademyReason] = useState('');
+  const [expandedAcademy, setExpandedAcademy] = useState(null);
 
   useEffect(() => {
     if (!user?.isAdmin) { navigate('/login'); return; }
@@ -548,7 +549,7 @@ export default function AdminDashboard() {
               {['pending', 'approved', 'rejected', 'blocked'].map(filter => (
                 <button
                   key={filter}
-                  onClick={() => setAcademyFilter(filter)}
+                  onClick={() => { setAcademyFilter(filter); setExpandedAcademy(null); }}
                   className={`px-4 py-2 rounded-lg font-medium transition-all capitalize ${
                     academyFilter === filter
                       ? filter === 'pending' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
@@ -563,287 +564,143 @@ export default function AdminDashboard() {
               ))}
             </div>
 
-            {/* Academies List */}
+            {/* Academies List - Minimalist Compact Cards */}
             {academies.filter(a => academyFilter === 'blocked' ? a.isBlocked : (a.status === academyFilter && !a.isBlocked)).length === 0 ? (
               <div className="text-center py-12 bg-slate-800/50 rounded-xl border border-white/10">
                 <Building2 className="w-12 h-12 text-gray-600 mx-auto mb-3" />
                 <p className="text-gray-400">No {academyFilter} academies</p>
               </div>
             ) : (
-              <div className="space-y-6">
+              <div className="space-y-3">
                 {academies.filter(a => academyFilter === 'blocked' ? a.isBlocked : (a.status === academyFilter && !a.isBlocked)).map(academy => (
-                  <div key={academy.id} className="relative group">
-                    {/* Halo effect */}
-                    <div className={`absolute -inset-1 bg-gradient-to-r ${
-                      academy.isBlocked ? 'from-gray-500/30 via-slate-500/30 to-gray-500/30' :
-                      academy.status === 'pending' ? 'from-amber-500/30 via-orange-500/30 to-amber-500/30' :
-                      academy.status === 'approved' ? 'from-emerald-500/30 via-teal-500/30 to-emerald-500/30' :
-                      'from-red-500/30 via-rose-500/30 to-red-500/30'
-                    } rounded-2xl blur-lg opacity-40 group-hover:opacity-60 transition-opacity`}></div>
-                    
-                    <div className="relative bg-slate-800/80 backdrop-blur-sm rounded-2xl border border-white/10 overflow-hidden">
-                      {/* Header */}
-                      <div className={`p-5 border-b border-white/10 bg-gradient-to-r ${
-                        academy.status === 'pending' ? 'from-amber-500/10 to-orange-500/10' :
-                        academy.status === 'approved' ? 'from-emerald-500/10 to-teal-500/10' :
-                        'from-red-500/10 to-rose-500/10'
-                      }`}>
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-center gap-4">
-                            <div className={`w-14 h-14 rounded-xl flex items-center justify-center text-2xl ${
-                              academy.status === 'pending' ? 'bg-amber-500/20' :
-                              academy.status === 'approved' ? 'bg-emerald-500/20' :
-                              'bg-red-500/20'
-                            }`}>
-                              🏫
-                            </div>
-                            <div>
-                              <h3 className="text-xl font-bold text-white">{academy.name}</h3>
-                              <p className="text-gray-400 flex items-center gap-1 mt-1">
-                                <MapPin className="w-4 h-4" />
-                                {academy.city}, {academy.state} - {academy.pincode}
-                              </p>
-                            </div>
+                  <div key={academy.id} className="bg-slate-800/80 rounded-xl border border-white/10 overflow-hidden">
+                    {/* Compact Header - Click to Expand */}
+                    <div 
+                      onClick={() => setExpandedAcademy(expandedAcademy === academy.id ? null : academy.id)}
+                      className="p-4 cursor-pointer hover:bg-white/5 transition-colors"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-lg flex-shrink-0 ${
+                            academy.isBlocked ? 'bg-gray-500/20' :
+                            academy.status === 'pending' ? 'bg-amber-500/20' :
+                            academy.status === 'approved' ? 'bg-emerald-500/20' :
+                            'bg-red-500/20'
+                          }`}>
+                            🏫
                           </div>
-                          <div className="flex flex-col gap-2 items-end">
-                            <span className={`px-3 py-1.5 rounded-full text-sm font-semibold capitalize ${
-                              academy.isBlocked ? 'bg-gray-500/20 text-gray-400 border border-gray-500/30' :
-                              academy.status === 'pending' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
-                              academy.status === 'approved' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
-                              'bg-red-500/20 text-red-400 border border-red-500/30'
-                            }`}>
-                              {academy.isBlocked ? '🚫 Blocked' : academy.status === 'pending' ? '⏳ Pending' : academy.status === 'approved' ? '✅ Approved' : '❌ Rejected'}
-                            </span>
-                            {academy.isBlocked && academy.blockReason && (
-                              <p className="text-xs text-gray-500 max-w-[200px] text-right">Reason: {academy.blockReason}</p>
-                            )}
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-white font-semibold truncate">{academy.name}</h3>
+                            <p className="text-sm text-gray-400 truncate">{academy.city}, {academy.state}</p>
                           </div>
                         </div>
+                        <div className="flex items-center gap-3 flex-shrink-0">
+                          <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                            academy.isBlocked ? 'bg-gray-500/20 text-gray-400' :
+                            academy.status === 'pending' ? 'bg-amber-500/20 text-amber-400' :
+                            academy.status === 'approved' ? 'bg-emerald-500/20 text-emerald-400' :
+                            'bg-red-500/20 text-red-400'
+                          }`}>
+                            {academy.isBlocked ? 'Blocked' : academy.status === 'pending' ? 'Pending' : academy.status === 'approved' ? 'Live' : 'Rejected'}
+                          </span>
+                          <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform ${expandedAcademy === academy.id ? 'rotate-90' : ''}`} />
+                        </div>
                       </div>
+                    </div>
 
-                      {/* Details Grid */}
-                      <div className="p-5 border-b border-white/10">
-                        <h4 className="text-sm font-semibold text-gray-400 mb-3 flex items-center gap-2">
-                          <Users className="w-4 h-4" />
-                          Contact Information
-                        </h4>
-                        <div className="grid md:grid-cols-3 gap-3">
-                          <div className="flex items-center gap-3 p-3 bg-slate-700/50 border border-white/10 rounded-xl">
-                            <Phone className="w-5 h-5 text-blue-400" />
-                            <div>
-                              <p className="text-xs text-gray-500">Phone</p>
-                              <p className="text-white font-medium">{academy.phone || '-'}</p>
-                            </div>
+                    {/* Expanded Details */}
+                    {expandedAcademy === academy.id && (
+                      <div className="border-t border-white/10">
+                        {/* Contact & Address */}
+                        <div className="p-4 grid md:grid-cols-2 gap-3 bg-slate-900/30">
+                          <div className="space-y-2">
+                            <p className="text-xs text-gray-500">Contact</p>
+                            <p className="text-white text-sm flex items-center gap-2"><Phone className="w-3 h-3" />{academy.phone}</p>
+                            <p className="text-white text-sm flex items-center gap-2 truncate"><Mail className="w-3 h-3" />{academy.email || academy.submittedByEmail}</p>
                           </div>
-                          <div className="flex items-center gap-3 p-3 bg-slate-700/50 border border-white/10 rounded-xl">
-                            <Mail className="w-5 h-5 text-purple-400" />
-                            <div>
-                              <p className="text-xs text-gray-500">Email</p>
-                              <p className="text-white font-medium truncate">{academy.email || academy.submittedByEmail || '-'}</p>
-                            </div>
+                          <div className="space-y-2">
+                            <p className="text-xs text-gray-500">Address</p>
+                            <p className="text-white text-sm">{academy.address}, {academy.city}, {academy.state} - {academy.pincode}</p>
                           </div>
-                          {academy.website && (
-                            <div className="flex items-center gap-3 p-3 bg-slate-700/50 border border-white/10 rounded-xl">
-                              <Globe className="w-5 h-5 text-cyan-400" />
-                              <div>
-                                <p className="text-xs text-gray-500">Website</p>
-                                <a href={academy.website} target="_blank" rel="noopener noreferrer" className="text-cyan-400 font-medium hover:underline truncate block">{academy.website}</a>
-                              </div>
+                        </div>
+
+                        {/* Sports & Details */}
+                        <div className="p-4 border-t border-white/10">
+                          <p className="text-xs text-gray-500 mb-2">Sports</p>
+                          <div className="flex flex-wrap gap-2 mb-3">
+                            {academy.sports?.map(sport => (
+                              <span key={sport} className="px-2 py-1 bg-purple-500/20 text-purple-300 rounded text-xs">{sport}</span>
+                            ))}
+                          </div>
+                          {academy.sportDetails && Object.keys(academy.sportDetails).length > 0 && (
+                            <div className="grid grid-cols-2 gap-2 mt-3">
+                              {Object.entries(academy.sportDetails).slice(0, 4).map(([key, value]) => (
+                                <div key={key} className="text-xs">
+                                  <span className="text-gray-500">{key.replace(/_/g, ' ')}: </span>
+                                  <span className="text-white font-medium">{value}</span>
+                                </div>
+                              ))}
                             </div>
                           )}
                         </div>
-                      </div>
 
-                      {/* Address */}
-                      <div className="p-5 border-b border-white/10">
-                        <h4 className="text-sm font-semibold text-gray-400 mb-3 flex items-center gap-2">
-                          <MapPin className="w-4 h-4" />
-                          Full Address
-                        </h4>
-                        <div className="p-3 bg-slate-700/50 border border-white/10 rounded-xl">
-                          <p className="text-white">{academy.address}, {academy.city}, {academy.state} - {academy.pincode}</p>
-                        </div>
-                      </div>
-
-                      {/* Sports */}
-                      <div className="p-5 border-b border-white/10">
-                        <h4 className="text-sm font-semibold text-gray-400 mb-3 flex items-center gap-2">
-                          <Trophy className="w-4 h-4" />
-                          Sports Offered
-                        </h4>
-                        <div className="flex flex-wrap gap-2">
-                          {academy.sports?.map(sport => (
-                            <span key={sport} className="px-3 py-1.5 bg-purple-500/20 text-purple-300 rounded-lg font-medium border border-purple-500/30">
-                              {sport}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Sport Details */}
-                      {academy.sportDetails && Object.keys(academy.sportDetails).length > 0 && (
-                        <div className="p-5 border-b border-white/10">
-                          <h4 className="text-sm font-semibold text-gray-400 mb-3 flex items-center gap-2">
-                            <Activity className="w-4 h-4" />
-                            Facility Details
-                          </h4>
-                          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
-                            {Object.entries(academy.sportDetails).map(([key, value]) => (
-                              <div key={key} className="flex items-center gap-3 p-3 bg-indigo-500/10 border border-indigo-500/30 rounded-xl">
-                                <div className="w-8 h-8 bg-indigo-500/20 rounded-lg flex items-center justify-center">
-                                  <Zap className="w-4 h-4 text-indigo-400" />
-                                </div>
-                                <div>
-                                  <p className="text-xs text-indigo-400">{key.replace(/_/g, ' ')}</p>
-                                  <p className="text-white font-semibold">{value}</p>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Description */}
-                      {academy.description && (
-                        <div className="p-5 border-b border-white/10">
-                          <h4 className="text-sm font-semibold text-gray-400 mb-3 flex items-center gap-2">
-                            <Info className="w-4 h-4" />
-                            Description
-                          </h4>
-                          <div className="p-3 bg-slate-700/50 border border-white/10 rounded-xl">
-                            <p className="text-gray-300">{academy.description}</p>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Photos */}
-                      {academy.photos && academy.photos.length > 0 && (
-                        <div className="p-5 border-b border-white/10">
-                          <h4 className="text-sm font-semibold text-gray-400 mb-3 flex items-center gap-2">
-                            <Eye className="w-4 h-4" />
-                            Academy Photos ({academy.photos.length})
-                          </h4>
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                            {academy.photos.slice(0, 4).map((photo, idx) => (
-                              <img 
-                                key={idx} 
-                                src={photo} 
-                                alt={`Academy photo ${idx + 1}`} 
-                                className="w-full h-24 object-cover rounded-lg border border-white/10 cursor-pointer hover:opacity-80 transition-opacity"
-                                onClick={() => setViewingScreenshot(photo)}
-                              />
-                            ))}
-                            {academy.photos.length > 4 && (
-                              <div className="w-full h-24 bg-slate-700/50 border border-white/10 rounded-lg flex items-center justify-center text-gray-400">
-                                +{academy.photos.length - 4} more
-                              </div>
+                        {/* Payment & Photos */}
+                        <div className="p-4 border-t border-white/10 flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <span className="text-emerald-400 font-bold">₹200</span>
+                            {academy.paymentScreenshot && (
+                              <button 
+                                onClick={() => setViewingScreenshot(academy.paymentScreenshot)}
+                                className="text-xs px-3 py-1 bg-blue-500/20 text-blue-400 rounded hover:bg-blue-500/30 transition-colors"
+                              >
+                                View Payment
+                              </button>
                             )}
                           </div>
-                        </div>
-                      )}
-
-                      {/* Academy QR Code */}
-                      {academy.academyQrCode && (
-                        <div className="p-5 border-b border-white/10">
-                          <h4 className="text-sm font-semibold text-gray-400 mb-3 flex items-center gap-2">
-                            <QrCode className="w-4 h-4" />
-                            Academy's Payment QR Code
-                          </h4>
-                          <div className="flex items-start gap-4">
-                            <div className="bg-white p-3 rounded-xl">
-                              <img 
-                                src={academy.academyQrCode} 
-                                alt="Academy QR Code" 
-                                className="w-40 h-40 object-contain cursor-pointer hover:opacity-80 transition-opacity"
-                                onClick={() => setViewingScreenshot(academy.academyQrCode)}
-                              />
-                            </div>
-                            <div className="flex-1">
-                              <p className="text-gray-400 text-sm mb-2">This is the academy's own payment QR code for receiving payments from players.</p>
-                              <button 
-                                onClick={() => setViewingScreenshot(academy.academyQrCode)}
-                                className="flex items-center gap-2 px-4 py-2 bg-purple-500/20 text-purple-400 rounded-lg hover:bg-purple-500/30 transition-colors border border-purple-500/30 text-sm"
-                              >
-                                <Eye className="w-4 h-4" />
-                                View Full Size
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Payment Section */}
-                      <div className="p-5 border-b border-white/10">
-                        <h4 className="text-sm font-semibold text-gray-400 mb-3 flex items-center gap-2">
-                          <CreditCard className="w-4 h-4" />
-                          Payment Details
-                        </h4>
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-3 p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl">
-                            <CreditCard className="w-5 h-5 text-emerald-400" />
-                            <div>
-                              <p className="text-xs text-emerald-400">Registration Fee</p>
-                              <p className="text-emerald-300 font-bold text-xl">₹200</p>
-                            </div>
-                          </div>
-                          {academy.paymentScreenshot && (
+                          {academy.photos && academy.photos.length > 0 && (
                             <button 
-                              onClick={() => setViewingScreenshot(academy.paymentScreenshot)}
-                              className="flex items-center gap-2 px-4 py-3 bg-blue-500/20 text-blue-400 rounded-xl hover:bg-blue-500/30 transition-colors border border-blue-500/30"
+                              onClick={() => setViewingScreenshot(academy.photos[0])}
+                              className="text-xs px-3 py-1 bg-purple-500/20 text-purple-400 rounded hover:bg-purple-500/30 transition-colors"
                             >
-                              <Eye className="w-5 h-5" />
-                              View Payment Screenshot
+                              {academy.photos.length} Photo{academy.photos.length > 1 ? 's' : ''}
                             </button>
                           )}
                         </div>
-                      </div>
 
-                      {/* Submitted Info */}
-                      <div className="p-5 border-b border-white/10 bg-slate-900/30">
-                        <div className="flex items-center gap-3 text-sm text-gray-400">
-                          <Calendar className="w-4 h-4" />
-                          <span>Submitted by: <span className="text-white font-medium">{academy.submittedByEmail || 'Unknown'}</span></span>
-                          {academy.createdAt && (
-                            <>
-                              <span className="text-gray-600">•</span>
-                              <span>on {new Date(academy.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
-                            </>
-                          )}
-                        </div>
+                        {/* Action Buttons */}
+                        {academy.status === 'pending' && (
+                          <div className="p-4 bg-slate-900/50 border-t border-white/10 flex gap-2">
+                            <button
+                              onClick={async () => {
+                                try {
+                                  await api.post(`/academies/admin/${academy.id}/approve`);
+                                  setAcademies(prev => prev.map(a => a.id === academy.id ? { ...a, status: 'approved' } : a));
+                                  setAlertModal({ type: 'success', message: `"${academy.name}" approved!` });
+                                  setExpandedAcademy(null);
+                                } catch (e) {
+                                  setAlertModal({ type: 'error', message: 'Failed to approve academy' });
+                                }
+                              }}
+                              className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors text-sm font-medium"
+                            >
+                              <CheckCircle className="w-4 h-4" />
+                              Approve
+                            </button>
+                            <button
+                              onClick={() => {
+                                setAcademyToReject(academy);
+                                setRejectAcademyReason('');
+                                setShowRejectAcademyModal(true);
+                              }}
+                              className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors text-sm font-medium"
+                            >
+                              <X className="w-4 h-4" />
+                              Reject
+                            </button>
+                          </div>
+                        )}
                       </div>
-
-                      {/* Action Buttons */}
-                      {academy.status === 'pending' && (
-                        <div className="p-5 bg-slate-900/50 flex gap-3">
-                          <button
-                            onClick={async () => {
-                              try {
-                                await api.post(`/academies/admin/${academy.id}/approve`);
-                                setAcademies(prev => prev.map(a => a.id === academy.id ? { ...a, status: 'approved' } : a));
-                                setAlertModal({ type: 'success', message: `🎉 "${academy.name}" has been approved! The academy owner has been notified and their listing is now live on Matchify.pro` });
-                              } catch (e) {
-                                setAlertModal({ type: 'error', message: 'Failed to approve academy. Please try again.' });
-                              }
-                            }}
-                            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white rounded-xl transition-colors font-semibold"
-                          >
-                            <CheckCircle className="w-5 h-5" />
-                            Approve Academy
-                          </button>
-                          <button
-                            onClick={() => {
-                              setAcademyToReject(academy);
-                              setRejectAcademyReason('');
-                              setShowRejectAcademyModal(true);
-                            }}
-                            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600 text-white rounded-xl transition-colors font-semibold"
-                          >
-                            <X className="w-5 h-5" />
-                            Reject Academy
-                          </button>
-                        </div>
-                      )}
-                    </div>
+                    )}
                   </div>
                 ))}
               </div>

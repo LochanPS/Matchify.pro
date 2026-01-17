@@ -338,7 +338,7 @@ class AdminController {
           id: true,
           email: true,
           name: true,
-          role: true,
+          roles: true,
           phone: true,
           city: true,
           state: true,
@@ -355,7 +355,7 @@ class AdminController {
       }
 
       // Cannot impersonate other admins
-      if (user.role === 'ADMIN') {
+      if (user.roles && user.roles.includes('ADMIN')) {
         return res.status(403).json({
           success: false,
           message: 'Cannot impersonate admin users',
@@ -365,7 +365,7 @@ class AdminController {
       // Generate JWT token for the user
       const jwt = require('jsonwebtoken');
       const token = jwt.sign(
-        { userId: user.id, email: user.email, role: user.role },
+        { userId: user.id, email: user.email, roles: user.roles },
         process.env.JWT_SECRET || 'your-secret-key',
         { expiresIn: '24h' }
       );
@@ -379,7 +379,7 @@ class AdminController {
         details: {
           userEmail: user.email,
           userName: user.name,
-          userRole: user.role,
+          userRoles: user.roles,
         },
         ipAddress: req.ip,
         userAgent: req.get('user-agent'),

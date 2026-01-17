@@ -320,7 +320,9 @@ export default function AdminDashboard() {
                       <tr className="bg-slate-900/50 border-b border-white/10">
                         <th className="text-left px-4 py-3 text-gray-300 font-semibold">Name</th>
                         <th className="text-left px-4 py-3 text-gray-300 font-semibold">Email</th>
-                        <th className="text-left px-4 py-3 text-gray-300 font-semibold hidden lg:table-cell">Stats</th>
+                        <th className="text-left px-4 py-3 text-gray-300 font-semibold hidden md:table-cell">Phone</th>
+                        <th className="text-left px-4 py-3 text-gray-300 font-semibold hidden lg:table-cell">Registered</th>
+                        <th className="text-left px-4 py-3 text-gray-300 font-semibold hidden xl:table-cell">Stats</th>
                         <th className="text-left px-4 py-3 text-gray-300 font-semibold">Status</th>
                         <th className="text-right px-4 py-3 text-gray-300 font-semibold">Actions</th>
                       </tr>
@@ -328,7 +330,7 @@ export default function AdminDashboard() {
                     <tbody>
                       {filteredUsers.length === 0 ? (
                         <tr>
-                          <td colSpan="5" className="px-4 py-8 text-center text-gray-300">No users found</td>
+                          <td colSpan="7" className="px-4 py-8 text-center text-gray-300">No users found</td>
                         </tr>
                       ) : (
                         filteredUsers.map((u, idx) => (
@@ -347,13 +349,22 @@ export default function AdminDashboard() {
                                 </div>
                                 <div>
                                   <p className="text-white font-semibold">{u.name || 'Unknown'}</p>
+                                  {u.city && <p className="text-xs text-gray-500">{u.city}</p>}
                                 </div>
                               </div>
                             </td>
                             <td className="px-4 py-3">
                               <p className="text-white font-medium">{u.email}</p>
                             </td>
+                            <td className="px-4 py-3 hidden md:table-cell">
+                              <p className="text-gray-300">{u.phone || '-'}</p>
+                            </td>
                             <td className="px-4 py-3 hidden lg:table-cell">
+                              <p className="text-gray-300 text-sm">
+                                {u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'}
+                              </p>
+                            </td>
+                            <td className="px-4 py-3 hidden xl:table-cell">
                               <div className="flex gap-2 text-xs">
                                 {/* Tournaments Badge with Halo */}
                                 <div className="relative group">

@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import AuditLogService from '../services/auditLog.service.js';
+import jwt from 'jsonwebtoken';
 
 const prisma = new PrismaClient();
 
@@ -363,7 +364,6 @@ class AdminController {
       }
 
       // Generate JWT token for the user
-      const jwt = require('jsonwebtoken');
       const token = jwt.sign(
         { userId: user.id, email: user.email, roles: user.roles },
         process.env.JWT_SECRET || 'your-secret-key',

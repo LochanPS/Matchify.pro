@@ -318,8 +318,8 @@ export default function AdminDashboard() {
                   <table className="w-full">
                     <thead>
                       <tr className="bg-slate-900/50 border-b border-white/10">
-                        <th className="text-left px-4 py-3 text-gray-300 font-semibold">User</th>
-                        <th className="text-left px-4 py-3 text-gray-300 font-semibold hidden md:table-cell">Email</th>
+                        <th className="text-left px-4 py-3 text-gray-300 font-semibold">Name</th>
+                        <th className="text-left px-4 py-3 text-gray-300 font-semibold">Email</th>
                         <th className="text-left px-4 py-3 text-gray-300 font-semibold hidden lg:table-cell">Stats</th>
                         <th className="text-left px-4 py-3 text-gray-300 font-semibold">Status</th>
                         <th className="text-right px-4 py-3 text-gray-300 font-semibold">Actions</th>
@@ -347,11 +347,12 @@ export default function AdminDashboard() {
                                 </div>
                                 <div>
                                   <p className="text-white font-semibold">{u.name || 'Unknown'}</p>
-                                  <p className="text-sm text-gray-300 md:hidden">{u.email}</p>
                                 </div>
                               </div>
                             </td>
-                            <td className="px-4 py-3 text-gray-200 hidden md:table-cell">{u.email}</td>
+                            <td className="px-4 py-3">
+                              <p className="text-white font-medium">{u.email}</p>
+                            </td>
                             <td className="px-4 py-3 hidden lg:table-cell">
                               <div className="flex gap-2 text-xs">
                                 {/* Tournaments Badge with Halo */}

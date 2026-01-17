@@ -7,7 +7,7 @@ import {
   Shield, Users, Trophy, CreditCard, LogOut, Search,
   ChevronRight, Activity, TrendingUp, Calendar, AlertTriangle,
   Ban, CheckCircle, Eye, Trash2, RefreshCw, X, Zap, Crown, Bell, Building2,
-  MapPin, Phone, Mail, Globe, Info, QrCode
+  MapPin, Phone, Mail, Globe, Info, QrCode, FileText
 } from 'lucide-react';
 import NotificationBell from '../components/NotificationBell';
 
@@ -674,60 +674,166 @@ export default function AdminDashboard() {
                     {/* Expanded Details */}
                     {expandedAcademy === academy.id && (
                       <div className="border-t border-white/10">
-                        {/* Contact & Address */}
-                        <div className="p-4 grid md:grid-cols-2 gap-3 bg-slate-900/30">
-                          <div className="space-y-2">
-                            <p className="text-xs text-gray-500">Contact</p>
-                            <p className="text-white text-sm flex items-center gap-2"><Phone className="w-3 h-3" />{academy.phone}</p>
-                            <p className="text-white text-sm flex items-center gap-2 truncate"><Mail className="w-3 h-3" />{academy.email || academy.submittedByEmail}</p>
-                          </div>
-                          <div className="space-y-2">
-                            <p className="text-xs text-gray-500">Address</p>
-                            <p className="text-white text-sm">{academy.address}, {academy.city}, {academy.state} - {academy.pincode}</p>
+                        {/* Header Section with Key Info */}
+                        <div className="p-6 bg-gradient-to-r from-purple-500/10 to-blue-500/10 border-b border-white/10">
+                          <div className="flex items-start justify-between mb-4">
+                            <div>
+                              <h2 className="text-2xl font-bold text-white mb-2">{academy.name}</h2>
+                              <div className="flex items-center gap-2 text-gray-300">
+                                <MapPin className="w-4 h-4 text-purple-400" />
+                                <span>{academy.city}, {academy.state}</span>
+                              </div>
+                            </div>
+                            <div className="flex flex-col items-end gap-2">
+                              <span className={`px-4 py-2 rounded-xl text-sm font-bold ${
+                                academy.isDeleted ? 'bg-slate-500/30 text-slate-300' :
+                                academy.isBlocked ? 'bg-gray-500/30 text-gray-300' :
+                                academy.status === 'pending' ? 'bg-amber-500/30 text-amber-300' :
+                                academy.status === 'approved' ? 'bg-emerald-500/30 text-emerald-300' :
+                                'bg-red-500/30 text-red-300'
+                              }`}>
+                                {academy.isDeleted ? '🗑️ Deleted' : academy.isBlocked ? '🚫 Blocked' : academy.status === 'pending' ? '⏳ Pending Review' : academy.status === 'approved' ? '✅ Live' : '❌ Rejected'}
+                              </span>
+                              {academy.registrationDate && (
+                                <span className="text-xs text-gray-400">
+                                  Registered: {new Date(academy.registrationDate).toLocaleDateString('en-IN')}
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
 
-                        {/* Sports & Details */}
-                        <div className="p-4 border-t border-white/10">
-                          <p className="text-xs text-gray-500 mb-2">Sports</p>
-                          <div className="flex flex-wrap gap-2 mb-3">
-                            {academy.sports?.map(sport => (
-                              <span key={sport} className="px-2 py-1 bg-purple-500/20 text-purple-300 rounded text-xs">{sport}</span>
-                            ))}
+                        {/* Contact Information Section */}
+                        <div className="p-6 border-b border-white/10">
+                          <h3 className="text-sm font-bold text-purple-400 mb-4 flex items-center gap-2">
+                            <Phone className="w-4 h-4" />
+                            CONTACT INFORMATION
+                          </h3>
+                          <div className="grid md:grid-cols-2 gap-4">
+                            <div className="flex items-start gap-3 p-4 bg-slate-700/30 rounded-xl">
+                              <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <Phone className="w-5 h-5 text-blue-400" />
+                              </div>
+                              <div>
+                                <p className="text-xs text-gray-400 mb-1">Phone Number</p>
+                                <p className="text-white font-medium">{academy.phone}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-start gap-3 p-4 bg-slate-700/30 rounded-xl">
+                              <div className="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <Mail className="w-5 h-5 text-purple-400" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs text-gray-400 mb-1">Email Address</p>
+                                <p className="text-white font-medium truncate">{academy.email || academy.submittedByEmail}</p>
+                              </div>
+                            </div>
                           </div>
-                          {academy.sportDetails && Object.keys(academy.sportDetails).length > 0 && (
-                            <div className="grid grid-cols-2 gap-2 mt-3">
-                              {Object.entries(academy.sportDetails).slice(0, 4).map(([key, value]) => (
-                                <div key={key} className="text-xs">
-                                  <span className="text-gray-500">{key.replace(/_/g, ' ')}: </span>
-                                  <span className="text-white font-medium">{value}</span>
-                                </div>
+                        </div>
+
+                        {/* Address Section */}
+                        <div className="p-6 border-b border-white/10">
+                          <h3 className="text-sm font-bold text-purple-400 mb-4 flex items-center gap-2">
+                            <MapPin className="w-4 h-4" />
+                            ADDRESS
+                          </h3>
+                          <div className="p-4 bg-slate-700/30 rounded-xl">
+                            <p className="text-white leading-relaxed">
+                              {academy.address}
+                              <br />
+                              {academy.city}, {academy.state} - {academy.pincode}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Sports & Facilities Section */}
+                        <div className="p-6 border-b border-white/10">
+                          <h3 className="text-sm font-bold text-purple-400 mb-4 flex items-center gap-2">
+                            <Trophy className="w-4 h-4" />
+                            SPORTS & FACILITIES
+                          </h3>
+                          
+                          {/* Sports Tags */}
+                          <div className="mb-4">
+                            <p className="text-xs text-gray-400 mb-2">Available Sports</p>
+                            <div className="flex flex-wrap gap-2">
+                              {academy.sports?.map(sport => (
+                                <span key={sport} className="px-4 py-2 bg-gradient-to-r from-purple-500/20 to-blue-500/20 text-purple-300 rounded-xl text-sm font-medium border border-purple-500/30">
+                                  {sport}
+                                </span>
                               ))}
+                            </div>
+                          </div>
+
+                          {/* Facility Details */}
+                          {academy.sportDetails && Object.keys(academy.sportDetails).length > 0 && (
+                            <div>
+                              <p className="text-xs text-gray-400 mb-3">Facility Details</p>
+                              <div className="grid md:grid-cols-2 gap-3">
+                                {Object.entries(academy.sportDetails).map(([key, value]) => (
+                                  <div key={key} className="flex items-center justify-between p-3 bg-slate-700/30 rounded-xl border border-slate-600/50">
+                                    <span className="text-gray-300 text-sm">{key.replace(/_/g, ' ')}</span>
+                                    <span className="text-white font-bold">{value}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Additional Sports Info */}
+                          {academy.additionalSportsInfo && (
+                            <div className="mt-4 p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl">
+                              <p className="text-xs text-blue-400 font-semibold mb-2">Additional Information</p>
+                              <p className="text-gray-300 text-sm leading-relaxed">{academy.additionalSportsInfo}</p>
                             </div>
                           )}
                         </div>
 
-                        {/* Payment & Photos */}
-                        <div className="p-4 border-t border-white/10 flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <span className="text-emerald-400 font-bold">₹200</span>
-                            {academy.paymentScreenshot && (
-                              <button 
-                                onClick={() => setViewingScreenshot(academy.paymentScreenshot)}
-                                className="text-xs px-3 py-1 bg-blue-500/20 text-blue-400 rounded hover:bg-blue-500/30 transition-colors"
-                              >
-                                View Payment
-                              </button>
+                        {/* Description Section */}
+                        {academy.description && (
+                          <div className="p-6 border-b border-white/10">
+                            <h3 className="text-sm font-bold text-purple-400 mb-4 flex items-center gap-2">
+                              <FileText className="w-4 h-4" />
+                              DESCRIPTION
+                            </h3>
+                            <div className="p-4 bg-slate-700/30 rounded-xl">
+                              <p className="text-gray-300 leading-relaxed">{academy.description}</p>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Payment & Media Section */}
+                        <div className="p-6 border-b border-white/10">
+                          <h3 className="text-sm font-bold text-purple-400 mb-4 flex items-center gap-2">
+                            <CreditCard className="w-4 h-4" />
+                            PAYMENT & MEDIA
+                          </h3>
+                          <div className="grid md:grid-cols-2 gap-4">
+                            <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl">
+                              <p className="text-xs text-emerald-400 mb-2">Registration Fee</p>
+                              <p className="text-2xl font-bold text-emerald-300">₹200</p>
+                              {academy.paymentScreenshot && (
+                                <button 
+                                  onClick={() => setViewingScreenshot(academy.paymentScreenshot)}
+                                  className="mt-3 w-full px-4 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 rounded-lg transition-colors text-sm font-medium"
+                                >
+                                  View Payment Screenshot
+                                </button>
+                              )}
+                            </div>
+                            {academy.photos && academy.photos.length > 0 && (
+                              <div className="p-4 bg-purple-500/10 border border-purple-500/30 rounded-xl">
+                                <p className="text-xs text-purple-400 mb-2">Academy Photos</p>
+                                <p className="text-2xl font-bold text-purple-300">{academy.photos.length} Photo{academy.photos.length > 1 ? 's' : ''}</p>
+                                <button 
+                                  onClick={() => setViewingScreenshot(academy.photos[0])}
+                                  className="mt-3 w-full px-4 py-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 rounded-lg transition-colors text-sm font-medium"
+                                >
+                                  View Photos
+                                </button>
+                              </div>
                             )}
                           </div>
-                          {academy.photos && academy.photos.length > 0 && (
-                            <button 
-                              onClick={() => setViewingScreenshot(academy.photos[0])}
-                              className="text-xs px-3 py-1 bg-purple-500/20 text-purple-400 rounded hover:bg-purple-500/30 transition-colors"
-                            >
-                              {academy.photos.length} Photo{academy.photos.length > 1 ? 's' : ''}
-                            </button>
-                          )}
                         </div>
 
                         {/* Action Buttons */}

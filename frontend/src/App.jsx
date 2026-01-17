@@ -62,11 +62,25 @@ import AddAcademyPage from './pages/AddAcademyPage'
 // Inner component that can access AuthContext
 function AppContent() {
   const { user, showProfileCompletion, completeProfile } = useAuth();
+  
+  // Check if impersonating
+  const isImpersonating = () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (token) {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        return !!payload.isImpersonating;
+      }
+    } catch (error) {
+      return false;
+    }
+    return false;
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
       <ImpersonationBanner />
-      <div className="pt-[52px]"> {/* Add padding for impersonation banner */}
+      <div className={isImpersonating() ? 'pt-[60px]' : ''}> {/* Add padding only when impersonating */}
         <Navbar />
       </div>
       

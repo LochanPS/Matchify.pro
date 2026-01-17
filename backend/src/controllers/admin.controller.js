@@ -353,8 +353,18 @@ class AdminController {
         });
       }
 
+      // Parse roles - handle both string and array formats
+      let userRoles = ['PLAYER'];
+      if (user.roles) {
+        if (typeof user.roles === 'string') {
+          userRoles = user.roles.split(',');
+        } else if (Array.isArray(user.roles)) {
+          userRoles = user.roles;
+        }
+      }
+
       // Cannot impersonate other admins
-      if (user.roles && user.roles.includes('ADMIN')) {
+      if (userRoles.includes('ADMIN')) {
         return res.status(403).json({
           success: false,
           message: 'Cannot impersonate admin users',
@@ -366,7 +376,7 @@ class AdminController {
         { 
           userId: user.id, 
           email: user.email, 
-          roles: user.roles,
+          roles: userRoles,
           isImpersonating: true,
           adminId: adminId
         },
@@ -383,17 +393,24 @@ class AdminController {
         details: {
           userEmail: user.email,
           userName: user.name,
-          userRoles: user.roles,
+          userRoles: userRoles,
         },
         ipAddress: req.ip,
         userAgent: req.get('user-agent'),
       });
 
+      // Return user with proper role format
+      const impersonatedUser = {
+        ...user,
+        roles: userRoles,
+        isAdmin: false
+      };
+
       res.json({
         success: true,
         message: `Logged in as ${user.name}`,
         token,
-        user,
+        user: impersonatedUser,
       });
     } catch (error) {
       console.error('Login as user error:', error);
@@ -410,16 +427,69 @@ class AdminController {
    */
   static async returnToAdmin(req, res) {
     try {
-      const { adminId } = req.user; // Get admin ID from impersonation token
+      console.log('🔄 Return to admin request received');
+      console.log('📋 req.user:', JSON.stringify(req.user, null, 2));
 
-      if (!adminId) {
+      const { adminId, isImpersonating } = req.user || {}; // Get admin ID from impersonation token
+
+      console.log('🔍 isImpersonating:', isImpersonating);
+      console.log('🔍 adminId:', adminId);
+
+      if (!isImpersonating || !adminId) {
+        console.log('❌ Not impersonating or no adminId');
         return res.status(400).json({
           success: false,
           message: 'Not currently impersonating a user',
         });
       }
 
-      // Get the admin user
+      // Handle hardcoded super admin
+      if (adminId === 'admin') {
+        console.log('👑 Returning to hardcoded super admin');
+        
+        // Generate admin JWT
+        const token = jwt.sign(
+          { userId: 'admin', email: 'ADMIN@gmail.com', roles: ['ADMIN'], isAdmin: true },
+          process.env.JWT_SECRET || 'your-secret-key',
+          { expiresIn: '7d' }
+        );
+
+        // Log the return action
+        try {
+          await AuditLogService.log({
+            adminId: 'admin',
+            action: 'RETURN_FROM_IMPERSONATION',
+            entityType: 'USER',
+            entityId: req.user.userId,
+            details: {
+              returnedFrom: req.user.email,
+              adminType: 'hardcoded_super_admin'
+            },
+            ipAddress: req.ip,
+            userAgent: req.get('user-agent'),
+          });
+          console.log('📝 Audit log created');
+        } catch (auditError) {
+          console.error('⚠️ Audit log failed (non-critical):', auditError.message);
+        }
+
+        console.log('✅ Returning super admin success response');
+        return res.json({
+          success: true,
+          message: 'Returned to admin account',
+          token,
+          user: {
+            id: 'admin',
+            email: 'ADMIN@gmail.com',
+            name: 'Super Admin',
+            roles: ['ADMIN'],
+            isAdmin: true,
+          },
+        });
+      }
+
+      // Get the admin user from database
+      console.log('🔍 Looking up admin user with ID:', adminId);
       const admin = await prisma.user.findUnique({
         where: { id: adminId },
         select: {
@@ -435,39 +505,87 @@ class AdminController {
         },
       });
 
+      console.log('👤 Admin found:', admin ? 'Yes' : 'No');
+      if (admin) {
+        console.log('📧 Admin email:', admin.email);
+        console.log('🎭 Admin roles:', admin.roles);
+      }
+
       if (!admin) {
+        console.log('❌ Admin account not found');
         return res.status(404).json({
           success: false,
           message: 'Admin account not found',
         });
       }
 
+      // Parse roles - handle both string and array formats
+      let adminRoles = ['ADMIN'];
+      if (admin.roles) {
+        if (typeof admin.roles === 'string') {
+          adminRoles = admin.roles.split(',');
+        } else if (Array.isArray(admin.roles)) {
+          adminRoles = admin.roles;
+        }
+      }
+
+      console.log('🎭 Parsed admin roles:', adminRoles);
+
       // Generate new JWT token for admin (without impersonation flag)
       const token = jwt.sign(
         { 
           userId: admin.id, 
           email: admin.email, 
-          roles: admin.roles
+          roles: adminRoles
         },
         process.env.JWT_SECRET || 'your-secret-key',
         { expiresIn: '24h' }
       );
 
-      // Log the return action
-      await AuditLogService.log({
-        adminId: admin.id,
-        action: 'RETURN_FROM_IMPERSONATION',
-        entityType: 'USER',
-        entityId: req.user.userId,
-        details: {
-          returnedFrom: req.user.email,
-        },
-        ipAddress: req.ip,
-        userAgent: req.get('user-agent'),
-      });
+      console.log('🔑 New token generated');
 
+      // Log the return action
+      try {
+        await AuditLogService.log({
+          adminId: admin.id,
+          action: 'RETURN_FROM_IMPERSONATION',
+          entityType: 'USER',
+          entityId: req.user.userId,
+          details: {
+            returnedFrom: req.user.email,
+          },
+          ipAddress: req.ip,
+          userAgent: req.get('user-agent'),
+        });
+        console.log('📝 Audit log created');
+      } catch (auditError) {
+        console.error('⚠️ Audit log failed (non-critical):', auditError.message);
+      }
+
+      // Return admin user with proper role format
+      const adminUser = {
+        ...admin,
+        roles: adminRoles,
+        isAdmin: adminRoles.includes('ADMIN')
+      };
+
+      console.log('✅ Returning success response');
       res.json({
         success: true,
+        message: 'Returned to admin account',
+        token,
+        user: adminUser,
+      });
+    } catch (error) {
+      console.error('❌ Return to admin error:', error);
+      console.error('Stack trace:', error.stack);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to return to admin',
+        error: error.message,
+      });
+    }
+  }
         message: 'Returned to admin account',
         token,
         user: admin,

@@ -20,6 +20,13 @@ const authenticate = async (req, res, next) => {
     // Verify token
     const decoded = verifyAccessToken(token);
 
+    console.log('🔓 Token decoded:', {
+      userId: decoded.userId,
+      email: decoded.email,
+      isImpersonating: decoded.isImpersonating,
+      adminId: decoded.adminId
+    });
+
     // Check if this is a super admin token
     if (decoded.isAdmin && decoded.userId === 'admin') {
       req.user = {
@@ -75,7 +82,10 @@ const authenticate = async (req, res, next) => {
       roles: userRoles, // All roles for multi-role support
       name: user.name,
       isVerified: user.isVerified,
-      isAdmin: false
+      isAdmin: false,
+      // Preserve impersonation fields from JWT token
+      isImpersonating: decoded.isImpersonating || false,
+      adminId: decoded.adminId || null
     };
 
     next();

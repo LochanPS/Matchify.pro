@@ -31,18 +31,18 @@ const Toast = ({ message, show, onClose }) => {
 
 // Sports with their specific facility questions
 const SPORTS_CONFIG = {
-  'Badminton': { label: 'Number of Badminton Courts', type: 'number', placeholder: 'How many badminton courts?' },
-  'Tennis': { label: 'Number of Tennis Courts', type: 'number', placeholder: 'How many tennis courts?' },
-  'Table Tennis': { label: 'Number of Table Tennis Tables', type: 'number', placeholder: 'How many TT tables?' },
-  'Squash': { label: 'Number of Squash Courts', type: 'number', placeholder: 'How many squash courts?' },
-  'Basketball': { label: 'Number of Basketball Courts', type: 'number', placeholder: 'How many basketball courts?' },
-  'Volleyball': { label: 'Number of Volleyball Courts', type: 'number', placeholder: 'How many volleyball courts?' },
-  'Swimming': { label: 'Pool Size (in meters)', type: 'text', placeholder: 'e.g., 25m x 10m or Olympic size' },
-  'Cricket': { label: 'Cricket Ground/Net Details', type: 'text', placeholder: 'e.g., 2 nets, 1 ground' },
-  'Football': { label: 'Football Ground Size', type: 'text', placeholder: 'e.g., Full size, 5-a-side, 7-a-side' },
-  'Gym': { label: 'Gym Area (sq ft)', type: 'text', placeholder: 'e.g., 2000 sq ft' },
-  'Yoga': { label: 'Yoga Hall Capacity', type: 'text', placeholder: 'e.g., 30 people' },
-  'Athletics': { label: 'Track Details', type: 'text', placeholder: 'e.g., 400m track, 100m straight' },
+  'Badminton': { label: 'Badminton Courts', type: 'number', placeholder: 'Enter number of courts', suffix: 'Courts' },
+  'Tennis': { label: 'Tennis Courts', type: 'number', placeholder: 'Enter number of courts', suffix: 'Courts' },
+  'Table Tennis': { label: 'Table Tennis Tables', type: 'number', placeholder: 'Enter number of tables', suffix: 'Tables' },
+  'Squash': { label: 'Squash Courts', type: 'number', placeholder: 'Enter number of courts', suffix: 'Courts' },
+  'Basketball': { label: 'Basketball Courts', type: 'number', placeholder: 'Enter number of courts', suffix: 'Courts' },
+  'Volleyball': { label: 'Volleyball Courts', type: 'number', placeholder: 'Enter number of courts', suffix: 'Courts' },
+  'Swimming': { label: 'Swimming Pool Size', type: 'text', placeholder: 'e.g., 25m x 10m, Olympic size, 50m', suffix: '' },
+  'Cricket': { label: 'Cricket Facilities', type: 'text', placeholder: 'e.g., 2 nets, 1 ground, Full size ground', suffix: '' },
+  'Football': { label: 'Football Ground', type: 'text', placeholder: 'e.g., Full size, 5-a-side, 7-a-side, 100x60m', suffix: '' },
+  'Gym': { label: 'Gym Area', type: 'text', placeholder: 'e.g., 2000 sq ft, 500 sq m', suffix: '' },
+  'Yoga': { label: 'Yoga Hall', type: 'text', placeholder: 'e.g., 30 people capacity, 800 sq ft', suffix: '' },
+  'Athletics': { label: 'Athletics Track', type: 'text', placeholder: 'e.g., 400m track, 100m straight, 200m oval', suffix: '' },
 };
 
 const SPORTS_OPTIONS = Object.keys(SPORTS_CONFIG);
@@ -239,6 +239,7 @@ const AddAcademyPage = () => {
     pincode: '',
     sports: [],
     sportDetails: {},
+    additionalSportsInfo: '',
     description: '',
     phone: '',
     email: '',
@@ -783,22 +784,47 @@ const AddAcademyPage = () => {
                       <label className="block text-sm text-gray-400 mb-2">
                         {config.label} *
                       </label>
-                      <input
-                        type={config.type}
-                        value={formData.sportDetails[sport] || ''}
-                        onChange={(e) => handleSportDetailChange(sport, e.target.value)}
-                        placeholder={config.placeholder}
-                        min={config.type === 'number' ? '1' : undefined}
-                        className={`w-full px-4 py-3 bg-slate-700/50 text-white rounded-xl border ${
-                          errors[`sport_${sport}`] ? 'border-red-500' : 'border-gray-600'
-                        } focus:outline-none focus:border-purple-500`}
-                      />
+                      <div className="relative">
+                        <input
+                          type={config.type}
+                          value={formData.sportDetails[sport] || ''}
+                          onChange={(e) => handleSportDetailChange(sport, e.target.value)}
+                          placeholder={config.placeholder}
+                          min={config.type === 'number' ? '1' : undefined}
+                          className={`w-full px-4 py-3 bg-slate-700/50 text-white rounded-xl border ${
+                            errors[`sport_${sport}`] ? 'border-red-500' : 'border-gray-600'
+                          } focus:outline-none focus:border-purple-500 ${config.suffix ? 'pr-20' : ''}`}
+                        />
+                        {config.suffix && (
+                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium pointer-events-none">
+                            {config.suffix}
+                          </span>
+                        )}
+                      </div>
                       {errors[`sport_${sport}`] && (
                         <p className="text-red-400 text-sm mt-1">{errors[`sport_${sport}`]}</p>
                       )}
                     </div>
                   );
                 })}
+              </div>
+
+              {/* Additional Sports Information */}
+              <div className="mt-4 pt-4 border-t border-slate-600/50">
+                <label className="block text-sm text-gray-400 mb-2">
+                  Additional Sports Information (Optional)
+                </label>
+                <textarea
+                  name="additionalSportsInfo"
+                  value={formData.additionalSportsInfo}
+                  onChange={handleInputChange}
+                  placeholder="Any other sports facilities or additional details you'd like to mention..."
+                  rows={3}
+                  className="w-full px-4 py-3 bg-slate-700/50 text-white rounded-xl border border-gray-600 focus:outline-none focus:border-purple-500 resize-none"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  e.g., Indoor/outdoor facilities, equipment provided, coaching available, etc.
+                </p>
               </div>
             </div>
           )}

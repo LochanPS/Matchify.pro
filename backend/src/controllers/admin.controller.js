@@ -586,19 +586,6 @@ class AdminController {
       });
     }
   }
-        message: 'Returned to admin account',
-        token,
-        user: admin,
-      });
-    } catch (error) {
-      console.error('Return to admin error:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to return to admin',
-        error: error.message,
-      });
-    }
-  }
 
   /**
    * DELETE /admin/users/clear-all - Clear all users from database (DANGEROUS)

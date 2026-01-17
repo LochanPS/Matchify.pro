@@ -334,9 +334,41 @@ function HomePage() {
                 <span className="text-transparent bg-clip-text bg-gradient-to-b from-amber-300 to-amber-500">.PRO</span>
               </span>
             </div>
-            <p className="text-gray-500 mb-6 text-center max-w-md">
+            <p className="text-gray-500 mb-8 text-center max-w-md">
               Built with ❤️ for the Indian Badminton Community
             </p>
+            
+            {/* Co-Founders Section - Professional Design */}
+            <div className="relative mb-8 max-w-2xl mx-auto">
+              {/* Subtle halo effect */}
+              <div className="absolute -inset-1 bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-amber-500/20 rounded-xl blur-xl"></div>
+              
+              {/* Content */}
+              <div className="relative bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-sm border border-white/10 rounded-xl px-8 py-6 shadow-2xl">
+                <p className="text-xs text-gray-400 font-medium mb-3 tracking-widest uppercase text-center">Co-Founded By</p>
+                <h3 className="text-3xl md:text-4xl font-bold text-center mb-4">
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">
+                    PS Brothers
+                  </span>
+                </h3>
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-emerald-400"></div>
+                    <span className="text-lg md:text-xl font-semibold text-white">
+                      PS Lochan
+                    </span>
+                  </div>
+                  <div className="hidden sm:block w-px h-6 bg-white/20"></div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-blue-400"></div>
+                    <span className="text-lg md:text-xl font-semibold text-white">
+                      PS Pradyumna
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
             <div className="flex gap-6 mb-8">
               <a href="#" className="text-gray-500 hover:text-white transition-colors">About</a>
               <a href="#" className="text-gray-500 hover:text-white transition-colors">Contact</a>

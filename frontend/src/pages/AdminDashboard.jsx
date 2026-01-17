@@ -45,6 +45,9 @@ export default function AdminDashboard() {
   const [showBlockAcademyModal, setShowBlockAcademyModal] = useState(false);
   const [academyToBlock, setAcademyToBlock] = useState(null);
   const [blockAcademyReason, setBlockAcademyReason] = useState('');
+  const [showLoginAsUserModal, setShowLoginAsUserModal] = useState(false);
+  const [userToImpersonate, setUserToImpersonate] = useState(null);
+  const [impersonationPassword, setImpersonationPassword] = useState('');
   const [expandedAcademy, setExpandedAcademy] = useState(null);
 
   useEffect(() => {
@@ -411,18 +414,10 @@ export default function AdminDashboard() {
                             <td className="px-4 py-3">
                               <div className="flex justify-end gap-2">
                                 <button
-                                  onClick={async () => {
-                                    try {
-                                      const response = await api.post(`/admin/users/${u.id}/login-as`);
-                                      if (response.data.success) {
-                                        // Store the new token
-                                        localStorage.setItem('token', response.data.token);
-                                        // Reload the page to log in as the user
-                                        window.location.href = '/';
-                                      }
-                                    } catch (error) {
-                                      setAlertModal({ type: 'error', message: 'Failed to login as user' });
-                                    }
+                                  onClick={() => {
+                                    setUserToImpersonate(u);
+                                    setImpersonationPassword('');
+                                    setShowLoginAsUserModal(true);
                                   }}
                                   className="p-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg transition-all border border-blue-500/30"
                                   title="Login As User"
@@ -1097,6 +1092,110 @@ export default function AdminDashboard() {
                 >
                   <Ban className="w-4 h-4" />
                   Block Academy
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Login As User Password Modal */}
+      {showLoginAsUserModal && userToImpersonate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className="relative w-full max-w-md">
+            {/* Halo effect */}
+            <div className="absolute -inset-2 bg-gradient-to-r from-blue-500 via-indigo-500 to-blue-500 rounded-3xl blur-xl opacity-50"></div>
+            <div className="relative bg-slate-800 rounded-2xl border border-white/10 overflow-hidden">
+              <div className="p-6 border-b border-white/10">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-blue-500/20 rounded-lg">
+                      <Shield className="w-5 h-5 text-blue-400" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-white">Admin Verification Required</h3>
+                  </div>
+                  <button 
+                    onClick={() => { setShowLoginAsUserModal(false); setUserToImpersonate(null); setImpersonationPassword(''); }} 
+                    className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                  >
+                    <X className="w-5 h-5 text-gray-400" />
+                  </button>
+                </div>
+              </div>
+              <div className="p-6 space-y-4">
+                <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl">
+                  <div className="flex items-start gap-3">
+                    <Eye className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-blue-400 font-semibold mb-1">🔐 Login As User</p>
+                      <p className="text-sm text-gray-300">You are about to view this user's account. Enter admin password to continue.</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-4 bg-slate-700/50 rounded-xl">
+                  <p className="text-sm text-gray-400">User to impersonate:</p>
+                  <p className="text-white font-semibold mt-1">{userToImpersonate.name}</p>
+                  <p className="text-sm text-gray-500">{userToImpersonate.email}</p>
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-400 mb-2">Admin Password <span className="text-red-400">*</span></label>
+                  <input
+                    type="password"
+                    value={impersonationPassword}
+                    onChange={(e) => setImpersonationPassword(e.target.value)}
+                    placeholder="Enter admin password..."
+                    className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter' && impersonationPassword.trim()) {
+                        document.getElementById('loginAsUserBtn').click();
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+              <div className="p-6 bg-slate-900/50 border-t border-white/10 flex gap-3">
+                <button
+                  onClick={() => { setShowLoginAsUserModal(false); setUserToImpersonate(null); setImpersonationPassword(''); }}
+                  className="flex-1 px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  id="loginAsUserBtn"
+                  onClick={async () => {
+                    if (!impersonationPassword.trim()) {
+                      setAlertModal({ type: 'error', message: 'Please enter admin password' });
+                      return;
+                    }
+                    
+                    // Verify password
+                    if (impersonationPassword !== 'Pradyu@123(123)') {
+                      setAlertModal({ type: 'error', message: 'Incorrect admin password' });
+                      setImpersonationPassword('');
+                      return;
+                    }
+                    
+                    try {
+                      const response = await api.post(`/admin/users/${userToImpersonate.id}/login-as`);
+                      if (response.data.success) {
+                        // Store the new token and user data
+                        localStorage.setItem('token', response.data.token);
+                        localStorage.setItem('user', JSON.stringify(response.data.user));
+                        // Redirect to home page as the user
+                        window.location.href = '/';
+                      }
+                    } catch (error) {
+                      setAlertModal({ type: 'error', message: 'Failed to login as user. Please try again.' });
+                    }
+                    
+                    setShowLoginAsUserModal(false);
+                    setUserToImpersonate(null);
+                    setImpersonationPassword('');
+                  }}
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white rounded-xl transition-colors font-medium flex items-center justify-center gap-2"
+                >
+                  <Eye className="w-4 h-4" />
+                  Login As User
                 </button>
               </div>
             </div>

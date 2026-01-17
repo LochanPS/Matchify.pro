@@ -15,6 +15,132 @@ import {
   ArrowLeftIcon
 } from '@heroicons/react/24/outline';
 
+// Indian Cities with States for Autocomplete
+const INDIAN_CITIES = [
+  { city: 'Mumbai', state: 'Maharashtra' },
+  { city: 'Delhi', state: 'Delhi' },
+  { city: 'Bangalore', state: 'Karnataka' },
+  { city: 'Hyderabad', state: 'Telangana' },
+  { city: 'Ahmedabad', state: 'Gujarat' },
+  { city: 'Chennai', state: 'Tamil Nadu' },
+  { city: 'Kolkata', state: 'West Bengal' },
+  { city: 'Pune', state: 'Maharashtra' },
+  { city: 'Jaipur', state: 'Rajasthan' },
+  { city: 'Surat', state: 'Gujarat' },
+  { city: 'Lucknow', state: 'Uttar Pradesh' },
+  { city: 'Kanpur', state: 'Uttar Pradesh' },
+  { city: 'Nagpur', state: 'Maharashtra' },
+  { city: 'Indore', state: 'Madhya Pradesh' },
+  { city: 'Thane', state: 'Maharashtra' },
+  { city: 'Bhopal', state: 'Madhya Pradesh' },
+  { city: 'Visakhapatnam', state: 'Andhra Pradesh' },
+  { city: 'Pimpri-Chinchwad', state: 'Maharashtra' },
+  { city: 'Patna', state: 'Bihar' },
+  { city: 'Vadodara', state: 'Gujarat' },
+  { city: 'Ghaziabad', state: 'Uttar Pradesh' },
+  { city: 'Ludhiana', state: 'Punjab' },
+  { city: 'Agra', state: 'Uttar Pradesh' },
+  { city: 'Nashik', state: 'Maharashtra' },
+  { city: 'Faridabad', state: 'Haryana' },
+  { city: 'Meerut', state: 'Uttar Pradesh' },
+  { city: 'Rajkot', state: 'Gujarat' },
+  { city: 'Varanasi', state: 'Uttar Pradesh' },
+  { city: 'Srinagar', state: 'Jammu and Kashmir' },
+  { city: 'Aurangabad', state: 'Maharashtra' },
+  { city: 'Dhanbad', state: 'Jharkhand' },
+  { city: 'Amritsar', state: 'Punjab' },
+  { city: 'Navi Mumbai', state: 'Maharashtra' },
+  { city: 'Allahabad', state: 'Uttar Pradesh' },
+  { city: 'Ranchi', state: 'Jharkhand' },
+  { city: 'Howrah', state: 'West Bengal' },
+  { city: 'Coimbatore', state: 'Tamil Nadu' },
+  { city: 'Jabalpur', state: 'Madhya Pradesh' },
+  { city: 'Gwalior', state: 'Madhya Pradesh' },
+  { city: 'Vijayawada', state: 'Andhra Pradesh' },
+  { city: 'Jodhpur', state: 'Rajasthan' },
+  { city: 'Madurai', state: 'Tamil Nadu' },
+  { city: 'Raipur', state: 'Chhattisgarh' },
+  { city: 'Kota', state: 'Rajasthan' },
+  { city: 'Chandigarh', state: 'Chandigarh' },
+  { city: 'Guwahati', state: 'Assam' },
+  { city: 'Solapur', state: 'Maharashtra' },
+  { city: 'Mysore', state: 'Karnataka' },
+  { city: 'Tiruchirappalli', state: 'Tamil Nadu' },
+  { city: 'Bareilly', state: 'Uttar Pradesh' },
+  { city: 'Aligarh', state: 'Uttar Pradesh' },
+  { city: 'Tiruppur', state: 'Tamil Nadu' },
+  { city: 'Moradabad', state: 'Uttar Pradesh' },
+  { city: 'Jalandhar', state: 'Punjab' },
+  { city: 'Bhubaneswar', state: 'Odisha' },
+  { city: 'Salem', state: 'Tamil Nadu' },
+  { city: 'Warangal', state: 'Telangana' },
+  { city: 'Thiruvananthapuram', state: 'Kerala' },
+  { city: 'Guntur', state: 'Andhra Pradesh' },
+  { city: 'Bikaner', state: 'Rajasthan' },
+  { city: 'Noida', state: 'Uttar Pradesh' },
+  { city: 'Jamshedpur', state: 'Jharkhand' },
+  { city: 'Bhilai', state: 'Chhattisgarh' },
+  { city: 'Cuttack', state: 'Odisha' },
+  { city: 'Kochi', state: 'Kerala' },
+  { city: 'Bhavnagar', state: 'Gujarat' },
+  { city: 'Dehradun', state: 'Uttarakhand' },
+  { city: 'Asansol', state: 'West Bengal' },
+  { city: 'Nanded', state: 'Maharashtra' },
+  { city: 'Kolhapur', state: 'Maharashtra' },
+  { city: 'Ajmer', state: 'Rajasthan' },
+  { city: 'Jamnagar', state: 'Gujarat' },
+  { city: 'Ujjain', state: 'Madhya Pradesh' },
+  { city: 'Siliguri', state: 'West Bengal' },
+  { city: 'Jhansi', state: 'Uttar Pradesh' },
+  { city: 'Jammu', state: 'Jammu and Kashmir' },
+  { city: 'Mangalore', state: 'Karnataka' },
+  { city: 'Erode', state: 'Tamil Nadu' },
+  { city: 'Belgaum', state: 'Karnataka' },
+  { city: 'Tirunelveli', state: 'Tamil Nadu' },
+  { city: 'Udaipur', state: 'Rajasthan' },
+  { city: 'Kozhikode', state: 'Kerala' },
+  { city: 'Kurnool', state: 'Andhra Pradesh' },
+  { city: 'Bokaro', state: 'Jharkhand' },
+  { city: 'Rajahmundry', state: 'Andhra Pradesh' },
+  { city: 'Agartala', state: 'Tripura' },
+  { city: 'Bhagalpur', state: 'Bihar' },
+  { city: 'Latur', state: 'Maharashtra' },
+  { city: 'Dhule', state: 'Maharashtra' },
+  { city: 'Muzaffarpur', state: 'Bihar' },
+  { city: 'Ahmednagar', state: 'Maharashtra' },
+  { city: 'Kollam', state: 'Kerala' },
+  { city: 'Bilaspur', state: 'Chhattisgarh' },
+  { city: 'Shahjahanpur', state: 'Uttar Pradesh' },
+  { city: 'Thrissur', state: 'Kerala' },
+  { city: 'Alwar', state: 'Rajasthan' },
+  { city: 'Kakinada', state: 'Andhra Pradesh' },
+  { city: 'Nizamabad', state: 'Telangana' },
+  { city: 'Tumkur', state: 'Karnataka' },
+  { city: 'Hisar', state: 'Haryana' },
+  { city: 'Rohtak', state: 'Haryana' },
+  { city: 'Panipat', state: 'Haryana' },
+  { city: 'Darbhanga', state: 'Bihar' },
+  { city: 'Aizawl', state: 'Mizoram' },
+  { city: 'Tirupati', state: 'Andhra Pradesh' },
+  { city: 'Karnal', state: 'Haryana' },
+  { city: 'Bathinda', state: 'Punjab' },
+  { city: 'Rampur', state: 'Uttar Pradesh' },
+  { city: 'Shillong', state: 'Meghalaya' },
+  { city: 'Patiala', state: 'Punjab' },
+  { city: 'Imphal', state: 'Manipur' },
+  { city: 'Hapur', state: 'Uttar Pradesh' },
+  { city: 'Anantapur', state: 'Andhra Pradesh' },
+  { city: 'Nellore', state: 'Andhra Pradesh' },
+  { city: 'Rourkela', state: 'Odisha' },
+  { city: 'Vellore', state: 'Tamil Nadu' },
+  { city: 'Shimla', state: 'Himachal Pradesh' },
+  { city: 'Gangtok', state: 'Sikkim' },
+  { city: 'Itanagar', state: 'Arunachal Pradesh' },
+  { city: 'Kohima', state: 'Nagaland' },
+  { city: 'Port Blair', state: 'Andaman and Nicobar Islands' },
+  { city: 'Puducherry', state: 'Puducherry' },
+];
+
 export default function ProfilePage() {
   const navigate = useNavigate();
   const { user, updateUser } = useAuth();
@@ -27,6 +153,8 @@ export default function ProfilePage() {
   const [pendingData, setPendingData] = useState(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [citySuggestions, setCitySuggestions] = useState([]);
+  const [showCitySuggestions, setShowCitySuggestions] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     dateOfBirth: '',
@@ -162,6 +290,23 @@ export default function ProfilePage() {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+
+    // City autocomplete
+    if (name === 'city' && value.length >= 2) {
+      const matches = INDIAN_CITIES.filter(item =>
+        item.city.toLowerCase().includes(value.toLowerCase())
+      ).slice(0, 5);
+      setCitySuggestions(matches);
+      setShowCitySuggestions(matches.length > 0);
+    } else if (name === 'city') {
+      setShowCitySuggestions(false);
+    }
+  };
+
+  const handleCitySelect = (city, state) => {
+    setFormData(prev => ({ ...prev, city, state }));
+    setShowCitySuggestions(false);
+    setCitySuggestions([]);
   };
 
   const canEditName = !profile?.name;
@@ -404,16 +549,44 @@ export default function ProfilePage() {
                 </select>
               </div>
 
-              <div>
+              <div className="relative">
                 <label className="block text-sm font-medium text-gray-300 mb-2">City</label>
                 <input
                   type="text"
                   name="city"
                   value={formData.city}
                   onChange={handleInputChange}
+                  onFocus={() => {
+                    if (formData.city.length >= 2 && citySuggestions.length > 0) {
+                      setShowCitySuggestions(true);
+                    }
+                  }}
+                  onBlur={() => {
+                    setTimeout(() => setShowCitySuggestions(false), 300);
+                  }}
+                  autoComplete="off"
                   className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                   placeholder="Enter your city"
                 />
+                
+                {/* City Suggestions Dropdown */}
+                {showCitySuggestions && citySuggestions.length > 0 && (
+                  <div className="absolute z-50 w-full mt-1 bg-slate-800 border border-purple-500/30 rounded-xl shadow-2xl shadow-purple-500/20 overflow-hidden">
+                    {citySuggestions.map((item, index) => (
+                      <div
+                        key={index}
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          handleCitySelect(item.city, item.state);
+                        }}
+                        className="px-4 py-3 hover:bg-purple-500/20 cursor-pointer transition-colors border-b border-slate-700/50 last:border-b-0"
+                      >
+                        <div className="text-white font-medium">{item.city}</div>
+                        <div className="text-gray-400 text-sm">{item.state}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div>
@@ -423,8 +596,9 @@ export default function ProfilePage() {
                   name="state"
                   value={formData.state}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                  placeholder="Enter your state"
+                  readOnly
+                  className="w-full px-4 py-3 bg-slate-700/30 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all cursor-not-allowed"
+                  placeholder="State (auto-filled)"
                 />
               </div>
 

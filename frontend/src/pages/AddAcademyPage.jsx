@@ -47,6 +47,165 @@ const SPORTS_CONFIG = {
 
 const SPORTS_OPTIONS = Object.keys(SPORTS_CONFIG);
 
+// Indian Cities with States for Autocomplete
+const INDIAN_CITIES = [
+  { city: 'Mumbai', state: 'Maharashtra' },
+  { city: 'Delhi', state: 'Delhi' },
+  { city: 'Bangalore', state: 'Karnataka' },
+  { city: 'Hyderabad', state: 'Telangana' },
+  { city: 'Ahmedabad', state: 'Gujarat' },
+  { city: 'Chennai', state: 'Tamil Nadu' },
+  { city: 'Kolkata', state: 'West Bengal' },
+  { city: 'Pune', state: 'Maharashtra' },
+  { city: 'Jaipur', state: 'Rajasthan' },
+  { city: 'Surat', state: 'Gujarat' },
+  { city: 'Lucknow', state: 'Uttar Pradesh' },
+  { city: 'Kanpur', state: 'Uttar Pradesh' },
+  { city: 'Nagpur', state: 'Maharashtra' },
+  { city: 'Indore', state: 'Madhya Pradesh' },
+  { city: 'Thane', state: 'Maharashtra' },
+  { city: 'Bhopal', state: 'Madhya Pradesh' },
+  { city: 'Visakhapatnam', state: 'Andhra Pradesh' },
+  { city: 'Pimpri-Chinchwad', state: 'Maharashtra' },
+  { city: 'Patna', state: 'Bihar' },
+  { city: 'Vadodara', state: 'Gujarat' },
+  { city: 'Ghaziabad', state: 'Uttar Pradesh' },
+  { city: 'Ludhiana', state: 'Punjab' },
+  { city: 'Agra', state: 'Uttar Pradesh' },
+  { city: 'Nashik', state: 'Maharashtra' },
+  { city: 'Faridabad', state: 'Haryana' },
+  { city: 'Meerut', state: 'Uttar Pradesh' },
+  { city: 'Rajkot', state: 'Gujarat' },
+  { city: 'Kalyan-Dombivali', state: 'Maharashtra' },
+  { city: 'Vasai-Virar', state: 'Maharashtra' },
+  { city: 'Varanasi', state: 'Uttar Pradesh' },
+  { city: 'Srinagar', state: 'Jammu and Kashmir' },
+  { city: 'Aurangabad', state: 'Maharashtra' },
+  { city: 'Dhanbad', state: 'Jharkhand' },
+  { city: 'Amritsar', state: 'Punjab' },
+  { city: 'Navi Mumbai', state: 'Maharashtra' },
+  { city: 'Allahabad', state: 'Uttar Pradesh' },
+  { city: 'Ranchi', state: 'Jharkhand' },
+  { city: 'Howrah', state: 'West Bengal' },
+  { city: 'Coimbatore', state: 'Tamil Nadu' },
+  { city: 'Jabalpur', state: 'Madhya Pradesh' },
+  { city: 'Gwalior', state: 'Madhya Pradesh' },
+  { city: 'Vijayawada', state: 'Andhra Pradesh' },
+  { city: 'Jodhpur', state: 'Rajasthan' },
+  { city: 'Madurai', state: 'Tamil Nadu' },
+  { city: 'Raipur', state: 'Chhattisgarh' },
+  { city: 'Kota', state: 'Rajasthan' },
+  { city: 'Chandigarh', state: 'Chandigarh' },
+  { city: 'Guwahati', state: 'Assam' },
+  { city: 'Solapur', state: 'Maharashtra' },
+  { city: 'Hubli-Dharwad', state: 'Karnataka' },
+  { city: 'Mysore', state: 'Karnataka' },
+  { city: 'Tiruchirappalli', state: 'Tamil Nadu' },
+  { city: 'Bareilly', state: 'Uttar Pradesh' },
+  { city: 'Aligarh', state: 'Uttar Pradesh' },
+  { city: 'Tiruppur', state: 'Tamil Nadu' },
+  { city: 'Moradabad', state: 'Uttar Pradesh' },
+  { city: 'Jalandhar', state: 'Punjab' },
+  { city: 'Bhubaneswar', state: 'Odisha' },
+  { city: 'Salem', state: 'Tamil Nadu' },
+  { city: 'Warangal', state: 'Telangana' },
+  { city: 'Mira-Bhayandar', state: 'Maharashtra' },
+  { city: 'Thiruvananthapuram', state: 'Kerala' },
+  { city: 'Bhiwandi', state: 'Maharashtra' },
+  { city: 'Saharanpur', state: 'Uttar Pradesh' },
+  { city: 'Guntur', state: 'Andhra Pradesh' },
+  { city: 'Amravati', state: 'Maharashtra' },
+  { city: 'Bikaner', state: 'Rajasthan' },
+  { city: 'Noida', state: 'Uttar Pradesh' },
+  { city: 'Jamshedpur', state: 'Jharkhand' },
+  { city: 'Bhilai', state: 'Chhattisgarh' },
+  { city: 'Cuttack', state: 'Odisha' },
+  { city: 'Firozabad', state: 'Uttar Pradesh' },
+  { city: 'Kochi', state: 'Kerala' },
+  { city: 'Bhavnagar', state: 'Gujarat' },
+  { city: 'Dehradun', state: 'Uttarakhand' },
+  { city: 'Durgapur', state: 'West Bengal' },
+  { city: 'Asansol', state: 'West Bengal' },
+  { city: 'Nanded', state: 'Maharashtra' },
+  { city: 'Kolhapur', state: 'Maharashtra' },
+  { city: 'Ajmer', state: 'Rajasthan' },
+  { city: 'Gulbarga', state: 'Karnataka' },
+  { city: 'Jamnagar', state: 'Gujarat' },
+  { city: 'Ujjain', state: 'Madhya Pradesh' },
+  { city: 'Loni', state: 'Uttar Pradesh' },
+  { city: 'Siliguri', state: 'West Bengal' },
+  { city: 'Jhansi', state: 'Uttar Pradesh' },
+  { city: 'Ulhasnagar', state: 'Maharashtra' },
+  { city: 'Jammu', state: 'Jammu and Kashmir' },
+  { city: 'Mangalore', state: 'Karnataka' },
+  { city: 'Erode', state: 'Tamil Nadu' },
+  { city: 'Belgaum', state: 'Karnataka' },
+  { city: 'Ambattur', state: 'Tamil Nadu' },
+  { city: 'Tirunelveli', state: 'Tamil Nadu' },
+  { city: 'Malegaon', state: 'Maharashtra' },
+  { city: 'Gaya', state: 'Bihar' },
+  { city: 'Udaipur', state: 'Rajasthan' },
+  { city: 'Maheshtala', state: 'West Bengal' },
+  { city: 'Davanagere', state: 'Karnataka' },
+  { city: 'Kozhikode', state: 'Kerala' },
+  { city: 'Akola', state: 'Maharashtra' },
+  { city: 'Kurnool', state: 'Andhra Pradesh' },
+  { city: 'Bokaro', state: 'Jharkhand' },
+  { city: 'Rajahmundry', state: 'Andhra Pradesh' },
+  { city: 'Ballari', state: 'Karnataka' },
+  { city: 'Agartala', state: 'Tripura' },
+  { city: 'Bhagalpur', state: 'Bihar' },
+  { city: 'Latur', state: 'Maharashtra' },
+  { city: 'Dhule', state: 'Maharashtra' },
+  { city: 'Korba', state: 'Chhattisgarh' },
+  { city: 'Bhilwara', state: 'Rajasthan' },
+  { city: 'Brahmapur', state: 'Odisha' },
+  { city: 'Mysuru', state: 'Karnataka' },
+  { city: 'Muzaffarpur', state: 'Bihar' },
+  { city: 'Ahmednagar', state: 'Maharashtra' },
+  { city: 'Kollam', state: 'Kerala' },
+  { city: 'Raghunathganj', state: 'West Bengal' },
+  { city: 'Bilaspur', state: 'Chhattisgarh' },
+  { city: 'Shahjahanpur', state: 'Uttar Pradesh' },
+  { city: 'Thrissur', state: 'Kerala' },
+  { city: 'Alwar', state: 'Rajasthan' },
+  { city: 'Kakinada', state: 'Andhra Pradesh' },
+  { city: 'Nizamabad', state: 'Telangana' },
+  { city: 'Sagar', state: 'Madhya Pradesh' },
+  { city: 'Tumkur', state: 'Karnataka' },
+  { city: 'Hisar', state: 'Haryana' },
+  { city: 'Rohtak', state: 'Haryana' },
+  { city: 'Panipat', state: 'Haryana' },
+  { city: 'Darbhanga', state: 'Bihar' },
+  { city: 'Kharagpur', state: 'West Bengal' },
+  { city: 'Aizawl', state: 'Mizoram' },
+  { city: 'Ichalkaranji', state: 'Maharashtra' },
+  { city: 'Tirupati', state: 'Andhra Pradesh' },
+  { city: 'Karnal', state: 'Haryana' },
+  { city: 'Bathinda', state: 'Punjab' },
+  { city: 'Rampur', state: 'Uttar Pradesh' },
+  { city: 'Shillong', state: 'Meghalaya' },
+  { city: 'Patiala', state: 'Punjab' },
+  { city: 'Imphal', state: 'Manipur' },
+  { city: 'Hapur', state: 'Uttar Pradesh' },
+  { city: 'Anantapur', state: 'Andhra Pradesh' },
+  { city: 'Nellore', state: 'Andhra Pradesh' },
+  { city: 'Rourkela', state: 'Odisha' },
+  { city: 'Vellore', state: 'Tamil Nadu' },
+  { city: 'Barasat', state: 'West Bengal' },
+  { city: 'Khammam', state: 'Telangana' },
+  { city: 'Parbhani', state: 'Maharashtra' },
+  { city: 'Shimla', state: 'Himachal Pradesh' },
+  { city: 'Gangtok', state: 'Sikkim' },
+  { city: 'Itanagar', state: 'Arunachal Pradesh' },
+  { city: 'Kohima', state: 'Nagaland' },
+  { city: 'Port Blair', state: 'Andaman and Nicobar Islands' },
+  { city: 'Silvassa', state: 'Dadra and Nagar Haveli' },
+  { city: 'Daman', state: 'Daman and Diu' },
+  { city: 'Kavaratti', state: 'Lakshadweep' },
+  { city: 'Puducherry', state: 'Puducherry' },
+];
+
 // Load draft from localStorage
 const loadDraft = () => {
   try {
@@ -91,6 +250,8 @@ const AddAcademyPage = () => {
   const [academyQrCode, setAcademyQrCode] = useState(null);
   const [paymentScreenshot, setPaymentScreenshot] = useState(null);
   const [errors, setErrors] = useState({});
+  const [citySuggestions, setCitySuggestions] = useState([]);
+  const [showCitySuggestions, setShowCitySuggestions] = useState(false);
 
   // Load draft on mount
   useEffect(() => {
@@ -146,6 +307,25 @@ const AddAcademyPage = () => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
+
+    // City autocomplete
+    if (name === 'city' && value.length >= 2) {
+      const matches = INDIAN_CITIES.filter(item =>
+        item.city.toLowerCase().includes(value.toLowerCase())
+      ).slice(0, 5);
+      setCitySuggestions(matches);
+      setShowCitySuggestions(matches.length > 0);
+    } else if (name === 'city') {
+      setShowCitySuggestions(false);
+    }
+  };
+
+  const handleCitySelect = (city, state) => {
+    setFormData(prev => ({ ...prev, city, state }));
+    setShowCitySuggestions(false);
+    setCitySuggestions([]);
+    if (errors.city) setErrors(prev => ({ ...prev, city: '' }));
+    if (errors.state) setErrors(prev => ({ ...prev, state: '' }));
   };
 
   const handleSportDetailChange = (sport, value) => {
@@ -499,17 +679,45 @@ const AddAcademyPage = () => {
 
           {/* City, State, Pincode */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
-            <div>
+            <div className="relative">
               <label className="block text-sm text-gray-400 mb-2">City *</label>
               <input
                 type="text"
                 name="city"
                 value={formData.city}
                 onChange={handleInputChange}
+                onFocus={() => {
+                  if (formData.city.length >= 2 && citySuggestions.length > 0) {
+                    setShowCitySuggestions(true);
+                  }
+                }}
+                onBlur={() => {
+                  setTimeout(() => setShowCitySuggestions(false), 300);
+                }}
                 placeholder="City"
+                autoComplete="off"
                 className={`w-full px-4 py-3 bg-slate-700/50 text-white rounded-xl border ${errors.city ? 'border-red-500' : 'border-gray-600'} focus:outline-none focus:border-purple-500`}
               />
               {errors.city && <p className="text-red-400 text-sm mt-1">{errors.city}</p>}
+              
+              {/* City Suggestions Dropdown */}
+              {showCitySuggestions && citySuggestions.length > 0 && (
+                <div className="absolute z-50 w-full mt-1 bg-slate-800 border border-purple-500/30 rounded-xl shadow-2xl shadow-purple-500/20 overflow-hidden">
+                  {citySuggestions.map((item, index) => (
+                    <div
+                      key={index}
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        handleCitySelect(item.city, item.state);
+                      }}
+                      className="px-4 py-3 hover:bg-purple-500/20 cursor-pointer transition-colors border-b border-slate-700/50 last:border-b-0"
+                    >
+                      <div className="text-white font-medium">{item.city}</div>
+                      <div className="text-gray-400 text-sm">{item.state}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
             <div>
               <label className="block text-sm text-gray-400 mb-2">State *</label>
@@ -518,8 +726,9 @@ const AddAcademyPage = () => {
                 name="state"
                 value={formData.state}
                 onChange={handleInputChange}
-                placeholder="State"
-                className={`w-full px-4 py-3 bg-slate-700/50 text-white rounded-xl border ${errors.state ? 'border-red-500' : 'border-gray-600'} focus:outline-none focus:border-purple-500`}
+                placeholder="State (auto-filled)"
+                readOnly
+                className={`w-full px-4 py-3 bg-slate-700/30 text-white rounded-xl border ${errors.state ? 'border-red-500' : 'border-gray-600'} focus:outline-none focus:border-purple-500 cursor-not-allowed`}
               />
               {errors.state && <p className="text-red-400 text-sm mt-1">{errors.state}</p>}
             </div>

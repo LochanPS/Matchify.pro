@@ -320,8 +320,8 @@ export default function AdminDashboard() {
                       <tr className="bg-slate-900/50 border-b border-white/10">
                         <th className="text-left px-4 py-3 text-gray-300 font-semibold">Name</th>
                         <th className="text-left px-4 py-3 text-gray-300 font-semibold">Email</th>
-                        <th className="text-left px-4 py-3 text-gray-300 font-semibold hidden md:table-cell">Phone</th>
-                        <th className="text-left px-4 py-3 text-gray-300 font-semibold hidden lg:table-cell">Registered</th>
+                        <th className="text-left px-4 py-3 text-gray-300 font-semibold">Phone</th>
+                        <th className="text-left px-4 py-3 text-gray-300 font-semibold">Registered</th>
                         <th className="text-left px-4 py-3 text-gray-300 font-semibold hidden xl:table-cell">Stats</th>
                         <th className="text-left px-4 py-3 text-gray-300 font-semibold">Status</th>
                         <th className="text-right px-4 py-3 text-gray-300 font-semibold">Actions</th>
@@ -356,11 +356,11 @@ export default function AdminDashboard() {
                             <td className="px-4 py-3">
                               <p className="text-white font-medium">{u.email}</p>
                             </td>
-                            <td className="px-4 py-3 hidden md:table-cell">
-                              <p className="text-gray-300">{u.phone || '-'}</p>
+                            <td className="px-4 py-3">
+                              <p className="text-white">{u.phone || '-'}</p>
                             </td>
-                            <td className="px-4 py-3 hidden lg:table-cell">
-                              <p className="text-gray-300 text-sm">
+                            <td className="px-4 py-3">
+                              <p className="text-white text-sm">
                                 {u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'}
                               </p>
                             </td>

@@ -404,6 +404,25 @@ export default function AdminDashboard() {
                             </td>
                             <td className="px-4 py-3">
                               <div className="flex justify-end gap-2">
+                                <button
+                                  onClick={async () => {
+                                    try {
+                                      const response = await api.post(`/admin/users/${u.id}/login-as`);
+                                      if (response.data.success) {
+                                        // Store the new token
+                                        localStorage.setItem('token', response.data.token);
+                                        // Reload the page to log in as the user
+                                        window.location.href = '/';
+                                      }
+                                    } catch (error) {
+                                      setAlertModal({ type: 'error', message: 'Failed to login as user' });
+                                    }
+                                  }}
+                                  className="p-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg transition-all border border-blue-500/30"
+                                  title="Login As User"
+                                >
+                                  <Eye className="w-4 h-4" />
+                                </button>
                                 {u.isSuspended ? (
                                   <button
                                     onClick={() => handleUnblockUser(u)}

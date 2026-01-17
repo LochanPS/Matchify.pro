@@ -324,6 +324,84 @@ class AdminController {
   }
 
   /**
+   * POST /admin/users/:id/login-as - Login as a user (admin impersonation)
+   */
+  static async loginAsUser(req, res) {
+    try {
+      const { id } = req.params;
+      const adminId = req.user.id;
+
+      // Get the user
+      const user = await prisma.user.findUnique({
+        where: { id },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          role: true,
+          phone: true,
+          city: true,
+          state: true,
+          profilePhoto: true,
+          walletBalance: true,
+        },
+      });
+
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'User not found',
+        });
+      }
+
+      // Cannot impersonate other admins
+      if (user.role === 'ADMIN') {
+        return res.status(403).json({
+          success: false,
+          message: 'Cannot impersonate admin users',
+        });
+      }
+
+      // Generate JWT token for the user
+      const jwt = require('jsonwebtoken');
+      const token = jwt.sign(
+        { userId: user.id, email: user.email, role: user.role },
+        process.env.JWT_SECRET || 'your-secret-key',
+        { expiresIn: '24h' }
+      );
+
+      // Log the action
+      await AuditLogService.log({
+        adminId,
+        action: 'USER_IMPERSONATION',
+        entityType: 'USER',
+        entityId: id,
+        details: {
+          userEmail: user.email,
+          userName: user.name,
+          userRole: user.role,
+        },
+        ipAddress: req.ip,
+        userAgent: req.get('user-agent'),
+      });
+
+      res.json({
+        success: true,
+        message: `Logged in as ${user.name}`,
+        token,
+        user,
+      });
+    } catch (error) {
+      console.error('Login as user error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to login as user',
+        error: error.message,
+      });
+    }
+  }
+
+  /**
    * DELETE /admin/users/clear-all - Clear all users from database (DANGEROUS)
    */
   static async clearAllUsers(req, res) {

@@ -49,6 +49,9 @@ export default function AdminDashboard() {
   const [userToImpersonate, setUserToImpersonate] = useState(null);
   const [impersonationPassword, setImpersonationPassword] = useState('');
   const [expandedAcademy, setExpandedAcademy] = useState(null);
+  const [screenshotType, setScreenshotType] = useState('payment'); // 'payment' or 'photo'
+  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+  const [currentPhotos, setCurrentPhotos] = useState([]);
 
   useEffect(() => {
     if (!user?.isAdmin) { navigate('/login'); return; }
@@ -809,30 +812,50 @@ export default function AdminDashboard() {
                             PAYMENT & MEDIA
                           </h3>
                           <div className="grid md:grid-cols-2 gap-4">
+                            {/* Payment Screenshot */}
                             <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl">
-                              <p className="text-xs text-emerald-400 mb-2">Registration Fee</p>
+                              <p className="text-xs text-emerald-400 mb-2">Registration Fee Payment</p>
                               <p className="text-2xl font-bold text-emerald-300">₹200</p>
-                              {academy.paymentScreenshot && (
+                              {academy.paymentScreenshot ? (
                                 <button 
-                                  onClick={() => setViewingScreenshot(academy.paymentScreenshot)}
+                                  onClick={() => {
+                                    setViewingScreenshot(academy.paymentScreenshot);
+                                    setScreenshotType('payment');
+                                  }}
                                   className="mt-3 w-full px-4 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 rounded-lg transition-colors text-sm font-medium"
                                 >
                                   View Payment Screenshot
                                 </button>
+                              ) : (
+                                <p className="mt-3 text-xs text-gray-400">No payment screenshot uploaded</p>
                               )}
                             </div>
-                            {academy.photos && academy.photos.length > 0 && (
-                              <div className="p-4 bg-purple-500/10 border border-purple-500/30 rounded-xl">
-                                <p className="text-xs text-purple-400 mb-2">Academy Photos</p>
-                                <p className="text-2xl font-bold text-purple-300">{academy.photos.length} Photo{academy.photos.length > 1 ? 's' : ''}</p>
-                                <button 
-                                  onClick={() => setViewingScreenshot(academy.photos[0])}
-                                  className="mt-3 w-full px-4 py-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 rounded-lg transition-colors text-sm font-medium"
-                                >
-                                  View Photos
-                                </button>
-                              </div>
-                            )}
+
+                            {/* Academy Photos */}
+                            <div className="p-4 bg-purple-500/10 border border-purple-500/30 rounded-xl">
+                              <p className="text-xs text-purple-400 mb-2">Academy Photos</p>
+                              {academy.photos && academy.photos.length > 0 ? (
+                                <>
+                                  <p className="text-2xl font-bold text-purple-300">{academy.photos.length} Photo{academy.photos.length > 1 ? 's' : ''}</p>
+                                  <button 
+                                    onClick={() => {
+                                      setViewingScreenshot(academy.photos[0]);
+                                      setScreenshotType('photo');
+                                      setCurrentPhotoIndex(0);
+                                      setCurrentPhotos(academy.photos);
+                                    }}
+                                    className="mt-3 w-full px-4 py-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 rounded-lg transition-colors text-sm font-medium"
+                                  >
+                                    View Academy Photos
+                                  </button>
+                                </>
+                              ) : (
+                                <>
+                                  <p className="text-2xl font-bold text-gray-500">0 Photos</p>
+                                  <p className="mt-3 text-xs text-gray-400">No photos uploaded</p>
+                                </>
+                              )}
+                            </div>
                           </div>
                         </div>
 
@@ -1309,22 +1332,34 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {/* Payment Screenshot Modal */}
+      {/* Screenshot/Photo Viewing Modal */}
       {viewingScreenshot && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
           <div className="relative w-full max-w-2xl">
             {/* Halo effect */}
-            <div className="absolute -inset-2 bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500 rounded-3xl blur-xl opacity-50"></div>
+            <div className={`absolute -inset-2 bg-gradient-to-r ${screenshotType === 'payment' ? 'from-emerald-500 via-green-500 to-emerald-500' : 'from-purple-500 via-pink-500 to-purple-500'} rounded-3xl blur-xl opacity-50`}></div>
             <div className="relative bg-slate-800 rounded-2xl border border-white/10 overflow-hidden">
               <div className="p-4 border-b border-white/10 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-blue-500/20 rounded-lg">
-                    <Eye className="w-5 h-5 text-blue-400" />
+                  <div className={`p-2 ${screenshotType === 'payment' ? 'bg-emerald-500/20' : 'bg-purple-500/20'} rounded-lg`}>
+                    <Eye className={`w-5 h-5 ${screenshotType === 'payment' ? 'text-emerald-400' : 'text-purple-400'}`} />
                   </div>
-                  <h3 className="text-lg font-semibold text-white">Payment Screenshot</h3>
+                  <div>
+                    <h3 className="text-lg font-semibold text-white">
+                      {screenshotType === 'payment' ? 'Payment Screenshot' : 'Academy Photos'}
+                    </h3>
+                    {screenshotType === 'photo' && currentPhotos.length > 1 && (
+                      <p className="text-xs text-gray-400">Photo {currentPhotoIndex + 1} of {currentPhotos.length}</p>
+                    )}
+                  </div>
                 </div>
                 <button 
-                  onClick={() => setViewingScreenshot(null)} 
+                  onClick={() => {
+                    setViewingScreenshot(null);
+                    setScreenshotType('payment');
+                    setCurrentPhotoIndex(0);
+                    setCurrentPhotos([]);
+                  }} 
                   className="p-2 hover:bg-white/10 rounded-lg transition-colors"
                 >
                   <X className="w-5 h-5 text-gray-400" />
@@ -1333,18 +1368,50 @@ export default function AdminDashboard() {
               <div className="p-4">
                 <img 
                   src={viewingScreenshot} 
-                  alt="Payment Screenshot" 
+                  alt={screenshotType === 'payment' ? 'Payment Screenshot' : 'Academy Photo'} 
                   className="w-full max-h-[70vh] object-contain rounded-lg"
                 />
               </div>
               <div className="p-4 bg-slate-900/50 border-t border-white/10">
-                <button
-                  onClick={() => setViewingScreenshot(null)}
-                  className="w-full px-4 py-3 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-xl transition-colors font-medium flex items-center justify-center gap-2"
-                >
-                  <ChevronRight className="w-4 h-4 rotate-180" />
-                  Back
-                </button>
+                {screenshotType === 'photo' && currentPhotos.length > 1 ? (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        const newIndex = currentPhotoIndex > 0 ? currentPhotoIndex - 1 : currentPhotos.length - 1;
+                        setCurrentPhotoIndex(newIndex);
+                        setViewingScreenshot(currentPhotos[newIndex]);
+                      }}
+                      className="flex-1 px-4 py-3 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 rounded-xl transition-colors font-medium flex items-center justify-center gap-2"
+                    >
+                      <ChevronRight className="w-4 h-4 rotate-180" />
+                      Previous
+                    </button>
+                    <button
+                      onClick={() => {
+                        const newIndex = currentPhotoIndex < currentPhotos.length - 1 ? currentPhotoIndex + 1 : 0;
+                        setCurrentPhotoIndex(newIndex);
+                        setViewingScreenshot(currentPhotos[newIndex]);
+                      }}
+                      className="flex-1 px-4 py-3 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 rounded-xl transition-colors font-medium flex items-center justify-center gap-2"
+                    >
+                      Next
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setViewingScreenshot(null);
+                      setScreenshotType('payment');
+                      setCurrentPhotoIndex(0);
+                      setCurrentPhotos([]);
+                    }}
+                    className={`w-full px-4 py-3 bg-gradient-to-r ${screenshotType === 'payment' ? 'from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600' : 'from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600'} text-white rounded-xl transition-colors font-medium flex items-center justify-center gap-2`}
+                  >
+                    <ChevronRight className="w-4 h-4 rotate-180" />
+                    Back
+                  </button>
+                )}
               </div>
             </div>
           </div>

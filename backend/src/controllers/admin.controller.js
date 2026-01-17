@@ -1,8 +1,6 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma.js';
 import AuditLogService from '../services/auditLog.service.js';
 import jwt from 'jsonwebtoken';
-
-const prisma = new PrismaClient();
 
 class AdminController {
   /**

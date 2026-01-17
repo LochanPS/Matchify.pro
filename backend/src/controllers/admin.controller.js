@@ -363,9 +363,15 @@ class AdminController {
         });
       }
 
-      // Generate JWT token for the user
+      // Generate JWT token for the user with admin impersonation flag
       const token = jwt.sign(
-        { userId: user.id, email: user.email, roles: user.roles },
+        { 
+          userId: user.id, 
+          email: user.email, 
+          roles: user.roles,
+          isImpersonating: true,
+          adminId: adminId
+        },
         process.env.JWT_SECRET || 'your-secret-key',
         { expiresIn: '24h' }
       );
@@ -396,6 +402,83 @@ class AdminController {
       res.status(500).json({
         success: false,
         message: 'Failed to login as user',
+        error: error.message,
+      });
+    }
+  }
+
+  /**
+   * POST /admin/return-to-admin - Return from user impersonation to admin account
+   */
+  static async returnToAdmin(req, res) {
+    try {
+      const { adminId } = req.user; // Get admin ID from impersonation token
+
+      if (!adminId) {
+        return res.status(400).json({
+          success: false,
+          message: 'Not currently impersonating a user',
+        });
+      }
+
+      // Get the admin user
+      const admin = await prisma.user.findUnique({
+        where: { id: adminId },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          roles: true,
+          phone: true,
+          city: true,
+          state: true,
+          profilePhoto: true,
+          walletBalance: true,
+        },
+      });
+
+      if (!admin) {
+        return res.status(404).json({
+          success: false,
+          message: 'Admin account not found',
+        });
+      }
+
+      // Generate new JWT token for admin (without impersonation flag)
+      const token = jwt.sign(
+        { 
+          userId: admin.id, 
+          email: admin.email, 
+          roles: admin.roles
+        },
+        process.env.JWT_SECRET || 'your-secret-key',
+        { expiresIn: '24h' }
+      );
+
+      // Log the return action
+      await AuditLogService.log({
+        adminId: admin.id,
+        action: 'RETURN_FROM_IMPERSONATION',
+        entityType: 'USER',
+        entityId: req.user.userId,
+        details: {
+          returnedFrom: req.user.email,
+        },
+        ipAddress: req.ip,
+        userAgent: req.get('user-agent'),
+      });
+
+      res.json({
+        success: true,
+        message: 'Returned to admin account',
+        token,
+        user: admin,
+      });
+    } catch (error) {
+      console.error('Return to admin error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to return to admin',
         error: error.message,
       });
     }

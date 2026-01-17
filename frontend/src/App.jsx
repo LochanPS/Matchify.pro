@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { NotificationProvider } from './contexts/NotificationContext'
 import Navbar from './components/Navbar'
 import ProfileCompletionModal from './components/ProfileCompletionModal'
+import ImpersonationBanner from './components/ImpersonationBanner'
 import ProtectedRoute from './components/ProtectedRoute'
 import RoleRoute from './components/RoleRoute'
 import HomePage from './pages/HomePage'
@@ -64,7 +65,10 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
+      <ImpersonationBanner />
+      <div className="pt-[52px]"> {/* Add padding for impersonation banner */}
+        <Navbar />
+      </div>
       
       {/* Profile Completion Modal - shows when user has incomplete profile */}
       {showProfileCompletion && user && (

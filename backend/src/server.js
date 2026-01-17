@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import compression from 'compression';
 import dotenv from 'dotenv';
+import rateLimit from 'express-rate-limit';
 
 // Import routes
 import authRoutes from './routes/auth.js';
@@ -31,6 +32,13 @@ import multiRoleMatchRoutes from './routes/multiRoleMatch.routes.js';
 
 // Import middleware
 import { authenticate, authorize } from './middleware/auth.js';
+import { 
+  sanitizeInput, 
+  preventParameterPollution, 
+  securityHeaders,
+  validateTokenFormat,
+  logSuspiciousActivity 
+} from './middleware/security.js';
 
 // Import services
 import { initEmailService } from './services/email.service.js';
@@ -101,6 +109,33 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Compression middleware
 app.use(compression());
 
+// Rate limiting - Prevent brute force attacks
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Apply rate limiting to all routes
+app.use(limiter);
+
+// Apply additional security middlewares
+app.use(securityHeaders);
+app.use(sanitizeInput);
+app.use(preventParameterPollution);
+app.use(validateTokenFormat);
+app.use(logSuspiciousActivity);
+
+// Stricter rate limiting for auth routes
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // Limit each IP to 5 login attempts per windowMs
+  message: 'Too many login attempts, please try again after 15 minutes.',
+  skipSuccessfulRequests: true,
+});
+
 // Static file serving for uploads
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -153,9 +188,9 @@ app.get('/api', (req, res) => {
   });
 });
 
-// Auth routes (both old and new multi-role)
-app.use('/api/auth', authRoutes);
-app.use('/api/multi-auth', multiRoleAuthRoutes);
+// Auth routes (both old and new multi-role) - with stricter rate limiting
+app.use('/api/auth', authLimiter, authRoutes);
+app.use('/api/multi-auth', authLimiter, multiRoleAuthRoutes);
 
 // Profile routes
 app.use('/api/profile', profileRoutes);

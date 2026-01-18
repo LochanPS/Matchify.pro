@@ -58,6 +58,8 @@ import NotificationDetailPage from './pages/NotificationDetailPage'
 import RefundIssuePage from './pages/RefundIssuePage'
 import SearchAcademiesPage from './pages/SearchAcademiesPage'
 import AddAcademyPage from './pages/AddAcademyPage'
+import KYCSubmission from './pages/organizer/KYCSubmission'
+import VideoCallPage from './pages/organizer/VideoCallPage'
 
 // Inner component that can access AuthContext
 function AppContent() {
@@ -264,6 +266,29 @@ function AppContent() {
               <ProtectedRoute>
                 <RoleRoute allowedRoles={['PLAYER']} blockAdmin={true}>
                   <PlayerDashboard />
+                </RoleRoute>
+              </ProtectedRoute>
+            }
+          />
+          
+          {/* Organizer KYC Routes */}
+          <Route
+            path="/organizer/kyc/submit"
+            element={
+              <ProtectedRoute>
+                <RoleRoute allowedRoles={['ORGANIZER']} blockAdmin={true}>
+                  <KYCSubmission />
+                </RoleRoute>
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/organizer/kyc/video-call"
+            element={
+              <ProtectedRoute>
+                <RoleRoute allowedRoles={['ORGANIZER']} blockAdmin={true}>
+                  <VideoCallPage />
                 </RoleRoute>
               </ProtectedRoute>
             }

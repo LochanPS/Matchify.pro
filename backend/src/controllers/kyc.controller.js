@@ -1,7 +1,70 @@
 import { PrismaClient } from '@prisma/client';
 import { v2 as cloudinary } from 'cloudinary';
+import multer from 'multer';
 
 const prisma = new PrismaClient();
+
+// Configure multer for memory storage
+const storage = multer.memoryStorage();
+const upload = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type. Only JPG, PNG, and PDF are allowed.'));
+    }
+  }
+});
+
+export { upload };
+
+// ============================================
+// ORGANIZER KYC ENDPOINTS
+// ============================================
+
+/**
+ * Upload Aadhaar to Cloudinary
+ * POST /api/kyc/upload-aadhaar
+ */
+export const uploadAadhaar = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        error: 'NO_FILE',
+        message: 'Please upload a file'
+      });
+    }
+
+    // Upload to Cloudinary
+    const result = await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: 'kyc/aadhaar',
+          resource_type: 'auto'
+        },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }
+      );
+      uploadStream.end(req.file.buffer);
+    });
+
+    res.json({
+      success: true,
+      imageUrl: result.secure_url
+    });
+  } catch (error) {
+    console.error('Aadhaar upload error:', error);
+    res.status(500).json({
+      error: 'UPLOAD_FAILED',
+      message: 'Failed to upload image'
+    });
+  }
+};
 
 // ============================================
 // ORGANIZER KYC ENDPOINTS

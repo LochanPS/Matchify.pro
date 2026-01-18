@@ -81,24 +81,23 @@ export default function KYCSubmission() {
   };
 
   const uploadToCloudinary = async (file) => {
+    // Upload via backend instead of direct Cloudinary upload
     const formData = new FormData();
-    formData.append('file', file);
-    formData.append('upload_preset', 'matchify_kyc'); // You'll need to create this preset
-    formData.append('folder', 'kyc/aadhaar');
+    formData.append('aadhaar', file);
 
-    const response = await fetch(
-      `https://api.cloudinary.com/v1_1/dfg8tdgmf/image/upload`,
-      {
-        method: 'POST',
-        body: formData
-      }
-    );
+    const response = await fetch('http://localhost:5000/api/kyc/upload-aadhaar', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      },
+      body: formData
+    });
 
     const data = await response.json();
-    if (data.error) {
-      throw new Error(data.error.message);
+    if (!response.ok) {
+      throw new Error(data.message || 'Upload failed');
     }
-    return data.secure_url;
+    return data.imageUrl;
   };
 
   const handleSubmit = async () => {

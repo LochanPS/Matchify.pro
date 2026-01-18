@@ -1,6 +1,8 @@
 import express from 'express';
 import { authenticate } from '../middleware/auth.js';
 import {
+  uploadAadhaar,
+  upload,
   submitKYC,
   requestVideoCall,
   getKYCStatus,
@@ -11,6 +13,9 @@ const router = express.Router();
 
 // All routes require authentication
 router.use(authenticate);
+
+// Upload Aadhaar image
+router.post('/upload-aadhaar', upload.single('aadhaar'), uploadAadhaar);
 
 // Organizer KYC routes
 router.post('/submit', submitKYC);

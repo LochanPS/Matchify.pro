@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { deleteDailyRoom } from '../utils/daily.js';
 
 const prisma = new PrismaClient();
 
@@ -117,13 +118,14 @@ export const approveKYC = async (req, res) => {
       }
     });
 
+    // Delete Daily.co room (cleanup)
+    if (kyc.videoRoomUrl) {
+      const roomName = kyc.videoRoomUrl.split('/').pop();
+      await deleteDailyRoom(roomName);
+    }
+
     // TODO: Send approval email to organizer
     // await sendKYCApprovalEmail(kyc.organizer);
-
-    // TODO: Delete Daily.co room (cleanup)
-    // if (kyc.videoRoomUrl) {
-    //   await deleteDailyRoom(kyc.videoRoomUrl);
-    // }
 
     res.json({
       success: true,
@@ -202,13 +204,14 @@ export const rejectKYC = async (req, res) => {
       }
     });
 
+    // Delete Daily.co room (cleanup)
+    if (kyc.videoRoomUrl) {
+      const roomName = kyc.videoRoomUrl.split('/').pop();
+      await deleteDailyRoom(roomName);
+    }
+
     // TODO: Send rejection email to organizer
     // await sendKYCRejectionEmail(kyc.organizer, rejectionReason);
-
-    // TODO: Delete Daily.co room (cleanup)
-    // if (kyc.videoRoomUrl) {
-    //   await deleteDailyRoom(kyc.videoRoomUrl);
-    // }
 
     res.json({
       success: true,

@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { v2 as cloudinary } from 'cloudinary';
 import multer from 'multer';
+import { createDailyRoom, deleteDailyRoom } from '../utils/daily.js';
 
 const prisma = new PrismaClient();
 
@@ -210,13 +211,10 @@ export const requestVideoCall = async (req, res) => {
       });
     }
 
-    // Create Daily.co room (placeholder - will implement after getting API key)
+    // Create Daily.co room
     const roomName = `kyc-${kyc.id}-${Date.now()}`;
-    const roomUrl = `https://matchify.daily.co/${roomName}`; // Placeholder
-
-    // TODO: Implement actual Daily.co API call when API key is available
-    // const dailyResponse = await createDailyRoom(roomName);
-    // const roomUrl = dailyResponse.url;
+    const dailyRoom = await createDailyRoom(roomName);
+    const roomUrl = dailyRoom.url;
 
     // Update KYC record
     const updatedKYC = await prisma.organizerKYC.update({

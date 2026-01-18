@@ -60,6 +60,7 @@ import SearchAcademiesPage from './pages/SearchAcademiesPage'
 import AddAcademyPage from './pages/AddAcademyPage'
 import KYCSubmission from './pages/organizer/KYCSubmission'
 import VideoCallPage from './pages/organizer/VideoCallPage'
+import AdminKYCDashboard from './pages/admin/AdminKYCDashboard'
 
 // Inner component that can access AuthContext
 function AppContent() {
@@ -411,6 +412,7 @@ function AppContent() {
             <Route path="invites" element={<InviteManagementPage />} />
             <Route path="audit-logs" element={<AuditLogsPage />} />
             <Route path="academies" element={<AcademyApprovalsPage />} />
+            <Route path="kyc" element={<AdminKYCDashboard />} />
           </Route>
           
           {/* Catch all route */}

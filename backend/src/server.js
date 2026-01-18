@@ -229,6 +229,12 @@ app.use('/api/credits', creditsRoutes);
 // Academy routes
 app.use('/api/academies', academyRoutes);
 
+// KYC routes
+import kycRoutes from './routes/kyc.routes.js';
+import adminKycRoutes from './routes/admin-kyc.routes.js';
+app.use('/api/kyc', kycRoutes);
+app.use('/api/admin/kyc', adminKycRoutes);
+
 // Draw routes
 app.use('/api', drawRoutes);
 

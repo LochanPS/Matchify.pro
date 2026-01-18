@@ -36,6 +36,9 @@ model User {
   createdAt            DateTime            @default(now())
   updatedAt            DateTime            @updatedAt
   
+  // KYC for admins
+  availableForKYC      Boolean             @default(false) // Admin toggle for KYC availability
+  
   // Profile relations
   playerProfile        PlayerProfile?
   organizerProfile     OrganizerProfile?
@@ -52,6 +55,10 @@ model User {
   umpiredMatches       Match[]             @relation("UmpireMatches")
   matchifyCredits      MatchifyCredits?
   tournamentUmpires    TournamentUmpire[]  @relation("TournamentUmpires")
+  
+  // KYC relations
+  kycSubmissions       OrganizerKYC[]      @relation("OrganizerKYC")
+  kycReviews           OrganizerKYC[]      @relation("KYCReviewer")
 
   @@index([email])
   @@index([phone])
@@ -495,4 +502,47 @@ model Academy {
   @@index([createdAt])
   @@index([isDeleted])
   @@map("academies")
+}
+
+
+// ============================================
+// ORGANIZER KYC VERIFICATION SYSTEM
+// ============================================
+
+model OrganizerKYC {
+  id                  String    @id @default(uuid())
+  organizerId         String    @unique
+  organizer           User      @relation("OrganizerKYC", fields: [organizerId], references: [id], onDelete: Cascade)
+  
+  // Document
+  aadhaarImageUrl     String
+  aadhaarNumber       String?   // Optional: last 4 digits only for display
+  
+  // Video Call
+  videoCallStartedAt  DateTime?
+  videoCallEndedAt    DateTime?
+  videoRoomUrl        String?   // Daily.co room URL
+  
+  // Review
+  status              KYCStatus @default(PENDING)
+  reviewedBy          String?   // Admin user ID
+  reviewer            User?     @relation("KYCReviewer", fields: [reviewedBy], references: [id])
+  reviewedAt          DateTime?
+  rejectionReason     String?
+  adminNotes          String?
+  
+  // Metadata
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  
+  @@index([organizerId])
+  @@index([status])
+  @@map("organizer_kyc")
+}
+
+enum KYCStatus {
+  PENDING           // Waiting for video call
+  IN_PROGRESS       // Video call ongoing
+  APPROVED          // KYC verified
+  REJECTED          // KYC failed
 }

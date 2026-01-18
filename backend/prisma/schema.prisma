@@ -32,6 +32,10 @@ model User {
   isSuspended          Boolean             @default(false)
   suspendedUntil       DateTime?
   suspensionReason     String?
+  isDeleted            Boolean             @default(false) // Soft delete flag
+  deletedAt            DateTime?           // When user was deleted
+  deletedBy            String?             // Admin who deleted the user
+  deletionReason       String?             // Reason for deletion
   refreshToken         String?
   createdAt            DateTime            @default(now())
   updatedAt            DateTime            @updatedAt
@@ -63,6 +67,7 @@ model User {
   @@index([email])
   @@index([phone])
   @@index([roles])
+  @@index([isDeleted])
 }
 
 model PlayerProfile {

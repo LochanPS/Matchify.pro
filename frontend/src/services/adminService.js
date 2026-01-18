@@ -80,6 +80,44 @@ const adminService = {
     return response.data;
   },
 
+  /**
+   * Delete a user (soft delete)
+   */
+  async deleteUser(userId, reason) {
+    const response = await axios.post(
+      `${API_URL}/admin/users/${userId}/delete`,
+      { reason },
+      { headers: getAuthHeader() }
+    );
+    return response.data;
+  },
+
+  /**
+   * Restore a deleted user
+   */
+  async restoreUser(userId) {
+    const response = await axios.post(
+      `${API_URL}/admin/users/${userId}/restore`,
+      {},
+      { headers: getAuthHeader() }
+    );
+    return response.data;
+  },
+
+  /**
+   * Get deleted users
+   */
+  async getDeletedUsers({ page = 1, limit = 20, search }) {
+    const params = { page, limit };
+    if (search) params.search = search;
+    
+    const response = await axios.get(`${API_URL}/admin/users/deleted`, {
+      headers: getAuthHeader(),
+      params
+    });
+    return response.data;
+  },
+
   // ==================== TOURNAMENT MANAGEMENT ====================
   
   /**

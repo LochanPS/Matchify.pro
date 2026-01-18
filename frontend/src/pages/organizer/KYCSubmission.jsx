@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Upload, FileText, CheckCircle, AlertCircle, ArrowRight } from 'lucide-react';
 import { submitKYC, getKYCStatus } from '../../api/kyc';
-import { v2 as cloudinary } from 'cloudinary';
 
 export default function KYCSubmission() {
   const navigate = useNavigate();

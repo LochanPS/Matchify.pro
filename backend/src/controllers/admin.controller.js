@@ -13,14 +13,16 @@ class AdminController {
         limit = 20,
         search, // email, name, phone
         role,
-        status, // ACTIVE, SUSPENDED
+        status, // ACTIVE, SUSPENDED, ALL
         city,
         state,
       } = req.query;
 
       const skip = (page - 1) * limit;
 
-      const where = {};
+      const where = {
+        isDeleted: false, // Exclude deleted users
+      };
 
       // Search filter
       if (search) {
@@ -35,15 +37,21 @@ class AdminController {
       if (role) where.role = role;
 
       // Status filter
-      if (status) {
-        if (status === 'SUSPENDED') {
-          where.suspendedUntil = { gt: new Date() };
-        } else if (status === 'ACTIVE') {
-          where.OR = [
-            { suspendedUntil: null },
-            { suspendedUntil: { lte: new Date() } },
-          ];
-        }
+      if (status === 'SUSPENDED') {
+        // Show ONLY suspended users
+        where.suspendedUntil = { gt: new Date() };
+      } else if (status === 'ACTIVE') {
+        // Show ONLY active (non-suspended) users
+        where.OR = [
+          { suspendedUntil: null },
+          { suspendedUntil: { lte: new Date() } },
+        ];
+      } else if (!status || status === 'ALL') {
+        // Default: Show only active users (exclude suspended)
+        where.OR = [
+          { suspendedUntil: null },
+          { suspendedUntil: { lte: new Date() } },
+        ];
       }
 
       // Location filters
@@ -58,7 +66,7 @@ class AdminController {
             name: true,
             email: true,
             phone: true,
-            role: true,
+            roles: true,
             city: true,
             state: true,
             createdAt: true,
@@ -81,6 +89,7 @@ class AdminController {
       // Add isSuspended flag
       const usersWithStatus = users.map(user => ({
         ...user,
+        role: user.roles, // Map roles to role for frontend compatibility
         isSuspended: user.suspendedUntil && new Date(user.suspendedUntil) > new Date(),
       }));
 
@@ -962,7 +971,8 @@ class AdminController {
         totalTournaments,
         totalRegistrations,
         totalMatches,
-        totalRevenue,
+        playerToOrganizerRevenue,
+        adminProfitRevenue,
         usersByRole,
         tournamentsByStatus,
         recentRegistrations,
@@ -984,12 +994,25 @@ class AdminController {
         // Total matches
         prisma.match.count({ where: dateFilter }),
 
-        // Total revenue
-        prisma.walletTransaction.aggregate({
+        // Revenue Type 1: Player → Organizer transactions (tournament registrations)
+        prisma.registration.aggregate({
           where: {
             ...dateFilter,
-            type: 'DEBIT',
-            status: 'COMPLETED',
+            status: 'CONFIRMED',
+          },
+          _sum: {
+            amountTotal: true,
+          },
+        }),
+
+        // Revenue Type 2: Admin profit (KYC payments)
+        prisma.kYCPayment.aggregate({
+          where: {
+            status: 'VERIFIED',
+            verifiedAt: startDate || endDate ? {
+              ...(startDate && { gte: new Date(startDate) }),
+              ...(endDate && { lte: new Date(endDate) }),
+            } : undefined,
           },
           _sum: {
             amount: true,
@@ -1046,7 +1069,12 @@ class AdminController {
           totalTournaments,
           totalRegistrations,
           totalMatches,
-          totalRevenue: totalRevenue._sum.amount || 0,
+          // Revenue Type 1: Player → Organizer (tournament fees)
+          playerToOrganizerRevenue: playerToOrganizerRevenue._sum.amountTotal || 0,
+          // Revenue Type 2: Admin profit (KYC fees)
+          adminProfitRevenue: adminProfitRevenue._sum.amount || 0,
+          // Total revenue (both types combined)
+          totalRevenue: (playerToOrganizerRevenue._sum.amountTotal || 0) + (adminProfitRevenue._sum.amount || 0),
           usersByRole: usersByRole.reduce((acc, item) => {
             acc[item.role] = item._count;
             return acc;
@@ -1172,6 +1200,233 @@ class AdminController {
       res.status(500).json({
         success: false,
         message: 'Failed to export audit logs',
+        error: error.message,
+      });
+    }
+  }
+
+  /**
+   * POST /admin/users/:id/delete - Soft delete a user
+   */
+  static async deleteUser(req, res) {
+    try {
+      const { id } = req.params;
+      const adminId = req.user.id;
+      const { reason } = req.body;
+
+      if (!reason || reason.trim().length < 10) {
+        return res.status(400).json({
+          success: false,
+          message: 'Deletion reason is required (minimum 10 characters)',
+        });
+      }
+
+      const user = await prisma.user.findUnique({ where: { id } });
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'User not found',
+        });
+      }
+
+      // Cannot delete admin users
+      if (user.roles && user.roles.includes('ADMIN')) {
+        return res.status(403).json({
+          success: false,
+          message: 'Cannot delete admin users',
+        });
+      }
+
+      // Check if already deleted
+      if (user.isDeleted) {
+        return res.status(400).json({
+          success: false,
+          message: 'User is already deleted',
+        });
+      }
+
+      // Soft delete the user
+      const updatedUser = await prisma.user.update({
+        where: { id },
+        data: {
+          isDeleted: true,
+          deletedAt: new Date(),
+          deletedBy: adminId,
+          deletionReason: reason,
+        },
+      });
+
+      // Log the action
+      await AuditLogService.log({
+        adminId,
+        action: 'USER_DELETED',
+        entityType: 'USER',
+        entityId: id,
+        details: {
+          userEmail: user.email,
+          userName: user.name,
+          userRoles: user.roles,
+          deletionReason: reason,
+        },
+        ipAddress: req.ip,
+        userAgent: req.get('user-agent'),
+      });
+
+      res.json({
+        success: true,
+        message: 'User deleted successfully',
+        user: {
+          id: updatedUser.id,
+          email: updatedUser.email,
+          deletedAt: updatedUser.deletedAt,
+        },
+      });
+    } catch (error) {
+      console.error('Delete user error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to delete user',
+        error: error.message,
+      });
+    }
+  }
+
+  /**
+   * POST /admin/users/:id/restore - Restore a deleted user
+   */
+  static async restoreUser(req, res) {
+    try {
+      const { id } = req.params;
+      const adminId = req.user.id;
+
+      const user = await prisma.user.findUnique({ where: { id } });
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'User not found',
+        });
+      }
+
+      if (!user.isDeleted) {
+        return res.status(400).json({
+          success: false,
+          message: 'User is not deleted',
+        });
+      }
+
+      // Restore the user
+      const updatedUser = await prisma.user.update({
+        where: { id },
+        data: {
+          isDeleted: false,
+          deletedAt: null,
+          deletedBy: null,
+          deletionReason: null,
+        },
+      });
+
+      // Log the action
+      await AuditLogService.log({
+        adminId,
+        action: 'USER_RESTORED',
+        entityType: 'USER',
+        entityId: id,
+        details: {
+          userEmail: user.email,
+          userName: user.name,
+          previousDeletionReason: user.deletionReason,
+        },
+        ipAddress: req.ip,
+        userAgent: req.get('user-agent'),
+      });
+
+      res.json({
+        success: true,
+        message: 'User restored successfully',
+        user: {
+          id: updatedUser.id,
+          email: updatedUser.email,
+        },
+      });
+    } catch (error) {
+      console.error('Restore user error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to restore user',
+        error: error.message,
+      });
+    }
+  }
+
+  /**
+   * GET /admin/users/deleted - Get all deleted users
+   */
+  static async getDeletedUsers(req, res) {
+    try {
+      const {
+        page = 1,
+        limit = 20,
+        search,
+      } = req.query;
+
+      const skip = (page - 1) * limit;
+
+      const where = {
+        isDeleted: true,
+      };
+
+      // Search filter
+      if (search) {
+        where.OR = [
+          { email: { contains: search } },
+          { name: { contains: search } },
+          { phone: { contains: search } },
+        ];
+      }
+
+      const [users, total] = await Promise.all([
+        prisma.user.findMany({
+          where,
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            roles: true,
+            city: true,
+            state: true,
+            createdAt: true,
+            deletedAt: true,
+            deletionReason: true,
+            _count: {
+              select: {
+                registrations: true,
+                tournaments: true,
+              },
+            },
+          },
+          orderBy: { deletedAt: 'desc' },
+          skip,
+          take: parseInt(limit),
+        }),
+        prisma.user.count({ where }),
+      ]);
+
+      res.json({
+        success: true,
+        users,
+        pagination: {
+          page: parseInt(page),
+          limit: parseInt(limit),
+          total,
+          totalPages: Math.ceil(total / parseInt(limit)),
+        },
+      });
+    } catch (error) {
+      console.error('Get deleted users error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to fetch deleted users',
         error: error.message,
       });
     }

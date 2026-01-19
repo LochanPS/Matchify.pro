@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AlertTriangle, CheckCircle, X, UserX, UserCheck, ArrowLeft } from 'lucide-react';
+import { AlertTriangle, CheckCircle, X, UserX, UserCheck, ArrowLeft, Trash2, RotateCcw } from 'lucide-react';
 import adminService from '../../services/adminService';
 import UserDetailsModal from '../../components/admin/UserDetailsModal';
 
@@ -10,6 +10,7 @@ const UserManagementPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0 });
+  const [activeTab, setActiveTab] = useState('active'); // 'active' or 'deleted'
   
   // Filters
   const [search, setSearch] = useState('');
@@ -21,23 +22,37 @@ const UserManagementPage = () => {
   const [suspendModal, setSuspendModal] = useState(null);
   const [suspendReason, setSuspendReason] = useState('');
   const [suspendDuration, setSuspendDuration] = useState('7');
+  const [deleteModal, setDeleteModal] = useState(null);
+  const [deleteReason, setDeleteReason] = useState('');
   const [alertModal, setAlertModal] = useState(null);
   const [unsuspendModal, setUnsuspendModal] = useState(null);
+  const [restoreModal, setRestoreModal] = useState(null);
 
   useEffect(() => {
     fetchUsers();
-  }, [pagination.page, roleFilter, statusFilter]);
+  }, [pagination.page, roleFilter, statusFilter, activeTab]);
 
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const data = await adminService.getUsers({
-        page: pagination.page,
-        limit: pagination.limit,
-        search: search || undefined,
-        role: roleFilter || undefined,
-        status: statusFilter || undefined
-      });
+      let data;
+      
+      if (activeTab === 'deleted') {
+        data = await adminService.getDeletedUsers({
+          page: pagination.page,
+          limit: pagination.limit,
+          search: search || undefined,
+        });
+      } else {
+        data = await adminService.getUsers({
+          page: pagination.page,
+          limit: pagination.limit,
+          search: search || undefined,
+          role: roleFilter || undefined,
+          status: statusFilter || undefined
+        });
+      }
+      
       setUsers(data.users);
       setPagination(data.pagination);
     } catch (err) {
@@ -87,6 +102,39 @@ const UserManagementPage = () => {
     }
   };
 
+  const handleDelete = async () => {
+    if (!deleteReason.trim() || deleteReason.length < 10) {
+      setAlertModal({ type: 'error', message: 'Please provide a reason (at least 10 characters)' });
+      return;
+    }
+
+    try {
+      await adminService.deleteUser(deleteModal.id, deleteReason);
+      setAlertModal({ type: 'success', message: 'User deleted successfully' });
+      setDeleteModal(null);
+      setDeleteReason('');
+      fetchUsers();
+    } catch (err) {
+      setAlertModal({ type: 'error', message: err.response?.data?.message || 'Failed to delete user' });
+    }
+  };
+
+  const handleRestore = async (userId) => {
+    setRestoreModal({ userId });
+  };
+
+  const confirmRestore = async () => {
+    try {
+      await adminService.restoreUser(restoreModal.userId);
+      setAlertModal({ type: 'success', message: 'User restored successfully' });
+      setRestoreModal(null);
+      fetchUsers();
+    } catch (err) {
+      setAlertModal({ type: 'error', message: err.response?.data?.message || 'Failed to restore user' });
+      setRestoreModal(null);
+    }
+  };
+
   return (
     <div className="p-8">
       {/* Back Button */}
@@ -104,68 +152,127 @@ const UserManagementPage = () => {
         <p className="text-gray-600 mt-2">Search, view, and manage platform users</p>
       </div>
 
-      {/* Filters */}
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {/* Search */}
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Search
-            </label>
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Name, email, or phone..."
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-
-          {/* Role Filter */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Role
-            </label>
-            <select
-              value={roleFilter}
-              onChange={(e) => setRoleFilter(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="">All Roles</option>
-              <option value="PLAYER">Player</option>
-              <option value="ORGANIZER">Organizer</option>
-              <option value="UMPIRE">Umpire</option>
-              <option value="ADMIN">Admin</option>
-            </select>
-          </div>
-
-          {/* Status Filter */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Status
-            </label>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="">All Status</option>
-              <option value="ACTIVE">Active</option>
-              <option value="SUSPENDED">Suspended</option>
-            </select>
-          </div>
-
-          {/* Search Button */}
-          <div className="md:col-span-4">
-            <button
-              type="submit"
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-            >
-              Search
-            </button>
-          </div>
-        </form>
+      {/* Tabs */}
+      <div className="flex gap-4 mb-6">
+        <button
+          onClick={() => {
+            setActiveTab('active');
+            setPagination({ ...pagination, page: 1 });
+          }}
+          className={`px-6 py-3 rounded-lg font-medium transition-colors ${
+            activeTab === 'active'
+              ? 'bg-blue-600 text-white'
+              : 'bg-white text-gray-700 hover:bg-gray-50'
+          }`}
+        >
+          Active Users
+        </button>
+        <button
+          onClick={() => {
+            setActiveTab('deleted');
+            setPagination({ ...pagination, page: 1 });
+          }}
+          className={`px-6 py-3 rounded-lg font-medium transition-colors ${
+            activeTab === 'deleted'
+              ? 'bg-red-600 text-white'
+              : 'bg-white text-gray-700 hover:bg-gray-50'
+          }`}
+        >
+          Deleted Users
+        </button>
       </div>
+
+      {/* Filters */}
+      {activeTab === 'active' && (
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {/* Search */}
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Search
+              </label>
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Name, email, or phone..."
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+
+            {/* Role Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Role
+              </label>
+              <select
+                value={roleFilter}
+                onChange={(e) => setRoleFilter(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="">All Roles</option>
+                <option value="PLAYER">Player</option>
+                <option value="ORGANIZER">Organizer</option>
+                <option value="UMPIRE">Umpire</option>
+                <option value="ADMIN">Admin</option>
+              </select>
+            </div>
+
+            {/* Status Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Status
+              </label>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="">All Users</option>
+                <option value="ACTIVE">Active Only</option>
+                <option value="SUSPENDED">Blocked Only</option>
+              </select>
+            </div>
+
+            {/* Search Button */}
+            <div className="md:col-span-4">
+              <button
+                type="submit"
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              >
+                Search
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {activeTab === 'deleted' && (
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <form onSubmit={handleSearch} className="flex gap-4">
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Search
+              </label>
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Name, email, or phone..."
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+            <div className="flex items-end">
+              <button
+                type="submit"
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              >
+                Search
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
 
       {/* Error */}
       {error && (
@@ -259,22 +366,39 @@ const UserManagementPage = () => {
                         >
                           👁️
                         </button>
-                        {user.isSuspended ? (
+                        {activeTab === 'deleted' ? (
+                          <button
+                            onClick={() => handleRestore(user.id)}
+                            className="text-green-600 hover:text-green-900"
+                            title="Restore User"
+                          >
+                            <RotateCcw className="w-4 h-4 inline" />
+                          </button>
+                        ) : user.isSuspended ? (
                           <button
                             onClick={() => handleUnsuspend(user.id)}
-                            className="text-green-600 hover:text-green-900"
+                            className="text-green-600 hover:text-green-900 mr-3"
                             title="Unsuspend"
                           >
                             ✅
                           </button>
                         ) : user.role !== 'ADMIN' ? (
-                          <button
-                            onClick={() => setSuspendModal(user)}
-                            className="text-red-600 hover:text-red-900"
-                            title="Suspend"
-                          >
-                            🚫
-                          </button>
+                          <>
+                            <button
+                              onClick={() => setSuspendModal(user)}
+                              className="text-yellow-600 hover:text-yellow-900 mr-3"
+                              title="Suspend"
+                            >
+                              🚫
+                            </button>
+                            <button
+                              onClick={() => setDeleteModal(user)}
+                              className="text-red-600 hover:text-red-900"
+                              title="Delete User"
+                            >
+                              <Trash2 className="w-4 h-4 inline" />
+                            </button>
+                          </>
                         ) : null}
                       </td>
                     </tr>
@@ -454,6 +578,97 @@ const UserManagementPage = () => {
                   }`}
                 >
                   OK
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Modal */}
+      {deleteModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-8 max-w-md w-full mx-4">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <Trash2 className="w-6 h-6 text-red-600" />
+              Delete User
+            </h2>
+            <p className="text-gray-600 mb-4">
+              You are about to delete <strong>{deleteModal.name}</strong>. This action can be reversed later.
+            </p>
+
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Reason for Deletion *
+              </label>
+              <textarea
+                value={deleteReason}
+                onChange={(e) => setDeleteReason(e.target.value)}
+                placeholder="Provide a detailed reason for deletion..."
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                rows="4"
+              />
+              <p className="text-xs text-gray-500 mt-1">Minimum 10 characters</p>
+            </div>
+
+            <div className="flex space-x-3">
+              <button
+                onClick={() => {
+                  setDeleteModal(null);
+                  setDeleteReason('');
+                }}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center justify-center gap-2"
+              >
+                <Trash2 className="w-4 h-4" />
+                Delete User
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Restore Confirmation Modal */}
+      {restoreModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className="relative w-full max-w-md">
+            <div className="absolute -inset-2 bg-gradient-to-r from-green-500 via-emerald-500 to-green-500 rounded-3xl blur-xl opacity-50"></div>
+            <div className="relative bg-slate-800 rounded-2xl border border-white/10 overflow-hidden">
+              <div className="p-6 border-b border-white/10">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-green-500/20 rounded-lg">
+                      <RotateCcw className="w-5 h-5 text-green-400" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-white">Restore User</h3>
+                  </div>
+                  <button onClick={() => setRestoreModal(null)} className="p-2 hover:bg-white/10 rounded-lg transition-colors">
+                    <X className="w-5 h-5 text-gray-400" />
+                  </button>
+                </div>
+              </div>
+              <div className="p-6 space-y-4">
+                <p className="text-gray-300">Are you sure you want to restore this user?</p>
+                <p className="text-sm text-gray-400">They will regain full access to their account.</p>
+              </div>
+              <div className="p-6 bg-slate-900/50 border-t border-white/10 flex gap-3">
+                <button
+                  onClick={() => setRestoreModal(null)}
+                  className="flex-1 px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl transition-colors font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmRestore}
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-xl transition-colors font-medium flex items-center justify-center gap-2"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  Restore
                 </button>
               </div>
             </div>

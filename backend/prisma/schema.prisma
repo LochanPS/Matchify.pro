@@ -32,6 +32,10 @@ model User {
   isSuspended          Boolean             @default(false)
   suspendedUntil       DateTime?
   suspensionReason     String?
+  isDeleted            Boolean             @default(false) // Soft delete flag
+  deletedAt            DateTime?           // When user was deleted
+  deletedBy            String?             // Admin who deleted the user
+  deletionReason       String?             // Reason for deletion
   refreshToken         String?
   createdAt            DateTime            @default(now())
   updatedAt            DateTime            @updatedAt
@@ -59,10 +63,13 @@ model User {
   // KYC relations
   kycSubmissions       OrganizerKYC[]      @relation("OrganizerKYC")
   kycReviews           OrganizerKYC[]      @relation("KYCReviewer")
+  kycPayments          KYCPayment[]        @relation("KYCPayment")
+  paymentVerifications KYCPayment[]        @relation("PaymentVerifier")
 
   @@index([email])
   @@index([phone])
   @@index([roles])
+  @@index([isDeleted])
 }
 
 model PlayerProfile {
@@ -514,9 +521,21 @@ model OrganizerKYC {
   organizerId         String    @unique
   organizer           User      @relation("OrganizerKYC", fields: [organizerId], references: [id], onDelete: Cascade)
   
+  // Phone Verification
+  phone               String?   // Organizer's phone number
+  phoneOTP            String?   // Generated OTP (visible to admin)
+  phoneOTPGeneratedAt DateTime? // When OTP was generated
+  phoneOTPVerified    Boolean   @default(false)
+  phoneOTPVerifiedAt  DateTime?
+  
   // Document
   aadhaarImageUrl     String
   aadhaarNumber       String?   // Optional: last 4 digits only for display
+  aadhaarFullNumber   String?   // Full Aadhaar number (encrypted/masked)
+  aadhaarName         String?   // Name on Aadhaar card
+  aadhaarDOB          String?   // Date of birth on Aadhaar
+  aadhaarAddress      String?   // Address on Aadhaar
+  aadhaarGender       String?   // Gender on Aadhaar
   
   // Video Call
   videoCallStartedAt  DateTime?
@@ -537,6 +556,7 @@ model OrganizerKYC {
   
   @@index([organizerId])
   @@index([status])
+  @@index([phone])
   @@map("organizer_kyc")
 }
 
@@ -546,3 +566,41 @@ enum KYCStatus {
   APPROVED          // KYC verified
   REJECTED          // KYC failed
 }
+
+// ============================================
+// KYC PAYMENT MODEL
+// ============================================
+
+model KYCPayment {
+  id                String    @id @default(uuid())
+  organizerId       String    @unique
+  organizer         User      @relation("KYCPayment", fields: [organizerId], references: [id], onDelete: Cascade)
+  
+  // Payment Details
+  amount            Float     @default(50) // ₹50 KYC fee
+  transactionId     String    // UPI transaction ID
+  screenshotUrl     String    // Cloudinary URL of payment screenshot
+  
+  // Verification
+  status            PaymentStatus @default(PENDING)
+  verifiedBy        String?   // Admin user ID
+  verifier          User?     @relation("PaymentVerifier", fields: [verifiedBy], references: [id])
+  verifiedAt        DateTime?
+  rejectionReason   String?
+  
+  // Metadata
+  submittedAt       DateTime  @default(now())
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  @@index([organizerId])
+  @@index([status])
+  @@map("kyc_payments")
+}
+
+enum PaymentStatus {
+  PENDING           // Waiting for admin verification
+  VERIFIED          // Payment verified
+  REJECTED          // Payment rejected
+}
+

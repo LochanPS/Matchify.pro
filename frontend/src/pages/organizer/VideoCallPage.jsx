@@ -191,23 +191,9 @@ export default function VideoCallPage() {
             <iframe
               src={roomUrl}
               allow="camera; microphone; fullscreen; display-capture"
-              className="w-full h-full"
+              className="w-full h-full border-0"
               title="KYC Video Call"
             />
-            
-            {/* Placeholder for Daily.co iframe */}
-            <div className="absolute inset-0 flex items-center justify-center bg-slate-900">
-              <div className="text-center">
-                <Video className="w-16 h-16 text-purple-400 mx-auto mb-4" />
-                <p className="text-white text-lg font-medium mb-2">Video Call Active</p>
-                <p className="text-gray-400 text-sm">
-                  Daily.co integration will be added when API key is available
-                </p>
-                <p className="text-gray-500 text-xs mt-4">
-                  Room URL: {roomUrl}
-                </p>
-              </div>
-            </div>
           </div>
         </div>
       )}

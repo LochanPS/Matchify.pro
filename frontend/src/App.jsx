@@ -59,8 +59,14 @@ import RefundIssuePage from './pages/RefundIssuePage'
 import SearchAcademiesPage from './pages/SearchAcademiesPage'
 import AddAcademyPage from './pages/AddAcademyPage'
 import KYCSubmission from './pages/organizer/KYCSubmission'
+import KYCInfoPage from './pages/organizer/KYCInfoPage'
+import KYCPaymentPage from './pages/organizer/KYCPaymentPage'
+import PhoneVerificationPage from './pages/organizer/PhoneVerificationPage'
 import VideoCallPage from './pages/organizer/VideoCallPage'
 import AdminKYCDashboard from './pages/admin/AdminKYCDashboard'
+import KYCPaymentVerification from './pages/admin/KYCPaymentVerification'
+import AdminVideoCallPage from './pages/admin/AdminVideoCallPage'
+import PhoneVerificationManagement from './pages/admin/PhoneVerificationManagement'
 
 // Inner component that can access AuthContext
 function AppContent() {
@@ -274,6 +280,39 @@ function AppContent() {
           
           {/* Organizer KYC Routes */}
           <Route
+            path="/organizer/kyc/info"
+            element={
+              <ProtectedRoute>
+                <RoleRoute allowedRoles={['ORGANIZER']} blockAdmin={true}>
+                  <KYCInfoPage />
+                </RoleRoute>
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/organizer/kyc/phone-verify"
+            element={
+              <ProtectedRoute>
+                <RoleRoute allowedRoles={['ORGANIZER']} blockAdmin={true}>
+                  <PhoneVerificationPage />
+                </RoleRoute>
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/organizer/kyc/payment"
+            element={
+              <ProtectedRoute>
+                <RoleRoute allowedRoles={['ORGANIZER']} blockAdmin={true}>
+                  <KYCPaymentPage />
+                </RoleRoute>
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
             path="/organizer/kyc/submit"
             element={
               <ProtectedRoute>
@@ -413,6 +452,9 @@ function AppContent() {
             <Route path="audit-logs" element={<AuditLogsPage />} />
             <Route path="academies" element={<AcademyApprovalsPage />} />
             <Route path="kyc" element={<AdminKYCDashboard />} />
+            <Route path="kyc/payments" element={<KYCPaymentVerification />} />
+            <Route path="kyc/video-call" element={<AdminVideoCallPage />} />
+            <Route path="kyc/phone-verifications" element={<PhoneVerificationManagement />} />
           </Route>
           
           {/* Catch all route */}

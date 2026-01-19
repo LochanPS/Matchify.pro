@@ -47,8 +47,8 @@ router.get('/invite/details/:token', async (req, res) => {
 });
 
 // User Management (Admin only)
-router.get('/users', authenticate, requireAdmin, AdminController.getUsers);
 router.get('/users/deleted', authenticate, requireAdmin, AdminController.getDeletedUsers);
+router.get('/users', authenticate, requireAdmin, AdminController.getUsers);
 router.get('/users/:id', authenticate, requireAdmin, AdminController.getUserDetails);
 router.post('/users/:id/suspend', authenticate, requireAdmin, AdminController.suspendUser);
 router.post('/users/:id/unsuspend', authenticate, requireAdmin, AdminController.unsuspendUser);

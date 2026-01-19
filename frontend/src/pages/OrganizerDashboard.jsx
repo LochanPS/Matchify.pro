@@ -121,8 +121,8 @@ export default function OrganizerDashboard() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 -mt-8">
-        {/* KYC Banner - Show if KYC not approved */}
-        {!kycLoading && kycStatus !== 'APPROVED' && (
+        {/* KYC Banner - Show if KYC not approved (show by default unless explicitly approved) */}
+        {(kycLoading || kycStatus !== 'APPROVED') && (
           <KYCBanner />
         )}
 

@@ -19,14 +19,17 @@ export default function KYCInfoPage() {
 
       {/* Header */}
       <div className="max-w-4xl mx-auto px-4 py-12 text-center">
-        <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mb-6 shadow-2xl shadow-blue-500/30">
+        <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-red-500 to-orange-600 rounded-2xl mb-6 shadow-2xl shadow-red-500/50 animate-pulse">
           <Shield className="w-10 h-10 text-white" />
         </div>
+        <div className="bg-red-500/20 border-2 border-red-500/60 rounded-xl p-4 mb-6 inline-block">
+          <p className="text-red-300 font-bold text-lg">⚠️ COMPULSORY REQUIREMENT ⚠️</p>
+        </div>
         <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-          KYC Verification Required
+          KYC Verification is Mandatory
         </h1>
         <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-          Complete your KYC verification to start creating tournaments on Matchify.pro
+          You <strong className="text-red-400">MUST</strong> complete KYC verification before creating any tournament on Matchify.pro
         </p>
       </div>
 

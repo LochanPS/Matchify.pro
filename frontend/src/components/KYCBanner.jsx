@@ -14,7 +14,7 @@ export default function KYCBanner({ onDismiss }) {
   if (dismissed) return null;
 
   return (
-    <div className="bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-red-500/20 border border-amber-500/40 rounded-xl p-4 mb-6 animate-pulse-slow">
+    <div className="bg-gradient-to-r from-red-500/30 via-orange-500/30 to-amber-500/30 border-2 border-red-500/60 rounded-xl p-6 mb-6 shadow-2xl shadow-red-500/20">
       <div className="flex items-start gap-4">
         {/* Icon */}
         <div className="flex-shrink-0">
@@ -27,13 +27,13 @@ export default function KYCBanner({ onDismiss }) {
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1">
-              <h3 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
-                <AlertCircle className="w-5 h-5 text-amber-400" />
-                KYC Verification Required
+              <h3 className="text-2xl font-bold text-white mb-2 flex items-center gap-2">
+                <AlertCircle className="w-6 h-6 text-red-400 animate-pulse" />
+                ⚠️ KYC Verification Required Before Creating Tournaments
               </h3>
-              <p className="text-gray-300 text-sm mb-3">
-                Complete your KYC verification before creating your first tournament. 
-                It's quick (5-10 minutes) and ensures a safe platform for everyone.
+              <p className="text-white text-base mb-4 font-medium">
+                You must complete KYC verification before you can create your first tournament. 
+                This is a quick 5-10 minute process to ensure platform safety.
               </p>
               
               {/* Features */}
@@ -53,17 +53,17 @@ export default function KYCBanner({ onDismiss }) {
               <div className="flex flex-wrap gap-3">
                 <button
                   onClick={() => navigate('/organizer/kyc/info')}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg font-medium hover:shadow-lg hover:shadow-blue-500/30 transition-all text-sm"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-white text-gray-900 rounded-lg font-bold hover:bg-gray-100 transition-all text-base shadow-lg"
                 >
-                  Learn More
-                  <ArrowRight className="w-4 h-4" />
+                  📚 Learn More About KYC
+                  <ArrowRight className="w-5 h-5" />
                 </button>
                 <button
                   onClick={() => navigate('/organizer/kyc/submit')}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg font-bold hover:shadow-lg hover:shadow-green-500/30 transition-all text-sm"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg font-bold hover:shadow-xl hover:shadow-green-500/50 transition-all text-base"
                 >
-                  <Shield className="w-4 h-4" />
-                  Start KYC Now
+                  <Shield className="w-5 h-5" />
+                  Start KYC Verification Now
                 </button>
               </div>
             </div>

@@ -1,5 +1,4 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
-import { lazy, Suspense } from 'react'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { NotificationProvider } from './contexts/NotificationContext'
 import Navbar from './components/Navbar'
@@ -7,96 +6,67 @@ import ProfileCompletionModal from './components/ProfileCompletionModal'
 import ImpersonationBanner from './components/ImpersonationBanner'
 import ProtectedRoute from './components/ProtectedRoute'
 import RoleRoute from './components/RoleRoute'
-
-// Loading component
-const PageLoader = () => (
-  <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-    <div className="text-center">
-      <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-      <p className="text-white text-lg">Loading...</p>
-    </div>
-  </div>
-)
-
-// Lazy load all pages - Critical pages loaded first
-const HomePage = lazy(() => import('./pages/HomePage'))
-const LoginPage = lazy(() => import('./pages/LoginPage'))
-const RegisterPage = lazy(() => import('./pages/RegisterPage'))
-
-// Player pages
-const PlayerDashboard = lazy(() => import('./pages/PlayerDashboard'))
-const ProfilePage = lazy(() => import('./pages/ProfilePage'))
-const MyRegistrationsPage = lazy(() => import('./pages/MyRegistrationsPage'))
-const MyPoints = lazy(() => import('./pages/MyPoints'))
-
-// Tournament pages
-const TournamentDiscoveryPage = lazy(() => import('./pages/TournamentDiscoveryPage'))
-const TournamentDetailPage = lazy(() => import('./pages/TournamentDetailPage'))
-const TournamentRegistrationPage = lazy(() => import('./pages/TournamentRegistrationPage'))
-const ViewDrawsPage = lazy(() => import('./pages/ViewDrawsPage'))
-const DrawPage = lazy(() => import('./pages/DrawPage'))
-const Leaderboard = lazy(() => import('./pages/Leaderboard'))
-
-// Organizer pages
-const OrganizerDashboard = lazy(() => import('./pages/OrganizerDashboard'))
-const CreateTournament = lazy(() => import('./pages/CreateTournament'))
-const EditTournament = lazy(() => import('./pages/EditTournament'))
-const ManageCategoriesPage = lazy(() => import('./pages/ManageCategoriesPage'))
-const TournamentManagementPage = lazy(() => import('./pages/TournamentManagementPage'))
-const OrganizerTournamentHistory = lazy(() => import('./pages/OrganizerTournamentHistory'))
-const TournamentCategoryDetails = lazy(() => import('./pages/TournamentCategoryDetails'))
-const CancellationRequestPage = lazy(() => import('./pages/CancellationRequestPage'))
-
-// Organizer KYC pages
-const KYCInfoPage = lazy(() => import('./pages/organizer/KYCInfoPage'))
-const PhoneVerificationPage = lazy(() => import('./pages/organizer/PhoneVerificationPage'))
-const KYCPaymentPage = lazy(() => import('./pages/organizer/KYCPaymentPage'))
-const KYCSubmission = lazy(() => import('./pages/organizer/KYCSubmission'))
-const VideoCallPage = lazy(() => import('./pages/organizer/VideoCallPage'))
-
-// Umpire pages
-const UmpireDashboard = lazy(() => import('./pages/UmpireDashboard'))
-const UmpireScoring = lazy(() => import('./pages/UmpireScoring'))
-const MatchScoringPage = lazy(() => import('./pages/MatchScoringPage'))
-const ScoringConsolePage = lazy(() => import('./pages/ScoringConsolePage'))
-const ConductMatchPage = lazy(() => import('./pages/ConductMatchPage'))
-
-// Match/Live pages
-const MatchListPage = lazy(() => import('./pages/MatchListPage'))
-const LiveMatches = lazy(() => import('./pages/LiveMatches'))
-const LiveMatchDetail = lazy(() => import('./pages/LiveMatchDetail'))
-const SpectatorViewPage = lazy(() => import('./pages/SpectatorViewPage'))
-const LiveTournamentDashboard = lazy(() => import('./pages/LiveTournamentDashboard'))
-
-// Wallet/Credits pages
-const Wallet = lazy(() => import('./pages/Wallet'))
-const Credits = lazy(() => import('./pages/Credits'))
-
-// Notification pages
-const NotificationsPage = lazy(() => import('./pages/NotificationsPage'))
-const NotificationDetailPage = lazy(() => import('./pages/NotificationDetailPage'))
-
-// Other pages
-const PartnerConfirmationPage = lazy(() => import('./pages/PartnerConfirmationPage'))
-const AcceptInvite = lazy(() => import('./pages/AcceptInvite'))
-const RefundIssuePage = lazy(() => import('./pages/RefundIssuePage'))
-const SearchAcademiesPage = lazy(() => import('./pages/SearchAcademiesPage'))
-const AddAcademyPage = lazy(() => import('./pages/AddAcademyPage'))
-const BracketDemo = lazy(() => import('./pages/BracketDemo'))
-
-// Admin pages
-const AdminDashboard = lazy(() => import('./pages/AdminDashboard'))
-const AdminInvites = lazy(() => import('./pages/AdminInvites'))
-const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'))
-const AdminDashboardPage = lazy(() => import('./pages/admin/AdminDashboardPage'))
-const UserManagementPage = lazy(() => import('./pages/admin/UserManagementPage'))
-const InviteManagementPage = lazy(() => import('./pages/admin/InviteManagementPage'))
-const AuditLogsPage = lazy(() => import('./pages/admin/AuditLogsPage'))
-const AcademyApprovalsPage = lazy(() => import('./pages/admin/AcademyApprovalsPage'))
-const AdminKYCDashboard = lazy(() => import('./pages/admin/AdminKYCDashboard'))
-const KYCPaymentVerification = lazy(() => import('./pages/admin/KYCPaymentVerification'))
-const AdminVideoCallPage = lazy(() => import('./pages/admin/AdminVideoCallPage'))
-const PhoneVerificationManagement = lazy(() => import('./pages/admin/PhoneVerificationManagement'))
+import HomePage from './pages/HomePage'
+import LoginPage from './pages/LoginPage'
+import RegisterPage from './pages/RegisterPage'
+import ProfilePage from './pages/ProfilePage'
+import WalletPage from './pages/WalletPage'
+import Wallet from './pages/Wallet'
+import Credits from './pages/Credits'
+import TournamentsPage from './pages/TournamentsPage'
+import TournamentDetailPage from './pages/TournamentDetailPage'
+import TournamentDiscoveryPage from './pages/TournamentDiscoveryPage'
+import CreateTournament from './pages/CreateTournament'
+import EditTournament from './pages/EditTournament'
+import ViewDrawsPage from './pages/ViewDrawsPage'
+import DrawPage from './pages/DrawPage'
+import TournamentRegistrationPage from './pages/TournamentRegistrationPage'
+import MyRegistrationsPage from './pages/MyRegistrationsPage'
+import PartnerConfirmationPage from './pages/PartnerConfirmationPage'
+import OrganizerDashboardPage from './pages/OrganizerDashboardPage'
+import TournamentManagementPage from './pages/TournamentManagementPage'
+import ManageCategoriesPage from './pages/ManageCategoriesPage'
+import PlayerDashboard from './pages/PlayerDashboard'
+import OrganizerDashboard from './pages/OrganizerDashboard'
+import UmpireDashboard from './pages/UmpireDashboard'
+import UmpireScoring from './pages/UmpireScoring'
+import MatchScoringPage from './pages/MatchScoringPage'
+import AdminDashboard from './pages/AdminDashboard'
+import Leaderboard from './pages/Leaderboard'
+import MyPoints from './pages/MyPoints'
+import ScoringConsolePage from './pages/ScoringConsolePage'
+import MatchListPage from './pages/MatchListPage'
+import SpectatorViewPage from './pages/SpectatorViewPage'
+import ConductMatchPage from './pages/ConductMatchPage'
+import LiveTournamentDashboard from './pages/LiveTournamentDashboard'
+import LiveMatches from './pages/LiveMatches'
+import LiveMatchDetail from './pages/LiveMatchDetail'
+import OrganizerTournamentHistory from './pages/OrganizerTournamentHistory'
+import TournamentCategoryDetails from './pages/TournamentCategoryDetails'
+import AdminInvites from './pages/AdminInvites'
+import AcceptInvite from './pages/AcceptInvite'
+import NotificationsPage from './pages/NotificationsPage'
+import AdminLayout from './pages/admin/AdminLayout'
+import AdminDashboardPage from './pages/admin/AdminDashboardPage'
+import UserManagementPage from './pages/admin/UserManagementPage'
+import BracketDemo from './pages/BracketDemo'
+import InviteManagementPage from './pages/admin/InviteManagementPage'
+import AuditLogsPage from './pages/admin/AuditLogsPage'
+import AcademyApprovalsPage from './pages/admin/AcademyApprovalsPage'
+import CancellationRequestPage from './pages/CancellationRequestPage'
+import NotificationDetailPage from './pages/NotificationDetailPage'
+import RefundIssuePage from './pages/RefundIssuePage'
+import SearchAcademiesPage from './pages/SearchAcademiesPage'
+import AddAcademyPage from './pages/AddAcademyPage'
+import KYCSubmission from './pages/organizer/KYCSubmission'
+import KYCInfoPage from './pages/organizer/KYCInfoPage'
+import KYCPaymentPage from './pages/organizer/KYCPaymentPage'
+import PhoneVerificationPage from './pages/organizer/PhoneVerificationPage'
+import VideoCallPage from './pages/organizer/VideoCallPage'
+import AdminKYCDashboard from './pages/admin/AdminKYCDashboard'
+import KYCPaymentVerification from './pages/admin/KYCPaymentVerification'
+import AdminVideoCallPage from './pages/admin/AdminVideoCallPage'
+import PhoneVerificationManagement from './pages/admin/PhoneVerificationManagement'
 
 // Inner component that can access AuthContext
 function AppContent() {
@@ -131,8 +101,7 @@ function AppContent() {
         />
       )}
       
-      <Suspense fallback={<PageLoader />}>
-        <Routes>
+      <Routes>
             {/* Public routes */}
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
@@ -491,7 +460,6 @@ function AppContent() {
           {/* Catch all route */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </Suspense>
       </div>
   );
 }

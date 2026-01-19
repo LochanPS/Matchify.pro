@@ -6,6 +6,7 @@ const Sidebar = () => {
   const menuItems = [
     { path: '/admin/dashboard', icon: '📊', label: 'Dashboard' },
     { path: '/admin/users', icon: '👥', label: 'User Management' },
+    { path: '/admin/kyc', icon: '🛡️', label: 'KYC Management' },
     { path: '/admin/invites', icon: '✉️', label: 'Admin Invites' },
     { path: '/admin/academies', icon: '🏢', label: 'Academy Approvals' },
     { path: '/admin/audit-logs', icon: '📋', label: 'Audit Logs' },

@@ -1,6 +1,5 @@
 import express from 'express';
 import { authenticate } from '../middleware/auth.js';
-import { requireRole } from '../middleware/requireRole.js';
 import {
   submitKYCPayment,
   getKYCPaymentStatus,
@@ -16,9 +15,9 @@ const router = express.Router();
 router.post('/payment', authenticate, upload.single('paymentScreenshot'), submitKYCPayment);
 router.get('/payment/status', authenticate, getKYCPaymentStatus);
 
-// Admin routes
-router.get('/admin/payments', authenticate, requireRole(['ADMIN']), getAllKYCPayments);
-router.post('/admin/payments/:id/verify', authenticate, requireRole(['ADMIN']), verifyKYCPayment);
-router.post('/admin/payments/:id/reject', authenticate, requireRole(['ADMIN']), rejectKYCPayment);
+// Admin routes (authenticate middleware already checks for ADMIN role)
+router.get('/admin/payments', authenticate, getAllKYCPayments);
+router.post('/admin/payments/:id/verify', authenticate, verifyKYCPayment);
+router.post('/admin/payments/:id/reject', authenticate, rejectKYCPayment);
 
 export default router;

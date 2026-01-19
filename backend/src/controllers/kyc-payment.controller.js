@@ -163,6 +163,14 @@ export const getKYCPaymentStatus = async (req, res) => {
  */
 export const getAllKYCPayments = async (req, res) => {
   try {
+    // Check if user is admin
+    if (!req.user.roles || !req.user.roles.includes('ADMIN')) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. Admin role required.'
+      });
+    }
+
     const { status } = req.query;
 
     const where = {};
@@ -205,6 +213,14 @@ export const getAllKYCPayments = async (req, res) => {
  */
 export const verifyKYCPayment = async (req, res) => {
   try {
+    // Check if user is admin
+    if (!req.user.roles || !req.user.roles.includes('ADMIN')) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. Admin role required.'
+      });
+    }
+
     const { id } = req.params;
     const adminId = req.user.id;
 
@@ -238,6 +254,14 @@ export const verifyKYCPayment = async (req, res) => {
  */
 export const rejectKYCPayment = async (req, res) => {
   try {
+    // Check if user is admin
+    if (!req.user.roles || !req.user.roles.includes('ADMIN')) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. Admin role required.'
+      });
+    }
+
     const { id } = req.params;
     const { reason } = req.body;
 

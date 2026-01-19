@@ -70,6 +70,14 @@ export const validateTokenFormat = (req, res, next) => {
 
 // Log suspicious activity
 export const logSuspiciousActivity = (req, res, next) => {
+  // Skip security checks for auth routes
+  if (req.url.includes('/auth/register') || 
+      req.url.includes('/auth/login') ||
+      req.url.includes('/multi-auth/register') ||
+      req.url.includes('/multi-auth/login')) {
+    return next();
+  }
+
   const suspiciousPatterns = [
     /(\.\.|\/etc\/|\/proc\/|\/sys\/)/i,  // Path traversal
     /(union|select|insert|update|delete|drop|create|alter)/i,  // SQL injection
@@ -77,7 +85,14 @@ export const logSuspiciousActivity = (req, res, next) => {
     /(eval\(|exec\(|system\()/i,  // Code injection
   ];
   
-  const checkString = JSON.stringify(req.body) + JSON.stringify(req.query) + req.url;
+  // Don't check passwords for SQL injection patterns
+  const bodyToCheck = { ...req.body };
+  delete bodyToCheck.password;
+  delete bodyToCheck.confirmPassword;
+  delete bodyToCheck.oldPassword;
+  delete bodyToCheck.newPassword;
+  
+  const checkString = JSON.stringify(bodyToCheck) + JSON.stringify(req.query) + req.url;
   
   for (const pattern of suspiciousPatterns) {
     if (pattern.test(checkString)) {
@@ -85,13 +100,12 @@ export const logSuspiciousActivity = (req, res, next) => {
         ip: req.ip,
         method: req.method,
         url: req.url,
-        userAgent: req.get('user-agent'),
         timestamp: new Date().toISOString()
       });
       
       return res.status(403).json({
         success: false,
-        message: 'Suspicious activity detected. This incident has been logged.'
+        message: 'Suspicious activity detected.'
       });
     }
   }

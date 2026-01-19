@@ -24,11 +24,23 @@ export const getDashboardStats = async (req, res) => {
       prisma.tournament.count({ where: { status: 'completed' } })
     ]);
 
-    // Calculate total revenue from registrations
-    const revenueResult = await prisma.registration.aggregate({
-      _sum: { amountTotal: true },
-      where: { paymentStatus: 'verified' }
+    // Revenue Type 1: Player → Organizer transactions (tournament fees)
+    const revenueType1Result = await prisma.walletTransaction.aggregate({
+      where: {
+        type: 'DEBIT',
+        description: { contains: 'tournament registration' }
+      },
+      _sum: { amount: true }
     });
+
+    // Revenue Type 2: Admin Profit (KYC fees at ₹50 each)
+    const approvedKYCCount = await prisma.kYCSubmission.count({
+      where: { status: 'APPROVED' }
+    }).catch(() => 0); // Handle if KYC table doesn't exist
+
+    const revenueType1 = revenueType1Result._sum.amount || 0;
+    const revenueType2 = approvedKYCCount * 50;
+    const totalRevenue = revenueType1 + revenueType2;
 
     res.json({
       stats: {
@@ -40,7 +52,11 @@ export const getDashboardStats = async (req, res) => {
         blockedUsers,
         pendingRegistrations,
         completedTournaments,
-        totalRevenue: revenueResult._sum.amountTotal || 0
+        revenue: {
+          type1: revenueType1,
+          type2: revenueType2,
+          total: totalRevenue
+        }
       }
     });
   } catch (error) {

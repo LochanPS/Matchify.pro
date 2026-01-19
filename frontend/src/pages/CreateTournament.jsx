@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { useTournamentForm, deleteTournamentDraft } from '../hooks/useTournamentForm';
 import { tournamentAPI } from '../api/tournament';
 import TournamentStepper from '../components/tournament/TournamentStepper';
@@ -15,6 +16,7 @@ const CreateTournament = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const draftIdFromUrl = searchParams.get('draft');
+  const { user } = useAuth();
   
   const {
     draftId,
@@ -36,6 +38,10 @@ const CreateTournament = () => {
   const [showExitModal, setShowExitModal] = useState(false);
 
   const hasFormData = formData.name || formData.description || formData.venue || formData.city;
+
+  // Check KYC status
+  const kycStatus = user?.organizerProfile?.kycStatus;
+  const isKYCApproved = kycStatus === 'APPROVED';
 
   useEffect(() => {
     const handleBeforeUnload = (e) => {
@@ -216,6 +222,48 @@ const CreateTournament = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      {/* KYC Blocking Modal */}
+      {!isKYCApproved && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+          <div className="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 rounded-2xl p-8 max-w-2xl w-full border border-purple-500/30 shadow-2xl">
+            <div className="text-center mb-6">
+              <div className="w-20 h-20 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-5xl">🔒</span>
+              </div>
+              <h2 className="text-3xl font-bold text-white mb-2">KYC Verification Required</h2>
+              <p className="text-gray-300">You must complete KYC verification before creating tournaments</p>
+            </div>
+
+            <div className="space-y-4 mb-6">
+              <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                <h3 className="font-semibold text-white mb-2">Why KYC is Required:</h3>
+                <ul className="space-y-2 text-gray-300 text-sm">
+                  <li>✓ Verify your identity as a tournament organizer</li>
+                  <li>✓ Ensure secure and trustworthy tournaments</li>
+                  <li>✓ Comply with platform regulations</li>
+                  <li>✓ Protect players and maintain quality</li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="flex gap-4">
+              <button
+                onClick={() => navigate('/organizer/kyc/info')}
+                className="flex-1 px-6 py-4 bg-gradient-to-r from-emerald-500 to-cyan-500 text-white font-bold rounded-xl hover:shadow-lg transition-all"
+              >
+                Start KYC Now
+              </button>
+              <button
+                onClick={() => navigate('/organizer/dashboard')}
+                className="px-6 py-4 bg-white/10 text-white font-semibold rounded-xl hover:bg-white/20 transition-all"
+              >
+                Back to Dashboard
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Hero Header */}
       <div className="relative bg-gradient-to-r from-slate-900 via-emerald-900 to-slate-900 overflow-hidden">
         <div className="absolute inset-0">

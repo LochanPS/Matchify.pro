@@ -17,7 +17,8 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [stats, setStats] = useState({
     totalUsers: 0, totalTournaments: 0, totalRegistrations: 0, totalMatches: 0,
-    activeUsers: 0, blockedUsers: 0, pendingRegistrations: 0, completedTournaments: 0, totalRevenue: 0
+    activeUsers: 0, blockedUsers: 0, pendingRegistrations: 0, completedTournaments: 0, 
+    revenue: { type1: 0, type2: 0, total: 0 }
   });
   const [users, setUsers] = useState([]);
   const [tournaments, setTournaments] = useState([]);
@@ -235,7 +236,42 @@ export default function AdminDashboard() {
             </div>
 
             {/* Revenue & Blocked Users */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Revenue Type 1 */}
+              <div className="relative group">
+                <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity"></div>
+                <div className="relative bg-slate-800/80 backdrop-blur-sm rounded-xl p-6 border border-white/10">
+                  <div className="flex items-center gap-4">
+                    <div className="p-4 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600">
+                      <CreditCard className="w-8 h-8 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-gray-400">Revenue Type 1</p>
+                      <p className="text-3xl font-bold text-white">₹{stats.revenue?.type1?.toLocaleString() || 0}</p>
+                      <p className="text-sm text-blue-400">Player → Organizer Transactions</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Revenue Type 2 */}
+              <div className="relative group">
+                <div className="absolute -inset-1 bg-gradient-to-r from-amber-500 to-amber-600 rounded-2xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity"></div>
+                <div className="relative bg-slate-800/80 backdrop-blur-sm rounded-xl p-6 border border-white/10">
+                  <div className="flex items-center gap-4">
+                    <div className="p-4 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600">
+                      <CreditCard className="w-8 h-8 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-gray-400">Revenue Type 2</p>
+                      <p className="text-3xl font-bold text-white">₹{stats.revenue?.type2?.toLocaleString() || 0}</p>
+                      <p className="text-sm text-amber-400">Admin Profit (KYC Fees)</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Total Revenue */}
               <div className="relative group">
                 <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity"></div>
                 <div className="relative bg-slate-800/80 backdrop-blur-sm rounded-xl p-6 border border-white/10">
@@ -245,13 +281,16 @@ export default function AdminDashboard() {
                     </div>
                     <div>
                       <p className="text-gray-400">Total Revenue</p>
-                      <p className="text-3xl font-bold text-white">₹{stats.totalRevenue?.toLocaleString() || 0}</p>
-                      <p className="text-sm text-emerald-400">From verified payments</p>
+                      <p className="text-3xl font-bold text-white">₹{stats.revenue?.total?.toLocaleString() || 0}</p>
+                      <p className="text-sm text-emerald-400">Combined Revenue</p>
                     </div>
                   </div>
                 </div>
               </div>
+            </div>
 
+            {/* Blocked Users */}
+            <div className="grid grid-cols-1 gap-4">
               <div className="relative group">
                 <div className="absolute -inset-1 bg-gradient-to-r from-red-500 to-rose-500 rounded-2xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity"></div>
                 <div className="relative bg-slate-800/80 backdrop-blur-sm rounded-xl p-6 border border-white/10">

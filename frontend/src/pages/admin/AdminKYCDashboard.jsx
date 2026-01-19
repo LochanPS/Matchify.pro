@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   ToggleLeft, ToggleRight, Video, CheckCircle, XCircle, 
-  Clock, User, Mail, Phone, FileText, Loader2, Eye
+  Clock, User, Mail, Phone, FileText, Loader2, Eye, ArrowLeft
 } from 'lucide-react';
 import { 
   getPendingKYCs, 
@@ -12,6 +13,7 @@ import {
 } from '../../api/kyc';
 
 export default function AdminKYCDashboard() {
+  const navigate = useNavigate();
   const [available, setAvailable] = useState(false);
   const [pendingKYCs, setPendingKYCs] = useState([]);
   const [stats, setStats] = useState({ pending: 0, inProgress: 0, approved: 0, rejected: 0 });
@@ -114,6 +116,15 @@ export default function AdminKYCDashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 py-8 px-4">
       <div className="max-w-7xl mx-auto">
+        {/* Back Button */}
+        <button
+          onClick={() => navigate('/admin/dashboard')}
+          className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors group mb-6"
+        >
+          <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+          <span>Back to Admin Dashboard</span>
+        </button>
+
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-white mb-2">KYC Management</h1>

@@ -2,8 +2,14 @@ import { PrismaClient } from '@prisma/client';
 import { v2 as cloudinary } from 'cloudinary';
 import multer from 'multer';
 import { createDailyRoom, deleteDailyRoom } from '../utils/daily.js';
+import sgMail from '@sendgrid/mail';
 
 const prisma = new PrismaClient();
+
+// Configure SendGrid
+if (process.env.SENDGRID_API_KEY) {
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+}
 
 // Configure multer for memory storage
 const storage = multer.memoryStorage();
@@ -391,10 +397,54 @@ export const submitPhoneAndAadhaar = async (req, res) => {
       }
     });
 
+    // Get user email
+    const user = await prisma.user.findUnique({
+      where: { id: organizerId },
+      select: { email: true, name: true }
+    });
+
+    // Try to send OTP via email (SendGrid)
+    let emailSent = false;
+    if (process.env.SENDGRID_API_KEY && user.email) {
+      try {
+        const msg = {
+          to: user.email,
+          from: process.env.SENDGRID_FROM_EMAIL || 'noreply@matchify.pro',
+          subject: 'Your Matchify KYC Verification OTP',
+          text: `Hello ${user.name},\n\nYour OTP for KYC phone verification is: ${otp}\n\nThis OTP is valid for 10 minutes.\n\nIf you didn't request this, please ignore this email.\n\nBest regards,\nMatchify.pro Team`,
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #7c3aed;">Matchify.pro - KYC Verification</h2>
+              <p>Hello <strong>${user.name}</strong>,</p>
+              <p>Your OTP for KYC phone verification is:</p>
+              <div style="background: #f3f4f6; padding: 20px; text-align: center; border-radius: 8px; margin: 20px 0;">
+                <h1 style="color: #7c3aed; font-size: 36px; letter-spacing: 8px; margin: 0;">${otp}</h1>
+              </div>
+              <p style="color: #ef4444;"><strong>This OTP is valid for 10 minutes.</strong></p>
+              <p>If you didn't request this, please ignore this email.</p>
+              <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;">
+              <p style="color: #6b7280; font-size: 12px;">Best regards,<br>Matchify.pro Team</p>
+            </div>
+          `
+        };
+        
+        await sgMail.send(msg);
+        emailSent = true;
+        console.log('OTP email sent successfully to:', user.email);
+      } catch (emailError) {
+        console.error('Failed to send OTP email:', emailError);
+        // Continue even if email fails - admin can send manually
+      }
+    }
+
     res.json({
       success: true,
-      message: 'Phone number and Aadhaar submitted. Admin will send OTP to your phone.',
-      kycId: kyc.id
+      message: emailSent 
+        ? `OTP sent to your email (${user.email}). Please check your inbox.`
+        : 'Phone number and Aadhaar submitted. Admin will send OTP to your phone.',
+      kycId: kyc.id,
+      emailSent,
+      fallbackToManual: !emailSent
     });
   } catch (error) {
     console.error('Submit phone and Aadhaar error:', error);

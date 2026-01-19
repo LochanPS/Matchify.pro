@@ -102,13 +102,19 @@ export default function PhoneVerificationPage() {
     setSuccess('');
     
     try {
-      await api.post('/kyc/submit-phone', {
+      const response = await api.post('/kyc/submit-phone', {
         phone,
         aadhaarImageUrl: aadhaarUrl
       });
       
       setStep('otp');
-      setSuccess('Phone number submitted! Admin will send OTP to your phone.');
+      
+      // Show different message based on email sent or manual
+      if (response.data.emailSent) {
+        setSuccess('✅ OTP sent to your email! Please check your inbox and spam folder.');
+      } else {
+        setSuccess('📱 Phone number submitted! Admin will send OTP to your phone via WhatsApp/SMS.');
+      }
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to submit phone number');
     } finally {
@@ -319,9 +325,13 @@ export default function PhoneVerificationPage() {
               Enter OTP
             </h2>
             
-            <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4 mb-6">
-              <p className="text-yellow-300 text-sm">
-                <strong>Waiting for Admin:</strong> Admin will send a 6-digit OTP to <strong>+91 {phone}</strong> via WhatsApp or SMS. Please wait for the message.
+            <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 mb-6">
+              <p className="text-blue-300 text-sm">
+                <strong>Check your email or phone:</strong>
+                <br />
+                • If OTP was sent to your email, check your inbox and spam folder
+                <br />
+                • If email failed, admin will send OTP to <strong>+91 {phone}</strong> via WhatsApp or SMS
               </p>
             </div>
             
@@ -358,7 +368,7 @@ export default function PhoneVerificationPage() {
             </button>
             
             <p className="text-center text-gray-400 text-sm mt-4">
-              Didn't receive OTP? Contact admin or wait for them to send it.
+              Didn't receive OTP? Check spam folder or contact admin.
             </p>
           </div>
         )}

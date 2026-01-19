@@ -95,15 +95,24 @@ export default function PhoneVerificationManagement() {
         <div className="bg-blue-500/10 border border-blue-500/30 rounded-2xl p-6 mb-8">
           <h3 className="text-lg font-bold text-white mb-3 flex items-center gap-2">
             <AlertCircle className="w-5 h-5 text-blue-400" />
-            How to Send OTP
+            Dual OTP System
           </h3>
-          <ol className="text-blue-200 space-y-2 list-decimal list-inside">
-            <li>Click "Generate New OTP" to create a fresh 6-digit code</li>
-            <li>Copy the OTP by clicking the copy button</li>
-            <li>Click "Send via WhatsApp" to open WhatsApp with the organizer's number</li>
-            <li>Send the OTP to the organizer via WhatsApp or SMS</li>
-            <li>Organizer will enter the OTP in their app to verify</li>
-          </ol>
+          <div className="space-y-3 text-blue-200">
+            <div>
+              <p className="font-semibold text-blue-100 mb-1">🔹 Primary Method: Automatic Email OTP</p>
+              <p className="text-sm">System automatically sends OTP to organizer's email when they submit phone number.</p>
+            </div>
+            <div>
+              <p className="font-semibold text-blue-100 mb-1">🔹 Fallback Method: Manual WhatsApp/SMS</p>
+              <p className="text-sm">If email fails, you can manually send OTP:</p>
+              <ol className="list-decimal list-inside text-sm mt-2 space-y-1 ml-4">
+                <li>Click "Generate New OTP" to create a fresh code</li>
+                <li>Copy the OTP by clicking the copy button</li>
+                <li>Click "Send via WhatsApp" to open WhatsApp</li>
+                <li>Send the OTP to the organizer</li>
+              </ol>
+            </div>
+          </div>
         </div>
 
         {/* Pending Verifications */}

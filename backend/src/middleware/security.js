@@ -77,7 +77,14 @@ export const logSuspiciousActivity = (req, res, next) => {
     /(eval\(|exec\(|system\()/i,  // Code injection
   ];
   
-  const checkString = JSON.stringify(req.body) + JSON.stringify(req.query) + req.url;
+  // Create a copy of body without password fields to avoid false positives
+  const bodyToCheck = { ...req.body };
+  delete bodyToCheck.password;
+  delete bodyToCheck.confirmPassword;
+  delete bodyToCheck.oldPassword;
+  delete bodyToCheck.newPassword;
+  
+  const checkString = JSON.stringify(bodyToCheck) + JSON.stringify(req.query) + req.url;
   
   for (const pattern of suspiciousPatterns) {
     if (pattern.test(checkString)) {

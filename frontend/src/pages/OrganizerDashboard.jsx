@@ -113,8 +113,23 @@ export default function OrganizerDashboard() {
                 <p className="text-white/40 text-sm mt-1">{user?.email}</p>
               </div>
             </div>
-            <Link to="/tournaments/create" className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl shadow-lg shadow-green-500/30 hover:shadow-green-500/50 hover:scale-105 transition-all flex items-center gap-2 font-semibold">
-              <PlusIcon className="w-5 h-5" />Create Tournament
+            <Link 
+              to={kycStatus === 'APPROVED' ? "/tournaments/create" : "#"}
+              onClick={(e) => {
+                if (kycStatus !== 'APPROVED') {
+                  e.preventDefault();
+                  // Scroll to KYC banner
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+              }}
+              className={`px-6 py-3 rounded-xl shadow-lg hover:scale-105 transition-all flex items-center gap-2 font-semibold ${
+                kycStatus === 'APPROVED' 
+                  ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-green-500/30 hover:shadow-green-500/50' 
+                  : 'bg-gray-600 text-gray-300 cursor-not-allowed opacity-60'
+              }`}
+            >
+              <PlusIcon className="w-5 h-5" />
+              {kycStatus === 'APPROVED' ? 'Create Tournament' : '🔒 Complete KYC First'}
             </Link>
           </div>
         </div>
@@ -144,10 +159,38 @@ export default function OrganizerDashboard() {
         <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-6 mb-8">
           <h2 className="text-lg font-bold text-white mb-4">Quick Actions</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Link to="/tournaments/create" className="flex items-center gap-4 p-4 bg-slate-700/30 rounded-xl border border-white/5 hover:border-blue-500/50 transition-all group">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform"><PlusIcon className="w-6 h-6 text-white" /></div>
-              <div className="flex-1"><p className="font-semibold text-white">Create Tournament</p><p className="text-sm text-gray-400">Start a new tournament</p></div>
-              <ArrowRightIcon className="w-5 h-5 text-gray-500 group-hover:translate-x-1 group-hover:text-amber-400 transition-all" />
+            <Link 
+              to={kycStatus === 'APPROVED' ? "/tournaments/create" : "#"}
+              onClick={(e) => {
+                if (kycStatus !== 'APPROVED') {
+                  e.preventDefault();
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+              }}
+              className={`flex items-center gap-4 p-4 bg-slate-700/30 rounded-xl border transition-all group ${
+                kycStatus === 'APPROVED'
+                  ? 'border-white/5 hover:border-blue-500/50 cursor-pointer'
+                  : 'border-red-500/30 cursor-not-allowed opacity-60'
+              }`}
+            >
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-transform ${
+                kycStatus === 'APPROVED' 
+                  ? 'bg-gradient-to-br from-blue-500 to-indigo-600 group-hover:scale-110' 
+                  : 'bg-gray-600'
+              }`}>
+                {kycStatus === 'APPROVED' ? <PlusIcon className="w-6 h-6 text-white" /> : <span className="text-2xl">🔒</span>}
+              </div>
+              <div className="flex-1">
+                <p className="font-semibold text-white">
+                  {kycStatus === 'APPROVED' ? 'Create Tournament' : 'Complete KYC First'}
+                </p>
+                <p className="text-sm text-gray-400">
+                  {kycStatus === 'APPROVED' ? 'Start a new tournament' : 'KYC verification required'}
+                </p>
+              </div>
+              <ArrowRightIcon className={`w-5 h-5 text-gray-500 transition-all ${
+                kycStatus === 'APPROVED' ? 'group-hover:translate-x-1 group-hover:text-amber-400' : ''
+              }`} />
             </Link>
             <Link to="/organizer/history" className="flex items-center gap-4 p-4 bg-slate-700/30 rounded-xl border border-white/5 hover:border-green-500/50 transition-all group">
               <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform"><ClipboardDocumentListIcon className="w-6 h-6 text-white" /></div>
@@ -209,7 +252,23 @@ export default function OrganizerDashboard() {
                 <div className="w-20 h-20 bg-slate-700/50 rounded-2xl flex items-center justify-center mx-auto mb-4"><span className="text-4xl">🏆</span></div>
                 <h4 className="text-lg font-semibold text-white mb-2">No tournaments yet</h4>
                 <p className="text-gray-400 mb-6">Create your first tournament and start hosting!</p>
-                <Link to="/tournaments/create" className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl font-medium hover:shadow-lg hover:shadow-amber-500/25 transition-all"><PlusIcon className="w-5 h-5" />Create Your First Tournament</Link>
+                <Link 
+                  to={kycStatus === 'APPROVED' ? "/tournaments/create" : "#"}
+                  onClick={(e) => {
+                    if (kycStatus !== 'APPROVED') {
+                      e.preventDefault();
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                  }}
+                  className={`inline-flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all ${
+                    kycStatus === 'APPROVED'
+                      ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white hover:shadow-lg hover:shadow-amber-500/25'
+                      : 'bg-gray-600 text-gray-300 cursor-not-allowed opacity-60'
+                  }`}
+                >
+                  {kycStatus === 'APPROVED' ? <PlusIcon className="w-5 h-5" /> : <span className="text-xl">🔒</span>}
+                  {kycStatus === 'APPROVED' ? 'Create Your First Tournament' : 'Complete KYC to Create Tournaments'}
+                </Link>
               </div>
             ) : (
               <div className="space-y-3">

@@ -328,3 +328,200 @@ export const rejoinCall = async (req, res) => {
     });
   }
 };
+
+
+/**
+ * Submit Phone Number with Aadhaar (Step 1 of KYC)
+ * POST /api/kyc/submit-phone
+ */
+export const submitPhoneAndAadhaar = async (req, res) => {
+  try {
+    const organizerId = req.user.id;
+    const { phone, aadhaarImageUrl } = req.body;
+
+    if (!phone || !aadhaarImageUrl) {
+      return res.status(400).json({
+        error: 'MISSING_FIELDS',
+        message: 'Phone number and Aadhaar image are required'
+      });
+    }
+
+    // Validate Indian phone number
+    if (!/^[6-9]\d{9}$/.test(phone)) {
+      return res.status(400).json({
+        error: 'INVALID_PHONE',
+        message: 'Please enter a valid 10-digit Indian phone number'
+      });
+    }
+
+    // Check if KYC already exists
+    const existingKYC = await prisma.organizerKYC.findUnique({
+      where: { organizerId }
+    });
+
+    if (existingKYC && existingKYC.status === 'APPROVED') {
+      return res.status(400).json({
+        error: 'KYC_ALREADY_APPROVED',
+        message: 'You have already completed KYC verification'
+      });
+    }
+
+    // Generate 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Create or update KYC record
+    const kyc = await prisma.organizerKYC.upsert({
+      where: { organizerId },
+      update: {
+        phone,
+        aadhaarImageUrl,
+        phoneOTP: otp,
+        phoneOTPGeneratedAt: new Date(),
+        phoneOTPVerified: false,
+        status: 'PENDING'
+      },
+      create: {
+        organizerId,
+        phone,
+        aadhaarImageUrl,
+        phoneOTP: otp,
+        phoneOTPGeneratedAt: new Date(),
+        phoneOTPVerified: false,
+        status: 'PENDING'
+      }
+    });
+
+    res.json({
+      success: true,
+      message: 'Phone number and Aadhaar submitted. Admin will send OTP to your phone.',
+      kycId: kyc.id
+    });
+  } catch (error) {
+    console.error('Submit phone and Aadhaar error:', error);
+    res.status(500).json({
+      error: 'SUBMIT_FAILED',
+      message: 'Failed to submit phone and Aadhaar'
+    });
+  }
+};
+
+/**
+ * Verify OTP entered by organizer
+ * POST /api/kyc/verify-otp
+ */
+export const verifyOTP = async (req, res) => {
+  try {
+    const organizerId = req.user.id;
+    const { otp } = req.body;
+
+    if (!otp || otp.length !== 6) {
+      return res.status(400).json({
+        error: 'INVALID_OTP',
+        message: 'Please enter a valid 6-digit OTP'
+      });
+    }
+
+    // Find KYC record
+    const kyc = await prisma.organizerKYC.findUnique({
+      where: { organizerId }
+    });
+
+    if (!kyc) {
+      return res.status(404).json({
+        error: 'KYC_NOT_FOUND',
+        message: 'KYC record not found'
+      });
+    }
+
+    if (kyc.phoneOTPVerified) {
+      return res.status(400).json({
+        error: 'ALREADY_VERIFIED',
+        message: 'Phone number already verified'
+      });
+    }
+
+    if (!kyc.phoneOTP) {
+      return res.status(400).json({
+        error: 'NO_OTP',
+        message: 'No OTP generated. Please submit phone number first.'
+      });
+    }
+
+    // Check if OTP expired (10 minutes)
+    const otpAge = Date.now() - new Date(kyc.phoneOTPGeneratedAt).getTime();
+    if (otpAge > 10 * 60 * 1000) {
+      return res.status(400).json({
+        error: 'OTP_EXPIRED',
+        message: 'OTP has expired. Please request a new one from admin.'
+      });
+    }
+
+    // Verify OTP
+    if (otp !== kyc.phoneOTP) {
+      return res.status(400).json({
+        error: 'INVALID_OTP',
+        message: 'Invalid OTP. Please try again.'
+      });
+    }
+
+    // Mark as verified
+    await prisma.organizerKYC.update({
+      where: { id: kyc.id },
+      data: {
+        phoneOTPVerified: true,
+        phoneOTPVerifiedAt: new Date()
+      }
+    });
+
+    res.json({
+      success: true,
+      message: 'Phone number verified successfully! You can now proceed with KYC.'
+    });
+  } catch (error) {
+    console.error('Verify OTP error:', error);
+    res.status(500).json({
+      error: 'VERIFY_FAILED',
+      message: 'Failed to verify OTP'
+    });
+  }
+};
+
+/**
+ * Check if phone is verified
+ * GET /api/kyc/phone-status
+ */
+export const getPhoneStatus = async (req, res) => {
+  try {
+    const organizerId = req.user.id;
+
+    const kyc = await prisma.organizerKYC.findUnique({
+      where: { organizerId },
+      select: {
+        phone: true,
+        phoneOTPVerified: true,
+        phoneOTPVerifiedAt: true
+      }
+    });
+
+    if (!kyc) {
+      return res.json({
+        success: true,
+        phoneVerified: false,
+        phone: null
+      });
+    }
+
+    res.json({
+      success: true,
+      phoneVerified: kyc.phoneOTPVerified,
+      phone: kyc.phone,
+      verifiedAt: kyc.phoneOTPVerifiedAt
+    });
+  } catch (error) {
+    console.error('Get phone status error:', error);
+    res.status(500).json({
+      error: 'FETCH_FAILED',
+      message: 'Failed to fetch phone status'
+    });
+  }
+};

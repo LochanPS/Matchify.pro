@@ -174,17 +174,25 @@ export default function AdminKYCDashboard() {
         </button>
 
         {/* Header */}
-        <div className="mb-8 flex items-center justify-between">
+        <div className="mb-8 flex items-center justify-between flex-wrap gap-4">
           <div>
             <h1 className="text-4xl font-bold text-white mb-2">KYC Management</h1>
             <p className="text-gray-300">Review and approve organizer KYC submissions</p>
           </div>
-          <button
-            onClick={() => navigate('/admin/kyc/payments')}
-            className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-xl font-medium transition-all flex items-center gap-2 shadow-lg"
-          >
-            💰 Payment Verification
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={() => navigate('/admin/kyc/phone-verifications')}
+              className="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white rounded-xl font-medium transition-all flex items-center gap-2 shadow-lg"
+            >
+              📱 Phone Verifications
+            </button>
+            <button
+              onClick={() => navigate('/admin/kyc/payments')}
+              className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-xl font-medium transition-all flex items-center gap-2 shadow-lg"
+            >
+              💰 Payment Verification
+            </button>
+          </div>
         </div>
 
         {/* Stats Cards */}

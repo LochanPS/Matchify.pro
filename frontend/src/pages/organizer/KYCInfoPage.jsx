@@ -1,8 +1,24 @@
 import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { ArrowLeft, Shield, Video, CheckCircle, Clock, FileText, AlertCircle } from 'lucide-react';
+import TermsAndConditionsModal from '../../components/TermsAndConditionsModal';
 
 export default function KYCInfoPage() {
   const navigate = useNavigate();
+  const [showTermsModal, setShowTermsModal] = useState(false);
+
+  const handleStartKYC = () => {
+    setShowTermsModal(true);
+  };
+
+  const handleAcceptTerms = () => {
+    setShowTermsModal(false);
+    navigate('/organizer/kyc/phone-verify');
+  };
+
+  const handleDeclineTerms = () => {
+    setShowTermsModal(false);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
@@ -231,7 +247,7 @@ export default function KYCInfoPage() {
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row gap-4">
           <button
-            onClick={() => navigate('/organizer/kyc/payment')}
+            onClick={handleStartKYC}
             className="flex-1 px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl font-bold text-lg hover:shadow-2xl hover:shadow-green-500/30 transition-all flex items-center justify-center gap-2"
           >
             <CheckCircle className="w-6 h-6" />
@@ -253,6 +269,13 @@ export default function KYCInfoPage() {
           </a>
         </p>
       </div>
+
+      {/* Terms & Conditions Modal */}
+      <TermsAndConditionsModal
+        isOpen={showTermsModal}
+        onAccept={handleAcceptTerms}
+        onDecline={handleDeclineTerms}
+      />
     </div>
   );
 }

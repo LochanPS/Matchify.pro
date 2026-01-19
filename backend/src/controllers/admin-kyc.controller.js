@@ -447,3 +447,134 @@ export const saveAadhaarInfo = async (req, res) => {
   }
 };
 
+
+
+/**
+ * Admin: Generate New OTP for Organizer
+ * POST /api/admin/kyc/:kycId/generate-otp
+ */
+export const generateOTP = async (req, res) => {
+  try {
+    const { kycId } = req.params;
+
+    // Verify admin role
+    if (!req.user.roles.includes('ADMIN')) {
+      return res.status(403).json({
+        error: 'UNAUTHORIZED',
+        message: 'Only admins can generate OTP'
+      });
+    }
+
+    const kyc = await prisma.organizerKYC.findUnique({
+      where: { id: kycId },
+      include: {
+        organizer: {
+          select: {
+            name: true,
+            email: true
+          }
+        }
+      }
+    });
+
+    if (!kyc) {
+      return res.status(404).json({
+        error: 'KYC_NOT_FOUND',
+        message: 'KYC record not found'
+      });
+    }
+
+    if (!kyc.phone) {
+      return res.status(400).json({
+        error: 'NO_PHONE',
+        message: 'No phone number submitted by organizer'
+      });
+    }
+
+    // Generate new 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Update KYC with new OTP
+    await prisma.organizerKYC.update({
+      where: { id: kycId },
+      data: {
+        phoneOTP: otp,
+        phoneOTPGeneratedAt: new Date(),
+        phoneOTPVerified: false
+      }
+    });
+
+    res.json({
+      success: true,
+      message: 'OTP generated successfully',
+      otp,
+      phone: kyc.phone,
+      organizerName: kyc.organizer.name,
+      organizerEmail: kyc.organizer.email
+    });
+  } catch (error) {
+    console.error('Generate OTP error:', error);
+    res.status(500).json({
+      error: 'GENERATE_FAILED',
+      message: 'Failed to generate OTP'
+    });
+  }
+};
+
+/**
+ * Admin: Get Pending Phone Verifications
+ * GET /api/admin/kyc/pending-phones
+ */
+export const getPendingPhoneVerifications = async (req, res) => {
+  try {
+    // Verify admin role
+    if (!req.user.roles.includes('ADMIN')) {
+      return res.status(403).json({
+        error: 'UNAUTHORIZED',
+        message: 'Only admins can view pending verifications'
+      });
+    }
+
+    const pendingKYCs = await prisma.organizerKYC.findMany({
+      where: {
+        phone: { not: null },
+        phoneOTPVerified: false
+      },
+      include: {
+        organizer: {
+          select: {
+            id: true,
+            name: true,
+            email: true
+          }
+        }
+      },
+      orderBy: {
+        phoneOTPGeneratedAt: 'desc'
+      }
+    });
+
+    const formattedKYCs = pendingKYCs.map(kyc => ({
+      id: kyc.id,
+      organizerId: kyc.organizerId,
+      organizerName: kyc.organizer.name,
+      organizerEmail: kyc.organizer.email,
+      phone: kyc.phone,
+      otp: kyc.phoneOTP,
+      aadhaarImageUrl: kyc.aadhaarImageUrl,
+      otpGeneratedAt: kyc.phoneOTPGeneratedAt,
+      createdAt: kyc.createdAt
+    }));
+
+    res.json({
+      success: true,
+      pendingVerifications: formattedKYCs
+    });
+  } catch (error) {
+    console.error('Get pending phone verifications error:', error);
+    res.status(500).json({
+      error: 'FETCH_FAILED',
+      message: 'Failed to fetch pending verifications'
+    });
+  }
+};

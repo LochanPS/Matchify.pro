@@ -61,10 +61,12 @@ import AddAcademyPage from './pages/AddAcademyPage'
 import KYCSubmission from './pages/organizer/KYCSubmission'
 import KYCInfoPage from './pages/organizer/KYCInfoPage'
 import KYCPaymentPage from './pages/organizer/KYCPaymentPage'
+import PhoneVerificationPage from './pages/organizer/PhoneVerificationPage'
 import VideoCallPage from './pages/organizer/VideoCallPage'
 import AdminKYCDashboard from './pages/admin/AdminKYCDashboard'
 import KYCPaymentVerification from './pages/admin/KYCPaymentVerification'
 import AdminVideoCallPage from './pages/admin/AdminVideoCallPage'
+import PhoneVerificationManagement from './pages/admin/PhoneVerificationManagement'
 
 // Inner component that can access AuthContext
 function AppContent() {
@@ -289,6 +291,17 @@ function AppContent() {
           />
           
           <Route
+            path="/organizer/kyc/phone-verify"
+            element={
+              <ProtectedRoute>
+                <RoleRoute allowedRoles={['ORGANIZER']} blockAdmin={true}>
+                  <PhoneVerificationPage />
+                </RoleRoute>
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
             path="/organizer/kyc/payment"
             element={
               <ProtectedRoute>
@@ -441,6 +454,7 @@ function AppContent() {
             <Route path="kyc" element={<AdminKYCDashboard />} />
             <Route path="kyc/payments" element={<KYCPaymentVerification />} />
             <Route path="kyc/video-call" element={<AdminVideoCallPage />} />
+            <Route path="kyc/phone-verifications" element={<PhoneVerificationManagement />} />
           </Route>
           
           {/* Catch all route */}

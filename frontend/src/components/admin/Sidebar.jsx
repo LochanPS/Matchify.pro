@@ -28,6 +28,7 @@ const Sidebar = () => {
     { path: '/admin/dashboard', icon: '📊', label: 'Dashboard' },
     { path: '/admin/users', icon: '👥', label: 'User Management' },
     { path: '/admin/kyc', icon: '🛡️', label: 'KYC Management' },
+    { path: '/admin/kyc/phone-verifications', icon: '📱', label: 'Phone Verifications' },
     { path: '/admin/kyc/payments', icon: '💰', label: 'Payment Verification', badge: pendingPayments },
     { path: '/admin/invites', icon: '✉️', label: 'Admin Invites' },
     { path: '/admin/academies', icon: '🏢', label: 'Academy Approvals' },

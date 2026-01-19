@@ -521,6 +521,13 @@ model OrganizerKYC {
   organizerId         String    @unique
   organizer           User      @relation("OrganizerKYC", fields: [organizerId], references: [id], onDelete: Cascade)
   
+  // Phone Verification
+  phone               String?   // Organizer's phone number
+  phoneOTP            String?   // Generated OTP (visible to admin)
+  phoneOTPGeneratedAt DateTime? // When OTP was generated
+  phoneOTPVerified    Boolean   @default(false)
+  phoneOTPVerifiedAt  DateTime?
+  
   // Document
   aadhaarImageUrl     String
   aadhaarNumber       String?   // Optional: last 4 digits only for display
@@ -549,6 +556,7 @@ model OrganizerKYC {
   
   @@index([organizerId])
   @@index([status])
+  @@index([phone])
   @@map("organizer_kyc")
 }
 

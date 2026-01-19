@@ -60,7 +60,7 @@ class AdminController {
             name: true,
             email: true,
             phone: true,
-            role: true,
+            roles: true,
             city: true,
             state: true,
             createdAt: true,
@@ -83,6 +83,7 @@ class AdminController {
       // Add isSuspended flag
       const usersWithStatus = users.map(user => ({
         ...user,
+        role: user.roles, // Map roles to role for frontend compatibility
         isSuspended: user.suspendedUntil && new Date(user.suspendedUntil) > new Date(),
       }));
 

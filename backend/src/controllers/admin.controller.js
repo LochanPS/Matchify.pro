@@ -13,7 +13,7 @@ class AdminController {
         limit = 20,
         search, // email, name, phone
         role,
-        status, // ACTIVE, SUSPENDED
+        status, // ACTIVE, SUSPENDED, ALL
         city,
         state,
       } = req.query;
@@ -37,15 +37,21 @@ class AdminController {
       if (role) where.role = role;
 
       // Status filter
-      if (status) {
-        if (status === 'SUSPENDED') {
-          where.suspendedUntil = { gt: new Date() };
-        } else if (status === 'ACTIVE') {
-          where.OR = [
-            { suspendedUntil: null },
-            { suspendedUntil: { lte: new Date() } },
-          ];
-        }
+      if (status === 'SUSPENDED') {
+        // Show ONLY suspended users
+        where.suspendedUntil = { gt: new Date() };
+      } else if (status === 'ACTIVE') {
+        // Show ONLY active (non-suspended) users
+        where.OR = [
+          { suspendedUntil: null },
+          { suspendedUntil: { lte: new Date() } },
+        ];
+      } else if (!status || status === 'ALL') {
+        // Default: Show only active users (exclude suspended)
+        where.OR = [
+          { suspendedUntil: null },
+          { suspendedUntil: { lte: new Date() } },
+        ];
       }
 
       // Location filters

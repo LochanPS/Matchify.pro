@@ -228,9 +228,9 @@ const UserManagementPage = () => {
                 onChange={(e) => setStatusFilter(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="">All Status</option>
-                <option value="ACTIVE">Active</option>
-                <option value="SUSPENDED">Suspended</option>
+                <option value="">All Users</option>
+                <option value="ACTIVE">Active Only</option>
+                <option value="SUSPENDED">Blocked Only</option>
               </select>
             </div>
 

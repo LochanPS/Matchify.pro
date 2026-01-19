@@ -59,6 +59,7 @@ import RefundIssuePage from './pages/RefundIssuePage'
 import SearchAcademiesPage from './pages/SearchAcademiesPage'
 import AddAcademyPage from './pages/AddAcademyPage'
 import KYCSubmission from './pages/organizer/KYCSubmission'
+import KYCInfoPage from './pages/organizer/KYCInfoPage'
 import VideoCallPage from './pages/organizer/VideoCallPage'
 import AdminKYCDashboard from './pages/admin/AdminKYCDashboard'
 
@@ -273,6 +274,17 @@ function AppContent() {
           />
           
           {/* Organizer KYC Routes */}
+          <Route
+            path="/organizer/kyc/info"
+            element={
+              <ProtectedRoute>
+                <RoleRoute allowedRoles={['ORGANIZER']} blockAdmin={true}>
+                  <KYCInfoPage />
+                </RoleRoute>
+              </ProtectedRoute>
+            }
+          />
+          
           <Route
             path="/organizer/kyc/submit"
             element={

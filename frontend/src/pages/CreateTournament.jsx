@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTournamentForm, deleteTournamentDraft } from '../hooks/useTournamentForm';
 import { tournamentAPI } from '../api/tournament';
+import api from '../utils/api';
 import TournamentStepper from '../components/tournament/TournamentStepper';
 import BasicInfoStep from '../components/tournament/steps/BasicInfoStep';
 import DatesStep from '../components/tournament/steps/DatesStep';
@@ -9,7 +10,8 @@ import PostersStep from '../components/tournament/steps/PostersStep';
 import CategoriesStep from '../components/tournament/steps/CategoriesStep';
 import PaymentQRStep from '../components/tournament/steps/PaymentQRStep';
 import ReviewStep from '../components/tournament/steps/ReviewStep';
-import { Trophy, Save, X, AlertTriangle, CheckCircle, Sparkles, ArrowLeft } from 'lucide-react';
+import KYCBanner from '../components/KYCBanner';
+import { Trophy, Save, X, AlertTriangle, CheckCircle, Sparkles, ArrowLeft, Shield } from 'lucide-react';
 
 const CreateTournament = () => {
   const navigate = useNavigate();
@@ -34,8 +36,26 @@ const CreateTournament = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [showExitModal, setShowExitModal] = useState(false);
+  const [kycStatus, setKycStatus] = useState(null);
+  const [kycLoading, setKycLoading] = useState(true);
 
   const hasFormData = formData.name || formData.description || formData.venue || formData.city;
+
+  useEffect(() => {
+    checkKYCStatus();
+  }, []);
+
+  const checkKYCStatus = async () => {
+    try {
+      const response = await api.get('/kyc/status');
+      setKycStatus(response.data.status);
+    } catch (error) {
+      console.error('KYC status check failed:', error);
+      setKycStatus(null);
+    } finally {
+      setKycLoading(false);
+    }
+  };
 
   useEffect(() => {
     const handleBeforeUnload = (e) => {
@@ -269,6 +289,11 @@ const CreateTournament = () => {
       </div>
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 -mt-4">
+        {/* KYC Banner - Show if KYC not approved */}
+        {!kycLoading && kycStatus !== 'APPROVED' && (
+          <KYCBanner />
+        )}
+
         {/* Error Message */}
         {error && (
           <div className="relative mb-6 group">

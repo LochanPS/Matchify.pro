@@ -5,6 +5,7 @@ import api from '../utils/api';
 import { formatDateIndian } from '../utils/dateFormat';
 import { X, Users, Mail, Phone, MapPin, Trophy, Trash2, Edit3, AlertTriangle } from 'lucide-react';
 import { getTournamentDrafts, deleteTournamentDraft } from '../hooks/useTournamentForm';
+import KYCBanner from '../components/KYCBanner';
 import {
   TrophyIcon,
   BoltIcon,
@@ -26,10 +27,24 @@ export default function OrganizerDashboard() {
   const [showParticipantsModal, setShowParticipantsModal] = useState(false);
   const [allParticipants, setAllParticipants] = useState([]);
   const [deleteDraftModal, setDeleteDraftModal] = useState(null);
+  const [kycStatus, setKycStatus] = useState(null);
+  const [kycLoading, setKycLoading] = useState(true);
 
-  useEffect(() => { fetchOrganizerData(); loadDrafts(); }, []);
+  useEffect(() => { fetchOrganizerData(); loadDrafts(); checkKYCStatus(); }, []);
 
   const loadDrafts = () => setDrafts(getTournamentDrafts());
+
+  const checkKYCStatus = async () => {
+    try {
+      const response = await api.get('/kyc/status');
+      setKycStatus(response.data.status);
+    } catch (error) {
+      console.error('KYC status check failed:', error);
+      setKycStatus(null);
+    } finally {
+      setKycLoading(false);
+    }
+  };
   const handleDeleteDraft = (draftId) => { deleteTournamentDraft(draftId); loadDrafts(); setDeleteDraftModal(null); };
   const handleContinueDraft = (draftId) => navigate(`/tournaments/create?draft=${draftId}`);
 
@@ -106,6 +121,11 @@ export default function OrganizerDashboard() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 -mt-8">
+        {/* KYC Banner - Show if KYC not approved */}
+        {!kycLoading && kycStatus !== 'APPROVED' && (
+          <KYCBanner />
+        )}
+
         {/* Stats Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {statCards.map((stat, index) => (

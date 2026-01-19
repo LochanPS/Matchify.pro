@@ -232,7 +232,9 @@ app.use('/api/academies', academyRoutes);
 // KYC routes
 import kycRoutes from './routes/kyc.routes.js';
 import adminKycRoutes from './routes/admin-kyc.routes.js';
+import kycPaymentRoutes from './routes/kyc-payment.routes.js';
 app.use('/api/kyc', kycRoutes);
+app.use('/api/kyc', kycPaymentRoutes);
 app.use('/api/admin/kyc', adminKycRoutes);
 
 // Draw routes

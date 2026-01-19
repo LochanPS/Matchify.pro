@@ -59,7 +59,7 @@ export default function KYCBanner({ onDismiss }) {
                   <ArrowRight className="w-5 h-5" />
                 </button>
                 <button
-                  onClick={() => navigate('/organizer/kyc/submit')}
+                  onClick={() => navigate('/organizer/kyc/payment')}
                   className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg font-bold hover:shadow-xl hover:shadow-green-500/50 transition-all text-base"
                 >
                   <Shield className="w-5 h-5" />

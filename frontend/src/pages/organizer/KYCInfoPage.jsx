@@ -231,7 +231,7 @@ export default function KYCInfoPage() {
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row gap-4">
           <button
-            onClick={() => navigate('/organizer/kyc/submit')}
+            onClick={() => navigate('/organizer/kyc/payment')}
             className="flex-1 px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl font-bold text-lg hover:shadow-2xl hover:shadow-green-500/30 transition-all flex items-center justify-center gap-2"
           >
             <CheckCircle className="w-6 h-6" />

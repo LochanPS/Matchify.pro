@@ -60,6 +60,7 @@ import SearchAcademiesPage from './pages/SearchAcademiesPage'
 import AddAcademyPage from './pages/AddAcademyPage'
 import KYCSubmission from './pages/organizer/KYCSubmission'
 import KYCInfoPage from './pages/organizer/KYCInfoPage'
+import KYCPaymentPage from './pages/organizer/KYCPaymentPage'
 import VideoCallPage from './pages/organizer/VideoCallPage'
 import AdminKYCDashboard from './pages/admin/AdminKYCDashboard'
 
@@ -280,6 +281,17 @@ function AppContent() {
               <ProtectedRoute>
                 <RoleRoute allowedRoles={['ORGANIZER']} blockAdmin={true}>
                   <KYCInfoPage />
+                </RoleRoute>
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/organizer/kyc/payment"
+            element={
+              <ProtectedRoute>
+                <RoleRoute allowedRoles={['ORGANIZER']} blockAdmin={true}>
+                  <KYCPaymentPage />
                 </RoleRoute>
               </ProtectedRoute>
             }

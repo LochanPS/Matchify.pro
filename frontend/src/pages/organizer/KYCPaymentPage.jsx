@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Upload, CheckCircle, AlertCircle, CreditCard, Shield } from 'lucide-react';
+import { ArrowLeft, Upload, CheckCircle, AlertCircle, CreditCard, Shield, X } from 'lucide-react';
 import api from '../../utils/api';
 
 export default function KYCPaymentPage() {
@@ -128,10 +128,17 @@ export default function KYCPaymentPage() {
               <p className="text-center text-gray-800 font-semibold mb-4">Scan QR Code to Pay</p>
               <div className="flex justify-center">
                 <img 
-                  src="data:image/png;base64,YOUR_QR_CODE_BASE64_HERE" 
+                  src="/kyc-payment-qr.png" 
                   alt="Payment QR Code" 
                   className="w-64 h-64 object-contain"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.nextElementSibling.style.display = 'block';
+                  }}
                 />
+                <div style={{display: 'none'}} className="w-64 h-64 bg-gray-100 rounded-lg flex items-center justify-center">
+                  <p className="text-gray-500 text-sm text-center px-4">QR Code will be displayed here</p>
+                </div>
               </div>
               <p className="text-center text-sm text-gray-600 mt-4">
                 Use any UPI app to scan and pay
@@ -142,7 +149,7 @@ export default function KYCPaymentPage() {
             <div className="space-y-3">
               <div className="bg-slate-700/30 rounded-lg p-4">
                 <p className="text-sm text-gray-400 mb-1">UPI ID</p>
-                <p className="text-white font-mono">YOUR_UPI_ID@paytm</p>
+                <p className="text-white font-mono">9742628582@slc</p>
               </div>
               <div className="bg-slate-700/30 rounded-lg p-4">
                 <p className="text-sm text-gray-400 mb-1">Account Name</p>

@@ -63,6 +63,8 @@ model User {
   // KYC relations
   kycSubmissions       OrganizerKYC[]      @relation("OrganizerKYC")
   kycReviews           OrganizerKYC[]      @relation("KYCReviewer")
+  kycPayments          KYCPayment[]        @relation("KYCPayment")
+  paymentVerifications KYCPayment[]        @relation("PaymentVerifier")
 
   @@index([email])
   @@index([phone])
@@ -551,3 +553,41 @@ enum KYCStatus {
   APPROVED          // KYC verified
   REJECTED          // KYC failed
 }
+
+// ============================================
+// KYC PAYMENT MODEL
+// ============================================
+
+model KYCPayment {
+  id                String    @id @default(uuid())
+  organizerId       String    @unique
+  organizer         User      @relation("KYCPayment", fields: [organizerId], references: [id], onDelete: Cascade)
+  
+  // Payment Details
+  amount            Float     @default(50) // ₹50 KYC fee
+  transactionId     String    // UPI transaction ID
+  screenshotUrl     String    // Cloudinary URL of payment screenshot
+  
+  // Verification
+  status            PaymentStatus @default(PENDING)
+  verifiedBy        String?   // Admin user ID
+  verifier          User?     @relation("PaymentVerifier", fields: [verifiedBy], references: [id])
+  verifiedAt        DateTime?
+  rejectionReason   String?
+  
+  // Metadata
+  submittedAt       DateTime  @default(now())
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  @@index([organizerId])
+  @@index([status])
+  @@map("kyc_payments")
+}
+
+enum PaymentStatus {
+  PENDING           // Waiting for admin verification
+  VERIFIED          // Payment verified
+  REJECTED          // Payment rejected
+}
+

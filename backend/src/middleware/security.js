@@ -70,6 +70,14 @@ export const validateTokenFormat = (req, res, next) => {
 
 // Log suspicious activity
 export const logSuspiciousActivity = (req, res, next) => {
+  // Skip security checks for auth routes (registration/login)
+  if (req.url.includes('/auth/register') || 
+      req.url.includes('/auth/login') ||
+      req.url.includes('/multi-auth/register') ||
+      req.url.includes('/multi-auth/login')) {
+    return next();
+  }
+  
   const suspiciousPatterns = [
     /(\.\.|\/etc\/|\/proc\/|\/sys\/)/i,  // Path traversal
     /(union|select|insert|update|delete|drop|create|alter)/i,  // SQL injection

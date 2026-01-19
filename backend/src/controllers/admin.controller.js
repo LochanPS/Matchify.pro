@@ -971,7 +971,8 @@ class AdminController {
         totalTournaments,
         totalRegistrations,
         totalMatches,
-        totalRevenue,
+        playerToOrganizerRevenue,
+        adminProfitRevenue,
         usersByRole,
         tournamentsByStatus,
         recentRegistrations,
@@ -993,12 +994,25 @@ class AdminController {
         // Total matches
         prisma.match.count({ where: dateFilter }),
 
-        // Total revenue
-        prisma.walletTransaction.aggregate({
+        // Revenue Type 1: Player → Organizer transactions (tournament registrations)
+        prisma.registration.aggregate({
           where: {
             ...dateFilter,
-            type: 'DEBIT',
-            status: 'COMPLETED',
+            status: 'CONFIRMED',
+          },
+          _sum: {
+            amountTotal: true,
+          },
+        }),
+
+        // Revenue Type 2: Admin profit (KYC payments)
+        prisma.kYCPayment.aggregate({
+          where: {
+            status: 'VERIFIED',
+            verifiedAt: startDate || endDate ? {
+              ...(startDate && { gte: new Date(startDate) }),
+              ...(endDate && { lte: new Date(endDate) }),
+            } : undefined,
           },
           _sum: {
             amount: true,
@@ -1055,7 +1069,12 @@ class AdminController {
           totalTournaments,
           totalRegistrations,
           totalMatches,
-          totalRevenue: totalRevenue._sum.amount || 0,
+          // Revenue Type 1: Player → Organizer (tournament fees)
+          playerToOrganizerRevenue: playerToOrganizerRevenue._sum.amountTotal || 0,
+          // Revenue Type 2: Admin profit (KYC fees)
+          adminProfitRevenue: adminProfitRevenue._sum.amount || 0,
+          // Total revenue (both types combined)
+          totalRevenue: (playerToOrganizerRevenue._sum.amountTotal || 0) + (adminProfitRevenue._sum.amount || 0),
           usersByRole: usersByRole.reduce((acc, item) => {
             acc[item.role] = item._count;
             return acc;

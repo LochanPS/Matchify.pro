@@ -17,7 +17,8 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [stats, setStats] = useState({
     totalUsers: 0, totalTournaments: 0, totalRegistrations: 0, totalMatches: 0,
-    activeUsers: 0, blockedUsers: 0, pendingRegistrations: 0, completedTournaments: 0, totalRevenue: 0
+    activeUsers: 0, blockedUsers: 0, pendingRegistrations: 0, completedTournaments: 0, 
+    totalRevenue: 0, playerToOrganizerRevenue: 0, adminProfitRevenue: 0
   });
   const [users, setUsers] = useState([]);
   const [tournaments, setTournaments] = useState([]);
@@ -234,8 +235,45 @@ export default function AdminDashboard() {
               <StatCard icon={Zap} label="Total Matches" value={stats.totalMatches} color="from-orange-500 to-amber-500" />
             </div>
 
-            {/* Revenue & Blocked Users */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Revenue Cards - Two Types */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Revenue Type 1: Player → Organizer */}
+              <div className="relative group">
+                <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity"></div>
+                <div className="relative bg-slate-800/80 backdrop-blur-sm rounded-xl p-6 border border-white/10">
+                  <div className="flex items-center gap-4">
+                    <div className="p-4 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600">
+                      <Users className="w-8 h-8 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-gray-400 text-sm">Revenue Type 1</p>
+                      <p className="text-2xl font-bold text-white">₹{stats.playerToOrganizerRevenue?.toLocaleString() || 0}</p>
+                      <p className="text-xs text-blue-400">Player → Organizer</p>
+                      <p className="text-xs text-gray-500 mt-1">Tournament fees</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Revenue Type 2: Admin Profit */}
+              <div className="relative group">
+                <div className="absolute -inset-1 bg-gradient-to-r from-amber-500 to-orange-500 rounded-2xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity"></div>
+                <div className="relative bg-slate-800/80 backdrop-blur-sm rounded-xl p-6 border border-white/10">
+                  <div className="flex items-center gap-4">
+                    <div className="p-4 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600">
+                      <Crown className="w-8 h-8 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-gray-400 text-sm">Revenue Type 2</p>
+                      <p className="text-2xl font-bold text-white">₹{stats.adminProfitRevenue?.toLocaleString() || 0}</p>
+                      <p className="text-xs text-amber-400">Admin Profit</p>
+                      <p className="text-xs text-gray-500 mt-1">KYC fees (₹50 each)</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Total Revenue */}
               <div className="relative group">
                 <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-2xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity"></div>
                 <div className="relative bg-slate-800/80 backdrop-blur-sm rounded-xl p-6 border border-white/10">
@@ -244,14 +282,18 @@ export default function AdminDashboard() {
                       <TrendingUp className="w-8 h-8 text-white" />
                     </div>
                     <div>
-                      <p className="text-gray-400">Total Revenue</p>
-                      <p className="text-3xl font-bold text-white">₹{stats.totalRevenue?.toLocaleString() || 0}</p>
-                      <p className="text-sm text-emerald-400">From verified payments</p>
+                      <p className="text-gray-400 text-sm">Total Revenue</p>
+                      <p className="text-2xl font-bold text-white">₹{stats.totalRevenue?.toLocaleString() || 0}</p>
+                      <p className="text-xs text-emerald-400">Combined</p>
+                      <p className="text-xs text-gray-500 mt-1">All transactions</p>
                     </div>
                   </div>
                 </div>
               </div>
+            </div>
 
+            {/* Blocked Users */}
+            <div className="grid grid-cols-1 gap-4">
               <div className="relative group">
                 <div className="absolute -inset-1 bg-gradient-to-r from-red-500 to-rose-500 rounded-2xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity"></div>
                 <div className="relative bg-slate-800/80 backdrop-blur-sm rounded-xl p-6 border border-white/10">

@@ -5,7 +5,9 @@ import {
   approveKYC,
   rejectKYC,
   toggleAvailability,
-  getKYCStats
+  getKYCStats,
+  getKYCById,
+  saveAadhaarInfo
 } from '../controllers/admin-kyc.controller.js';
 
 const router = express.Router();
@@ -15,9 +17,11 @@ router.use(authenticate);
 
 // Admin KYC routes
 router.get('/pending', getPendingKYCs);
+router.get('/stats', getKYCStats);
+router.get('/kyc/:kycId', getKYCById);
 router.post('/approve/:kycId', approveKYC);
 router.post('/reject/:kycId', rejectKYC);
+router.post('/kyc/:kycId/aadhaar-info', saveAadhaarInfo);
 router.put('/availability', toggleAvailability);
-router.get('/stats', getKYCStats);
 
 export default router;

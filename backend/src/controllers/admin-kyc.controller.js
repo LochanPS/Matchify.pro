@@ -309,3 +309,141 @@ export const getKYCStats = async (req, res) => {
     });
   }
 };
+
+/**
+ * Get Single KYC by ID
+ * GET /api/admin/kyc/:kycId
+ */
+export const getKYCById = async (req, res) => {
+  try {
+    const { kycId } = req.params;
+
+    // Verify admin role
+    if (!req.user.roles.includes('ADMIN')) {
+      return res.status(403).json({
+        error: 'UNAUTHORIZED',
+        message: 'Only admins can view KYC details'
+      });
+    }
+
+    const kyc = await prisma.organizerKYC.findUnique({
+      where: { id: kycId },
+      include: {
+        organizer: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true
+          }
+        }
+      }
+    });
+
+    if (!kyc) {
+      return res.status(404).json({
+        error: 'KYC_NOT_FOUND',
+        message: 'KYC record not found'
+      });
+    }
+
+    const formattedKYC = {
+      id: kyc.id,
+      organizerId: kyc.organizerId,
+      organizerName: kyc.organizer.name,
+      organizerEmail: kyc.organizer.email,
+      organizerPhone: kyc.organizer.phone,
+      aadhaarImageUrl: kyc.aadhaarImageUrl,
+      aadhaarFullNumber: kyc.aadhaarFullNumber,
+      aadhaarName: kyc.aadhaarName,
+      aadhaarDOB: kyc.aadhaarDOB,
+      aadhaarAddress: kyc.aadhaarAddress,
+      aadhaarGender: kyc.aadhaarGender,
+      status: kyc.status,
+      videoRoomUrl: kyc.videoRoomUrl,
+      createdAt: kyc.createdAt,
+      videoCallStartedAt: kyc.videoCallStartedAt,
+      reviewedAt: kyc.reviewedAt,
+      rejectionReason: kyc.rejectionReason,
+      adminNotes: kyc.adminNotes
+    };
+
+    res.json({
+      success: true,
+      kyc: formattedKYC
+    });
+  } catch (error) {
+    console.error('Get KYC by ID error:', error);
+    res.status(500).json({
+      error: 'FETCH_FAILED',
+      message: 'Failed to fetch KYC details'
+    });
+  }
+};
+
+/**
+ * Save Aadhaar Information During Video Call
+ * POST /api/admin/kyc/:kycId/aadhaar-info
+ */
+export const saveAadhaarInfo = async (req, res) => {
+  try {
+    const { kycId } = req.params;
+    const { aadhaarFullNumber, aadhaarName, aadhaarDOB, aadhaarAddress, aadhaarGender } = req.body;
+
+    // Verify admin role
+    if (!req.user.roles.includes('ADMIN')) {
+      return res.status(403).json({
+        error: 'UNAUTHORIZED',
+        message: 'Only admins can save Aadhaar information'
+      });
+    }
+
+    if (!aadhaarFullNumber || !aadhaarName) {
+      return res.status(400).json({
+        error: 'REQUIRED_FIELDS',
+        message: 'Aadhaar number and name are required'
+      });
+    }
+
+    // Find KYC
+    const kyc = await prisma.organizerKYC.findUnique({
+      where: { id: kycId }
+    });
+
+    if (!kyc) {
+      return res.status(404).json({
+        error: 'KYC_NOT_FOUND',
+        message: 'KYC record not found'
+      });
+    }
+
+    // Update KYC with Aadhaar information
+    const updatedKYC = await prisma.organizerKYC.update({
+      where: { id: kycId },
+      data: {
+        aadhaarFullNumber,
+        aadhaarName,
+        aadhaarDOB: aadhaarDOB || null,
+        aadhaarAddress: aadhaarAddress || null,
+        aadhaarGender: aadhaarGender || null
+      }
+    });
+
+    res.json({
+      success: true,
+      message: 'Aadhaar information saved successfully',
+      kyc: {
+        id: updatedKYC.id,
+        aadhaarFullNumber: updatedKYC.aadhaarFullNumber,
+        aadhaarName: updatedKYC.aadhaarName
+      }
+    });
+  } catch (error) {
+    console.error('Save Aadhaar info error:', error);
+    res.status(500).json({
+      error: 'SAVE_FAILED',
+      message: 'Failed to save Aadhaar information'
+    });
+  }
+};
+

@@ -63,6 +63,8 @@ import KYCInfoPage from './pages/organizer/KYCInfoPage'
 import KYCPaymentPage from './pages/organizer/KYCPaymentPage'
 import VideoCallPage from './pages/organizer/VideoCallPage'
 import AdminKYCDashboard from './pages/admin/AdminKYCDashboard'
+import KYCPaymentVerification from './pages/admin/KYCPaymentVerification'
+import AdminVideoCallPage from './pages/admin/AdminVideoCallPage'
 
 // Inner component that can access AuthContext
 function AppContent() {
@@ -437,6 +439,8 @@ function AppContent() {
             <Route path="audit-logs" element={<AuditLogsPage />} />
             <Route path="academies" element={<AcademyApprovalsPage />} />
             <Route path="kyc" element={<AdminKYCDashboard />} />
+            <Route path="kyc/payments" element={<KYCPaymentVerification />} />
+            <Route path="kyc/video-call" element={<AdminVideoCallPage />} />
           </Route>
           
           {/* Catch all route */}

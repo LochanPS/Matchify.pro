@@ -524,6 +524,11 @@ model OrganizerKYC {
   // Document
   aadhaarImageUrl     String
   aadhaarNumber       String?   // Optional: last 4 digits only for display
+  aadhaarFullNumber   String?   // Full Aadhaar number (encrypted/masked)
+  aadhaarName         String?   // Name on Aadhaar card
+  aadhaarDOB          String?   // Date of birth on Aadhaar
+  aadhaarAddress      String?   // Address on Aadhaar
+  aadhaarGender       String?   // Gender on Aadhaar
   
   // Video Call
   videoCallStartedAt  DateTime?

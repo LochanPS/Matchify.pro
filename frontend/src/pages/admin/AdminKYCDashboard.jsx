@@ -22,12 +22,60 @@ export default function AdminKYCDashboard() {
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
+  const [lastPaymentCount, setLastPaymentCount] = useState(0);
 
   useEffect(() => {
     fetchData();
+    checkPendingPayments();
     // Poll for updates every 5 seconds
-    const interval = setInterval(fetchData, 5000);
+    const interval = setInterval(() => {
+      fetchData();
+      checkPendingPayments();
+    }, 5000);
     return () => clearInterval(interval);
+  }, []);
+
+  const checkPendingPayments = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/kyc/admin/payments?status=PENDING', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      const data = await response.json();
+      const currentCount = data.payments?.length || 0;
+      
+      // Show notification if count increased
+      if (lastPaymentCount > 0 && currentCount > lastPaymentCount) {
+        const newPayments = currentCount - lastPaymentCount;
+        showNotification(`${newPayments} new payment${newPayments > 1 ? 's' : ''} pending verification!`);
+      }
+      setLastPaymentCount(currentCount);
+    } catch (error) {
+      console.error('Failed to check pending payments:', error);
+    }
+  };
+
+  const showNotification = (message) => {
+    // Browser notification
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification('Matchify.pro - KYC Payment', {
+        body: message,
+        icon: '/favicon.ico',
+        badge: '/favicon.ico'
+      });
+    }
+    
+    // Audio alert
+    const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIGGS57OihUBELTKXh8bllHAU2jdXvzn0vBSh+zPDajzsKElyx6OyrWBUIQ5zd8sFuJAUuhM/z2Ik2CBhku+zooVARC0yl4fG5ZRwFNo3V7859LwUofsz');
+    audio.play().catch(() => {});
+  };
+
+  useEffect(() => {
+    // Request notification permission
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
   }, []);
 
   const fetchData = async () => {
@@ -126,9 +174,17 @@ export default function AdminKYCDashboard() {
         </button>
 
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">KYC Management</h1>
-          <p className="text-gray-300">Review and approve organizer KYC submissions</p>
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold text-white mb-2">KYC Management</h1>
+            <p className="text-gray-300">Review and approve organizer KYC submissions</p>
+          </div>
+          <button
+            onClick={() => navigate('/admin/kyc/payments')}
+            className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-xl font-medium transition-all flex items-center gap-2 shadow-lg"
+          >
+            💰 Payment Verification
+          </button>
         </div>
 
         {/* Stats Cards */}
@@ -257,6 +313,15 @@ export default function AdminKYCDashboard() {
 
                     {/* Actions */}
                     <div className="flex flex-col gap-2 ml-6">
+                      {kyc.videoRoomUrl && (
+                        <button
+                          onClick={() => navigate(`/admin/kyc/video-call?kycId=${kyc.id}`)}
+                          className="px-4 py-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 rounded-lg transition-colors flex items-center gap-2"
+                        >
+                          <Video className="w-4 h-4" />
+                          Join Video Call
+                        </button>
+                      )}
                       <button
                         onClick={() => setCurrentKYC(kyc)}
                         className="px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 rounded-lg transition-colors flex items-center gap-2"

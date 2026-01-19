@@ -1,12 +1,34 @@
 import { Link, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import api from '../../utils/api';
 
 const Sidebar = () => {
   const location = useLocation();
+  const [pendingPayments, setPendingPayments] = useState(0);
+
+  useEffect(() => {
+    fetchPendingPayments();
+    // Poll every 30 seconds
+    const interval = setInterval(fetchPendingPayments, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const fetchPendingPayments = async () => {
+    try {
+      const response = await api.get('/kyc/admin/payments', {
+        params: { status: 'PENDING' }
+      });
+      setPendingPayments(response.data.payments?.length || 0);
+    } catch (error) {
+      console.error('Failed to fetch pending payments:', error);
+    }
+  };
 
   const menuItems = [
     { path: '/admin/dashboard', icon: '📊', label: 'Dashboard' },
     { path: '/admin/users', icon: '👥', label: 'User Management' },
     { path: '/admin/kyc', icon: '🛡️', label: 'KYC Management' },
+    { path: '/admin/kyc/payments', icon: '💰', label: 'Payment Verification', badge: pendingPayments },
     { path: '/admin/invites', icon: '✉️', label: 'Admin Invites' },
     { path: '/admin/academies', icon: '🏢', label: 'Academy Approvals' },
     { path: '/admin/audit-logs', icon: '📋', label: 'Audit Logs' },
@@ -29,14 +51,21 @@ const Sidebar = () => {
             <li key={item.path}>
               <Link
                 to={item.path}
-                className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition ${
+                className={`flex items-center justify-between px-4 py-3 rounded-lg transition ${
                   isActive(item.path)
                     ? 'bg-blue-600 text-white'
                     : 'text-gray-300 hover:bg-gray-800'
                 }`}
               >
-                <span className="text-xl">{item.icon}</span>
-                <span className="font-medium">{item.label}</span>
+                <div className="flex items-center space-x-3">
+                  <span className="text-xl">{item.icon}</span>
+                  <span className="font-medium">{item.label}</span>
+                </div>
+                {item.badge > 0 && (
+                  <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">
+                    {item.badge}
+                  </span>
+                )}
               </Link>
             </li>
           ))}

@@ -1,4 +1,5 @@
 let admin = null;
+let isInitialized = false;
 
 try {
   const firebaseAdmin = require('firebase-admin');
@@ -12,6 +13,7 @@ try {
     admin = firebaseAdmin.initializeApp({
       credential: firebaseAdmin.credential.cert(serviceAccount)
     });
+    isInitialized = true;
     console.log('✅ Firebase initialized');
   } else {
     console.log('⚠️  Firebase not configured - service account file not found');
@@ -20,5 +22,33 @@ try {
   console.log('⚠️  Firebase disabled:', error.message);
 }
 
-module.exports = admin;
-module.exports.auth = () => admin ? admin.auth() : null;
+// Safe exports that won't crash if Firebase isn't initialized
+const safeAdmin = {
+  auth: () => {
+    if (!isInitialized || !admin) {
+      return null;
+    }
+    try {
+      return admin.auth();
+    } catch (error) {
+      console.log('⚠️  Firebase auth not available');
+      return null;
+    }
+  },
+  messaging: () => {
+    if (!isInitialized || !admin) {
+      return null;
+    }
+    try {
+      return admin.messaging();
+    } catch (error) {
+      console.log('⚠️  Firebase messaging not available');
+      return null;
+    }
+  }
+};
+
+module.exports = safeAdmin;
+module.exports.admin = admin;
+module.exports.isInitialized = isInitialized;
+

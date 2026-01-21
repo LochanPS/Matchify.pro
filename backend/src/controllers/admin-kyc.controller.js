@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { deleteDailyRoom } from '../utils/daily.js';
 
 const prisma = new PrismaClient();
 
@@ -117,13 +118,14 @@ export const approveKYC = async (req, res) => {
       }
     });
 
+    // Delete Daily.co room (cleanup)
+    if (kyc.videoRoomUrl) {
+      const roomName = kyc.videoRoomUrl.split('/').pop();
+      await deleteDailyRoom(roomName);
+    }
+
     // TODO: Send approval email to organizer
     // await sendKYCApprovalEmail(kyc.organizer);
-
-    // TODO: Delete Daily.co room (cleanup)
-    // if (kyc.videoRoomUrl) {
-    //   await deleteDailyRoom(kyc.videoRoomUrl);
-    // }
 
     res.json({
       success: true,
@@ -202,13 +204,14 @@ export const rejectKYC = async (req, res) => {
       }
     });
 
+    // Delete Daily.co room (cleanup)
+    if (kyc.videoRoomUrl) {
+      const roomName = kyc.videoRoomUrl.split('/').pop();
+      await deleteDailyRoom(roomName);
+    }
+
     // TODO: Send rejection email to organizer
     // await sendKYCRejectionEmail(kyc.organizer, rejectionReason);
-
-    // TODO: Delete Daily.co room (cleanup)
-    // if (kyc.videoRoomUrl) {
-    //   await deleteDailyRoom(kyc.videoRoomUrl);
-    // }
 
     res.json({
       success: true,
@@ -303,6 +306,275 @@ export const getKYCStats = async (req, res) => {
     res.status(500).json({
       error: 'STATS_FETCH_FAILED',
       message: 'Failed to fetch KYC statistics'
+    });
+  }
+};
+
+/**
+ * Get Single KYC by ID
+ * GET /api/admin/kyc/:kycId
+ */
+export const getKYCById = async (req, res) => {
+  try {
+    const { kycId } = req.params;
+
+    // Verify admin role
+    if (!req.user.roles.includes('ADMIN')) {
+      return res.status(403).json({
+        error: 'UNAUTHORIZED',
+        message: 'Only admins can view KYC details'
+      });
+    }
+
+    const kyc = await prisma.organizerKYC.findUnique({
+      where: { id: kycId },
+      include: {
+        organizer: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true
+          }
+        }
+      }
+    });
+
+    if (!kyc) {
+      return res.status(404).json({
+        error: 'KYC_NOT_FOUND',
+        message: 'KYC record not found'
+      });
+    }
+
+    const formattedKYC = {
+      id: kyc.id,
+      organizerId: kyc.organizerId,
+      organizerName: kyc.organizer.name,
+      organizerEmail: kyc.organizer.email,
+      organizerPhone: kyc.organizer.phone,
+      aadhaarImageUrl: kyc.aadhaarImageUrl,
+      aadhaarFullNumber: kyc.aadhaarFullNumber,
+      aadhaarName: kyc.aadhaarName,
+      aadhaarDOB: kyc.aadhaarDOB,
+      aadhaarAddress: kyc.aadhaarAddress,
+      aadhaarGender: kyc.aadhaarGender,
+      status: kyc.status,
+      videoRoomUrl: kyc.videoRoomUrl,
+      createdAt: kyc.createdAt,
+      videoCallStartedAt: kyc.videoCallStartedAt,
+      reviewedAt: kyc.reviewedAt,
+      rejectionReason: kyc.rejectionReason,
+      adminNotes: kyc.adminNotes
+    };
+
+    res.json({
+      success: true,
+      kyc: formattedKYC
+    });
+  } catch (error) {
+    console.error('Get KYC by ID error:', error);
+    res.status(500).json({
+      error: 'FETCH_FAILED',
+      message: 'Failed to fetch KYC details'
+    });
+  }
+};
+
+/**
+ * Save Aadhaar Information During Video Call
+ * POST /api/admin/kyc/:kycId/aadhaar-info
+ */
+export const saveAadhaarInfo = async (req, res) => {
+  try {
+    const { kycId } = req.params;
+    const { aadhaarFullNumber, aadhaarName, aadhaarDOB, aadhaarAddress, aadhaarGender } = req.body;
+
+    // Verify admin role
+    if (!req.user.roles.includes('ADMIN')) {
+      return res.status(403).json({
+        error: 'UNAUTHORIZED',
+        message: 'Only admins can save Aadhaar information'
+      });
+    }
+
+    if (!aadhaarFullNumber || !aadhaarName) {
+      return res.status(400).json({
+        error: 'REQUIRED_FIELDS',
+        message: 'Aadhaar number and name are required'
+      });
+    }
+
+    // Find KYC
+    const kyc = await prisma.organizerKYC.findUnique({
+      where: { id: kycId }
+    });
+
+    if (!kyc) {
+      return res.status(404).json({
+        error: 'KYC_NOT_FOUND',
+        message: 'KYC record not found'
+      });
+    }
+
+    // Update KYC with Aadhaar information
+    const updatedKYC = await prisma.organizerKYC.update({
+      where: { id: kycId },
+      data: {
+        aadhaarFullNumber,
+        aadhaarName,
+        aadhaarDOB: aadhaarDOB || null,
+        aadhaarAddress: aadhaarAddress || null,
+        aadhaarGender: aadhaarGender || null
+      }
+    });
+
+    res.json({
+      success: true,
+      message: 'Aadhaar information saved successfully',
+      kyc: {
+        id: updatedKYC.id,
+        aadhaarFullNumber: updatedKYC.aadhaarFullNumber,
+        aadhaarName: updatedKYC.aadhaarName
+      }
+    });
+  } catch (error) {
+    console.error('Save Aadhaar info error:', error);
+    res.status(500).json({
+      error: 'SAVE_FAILED',
+      message: 'Failed to save Aadhaar information'
+    });
+  }
+};
+
+
+
+/**
+ * Admin: Generate New OTP for Organizer
+ * POST /api/admin/kyc/:kycId/generate-otp
+ */
+export const generateOTP = async (req, res) => {
+  try {
+    const { kycId } = req.params;
+
+    // Verify admin role
+    if (!req.user.roles.includes('ADMIN')) {
+      return res.status(403).json({
+        error: 'UNAUTHORIZED',
+        message: 'Only admins can generate OTP'
+      });
+    }
+
+    const kyc = await prisma.organizerKYC.findUnique({
+      where: { id: kycId },
+      include: {
+        organizer: {
+          select: {
+            name: true,
+            email: true
+          }
+        }
+      }
+    });
+
+    if (!kyc) {
+      return res.status(404).json({
+        error: 'KYC_NOT_FOUND',
+        message: 'KYC record not found'
+      });
+    }
+
+    if (!kyc.phone) {
+      return res.status(400).json({
+        error: 'NO_PHONE',
+        message: 'No phone number submitted by organizer'
+      });
+    }
+
+    // Generate new 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Update KYC with new OTP
+    await prisma.organizerKYC.update({
+      where: { id: kycId },
+      data: {
+        phoneOTP: otp,
+        phoneOTPGeneratedAt: new Date(),
+        phoneOTPVerified: false
+      }
+    });
+
+    res.json({
+      success: true,
+      message: 'OTP generated successfully',
+      otp,
+      phone: kyc.phone,
+      organizerName: kyc.organizer.name,
+      organizerEmail: kyc.organizer.email
+    });
+  } catch (error) {
+    console.error('Generate OTP error:', error);
+    res.status(500).json({
+      error: 'GENERATE_FAILED',
+      message: 'Failed to generate OTP'
+    });
+  }
+};
+
+/**
+ * Admin: Get Pending Phone Verifications
+ * GET /api/admin/kyc/pending-phones
+ */
+export const getPendingPhoneVerifications = async (req, res) => {
+  try {
+    // Verify admin role
+    if (!req.user.roles.includes('ADMIN')) {
+      return res.status(403).json({
+        error: 'UNAUTHORIZED',
+        message: 'Only admins can view pending verifications'
+      });
+    }
+
+    const pendingKYCs = await prisma.organizerKYC.findMany({
+      where: {
+        phone: { not: null },
+        phoneOTPVerified: false
+      },
+      include: {
+        organizer: {
+          select: {
+            id: true,
+            name: true,
+            email: true
+          }
+        }
+      },
+      orderBy: {
+        phoneOTPGeneratedAt: 'desc'
+      }
+    });
+
+    const formattedKYCs = pendingKYCs.map(kyc => ({
+      id: kyc.id,
+      organizerId: kyc.organizerId,
+      organizerName: kyc.organizer.name,
+      organizerEmail: kyc.organizer.email,
+      phone: kyc.phone,
+      otp: kyc.phoneOTP,
+      aadhaarImageUrl: kyc.aadhaarImageUrl,
+      otpGeneratedAt: kyc.phoneOTPGeneratedAt,
+      createdAt: kyc.createdAt
+    }));
+
+    res.json({
+      success: true,
+      pendingVerifications: formattedKYCs
+    });
+  } catch (error) {
+    console.error('Get pending phone verifications error:', error);
+    res.status(500).json({
+      error: 'FETCH_FAILED',
+      message: 'Failed to fetch pending verifications'
     });
   }
 };

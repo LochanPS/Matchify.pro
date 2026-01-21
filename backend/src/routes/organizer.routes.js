@@ -204,6 +204,8 @@ router.get('/dashboard', authenticate, async (req, res) => {
           created_at: r.createdAt
         })),
         revenue: {
+          type1: 0, // Player → Organizer transactions (not tracked at organizer level)
+          type2: 0, // Admin profit (not tracked at organizer level)
           total: totalRevenue,
           currency: 'INR'
         },

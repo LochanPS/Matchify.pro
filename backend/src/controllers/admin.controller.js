@@ -31,8 +31,10 @@ class AdminController {
         ];
       }
 
-      // Role filter
-      if (role) where.role = role;
+      // Role filter - check if roles contains the specified role
+      if (role) {
+        where.roles = { contains: role };
+      }
 
       // Status filter
       if (status) {
@@ -58,7 +60,7 @@ class AdminController {
             name: true,
             email: true,
             phone: true,
-            role: true,
+            roles: true,
             city: true,
             state: true,
             createdAt: true,
@@ -78,11 +80,29 @@ class AdminController {
         prisma.user.count({ where }),
       ]);
 
-      // Add isSuspended flag
-      const usersWithStatus = users.map(user => ({
-        ...user,
-        isSuspended: user.suspendedUntil && new Date(user.suspendedUntil) > new Date(),
-      }));
+      // Add isSuspended flag and parse roles
+      const usersWithStatus = users.map(user => {
+        // Parse roles - handle both string and array formats
+        let userRoles = ['PLAYER'];
+        if (user.roles) {
+          if (typeof user.roles === 'string') {
+            userRoles = user.roles.split(',');
+          } else if (Array.isArray(user.roles)) {
+            userRoles = user.roles;
+          }
+        }
+        
+        // Get primary role for display
+        const role = userRoles.includes('ADMIN') ? 'ADMIN' :
+                     userRoles.includes('ORGANIZER') ? 'ORGANIZER' :
+                     userRoles.includes('UMPIRE') ? 'UMPIRE' : 'PLAYER';
+        
+        return {
+          ...user,
+          role, // Add single role for display
+          isSuspended: user.suspendedUntil && new Date(user.suspendedUntil) > new Date(),
+        };
+      });
 
       res.json({
         success: true,
@@ -1155,18 +1175,31 @@ class AdminController {
       res.send(csv);
 
       // Log this export action
-      await AuditLogService.log({
-        adminId: req.user.id,
-        action: 'AUDIT_LOG_EXPORTED',
-        entityType: 'AUDIT_LOG',
-        entityId: null,
-        details: {
-          filters: { action, entityType, adminId, startDate, endDate },
-          recordCount: result.logs.length,
-        },
-        ipAddress: req.ip,
-        userAgent: req.get('user-agent'),
-      });
+      try {
+        // Handle super admin case - use the real admin user ID instead of 'admin'
+        let auditAdminId = req.user.id;
+        if (req.user.id === 'admin') {
+          const realAdmin = await prisma.user.findFirst({
+            where: { roles: { contains: 'ADMIN' } }
+          });
+          auditAdminId = realAdmin?.id || req.user.id;
+        }
+        
+        await AuditLogService.log({
+          adminId: auditAdminId,
+          action: 'AUDIT_LOG_EXPORTED',
+          entityType: 'AUDIT_LOG',
+          entityId: null,
+          details: {
+            filters: { action, entityType, adminId, startDate, endDate },
+            recordCount: result.logs.length,
+          },
+          ipAddress: req.ip,
+          userAgent: req.get('user-agent'),
+        });
+      } catch (auditError) {
+        console.error('⚠️ Failed to log export audit entry (non-critical):', auditError.message);
+      }
     } catch (error) {
       console.error('Export audit logs error:', error);
       res.status(500).json({

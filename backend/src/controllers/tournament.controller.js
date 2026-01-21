@@ -1000,9 +1000,12 @@ const updateCategory = async (req, res) => {
       });
     }
 
-    // Check if category exists
+    // Check if category exists and get registration count
     const existingCategory = await prisma.category.findUnique({
       where: { id: categoryId },
+      include: {
+        registrations: true // Include registrations to check if any exist
+      }
     });
 
     if (!existingCategory || existingCategory.tournamentId !== id) {
@@ -1025,6 +1028,21 @@ const updateCategory = async (req, res) => {
       prizeDescription,
     } = req.body;
 
+    // Check if entry fee is being changed and if there are existing registrations
+    if (entryFee !== undefined && parseFloat(entryFee) !== existingCategory.entryFee) {
+      if (existingCategory.registrations.length > 0) {
+        return res.status(400).json({ 
+          success: false, 
+          error: 'Cannot change entry fee after registrations have started',
+          details: `This category has ${existingCategory.registrations.length} existing registration(s). Entry fees are locked once players register to maintain fairness and prevent confusion.`,
+          currentFee: existingCategory.entryFee,
+          attemptedFee: parseFloat(entryFee),
+          registrationCount: existingCategory.registrations.length,
+          feeLocked: true
+        });
+      }
+    }
+
     // Build update data
     const updateData = {};
     if (name !== undefined) updateData.name = name.trim();
@@ -1041,7 +1059,12 @@ const updateCategory = async (req, res) => {
       if (gender === 'OPEN') normalizedGender = 'mixed';
       updateData.gender = normalizedGender;
     }
-    if (entryFee !== undefined) updateData.entryFee = parseFloat(entryFee);
+    
+    // Only allow entry fee change if no registrations exist
+    if (entryFee !== undefined) {
+      updateData.entryFee = parseFloat(entryFee);
+    }
+    
     if (maxParticipants !== undefined) updateData.maxParticipants = maxParticipants ? parseInt(maxParticipants) : null;
     if (tournamentFormat !== undefined) updateData.tournamentFormat = tournamentFormat;
     if (scoringFormat !== undefined) updateData.scoringFormat = scoringFormat;
@@ -1057,6 +1080,8 @@ const updateCategory = async (req, res) => {
       success: true,
       message: 'Category updated successfully',
       category,
+      feeLocked: existingCategory.registrations.length > 0,
+      registrationCount: existingCategory.registrations.length
     });
 
   } catch (error) {
@@ -1556,6 +1581,45 @@ const removeUmpire = async (req, res) => {
   }
 };
 
+/**
+ * Get registrations for a specific category
+ * GET /api/tournaments/:tournamentId/categories/:categoryId/registrations
+ */
+const getCategoryRegistrations = async (req, res) => {
+  try {
+    const { tournamentId, categoryId } = req.params;
+
+    // Get registrations for this category
+    const registrations = await prisma.registration.findMany({
+      where: {
+        tournamentId,
+        categoryId
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true
+          }
+        }
+      },
+      orderBy: { createdAt: 'asc' }
+    });
+
+    res.json({
+      success: true,
+      registrations,
+      totalCount: registrations.length,
+      confirmedCount: registrations.filter(r => r.status === 'confirmed').length
+    });
+  } catch (error) {
+    console.error('Get category registrations error:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch registrations' });
+  }
+};
+
 export {
   createTournament,
   getTournaments,
@@ -1575,4 +1639,6 @@ export {
   addUmpireByCode,
   getTournamentUmpires,
   removeUmpire,
+  // Registration endpoints
+  getCategoryRegistrations,
 };

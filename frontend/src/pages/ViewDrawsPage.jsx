@@ -116,7 +116,7 @@ const ViewDrawsPage = () => {
     switch (format) {
       case 'KNOCKOUT': return 'Knockout';
       case 'ROUND_ROBIN': return 'Round Robin';
-      case 'ROUND_ROBIN_KNOCKOUT': return 'Groups + Knockout';
+      case 'ROUND_ROBIN_KNOCKOUT': return 'Round Robin + Knockout';
       default: return format || 'Not Set';
     }
   };
@@ -291,7 +291,7 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
   const formatOptions = [
     { value: 'KNOCKOUT', label: 'Knockout', icon: '🏆', desc: 'Single elimination. Lose once, you\'re out.' },
     { value: 'ROUND_ROBIN', label: 'Round Robin', icon: '🔄', desc: 'Everyone plays everyone in the group.' },
-    { value: 'ROUND_ROBIN_KNOCKOUT', label: 'Groups + Knockout', icon: '⚡', desc: 'Round robin groups, then knockout finals.' }
+    { value: 'ROUND_ROBIN_KNOCKOUT', label: 'Round Robin + Knockout', icon: '⚡', desc: 'Round robin groups, then knockout finals.' }
   ];
 
   const groupOptions = [2, 4, 8, 16].filter(n => n <= maxParticipants / 2);

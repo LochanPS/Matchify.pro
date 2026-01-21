@@ -16,6 +16,7 @@ import {
   addUmpireByCode,
   getTournamentUmpires,
   removeUmpire,
+  getCategoryRegistrations,
 } from '../controllers/tournament.controller.js';
 import { authenticate, preventAdminAccess } from '../middleware/auth.js';
 
@@ -25,6 +26,7 @@ const router = express.Router();
 router.get('/', getTournaments); // Get all tournaments (with filters)
 router.get('/:id', getTournament); // Get single tournament
 router.get('/:id/categories', getCategories); // Get tournament categories (public)
+router.get('/:tournamentId/categories/:categoryId/registrations', getCategoryRegistrations); // Get category registrations
 
 // Protected routes (require authentication + block admins)
 router.use(authenticate);

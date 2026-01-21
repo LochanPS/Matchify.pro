@@ -4,11 +4,7 @@ import {
   getTournamentRegistrations,
   exportParticipants,
   updateTournamentStatus,
-  approveRegistration,
-  rejectRegistration,
   removeRegistration,
-  approveRefund,
-  rejectRefund,
   completeRefund,
 } from '../api/organizer';
 import { formatDateIndian } from '../utils/dateFormat';
@@ -80,34 +76,6 @@ export default function TournamentManagementPage() {
     }
   };
 
-  const handleApprove = async (registrationId) => {
-    try {
-      setActionLoading(registrationId);
-      setConfirmModal(null);
-      await approveRegistration(registrationId);
-      await fetchRegistrations();
-    } catch (error) {
-      console.error('Error approving registration:', error);
-      setErrorMessage('Failed to approve registration');
-    } finally {
-      setActionLoading(null);
-    }
-  };
-
-  const handleReject = async (registrationId, reason = '') => {
-    try {
-      setActionLoading(registrationId);
-      setConfirmModal(null);
-      await rejectRegistration(registrationId, reason);
-      await fetchRegistrations();
-    } catch (error) {
-      console.error('Error rejecting registration:', error);
-      setErrorMessage('Failed to reject registration');
-    } finally {
-      setActionLoading(null);
-    }
-  };
-
   const handleRemove = async (registrationId) => {
     try {
       setActionLoading(registrationId);
@@ -117,34 +85,6 @@ export default function TournamentManagementPage() {
     } catch (error) {
       console.error('Error removing registration:', error);
       setErrorMessage('Failed to remove registration');
-    } finally {
-      setActionLoading(null);
-    }
-  };
-
-  const handleApproveRefund = async (registrationId) => {
-    try {
-      setActionLoading(registrationId);
-      setConfirmModal(null);
-      await approveRefund(registrationId);
-      await fetchRegistrations();
-    } catch (error) {
-      console.error('Error approving refund:', error);
-      setErrorMessage('Failed to approve refund');
-    } finally {
-      setActionLoading(null);
-    }
-  };
-
-  const handleRejectRefund = async (registrationId, reason = '') => {
-    try {
-      setActionLoading(registrationId);
-      setConfirmModal(null);
-      await rejectRefund(registrationId, reason);
-      await fetchRegistrations();
-    } catch (error) {
-      console.error('Error rejecting refund:', error);
-      setErrorMessage('Failed to reject refund');
     } finally {
       setActionLoading(null);
     }
@@ -471,24 +411,10 @@ export default function TournamentManagementPage() {
                       <td className="px-6 py-4">
                         <div className="flex flex-col items-center gap-2">
                           {registration.status === 'pending' && (
-                            <div className="flex items-center gap-2">
-                              <button
-                                onClick={() => setConfirmModal({ type: 'approve', registration })}
-                                disabled={actionLoading === registration.id}
-                                className="p-2 bg-emerald-500/20 text-emerald-400 rounded-lg hover:bg-emerald-500/30 transition-colors disabled:opacity-50"
-                                title="Approve"
-                              >
-                                <Check className="h-4 w-4" />
-                              </button>
-                              <button
-                                onClick={() => setConfirmModal({ type: 'reject', registration, reason: '' })}
-                                disabled={actionLoading === registration.id}
-                                className="p-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors disabled:opacity-50"
-                                title="Reject"
-                              >
-                                <X className="h-4 w-4" />
-                              </button>
-                            </div>
+                            <span className="text-yellow-400 text-sm flex items-center gap-1">
+                              <Clock className="h-4 w-4" />
+                              Pending Admin Approval
+                            </span>
                           )}
                           {registration.status === 'confirmed' && (
                             <span className="text-emerald-400 text-sm flex items-center gap-1">
@@ -512,24 +438,10 @@ export default function TournamentManagementPage() {
                                 <Eye className="h-4 w-4" />
                                 <span className="text-xs">Details</span>
                               </button>
-                              <div className="flex items-center gap-2">
-                                <button
-                                  onClick={() => setConfirmModal({ type: 'approveRefund', registration })}
-                                  disabled={actionLoading === registration.id}
-                                  className="p-2 bg-emerald-500/20 text-emerald-400 rounded-lg hover:bg-emerald-500/30 transition-colors disabled:opacity-50"
-                                  title="Approve Refund"
-                                >
-                                  <Check className="h-4 w-4" />
-                                </button>
-                                <button
-                                  onClick={() => setConfirmModal({ type: 'rejectRefund', registration, reason: '' })}
-                                  disabled={actionLoading === registration.id}
-                                  className="p-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors disabled:opacity-50"
-                                  title="Reject Refund"
-                                >
-                                  <X className="h-4 w-4" />
-                                </button>
-                              </div>
+                              <span className="text-orange-400 text-sm flex items-center gap-1">
+                                <AlertTriangle className="h-4 w-4" />
+                                Awaiting Admin Decision
+                              </span>
                             </>
                           )}
                           {registration.status === 'cancelled' && (
@@ -611,88 +523,23 @@ export default function TournamentManagementPage() {
             className="modal-content max-w-md animate-scale-in"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Approve Modal */}
-            {confirmModal.type === 'approve' && (
-              <>
-                <div className="text-center mb-6">
-                  <div className="w-20 h-20 bg-gradient-to-br from-purple-500 via-pink-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-2xl shadow-purple-500/50 animate-pulse">
-                    <CheckCircle className="w-10 h-10 text-white" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400 mb-3">
-                    Approve {confirmModal.registration.user.name}'s registration
-                  </h3>
-                </div>
-                <div className="bg-gradient-to-br from-purple-500/10 via-pink-500/10 to-indigo-500/10 border border-purple-500/30 rounded-xl p-5 mb-6 backdrop-blur-sm">
-                  <p className="text-base text-purple-300 font-semibold mb-3">This confirms:</p>
-                  <ul className="text-base text-gray-300 space-y-2">
-                    <li className="flex items-center gap-2">
-                      <span className="text-green-400">✓</span>
-                      <span>Payment of <span className="text-purple-400 font-semibold">₹{confirmModal.registration.amountTotal}</span> received</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <span className="text-green-400">✓</span>
-                      <span>Player added to tournament</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <span className="text-green-400">✓</span>
-                      <span>Confirmation notification sent</span>
-                    </li>
-                  </ul>
-                </div>
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => setConfirmModal(null)}
-                    className="flex-1 py-3 px-4 bg-slate-700/50 text-gray-300 rounded-xl hover:bg-slate-700 transition-all font-medium border border-white/10"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={() => handleApprove(confirmModal.registration.id)}
-                    disabled={actionLoading}
-                    className="flex-1 py-3 px-4 bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-600 text-white rounded-xl hover:shadow-2xl hover:shadow-purple-500/50 transition-all font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
-                  >
-                    {actionLoading ? (
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      <>
-                        <Check className="w-5 h-5" />
-                        Approve
-                      </>
-                    )}
-                  </button>
-                </div>
-              </>
-            )}
-
-            {/* Reject Modal */}
-            {confirmModal.type === 'reject' && (
+            {/* Remove Modal */}
+            {confirmModal.type === 'remove' && (
               <>
                 <div className="text-center mb-6">
                   <div className="w-16 h-16 bg-gradient-to-br from-red-400 to-rose-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-red-500/30">
-                    <XCircle className="w-8 h-8 text-white" />
+                    <Trash2 className="w-8 h-8 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold text-white mb-2">Reject Registration?</h3>
+                  <h3 className="text-xl font-bold text-white mb-2">Remove Registration?</h3>
                   <p className="text-gray-400">
-                    Reject <span className="text-red-400 font-medium">{confirmModal.registration.user.name}</span>'s registration.
+                    Remove <span className="text-red-400 font-medium">{confirmModal.registration.user.name}</span>'s registration permanently.
                   </p>
-                </div>
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Reason for rejection (optional)
-                  </label>
-                  <textarea
-                    value={confirmModal.reason || ''}
-                    onChange={(e) => setConfirmModal({ ...confirmModal, reason: e.target.value })}
-                    placeholder="e.g., Payment not received, Invalid screenshot..."
-                    className="input-premium resize-none"
-                    rows={3}
-                  />
                 </div>
                 <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 mb-6">
                   <p className="text-sm text-red-300 font-medium mb-2">This will:</p>
                   <ul className="text-sm text-red-200/80 space-y-1">
-                    <li>• Cancel the player's registration</li>
-                    <li>• Notify the player about rejection</li>
+                    <li>• Permanently delete the registration</li>
+                    <li>• Cannot be undone</li>
                   </ul>
                 </div>
                 <div className="flex gap-3">
@@ -703,7 +550,7 @@ export default function TournamentManagementPage() {
                     Cancel
                   </button>
                   <button
-                    onClick={() => handleReject(confirmModal.registration.id, confirmModal.reason)}
+                    onClick={() => handleRemove(confirmModal.registration.id)}
                     disabled={actionLoading}
                     className="flex-1 py-3 px-4 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl hover:shadow-lg hover:shadow-red-500/30 transition-all font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
                   >
@@ -711,114 +558,8 @@ export default function TournamentManagementPage() {
                       <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     ) : (
                       <>
-                        <X className="w-5 h-5" />
-                        Reject
-                      </>
-                    )}
-                  </button>
-                </div>
-              </>
-            )}
-
-            {/* Approve Refund Modal */}
-            {confirmModal.type === 'approveRefund' && (
-              <>
-                <div className="text-center mb-6">
-                  <div className="w-16 h-16 bg-gradient-to-br from-emerald-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-500/30">
-                    <CreditCard className="w-8 h-8 text-white" />
-                  </div>
-                  <h3 className="text-xl font-bold text-white mb-2">Approve Refund?</h3>
-                  <p className="text-gray-400">
-                    Approve refund for <span className="text-emerald-400 font-medium">{confirmModal.registration.user.name}</span>.
-                  </p>
-                </div>
-                <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 mb-4">
-                  <p className="text-sm text-emerald-300 font-medium mb-2">Refund Details:</p>
-                  <ul className="text-sm text-emerald-200/80 space-y-1">
-                    <li>• Amount: <span className="font-bold">₹{confirmModal.registration.refundAmount || confirmModal.registration.amountTotal}</span></li>
-                    <li>• UPI ID: <span className="font-mono">{confirmModal.registration.refundUpiId || 'Not provided'}</span></li>
-                  </ul>
-                </div>
-                <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mb-6">
-                  <p className="text-sm text-amber-300">
-                    <strong>Next Step:</strong> Send refund to player's UPI ID and mark as completed.
-                  </p>
-                </div>
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => setConfirmModal(null)}
-                    className="flex-1 py-3 px-4 bg-white/10 text-white rounded-xl hover:bg-white/20 transition-colors font-medium"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={() => handleApproveRefund(confirmModal.registration.id)}
-                    disabled={actionLoading}
-                    className="flex-1 py-3 px-4 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-xl hover:shadow-lg hover:shadow-emerald-500/30 transition-all font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
-                  >
-                    {actionLoading ? (
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      <>
-                        <Check className="w-5 h-5" />
-                        Approve
-                      </>
-                    )}
-                  </button>
-                </div>
-              </>
-            )}
-
-            {/* Reject Refund Modal */}
-            {confirmModal.type === 'rejectRefund' && (
-              <>
-                <div className="text-center mb-6">
-                  <div className="w-16 h-16 bg-gradient-to-br from-red-400 to-rose-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-red-500/30">
-                    <XCircle className="w-8 h-8 text-white" />
-                  </div>
-                  <h3 className="text-xl font-bold text-white mb-2">Reject Refund?</h3>
-                  <p className="text-gray-400">
-                    Reject refund for <span className="text-red-400 font-medium">{confirmModal.registration.user.name}</span>.
-                  </p>
-                </div>
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Reason for rejection (required)
-                  </label>
-                  <textarea
-                    value={confirmModal.reason || ''}
-                    onChange={(e) => setConfirmModal({ ...confirmModal, reason: e.target.value })}
-                    placeholder="e.g., Cancellation policy not met..."
-                    className="input-premium resize-none"
-                    rows={3}
-                  />
-                </div>
-                <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 mb-6">
-                  <p className="text-sm text-red-300 font-medium mb-2">This will:</p>
-                  <ul className="text-sm text-red-200/80 space-y-1">
-                    <li>• Reject the refund request</li>
-                    <li>• Keep registration active</li>
-                    <li>• Notify player about rejection</li>
-                  </ul>
-                </div>
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => setConfirmModal(null)}
-                    className="flex-1 py-3 px-4 bg-white/10 text-white rounded-xl hover:bg-white/20 transition-colors font-medium"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={() => handleRejectRefund(confirmModal.registration.id, confirmModal.reason)}
-                    disabled={actionLoading || !confirmModal.reason?.trim()}
-                    className="flex-1 py-3 px-4 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl hover:shadow-lg hover:shadow-red-500/30 transition-all font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
-                  >
-                    {actionLoading ? (
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      <>
-                        <X className="w-5 h-5" />
-                        Reject
+                        <Trash2 className="w-5 h-5" />
+                        Remove
                       </>
                     )}
                   </button>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Connection Test</title>
+</head>
+<body>
+    <h1>Testing API Connection</h1>
+    <div id="result"></div>
+    
+    <script>
+        async function testAPI() {
+            const resultDiv = document.getElementById('result');
+            
+            try {
+                resultDiv.innerHTML = '<p>Testing API connection...</p>';
+                
+                const response = await fetch('http://localhost:5000/api/tournaments?page=1&limit=12');
+                const data = await response.json();
+                
+                console.log('API Response:', data);
+                
+                if (data.success && data.data.tournaments) {
+                    resultDiv.innerHTML = `
+                        <h2>✅ API Connection Successful!</h2>
+                        <p><strong>Tournaments found:</strong> ${data.data.tournaments.length}</p>
+                        <p><strong>Total:</strong> ${data.data.pagination.total}</p>
+                        <h3>Tournament Details:</h3>
+                        <ul>
+                            ${data.data.tournaments.map(t => `
+                                <li>
+                                    <strong>${t.name}</strong><br>
+                                    Status: ${t.status}<br>
+                                    Privacy: ${t.privacy}<br>
+                                    Location: ${t.city}, ${t.state}<br>
+                                    Registrations: ${t.totalRegistrations}
+                                </li>
+                            `).join('')}
+                        </ul>
+                    `;
+                } else {
+                    resultDiv.innerHTML = '<h2>❌ No tournaments found in response</h2>';
+                }
+            } catch (error) {
+                console.error('API Error:', error);
+                resultDiv.innerHTML = `<h2>❌ API Connection Failed</h2><p>Error: ${error.message}</p>`;
+            }
+        }
+        
+        // Test on page load
+        testAPI();
+    </script>
+</body>
+</html>

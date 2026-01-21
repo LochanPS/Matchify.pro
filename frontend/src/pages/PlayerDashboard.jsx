@@ -296,20 +296,6 @@ const PlayerDashboard = () => {
                   </div>
                   <ArrowRightIcon className="w-5 h-5 text-gray-500 group-hover:translate-x-1 group-hover:text-amber-400 transition-all" />
                 </Link>
-
-                <Link
-                  to="/wallet"
-                  className="flex items-center gap-4 p-4 bg-slate-700/30 rounded-xl border border-white/5 hover:border-emerald-500/50 transition-all group"
-                >
-                  <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <span className="text-xl">💰</span>
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-semibold text-white">Wallet</p>
-                    <p className="text-sm text-gray-400">₹{user?.walletBalance || 0} balance</p>
-                  </div>
-                  <ArrowRightIcon className="w-5 h-5 text-gray-500 group-hover:translate-x-1 group-hover:text-amber-400 transition-all" />
-                </Link>
               </div>
             </div>
 

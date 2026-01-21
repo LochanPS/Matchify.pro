@@ -105,17 +105,17 @@ const PaymentQRStep = ({ formData, updateFormData, updateMultipleFields, onNext,
   const handleNext = async () => {
     // Payment QR is required
     if (!formData.paymentQR) {
-      setError('Please upload your UPI QR code. This is required for players to pay entry fees.');
+      setError('Please upload your UPI QR code. This is required for admin to pay your tournament earnings.');
       return;
     }
     // UPI ID is required
     if (!formData.upiId || !formData.upiId.trim()) {
-      setError('UPI ID is required for players to make payments.');
+      setError('UPI ID is required for admin to make payments to you.');
       return;
     }
     // Account Holder Name is required
     if (!formData.accountHolderName || !formData.accountHolderName.trim()) {
-      setError('Account Holder Name is required so players can verify the payment recipient.');
+      setError('Account Holder Name is required so admin can verify the payment recipient.');
       return;
     }
 
@@ -132,7 +132,7 @@ const PaymentQRStep = ({ formData, updateFormData, updateMultipleFields, onNext,
       <div>
         <h2 className="text-xl font-semibold text-white mb-2">Payment QR Code <span className="text-red-500">*</span></h2>
         <p className="text-gray-400">
-          Upload your UPI QR code so players can scan and pay the entry fees directly to you
+          Upload your UPI QR code so the admin can scan and pay your tournament earnings directly to you
         </p>
       </div>
 
@@ -223,7 +223,7 @@ const PaymentQRStep = ({ formData, updateFormData, updateMultipleFields, onNext,
           required
         />
         <p className="mt-1 text-sm text-gray-500">
-          Players can also pay using this UPI ID directly
+          Admin will use this UPI ID to pay your tournament earnings
         </p>
       </div>
 
@@ -242,7 +242,7 @@ const PaymentQRStep = ({ formData, updateFormData, updateMultipleFields, onNext,
           required
         />
         <p className="mt-1 text-sm text-gray-500">
-          This helps players verify they're paying to the right person
+          This helps admin verify they're paying to the right person
         </p>
       </div>
 
@@ -274,10 +274,10 @@ const PaymentQRStep = ({ formData, updateFormData, updateMultipleFields, onNext,
             <h3 className="text-sm font-medium text-purple-300">How it works</h3>
             <div className="mt-2 text-sm text-gray-400">
               <ul className="list-disc list-inside space-y-1">
-                <li>Players will see this QR code when registering for your tournament</li>
-                <li>They can scan and pay the entry fee directly to your account</li>
-                <li>After payment, they'll upload the payment screenshot for verification</li>
-                <li>You can verify payments from your organizer dashboard</li>
+                <li>Players pay entry fees to the admin account first</li>
+                <li>Admin collects all payments and verifies them</li>
+                <li>Admin uses your QR code to pay your tournament earnings (30% before, 65% after)</li>
+                <li>You receive payments directly from admin based on the tournament results</li>
               </ul>
             </div>
           </div>

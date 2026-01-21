@@ -112,7 +112,7 @@ app.use(compression());
 // Rate limiting - Prevent brute force attacks
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 500, // Increased limit for admin operations
+  max: 1000, // Increased limit for normal operations
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
@@ -128,10 +128,10 @@ app.use(preventParameterPollution);
 app.use(validateTokenFormat);
 app.use(logSuspiciousActivity);
 
-// Stricter rate limiting for auth routes
+// More reasonable rate limiting for auth routes
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // Limit each IP to 5 login attempts per windowMs
+  max: 20, // Allow 20 attempts per 15 minutes (more reasonable)
   message: 'Too many login attempts, please try again after 15 minutes.',
   skipSuccessfulRequests: true,
 });
@@ -162,6 +162,18 @@ app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'ok',
     timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development',
+    version: '1.0.0'
+  });
+});
+
+// API Health check endpoint (for testing)
+app.get('/api/health', (req, res) => {
+  res.status(200).json({
+    status: 'healthy',
+    message: 'MATCHIFY.PRO API is running',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
     environment: process.env.NODE_ENV || 'development',
     version: '1.0.0'
   });

@@ -735,6 +735,85 @@ const updateLiveScore = async (req, res) => {
  * End match and declare winner
  * PUT /api/matches/:matchId/end
  */
+/**
+ * Update Round Robin group standings after match completion
+ */
+async function updateRoundRobinStandings(tournamentId, categoryId, groupName) {
+  try {
+    // Get the current draw
+    const draw = await prisma.draw.findUnique({
+      where: { tournamentId_categoryId: { tournamentId, categoryId } }
+    });
+
+    if (!draw) return;
+
+    let bracketJson = typeof draw.bracketJson === 'string' ? JSON.parse(draw.bracketJson) : draw.bracketJson;
+    
+    if (bracketJson.format !== 'ROUND_ROBIN' && bracketJson.format !== 'ROUND_ROBIN_KNOCKOUT') {
+      return;
+    }
+
+    // Find the group
+    const group = bracketJson.groups.find(g => g.groupName === groupName);
+    if (!group) return;
+
+    // Get all completed matches for this group
+    const groupMatches = await prisma.match.findMany({
+      where: {
+        tournamentId,
+        categoryId,
+        groupName,
+        status: 'COMPLETED'
+      }
+    });
+
+    // Reset all participant stats
+    group.participants.forEach(p => {
+      p.played = 0;
+      p.wins = 0;
+      p.losses = 0;
+      p.points = 0;
+    });
+
+    // Calculate new standings
+    groupMatches.forEach(match => {
+      const player1 = group.participants.find(p => p.id === match.player1Id);
+      const player2 = group.participants.find(p => p.id === match.player2Id);
+
+      if (player1 && player2) {
+        player1.played++;
+        player2.played++;
+
+        if (match.winnerId === match.player1Id) {
+          player1.wins++;
+          player1.points += 2; // Win = 2 points
+          player2.losses++;
+        } else if (match.winnerId === match.player2Id) {
+          player2.wins++;
+          player2.points += 2; // Win = 2 points
+          player1.losses++;
+        }
+      }
+    });
+
+    // Sort participants by points (descending), then by wins
+    group.participants.sort((a, b) => {
+      if (b.points !== a.points) return b.points - a.points;
+      return b.wins - a.wins;
+    });
+
+    // Update the draw
+    await prisma.draw.update({
+      where: { tournamentId_categoryId: { tournamentId, categoryId } },
+      data: { bracketJson: JSON.stringify(bracketJson), updatedAt: new Date() }
+    });
+
+    console.log(`Updated standings for ${groupName}:`, group.participants.map(p => `${p.name}: ${p.points}pts`));
+  } catch (error) {
+    console.error('Error updating Round Robin standings:', error);
+  }
+}
+
 const endMatch = async (req, res) => {
   try {
     const { matchId } = req.params;
@@ -815,7 +894,7 @@ const endMatch = async (req, res) => {
       });
       console.log(`Finals completed! Winner: ${winnerId}, Runner-up: ${loserId}`);
     } else if (match.parentMatchId && match.winnerPosition) {
-      // Update bracket - advance winner to next match
+      // Knockout: Update bracket - advance winner to next match
       const updateData = match.winnerPosition === 'player1'
         ? { player1Id: winnerId }
         : { player2Id: winnerId };
@@ -825,6 +904,10 @@ const endMatch = async (req, res) => {
         data: updateData
       });
       console.log(`Winner ${winnerId} advanced to next round`);
+    } else if (match.groupName) {
+      // Round Robin: Update group standings
+      await updateRoundRobinStandings(match.tournamentId, match.categoryId, match.groupName);
+      console.log(`Round Robin match completed in ${match.groupName}. Standings updated.`);
     }
 
     res.json({

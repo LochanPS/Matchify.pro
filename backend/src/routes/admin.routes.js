@@ -10,6 +10,8 @@ import {
 } from '../controllers/adminInvite.controller.js';
 import { getInvitePublicDetails } from '../utils/inviteValidator.js';
 import AdminController from '../controllers/admin.controller.js';
+import adminPaymentRoutes from './adminPayment.routes.js';
+import userLedgerRoutes from './userLedger.routes.js';
 
 const router = express.Router();
 
@@ -47,10 +49,13 @@ router.get('/invite/details/:token', async (req, res) => {
 });
 
 // User Management (Admin only)
+router.get('/users/deleted', authenticate, requireAdmin, AdminController.getDeletedUsers);
 router.get('/users', authenticate, requireAdmin, AdminController.getUsers);
 router.get('/users/:id', authenticate, requireAdmin, AdminController.getUserDetails);
 router.post('/users/:id/suspend', authenticate, requireAdmin, AdminController.suspendUser);
 router.post('/users/:id/unsuspend', authenticate, requireAdmin, AdminController.unsuspendUser);
+router.post('/users/:id/delete', authenticate, requireAdmin, AdminController.deleteUser);
+router.post('/users/:id/restore', authenticate, requireAdmin, AdminController.restoreUser);
 router.post('/users/:id/login-as', authenticate, requireAdmin, AdminController.loginAsUser);
 router.post('/return-to-admin', authenticate, AdminController.returnToAdmin);
 router.delete('/users/clear-all', authenticate, requireAdmin, AdminController.clearAllUsers);
@@ -66,5 +71,11 @@ router.get('/stats', authenticate, requireAdmin, AdminController.getStats);
 router.get('/audit-logs/export', authenticate, requireAdmin, AdminController.exportAuditLogs);
 router.get('/audit-logs', authenticate, requireAdmin, AdminController.getAuditLogs);
 router.get('/audit-logs/:entityType/:entityId', authenticate, requireAdmin, AdminController.getEntityAuditLogs);
+
+// Payment Management Routes
+router.use('/payment', adminPaymentRoutes);
+
+// User Ledger Routes
+router.use('/user-ledger', userLedgerRoutes);
 
 export default router;

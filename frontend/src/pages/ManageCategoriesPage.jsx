@@ -82,11 +82,22 @@ const ManageCategoriesPage = () => {
         setSuccessMessage('Category updated successfully!');
         setTimeout(() => setSuccessMessage(''), 3000);
       } else {
-        setError(response.data.error || 'Failed to update category');
+        // Handle fee locking error specifically
+        if (response.data.feeLocked) {
+          setError(`Entry fee cannot be changed: ${response.data.details}`);
+        } else {
+          setError(response.data.error || 'Failed to update category');
+        }
       }
     } catch (err) {
       console.error('Error updating category:', err);
-      setError('Failed to update category');
+      
+      // Handle fee locking error from server response
+      if (err.response?.data?.feeLocked) {
+        setError(`Entry fee is locked: ${err.response.data.details}`);
+      } else {
+        setError(err.response?.data?.error || 'Failed to update category');
+      }
     } finally {
       setSaving(false);
     }
@@ -246,7 +257,15 @@ const ManageCategoriesPage = () => {
                           )}
                           <div className="bg-white/5 rounded-lg p-2">
                             <span className="text-gray-500 text-xs">Entry Fee</span>
-                            <p className="text-emerald-400 font-bold">₹{category.entryFee}</p>
+                            <div className="flex items-center gap-2">
+                              <p className="text-emerald-400 font-bold">₹{category.entryFee}</p>
+                              {category.registrationCount > 0 && (
+                                <div className="flex items-center gap-1" title="Entry fee is locked due to existing registrations">
+                                  <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
+                                  <span className="text-xs text-amber-400">Locked</span>
+                                </div>
+                              )}
+                            </div>
                           </div>
                           {category.maxParticipants && (
                             <div className="bg-white/5 rounded-lg p-2">

@@ -666,27 +666,43 @@ const createRegistrationWithScreenshot = async (req, res) => {
       });
     }
 
-    // Notify organizer about new registration
+    // Notify ADMIN (not organizer) about new registration for payment verification
     const currentUser = await prisma.user.findUnique({
       where: { id: userId },
       select: { name: true },
     });
 
-    // Create notification for organizer
-    await prisma.notification.create({
-      data: {
-        userId: tournament.organizerId,
-        type: 'PAYMENT_VERIFICATION_REQUIRED',
-        title: 'New Registration - Payment Verification Required',
-        message: `${currentUser.name} has registered for ${tournament.name}. Please verify their payment screenshot.`,
-        data: JSON.stringify({
-          registrationIds: registrations.map(r => r.id),
-          playerName: currentUser.name,
-          tournamentId: tournament.id,
-          amount: totalAmount,
-        }),
-      },
+    // Find admin user
+    const adminUser = await prisma.user.findFirst({
+      where: {
+        roles: {
+          contains: 'ADMIN'
+        }
+      }
     });
+
+    if (adminUser) {
+      // Create notification for ADMIN
+      await prisma.notification.create({
+        data: {
+          userId: adminUser.id,
+          type: 'PAYMENT_VERIFICATION_REQUIRED',
+          title: 'New Registration - Payment Verification Required',
+          message: `${currentUser.name} has registered for ${tournament.name} (₹${totalAmount}). Please verify their payment screenshot.`,
+          data: JSON.stringify({
+            registrationIds: registrations.map(r => r.id),
+            playerName: currentUser.name,
+            tournamentId: tournament.id,
+            tournamentName: tournament.name,
+            amount: totalAmount,
+            paymentScreenshot: screenshotUrl,
+          }),
+        },
+      });
+      console.log('✅ Admin notification created for payment verification');
+    } else {
+      console.warn('⚠️ No admin user found to send notification');
+    }
 
     // Send partner invitations for doubles
     for (const registration of registrations) {

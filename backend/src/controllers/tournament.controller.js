@@ -190,9 +190,14 @@ const createTournament = async (req, res) => {
       return res.status(400).json({ success: false, errors });
     }
 
+    // Get Matchify payment settings for QR code
+    const paymentSettings = await prisma.paymentSettings.findFirst({
+      where: { isActive: true }
+    });
+
     // Create tournament (FREE - no credits deducted)
     const result = await prisma.$transaction(async (tx) => {
-      // Create tournament
+      // Create tournament with Matchify QR code
       const tournament = await tx.tournament.create({
         data: {
           organizerId: userId,
@@ -212,7 +217,20 @@ const createTournament = async (req, res) => {
           startDate: startDate,                    // Store as string
           endDate: endDate,                        // Store as string
           status: 'draft', // Will be published later
+          // Use Matchify payment QR code
+          paymentQRUrl: paymentSettings?.qrCodeUrl || null,
+          upiId: paymentSettings?.upiId || null,
+          accountHolderName: paymentSettings?.accountHolder || null,
         },
+      });
+
+      // Create tournament payment tracking
+      await tx.tournamentPayment.create({
+        data: {
+          tournamentId: tournament.id,
+          organizerId: userId,
+          platformFeePercent: 5, // 5% platform fee
+        }
       });
 
       return tournament;

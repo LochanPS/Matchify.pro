@@ -1,22 +1,29 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import adminService from '../../services/adminService';
+import { getPaymentSettings } from '../../api/payment';
 
 const AdminDashboardPage = () => {
   const [stats, setStats] = useState(null);
+  const [paymentSettings, setPaymentSettings] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    fetchStats();
+    fetchData();
   }, []);
 
-  const fetchStats = async () => {
+  const fetchData = async () => {
     try {
       setLoading(true);
-      const data = await adminService.getStats();
-      setStats(data.stats);
+      const [statsData, paymentData] = await Promise.all([
+        adminService.getStats(),
+        getPaymentSettings().catch(() => ({ data: null }))
+      ]);
+      setStats(statsData.stats);
+      setPaymentSettings(paymentData.data);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to load statistics');
+      setError(err.response?.data?.message || 'Failed to load data');
     } finally {
       setLoading(false);
     }
@@ -24,12 +31,12 @@ const AdminDashboardPage = () => {
 
   if (loading) {
     return (
-      <div className="p-8">
+      <div className="min-h-screen bg-slate-900 p-8">
         <div className="animate-pulse">
-          <div className="h-8 bg-gray-300 rounded w-1/4 mb-8"></div>
+          <div className="h-8 bg-slate-700 rounded w-1/4 mb-8"></div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-32 bg-gray-300 rounded"></div>
+              <div key={i} className="h-32 bg-slate-800 rounded"></div>
             ))}
           </div>
         </div>
@@ -39,107 +46,201 @@ const AdminDashboardPage = () => {
 
   if (error) {
     return (
-      <div className="p-8">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-800">
+      <div className="min-h-screen bg-slate-900 p-8">
+        <div className="bg-red-900/20 border border-red-700 rounded-lg p-4 text-red-400">
           {error}
         </div>
       </div>
     );
   }
 
-  const statCards = [
-    {
-      title: 'Total Users',
-      value: stats?.totalUsers || 0,
-      icon: '👥',
-      color: 'blue',
-      breakdown: stats?.usersByRole
-    },
-    {
-      title: 'Total Tournaments',
-      value: stats?.totalTournaments || 0,
-      icon: '🏆',
-      color: 'green',
-      breakdown: stats?.tournamentsByStatus
-    },
-    {
-      title: 'Total Registrations',
-      value: stats?.totalRegistrations || 0,
-      icon: '📝',
-      color: 'purple'
-    },
-    {
-      title: 'Total Revenue',
-      value: `₹${stats?.totalRevenue || 0}`,
-      icon: '💰',
-      color: 'yellow'
-    }
-  ];
-
-  const colorClasses = {
-    blue: 'bg-blue-50 border-blue-200 text-blue-800',
-    green: 'bg-green-50 border-green-200 text-green-800',
-    purple: 'bg-purple-50 border-purple-200 text-purple-800',
-    yellow: 'bg-yellow-50 border-yellow-200 text-yellow-800'
-  };
-
   return (
-    <div className="p-8">
+    <div className="min-h-screen bg-slate-900 p-8">
+      {/* Back Button */}
+      <button
+        onClick={() => window.history.back()}
+        className="mb-6 flex items-center gap-2 text-gray-400 hover:text-teal-400 transition"
+      >
+        <span>←</span>
+        <span>Back</span>
+      </button>
+
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-        <p className="text-gray-600 mt-2">Platform overview and statistics</p>
+        <h1 className="text-3xl font-bold text-white mb-2">Admin Dashboard</h1>
+        <p className="text-gray-400">Welcome to Matchify.pro Admin Panel</p>
+      </div>
+
+      {/* PROMINENT QR SETTINGS CARD */}
+      <div className="mb-8">
+        <Link to="/admin/qr-settings">
+          <div className="bg-gradient-to-r from-teal-600 to-cyan-600 rounded-xl p-8 border-2 border-teal-400 shadow-2xl shadow-teal-500/50 hover:shadow-teal-500/70 transition-all cursor-pointer group">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-6">
+                <div className="text-7xl group-hover:scale-110 transition-transform">📱</div>
+                <div>
+                  <h2 className="text-3xl font-bold text-white mb-2">Payment QR Code Settings</h2>
+                  <p className="text-teal-100 text-lg mb-4">
+                    Control ALL tournament payments across Matchify.pro
+                  </p>
+                  <div className="flex items-center gap-4">
+                    {paymentSettings?.qrCodeUrl ? (
+                      <>
+                        <div className="bg-white/20 rounded-lg px-4 py-2">
+                          <p className="text-white font-mono text-sm">{paymentSettings.upiId}</p>
+                        </div>
+                        <div className="bg-white/20 rounded-lg px-4 py-2">
+                          <p className="text-white font-medium text-sm">{paymentSettings.accountHolder}</p>
+                        </div>
+                        <span className="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-bold">
+                          ✅ Active
+                        </span>
+                      </>
+                    ) : (
+                      <span className="bg-amber-500 text-white px-4 py-2 rounded-lg text-sm font-bold animate-pulse">
+                        ⚠️ QR Code Not Uploaded - Click to Upload
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="text-white text-4xl group-hover:translate-x-2 transition-transform">
+                →
+              </div>
+            </div>
+            <div className="mt-6 pt-6 border-t border-white/20">
+              <div className="grid grid-cols-3 gap-4 text-center">
+                <div>
+                  <p className="text-teal-100 text-sm">Your Power</p>
+                  <p className="text-white font-bold text-lg">Upload QR Code</p>
+                </div>
+                <div>
+                  <p className="text-teal-100 text-sm">Your Control</p>
+                  <p className="text-white font-bold text-lg">Change UPI Details</p>
+                </div>
+                <div>
+                  <p className="text-teal-100 text-sm">Your Platform</p>
+                  <p className="text-white font-bold text-lg">All Payments to You</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Link>
       </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {statCards.map((card, index) => (
-          <div
-            key={index}
-            className={`border rounded-lg p-6 ${colorClasses[card.color]}`}
-          >
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-4xl">{card.icon}</span>
-              <div className="text-right">
-                <p className="text-sm font-medium opacity-75">{card.title}</p>
-                <p className="text-3xl font-bold mt-1">{card.value}</p>
+        <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-lg">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-4xl">👥</span>
+            <div className="text-right">
+              <p className="text-gray-400 text-sm">Total Users</p>
+              <p className="text-3xl font-bold text-white mt-1">{stats?.totalUsers || 0}</p>
+            </div>
+          </div>
+          {stats?.usersByRole && (
+            <div className="mt-4 pt-4 border-t border-slate-700">
+              <div className="text-xs text-gray-400 space-y-1">
+                {Object.entries(stats.usersByRole).map(([key, value]) => (
+                  <div key={key} className="flex justify-between">
+                    <span>{key}:</span>
+                    <span className="font-semibold text-white">{value}</span>
+                  </div>
+                ))}
               </div>
             </div>
-            {card.breakdown && (
-              <div className="mt-4 pt-4 border-t border-current opacity-50">
-                <div className="text-xs space-y-1">
-                  {Object.entries(card.breakdown).map(([key, value]) => (
-                    <div key={key} className="flex justify-between">
-                      <span>{key}:</span>
-                      <span className="font-semibold">{value}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+          )}
+        </div>
+
+        <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-lg">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-4xl">🏆</span>
+            <div className="text-right">
+              <p className="text-gray-400 text-sm">Tournaments</p>
+              <p className="text-3xl font-bold text-white mt-1">{stats?.totalTournaments || 0}</p>
+            </div>
           </div>
-        ))}
+          {stats?.tournamentsByStatus && (
+            <div className="mt-4 pt-4 border-t border-slate-700">
+              <div className="text-xs text-gray-400 space-y-1">
+                {Object.entries(stats.tournamentsByStatus).map(([key, value]) => (
+                  <div key={key} className="flex justify-between">
+                    <span>{key}:</span>
+                    <span className="font-semibold text-white">{value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-lg">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-4xl">📝</span>
+            <div className="text-right">
+              <p className="text-gray-400 text-sm">Registrations</p>
+              <p className="text-3xl font-bold text-white mt-1">{stats?.totalRegistrations || 0}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-lg">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-4xl">💰</span>
+            <div className="text-right">
+              <p className="text-gray-400 text-sm">Total Revenue</p>
+              <p className="text-3xl font-bold text-teal-400 mt-1">₹{stats?.totalRevenue || 0}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <Link to="/admin/payment-verifications" className="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-lg hover:shadow-teal-500/50 transition group">
+          <div className="text-4xl mb-4 group-hover:scale-110 transition-transform">💳</div>
+          <h3 className="text-xl font-bold text-white mb-2 group-hover:text-teal-400 transition">
+            Payment Verification
+          </h3>
+          <p className="text-gray-400 text-sm">Approve/reject payment screenshots</p>
+        </Link>
+
+        <Link to="/admin/organizer-payouts" className="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-lg hover:shadow-teal-500/50 transition group">
+          <div className="text-4xl mb-4 group-hover:scale-110 transition-transform">💸</div>
+          <h3 className="text-xl font-bold text-white mb-2 group-hover:text-teal-400 transition">
+            Organizer Payouts
+          </h3>
+          <p className="text-gray-400 text-sm">Manage 50/50 payout installments</p>
+        </Link>
+
+        <Link to="/admin/revenue" className="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-lg hover:shadow-teal-500/50 transition group">
+          <div className="text-4xl mb-4 group-hover:scale-110 transition-transform">📊</div>
+          <h3 className="text-xl font-bold text-white mb-2 group-hover:text-teal-400 transition">
+            Revenue Analytics
+          </h3>
+          <p className="text-gray-400 text-sm">Track your platform earnings</p>
+        </Link>
       </div>
 
       {/* Recent Activity */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Recent Activity</h2>
+      <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-lg">
+        <h2 className="text-xl font-bold text-white mb-4">Recent Activity</h2>
         {stats?.recentActivity && stats.recentActivity.length > 0 ? (
           <div className="space-y-3">
             {stats.recentActivity.map((activity, index) => (
               <div
                 key={index}
-                className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+                className="flex items-center justify-between p-4 bg-slate-900 rounded-lg border border-slate-700"
               >
                 <div className="flex items-center space-x-4">
-                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                    <span className="text-blue-600 font-bold">
+                  <div className="w-10 h-10 bg-teal-600 rounded-full flex items-center justify-center">
+                    <span className="text-white font-bold">
                       {activity.user.name.charAt(0).toUpperCase()}
                     </span>
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900">{activity.user.name}</p>
-                    <p className="text-sm text-gray-600">
+                    <p className="font-medium text-white">{activity.user.name}</p>
+                    <p className="text-sm text-gray-400">
                       Registered for {activity.tournament.name} - {activity.category.name}
                     </p>
                   </div>

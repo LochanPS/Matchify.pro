@@ -1,4 +1,6 @@
 import { QrCodeIcon } from '@heroicons/react/24/outline';
+import { useState, useEffect } from 'react';
+import { getPublicPaymentSettings } from '../../api/payment';
 
 // Helper to get proper image URL
 const getImageUrl = (url) => {
@@ -15,6 +17,25 @@ export default function PaymentSummary({
   categories,
   tournament
 }) {
+  const [adminPaymentSettings, setAdminPaymentSettings] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch admin payment settings (PUBLIC endpoint)
+  useEffect(() => {
+    const fetchAdminPaymentSettings = async () => {
+      try {
+        const response = await getPublicPaymentSettings();
+        setAdminPaymentSettings(response.data);
+      } catch (error) {
+        console.error('Error fetching admin payment settings:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAdminPaymentSettings();
+  }, []);
+
   // Calculate total amount
   const totalAmount = selectedCategories.reduce((sum, catId) => {
     const category = categories.find(c => c.id === catId);
@@ -25,7 +46,8 @@ export default function PaymentSummary({
     categories.find(c => c.id === catId)
   ).filter(Boolean);
 
-  const qrImageUrl = getImageUrl(tournament?.paymentQRUrl);
+  // Use ADMIN's QR code instead of organizer's
+  const qrImageUrl = adminPaymentSettings?.qrCodeUrl ? getImageUrl(adminPaymentSettings.qrCodeUrl) : null;
 
   if (selectedCategories.length === 0) {
     return null;
@@ -54,13 +76,13 @@ export default function PaymentSummary({
         </div>
       </div>
 
-      {/* Payment QR Code */}
-      {qrImageUrl && (
+      {/* Payment QR Code - ADMIN's QR */}
+      {!loading && qrImageUrl && (
         <div className="bg-slate-700/50 border border-white/10 rounded-xl p-4 text-center">
           <div className="flex items-center justify-center gap-2 mb-3">
             <QrCodeIcon className="h-5 w-5 text-purple-400" />
             <h4 className="text-sm font-medium text-gray-300">
-              Scan & Pay to Organizer
+              Scan & Pay to Matchify.pro
             </h4>
           </div>
           
@@ -72,15 +94,15 @@ export default function PaymentSummary({
             />
           </div>
           
-          {tournament.accountHolderName && (
+          {adminPaymentSettings?.accountHolderName && (
             <p className="mt-3 text-sm font-medium text-white">
-              {tournament.accountHolderName}
+              {adminPaymentSettings.accountHolderName}
             </p>
           )}
           
-          {tournament.upiId && (
+          {adminPaymentSettings?.upiId && (
             <p className="text-sm text-gray-400">
-              UPI: {tournament.upiId}
+              UPI: {adminPaymentSettings.upiId}
             </p>
           )}
           
@@ -89,20 +111,30 @@ export default function PaymentSummary({
               💡 Pay <strong className="text-amber-200">₹{totalAmount}</strong> using any UPI app
             </p>
           </div>
+
+          {/* Anti-Scam Notice */}
+          <div className="mt-3 p-2 bg-teal-500/10 border border-teal-500/30 rounded-xl">
+            <p className="text-xs text-teal-300">
+              🔒 <strong>Secure Payment:</strong> All payments go to Matchify.pro. Admin will pay organizer after verification.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Loading State */}
+      {loading && (
+        <div className="bg-slate-700/50 border border-white/10 rounded-xl p-8 text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto"></div>
+          <p className="text-sm text-gray-400 mt-2">Loading payment details...</p>
         </div>
       )}
 
       {/* No QR Code Message */}
-      {!qrImageUrl && (
+      {!loading && !qrImageUrl && (
         <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4">
           <p className="text-sm text-amber-300">
-            ⚠️ Payment QR not available. Please contact the organizer for payment details.
+            ⚠️ Payment QR not available. Please contact support.
           </p>
-          {tournament?.organizer && (
-            <p className="text-sm text-amber-400/80 mt-2">
-              Organizer: {tournament.organizer.name} ({tournament.organizer.email})
-            </p>
-          )}
         </div>
       )}
 
@@ -111,10 +143,10 @@ export default function PaymentSummary({
         <h4 className="text-sm font-medium text-blue-300 mb-2">How to Pay:</h4>
         <ol className="text-xs text-blue-400/80 space-y-1 list-decimal list-inside">
           <li>Scan the QR code with any UPI app</li>
-          <li>Pay ₹{totalAmount} to the organizer</li>
+          <li>Pay ₹{totalAmount} to Matchify.pro</li>
           <li>Take a screenshot of the payment</li>
           <li>Click "Complete Registration" below</li>
-          <li>Organizer will verify your payment</li>
+          <li>Admin will verify your payment</li>
         </ol>
       </div>
     </div>

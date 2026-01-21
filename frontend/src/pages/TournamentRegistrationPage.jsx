@@ -506,7 +506,7 @@ export default function TournamentRegistrationPage() {
                 <div className="space-y-2 text-sm text-amber-300/90">
                   <p>✓ Payment screenshot uploaded</p>
                   <p>✓ Registration details saved</p>
-                  <p>⏳ Waiting for organizer to verify payment</p>
+                  <p>⏳ Waiting for admin to verify payment</p>
                 </div>
               </div>
             </div>

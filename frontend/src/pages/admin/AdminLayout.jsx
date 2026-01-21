@@ -12,7 +12,7 @@ const AdminLayout = () => {
       if (!user) {
         // Not logged in
         navigate('/login');
-      } else if (user.role !== 'ADMIN') {
+      } else if (!user.isAdmin && user.role !== 'ADMIN') {
         // Not an admin
         navigate('/');
       }
@@ -30,14 +30,14 @@ const AdminLayout = () => {
     );
   }
 
-  if (!user || user.role !== 'ADMIN') {
+  if (!user || (!user.isAdmin && user.role !== 'ADMIN')) {
     return null;
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
+    <div className="flex min-h-screen bg-slate-900">
       <Sidebar />
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto bg-slate-900">
         <Outlet />
       </div>
     </div>

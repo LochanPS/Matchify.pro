@@ -1,0 +1,26 @@
+# ============================================
+# MATCHIFY.PRO BACKEND - MINIMAL CONFIG
+# ============================================
+
+# Server
+PORT=5000
+NODE_ENV=development
+FRONTEND_URL=https://matchify.vercel.app
+
+# Database (SQLite for local development)
+DATABASE_URL=postgresql://postgres:Matchify.pro@db.euiltolaoeqszmrcjoze.supabase.co:5432/postgres
+
+# JWT Authentication (CHANGE THESE IN PRODUCTION!)
+JWT_SECRET=7a9f2e8b4c6d1a5e3f9b7c2d8a4e6f1b9c3e5a7d2f4b8e1c6a9d3f7e2b5c8a4d6f1e9b3c7a5d2e8f4b1c6a9e3d7f2b5c8a1e4d6f9b3c7a2e5d8f1b4c6a9e3d7f2b5c8a1e4d6f9b3c7a2e5d8f1b4c6a9
+JWT_REFRESH_SECRET=3e7f1b9d5a2c8e4f6b1d9a3c7e5f2b8d4a6c9e1f7b3d5a8c2e6f4b9d1a7c3e5f8b2d6a4c9e1f7b3d5a8c2e6f4b9d1a7c3e5f8b2d6a4c9e1f7b3d5a8c2e6f4b9d1a7c3e5f8b2d6a4c9e1f7b3d5a8c2e6f4b
+JWT_EXPIRE=7d
+JWT_REFRESH_EXPIRE=30d
+
+# Security
+BCRYPT_ROUNDS=12
+
+# Cloudinary (Image Storage)
+CLOUDINARY_CLOUD_NAME=dfg8tdgmf
+CLOUDINARY_API_KEY=417764488597768
+CLOUDINARY_API_SECRET=ithriq7poX0T-4_j3PWmhlVmHqI
+CLOUDINARY_URL=cloudinary://417764488597768:ithriq7poX0T-4_j3PWmhlVmHqI@dfg8tdgmf

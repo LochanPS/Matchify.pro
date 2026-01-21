@@ -80,6 +80,18 @@ const adminService = {
     return response.data;
   },
 
+  /**
+   * Login as a user (impersonation)
+   */
+  async loginAsUser(userId) {
+    const response = await axios.post(
+      `${API_URL}/admin/users/${userId}/login-as`,
+      {},
+      { headers: getAuthHeader() }
+    );
+    return response.data;
+  },
+
   // ==================== TOURNAMENT MANAGEMENT ====================
   
   /**

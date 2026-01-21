@@ -17,6 +17,16 @@ export const AuthProvider = ({ children }) => {
   // Fetch fresh user data from server
   const fetchUserProfile = async () => {
     try {
+      // Skip profile fetch for admin user (hardcoded admin doesn't have a profile)
+      const token = localStorage.getItem('token');
+      if (token) {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        if (payload.isAdmin && payload.userId === 'admin') {
+          console.log('Skipping profile fetch for super admin');
+          return null;
+        }
+      }
+      
       const response = await api.get('/profile');
       if (response.data.user) {
         const freshUser = response.data.user;

@@ -1,6 +1,7 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { NotificationProvider } from './contexts/NotificationContext'
+import { Toaster } from 'react-hot-toast'
 import Navbar from './components/Navbar'
 import ProfileCompletionModal from './components/ProfileCompletionModal'
 import ImpersonationBanner from './components/ImpersonationBanner'
@@ -58,6 +59,14 @@ import NotificationDetailPage from './pages/NotificationDetailPage'
 import RefundIssuePage from './pages/RefundIssuePage'
 import SearchAcademiesPage from './pages/SearchAcademiesPage'
 import AddAcademyPage from './pages/AddAcademyPage'
+
+// Payment System Pages
+import PaymentVerificationPage from './pages/admin/PaymentVerificationPage'
+import TournamentPaymentsPage from './pages/admin/TournamentPaymentsPage'
+import OrganizerPayoutsPage from './pages/admin/OrganizerPayoutsPage'
+import RevenueDashboardPage from './pages/admin/RevenueDashboardPage'
+import QRSettingsPage from './pages/admin/QRSettingsPage'
+
 import KYCSubmission from './pages/organizer/KYCSubmission'
 import VideoCallPage from './pages/organizer/VideoCallPage'
 import AdminKYCDashboard from './pages/admin/AdminKYCDashboard'
@@ -65,6 +74,7 @@ import AdminKYCDashboard from './pages/admin/AdminKYCDashboard'
 // Inner component that can access AuthContext
 function AppContent() {
   const { user, showProfileCompletion, completeProfile } = useAuth();
+  const location = useLocation();
   
   // Check if impersonating
   const isImpersonating = () => {
@@ -80,11 +90,14 @@ function AppContent() {
     return false;
   };
 
+  // Hide Navbar for admin dashboard (it has its own header)
+  const shouldShowNavbar = !location.pathname.startsWith('/admin-dashboard');
+
   return (
     <div className="min-h-screen bg-gray-50">
       <ImpersonationBanner />
       <div className={isImpersonating() ? 'pt-[60px]' : ''}> {/* Add padding only when impersonating */}
-        <Navbar />
+        {shouldShowNavbar && <Navbar />}
       </div>
       
       {/* Profile Completion Modal - shows when user has incomplete profile */}
@@ -384,7 +397,7 @@ function AppContent() {
           />
           
           <Route
-            path="/admin/dashboard"
+            path="/admin-dashboard"
             element={
               <ProtectedRoute>
                 <RoleRoute allowedRoles={['ADMIN']}>
@@ -392,6 +405,11 @@ function AppContent() {
                 </RoleRoute>
               </ProtectedRoute>
             }
+          />
+          
+          <Route
+            path="/admin/dashboard"
+            element={<Navigate to="/admin-dashboard" replace />}
           />
           
           <Route
@@ -407,12 +425,18 @@ function AppContent() {
           
           {/* New Admin Panel Routes */}
           <Route path="/admin" element={<AdminLayout />}>
-            <Route path="dashboard" element={<AdminDashboardPage />} />
             <Route path="users" element={<UserManagementPage />} />
             <Route path="invites" element={<InviteManagementPage />} />
             <Route path="audit-logs" element={<AuditLogsPage />} />
             <Route path="academies" element={<AcademyApprovalsPage />} />
             <Route path="kyc" element={<AdminKYCDashboard />} />
+            
+            {/* Payment System Routes */}
+            <Route path="payment-verifications" element={<PaymentVerificationPage />} />
+            <Route path="tournament-payments" element={<TournamentPaymentsPage />} />
+            <Route path="organizer-payouts" element={<OrganizerPayoutsPage />} />
+            <Route path="revenue" element={<RevenueDashboardPage />} />
+            <Route path="qr-settings" element={<QRSettingsPage />} />
           </Route>
           
           {/* Catch all route */}
@@ -426,6 +450,29 @@ function App() {
   return (
     <AuthProvider>
       <NotificationProvider>
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            duration: 3000,
+            style: {
+              background: '#1e293b',
+              color: '#fff',
+              border: '1px solid #334155',
+            },
+            success: {
+              iconTheme: {
+                primary: '#14b8a6',
+                secondary: '#fff',
+              },
+            },
+            error: {
+              iconTheme: {
+                primary: '#ef4444',
+                secondary: '#fff',
+              },
+            },
+          }}
+        />
         <AppContent />
       </NotificationProvider>
     </AuthProvider>

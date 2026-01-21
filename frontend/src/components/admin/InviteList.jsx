@@ -71,7 +71,7 @@ const InviteList = ({ invites, onInviteRevoked }) => {
 
   if (invites.length === 0) {
     return (
-      <div className="bg-white rounded-lg shadow p-12 text-center text-gray-500">
+      <div className="bg-slate-800 rounded-lg shadow-lg border border-slate-700 p-12 text-center text-gray-400">
         No invites found
       </div>
     );
@@ -79,38 +79,38 @@ const InviteList = ({ invites, onInviteRevoked }) => {
 
   return (
     <>
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-slate-800 rounded-lg shadow-lg border border-slate-700 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-slate-700">
+            <thead className="bg-slate-900">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Email
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Role
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Invited By
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Expires At
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Created At
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-slate-800 divide-y divide-slate-700">
               {invites.map((invite) => (
-                <tr key={invite.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                <tr key={invite.id} className="hover:bg-slate-700/50">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
                     {invite.email}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -119,13 +119,13 @@ const InviteList = ({ invites, onInviteRevoked }) => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     {getStatusBadge(invite.status)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                     {invite.invitedBy || 'N/A'}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                     {new Date(invite.expiresAt).toLocaleString()}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                     {new Date(invite.createdAt).toLocaleString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
@@ -133,7 +133,7 @@ const InviteList = ({ invites, onInviteRevoked }) => {
                       <button
                         onClick={() => handleRevoke(invite.id)}
                         disabled={revoking === invite.id}
-                        className="text-red-600 hover:text-red-900 disabled:opacity-50"
+                        className="text-red-400 hover:text-red-300 disabled:opacity-50"
                         title="Revoke Invite"
                       >
                         {revoking === invite.id ? 'Revoking...' : '🚫 Revoke'}
@@ -142,7 +142,7 @@ const InviteList = ({ invites, onInviteRevoked }) => {
                     {(invite.status === 'revoked' || invite.status === 'expired') && (
                       <button
                         onClick={() => handleDelete(invite.id)}
-                        className="text-gray-600 hover:text-gray-900"
+                        className="text-gray-400 hover:text-gray-300"
                         title="Delete Invite"
                       >
                         🗑️ Delete

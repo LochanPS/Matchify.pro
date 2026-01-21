@@ -14,7 +14,7 @@ model User {
   password             String
   name                 String
   phone                String?             @unique
-  roles                String              @default("PLAYER") // Will store comma-separated roles
+  roles                String              @default("PLAYER,UMPIRE,ORGANIZER") // Will store comma-separated roles
   umpireCode           String?             @unique // Unique umpire code like #123ABCD
   profilePhoto         String?
   city                 String?
@@ -35,6 +35,13 @@ model User {
   refreshToken         String?
   createdAt            DateTime            @default(now())
   updatedAt            DateTime            @updatedAt
+  
+  // Blue Tick Verification System
+  isVerifiedOrganizer  Boolean             @default(false) // Admin approved after interview
+  isVerifiedPlayer     Boolean             @default(false) // Auto at 12+ tournaments
+  isVerifiedUmpire     Boolean             @default(false) // Auto at 10+ matches
+  tournamentsRegistered Int                @default(0)     // Count for player verification
+  matchesUmpired       Int                @default(0)     // Count for umpire verification
   
   // KYC for admins
   availableForKYC      Boolean             @default(false) // Admin toggle for KYC availability
@@ -59,6 +66,14 @@ model User {
   // KYC relations
   kycSubmissions       OrganizerKYC[]      @relation("OrganizerKYC")
   kycReviews           OrganizerKYC[]      @relation("KYCReviewer")
+  
+  // Organizer request relations
+  organizerRequest     OrganizerRequest?   @relation("UserOrganizerRequest")
+  reviewedRequests     OrganizerRequest[]  @relation("AdminReviewedRequests")
+  
+  // Super Admin Invite relations
+  superAdminInvitesCreated SuperAdminInvite[] @relation("SuperAdminInviteCreator")
+  superAdminInviteUsages   SuperAdminInviteUsage[] @relation("SuperAdminInviteUsage")
 
   @@index([email])
   @@index([phone])
@@ -379,6 +394,43 @@ model AdminInvite {
   @@map("admin_invites")
 }
 
+// ============================================
+// SUPER ADMIN INVITE SYSTEM (Shareable Links)
+// ============================================
+
+model SuperAdminInvite {
+  id          String                    @id @default(uuid())
+  token       String                    @unique
+  accessCode  String                    // 6-character code required to use the link
+  createdBy   String
+  creator     User                      @relation("SuperAdminInviteCreator", fields: [createdBy], references: [id])
+  expiresAt   DateTime
+  maxUses     Int?                      // null = unlimited uses
+  usedCount   Int                       @default(0)
+  isActive    Boolean                   @default(true)
+  createdAt   DateTime                  @default(now())
+  updatedAt   DateTime                  @updatedAt
+  usedBy      SuperAdminInviteUsage[]
+
+  @@index([token])
+  @@index([createdBy])
+  @@index([isActive])
+  @@map("super_admin_invites")
+}
+
+model SuperAdminInviteUsage {
+  id        String            @id @default(uuid())
+  inviteId  String
+  invite    SuperAdminInvite  @relation(fields: [inviteId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User              @relation("SuperAdminInviteUsage", fields: [userId], references: [id])
+  createdAt DateTime          @default(now())
+
+  @@index([inviteId])
+  @@index([userId])
+  @@map("super_admin_invite_usage")
+}
+
 model AuditLog {
   id         String   @id @default(uuid())
   adminId    String
@@ -545,4 +597,141 @@ enum KYCStatus {
   IN_PROGRESS       // Video call ongoing
   APPROVED          // KYC verified
   REJECTED          // KYC failed
+}
+
+// ============================================
+// ORGANIZER REQUEST & VERIFICATION SYSTEM
+// ============================================
+
+model OrganizerRequest {
+  id                  String    @id @default(uuid())
+  userId              String    @unique
+  user                User      @relation("UserOrganizerRequest", fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Application details
+  reason              String    // Why they want to become organizer
+  experience          String?   // Previous organizing experience
+  preferredContact    String    // WhatsApp, Phone, GoogleMeet
+  
+  // Status
+  status              String    @default("pending") // pending, approved, rejected
+  
+  // Interview details
+  interviewScheduled  DateTime?
+  interviewNotes      String?   // Admin's notes from interview
+  
+  // Review
+  reviewedBy          String?   // Admin user ID
+  reviewer            User?     @relation("AdminReviewedRequests", fields: [reviewedBy], references: [id])
+  reviewedAt          DateTime?
+  rejectionReason     String?
+  
+  // Metadata
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("organizer_requests")
+}
+
+
+// ============================================
+// MATCHIFY PAYMENT SETTINGS (Admin QR Code)
+// ============================================
+
+model PaymentSettings {
+  id              String   @id @default(uuid())
+  upiId           String   // Admin's UPI ID
+  accountHolder   String   // Admin's name
+  qrCodeUrl       String?  // Cloudinary URL of QR code
+  qrCodePublicId  String?  // Cloudinary public ID
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@map("payment_settings")
+}
+
+// ============================================
+// TOURNAMENT PAYMENT TRACKING
+// ============================================
+
+model TournamentPayment {
+  id                    String   @id @default(uuid())
+  tournamentId          String   @unique
+  organizerId           String
+  
+  // Payment collection
+  totalCollected        Float    @default(0)
+  totalRegistrations    Int      @default(0)
+  
+  // Platform fee (5%)
+  platformFeePercent    Float    @default(5)
+  platformFeeAmount     Float    @default(0)
+  
+  // Organizer payouts (50% + 50%)
+  organizerShare        Float    @default(0) // 95% of total
+  payout50Percent1      Float    @default(0) // First 50% of organizer share (before tournament)
+  payout50Percent2      Float    @default(0) // Second 50% of organizer share (after tournament)
+  
+  // Payout status - First 50%
+  payout50Status1       String   @default("pending") // pending, paid
+  payout50PaidAt1       DateTime?
+  payout50PaidBy1       String?  // Admin ID who marked as paid
+  payout50Notes1        String?
+  
+  // Payout status - Second 50%
+  payout50Status2       String   @default("pending") // pending, paid
+  payout50PaidAt2       DateTime?
+  payout50PaidBy2       String?  // Admin ID who marked as paid
+  payout50Notes2        String?
+  
+  // Organizer payout details
+  organizerUpiId        String?
+  organizerAccountHolder String?
+  organizerBankDetails  String?  // JSON for bank account details
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  @@index([tournamentId])
+  @@index([organizerId])
+  @@index([payout50Status1])
+  @@index([payout50Status2])
+  @@map("tournament_payments")
+}
+
+// ============================================
+// PAYMENT VERIFICATION (Player Screenshots)
+// ============================================
+
+model PaymentVerification {
+  id                String    @id @default(uuid())
+  registrationId    String    @unique
+  tournamentId      String
+  userId            String
+  
+  // Payment details
+  amount            Float
+  paymentScreenshot String    // Cloudinary URL
+  screenshotPublicId String?  // Cloudinary public ID
+  
+  // Verification
+  status            String    @default("pending") // pending, approved, rejected
+  verifiedBy        String?   // Admin ID
+  verifiedAt        DateTime?
+  rejectionReason   String?
+  
+  // Metadata
+  submittedAt       DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  @@index([registrationId])
+  @@index([tournamentId])
+  @@index([userId])
+  @@index([status])
+  @@index([submittedAt])
+  @@map("payment_verifications")
 }

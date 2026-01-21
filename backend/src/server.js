@@ -235,6 +235,16 @@ import adminKycRoutes from './routes/admin-kyc.routes.js';
 app.use('/api/kyc', kycRoutes);
 app.use('/api/admin/kyc', adminKycRoutes);
 
+// Payment system routes (Admin only)
+import paymentSettingsRoutes from './routes/admin/payment-settings.routes.js';
+import paymentVerificationRoutes from './routes/admin/payment-verification.routes.js';
+import tournamentPaymentsRoutes from './routes/admin/tournament-payments.routes.js';
+import revenueAnalyticsRoutes from './routes/admin/revenue-analytics.routes.js';
+app.use('/api/admin/payment-settings', paymentSettingsRoutes);
+app.use('/api/admin/payment-verifications', paymentVerificationRoutes);
+app.use('/api/admin/tournament-payments', tournamentPaymentsRoutes);
+app.use('/api/admin/revenue', revenueAnalyticsRoutes);
+
 // Draw routes
 app.use('/api', drawRoutes);
 

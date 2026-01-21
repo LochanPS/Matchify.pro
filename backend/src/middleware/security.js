@@ -70,6 +70,11 @@ export const validateTokenFormat = (req, res, next) => {
 
 // Log suspicious activity
 export const logSuspiciousActivity = (req, res, next) => {
+  // Skip security checks in development mode
+  if (process.env.NODE_ENV === 'development') {
+    return next();
+  }
+  
   const suspiciousPatterns = [
     /(\.\.|\/etc\/|\/proc\/|\/sys\/)/i,  // Path traversal
     /(union|select|insert|update|delete|drop|create|alter)/i,  // SQL injection

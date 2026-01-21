@@ -18,7 +18,6 @@ import {
   removeUmpire,
 } from '../controllers/tournament.controller.js';
 import { authenticate, preventAdminAccess } from '../middleware/auth.js';
-import { requireKYC } from '../middleware/requireKYC.js';
 
 const router = express.Router();
 
@@ -31,8 +30,8 @@ router.get('/:id/categories', getCategories); // Get tournament categories (publ
 router.use(authenticate);
 router.use(preventAdminAccess);
 
-// POST /api/tournaments - Create tournament (REQUIRES KYC)
-router.post('/', requireKYC, createTournament);
+// POST /api/tournaments - Create tournament (NO KYC REQUIRED)
+router.post('/', createTournament);
 
 // PUT /api/tournaments/:id - Update tournament
 router.put('/:id', updateTournament);

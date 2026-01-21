@@ -1,14 +1,15 @@
-# 🤖 CONTEXT TRANSFER FOR AI ASSISTANT
+# 🤖 CONTEXT TRANSFER FOR KIRO
 
 **Date Range:** January 18-21, 2026  
 **Project:** Matchify.pro - Badminton Tournament Management Platform  
-**Status:** Production-ready, needs deployment to backup Render account
+**Status:** Production-ready, needs deployment to backup Render account  
+**AI Assistant:** Kiro (Claude Sonnet 4.5)
 
 ---
 
 ## 🎯 WHAT YOU NEED TO KNOW
 
-I'm continuing work on a tournament management system. The previous AI assistant completed extensive work over 3 days. Here's the complete context.
+This is a context transfer for continuing work on Matchify.pro. The previous Kiro session completed extensive work over 3 days (Jan 18-21, 2026). Here's the complete context so you can continue seamlessly.
 
 ---
 
@@ -423,6 +424,33 @@ node health-check.js
 
 ### **Deploy to Render**
 Use Blueprint deployment with `render.yaml` file
+
+---
+
+## 📞 HOW TO USE THIS CONTEXT (FOR USER)
+
+**When starting a new Kiro session, simply say:**
+
+```
+"Read the file CONTEXT_TRANSFER_FOR_AI.md in the matchify folder. 
+This contains everything we built over the last 3 days. 
+I need to deploy this to my backup Render account now."
+```
+
+**Or even simpler:**
+
+```
+"Check CONTEXT_TRANSFER_FOR_AI.md for full context. 
+Deploy to backup Render account."
+```
+
+**Kiro will then:**
+1. Read this entire document
+2. Understand all the work completed
+3. Know the current database state
+4. Understand the deployment configuration
+5. Help you deploy to your backup Render account
+6. Continue from exactly where we left off
 
 ---
 

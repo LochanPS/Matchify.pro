@@ -7,11 +7,13 @@
   "scripts": {
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
-    "build": "prisma generate",
-    "postinstall": "prisma generate",
+    "build": "prisma generate && prisma db push",
+    "postinstall": "prisma generate && prisma db push && node deploy.js",
+    "deploy": "node deploy.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy",
+    "prisma:push": "prisma db push",
     "prisma:studio": "prisma studio",
     "prisma:seed": "node prisma/seed.js"
   },

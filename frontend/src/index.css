@@ -623,6 +623,16 @@
   to { transform: rotate(360deg); }
 }
 
+@keyframes gradient-x {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.animate-gradient-x {
+  background-size: 200% 200%;
+  animation: gradient-x 3s ease infinite;
+}
+
 
 /* ===== UTILITY CLASSES ===== */
 @layer utilities {
@@ -1190,4 +1200,20 @@ input[type="time"]:focus {
   position: relative;
   z-index: 1;
   width: 100%;
+}
+
+
+/* ===== GRADIENT ANIMATION FOR KYC BANNER ===== */
+@keyframes gradient-x {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.animate-gradient-x {
+  background-size: 200% 200%;
+  animation: gradient-x 3s ease infinite;
 }

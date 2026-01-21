@@ -46,24 +46,82 @@ export const register = async (req, res) => {
   try {
     const { email, password, name, phone, alternateEmail } = req.body;
 
+    // Validate required fields
+    if (!name || !email || !password || !phone) {
+      return res.status(400).json({ 
+        error: 'Missing required fields. Please provide name, email, password, and phone number.' 
+      });
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ 
+        error: 'Invalid email format. Please enter a valid email address (e.g., user@example.com).' 
+      });
+    }
+
+    // Validate phone number format (10 digits)
+    const phoneRegex = /^[0-9]{10}$/;
+    if (!phoneRegex.test(phone)) {
+      return res.status(400).json({ 
+        error: 'Invalid phone number. Please enter a valid 10-digit phone number (e.g., 9876543210).' 
+      });
+    }
+
+    // Validate password strength
+    if (password.length < 6) {
+      return res.status(400).json({ 
+        error: 'Password too short. Password must be at least 6 characters long.' 
+      });
+    }
+
+    const hasUppercase = /[A-Z]/.test(password);
+    const numberCount = (password.match(/[0-9]/g) || []).length;
+    const hasSymbol = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+
+    if (!hasUppercase) {
+      return res.status(400).json({ 
+        error: 'Weak password. Password must contain at least one uppercase letter (A-Z).' 
+      });
+    }
+
+    if (numberCount < 2) {
+      return res.status(400).json({ 
+        error: 'Weak password. Password must contain at least two numbers (0-9).' 
+      });
+    }
+
+    if (!hasSymbol) {
+      return res.status(400).json({ 
+        error: 'Weak password. Password must contain at least one symbol (!@#$%^&*...).' 
+      });
+    }
+
+    // Validate alternate email if provided
+    if (alternateEmail && !emailRegex.test(alternateEmail)) {
+      return res.status(400).json({ 
+        error: 'Invalid alternate email format. Please enter a valid email address or leave it empty.' 
+      });
+    }
+
     // All users automatically get all three roles
     const userRoles = ['PLAYER', 'ORGANIZER', 'UMPIRE'];
-
-    // Validate phone number is required
-    if (!phone) {
-      return res.status(400).json({ error: 'Phone number is required' });
-    }
 
     // Check if user exists by email
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
-      return res.status(400).json({ error: 'User with this email already exists' });
+      return res.status(400).json({ 
+        error: `Email already registered. The email "${email}" is already associated with an account. Please use a different email or try logging in.` 
+      });
     }
 
     // Check if phone already exists
     const existingPhone = await prisma.user.findUnique({ where: { phone } });
     if (existingPhone) {
-      return res.status(400).json({ error: 'User with this phone number already exists' });
+      return res.status(400).json({ 
+        error: `Phone number already registered. The phone number "${phone}" is already associated with an account. Please use a different phone number.` 
+      });
     }
 
     // Hash password
@@ -142,7 +200,25 @@ export const register = async (req, res) => {
     });
   } catch (error) {
     console.error('Register error:', error);
-    res.status(500).json({ error: 'Registration failed', details: error.message });
+    
+    // Handle Prisma unique constraint errors
+    if (error.code === 'P2002') {
+      const field = error.meta?.target?.[0];
+      if (field === 'email') {
+        return res.status(400).json({ 
+          error: 'Email already registered. This email is already associated with an account. Please use a different email or try logging in.' 
+        });
+      } else if (field === 'phone') {
+        return res.status(400).json({ 
+          error: 'Phone number already registered. This phone number is already associated with an account. Please use a different phone number.' 
+        });
+      }
+    }
+    
+    res.status(500).json({ 
+      error: 'Registration failed. An unexpected error occurred. Please try again or contact support if the problem persists.',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 };
 

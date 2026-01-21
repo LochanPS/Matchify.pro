@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "nodemon src/server.js",
-    "start": "node src/server.js",
+    "start": "FIREBASE_ENABLED=false node src/server.js",
     "build": "prisma generate && prisma db push",
     "postinstall": "prisma generate && prisma db push && node deploy.js",
     "deploy": "node deploy.js",

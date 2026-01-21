@@ -260,7 +260,7 @@ const Navbar = () => {
               </NavLink>
               <NavLink to="/academies" active={isActiveLink('/academies')}>
                 <Search className="w-4 h-4" />
-                Search Academies
+                Academies
               </NavLink>
               {user && (
                 <>
@@ -321,17 +321,6 @@ const Navbar = () => {
                   >
                     <Plus className="w-4 h-4" />
                     Create
-                  </Link>
-                )}
-
-                {/* Add Academy Button - Show on academies page */}
-                {location.pathname.startsWith('/academies') && (
-                  <Link
-                    to="/academies/add"
-                    className="hidden sm:flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-xl hover:shadow-lg hover:shadow-purple-500/30 hover:scale-105 transition-all text-sm font-semibold"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Add Academy
                   </Link>
                 )}
 
@@ -473,7 +462,7 @@ const Navbar = () => {
             </MobileNavLink>
             <MobileNavLink to="/academies" onClick={() => setShowMobileMenu(false)}>
               <Search className="w-5 h-5" />
-              Search Academies
+              Academies
             </MobileNavLink>
             <MobileNavLink to={getDashboardLink()} onClick={() => setShowMobileMenu(false)}>
               <LayoutDashboard className="w-5 h-5" />

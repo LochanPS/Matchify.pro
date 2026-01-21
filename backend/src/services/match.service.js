@@ -13,6 +13,55 @@ class MatchService {
     const matchRecords = [];
     const matchIdMap = new Map(); // Map to track match IDs for parent relationships
 
+    if (bracket.format === 'ROUND_ROBIN' || bracket.format === 'ROUND_ROBIN_KNOCKOUT') {
+      // Generate Round Robin matches for each group
+      let globalMatchNum = 1;
+      
+      for (const group of bracket.groups) {
+        if (group.matches) {
+          for (const match of group.matches) {
+            const matchRecord = {
+              tournamentId,
+              categoryId,
+              round: 1, // All Round Robin matches are round 1
+              matchNumber: globalMatchNum++,
+              
+              // Participants
+              player1Id: match.player1?.id || null,
+              player2Id: match.player2?.id || null,
+              player1Seed: match.player1?.seed || null,
+              player2Seed: match.player2?.seed || null,
+              
+              // Status
+              status: (match.player1?.id && match.player2?.id) ? 'READY' : 'PENDING',
+              winnerId: match.winner?.id || null,
+              
+              // Round Robin specific
+              groupName: group.groupName,
+              courtNumber: null,
+              scoreJson: null,
+              parentMatchId: null,
+              winnerPosition: null
+            };
+
+            matchRecords.push(matchRecord);
+          }
+        }
+      }
+      
+      // Create all matches in database
+      const createdMatches = [];
+      for (const matchData of matchRecords) {
+        const created = await prisma.match.create({
+          data: matchData
+        });
+        createdMatches.push(created);
+      }
+      
+      return createdMatches;
+    }
+
+    // Original knockout logic
     // Process each round
     for (const round of bracket.rounds) {
       for (const match of round.matches) {
@@ -59,34 +108,36 @@ class MatchService {
       matchIdMap.set(key, created.id);
     }
 
-    // Second pass: Set parent relationships
-    for (let i = 0; i < bracket.rounds.length; i++) {
-      const round = bracket.rounds[i];
-      
-      // Skip the final round (no parent)
-      if (round.roundNumber === 1) continue;
-
-      for (let j = 0; j < round.matches.length; j++) {
-        const match = round.matches[j];
+    // Second pass: Set parent relationships (only for knockout)
+    if (bracket.format === 'KNOCKOUT') {
+      for (let i = 0; i < bracket.rounds.length; i++) {
+        const round = bracket.rounds[i];
         
-        // Find parent match (in the next round, half the match number)
-        const parentRound = round.roundNumber - 1;
-        const parentMatchNumber = Math.floor(j / 2) + 1;
-        const parentKey = `${parentRound}-${parentMatchNumber}`;
-        const parentMatchId = matchIdMap.get(parentKey);
+        // Skip the final round (no parent)
+        if (round.roundNumber === 1) continue;
 
-        if (parentMatchId) {
-          const currentKey = `${round.roundNumber}-${match.matchNumber}`;
-          const currentMatchId = matchIdMap.get(currentKey);
+        for (let j = 0; j < round.matches.length; j++) {
+          const match = round.matches[j];
+          
+          // Find parent match (in the next round, half the match number)
+          const parentRound = round.roundNumber - 1;
+          const parentMatchNumber = Math.floor(j / 2) + 1;
+          const parentKey = `${parentRound}-${parentMatchNumber}`;
+          const parentMatchId = matchIdMap.get(parentKey);
 
-          // Update match with parent relationship
-          await prisma.match.update({
-            where: { id: currentMatchId },
-            data: {
-              parentMatchId: parentMatchId,
-              winnerPosition: j % 2 === 0 ? 'player1' : 'player2'
-            }
-          });
+          if (parentMatchId) {
+            const currentKey = `${round.roundNumber}-${match.matchNumber}`;
+            const currentMatchId = matchIdMap.get(currentKey);
+
+            // Update match with parent relationship
+            await prisma.match.update({
+              where: { id: currentMatchId },
+              data: {
+                parentMatchId: parentMatchId,
+                winnerPosition: j % 2 === 0 ? 'player1' : 'player2'
+              }
+            });
+          }
         }
       }
     }

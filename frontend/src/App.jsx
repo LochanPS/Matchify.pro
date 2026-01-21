@@ -1,6 +1,7 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { NotificationProvider } from './contexts/NotificationContext'
+import { Toaster } from 'react-hot-toast'
 import Navbar from './components/Navbar'
 import ProfileCompletionModal from './components/ProfileCompletionModal'
 import ImpersonationBanner from './components/ImpersonationBanner'
@@ -10,9 +11,6 @@ import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import ProfilePage from './pages/ProfilePage'
-import WalletPage from './pages/WalletPage'
-import Wallet from './pages/Wallet'
-import Credits from './pages/Credits'
 import TournamentsPage from './pages/TournamentsPage'
 import TournamentDetailPage from './pages/TournamentDetailPage'
 import TournamentDiscoveryPage from './pages/TournamentDiscoveryPage'
@@ -41,6 +39,11 @@ import ConductMatchPage from './pages/ConductMatchPage'
 import LiveTournamentDashboard from './pages/LiveTournamentDashboard'
 import LiveMatches from './pages/LiveMatches'
 import LiveMatchDetail from './pages/LiveMatchDetail'
+import LiveMatchScoring from './pages/LiveMatchScoring'
+import TournamentResults from './pages/TournamentResults'
+import TournamentDraw from './pages/TournamentDraw'
+import MatchScoringDemo from './pages/MatchScoringDemo'
+import DebugTournaments from './pages/DebugTournaments'
 import OrganizerTournamentHistory from './pages/OrganizerTournamentHistory'
 import TournamentCategoryDetails from './pages/TournamentCategoryDetails'
 import AdminInvites from './pages/AdminInvites'
@@ -57,14 +60,24 @@ import CancellationRequestPage from './pages/CancellationRequestPage'
 import NotificationDetailPage from './pages/NotificationDetailPage'
 import RefundIssuePage from './pages/RefundIssuePage'
 import SearchAcademiesPage from './pages/SearchAcademiesPage'
-import AddAcademyPage from './pages/AddAcademyPage'
+
+// Payment System Pages
+import PaymentVerificationPage from './pages/admin/PaymentVerificationPage'
+import TournamentPaymentsPage from './pages/admin/TournamentPaymentsPage'
+import OrganizerPayoutsPage from './pages/admin/OrganizerPayoutsPage'
+import RevenueDashboardPage from './pages/admin/RevenueDashboardPage'
+import QRSettingsPage from './pages/admin/QRSettingsPage'
+
 import KYCSubmission from './pages/organizer/KYCSubmission'
 import VideoCallPage from './pages/organizer/VideoCallPage'
 import AdminKYCDashboard from './pages/admin/AdminKYCDashboard'
+import AdminPaymentDashboard from './pages/admin/AdminPaymentDashboard'
+import UserLedgerPage from './pages/admin/UserLedgerPage'
 
 // Inner component that can access AuthContext
 function AppContent() {
   const { user, showProfileCompletion, completeProfile } = useAuth();
+  const location = useLocation();
   
   // Check if impersonating
   const isImpersonating = () => {
@@ -80,11 +93,14 @@ function AppContent() {
     return false;
   };
 
+  // Hide Navbar for admin dashboard (it has its own header)
+  const shouldShowNavbar = !location.pathname.startsWith('/admin-dashboard');
+
   return (
     <div className="min-h-screen bg-gray-50">
       <ImpersonationBanner />
       <div className={isImpersonating() ? 'pt-[60px]' : ''}> {/* Add padding only when impersonating */}
-        <Navbar />
+        {shouldShowNavbar && <Navbar />}
       </div>
       
       {/* Profile Completion Modal - shows when user has incomplete profile */}
@@ -102,7 +118,6 @@ function AppContent() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/tournaments" element={<TournamentDiscoveryPage />} />
           <Route path="/academies" element={<SearchAcademiesPage />} />
-          <Route path="/academies/add" element={<AddAcademyPage />} />
           <Route path="/tournaments/:id" element={<TournamentDetailPage />} />
           <Route path="/tournaments/:tournamentId/draws/:categoryId?" element={<DrawPage />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
@@ -119,6 +134,14 @@ function AppContent() {
           <Route path="/matches/:matchId/live" element={<LiveMatchDetail />} />
           <Route path="/watch/:matchId" element={<SpectatorViewPage />} />
           <Route path="/tournament/:tournamentId/live" element={<LiveTournamentDashboard />} />
+          
+          {/* New Match Management Routes */}
+          <Route path="/match/:matchId/live" element={<LiveMatchScoring />} />
+          <Route path="/tournament/:tournamentId/results" element={<TournamentResults />} />
+          <Route path="/tournament/:tournamentId/draw" element={<TournamentDraw />} />
+          <Route path="/match-scoring-demo" element={<MatchScoringDemo />} />
+          <Route path="/debug-tournaments" element={<DebugTournaments />} />
+          
           <Route path="/scoring/:matchId" element={
             <ProtectedRoute>
               <RoleRoute allowedRoles={['UMPIRE', 'ORGANIZER']} blockAdmin={true}>
@@ -201,24 +224,6 @@ function AppContent() {
             element={
               <ProtectedRoute>
                 <ProfilePage />
-              </ProtectedRoute>
-            }
-          />
-          
-          <Route
-            path="/wallet"
-            element={
-              <ProtectedRoute>
-                <Wallet />
-              </ProtectedRoute>
-            }
-          />
-          
-          <Route
-            path="/credits"
-            element={
-              <ProtectedRoute>
-                <Credits />
               </ProtectedRoute>
             }
           />
@@ -384,7 +389,7 @@ function AppContent() {
           />
           
           <Route
-            path="/admin/dashboard"
+            path="/admin-dashboard"
             element={
               <ProtectedRoute>
                 <RoleRoute allowedRoles={['ADMIN']}>
@@ -392,6 +397,11 @@ function AppContent() {
                 </RoleRoute>
               </ProtectedRoute>
             }
+          />
+          
+          <Route
+            path="/admin/dashboard"
+            element={<Navigate to="/admin-dashboard" replace />}
           />
           
           <Route
@@ -413,6 +423,15 @@ function AppContent() {
             <Route path="audit-logs" element={<AuditLogsPage />} />
             <Route path="academies" element={<AcademyApprovalsPage />} />
             <Route path="kyc" element={<AdminKYCDashboard />} />
+            
+            {/* Payment System Routes */}
+            <Route path="payments" element={<AdminPaymentDashboard />} />
+            <Route path="user-ledger" element={<UserLedgerPage />} />
+            <Route path="payment-verifications" element={<PaymentVerificationPage />} />
+            <Route path="tournament-payments" element={<TournamentPaymentsPage />} />
+            <Route path="organizer-payouts" element={<OrganizerPayoutsPage />} />
+            <Route path="revenue" element={<RevenueDashboardPage />} />
+            <Route path="qr-settings" element={<QRSettingsPage />} />
           </Route>
           
           {/* Catch all route */}
@@ -426,6 +445,29 @@ function App() {
   return (
     <AuthProvider>
       <NotificationProvider>
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            duration: 3000,
+            style: {
+              background: '#1e293b',
+              color: '#fff',
+              border: '1px solid #334155',
+            },
+            success: {
+              iconTheme: {
+                primary: '#14b8a6',
+                secondary: '#fff',
+              },
+            },
+            error: {
+              iconTheme: {
+                primary: '#ef4444',
+                secondary: '#fff',
+              },
+            },
+          }}
+        />
         <AppContent />
       </NotificationProvider>
     </AuthProvider>

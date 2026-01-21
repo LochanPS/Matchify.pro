@@ -2,6 +2,8 @@ import { PrismaClient } from '@prisma/client';
 import Razorpay from 'razorpay';
 import crypto from 'crypto';
 import { notifyPartnerInvitation } from '../services/notification.service.js';
+import adminPaymentService from '../services/adminPaymentService.js';
+import userPaymentLedgerService from '../services/userPaymentLedgerService.js';
 
 const prisma = new PrismaClient();
 
@@ -666,27 +668,156 @@ const createRegistrationWithScreenshot = async (req, res) => {
       });
     }
 
-    // Notify organizer about new registration
+    // Notify ADMIN (not organizer) about new registration for payment verification
     const currentUser = await prisma.user.findUnique({
       where: { id: userId },
       select: { name: true },
     });
 
-    // Create notification for organizer
+    // Find admin user - try multiple ways to find admin
+    let adminUser = await prisma.user.findFirst({
+      where: {
+        roles: {
+          contains: 'ADMIN'
+        }
+      }
+    });
+
+    // If no admin found with roles, try finding by email pattern
+    if (!adminUser) {
+      adminUser = await prisma.user.findFirst({
+        where: {
+          OR: [
+            { email: { contains: 'admin' } },
+            { email: { contains: 'matchify.pro' } },
+            { name: { contains: 'admin' } },
+            { name: { contains: 'Admin' } }
+          ]
+        }
+      });
+    }
+
+    // If still no admin found, get the first user (fallback)
+    if (!adminUser) {
+      adminUser = await prisma.user.findFirst({
+        orderBy: { createdAt: 'asc' }
+      });
+      console.warn('⚠️ No admin user found, using first user as fallback');
+    }
+
+    // Create PaymentVerification records for each registration
+    for (const registration of registrations) {
+      try {
+        await prisma.paymentVerification.create({
+          data: {
+            registrationId: registration.id,
+            userId: userId,
+            tournamentId: tournament.id,
+            amount: registration.amountTotal,
+            paymentScreenshot: screenshotUrl,
+            status: 'pending',
+            submittedAt: new Date(),
+          }
+        });
+        console.log('✅ PaymentVerification record created for registration:', registration.id);
+      } catch (verificationError) {
+        console.error('❌ Error creating PaymentVerification record:', verificationError.message);
+        // Continue with other processes even if verification record fails
+      }
+
+      // Integrate with admin payment service for tracking
+      await adminPaymentService.handlePlayerPayment(registration.id, {
+        screenshot: screenshotUrl,
+        amount: registration.amountTotal
+      });
+
+      // Record in user payment ledger
+      await userPaymentLedgerService.recordUserPayment({
+        userId: userId,
+        amount: registration.amountTotal,
+        tournamentId: tournament.id,
+        registrationId: registration.id,
+        description: `Tournament entry fee for ${tournament.name} - ${registration.category.name}`,
+        transactionRef: `REG-${registration.id}`,
+        paymentMethod: 'UPI',
+        screenshot: screenshotUrl,
+        adminId: adminUser?.id
+      });
+      console.log('✅ User payment recorded in ledger:', {
+        userId,
+        amount: registration.amountTotal,
+        tournament: tournament.name
+      });
+    }
+
+    if (adminUser) {
+      // Create notification for ADMIN
+      await prisma.notification.create({
+        data: {
+          userId: adminUser.id,
+          type: 'PAYMENT_VERIFICATION_REQUIRED',
+          title: '🔔 New Tournament Registration - Payment Verification Required',
+          message: `
+📋 REGISTRATION DETAILS:
+👤 Player: ${currentUser.name}
+🏆 Tournament: ${tournament.name}
+📍 Location: ${tournament.city}, ${tournament.state}
+📅 Tournament Date: ${tournament.startDate} to ${tournament.endDate}
+🎯 Categories: ${registrations.map(r => r.category.name).join(', ')}
+💰 Total Amount: ₹${totalAmount}
+📸 Payment Screenshot: Submitted
+⏰ Registered: ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
+
+🔍 ACTION REQUIRED:
+Please verify the payment screenshot and approve/reject this registration.
+Go to Admin Panel → Payment Verification to review.
+          `.trim(),
+          data: JSON.stringify({
+            registrationIds: registrations.map(r => r.id),
+            playerName: currentUser.name,
+            playerEmail: userId, // Will be resolved to email
+            tournamentId: tournament.id,
+            tournamentName: tournament.name,
+            tournamentLocation: `${tournament.city}, ${tournament.state}`,
+            tournamentDates: `${tournament.startDate} to ${tournament.endDate}`,
+            categories: registrations.map(r => r.category.name).join(', '),
+            amount: totalAmount,
+            paymentScreenshot: screenshotUrl,
+            registrationTime: new Date().toISOString(),
+            urgent: true,
+            actionRequired: 'PAYMENT_VERIFICATION'
+          }),
+        },
+      });
+      console.log('✅ Detailed admin notification created for payment verification:', {
+        adminId: adminUser.id,
+        adminEmail: adminUser.email,
+        playerName: currentUser.name,
+        tournament: tournament.name,
+        amount: totalAmount,
+        categories: registrations.map(r => r.category.name).join(', ')
+      });
+    } else {
+      console.error('❌ No admin user found to send notification - this is critical!');
+    }
+
+    // Notify PLAYER about registration submission
     await prisma.notification.create({
       data: {
-        userId: tournament.organizerId,
-        type: 'PAYMENT_VERIFICATION_REQUIRED',
-        title: 'New Registration - Payment Verification Required',
-        message: `${currentUser.name} has registered for ${tournament.name}. Please verify their payment screenshot.`,
+        userId: userId,
+        type: 'REGISTRATION_SUBMITTED',
+        title: 'Registration Submitted Successfully',
+        message: `Your registration for ${tournament.name} has been submitted. Your registration will be checked and you will be notified once approved.`,
         data: JSON.stringify({
           registrationIds: registrations.map(r => r.id),
-          playerName: currentUser.name,
           tournamentId: tournament.id,
+          tournamentName: tournament.name,
           amount: totalAmount,
+          status: 'pending_verification'
         }),
       },
     });
+    console.log('✅ Player notification created for registration submission');
 
     // Send partner invitations for doubles
     for (const registration of registrations) {
@@ -704,11 +835,11 @@ const createRegistrationWithScreenshot = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: 'Registration submitted. Awaiting payment verification from organizer.',
+      message: 'Registration submitted successfully. Your registration will be checked and you will be notified once approved.',
       data: {
         registrations,
         totalAmount,
-        paymentStatus: 'submitted',
+        paymentStatus: 'pending_verification',
       },
     });
   } catch (error) {

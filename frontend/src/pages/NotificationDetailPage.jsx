@@ -788,38 +788,28 @@ export default function NotificationDetailPage() {
             </div>
           )}
 
-          {/* Action Buttons for Organizer - Payment Verification */}
+          {/* Action Buttons for Organizer - Payment Verification REMOVED */}
+          {/* Organizers can NO LONGER verify payments - only ADMIN can */}
           {isPaymentVerification && registration && (registration.status === 'pending' || registration.paymentStatus === 'submitted') && (
-            <div className="p-6 bg-slate-700/30">
-              <h3 className="text-lg font-bold text-white mb-4">Verify Payment</h3>
-              <p className="text-gray-400 mb-4">Review the payment screenshot above and verify if the payment is valid.</p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <button
-                  type="button"
-                  onClick={handleApprovePayment}
-                  disabled={actionLoading}
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-green-500/30 transition-all disabled:opacity-50"
-                >
-                  {actionLoading ? (
-                    <Loader className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <Check className="w-5 h-5" />
-                  )}
-                  Approve Payment
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowRejectModal(true)}
-                  disabled={actionLoading}
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-red-500/30 transition-all disabled:opacity-50"
-                >
-                  <X className="w-5 h-5" />
-                  Reject Payment
-                </button>
+            <div className="p-6 bg-amber-900/20 border-t border-amber-700">
+              <div className="flex items-start gap-4">
+                <div className="text-3xl">🔒</div>
+                <div>
+                  <h3 className="text-lg font-bold text-amber-300 mb-2">Payment Verification by Admin Only</h3>
+                  <p className="text-amber-400/80 text-sm mb-3">
+                    All payments are verified by Matchify.pro admin to prevent scams and ensure security.
+                  </p>
+                  <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
+                    <p className="text-gray-300 text-sm mb-2">
+                      <strong>Admin Contact:</strong>
+                    </p>
+                    <p className="text-teal-400 font-mono">ADMIN@gmail.com</p>
+                  </div>
+                  <p className="text-gray-400 text-xs mt-3">
+                    💡 The admin will verify this payment and you'll receive a notification once approved.
+                  </p>
+                </div>
               </div>
-              <p className="text-center text-sm text-gray-400 mt-4">
-                The player will be notified of your decision
-              </p>
             </div>
           )}
 

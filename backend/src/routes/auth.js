@@ -98,15 +98,15 @@ router.post('/register', async (req, res) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    // Determine initial wallet balance based on role
-    const initialBalance = role === 'ORGANIZER' ? 25 : 0;
+    // Determine initial wallet balance based on roles
+    const initialBalance = userRoles.includes('ORGANIZER') ? 25 : 0;
 
-    // Create user
+    // Create user with first role as primary role (for backward compatibility)
     const user = await prisma.user.create({
       data: {
         email,
         password: hashedPassword,
-        role,
+        roles: userRoles[0], // Use 'roles' field as expected by schema
         name,
         phone,
         dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
@@ -118,7 +118,7 @@ router.post('/register', async (req, res) => {
     });
 
     // Generate tokens
-    const accessToken = generateAccessToken(user.id, user.role);
+    const accessToken = generateAccessToken(user.id, user.roles);
     const refreshToken = generateRefreshToken(user.id);
 
     // Store refresh token in database
@@ -138,6 +138,15 @@ router.post('/register', async (req, res) => {
     });
   } catch (error) {
     console.error('Registration error:', error);
+    
+    // More detailed error logging for debugging
+    if (error.code === 'P2002') {
+      return res.status(409).json({
+        error: 'User with this email or phone already exists',
+        details: process.env.NODE_ENV === 'development' ? error.message : 'Duplicate entry'
+      });
+    }
+    
     res.status(500).json({
       error: 'Registration failed',
       details: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'

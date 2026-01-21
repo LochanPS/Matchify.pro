@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { tournamentAPI } from '../api/tournament';
 import { registrationAPI } from '../api/registration';
+import { getPublicPaymentSettings } from '../api/payment';
 import { getImageUrl } from '../utils/imageUrl';
 import CategorySelector from '../components/registration/CategorySelector';
 import PaymentSummary from '../components/registration/PaymentSummary';
@@ -27,10 +28,21 @@ export default function TournamentRegistrationPage() {
   const [step, setStep] = useState(1); // 1: Select categories, 2: Payment
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [alreadyRegisteredCategories, setAlreadyRegisteredCategories] = useState([]);
+  const [adminPaymentSettings, setAdminPaymentSettings] = useState(null);
 
   useEffect(() => {
     fetchTournamentData();
+    fetchAdminPaymentSettings();
   }, [id]);
+
+  const fetchAdminPaymentSettings = async () => {
+    try {
+      const response = await getPublicPaymentSettings();
+      setAdminPaymentSettings(response.data);
+    } catch (error) {
+      console.error('Error fetching admin payment settings:', error);
+    }
+  };
 
   const fetchTournamentData = async () => {
     try {
@@ -322,28 +334,27 @@ export default function TournamentRegistrationPage() {
                 </div>
               </div>
 
-              {/* Check if payment details exist */}
-              {!tournament.paymentQRUrl && !tournament.upiId ? (
+              {/* Check if admin payment details exist */}
+              {!adminPaymentSettings?.qrCodeUrl && !adminPaymentSettings?.upiId ? (
                 <div className="p-6 bg-red-500/10 border border-red-500/30 rounded-xl text-center">
                   <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
                     <XMarkIcon className="w-8 h-8 text-red-400" />
                   </div>
                   <h4 className="text-lg font-semibold text-red-300 mb-2">Payment Details Not Available</h4>
                   <p className="text-sm text-red-400/80">
-                    The organizer has not set up payment details for this tournament yet. 
-                    Please contact the organizer or try again later.
+                    Admin payment details are not set up yet. Please contact support.
                   </p>
                 </div>
               ) : (
                 <>
-                  {/* QR Code */}
-                  {tournament.paymentQRUrl && (
+                  {/* Admin's QR Code */}
+                  {adminPaymentSettings?.qrCodeUrl && (
                     <div className="flex justify-center mb-6">
                       <div className="relative p-6 bg-white rounded-2xl shadow-2xl">
                         <div className="absolute -inset-1 bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 rounded-2xl blur opacity-30"></div>
                         <div className="relative bg-white p-4 rounded-xl">
                           <img 
-                            src={getImageUrl(tournament.paymentQRUrl)} 
+                            src={adminPaymentSettings.qrCodeUrl}
                             alt="Payment QR Code" 
                             className="w-64 h-64 object-contain"
                             onError={(e) => {
@@ -361,11 +372,11 @@ export default function TournamentRegistrationPage() {
                   <div className="space-y-4 p-4 bg-slate-700/50 border border-white/10 rounded-xl">
                     <div className="flex justify-between">
                       <span className="text-gray-400">UPI ID:</span>
-                      <span className="font-semibold text-white">{tournament.upiId || 'Not provided'}</span>
+                      <span className="font-semibold text-white">{adminPaymentSettings?.upiId || 'Not provided'}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-400">Account Holder:</span>
-                      <span className="font-semibold text-white">{tournament.accountHolderName || 'Not provided'}</span>
+                      <span className="font-semibold text-white">{adminPaymentSettings?.accountHolder || 'Not provided'}</span>
                     </div>
                     <div className="flex justify-between border-t border-white/10 pt-4">
                       <span className="text-gray-400 font-medium">Amount to Pay:</span>
@@ -376,6 +387,13 @@ export default function TournamentRegistrationPage() {
                   <div className="mt-4 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl">
                     <p className="text-sm text-amber-300">
                       <strong>Important:</strong> Please pay exactly ₹{calculateTotal()} and take a screenshot of the successful payment.
+                    </p>
+                  </div>
+
+                  {/* Security Notice */}
+                  <div className="mt-4 p-4 bg-teal-500/10 border border-teal-500/30 rounded-xl">
+                    <p className="text-sm text-teal-300">
+                      🔒 <strong>Secure Payment:</strong> All payments go to Matchify.pro. Admin will verify and pay organizer after verification.
                     </p>
                   </div>
                 </>
@@ -433,7 +451,7 @@ export default function TournamentRegistrationPage() {
               {/* Submit Button */}
               <button
                 onClick={handleRegister}
-                disabled={submitting || !paymentScreenshot || (!tournament.paymentQRUrl && !tournament.upiId)}
+                disabled={submitting || !paymentScreenshot || (!adminPaymentSettings?.qrCodeUrl && !adminPaymentSettings?.upiId)}
                 className="w-full mt-6 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:shadow-lg hover:shadow-green-500/30 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {submitting ? (
@@ -506,7 +524,7 @@ export default function TournamentRegistrationPage() {
                 <div className="space-y-2 text-sm text-amber-300/90">
                   <p>✓ Payment screenshot uploaded</p>
                   <p>✓ Registration details saved</p>
-                  <p>⏳ Waiting for organizer to verify payment</p>
+                  <p>⏳ Waiting for admin to verify payment</p>
                 </div>
               </div>
             </div>

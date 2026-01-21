@@ -1,5 +1,5 @@
 import express from 'express';
-import { generateDraw, getDraw, deleteDraw, createConfiguredDraw, getCategoryPlayers, assignPlayersToDraw } from '../controllers/draw.controller.js';
+import { generateDraw, getDraw, deleteDraw, createConfiguredDraw, getCategoryPlayers, assignPlayersToDraw, bulkAssignAllPlayers, shuffleAssignedPlayers } from '../controllers/draw.controller.js';
 import { authenticate } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -9,6 +9,12 @@ router.post('/draws/create', authenticate, createConfiguredDraw);
 
 // Assign players to draw (organizer only)
 router.put('/draws/assign-players', authenticate, assignPlayersToDraw);
+
+// Bulk assign all players (organizer only)
+router.post('/draws/bulk-assign-all', authenticate, bulkAssignAllPlayers);
+
+// Shuffle assigned players (organizer only)
+router.post('/draws/shuffle-players', authenticate, shuffleAssignedPlayers);
 
 // Generate draw (organizer only)
 router.post(

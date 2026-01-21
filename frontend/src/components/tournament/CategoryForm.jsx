@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 
 const CategoryForm = ({ initialData, onSave, onCancel }) => {
+  // Check if this category has registrations (fee is locked)
+  const isFeeLocked = initialData && initialData.registrationCount > 0;
   // Parse scoring format from string like "3 games to 21 pts" or "21x3"
   const parseScoringFormat = (scoringFormat) => {
     if (!scoringFormat) return { numberOfGames: 3, pointsPerGame: 21 };
@@ -190,16 +192,36 @@ const CategoryForm = ({ initialData, onSave, onCancel }) => {
           <p className="text-xs text-gray-500 mt-1">Optional - Leave empty for open age</p>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">Entry Fee (₹) *</label>
+          <label className="block text-sm font-medium text-gray-300 mb-2">
+            Entry Fee (₹) *
+            {isFeeLocked && (
+              <span className="ml-2 inline-flex items-center gap-1 px-2 py-1 bg-amber-500/20 text-amber-400 text-xs rounded-full">
+                <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
+                Locked
+              </span>
+            )}
+          </label>
           <input
             type="number"
             value={formData.entryFee}
             onChange={(e) => handleChange('entryFee', e.target.value)}
             min="0"
             step="1"
-            className={`w-full px-4 py-3 bg-slate-700/50 border rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 transition-all ${errors.entryFee ? 'border-red-500' : 'border-white/10'}`}
+            disabled={isFeeLocked}
+            className={`w-full px-4 py-3 bg-slate-700/50 border rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 transition-all ${
+              isFeeLocked 
+                ? 'opacity-60 cursor-not-allowed bg-slate-800/50' 
+                : errors.entryFee 
+                  ? 'border-red-500' 
+                  : 'border-white/10'
+            }`}
           />
           {errors.entryFee && <p className="text-red-400 text-sm mt-1">{errors.entryFee}</p>}
+          {isFeeLocked && (
+            <p className="text-amber-400 text-sm mt-1">
+              Entry fee cannot be changed because {initialData.registrationCount} player(s) have already registered for this category.
+            </p>
+          )}
         </div>
       </div>
 

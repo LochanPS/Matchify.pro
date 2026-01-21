@@ -21,6 +21,8 @@ const MatchScoringPage = () => {
   const [showEndModal, setShowEndModal] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [timerData, setTimerData] = useState(null);
+  const [showSetCompleteModal, setShowSetCompleteModal] = useState(false);
+  const [completedSetData, setCompletedSetData] = useState(null);
 
   // Score state
   const [score, setScore] = useState({
@@ -29,7 +31,8 @@ const MatchScoringPage = () => {
     matchConfig: {
       pointsPerSet: 21,
       setsToWin: 2,
-      maxSets: 3
+      maxSets: 3,
+      extension: true
     }
   });
 
@@ -107,28 +110,77 @@ const MatchScoringPage = () => {
     
     newScore.sets[currentSetIndex] = currentSet;
 
-    // Check if set is won
-    const { pointsPerSet } = newScore.matchConfig;
+    // Check if set is won based on match configuration
+    const { pointsPerSet, extension } = newScore.matchConfig;
     const p1 = currentSet.player1;
     const p2 = currentSet.player2;
     
-    const setWon = (p1 >= pointsPerSet && p1 - p2 >= 2) || 
-                   (p2 >= pointsPerSet && p2 - p1 >= 2) ||
-                   p1 >= 30 || p2 >= 30;
-
-    if (setWon && currentSetIndex < newScore.matchConfig.maxSets - 1) {
-      const p1Sets = newScore.sets.filter((s, i) => i <= currentSetIndex && 
-        ((s.player1 >= pointsPerSet && s.player1 - s.player2 >= 2) || s.player1 >= 30)).length;
-      const p2Sets = newScore.sets.filter((s, i) => i <= currentSetIndex && 
-        ((s.player2 >= pointsPerSet && s.player2 - s.player1 >= 2) || s.player2 >= 30)).length;
-
-      if (p1Sets < newScore.matchConfig.setsToWin && p2Sets < newScore.matchConfig.setsToWin) {
-        newScore.sets.push({ player1: 0, player2: 0 });
-        newScore.currentSet = currentSetIndex + 1;
+    let setWon = false;
+    let winner = null;
+    
+    if (extension) {
+      // With extension (deuce): need to reach pointsPerSet AND have 2-point lead, OR reach 30 points
+      if ((p1 >= pointsPerSet && p1 - p2 >= 2) || p1 >= 30) {
+        setWon = true;
+        winner = 1;
+      } else if ((p2 >= pointsPerSet && p2 - p1 >= 2) || p2 >= 30) {
+        setWon = true;
+        winner = 2;
+      }
+    } else {
+      // Without extension: first to reach pointsPerSet wins
+      if (p1 >= pointsPerSet) {
+        setWon = true;
+        winner = 1;
+      } else if (p2 >= pointsPerSet) {
+        setWon = true;
+        winner = 2;
       }
     }
 
-    updateScore(newScore);
+    if (setWon) {
+      // Mark the set as completed
+      currentSet.winner = winner;
+      newScore.sets[currentSetIndex] = currentSet;
+      
+      // Check if this is the final set or if we should ask for continuation
+      const setsWon = getSetsWonFromScore(newScore);
+      const matchWon = setsWon.p1Sets >= newScore.matchConfig.setsToWin || 
+                      setsWon.p2Sets >= newScore.matchConfig.setsToWin;
+      
+      if (matchWon || currentSetIndex >= newScore.matchConfig.maxSets - 1) {
+        // Match is complete - automatically detect winner and show confirmation
+        const matchWinnerId = winner === 1 ? match.player1?.id : match.player2?.id;
+        const matchWinnerName = winner === 1 ? match.player1?.name : match.player2?.name;
+        
+        updateScore(newScore);
+        
+        // Show automatic winner confirmation modal
+        setCompletedSetData({
+          setNumber: currentSetIndex + 1,
+          winner: matchWinnerName,
+          score: `${p1}-${p2}`,
+          newScore: newScore,
+          isMatchComplete: true,
+          matchWinnerId: matchWinnerId,
+          matchWinnerName: matchWinnerName
+        });
+        setShowSetCompleteModal(true);
+      } else {
+        // Set completed but match can continue - show continuation modal
+        setCompletedSetData({
+          setNumber: currentSetIndex + 1,
+          winner: winner === 1 ? match.player1?.name : match.player2?.name,
+          score: `${p1}-${p2}`,
+          newScore: newScore,
+          isMatchComplete: false
+        });
+        setShowSetCompleteModal(true);
+      }
+    } else {
+      // Set not won yet, just update score
+      updateScore(newScore);
+    }
   };
 
   // Remove point (undo)
@@ -194,11 +246,11 @@ const MatchScoringPage = () => {
       setSaving(true);
       await api.put(`/matches/${matchId}/end`, { winnerId, finalScore: score });
       setShowEndModal(false);
-      // Navigate to draw page after ending match
-      if (match?.tournament?.id && match?.category?.id) {
-        navigate(`/tournaments/${match.tournament.id}/draw?category=${match.category.id}`);
-      } else if (match?.tournamentId && match?.categoryId) {
-        navigate(`/tournaments/${match.tournamentId}/draw?category=${match.categoryId}`);
+      // Navigate to tournament main page after ending match
+      if (match?.tournament?.id) {
+        navigate(`/tournaments/${match.tournament.id}`);
+      } else if (match?.tournamentId) {
+        navigate(`/tournaments/${match.tournamentId}`);
       } else {
         navigate('/dashboard');
       }
@@ -211,15 +263,75 @@ const MatchScoringPage = () => {
 
   // Calculate sets won
   const getSetsWon = () => {
-    const { pointsPerSet } = score.matchConfig;
+    return getSetsWonFromScore(score);
+  };
+
+  // Helper function to calculate sets won from any score object
+  const getSetsWonFromScore = (scoreObj) => {
+    const { pointsPerSet, extension } = scoreObj.matchConfig;
     let p1Sets = 0, p2Sets = 0;
     
-    score.sets.forEach(set => {
-      if ((set.player1 >= pointsPerSet && set.player1 - set.player2 >= 2) || set.player1 >= 30) p1Sets++;
-      if ((set.player2 >= pointsPerSet && set.player2 - set.player1 >= 2) || set.player2 >= 30) p2Sets++;
+    scoreObj.sets.forEach(set => {
+      if (set.winner === 1) {
+        p1Sets++;
+      } else if (set.winner === 2) {
+        p2Sets++;
+      } else {
+        // Legacy calculation for sets without winner field
+        if (extension) {
+          if ((set.player1 >= pointsPerSet && set.player1 - set.player2 >= 2) || set.player1 >= 30) p1Sets++;
+          if ((set.player2 >= pointsPerSet && set.player2 - set.player1 >= 2) || set.player2 >= 30) p2Sets++;
+        } else {
+          if (set.player1 >= pointsPerSet) p1Sets++;
+          if (set.player2 >= pointsPerSet) p2Sets++;
+        }
+      }
     });
     
     return { p1Sets, p2Sets };
+  };
+
+  // Continue to next set
+  const handleContinueToNextSet = () => {
+    if (!completedSetData) return;
+    
+    const newScore = { ...completedSetData.newScore };
+    
+    // Add new set if we haven't reached max sets
+    if (newScore.currentSet < newScore.matchConfig.maxSets - 1) {
+      newScore.sets.push({ player1: 0, player2: 0 });
+      newScore.currentSet = newScore.currentSet + 1;
+    }
+    
+    updateScore(newScore);
+    setShowSetCompleteModal(false);
+    setCompletedSetData(null);
+  };
+
+  // Confirm match winner (automatic detection)
+  const handleConfirmMatchWinner = async () => {
+    if (!completedSetData || !completedSetData.isMatchComplete) return;
+    
+    try {
+      await handleEndMatch(completedSetData.matchWinnerId);
+      // Close the set completion modal
+      setShowSetCompleteModal(false);
+      setCompletedSetData(null);
+      // Navigation is handled in handleEndMatch - goes back to draw page
+    } catch (err) {
+      console.error('Error confirming match winner:', err);
+      setError('Failed to confirm match winner');
+    }
+  };
+
+  // End match early (umpire decision) - for non-complete matches
+  const handleEndMatchEarly = () => {
+    if (!completedSetData) return;
+    
+    updateScore(completedSetData.newScore);
+    setShowSetCompleteModal(false);
+    setCompletedSetData(null);
+    setShowEndModal(true);
   };
 
   if (loading) {
@@ -477,6 +589,88 @@ const MatchScoringPage = () => {
           </div>
         )}
       </div>
+
+      {/* Set Completion Modal */}
+      {showSetCompleteModal && completedSetData && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-800 border border-white/10 rounded-2xl max-w-md w-full p-6">
+            {completedSetData.isMatchComplete ? (
+              // Match Complete - Automatic Winner Detection
+              <>
+                <div className="text-center mb-6">
+                  <div className="w-20 h-20 bg-gradient-to-br from-amber-500 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+                    <Trophy className="w-10 h-10 text-white" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-white mb-2">🎉 Match Complete!</h2>
+                  <p className="text-gray-400 mb-2">Final set won by</p>
+                  <p className="text-3xl font-bold text-amber-400 mb-2">{completedSetData.matchWinnerName}</p>
+                  <p className="text-xl text-white">Set {completedSetData.setNumber}: {completedSetData.score}</p>
+                </div>
+                
+                <div className="space-y-3">
+                  <button
+                    onClick={handleConfirmMatchWinner}
+                    className="w-full py-4 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl font-bold text-lg hover:shadow-lg hover:shadow-amber-500/30 transition-all flex items-center justify-center gap-3"
+                  >
+                    <Trophy className="w-6 h-6" />
+                    Confirm {completedSetData.matchWinnerName} as Winner
+                  </button>
+                  
+                  <div className="pt-2 border-t border-white/10">
+                    <p className="text-center text-gray-500 text-sm">
+                      🏆 {completedSetData.matchWinnerName} scored the final point and wins the match!
+                    </p>
+                    <p className="text-center text-gray-400 text-xs mt-1">
+                      Click confirm to officially end the match
+                    </p>
+                  </div>
+                </div>
+              </>
+            ) : (
+              // Set Complete - Continue or End Early
+              <>
+                <div className="text-center mb-6">
+                  <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Trophy className="w-8 h-8 text-white" />
+                  </div>
+                  <h2 className="text-xl font-bold text-white mb-2">Set {completedSetData.setNumber} Complete!</h2>
+                  <p className="text-gray-400 mb-1">
+                    <span className="text-emerald-400 font-semibold">{completedSetData.winner}</span> wins the set
+                  </p>
+                  <p className="text-2xl font-bold text-white">{completedSetData.score}</p>
+                </div>
+                
+                <div className="space-y-3">
+                  <button
+                    onClick={handleContinueToNextSet}
+                    className="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-emerald-500/30 transition-all flex items-center justify-center gap-3"
+                  >
+                    <Play className="w-5 h-5" />
+                    Continue to Set {completedSetData.setNumber + 1}
+                  </button>
+                  
+                  <button
+                    onClick={handleEndMatchEarly}
+                    className="w-full py-4 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-amber-500/30 transition-all flex items-center justify-center gap-3"
+                  >
+                    <Trophy className="w-5 h-5" />
+                    End Match Here
+                  </button>
+                  
+                  <div className="pt-2 border-t border-white/10">
+                    <p className="text-center text-gray-500 text-sm">
+                      Match configured for {score.matchConfig.maxSets === 1 ? '1 set' : `best of ${score.matchConfig.maxSets} sets`}
+                    </p>
+                    <p className="text-center text-gray-400 text-xs mt-1">
+                      You can end the match early or continue as planned
+                    </p>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* End Match Modal */}
       {showEndModal && (

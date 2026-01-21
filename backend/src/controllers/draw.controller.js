@@ -582,7 +582,7 @@ function generateKnockoutBracket(size) {
   return { format: 'KNOCKOUT', bracketSize, totalParticipants: 0, rounds };
 }
 
-// Helper: Generate round robin bracket with groups
+// Helper: Generate round robin bracket with groups and matches
 function generateRoundRobinBracket(size, numberOfGroups) {
   const playersPerGroup = Math.ceil(size / numberOfGroups);
   const groups = [];
@@ -595,10 +595,42 @@ function generateRoundRobinBracket(size, numberOfGroups) {
         participants.push({ id: null, name: `Slot ${slotNum}`, seed: slotNum, played: 0, wins: 0, losses: 0, points: 0 });
       }
     }
-    groups.push({ groupName: String.fromCharCode(65 + g), participants });
+    
+    // Generate all matches for this group (Round Robin)
+    const matches = generateGroupMatches(participants, g);
+    
+    groups.push({ 
+      groupName: String.fromCharCode(65 + g), 
+      participants,
+      matches,
+      totalMatches: matches.length
+    });
   }
 
   return { format: 'ROUND_ROBIN', bracketSize: size, numberOfGroups, groups };
+}
+
+// Helper: Generate all matches for a group (everyone plays everyone)
+function generateGroupMatches(participants, groupIndex) {
+  const matches = [];
+  let matchNumber = 1;
+  
+  for (let i = 0; i < participants.length; i++) {
+    for (let j = i + 1; j < participants.length; j++) {
+      matches.push({
+        matchNumber: matchNumber++,
+        groupIndex,
+        player1: participants[i],
+        player2: participants[j],
+        status: 'pending',
+        winner: null,
+        score: null,
+        round: 1 // All Round Robin matches are in "round 1"
+      });
+    }
+  }
+  
+  return matches;
 }
 
 // Helper: Generate groups + knockout bracket
@@ -617,11 +649,282 @@ function generateGroupsKnockoutBracket(size, numberOfGroups, advanceFromGroup) {
   };
 }
 
+/**
+ * Bulk assign all registered players to available slots
+ * POST /api/draws/bulk-assign-all
+ */
+const bulkAssignAllPlayers = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { tournamentId, categoryId } = req.body;
+
+    // Verify tournament and ownership
+    const tournament = await prisma.tournament.findUnique({ where: { id: tournamentId } });
+    if (!tournament || tournament.organizerId !== userId) {
+      return res.status(403).json({ success: false, error: 'Unauthorized' });
+    }
+
+    // Get existing draw
+    const draw = await prisma.draw.findUnique({
+      where: { tournamentId_categoryId: { tournamentId, categoryId } }
+    });
+
+    if (!draw) {
+      return res.status(404).json({ success: false, error: 'Draw not found' });
+    }
+
+    // Get all confirmed registrations for this category
+    const registrations = await prisma.registration.findMany({
+      where: {
+        tournamentId,
+        categoryId,
+        status: 'confirmed'
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true
+          }
+        }
+      },
+      orderBy: { createdAt: 'asc' }
+    });
+
+    // Parse bracket
+    let bracketJson = typeof draw.bracketJson === 'string' ? JSON.parse(draw.bracketJson) : draw.bracketJson;
+
+    // Get available slots (not locked by started matches)
+    const matches = await prisma.match.findMany({
+      where: { tournamentId, categoryId },
+      orderBy: { matchNumber: 'asc' }
+    });
+
+    if (bracketJson.format === 'KNOCKOUT' && bracketJson.rounds) {
+      const firstRound = bracketJson.rounds[0];
+      const assignments = [];
+      let playerIndex = 0;
+
+      // Assign players to available slots
+      firstRound.matches.forEach((match, matchIdx) => {
+        const dbMatch = matches.find(m => m.round === bracketJson.rounds.length && m.matchNumber === matchIdx + 1);
+        const isLocked = dbMatch?.status === 'COMPLETED' || dbMatch?.status === 'IN_PROGRESS';
+
+        if (!isLocked) {
+          // Assign to player1 slot if empty
+          if (!match.player1?.id && playerIndex < registrations.length) {
+            const reg = registrations[playerIndex];
+            match.player1 = {
+              id: reg.user.id,
+              name: reg.user.name,
+              seed: matchIdx * 2 + 1
+            };
+            assignments.push({
+              slot: matchIdx * 2 + 1,
+              playerId: reg.user.id,
+              playerName: reg.user.name
+            });
+            playerIndex++;
+          }
+
+          // Assign to player2 slot if empty
+          if (!match.player2?.id && playerIndex < registrations.length) {
+            const reg = registrations[playerIndex];
+            match.player2 = {
+              id: reg.user.id,
+              name: reg.user.name,
+              seed: matchIdx * 2 + 2
+            };
+            assignments.push({
+              slot: matchIdx * 2 + 2,
+              playerId: reg.user.id,
+              playerName: reg.user.name
+            });
+            playerIndex++;
+          }
+        }
+      });
+
+      // Update match records
+      for (const assignment of assignments) {
+        const matchIndex = Math.floor((assignment.slot - 1) / 2);
+        const playerPosition = (assignment.slot - 1) % 2 === 0 ? 'player1Id' : 'player2Id';
+        const seedPosition = (assignment.slot - 1) % 2 === 0 ? 'player1Seed' : 'player2Seed';
+        
+        const dbMatch = matches[matchIndex];
+        if (dbMatch) {
+          await prisma.match.update({
+            where: { id: dbMatch.id },
+            data: {
+              [playerPosition]: assignment.playerId,
+              [seedPosition]: assignment.slot
+            }
+          });
+        }
+      }
+    }
+
+    // Save updated draw
+    const updatedDraw = await prisma.draw.update({
+      where: { tournamentId_categoryId: { tournamentId, categoryId } },
+      data: { bracketJson: JSON.stringify(bracketJson), updatedAt: new Date() }
+    });
+
+    res.json({
+      success: true,
+      message: 'All available players assigned successfully',
+      draw: { ...updatedDraw, bracketJson }
+    });
+  } catch (error) {
+    console.error('Bulk assign all players error:', error);
+    res.status(500).json({ success: false, error: 'Failed to assign players' });
+  }
+};
+
+/**
+ * Shuffle all assigned players randomly
+ * POST /api/draws/shuffle-players
+ */
+const shuffleAssignedPlayers = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { tournamentId, categoryId } = req.body;
+
+    // Verify tournament and ownership
+    const tournament = await prisma.tournament.findUnique({ where: { id: tournamentId } });
+    if (!tournament || tournament.organizerId !== userId) {
+      return res.status(403).json({ success: false, error: 'Unauthorized' });
+    }
+
+    // Get existing draw
+    const draw = await prisma.draw.findUnique({
+      where: { tournamentId_categoryId: { tournamentId, categoryId } }
+    });
+
+    if (!draw) {
+      return res.status(404).json({ success: false, error: 'Draw not found' });
+    }
+
+    // Parse bracket
+    let bracketJson = typeof draw.bracketJson === 'string' ? JSON.parse(draw.bracketJson) : draw.bracketJson;
+
+    // Get matches to check for locked status
+    const matches = await prisma.match.findMany({
+      where: { tournamentId, categoryId },
+      orderBy: { matchNumber: 'asc' }
+    });
+
+    if (bracketJson.format === 'KNOCKOUT' && bracketJson.rounds) {
+      const firstRound = bracketJson.rounds[0];
+      
+      // Collect all assigned players from unlocked matches
+      const assignedPlayers = [];
+      const unlockedSlots = [];
+
+      firstRound.matches.forEach((match, matchIdx) => {
+        const dbMatch = matches.find(m => m.round === bracketJson.rounds.length && m.matchNumber === matchIdx + 1);
+        const isLocked = dbMatch?.status === 'COMPLETED' || dbMatch?.status === 'IN_PROGRESS';
+
+        if (!isLocked) {
+          if (match.player1?.id) {
+            assignedPlayers.push(match.player1);
+            unlockedSlots.push({ matchIdx, position: 'player1', slot: matchIdx * 2 + 1 });
+          }
+          if (match.player2?.id) {
+            assignedPlayers.push(match.player2);
+            unlockedSlots.push({ matchIdx, position: 'player2', slot: matchIdx * 2 + 2 });
+          }
+        }
+      });
+
+      // Shuffle the players array
+      const shuffledPlayers = [...assignedPlayers].sort(() => Math.random() - 0.5);
+
+      // Clear unlocked slots first
+      unlockedSlots.forEach(({ matchIdx, position }) => {
+        firstRound.matches[matchIdx][position] = { id: null, name: `Slot ${matchIdx * 2 + (position === 'player1' ? 1 : 2)}`, seed: matchIdx * 2 + (position === 'player1' ? 1 : 2) };
+      });
+
+      // Reassign shuffled players
+      const assignments = [];
+      shuffledPlayers.forEach((player, index) => {
+        if (index < unlockedSlots.length) {
+          const { matchIdx, position, slot } = unlockedSlots[index];
+          firstRound.matches[matchIdx][position] = {
+            ...player,
+            seed: slot
+          };
+          assignments.push({
+            slot,
+            playerId: player.id,
+            playerName: player.name
+          });
+        }
+      });
+
+      // Update match records
+      for (const assignment of assignments) {
+        const matchIndex = Math.floor((assignment.slot - 1) / 2);
+        const playerPosition = (assignment.slot - 1) % 2 === 0 ? 'player1Id' : 'player2Id';
+        const seedPosition = (assignment.slot - 1) % 2 === 0 ? 'player1Seed' : 'player2Seed';
+        
+        const dbMatch = matches[matchIndex];
+        if (dbMatch) {
+          await prisma.match.update({
+            where: { id: dbMatch.id },
+            data: {
+              [playerPosition]: assignment.playerId,
+              [seedPosition]: assignment.slot
+            }
+          });
+        }
+      }
+
+      // Clear assignments for slots that don't have shuffled players
+      for (let i = assignments.length; i < unlockedSlots.length; i++) {
+        const { slot } = unlockedSlots[i];
+        const matchIndex = Math.floor((slot - 1) / 2);
+        const playerPosition = (slot - 1) % 2 === 0 ? 'player1Id' : 'player2Id';
+        const seedPosition = (slot - 1) % 2 === 0 ? 'player1Seed' : 'player2Seed';
+        
+        const dbMatch = matches[matchIndex];
+        if (dbMatch) {
+          await prisma.match.update({
+            where: { id: dbMatch.id },
+            data: {
+              [playerPosition]: null,
+              [seedPosition]: null
+            }
+          });
+        }
+      }
+    }
+
+    // Save updated draw
+    const updatedDraw = await prisma.draw.update({
+      where: { tournamentId_categoryId: { tournamentId, categoryId } },
+      data: { bracketJson: JSON.stringify(bracketJson), updatedAt: new Date() }
+    });
+
+    res.json({
+      success: true,
+      message: 'Players shuffled successfully',
+      draw: { ...updatedDraw, bracketJson }
+    });
+  } catch (error) {
+    console.error('Shuffle players error:', error);
+    res.status(500).json({ success: false, error: 'Failed to shuffle players' });
+  }
+};
+
 export {
   generateDraw,
   getDraw,
   deleteDraw,
   createConfiguredDraw,
   getCategoryPlayers,
-  assignPlayersToDraw
+  assignPlayersToDraw,
+  bulkAssignAllPlayers,
+  shuffleAssignedPlayers
 };

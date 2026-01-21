@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Payment QR Display - Matchify.pro</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 min-h-screen p-8">
+  <div class="max-w-2xl mx-auto">
+    <h1 class="text-3xl font-bold text-white mb-8">🧪 Payment QR Code Display Test</h1>
+    
+    <div class="bg-slate-800 rounded-xl p-6 border border-slate-700 mb-6">
+      <h2 class="text-xl font-bold text-white mb-4">Current Admin Payment Settings</h2>
+      <div id="settings-info" class="space-y-2 text-gray-300">
+        <p>Loading...</p>
+      </div>
+    </div>
+
+    <div class="bg-slate-800 rounded-xl p-6 border border-slate-700">
+      <h2 class="text-xl font-bold text-white mb-4">QR Code Preview (What Players See)</h2>
+      <div id="qr-preview" class="text-center">
+        <p class="text-gray-400">Loading...</p>
+      </div>
+    </div>
+
+    <div class="mt-6 bg-teal-900/20 border border-teal-700 rounded-xl p-4">
+      <p class="text-teal-300 text-sm">
+        ℹ️ This page shows what QR code is currently stored in the database and what players will see during tournament registration.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = 'http://localhost:5000/api';
+
+    async function fetchPaymentSettings() {
+      try {
+        const response = await fetch(`${API_URL}/admin/payment-settings/public`);
+        const data = await response.json();
+
+        if (data.success) {
+          const settings = data.data;
+          
+          // Display settings info
+          document.getElementById('settings-info').innerHTML = `
+            <p><strong class="text-teal-400">UPI ID:</strong> ${settings.upiId}</p>
+            <p><strong class="text-teal-400">Account Holder:</strong> ${settings.accountHolder}</p>
+            <p><strong class="text-teal-400">QR Code URL:</strong> <a href="${settings.qrCodeUrl}" target="_blank" class="text-blue-400 hover:underline break-all">${settings.qrCodeUrl}</a></p>
+            <p><strong class="text-teal-400">Status:</strong> <span class="text-green-400">✅ Active</span></p>
+          `;
+
+          // Display QR code preview
+          if (settings.qrCodeUrl) {
+            document.getElementById('qr-preview').innerHTML = `
+              <div class="bg-slate-700/50 border border-white/10 rounded-xl p-6 inline-block">
+                <div class="mb-4">
+                  <h3 class="text-lg font-semibold text-white mb-2">Scan & Pay to Matchify.pro</h3>
+                  <p class="text-sm text-gray-400">This is what players see during registration</p>
+                </div>
+                
+                <div class="p-4 bg-slate-600/50 border border-white/10 rounded-xl">
+                  <img
+                    src="${settings.qrCodeUrl}"
+                    alt="Payment QR Code"
+                    class="w-64 h-64 mx-auto object-contain rounded-lg"
+                    onerror="this.parentElement.innerHTML='<p class=\\'text-red-400\\'>❌ Failed to load QR code image</p>'"
+                  />
+                </div>
+                
+                <div class="mt-4 space-y-2">
+                  <p class="text-white font-medium">${settings.accountHolder}</p>
+                  <p class="text-gray-400 text-sm">UPI: ${settings.upiId}</p>
+                </div>
+
+                <div class="mt-4 p-3 bg-teal-500/10 border border-teal-500/30 rounded-xl">
+                  <p class="text-xs text-teal-300">
+                    🔒 <strong>Secure Payment:</strong> All payments go to Matchify.pro. Admin will pay organizer after verification.
+                  </p>
+                </div>
+              </div>
+
+              <div class="mt-6 text-left bg-blue-500/10 border border-blue-500/30 rounded-xl p-4">
+                <h4 class="text-sm font-medium text-blue-300 mb-2">How Players Pay:</h4>
+                <ol class="text-xs text-blue-400/80 space-y-1 list-decimal list-inside">
+                  <li>Scan the QR code with any UPI app</li>
+                  <li>Pay the tournament entry fee</li>
+                  <li>Take a screenshot of the payment</li>
+                  <li>Upload screenshot during registration</li>
+                  <li>Admin verifies and approves payment</li>
+                </ol>
+              </div>
+            `;
+          } else {
+            document.getElementById('qr-preview').innerHTML = `
+              <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-6">
+                <p class="text-amber-300">⚠️ No QR code uploaded yet!</p>
+                <p class="text-amber-400 text-sm mt-2">Admin needs to upload QR code via Admin Dashboard → QR Settings</p>
+              </div>
+            `;
+          }
+        } else {
+          throw new Error(data.message || 'Failed to fetch settings');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        document.getElementById('settings-info').innerHTML = `
+          <p class="text-red-400">❌ Error: ${error.message}</p>
+          <p class="text-gray-400 text-sm mt-2">Make sure the backend server is running on port 5000</p>
+        `;
+        document.getElementById('qr-preview').innerHTML = `
+          <p class="text-red-400">❌ Failed to load QR code</p>
+        `;
+      }
+    }
+
+    // Load settings on page load
+    fetchPaymentSettings();
+  </script>
+</body>
+</html>

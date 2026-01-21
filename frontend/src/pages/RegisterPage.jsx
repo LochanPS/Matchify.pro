@@ -10,7 +10,8 @@ import {
   PhoneIcon,
   ArrowRightIcon,
   CheckCircleIcon,
-  SparklesIcon
+  SparklesIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 import { Zap, Trophy, Users, Rocket, Star, Gift } from 'lucide-react';
 
@@ -27,6 +28,9 @@ const RegisterPage = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
   
   const { register } = useAuth();
   const navigate = useNavigate();
@@ -378,9 +382,30 @@ const RegisterPage = () => {
 
             {/* Terms */}
             <label className="flex items-start gap-3 cursor-pointer group">
-              <input type="checkbox" required className="w-5 h-5 rounded border-white/20 bg-slate-800 text-purple-500 focus:ring-purple-500 focus:ring-offset-0 mt-0.5" />
+              <input 
+                type="checkbox" 
+                required 
+                checked={termsAccepted}
+                onChange={(e) => setTermsAccepted(e.target.checked)}
+                className="w-5 h-5 rounded border-white/20 bg-slate-800 text-purple-500 focus:ring-purple-500 focus:ring-offset-0 mt-0.5" 
+              />
               <span className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors">
-                I agree to the <a href="#" className="text-purple-400 hover:text-purple-300">Terms of Service</a> and <a href="#" className="text-purple-400 hover:text-purple-300">Privacy Policy</a>
+                I agree to the{' '}
+                <button 
+                  type="button"
+                  onClick={() => setShowTermsModal(true)}
+                  className="text-purple-400 hover:text-purple-300 underline"
+                >
+                  Terms of Service
+                </button>
+                {' '}and{' '}
+                <button 
+                  type="button"
+                  onClick={() => setShowPrivacyModal(true)}
+                  className="text-purple-400 hover:text-purple-300 underline"
+                >
+                  Privacy Policy
+                </button>
               </span>
             </label>
 
@@ -418,8 +443,568 @@ const RegisterPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Terms of Service Modal */}
+      {showTermsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="bg-slate-800 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col border border-purple-500/30">
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b border-slate-700">
+              <h2 className="text-2xl font-bold text-white">Terms and Conditions</h2>
+              <button
+                onClick={() => setShowTermsModal(false)}
+                className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
+              >
+                <XMarkIcon className="w-6 h-6 text-gray-400" />
+              </button>
+            </div>
+            
+            {/* Content - Scrollable */}
+            <div className="flex-1 overflow-y-auto p-6 prose prose-invert prose-sm max-w-none">
+              <TermsContent />
+            </div>
+            
+            {/* Footer */}
+            <div className="p-6 border-t border-slate-700 flex justify-end gap-4">
+              <button
+                onClick={() => setShowTermsModal(false)}
+                className="px-6 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => {
+                  setTermsAccepted(true);
+                  setShowTermsModal(false);
+                }}
+                className="px-6 py-2 bg-gradient-to-r from-emerald-500 to-cyan-500 text-white rounded-lg hover:shadow-lg transition-all"
+              >
+                I Accept
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Privacy Policy Modal */}
+      {showPrivacyModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="bg-slate-800 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col border border-purple-500/30">
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b border-slate-700">
+              <h2 className="text-2xl font-bold text-white">Privacy Policy</h2>
+              <button
+                onClick={() => setShowPrivacyModal(false)}
+                className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
+              >
+                <XMarkIcon className="w-6 h-6 text-gray-400" />
+              </button>
+            </div>
+            
+            {/* Content - Scrollable */}
+            <div className="flex-1 overflow-y-auto p-6 prose prose-invert prose-sm max-w-none">
+              <PrivacyContent />
+            </div>
+            
+            {/* Footer */}
+            <div className="p-6 border-t border-slate-700 flex justify-end gap-4">
+              <button
+                onClick={() => setShowPrivacyModal(false)}
+                className="px-6 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => {
+                  setTermsAccepted(true);
+                  setShowPrivacyModal(false);
+                }}
+                className="px-6 py-2 bg-gradient-to-r from-emerald-500 to-cyan-500 text-white rounded-lg hover:shadow-lg transition-all"
+              >
+                I Accept
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
+
+// Terms of Service Content Component
+const TermsContent = () => (
+  <div className="text-gray-300 space-y-6">
+    <div className="text-sm text-gray-400">
+      <p><strong>Last Updated:</strong> January 20, 2026</p>
+      <p><strong>Effective Date:</strong> January 20, 2026</p>
+      <p><strong>Version:</strong> 1.0</p>
+    </div>
+
+    <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
+      <p className="text-yellow-300 font-semibold">⚠️ IMPORTANT</p>
+      <p className="text-sm mt-2">By using Matchify.pro, you agree to these Terms and Conditions. If you do not agree, do not use this platform.</p>
+    </div>
+
+    <section>
+      <h3 className="text-xl font-bold text-white mb-3">1. ELIGIBILITY</h3>
+      <ul className="list-disc pl-6 space-y-2">
+        <li>You must be <strong>18 years or older</strong> to use this platform</li>
+        <li>Users 13-17 may use with verifiable parental consent</li>
+        <li>Users under 13 are strictly prohibited</li>
+        <li>You must have legal capacity to enter binding contracts</li>
+      </ul>
+    </section>
+
+    <section>
+      <h3 className="text-xl font-bold text-white mb-3">2. PLATFORM SERVICES</h3>
+      <p>Matchify.pro is a <strong>booking and management platform</strong> that:</p>
+      <ul className="list-disc pl-6 space-y-2 mt-2">
+        <li>Connects Players with Tournament Organizers</li>
+        <li>Facilitates tournament registration and payment processing</li>
+        <li>Charges a <strong>5% platform fee</strong> on all entry fees</li>
+        <li>Acts as an intermediary, NOT a tournament organizer</li>
+        <li>Handles all payments to prevent scams</li>
+        <li>Pays organizers in 2 installments: <strong>30% before + 65% after tournament</strong></li>
+      </ul>
+
+      <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-3 mt-3">
+        <p className="text-purple-300 text-sm font-semibold">💡 How it works:</p>
+        <ol className="list-decimal pl-6 space-y-1 text-xs mt-2">
+          <li>Players pay 100% entry fee to Matchify.pro admin</li>
+          <li>Admin verifies payment and confirms registration</li>
+          <li>Admin keeps 5% as platform fee</li>
+          <li>Admin pays organizer 30% before tournament starts</li>
+          <li>Tournament happens</li>
+          <li>Admin pays organizer remaining 65% after tournament ends</li>
+        </ol>
+      </div>
+    </section>
+
+    <section>
+      <h3 className="text-xl font-bold text-white mb-3">3. PAYMENT TERMS</h3>
+      <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-4 mb-4">
+        <p className="text-emerald-300 font-semibold mb-2">💰 PAYMENT BREAKDOWN</p>
+        <div className="space-y-2 text-sm">
+          <div className="flex justify-between">
+            <span>Players pay to:</span>
+            <span className="font-semibold text-white">Matchify.pro Admin (100%)</span>
+          </div>
+          <div className="border-t border-emerald-500/20 my-2"></div>
+          <div className="flex justify-between">
+            <span>Platform keeps:</span>
+            <span className="font-semibold text-purple-300">5% (Platform Fee)</span>
+          </div>
+          <div className="flex justify-between">
+            <span>Organizer gets (Total):</span>
+            <span className="font-semibold text-cyan-300">95%</span>
+          </div>
+          <div className="border-t border-emerald-500/20 my-2"></div>
+          <div className="pl-4 space-y-1">
+            <div className="flex justify-between text-xs">
+              <span>→ First Payment (BEFORE tournament):</span>
+              <span className="font-semibold text-white">30%</span>
+            </div>
+            <div className="flex justify-between text-xs">
+              <span>→ Second Payment (AFTER tournament):</span>
+              <span className="font-semibold text-white">65%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <p className="text-sm mb-3"><strong>Example:</strong> If entry fee is ₹1,000</p>
+      <ul className="list-none pl-6 space-y-1 text-sm bg-slate-700/50 rounded-lg p-3">
+        <li>• Player pays: <strong className="text-white">₹1,000</strong> to Matchify.pro admin</li>
+        <li>• Platform keeps: <strong className="text-purple-300">₹50</strong> (5%)</li>
+        <li>• Organizer gets: <strong className="text-cyan-300">₹950</strong> (95%)</li>
+        <li className="pl-4 text-xs">→ Before tournament: <strong className="text-white">₹300</strong> (30%)</li>
+        <li className="pl-4 text-xs">→ After tournament: <strong className="text-white">₹650</strong> (65%)</li>
+      </ul>
+
+      <h4 className="font-semibold text-white mt-4 mb-2">Payment Process:</h4>
+      <ul className="list-disc pl-6 space-y-2">
+        <li><strong>Payment Method:</strong> UPI transfer to Matchify.pro admin account</li>
+        <li><strong>Payment Proof:</strong> Upload screenshot of UPI payment</li>
+        <li><strong>Verification:</strong> Admin verifies payment within 24-48 hours</li>
+        <li><strong>Confirmation:</strong> Registration confirmed after payment approval</li>
+        <li><strong>To Organizer:</strong> Admin pays organizer in 2 installments (30% + 65%)</li>
+      </ul>
+
+      <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 mt-3">
+        <p className="text-blue-300 text-sm font-semibold">🔒 Why payments go to admin:</p>
+        <ul className="list-disc pl-6 space-y-1 text-xs mt-2">
+          <li>Prevents organizer scams</li>
+          <li>Ensures fair payment distribution</li>
+          <li>Platform can issue refunds if needed</li>
+          <li>Transparent and secure process</li>
+        </ul>
+      </div>
+    </section>
+
+    <section>
+      <h3 className="text-xl font-bold text-white mb-3">4. REFUND POLICY</h3>
+      <ul className="list-disc pl-6 space-y-2">
+        <li><strong>Tournament cancelled by Organizer:</strong> 100% refund</li>
+        <li><strong>Player cancels 7+ days before:</strong> 80% refund</li>
+        <li><strong>Player cancels 3-6 days before:</strong> 50% refund</li>
+        <li><strong>Player cancels less than 3 days:</strong> NO REFUND</li>
+        <li><strong>Payment rejected:</strong> 100% refund within 7 days</li>
+      </ul>
+    </section>
+
+    <section>
+      <h3 className="text-xl font-bold text-white mb-3">5. LIABILITY WAIVER</h3>
+      <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
+        <p className="text-red-300 font-semibold mb-2">⚠️ BY PARTICIPATING, YOU ACKNOWLEDGE:</p>
+        <ul className="list-disc pl-6 space-y-2 text-sm">
+          <li>Badminton involves physical activity and risk of injury</li>
+          <li>You participate entirely at your own risk</li>
+          <li>Matchify.pro is NOT liable for injuries, accidents, or health issues</li>
+          <li>You release Matchify.pro from all claims related to injuries</li>
+          <li>You are responsible for your own medical insurance</li>
+        </ul>
+      </div>
+    </section>
+
+    <section>
+      <h3 className="text-xl font-bold text-white mb-3">6. GAMBLING DISCLAIMER</h3>
+      <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4">
+        <p className="text-green-300 font-semibold mb-2">✓ GAME OF SKILL</p>
+        <ul className="list-disc pl-6 space-y-2 text-sm">
+          <li>Badminton is a <strong>game of SKILL</strong>, not chance</li>
+          <li>This platform does NOT involve gambling</li>
+          <li>Prize money (if any) is provided by Organizers from their own funds</li>
+          <li>Entry fees are for tournament costs, NOT pooled for prizes</li>
+        </ul>
+      </div>
+    </section>
+
+    <section>
+      <h3 className="text-xl font-bold text-white mb-3">7. PROHIBITED CONDUCT</h3>
+      <p>You agree NOT to:</p>
+      <ul className="list-disc pl-6 space-y-2 mt-2">
+        <li>Violate any laws or regulations</li>
+        <li>Use the platform for fraudulent purposes</li>
+        <li>Harass or abuse other users</li>
+        <li>Upload offensive or illegal content</li>
+        <li>Create fake accounts or manipulate rankings</li>
+        <li>Interfere with platform operations</li>
+      </ul>
+    </section>
+
+    <section>
+      <h3 className="text-xl font-bold text-white mb-3">8. LIMITATION OF LIABILITY</h3>
+      <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
+        <p className="text-blue-300 font-semibold mb-2">MAXIMUM LIABILITY</p>
+        <ul className="list-disc pl-6 space-y-2 text-sm">
+          <li>Platform provided "AS IS" with no warranties</li>
+          <li>We are NOT liable for tournament quality, safety, or organization</li>
+          <li>We are NOT liable for injuries, accidents, or health issues</li>
+          <li>Our total liability is limited to amount you paid in last 12 months</li>
+          <li>Maximum liability: ₹10,000</li>
+        </ul>
+      </div>
+    </section>
+
+    <section>
+      <h3 className="text-xl font-bold text-white mb-3">9. DISPUTE RESOLUTION</h3>
+      <ul className="list-disc pl-6 space-y-2">
+        <li><strong>Governing Law:</strong> Laws of India</li>
+        <li><strong>Jurisdiction:</strong> Courts in Bangalore, Karnataka</li>
+        <li><strong>Arbitration:</strong> All disputes resolved through binding arbitration</li>
+        <li><strong>No Class Action:</strong> Disputes resolved individually only</li>
+      </ul>
+    </section>
+
+    <section>
+      <h3 className="text-xl font-bold text-white mb-3">10. GRIEVANCE OFFICER</h3>
+      <div className="bg-slate-700 rounded-lg p-4">
+        <p className="text-sm">For complaints or concerns:</p>
+        <ul className="list-none space-y-1 mt-2 text-sm">
+          <li><strong>Email:</strong> grievance@matchify.pro</li>
+          <li><strong>Response Time:</strong> Within 24 hours</li>
+          <li><strong>Resolution Time:</strong> Within 15 days</li>
+        </ul>
+      </div>
+    </section>
+
+    <section>
+      <h3 className="text-xl font-bold text-white mb-3">11. ACCOUNT TERMINATION</h3>
+      <p>We may suspend or terminate your account if you:</p>
+      <ul className="list-disc pl-6 space-y-2 mt-2">
+        <li>Violate these Terms</li>
+        <li>Engage in fraudulent activity</li>
+        <li>Abuse or harass other users</li>
+        <li>Upload illegal content</li>
+        <li>Fail to pay fees</li>
+      </ul>
+      <p className="mt-2"><strong>Effect:</strong> No refunds for terminated accounts</p>
+    </section>
+
+    <section>
+      <h3 className="text-xl font-bold text-white mb-3">12. MODIFICATIONS</h3>
+      <ul className="list-disc pl-6 space-y-2">
+        <li>We may modify these Terms at any time</li>
+        <li>Changes effective immediately upon posting</li>
+        <li>Continued use constitutes acceptance</li>
+        <li>Material changes notified via email (30 days notice)</li>
+      </ul>
+    </section>
+
+    <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-4 mt-8">
+      <p className="text-purple-300 font-semibold mb-2">✓ BY USING MATCHIFY.PRO, YOU ACKNOWLEDGE:</p>
+      <ul className="list-disc pl-6 space-y-1 text-sm">
+        <li>You have read and understood these Terms</li>
+        <li>You agree to be bound by these Terms</li>
+        <li>You meet the age requirements</li>
+        <li>You understand the risks of sports participation</li>
+        <li>You release Matchify.pro from all liability</li>
+        <li>You agree to arbitration for dispute resolution</li>
+      </ul>
+    </div>
+
+    <div className="text-center text-sm text-gray-500 mt-8">
+      <p>© 2026 Matchify.pro. All Rights Reserved.</p>
+      <p>Contact: legal@matchify.pro</p>
+    </div>
+  </div>
+);
+
+// Privacy Policy Content Component
+const PrivacyContent = () => (
+  <div className="text-gray-300 space-y-6">
+    <div className="text-sm text-gray-400">
+      <p><strong>Last Updated:</strong> January 20, 2026</p>
+      <p><strong>Effective Date:</strong> January 20, 2026</p>
+      <p><strong>Version:</strong> 1.0</p>
+    </div>
+
+    <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
+      <p className="text-blue-300 font-semibold">🔒 YOUR PRIVACY MATTERS</p>
+      <p className="text-sm mt-2">This Privacy Policy explains how we collect, use, store, and protect your personal data in compliance with the Digital Personal Data Protection Act, 2023.</p>
+    </div>
+
+    <section>
+      <h3 className="text-xl font-bold text-white mb-3">1. DATA WE COLLECT</h3>
+      
+      <h4 className="font-semibold text-white mt-4 mb-2">Personal Information:</h4>
+      <ul className="list-disc pl-6 space-y-1">
+        <li>Name, email, phone number</li>
+        <li>Date of birth, gender</li>
+        <li>City, state, country</li>
+        <li>Profile photo</li>
+        <li>Password (encrypted)</li>
+      </ul>
+
+      <h4 className="font-semibold text-white mt-4 mb-2">Payment Information:</h4>
+      <ul className="list-disc pl-6 space-y-1">
+        <li>UPI ID</li>
+        <li>Payment screenshots</li>
+        <li>Transaction history</li>
+      </ul>
+
+      <h4 className="font-semibold text-white mt-4 mb-2">Tournament Information:</h4>
+      <ul className="list-disc pl-6 space-y-1">
+        <li>Registration history</li>
+        <li>Match results and scores</li>
+        <li>Matchify Points and rankings</li>
+      </ul>
+
+      <h4 className="font-semibold text-white mt-4 mb-2">Technical Information:</h4>
+      <ul className="list-disc pl-6 space-y-1">
+        <li>IP address</li>
+        <li>Device type and browser</li>
+        <li>Usage data and analytics</li>
+      </ul>
+    </section>
+
+    <section>
+      <h3 className="text-xl font-bold text-white mb-3">2. HOW WE USE YOUR DATA</h3>
+      <ul className="list-disc pl-6 space-y-2">
+        <li><strong>Account Management:</strong> Create and maintain your account</li>
+        <li><strong>Tournament Services:</strong> Register you for tournaments, match partners</li>
+        <li><strong>Payment Processing:</strong> Verify payments, process refunds</li>
+        <li><strong>Communication:</strong> Send confirmations, updates, notifications</li>
+        <li><strong>Platform Improvement:</strong> Analyze usage, fix bugs, develop features</li>
+        <li><strong>Security:</strong> Detect fraud, prevent unauthorized access</li>
+        <li><strong>Legal Compliance:</strong> Comply with tax laws, respond to legal requests</li>
+      </ul>
+    </section>
+
+    <section>
+      <h3 className="text-xl font-bold text-white mb-3">3. DATA SHARING</h3>
+      
+      <h4 className="font-semibold text-white mt-4 mb-2">With Tournament Organizers:</h4>
+      <ul className="list-disc pl-6 space-y-1">
+        <li>Your name, email, phone</li>
+        <li>Selected categories</li>
+        <li>Partner information (if doubles)</li>
+        <li><strong>NOT shared:</strong> Password, payment screenshots, full transaction history</li>
+      </ul>
+
+      <h4 className="font-semibold text-white mt-4 mb-2">With Service Providers:</h4>
+      <ul className="list-disc pl-6 space-y-1">
+        <li><strong>Cloudinary:</strong> Image storage (Asia region)</li>
+        <li><strong>SendGrid:</strong> Email delivery</li>
+        <li><strong>Render:</strong> Platform hosting (India region)</li>
+      </ul>
+
+      <h4 className="font-semibold text-white mt-4 mb-2">With Law Enforcement:</h4>
+      <ul className="list-disc pl-6 space-y-1">
+        <li>If required by court order</li>
+        <li>To prevent crime or fraud</li>
+        <li>Required by tax authorities</li>
+      </ul>
+
+      <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4 mt-4">
+        <p className="text-green-300 font-semibold text-sm">✓ WE DO NOT:</p>
+        <ul className="list-disc pl-6 space-y-1 text-sm mt-2">
+          <li>Sell your data to third parties</li>
+          <li>Use your data for unrelated purposes</li>
+          <li>Share your data without consent (except as required by law)</li>
+        </ul>
+      </div>
+    </section>
+
+    <section>
+      <h3 className="text-xl font-bold text-white mb-3">4. DATA STORAGE & SECURITY</h3>
+      
+      <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
+        <p className="text-blue-300 font-semibold mb-2">🇮🇳 DATA LOCALIZATION</p>
+        <p className="text-sm">All data is stored in India:</p>
+        <ul className="list-disc pl-6 space-y-1 text-sm mt-2">
+          <li>Database: PostgreSQL on Render (India region)</li>
+          <li>Images: Cloudinary (Asia region)</li>
+          <li>Compliant with DPDP Act 2023</li>
+        </ul>
+      </div>
+
+      <h4 className="font-semibold text-white mt-4 mb-2">Security Measures:</h4>
+      <ul className="list-disc pl-6 space-y-1">
+        <li>HTTPS encryption for all data transmission</li>
+        <li>Bcrypt password hashing (irreversible)</li>
+        <li>Database encryption at rest</li>
+        <li>Regular security updates</li>
+        <li>Rate limiting to prevent attacks</li>
+        <li>Admin actions logged in audit trail</li>
+      </ul>
+    </section>
+
+    <section>
+      <h3 className="text-xl font-bold text-white mb-3">5. YOUR RIGHTS (DPDP ACT 2023)</h3>
+      
+      <div className="space-y-3">
+        <div className="bg-slate-700 rounded-lg p-3">
+          <p className="font-semibold text-white">✓ Right to Access</p>
+          <p className="text-sm mt-1">Request a copy of your personal data</p>
+        </div>
+        
+        <div className="bg-slate-700 rounded-lg p-3">
+          <p className="font-semibold text-white">✓ Right to Correction</p>
+          <p className="text-sm mt-1">Correct inaccurate or incomplete data</p>
+        </div>
+        
+        <div className="bg-slate-700 rounded-lg p-3">
+          <p className="font-semibold text-white">✓ Right to Erasure</p>
+          <p className="text-sm mt-1">Request deletion of your personal data</p>
+        </div>
+        
+        <div className="bg-slate-700 rounded-lg p-3">
+          <p className="font-semibold text-white">✓ Right to Data Portability</p>
+          <p className="text-sm mt-1">Receive your data in machine-readable format</p>
+        </div>
+        
+        <div className="bg-slate-700 rounded-lg p-3">
+          <p className="font-semibold text-white">✓ Right to Withdraw Consent</p>
+          <p className="text-sm mt-1">Withdraw consent for data processing anytime</p>
+        </div>
+      </div>
+
+      <p className="mt-4 text-sm">To exercise your rights, email: <strong>dpo@matchify.pro</strong></p>
+    </section>
+
+    <section>
+      <h3 className="text-xl font-bold text-white mb-3">6. DATA RETENTION</h3>
+      <ul className="list-disc pl-6 space-y-2">
+        <li><strong>Active accounts:</strong> Data retained while account is active</li>
+        <li><strong>Deleted accounts:</strong> Personal data deleted within 30 days</li>
+        <li><strong>Transaction records:</strong> Retained for 5 years (tax compliance)</li>
+        <li><strong>Aadhaar images:</strong> Deleted within 24 hours after verification</li>
+        <li><strong>Payment screenshots:</strong> Retained for 5 years</li>
+      </ul>
+    </section>
+
+    <section>
+      <h3 className="text-xl font-bold text-white mb-3">7. COOKIES</h3>
+      <p>We use cookies for:</p>
+      <ul className="list-disc pl-6 space-y-1 mt-2">
+        <li><strong>Essential:</strong> Authentication, security (required)</li>
+        <li><strong>Analytics:</strong> Track usage, improve platform (optional)</li>
+        <li><strong>Preferences:</strong> Remember your settings (optional)</li>
+      </ul>
+      <p className="mt-2 text-sm">You can control cookies through browser settings.</p>
+    </section>
+
+    <section>
+      <h3 className="text-xl font-bold text-white mb-3">8. CHILDREN'S PRIVACY</h3>
+      <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
+        <p className="text-yellow-300 font-semibold mb-2">⚠️ AGE RESTRICTIONS</p>
+        <ul className="list-disc pl-6 space-y-1 text-sm">
+          <li>Platform is for users 18 years and older</li>
+          <li>Users 13-17 may use with parental consent</li>
+          <li>Users under 13 are strictly prohibited</li>
+          <li>Parents can access and delete child's data</li>
+        </ul>
+      </div>
+    </section>
+
+    <section>
+      <h3 className="text-xl font-bold text-white mb-3">9. DATA BREACH NOTIFICATION</h3>
+      <p>If a data breach occurs, we will:</p>
+      <ul className="list-disc pl-6 space-y-1 mt-2">
+        <li>Investigate immediately</li>
+        <li>Notify affected users within 72 hours</li>
+        <li>Notify Data Protection Board (if required)</li>
+        <li>Provide details and steps to protect yourself</li>
+      </ul>
+    </section>
+
+    <section>
+      <h3 className="text-xl font-bold text-white mb-3">10. CONTACT INFORMATION</h3>
+      <div className="bg-slate-700 rounded-lg p-4 space-y-2">
+        <div>
+          <p className="font-semibold text-white">General Inquiries:</p>
+          <p className="text-sm">privacy@matchify.pro</p>
+        </div>
+        <div>
+          <p className="font-semibold text-white">Data Protection Officer:</p>
+          <p className="text-sm">dpo@matchify.pro</p>
+        </div>
+        <div>
+          <p className="font-semibold text-white">Grievance Officer:</p>
+          <p className="text-sm">grievance@matchify.pro</p>
+          <p className="text-xs text-gray-400">Response within 24 hours</p>
+        </div>
+      </div>
+    </section>
+
+    <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-4 mt-8">
+      <p className="text-purple-300 font-semibold mb-2">✓ BY USING MATCHIFY.PRO, YOU CONSENT TO:</p>
+      <ul className="list-disc pl-6 space-y-1 text-sm">
+        <li>Collection and use of your data as described</li>
+        <li>Data storage in India</li>
+        <li>Sharing with service providers</li>
+        <li>Disclosure if required by law</li>
+      </ul>
+      <p className="text-sm mt-3">You can withdraw consent anytime (with service limitations)</p>
+    </div>
+
+    <div className="text-center text-sm text-gray-500 mt-8">
+      <p><strong>Compliant with:</strong></p>
+      <p>Digital Personal Data Protection Act, 2023 | Information Technology Act, 2000</p>
+      <p className="mt-2">© 2026 Matchify.pro. All Rights Reserved.</p>
+    </div>
+  </div>
+);
 
 export default RegisterPage;

@@ -63,11 +63,11 @@ const AcademyApprovalsPage = () => {
 
 
   return (
-    <div className="p-6">
+    <div className="min-h-screen bg-slate-900 p-6">
       {/* Back Button */}
       <button
         onClick={() => navigate(-1)}
-        className="flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors group"
+        className="flex items-center gap-2 text-gray-400 hover:text-teal-400 mb-6 transition-colors group"
       >
         <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
         <span>Back</span>
@@ -239,26 +239,32 @@ const AcademyApprovalsPage = () => {
             <div className="p-6 border-t border-white/10 flex gap-3">
               <button
                 onClick={() => { setShowModal(false); setSelectedAcademy(null); setRejectReason(''); }}
-                className="flex-1 py-3 bg-slate-700 text-white rounded-xl hover:bg-slate-600 transition-colors"
+                className="flex-1 py-3 bg-slate-700 text-white rounded-xl hover:bg-slate-600 transition-colors font-medium"
               >
                 Cancel
               </button>
-              <button
-                onClick={() => handleReject(selectedAcademy.id)}
-                disabled={actionLoading}
-                className="flex-1 py-3 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                {actionLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <XCircle className="w-5 h-5" />}
-                Decline Payment
-              </button>
-              <button
-                onClick={() => handleApprove(selectedAcademy.id)}
-                disabled={actionLoading}
-                className="flex-1 py-3 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                {actionLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle className="w-5 h-5" />}
-                Approve Payment
-              </button>
+              <div className="relative group flex-1">
+                <div className="absolute -inset-1 bg-gradient-to-r from-red-500 to-rose-500 rounded-xl blur-lg opacity-50 group-hover:opacity-100 transition duration-300"></div>
+                <button
+                  onClick={() => handleReject(selectedAcademy.id)}
+                  disabled={actionLoading}
+                  className="relative w-full py-3 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2 font-medium"
+                >
+                  {actionLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <XCircle className="w-5 h-5" />}
+                  Decline Payment
+                </button>
+              </div>
+              <div className="relative group flex-1">
+                <div className="absolute -inset-1 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl blur-lg opacity-50 group-hover:opacity-100 transition duration-300"></div>
+                <button
+                  onClick={() => handleApprove(selectedAcademy.id)}
+                  disabled={actionLoading}
+                  className="relative w-full py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2 font-medium"
+                >
+                  {actionLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle className="w-5 h-5" />}
+                  Approve Payment
+                </button>
+              </div>
             </div>
           </div>
         </div>

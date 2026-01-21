@@ -42,5 +42,23 @@ export const drawAPI = {
       `${API_URL}/tournaments/${tournamentId}/categories/${categoryId}/draw`
     );
     return response.data;
+  },
+
+  // Bulk assign all registered players to available slots
+  bulkAssignAllPlayers: async (tournamentId, categoryId) => {
+    const response = await axios.post(`${API_URL}/draws/bulk-assign-all`, {
+      tournamentId,
+      categoryId
+    });
+    return response.data;
+  },
+
+  // Shuffle all assigned players randomly
+  shuffleAssignedPlayers: async (tournamentId, categoryId) => {
+    const response = await axios.post(`${API_URL}/draws/shuffle-players`, {
+      tournamentId,
+      categoryId
+    });
+    return response.data;
   }
 };

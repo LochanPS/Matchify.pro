@@ -96,9 +96,6 @@ export default function NotificationsPage() {
         }
         return '/tournaments';
       
-      case 'REFUND_PROCESSED':
-        return '/wallet';
-      
       case 'POINTS_AWARDED':
         return '/points';
       

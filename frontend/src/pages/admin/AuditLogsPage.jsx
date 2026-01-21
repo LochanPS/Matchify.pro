@@ -76,11 +76,11 @@ const AuditLogsPage = () => {
   };
 
   return (
-    <div className="p-8">
+    <div className="min-h-screen bg-slate-900 p-8">
       {/* Back Button */}
       <button
         onClick={() => navigate(-1)}
-        className="flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors group"
+        className="flex items-center gap-2 text-gray-400 hover:text-teal-400 mb-6 transition-colors group"
       >
         <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
         <span>Back</span>
@@ -89,30 +89,33 @@ const AuditLogsPage = () => {
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Audit Logs</h1>
-          <p className="text-gray-600 mt-2">Immutable record of all admin actions</p>
+          <h1 className="text-3xl font-bold text-white">Audit Logs</h1>
+          <p className="text-gray-400 mt-2">Immutable record of all admin actions</p>
         </div>
-        <button
-          onClick={handleExport}
-          disabled={exporting}
-          className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 disabled:opacity-50 transition flex items-center space-x-2"
-        >
-          <span>{exporting ? 'Exporting...' : '📥 Export to CSV'}</span>
-        </button>
+        <div className="relative group">
+          <div className="absolute -inset-1 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl blur-lg opacity-50 group-hover:opacity-100 transition duration-300"></div>
+          <button
+            onClick={handleExport}
+            disabled={exporting}
+            className="relative bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-6 py-2 rounded-lg disabled:opacity-50 transition flex items-center space-x-2 font-medium"
+          >
+            <span>{exporting ? 'Exporting...' : '📥 Export to CSV'}</span>
+          </button>
+        </div>
       </div>
 
       {/* Filters */}
-      <div className="bg-white p-6 rounded-lg shadow mb-6">
-        <h3 className="text-lg font-semibold mb-4">Filters</h3>
+      <div className="bg-slate-800 border border-slate-700 p-6 rounded-xl shadow-lg mb-6">
+        <h3 className="text-lg font-semibold text-white mb-4">Filters</h3>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-300 mb-1">
               Action Type
             </label>
             <select
               value={filters.action}
               onChange={(e) => setFilters({ ...filters, action: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 bg-slate-700 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
             >
               <option value="">All Actions</option>
               <option value="USER_SUSPEND">User Suspended</option>
@@ -123,13 +126,13 @@ const AuditLogsPage = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-300 mb-1">
               Entity Type
             </label>
             <select
               value={filters.entityType}
               onChange={(e) => setFilters({ ...filters, entityType: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 bg-slate-700 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
             >
               <option value="">All Entities</option>
               <option value="USER">User</option>
@@ -139,40 +142,43 @@ const AuditLogsPage = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-300 mb-1">
               Start Date
             </label>
             <input
               type="date"
               value={filters.startDate}
               onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 bg-slate-700 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-300 mb-1">
               End Date
             </label>
             <input
               type="date"
               value={filters.endDate}
               onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 bg-slate-700 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
             />
           </div>
         </div>
 
         <div className="mt-4 flex space-x-3">
-          <button
-            onClick={handleFilter}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-          >
-            Apply Filters
-          </button>
+          <div className="relative group">
+            <div className="absolute -inset-1 bg-gradient-to-r from-teal-500 to-cyan-500 rounded-xl blur-lg opacity-50 group-hover:opacity-100 transition duration-300"></div>
+            <button
+              onClick={handleFilter}
+              className="relative px-6 py-2 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white rounded-lg transition font-medium"
+            >
+              Apply Filters
+            </button>
+          </div>
           <button
             onClick={handleReset}
-            className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition"
+            className="px-6 py-2 bg-slate-700 border border-slate-600 rounded-lg text-gray-300 hover:bg-slate-600 transition font-medium"
           >
             Reset Filters
           </button>
@@ -181,9 +187,9 @@ const AuditLogsPage = () => {
 
       {/* Logs Table */}
       {loading ? (
-        <div className="bg-white rounded-lg shadow p-12 text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading audit logs...</p>
+        <div className="bg-slate-800 border border-slate-700 rounded-xl shadow p-12 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-500 mx-auto"></div>
+          <p className="mt-4 text-gray-400">Loading audit logs...</p>
         </div>
       ) : (
         <>
@@ -191,8 +197,8 @@ const AuditLogsPage = () => {
 
           {/* Pagination */}
           {pagination.totalPages > 1 && (
-            <div className="mt-6 bg-white rounded-lg shadow px-6 py-4 flex items-center justify-between">
-              <div className="text-sm text-gray-700">
+            <div className="mt-6 bg-slate-800 border border-slate-700 rounded-xl shadow px-6 py-4 flex items-center justify-between">
+              <div className="text-sm text-gray-400">
                 Showing {((pagination.page - 1) * pagination.limit) + 1} to{' '}
                 {Math.min(pagination.page * pagination.limit, pagination.total)} of{' '}
                 {pagination.total} logs
@@ -201,17 +207,17 @@ const AuditLogsPage = () => {
                 <button
                   onClick={() => setPagination({ ...pagination, page: pagination.page - 1 })}
                   disabled={pagination.page === 1}
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-sm font-medium text-gray-300 hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed transition"
                 >
                   Previous
                 </button>
-                <span className="px-4 py-2 text-sm text-gray-700">
+                <span className="px-4 py-2 text-sm text-gray-300">
                   Page {pagination.page} of {pagination.totalPages}
                 </span>
                 <button
                   onClick={() => setPagination({ ...pagination, page: pagination.page + 1 })}
                   disabled={pagination.page >= pagination.totalPages}
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-sm font-medium text-gray-300 hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed transition"
                 >
                   Next
                 </button>

@@ -50,6 +50,13 @@ const DrawPage = () => {
   const [tournamentUmpires, setTournamentUmpires] = useState([]);
   const [showUmpireModal, setShowUmpireModal] = useState(false);
   const [selectedMatchForUmpire, setSelectedMatchForUmpire] = useState(null);
+  const [tournamentStats, setTournamentStats] = useState({
+    totalPlayers: 0,
+    confirmedPlayers: 0,
+    totalMatches: 0,
+    completedMatches: 0
+  });
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     fetchTournamentData();
@@ -58,8 +65,35 @@ const DrawPage = () => {
   useEffect(() => {
     if (activeCategory) {
       fetchBracket();
+      fetchTournamentStats();
     }
   }, [activeCategory]);
+
+  // Handle refresh parameter from URL (when returning from match completion)
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const shouldRefresh = urlParams.get('refresh');
+    
+    if (shouldRefresh === 'true' && activeCategory) {
+      setRefreshing(true);
+      setSuccess('Match completed! Updating bracket...');
+      
+      // Force refresh bracket and stats after match completion
+      setTimeout(async () => {
+        await fetchBracket();
+        await fetchTournamentStats();
+        setRefreshing(false);
+        setSuccess('Bracket updated successfully! Winner advanced to next round.');
+        
+        // Clear the refresh parameter from URL
+        const newUrl = window.location.pathname + (window.location.search.replace(/[?&]refresh=true/, '').replace(/^&/, '?') || '');
+        window.history.replaceState({}, '', newUrl);
+        
+        // Clear success message after 5 seconds
+        setTimeout(() => setSuccess(null), 5000);
+      }, 500); // Small delay to ensure backend has processed the match completion
+    }
+  }, [activeCategory, window.location.search]);
 
   const fetchTournamentData = async () => {
     try {
@@ -119,6 +153,36 @@ const DrawPage = () => {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchTournamentStats = async () => {
+    if (!activeCategory) return;
+
+    try {
+      // Fetch registrations for this category
+      const registrationsResponse = await api.get(`/tournaments/${tournamentId}/categories/${activeCategory.id}/registrations`);
+      const registrations = registrationsResponse.data.registrations || [];
+      
+      // Fetch matches for this category
+      const matchesResponse = await api.get(`/tournaments/${tournamentId}/categories/${activeCategory.id}/matches`);
+      const matches = matchesResponse.data.matches || [];
+
+      setTournamentStats({
+        totalPlayers: registrations.length,
+        confirmedPlayers: registrations.filter(r => r.status === 'confirmed').length,
+        totalMatches: matches.length,
+        completedMatches: matches.filter(m => m.status === 'COMPLETED').length
+      });
+    } catch (err) {
+      console.error('Error fetching tournament stats:', err);
+      // Set default stats if fetch fails
+      setTournamentStats({
+        totalPlayers: 0,
+        confirmedPlayers: 0,
+        totalMatches: 0,
+        completedMatches: 0
+      });
     }
   };
 
@@ -390,6 +454,87 @@ const DrawPage = () => {
         </div>
       </div>
 
+      {/* Tournament Statistics Header */}
+      {activeCategory && (
+        <div className="bg-slate-800/50 backdrop-blur-sm border-b border-white/10">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {/* Total Players */}
+              <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-500/20 rounded-xl p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                    <Users className="w-5 h-5 text-blue-400" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-white">{tournamentStats.totalPlayers}</p>
+                    <p className="text-blue-300 text-sm font-medium">Total Players</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Confirmed Players */}
+              <div className="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 rounded-xl p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-emerald-500/20 rounded-lg flex items-center justify-center">
+                    <CheckCircle className="w-5 h-5 text-emerald-400" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-white">{tournamentStats.confirmedPlayers}</p>
+                    <p className="text-emerald-300 text-sm font-medium">Confirmed</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Total Matches */}
+              <div className="bg-gradient-to-br from-purple-500/10 to-violet-500/10 border border-purple-500/20 rounded-xl p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center">
+                    <Gavel className="w-5 h-5 text-purple-400" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-white">{tournamentStats.totalMatches}</p>
+                    <p className="text-purple-300 text-sm font-medium">Total Matches</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Completed Matches */}
+              <div className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-xl p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-amber-500/20 rounded-lg flex items-center justify-center">
+                    <TrophyIcon className="w-5 h-5 text-amber-400" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-white">{tournamentStats.completedMatches}</p>
+                    <p className="text-amber-300 text-sm font-medium">Completed</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Progress Bar */}
+            {tournamentStats.totalMatches > 0 && (
+              <div className="mt-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-gray-400">Tournament Progress</span>
+                  <span className="text-sm text-gray-300">
+                    {Math.round((tournamentStats.completedMatches / tournamentStats.totalMatches) * 100)}%
+                  </span>
+                </div>
+                <div className="w-full bg-slate-700 rounded-full h-2">
+                  <div 
+                    className="bg-gradient-to-r from-emerald-500 to-teal-500 h-2 rounded-full transition-all duration-500"
+                    style={{ 
+                      width: `${Math.min((tournamentStats.completedMatches / tournamentStats.totalMatches) * 100, 100)}%` 
+                    }}
+                  ></div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Messages */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
         {error && (
@@ -403,6 +548,11 @@ const DrawPage = () => {
           <div className="mb-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 flex items-center gap-3">
             <CheckCircle className="w-5 h-5 text-emerald-400 flex-shrink-0" />
             <span className="text-emerald-300 font-medium">{success}</span>
+            {refreshing && (
+              <div className="ml-auto">
+                <div className="w-5 h-5 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            )}
             <button onClick={() => setSuccess(null)} className="ml-auto text-emerald-400 hover:text-emerald-300"><X className="w-5 h-5" /></button>
           </div>
         )}
@@ -519,6 +669,12 @@ const DrawPage = () => {
           onClose={() => setShowAssignModal(false)}
           onSave={assignPlayers}
           saving={assigning}
+          tournamentId={tournamentId}
+          activeCategory={activeCategory}
+          setBracket={setBracket}
+          setSuccess={setSuccess}
+          setError={setError}
+          setShowAssignModal={setShowAssignModal}
         />
       )}
 
@@ -543,7 +699,13 @@ const DrawDisplay = ({ bracket, matches, user, isOrganizer, onAssignUmpire, acti
   const format = bracket?.format;
 
   if (format === 'ROUND_ROBIN') {
-    return <RoundRobinDisplay data={bracket} />;
+    return <RoundRobinDisplay 
+      data={bracket} 
+      matches={matches} 
+      user={user} 
+      isOrganizer={isOrganizer} 
+      onAssignUmpire={onAssignUmpire} 
+    />;
   }
   if (format === 'ROUND_ROBIN_KNOCKOUT') {
     return <GroupsKnockoutDisplay 
@@ -562,6 +724,93 @@ const DrawDisplay = ({ bracket, matches, user, isOrganizer, onAssignUmpire, acti
     isOrganizer={isOrganizer} 
     onAssignUmpire={onAssignUmpire} 
   />;
+};
+
+// Helper function to format player score for display
+const getPlayerScore = (scoreData, playerNumber) => {
+  if (!scoreData || !scoreData.sets) return '';
+  
+  try {
+    // Count sets won by this player
+    let setsWon = 0;
+    const setScores = [];
+    
+    scoreData.sets.forEach((set) => {
+      if (set.winner === playerNumber) {
+        setsWon++;
+      }
+      
+      // Get individual set scores
+      if (set.player1Score !== undefined && set.player2Score !== undefined) {
+        const playerScore = playerNumber === 1 ? set.player1Score : set.player2Score;
+        setScores.push(playerScore);
+      }
+    });
+    
+    // Format: "2-1" for sets, then individual set scores like "(21-19, 18-21, 21-16)"
+    const totalSets = scoreData.sets.length;
+    const setsLost = totalSets - setsWon;
+    
+    if (setScores.length > 0) {
+      return `${setsWon}-${setsLost} (${setScores.join(', ')})`;
+    } else {
+      return `${setsWon}-${setsLost}`;
+    }
+  } catch (err) {
+    console.error('Error formatting score:', err);
+    return '';
+  }
+};
+
+// Helper function to get detailed set-by-set scores for display
+const getDetailedSetScores = (scoreData, playerNumber) => {
+  if (!scoreData || !scoreData.sets) return '';
+  
+  try {
+    const setScores = [];
+    
+    scoreData.sets.forEach((set, index) => {
+      if (set.player1Score !== undefined && set.player2Score !== undefined) {
+        const playerScore = playerNumber === 1 ? set.player1Score : set.player2Score;
+        setScores.push(`Set ${index + 1}: ${playerScore}`);
+      }
+    });
+    
+    return setScores.join('  ');
+  } catch (err) {
+    console.error('Error formatting detailed scores:', err);
+    return '';
+  }
+};
+
+// Helper function to get complete match score display
+const getCompleteMatchScore = (scoreData) => {
+  if (!scoreData || !scoreData.sets) return '';
+  
+  try {
+    let p1SetsWon = 0;
+    let p2SetsWon = 0;
+    const setScores = [];
+    
+    scoreData.sets.forEach((set) => {
+      if (set.winner === 1) p1SetsWon++;
+      if (set.winner === 2) p2SetsWon++;
+      
+      if (set.player1Score !== undefined && set.player2Score !== undefined) {
+        setScores.push(`${set.player1Score}-${set.player2Score}`);
+      }
+    });
+    
+    // Format: "2-1 (21-19, 18-21, 21-16)"
+    if (setScores.length > 0) {
+      return `${p1SetsWon}-${p2SetsWon} (${setScores.join(', ')})`;
+    } else {
+      return `${p1SetsWon}-${p2SetsWon}`;
+    }
+  } catch (err) {
+    console.error('Error formatting complete score:', err);
+    return '';
+  }
 };
 
 // Knockout Display - HORIZONTAL PYRAMID (LEFT TO RIGHT)
@@ -706,6 +955,7 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire }) =
               const hasPlayers = match.player1?.id && match.player2?.id;
               const isLive = dbMatch?.status === 'IN_PROGRESS';
               const isCompleted = dbMatch?.status === 'COMPLETED';
+              const hasUmpire = dbMatch?.umpireId;
               
               const cardWidth = 280;
               const cardHeight = 180;
@@ -767,9 +1017,15 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire }) =
                       height="50"
                       fill={match.winner === 1 || dbMatch?.winnerId === match.player1?.id ? 'rgba(168, 85, 247, 0.2)' : 'transparent'}
                     />
-                    <text x="12" y="30" fill={match.winner === 1 || dbMatch?.winnerId === match.player1?.id ? '#ffffff' : '#d1d5db'} fontSize="14" fontWeight="600">
+                    <text x="12" y="20" fill={match.winner === 1 || dbMatch?.winnerId === match.player1?.id ? '#ffffff' : '#d1d5db'} fontSize="14" fontWeight="600">
                       {(match.player1?.name || 'TBD').substring(0, 22)}
                     </text>
+                    {/* Player 1 Detailed Set Scores */}
+                    {isCompleted && dbMatch?.score && (
+                      <text x="12" y="35" fill="#9ca3af" fontSize="10" fontWeight="500">
+                        {getDetailedSetScores(dbMatch.score, 1)}
+                      </text>
+                    )}
                     {(match.winner === 1 || dbMatch?.winnerId === match.player1?.id) && (
                       <text x={cardWidth - 40} y="30" fill="#fbbf24" fontSize="18">👑</text>
                     )}
@@ -778,6 +1034,16 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire }) =
                   {/* Divider */}
                   <line x1="12" y1="110" x2={cardWidth - 12} y2="110" stroke="rgba(255, 255, 255, 0.1)" strokeWidth="1" />
 
+                  {/* Match Score Display (center) */}
+                  {isCompleted && dbMatch?.score && (
+                    <g transform="translate(0, 110)">
+                      <rect x={cardWidth / 2 - 40} y="-15" width="80" height="30" rx="15" fill="rgba(0, 0, 0, 0.7)" stroke="rgba(168, 85, 247, 0.3)" strokeWidth="1" />
+                      <text x={cardWidth / 2} y="5" textAnchor="middle" fill="#a855f7" fontSize="11" fontWeight="700">
+                        {getCompleteMatchScore(dbMatch.score)}
+                      </text>
+                    </g>
+                  )}
+
                   {/* Player 2 */}
                   <g transform="translate(0, 110)">
                     <rect
@@ -785,16 +1051,22 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire }) =
                       height="50"
                       fill={match.winner === 2 || dbMatch?.winnerId === match.player2?.id ? 'rgba(168, 85, 247, 0.2)' : 'transparent'}
                     />
-                    <text x="12" y="30" fill={match.winner === 2 || dbMatch?.winnerId === match.player2?.id ? '#ffffff' : '#d1d5db'} fontSize="14" fontWeight="600">
+                    <text x="12" y="20" fill={match.winner === 2 || dbMatch?.winnerId === match.player2?.id ? '#ffffff' : '#d1d5db'} fontSize="14" fontWeight="600">
                       {(match.player2?.name || 'TBD').substring(0, 22)}
                     </text>
+                    {/* Player 2 Detailed Set Scores */}
+                    {isCompleted && dbMatch?.score && (
+                      <text x="12" y="35" fill="#9ca3af" fontSize="10" fontWeight="500">
+                        {getDetailedSetScores(dbMatch.score, 2)}
+                      </text>
+                    )}
                     {(match.winner === 2 || dbMatch?.winnerId === match.player2?.id) && (
                       <text x={cardWidth - 40} y="30" fill="#fbbf24" fontSize="18">👑</text>
                     )}
                   </g>
 
-                  {/* Umpire/Score button overlay */}
-                  {isOrganizer && !isCompleted && (
+                  {/* Umpire Assignment Button */}
+                  {isOrganizer && hasPlayers && !isCompleted && (
                     <g
                       onClick={() => {
                         const bracketMatchData = {
@@ -807,8 +1079,64 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire }) =
                       }}
                       style={{ cursor: 'pointer' }}
                     >
-                      <rect x="10" y="165" width={cardWidth - 20} height="10" rx="5" fill="rgba(59, 130, 246, 0.3)" />
+                      {/* Umpire Button Background with Glow */}
+                      <defs>
+                        <filter id={`umpire-glow-${pos.roundIndex}-${pos.matchIndex}`} x="-50%" y="-50%" width="200%" height="200%">
+                          <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                          <feMerge>
+                            <feMergeNode in="coloredBlur"/>
+                            <feMergeNode in="SourceGraphic"/>
+                          </feMerge>
+                        </filter>
+                      </defs>
+                      
+                      <rect 
+                        x={cardWidth - 50} 
+                        y="162" 
+                        width="40" 
+                        height="16" 
+                        rx="8" 
+                        fill={hasUmpire ? "rgba(34, 197, 94, 0.3)" : "rgba(59, 130, 246, 0.3)"} 
+                        stroke={hasUmpire ? "#22c55e" : "#3b82f6"} 
+                        strokeWidth="1.5"
+                        filter={`url(#umpire-glow-${pos.roundIndex}-${pos.matchIndex})`}
+                      />
+                      
+                      {/* Umpire Icon */}
+                      <text 
+                        x={cardWidth - 30} 
+                        y="172" 
+                        textAnchor="middle" 
+                        fill={hasUmpire ? "#22c55e" : "#3b82f6"} 
+                        fontSize="10" 
+                        fontWeight="700"
+                      >
+                        ⚖️
+                      </text>
+                      
+                      {/* Status Indicator */}
+                      {hasUmpire && (
+                        <circle 
+                          cx={cardWidth - 15} 
+                          cy="166" 
+                          r="2" 
+                          fill="#22c55e"
+                        />
+                      )}
                     </g>
+                  )}
+
+                  {/* Match Status Text */}
+                  {isOrganizer && hasPlayers && !isCompleted && (
+                    <text 
+                      x="12" 
+                      y="173" 
+                      fill="#9ca3af" 
+                      fontSize="8" 
+                      fontWeight="500"
+                    >
+                      {hasUmpire ? "Ready to start" : "Click ⚖️ to assign umpire"}
+                    </text>
                   )}
                 </g>
               );
@@ -820,45 +1148,210 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire }) =
   );
 };
 
-// Round Robin Display
-const RoundRobinDisplay = ({ data }) => {
+// Round Robin Display with Match Schedule
+const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire }) => {
   if (!data?.groups) return <p className="text-gray-400 text-center p-8">No group data</p>;
 
+  // Find database matches for each group match
+  const findDbMatch = (groupMatch, groupIndex) => {
+    if (!matches || !Array.isArray(matches)) return null;
+    // Look for match by group and match number
+    return matches.find(m => 
+      m.player1Id === groupMatch.player1?.id && 
+      m.player2Id === groupMatch.player2?.id
+    );
+  };
+
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-8">
       {data.groups.map((group, gi) => (
-        <div key={gi} className="bg-slate-700/30 rounded-xl p-4">
-          <h4 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-            <span className="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center text-purple-400 font-bold">
-              {String.fromCharCode(65 + gi)}
-            </span>
-            Group {String.fromCharCode(65 + gi)}
-          </h4>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-white/10">
-                  <th className="text-left py-3 px-4 text-gray-400 font-semibold">#</th>
-                  <th className="text-left py-3 px-4 text-gray-400 font-semibold">Player</th>
-                  <th className="text-center py-3 px-4 text-gray-400 font-semibold">P</th>
-                  <th className="text-center py-3 px-4 text-gray-400 font-semibold">W</th>
-                  <th className="text-center py-3 px-4 text-gray-400 font-semibold">L</th>
-                  <th className="text-center py-3 px-4 text-gray-400 font-semibold">Pts</th>
-                </tr>
-              </thead>
-              <tbody>
-                {group.participants.map((p, pi) => (
-                  <tr key={pi} className="border-b border-white/5 hover:bg-white/5">
-                    <td className="py-3 px-4 text-gray-500 font-medium">{pi + 1}</td>
-                    <td className="py-3 px-4 text-white font-medium">{p.name || `Slot ${pi + 1}`}</td>
-                    <td className="py-3 px-4 text-center text-gray-400">{p.played || 0}</td>
-                    <td className="py-3 px-4 text-center text-emerald-400 font-semibold">{p.wins || 0}</td>
-                    <td className="py-3 px-4 text-center text-red-400 font-semibold">{p.losses || 0}</td>
-                    <td className="py-3 px-4 text-center text-amber-400 font-bold">{p.points || 0}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        <div key={gi} className="bg-slate-700/30 rounded-xl overflow-hidden">
+          {/* Group Header */}
+          <div className="bg-gradient-to-r from-purple-600/20 to-indigo-600/20 p-4 border-b border-white/10">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <span className="w-10 h-10 bg-purple-500/30 rounded-xl flex items-center justify-center text-purple-300 font-bold text-lg">
+                  {String.fromCharCode(65 + gi)}
+                </span>
+                <div>
+                  <h4 className="text-xl font-bold text-white">Group {String.fromCharCode(65 + gi)}</h4>
+                  <p className="text-purple-300 text-sm">
+                    {group.participants.filter(p => p.id).length} players • {group.matches?.length || 0} matches
+                  </p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-gray-400">Round Robin Format</p>
+                <p className="text-sm text-purple-300 font-semibold">Everyone plays everyone</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-6 p-6">
+            {/* Left: Match Schedule */}
+            <div>
+              <h5 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                <span className="w-6 h-6 bg-blue-500/20 rounded-lg flex items-center justify-center text-blue-400 text-sm">📅</span>
+                Match Schedule
+              </h5>
+              
+              {group.matches && group.matches.length > 0 ? (
+                <div className="space-y-3">
+                  {group.matches.map((match, mi) => {
+                    const dbMatch = findDbMatch(match, gi);
+                    const hasPlayers = match.player1?.id && match.player2?.id;
+                    const isCompleted = dbMatch?.status === 'COMPLETED';
+                    const isInProgress = dbMatch?.status === 'IN_PROGRESS';
+                    const hasUmpire = dbMatch?.umpireId;
+                    
+                    return (
+                      <div 
+                        key={mi} 
+                        className={`p-4 rounded-xl border transition-all ${
+                          isCompleted 
+                            ? 'border-emerald-500/30 bg-emerald-500/10' 
+                            : isInProgress
+                              ? 'border-amber-500/30 bg-amber-500/10'
+                              : hasPlayers
+                                ? 'border-blue-500/30 bg-blue-500/10 hover:bg-blue-500/20'
+                                : 'border-white/10 bg-slate-800/30'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <span className="px-2 py-1 bg-purple-500/20 text-purple-300 rounded text-xs font-bold">
+                                Match {match.matchNumber}
+                              </span>
+                              {isCompleted && <span className="text-emerald-400 text-sm">✅ Complete</span>}
+                              {isInProgress && <span className="text-amber-400 text-sm">🔴 Live</span>}
+                              {hasUmpire && !isCompleted && !isInProgress && <span className="text-blue-400 text-sm">⚖️ Umpire Ready</span>}
+                            </div>
+                            
+                            <div className="flex items-center gap-3">
+                              <span className={`font-medium ${hasPlayers ? 'text-white' : 'text-gray-500'}`}>
+                                {match.player1?.name || 'TBD'}
+                              </span>
+                              <span className="text-gray-400 text-sm">vs</span>
+                              <span className={`font-medium ${hasPlayers ? 'text-white' : 'text-gray-500'}`}>
+                                {match.player2?.name || 'TBD'}
+                              </span>
+                            </div>
+                            
+                            {dbMatch?.winnerId && (
+                              <div className="mt-2 text-sm">
+                                <span className="text-emerald-400">
+                                  Winner: {dbMatch.winnerId === match.player1?.id ? match.player1?.name : match.player2?.name}
+                                </span>
+                                {/* Display detailed set scores for both players */}
+                                {dbMatch.score && (
+                                  <div className="mt-2 space-y-1">
+                                    <div className="text-xs text-gray-300">
+                                      <span className="font-medium">{match.player1?.name}:</span> {getDetailedSetScores(dbMatch.score, 1)}
+                                    </div>
+                                    <div className="text-xs text-gray-300">
+                                      <span className="font-medium">{match.player2?.name}:</span> {getDetailedSetScores(dbMatch.score, 2)}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                          
+                          {/* Umpire Assignment Button */}
+                          {isOrganizer && hasPlayers && !isCompleted && (
+                            <button
+                              onClick={() => {
+                                const bracketMatchData = {
+                                  matchNumber: match.matchNumber,
+                                  round: 1,
+                                  player1: match.player1,
+                                  player2: match.player2,
+                                  groupName: group.groupName
+                                };
+                                onAssignUmpire(dbMatch, bracketMatchData);
+                              }}
+                              className={`px-3 py-2 rounded-lg transition-all flex items-center gap-2 text-sm font-medium ${
+                                hasUmpire 
+                                  ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' 
+                                  : 'bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30'
+                              }`}
+                            >
+                              <span className="text-base">⚖️</span>
+                              {hasUmpire ? 'Ready' : 'Assign'}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <p>No matches generated yet</p>
+                  <p className="text-sm">Assign players to generate matches</p>
+                </div>
+              )}
+            </div>
+
+            {/* Right: Standings Table */}
+            <div>
+              <h5 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                <span className="w-6 h-6 bg-amber-500/20 rounded-lg flex items-center justify-center text-amber-400 text-sm">🏆</span>
+                Group Standings
+              </h5>
+              
+              <div className="bg-slate-800/50 rounded-xl overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-slate-700/50 border-b border-white/10">
+                      <th className="text-left py-3 px-4 text-gray-400 font-semibold">#</th>
+                      <th className="text-left py-3 px-4 text-gray-400 font-semibold">Player</th>
+                      <th className="text-center py-3 px-4 text-gray-400 font-semibold">P</th>
+                      <th className="text-center py-3 px-4 text-gray-400 font-semibold">W</th>
+                      <th className="text-center py-3 px-4 text-gray-400 font-semibold">L</th>
+                      <th className="text-center py-3 px-4 text-gray-400 font-semibold">Pts</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {group.participants
+                      .sort((a, b) => (b.points || 0) - (a.points || 0)) // Sort by points
+                      .map((p, pi) => (
+                        <tr key={pi} className="border-b border-white/5 hover:bg-white/5">
+                          <td className="py-3 px-4">
+                            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                              pi === 0 ? 'bg-amber-500/20 text-amber-400' : 
+                              pi === 1 ? 'bg-gray-400/20 text-gray-400' :
+                              pi === 2 ? 'bg-orange-500/20 text-orange-400' :
+                              'bg-slate-600/20 text-gray-500'
+                            }`}>
+                              {pi + 1}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className={`font-medium ${p.id ? 'text-white' : 'text-gray-500'}`}>
+                              {p.name || `Slot ${pi + 1}`}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4 text-center text-gray-400">{p.played || 0}</td>
+                          <td className="py-3 px-4 text-center text-emerald-400 font-semibold">{p.wins || 0}</td>
+                          <td className="py-3 px-4 text-center text-red-400 font-semibold">{p.losses || 0}</td>
+                          <td className="py-3 px-4 text-center text-amber-400 font-bold">{p.points || 0}</td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+              
+              {/* Points System Explanation */}
+              <div className="mt-4 p-3 bg-slate-800/30 rounded-lg">
+                <p className="text-xs text-gray-400 mb-1">Points System:</p>
+                <div className="flex gap-4 text-xs">
+                  <span className="text-emerald-400">Win: +2 pts</span>
+                  <span className="text-red-400">Loss: +0 pts</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       ))}
@@ -877,7 +1370,13 @@ const GroupsKnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpir
           <span className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-lg text-sm font-semibold">Stage 1</span>
           Group Stage (Round Robin)
         </h3>
-        <RoundRobinDisplay data={data} />
+        <RoundRobinDisplay 
+          data={data} 
+          matches={matches} 
+          user={user} 
+          isOrganizer={isOrganizer} 
+          onAssignUmpire={onAssignUmpire} 
+        />
       </div>
 
       {/* Knockout Stage */}
@@ -914,7 +1413,7 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
   const formatOptions = [
     { value: 'KNOCKOUT', label: 'Knockout', icon: '🏆', desc: 'Single elimination. Lose once, you\'re out.' },
     { value: 'ROUND_ROBIN', label: 'Round Robin', icon: '🔄', desc: 'Everyone plays everyone in the group.' },
-    { value: 'ROUND_ROBIN_KNOCKOUT', label: 'Groups + Knockout', icon: '⚡', desc: 'Round robin groups, then knockout finals.' }
+    { value: 'ROUND_ROBIN_KNOCKOUT', label: 'Round Robin + Knockout', icon: '⚡', desc: 'Round robin groups, then knockout finals.' }
   ];
 
   const groupOptions = [2, 4, 8, 16].filter(n => n <= config.bracketSize / 2);
@@ -1183,20 +1682,54 @@ const SlotCard = ({ slot, assigned, canAccept, onSlotClick, onRemove, playerLabe
   );
 };
 
-// Compact Slot Card for two-column layout
-const CompactSlotCard = ({ slot, assigned, canAccept, onSlotClick, onRemove, playerLabel, locked }) => {
+// Compact Slot Card for two-column layout with drag-and-drop support
+const CompactSlotCard = ({ slot, assigned, canAccept, onSlotClick, onRemove, playerLabel, locked, onDragStart, onDragOver, onDrop, isDragOver }) => {
+  const handleDragStart = (e) => {
+    if (locked || !assigned) return;
+    e.dataTransfer.setData('text/plain', JSON.stringify({
+      sourceSlot: slot.slot,
+      playerId: assigned.playerId,
+      playerName: assigned.playerName
+    }));
+    onDragStart && onDragStart(slot.slot);
+  };
+
+  const handleDragOver = (e) => {
+    if (locked) return;
+    e.preventDefault();
+    onDragOver && onDragOver(slot.slot);
+  };
+
+  const handleDrop = (e) => {
+    if (locked) return;
+    e.preventDefault();
+    try {
+      const dragData = JSON.parse(e.dataTransfer.getData('text/plain'));
+      onDrop && onDrop(dragData, slot.slot);
+    } catch (err) {
+      console.error('Invalid drag data:', err);
+    }
+  };
+
   return (
     <div
       onClick={locked ? undefined : onSlotClick}
+      draggable={assigned && !locked}
+      onDragStart={handleDragStart}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
       className={`px-2 py-1.5 rounded-lg border transition-all ${
         locked
           ? 'border-amber-500/30 bg-amber-500/5 cursor-not-allowed'
-          : assigned
-            ? 'border-emerald-500/50 bg-emerald-500/10 border-solid'
-            : canAccept
-              ? 'border-purple-500 bg-purple-500/10 border-dashed cursor-pointer hover:bg-purple-500/20'
-              : 'border-white/10 bg-slate-800/30 border-dashed'
+          : isDragOver
+            ? 'border-emerald-500 bg-emerald-500/20 border-dashed'
+            : assigned
+              ? 'border-emerald-500/50 bg-emerald-500/10 border-solid cursor-move'
+              : canAccept
+                ? 'border-purple-500 bg-purple-500/10 border-dashed cursor-pointer hover:bg-purple-500/20'
+                : 'border-white/10 bg-slate-800/30 border-dashed'
       }`}
+      title={assigned && !locked ? 'Drag to move player to another slot' : undefined}
     >
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0 flex-1">
@@ -1239,9 +1772,10 @@ const CompactSlotCard = ({ slot, assigned, canAccept, onSlotClick, onRemove, pla
 };
 
 // Assign Players Modal
-const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSave, saving }) => {
+const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSave, saving, tournamentId, activeCategory, setBracket, setSuccess, setError, setShowAssignModal }) => {
   const [assignments, setAssignments] = useState({});  // { slot: { playerId, playerName } }
   const [selectedPlayer, setSelectedPlayer] = useState(null);  // Currently selected player
+  const [dragOverSlot, setDragOverSlot] = useState(null);  // Slot being dragged over
 
   // Get total rounds for round mapping
   const totalRounds = bracket?.rounds?.length || 1;
@@ -1370,6 +1904,82 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
     return Object.values(assignments).some(a => a?.playerId === playerId);
   };
 
+  // Drag and Drop Handlers
+  const handleDragStart = (sourceSlot) => {
+    // Visual feedback can be added here if needed
+  };
+
+  const handleDragOver = (targetSlot) => {
+    setDragOverSlot(targetSlot);
+  };
+
+  const handleDrop = (dragData, targetSlot) => {
+    setDragOverSlot(null);
+    
+    const sourceSlot = dragData.sourceSlot;
+    const targetSlotData = slots.find(s => s.slot === targetSlot);
+    const sourceSlotData = slots.find(s => s.slot === sourceSlot);
+    
+    // Don't allow drops on locked slots
+    if (targetSlotData?.locked || sourceSlotData?.locked) return;
+    
+    // Don't drop on same slot
+    if (sourceSlot === targetSlot) return;
+    
+    const newAssignments = { ...assignments };
+    
+    // Get current assignments
+    const sourceAssignment = newAssignments[sourceSlot];
+    const targetAssignment = newAssignments[targetSlot];
+    
+    // Swap assignments
+    if (targetAssignment) {
+      // Swap players
+      newAssignments[sourceSlot] = targetAssignment;
+      newAssignments[targetSlot] = sourceAssignment;
+    } else {
+      // Move player to empty slot
+      newAssignments[targetSlot] = sourceAssignment;
+      delete newAssignments[sourceSlot];
+    }
+    
+    setAssignments(newAssignments);
+  };
+
+  // Add All Players - automatically assign all registered players to available slots
+  const handleAddAllPlayers = async () => {
+    try {
+      setError(null);
+      const response = await drawAPI.bulkAssignAllPlayers(tournamentId, activeCategory.id);
+      const draw = response.draw;
+      const bracketData = draw.bracketJson || draw.bracket;
+      setBracket(typeof bracketData === 'string' ? JSON.parse(bracketData) : bracketData);
+      setSuccess('All available players assigned successfully!');
+      setShowAssignModal(false);
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err) {
+      console.error('Error bulk assigning players:', err);
+      setError(err.response?.data?.error || 'Failed to assign all players');
+    }
+  };
+
+  // Shuffle All Players - randomly redistribute all assigned players
+  const handleShuffleAllPlayers = async () => {
+    try {
+      setError(null);
+      const response = await drawAPI.shuffleAssignedPlayers(tournamentId, activeCategory.id);
+      const draw = response.draw;
+      const bracketData = draw.bracketJson || draw.bracket;
+      setBracket(typeof bracketData === 'string' ? JSON.parse(bracketData) : bracketData);
+      setSuccess('Players shuffled successfully!');
+      setShowAssignModal(false);
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err) {
+      console.error('Error shuffling players:', err);
+      setError(err.response?.data?.error || 'Failed to shuffle players');
+    }
+  };
+
   const handleSave = () => {
     // Convert object to array format for API
     const assignmentsArray = Object.entries(assignments).map(([slot, data]) => ({
@@ -1381,6 +1991,10 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
   };
 
   const assignedCount = Object.keys(assignments).length;
+  const unassignedPlayersCount = players.filter(p => !isPlayerAssigned(p.id)).length;
+  const availableSlotsCount = slots.filter(s => !s.locked && !getAssignedPlayer(s.slot)).length;
+  const canAddAll = unassignedPlayersCount > 0 && availableSlotsCount > 0;
+  const canShuffle = assignedCount > 1 && slots.some(s => !s.locked && getAssignedPlayer(s.slot));
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -1400,6 +2014,35 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
               <X className="w-5 h-5 text-gray-400" />
             </button>
           </div>
+          
+          {/* Bulk Action Buttons */}
+          <div className="mt-4 flex gap-3">
+            <button
+              onClick={handleAddAllPlayers}
+              disabled={!canAddAll}
+              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-xl hover:shadow-lg hover:shadow-blue-500/25 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+              title={canAddAll ? `Add ${Math.min(unassignedPlayersCount, availableSlotsCount)} unassigned players to available slots` : 'No unassigned players or available slots'}
+            >
+              <Users className="w-4 h-4" />
+              Add All Players
+              {canAddAll && (
+                <span className="px-2 py-0.5 bg-white/20 rounded-full text-xs">
+                  +{Math.min(unassignedPlayersCount, availableSlotsCount)}
+                </span>
+              )}
+            </button>
+            
+            <button
+              onClick={handleShuffleAllPlayers}
+              disabled={!canShuffle}
+              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-violet-600 text-white rounded-xl hover:shadow-lg hover:shadow-purple-500/25 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+              title={canShuffle ? 'Randomly redistribute all assigned players (locked matches unchanged)' : 'Need at least 2 assigned players to shuffle'}
+            >
+              <Zap className="w-4 h-4" />
+              Shuffle All Players
+            </button>
+          </div>
+          
           {selectedPlayer && (
             <div className="mt-3 px-4 py-2 bg-purple-500/20 border border-purple-500/30 rounded-xl flex items-center justify-between">
               <span className="text-purple-300 text-sm">
@@ -1545,6 +2188,10 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                           onRemove={() => !slot1.locked && handleRemoveAssignment(slot1.slot)}
                           playerLabel="P1"
                           locked={slot1.locked}
+                          onDragStart={handleDragStart}
+                          onDragOver={handleDragOver}
+                          onDrop={handleDrop}
+                          isDragOver={dragOverSlot === slot1.slot}
                         />
                       )}
                       
@@ -1565,6 +2212,10 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                           onRemove={() => !slot2.locked && handleRemoveAssignment(slot2.slot)}
                           playerLabel="P2"
                           locked={slot2.locked}
+                          onDragStart={handleDragStart}
+                          onDragOver={handleDragOver}
+                          onDrop={handleDrop}
+                          isDragOver={dragOverSlot === slot2.slot}
                         />
                       )}
                     </div>
@@ -1642,8 +2293,10 @@ const AssignUmpireModal = ({ match, umpires, onClose, onAssign }) => {
                 <Gavel className="w-6 h-6 text-blue-400" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-white">Assign Umpire</h2>
-                <p className="text-gray-400 text-sm">Match {match?.matchNumber}</p>
+                <h2 className="text-xl font-bold text-white">Assign Umpire & Start Match</h2>
+                <p className="text-gray-400 text-sm">
+                  Match {match?.matchNumber} • {match?.player1?.name || 'TBD'} vs {match?.player2?.name || 'TBD'}
+                </p>
               </div>
             </div>
             <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-lg transition-colors">
@@ -1703,14 +2356,14 @@ const AssignUmpireModal = ({ match, umpires, onClose, onAssign }) => {
         </div>
 
         <div className="p-6 border-t border-white/10 space-y-3">
-          {/* Conduct Match Button - Primary action */}
+          {/* Quick Start Match Button - Primary action */}
           <button
             onClick={handleConductMatch}
             disabled={!selectedUmpire || umpires.length === 0}
             className="w-full px-4 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl hover:shadow-lg hover:shadow-emerald-500/25 transition-all font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
           >
             <Gavel className="w-5 h-5" />
-            Conduct Match
+            {selectedUmpire ? "Start Match" : "Select Umpire to Start"}
           </button>
           
           {/* Secondary actions */}
@@ -1729,13 +2382,25 @@ const AssignUmpireModal = ({ match, umpires, onClose, onAssign }) => {
               {assigning ? (
                 <>
                   <div className="w-3 h-3 border-2 border-blue-300/30 border-t-blue-300 rounded-full animate-spin"></div>
-                  Saving...
+                  Assigning...
                 </>
               ) : (
-                'Save & Close'
+                <>
+                  <CheckCircle className="w-4 h-4" />
+                  Assign Only
+                </>
               )}
             </button>
           </div>
+          
+          {/* Quick Info */}
+          {selectedUmpireData && (
+            <div className="text-center">
+              <p className="text-xs text-gray-500">
+                Press "Start Match" to assign <span className="text-emerald-400 font-medium">{selectedUmpireData.name}</span> and begin scoring
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>

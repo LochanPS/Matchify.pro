@@ -10,7 +10,7 @@
     "build": "prisma generate",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
-    "postinstall": "prisma generate && prisma db push --accept-data-loss && node deploy.js",
+    "postinstall": "prisma generate && prisma db push --accept-data-loss",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy",

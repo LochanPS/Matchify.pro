@@ -16,8 +16,20 @@ router.post('/delete-all-info', authenticate, async (req, res) => {
   try {
     const { password } = req.body;
 
-    // Check if user is admin
-    if (!req.user.roles || !req.user.roles.includes('ADMIN')) {
+    console.log('🔍 Delete all data request from:', {
+      userId: req.user?.id,
+      email: req.user?.email,
+      roles: req.user?.roles,
+      isAdmin: req.user?.isAdmin
+    });
+
+    // Check if user is admin (support both roles array and isAdmin flag)
+    const isAdmin = req.user?.isAdmin || 
+                    (req.user?.roles && req.user.roles.includes('ADMIN')) ||
+                    (req.user?.role === 'ADMIN');
+
+    if (!isAdmin) {
+      console.log('❌ Access denied - not an admin');
       return res.status(403).json({
         success: false,
         error: 'Only admins can delete all data'
@@ -26,6 +38,7 @@ router.post('/delete-all-info', authenticate, async (req, res) => {
 
     // Verify special password
     if (password !== DELETE_PASSWORD) {
+      console.log('❌ Invalid password provided');
       return res.status(401).json({
         success: false,
         error: 'Invalid password'

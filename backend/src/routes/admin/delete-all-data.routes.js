@@ -7,6 +7,15 @@ const router = express.Router();
 // Special password for delete all data
 const DELETE_PASSWORD = 'Pradyu@123(123)';
 
+// Test endpoint to verify route is working
+router.get('/delete-all-info/test', (req, res) => {
+  res.json({
+    success: true,
+    message: 'Delete all data route is working!',
+    timestamp: new Date().toISOString()
+  });
+});
+
 /**
  * POST /api/admin/delete-all-info
  * Delete all data and reset everything to zero

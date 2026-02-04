@@ -22,13 +22,21 @@ router.get('/delete-all-info/test', (req, res) => {
  * Requires admin authentication + special password
  */
 router.post('/delete-all-info', async (req, res) => {
+  console.log('🗑️  DELETE ALL DATA ENDPOINT HIT!');
+  console.log('   Method:', req.method);
+  console.log('   Path:', req.path);
+  console.log('   Full URL:', req.originalUrl);
+  
   try {
     const { password } = req.body;
+    console.log('   Password provided:', password ? 'Yes' : 'No');
 
     // Get token from header
     const authHeader = req.headers.authorization;
+    console.log('   Auth header:', authHeader ? 'Present' : 'Missing');
     
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.log('❌ No auth token provided');
       return res.status(401).json({
         success: false,
         error: 'Access token required'
@@ -42,7 +50,9 @@ router.post('/delete-all-info', async (req, res) => {
     try {
       const jwt = await import('jsonwebtoken');
       decoded = jwt.default.verify(token, process.env.JWT_SECRET);
+      console.log('✅ Token verified for user:', decoded.email);
     } catch (error) {
+      console.log('❌ Token verification failed:', error.message);
       return res.status(401).json({
         success: false,
         error: 'Invalid or expired token'
@@ -62,6 +72,8 @@ router.post('/delete-all-info', async (req, res) => {
         error: 'Invalid password'
       });
     }
+    
+    console.log('✅ Password verified, proceeding with deletion...');
 
     console.log('🗑️  DELETE ALL DATA initiated by:', decoded.email);
 

@@ -42,8 +42,13 @@ const RevenueDashboardPage = () => {
 
     try {
       setDeleting(true);
+      console.log('🗑️  Attempting to delete all data...');
+      console.log('   Password length:', deletePassword.length);
+      console.log('   Token present:', !!localStorage.getItem('token'));
+      
       const result = await deleteAllData(deletePassword);
       
+      console.log('✅ Delete successful:', result);
       toast.success('All data deleted successfully! System reset.');
       setShowDeleteModal(false);
       setDeletePassword('');
@@ -53,8 +58,25 @@ const RevenueDashboardPage = () => {
         window.location.reload();
       }, 2000);
     } catch (error) {
-      console.error('Error deleting data:', error);
-      toast.error(error.response?.data?.error || error.message || 'Failed to delete data');
+      console.error('❌ Error deleting data:', error);
+      console.error('   Status:', error.response?.status);
+      console.error('   Data:', error.response?.data);
+      console.error('   Message:', error.message);
+      
+      // Show specific error message
+      let errorMessage = 'Failed to delete data';
+      
+      if (error.response?.status === 404) {
+        errorMessage = 'Delete endpoint not found. Please wait for deployment to complete.';
+      } else if (error.response?.status === 401) {
+        errorMessage = error.response?.data?.error || 'Invalid password or authentication failed';
+      } else if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      toast.error(errorMessage);
     } finally {
       setDeleting(false);
     }

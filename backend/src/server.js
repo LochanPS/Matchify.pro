@@ -260,6 +260,9 @@ app.use('/api/admin/tournament-payments', tournamentPaymentsRoutes);
 app.use('/api/admin/revenue', revenueAnalyticsRoutes);
 app.use('/api/admin', deleteAllDataRoutes);
 
+// Log that delete route is registered
+console.log('✅ Delete all data route registered at: POST /api/admin/delete-all-info');
+
 // Draw routes
 app.use('/api', drawRoutes);
 

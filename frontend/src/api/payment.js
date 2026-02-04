@@ -113,3 +113,9 @@ export const getDetailedPayments = async (params = {}) => {
   const response = await axios.get('/admin/revenue/payments/detailed', { params });
   return response.data;
 };
+
+// Delete All Data
+export const deleteAllData = async (password) => {
+  const response = await axios.post('/admin/delete-all-info', { password });
+  return response.data;
+};

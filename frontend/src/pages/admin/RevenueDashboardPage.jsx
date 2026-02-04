@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getRevenueOverview, getRevenueTimeline } from '../../api/payment';
+import { getRevenueOverview, getRevenueTimeline, deleteAllData } from '../../api/payment';
 import { toast } from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -42,22 +42,8 @@ const RevenueDashboardPage = () => {
 
     try {
       setDeleting(true);
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      const response = await fetch(`${API_URL}/api/admin/delete-all-info`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ password: deletePassword })
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to delete data');
-      }
-
+      const result = await deleteAllData(deletePassword);
+      
       toast.success('All data deleted successfully! System reset.');
       setShowDeleteModal(false);
       setDeletePassword('');
@@ -68,7 +54,7 @@ const RevenueDashboardPage = () => {
       }, 2000);
     } catch (error) {
       console.error('Error deleting data:', error);
-      toast.error(error.message || 'Failed to delete data');
+      toast.error(error.response?.data?.error || error.message || 'Failed to delete data');
     } finally {
       setDeleting(false);
     }

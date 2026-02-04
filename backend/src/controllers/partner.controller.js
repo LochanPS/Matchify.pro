@@ -1,7 +1,6 @@
 import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma.js';
 import { notifyPartnerAccepted, notifyPartnerDeclined } from '../services/notification.service.js';
-
-const prisma = new PrismaClient();
 
 // GET /api/partner/confirm/:token - Get partner invitation details
 const getPartnerInvitation = async (req, res) => {

@@ -5,7 +5,6 @@ import api from '../utils/api';
 import { formatDateIndian } from '../utils/dateFormat';
 import { X, Users, Mail, Phone, MapPin, Trophy, Trash2, Edit3, AlertTriangle } from 'lucide-react';
 import { getTournamentDrafts, deleteTournamentDraft } from '../hooks/useTournamentForm';
-import KYCBanner from '../components/KYCBanner';
 import {
   TrophyIcon,
   BoltIcon,
@@ -27,8 +26,6 @@ export default function OrganizerDashboard() {
   const [showParticipantsModal, setShowParticipantsModal] = useState(false);
   const [allParticipants, setAllParticipants] = useState([]);
   const [deleteDraftModal, setDeleteDraftModal] = useState(null);
-
-  const isKYCApproved = user?.organizerProfile?.kycStatus === 'APPROVED';
 
   useEffect(() => { fetchOrganizerData(); loadDrafts(); }, []);
 
@@ -102,20 +99,9 @@ export default function OrganizerDashboard() {
               </div>
             </div>
             <Link 
-              to={isKYCApproved ? "/tournaments/create" : "#"}
-              onClick={(e) => {
-                if (!isKYCApproved) {
-                  e.preventDefault();
-                  document.getElementById('kyc-banner')?.scrollIntoView({ behavior: 'smooth' });
-                }
-              }}
-              className={`px-6 py-3 rounded-xl shadow-lg hover:scale-105 transition-all flex items-center gap-2 font-semibold ${
-                isKYCApproved
-                  ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:shadow-green-500/50'
-                  : 'bg-gray-600 text-gray-400 cursor-not-allowed'
-              }`}
+              to="/tournaments/create"
+              className="px-6 py-3 rounded-xl shadow-lg hover:scale-105 transition-all flex items-center gap-2 font-semibold bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:shadow-green-500/50"
             >
-              {!isKYCApproved && '🔒 '}
               <PlusIcon className="w-5 h-5" />Create Tournament
             </Link>
           </div>
@@ -123,9 +109,6 @@ export default function OrganizerDashboard() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 -mt-8">
-        {/* KYC Banner */}
-        <KYCBanner kycStatus={user?.organizerProfile?.kycStatus} />
-
         {/* Stats Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {statCards.map((stat, index) => (
@@ -145,28 +128,17 @@ export default function OrganizerDashboard() {
           <h2 className="text-lg font-bold text-white mb-4">Quick Actions</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Link 
-              to={isKYCApproved ? "/tournaments/create" : "#"}
-              onClick={(e) => {
-                if (!isKYCApproved) {
-                  e.preventDefault();
-                  document.getElementById('kyc-banner')?.scrollIntoView({ behavior: 'smooth' });
-                }
-              }}
-              className={`flex items-center gap-4 p-4 rounded-xl border transition-all group ${
-                isKYCApproved
-                  ? 'bg-slate-700/30 border-white/5 hover:border-blue-500/50'
-                  : 'bg-slate-700/20 border-gray-600/30 cursor-not-allowed opacity-60'
-              }`}
+              to="/tournaments/create"
+              className="flex items-center gap-4 p-4 rounded-xl border transition-all group bg-slate-700/30 border-white/5 hover:border-blue-500/50"
             >
-              <div className={`w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center ${isKYCApproved ? 'group-hover:scale-110' : ''} transition-transform`}>
-                {!isKYCApproved && <span className="absolute -top-1 -right-1 text-xl">🔒</span>}
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
                 <PlusIcon className="w-6 h-6 text-white" />
               </div>
               <div className="flex-1">
                 <p className="font-semibold text-white">Create Tournament</p>
-                <p className="text-sm text-gray-400">{isKYCApproved ? 'Start a new tournament' : 'Complete KYC first'}</p>
+                <p className="text-sm text-gray-400">Start a new tournament</p>
               </div>
-              {isKYCApproved && <ArrowRightIcon className="w-5 h-5 text-gray-500 group-hover:translate-x-1 group-hover:text-amber-400 transition-all" />}
+              <ArrowRightIcon className="w-5 h-5 text-gray-500 group-hover:translate-x-1 group-hover:text-amber-400 transition-all" />
             </Link>
             <Link to="/organizer/history" className="flex items-center gap-4 p-4 bg-slate-700/30 rounded-xl border border-white/5 hover:border-green-500/50 transition-all group">
               <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform"><ClipboardDocumentListIcon className="w-6 h-6 text-white" /></div>

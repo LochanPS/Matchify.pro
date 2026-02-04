@@ -1,9 +1,8 @@
 import express from 'express';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../../lib/prisma.js';
 import { authenticate, requireAdmin } from '../../middleware/auth.js';
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 // Get all payment verifications (with filters)
 router.get('/', authenticate, requireAdmin, async (req, res) => {
@@ -160,7 +159,12 @@ router.post('/:id/approve', authenticate, requireAdmin, async (req, res) => {
     });
 
     // Update tournament payment tracking
-    await updateTournamentPayment(verification.tournamentId, verification.amount);
+    try {
+      await updateTournamentPayment(verification.tournamentId, verification.amount);
+    } catch (paymentError) {
+      console.error('Error updating tournament payment:', paymentError);
+      // Continue even if payment tracking fails
+    }
 
     // Send notification to user
     await prisma.notification.create({
@@ -182,9 +186,11 @@ router.post('/:id/approve', authenticate, requireAdmin, async (req, res) => {
     });
   } catch (error) {
     console.error('Error approving payment:', error);
+    console.error('Error stack:', error.stack);
     res.status(500).json({
       success: false,
-      message: 'Failed to approve payment'
+      message: 'Failed to approve payment',
+      error: error.message
     });
   }
 });
@@ -280,10 +286,10 @@ async function updateTournamentPayment(tournamentId, amount) {
   }
 
   const totalCollected = tournamentPayment.totalCollected + amount;
-  const platformFeeAmount = totalCollected * (tournamentPayment.platformFeePercent / 100);
-  const organizerShare = totalCollected - platformFeeAmount;
-  const payout50Percent1 = organizerShare * 0.5; // First 50%
-  const payout50Percent2 = organizerShare * 0.5; // Second 50%
+  const platformFeeAmount = totalCollected * 0.05; // 5% of total
+  const organizerShare = totalCollected - platformFeeAmount; // For display only
+  const payout50Percent1 = totalCollected * 0.30; // 30% of TOTAL
+  const payout50Percent2 = totalCollected * 0.65; // 65% of TOTAL
 
   await prisma.tournamentPayment.update({
     where: { tournamentId },

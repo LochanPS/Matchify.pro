@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../utils/api';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
-import { Gavel, Trophy, AlertTriangle, Play, Loader, Swords, Clock, MapPin, Calendar, Target, Settings, Check } from 'lucide-react';
+import { Gavel, Trophy, AlertTriangle, Play, Loader, Swords, Clock, Calendar, Target, Settings, Check } from 'lucide-react';
 
 const ConductMatchPage = () => {
   const { matchId } = useParams();
@@ -15,7 +15,7 @@ const ConductMatchPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [assigning, setAssigning] = useState(false);
-  const [courtNumber, setCourtNumber] = useState('');
+  const [givingBye, setGivingBye] = useState(false);
   
   // Editable scoring config
   const [pointsPerSet, setPointsPerSet] = useState(21);
@@ -32,7 +32,6 @@ const ConductMatchPage = () => {
       setLoading(true);
       const response = await api.get(`/matches/${matchId}`);
       setMatch(response.data.match);
-      setCourtNumber(response.data.match?.courtNumber || '');
       
       // Parse and set initial scoring config from category
       const category = response.data.match?.category;
@@ -85,32 +84,88 @@ const ConductMatchPage = () => {
 
   // Assign umpire, set court, and start conducting
   const handleStartMatch = async () => {
-    if (!umpireId) return;
-    
     setAssigning(true);
+    setError(null);
+    
     try {
-      // Assign umpire to match
-      await api.put(`/matches/${matchId}/umpire`, { umpireId });
-      
-      // Set court number if provided
-      if (courtNumber) {
-        await api.put(`/matches/${matchId}/court`, { courtNumber });
+      // Assign umpire to match if umpireId is provided
+      if (umpireId) {
+        await api.put(`/matches/${matchId}/umpire`, { umpireId });
       }
       
-      // Save custom scoring config
-      await api.put(`/matches/${matchId}/config`, {
-        pointsPerSet,
-        maxSets,
-        setsToWin: Math.ceil(maxSets / 2),
-        extension
-      });
+      // Only save config if match hasn't started yet
+      if (match.status === 'PENDING' || match.status === 'READY' || match.status === 'SCHEDULED') {
+        try {
+          await api.put(`/matches/${matchId}/config`, {
+            pointsPerSet,
+            maxSets,
+            setsToWin: Math.ceil(maxSets / 2),
+            extension
+          });
+          console.log('✅ Match config saved successfully');
+        } catch (configErr) {
+          // If config fails (match already started), just continue to scoring
+          console.log('⚠️ Config not saved (match may have started):', configErr.response?.data?.error);
+        }
+      } else {
+        console.log('⚠️ Match already started, skipping config save. Status:', match.status);
+      }
       
       // Navigate to scoring page
       navigate(`/match/${matchId}/score`);
     } catch (err) {
-      console.error('Error starting match:', err);
+      console.error('❌ Error starting match:', err);
       setError(err.response?.data?.error || 'Failed to start match');
       setAssigning(false);
+    }
+  };
+
+  // Give bye to the player with no opponent
+  const handleGiveBye = async () => {
+    setGivingBye(true);
+    setError(null);
+    
+    try {
+      // Determine which player gets the bye
+      const byeWinnerId = player1 ? match.player1Id : match.player2Id;
+      
+      if (!byeWinnerId) {
+        setError('No player found to give bye');
+        setGivingBye(false);
+        return;
+      }
+
+      // Call backend to give bye
+      await api.post(`/matches/${matchId}/give-bye`, { winnerId: byeWinnerId });
+      
+      // Navigate back to draws page
+      navigate(`/tournaments/${match.tournamentId}/draws`);
+    } catch (err) {
+      console.error('❌ Error giving bye:', err);
+      setError(err.response?.data?.error || 'Failed to give bye');
+      setGivingBye(false);
+    }
+  };
+
+  // End tournament
+  const handleEndTournament = async () => {
+    setEndingTournament(true);
+    setError(null);
+    
+    try {
+      await api.put(`/tournaments/${tournamentId}/end`);
+      setSuccess('Tournament ended successfully!');
+      setShowEndTournamentModal(false);
+      
+      // Refresh tournament data
+      await fetchTournamentData();
+      
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err) {
+      console.error('Error ending tournament:', err);
+      setError(err.response?.data?.error || 'Failed to end tournament');
+    } finally {
+      setEndingTournament(false);
     }
   };
 
@@ -269,21 +324,6 @@ const ConductMatchPage = () => {
           </div>
         )}
 
-        {/* Court Number Input */}
-        <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-5 mb-6">
-          <label className="block text-gray-400 text-sm font-semibold mb-3">
-            <MapPin className="w-4 h-4 inline mr-2" />
-            Court Number
-          </label>
-          <input
-            type="text"
-            value={courtNumber}
-            onChange={(e) => setCourtNumber(e.target.value)}
-            placeholder="Enter court number (e.g., Court 1, A1)"
-            className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all"
-          />
-        </div>
-
         {/* Scoring Configuration */}
         <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-5 mb-6">
           <div className="flex items-center justify-between mb-4">
@@ -291,12 +331,18 @@ const ConductMatchPage = () => {
               <Settings className="w-4 h-4" />
               Match Scoring Format
             </label>
-            <button
-              onClick={() => setShowScoringEdit(!showScoringEdit)}
-              className="text-emerald-400 text-sm font-semibold hover:text-emerald-300 transition-colors"
-            >
-              {showScoringEdit ? 'Done' : 'Edit'}
-            </button>
+            {(match.status === 'PENDING' || match.status === 'READY' || match.status === 'SCHEDULED') ? (
+              <button
+                onClick={() => setShowScoringEdit(!showScoringEdit)}
+                className="text-emerald-400 text-sm font-semibold hover:text-emerald-300 transition-colors"
+              >
+                {showScoringEdit ? 'Done' : 'Edit'}
+              </button>
+            ) : (
+              <span className="text-xs text-amber-400 bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20">
+                Match Started - Config Locked
+              </span>
+            )}
           </div>
 
           {!showScoringEdit ? (
@@ -430,34 +476,65 @@ const ConductMatchPage = () => {
           </p>
         </div>
 
-        {/* Action Button */}
-        <button
-          onClick={handleStartMatch}
-          disabled={assigning || !player1 || !player2}
-          className="w-full py-5 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-white rounded-2xl font-bold text-lg shadow-2xl shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-3 relative overflow-hidden group"
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
-          
-          {assigning ? (
-            <>
-              <Loader className="w-6 h-6 animate-spin" />
-              Starting Match...
-            </>
-          ) : (
-            <>
-              <Play className="w-6 h-6" />
-              Start Conducting Match
-            </>
-          )}
-        </button>
+        {/* Action Buttons */}
+        {(!player1 || !player2) ? (
+          // Show Give Bye button when one player is missing
+          <div className="space-y-4">
+            <button
+              onClick={handleGiveBye}
+              disabled={givingBye || (!player1 && !player2)}
+              className="w-full py-5 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white rounded-2xl font-bold text-lg shadow-2xl shadow-amber-500/30 hover:shadow-amber-500/50 hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-3 relative overflow-hidden group"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+              
+              {givingBye ? (
+                <>
+                  <Loader className="w-6 h-6 animate-spin" />
+                  Giving Bye...
+                </>
+              ) : (
+                <>
+                  <Trophy className="w-6 h-6" />
+                  Give Bye to {player1?.name || player2?.name || 'Player'}
+                </>
+              )}
+            </button>
 
-        {(!player1 || !player2) && (
-          <div className="mt-4 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl flex items-center gap-3">
-            <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0" />
-            <p className="text-amber-300 text-sm">
-              Both players must be assigned before conducting the match
-            </p>
+            <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl flex items-center gap-3">
+              <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0" />
+              <div>
+                <p className="text-amber-300 text-sm font-semibold mb-1">
+                  One player is missing
+                </p>
+                <p className="text-amber-300/70 text-xs">
+                  Click "Give Bye" to automatically advance {player1?.name || player2?.name || 'the player'} to the next round without playing this match.
+                </p>
+              </div>
+            </div>
           </div>
+        ) : (
+          // Show Start Match button when both players are present
+          <>
+            <button
+              onClick={handleStartMatch}
+              disabled={assigning}
+              className="w-full py-5 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-white rounded-2xl font-bold text-lg shadow-2xl shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-3 relative overflow-hidden group"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+              
+              {assigning ? (
+                <>
+                  <Loader className="w-6 h-6 animate-spin" />
+                  Starting Match...
+                </>
+              ) : (
+                <>
+                  <Play className="w-6 h-6" />
+                  Start Conducting Match
+                </>
+              )}
+            </button>
+          </>
         )}
       </div>
     </div>

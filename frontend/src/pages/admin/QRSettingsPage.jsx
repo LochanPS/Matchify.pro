@@ -241,8 +241,8 @@ const QRSettingsPage = () => {
             <ul className="text-gray-300 space-y-2 text-sm">
               <li>• <strong className="text-teal-400">Players pay to Matchify.pro's QR code</strong> during tournament registration</li>
               <li>• <strong className="text-teal-400">Matchify.pro collects all payments</strong> and keeps 5% platform fee</li>
-              <li>• <strong className="text-teal-400">Upload your QR code here</strong> so Matchify.pro can pay you your 95% share</li>
-              <li>• You'll receive <strong className="text-yellow-400">50% before the tournament</strong> and <strong className="text-yellow-400">50% after completion</strong></li>
+              <li>• <strong className="text-teal-400">Upload your QR code here</strong> so Matchify.pro can pay you</li>
+              <li>• You'll receive <strong className="text-yellow-400">30% before the tournament</strong> and <strong className="text-yellow-400">65% after completion</strong></li>
               <li>• Make sure your QR code and UPI ID are correct to receive payments smoothly</li>
             </ul>
           </div>

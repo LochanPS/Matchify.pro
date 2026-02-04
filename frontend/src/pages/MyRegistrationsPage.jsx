@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { registrationAPI } from '../api/registration';
-import { Loader, Calendar, MapPin, Users, CreditCard, XCircle, Trophy, ArrowRight, ArrowLeft, X, CheckCircle, AlertTriangle, Upload, QrCode } from 'lucide-react';
+import { Loader, Calendar, MapPin, Users, CreditCard, XCircle, Trophy, ArrowRight, ArrowLeft, X, CheckCircle, AlertTriangle, Upload, QrCode, Clock } from 'lucide-react';
 import { formatDateIndian } from '../utils/dateFormat';
 import { TrophyIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 
@@ -352,17 +352,27 @@ export default function MyRegistrationsPage() {
 
       {/* Cancel Registration Modal */}
       {cancelModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden max-h-[90vh] overflow-y-auto">
-            <div className="bg-gradient-to-r from-red-500 to-rose-600 p-6 text-white sticky top-0">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                  <AlertTriangle className="h-6 w-6" />
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-slate-800/90 backdrop-blur-sm border border-white/10 rounded-2xl shadow-2xl max-w-lg w-full my-8">
+            <div className="bg-gradient-to-r from-red-500 to-rose-600 p-6 text-white">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                    <AlertTriangle className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold">Request Cancellation & Refund</h2>
+                    <p className="text-red-100 text-sm mt-1">Refund Amount: ₹{cancelModal.amount}</p>
+                  </div>
                 </div>
-                <div>
-                  <h2 className="text-xl font-bold">Request Cancellation & Refund</h2>
-                  <p className="text-red-100 text-sm mt-1">Refund Amount: ₹{cancelModal.amount}</p>
-                </div>
+                <button
+                  onClick={() => setCancelModal(null)}
+                  disabled={cancelling}
+                  className="w-10 h-10 bg-white/20 hover:bg-white/30 rounded-xl flex items-center justify-center transition-colors disabled:opacity-50"
+                  aria-label="Close"
+                >
+                  <X className="h-5 w-5" />
+                </button>
               </div>
             </div>
 

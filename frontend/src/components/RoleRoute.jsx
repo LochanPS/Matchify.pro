@@ -38,8 +38,22 @@ const RoleRoute = ({ children, allowedRoles, blockAdmin = false }) => {
   
   const userRoles = getUserRoles();
 
-  // Block admins from accessing non-admin features
-  if (blockAdmin && userRoles.includes('ADMIN')) {
+  // Check if admin is impersonating
+  const isImpersonating = () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (token) {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        return !!payload.isImpersonating;
+      }
+    } catch (error) {
+      return false;
+    }
+    return false;
+  };
+
+  // Block admins from accessing non-admin features (UNLESS they are impersonating)
+  if (blockAdmin && userRoles.includes('ADMIN') && !isImpersonating()) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="text-center max-w-2xl mx-auto p-8">

@@ -12,20 +12,36 @@ import {
   ArrowRightIcon,
   SparklesIcon,
   FireIcon,
-  BoltIcon
+  BoltIcon,
+  StarIcon,
+  InformationCircleIcon,
+  XMarkIcon,
+  EnvelopeIcon,
+  ShieldCheckIcon
 } from '@heroicons/react/24/outline';
-import { StarIcon } from '@heroicons/react/24/solid';
 
 const PlayerDashboard = () => {
   const { user } = useAuth();
   const [registrations, setRegistrations] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [umpireCode, setUmpireCode] = useState(null);
+  const [playerCode, setPlayerCode] = useState(null);
+  const [showLevelInfo, setShowLevelInfo] = useState(false);
+  const [userProfile, setUserProfile] = useState(null);
 
   useEffect(() => {
     fetchPlayerData();
-    fetchUmpireCode();
+    fetchPlayerCode();
+    fetchUserProfile();
   }, []);
+
+  const fetchUserProfile = async () => {
+    try {
+      const response = await api.get('/auth/me');
+      setUserProfile(response.data.user);
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+    }
+  };
 
   const fetchPlayerData = async () => {
     try {
@@ -38,20 +54,55 @@ const PlayerDashboard = () => {
     }
   };
 
-  const fetchUmpireCode = async () => {
+  const fetchPlayerCode = async () => {
     try {
       const response = await api.get('/auth/me');
-      if (response.data.user?.umpireCode) {
-        setUmpireCode(response.data.user.umpireCode);
+      if (response.data.user?.playerCode) {
+        setPlayerCode(response.data.user.playerCode);
       }
     } catch (error) {
-      console.error('Error fetching umpire code:', error);
+      console.error('Error fetching player code:', error);
     }
   };
 
   const userRoles = Array.isArray(user?.roles) ? user.roles : [user?.role];
   const winRate = (user?.matchesWon || 0) + (user?.matchesLost || 0) > 0
     ? Math.round((user?.matchesWon / ((user?.matchesWon || 0) + (user?.matchesLost || 0))) * 100)
+    : 0;
+
+  // Calculate experience level based on tournaments played
+  const getExperienceLevel = (tournaments) => {
+    if (tournaments === 0) return 'New Player';
+    if (tournaments >= 1 && tournaments <= 3) return 'Beginner';
+    if (tournaments >= 4 && tournaments <= 8) return 'Intermediate';
+    if (tournaments >= 9 && tournaments <= 15) return 'Advanced';
+    if (tournaments >= 16 && tournaments <= 25) return 'Expert';
+    return 'Master';
+  };
+
+  const getStarCount = (tournaments) => {
+    if (tournaments === 0) return 0;
+    if (tournaments >= 1 && tournaments <= 3) return 1;
+    if (tournaments >= 4 && tournaments <= 8) return 2;
+    if (tournaments >= 9 && tournaments <= 15) return 3;
+    if (tournaments >= 16 && tournaments <= 25) return 4;
+    return 5;
+  };
+
+  const experienceLevel = getExperienceLevel(user?.tournamentsPlayed || 0);
+  const starCount = getStarCount(user?.tournamentsPlayed || 0);
+
+  // Calculate additional stats
+  const memberSince = userProfile?.createdAt 
+    ? new Date(userProfile.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+    : 'N/A';
+
+  const daysActive = userProfile?.createdAt
+    ? Math.floor((new Date() - new Date(userProfile.createdAt)) / (1000 * 60 * 60 * 24))
+    : 0;
+
+  const averageTournamentsPerMonth = userProfile?.createdAt && (user?.tournamentsPlayed || 0) > 0
+    ? Math.round(((user?.tournamentsPlayed || 0) / (daysActive / 30)) * 10) / 10
     : 0;
 
   const stats = [
@@ -132,14 +183,14 @@ const PlayerDashboard = () => {
                     </span>
                   )}
                 </div>
-                {/* Umpire Code - Show if user is an umpire */}
-                {umpireCode && (
-                  <div className="mt-3 inline-flex items-center gap-2 px-4 py-2 bg-amber-500/20 border border-amber-500/30 rounded-xl">
-                    <span className="text-amber-400/80 text-sm">Umpire Code:</span>
-                    <span className="text-amber-400 font-mono font-bold text-lg tracking-wider">{umpireCode}</span>
+                {/* Player Code - Show for all players */}
+                {playerCode && (
+                  <div className="mt-3 inline-flex items-center gap-2 px-4 py-2 bg-blue-500/20 border border-blue-500/30 rounded-xl">
+                    <span className="text-blue-400/80 text-sm">Player Code:</span>
+                    <span className="text-blue-400 font-mono font-bold text-lg tracking-wider">{playerCode}</span>
                     <button
-                      onClick={() => navigator.clipboard.writeText(umpireCode)}
-                      className="p-1.5 hover:bg-amber-500/20 rounded-lg transition-colors ml-1"
+                      onClick={() => navigator.clipboard.writeText(playerCode)}
+                      className="p-1.5 hover:bg-blue-500/20 rounded-lg transition-colors ml-1"
                       title="Copy code"
                     >
                       <svg className="w-4 h-4 text-amber-400/60 hover:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -178,6 +229,222 @@ const PlayerDashboard = () => {
               <p className="text-gray-400 text-sm mt-1">{stat.label}</p>
             </div>
           ))}
+        </div>
+
+        {/* Player Profile Details - 3 Column Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          {/* Profile Information */}
+          <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center">
+                <UserIcon className="w-5 h-5 text-white" />
+              </div>
+              <h3 className="text-lg font-bold text-white">Profile Information</h3>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <p className="text-gray-400 text-xs mb-1">Full Name</p>
+                <p className="text-white font-medium">{userProfile?.name || user?.name || 'N/A'}</p>
+              </div>
+              
+              {(userProfile?.email || user?.email) && (
+                <div>
+                  <p className="text-gray-400 text-xs mb-1">Email Address</p>
+                  <p className="text-white font-medium text-sm break-all">{userProfile?.email || user?.email}</p>
+                </div>
+              )}
+              
+              {(userProfile?.phone || user?.phone) && (
+                <div>
+                  <p className="text-gray-400 text-xs mb-1">Phone Number</p>
+                  <p className="text-white font-medium">{userProfile?.phone || user?.phone}</p>
+                </div>
+              )}
+              
+              {((userProfile?.city || user?.city) || (userProfile?.state || user?.state)) && (
+                <div>
+                  <p className="text-gray-400 text-xs mb-1">Location</p>
+                  <p className="text-white font-medium">
+                    {[userProfile?.city || user?.city, userProfile?.state || user?.state, userProfile?.country || user?.country].filter(Boolean).join(', ')}
+                  </p>
+                </div>
+              )}
+              
+              {(userProfile?.gender || user?.gender) && (
+                <div>
+                  <p className="text-gray-400 text-xs mb-1">Gender</p>
+                  <p className="text-white font-medium capitalize">{userProfile?.gender || user?.gender}</p>
+                </div>
+              )}
+              
+              <div>
+                <p className="text-gray-400 text-xs mb-1">Member Since</p>
+                <p className="text-white font-medium">{memberSince}</p>
+              </div>
+              
+              <div>
+                <p className="text-gray-400 text-xs mb-1">Days Active</p>
+                <p className="text-white font-medium">{daysActive} days</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Performance Stats */}
+          <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center">
+                <ChartBarIcon className="w-5 h-5 text-white" />
+              </div>
+              <h3 className="text-lg font-bold text-white">Performance Stats</h3>
+            </div>
+            
+            <div className="space-y-6">
+              {/* Win Rate */}
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <p className="text-gray-400 text-sm">Win Rate</p>
+                  <p className="text-green-400 font-bold text-lg">{winRate}%</p>
+                </div>
+                <div className="w-full h-2 bg-slate-700 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-gradient-to-r from-green-500 to-emerald-600 transition-all duration-500"
+                    style={{ width: `${winRate}%` }}
+                  ></div>
+                </div>
+                <p className="text-gray-500 text-xs mt-1">
+                  {user?.matchesWon || 0} wins of {(user?.matchesWon || 0) + (user?.matchesLost || 0)} matches
+                </p>
+              </div>
+
+              {/* Average Tournaments Per Month */}
+              <div>
+                <p className="text-gray-400 text-sm mb-2">Avg Tournaments/Month</p>
+                <div className="flex items-end gap-2">
+                  <p className="text-4xl font-bold text-orange-400">{averageTournamentsPerMonth}</p>
+                  <p className="text-gray-500 text-sm mb-1">tournaments</p>
+                </div>
+                <div className="flex items-center gap-2 mt-2">
+                  <FireIcon className="w-4 h-4 text-orange-400" />
+                  <p className="text-gray-500 text-xs">
+                    {averageTournamentsPerMonth > 2 ? 'Highly active' : 
+                     averageTournamentsPerMonth > 1 ? 'Active' : 'Getting started'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Experience Level */}
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <p className="text-gray-400 text-sm">Experience Level</p>
+                  <button
+                    onClick={() => setShowLevelInfo(true)}
+                    className="p-1 hover:bg-slate-700 rounded-lg transition-colors"
+                    title="View level details"
+                  >
+                    <InformationCircleIcon className="w-4 h-4 text-blue-400" />
+                  </button>
+                </div>
+                <p className="text-2xl font-bold text-amber-400 mb-2">{experienceLevel}</p>
+                <div className="flex gap-1">
+                  {[...Array(5)].map((_, i) => (
+                    <StarIcon
+                      key={i}
+                      className={`h-5 w-5 ${
+                        i < starCount ? 'text-amber-400 fill-amber-400' : 'text-gray-600'
+                      }`}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Activity & Achievements */}
+          <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
+                <TrophyIcon className="w-5 h-5 text-white" />
+              </div>
+              <h3 className="text-lg font-bold text-white">Activity & Status</h3>
+            </div>
+            
+            <div className="space-y-4">
+              {/* Current Status */}
+              <div className="bg-slate-700/50 rounded-xl p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-gray-400 text-sm">Current Status</p>
+                  <div className={`w-3 h-3 rounded-full ${
+                    registrations.length > 0 ? 'bg-green-500 animate-pulse' : 
+                    (user?.tournamentsPlayed || 0) > 0 ? 'bg-yellow-500' : 'bg-gray-500'
+                  }`}></div>
+                </div>
+                <p className="text-white font-bold text-lg">
+                  {registrations.length > 0 ? 'Active' : 
+                   (user?.tournamentsPlayed || 0) > 0 ? 'Inactive' : 'New'}
+                </p>
+                <p className="text-gray-500 text-xs mt-1">
+                  {registrations.length > 0 ? `${registrations.length} active registrations` : 
+                   (user?.tournamentsPlayed || 0) > 0 ? 'No active registrations' : 'Join your first tournament'}
+                </p>
+              </div>
+
+              {/* Total Points */}
+              <div className="bg-slate-700/50 rounded-xl p-4">
+                <p className="text-gray-400 text-sm mb-2">Matchify Points</p>
+                <p className="text-3xl font-bold text-amber-400">{user?.totalPoints || 0}</p>
+                <p className="text-gray-500 text-xs mt-1">
+                  Rank #{user?.rank || '---'}
+                </p>
+              </div>
+
+              {/* Achievements */}
+              <div>
+                <p className="text-gray-400 text-sm mb-3">Achievements</p>
+                <div className="space-y-2">
+                  {(user?.tournamentsPlayed || 0) >= 1 && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="text-lg">🎯</span>
+                      <span className="text-white">First Tournament</span>
+                    </div>
+                  )}
+                  {(user?.tournamentsPlayed || 0) >= 3 && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="text-lg">⭐</span>
+                      <span className="text-white">3 Tournaments</span>
+                    </div>
+                  )}
+                  {(user?.tournamentsPlayed || 0) >= 10 && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="text-lg">🏆</span>
+                      <span className="text-white">10 Tournaments</span>
+                    </div>
+                  )}
+                  {(user?.matchesWon || 0) >= 10 && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="text-lg">🔥</span>
+                      <span className="text-white">10 Wins</span>
+                    </div>
+                  )}
+                  {(user?.tournamentsPlayed || 0) >= 25 && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="text-lg">💎</span>
+                      <span className="text-white">25 Tournaments</span>
+                    </div>
+                  )}
+                  {(user?.tournamentsPlayed || 0) >= 50 && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="text-lg">👑</span>
+                      <span className="text-white">Master Player</span>
+                    </div>
+                  )}
+                  {(user?.tournamentsPlayed || 0) === 0 && (
+                    <p className="text-gray-500 text-xs">Play tournaments to earn achievements</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-6">
@@ -325,6 +592,184 @@ const PlayerDashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* Experience Level Info Modal */}
+      {showLevelInfo && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-800 border border-white/10 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            {/* Header */}
+            <div className="sticky top-0 bg-slate-800 border-b border-white/10 p-6 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center">
+                  <StarIcon className="w-5 h-5 text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-white">Player Experience Levels</h3>
+              </div>
+              <button
+                onClick={() => setShowLevelInfo(false)}
+                className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
+              >
+                <XMarkIcon className="w-5 h-5 text-gray-400" />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-6 space-y-4">
+              <p className="text-gray-300 mb-6">
+                Your experience level is determined by the total number of tournaments you've played. 
+                Each level comes with a star rating to showcase your journey.
+              </p>
+
+              {/* Level Cards */}
+              <div className="space-y-3">
+                {/* New Player */}
+                <div className="bg-slate-700/50 border border-white/10 rounded-xl p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <h4 className="text-lg font-bold text-gray-300">New Player</h4>
+                      <p className="text-sm text-gray-400">0 tournaments</p>
+                    </div>
+                    <div className="flex gap-1">
+                      {[...Array(5)].map((_, i) => (
+                        <StarIcon key={i} className="w-5 h-5 text-gray-600" />
+                      ))}
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-400">
+                    Just getting started! Join your first tournament to earn your first star.
+                  </p>
+                </div>
+
+                {/* Beginner */}
+                <div className="bg-slate-700/50 border border-amber-500/30 rounded-xl p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <h4 className="text-lg font-bold text-amber-400">Beginner</h4>
+                      <p className="text-sm text-gray-400">1-3 tournaments</p>
+                    </div>
+                    <div className="flex gap-1">
+                      <StarIcon className="w-5 h-5 text-amber-400 fill-amber-400" />
+                      {[...Array(4)].map((_, i) => (
+                        <StarIcon key={i} className="w-5 h-5 text-gray-600" />
+                      ))}
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-400">
+                    Building foundational skills and learning competitive play.
+                  </p>
+                </div>
+
+                {/* Intermediate */}
+                <div className="bg-slate-700/50 border border-blue-500/30 rounded-xl p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <h4 className="text-lg font-bold text-blue-400">Intermediate</h4>
+                      <p className="text-sm text-gray-400">4-8 tournaments</p>
+                    </div>
+                    <div className="flex gap-1">
+                      <StarIcon className="w-5 h-5 text-amber-400 fill-amber-400" />
+                      <StarIcon className="w-5 h-5 text-amber-400 fill-amber-400" />
+                      {[...Array(3)].map((_, i) => (
+                        <StarIcon key={i} className="w-5 h-5 text-gray-600" />
+                      ))}
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-400">
+                    Gaining confidence and developing consistent performance.
+                  </p>
+                </div>
+
+                {/* Advanced */}
+                <div className="bg-slate-700/50 border border-purple-500/30 rounded-xl p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <h4 className="text-lg font-bold text-purple-400">Advanced</h4>
+                      <p className="text-sm text-gray-400">9-15 tournaments</p>
+                    </div>
+                    <div className="flex gap-1">
+                      <StarIcon className="w-5 h-5 text-amber-400 fill-amber-400" />
+                      <StarIcon className="w-5 h-5 text-amber-400 fill-amber-400" />
+                      <StarIcon className="w-5 h-5 text-amber-400 fill-amber-400" />
+                      {[...Array(2)].map((_, i) => (
+                        <StarIcon key={i} className="w-5 h-5 text-gray-600" />
+                      ))}
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-400">
+                    Experienced player with solid tournament track record.
+                  </p>
+                </div>
+
+                {/* Expert */}
+                <div className="bg-slate-700/50 border border-green-500/30 rounded-xl p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <h4 className="text-lg font-bold text-green-400">Expert</h4>
+                      <p className="text-sm text-gray-400">16-25 tournaments</p>
+                    </div>
+                    <div className="flex gap-1">
+                      <StarIcon className="w-5 h-5 text-amber-400 fill-amber-400" />
+                      <StarIcon className="w-5 h-5 text-amber-400 fill-amber-400" />
+                      <StarIcon className="w-5 h-5 text-amber-400 fill-amber-400" />
+                      <StarIcon className="w-5 h-5 text-amber-400 fill-amber-400" />
+                      <StarIcon className="w-5 h-5 text-gray-600" />
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-400">
+                    Highly experienced player with competitive excellence.
+                  </p>
+                </div>
+
+                {/* Master */}
+                <div className="bg-gradient-to-r from-yellow-900/30 to-orange-900/30 border border-yellow-500/30 rounded-xl p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <h4 className="text-lg font-bold text-yellow-400">Master</h4>
+                      <p className="text-sm text-gray-400">26+ tournaments</p>
+                    </div>
+                    <div className="flex gap-1">
+                      {[...Array(5)].map((_, i) => (
+                        <StarIcon key={i} className="w-5 h-5 text-amber-400 fill-amber-400" />
+                      ))}
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-400">
+                    Elite player with extensive tournament experience and exceptional skills.
+                  </p>
+                </div>
+              </div>
+
+              {/* Current Progress */}
+              {(user?.tournamentsPlayed || 0) > 0 && (
+                <div className="mt-6 bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <TrophyIcon className="w-5 h-5 text-blue-400" />
+                    <h4 className="font-bold text-white">Your Progress</h4>
+                  </div>
+                  <p className="text-gray-300">
+                    You've played <span className="font-bold text-blue-400">{user?.tournamentsPlayed || 0}</span> {(user?.tournamentsPlayed || 0) === 1 ? 'tournament' : 'tournaments'}.
+                    {(user?.tournamentsPlayed || 0) < 4 && ` Play ${4 - (user?.tournamentsPlayed || 0)} more to reach Intermediate level!`}
+                    {(user?.tournamentsPlayed || 0) >= 4 && (user?.tournamentsPlayed || 0) < 9 && ` Play ${9 - (user?.tournamentsPlayed || 0)} more to reach Advanced level!`}
+                    {(user?.tournamentsPlayed || 0) >= 9 && (user?.tournamentsPlayed || 0) < 16 && ` Play ${16 - (user?.tournamentsPlayed || 0)} more to reach Expert level!`}
+                    {(user?.tournamentsPlayed || 0) >= 16 && (user?.tournamentsPlayed || 0) < 26 && ` Play ${26 - (user?.tournamentsPlayed || 0)} more to reach Master level!`}
+                    {(user?.tournamentsPlayed || 0) >= 26 && ' You are a Master Player! 🏆'}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="sticky bottom-0 bg-slate-800 border-t border-white/10 p-4">
+              <button
+                onClick={() => setShowLevelInfo(false)}
+                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-4 rounded-xl font-medium hover:shadow-lg transition-all"
+              >
+                Got it!
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -55,7 +55,7 @@ export const undoLastPoint = async (matchId) => {
 export const pauseTimer = async (matchId) => {
   const token = localStorage.getItem('token');
   const response = await axios.put(
-    `${API_URL}/matches/${matchId}/timer/pause`,
+    `${API_URL}/matches/${matchId}/pause`,
     {},
     { headers: { Authorization: `Bearer ${token}` } }
   );
@@ -66,7 +66,7 @@ export const pauseTimer = async (matchId) => {
 export const resumeTimer = async (matchId) => {
   const token = localStorage.getItem('token');
   const response = await axios.put(
-    `${API_URL}/matches/${matchId}/timer/resume`,
+    `${API_URL}/matches/${matchId}/resume`,
     {},
     { headers: { Authorization: `Bearer ${token}` } }
   );

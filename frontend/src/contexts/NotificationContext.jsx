@@ -23,8 +23,9 @@ export const NotificationProvider = ({ children }) => {
       const response = await api.get('/notifications', {
         params: { unreadOnly },
       });
-      setNotifications(response.data.data?.notifications || []);
-      setUnreadCount(response.data.data?.unreadCount || 0);
+      console.log('📥 Notifications response:', response.data);
+      setNotifications(response.data.notifications || []);
+      setUnreadCount(response.data.unreadCount || 0);
     } catch (error) {
       console.error('Error fetching notifications:', error);
     } finally {
@@ -39,7 +40,8 @@ export const NotificationProvider = ({ children }) => {
       if (!token) return;
       
       const response = await api.get('/notifications/unread-count');
-      setUnreadCount(response.data.data?.count || 0);
+      console.log('📊 Unread count response:', response.data);
+      setUnreadCount(response.data.count || 0);
     } catch (error) {
       console.error('Error fetching unread count:', error);
     }
@@ -83,6 +85,20 @@ export const NotificationProvider = ({ children }) => {
       }
     } catch (error) {
       console.error('Error deleting notification:', error);
+      throw error;
+    }
+  };
+
+  // Delete all notifications
+  const deleteAllNotifications = async () => {
+    try {
+      const response = await api.delete('/notifications/all');
+      setNotifications([]);
+      setUnreadCount(0);
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting all notifications:', error);
+      throw error;
     }
   };
 
@@ -107,6 +123,7 @@ export const NotificationProvider = ({ children }) => {
         markAsRead,
         markAllAsRead,
         deleteNotification,
+        deleteAllNotifications,
       }}
     >
       {children}

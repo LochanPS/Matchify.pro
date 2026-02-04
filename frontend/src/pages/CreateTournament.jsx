@@ -11,8 +11,7 @@ import PostersStep from '../components/tournament/steps/PostersStep';
 import CategoriesStep from '../components/tournament/steps/CategoriesStep';
 import PaymentQRStep from '../components/tournament/steps/PaymentQRStep';
 import ReviewStep from '../components/tournament/steps/ReviewStep';
-import KYCBanner from '../components/KYCBanner';
-import { Trophy, Save, X, AlertTriangle, CheckCircle, Sparkles, ArrowLeft, Shield } from 'lucide-react';
+import { Trophy, Save, X, AlertTriangle, CheckCircle, Sparkles, ArrowLeft } from 'lucide-react';
 
 const CreateTournament = () => {
   const navigate = useNavigate();
@@ -38,38 +37,8 @@ const CreateTournament = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [showExitModal, setShowExitModal] = useState(false);
-  const [kycStatus, setKycStatus] = useState(null);
-  const [kycLoading, setKycLoading] = useState(true);
-  const [showKYCBlockModal, setShowKYCBlockModal] = useState(false);
 
   const hasFormData = formData.name || formData.description || formData.venue || formData.city;
-
-  // Check KYC status
-  const kycStatus = user?.organizerProfile?.kycStatus;
-  const isKYCApproved = kycStatus === 'APPROVED';
-
-  useEffect(() => {
-    checkKYCStatus();
-  }, []);
-
-  const checkKYCStatus = async () => {
-    try {
-      const response = await api.get('/kyc/status');
-      setKycStatus(response.data.status);
-      
-      // If KYC is not approved, show blocking modal
-      if (response.data.status !== 'APPROVED') {
-        setShowKYCBlockModal(true);
-      }
-    } catch (error) {
-      console.error('KYC status check failed:', error);
-      setKycStatus(null);
-      // If KYC check fails, assume not approved and show modal
-      setShowKYCBlockModal(true);
-    } finally {
-      setKycLoading(false);
-    }
-  };
 
   useEffect(() => {
     const handleBeforeUnload = (e) => {
@@ -250,48 +219,6 @@ const CreateTournament = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      {/* KYC Blocking Modal */}
-      {!isKYCApproved && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-          <div className="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 rounded-2xl p-8 max-w-2xl w-full border border-purple-500/30 shadow-2xl">
-            <div className="text-center mb-6">
-              <div className="w-20 h-20 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-5xl">🔒</span>
-              </div>
-              <h2 className="text-3xl font-bold text-white mb-2">KYC Verification Required</h2>
-              <p className="text-gray-300">You must complete KYC verification before creating tournaments</p>
-            </div>
-
-            <div className="space-y-4 mb-6">
-              <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-                <h3 className="font-semibold text-white mb-2">Why KYC is Required:</h3>
-                <ul className="space-y-2 text-gray-300 text-sm">
-                  <li>✓ Verify your identity as a tournament organizer</li>
-                  <li>✓ Ensure secure and trustworthy tournaments</li>
-                  <li>✓ Comply with platform regulations</li>
-                  <li>✓ Protect players and maintain quality</li>
-                </ul>
-              </div>
-            </div>
-
-            <div className="flex gap-4">
-              <button
-                onClick={() => navigate('/organizer/kyc/info')}
-                className="flex-1 px-6 py-4 bg-gradient-to-r from-emerald-500 to-cyan-500 text-white font-bold rounded-xl hover:shadow-lg transition-all"
-              >
-                Start KYC Now
-              </button>
-              <button
-                onClick={() => navigate('/organizer/dashboard')}
-                className="px-6 py-4 bg-white/10 text-white font-semibold rounded-xl hover:bg-white/20 transition-all"
-              >
-                Back to Dashboard
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Hero Header */}
       <div className="relative bg-gradient-to-r from-slate-900 via-emerald-900 to-slate-900 overflow-hidden">
         <div className="absolute inset-0">
@@ -345,10 +272,6 @@ const CreateTournament = () => {
       </div>
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 -mt-4">
-        {/* KYC Banner - Show if KYC not approved (show by default unless explicitly approved) */}
-        {(kycLoading || kycStatus !== 'APPROVED') && (
-          <KYCBanner />
-        )}
 
         {/* Error Message */}
         {error && (
@@ -447,124 +370,6 @@ const CreateTournament = () => {
         </div>
       )}
 
-      {/* KYC BLOCKING MODAL - Prevents tournament creation */}
-      {showKYCBlockModal && kycStatus !== 'APPROVED' && (
-        <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center z-[100] p-4">
-          <div className="relative max-w-2xl w-full">
-            {/* Animated gradient border */}
-            <div className="absolute -inset-1 bg-gradient-to-r from-red-600 via-orange-500 to-amber-500 rounded-3xl blur-xl opacity-75 animate-pulse"></div>
-            
-            {/* Modal content */}
-            <div className="relative bg-gradient-to-br from-slate-900 via-purple-900/50 to-slate-900 border-4 border-red-500/80 rounded-3xl shadow-2xl overflow-hidden">
-              {/* Pulsing alert at top */}
-              <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-red-500 via-orange-500 to-amber-500 animate-pulse"></div>
-              
-              <div className="p-8 md:p-12">
-                {/* Icon */}
-                <div className="text-center mb-6">
-                  <div className="relative inline-block">
-                    <div className="absolute -inset-4 bg-red-500 rounded-full blur-2xl opacity-50 animate-pulse"></div>
-                    <div className="relative w-24 h-24 bg-gradient-to-br from-red-500 to-rose-600 rounded-full flex items-center justify-center mx-auto shadow-2xl">
-                      <Shield className="w-12 h-12 text-white" />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Title */}
-                <h2 className="text-4xl font-black text-white text-center mb-4 flex items-center justify-center gap-3">
-                  <span className="text-5xl animate-bounce">🚫</span>
-                  KYC Required!
-                </h2>
-
-                {/* Message */}
-                <div className="bg-red-500/10 border-2 border-red-500/30 rounded-2xl p-6 mb-6">
-                  <p className="text-white text-lg text-center font-semibold leading-relaxed">
-                    You must complete <span className="text-red-400 font-black">KYC verification</span> before creating tournaments.
-                  </p>
-                  <p className="text-white/70 text-center mt-3">
-                    This is a <span className="text-amber-400 font-bold">mandatory requirement</span> for all tournament organizers to ensure platform safety and trust.
-                  </p>
-                </div>
-
-                {/* Why KYC? */}
-                <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 mb-6">
-                  <h3 className="text-white font-bold text-lg mb-4 flex items-center gap-2">
-                    <CheckCircle className="w-5 h-5 text-emerald-400" />
-                    Why KYC is Required:
-                  </h3>
-                  <ul className="space-y-3 text-white/80">
-                    <li className="flex items-start gap-3">
-                      <span className="text-emerald-400 text-xl flex-shrink-0">✓</span>
-                      <span>Verify your identity and build trust with players</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <span className="text-emerald-400 text-xl flex-shrink-0">✓</span>
-                      <span>Prevent fraud and ensure secure tournaments</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <span className="text-emerald-400 text-xl flex-shrink-0">✓</span>
-                      <span>Comply with platform regulations</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <span className="text-emerald-400 text-xl flex-shrink-0">✓</span>
-                      <span>Quick process: Only 5-10 minutes!</span>
-                    </li>
-                  </ul>
-                </div>
-
-                {/* Process Steps */}
-                <div className="grid grid-cols-3 gap-3 mb-8">
-                  <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 text-center">
-                    <div className="text-3xl mb-2">📄</div>
-                    <p className="text-white text-sm font-semibold">Upload Docs</p>
-                    <p className="text-white/60 text-xs mt-1">Pay ₹50</p>
-                  </div>
-                  <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl p-4 text-center">
-                    <div className="text-3xl mb-2">🎥</div>
-                    <p className="text-white text-sm font-semibold">Video Call</p>
-                    <p className="text-white/60 text-xs mt-1">Quick verify</p>
-                  </div>
-                  <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 text-center">
-                    <div className="text-3xl mb-2">✅</div>
-                    <p className="text-white text-sm font-semibold">Approved</p>
-                    <p className="text-white/60 text-xs mt-1">5-10 mins</p>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="space-y-3">
-                  <button
-                    onClick={() => navigate('/organizer/kyc/info')}
-                    className="w-full py-4 px-6 bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 text-white rounded-xl font-black text-lg hover:shadow-2xl hover:shadow-green-500/50 transition-all hover:scale-105 flex items-center justify-center gap-3 relative overflow-hidden group"
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-400 opacity-0 group-hover:opacity-20 transition-opacity"></div>
-                    <Shield className="w-6 h-6" />
-                    Start KYC Verification Now
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-bounce">
-                      Required!
-                    </span>
-                  </button>
-
-                  <button
-                    onClick={() => navigate('/organizer/dashboard')}
-                    className="w-full py-3 px-6 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 text-white rounded-xl font-semibold transition-all hover:scale-105 flex items-center justify-center gap-2"
-                  >
-                    <ArrowLeft className="w-5 h-5" />
-                    Back to Dashboard
-                  </button>
-                </div>
-
-                {/* Note */}
-                <div className="mt-6 text-center">
-                  <p className="text-white/50 text-sm">
-                    💡 You can save tournament drafts, but cannot publish without KYC approval
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

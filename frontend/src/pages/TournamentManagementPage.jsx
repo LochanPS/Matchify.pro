@@ -57,6 +57,9 @@ export default function TournamentManagementPage() {
   const [screenshotModal, setScreenshotModal] = useState(null);
   const [confirmModal, setConfirmModal] = useState(null);
   const [refundQrModal, setRefundQrModal] = useState(null);
+  const [completeRefundModal, setCompleteRefundModal] = useState(null); // { registrationId, playerName, amount }
+  const [paymentScreenshot, setPaymentScreenshot] = useState(null);
+  const [paymentScreenshotError, setPaymentScreenshotError] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
@@ -90,16 +93,58 @@ export default function TournamentManagementPage() {
     }
   };
 
-  const handleCompleteRefund = async (registrationId) => {
+  const handleCompleteRefund = async () => {
+    if (!completeRefundModal) return;
+    
+    if (!paymentScreenshot) {
+      setPaymentScreenshotError('Please upload payment screenshot as proof');
+      return;
+    }
+
     try {
-      setActionLoading(registrationId);
-      await completeRefund(registrationId);
+      setActionLoading(completeRefundModal.registrationId);
+      
+      const formData = new FormData();
+      formData.append('paymentScreenshot', paymentScreenshot);
+      
+      await completeRefund(completeRefundModal.registrationId, formData);
+      
+      setCompleteRefundModal(null);
+      setPaymentScreenshot(null);
+      setPaymentScreenshotError('');
       await fetchRegistrations();
     } catch (error) {
       console.error('Error completing refund:', error);
-      setErrorMessage('Failed to complete refund');
+      setErrorMessage(error.response?.data?.error || 'Failed to complete refund');
     } finally {
       setActionLoading(null);
+    }
+  };
+
+  const openCompleteRefundModal = (registration) => {
+    setCompleteRefundModal({
+      registrationId: registration.id,
+      playerName: registration.user.name,
+      amount: registration.amountTotal,
+      upiId: registration.refundUpiId
+    });
+    setPaymentScreenshot(null);
+    setPaymentScreenshotError('');
+  };
+
+  const handlePaymentScreenshotChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        setPaymentScreenshotError('Please upload an image file');
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        setPaymentScreenshotError('File size must be less than 5MB');
+        return;
+      }
+      setPaymentScreenshot(file);
+      setPaymentScreenshotError('');
     }
   };
 
@@ -422,6 +467,18 @@ export default function TournamentManagementPage() {
                               Registered
                             </span>
                           )}
+                          {registration.status === 'rejected' && (
+                            <span className="text-red-400 text-sm flex items-center gap-1">
+                              <XCircle className="h-4 w-4" />
+                              Rejected by Admin
+                            </span>
+                          )}
+                          {registration.status === 'cancelled' && (
+                            <span className="text-gray-400 text-sm flex items-center gap-1">
+                              <XCircle className="h-4 w-4" />
+                              Cancelled
+                            </span>
+                          )}
                           {registration.status === 'cancellation_requested' && (
                             <>
                               <button
@@ -444,7 +501,24 @@ export default function TournamentManagementPage() {
                               </span>
                             </>
                           )}
-                          {registration.status === 'cancelled' && (
+                          {registration.status === 'cancelled' && registration.refundStatus === 'approved' && (
+                            <button
+                              onClick={() => openCompleteRefundModal(registration)}
+                              disabled={actionLoading === registration.id}
+                              className="p-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition-colors w-full flex items-center justify-center gap-1 disabled:opacity-50"
+                              title="Mark Refund as Completed"
+                            >
+                              <CreditCard className="h-4 w-4" />
+                              <span className="text-xs">Complete Refund</span>
+                            </button>
+                          )}
+                          {registration.status === 'cancelled' && registration.refundStatus === 'completed' && (
+                            <span className="text-green-400 text-sm flex items-center gap-1">
+                              <CheckCircle className="h-4 w-4" />
+                              Refund Completed
+                            </span>
+                          )}
+                          {registration.status === 'cancelled' && !registration.refundStatus && (
                             <span className="text-gray-500 text-sm italic">No actions</span>
                           )}
                           {actionLoading === registration.id && (
@@ -652,6 +726,135 @@ export default function TournamentManagementPage() {
           </div>
         </div>
       )}
+
+      {/* Complete Refund Modal - Upload Payment Screenshot */}
+      {completeRefundModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-slate-800/90 backdrop-blur-sm border border-white/10 rounded-2xl shadow-2xl max-w-lg w-full my-8">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-6 text-white">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                    <CreditCard className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold">Complete Refund</h2>
+                    <p className="text-green-100 text-sm mt-1">Upload payment proof</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setCompleteRefundModal(null)}
+                  disabled={actionLoading}
+                  className="w-10 h-10 bg-white/20 hover:bg-white/30 rounded-xl flex items-center justify-center transition-colors disabled:opacity-50"
+                  aria-label="Close"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="p-6">
+              <div className="mb-6">
+                <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 mb-4">
+                  <p className="text-gray-300 mb-2">
+                    You are completing the refund for <span className="font-semibold text-white">{completeRefundModal.playerName}</span>
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-400">Refund Amount:</span>
+                    <span className="text-2xl font-bold text-white">₹{completeRefundModal.amount}</span>
+                  </div>
+                  <div className="flex items-center justify-between mt-2">
+                    <span className="text-gray-400">UPI ID:</span>
+                    <span className="text-white font-mono">{completeRefundModal.upiId}</span>
+                  </div>
+                </div>
+
+                <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mb-6">
+                  <p className="text-amber-300 text-sm">
+                    <strong>Important:</strong> Please send ₹{completeRefundModal.amount} to the player's UPI ID via your UPI app (Google Pay, PhonePe, Paytm, etc.), then upload the payment screenshot as proof.
+                  </p>
+                </div>
+
+                {/* Payment Screenshot Upload */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-300 mb-2">
+                    Payment Screenshot <span className="text-red-400">*</span>
+                  </label>
+                  <p className="text-gray-500 text-sm mb-3">
+                    Upload a screenshot of the successful payment from your UPI app
+                  </p>
+                  
+                  <input
+                    type="file"
+                    id="payment-screenshot-input"
+                    onChange={handlePaymentScreenshotChange}
+                    accept="image/*"
+                    className="hidden"
+                  />
+                  
+                  <label
+                    htmlFor="payment-screenshot-input"
+                    className={`w-full px-4 py-6 border-2 border-dashed rounded-xl flex flex-col items-center justify-center gap-2 transition-all cursor-pointer ${
+                      paymentScreenshot 
+                        ? 'border-green-500/50 bg-green-500/10' 
+                        : 'border-white/20 hover:border-white/30 hover:bg-slate-700/30'
+                    }`}
+                  >
+                    {paymentScreenshot ? (
+                      <>
+                        <CheckCircle className="h-10 w-10 text-green-400" />
+                        <span className="text-green-300 font-medium text-center">{paymentScreenshot.name}</span>
+                        <span className="text-green-400/80 text-sm">Click to change</span>
+                      </>
+                    ) : (
+                      <>
+                        <Image className="h-10 w-10 text-gray-500" />
+                        <span className="text-gray-400 font-medium">Upload Payment Screenshot</span>
+                        <span className="text-gray-500 text-sm">PNG, JPG up to 5MB</span>
+                      </>
+                    )}
+                  </label>
+                  
+                  {paymentScreenshotError && (
+                    <p className="text-red-400 text-sm mt-2">{paymentScreenshotError}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setCompleteRefundModal(null)}
+                  disabled={actionLoading}
+                  className="flex-1 px-4 py-3 border border-white/10 rounded-xl text-gray-300 hover:bg-slate-700/50 transition-colors font-medium disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleCompleteRefund}
+                  disabled={actionLoading || !paymentScreenshot}
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:shadow-lg hover:shadow-green-500/30 transition-all font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {actionLoading ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="h-4 w-4" />
+                      Mark as Completed
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+

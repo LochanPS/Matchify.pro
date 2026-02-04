@@ -76,11 +76,11 @@ const TournamentPaymentsPage = () => {
             </p>
           </div>
           <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-lg">
-            <p className="text-gray-400 text-sm">Pending First 50% Payouts</p>
+            <p className="text-gray-400 text-sm">Pending First 30% Payouts</p>
             <p className="text-3xl font-bold text-yellow-400 mt-2">{stats.pending50Payouts1}</p>
           </div>
           <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-lg">
-            <p className="text-gray-400 text-sm">Pending Second 50% Payouts</p>
+            <p className="text-gray-400 text-sm">Pending Second 65% Payouts</p>
             <p className="text-3xl font-bold text-orange-400 mt-2">{stats.pending50Payouts2}</p>
           </div>
         </div>
@@ -164,7 +164,7 @@ const TournamentPaymentsPage = () => {
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-gray-400 text-sm">Organizer Share (95%)</span>
+                      <span className="text-gray-400 text-sm">Organizer Total (30% + 65%)</span>
                       <span className="text-white font-bold">
                         ₹{payment.organizerShare.toLocaleString()}
                       </span>
@@ -176,10 +176,10 @@ const TournamentPaymentsPage = () => {
                 <div className="lg:col-span-1">
                   <h4 className="text-sm font-semibold text-gray-400 mb-3">Payout Status</h4>
                   <div className="space-y-3">
-                    {/* First 50% Payout */}
+                    {/* First 30% Payout */}
                     <div className="p-3 bg-slate-900 rounded-lg">
                       <div className="flex justify-between items-center mb-2">
-                        <span className="text-gray-400 text-sm">First 50%</span>
+                        <span className="text-gray-400 text-sm">First 30%</span>
                         <span className={`px-2 py-1 rounded text-xs font-medium ${
                           payment.payout50Status1 === 'paid'
                             ? 'bg-green-900/50 text-green-400'
@@ -196,10 +196,10 @@ const TournamentPaymentsPage = () => {
                       )}
                     </div>
 
-                    {/* Second 50% Payout */}
+                    {/* Second 65% Payout */}
                     <div className="p-3 bg-slate-900 rounded-lg">
                       <div className="flex justify-between items-center mb-2">
-                        <span className="text-gray-400 text-sm">Second 50%</span>
+                        <span className="text-gray-400 text-sm">Second 65%</span>
                         <span className={`px-2 py-1 rounded text-xs font-medium ${
                           payment.payout50Status2 === 'paid'
                             ? 'bg-green-900/50 text-green-400'

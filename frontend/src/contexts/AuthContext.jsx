@@ -17,12 +17,17 @@ export const AuthProvider = ({ children }) => {
   // Fetch fresh user data from server
   const fetchUserProfile = async () => {
     try {
-      // Skip profile fetch for admin user (hardcoded admin doesn't have a profile)
+      // Skip profile fetch for admin users
       const token = localStorage.getItem('token');
-      if (token) {
+      const storedUser = localStorage.getItem('user');
+      
+      if (token && storedUser) {
         const payload = JSON.parse(atob(token.split('.')[1]));
-        if (payload.isAdmin && payload.userId === 'admin') {
-          console.log('Skipping profile fetch for super admin');
+        const user = JSON.parse(storedUser);
+        
+        // Skip for any admin user (hardcoded or database)
+        if (payload.isAdmin || (user.roles && (Array.isArray(user.roles) ? user.roles.includes('ADMIN') : user.roles === 'ADMIN'))) {
+          console.log('Skipping profile fetch for admin user');
           return null;
         }
       }

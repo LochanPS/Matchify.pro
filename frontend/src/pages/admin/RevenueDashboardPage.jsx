@@ -9,6 +9,9 @@ const RevenueDashboardPage = () => {
   const [timeline, setTimeline] = useState([]);
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState('daily');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -28,6 +31,45 @@ const RevenueDashboardPage = () => {
       toast.error('Failed to load revenue data');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteAllData = async () => {
+    if (!deletePassword) {
+      toast.error('Please enter the password');
+      return;
+    }
+
+    try {
+      setDeleting(true);
+      const response = await fetch('http://localhost:5000/api/admin/delete-all-info', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({ password: deletePassword })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to delete data');
+      }
+
+      toast.success('All data deleted successfully! System reset.');
+      setShowDeleteModal(false);
+      setDeletePassword('');
+      
+      // Refresh the page after 2 seconds
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+    } catch (error) {
+      console.error('Error deleting data:', error);
+      toast.error(error.message || 'Failed to delete data');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -132,7 +174,7 @@ const RevenueDashboardPage = () => {
               </span>
             </div>
             <div className="flex justify-between items-center p-4 bg-slate-900 rounded-lg">
-              <span className="text-gray-400">Organizer Share (95%)</span>
+              <span className="text-gray-400">Organizer Total (30% + 65%)</span>
               <span className="text-white font-bold text-lg">
                 ₹{overview.breakdown.organizerShare.toLocaleString()}
               </span>
@@ -257,7 +299,7 @@ const RevenueDashboardPage = () => {
       </div>
 
       {/* Quick Links */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <Link
           to="/admin/tournament-payments"
           className="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-lg hover:shadow-teal-500/50 transition group"
@@ -291,6 +333,103 @@ const RevenueDashboardPage = () => {
           <p className="text-gray-400 text-sm">Approve payment screenshots</p>
         </Link>
       </div>
+
+      {/* Danger Zone - Delete All Data */}
+      <div className="bg-red-900/20 rounded-xl p-6 border-2 border-red-700 shadow-lg">
+        <div className="flex items-start gap-4">
+          <div className="text-4xl">⚠️</div>
+          <div className="flex-1">
+            <h3 className="text-xl font-bold text-red-400 mb-2">Danger Zone</h3>
+            <p className="text-gray-300 mb-4">
+              Delete all system data including tournaments, registrations, payments, and users. 
+              This action is irreversible and will reset all revenue to zero.
+            </p>
+            <p className="text-sm text-gray-400 mb-4">
+              ⚠️ Admin account (ADMIN@gmail.com) will be preserved
+            </p>
+            <button
+              onClick={() => setShowDeleteModal(true)}
+              className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition shadow-lg shadow-red-500/50"
+            >
+              🗑️ Delete All Info
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-800 rounded-2xl border-2 border-red-600 shadow-2xl max-w-md w-full p-8">
+            <div className="text-center mb-6">
+              <div className="text-6xl mb-4">⚠️</div>
+              <h2 className="text-2xl font-bold text-red-400 mb-2">Delete All Data?</h2>
+              <p className="text-gray-300 mb-4">
+                This will permanently delete:
+              </p>
+              <ul className="text-left text-gray-400 text-sm space-y-2 mb-4">
+                <li>✗ All tournaments and matches</li>
+                <li>✗ All registrations and payments</li>
+                <li>✗ All users (except admin)</li>
+                <li>✗ All revenue data</li>
+                <li>✗ All notifications and logs</li>
+              </ul>
+              <div className="bg-green-900/30 border border-green-700 rounded-lg p-3 mb-4">
+                <p className="text-green-400 text-sm">
+                  ✓ Admin account will be preserved
+                </p>
+              </div>
+              <p className="text-red-400 font-bold text-lg">
+                This action cannot be undone!
+              </p>
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-gray-300 font-medium mb-2">
+                Enter Admin Password to Confirm:
+              </label>
+              <input
+                type="password"
+                value={deletePassword}
+                onChange={(e) => setDeletePassword(e.target.value)}
+                placeholder="Enter special password"
+                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-red-500"
+                disabled={deleting}
+              />
+              <p className="text-xs text-gray-500 mt-2">
+                Special password required for this operation
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setDeletePassword('');
+                }}
+                className="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-medium py-3 px-4 rounded-lg transition"
+                disabled={deleting}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteAllData}
+                disabled={deleting || !deletePassword}
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {deleting ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    Deleting...
+                  </span>
+                ) : (
+                  '🗑️ Delete Everything'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

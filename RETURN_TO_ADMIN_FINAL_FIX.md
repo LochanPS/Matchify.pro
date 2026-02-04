@@ -1,160 +1,136 @@
-# Return to Admin - Final Fix ✅
+# ✅ Return to Admin - FINAL FIX
 
-## Root Cause Identified
+## 🐛 Issues Found and Fixed
 
-**The Problem:**
-The hardcoded super admin (`ADMIN@gmail.com`) uses `userId: 'admin'` (a string literal), but the `returnToAdmin` function was trying to look up this ID in the database, which doesn't exist.
+### Issue 1: `setUser is not a function`
+**Problem:** ImpersonationBanner was calling `setUser()` but AuthContext exports `updateUser()` instead.
 
-## The Fix
+**Fix:** Changed from `setUser` to `updateUser` in ImpersonationBanner.jsx
 
-### Added Special Handling for Hardcoded Admin
+### Issue 2: Double-Click Causing 400 Error
+**Problem:** User could click "Return to Admin" button multiple times before redirect completed, causing:
+- First click: 200 success ✅
+- Second click: 400 error (not in impersonation mode anymore) ❌
 
-**File:** `matchify/backend/src/controllers/admin.controller.js`
+**Fix:** Added loading state to prevent double-clicks:
+- Button shows "Returning..." with spinner during process
+- Button is disabled while returning
+- Prevents multiple API calls
 
-```javascript
-// Handle hardcoded super admin
-if (adminId === 'admin') {
-  console.log('👑 Returning to hardcoded super admin');
-  
-  // Generate admin JWT
-  const token = jwt.sign(
-    { userId: 'admin', email: 'ADMIN@gmail.com', roles: ['ADMIN'], isAdmin: true },
-    process.env.JWT_SECRET || 'your-secret-key',
-    { expiresIn: '7d' }
-  );
+## 🔧 Changes Made
 
-  return res.json({
-    success: true,
-    message: 'Returned to admin account',
-    token,
-    user: {
-      id: 'admin',
-      email: 'ADMIN@gmail.com',
-      name: 'Super Admin',
-      roles: ['ADMIN'],
-      isAdmin: true,
-    },
-  });
-}
+### File: `frontend/src/components/ImpersonationBanner.jsx`
+
+1. **Changed AuthContext import:**
+   ```javascript
+   const { updateUser } = useAuth(); // Was: setUser
+   ```
+
+2. **Added loading state:**
+   ```javascript
+   const [isReturning, setIsReturning] = useState(false);
+   ```
+
+3. **Updated handleReturnToAdmin:**
+   ```javascript
+   const handleReturnToAdmin = async () => {
+     if (isReturning) return; // Prevent double-clicks
+     
+     try {
+       setIsReturning(true);
+       // ... API call ...
+       updateUser(response.data.user); // Was: setUser
+       window.location.href = '/admin-dashboard';
+     } catch (error) {
+       setIsReturning(false); // Re-enable button on error
+     }
+   };
+   ```
+
+4. **Updated button with loading state:**
+   ```javascript
+   <button
+     onClick={handleReturnToAdmin}
+     disabled={isReturning}
+     className={isReturning ? 'cursor-not-allowed' : 'hover:bg-orange-50'}
+   >
+     {isReturning ? (
+       <>
+         <Spinner />
+         Returning...
+       </>
+     ) : (
+       <>
+         <ArrowLeft />
+         Return to Admin
+       </>
+     )}
+   </button>
+   ```
+
+## ✅ How It Works Now
+
+1. **User clicks "Return to Admin"**
+   - Button immediately shows "Returning..." with spinner
+   - Button becomes disabled (gray, cursor-not-allowed)
+   - API call is made to `/api/admin/return-to-admin`
+
+2. **Backend processes request**
+   - Verifies user is impersonating
+   - Finds admin user by ID
+   - Generates new admin token
+   - Returns success response
+
+3. **Frontend receives response**
+   - Updates localStorage with new token and user
+   - Updates AuthContext with new user data
+   - Redirects to `/admin-dashboard`
+   - Page reloads with admin session
+
+4. **If error occurs**
+   - Shows error modal
+   - Re-enables button (removes loading state)
+   - User can try again
+
+## 🧪 Test Now
+
+### Steps:
+1. Login as admin: `ADMIN@gmail.com` / `ADMIN@123(123)`
+2. Go to Users section
+3. Click "Login as User" on any non-admin user
+4. Orange banner appears with "Return to Admin" button
+5. Click "Return to Admin" button
+6. **Expected:**
+   - ✅ Button shows "Returning..." with spinner
+   - ✅ Button is disabled (can't click again)
+   - ✅ Redirects to admin dashboard
+   - ✅ No errors in console
+   - ✅ Orange banner disappears
+
+### Console Output (Expected):
+```
+🔄 Attempting to return to admin...
+✅ Response received: {success: true, ...}
+✅ Success! Updating localStorage and context...
+📦 User data from response: {id: "...", email: "ADMIN@gmail.com", ...}
+✅ LocalStorage updated
+✅ AuthContext updated
+✅ Redirecting to admin dashboard...
 ```
 
-## How It Works Now
+## 🎉 Status: READY TO TEST
 
-### 1. Admin Login (Hardcoded)
-```javascript
-// authController.js
-if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-  const token = jwt.sign(
-    { userId: 'admin', email: ADMIN_EMAIL, roles: ['ADMIN'], isAdmin: true },
-    process.env.JWT_SECRET,
-    { expiresIn: '7d' }
-  );
-  // Returns token with userId: 'admin'
-}
-```
+All issues fixed:
+- ✅ AuthContext function name corrected
+- ✅ Double-click prevention added
+- ✅ Loading state implemented
+- ✅ Error handling improved
+- ✅ Backend working correctly
+- ✅ Frontend updated
 
-### 2. Admin Impersonates User
-```javascript
-// admin.controller.js - loginAsUser
-const token = jwt.sign(
-  { 
-    userId: user.id,           // Real user ID
-    email: user.email,
-    roles: userRoles,
-    isImpersonating: true,
-    adminId: 'admin'           // Hardcoded admin ID
-  },
-  process.env.JWT_SECRET,
-  { expiresIn: '24h' }
-);
-```
-
-### 3. Return to Admin
-```javascript
-// admin.controller.js - returnToAdmin
-const { adminId, isImpersonating } = req.user;
-
-// Check if hardcoded admin
-if (adminId === 'admin') {
-  // Generate hardcoded admin token
-  // Return hardcoded admin user object
-  // ✅ SUCCESS
-}
-
-// Otherwise, look up admin in database
-const admin = await prisma.user.findUnique({ where: { id: adminId } });
-```
-
-## Complete Flow
-
-1. **Admin logs in** with `ADMIN@gmail.com` / `ADMIN@123(123)`
-   - Gets token with `userId: 'admin'`
-
-2. **Admin clicks eye icon** to view user
-   - Enters password `Pradyu@123(123)`
-   - Gets new token with `isImpersonating: true` and `adminId: 'admin'`
-
-3. **Page reloads as user**
-   - Orange "ADMIN MODE" banner appears
-   - Admin can explore user's account
-
-4. **Admin clicks "Return to Admin"**
-   - Backend checks if `adminId === 'admin'`
-   - Generates hardcoded admin token
-   - Returns hardcoded admin user object
-   - ✅ **SUCCESS!**
-
-## Additional Improvements
-
-### 1. Enhanced Logging
-Added comprehensive console logs to track the entire flow:
-- Token decoding
-- Admin ID detection
-- Database lookups
-- Token generation
-- Audit logging
-
-### 2. Error Handling
-- Non-critical audit log failures don't break the flow
-- Clear error messages for debugging
-- Proper status codes
-
-### 3. Matchify-Styled Error Modal
-Replaced browser `alert()` with custom modal showing "Matchify.pro" title
-
-## Files Modified
-
-1. ✅ `matchify/backend/src/controllers/admin.controller.js`
-   - Added hardcoded admin handling in `returnToAdmin`
-   - Enhanced logging throughout
-   - Better error handling
-
-2. ✅ `matchify/backend/src/middleware/auth.js`
-   - Preserve `isImpersonating` and `adminId` from JWT
-   - Added token decoding logs
-
-3. ✅ `matchify/frontend/src/components/ImpersonationBanner.jsx`
-   - Replaced browser alert with Matchify modal
-   - Better error display
-
-## Testing Checklist
-
-- [x] Admin can login with hardcoded credentials
-- [x] Admin can impersonate users
-- [x] Admin can return from impersonation
-- [x] No "localhost:5173 says" messages
-- [x] Error modal shows "Matchify.pro" title
-- [x] Hardcoded admin properly handled
-- [x] Database admins also work (if any exist)
-- [x] All actions logged in audit trail
-- [x] Console logs help with debugging
-
-## Status: FIXED ✅
-
-The "Return to Admin" feature now works correctly for the hardcoded super admin account!
+**Test it now!** 🚀
 
 ---
 
-**Last Updated:** January 17, 2026
-**Status:** Complete and tested
-**Ready for:** Deployment
+**Date:** February 2, 2026
+**Files Modified:** `frontend/src/components/ImpersonationBanner.jsx`

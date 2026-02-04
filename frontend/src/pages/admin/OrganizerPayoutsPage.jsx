@@ -35,10 +35,10 @@ const OrganizerPayoutsPage = () => {
       
       if (type === '50-1') {
         await markPayout50_1Paid(tournamentId, notes);
-        toast.success('First 50% payout marked as paid!');
+        toast.success('First 30% payout marked as paid!');
       } else {
         await markPayout50_2Paid(tournamentId, notes);
-        toast.success('Second 50% payout marked as paid!');
+        toast.success('Second 65% payout marked as paid!');
       }
       
       setShowNotesModal(null);
@@ -90,14 +90,14 @@ const OrganizerPayoutsPage = () => {
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-lg">
-          <p className="text-gray-400 text-sm">Pending First 50% Payouts</p>
+          <p className="text-gray-400 text-sm">Pending First 30% Payouts</p>
           <p className="text-4xl font-bold text-yellow-400 mt-2">{pending50_1.length}</p>
           <p className="text-gray-500 text-sm mt-2">
             Total: ₹{pending50_1.reduce((sum, p) => sum + p.payout50Percent1, 0).toLocaleString()}
           </p>
         </div>
         <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-lg">
-          <p className="text-gray-400 text-sm">Pending Second 50% Payouts</p>
+          <p className="text-gray-400 text-sm">Pending Second 65% Payouts</p>
           <p className="text-4xl font-bold text-orange-400 mt-2">{pending50_2.length}</p>
           <p className="text-gray-500 text-sm mt-2">
             Total: ₹{pending50_2.reduce((sum, p) => sum + p.payout50Percent2, 0).toLocaleString()}
@@ -126,7 +126,7 @@ const OrganizerPayoutsPage = () => {
                 : 'bg-slate-800 text-gray-400 hover:bg-slate-700'
             }`}
           >
-            {f === 'all' ? 'All Pending' : f === '50-1' ? 'Pending First 50%' : 'Pending Second 50%'}
+            {f === 'all' ? 'All Pending' : f === '50-1' ? 'Pending First 30%' : 'Pending Second 65%'}
           </button>
         ))}
       </div>
@@ -211,11 +211,11 @@ const OrganizerPayoutsPage = () => {
                 <div className="lg:col-span-1">
                   <h4 className="text-sm font-semibold text-gray-400 mb-3">Payout Actions</h4>
                   <div className="space-y-3">
-                    {/* First 50% Payout */}
+                    {/* First 30% Payout */}
                     {payout.payout50Status1 === 'pending' && (
                       <div className="p-3 bg-yellow-900/20 border border-yellow-700 rounded-lg">
                         <div className="flex justify-between items-center mb-2">
-                          <span className="text-yellow-300 text-sm font-medium">First 50%</span>
+                          <span className="text-yellow-300 text-sm font-medium">First 30%</span>
                           <span className="text-yellow-400 font-bold">
                             ₹{payout.payout50Percent1.toLocaleString()}
                           </span>
@@ -233,7 +233,7 @@ const OrganizerPayoutsPage = () => {
                     {payout.payout50Status1 === 'paid' && (
                       <div className="p-3 bg-green-900/20 border border-green-700 rounded-lg">
                         <div className="flex justify-between items-center">
-                          <span className="text-green-300 text-sm">First 50% Paid</span>
+                          <span className="text-green-300 text-sm">First 30% Paid</span>
                           <span className="text-green-400 font-bold">
                             ₹{payout.payout50Percent1.toLocaleString()}
                           </span>
@@ -246,11 +246,11 @@ const OrganizerPayoutsPage = () => {
                       </div>
                     )}
 
-                    {/* Second 50% Payout */}
+                    {/* Second 65% Payout */}
                     {payout.payout50Status2 === 'pending' && (
                       <div className="p-3 bg-orange-900/20 border border-orange-700 rounded-lg">
                         <div className="flex justify-between items-center mb-2">
-                          <span className="text-orange-300 text-sm font-medium">Second 50%</span>
+                          <span className="text-orange-300 text-sm font-medium">Second 65%</span>
                           <span className="text-orange-400 font-bold">
                             ₹{payout.payout50Percent2.toLocaleString()}
                           </span>
@@ -268,7 +268,7 @@ const OrganizerPayoutsPage = () => {
                     {payout.payout50Status2 === 'paid' && (
                       <div className="p-3 bg-green-900/20 border border-green-700 rounded-lg">
                         <div className="flex justify-between items-center">
-                          <span className="text-green-300 text-sm">Second 50% Paid</span>
+                          <span className="text-green-300 text-sm">Second 65% Paid</span>
                           <span className="text-green-400 font-bold">
                             ₹{payout.payout50Percent2.toLocaleString()}
                           </span>
@@ -293,7 +293,7 @@ const OrganizerPayoutsPage = () => {
         <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
           <div className="bg-slate-800 rounded-xl p-8 max-w-md w-full border border-slate-700">
             <h3 className="text-2xl font-bold text-white mb-4">
-              Confirm {showNotesModal.type === '50-1' ? 'First' : 'Second'} 50% Payout
+              Confirm {showNotesModal.type === '50-1' ? 'First 30%' : 'Second 65%'} Payout
             </h3>
             <div className="bg-slate-900 rounded-lg p-4 mb-4">
               <p className="text-gray-400 text-sm">Amount to be paid:</p>

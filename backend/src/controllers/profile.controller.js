@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma.js';
 import bcrypt from 'bcryptjs';
 import cloudinary from '../config/cloudinary.js';
 import { updateProfileSchema, changePasswordSchema, profilePhotoSchema } from '../validators/profile.validator.js';
@@ -8,8 +9,6 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-const prisma = new PrismaClient();
 
 // Check if Cloudinary is properly configured
 const isCloudinaryConfigured = () => {

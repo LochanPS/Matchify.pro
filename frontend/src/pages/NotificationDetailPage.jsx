@@ -1,973 +1,369 @@
-import { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import api from '../utils/api';
+import { ArrowLeft, Trash2, ExternalLink, Calendar, Clock } from 'lucide-react';
 import { useNotifications } from '../contexts/NotificationContext';
-import { formatDateIndian } from '../utils/dateFormat';
 import { format } from 'date-fns';
-import {
-  ArrowLeft,
-  User,
-  Mail,
-  Phone,
-  MapPin,
-  Calendar,
-  CreditCard,
-  QrCode,
-  AlertTriangle,
-  Check,
-  X,
-  Loader,
-  Trophy,
-  Bell,
-  Clock,
-  CheckCircle,
-  XCircle,
-  Info,
-} from 'lucide-react';
 
-// Helper to get proper image URL
-const getImageUrl = (url) => {
-  if (!url) return null;
-  if (url.startsWith('/uploads')) {
-    const baseUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
-    return `${baseUrl}${url}`;
-  }
-  return url;
-};
-
-export default function NotificationDetailPage() {
-  const { notificationId } = useParams();
+const NotificationDetailPage = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
-  const { markAsRead } = useNotifications();
+  const { notifications, markAsRead, deleteNotification } = useNotifications();
   const [notification, setNotification] = useState(null);
-  const [registration, setRegistration] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [actionLoading, setActionLoading] = useState(false);
-  const [rejectReason, setRejectReason] = useState('');
-  const [showRejectModal, setShowRejectModal] = useState(false);
-  const [resultModal, setResultModal] = useState(null);
 
   useEffect(() => {
-    fetchNotificationDetails();
-  }, [notificationId]);
-
-  const fetchNotificationDetails = async () => {
-    try {
-      setLoading(true);
-      // Fetch notification
-      const notifResponse = await api.get(`/notifications/${notificationId}`);
-      const notif = notifResponse.data.notification;
-      setNotification(notif);
-      
-      // Mark as read
-      if (!notif.read) {
-        markAsRead(notificationId);
+    const found = notifications.find(n => n.id === id);
+    if (found) {
+      console.log('📧 Notification found:', found);
+      console.log('📦 Notification data:', found.data);
+      console.log('📦 Parsed data:', found.data ? JSON.parse(found.data) : {});
+      setNotification(found);
+      // Mark as read when viewing
+      if (!found.read) {
+        markAsRead(id);
       }
-
-      // Parse notification data
-      const data = notif.data ? JSON.parse(notif.data) : {};
-      console.log('Notification data:', data);
-      
-      // If it's a payment verification notification (organizer), fetch registration as organizer
-      if (notif.type === 'PAYMENT_VERIFICATION_REQUIRED' && data.registrationIds) {
-        try {
-          // Fetch the first registration (usually there's one per notification)
-          const regId = data.registrationIds[0];
-          const regResponse = await api.get(`/organizer/registrations/${regId}`);
-          setRegistration(regResponse.data.registration);
-          console.log('Fetched registration as organizer:', regResponse.data.registration);
-        } catch (err) {
-          console.log('Could not fetch registration as organizer:', err);
-        }
-      }
-      // If it's a registration-related notification, fetch registration details
-      else if (data.registrationId) {
-        try {
-          const regResponse = await api.get(`/registrations/${data.registrationId}`);
-          setRegistration(regResponse.data.registration);
-          console.log('Fetched registration:', regResponse.data.registration);
-        } catch (err) {
-          console.log('Could not fetch registration details, trying fallback');
-          // Fallback: try to find from cancelled registrations
-          await fetchCancelledRegistration(data, notif);
-        }
-      } else if (notif.type === 'REFUND_APPROVED' || notif.type === 'REFUND_REJECTED') {
-        // For older notifications without registrationId, try to find the registration
-        await fetchCancelledRegistration(data, notif);
-      }
-    } catch (err) {
-      console.error('Error fetching notification:', err);
-      // If notification not found (404), redirect to notifications list
-      if (err.response?.status === 404) {
-        navigate('/notifications', { replace: true });
-        return;
-      }
-      setError(err.response?.data?.error || 'Failed to load notification');
-    } finally {
-      setLoading(false);
     }
-  };
+  }, [id, notifications]);
 
-  const fetchCancelledRegistration = async (data, notif) => {
-    try {
-      console.log('Fetching cancelled registrations...');
-      
-      // Try to fetch cancelled registrations first
-      let regs = [];
-      try {
-        const regResponse = await api.get('/registrations/my?status=cancelled');
-        regs = regResponse.data.registrations || [];
-        console.log('Cancelled registrations found:', regs.length);
-      } catch (err) {
-        console.log('Error fetching cancelled registrations:', err);
-      }
-      
-      // If no cancelled registrations, try cancellation_requested
-      if (regs.length === 0) {
-        try {
-          const reqResponse = await api.get('/registrations/my?status=cancellation_requested');
-          regs = reqResponse.data.registrations || [];
-          console.log('Cancellation requested registrations found:', regs.length);
-        } catch (err) {
-          console.log('Error fetching cancellation_requested registrations:', err);
-        }
-      }
-      
-      // If still no registrations, try fetching all registrations
-      if (regs.length === 0) {
-        try {
-          const allResponse = await api.get('/registrations/my');
-          regs = allResponse.data.registrations || [];
-          console.log('All registrations found:', regs.length);
-          // Filter to only cancelled or cancellation_requested
-          regs = regs.filter(r => r.status === 'cancelled' || r.status === 'cancellation_requested');
-          console.log('Filtered registrations:', regs.length);
-        } catch (err) {
-          console.log('Error fetching all registrations:', err);
-        }
-      }
-      
-      if (regs.length > 0) {
-        // Try to match by tournament name if available
-        if (data.tournamentName) {
-          const matchedReg = regs.find(r => r.tournament?.name === data.tournamentName);
-          if (matchedReg) {
-            setRegistration(matchedReg);
-            console.log('Matched registration by tournament name:', matchedReg.id);
-            return;
-          }
-        }
-        // Try to match by category name if available
-        if (data.categoryName) {
-          const matchedReg = regs.find(r => r.category?.name === data.categoryName);
-          if (matchedReg) {
-            setRegistration(matchedReg);
-            console.log('Matched registration by category name:', matchedReg.id);
-            return;
-          }
-        }
-        // Otherwise use the most recent one
-        setRegistration(regs[0]);
-        console.log('Using most recent registration:', regs[0].id);
-      } else {
-        console.log('No registrations found for fallback');
-      }
-    } catch (err) {
-      console.log('Could not fetch registrations:', err);
-    }
-  };
-
-  // Organizer actions for cancellation requests
-  const handleApproveRefund = async () => {
-    const data = notification.data ? JSON.parse(notification.data) : {};
-    if (!data.registrationId) return;
-
-    try {
-      setActionLoading(true);
-      await api.put(`/organizer/registrations/${data.registrationId}/approve-refund`);
-      setResultModal({
-        type: 'success',
-        title: 'Refund Approved',
-        message: `Refund has been approved. The player will be notified. Please send the refund to their UPI ID.`
-      });
-    } catch (err) {
-      console.error('Error approving refund:', err);
-      setResultModal({
-        type: 'error',
-        title: 'Error',
-        message: err.response?.data?.error || 'Failed to approve refund'
-      });
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  const handleRejectRefund = async () => {
-    const data = notification.data ? JSON.parse(notification.data) : {};
-    if (!data.registrationId || !rejectReason.trim()) return;
-
-    try {
-      setActionLoading(true);
-      setShowRejectModal(false);
-      await api.put(`/organizer/registrations/${data.registrationId}/reject-refund`, {
-        reason: rejectReason
-      });
-      setResultModal({
-        type: 'success',
-        title: 'Refund Rejected',
-        message: 'The refund request has been rejected. The player will be notified.'
-      });
-    } catch (err) {
-      console.error('Error rejecting refund:', err);
-      setResultModal({
-        type: 'error',
-        title: 'Error',
-        message: err.response?.data?.error || 'Failed to reject refund'
-      });
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  // Organizer actions for payment verification
-  const handleApprovePayment = async () => {
-    if (!registration?.id) return;
-
-    try {
-      setActionLoading(true);
-      await api.put(`/organizer/registrations/${registration.id}/approve`);
-      setResultModal({
-        type: 'success',
-        title: 'Payment Verified! ✅',
-        message: `Payment has been verified and ${registration.user?.name}'s registration is now confirmed. They will be notified.`
-      });
-      // Update local registration state
-      setRegistration({ ...registration, status: 'confirmed', paymentStatus: 'verified' });
-    } catch (err) {
-      console.error('Error approving payment:', err);
-      setResultModal({
-        type: 'error',
-        title: 'Error',
-        message: err.response?.data?.error || 'Failed to verify payment'
-      });
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  const handleRejectPayment = async () => {
-    if (!registration?.id || !rejectReason.trim()) return;
-
-    try {
-      setActionLoading(true);
-      setShowRejectModal(false);
-      await api.put(`/organizer/registrations/${registration.id}/reject`, {
-        reason: rejectReason
-      });
-      setResultModal({
-        type: 'success',
-        title: 'Payment Rejected',
-        message: `The payment has been rejected. ${registration.user?.name} will be notified with your reason.`
-      });
-      // Update local registration state
-      setRegistration({ ...registration, status: 'rejected', paymentStatus: 'rejected' });
-    } catch (err) {
-      console.error('Error rejecting payment:', err);
-      setResultModal({
-        type: 'error',
-        title: 'Error',
-        message: err.response?.data?.error || 'Failed to reject payment'
-      });
-    } finally {
-      setActionLoading(false);
-      setRejectReason('');
-    }
-  };
-
-  // Player actions for refund confirmation
-  const handleConfirmRefundReceived = async () => {
-    const data = notification.data ? JSON.parse(notification.data) : {};
-    const regId = data.registrationId || registration?.id;
-    
-    console.log('Confirm refund clicked!');
-    console.log('Notification data:', data);
-    console.log('Registration state:', registration);
-    console.log('Registration ID:', regId);
-    
-    if (!regId) {
-      setResultModal({
-        type: 'error',
-        title: 'Registration Not Found',
-        message: 'Could not find your registration details. This may happen with older notifications. Please contact the organizer directly to confirm your refund.'
-      });
-      return;
-    }
-
-    try {
-      setActionLoading(true);
-      await api.put(`/registrations/${regId}/confirm-refund`);
-      setResultModal({
-        type: 'success',
-        title: 'Thank You!',
-        message: 'Your refund confirmation has been recorded. The process is now complete.'
-      });
-    } catch (err) {
-      console.error('Error confirming refund:', err);
-      setResultModal({
-        type: 'error',
-        title: 'Error',
-        message: err.response?.data?.error || 'Failed to confirm refund. Please try again or contact the organizer.'
-      });
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  const handleReportRefundNotReceived = () => {
-    const data = notification.data ? JSON.parse(notification.data) : {};
-    const regId = data.registrationId || registration?.id;
-    
-    console.log('Report not received clicked!');
-    console.log('Notification data:', data);
-    console.log('Registration state:', registration);
-    console.log('Registration ID:', regId);
-    
-    if (regId) {
-      navigate(`/refund-issue/${regId}`);
-    } else {
-      setResultModal({
-        type: 'error',
-        title: 'Registration Not Found',
-        message: 'Could not find your registration details. This may happen with older notifications. Please contact the organizer directly to report the issue.'
-      });
-    }
-  };
-
-  const getNotificationStyle = (type) => {
-    const styles = {
-      REGISTRATION_CONFIRMED: { icon: '✅', color: 'green', title: 'Registration Confirmed' },
-      REGISTRATION_REJECTED: { icon: '❌', color: 'red', title: 'Registration Rejected' },
-      REGISTRATION_REMOVED: { icon: '🚫', color: 'red', title: 'Registration Removed' },
-      REGISTRATION_PENDING: { icon: '⏳', color: 'amber', title: 'Registration Pending' },
-      PAYMENT_VERIFICATION_REQUIRED: { icon: '💳', color: 'blue', title: 'Payment Verification' },
-      PARTNER_INVITATION: { icon: '🤝', color: 'blue', title: 'Partner Invitation' },
-      PARTNER_ACCEPTED: { icon: '👍', color: 'green', title: 'Partner Accepted' },
-      PARTNER_DECLINED: { icon: '👎', color: 'orange', title: 'Partner Declined' },
-      DRAW_PUBLISHED: { icon: '📊', color: 'purple', title: 'Draw Published' },
-      MATCH_ASSIGNED: { icon: '🏸', color: 'cyan', title: 'Match Assigned' },
-      MATCH_STARTING_SOON: { icon: '⏰', color: 'yellow', title: 'Match Starting Soon' },
-      TOURNAMENT_CANCELLED: { icon: '📛', color: 'red', title: 'Tournament Cancelled' },
-      REFUND_PROCESSED: { icon: '💰', color: 'green', title: 'Refund Processed' },
-      REFUND_APPROVED: { icon: '💰', color: 'green', title: 'Refund Approved' },
-      REFUND_REJECTED: { icon: '❌', color: 'red', title: 'Refund Rejected' },
-      TOURNAMENT_REMINDER: { icon: '📅', color: 'blue', title: 'Tournament Reminder' },
-      POINTS_AWARDED: { icon: '🏆', color: 'yellow', title: 'Points Awarded' },
-      CANCELLATION_REQUEST: { icon: '🔴', color: 'orange', title: 'Cancellation Request' },
-      ACADEMY_SUBMISSION: { icon: '🏢', color: 'purple', title: 'New Academy Submission' },
-      ACADEMY_APPROVED: { icon: '🎉', color: 'green', title: 'Academy Approved' },
-      ACADEMY_REJECTED: { icon: '❌', color: 'red', title: 'Academy Rejected' },
-      ACADEMY_BLOCKED: { icon: '⚠️', color: 'orange', title: 'Academy Blocked' },
-      ACADEMY_UNBLOCKED: { icon: '🎉', color: 'green', title: 'Academy Restored' },
-      ACADEMY_DELETED: { icon: '🗑️', color: 'red', title: 'Academy Deleted' },
+  const getNotificationIcon = (type) => {
+    const icons = {
+      REGISTRATION_CONFIRMED: '✅',
+      REGISTRATION_REJECTED: '❌',
+      REGISTRATION_REMOVED: '🚫',
+      REGISTRATION_PENDING: '⏳',
+      PAYMENT_VERIFICATION_REQUIRED: '💳',
+      PARTNER_INVITATION: '🤝',
+      PARTNER_ACCEPTED: '👍',
+      PARTNER_DECLINED: '👎',
+      DRAW_PUBLISHED: '📊',
+      MATCH_ASSIGNED: '⚖️',
+      MATCH_STARTING_SOON: '⏰',
+      TOURNAMENT_CANCELLED: '❌',
+      REFUND_PROCESSED: '💰',
+      REFUND_APPROVED: '💰',
+      REFUND_REJECTED: '❌',
+      TOURNAMENT_REMINDER: '📅',
+      POINTS_AWARDED: '🏆',
+      ACCOUNT_SUSPENDED: '⚠️',
+      CANCELLATION_REQUEST: '🔴',
     };
-    return styles[type] || { icon: '🔔', color: 'gray', title: 'Notification' };
+    return icons[type] || '🔔';
   };
 
-  const getColorClasses = (color) => {
-    const colors = {
-      green: { bg: 'from-green-500 to-emerald-600', light: 'bg-green-50', border: 'border-green-200', text: 'text-green-700' },
-      red: { bg: 'from-red-500 to-rose-600', light: 'bg-red-50', border: 'border-red-200', text: 'text-red-700' },
-      blue: { bg: 'from-blue-500 to-indigo-600', light: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-700' },
-      orange: { bg: 'from-orange-500 to-red-600', light: 'bg-orange-50', border: 'border-orange-200', text: 'text-orange-700' },
-      amber: { bg: 'from-amber-500 to-orange-600', light: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-700' },
-      purple: { bg: 'from-purple-500 to-violet-600', light: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-700' },
-      cyan: { bg: 'from-cyan-500 to-sky-600', light: 'bg-cyan-50', border: 'border-cyan-200', text: 'text-cyan-700' },
-      yellow: { bg: 'from-yellow-500 to-amber-600', light: 'bg-yellow-50', border: 'border-yellow-200', text: 'text-yellow-700' },
-      gray: { bg: 'from-gray-500 to-slate-600', light: 'bg-gray-50', border: 'border-gray-200', text: 'text-gray-700' },
-    };
-    return colors[color] || colors.gray;
+  const getNotificationPath = (notification) => {
+    const data = notification.data ? JSON.parse(notification.data) : {};
+    const type = notification.type;
+
+    switch (type) {
+      case 'CANCELLATION_REQUEST':
+        if (data.registrationId) {
+          return `/organizer/cancellation/${data.registrationId}`;
+        }
+        if (data.tournamentId) {
+          return `/organizer/tournaments/${data.tournamentId}?tab=refunds`;
+        }
+        return '/organizer/dashboard';
+
+      case 'PAYMENT_VERIFICATION_REQUIRED':
+      case 'REGISTRATION_PENDING':
+        if (data.tournamentId) {
+          return `/organizer/tournaments/${data.tournamentId}`;
+        }
+        return '/organizer/dashboard';
+      
+      case 'REGISTRATION_CONFIRMED':
+      case 'REGISTRATION_REJECTED':
+      case 'REGISTRATION_REMOVED':
+      case 'REFUND_APPROVED':
+      case 'REFUND_REJECTED':
+        return '/registrations';
+      
+      case 'PARTNER_INVITATION':
+        // Navigate to tournament page (not registration)
+        if (data.tournamentId) {
+          return `/tournaments/${data.tournamentId}`;
+        }
+        return '/tournaments';
+      
+      case 'PARTNER_ACCEPTED':
+      case 'PARTNER_DECLINED':
+        return '/registrations';
+      
+      case 'DRAW_PUBLISHED':
+        if (data.tournamentId) {
+          return `/tournaments/${data.tournamentId}/draws`;
+        }
+        return '/tournaments';
+      
+      case 'MATCH_ASSIGNED':
+      case 'MATCH_STARTING_SOON':
+        if (data.matchId) {
+          return `/umpire/scoring/${data.matchId}`;
+        }
+        if (data.tournamentId) {
+          return `/tournaments/${data.tournamentId}`;
+        }
+        return '/tournaments';
+      
+      case 'TOURNAMENT_CANCELLED':
+      case 'TOURNAMENT_REMINDER':
+        if (data.tournamentId) {
+          return `/tournaments/${data.tournamentId}`;
+        }
+        return '/tournaments';
+      
+      case 'REFUND_PROCESSED':
+        return '/wallet';
+      
+      case 'POINTS_AWARDED':
+        return '/leaderboard';
+      
+      default:
+        return null;
+    }
   };
 
-  if (loading) {
+  const getActionButtonText = (type) => {
+    switch (type) {
+      case 'PARTNER_INVITATION':
+        return 'View Tournament';
+      case 'REGISTRATION_CONFIRMED':
+      case 'REGISTRATION_REJECTED':
+      case 'REGISTRATION_REMOVED':
+        return 'View My Registrations';
+      case 'DRAW_PUBLISHED':
+        return 'View Tournament Draws';
+      case 'MATCH_ASSIGNED':
+      case 'MATCH_STARTING_SOON':
+        return 'Go to Match Scoring';
+      case 'TOURNAMENT_CANCELLED':
+      case 'TOURNAMENT_REMINDER':
+        return 'View Tournament Details';
+      case 'PAYMENT_VERIFICATION_REQUIRED':
+      case 'REGISTRATION_PENDING':
+        return 'View Tournament Dashboard';
+      case 'CANCELLATION_REQUEST':
+        return 'Review Cancellation Request';
+      case 'REFUND_PROCESSED':
+        return 'View My Wallet';
+      case 'POINTS_AWARDED':
+        return 'View Leaderboard';
+      default:
+        return 'Take Action';
+    }
+  };
+
+  const handleDelete = () => {
+    deleteNotification(id);
+    navigate('/notifications');
+  };
+
+  const handleTakeAction = () => {
+    const path = getNotificationPath(notification);
+    if (path) {
+      navigate(path);
+    }
+  };
+
+  if (!notification) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="text-gray-500 mt-4 font-medium">Loading notification...</p>
+          <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="text-gray-400 mt-4">Loading notification...</p>
         </div>
       </div>
     );
   }
 
-  if (error || !notification) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
-        <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
-          <div className="w-16 h-16 bg-red-500/20 border border-red-500/30 rounded-full flex items-center justify-center mx-auto mb-4">
-            <X className="w-8 h-8 text-red-400" />
-          </div>
-          <h2 className="text-xl font-bold text-white mb-2">Error</h2>
-          <p className="text-gray-400 mb-6">{error || 'Failed to load notification'}</p>
-          <button
-            onClick={() => navigate('/notifications')}
-            className="px-6 py-3 bg-slate-700/50 border border-white/10 text-gray-300 rounded-xl hover:bg-slate-600/50 transition-colors font-medium"
-          >
-            Go Back
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  const style = getNotificationStyle(notification.type);
-  const colorClasses = getColorClasses(style.color);
+  const actionPath = getNotificationPath(notification);
   const data = notification.data ? JSON.parse(notification.data) : {};
-
-  // Determine if this notification needs action buttons
-  const isCancellationRequest = notification.type === 'CANCELLATION_REQUEST';
-  const isRefundApproved = notification.type === 'REFUND_APPROVED';
-  const isPaymentVerification = notification.type === 'PAYMENT_VERIFICATION_REQUIRED';
+  
+  console.log('🎯 Action path:', actionPath);
+  console.log('📊 Display data:', data);
+  console.log('📊 Data keys:', Object.keys(data));
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      {/* Header */}
-      <div className={`relative bg-gradient-to-r ${colorClasses.bg} overflow-hidden`}>
-        <div className="absolute inset-0">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-white rounded-full mix-blend-multiply filter blur-3xl opacity-10"></div>
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-white rounded-full mix-blend-multiply filter blur-3xl opacity-10"></div>
-        </div>
-        
-        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      {/* Animated Background */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-2000"></div>
+      </div>
+
+      <div className="relative max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="mb-8">
           <button
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-white/70 hover:text-white mb-6 transition-colors group"
+            onClick={() => navigate('/notifications')}
+            className="flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors"
           >
-            <ArrowLeft className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
-            <span>Back</span>
+            <ArrowLeft className="w-5 h-5" />
+            <span>Back to Notifications</span>
           </button>
-
-          <div className="flex items-center gap-5">
-            <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center text-4xl">
-              {style.icon}
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-white">{notification.title}</h1>
-              <p className="text-white/70 mt-1 flex items-center gap-2">
-                <Clock className="w-4 h-4" />
-                {format(new Date(notification.createdAt), 'dd/MM/yyyy, h:mm a')}
-              </p>
-            </div>
-          </div>
         </div>
-      </div>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 -mt-6">
-        {/* Main Content */}
-        <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl shadow-xl border border-white/10 overflow-hidden">
-          {/* Message */}
-          <div className="p-6 border-b border-white/10">
-            <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-              <Info className="w-5 h-5 text-gray-400" />
-              Message
-            </h3>
-            <div className="p-4 bg-slate-700/50 border border-white/10 rounded-xl">
-              <p className="text-gray-200 text-lg">{notification.message}</p>
-            </div>
-          </div>
-
-          {/* Context Details */}
-          {(data.tournamentName || data.categoryName || data.playerName || data.amount) && (
-            <div className="p-6 border-b border-white/10">
-              <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                <Trophy className="w-5 h-5 text-purple-400" />
-                Details
-              </h3>
-              <div className="grid md:grid-cols-2 gap-4">
-                {data.tournamentName && (
-                  <div className="flex items-center gap-3 p-4 bg-slate-700/50 border border-white/10 rounded-xl">
-                    <Trophy className="w-5 h-5 text-purple-400" />
-                    <div>
-                      <p className="text-sm text-gray-400">Tournament</p>
-                      <p className="font-semibold text-white">{data.tournamentName}</p>
-                    </div>
-                  </div>
-                )}
-                {data.categoryName && (
-                  <div className="flex items-center gap-3 p-4 bg-slate-700/50 border border-white/10 rounded-xl">
-                    <Bell className="w-5 h-5 text-blue-400" />
-                    <div>
-                      <p className="text-sm text-gray-400">Category</p>
-                      <p className="font-semibold text-white">{data.categoryName}</p>
-                    </div>
-                  </div>
-                )}
-                {data.playerName && (
-                  <div className="flex items-center gap-3 p-4 bg-slate-700/50 border border-white/10 rounded-xl">
-                    <User className="w-5 h-5 text-green-400" />
-                    <div>
-                      <p className="text-sm text-gray-400">Player</p>
-                      <p className="font-semibold text-white">{data.playerName}</p>
-                    </div>
-                  </div>
-                )}
-                {data.amount && (
-                  <div className="flex items-center gap-3 p-4 bg-green-500/10 border border-green-500/30 rounded-xl">
-                    <CreditCard className="w-5 h-5 text-green-400" />
-                    <div>
-                      <p className="text-sm text-green-400">Amount</p>
-                      <p className="font-bold text-green-300 text-xl">₹{data.amount}</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Cancellation Reason (for organizer - cancellation request) */}
-          {isCancellationRequest && data.reason && (
-            <div className="p-6 border-b border-white/10">
-              <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                <AlertTriangle className="w-5 h-5 text-orange-400" />
-                Cancellation Reason
-              </h3>
-              <div className="p-4 bg-orange-500/10 border border-orange-500/30 rounded-xl">
-                <p className="text-orange-300">{data.reason}</p>
-              </div>
-            </div>
-          )}
-
-          {/* Academy Submission Details (for admin) */}
-          {notification.type === 'ACADEMY_SUBMISSION' && (
-            <div className="p-6 border-b border-white/10">
-              <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                <Trophy className="w-5 h-5 text-purple-400" />
-                Academy Details
-              </h3>
-              <div className="grid md:grid-cols-2 gap-4 mb-4">
-                {data.academyName && (
-                  <div className="flex items-center gap-3 p-4 bg-slate-700/50 border border-white/10 rounded-xl">
-                    <Info className="w-5 h-5 text-purple-400" />
-                    <div>
-                      <p className="text-sm text-gray-400">Academy Name</p>
-                      <p className="font-semibold text-white">{data.academyName}</p>
-                    </div>
-                  </div>
-                )}
-                {(data.city || data.state) && (
-                  <div className="flex items-center gap-3 p-4 bg-slate-700/50 border border-white/10 rounded-xl">
-                    <MapPin className="w-5 h-5 text-blue-400" />
-                    <div>
-                      <p className="text-sm text-gray-400">Location</p>
-                      <p className="font-semibold text-white">{data.city}, {data.state}</p>
-                    </div>
-                  </div>
-                )}
-                {data.phone && (
-                  <div className="flex items-center gap-3 p-4 bg-slate-700/50 border border-white/10 rounded-xl">
-                    <Phone className="w-5 h-5 text-green-400" />
-                    <div>
-                      <p className="text-sm text-gray-400">Phone</p>
-                      <p className="font-semibold text-white">{data.phone}</p>
-                    </div>
-                  </div>
-                )}
-                {data.email && (
-                  <div className="flex items-center gap-3 p-4 bg-slate-700/50 border border-white/10 rounded-xl">
-                    <Mail className="w-5 h-5 text-cyan-400" />
-                    <div>
-                      <p className="text-sm text-gray-400">Email</p>
-                      <p className="font-semibold text-white">{data.email}</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-              
-              {/* Payment Screenshot */}
-              {data.paymentScreenshot && (
-                <div className="mt-4">
-                  <h4 className="text-sm font-semibold text-gray-400 mb-3 flex items-center gap-2">
-                    <CreditCard className="w-4 h-4" />
-                    Payment Screenshot (₹200)
-                  </h4>
-                  <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl">
-                    <img
-                      src={data.paymentScreenshot}
-                      alt="Payment Screenshot"
-                      className="max-w-full max-h-96 rounded-lg shadow-md cursor-pointer hover:opacity-90 transition-opacity mx-auto"
-                      onClick={() => window.open(data.paymentScreenshot, '_blank')}
-                    />
-                    <p className="text-xs text-emerald-400 mt-3 text-center">Click to view full size</p>
-                  </div>
-                </div>
-              )}
-
-              {/* Action Button to go to Admin Dashboard */}
-              <div className="mt-6">
-                <button
-                  onClick={() => navigate('/admin')}
-                  className="w-full px-4 py-3 bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white rounded-xl transition-colors font-medium"
-                >
-                  Go to Admin Dashboard to Approve/Reject
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Academy Rejection Reason (for academy owner) */}
-          {notification.type === 'ACADEMY_REJECTED' && data.reason && (
-            <div className="p-6 border-b border-white/10">
-              <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                <AlertTriangle className="w-5 h-5 text-red-400" />
-                Reason for Rejection
-              </h3>
-              <div className="relative p-5 rounded-2xl overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-red-500/30 via-rose-500/30 to-red-500/30 blur-xl"></div>
-                <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 to-rose-500/10 rounded-2xl"></div>
-                <div className="relative bg-red-500/10 border-2 border-red-500/40 rounded-xl p-4 shadow-lg shadow-red-500/20">
-                  <p className="text-red-200 text-lg font-medium">{data.reason}</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Tournament Cancelled Reason (for players) */}
-          {notification.type === 'TOURNAMENT_CANCELLED' && data.reason && (
-            <div className="p-6 border-b border-white/10">
-              <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                <AlertTriangle className="w-5 h-5 text-red-400" />
-                Reason for Cancellation
-              </h3>
-              <div className="relative p-5 rounded-2xl overflow-hidden">
-                {/* Halo/Glow effect */}
-                <div className="absolute inset-0 bg-gradient-to-r from-red-500/30 via-rose-500/30 to-red-500/30 blur-xl"></div>
-                <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 to-rose-500/10 rounded-2xl"></div>
-                {/* Content */}
-                <div className="relative bg-red-500/10 border-2 border-red-500/40 rounded-xl p-4 shadow-lg shadow-red-500/20">
-                  <p className="text-red-200 text-lg font-medium">{data.reason}</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Registration Details (if available) */}
-          {registration && (
-            <div className="p-6 border-b border-white/10">
-              <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                <User className="w-5 h-5 text-blue-400" />
-                Registration Details
-              </h3>
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="flex items-center gap-3 p-4 bg-slate-700/50 border border-white/10 rounded-xl">
-                  <User className="w-5 h-5 text-gray-400" />
-                  <div>
-                    <p className="text-sm text-gray-400">Player</p>
-                    <p className="font-semibold text-white">{registration.user?.name}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 p-4 bg-slate-700/50 border border-white/10 rounded-xl">
-                  <Mail className="w-5 h-5 text-gray-400" />
-                  <div>
-                    <p className="text-sm text-gray-400">Email</p>
-                    <p className="font-semibold text-white">{registration.user?.email}</p>
-                  </div>
-                </div>
-                {registration.user?.phone && (
-                  <div className="flex items-center gap-3 p-4 bg-slate-700/50 border border-white/10 rounded-xl">
-                    <Phone className="w-5 h-5 text-gray-400" />
-                    <div>
-                      <p className="text-sm text-gray-400">Phone</p>
-                      <p className="font-semibold text-white">{registration.user?.phone}</p>
-                    </div>
-                  </div>
-                )}
-                <div className="flex items-center gap-3 p-4 bg-green-500/10 border border-green-500/30 rounded-xl">
-                  <CreditCard className="w-5 h-5 text-green-400" />
-                  <div>
-                    <p className="text-sm text-green-400">Amount Paid</p>
-                    <p className="font-bold text-green-300 text-xl">₹{notification?.data ? (JSON.parse(notification.data).amount || registration.amountTotal) : registration.amountTotal}</p>
-                  </div>
+        {/* Notification Card */}
+        <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden">
+          {/* Header */}
+          <div className="p-8 border-b border-white/10">
+            <div className="flex items-start gap-6">
+              {/* Icon */}
+              <div className="flex-shrink-0">
+                <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center text-4xl shadow-lg shadow-purple-500/30">
+                  {getNotificationIcon(notification.type)}
                 </div>
               </div>
 
-              {/* Refund UPI ID (for organizer) */}
-              {isCancellationRequest && registration.refundUpiId && (
-                <div className="mt-4 p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl">
-                  <p className="text-sm text-blue-400 mb-1 flex items-center gap-2">
-                    <QrCode className="w-4 h-4" />
-                    Player's UPI ID for Refund
-                  </p>
-                  <p className="text-xl font-mono font-bold text-blue-300">{registration.refundUpiId}</p>
-                </div>
-              )}
-
-              {/* Refund QR Code (for organizer) */}
-              {isCancellationRequest && registration.refundQrCode && (
-                <div className="mt-4">
-                  <p className="text-sm font-medium text-gray-400 mb-2">Player's Payment QR Code</p>
-                  <div className="p-4 bg-slate-900/80 border border-white/10 rounded-xl inline-block">
-                    <div className="p-3 bg-slate-800/50 border border-white/5 rounded-xl">
-                      <img
-                        src={getImageUrl(registration.refundQrCode)}
-                        alt="Refund QR Code"
-                        className="max-w-xs rounded-lg shadow-md"
-                      />
-                    </div>
+              {/* Title and Meta */}
+              <div className="flex-1">
+                <h1 className="text-2xl font-bold text-white mb-3">
+                  {notification.title}
+                </h1>
+                
+                <div className="flex flex-wrap items-center gap-4 text-sm text-gray-400">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    <span>{format(new Date(notification.createdAt), 'MMMM dd, yyyy')}</span>
                   </div>
-                </div>
-              )}
-
-              {/* Payment Screenshot (for payment verification) */}
-              {isPaymentVerification && registration.paymentScreenshot && (
-                <div className="mt-4">
-                  <p className="text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
-                    <CreditCard className="w-4 h-4" />
-                    Payment Screenshot
-                  </p>
-                  <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl">
-                    <img
-                      src={getImageUrl(registration.paymentScreenshot)}
-                      alt="Payment Screenshot"
-                      className="max-w-full rounded-lg shadow-md cursor-pointer hover:opacity-90 transition-opacity"
-                      onClick={() => window.open(getImageUrl(registration.paymentScreenshot), '_blank')}
-                    />
-                    <p className="text-xs text-blue-400 mt-2 text-center">Click to view full size</p>
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4" />
+                    <span>{format(new Date(notification.createdAt), 'h:mm a')}</span>
                   </div>
-                </div>
-              )}
-
-              {/* Payment Status Badge */}
-              {isPaymentVerification && (
-                <div className="mt-4 flex items-center gap-2">
-                  <span className="text-sm text-gray-400">Payment Status:</span>
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                    registration.paymentStatus === 'verified' ? 'bg-green-500/20 text-green-300' :
-                    registration.paymentStatus === 'rejected' ? 'bg-red-500/20 text-red-300' :
-                    registration.paymentStatus === 'submitted' ? 'bg-amber-500/20 text-amber-300' :
-                    'bg-gray-500/20 text-gray-300'
-                  }`}>
-                    {registration.paymentStatus === 'verified' ? '✅ Verified' :
-                     registration.paymentStatus === 'rejected' ? '❌ Rejected' :
-                     registration.paymentStatus === 'submitted' ? '⏳ Awaiting Verification' :
-                     registration.paymentStatus || 'Pending'}
-                  </span>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Action Buttons for Organizer - Cancellation Request */}
-          {isCancellationRequest && registration?.status === 'cancellation_requested' && (
-            <div className="p-6 bg-slate-700/30">
-              <h3 className="text-lg font-bold text-white mb-4">Take Action</h3>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <button
-                  onClick={handleApproveRefund}
-                  disabled={actionLoading}
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-green-500/30 transition-all disabled:opacity-50"
-                >
-                  {actionLoading ? (
-                    <Loader className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <Check className="w-5 h-5" />
-                  )}
-                  Approve Refund
-                </button>
-                <button
-                  onClick={() => setShowRejectModal(true)}
-                  disabled={actionLoading}
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-red-500/30 transition-all disabled:opacity-50"
-                >
-                  <X className="w-5 h-5" />
-                  Reject Request
-                </button>
-              </div>
-              <p className="text-center text-sm text-gray-400 mt-4">
-                The player will be notified of your decision
-              </p>
-            </div>
-          )}
-
-          {/* Action Buttons for Organizer - Payment Verification REMOVED */}
-          {/* Organizers can NO LONGER verify payments - only ADMIN can */}
-          {isPaymentVerification && registration && (registration.status === 'pending' || registration.paymentStatus === 'submitted') && (
-            <div className="p-6 bg-amber-900/20 border-t border-amber-700">
-              <div className="flex items-start gap-4">
-                <div className="text-3xl">🔒</div>
-                <div>
-                  <h3 className="text-lg font-bold text-amber-300 mb-2">Payment Verification by Admin Only</h3>
-                  <p className="text-amber-400/80 text-sm mb-3">
-                    All payments are verified by Matchify.pro admin to prevent scams and ensure security.
-                  </p>
-                  <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
-                    <p className="text-gray-300 text-sm mb-2">
-                      <strong>Admin Contact:</strong>
-                    </p>
-                    <p className="text-teal-400 font-mono">ADMIN@gmail.com</p>
-                  </div>
-                  <p className="text-gray-400 text-xs mt-3">
-                    💡 The admin will verify this payment and you'll receive a notification once approved.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Already Verified/Rejected Message */}
-          {isPaymentVerification && registration && registration.status === 'confirmed' && (
-            <div className="p-6 bg-green-500/10 border-t border-green-500/30">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center">
-                  <CheckCircle className="w-5 h-5 text-green-400" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-green-300">Payment Already Verified</h3>
-                  <p className="text-green-400/80 text-sm">This registration has been confirmed.</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {isPaymentVerification && registration && registration.status === 'rejected' && (
-            <div className="p-6 bg-red-500/10 border-t border-red-500/30">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-red-500/20 rounded-full flex items-center justify-center">
-                  <XCircle className="w-5 h-5 text-red-400" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-red-300">Payment Rejected</h3>
-                  <p className="text-red-400/80 text-sm">This registration has been rejected.</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Action Buttons for Player - Refund Approved */}
-          {isRefundApproved && (
-            <div className="p-6 bg-slate-700/30">
-              <h3 className="text-lg font-bold text-white mb-2">Did you receive the refund?</h3>
-              <p className="text-gray-400 mb-4">Please confirm once you receive the refund in your account.</p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <button
-                  type="button"
-                  onClick={handleConfirmRefundReceived}
-                  disabled={actionLoading}
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-green-500/30 transition-all disabled:opacity-50"
-                >
-                  {actionLoading ? (
-                    <Loader className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <CheckCircle className="w-5 h-5" />
-                  )}
-                  Yes, I Received It
-                </button>
-                <button
-                  type="button"
-                  onClick={handleReportRefundNotReceived}
-                  disabled={actionLoading}
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-orange-500/30 transition-all disabled:opacity-50"
-                >
-                  <XCircle className="w-5 h-5" />
-                  No, Not Yet
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Reject Modal */}
-      {showRejectModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-white/10">
-            <div className="bg-gradient-to-r from-red-500 to-rose-600 p-6 text-white">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                  <X className="h-6 w-6" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold">
-                    {isPaymentVerification ? 'Reject Payment' : 'Reject Refund Request'}
-                  </h2>
-                  <p className="text-red-100 text-sm mt-1">Please provide a reason</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6">
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Reason for Rejection <span className="text-red-400">*</span>
-              </label>
-              <textarea
-                value={rejectReason}
-                onChange={(e) => setRejectReason(e.target.value)}
-                placeholder={isPaymentVerification 
-                  ? "e.g., Payment screenshot is unclear, Amount doesn't match, Transaction ID not visible..."
-                  : "e.g., Tournament has already started, Cancellation policy not met..."
-                }
-                rows={4}
-                className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all"
-              />
-              
-              <div className="flex gap-3 mt-6">
-                <button
-                  onClick={() => {
-                    setShowRejectModal(false);
-                    setRejectReason('');
-                  }}
-                  className="flex-1 px-4 py-3 border border-white/10 rounded-xl text-gray-300 hover:bg-slate-700/50 transition-colors font-medium"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={isPaymentVerification ? handleRejectPayment : handleRejectRefund}
-                  disabled={!rejectReason.trim() || actionLoading}
-                  className="flex-1 px-4 py-3 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl hover:shadow-lg transition-all font-semibold disabled:opacity-50"
-                >
-                  {actionLoading ? 'Rejecting...' : 'Reject'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Result Modal */}
-      {resultModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-white/10">
-            <div className={`p-6 text-white ${resultModal.type === 'success' ? 'bg-gradient-to-r from-green-500 to-emerald-600' : 'bg-gradient-to-r from-red-500 to-rose-600'}`}>
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                  {resultModal.type === 'success' ? (
-                    <Check className="h-6 w-6" />
-                  ) : (
-                    <X className="h-6 w-6" />
+                  {!notification.read && (
+                    <span className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs font-semibold">
+                      New
+                    </span>
                   )}
                 </div>
-                <h2 className="text-xl font-bold">{resultModal.title}</h2>
               </div>
-            </div>
 
-            <div className="p-6">
-              <p className="text-gray-300 mb-6">{resultModal.message}</p>
+              {/* Delete Button */}
               <button
-                onClick={() => {
-                  setResultModal(null);
-                  navigate('/notifications');
-                }}
-                className={`w-full px-4 py-3 rounded-xl font-semibold transition-all ${
-                  resultModal.type === 'success' 
-                    ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:shadow-lg' 
-                    : 'bg-gradient-to-r from-red-500 to-rose-600 text-white hover:shadow-lg'
-                }`}
+                onClick={handleDelete}
+                className="p-3 hover:bg-red-500/20 rounded-xl transition-colors"
+                title="Delete notification"
               >
-                Done
+                <Trash2 className="w-5 h-5 text-gray-500 hover:text-red-400" />
               </button>
             </div>
           </div>
+
+          {/* Message */}
+          <div className="p-8">
+            <div className="prose prose-invert max-w-none">
+              <p className="text-lg text-gray-300 leading-relaxed whitespace-pre-wrap mb-0">
+                {notification.message}
+              </p>
+            </div>
+
+            {/* Additional Data - Enhanced Display */}
+            {Object.keys(data).length > 0 && notification.type !== 'PARTNER_INVITATION' && (
+              <div className="mt-8 space-y-4">
+                {/* Tournament Details Card */}
+                {(data.tournamentName || data.categoryName || data.tournamentDate) && (
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-indigo-500/10 to-purple-500/10 blur-xl rounded-2xl"></div>
+                    <div className="relative bg-slate-700/40 border border-white/10 rounded-2xl p-6">
+                      <h3 className="text-sm font-semibold text-purple-400 mb-4 flex items-center gap-2">
+                        <span className="text-lg">🏸</span>
+                        Tournament Details
+                      </h3>
+                      <div className="space-y-3">
+                        {data.tournamentName && (
+                          <div className="flex items-start gap-3">
+                            <span className="text-gray-400 text-sm min-w-[100px]">Tournament:</span>
+                            <span className="text-white font-semibold text-base flex-1">{data.tournamentName}</span>
+                          </div>
+                        )}
+                        {data.categoryName && (
+                          <div className="flex items-start gap-3">
+                            <span className="text-gray-400 text-sm min-w-[100px]">Category:</span>
+                            <span className="text-purple-300 font-semibold text-base flex-1">{data.categoryName}</span>
+                          </div>
+                        )}
+                        {data.tournamentDate && (
+                          <div className="flex items-start gap-3">
+                            <span className="text-gray-400 text-sm min-w-[100px]">Date:</span>
+                            <span className="text-blue-300 font-medium text-base flex-1">{data.tournamentDate}</span>
+                          </div>
+                        )}
+                        {data.playerName && (
+                          <div className="flex items-start gap-3">
+                            <span className="text-gray-400 text-sm min-w-[100px]">Partner:</span>
+                            <span className="text-green-300 font-semibold text-base flex-1">{data.playerName}</span>
+                          </div>
+                        )}
+                        {data.partnerName && (
+                          <div className="flex items-start gap-3">
+                            <span className="text-gray-400 text-sm min-w-[100px]">Partner:</span>
+                            <span className="text-green-300 font-semibold text-base flex-1">{data.partnerName}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Points & Placement Card */}
+                {(data.points || data.placement) && (
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/10 via-amber-500/10 to-yellow-500/10 blur-xl rounded-2xl"></div>
+                    <div className="relative bg-slate-700/40 border border-yellow-500/20 rounded-2xl p-6">
+                      <h3 className="text-sm font-semibold text-yellow-400 mb-4 flex items-center gap-2">
+                        <span className="text-lg">🏆</span>
+                        Achievement
+                      </h3>
+                      <div className="space-y-3">
+                        {data.placement && (
+                          <div className="flex items-start gap-3">
+                            <span className="text-gray-400 text-sm min-w-[100px]">Placement:</span>
+                            <span className="text-white font-bold text-xl flex-1">{data.placement}</span>
+                          </div>
+                        )}
+                        {data.points && (
+                          <div className="flex items-start gap-3">
+                            <span className="text-gray-400 text-sm min-w-[100px]">Points Earned:</span>
+                            <span className="text-yellow-400 font-bold text-2xl flex-1">+{data.points} pts</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Reason Card (for rejections/cancellations) */}
+                {data.reason && (
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 via-orange-500/10 to-red-500/10 blur-xl rounded-2xl"></div>
+                    <div className="relative bg-slate-700/40 border border-red-500/20 rounded-2xl p-6">
+                      <h3 className="text-sm font-semibold text-red-400 mb-3 flex items-center gap-2">
+                        <span className="text-lg">ℹ️</span>
+                        Reason
+                      </h3>
+                      <p className="text-gray-300 text-base leading-relaxed">{data.reason}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Action Button */}
+            {actionPath && (
+              <div className="mt-8">
+                <button
+                  onClick={handleTakeAction}
+                  className="w-full px-6 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-purple-500/30 transition-all flex items-center justify-center gap-2 group"
+                >
+                  <span>{getActionButtonText(notification.type)}</span>
+                  <ExternalLink className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                </button>
+              </div>
+            )}
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
-}
+};
+
+export default NotificationDetailPage;

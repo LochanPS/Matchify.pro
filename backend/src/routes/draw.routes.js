@@ -1,5 +1,5 @@
 import express from 'express';
-import { generateDraw, getDraw, deleteDraw, createConfiguredDraw, getCategoryPlayers, assignPlayersToDraw, bulkAssignAllPlayers, shuffleAssignedPlayers } from '../controllers/draw.controller.js';
+import { generateDraw, getDraw, deleteDraw, createConfiguredDraw, getCategoryPlayers, assignPlayersToDraw, bulkAssignAllPlayers, shuffleAssignedPlayers, arrangeKnockoutMatchups, continueToKnockout } from '../controllers/draw.controller.js';
 import { authenticate } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -15,6 +15,12 @@ router.post('/draws/bulk-assign-all', authenticate, bulkAssignAllPlayers);
 
 // Shuffle assigned players (organizer only)
 router.post('/draws/shuffle-players', authenticate, shuffleAssignedPlayers);
+
+// Arrange knockout matchups (organizer only)
+router.post('/tournaments/:tournamentId/categories/:categoryId/draw/arrange-knockout', authenticate, arrangeKnockoutMatchups);
+
+// Continue to knockout stage automatically (organizer only)
+router.post('/tournaments/:tournamentId/categories/:categoryId/draw/continue-to-knockout', authenticate, continueToKnockout);
 
 // Generate draw (organizer only)
 router.post(

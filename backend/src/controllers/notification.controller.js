@@ -1,4 +1,4 @@
-import { getUserNotifications, markAsRead, markAllAsRead } from '../services/notification.service.js';
+import { getUserNotifications, markAsRead, markAllAsRead, deleteNotification, deleteAllNotifications } from '../services/notification.service.js';
 
 // GET /api/notifications - Get user notifications
 const getNotifications = async (req, res) => {
@@ -83,4 +83,66 @@ const markAllNotificationsAsRead = async (req, res) => {
   }
 };
 
-export { getNotifications, markNotificationAsRead, markAllNotificationsAsRead };
+// DELETE /api/notifications/:id - Delete a notification
+const deleteNotificationById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    const result = await deleteNotification(id, userId);
+
+    if (result.success) {
+      res.json({
+        success: true,
+        message: 'Notification deleted successfully',
+      });
+    } else {
+      res.status(result.status || 400).json({
+        success: false,
+        error: result.error,
+      });
+    }
+  } catch (error) {
+    console.error('Delete notification error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to delete notification',
+    });
+  }
+};
+
+// DELETE /api/notifications - Delete all notifications for user
+const deleteAllNotificationsForUser = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const result = await deleteAllNotifications(userId);
+
+    if (result.success) {
+      res.json({
+        success: true,
+        message: `${result.count} notification(s) deleted successfully`,
+        count: result.count,
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        error: result.error,
+      });
+    }
+  } catch (error) {
+    console.error('Delete all notifications error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to delete all notifications',
+    });
+  }
+};
+
+export { 
+  getNotifications, 
+  markNotificationAsRead, 
+  markAllNotificationsAsRead,
+  deleteNotificationById,
+  deleteAllNotificationsForUser
+};

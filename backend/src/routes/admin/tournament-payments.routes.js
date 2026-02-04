@@ -1,9 +1,8 @@
 import express from 'express';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../../lib/prisma.js';
 import { authenticate, requireAdmin } from '../../middleware/auth.js';
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 // Get all tournament payments
 router.get('/', authenticate, requireAdmin, async (req, res) => {
@@ -155,7 +154,7 @@ router.get('/stats/overview', authenticate, requireAdmin, async (req, res) => {
   }
 });
 
-// Mark first 50% payout as paid
+// Mark first 30% payout as paid
 router.post('/:tournamentId/payout-50-1/mark-paid', authenticate, requireAdmin, async (req, res) => {
   try {
     const { tournamentId } = req.params;
@@ -176,7 +175,7 @@ router.post('/:tournamentId/payout-50-1/mark-paid', authenticate, requireAdmin, 
     if (payment.payout50Status1 === 'paid') {
       return res.status(400).json({
         success: false,
-        message: 'First 50% payout already marked as paid'
+        message: 'First 30% payout already marked as paid'
       });
     }
 
@@ -200,12 +199,12 @@ router.post('/:tournamentId/payout-50-1/mark-paid', authenticate, requireAdmin, 
       data: {
         userId: tournament.organizerId,
         type: 'PAYOUT_RECEIVED',
-        title: 'Payment Received - First 50%',
-        message: `You have received first 50% payout (₹${payment.payout50Percent1.toFixed(2)}) for tournament "${tournament.name}"`,
+        title: 'Payment Received - First 30%',
+        message: `You have received first 30% payout (₹${payment.payout50Percent1.toFixed(2)}) for tournament "${tournament.name}"`,
         data: JSON.stringify({
           tournamentId,
           amount: payment.payout50Percent1,
-          percentage: 50,
+          percentage: 30,
           installment: 1
         })
       }
@@ -213,10 +212,10 @@ router.post('/:tournamentId/payout-50-1/mark-paid', authenticate, requireAdmin, 
 
     res.json({
       success: true,
-      message: 'First 50% payout marked as paid successfully'
+      message: 'First 30% payout marked as paid successfully'
     });
   } catch (error) {
-    console.error('Error marking first 50% payout as paid:', error);
+    console.error('Error marking first 30% payout as paid:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to mark payout as paid'
@@ -224,7 +223,7 @@ router.post('/:tournamentId/payout-50-1/mark-paid', authenticate, requireAdmin, 
   }
 });
 
-// Mark second 50% payout as paid
+// Mark second 65% payout as paid
 router.post('/:tournamentId/payout-50-2/mark-paid', authenticate, requireAdmin, async (req, res) => {
   try {
     const { tournamentId } = req.params;
@@ -245,7 +244,7 @@ router.post('/:tournamentId/payout-50-2/mark-paid', authenticate, requireAdmin, 
     if (payment.payout50Status2 === 'paid') {
       return res.status(400).json({
         success: false,
-        message: 'Second 50% payout already marked as paid'
+        message: 'Second 65% payout already marked as paid'
       });
     }
 
@@ -269,12 +268,12 @@ router.post('/:tournamentId/payout-50-2/mark-paid', authenticate, requireAdmin, 
       data: {
         userId: tournament.organizerId,
         type: 'PAYOUT_RECEIVED',
-        title: 'Payment Received - Second 50%',
-        message: `You have received final 50% payout (₹${payment.payout50Percent2.toFixed(2)}) for tournament "${tournament.name}"`,
+        title: 'Payment Received - Second 65%',
+        message: `You have received final 65% payout (₹${payment.payout50Percent2.toFixed(2)}) for tournament "${tournament.name}"`,
         data: JSON.stringify({
           tournamentId,
           amount: payment.payout50Percent2,
-          percentage: 50,
+          percentage: 65,
           installment: 2
         })
       }
@@ -282,10 +281,10 @@ router.post('/:tournamentId/payout-50-2/mark-paid', authenticate, requireAdmin, 
 
     res.json({
       success: true,
-      message: 'Second 50% payout marked as paid successfully'
+      message: 'Second 65% payout marked as paid successfully'
     });
   } catch (error) {
-    console.error('Error marking second 50% payout as paid:', error);
+    console.error('Error marking second 65% payout as paid:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to mark payout as paid'

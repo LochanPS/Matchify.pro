@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma.js';
 import {
   isGameComplete,
   getGameWinner,
@@ -7,8 +8,6 @@ import {
   validateScoreUpdate,
   determineServer,
 } from '../utils/badmintonRules.js';
-
-const prisma = new PrismaClient();
 
 /**
  * Initialize match score
@@ -112,6 +111,53 @@ async function addPoint(matchId, player) {
           completedAt: new Date(),
         },
       });
+
+      // WINNER ADVANCEMENT: If there's a parent match, advance the winner
+      if (match.parentMatchId && match.winnerPosition) {
+        const updateData = {};
+        if (match.winnerPosition === 'player1') {
+          updateData.player1Id = winnerId;
+        } else {
+          updateData.player2Id = winnerId;
+        }
+
+        // Check if parent match now has both players
+        const parentMatch = await prisma.match.findUnique({
+          where: { id: match.parentMatchId }
+        });
+
+        if (parentMatch) {
+          const bothPlayersReady = 
+            (match.winnerPosition === 'player1' && parentMatch.player2Id) ||
+            (match.winnerPosition === 'player2' && parentMatch.player1Id);
+
+          if (bothPlayersReady) {
+            updateData.status = 'READY'; // Both players assigned, match ready to start
+          }
+
+          await prisma.match.update({
+            where: { id: match.parentMatchId },
+            data: updateData
+          });
+          
+          console.log(`✅ Winner ${winnerId} advanced to next round${updateData.status === 'READY' ? ' (match now READY)' : ' (waiting for opponent)'}`);
+        }
+      }
+
+      // Check if this is the final match
+      const isFinal = match.round === 1 && !match.parentMatchId;
+      if (isFinal) {
+        const loserId = winnerId === match.player1Id ? match.player2Id : match.player1Id;
+        await prisma.category.update({
+          where: { id: match.categoryId },
+          data: {
+            winnerId: winnerId,
+            runnerUpId: loserId,
+            status: 'completed'
+          }
+        });
+        console.log(`🏆 Finals completed! Winner: ${winnerId}, Runner-up: ${loserId}`);
+      }
 
       return { scoreData, matchComplete: true, winner: matchWinner };
     }

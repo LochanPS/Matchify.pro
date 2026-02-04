@@ -1,9 +1,9 @@
 import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma.js';
 import cloudinary from '../config/cloudinary.js';
 import multer from 'multer';
 import notificationService from '../services/notificationService.js';
-
-const prisma = new PrismaClient();
+import tournamentPointsService from '../services/tournamentPoints.service.js';
 
 // Configure multer for memory storage
 const upload = multer({ storage: multer.memoryStorage() });
@@ -1641,4 +1641,191 @@ export {
   removeUmpire,
   // Registration endpoints
   getCategoryRegistrations,
+};
+
+/**
+ * End tournament - Mark as completed
+ * PUT /api/tournaments/:id/end
+ */
+export const endTournament = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.userId || req.user.id;
+
+    const tournament = await prisma.tournament.findUnique({
+      where: { id },
+      include: {
+        categories: {
+          select: { id: true, name: true }
+        }
+      }
+    });
+
+    if (!tournament) {
+      return res.status(404).json({ success: false, error: 'Tournament not found' });
+    }
+
+    const isOrganizer = tournament.organizerId === userId;
+    const hasAdminRole = req.user.roles?.includes('admin') || req.user.role === 'ADMIN';
+
+    if (!isOrganizer && !hasAdminRole) {
+      return res.status(403).json({ success: false, error: 'Not authorized' });
+    }
+
+    // Update tournament status to completed
+    const updatedTournament = await prisma.tournament.update({
+      where: { id },
+      data: { status: 'completed', updatedAt: new Date() }
+    });
+
+    // Award points to all categories in this tournament
+    console.log(`🏆 Tournament ended: ${tournament.name}`);
+    console.log(`📊 Awarding points for ${tournament.categories.length} categories...`);
+    
+    const pointsResults = [];
+    for (const category of tournament.categories) {
+      try {
+        const categoryPoints = await tournamentPointsService.awardTournamentPoints(id, category.id);
+        pointsResults.push({
+          categoryId: category.id,
+          categoryName: category.name,
+          playersAwarded: categoryPoints?.length || 0,
+          success: true
+        });
+        console.log(`✅ Points awarded for category: ${category.name} (${categoryPoints?.length || 0} players)`);
+      } catch (error) {
+        console.error(`❌ Error awarding points for category ${category.name}:`, error);
+        pointsResults.push({
+          categoryId: category.id,
+          categoryName: category.name,
+          success: false,
+          error: error.message
+        });
+      }
+    }
+
+    res.json({ 
+      success: true, 
+      message: 'Tournament ended successfully and points awarded', 
+      tournament: updatedTournament,
+      pointsAwarded: pointsResults
+    });
+  } catch (error) {
+    console.error('End tournament error:', error);
+    res.status(500).json({ success: false, error: 'Failed to end tournament' });
+  }
+};
+
+/**
+ * End a specific category (not entire tournament)
+ * PUT /api/tournaments/:tournamentId/categories/:categoryId/end
+ */
+export const endCategory = async (req, res) => {
+  console.log('🎯🎯🎯 END CATEGORY FUNCTION CALLED! 🎯🎯🎯');
+  console.log('Request method:', req.method);
+  console.log('Request path:', req.path);
+  console.log('Request params:', req.params);
+  console.log('Request URL:', req.url);
+  
+  try {
+    const { tournamentId, categoryId } = req.params;
+    const userId = req.user.userId || req.user.id;
+
+    console.log('🔍 DEBUG - endCategory called:');
+    console.log('1. tournamentId:', tournamentId);
+    console.log('2. categoryId:', categoryId);
+    console.log('3. userId:', userId);
+    console.log('4. Full params:', req.params);
+    console.log('5. Request path:', req.path);
+    console.log('6. Request method:', req.method);
+
+    // Verify tournament exists and user is authorized
+    const tournament = await prisma.tournament.findUnique({
+      where: { id: tournamentId }
+    });
+
+    console.log('7. Tournament found:', tournament ? 'YES' : 'NO');
+
+    if (!tournament) {
+      console.log('❌ Tournament not found');
+      return res.status(404).json({ success: false, error: 'Tournament not found' });
+    }
+
+    const isOrganizer = tournament.organizerId === userId;
+    const hasAdminRole = req.user.roles?.includes('admin') || req.user.role === 'ADMIN';
+
+    console.log('8. Is organizer:', isOrganizer);
+    console.log('9. Has admin role:', hasAdminRole);
+
+    if (!isOrganizer && !hasAdminRole) {
+      console.log('❌ Not authorized');
+      return res.status(403).json({ success: false, error: 'Not authorized' });
+    }
+
+    // Get category
+    const category = await prisma.category.findUnique({
+      where: { id: categoryId }
+    });
+
+    console.log('10. Category found:', category ? 'YES' : 'NO');
+    console.log('11. Category name:', category?.name);
+    console.log('12. Category status:', category?.status);
+
+    if (!category || category.tournamentId !== tournamentId) {
+      console.log('❌ Category not found or wrong tournament');
+      return res.status(404).json({ success: false, error: 'Category not found' });
+    }
+
+    // Check if already completed
+    if (category.status === 'completed') {
+      console.log('❌ Category already completed');
+      return res.status(400).json({ 
+        success: false, 
+        error: `Category '${category.name}' is already completed` 
+      });
+    }
+
+    // Update category status to completed
+    const updatedCategory = await prisma.category.update({
+      where: { id: categoryId },
+      data: { status: 'completed', updatedAt: new Date() }
+    });
+
+    console.log('✅ Category status updated to completed');
+
+    // Award points ONLY for this category
+    console.log(`🏆 Category ended: ${category.name} (${tournament.name})`);
+    console.log(`📊 Awarding points for this category...`);
+    
+    let pointsResult;
+    try {
+      const categoryPoints = await tournamentPointsService.awardTournamentPoints(tournamentId, categoryId);
+      pointsResult = {
+        categoryId: category.id,
+        categoryName: category.name,
+        playersAwarded: categoryPoints?.length || 0,
+        success: true
+      };
+      console.log(`✅ Points awarded: ${categoryPoints?.length || 0} players`);
+    } catch (error) {
+      console.error(`❌ Error awarding points:`, error);
+      pointsResult = {
+        categoryId: category.id,
+        categoryName: category.name,
+        success: false,
+        error: error.message
+      };
+    }
+
+    console.log('✅ Sending success response');
+    res.json({ 
+      success: true, 
+      message: `Category '${category.name}' ended successfully and points awarded`, 
+      category: updatedCategory,
+      pointsAwarded: pointsResult
+    });
+  } catch (error) {
+    console.error('❌ End category error:', error);
+    res.status(500).json({ success: false, error: 'Failed to end category' });
+  }
 };

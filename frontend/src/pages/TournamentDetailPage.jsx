@@ -462,8 +462,10 @@ const TournamentDetailPage = () => {
             {/* Description */}
             <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
               <h2 className="text-xl font-bold text-white mb-4">About Tournament</h2>
-              <p className="text-gray-400 whitespace-pre-wrap leading-relaxed">
-                {tournament.description || 'No description provided.'}
+              <p className="text-gray-400 whitespace-pre-wrap leading-relaxed break-words max-w-full overflow-hidden">
+                {tournament.description && tournament.description.length > 500 
+                  ? tournament.description.substring(0, 500) + '...' 
+                  : tournament.description || 'No description provided.'}
               </p>
             </div>
 

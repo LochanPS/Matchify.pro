@@ -1,10 +1,9 @@
 import twilio from 'twilio';
 import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
-
-const prisma = new PrismaClient();
 
 class SMSService {
   constructor() {

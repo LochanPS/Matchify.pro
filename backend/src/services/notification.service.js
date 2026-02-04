@@ -1,7 +1,6 @@
 import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma.js';
 import { sendPartnerInvitation, sendPartnerAccepted, sendPartnerDeclined } from './email.service.js';
-
-const prisma = new PrismaClient();
 
 // Create notification
 const createNotification = async ({ userId, type, title, message, data }) => {
@@ -27,6 +26,13 @@ const notifyPartnerInvitation = async ({ registration, playerName, partnerEmail 
   try {
     const { tournament, category, partnerToken } = registration;
 
+    // Format tournament date
+    const tournamentDate = new Date(tournament.startDate).toLocaleDateString('en-IN', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+
     // Send email
     await sendPartnerInvitation({
       to: partnerEmail,
@@ -46,10 +52,17 @@ const notifyPartnerInvitation = async ({ registration, playerName, partnerEmail 
         userId: partner.id,
         type: 'PARTNER_INVITATION',
         title: 'Partner Invitation',
-        message: `${playerName} invited you to be their partner for ${tournament.name} - ${category.name}`,
-        registrationId: registration.id,
-        tournamentId: tournament.id,
-        categoryId: category.id,
+        message: `Your partner ${playerName} has registered you and themselves in the ${category.name} category of ${tournament.name} tournament on ${tournamentDate}.`,
+        data: {
+          registrationId: registration.id,
+          tournamentId: tournament.id,
+          categoryId: category.id,
+          token: partnerToken,
+          playerName,
+          tournamentName: tournament.name,
+          categoryName: category.name,
+          tournamentDate,
+        },
       });
     }
 
@@ -85,9 +98,14 @@ const notifyPartnerAccepted = async ({ registration, partnerName }) => {
       type: 'PARTNER_ACCEPTED',
       title: 'Partner Accepted',
       message: `${partnerName} accepted your partner invitation for ${tournament.name} - ${category.name}`,
-      registrationId: registration.id,
-      tournamentId: tournament.id,
-      categoryId: category.id,
+      data: {
+        registrationId: registration.id,
+        tournamentId: tournament.id,
+        categoryId: category.id,
+        partnerName,
+        tournamentName: tournament.name,
+        categoryName: category.name,
+      },
     });
 
     return { success: true };
@@ -122,9 +140,14 @@ const notifyPartnerDeclined = async ({ registration, partnerName }) => {
       type: 'PARTNER_DECLINED',
       title: 'Partner Declined',
       message: `${partnerName} declined your partner invitation for ${tournament.name} - ${category.name}`,
-      registrationId: registration.id,
-      tournamentId: tournament.id,
-      categoryId: category.id,
+      data: {
+        registrationId: registration.id,
+        tournamentId: tournament.id,
+        categoryId: category.id,
+        partnerName,
+        tournamentName: tournament.name,
+        categoryName: category.name,
+      },
     });
 
     return { success: true };
@@ -182,10 +205,10 @@ const markAllAsRead = async (userId) => {
     await prisma.notification.updateMany({
       where: {
         userId,
-        isRead: false,
+        read: false,
       },
       data: {
-        isRead: true,
+        read: true,
         readAt: new Date(),
       },
     });
@@ -193,6 +216,58 @@ const markAllAsRead = async (userId) => {
     return { success: true };
   } catch (error) {
     console.error('Mark all as read error:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+// Delete a single notification
+const deleteNotification = async (notificationId, userId) => {
+  try {
+    // First check if notification exists and belongs to user
+    const notification = await prisma.notification.findFirst({
+      where: {
+        id: notificationId,
+        userId,
+      },
+    });
+
+    if (!notification) {
+      return { 
+        success: false, 
+        error: 'Notification not found or you do not have permission to delete it',
+        status: 404
+      };
+    }
+
+    // Delete the notification
+    await prisma.notification.delete({
+      where: {
+        id: notificationId,
+      },
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error('Delete notification error:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+// Delete all notifications for a user
+const deleteAllNotifications = async (userId) => {
+  try {
+    const result = await prisma.notification.deleteMany({
+      where: {
+        userId,
+      },
+    });
+
+    return { 
+      success: true,
+      count: result.count
+    };
+  } catch (error) {
+    console.error('Delete all notifications error:', error);
     return { success: false, error: error.message };
   }
 };
@@ -205,4 +280,6 @@ export {
   getUserNotifications,
   markAsRead,
   markAllAsRead,
+  deleteNotification,
+  deleteAllNotifications,
 };

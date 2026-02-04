@@ -1,7 +1,5 @@
 import smsService from '../services/smsService.js';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '../lib/prisma.js';
 
 export async function sendMatchReminders() {
   const fifteenMinutesLater = new Date(Date.now() + 15 * 60 * 1000);

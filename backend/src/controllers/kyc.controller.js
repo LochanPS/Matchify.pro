@@ -1,10 +1,9 @@
 import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma.js';
 import { v2 as cloudinary } from 'cloudinary';
 import multer from 'multer';
 import { createDailyRoom, deleteDailyRoom } from '../utils/daily.js';
 import sgMail from '@sendgrid/mail';
-
-const prisma = new PrismaClient();
 
 // Configure SendGrid
 if (process.env.SENDGRID_API_KEY) {

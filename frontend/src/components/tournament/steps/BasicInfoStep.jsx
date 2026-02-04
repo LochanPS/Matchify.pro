@@ -143,6 +143,7 @@ const BasicInfoStep = ({ formData, updateFormData, onNext }) => {
     if (formData.name.length < 5) newErrors.name = 'Name must be at least 5 characters';
     if (!formData.description.trim()) newErrors.description = 'Description is required';
     if (formData.description.length < 20) newErrors.description = 'Description must be at least 20 characters';
+    if (formData.description.length > 500) newErrors.description = 'Description must not exceed 500 characters';
     if (!formData.city.trim()) newErrors.city = 'City is required';
     if (!formData.state.trim()) newErrors.state = 'State is required';
     if (!formData.venue.trim()) newErrors.venue = 'Venue is required';
@@ -185,17 +186,24 @@ const BasicInfoStep = ({ formData, updateFormData, onNext }) => {
       <div>
         <label className="block text-sm font-medium text-gray-300 mb-1">
           Description <span className="text-red-500">*</span>
+          <span className="text-gray-500 text-xs ml-2">
+            ({formData.description.length}/500 characters)
+          </span>
         </label>
         <textarea
           value={formData.description}
           onChange={(e) => updateFormData('description', e.target.value)}
           placeholder="Describe your tournament..."
           rows={4}
-          className={`w-full px-4 py-3 bg-slate-700/50 border rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all ${
+          maxLength={500}
+          className={`w-full px-4 py-3 bg-slate-700/50 border rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all resize-none ${
             errors.description ? 'border-red-500' : 'border-white/10'
           }`}
         />
         {errors.description && <p className="mt-1 text-sm text-red-400">{errors.description}</p>}
+        <p className="mt-1 text-xs text-gray-500">
+          Minimum 20 characters, maximum 500 characters
+        </p>
       </div>
 
       {/* Format & Privacy - 2 columns */}

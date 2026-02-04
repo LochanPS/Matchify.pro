@@ -120,6 +120,18 @@ function AppContent() {
           <Route path="/tournaments/:tournamentId/draws/:categoryId?" element={<DrawPage />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
           
+          {/* Notification routes */}
+          <Route path="/notifications" element={
+            <ProtectedRoute>
+              <NotificationsPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/notifications/:id" element={
+            <ProtectedRoute>
+              <NotificationDetailPage />
+            </ProtectedRoute>
+          } />
+          
           {/* Invite acceptance (public) */}
           <Route path="/invite/accept/:token" element={<AcceptInvite />} />
           

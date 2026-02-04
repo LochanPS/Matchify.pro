@@ -19,11 +19,12 @@ import organizerRoutes from './routes/organizer.routes.js';
 import drawRoutes from './routes/draw.routes.js';
 import matchRoutes from './routes/match.routes.js';
 import pointsRoutes from './routes/points.routes.js';
+// leaderboardRoutes removed - using direct routes in server.js instead
 import adminRoutes from './routes/admin.routes.js';
 import superAdminRoutes from './routes/superAdmin.routes.js';
 import smsRoutes from './routes/sms.routes.js';
-import creditsRoutes from './routes/credits.routes.js';
 import academyRoutes from './routes/academy.routes.js';
+import userRoutes from './routes/user.routes.js';
 
 // Import multi-role routes
 import multiRoleAuthRoutes from './routes/multiRoleAuth.routes.js';
@@ -235,11 +236,11 @@ app.use('/api/super-admin', authenticate, superAdminRoutes);
 // SMS routes
 app.use('/api/sms', smsRoutes);
 
-// Credits routes (RBI-compliant Matchify Credits)
-app.use('/api/credits', creditsRoutes);
-
 // Academy routes
 app.use('/api/academies', academyRoutes);
+
+// User routes
+app.use('/api/users', userRoutes);
 
 // KYC routes
 import kycRoutes from './routes/kyc.routes.js';
@@ -252,20 +253,91 @@ import paymentSettingsRoutes from './routes/admin/payment-settings.routes.js';
 import paymentVerificationRoutes from './routes/admin/payment-verification.routes.js';
 import tournamentPaymentsRoutes from './routes/admin/tournament-payments.routes.js';
 import revenueAnalyticsRoutes from './routes/admin/revenue-analytics.routes.js';
+import deleteAllDataRoutes from './routes/admin/delete-all-data.routes.js';
 app.use('/api/admin/payment-settings', paymentSettingsRoutes);
 app.use('/api/admin/payment-verifications', paymentVerificationRoutes);
 app.use('/api/admin/tournament-payments', tournamentPaymentsRoutes);
 app.use('/api/admin/revenue', revenueAnalyticsRoutes);
+app.use('/api/admin', deleteAllDataRoutes);
 
 // Draw routes
 app.use('/api', drawRoutes);
+
+// ============================================
+// LEADERBOARD ROUTES (MUST BE BEFORE MATCH ROUTES)
+// ============================================
+// My rank endpoint (specific route first)
+app.get('/api/leaderboard/my-rank', authenticate, async (req, res) => {
+  console.log('🎯 MY RANK ROUTE HIT');
+  try {
+    const userId = req.user.userId || req.user.id;
+    const tournamentPointsService = (await import('./services/tournamentPoints.service.js')).default;
+    const playerRanks = await tournamentPointsService.getPlayerRankWithGeo(userId);
+    
+    if (!playerRanks) {
+      return res.status(404).json({
+        success: false,
+        error: 'Player not found'
+      });
+    }
+    
+    res.json({
+      success: true,
+      ranks: playerRanks
+    });
+  } catch (error) {
+    console.error('Get player rank error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch player rank'
+    });
+  }
+});
+
+// General leaderboard endpoint (NO AUTHENTICATION REQUIRED - PUBLIC)
+app.get('/api/leaderboard', async (req, res) => {
+  console.log('🎯🎯🎯 DIRECT LEADERBOARD ROUTE HIT!');
+  console.log('Query params:', req.query);
+  
+  try {
+    const { limit = 100, scope = 'country', city, state } = req.query;
+    
+    console.log('Calling getLeaderboard with:', { limit, scope, city, state });
+    
+    // Import the service
+    const tournamentPointsService = (await import('./services/tournamentPoints.service.js')).default;
+    
+    const leaderboard = await tournamentPointsService.getLeaderboard(
+      parseInt(limit),
+      scope,
+      city,
+      state
+    );
+    
+    console.log(`✅ Leaderboard fetched: ${leaderboard.length} players`);
+    
+    res.json({
+      success: true,
+      leaderboard,
+      total: leaderboard.length,
+      scope,
+      filters: { city, state }
+    });
+  } catch (error) {
+    console.error('❌ Direct leaderboard error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch leaderboard'
+    });
+  }
+});
 
 // Match routes (both old and new multi-role)
 app.use('/api', matchRoutes);  // For tournament-related match routes
 app.use('/api/matches', matchRoutes);  // For /matches/:matchId routes
 app.use('/api/multi-matches', multiRoleMatchRoutes);
 
-// Points and leaderboard routes
+// Points routes (after leaderboard)
 app.use('/api', pointsRoutes);
 
 // Test routes for authentication

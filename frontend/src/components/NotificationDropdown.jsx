@@ -95,8 +95,9 @@ const NotificationDropdown = ({ onClose }) => {
       
       case 'MATCH_ASSIGNED':
       case 'MATCH_STARTING_SOON':
-        if (data.matchId && data.tournamentId) {
-          return `/tournaments/${data.tournamentId}/matches/${data.matchId}`;
+        if (data.matchId) {
+          // Navigate to umpire scoring page
+          return `/umpire/scoring/${data.matchId}`;
         }
         if (data.tournamentId) {
           return `/tournaments/${data.tournamentId}`;
@@ -127,9 +128,17 @@ const NotificationDropdown = ({ onClose }) => {
       markAsRead(notification.id);
     }
     
-    // Always navigate to the notification detail page
+    // Get the correct navigation path based on notification type
+    const path = getNotificationPath(notification);
+    
     onClose();
-    navigate(`/notifications/${notification.id}`);
+    
+    // Navigate to the specific page if path exists, otherwise to notification detail
+    if (path) {
+      navigate(path);
+    } else {
+      navigate(`/notifications/${notification.id}`);
+    }
   };
 
   return (

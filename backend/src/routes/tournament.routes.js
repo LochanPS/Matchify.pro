@@ -17,7 +17,11 @@ import {
   getTournamentUmpires,
   removeUmpire,
   getCategoryRegistrations,
+  endTournament,
+  endCategory,
 } from '../controllers/tournament.controller.js';
+import { getMatches, createMatch, assignUmpire } from '../controllers/match.controller.js';
+import { restartDraw } from '../controllers/restartDraw.controller.js';
 import { authenticate, preventAdminAccess } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -27,6 +31,17 @@ router.get('/', getTournaments); // Get all tournaments (with filters)
 router.get('/:id', getTournament); // Get single tournament
 router.get('/:id/categories', getCategories); // Get tournament categories (public)
 router.get('/:tournamentId/categories/:categoryId/registrations', getCategoryRegistrations); // Get category registrations
+
+// Match routes (require authentication but allow admins)
+router.get('/:tournamentId/categories/:categoryId/matches', authenticate, getMatches);
+router.post('/:tournamentId/categories/:categoryId/matches', authenticate, createMatch);
+
+// Restart draw route (require authentication, organizer only)
+router.post('/:tournamentId/categories/:categoryId/draw/restart', authenticate, restartDraw);
+
+// End category route (require authentication, organizer only)
+// IMPORTANT: This route MUST be before the generic /:id/categories/:categoryId route
+router.put('/:tournamentId/categories/:categoryId/end', authenticate, endCategory);
 
 // Protected routes (require authentication + block admins)
 router.use(authenticate);
@@ -49,6 +64,9 @@ router.post('/:id/payment-qr', upload.single('paymentQR'), uploadPaymentQR);
 
 // PUT /api/tournaments/:id/payment-info - Update payment info
 router.put('/:id/payment-info', updatePaymentInfo);
+
+// PUT /api/tournaments/:id/end - End tournament (legacy - ends all categories)
+router.put('/:id/end', endTournament);
 
 // Category routes (organizer only)
 router.post('/:id/categories', createCategory);

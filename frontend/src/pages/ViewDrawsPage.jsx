@@ -468,6 +468,15 @@ const KnockoutBracket = ({ data }) => {
     return `Round ${idx + 1}`;
   };
 
+  // Helper function to display player name with partner
+  const getPlayerDisplay = (player) => {
+    if (!player || !player.name || player.name === 'TBD') return 'TBD';
+    if (player.partnerName) {
+      return `${player.name} & ${player.partnerName}`;
+    }
+    return player.name;
+  };
+
   return (
     <div className="overflow-x-auto">
       <div className="flex gap-6 min-w-max p-4">
@@ -476,12 +485,12 @@ const KnockoutBracket = ({ data }) => {
             <h4 className="text-sm font-semibold text-amber-400 text-center mb-3">{getRoundName(ri, data.rounds.length)}</h4>
             <div className="flex flex-col justify-around flex-1 gap-2" style={{ paddingTop: ri > 0 ? `${Math.pow(2, ri) * 16}px` : 0 }}>
               {round.matches.map((match, mi) => (
-                <div key={mi} className="bg-slate-700/50 border border-white/10 rounded-lg p-2 w-44" style={{ marginBottom: ri > 0 ? `${Math.pow(2, ri) * 32}px` : 0 }}>
+                <div key={mi} className="bg-slate-700/50 border border-white/10 rounded-lg p-2 w-56" style={{ marginBottom: ri > 0 ? `${Math.pow(2, ri) * 32}px` : 0 }}>
                   <div className={`px-2 py-1.5 rounded mb-1 text-sm ${match.winner === 1 ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-600/50 text-white'}`}>
-                    {match.player1?.name || 'TBD'}
+                    {getPlayerDisplay(match.player1)}
                   </div>
                   <div className={`px-2 py-1.5 rounded text-sm ${match.winner === 2 ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-600/50 text-white'}`}>
-                    {match.player2?.name || 'TBD'}
+                    {getPlayerDisplay(match.player2)}
                   </div>
                 </div>
               ))}

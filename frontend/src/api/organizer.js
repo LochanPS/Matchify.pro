@@ -69,8 +69,12 @@ export const rejectRefund = async (registrationId, reason) => {
   return response.data;
 };
 
-// Mark refund as completed
-export const completeRefund = async (registrationId) => {
-  const response = await api.put(`/organizer/registrations/${registrationId}/complete-refund`);
+// Mark refund as completed (with payment screenshot proof)
+export const completeRefund = async (registrationId, formData) => {
+  const response = await api.put(`/organizer/registrations/${registrationId}/complete-refund`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
   return response.data;
 };

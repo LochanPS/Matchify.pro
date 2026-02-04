@@ -103,10 +103,10 @@ class AdminPaymentService {
 
       // Calculate payment breakdown
       const totalAmount = registration.amountTotal;
-      const platformFee = totalAmount * 0.05; // 5%
-      const organizerShare = totalAmount * 0.95; // 95%
-      const firstPayment = totalAmount * 0.30; // 30%
-      const secondPayment = totalAmount * 0.65; // 65%
+      const platformFee = totalAmount * 0.05; // 5% of total
+      const organizerShare = totalAmount - platformFee; // For display only (95%)
+      const firstPayment = totalAmount * 0.30; // 30% of TOTAL
+      const secondPayment = totalAmount * 0.65; // 65% of TOTAL
 
       // Create or update tournament payment record
       await this.updateTournamentPayment(registration.tournamentId, {

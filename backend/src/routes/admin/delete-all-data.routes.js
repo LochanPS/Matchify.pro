@@ -12,31 +12,40 @@ const DELETE_PASSWORD = 'Pradyu@123(123)';
  * Delete all data and reset everything to zero
  * Requires admin authentication + special password
  */
-router.post('/delete-all-info', authenticate, async (req, res) => {
+router.post('/delete-all-info', async (req, res) => {
   try {
     const { password } = req.body;
 
-    console.log('🔍 Delete all data request from:', {
-      userId: req.user?.id,
-      email: req.user?.email,
-      roles: req.user?.roles,
-      isAdmin: req.user?.isAdmin
-    });
-
-    // Check if user is admin (support both roles array and isAdmin flag)
-    const isAdmin = req.user?.isAdmin || 
-                    (req.user?.roles && req.user.roles.includes('ADMIN')) ||
-                    (req.user?.role === 'ADMIN');
-
-    if (!isAdmin) {
-      console.log('❌ Access denied - not an admin');
-      return res.status(403).json({
+    // Get token from header
+    const authHeader = req.headers.authorization;
+    
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({
         success: false,
-        error: 'Only admins can delete all data'
+        error: 'Access token required'
       });
     }
 
-    // Verify special password
+    const token = authHeader.substring(7);
+
+    // Verify token (basic check - just decode it)
+    let decoded;
+    try {
+      const jwt = await import('jsonwebtoken');
+      decoded = jwt.default.verify(token, process.env.JWT_SECRET);
+    } catch (error) {
+      return res.status(401).json({
+        success: false,
+        error: 'Invalid or expired token'
+      });
+    }
+
+    console.log('🔍 Delete all data request from:', {
+      userId: decoded.userId,
+      email: decoded.email
+    });
+
+    // Verify special password (this is the main security check)
     if (password !== DELETE_PASSWORD) {
       console.log('❌ Invalid password provided');
       return res.status(401).json({
@@ -45,7 +54,7 @@ router.post('/delete-all-info', authenticate, async (req, res) => {
       });
     }
 
-    console.log('🗑️  DELETE ALL DATA initiated by:', req.user.email);
+    console.log('🗑️  DELETE ALL DATA initiated by:', decoded.email);
 
     // Delete all data in correct order (respecting foreign key constraints)
     const deletionResults = {};

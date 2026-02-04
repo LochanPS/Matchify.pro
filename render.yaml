@@ -33,6 +33,12 @@ services:
         value: ADMIN@gmail.com
       - key: ADMIN_PASSWORD
         value: ADMIN@123(123)
+      - key: CLOUDINARY_CLOUD_NAME
+        value: dfg8tdgmf
+      - key: CLOUDINARY_API_KEY
+        value: 417764488597768
+      - key: CLOUDINARY_API_SECRET
+        value: ithriq7poX0T-4_j3PWmhlVmHqI
 
 databases:
   - name: matchify-db

@@ -43,6 +43,35 @@ const TournamentPaymentsPage = () => {
     );
   }
 
+  // Show error state if data failed to load
+  if (!stats) {
+    return (
+      <div className="min-h-screen bg-slate-900 p-6">
+        <button
+          onClick={() => navigate('/admin-dashboard')}
+          className="mb-6 flex items-center gap-2 text-gray-400 hover:text-teal-400 transition"
+        >
+          <span>←</span>
+          <span>Back to Dashboard</span>
+        </button>
+        
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <div className="text-6xl mb-4">⚠️</div>
+            <h2 className="text-2xl font-bold text-white mb-2">Failed to Load Payment Data</h2>
+            <p className="text-gray-400 mb-6">There was an error loading the tournament payments.</p>
+            <button
+              onClick={fetchData}
+              className="px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white rounded-lg transition"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-900 p-6">
       {/* Back Button */}
@@ -66,22 +95,22 @@ const TournamentPaymentsPage = () => {
           <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-lg">
             <p className="text-gray-400 text-sm">Total Collected</p>
             <p className="text-3xl font-bold text-white mt-2">
-              ₹{stats.totalCollected.toLocaleString()}
+              ₹{(stats?.totalCollected || 0).toLocaleString()}
             </p>
           </div>
           <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-lg">
             <p className="text-gray-400 text-sm">Platform Fees</p>
             <p className="text-3xl font-bold text-teal-400 mt-2">
-              ₹{stats.totalPlatformFees.toLocaleString()}
+              ₹{(stats?.totalPlatformFees || stats?.platformFees || 0).toLocaleString()}
             </p>
           </div>
           <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-lg">
             <p className="text-gray-400 text-sm">Pending First 30% Payouts</p>
-            <p className="text-3xl font-bold text-yellow-400 mt-2">{stats.pending50Payouts1}</p>
+            <p className="text-3xl font-bold text-yellow-400 mt-2">{stats?.pending50Payouts1 || 0}</p>
           </div>
           <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-lg">
             <p className="text-gray-400 text-sm">Pending Second 65% Payouts</p>
-            <p className="text-3xl font-bold text-orange-400 mt-2">{stats.pending50Payouts2}</p>
+            <p className="text-3xl font-bold text-orange-400 mt-2">{stats?.pending50Payouts2 || 0}</p>
           </div>
         </div>
       )}

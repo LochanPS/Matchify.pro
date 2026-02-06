@@ -16,18 +16,8 @@ router.get('/', authenticate, getNotifications);
 // GET /api/notifications/unread-count - Get count of unread notifications
 router.get('/unread-count', authenticate, async (req, res) => {
   try {
-    const { PrismaClient } = await import('@prisma/client');
-    const prisma = new PrismaClient();
-    
-    const count = await prisma.notification.count({
-      where: {
-        userId: req.user.id,
-        read: false
-      }
-    });
-    
-    await prisma.$disconnect();
-    res.json({ count });
+    // For simplified SQLite schema without Notification table, return 0
+    res.json({ count: 0 });
   } catch (error) {
     console.error('Error getting unread count:', error);
     res.status(500).json({ error: 'Failed to get unread count' });

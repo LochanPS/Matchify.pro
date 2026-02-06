@@ -19,7 +19,7 @@ router.get('/users', authenticate, requireAdmin, async (req, res) => {
     const limit = Math.min(parseInt(req.query.limit) || 20, 100); // Max 100 per page
     const skip = (page - 1) * limit;
     const search = req.query.search || '';
-    const role = req.query.role || '';
+    const roleFilter = req.query.role || '';
     const status = req.query.status || '';
 
     // Build where clause for filtering
@@ -28,15 +28,18 @@ router.get('/users', authenticate, requireAdmin, async (req, res) => {
     // Search by name, email, or phone
     if (search) {
       where.OR = [
-        { name: { contains: search, mode: 'insensitive' } },
-        { email: { contains: search, mode: 'insensitive' } },
+        { name: { contains: search } },
+        { email: { contains: search } },
         { phone: { contains: search } }
       ];
     }
 
-    // Filter by role
-    if (role) {
-      where.roles = { contains: role };
+    // Filter by role (handle both 'role' and 'roles' fields)
+    if (roleFilter) {
+      where.OR = [
+        { role: roleFilter },
+        { roles: { contains: roleFilter } }
+      ];
     }
 
     // Filter by status
@@ -52,13 +55,12 @@ router.get('/users', authenticate, requireAdmin, async (req, res) => {
     // Get total count with filters
     const totalUsers = await prisma.user.count({ where });
 
-    // Get users with pagination and filters
+    // Get users with pagination and filters - only select fields that exist
     const users = await prisma.user.findMany({
       where,
       skip,
       take: limit,
       orderBy: [
-        { roles: 'desc' }, // Admin users first (ADMIN comes before PLAYER alphabetically when reversed)
         { createdAt: 'desc' }
       ],
       select: {
@@ -66,7 +68,7 @@ router.get('/users', authenticate, requireAdmin, async (req, res) => {
         email: true,
         name: true,
         phone: true,
-        roles: true,
+        role: true,
         city: true,
         state: true,
         country: true,
@@ -80,27 +82,21 @@ router.get('/users', authenticate, requireAdmin, async (req, res) => {
         isSuspended: true,
         suspendedUntil: true,
         suspensionReason: true,
-        isVerifiedOrganizer: true,
-        isVerifiedPlayer: true,
-        isVerifiedUmpire: true,
-        tournamentsRegistered: true,
-        matchesUmpired: true,
         createdAt: true,
-        updatedAt: true,
-        _count: {
-          select: {
-            registrations: true,
-            tournaments: true,
-            walletTransactions: true
-          }
-        }
+        updatedAt: true
       }
     });
 
+    // Format users to match expected format (convert role to roles array)
+    const formattedUsers = users.map(user => ({
+      ...user,
+      roles: user.role || 'PLAYER' // Convert single role to string for compatibility
+    }));
+
     // Sort to ensure admin is always first
-    const sortedUsers = users.sort((a, b) => {
-      const aIsAdmin = a.roles?.includes('ADMIN');
-      const bIsAdmin = b.roles?.includes('ADMIN');
+    const sortedUsers = formattedUsers.sort((a, b) => {
+      const aIsAdmin = a.role === 'ADMIN' || a.roles === 'ADMIN';
+      const bIsAdmin = b.role === 'ADMIN' || b.roles === 'ADMIN';
       if (aIsAdmin && !bIsAdmin) return -1;
       if (!aIsAdmin && bIsAdmin) return 1;
       return 0;
@@ -121,6 +117,7 @@ router.get('/users', authenticate, requireAdmin, async (req, res) => {
     console.error('Error fetching users:', error);
     res.status(500).json({
       success: false,
+      message: error.message,
       error: 'Failed to fetch users'
     });
   }
@@ -136,12 +133,9 @@ router.get('/users/:id', authenticate, requireAdmin, async (req, res) => {
       select: {
         id: true,
         email: true,
-        alternateEmail: true,
         name: true,
         phone: true,
-        roles: true,
-        playerCode: true,
-        umpireCode: true,
+        role: true,
         profilePhoto: true,
         city: true,
         state: true,
@@ -158,23 +152,8 @@ router.get('/users/:id', authenticate, requireAdmin, async (req, res) => {
         isSuspended: true,
         suspendedUntil: true,
         suspensionReason: true,
-        isVerifiedOrganizer: true,
-        isVerifiedPlayer: true,
-        isVerifiedUmpire: true,
-        tournamentsRegistered: true,
-        matchesUmpired: true,
-        availableForKYC: true,
         createdAt: true,
-        updatedAt: true,
-        _count: {
-          select: {
-            registrations: true,
-            tournaments: true,
-            walletTransactions: true,
-            notifications: true,
-            umpiredMatches: true
-          }
-        }
+        updatedAt: true
       }
     });
 
@@ -185,9 +164,15 @@ router.get('/users/:id', authenticate, requireAdmin, async (req, res) => {
       });
     }
 
+    // Format to match expected format
+    const formattedUser = {
+      ...user,
+      roles: user.role || 'PLAYER'
+    };
+
     res.json({
       success: true,
-      user
+      user: formattedUser
     });
   } catch (error) {
     console.error('Error fetching user:', error);

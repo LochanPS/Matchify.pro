@@ -81,7 +81,7 @@ async function generateUmpireCode() {
 // REGISTER - All users get all three roles automatically
 export const register = async (req, res) => {
   try {
-    const { email, password, name, phone, alternateEmail } = req.body;
+    const { email, password, name, phone, alternateEmail, city, state, gender, dateOfBirth } = req.body;
 
     // Validate required fields
     if (!name || !email || !password || !phone) {
@@ -164,55 +164,26 @@ export const register = async (req, res) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Generate unique player code and umpire code for all users
-    const playerCode = await generatePlayerCode();
-    const umpireCode = await generateUmpireCode();
-
-    // Create user with all three roles
-    // All new users get ₹10 welcome bonus
+    // For simplified schema - no player codes or profiles
+    // Create user with basic fields only
     const user = await prisma.user.create({
       data: {
         email,
         password: hashedPassword,
         name,
         phone,
-        alternateEmail: alternateEmail || null,
-        roles: userRoles.join(','),
-        playerCode, // All users get player code
-        umpireCode, // All users get umpire code
-        walletBalance: 10, // Welcome bonus
+        role: userRoles[0], // Use 'role' field (singular) for simplified schema
+        walletBalance: 0, // No welcome bonus in simplified schema
+        city: city || null,
+        state: state || null,
+        gender: gender || null,
+        dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
       },
     });
 
-    // Create welcome bonus transaction
-    await prisma.walletTransaction.create({
-      data: {
-        userId: user.id,
-        type: 'CREDIT',
-        amount: 10,
-        balanceBefore: 0,
-        balanceAfter: 10,
-        description: 'Welcome bonus - ₹10 credits!',
-        status: 'COMPLETED',
-      },
-    });
-
-    // Create all role-specific profiles
-    await prisma.playerProfile.create({
-      data: { userId: user.id },
-    });
-    
-    await prisma.organizerProfile.create({
-      data: { userId: user.id },
-    });
-    
-    await prisma.umpireProfile.create({
-      data: { userId: user.id },
-    });
-
-    // Generate JWT with all roles
+    // Generate JWT with role
     const token = jwt.sign(
-      { userId: user.id, email: user.email, roles: userRoles },
+      { userId: user.id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
@@ -233,9 +204,7 @@ export const register = async (req, res) => {
         profilePhoto: user.profilePhoto,
         walletBalance: user.walletBalance,
         totalPoints: user.totalPoints,
-        playerCode: user.playerCode,
-        umpireCode: user.umpireCode,
-        roles: userRoles,
+        role: user.role,
       },
     });
   } catch (error) {
@@ -302,14 +271,9 @@ export const login = async (req, res) => {
       });
     }
 
-    // Find user with all profile fields
+    // Find user - simplified schema (no includes)
     const user = await prisma.user.findUnique({
       where: { email },
-      include: {
-        playerProfile: true,
-        organizerProfile: true,
-        umpireProfile: true,
-      },
     });
 
     if (!user) {
@@ -332,12 +296,25 @@ export const login = async (req, res) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    // Parse roles from comma-separated string
-    const userRoles = user.roles ? user.roles.split(',') : ['PLAYER'];
+    // Parse roles - handle both 'role' (singular) and 'roles' (plural) fields
+    let userRoles;
+    if (user.roles) {
+      // If roles field exists (comma-separated string)
+      userRoles = user.roles.split(',');
+    } else if (user.role) {
+      // If only role field exists (single value)
+      userRoles = [user.role];
+    } else {
+      // Default to PLAYER
+      userRoles = ['PLAYER'];
+    }
+    
+    // Check if user is admin
+    const isAdmin = userRoles.includes('ADMIN');
 
     // Generate JWT with all roles
     const token = jwt.sign(
-      { userId: user.id, email: user.email, roles: userRoles, isAdmin: false },
+      { userId: user.id, email: user.email, roles: userRoles, isAdmin: isAdmin },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
@@ -358,15 +335,8 @@ export const login = async (req, res) => {
         profilePhoto: user.profilePhoto,
         walletBalance: user.walletBalance,
         totalPoints: user.totalPoints,
-        playerCode: user.playerCode,
-        umpireCode: user.umpireCode,
-        roles: userRoles,
-        isAdmin: false,
-        profiles: {
-          player: user.playerProfile,
-          organizer: user.organizerProfile,
-          umpire: user.umpireProfile,
-        },
+        role: user.role,
+        isAdmin: isAdmin,
       },
     });
   } catch (error) {

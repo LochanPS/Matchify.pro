@@ -3,35 +3,68 @@ import prisma from '../../lib/prisma.js';
 import { authenticate, requireAdmin } from '../../middleware/auth.js';
 import multer from 'multer';
 import { v2 as cloudinary } from 'cloudinary';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const router = express.Router();
 
 // Configure multer for memory storage
 const upload = multer({ storage: multer.memoryStorage() });
 
+// Path to store payment settings
+const SETTINGS_FILE = path.join(__dirname, '../../../payment-settings.json');
+
+// Helper function to read settings from file
+const readSettings = () => {
+  try {
+    if (fs.existsSync(SETTINGS_FILE)) {
+      const data = fs.readFileSync(SETTINGS_FILE, 'utf8');
+      return JSON.parse(data);
+    }
+  } catch (error) {
+    console.error('Error reading settings file:', error);
+  }
+  // Return default settings if file doesn't exist or error
+  return {
+    id: '1',
+    upiId: 'matchify@upi',
+    accountHolder: 'Matchify Pro',
+    qrCodeUrl: '/uploads/payment-qr/default-qr.png',
+    qrCodePublicId: null,
+    isActive: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+};
+
+// Helper function to write settings to file
+const writeSettings = (settings) => {
+  try {
+    fs.writeFileSync(SETTINGS_FILE, JSON.stringify(settings, null, 2), 'utf8');
+    return true;
+  } catch (error) {
+    console.error('Error writing settings file:', error);
+    return false;
+  }
+};
+
 // Get current payment settings (PUBLIC - for players to see QR code)
 router.get('/public', async (req, res) => {
   try {
-    const settings = await prisma.paymentSettings.findFirst({
-      where: { isActive: true },
-      select: {
-        upiId: true,
-        accountHolder: true,
-        qrCodeUrl: true,
-        isActive: true
-      }
-    });
-
-    if (!settings) {
-      return res.status(404).json({
-        success: false,
-        message: 'Payment settings not found'
-      });
-    }
-
+    const settings = readSettings();
+    
     res.json({
       success: true,
-      data: settings
+      data: {
+        upiId: settings.upiId,
+        accountHolder: settings.accountHolder,
+        qrCodeUrl: settings.qrCodeUrl,
+        isActive: settings.isActive
+      }
     });
   } catch (error) {
     console.error('Error fetching public payment settings:', error);
@@ -46,19 +79,8 @@ router.get('/public', async (req, res) => {
 router.get('/', authenticate, requireAdmin, async (req, res) => {
   console.log('📊 Get payment settings request');
   try {
-    const settings = await prisma.paymentSettings.findFirst({
-      where: { isActive: true }
-    });
-
-    if (!settings) {
-      console.log('❌ No payment settings found');
-      return res.status(404).json({
-        success: false,
-        message: 'Payment settings not found. Please initialize payment settings.'
-      });
-    }
-
-    console.log('✅ Payment settings found:', settings.id);
+    const settings = readSettings();
+    console.log('✅ Payment settings loaded from file');
 
     res.json({
       success: true,
@@ -83,92 +105,62 @@ router.put('/', authenticate, requireAdmin, upload.single('qrCode'), async (req,
     const { upiId, accountHolder } = req.body;
     const file = req.file;
 
-    // Get current settings
-    const currentSettings = await prisma.paymentSettings.findFirst({
-      where: { isActive: true }
-    });
-
-    if (!currentSettings) {
-      console.log('❌ No payment settings found in database');
-      return res.status(404).json({
-        success: false,
-        message: 'Payment settings not found. Please initialize payment settings first.'
-      });
-    }
-
-    console.log('✅ Current settings found:', currentSettings.id);
+    // Read current settings
+    const currentSettings = readSettings();
+    console.log('📖 Current settings:', currentSettings);
 
     let qrCodeUrl = currentSettings.qrCodeUrl;
     let qrCodePublicId = currentSettings.qrCodePublicId;
 
     // Upload new QR code if provided
     if (file) {
-      console.log('📤 Uploading new QR code to Cloudinary...');
+      console.log('📤 New QR code file uploaded, saving locally...');
       
-      // Check if Cloudinary is configured
-      if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
-        console.log('❌ Cloudinary not configured!');
-        return res.status(500).json({
-          success: false,
-          message: 'Cloudinary is not configured. Please contact administrator.'
-        });
+      // For simplified schema, save to local uploads folder
+      const uploadsDir = path.join(__dirname, '../../../uploads/payment-qr');
+      
+      // Create directory if it doesn't exist
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
       }
-
-      try {
-        // Delete old QR code from Cloudinary if exists
-        if (currentSettings.qrCodePublicId) {
-          try {
-            console.log('🗑️  Deleting old QR code:', currentSettings.qrCodePublicId);
-            await cloudinary.uploader.destroy(currentSettings.qrCodePublicId);
-          } catch (error) {
-            console.error('⚠️  Error deleting old QR code:', error.message);
-          }
-        }
-
-        // Upload new QR code
-        const uploadResult = await new Promise((resolve, reject) => {
-          const uploadStream = cloudinary.uploader.upload_stream(
-            {
-              folder: 'matchify/payment-qr',
-              resource_type: 'image'
-            },
-            (error, result) => {
-              if (error) {
-                console.error('❌ Cloudinary upload error:', error);
-                reject(error);
-              } else {
-                console.log('✅ Cloudinary upload success:', result.secure_url);
-                resolve(result);
-              }
-            }
-          );
-          uploadStream.end(file.buffer);
-        });
-
-        qrCodeUrl = uploadResult.secure_url;
-        qrCodePublicId = uploadResult.public_id;
-      } catch (uploadError) {
-        console.error('❌ Failed to upload to Cloudinary:', uploadError);
-        return res.status(500).json({
-          success: false,
-          message: 'Failed to upload QR code. Please try again.'
-        });
-      }
+      
+      // Generate unique filename
+      const filename = `qr-${Date.now()}.${file.mimetype.split('/')[1]}`;
+      const filepath = path.join(uploadsDir, filename);
+      
+      // Save file
+      fs.writeFileSync(filepath, file.buffer);
+      
+      // Update URL to point to uploaded file
+      qrCodeUrl = `/uploads/payment-qr/${filename}`;
+      console.log('✅ QR code saved:', qrCodeUrl);
     }
 
     // Update settings
-    console.log('💾 Updating database...');
-    const updatedSettings = await prisma.paymentSettings.update({
-      where: { id: currentSettings.id },
-      data: {
-        upiId: upiId || currentSettings.upiId,
-        accountHolder: accountHolder || currentSettings.accountHolder,
-        qrCodeUrl,
-        qrCodePublicId
-      }
-    });
+    const updatedSettings = {
+      id: currentSettings.id,
+      upiId: upiId || currentSettings.upiId,
+      accountHolder: accountHolder || currentSettings.accountHolder,
+      qrCodeUrl,
+      qrCodePublicId,
+      isActive: true,
+      createdAt: currentSettings.createdAt,
+      updatedAt: new Date().toISOString()
+    };
+
+    // Save to file
+    const saved = writeSettings(updatedSettings);
+    
+    if (!saved) {
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to save settings to file'
+      });
+    }
 
     console.log('✅ Payment settings updated successfully');
+    console.log('   UPI ID:', updatedSettings.upiId);
+    console.log('   Account Holder:', updatedSettings.accountHolder);
 
     res.json({
       success: true,

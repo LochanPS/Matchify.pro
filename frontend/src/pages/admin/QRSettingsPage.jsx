@@ -110,9 +110,14 @@ const QRSettingsPage = () => {
             {settings?.qrCodeUrl ? (
               <div className="bg-slate-900 rounded-lg p-4 border border-slate-700">
                 <img
-                  src={settings.qrCodeUrl}
+                  src={settings.qrCodeUrl.startsWith('http') ? settings.qrCodeUrl : `http://localhost:5000${settings.qrCodeUrl}`}
                   alt="Payment QR Code"
                   className="w-full max-w-sm mx-auto"
+                  onError={(e) => {
+                    console.error('Failed to load QR code:', settings.qrCodeUrl);
+                    e.target.style.display = 'none';
+                    e.target.parentElement.innerHTML = '<p class="text-red-400 text-center">Failed to load QR code</p>';
+                  }}
                 />
               </div>
             ) : (

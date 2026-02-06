@@ -213,7 +213,9 @@ router.post('/login', async (req, res) => {
     }
 
     // Generate tokens
-    const accessToken = generateAccessToken(user.id, user.role);
+    // Convert role string to array for consistency
+    const userRoles = user.role ? [user.role] : ['PLAYER'];
+    const accessToken = generateAccessToken(user.id, userRoles);
     const refreshToken = generateRefreshToken(user.id);
 
     // Update refresh token in database
@@ -273,7 +275,9 @@ router.post('/refresh-token', async (req, res) => {
     }
 
     // Generate new tokens
-    const newAccessToken = generateAccessToken(user.id, user.role);
+    // Convert role string to array for consistency
+    const userRoles = user.role ? [user.role] : ['PLAYER'];
+    const newAccessToken = generateAccessToken(user.id, userRoles);
     const newRefreshToken = generateRefreshToken(user.id);
 
     // Update refresh token in database
@@ -342,9 +346,7 @@ router.get('/me', async (req, res) => {
         email: true,
         name: true,
         phone: true,
-        roles: true,
-        playerCode: true,
-        umpireCode: true,
+        role: true, // Use 'role' instead of 'roles' for simplified schema
         city: true,
         state: true,
         country: true,

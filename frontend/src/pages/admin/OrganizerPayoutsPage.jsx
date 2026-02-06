@@ -20,10 +20,11 @@ const OrganizerPayoutsPage = () => {
     try {
       setLoading(true);
       const response = await getPendingPayouts(filter);
-      setPayouts(response.data);
+      setPayouts(response.data || []);
     } catch (error) {
       console.error('Error fetching payouts:', error);
       toast.error('Failed to load payouts');
+      setPayouts([]);
     } finally {
       setLoading(false);
     }
@@ -67,8 +68,8 @@ const OrganizerPayoutsPage = () => {
     );
   }
 
-  const pending50_1 = payouts.filter(p => p.payout50Status1 === 'pending');
-  const pending50_2 = payouts.filter(p => p.payout50Status2 === 'pending');
+  const pending50_1 = payouts.filter(p => p?.payout50Status1 === 'pending');
+  const pending50_2 = payouts.filter(p => p?.payout50Status2 === 'pending');
 
   return (
     <div className="min-h-screen bg-slate-900 p-6">
@@ -93,22 +94,22 @@ const OrganizerPayoutsPage = () => {
           <p className="text-gray-400 text-sm">Pending First 30% Payouts</p>
           <p className="text-4xl font-bold text-yellow-400 mt-2">{pending50_1.length}</p>
           <p className="text-gray-500 text-sm mt-2">
-            Total: ₹{pending50_1.reduce((sum, p) => sum + p.payout50Percent1, 0).toLocaleString()}
+            Total: ₹{pending50_1.reduce((sum, p) => sum + (p?.payout50Percent1 || 0), 0).toLocaleString()}
           </p>
         </div>
         <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-lg">
           <p className="text-gray-400 text-sm">Pending Second 65% Payouts</p>
           <p className="text-4xl font-bold text-orange-400 mt-2">{pending50_2.length}</p>
           <p className="text-gray-500 text-sm mt-2">
-            Total: ₹{pending50_2.reduce((sum, p) => sum + p.payout50Percent2, 0).toLocaleString()}
+            Total: ₹{pending50_2.reduce((sum, p) => sum + (p?.payout50Percent2 || 0), 0).toLocaleString()}
           </p>
         </div>
         <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-lg">
           <p className="text-gray-400 text-sm">Total Pending Amount</p>
           <p className="text-4xl font-bold text-teal-400 mt-2">
             ₹{(
-              pending50_1.reduce((sum, p) => sum + p.payout50Percent1, 0) +
-              pending50_2.reduce((sum, p) => sum + p.payout50Percent2, 0)
+              pending50_1.reduce((sum, p) => sum + (p?.payout50Percent1 || 0), 0) +
+              pending50_2.reduce((sum, p) => sum + (p?.payout50Percent2 || 0), 0)
             ).toLocaleString()}
           </p>
         </div>

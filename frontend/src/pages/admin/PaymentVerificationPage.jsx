@@ -96,7 +96,7 @@ const PaymentVerificationPage = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-400 text-sm">Pending</p>
-                <p className="text-3xl font-bold text-yellow-400 mt-2">{stats.pending}</p>
+                <p className="text-3xl font-bold text-yellow-400 mt-2">{stats?.pending || 0}</p>
               </div>
               <div className="text-4xl">⏳</div>
             </div>
@@ -106,7 +106,7 @@ const PaymentVerificationPage = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-400 text-sm">Approved</p>
-                <p className="text-3xl font-bold text-green-400 mt-2">{stats.approved}</p>
+                <p className="text-3xl font-bold text-green-400 mt-2">{stats?.approved || 0}</p>
               </div>
               <div className="text-4xl">✅</div>
             </div>
@@ -116,7 +116,7 @@ const PaymentVerificationPage = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-400 text-sm">Rejected</p>
-                <p className="text-3xl font-bold text-red-400 mt-2">{stats.rejected}</p>
+                <p className="text-3xl font-bold text-red-400 mt-2">{stats?.rejected || 0}</p>
               </div>
               <div className="text-4xl">❌</div>
             </div>
@@ -127,7 +127,7 @@ const PaymentVerificationPage = () => {
               <div>
                 <p className="text-gray-400 text-sm">Total Collected</p>
                 <p className="text-3xl font-bold text-teal-400 mt-2">
-                  ₹{stats.totalAmountCollected.toLocaleString()}
+                  ₹{(stats?.totalAmountCollected || stats?.totalAmount || 0).toLocaleString()}
                 </p>
               </div>
               <div className="text-4xl">💰</div>

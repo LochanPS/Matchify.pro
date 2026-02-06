@@ -93,6 +93,35 @@ const RevenueDashboardPage = () => {
     );
   }
 
+  // Show error state if data failed to load
+  if (!overview) {
+    return (
+      <div className="min-h-screen bg-slate-900 p-6">
+        <button
+          onClick={() => navigate('/admin-dashboard')}
+          className="mb-6 flex items-center gap-2 text-gray-400 hover:text-teal-400 transition"
+        >
+          <span>←</span>
+          <span>Back to Dashboard</span>
+        </button>
+        
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <div className="text-6xl mb-4">⚠️</div>
+            <h2 className="text-2xl font-bold text-white mb-2">Failed to Load Revenue Data</h2>
+            <p className="text-gray-400 mb-6">There was an error loading the revenue analytics.</p>
+            <button
+              onClick={fetchData}
+              className="px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white rounded-lg transition"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-900 p-6">
       {/* Back Button */}
@@ -117,14 +146,14 @@ const RevenueDashboardPage = () => {
           <div className="flex items-center justify-between mb-4">
             <div className="text-4xl">💰</div>
             <div className="bg-white/20 rounded-lg px-3 py-1">
-              <p className="text-white text-xs font-bold">{overview.platformFees.percentage}%</p>
+              <p className="text-white text-xs font-bold">{overview?.platformFees?.percentage || 0}%</p>
             </div>
           </div>
           <p className="text-teal-100 text-sm mb-2">Your Platform Fees</p>
           <p className="text-4xl font-bold text-white mb-2">
-            ₹{overview.platformFees.total.toLocaleString()}
+            ₹{(overview?.platformFees?.total || 0).toLocaleString()}
           </p>
-          <p className="text-teal-100 text-xs">{overview.platformFees.description}</p>
+          <p className="text-teal-100 text-xs">{overview?.platformFees?.description || 'Platform revenue'}</p>
         </div>
 
         {/* Total Collected */}
@@ -134,7 +163,7 @@ const RevenueDashboardPage = () => {
           </div>
           <p className="text-gray-400 text-sm mb-2">Total Collected</p>
           <p className="text-4xl font-bold text-white mb-2">
-            ₹{overview.totalCollected.toLocaleString()}
+            ₹{(overview?.totalCollected || 0).toLocaleString()}
           </p>
           <p className="text-gray-400 text-xs">From all tournaments</p>
         </div>
@@ -146,7 +175,7 @@ const RevenueDashboardPage = () => {
           </div>
           <p className="text-gray-400 text-sm mb-2">Balance in Hand</p>
           <p className="text-4xl font-bold text-cyan-400 mb-2">
-            ₹{overview.balanceInHand.toLocaleString()}
+            ₹{(overview?.balanceInHand || 0).toLocaleString()}
           </p>
           <p className="text-gray-400 text-xs">Collected - Paid out</p>
         </div>
@@ -158,7 +187,7 @@ const RevenueDashboardPage = () => {
           </div>
           <p className="text-gray-400 text-sm mb-2">Pending Payouts</p>
           <p className="text-4xl font-bold text-yellow-400 mb-2">
-            ₹{overview.breakdown.pendingPayout.toLocaleString()}
+            ₹{(overview?.breakdown?.pendingPayout || 0).toLocaleString()}
           </p>
           <p className="text-gray-400 text-xs">To be paid to organizers</p>
         </div>
@@ -173,31 +202,31 @@ const RevenueDashboardPage = () => {
             <div className="flex justify-between items-center p-4 bg-slate-900 rounded-lg">
               <span className="text-gray-400">Total Collected</span>
               <span className="text-white font-bold text-lg">
-                ₹{overview.breakdown.collected.toLocaleString()}
+                ₹{(overview?.breakdown?.collected || 0).toLocaleString()}
               </span>
             </div>
             <div className="flex justify-between items-center p-4 bg-teal-900/30 rounded-lg border border-teal-700">
               <span className="text-teal-300">Your Share (5%)</span>
               <span className="text-teal-400 font-bold text-lg">
-                ₹{overview.breakdown.yourShare.toLocaleString()}
+                ₹{(overview?.breakdown?.yourShare || 0).toLocaleString()}
               </span>
             </div>
             <div className="flex justify-between items-center p-4 bg-slate-900 rounded-lg">
               <span className="text-gray-400">Organizer Total (30% + 65%)</span>
               <span className="text-white font-bold text-lg">
-                ₹{overview.breakdown.organizerShare.toLocaleString()}
+                ₹{(overview?.breakdown?.organizerShare || 0).toLocaleString()}
               </span>
             </div>
             <div className="flex justify-between items-center p-4 bg-green-900/30 rounded-lg border border-green-700">
               <span className="text-green-300">Already Paid</span>
               <span className="text-green-400 font-bold text-lg">
-                ₹{overview.breakdown.alreadyPaid.toLocaleString()}
+                ₹{(overview?.breakdown?.alreadyPaid || 0).toLocaleString()}
               </span>
             </div>
             <div className="flex justify-between items-center p-4 bg-yellow-900/30 rounded-lg border border-yellow-700">
               <span className="text-yellow-300">Pending Payout</span>
               <span className="text-yellow-400 font-bold text-lg">
-                ₹{overview.breakdown.pendingPayout.toLocaleString()}
+                ₹{(overview?.breakdown?.pendingPayout || 0).toLocaleString()}
               </span>
             </div>
           </div>
@@ -210,7 +239,7 @@ const RevenueDashboardPage = () => {
             <div>
               <div className="flex justify-between items-center mb-2">
                 <span className="text-gray-400">Total Tournaments</span>
-                <span className="text-white font-bold text-2xl">{overview.stats.tournaments}</span>
+                <span className="text-white font-bold text-2xl">{overview?.stats?.tournaments || 0}</span>
               </div>
               <div className="w-full bg-slate-900 rounded-full h-2">
                 <div className="bg-teal-500 h-2 rounded-full" style={{ width: '100%' }}></div>
@@ -220,7 +249,7 @@ const RevenueDashboardPage = () => {
             <div>
               <div className="flex justify-between items-center mb-2">
                 <span className="text-gray-400">Total Registrations</span>
-                <span className="text-white font-bold text-2xl">{overview.stats.registrations}</span>
+                <span className="text-white font-bold text-2xl">{overview?.stats?.registrations || 0}</span>
               </div>
               <div className="w-full bg-slate-900 rounded-full h-2">
                 <div className="bg-cyan-500 h-2 rounded-full" style={{ width: '100%' }}></div>
@@ -231,7 +260,7 @@ const RevenueDashboardPage = () => {
               <div className="flex justify-between items-center mb-2">
                 <span className="text-gray-400">Avg per Tournament</span>
                 <span className="text-white font-bold text-2xl">
-                  ₹{Math.round(overview.stats.averagePerTournament).toLocaleString()}
+                  ₹{Math.round(overview?.stats?.averagePerTournament || 0).toLocaleString()}
                 </span>
               </div>
               <div className="w-full bg-slate-900 rounded-full h-2">
@@ -243,7 +272,7 @@ const RevenueDashboardPage = () => {
               <div className="flex justify-between items-center mb-2">
                 <span className="text-gray-400">Avg per Registration</span>
                 <span className="text-white font-bold text-2xl">
-                  ₹{Math.round(overview.stats.averagePerRegistration).toLocaleString()}
+                  ₹{Math.round(overview?.stats?.averagePerRegistration || 0).toLocaleString()}
                 </span>
               </div>
               <div className="w-full bg-slate-900 rounded-full h-2">

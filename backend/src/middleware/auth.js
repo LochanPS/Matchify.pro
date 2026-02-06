@@ -69,8 +69,21 @@ const authenticate = async (req, res, next) => {
       });
     }
 
-    // Attach user to request - support multi-role
-    const userRoles = user.roles ? user.roles.split(',') : ['PLAYER'];
+    // Attach user to request - support both 'role' and 'roles' fields
+    let userRoles;
+    if (user.roles) {
+      // If roles field exists (comma-separated string)
+      userRoles = user.roles.split(',');
+    } else if (user.role) {
+      // If only role field exists (single value)
+      userRoles = [user.role];
+    } else {
+      // Default to PLAYER
+      userRoles = ['PLAYER'];
+    }
+    
+    // Check if user is admin
+    const isAdmin = userRoles.includes('ADMIN');
     
     req.user = {
       id: user.id,
@@ -80,7 +93,7 @@ const authenticate = async (req, res, next) => {
       roles: userRoles, // All roles for multi-role support
       name: user.name,
       isVerified: user.isVerified,
-      isAdmin: false,
+      isAdmin: isAdmin,
       // Preserve impersonation fields from JWT token
       isImpersonating: decoded.isImpersonating || false,
       adminId: decoded.adminId || null
@@ -136,7 +149,16 @@ const optionalAuth = async (req, res, next) => {
     });
 
     if (user && user.isActive && !user.isSuspended) {
-      const userRoles = user.roles ? user.roles.split(',') : ['PLAYER'];
+      // Support both 'role' and 'roles' fields
+      let userRoles;
+      if (user.roles) {
+        userRoles = user.roles.split(',');
+      } else if (user.role) {
+        userRoles = [user.role];
+      } else {
+        userRoles = ['PLAYER'];
+      }
+      
       req.user = {
         id: user.id,
         userId: user.id,

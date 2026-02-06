@@ -4,64 +4,47 @@ import prisma from '../lib/prisma.js';
 // Get dashboard stats
 export const getDashboardStats = async (req, res) => {
   try {
+    // For simplified SQLite schema, only query User table
     const [
       totalUsers,
-      totalTournaments,
-      totalRegistrations,
-      totalMatches,
       activeUsers,
-      blockedUsers,
-      pendingRegistrations,
-      completedTournaments
+      blockedUsers
     ] = await Promise.all([
       prisma.user.count(),
-      prisma.tournament.count(),
-      prisma.registration.count(),
-      prisma.match.count(),
       prisma.user.count({ where: { isActive: true, isSuspended: false } }),
-      prisma.user.count({ where: { isSuspended: true } }),
-      prisma.registration.count({ where: { status: 'pending' } }),
-      prisma.tournament.count({ where: { status: 'completed' } })
+      prisma.user.count({ where: { isSuspended: true } })
     ]);
 
-    // Revenue Type 1: Player → Organizer transactions (tournament fees)
-    const revenueType1Result = await prisma.walletTransaction.aggregate({
-      where: {
-        type: 'DEBIT',
-        description: { contains: 'tournament registration' }
-      },
-      _sum: { amount: true }
+    // Count users by role
+    const allUsers = await prisma.user.findMany({
+      select: { role: true }
     });
-
-    // Revenue Type 2: Admin Profit (KYC fees at ₹50 each)
-    const approvedKYCCount = await prisma.kYCSubmission.count({
-      where: { status: 'APPROVED' }
-    }).catch(() => 0); // Handle if KYC table doesn't exist
-
-    const revenueType1 = revenueType1Result._sum.amount || 0;
-    const revenueType2 = approvedKYCCount * 50;
-    const totalRevenue = revenueType1 + revenueType2;
+    
+    const usersByRole = allUsers.reduce((acc, user) => {
+      const role = user.role || 'PLAYER';
+      acc[role] = (acc[role] || 0) + 1;
+      return acc;
+    }, {});
 
     res.json({
       stats: {
         totalUsers,
-        totalTournaments,
-        totalRegistrations,
-        totalMatches,
+        totalTournaments: 0,
+        totalRegistrations: 0,
+        totalMatches: 0,
         activeUsers,
         blockedUsers,
-        pendingRegistrations,
-        completedTournaments,
-        revenue: {
-          type1: revenueType1,
-          type2: revenueType2,
-          total: totalRevenue
-        }
+        pendingRegistrations: 0,
+        completedTournaments: 0,
+        totalRevenue: 0,
+        usersByRole,
+        tournamentsByStatus: {},
+        recentActivity: []
       }
     });
   } catch (error) {
     console.error('Error fetching dashboard stats:', error);
-    res.status(500).json({ error: 'Failed to fetch dashboard stats' });
+    res.status(500).json({ error: 'Failed to fetch dashboard stats', details: error.message });
   }
 };
 

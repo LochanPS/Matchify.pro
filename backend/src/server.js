@@ -26,11 +26,6 @@ import smsRoutes from './routes/sms.routes.js';
 import academyRoutes from './routes/academy.routes.js';
 import userRoutes from './routes/user.routes.js';
 
-// Import multi-role routes
-import multiRoleAuthRoutes from './routes/multiRoleAuth.routes.js';
-import multiRoleTournamentRoutes from './routes/multiRoleTournament.routes.js';
-import multiRoleMatchRoutes from './routes/multiRoleMatch.routes.js';
-
 // Import middleware
 import { authenticate, authorize } from './middleware/auth.js';
 import { 
@@ -201,9 +196,8 @@ app.get('/api', (req, res) => {
   });
 });
 
-// Auth routes (both old and new multi-role) - with stricter rate limiting
+// Auth routes - with stricter rate limiting
 app.use('/api/auth', authLimiter, authRoutes);
-app.use('/api/multi-auth', authLimiter, multiRoleAuthRoutes);
 
 // Profile routes
 app.use('/api/profile', profileRoutes);
@@ -211,9 +205,8 @@ app.use('/api/profile', profileRoutes);
 // Wallet routes
 app.use('/api/wallet', walletRoutes);
 
-// Tournament routes (both old and new multi-role)
+// Tournament routes
 app.use('/api/tournaments', tournamentRoutes);
-app.use('/api/multi-tournaments', multiRoleTournamentRoutes);
 
 // Registration routes
 app.use('/api/registrations', registrationRoutes);
@@ -335,10 +328,9 @@ app.get('/api/leaderboard', async (req, res) => {
   }
 });
 
-// Match routes (both old and new multi-role)
+// Match routes
 app.use('/api', matchRoutes);  // For tournament-related match routes
 app.use('/api/matches', matchRoutes);  // For /matches/:matchId routes
-app.use('/api/multi-matches', multiRoleMatchRoutes);
 
 // Points routes (after leaderboard)
 app.use('/api', pointsRoutes);

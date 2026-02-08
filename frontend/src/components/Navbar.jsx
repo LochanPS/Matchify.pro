@@ -23,19 +23,14 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [showRoleMenu, setShowRoleMenu] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const userMenuRef = useRef(null);
-  const roleMenuRef = useRef(null);
 
   // Close menus when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
         setShowUserMenu(false);
-      }
-      if (roleMenuRef.current && !roleMenuRef.current.contains(event.target)) {
-        setShowRoleMenu(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -294,42 +289,6 @@ const Navbar = () => {
           <div className="flex items-center gap-3">
             {user ? (
               <>
-                {/* Role Switcher - Always show, allow adding roles */}
-                <div className="relative hidden sm:block" ref={roleMenuRef}>
-                  <button
-                    onClick={() => setShowRoleMenu(!showRoleMenu)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-xl ${roleColors.bg} ${roleColors.text} text-sm font-semibold ${roleColors.hover} transition-all border border-white/10`}
-                  >
-                    <span className={`w-2.5 h-2.5 rounded-full ${roleColors.dot} animate-pulse`}></span>
-                    {currentRole}
-                    <ChevronDown className={`w-4 h-4 transition-transform ${showRoleMenu ? 'rotate-180' : ''}`} />
-                  </button>
-
-                  {showRoleMenu && (
-                    <div className="absolute right-0 mt-2 w-64 bg-slate-800 border border-white/10 rounded-2xl shadow-2xl shadow-black/50 py-2 z-50 overflow-hidden">
-                      <div className="px-4 py-2 text-xs text-gray-400 font-semibold uppercase tracking-wider">Your Roles</div>
-                      {availableRoles.map((role) => {
-                        const colors = getRoleColor(role);
-                        return (
-                          <button
-                            key={role}
-                            onClick={() => handleRoleSwitch(role)}
-                            className={`w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-white/5 transition-colors ${
-                              role === currentRole ? 'bg-white/5' : ''
-                            }`}
-                          >
-                            <span className={`w-3 h-3 rounded-full ${colors.dot}`}></span>
-                            <span className={`font-medium ${colors.text}`}>{role}</span>
-                            {role === currentRole && (
-                              <span className="ml-auto text-xs bg-gradient-to-r from-green-500 to-emerald-500 text-white px-2.5 py-1 rounded-full font-semibold">Active</span>
-                            )}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-
                 {/* Create Tournament Button - Only for Organizers, hide on academies page */}
                 {isOrganizer() && !location.pathname.startsWith('/academies') && (
                   <Link

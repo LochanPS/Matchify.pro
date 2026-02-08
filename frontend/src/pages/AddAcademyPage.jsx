@@ -4,7 +4,7 @@ import {
   Building2, MapPin, Dumbbell, Image, Upload, X, Plus, 
   CreditCard, CheckCircle, ArrowLeft, Loader2, Save, Clock
 } from 'lucide-react';
-import api from '../api/axios';
+import api from '../utils/api';
 
 const DRAFT_KEY = 'matchify_academy_draft';
 

@@ -86,10 +86,10 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await api.post('/multi-auth/login', { email, password });
-      const { user: userData, token } = response.data;
+      const response = await api.post('/auth/login', { email, password });
+      const { user: userData, accessToken } = response.data;
       
-      localStorage.setItem('token', token);
+      localStorage.setItem('token', accessToken);
       localStorage.setItem('user', JSON.stringify(userData));
       setUser(userData);
       
@@ -111,10 +111,10 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     try {
-      const response = await api.post('/multi-auth/register', userData);
-      const { user: newUser, token } = response.data;
+      const response = await api.post('/auth/register', userData);
+      const { user: newUser, accessToken } = response.data;
       
-      localStorage.setItem('token', token);
+      localStorage.setItem('token', accessToken);
       localStorage.setItem('user', JSON.stringify(newUser));
       setUser(newUser);
       

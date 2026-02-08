@@ -131,9 +131,6 @@ function AppContent() {
           {/* Invite acceptance (public) */}
           <Route path="/invite/accept/:token" element={<AcceptInvite />} />
           
-          {/* Bracket Demo */}
-          <Route path="/bracket-demo" element={<BracketDemo />} />
-          
           {/* Scoring routes */}
           <Route path="/matches" element={<MatchListPage />} />
           <Route path="/matches/live" element={<LiveMatches />} />
@@ -235,14 +232,6 @@ function AppContent() {
             }
           />
           
-          <Route
-            path="/credits"
-            element={
-              <ProtectedRoute>
-                <Credits />
-              </ProtectedRoute>
-            }
-          />
           
           <Route
             path="/notifications"

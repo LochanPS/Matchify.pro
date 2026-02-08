@@ -22,7 +22,7 @@ const RoleRoute = ({ children, allowedRoles, blockAdmin = false }) => {
   // Get user roles - support array, comma-separated string, and single role formats
   const getUserRoles = () => {
     if (Array.isArray(user.roles)) {
-      return user.roles;
+      return user.roles.map(r => r.toUpperCase());
     }
     if (typeof user.roles === 'string' && user.roles.includes(',')) {
       return user.roles.split(',').map(r => r.trim().toUpperCase());
@@ -33,13 +33,21 @@ const RoleRoute = ({ children, allowedRoles, blockAdmin = false }) => {
     if (user.role) {
       return [user.role.toUpperCase()];
     }
-    return [];
+    // Default: if user exists but has no roles, assume they have all roles
+    return ['PLAYER', 'ORGANIZER', 'UMPIRE'];
   };
   
   const userRoles = getUserRoles();
   
   // Also check currentRole if set
   const currentRole = user.currentRole ? user.currentRole.toUpperCase() : null;
+  
+  console.log('🔍 RoleRoute Debug:', {
+    userRoles,
+    currentRole,
+    allowedRoles,
+    userObject: user
+  });
 
   // Check if admin is impersonating
   const isImpersonating = () => {

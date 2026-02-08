@@ -68,6 +68,14 @@ export const AuthProvider = ({ children }) => {
     if (token && storedUser) {
       try {
         const parsedUser = JSON.parse(storedUser);
+        
+        // Set default currentRole to PLAYER if not set
+        if (!parsedUser.currentRole) {
+          const roles = parsedUser.roles ? parsedUser.roles.split(',').map(r => r.trim()) : [];
+          parsedUser.currentRole = roles[0] || 'PLAYER';
+          localStorage.setItem('user', JSON.stringify(parsedUser));
+        }
+        
         setUser(parsedUser);
         
         // Fetch fresh user data from server to ensure we have latest profile info
@@ -88,6 +96,12 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await api.post('/auth/login', { email, password });
       const { user: userData, accessToken } = response.data;
+      
+      // Set default currentRole to PLAYER if not set
+      if (!userData.currentRole) {
+        const roles = userData.roles ? userData.roles.split(',').map(r => r.trim()) : [];
+        userData.currentRole = roles[0] || 'PLAYER';
+      }
       
       localStorage.setItem('token', accessToken);
       localStorage.setItem('user', JSON.stringify(userData));
@@ -113,6 +127,12 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await api.post('/auth/register', userData);
       const { user: newUser, accessToken } = response.data;
+      
+      // Set default currentRole to PLAYER if not set
+      if (!newUser.currentRole) {
+        const roles = newUser.roles ? newUser.roles.split(',').map(r => r.trim()) : [];
+        newUser.currentRole = roles[0] || 'PLAYER';
+      }
       
       localStorage.setItem('token', accessToken);
       localStorage.setItem('user', JSON.stringify(newUser));

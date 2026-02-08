@@ -34,6 +34,8 @@ const RoleRoute = ({ children, allowedRoles, blockAdmin = false }) => {
       return [user.role.toUpperCase()];
     }
     // Default: if user exists but has no roles, assume they have all roles
+    // This handles legacy sessions
+    console.warn('⚠️ User has no roles field, using default roles');
     return ['PLAYER', 'ORGANIZER', 'UMPIRE'];
   };
   
@@ -42,12 +44,16 @@ const RoleRoute = ({ children, allowedRoles, blockAdmin = false }) => {
   // Also check currentRole if set
   const currentRole = user.currentRole ? user.currentRole.toUpperCase() : null;
   
-  console.log('🔍 RoleRoute Debug:', {
-    userRoles,
-    currentRole,
-    allowedRoles,
-    userObject: user
-  });
+  // Debug logging (remove in production)
+  if (process.env.NODE_ENV === 'development') {
+    console.log('🔍 RoleRoute Debug:', {
+      userRoles,
+      currentRole,
+      allowedRoles,
+      hasRolesField: !!user.roles,
+      hasRoleField: !!user.role
+    });
+  }
 
   // Check if admin is impersonating
   const isImpersonating = () => {

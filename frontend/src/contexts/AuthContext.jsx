@@ -69,11 +69,25 @@ export const AuthProvider = ({ children }) => {
       try {
         const parsedUser = JSON.parse(storedUser);
         
+        // Fix legacy user data - add roles if missing
+        let needsUpdate = false;
+        
+        if (!parsedUser.roles && !parsedUser.role) {
+          console.warn('⚠️ User missing roles field, adding default roles');
+          parsedUser.roles = 'PLAYER,ORGANIZER,UMPIRE';
+          needsUpdate = true;
+        }
+        
         // Set default currentRole to PLAYER if not set
         if (!parsedUser.currentRole) {
           const roles = parsedUser.roles ? parsedUser.roles.split(',').map(r => r.trim()) : [];
           parsedUser.currentRole = roles[0] || 'PLAYER';
+          needsUpdate = true;
+        }
+        
+        if (needsUpdate) {
           localStorage.setItem('user', JSON.stringify(parsedUser));
+          console.log('✅ User data updated with roles and currentRole');
         }
         
         setUser(parsedUser);

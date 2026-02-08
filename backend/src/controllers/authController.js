@@ -195,7 +195,7 @@ export const register = async (req, res) => {
 
     res.status(201).json({
       message: 'User registered successfully',
-      token,
+      accessToken: token,
       user: {
         id: user.id,
         email: user.email,
@@ -267,7 +267,7 @@ export const login = async (req, res) => {
 
       return res.json({
         message: 'Admin login successful',
-        token,
+        accessToken: token,
         user: {
           id: adminId,
           email: ADMIN_EMAIL,
@@ -328,7 +328,7 @@ export const login = async (req, res) => {
 
     res.json({
       message: 'Login successful',
-      token,
+      accessToken: token,
       user: {
         id: user.id,
         email: user.email,
@@ -342,7 +342,9 @@ export const login = async (req, res) => {
         profilePhoto: user.profilePhoto,
         walletBalance: user.walletBalance,
         totalPoints: user.totalPoints,
-        role: user.role,
+        roles: user.roles,
+        playerCode: user.playerCode,
+        umpireCode: user.umpireCode,
         isAdmin: isAdmin,
       },
     });

@@ -6,8 +6,6 @@ import {
   ChevronDown, 
   Plus, 
   User, 
-  Wallet, 
-  Coins,
   LogOut, 
   Menu, 
   X,
@@ -387,12 +385,6 @@ const Navbar = () => {
                         <MenuLink to="/profile" icon={<User className="w-4 h-4" />} onClick={() => setShowUserMenu(false)}>
                           My Profile
                         </MenuLink>
-                        <MenuLink to="/wallet" icon={<Wallet className="w-4 h-4" />} onClick={() => setShowUserMenu(false)}>
-                          My Wallet
-                        </MenuLink>
-                        <MenuLink to="/credits" icon={<Coins className="w-4 h-4" />} onClick={() => setShowUserMenu(false)}>
-                          Matchify Credits
-                        </MenuLink>
                         {currentRole === 'PLAYER' && (
                           <MenuLink to="/registrations" icon={<Trophy className="w-4 h-4" />} onClick={() => setShowUserMenu(false)}>
                             My Registrations
@@ -491,14 +483,6 @@ const Navbar = () => {
             <MobileNavLink to="/profile" onClick={() => setShowMobileMenu(false)}>
               <User className="w-5 h-5" />
               Profile
-            </MobileNavLink>
-            <MobileNavLink to="/wallet" onClick={() => setShowMobileMenu(false)}>
-              <Wallet className="w-5 h-5" />
-              Wallet
-            </MobileNavLink>
-            <MobileNavLink to="/credits" onClick={() => setShowMobileMenu(false)}>
-              <Coins className="w-5 h-5" />
-              Matchify Credits
             </MobileNavLink>
             {currentRole === 'PLAYER' && (
               <MobileNavLink to="/registrations" onClick={() => setShowMobileMenu(false)}>

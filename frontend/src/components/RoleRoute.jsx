@@ -25,18 +25,21 @@ const RoleRoute = ({ children, allowedRoles, blockAdmin = false }) => {
       return user.roles;
     }
     if (typeof user.roles === 'string' && user.roles.includes(',')) {
-      return user.roles.split(',').map(r => r.trim());
+      return user.roles.split(',').map(r => r.trim().toUpperCase());
     }
     if (typeof user.roles === 'string') {
-      return [user.roles];
+      return [user.roles.toUpperCase()];
     }
     if (user.role) {
-      return [user.role];
+      return [user.role.toUpperCase()];
     }
     return [];
   };
   
   const userRoles = getUserRoles();
+  
+  // Also check currentRole if set
+  const currentRole = user.currentRole ? user.currentRole.toUpperCase() : null;
 
   // Check if admin is impersonating
   const isImpersonating = () => {
@@ -100,11 +103,18 @@ const RoleRoute = ({ children, allowedRoles, blockAdmin = false }) => {
   // Check if user has ANY of the allowed roles
   // PLAYER role now includes ORGANIZER capabilities
   const hasAllowedRole = allowedRoles.some(role => {
-    if (role === 'ORGANIZER') {
+    const roleUpper = role.toUpperCase();
+    
+    // If currentRole is set, check if it matches
+    if (currentRole && currentRole === roleUpper) {
+      return true;
+    }
+    
+    if (roleUpper === 'ORGANIZER') {
       // PLAYER can access ORGANIZER routes
       return userRoles.includes('PLAYER') || userRoles.includes('ORGANIZER');
     }
-    return userRoles.includes(role);
+    return userRoles.includes(roleUpper);
   });
 
   if (!hasAllowedRole) {

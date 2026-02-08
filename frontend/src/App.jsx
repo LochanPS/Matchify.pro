@@ -11,7 +11,9 @@ import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import ProfilePage from './pages/ProfilePage'
+import WalletPage from './pages/WalletPage'
 import Wallet from './pages/Wallet'
+import Credits from './pages/Credits'
 import TournamentsPage from './pages/TournamentsPage'
 import TournamentDetailPage from './pages/TournamentDetailPage'
 import TournamentDiscoveryPage from './pages/TournamentDiscoveryPage'
@@ -22,6 +24,7 @@ import DrawPage from './pages/DrawPage'
 import TournamentRegistrationPage from './pages/TournamentRegistrationPage'
 import MyRegistrationsPage from './pages/MyRegistrationsPage'
 import PartnerConfirmationPage from './pages/PartnerConfirmationPage'
+import OrganizerDashboardPage from './pages/OrganizerDashboardPage'
 import TournamentManagementPage from './pages/TournamentManagementPage'
 import ManageCategoriesPage from './pages/ManageCategoriesPage'
 import PlayerDashboard from './pages/PlayerDashboard'
@@ -47,6 +50,7 @@ import NotificationsPage from './pages/NotificationsPage'
 import AdminLayout from './pages/admin/AdminLayout'
 import AdminDashboardPage from './pages/admin/AdminDashboardPage'
 import UserManagementPage from './pages/admin/UserManagementPage'
+import BracketDemo from './pages/BracketDemo'
 import InviteManagementPage from './pages/admin/InviteManagementPage'
 import AuditLogsPage from './pages/admin/AuditLogsPage'
 import AcademyApprovalsPage from './pages/admin/AcademyApprovalsPage'
@@ -130,6 +134,9 @@ function AppContent() {
           
           {/* Invite acceptance (public) */}
           <Route path="/invite/accept/:token" element={<AcceptInvite />} />
+          
+          {/* Bracket Demo */}
+          <Route path="/bracket-demo" element={<BracketDemo />} />
           
           {/* Scoring routes */}
           <Route path="/matches" element={<MatchListPage />} />
@@ -232,6 +239,14 @@ function AppContent() {
             }
           />
           
+          <Route
+            path="/credits"
+            element={
+              <ProtectedRoute>
+                <Credits />
+              </ProtectedRoute>
+            }
+          />
           
           <Route
             path="/notifications"

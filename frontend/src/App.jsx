@@ -47,7 +47,6 @@ import NotificationsPage from './pages/NotificationsPage'
 import AdminLayout from './pages/admin/AdminLayout'
 import AdminDashboardPage from './pages/admin/AdminDashboardPage'
 import UserManagementPage from './pages/admin/UserManagementPage'
-import BracketDemo from './pages/BracketDemo'
 import InviteManagementPage from './pages/admin/InviteManagementPage'
 import AuditLogsPage from './pages/admin/AuditLogsPage'
 import AcademyApprovalsPage from './pages/admin/AcademyApprovalsPage'
@@ -131,9 +130,6 @@ function AppContent() {
           
           {/* Invite acceptance (public) */}
           <Route path="/invite/accept/:token" element={<AcceptInvite />} />
-          
-          {/* Bracket Demo */}
-          <Route path="/bracket-demo" element={<BracketDemo />} />
           
           {/* Scoring routes */}
           <Route path="/matches" element={<MatchListPage />} />
@@ -232,15 +228,6 @@ function AppContent() {
             element={
               <ProtectedRoute>
                 <Wallet />
-              </ProtectedRoute>
-            }
-          />
-          
-          <Route
-            path="/credits"
-            element={
-              <ProtectedRoute>
-                <Credits />
               </ProtectedRoute>
             }
           />

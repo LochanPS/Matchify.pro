@@ -30,7 +30,7 @@ export const getProfile = async (req, res) => {
         email: true,
         name: true,
         phone: true,
-        role: true, // Use 'role' instead of 'roles' for simplified schema
+        roles: true,
         profilePhoto: true,
         city: true,
         state: true,
@@ -167,7 +167,7 @@ export const updateProfile = async (req, res) => {
         email: true,
         name: true,
         phone: true,
-        role: true, // Use 'role' instead of 'roles' for simplified schema
+        roles: true,
         profilePhoto: true,
         city: true,
         state: true,

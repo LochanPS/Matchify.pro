@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import NotificationBell from './NotificationBell';
+import RoleSwitcher from './RoleSwitcher';
 import { 
   ChevronDown, 
   Plus, 
@@ -342,6 +343,9 @@ const Navbar = () => {
 
                 {/* Notifications */}
                 <NotificationBell />
+
+                {/* Role Switcher */}
+                <RoleSwitcher />
 
                 {/* User Menu */}
                 <div className="relative" ref={userMenuRef}>

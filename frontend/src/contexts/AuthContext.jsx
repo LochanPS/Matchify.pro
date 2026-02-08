@@ -159,6 +159,18 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Get current role - defaults to first role in user's roles
+  const getCurrentRole = () => {
+    if (!user) return null;
+    if (user.currentRole) return user.currentRole;
+    
+    // Parse roles and return first one as default
+    const roles = user.roles ? user.roles.split(',') : [];
+    return roles[0] || 'PLAYER';
+  };
+
+  const currentRole = getCurrentRole();
+
   const completeProfile = (updatedUser) => {
     setUser(updatedUser);
     localStorage.setItem('user', JSON.stringify(updatedUser));
@@ -173,6 +185,7 @@ export const AuthProvider = ({ children }) => {
       logout, 
       updateUser,
       switchRole,
+      currentRole,
       loading,
       showProfileCompletion,
       setShowProfileCompletion,

@@ -164,16 +164,21 @@ export const register = async (req, res) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // For simplified schema - no player codes or profiles
-    // Create user with basic fields only
+    // Generate unique player and umpire codes
+    const playerCode = await generatePlayerCode();
+    const umpireCode = await generateUmpireCode();
+
+    // Create user with all roles and codes
     const user = await prisma.user.create({
       data: {
         email,
         password: hashedPassword,
         name,
         phone,
-        role: userRoles[0], // Use 'role' field (singular) for simplified schema
-        walletBalance: 0, // No welcome bonus in simplified schema
+        roles: userRoles.join(','), // Store as comma-separated string
+        playerCode,
+        umpireCode,
+        walletBalance: 0,
         city: city || null,
         state: state || null,
         gender: gender || null,
@@ -181,9 +186,9 @@ export const register = async (req, res) => {
       },
     });
 
-    // Generate JWT with role
+    // Generate JWT with roles
     const token = jwt.sign(
-      { userId: user.id, email: user.email, role: user.role },
+      { userId: user.id, email: user.email, roles: user.roles },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
@@ -204,7 +209,9 @@ export const register = async (req, res) => {
         profilePhoto: user.profilePhoto,
         walletBalance: user.walletBalance,
         totalPoints: user.totalPoints,
-        role: user.role,
+        roles: user.roles,
+        playerCode: user.playerCode,
+        umpireCode: user.umpireCode,
       },
     });
   } catch (error) {

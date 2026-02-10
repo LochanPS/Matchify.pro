@@ -65,9 +65,19 @@ export const AuthProvider = ({ children }) => {
     const token = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
     
+    console.log('🔄 AuthContext: Initializing...', {
+      hasToken: !!token,
+      hasStoredUser: !!storedUser
+    });
+    
     if (token && storedUser) {
       try {
         const parsedUser = JSON.parse(storedUser);
+        console.log('✅ AuthContext: User found in localStorage', {
+          email: parsedUser.email,
+          hasRoles: !!parsedUser.roles,
+          hasCurrentRole: !!parsedUser.currentRole
+        });
         
         // Fix legacy user data - add roles if missing
         let needsUpdate = false;
@@ -91,17 +101,21 @@ export const AuthProvider = ({ children }) => {
         }
         
         setUser(parsedUser);
+        console.log('✅ AuthContext: User set in state');
         
         // Fetch fresh user data from server to ensure we have latest profile info
         fetchUserProfile().finally(() => {
           setLoading(false);
+          console.log('✅ AuthContext: Loading complete');
         });
       } catch (error) {
-        console.error('Error parsing stored user:', error);
+        console.error('❌ Error parsing stored user:', error);
         localStorage.removeItem('user');
+        localStorage.removeItem('token');
         setLoading(false);
       }
     } else {
+      console.log('❌ AuthContext: No token or user in localStorage');
       setLoading(false);
     }
   }, []);

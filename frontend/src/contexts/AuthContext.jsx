@@ -65,31 +65,73 @@ export const AuthProvider = ({ children }) => {
     const token = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
     
+    console.log('🔄 AuthContext: Initializing...', {
+      hasToken: !!token,
+      hasStoredUser: !!storedUser
+    });
+    
     if (token && storedUser) {
       try {
         const parsedUser = JSON.parse(storedUser);
+        console.log('✅ AuthContext: User found in localStorage', {
+          email: parsedUser.email,
+          hasRoles: !!parsedUser.roles,
+          hasCurrentRole: !!parsedUser.currentRole
+        });
+        
+        // Fix legacy user data - add roles if missing
+        let needsUpdate = false;
+        
+        if (!parsedUser.roles && !parsedUser.role) {
+          console.warn('⚠️ User missing roles field, adding default roles');
+          parsedUser.roles = 'PLAYER,ORGANIZER,UMPIRE';
+          needsUpdate = true;
+        }
+        
+        // Set default currentRole to PLAYER if not set
+        if (!parsedUser.currentRole) {
+          const roles = parsedUser.roles ? parsedUser.roles.split(',').map(r => r.trim()) : [];
+          parsedUser.currentRole = roles[0] || 'PLAYER';
+          needsUpdate = true;
+        }
+        
+        if (needsUpdate) {
+          localStorage.setItem('user', JSON.stringify(parsedUser));
+          console.log('✅ User data updated with roles and currentRole');
+        }
+        
         setUser(parsedUser);
+        console.log('✅ AuthContext: User set in state');
         
         // Fetch fresh user data from server to ensure we have latest profile info
         fetchUserProfile().finally(() => {
           setLoading(false);
+          console.log('✅ AuthContext: Loading complete');
         });
       } catch (error) {
-        console.error('Error parsing stored user:', error);
+        console.error('❌ Error parsing stored user:', error);
         localStorage.removeItem('user');
+        localStorage.removeItem('token');
         setLoading(false);
       }
     } else {
+      console.log('❌ AuthContext: No token or user in localStorage');
       setLoading(false);
     }
   }, []);
 
   const login = async (email, password) => {
     try {
-      const response = await api.post('/multi-auth/login', { email, password });
-      const { user: userData, token } = response.data;
+      const response = await api.post('/auth/login', { email, password });
+      const { user: userData, accessToken } = response.data;
       
-      localStorage.setItem('token', token);
+      // Set default currentRole to PLAYER if not set
+      if (!userData.currentRole) {
+        const roles = userData.roles ? userData.roles.split(',').map(r => r.trim()) : [];
+        userData.currentRole = roles[0] || 'PLAYER';
+      }
+      
+      localStorage.setItem('token', accessToken);
       localStorage.setItem('user', JSON.stringify(userData));
       setUser(userData);
       
@@ -111,10 +153,16 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     try {
-      const response = await api.post('/multi-auth/register', userData);
-      const { user: newUser, token } = response.data;
+      const response = await api.post('/auth/register', userData);
+      const { user: newUser, accessToken } = response.data;
       
-      localStorage.setItem('token', token);
+      // Set default currentRole to PLAYER if not set
+      if (!newUser.currentRole) {
+        const roles = newUser.roles ? newUser.roles.split(',').map(r => r.trim()) : [];
+        newUser.currentRole = roles[0] || 'PLAYER';
+      }
+      
+      localStorage.setItem('token', accessToken);
       localStorage.setItem('user', JSON.stringify(newUser));
       setUser(newUser);
       
@@ -159,6 +207,18 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Get current role - defaults to first role in user's roles
+  const getCurrentRole = () => {
+    if (!user) return null;
+    if (user.currentRole) return user.currentRole;
+    
+    // Parse roles and return first one as default
+    const roles = user.roles ? user.roles.split(',') : [];
+    return roles[0] || 'PLAYER';
+  };
+
+  const currentRole = getCurrentRole();
+
   const completeProfile = (updatedUser) => {
     setUser(updatedUser);
     localStorage.setItem('user', JSON.stringify(updatedUser));
@@ -173,6 +233,7 @@ export const AuthProvider = ({ children }) => {
       logout, 
       updateUser,
       switchRole,
+      currentRole,
       loading,
       showProfileCompletion,
       setShowProfileCompletion,

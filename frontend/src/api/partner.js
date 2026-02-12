@@ -1,4 +1,4 @@
-import api from './axios';
+import api from '../utils/api';
 
 // Get partner invitation details
 export const getPartnerInvitation = async (token) => {

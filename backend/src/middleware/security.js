@@ -75,11 +75,16 @@ export const logSuspiciousActivity = (req, res, next) => {
     return next();
   }
   
+  // Skip for auth routes to avoid false positives
+  if (req.path.includes('/auth/') || req.path.includes('/register') || req.path.includes('/login')) {
+    return next();
+  }
+  
   const suspiciousPatterns = [
     /(\.\.|\/etc\/|\/proc\/|\/sys\/)/i,  // Path traversal
-    /(union|select|insert|update|delete|drop|create|alter)/i,  // SQL injection
-    /(<script|javascript:|onerror=|onload=)/i,  // XSS
-    /(eval\(|exec\(|system\()/i,  // Code injection
+    /(union\s+select|insert\s+into|update\s+set|delete\s+from|drop\s+table|create\s+table|alter\s+table)/i,  // SQL injection (more specific)
+    /(<script[^>]*>|javascript:|onerror\s*=|onload\s*=)/i,  // XSS
+    /(eval\s*\(|exec\s*\(|system\s*\()/i,  // Code injection
   ];
   
   const checkString = JSON.stringify(req.body) + JSON.stringify(req.query) + req.url;

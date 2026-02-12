@@ -1,4 +1,4 @@
-import axios from './axios';
+import axios from 'axios';
 
 // Payment Settings
 export const getPaymentSettings = async () => {
@@ -111,5 +111,11 @@ export const getRevenueTimeline = async (params = {}) => {
 
 export const getDetailedPayments = async (params = {}) => {
   const response = await axios.get('/admin/revenue/payments/detailed', { params });
+  return response.data;
+};
+
+// Delete All Data
+export const deleteAllData = async (password) => {
+  const response = await axios.post('/admin/delete-all-info', { password });
   return response.data;
 };

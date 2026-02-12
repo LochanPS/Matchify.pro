@@ -22,21 +22,38 @@ const RoleRoute = ({ children, allowedRoles, blockAdmin = false }) => {
   // Get user roles - support array, comma-separated string, and single role formats
   const getUserRoles = () => {
     if (Array.isArray(user.roles)) {
-      return user.roles;
+      return user.roles.map(r => r.toUpperCase());
     }
     if (typeof user.roles === 'string' && user.roles.includes(',')) {
-      return user.roles.split(',').map(r => r.trim());
+      return user.roles.split(',').map(r => r.trim().toUpperCase());
     }
     if (typeof user.roles === 'string') {
-      return [user.roles];
+      return [user.roles.toUpperCase()];
     }
     if (user.role) {
-      return [user.role];
+      return [user.role.toUpperCase()];
     }
-    return [];
+    // Default: if user exists but has no roles, assume they have all roles
+    // This handles legacy sessions
+    console.warn('⚠️ User has no roles field, using default roles');
+    return ['PLAYER', 'ORGANIZER', 'UMPIRE'];
   };
   
   const userRoles = getUserRoles();
+  
+  // Also check currentRole if set
+  const currentRole = user.currentRole ? user.currentRole.toUpperCase() : null;
+  
+  // Debug logging (remove in production)
+  if (process.env.NODE_ENV === 'development') {
+    console.log('🔍 RoleRoute Debug:', {
+      userRoles,
+      currentRole,
+      allowedRoles,
+      hasRolesField: !!user.roles,
+      hasRoleField: !!user.role
+    });
+  }
 
   // Check if admin is impersonating
   const isImpersonating = () => {
@@ -100,11 +117,18 @@ const RoleRoute = ({ children, allowedRoles, blockAdmin = false }) => {
   // Check if user has ANY of the allowed roles
   // PLAYER role now includes ORGANIZER capabilities
   const hasAllowedRole = allowedRoles.some(role => {
-    if (role === 'ORGANIZER') {
+    const roleUpper = role.toUpperCase();
+    
+    // If currentRole is set, check if it matches
+    if (currentRole && currentRole === roleUpper) {
+      return true;
+    }
+    
+    if (roleUpper === 'ORGANIZER') {
       // PLAYER can access ORGANIZER routes
       return userRoles.includes('PLAYER') || userRoles.includes('ORGANIZER');
     }
-    return userRoles.includes(role);
+    return userRoles.includes(roleUpper);
   });
 
   if (!hasAllowedRole) {

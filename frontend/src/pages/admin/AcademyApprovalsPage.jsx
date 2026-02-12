@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Building2, CheckCircle, XCircle, Eye, MapPin, Phone, Mail, Image, Loader2, ArrowLeft } from 'lucide-react';
-import api from '../../api/axios';
+import api from '../../utils/api';
 
 const AcademyApprovalsPage = () => {
   const navigate = useNavigate();

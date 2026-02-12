@@ -31,6 +31,8 @@ export const getProfile = async (req, res) => {
         name: true,
         phone: true,
         roles: true,
+        playerCode: true,
+        umpireCode: true,
         profilePhoto: true,
         city: true,
         state: true,
@@ -64,13 +66,8 @@ export const getProfile = async (req, res) => {
         : 0
     };
 
-    // Parse roles for frontend
-    const userRoles = user.roles ? user.roles.split(',') : ['PLAYER'];
-
     const profile = {
       ...user,
-      role: userRoles[0], // Primary role for backward compatibility
-      roles: userRoles,   // All roles array
       stats
     };
 
@@ -173,6 +170,8 @@ export const updateProfile = async (req, res) => {
         name: true,
         phone: true,
         roles: true,
+        playerCode: true,
+        umpireCode: true,
         profilePhoto: true,
         city: true,
         state: true,
@@ -191,16 +190,9 @@ export const updateProfile = async (req, res) => {
       }
     });
 
-    // Parse roles for frontend
-    const userRoles = updatedUser.roles ? updatedUser.roles.split(',') : ['PLAYER'];
-
     res.json({
       message: 'Profile updated successfully',
-      user: {
-        ...updatedUser,
-        role: userRoles[0],
-        roles: userRoles
-      }
+      user: updatedUser
     });
   } catch (error) {
     console.error('Update profile error:', error);

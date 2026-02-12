@@ -6,8 +6,6 @@ import {
   ChevronDown, 
   Plus, 
   User, 
-  Wallet, 
-  Coins,
   LogOut, 
   Menu, 
   X,
@@ -132,7 +130,7 @@ const Navbar = () => {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-8">
               {/* Logo - Same as regular users */}
-              <Link to="/admin/dashboard" className="flex items-center justify-center group">
+              <Link to="/admin-dashboard" className="flex items-center justify-center group">
                 <div className="relative flex items-center gap-2">
                   <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-14 h-14 bg-green-500/50 blur-xl rounded-full opacity-80 group-hover:opacity-100 transition-all duration-300"></div>
                   <div className="relative h-11 w-12 flex-shrink-0 group-hover:scale-110 transition-all duration-300">
@@ -168,7 +166,7 @@ const Navbar = () => {
 
               {/* Admin Navigation */}
               <nav className="hidden md:flex items-center gap-1">
-                <NavLink to="/admin/dashboard" active={location.pathname === '/admin/dashboard'}>
+                <NavLink to="/admin-dashboard" active={location.pathname === '/admin-dashboard' || location.pathname === '/admin/dashboard'}>
                   <LayoutDashboard className="w-4 h-4" />
                   Dashboard
                 </NavLink>
@@ -387,12 +385,6 @@ const Navbar = () => {
                         <MenuLink to="/profile" icon={<User className="w-4 h-4" />} onClick={() => setShowUserMenu(false)}>
                           My Profile
                         </MenuLink>
-                        <MenuLink to="/wallet" icon={<Wallet className="w-4 h-4" />} onClick={() => setShowUserMenu(false)}>
-                          My Wallet
-                        </MenuLink>
-                        <MenuLink to="/credits" icon={<Coins className="w-4 h-4" />} onClick={() => setShowUserMenu(false)}>
-                          Matchify Credits
-                        </MenuLink>
                         {currentRole === 'PLAYER' && (
                           <MenuLink to="/registrations" icon={<Trophy className="w-4 h-4" />} onClick={() => setShowUserMenu(false)}>
                             My Registrations
@@ -491,14 +483,6 @@ const Navbar = () => {
             <MobileNavLink to="/profile" onClick={() => setShowMobileMenu(false)}>
               <User className="w-5 h-5" />
               Profile
-            </MobileNavLink>
-            <MobileNavLink to="/wallet" onClick={() => setShowMobileMenu(false)}>
-              <Wallet className="w-5 h-5" />
-              Wallet
-            </MobileNavLink>
-            <MobileNavLink to="/credits" onClick={() => setShowMobileMenu(false)}>
-              <Coins className="w-5 h-5" />
-              Matchify Credits
             </MobileNavLink>
             {currentRole === 'PLAYER' && (
               <MobileNavLink to="/registrations" onClick={() => setShowMobileMenu(false)}>

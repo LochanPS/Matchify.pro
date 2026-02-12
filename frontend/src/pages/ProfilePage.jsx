@@ -355,6 +355,9 @@ export default function ProfilePage() {
             {/* Profile Info */}
             <div className="flex-1 text-center lg:text-left">
               <h1 className="text-3xl font-bold text-white mb-2">{profile?.name || 'No Name Set'}</h1>
+              {profile?.playerCode && (
+                <p className="text-lg text-purple-400 font-mono mb-3">{profile.playerCode}</p>
+              )}
               <div className="flex items-center justify-center lg:justify-start gap-2 mb-4">
                 <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${
                   profile?.role === 'PLAYER' ? 'bg-green-500/20 text-green-300 border border-green-500/30' :

@@ -100,7 +100,7 @@ export default function AdminDashboard() {
             {[
               { id: 'dashboard', label: 'Dashboard', url: null },
               { id: 'users', label: 'Users', url: '/admin/users' },
-              { id: 'tournaments', label: 'Tournaments', url: null },
+              { id: 'tournaments', label: 'Tournaments', url: '/tournaments' },
               { id: 'academies', label: 'Academies', url: '/admin/academies' },
               { id: 'revenue', label: 'Revenue', url: '/admin/revenue' }
             ].map(tab => (

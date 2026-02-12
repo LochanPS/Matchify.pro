@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Shield, LogOut, ArrowLeft, AlertTriangle, X } from 'lucide-react';
-import api from '../api/axios';
+import api from '../utils/api';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 

@@ -1,4 +1,4 @@
-import api from './axios';
+import api from '../utils/api';
 
 // Get organizer's tournaments with stats
 export const getOrganizerTournaments = async () => {

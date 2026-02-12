@@ -240,7 +240,7 @@ router.post('/reject/:registrationId', authenticate, requireAdmin, async (req, r
         where: { id: registrationId },
         data: { 
           paymentStatus: 'rejected',
-          status: 'cancelled'
+          status: 'rejected'  // Changed from 'cancelled' to 'rejected'
         }
       }),
       prisma.paymentVerification.update({

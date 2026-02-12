@@ -20,6 +20,7 @@ import TournamentDiscoveryPage from './pages/TournamentDiscoveryPage'
 import CreateTournament from './pages/CreateTournament'
 import EditTournament from './pages/EditTournament'
 import ViewDrawsPage from './pages/ViewDrawsPage'
+import PlayerViewDrawsPage from './pages/PlayerViewDrawsPage'
 import DrawPage from './pages/DrawPage'
 import TournamentRegistrationPage from './pages/TournamentRegistrationPage'
 import MyRegistrationsPage from './pages/MyRegistrationsPage'
@@ -119,6 +120,18 @@ function AppContent() {
           <Route path="/tournaments/:id" element={<TournamentDetailPage />} />
           <Route path="/tournaments/:tournamentId/draws/:categoryId?" element={<DrawPage />} />
           <Route path="/leaderboard" element={<Leaderboard />} />
+          
+          {/* Notification routes */}
+          <Route path="/notifications" element={
+            <ProtectedRoute>
+              <NotificationsPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/notifications/:id" element={
+            <ProtectedRoute>
+              <NotificationDetailPage />
+            </ProtectedRoute>
+          } />
           
           {/* Invite acceptance (public) */}
           <Route path="/invite/accept/:token" element={<AcceptInvite />} />
@@ -280,6 +293,18 @@ function AppContent() {
               <ProtectedRoute>
                 <RoleRoute allowedRoles={['PLAYER']} blockAdmin={true}>
                   <PlayerDashboard />
+                </RoleRoute>
+              </ProtectedRoute>
+            }
+          />
+          
+          {/* Player View Draws - Read Only */}
+          <Route
+            path="/player/tournaments/:id/draws"
+            element={
+              <ProtectedRoute>
+                <RoleRoute allowedRoles={['PLAYER', 'ORGANIZER', 'UMPIRE']} blockAdmin={true}>
+                  <PlayerViewDrawsPage />
                 </RoleRoute>
               </ProtectedRoute>
             }

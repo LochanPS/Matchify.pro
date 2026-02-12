@@ -1,6 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '../lib/prisma.js';
 
 export const getUmpireMatches = async (req, res) => {
   try {
@@ -76,20 +75,37 @@ export const submitMatch = async (req, res) => {
       'QUARTER_FINAL': 25 
     }[match.round] || 10;
 
-    // Update winner's player profile
-    await prisma.playerProfile.update({
-      where: { userId: winnerId },
-      data: { 
-        matchifyPoints: { increment: points }, 
-        matchesWon: { increment: 1 } 
-      },
-    });
+    // Update winner's player profile (if exists)
+    try {
+      await prisma.playerProfile.update({
+        where: { userId: winnerId },
+        data: { 
+          matchifyPoints: { increment: points }, 
+          matchesWon: { increment: 1 } 
+        },
+      });
+    } catch (error) {
+      console.log('Player profile not found for winner, skipping points update');
+    }
 
-    // Update umpire profile
-    await prisma.umpireProfile.update({
-      where: { userId: req.user.userId },
-      data: { matchesUmpired: { increment: 1 } },
-    });
+    // Update umpire statistics in User model
+    try {
+      const updatedUser = await prisma.user.update({
+        where: { id: req.user.userId },
+        data: { matchesUmpired: { increment: 1 } },
+      });
+
+      // Check if umpire should be verified (10+ matches)
+      if (updatedUser.matchesUmpired >= 10 && !updatedUser.isVerifiedUmpire) {
+        await prisma.user.update({
+          where: { id: req.user.userId },
+          data: { isVerifiedUmpire: true }
+        });
+        console.log(`✅ Umpire verified after ${updatedUser.matchesUmpired} matches`);
+      }
+    } catch (error) {
+      console.error('Error updating umpire stats:', error);
+    }
 
     res.json({ message: 'Match completed' });
   } catch (error) {

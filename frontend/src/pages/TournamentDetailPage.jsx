@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { tournamentAPI } from '../api/tournament';
+import { superAdminAPI } from '../api/superAdmin';
 import { useAuth } from '../contexts/AuthContext';
 import { formatDateLongIndian, formatDateTimeIndian } from '../utils/dateFormat';
 import { getImageUrl } from '../utils/imageUrl';
@@ -17,6 +18,7 @@ import {
   TrophyIcon,
   SparklesIcon,
   UserIcon,
+  UserPlusIcon,
 } from '@heroicons/react/24/outline';
 import { Edit, Users, Eye, Layers, GitBranch } from 'lucide-react';
 
@@ -144,6 +146,19 @@ const TournamentDetailPage = () => {
   const [addingUmpire, setAddingUmpire] = useState(false);
   const [umpireError, setUmpireError] = useState('');
   const [umpireSuccess, setUmpireSuccess] = useState('');
+
+  // Quick Add Player state (Super Admin only)
+  const [showQuickAddModal, setShowQuickAddModal] = useState(false);
+  const [quickAddData, setQuickAddData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    categoryId: '',
+    gender: 'Male'
+  });
+  const [quickAddLoading, setQuickAddLoading] = useState(false);
+  const [quickAddError, setQuickAddError] = useState('');
+  const [quickAddSuccess, setQuickAddSuccess] = useState('');
 
   useEffect(() => {
     fetchTournament();
@@ -313,6 +328,51 @@ const TournamentDetailPage = () => {
     }
   };
 
+  const handleQuickAddPlayer = async (e) => {
+    e.preventDefault();
+    setQuickAddError('');
+    setQuickAddSuccess('');
+
+    // Validation
+    if (!quickAddData.name || !quickAddData.email || !quickAddData.phone || !quickAddData.categoryId) {
+      setQuickAddError('All fields are required');
+      return;
+    }
+
+    try {
+      setQuickAddLoading(true);
+      const response = await superAdminAPI.quickAddPlayer(id, quickAddData);
+      
+      if (response.data.success) {
+        setQuickAddSuccess(`Player "${quickAddData.name}" added successfully!`);
+        // Reset form
+        setQuickAddData({
+          name: '',
+          email: '',
+          phone: '',
+          categoryId: '',
+          gender: 'Male'
+        });
+        // Refresh tournament data to update registration count
+        setTimeout(() => {
+          fetchTournament();
+          setShowQuickAddModal(false);
+          setQuickAddSuccess('');
+        }, 2000);
+      }
+    } catch (err) {
+      console.error('Quick add error:', err);
+      setQuickAddError(err.response?.data?.error || 'Failed to add player');
+    } finally {
+      setQuickAddLoading(false);
+    }
+  };
+
+  const isSuperAdmin = () => {
+    if (!user) return false;
+    return user.isAdmin === true || (user.roles && user.roles.includes('SUPER_ADMIN'));
+  };
+
   const canRegister = () => {
     if (!user) return false;
     const userRoles = user.roles || user.role || '';
@@ -462,8 +522,10 @@ const TournamentDetailPage = () => {
             {/* Description */}
             <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
               <h2 className="text-xl font-bold text-white mb-4">About Tournament</h2>
-              <p className="text-gray-400 whitespace-pre-wrap leading-relaxed">
-                {tournament.description || 'No description provided.'}
+              <p className="text-gray-400 whitespace-pre-wrap leading-relaxed break-words max-w-full overflow-hidden">
+                {tournament.description && tournament.description.length > 500 
+                  ? tournament.description.substring(0, 500) + '...' 
+                  : tournament.description || 'No description provided.'}
               </p>
             </div>
 
@@ -732,9 +794,34 @@ const TournamentDetailPage = () => {
                   <span className="font-bold text-green-400">{tournament.zone}</span>
                 </div>
               </div>
+              
+              {/* View Draws Button - Available for all users */}
+              {tournament.status === 'published' && (
+                <button
+                  onClick={() => {
+                    // Organizers go to full management page, others go to read-only view
+                    if (user && user.id === tournament.organizerId) {
+                      navigate(`/tournaments/${id}/draws`);
+                    } else {
+                      navigate(`/player/tournaments/${id}/draws`);
+                    }
+                  }}
+                  className="w-full mt-4 flex items-center justify-center gap-2 bg-amber-500/20 text-amber-400 border border-amber-500/30 px-4 py-3 rounded-xl hover:bg-amber-500/30 font-semibold transition-all"
+                >
+                  <GitBranch className="w-4 h-4" />
+                  View Draws
+                </button>
+              )}
             </div>
             
             {/* Organizer Management */}
+            {console.log('🔍 Organizer Check:', {
+              userId: user?.id,
+              organizerId: tournament.organizerId,
+              isMatch: user?.id === tournament.organizerId,
+              userName: user?.name,
+              userEmail: user?.email
+            })}
             {user && user.id === tournament.organizerId && (
               <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
                 <h3 className="font-bold text-white mb-4">Manage Tournament</h3>
@@ -788,6 +875,25 @@ const TournamentDetailPage = () => {
                   >
                     <TrashIcon className="h-4 w-4" />
                     Delete Tournament
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Super Admin Actions */}
+            {isSuperAdmin() && (
+              <div className="bg-gradient-to-br from-purple-900/50 to-indigo-900/50 backdrop-blur-sm border border-purple-500/30 rounded-2xl p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <SparklesIcon className="h-5 w-5 text-purple-400" />
+                  <h3 className="font-bold text-white">Super Admin Actions</h3>
+                </div>
+                <div className="space-y-3">
+                  <button
+                    onClick={() => setShowQuickAddModal(true)}
+                    className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-4 py-3 rounded-xl hover:shadow-lg hover:shadow-purple-500/30 font-semibold transition-all"
+                  >
+                    <UserPlusIcon className="h-4 w-4" />
+                    Quick Add Player
                   </button>
                 </div>
               </div>
@@ -1117,6 +1223,157 @@ const TournamentDetailPage = () => {
                 {deleteResultModal.type === 'success' ? 'Continue' : 'Got it'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Quick Add Player Modal (Super Admin Only) */}
+      {showQuickAddModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-purple-500/30">
+            <div className="relative bg-gradient-to-r from-purple-600 to-indigo-600 p-6 text-white overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-indigo-400/20 blur-xl"></div>
+              <div className="relative flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                    <UserPlusIcon className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold">Quick Add Player</h2>
+                    <p className="text-purple-100 text-sm mt-1">Add player without payment</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    setShowQuickAddModal(false);
+                    setQuickAddError('');
+                    setQuickAddSuccess('');
+                  }}
+                  className="w-10 h-10 bg-white/20 hover:bg-white/30 rounded-xl flex items-center justify-center transition-colors"
+                >
+                  <span className="text-2xl">×</span>
+                </button>
+              </div>
+            </div>
+            <form onSubmit={handleQuickAddPlayer} className="p-6 space-y-4">
+              {quickAddSuccess && (
+                <div className="bg-emerald-500/20 border border-emerald-500/30 rounded-xl p-4 text-emerald-300 text-sm">
+                  {quickAddSuccess}
+                </div>
+              )}
+              {quickAddError && (
+                <div className="bg-red-500/20 border border-red-500/30 rounded-xl p-4 text-red-300 text-sm">
+                  {quickAddError}
+                </div>
+              )}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Player Name <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={quickAddData.name}
+                  onChange={(e) => setQuickAddData({ ...quickAddData, name: e.target.value })}
+                  placeholder="Enter player name"
+                  className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Email Address <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="email"
+                  value={quickAddData.email}
+                  onChange={(e) => setQuickAddData({ ...quickAddData, email: e.target.value })}
+                  placeholder="player@example.com"
+                  className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Phone Number <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="tel"
+                  value={quickAddData.phone}
+                  onChange={(e) => setQuickAddData({ ...quickAddData, phone: e.target.value })}
+                  placeholder="+91 9876543210"
+                  className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Category <span className="text-red-400">*</span>
+                </label>
+                <select
+                  value={quickAddData.categoryId}
+                  onChange={(e) => setQuickAddData({ ...quickAddData, categoryId: e.target.value })}
+                  className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  required
+                >
+                  <option value="">Select a category</option>
+                  {tournament?.categories?.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name} - {category.format} ({category.gender})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Gender
+                </label>
+                <select
+                  value={quickAddData.gender}
+                  onChange={(e) => setQuickAddData({ ...quickAddData, gender: e.target.value })}
+                  className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                >
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4">
+                <p className="text-blue-300 text-sm">
+                  <strong>Note:</strong> This player will be added without payment. A temporary account will be created if the email doesn't exist.
+                </p>
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowQuickAddModal(false);
+                    setQuickAddError('');
+                    setQuickAddSuccess('');
+                  }}
+                  disabled={quickAddLoading}
+                  className="flex-1 px-4 py-3 border border-white/10 rounded-xl text-gray-300 hover:bg-slate-700/50 transition-colors font-medium disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={quickAddLoading}
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-xl hover:shadow-lg hover:shadow-purple-500/30 transition-all font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {quickAddLoading ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Adding...
+                    </>
+                  ) : (
+                    <>
+                      <UserPlusIcon className="h-4 w-4" />
+                      Add Player
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

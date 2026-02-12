@@ -1,7 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma.js';
 import { v2 as cloudinary } from 'cloudinary';
-
-const prisma = new PrismaClient();
 
 // Create academy submission
 export const createAcademy = async (req, res) => {

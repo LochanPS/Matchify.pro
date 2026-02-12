@@ -1,7 +1,6 @@
 import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma.js';
 import razorpayService from './razorpay.service.js';
-
-const prisma = new PrismaClient();
 
 // Transaction types
 export const TRANSACTION_TYPES = {

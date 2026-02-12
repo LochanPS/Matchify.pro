@@ -1,7 +1,44 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
+import prisma from '../lib/prisma.js';
+
+/**
+ * Generate unique player code
+ * Format: #ABC1234 (# + 3 letters + 4 numbers)
+ */
+async function generatePlayerCode() {
+  const numbers = '0123456789';
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  let isUnique = false;
+  let code = '';
+  
+  while (!isUnique) {
+    // Generate 3 random letters
+    let letterPart = '';
+    for (let i = 0; i < 3; i++) {
+      letterPart += letters.charAt(Math.floor(Math.random() * letters.length));
+    }
+    
+    // Generate 4 random numbers
+    let numPart = '';
+    for (let i = 0; i < 4; i++) {
+      numPart += numbers.charAt(Math.floor(Math.random() * numbers.length));
+    }
+    
+    code = '#' + letterPart + numPart;
+    
+    // Check if code already exists
+    const existing = await prisma.user.findUnique({
+      where: { playerCode: code }
+    });
+    
+    if (!existing) {
+      isUnique = true;
+    }
+  }
+  
+  return code;
+}
 
 /**
  * Generate unique umpire code
@@ -127,7 +164,8 @@ export const register = async (req, res) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Generate unique umpire code for all users
+    // Generate unique player code and umpire code for all users
+    const playerCode = await generatePlayerCode();
     const umpireCode = await generateUmpireCode();
 
     // Create user with all three roles
@@ -140,6 +178,7 @@ export const register = async (req, res) => {
         phone,
         alternateEmail: alternateEmail || null,
         roles: userRoles.join(','),
+        playerCode, // All users get player code
         umpireCode, // All users get umpire code
         walletBalance: 10, // Welcome bonus
       },
@@ -194,6 +233,7 @@ export const register = async (req, res) => {
         profilePhoto: user.profilePhoto,
         walletBalance: user.walletBalance,
         totalPoints: user.totalPoints,
+        playerCode: user.playerCode,
         umpireCode: user.umpireCode,
         roles: userRoles,
       },
@@ -233,9 +273,18 @@ export const login = async (req, res) => {
 
     // Check for admin login
     if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-      // Generate admin JWT
+      // Try to find admin user in database
+      let adminUser = await prisma.user.findUnique({
+        where: { email: ADMIN_EMAIL }
+      });
+
+      // If admin user doesn't exist in database, use hardcoded values
+      const adminId = adminUser ? adminUser.id : 'admin';
+      const adminName = adminUser ? adminUser.name : 'Super Admin';
+
+      // Generate admin JWT with actual user ID if available
       const token = jwt.sign(
-        { userId: 'admin', email: ADMIN_EMAIL, roles: ['ADMIN'], isAdmin: true },
+        { userId: adminId, email: ADMIN_EMAIL, roles: ['ADMIN'], isAdmin: true },
         process.env.JWT_SECRET,
         { expiresIn: '7d' }
       );
@@ -244,9 +293,9 @@ export const login = async (req, res) => {
         message: 'Admin login successful',
         token,
         user: {
-          id: 'admin',
+          id: adminId,
           email: ADMIN_EMAIL,
-          name: 'Super Admin',
+          name: adminName,
           roles: ['ADMIN'],
           isAdmin: true,
         },
@@ -309,6 +358,7 @@ export const login = async (req, res) => {
         profilePhoto: user.profilePhoto,
         walletBalance: user.walletBalance,
         totalPoints: user.totalPoints,
+        playerCode: user.playerCode,
         umpireCode: user.umpireCode,
         roles: userRoles,
         isAdmin: false,
@@ -420,6 +470,7 @@ export const addRole = async (req, res) => {
         name: true,
         phone: true,
         roles: true,
+        playerCode: true,
         umpireCode: true,
         profilePhoto: true,
         city: true,

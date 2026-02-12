@@ -1,6 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '../lib/prisma.js';
 
 // Get organizer's tournament history
 export const getOrganizerHistory = async (req, res) => {

@@ -1,6 +1,6 @@
 import express from 'express';
 import multer from 'multer';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma.js';
 import {
   getProfile,
   updateProfile,
@@ -11,7 +11,6 @@ import {
 import { authenticate } from '../middleware/auth.js';
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 // Configure multer for memory storage
 const upload = multer({

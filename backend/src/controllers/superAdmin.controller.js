@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
+import prisma from '../lib/prisma.js';
 
 // Get dashboard stats
 export const getDashboardStats = async (req, res) => {
@@ -34,7 +34,7 @@ export const getDashboardStats = async (req, res) => {
     });
 
     // Revenue Type 2: Admin Profit (KYC fees at ₹50 each)
-    const approvedKYCCount = await prisma.kYCSubmission.count({
+    const approvedKYCCount = await prisma.organizerKYC.count({
       where: { status: 'APPROVED' }
     }).catch(() => 0); // Handle if KYC table doesn't exist
 

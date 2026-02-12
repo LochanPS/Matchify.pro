@@ -1,7 +1,6 @@
 import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma.js';
 import matchService from '../services/match.service.js';
-
-const prisma = new PrismaClient();
 
 // Helper function to format duration in milliseconds to readable string
 const formatDuration = (ms) => {
@@ -59,19 +58,46 @@ const getMatches = async (req, res) => {
     // Get player details for each match
     const matchesWithPlayers = await Promise.all(
       matches.map(async (match) => {
-        const player1 = match.player1Id
-          ? await prisma.user.findUnique({
-              where: { id: match.player1Id },
-              select: { id: true, name: true, profilePhoto: true }
-            })
-          : null;
+        // Helper function to get player with partner info for doubles
+        const getPlayerWithPartner = async (playerId, categoryFormat) => {
+          if (!playerId) return null;
+          
+          const player = await prisma.user.findUnique({
+            where: { id: playerId },
+            select: { id: true, name: true, profilePhoto: true }
+          });
+          
+          if (!player) return null;
+          
+          // If doubles category, find partner from registration
+          if (categoryFormat === 'doubles') {
+            const registration = await prisma.registration.findFirst({
+              where: {
+                categoryId: match.categoryId,
+                userId: playerId,
+                status: { in: ['confirmed', 'pending'] }
+              },
+              include: {
+                partner: {
+                  select: { id: true, name: true }
+                }
+              }
+            });
+            
+            if (registration?.partner) {
+              return {
+                ...player,
+                partnerName: registration.partner.name,
+                partnerId: registration.partner.id
+              };
+            }
+          }
+          
+          return player;
+        };
 
-        const player2 = match.player2Id
-          ? await prisma.user.findUnique({
-              where: { id: match.player2Id },
-              select: { id: true, name: true, profilePhoto: true }
-            })
-          : null;
+        const player1 = await getPlayerWithPartner(match.player1Id, match.category.format);
+        const player2 = await getPlayerWithPartner(match.player2Id, match.category.format);
 
         const winner = match.winnerId
           ? await prisma.user.findUnique({
@@ -91,8 +117,10 @@ const getMatches = async (req, res) => {
           id: match.id,
           round: match.round,
           matchNumber: match.matchNumber,
+          stage: match.stage, // ADD THIS - needed for Round Robin vs Knockout detection
           courtNumber: match.courtNumber,
           categoryName: match.category.name,
+          categoryFormat: match.category.format, // Add format to know if doubles
           player1: player1 || { name: 'TBD' },
           player2: player2 || { name: 'TBD' },
           player1Seed: match.player1Seed,
@@ -172,7 +200,7 @@ const updateMatchResult = async (req, res) => {
   try {
     const { matchId } = req.params;
     const { winnerId, scoreJson } = req.body;
-    const userId = req.user.id;
+    const userId = req.user.userId || req.user.id;
 
     // Verify user is organizer or umpire
     const match = await prisma.match.findUnique({
@@ -236,7 +264,7 @@ const assignCourt = async (req, res) => {
   try {
     const { matchId } = req.params;
     const { courtNumber } = req.body;
-    const userId = req.user.id;
+    const userId = req.user.userId || req.user.id;
 
     // Verify user is organizer
     const match = await prisma.match.findUnique({
@@ -430,9 +458,9 @@ const createMatch = async (req, res) => {
   try {
     const { tournamentId, categoryId } = req.params;
     const { matchNumber, round, player1Id, player2Id } = req.body;
-    const userId = req.user.id;
+    const userId = req.user.userId || req.user.id;
 
-    // Verify tournament exists and user is organizer
+    // Verify tournament exists and user is organizer or admin
     const tournament = await prisma.tournament.findUnique({
       where: { id: tournamentId },
       select: { id: true, organizerId: true, name: true }
@@ -442,8 +470,13 @@ const createMatch = async (req, res) => {
       return res.status(404).json({ success: false, error: 'Tournament not found' });
     }
 
-    if (tournament.organizerId !== userId) {
-      return res.status(403).json({ success: false, error: 'Only the organizer can create matches' });
+    // Check if user is organizer or has ADMIN role
+    const userRoles = req.user.roles || [];
+    const isOrganizer = tournament.organizerId === userId;
+    const isAdmin = userRoles.includes('ADMIN') || req.user.role === 'ADMIN';
+
+    if (!isOrganizer && !isAdmin) {
+      return res.status(403).json({ success: false, error: 'Only the organizer or admin can create matches' });
     }
 
     // Check if match already exists
@@ -518,6 +551,129 @@ const createMatch = async (req, res) => {
   }
 };
 
+/**
+ * Give bye to a player (advance them to next round without playing)
+ * POST /api/matches/:matchId/give-bye
+ */
+const giveBye = async (req, res) => {
+  try {
+    const { matchId } = req.params;
+    const { winnerId } = req.body;
+    const userId = req.user.userId || req.user.id;
+
+    console.log('🎯 Give Bye - Match:', matchId, 'Winner:', winnerId);
+
+    const match = await prisma.match.findUnique({
+      where: { id: matchId },
+      include: { tournament: true }
+    });
+
+    if (!match) {
+      return res.status(404).json({ success: false, error: 'Match not found' });
+    }
+
+    // Check authorization
+    const isOrganizer = match.tournament.organizerId === userId;
+    const hasAdminRole = req.user.roles?.includes('admin') || req.user.role === 'ADMIN';
+
+    if (!isOrganizer && !hasAdminRole) {
+      return res.status(403).json({ success: false, error: 'Not authorized to give bye' });
+    }
+
+    // Validate that one player is missing
+    if (match.player1Id && match.player2Id) {
+      return res.status(400).json({ success: false, error: 'Both players are assigned. Cannot give bye.' });
+    }
+
+    // Validate winner is the assigned player
+    if (winnerId !== match.player1Id && winnerId !== match.player2Id) {
+      return res.status(400).json({ success: false, error: 'Winner must be the assigned player' });
+    }
+
+    // Create a bye score
+    const byeScore = {
+      sets: [],
+      winner: winnerId,
+      isBye: true,
+      completedAt: new Date().toISOString()
+    };
+
+    // Update match as completed with bye
+    const updatedMatch = await prisma.match.update({
+      where: { id: matchId },
+      data: {
+        status: 'COMPLETED',
+        winnerId,
+        scoreJson: JSON.stringify(byeScore),
+        completedAt: new Date()
+      }
+    });
+
+    console.log('✅ Bye given to winner:', winnerId);
+
+    // Check if this is the final match
+    const isFinal = match.round === 1 && !match.parentMatchId;
+
+    if (isFinal) {
+      // Update category with winner (no runner-up for bye)
+      await prisma.category.update({
+        where: { id: match.categoryId },
+        data: {
+          winnerId: winnerId,
+          status: 'completed'
+        }
+      });
+      console.log(`Finals completed with bye! Winner: ${winnerId}`);
+      
+      // Award tournament points
+      try {
+        const tournamentPointsService = await import('../services/tournamentPoints.service.js');
+        await tournamentPointsService.default.awardTournamentPoints(match.tournamentId, match.categoryId);
+        console.log(`✅ Tournament points awarded for category ${match.categoryId}`);
+      } catch (pointsError) {
+        console.error('❌ Error awarding tournament points:', pointsError);
+      }
+    } else if (match.parentMatchId && match.winnerPosition) {
+      // Knockout: Advance winner to next match
+      const updateData = match.winnerPosition === 'player1'
+        ? { player1Id: winnerId }
+        : { player2Id: winnerId };
+      
+      // Check if parent match now has both players
+      const parentMatch = await prisma.match.findUnique({
+        where: { id: match.parentMatchId }
+      });
+
+      if (parentMatch) {
+        const bothPlayersReady = 
+          (match.winnerPosition === 'player1' && parentMatch.player2Id) ||
+          (match.winnerPosition === 'player2' && parentMatch.player1Id);
+
+        if (bothPlayersReady) {
+          updateData.status = 'READY';
+        }
+      }
+      
+      await prisma.match.update({
+        where: { id: match.parentMatchId },
+        data: updateData
+      });
+      console.log(`Winner ${winnerId} advanced to next round via bye${updateData.status === 'READY' ? ' (match now READY)' : ' (waiting for opponent)'}`);
+    }
+
+    res.json({
+      success: true,
+      message: isFinal ? 'Finals completed with bye! Category winner recorded.' : 'Bye given successfully',
+      match: { ...updatedMatch, score: byeScore },
+      isFinal,
+      categoryWinner: isFinal ? winnerId : null
+    });
+  } catch (error) {
+    console.error('Give bye error:', error);
+    res.status(500).json({ success: false, error: 'Failed to give bye' });
+  }
+};
+
 export {
   getMatches,
   getMatch,
@@ -533,7 +689,8 @@ export {
   undoPoint,
   setMatchConfig,
   pauseMatchTimer,
-  resumeMatchTimer
+  resumeMatchTimer,
+  giveBye
 };
 
 /**
@@ -543,7 +700,7 @@ export {
 const startMatch = async (req, res) => {
   try {
     const { matchId } = req.params;
-    const userId = req.user.id;
+    const userId = req.user.userId || req.user.id;
 
     const match = await prisma.match.findUnique({
       where: { id: matchId },
@@ -673,7 +830,7 @@ const updateLiveScore = async (req, res) => {
   try {
     const { matchId } = req.params;
     const { player, score } = req.body;
-    const userId = req.user.id;
+    const userId = req.user.userId || req.user.id;
 
     const match = await prisma.match.findUnique({
       where: { id: matchId },
@@ -738,37 +895,77 @@ const updateLiveScore = async (req, res) => {
 /**
  * Update Round Robin group standings after match completion
  */
-async function updateRoundRobinStandings(tournamentId, categoryId, groupName) {
+async function updateRoundRobinStandings(tournamentId, categoryId, matchId) {
   try {
+    console.log('🔍 updateRoundRobinStandings called with:', { tournamentId, categoryId, matchId });
+    
     // Get the current draw
     const draw = await prisma.draw.findUnique({
       where: { tournamentId_categoryId: { tournamentId, categoryId } }
     });
 
-    if (!draw) return;
-
-    let bracketJson = typeof draw.bracketJson === 'string' ? JSON.parse(draw.bracketJson) : draw.bracketJson;
-    
-    if (bracketJson.format !== 'ROUND_ROBIN' && bracketJson.format !== 'ROUND_ROBIN_KNOCKOUT') {
+    if (!draw) {
+      console.log('❌ No draw found in updateRoundRobinStandings');
       return;
     }
 
-    // Find the group
-    const group = bracketJson.groups.find(g => g.groupName === groupName);
-    if (!group) return;
+    let bracketJson = typeof draw.bracketJson === 'string' ? JSON.parse(draw.bracketJson) : draw.bracketJson;
+    
+    console.log('🔍 Bracket format in updateRoundRobinStandings:', bracketJson.format);
+    
+    if (bracketJson.format !== 'ROUND_ROBIN' && bracketJson.format !== 'ROUND_ROBIN_KNOCKOUT') {
+      console.log('❌ Not a Round Robin format, exiting');
+      return;
+    }
 
-    // Get all completed matches for this group
-    const groupMatches = await prisma.match.findMany({
+    // Get the completed match to find which players are involved
+    const completedMatch = await prisma.match.findUnique({
+      where: { id: matchId }
+    });
+
+    if (!completedMatch) {
+      console.log('❌ Completed match not found');
+      return;
+    }
+
+    console.log('🔍 Completed match:', { player1Id: completedMatch.player1Id, player2Id: completedMatch.player2Id, winnerId: completedMatch.winnerId });
+
+    // Find which group this match belongs to by checking player IDs
+    let targetGroup = null;
+    for (const group of bracketJson.groups) {
+      const hasPlayer1 = group.participants.some(p => p.id === completedMatch.player1Id);
+      const hasPlayer2 = group.participants.some(p => p.id === completedMatch.player2Id);
+      if (hasPlayer1 && hasPlayer2) {
+        targetGroup = group;
+        break;
+      }
+    }
+
+    if (!targetGroup) {
+      console.log('❌ Target group not found for match players');
+      return;
+    }
+
+    console.log('🔍 Target group found:', targetGroup.groupName);
+
+    // Get all completed matches for this group (by checking if both players are in the group)
+    const allMatches = await prisma.match.findMany({
       where: {
         tournamentId,
         categoryId,
-        groupName,
         status: 'COMPLETED'
       }
     });
 
+    // Filter matches that belong to this group
+    const groupMatches = allMatches.filter(match => {
+      const hasPlayer1 = targetGroup.participants.some(p => p.id === match.player1Id);
+      const hasPlayer2 = targetGroup.participants.some(p => p.id === match.player2Id);
+      return hasPlayer1 && hasPlayer2;
+    });
+
     // Reset all participant stats
-    group.participants.forEach(p => {
+    targetGroup.participants.forEach(p => {
       p.played = 0;
       p.wins = 0;
       p.losses = 0;
@@ -777,8 +974,8 @@ async function updateRoundRobinStandings(tournamentId, categoryId, groupName) {
 
     // Calculate new standings
     groupMatches.forEach(match => {
-      const player1 = group.participants.find(p => p.id === match.player1Id);
-      const player2 = group.participants.find(p => p.id === match.player2Id);
+      const player1 = targetGroup.participants.find(p => p.id === match.player1Id);
+      const player2 = targetGroup.participants.find(p => p.id === match.player2Id);
 
       if (player1 && player2) {
         player1.played++;
@@ -797,7 +994,7 @@ async function updateRoundRobinStandings(tournamentId, categoryId, groupName) {
     });
 
     // Sort participants by points (descending), then by wins
-    group.participants.sort((a, b) => {
+    targetGroup.participants.sort((a, b) => {
       if (b.points !== a.points) return b.points - a.points;
       return b.wins - a.wins;
     });
@@ -808,9 +1005,9 @@ async function updateRoundRobinStandings(tournamentId, categoryId, groupName) {
       data: { bracketJson: JSON.stringify(bracketJson), updatedAt: new Date() }
     });
 
-    console.log(`Updated standings for ${groupName}:`, group.participants.map(p => `${p.name}: ${p.points}pts`));
+    console.log(`✅ Updated standings for ${targetGroup.groupName}:`, targetGroup.participants.map(p => `${p.name}: ${p.points}pts (${p.wins}W-${p.losses}L)`));
   } catch (error) {
-    console.error('Error updating Round Robin standings:', error);
+    console.error('❌ Error updating Round Robin standings:', error);
   }
 }
 
@@ -818,7 +1015,7 @@ const endMatch = async (req, res) => {
   try {
     const { matchId } = req.params;
     const { winnerId, finalScore } = req.body;
-    const userId = req.user.id;
+    const userId = req.user.userId || req.user.id;
 
     const match = await prisma.match.findUnique({
       where: { id: matchId },
@@ -876,6 +1073,33 @@ const endMatch = async (req, res) => {
       }
     });
 
+    // Update umpire statistics if an umpire was assigned
+    if (match.umpireId) {
+      try {
+        // Increment matchesUmpired count
+        const updatedUser = await prisma.user.update({
+          where: { id: match.umpireId },
+          data: {
+            matchesUmpired: { increment: 1 }
+          }
+        });
+
+        // Check if umpire should be verified (10+ matches)
+        if (updatedUser.matchesUmpired >= 10 && !updatedUser.isVerifiedUmpire) {
+          await prisma.user.update({
+            where: { id: match.umpireId },
+            data: { isVerifiedUmpire: true }
+          });
+          console.log(`✅ Umpire ${match.umpireId} verified after ${updatedUser.matchesUmpired} matches`);
+        }
+
+        console.log(`✅ Updated umpire stats: ${updatedUser.matchesUmpired} matches umpired`);
+      } catch (umpireError) {
+        console.error('❌ Error updating umpire statistics:', umpireError);
+        // Don't fail the match completion if umpire stats update fails
+      }
+    }
+
     // Determine the loser
     const loserId = winnerId === match.player1Id ? match.player2Id : match.player1Id;
 
@@ -893,21 +1117,65 @@ const endMatch = async (req, res) => {
         }
       });
       console.log(`Finals completed! Winner: ${winnerId}, Runner-up: ${loserId}`);
+      
+      // Award tournament points to all players
+      try {
+        const tournamentPointsService = await import('../services/tournamentPoints.service.js');
+        await tournamentPointsService.default.awardTournamentPoints(match.tournamentId, match.categoryId);
+        console.log(`✅ Tournament points awarded for category ${match.categoryId}`);
+      } catch (pointsError) {
+        console.error('❌ Error awarding tournament points:', pointsError);
+        // Don't fail the match completion if points awarding fails
+      }
     } else if (match.parentMatchId && match.winnerPosition) {
       // Knockout: Update bracket - advance winner to next match
       const updateData = match.winnerPosition === 'player1'
         ? { player1Id: winnerId }
         : { player2Id: winnerId };
       
+      // Check if parent match now has both players
+      const parentMatch = await prisma.match.findUnique({
+        where: { id: match.parentMatchId }
+      });
+
+      if (parentMatch) {
+        // Check if both players are now assigned
+        const bothPlayersReady = 
+          (match.winnerPosition === 'player1' && parentMatch.player2Id) ||
+          (match.winnerPosition === 'player2' && parentMatch.player1Id);
+
+        if (bothPlayersReady) {
+          updateData.status = 'READY'; // Both players assigned, match ready to start
+        }
+      }
+      
       await prisma.match.update({
         where: { id: match.parentMatchId },
         data: updateData
       });
-      console.log(`Winner ${winnerId} advanced to next round`);
-    } else if (match.groupName) {
-      // Round Robin: Update group standings
-      await updateRoundRobinStandings(match.tournamentId, match.categoryId, match.groupName);
-      console.log(`Round Robin match completed in ${match.groupName}. Standings updated.`);
+      console.log(`Winner ${winnerId} advanced to next round${updateData.status === 'READY' ? ' (match now READY)' : ' (waiting for opponent)'}`);
+    }
+
+    // Check if this is a Round Robin match and update standings
+    console.log('🔍 Checking if Round Robin match...');
+    const draw = await prisma.draw.findUnique({
+      where: { tournamentId_categoryId: { tournamentId: match.tournamentId, categoryId: match.categoryId } }
+    });
+    
+    console.log('🔍 Draw found:', !!draw);
+    if (draw) {
+      const bracketJson = typeof draw.bracketJson === 'string' ? JSON.parse(draw.bracketJson) : draw.bracketJson;
+      console.log('🔍 Bracket format:', bracketJson.format);
+      if (bracketJson.format === 'ROUND_ROBIN' || bracketJson.format === 'ROUND_ROBIN_KNOCKOUT') {
+        // This is a Round Robin match, update standings
+        console.log('🔍 Calling updateRoundRobinStandings...');
+        await updateRoundRobinStandings(match.tournamentId, match.categoryId, matchId);
+        console.log(`✅ Round Robin match completed. Standings updated.`);
+      } else {
+        console.log('🔍 Not a Round Robin format, skipping standings update');
+      }
+    } else {
+      console.log('🔍 No draw found, skipping standings update');
     }
 
     res.json({
@@ -929,7 +1197,7 @@ const endMatch = async (req, res) => {
  */
 const getUmpireMatches = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.userId || req.user.id;
 
     const matches = await prisma.match.findMany({
       where: {
@@ -985,11 +1253,14 @@ const assignUmpire = async (req, res) => {
   try {
     const { matchId } = req.params;
     const { umpireId } = req.body;
-    const userId = req.user.id;
+    const userId = req.user.userId || req.user.id;
 
     const match = await prisma.match.findUnique({
       where: { id: matchId },
-      include: { tournament: true }
+      include: { 
+        tournament: true,
+        category: true
+      }
     });
 
     if (!match) {
@@ -1001,12 +1272,114 @@ const assignUmpire = async (req, res) => {
       return res.status(403).json({ success: false, error: 'Only organizer can assign umpires' });
     }
 
+    // Get umpire details
+    const umpire = await prisma.user.findUnique({
+      where: { id: umpireId },
+      select: { id: true, name: true, email: true }
+    });
+
+    if (!umpire) {
+      return res.status(404).json({ success: false, error: 'Umpire not found' });
+    }
+
+    // Get player names for notification
+    const player1 = match.player1Id
+      ? await prisma.user.findUnique({
+          where: { id: match.player1Id },
+          select: { name: true }
+        })
+      : null;
+
+    const player2 = match.player2Id
+      ? await prisma.user.findUnique({
+          where: { id: match.player2Id },
+          select: { name: true }
+        })
+      : null;
+
     const updatedMatch = await prisma.match.update({
       where: { id: matchId },
       data: { umpireId }
     });
 
-    res.json({ success: true, message: 'Umpire assigned', match: updatedMatch });
+    // Determine round name
+    const roundNames = {
+      1: 'Finals',
+      2: 'Semi Finals',
+      3: 'Quarter Finals',
+      4: 'Round of 16',
+      5: 'Round of 32'
+    };
+    const roundName = roundNames[match.round] || `Round ${match.round}`;
+
+    // Send notification to umpire
+    console.log('📧 Sending notification to umpire:', umpire.name, umpire.email);
+    
+    const notificationService = await import('../services/notificationService.js');
+    const matchDetails = `${roundName} - Match #${match.matchNumber}`;
+    const playersInfo = player1 && player2 
+      ? `${player1.name} vs ${player2.name}` 
+      : 'Players TBD';
+    
+    // Build clean message with only relevant details
+    let message = `You have been assigned as umpire for ${matchDetails}\n\n`;
+    message += `Players: ${playersInfo}\n`;
+    message += `Tournament: ${match.tournament.name}\n`;
+    message += `Category: ${match.category.name}`;
+    
+    // Only add court if assigned
+    if (match.courtNumber) {
+      message += `\nCourt: ${match.courtNumber}`;
+    }
+
+    console.log('📧 Notification message:', message);
+    console.log('📧 Notification data:', {
+      matchId: match.id,
+      tournamentId: match.tournamentId,
+      categoryId: match.categoryId,
+      matchNumber: match.matchNumber,
+      round: match.round,
+      roundName,
+      courtNumber: match.courtNumber,
+      player1Name: player1?.name || 'TBD',
+      player2Name: player2?.name || 'TBD',
+      matchDetails
+    });
+
+    try {
+      await notificationService.default.createNotification({
+        userId: umpireId,
+        type: 'MATCH_ASSIGNED',
+        title: '⚖️ Match Assignment',
+        message: message,
+        data: {
+          matchId: match.id,
+          tournamentId: match.tournamentId,
+          categoryId: match.categoryId,
+          matchNumber: match.matchNumber,
+          round: match.round,
+          roundName,
+          courtNumber: match.courtNumber,
+          player1Name: player1?.name || 'TBD',
+          player2Name: player2?.name || 'TBD',
+          matchDetails
+        },
+        sendEmail: true
+      });
+      
+      console.log(`✅ Notification sent successfully to ${umpire.name}`);
+    } catch (notifError) {
+      console.error('❌ Error sending notification:', notifError);
+      // Don't fail the whole request if notification fails
+    }
+
+    console.log(`✅ Umpire ${umpire.name} assigned to ${matchDetails} and notified`);
+
+    res.json({ 
+      success: true, 
+      message: 'Umpire assigned and notified', 
+      match: updatedMatch 
+    });
   } catch (error) {
     console.error('Assign umpire error:', error);
     res.status(500).json({ success: false, error: 'Failed to assign umpire' });
@@ -1020,7 +1393,7 @@ const assignUmpire = async (req, res) => {
 const undoPoint = async (req, res) => {
   try {
     const { matchId } = req.params;
-    const userId = req.user.id;
+    const userId = req.user.userId || req.user.id;
 
     const match = await prisma.match.findUnique({
       where: { id: matchId },
@@ -1104,7 +1477,7 @@ const setMatchConfig = async (req, res) => {
   try {
     const { matchId } = req.params;
     const { pointsPerSet, maxSets, setsToWin, extension } = req.body;
-    const userId = req.user.id;
+    const userId = req.user.userId || req.user.id;
 
     const match = await prisma.match.findUnique({
       where: { id: matchId },
@@ -1124,9 +1497,14 @@ const setMatchConfig = async (req, res) => {
       return res.status(403).json({ success: false, error: 'Not authorized to set match config' });
     }
 
-    // Only allow config change before match starts
-    if (match.status !== 'PENDING' && match.status !== 'READY') {
-      return res.status(400).json({ success: false, error: 'Cannot change config after match has started' });
+    // Only allow config change before match starts (case-insensitive check)
+    const status = match.status?.toUpperCase();
+    if (status !== 'PENDING' && status !== 'READY' && status !== 'SCHEDULED') {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Cannot change config after match has started',
+        currentStatus: match.status
+      });
     }
 
     // Build the match config
@@ -1137,11 +1515,10 @@ const setMatchConfig = async (req, res) => {
       extension: extension !== undefined ? extension : true
     };
 
-    // Store config in a temporary field or in scoreJson
-    // We'll store it in scoreJson as initial config
+    // Store config in scoreJson as initial config
     const initialScore = {
       sets: [],
-      currentSet: 1,
+      currentSet: 0,
       currentScore: { player1: 0, player2: 0 },
       currentServer: 'player1',
       history: [],
@@ -1154,6 +1531,8 @@ const setMatchConfig = async (req, res) => {
         scoreJson: JSON.stringify(initialScore)
       }
     });
+
+    console.log(`✅ Match config saved for match ${matchId}:`, matchConfig);
 
     res.json({
       success: true,
@@ -1173,7 +1552,7 @@ const setMatchConfig = async (req, res) => {
 const pauseMatchTimer = async (req, res) => {
   try {
     const { matchId } = req.params;
-    const userId = req.user.id;
+    const userId = req.user.userId || req.user.id;
 
     const match = await prisma.match.findUnique({
       where: { id: matchId },
@@ -1241,7 +1620,7 @@ const pauseMatchTimer = async (req, res) => {
 const resumeMatchTimer = async (req, res) => {
   try {
     const { matchId } = req.params;
-    const userId = req.user.id;
+    const userId = req.user.userId || req.user.id;
 
     const match = await prisma.match.findUnique({
       where: { id: matchId },

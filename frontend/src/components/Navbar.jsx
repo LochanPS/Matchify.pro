@@ -13,7 +13,8 @@ import {
   X,
   Trophy,
   LayoutDashboard,
-  Search
+  Search,
+  Award
 } from 'lucide-react';
 
 const Navbar = () => {
@@ -48,6 +49,12 @@ const Navbar = () => {
 
   const getCurrentRole = () => {
     if (!user) return null;
+    
+    // Check if user is admin first
+    if (user.isAdmin || (user.roles && (Array.isArray(user.roles) ? user.roles.includes('ADMIN') : user.roles === 'ADMIN'))) {
+      return 'ADMIN';
+    }
+    
     return user.currentRole || user.role || (user.roles && user.roles[0]);
   };
 
@@ -103,6 +110,7 @@ const Navbar = () => {
   const isActiveLink = (path) => {
     if (path === '/tournaments') return location.pathname.startsWith('/tournaments');
     if (path === '/academies') return location.pathname.startsWith('/academies');
+    if (path === '/leaderboard') return location.pathname === '/leaderboard';
     if (path === '/dashboard') return location.pathname.includes('dashboard');
     return location.pathname === path;
   };
@@ -167,6 +175,10 @@ const Navbar = () => {
                 <NavLink to="/tournaments" active={isActiveLink('/tournaments')}>
                   <Trophy className="w-4 h-4" />
                   Tournaments
+                </NavLink>
+                <NavLink to="/leaderboard" active={isActiveLink('/leaderboard')}>
+                  <Award className="w-4 h-4" />
+                  Leaderboard
                 </NavLink>
                 <NavLink to="/academies" active={isActiveLink('/academies')}>
                   <Search className="w-4 h-4" />
@@ -257,6 +269,10 @@ const Navbar = () => {
               <NavLink to="/tournaments" active={isActiveLink('/tournaments')}>
                 <Trophy className="w-4 h-4" />
                 Tournaments
+              </NavLink>
+              <NavLink to="/leaderboard" active={isActiveLink('/leaderboard')}>
+                <Award className="w-4 h-4" />
+                Leaderboard
               </NavLink>
               <NavLink to="/academies" active={isActiveLink('/academies')}>
                 <Search className="w-4 h-4" />
@@ -459,6 +475,10 @@ const Navbar = () => {
             <MobileNavLink to="/tournaments" onClick={() => setShowMobileMenu(false)}>
               <Trophy className="w-5 h-5" />
               Tournaments
+            </MobileNavLink>
+            <MobileNavLink to="/leaderboard" onClick={() => setShowMobileMenu(false)}>
+              <Award className="w-5 h-5" />
+              Leaderboard
             </MobileNavLink>
             <MobileNavLink to="/academies" onClick={() => setShowMobileMenu(false)}>
               <Search className="w-5 h-5" />

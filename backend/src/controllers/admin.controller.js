@@ -629,20 +629,6 @@ class AdminController {
       const deletions = {};
 
       try {
-        const creditTransactions = await prisma.creditTransaction.deleteMany({});
-        deletions.creditTransactions = creditTransactions.count;
-      } catch (e) {
-        console.log('⚠️  Credit transactions table not found');
-      }
-
-      try {
-        const credits = await prisma.matchifyCredits.deleteMany({});
-        deletions.matchifyCredits = credits.count;
-      } catch (e) {
-        console.log('⚠️  Matchify credits table not found');
-      }
-
-      try {
         const corrections = await prisma.scoreCorrectionRequest.deleteMany({});
         deletions.scoreCorrectionRequests = corrections.count;
       } catch (e) {

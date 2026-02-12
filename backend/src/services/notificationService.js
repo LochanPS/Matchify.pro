@@ -1,7 +1,6 @@
 import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma.js';
 import emailService from './emailService.js';
-
-const prisma = new PrismaClient();
 
 // Notification types enum (for reference)
 const NotificationType = {

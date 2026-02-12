@@ -1,8 +1,6 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma.js';
 import { sendInviteEmail } from '../services/email.service.js';
 import { generateOneTimePassword, calculateExpiry, generateInviteToken } from '../utils/adminInvite.js';
-
-const prisma = new PrismaClient();
 
 // POST /admin/invites - Create new invite
 export const createInvite = async (req, res) => {

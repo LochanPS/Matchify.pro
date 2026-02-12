@@ -19,4 +19,8 @@ export const superAdminAPI = {
 
   // Registrations
   getRegistrations: (params) => api.get('/super-admin/registrations', { params }),
+
+  // Quick Add Players
+  quickAddPlayer: (tournamentId, data) => api.post(`/super-admin/tournaments/${tournamentId}/quick-add-player`, data),
+  getQuickAddedPlayers: (tournamentId) => api.get(`/super-admin/tournaments/${tournamentId}/quick-added-players`),
 };

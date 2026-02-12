@@ -1,77 +1,8 @@
 import express from 'express';
 import { authenticate } from '../middleware/auth.js';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma.js';
 
 const router = express.Router();
-const prisma = new PrismaClient();
-
-// GET /api/leaderboard - Public leaderboard with filters
-router.get('/leaderboard', async (req, res) => {
-  try {
-    const { scope = 'global', city, state, limit = 50 } = req.query;
-
-    // Build where clause based on scope
-    const where = {};
-    
-    if (scope === 'city' && city) {
-      where.city = { contains: city, mode: 'insensitive' };
-    }
-    
-    if ((scope === 'state' || scope === 'city') && state) {
-      where.state = { contains: state, mode: 'insensitive' };
-    }
-
-    // Fetch users with their points
-    const players = await prisma.user.findMany({
-      where: {
-        ...where,
-        role: 'PLAYER'
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        photo: true,
-        matchify_points: true,
-        city: true,
-        state: true,
-        registrations: {
-          select: {
-            id: true,
-            status: true
-          }
-        }
-      },
-      orderBy: {
-        matchify_points: 'desc'
-      },
-      take: parseInt(limit)
-    });
-
-    // Calculate additional stats
-    const playersWithStats = players.map(player => ({
-      id: player.id,
-      name: player.name,
-      email: player.email,
-      photo: player.photo,
-      matchify_points: player.matchify_points,
-      city: player.city,
-      state: player.state,
-      tournaments_played: player.registrations.filter(r => r.status === 'CONFIRMED').length,
-      win_rate: null // Will be calculated when match results are available
-    }));
-
-    res.json({
-      players: playersWithStats,
-      scope,
-      filters: { city, state },
-      total: playersWithStats.length
-    });
-  } catch (error) {
-    console.error('Leaderboard error:', error);
-    res.status(500).json({ error: 'Failed to fetch leaderboard' });
-  }
-});
 
 // GET /api/points/my - Get current user's points history
 router.get('/points/my', authenticate, async (req, res) => {

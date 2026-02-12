@@ -1,17 +1,17 @@
 import express from 'express';
 import multer from 'multer';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma.js';
 import {
   createRegistration,
   createRegistrationWithScreenshot,
   getMyRegistrations,
   cancelRegistration,
   verifyPayment,
+  getPartnerByCode,
 } from '../controllers/registration.controller.js';
 import { authenticate, preventAdminAccess } from '../middleware/auth.js';
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 // Configure multer for memory storage (Cloudinary upload)
 const upload = multer({
@@ -29,6 +29,9 @@ const upload = multer({
 // All routes require authentication + block admins
 router.use(authenticate);
 router.use(preventAdminAccess);
+
+// GET /api/registrations/partner-by-code/:playerCode - Get partner info by player code
+router.get('/partner-by-code/:playerCode', getPartnerByCode);
 
 // POST /api/registrations - Register for tournament (legacy)
 router.post('/', createRegistration);

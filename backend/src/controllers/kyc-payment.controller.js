@@ -1,8 +1,7 @@
 import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma.js';
 import { v2 as cloudinary } from 'cloudinary';
 import multer from 'multer';
-
-const prisma = new PrismaClient();
 
 // Configure multer for memory storage
 const storage = multer.memoryStorage();

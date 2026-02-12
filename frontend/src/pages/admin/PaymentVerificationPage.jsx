@@ -10,6 +10,7 @@ const PaymentVerificationPage = () => {
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [rejectionReason, setRejectionReason] = useState('');
   const [showRejectModal, setShowRejectModal] = useState(null);
+  const [showApproveModal, setShowApproveModal] = useState(null);
   const [processing, setProcessing] = useState(false);
 
   useEffect(() => {
@@ -34,12 +35,11 @@ const PaymentVerificationPage = () => {
   };
 
   const handleApprove = async (id) => {
-    if (!confirm('Are you sure you want to approve this payment?')) return;
-
     try {
       setProcessing(true);
       await approvePayment(id);
       toast.success('Payment approved successfully!');
+      setShowApproveModal(null);
       fetchData();
     } catch (error) {
       console.error('Error approving payment:', error);
@@ -233,7 +233,7 @@ const PaymentVerificationPage = () => {
                       <div className="relative group flex-1">
                         <div className="absolute -inset-1 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl blur-lg opacity-50 group-hover:opacity-100 transition duration-300"></div>
                         <button
-                          onClick={() => handleApprove(verification.id)}
+                          onClick={() => setShowApproveModal(verification.id)}
                           disabled={processing}
                           className="relative w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-3 px-6 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
                         >
@@ -292,6 +292,37 @@ const PaymentVerificationPage = () => {
             >
               Close
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Approve Confirmation Modal */}
+      {showApproveModal && (
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-800 rounded-2xl p-8 max-w-md w-full border border-slate-700 shadow-2xl">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-gradient-to-br from-teal-500 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-3xl">✅</span>
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-2">Matchify.pro</h3>
+              <p className="text-gray-300 text-lg">Are you sure you want to approve this payment?</p>
+            </div>
+            <div className="flex gap-4">
+              <button
+                onClick={() => handleApprove(showApproveModal)}
+                disabled={processing}
+                className="flex-1 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-bold py-3 px-6 rounded-xl transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+              >
+                OK
+              </button>
+              <button
+                onClick={() => setShowApproveModal(null)}
+                disabled={processing}
+                className="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 px-6 rounded-xl transition"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -1,52 +1,49 @@
 import { PrismaClient } from '@prisma/client';
+
 const prisma = new PrismaClient();
 
 async function checkMatches() {
   try {
-    const matches = await prisma.match.findMany({
-      take: 10,
-      include: {
-        tournament: { select: { name: true } },
-        category: { select: { name: true } }
-      },
-      orderBy: { createdAt: 'desc' }
+    console.log('🔍 Checking all matches...');
+
+    // Get all matches
+    const allMatches = await prisma.match.findMany({
+      orderBy: { matchNumber: 'asc' }
     });
 
-    console.log('\n===========================================');
-    console.log('MATCHES IN DATABASE');
-    console.log('===========================================\n');
-    console.log(`Total matches found: ${matches.length}\n`);
+    console.log(`\nTotal matches: ${allMatches.length}\n`);
 
-    if (matches.length === 0) {
-      console.log('❌ No matches found in database!');
-      console.log('\nYou need to:');
-      console.log('1. Create a tournament');
-      console.log('2. Add categories');
-      console.log('3. Register players');
-      console.log('4. Generate draws');
-      console.log('\nOr run the seed script to create test data.');
-    } else {
-      matches.forEach((match, index) => {
-        console.log(`${index + 1}. Match ID: ${match.id}`);
-        console.log(`   Tournament: ${match.tournament.name}`);
-        console.log(`   Category: ${match.category.name}`);
-        console.log(`   Status: ${match.status}`);
-        console.log(`   Round: ${match.round}`);
-        console.log(`   Match Number: ${match.matchNumber}`);
-        console.log(`   URL: http://localhost:5173/scoring/${match.id}`);
-        console.log('');
-      });
+    // Group by stage
+    const byStage = {};
+    allMatches.forEach(m => {
+      const stage = m.stage || 'NULL';
+      if (!byStage[stage]) byStage[stage] = [];
+      byStage[stage].push(m);
+    });
 
-      console.log('\n===========================================');
-      console.log('TO TEST SCORING:');
-      console.log('===========================================');
-      console.log(`\n1. Copy a match URL from above`);
-      console.log(`2. Paste it in your browser`);
-      console.log(`3. Click "Start Match"`);
-      console.log(`4. Start scoring!\n`);
-    }
+    console.log('Matches by stage:');
+    Object.keys(byStage).forEach(stage => {
+      console.log(`  ${stage}: ${byStage[stage].length} matches`);
+    });
+
+    // Show matches with status COMPLETED
+    const completedMatches = allMatches.filter(m => m.status === 'COMPLETED');
+    console.log(`\n⚠️ COMPLETED matches: ${completedMatches.length}`);
+    
+    completedMatches.forEach(m => {
+      console.log(`  Match ${m.matchNumber}: stage=${m.stage}, round=${m.round}, status=${m.status}`);
+    });
+
+    // Show matches that are NOT in GROUP stage
+    const nonGroupMatches = allMatches.filter(m => m.stage !== 'GROUP');
+    console.log(`\n🎯 Non-GROUP matches: ${nonGroupMatches.length}`);
+    
+    nonGroupMatches.forEach(m => {
+      console.log(`  Match ${m.matchNumber}: stage=${m.stage}, round=${m.round}, status=${m.status}, id=${m.id}`);
+    });
+
   } catch (error) {
-    console.error('Error:', error.message);
+    console.error('❌ Error:', error);
   } finally {
     await prisma.$disconnect();
   }

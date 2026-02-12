@@ -1,7 +1,6 @@
 import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma.js';
 import { deleteDailyRoom } from '../utils/daily.js';
-
-const prisma = new PrismaClient();
 
 // ============================================
 // ADMIN KYC ENDPOINTS

@@ -1,7 +1,6 @@
 import smsService from '../services/smsService.js';
 import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '../lib/prisma.js';
 
 export const testSMS = async (req, res) => {
   try {

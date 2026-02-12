@@ -1,19 +1,22 @@
 import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '../lib/prisma.js';
 
 /**
  * Payment Split Formula (CRITICAL - DO NOT CHANGE):
  * - Platform Fee: 5% of total revenue
- * - Organizer Share: 95% of total revenue
- * - First Payout: 30% of organizer share
- * - Second Payout: 65% of organizer share
+ * - First Payout to Organizer: 30% of total revenue
+ * - Second Payout to Organizer: 65% of total revenue
+ * - Total: 5% + 30% + 65% = 100%
+ * 
+ * Example: ₹100 total
+ * - Platform: ₹5 (5%)
+ * - First Payout: ₹30 (30%)
+ * - Second Payout: ₹65 (65%)
  * 
  * Example: ₹160,000 total
  * - Platform: ₹8,000 (5%)
- * - Organizer: ₹152,000 (95%)
- * - First: ₹45,600 (30% of ₹152,000)
- * - Second: ₹98,800 (65% of ₹152,000)
+ * - First Payout: ₹48,000 (30%)
+ * - Second Payout: ₹104,000 (65%)
  */
 
 export async function createOrUpdateTournamentPayment(tournamentId) {
@@ -23,7 +26,10 @@ export async function createOrUpdateTournamentPayment(tournamentId) {
       where: { id: tournamentId },
       include: {
         registrations: {
-          where: { paymentStatus: 'approved' }
+          where: { 
+            paymentStatus: { in: ['approved', 'completed', 'verified'] },
+            status: 'confirmed'
+          }
         },
         categories: true
       }
@@ -46,12 +52,12 @@ export async function createOrUpdateTournamentPayment(tournamentId) {
 
     // Calculate payment split
     const platformFeePercent = 5;
-    const platformFeeAmount = Math.round(totalCollected * (platformFeePercent / 100));
-    const organizerShare = totalCollected - platformFeeAmount;
+    const platformFeeAmount = Math.round(totalCollected * 0.05); // 5% of total
+    const organizerShare = totalCollected - platformFeeAmount; // For display only
 
-    // CRITICAL: 30% + 65% split (NOT 50-50)
-    const payout50Percent1 = Math.round(organizerShare * 0.30); // 30% of organizer share
-    const payout50Percent2 = Math.round(organizerShare * 0.65); // 65% of organizer share
+    // CRITICAL: 30% and 65% are of TOTAL, not organizer share
+    const payout50Percent1 = Math.round(totalCollected * 0.30); // 30% of TOTAL
+    const payout50Percent2 = Math.round(totalCollected * 0.65); // 65% of TOTAL
 
     // Create or update tournament payment record
     const existingPayment = await prisma.tournamentPayment.findUnique({

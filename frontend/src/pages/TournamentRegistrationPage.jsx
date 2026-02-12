@@ -19,7 +19,8 @@ export default function TournamentRegistrationPage() {
   const [tournament, setTournament] = useState(null);
   const [categories, setCategories] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
-  const [partnerEmails, setPartnerEmails] = useState({});
+  const [partnerCodes, setPartnerCodes] = useState({});
+  const [partnerInfo, setPartnerInfo] = useState({}); // Store fetched partner information
   const [paymentScreenshot, setPaymentScreenshot] = useState(null);
   const [paymentPreview, setPaymentPreview] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -29,11 +30,34 @@ export default function TournamentRegistrationPage() {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [alreadyRegisteredCategories, setAlreadyRegisteredCategories] = useState([]);
   const [adminPaymentSettings, setAdminPaymentSettings] = useState(null);
+  const [isRegistrationClosed, setIsRegistrationClosed] = useState(false);
 
   useEffect(() => {
     fetchTournamentData();
     fetchAdminPaymentSettings();
   }, [id]);
+
+  // Check if registration is closed
+  useEffect(() => {
+    if (tournament) {
+      const now = new Date();
+      const closeDate = new Date(tournament.registrationCloseDate);
+      setIsRegistrationClosed(now > closeDate);
+    }
+  }, [tournament]);
+
+  // Display already registered categories as info (not error)
+  const getAlreadyRegisteredCategoryNames = () => {
+    if (alreadyRegisteredCategories.length === 0) return null;
+    
+    return alreadyRegisteredCategories
+      .map(catId => {
+        const cat = categories.find(c => c.id === catId);
+        return cat?.name;
+      })
+      .filter(Boolean)
+      .join(', ');
+  };
 
   const fetchAdminPaymentSettings = async () => {
     try {
@@ -57,8 +81,14 @@ export default function TournamentRegistrationPage() {
       setCategories(categoriesData.categories || []);
       
       // Find categories user is already registered for in this tournament
+      // Only block re-registration if status is PENDING or APPROVED/CONFIRMED
+      // Allow re-registration if status is REJECTED or CANCELLED
       const registeredCategoryIds = (myRegistrations.registrations || [])
-        .filter(reg => reg.tournament.id === id && reg.status !== 'cancelled')
+        .filter(reg => 
+          reg.tournament.id === id && 
+          reg.status !== 'cancelled' && 
+          reg.status !== 'rejected'
+        )
         .map(reg => reg.category.id);
       setAlreadyRegisteredCategories(registeredCategoryIds);
     } catch (err) {
@@ -104,23 +134,31 @@ export default function TournamentRegistrationPage() {
       return;
     }
 
-    // Check if doubles categories have partner emails
+    // Check if doubles categories have partner codes
     const doublesCategories = selectedCategories.filter(catId => {
       const cat = categories.find(c => c.id === catId);
       return cat?.format === 'doubles';
     });
 
     for (const catId of doublesCategories) {
-      const email = partnerEmails[catId];
-      if (!email) {
+      const code = partnerCodes[catId];
+      if (!code) {
         const cat = categories.find(c => c.id === catId);
-        setError(`Partner email is required for ${cat?.name}`);
+        setError(`Partner player code is required for ${cat?.name}`);
         return;
       }
       
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      // Validate player code format: #ABC1234 (# + 3 letters + 4 numbers)
+      if (!/^#[A-Z]{3}\d{4}$/i.test(code)) {
         const cat = categories.find(c => c.id === catId);
-        setError(`Please enter a valid partner email for ${cat?.name}`);
+        setError(`Please enter a valid player code for ${cat?.name} (Format: #ABC1234)`);
+        return;
+      }
+
+      // Check if partner info was fetched
+      if (!partnerInfo[catId]) {
+        const cat = categories.find(c => c.id === catId);
+        setError(`Please verify the player code for ${cat?.name} by clicking the search button`);
         return;
       }
     }
@@ -144,6 +182,13 @@ export default function TournamentRegistrationPage() {
       const formData = new FormData();
       formData.append('tournamentId', id);
       formData.append('categoryIds', JSON.stringify(selectedCategories));
+      // Send partner emails extracted from partnerInfo
+      const partnerEmails = {};
+      Object.keys(partnerInfo).forEach(catId => {
+        if (partnerInfo[catId]) {
+          partnerEmails[catId] = partnerInfo[catId].email;
+        }
+      });
       formData.append('partnerEmails', JSON.stringify(partnerEmails));
       formData.append('paymentScreenshot', paymentScreenshot);
 
@@ -159,11 +204,51 @@ export default function TournamentRegistrationPage() {
     }
   };
 
-  const handlePartnerEmailChange = (categoryId, email) => {
-    setPartnerEmails(prev => ({
+  const handlePartnerCodeChange = (categoryId, code) => {
+    setPartnerCodes(prev => ({
       ...prev,
-      [categoryId]: email
+      [categoryId]: code.toUpperCase()
     }));
+    // Clear partner info when code changes
+    setPartnerInfo(prev => ({
+      ...prev,
+      [categoryId]: null
+    }));
+  };
+
+  const fetchPartnerByCode = async (categoryId, code) => {
+    try {
+      setError('');
+      
+      // Validate format first
+      if (!/^#[A-Z]{3}\d{4}$/i.test(code)) {
+        setError('Invalid player code format. Use #ABC1234 (# + 3 letters + 4 numbers)');
+        return;
+      }
+
+      // Fetch partner info from API
+      const response = await registrationAPI.getPartnerByCode(code.toUpperCase());
+      
+      if (response.success && response.user) {
+        setPartnerInfo(prev => ({
+          ...prev,
+          [categoryId]: response.user
+        }));
+      } else {
+        setError('Player not found with this code');
+        setPartnerInfo(prev => ({
+          ...prev,
+          [categoryId]: null
+        }));
+      }
+    } catch (err) {
+      console.error('Error fetching partner:', err);
+      setError(err.response?.data?.error || 'Failed to find player with this code');
+      setPartnerInfo(prev => ({
+        ...prev,
+        [categoryId]: null
+      }));
+    }
   };
 
   const calculateTotal = () => {
@@ -211,11 +296,11 @@ export default function TournamentRegistrationPage() {
         {/* Header */}
         <div className="mb-6">
           <button
-            onClick={() => step === 2 ? setStep(1) : navigate(-1)}
+            onClick={() => navigate(-1)}
             className="flex items-center gap-2 text-gray-400 hover:text-white mb-4"
           >
             <ArrowLeftIcon className="h-5 w-5" />
-            {step === 2 ? 'Back to Categories' : 'Back to Tournament'}
+            Back to Tournament
           </button>
           
           <h1 className="text-3xl font-bold text-white mb-2">
@@ -228,31 +313,70 @@ export default function TournamentRegistrationPage() {
           </div>
         </div>
 
-        {/* Step Indicator */}
-        <div className="mb-8">
-          <div className="flex items-center gap-4">
-            <div className={`flex items-center gap-2 ${step >= 1 ? 'text-purple-400' : 'text-gray-500'}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${step >= 1 ? 'bg-purple-600 text-white' : 'bg-slate-700 text-gray-400'}`}>1</div>
-              <span className="font-medium">Select Categories</span>
-            </div>
-            <div className="flex-1 h-1 bg-slate-700 rounded">
-              <div className={`h-full bg-purple-600 rounded transition-all ${step >= 2 ? 'w-full' : 'w-0'}`}></div>
-            </div>
-            <div className={`flex items-center gap-2 ${step >= 2 ? 'text-purple-400' : 'text-gray-500'}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${step >= 2 ? 'bg-purple-600 text-white' : 'bg-slate-700 text-gray-400'}`}>2</div>
-              <span className="font-medium">Payment</span>
+        {/* Registration Closed Warning */}
+        {isRegistrationClosed ? (
+          <div className="max-w-2xl mx-auto">
+            <div className="bg-red-500/10 border-2 border-red-500/30 rounded-2xl p-8 text-center">
+              <div className="w-20 h-20 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <XMarkIcon className="w-10 h-10 text-red-400" />
+              </div>
+              <h2 className="text-2xl font-bold text-red-400 mb-3">Registration Closed</h2>
+              <p className="text-gray-300 mb-2">
+                Registration for this tournament has ended.
+              </p>
+              <p className="text-gray-400 text-sm mb-6">
+                Deadline was: {new Date(tournament.registrationCloseDate).toLocaleDateString('en-IN', {
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
+              </p>
+              <button
+                onClick={() => navigate(`/tournaments/${id}`)}
+                className="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl transition-colors"
+              >
+                Back to Tournament Details
+              </button>
             </div>
           </div>
-        </div>
+        ) : (
+          <>
+            {/* Step Indicator */}
+            <div className="mb-8">
+              <div className="flex items-center gap-4">
+                <div className={`flex items-center gap-2 ${step >= 1 ? 'text-purple-400' : 'text-gray-500'}`}>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${step >= 1 ? 'bg-purple-600 text-white' : 'bg-slate-700 text-gray-400'}`}>1</div>
+                  <span className="font-medium">Select Categories</span>
+                </div>
+                <div className="flex-1 h-1 bg-slate-700 rounded">
+                  <div className={`h-full bg-purple-600 rounded transition-all ${step >= 2 ? 'w-full' : 'w-0'}`}></div>
+                </div>
+                <div className={`flex items-center gap-2 ${step >= 2 ? 'text-purple-400' : 'text-gray-500'}`}>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${step >= 2 ? 'bg-purple-600 text-white' : 'bg-slate-700 text-gray-400'}`}>2</div>
+                  <span className="font-medium">Payment</span>
+                </div>
+              </div>
+            </div>
 
-        {/* Error Message */}
-        {error && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
-            <p className="text-sm text-red-400">{error}</p>
-          </div>
-        )}
+            {/* Already Registered Categories Info */}
+            {alreadyRegisteredCategories.length > 0 && getAlreadyRegisteredCategoryNames() && (
+              <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
+                <p className="text-sm text-red-400">
+                  Already registered for {getAlreadyRegisteredCategoryNames()}
+                </p>
+              </div>
+            )}
 
-        {step === 1 ? (
+            {/* Error Message */}
+            {error && (
+              <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
+                <p className="text-sm text-red-400">{error}</p>
+              </div>
+            )}
+
+            {step === 1 ? (
           /* Step 1: Category Selection */
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
@@ -265,32 +389,72 @@ export default function TournamentRegistrationPage() {
                 />
               </div>
 
-              {/* Partner Email Inputs */}
+              {/* Partner Player Code Inputs */}
               {selectedDoublesCategories.length > 0 && (
                 <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
                   <div className="flex items-center gap-2 mb-4">
                     <UserGroupIcon className="h-6 w-6 text-purple-400" />
                     <h3 className="text-lg font-semibold text-white">Partner Details</h3>
                   </div>
-                  <div className="space-y-4">
+                  <div className="space-y-6">
                     {selectedDoublesCategories.map(catId => {
                       const category = categories.find(c => c.id === catId);
+                      const partner = partnerInfo[catId];
                       return (
-                        <div key={catId}>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Partner Email for <span className="text-purple-400">{category?.name}</span>
+                        <div key={catId} className="space-y-3">
+                          <label className="block text-sm font-medium text-gray-300">
+                            Partner Player Code for <span className="text-purple-400">{category?.name}</span>
                             <span className="text-red-400"> *</span>
                           </label>
-                          <input
-                            type="email"
-                            value={partnerEmails[catId] || ''}
-                            onChange={(e) => handlePartnerEmailChange(catId, e.target.value)}
-                            placeholder="partner@example.com"
-                            className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                            required
-                          />
-                          <p className="mt-1 text-xs text-gray-500">
-                            Your partner will receive a confirmation email to accept the partnership.
+                          <div className="flex gap-2">
+                            <input
+                              type="text"
+                              value={partnerCodes[catId] || ''}
+                              onChange={(e) => handlePartnerCodeChange(catId, e.target.value)}
+                              placeholder="#ABC1234"
+                              maxLength={8}
+                              className="flex-1 px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent uppercase font-mono"
+                              required
+                            />
+                            <button
+                              type="button"
+                              onClick={() => fetchPartnerByCode(catId, partnerCodes[catId])}
+                              disabled={!partnerCodes[catId] || partnerCodes[catId].length !== 8}
+                              className="px-6 py-3 bg-purple-600 hover:bg-purple-700 disabled:bg-slate-700 disabled:cursor-not-allowed text-white rounded-xl transition-colors font-medium"
+                            >
+                              Search
+                            </button>
+                          </div>
+                          
+                          {/* Show partner info if found */}
+                          {partner && (
+                            <div className="p-4 bg-green-500/10 border border-green-500/30 rounded-xl">
+                              <div className="flex items-center gap-3">
+                                {partner.profilePhoto ? (
+                                  <img 
+                                    src={partner.profilePhoto} 
+                                    alt={partner.name}
+                                    className="w-12 h-12 rounded-full object-cover"
+                                  />
+                                ) : (
+                                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg">
+                                    {partner.name?.charAt(0)?.toUpperCase()}
+                                  </div>
+                                )}
+                                <div className="flex-1">
+                                  <p className="text-white font-semibold">{partner.name}</p>
+                                  <p className="text-gray-400 text-sm">{partner.email}</p>
+                                  {partner.city && partner.state && (
+                                    <p className="text-gray-500 text-xs">{partner.city}, {partner.state}</p>
+                                  )}
+                                </div>
+                                <CheckCircleIcon className="w-6 h-6 text-green-400" />
+                              </div>
+                            </div>
+                          )}
+                          
+                          <p className="text-xs text-gray-500">
+                            Enter your partner's player code. They will receive a confirmation to accept the partnership.
                           </p>
                         </div>
                       );
@@ -479,6 +643,8 @@ export default function TournamentRegistrationPage() {
               </div>
             </div>
           </div>
+        )}
+          </>
         )}
       </div>
 

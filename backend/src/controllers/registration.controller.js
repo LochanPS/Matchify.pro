@@ -1,9 +1,8 @@
 import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma.js';
 import Razorpay from 'razorpay';
 import crypto from 'crypto';
 import { notifyPartnerInvitation } from '../services/notification.service.js';
-
-const prisma = new PrismaClient();
 
 // Initialize Razorpay (will be null if keys not provided)
 let razorpay = null;
@@ -94,6 +93,7 @@ const createRegistration = async (req, res) => {
       }
 
       // Check if already registered
+      // Allow re-registration if previous registration was rejected or cancelled
       const existing = await prisma.registration.findUnique({
         where: {
           userId_categoryId: {
@@ -103,10 +103,35 @@ const createRegistration = async (req, res) => {
         },
       });
 
-      if (existing) {
+      if (existing && existing.status !== 'rejected' && existing.status !== 'cancelled') {
         return res.status(400).json({
           success: false,
-          error: `Already registered for ${category.name}`,
+          error: `Already registered for ${category.name}. Current status: ${existing.status}`,
+        });
+      }
+
+      // Check if user is already a partner in this category
+      const existingAsPartner = await prisma.registration.findFirst({
+        where: {
+          categoryId: catId,
+          partnerId: userId,
+          status: {
+            in: ['pending', 'confirmed', 'approved'],
+          },
+        },
+        include: {
+          user: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      });
+
+      if (existingAsPartner) {
+        return res.status(400).json({
+          success: false,
+          error: `You are already registered as a partner with ${existingAsPartner.user.name} in ${category.name}`,
         });
       }
 
@@ -135,33 +160,76 @@ const createRegistration = async (req, res) => {
         partnerToken = crypto.randomBytes(32).toString('hex');
       }
 
-      // Registration with pending payment - organizer will verify via QR payment
-      const registration = await prisma.registration.create({
-        data: {
-          tournamentId,
-          categoryId: category.id,
-          userId,
-          partnerId,
-          partnerEmail: !partnerId && categoryPartnerEmail ? categoryPartnerEmail : null,
-          partnerToken,
-          amountTotal: category.entryFee,
-          amountWallet: 0, // No wallet payment
-          amountRazorpay: 0, // No Razorpay payment
-          paymentStatus: 'pending', // Organizer will verify QR payment
-          status: 'pending', // Pending until organizer confirms payment
-        },
-        include: {
-          category: true,
-          tournament: {
-            select: {
-              id: true,
-              name: true,
-              startDate: true,
-              endDate: true,
-            },
+      // Check if there's an existing rejected/cancelled registration
+      const existingRejected = await prisma.registration.findUnique({
+        where: {
+          userId_categoryId: {
+            userId,
+            categoryId: category.id,
           },
         },
       });
+
+      let registration;
+      
+      if (existingRejected && (existingRejected.status === 'rejected' || existingRejected.status === 'cancelled')) {
+        // UPDATE the existing rejected/cancelled registration
+        registration = await prisma.registration.update({
+          where: {
+            id: existingRejected.id,
+          },
+          data: {
+            partnerId,
+            partnerEmail: !partnerId && categoryPartnerEmail ? categoryPartnerEmail : null,
+            partnerToken,
+            amountTotal: category.entryFee,
+            amountWallet: 0,
+            amountRazorpay: 0,
+            paymentStatus: 'pending',
+            status: 'pending',
+          },
+          include: {
+            category: true,
+            tournament: {
+              select: {
+                id: true,
+                name: true,
+                startDate: true,
+                endDate: true,
+              },
+            },
+          },
+        });
+      } else {
+        // CREATE a new registration
+        registration = await prisma.registration.create({
+          data: {
+            tournamentId,
+            categoryId: category.id,
+            userId,
+            partnerId,
+            partnerEmail: !partnerId && categoryPartnerEmail ? categoryPartnerEmail : null,
+            partnerToken,
+            amountTotal: category.entryFee,
+            amountWallet: 0, // No wallet payment
+            amountRazorpay: 0, // No Razorpay payment
+            paymentStatus: 'pending', // Organizer will verify QR payment
+            status: 'pending', // Pending until organizer confirms payment
+          },
+          include: {
+            category: true,
+            tournament: {
+              select: {
+                id: true,
+                name: true,
+                startDate: true,
+                endDate: true,
+              },
+            },
+          },
+        });
+      }
+      
       registrations.push(registration);
 
       // Update category registration count
@@ -544,6 +612,7 @@ const createRegistrationWithScreenshot = async (req, res) => {
       }
 
       // Check if already registered
+      // Allow re-registration if previous registration was rejected or cancelled
       const existing = await prisma.registration.findUnique({
         where: {
           userId_categoryId: {
@@ -553,13 +622,52 @@ const createRegistrationWithScreenshot = async (req, res) => {
         },
       });
 
-      if (existing) {
+      console.log(`📋 Checking registration for category ${category.name} (${catId}):`, {
+        exists: !!existing,
+        status: existing?.status,
+        willBlock: existing && existing.status !== 'rejected' && existing.status !== 'cancelled'
+      });
+
+      if (existing && existing.status !== 'rejected' && existing.status !== 'cancelled') {
+        console.log(`❌ Blocking registration for ${category.name} - Status: ${existing.status}`);
         return res.status(400).json({
           success: false,
-          error: `Already registered for ${category.name}`,
+          error: `Already registered for ${category.name}. Current status: ${existing.status}`,
         });
       }
 
+      // Check if user is already a partner in this category
+      const existingAsPartner = await prisma.registration.findFirst({
+        where: {
+          categoryId: catId,
+          partnerId: userId,
+          status: {
+            in: ['pending', 'confirmed', 'approved'],
+          },
+        },
+        include: {
+          user: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      });
+
+      console.log(`🤝 Checking if user is partner in ${category.name}:`, {
+        isPartner: !!existingAsPartner,
+        partnerOf: existingAsPartner?.user?.name
+      });
+
+      if (existingAsPartner) {
+        console.log(`❌ Blocking registration - User is already a partner with ${existingAsPartner.user.name}`);
+        return res.status(400).json({
+          success: false,
+          error: `You are already registered as a partner with ${existingAsPartner.user.name} in ${category.name}`,
+        });
+      }
+
+      console.log(`✅ Registration allowed for ${category.name}`);
       totalAmount += category.entryFee;
       categories.push(category);
     }
@@ -629,41 +737,162 @@ const createRegistrationWithScreenshot = async (req, res) => {
         partnerToken = crypto.randomBytes(32).toString('hex');
       }
 
-      const registration = await prisma.registration.create({
-        data: {
-          tournamentId,
-          categoryId: category.id,
-          userId,
-          partnerId,
-          partnerEmail: !partnerId && categoryPartnerEmail ? categoryPartnerEmail : null,
-          partnerToken,
-          amountTotal: category.entryFee,
-          amountWallet: 0,
-          amountRazorpay: 0,
-          paymentScreenshot: screenshotUrl,
-          paymentStatus: 'submitted', // Screenshot submitted, awaiting verification
-          status: 'pending', // Pending until organizer confirms
-        },
-        include: {
-          category: true,
-          tournament: {
-            select: {
-              id: true,
-              name: true,
-              startDate: true,
-              endDate: true,
-              organizerId: true,
-            },
+      // Check if there's an existing rejected/cancelled registration
+      const existingRejected = await prisma.registration.findUnique({
+        where: {
+          userId_categoryId: {
+            userId,
+            categoryId: category.id,
           },
         },
       });
+
+      console.log(`🔍 Checking for existing registration:`, {
+        userId,
+        categoryId: category.id,
+        categoryName: category.name,
+        found: !!existingRejected,
+        status: existingRejected?.status,
+        willUpdate: existingRejected && (existingRejected.status === 'rejected' || existingRejected.status === 'cancelled')
+      });
+
+      let registration;
+      
+      if (existingRejected && (existingRejected.status === 'rejected' || existingRejected.status === 'cancelled')) {
+        // UPDATE the existing rejected/cancelled registration
+        console.log(`🔄 UPDATING existing ${existingRejected.status} registration ${existingRejected.id}`);
+        
+        registration = await prisma.registration.update({
+          where: {
+            id: existingRejected.id,
+          },
+          data: {
+            partnerId,
+            partnerEmail: !partnerId && categoryPartnerEmail ? categoryPartnerEmail : null,
+            partnerToken,
+            amountTotal: category.entryFee,
+            amountWallet: 0,
+            amountRazorpay: 0,
+            paymentScreenshot: screenshotUrl,
+            paymentStatus: 'submitted', // Screenshot submitted, awaiting verification
+            status: 'pending', // Reset to pending
+          },
+          include: {
+            category: true,
+            tournament: {
+              select: {
+                id: true,
+                name: true,
+                startDate: true,
+                endDate: true,
+                organizerId: true,
+              },
+            },
+          },
+        });
+        
+        console.log(`✅ Registration UPDATED to pending:`, {
+          id: registration.id,
+          status: registration.status,
+          paymentStatus: registration.paymentStatus
+        });
+      } else {
+        // CREATE a new registration
+        console.log(`➕ CREATING new registration for category ${category.name}`);
+        
+        registration = await prisma.registration.create({
+          data: {
+            tournamentId,
+            categoryId: category.id,
+            userId,
+            partnerId,
+            partnerEmail: !partnerId && categoryPartnerEmail ? categoryPartnerEmail : null,
+            partnerToken,
+            amountTotal: category.entryFee,
+            amountWallet: 0,
+            amountRazorpay: 0,
+            paymentScreenshot: screenshotUrl,
+            paymentStatus: 'submitted', // Screenshot submitted, awaiting verification
+            status: 'pending', // Pending until organizer confirms
+          },
+          include: {
+            category: true,
+            tournament: {
+              select: {
+                id: true,
+                name: true,
+                startDate: true,
+                endDate: true,
+                organizerId: true,
+              },
+            },
+          },
+        });
+      }
+      
       registrations.push(registration);
 
-      // Update category registration count
-      await prisma.category.update({
-        where: { id: category.id },
-        data: { registrationCount: { increment: 1 } },
+      // Create or Update PaymentVerification record for admin to review
+      const existingPaymentVerification = await prisma.paymentVerification.findUnique({
+        where: { registrationId: registration.id }
       });
+
+      console.log(`🔍 PaymentVerification check for registration ${registration.id}:`, {
+        exists: !!existingPaymentVerification,
+        currentStatus: existingPaymentVerification?.status,
+        willUpdate: !!existingPaymentVerification
+      });
+
+      if (existingPaymentVerification) {
+        // UPDATE existing payment verification - RESET TO PENDING
+        console.log(`🔄 UPDATING PaymentVerification ${existingPaymentVerification.id} from ${existingPaymentVerification.status} to pending`);
+        
+        const updated = await prisma.paymentVerification.update({
+          where: { registrationId: registration.id },
+          data: {
+            amount: category.entryFee,
+            paymentScreenshot: screenshotUrl,
+            status: 'pending',
+            rejectionReason: null,
+            verifiedBy: null,
+            verifiedAt: null,
+          },
+        });
+        
+        console.log(`✅ PaymentVerification UPDATED successfully:`, {
+          id: updated.id,
+          status: updated.status,
+          amount: updated.amount
+        });
+      } else {
+        // CREATE new payment verification
+        console.log(`➕ CREATING new PaymentVerification for registration ${registration.id}`);
+        
+        const created = await prisma.paymentVerification.create({
+          data: {
+            registrationId: registration.id,
+            tournamentId,
+            userId,
+            amount: category.entryFee,
+            paymentScreenshot: screenshotUrl,
+            status: 'pending',
+          },
+        });
+        
+        console.log(`✅ PaymentVerification CREATED successfully:`, {
+          id: created.id,
+          status: created.status,
+          amount: created.amount
+        });
+      }
+
+      // Update category registration count only if it's a new registration
+      if (!existingRejected) {
+        await prisma.category.update({
+          where: { id: category.id },
+          data: { registrationCount: { increment: 1 } },
+        });
+      }
     }
 
     // Notify ADMIN (not organizer) about new registration for payment verification
@@ -814,4 +1043,52 @@ const verifyPayment = async (req, res) => {
   }
 };
 
-export { createRegistration, createRegistrationWithScreenshot, getMyRegistrations, cancelRegistration, verifyPayment };
+// GET /api/registrations/partner-by-code/:playerCode - Get partner info by player code
+const getPartnerByCode = async (req, res) => {
+  try {
+    const { playerCode } = req.params;
+
+    // Validate player code format: #ABC1234
+    if (!/^#[A-Z]{3}\d{4}$/i.test(playerCode)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid player code format. Use #ABC1234 (# + 3 letters + 4 numbers)'
+      });
+    }
+
+    // Find user by player code
+    const user = await prisma.user.findUnique({
+      where: { playerCode: playerCode.toUpperCase() },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        playerCode: true,
+        phone: true,
+        city: true,
+        state: true,
+        profilePhoto: true
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: 'No player found with this code'
+      });
+    }
+
+    res.json({
+      success: true,
+      user
+    });
+  } catch (error) {
+    console.error('Error fetching partner by code:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch partner information'
+    });
+  }
+};
+
+export { createRegistration, createRegistrationWithScreenshot, getMyRegistrations, cancelRegistration, verifyPayment, getPartnerByCode };

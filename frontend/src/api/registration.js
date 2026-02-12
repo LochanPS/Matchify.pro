@@ -77,4 +77,15 @@ export const registrationAPI = {
     );
     return response.data;
   },
+
+  // Get partner by player code
+  getPartnerByCode: async (playerCode) => {
+    // URL encode the player code to handle the # symbol
+    const encodedCode = encodeURIComponent(playerCode);
+    const response = await axios.get(
+      `${API_URL}/registrations/partner-by-code/${encodedCode}`,
+      { headers: getAuthHeader() }
+    );
+    return response.data;
+  },
 };

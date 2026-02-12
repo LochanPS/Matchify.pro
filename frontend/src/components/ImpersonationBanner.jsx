@@ -8,7 +8,8 @@ const ImpersonationBanner = () => {
   const [isImpersonating, setIsImpersonating] = useState(false);
   const [impersonatedUser, setImpersonatedUser] = useState(null);
   const [errorModal, setErrorModal] = useState(null);
-  const { setUser } = useAuth();
+  const [isReturning, setIsReturning] = useState(false); // Add loading state
+  const { updateUser } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -16,39 +17,67 @@ const ImpersonationBanner = () => {
     const token = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
     
+    console.log('🔍 ImpersonationBanner useEffect - checking token...');
+    console.log('Token exists:', !!token);
+    console.log('Stored user exists:', !!storedUser);
+    
     if (token && storedUser) {
       try {
         // Decode JWT (simple base64 decode of payload)
         const payload = JSON.parse(atob(token.split('.')[1]));
+        console.log('🔍 Token payload:', payload);
+        console.log('🔍 isImpersonating:', payload.isImpersonating);
+        
         setIsImpersonating(!!payload.isImpersonating);
         
         if (payload.isImpersonating) {
           const user = JSON.parse(storedUser);
+          console.log('🔍 Impersonated user:', user);
           setImpersonatedUser(user);
+        } else {
+          console.log('🔍 Not impersonating - banner will not show');
         }
       } catch (error) {
         console.error('Error decoding token:', error);
       }
+    } else {
+      console.log('🔍 No token or user - banner will not show');
     }
   }, []);
 
   const handleReturnToAdmin = async () => {
+    if (isReturning) return; // Prevent double-clicks
+    
     try {
+      setIsReturning(true);
       console.log('🔄 Attempting to return to admin...');
       const response = await api.post('/admin/return-to-admin');
       console.log('✅ Response received:', response.data);
       
       if (response.data.success) {
-        console.log('✅ Success! Updating localStorage...');
-        // Update token and user
+        console.log('✅ Success! Updating localStorage and context...');
+        console.log('📦 User data from response:', response.data.user);
+        console.log('📦 User roles:', response.data.user.roles);
+        console.log('📦 User isAdmin:', response.data.user.isAdmin);
+        
+        // Update token and user in localStorage
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('user', JSON.stringify(response.data.user));
+        
+        console.log('✅ LocalStorage updated');
+        console.log('📦 Stored user:', localStorage.getItem('user'));
+        
+        // Update AuthContext
+        updateUser(response.data.user);
+        console.log('✅ AuthContext updated');
+        
         console.log('✅ Redirecting to admin dashboard...');
-        // Direct navigation without reload
-        window.location.href = '/admin/dashboard';
+        // Force full page reload to ensure all state is reset
+        window.location.href = '/admin-dashboard';
       } else {
         console.error('❌ Response not successful:', response.data);
         setErrorModal(response.data.message || 'Unable to return to admin account. Please try again or refresh the page.');
+        setIsReturning(false);
       }
     } catch (error) {
       console.error('❌ Failed to return to admin:', error);
@@ -60,6 +89,7 @@ const ImpersonationBanner = () => {
       
       const errorMessage = error.response?.data?.message || error.message || 'Unable to return to admin account. Please try again or refresh the page.';
       setErrorModal(errorMessage);
+      setIsReturning(false);
     }
   };
 
@@ -75,15 +105,29 @@ const ImpersonationBanner = () => {
               <span className="font-bold text-sm">ADMIN MODE</span>
             </div>
             <span className="font-semibold">
-              Viewing: {impersonatedUser?.name || 'User'} ({impersonatedUser?.email})
+              Viewing as: {impersonatedUser?.name || 'User'} ({impersonatedUser?.email})
             </span>
           </div>
           <button
             onClick={handleReturnToAdmin}
-            className="flex items-center gap-2 px-5 py-2.5 bg-white text-orange-600 hover:bg-orange-50 rounded-lg transition-colors font-bold shadow-md hover:shadow-lg"
+            disabled={isReturning}
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-lg transition-colors font-bold shadow-md ${
+              isReturning 
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                : 'bg-white text-orange-600 hover:bg-orange-50 hover:shadow-lg'
+            }`}
           >
-            <ArrowLeft className="w-4 h-4" />
-            Return to Admin
+            {isReturning ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-600"></div>
+                Returning...
+              </>
+            ) : (
+              <>
+                <ArrowLeft className="w-4 h-4" />
+                Return to Admin
+              </>
+            )}
           </button>
         </div>
       </div>

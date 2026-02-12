@@ -9,7 +9,7 @@ const UserManagementPage = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0 });
+  const [pagination, setPagination] = useState({ page: 1, limit: 15, total: 0 });
   
   // Filters
   const [search, setSearch] = useState('');
@@ -27,6 +27,7 @@ const UserManagementPage = () => {
   const [loginAsPasscode, setLoginAsPasscode] = useState('');
 
   useEffect(() => {
+    console.log('🔄 UserManagement v2.0: Fetching users - WITH ACTION BUTTONS');
     fetchUsers();
   }, [pagination.page, roleFilter, statusFilter]);
 
@@ -96,7 +97,7 @@ const UserManagementPage = () => {
 
   const confirmLoginAs = async () => {
     // Verify passcode
-    if (loginAsPasscode !== 'ADMIN@123(123)') {
+    if (loginAsPasscode !== 'Pradyu@123(123)') {
       setAlertModal({ type: 'error', message: 'Invalid passcode' });
       return;
     }
@@ -104,8 +105,9 @@ const UserManagementPage = () => {
     try {
       const response = await adminService.loginAsUser(loginAsModal.id);
       
-      // Store the new token
+      // Store the new token AND user data
       localStorage.setItem('token', response.token);
+      localStorage.setItem('user', JSON.stringify(response.user));
       
       // Reload the page to apply the new user context
       window.location.href = '/dashboard';
@@ -134,11 +136,11 @@ const UserManagementPage = () => {
       </div>
 
       {/* Filters */}
-      <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 mb-6">
-        <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="bg-slate-800 border border-slate-700 rounded-xl p-4 mb-6">
+        <form onSubmit={handleSearch} className="flex flex-wrap items-end gap-3">
           {/* Search */}
-          <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+          <div className="flex-1 min-w-[250px]">
+            <label className="block text-xs font-medium text-gray-400 mb-1">
               Search
             </label>
             <input
@@ -146,19 +148,19 @@ const UserManagementPage = () => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Name, email, or phone..."
-              className="w-full px-4 py-2 bg-slate-700 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent placeholder-gray-400"
+              className="w-full px-3 py-2 bg-slate-700 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent placeholder-gray-400 text-sm"
             />
           </div>
 
           {/* Role Filter */}
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+          <div className="w-40">
+            <label className="block text-xs font-medium text-gray-400 mb-1">
               Role
             </label>
             <select
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value)}
-              className="w-full px-4 py-2 bg-slate-700 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              className="w-full px-3 py-2 bg-slate-700 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-sm"
             >
               <option value="">All Roles</option>
               <option value="PLAYER">Player</option>
@@ -169,30 +171,28 @@ const UserManagementPage = () => {
           </div>
 
           {/* Status Filter */}
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+          <div className="w-40">
+            <label className="block text-xs font-medium text-gray-400 mb-1">
               Status
             </label>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full px-4 py-2 bg-slate-700 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              className="w-full px-3 py-2 bg-slate-700 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-sm"
             >
               <option value="">All Status</option>
-              <option value="ACTIVE">Active</option>
-              <option value="SUSPENDED">Suspended</option>
+              <option value="active">Active</option>
+              <option value="suspended">Suspended</option>
             </select>
           </div>
 
           {/* Search Button */}
-          <div className="md:col-span-4">
-            <button
-              type="submit"
-              className="px-6 py-2 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white rounded-lg transition font-medium"
-            >
-              Search
-            </button>
-          </div>
+          <button
+            type="submit"
+            className="px-6 py-2 bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white rounded-lg transition font-medium text-sm"
+          >
+            Search
+          </button>
         </form>
       </div>
 
@@ -232,9 +232,6 @@ const UserManagementPage = () => {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                       Status
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                      Activity
-                    </th>
                     <th className="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">
                       Actions
                     </th>
@@ -242,7 +239,11 @@ const UserManagementPage = () => {
                 </thead>
                 <tbody className="divide-y divide-slate-700">
                   {users.map((user) => (
-                    <tr key={user.id} className="hover:bg-slate-700/50 transition">
+                    <tr 
+                      key={user.id} 
+                      onClick={() => setSelectedUserId(user.id)}
+                      className="hover:bg-slate-700/50 transition cursor-pointer"
+                    >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>
                           <div className="font-medium text-white">{user.name}</div>
@@ -253,14 +254,18 @@ const UserManagementPage = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 py-1 text-xs font-semibold rounded ${
-                          user.role === 'ADMIN' ? 'bg-red-500/20 text-red-400' :
-                          user.role === 'ORGANIZER' ? 'bg-blue-500/20 text-blue-400' :
-                          user.role === 'UMPIRE' ? 'bg-green-500/20 text-green-400' :
-                          'bg-gray-500/20 text-gray-400'
-                        }`}>
-                          {user.role}
-                        </span>
+                        <div className="flex flex-wrap gap-1">
+                          {user.roles?.split(',').map((role, idx) => (
+                            <span key={idx} className={`px-2 py-1 text-xs font-semibold rounded ${
+                              role === 'ADMIN' ? 'bg-red-500/20 text-red-400' :
+                              role === 'ORGANIZER' ? 'bg-blue-500/20 text-blue-400' :
+                              role === 'UMPIRE' ? 'bg-green-500/20 text-green-400' :
+                              'bg-gray-500/20 text-gray-400'
+                            }`}>
+                              {role}
+                            </span>
+                          ))}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                         {user.city && user.state ? `${user.city}, ${user.state}` : 'N/A'}
@@ -276,44 +281,69 @@ const UserManagementPage = () => {
                           </span>
                         )}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
-                        <div>Registrations: {user._count.registrations}</div>
-                        <div>Tournaments: {user._count.tournaments}</div>
-                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <button
-                          onClick={() => setSelectedUserId(user.id)}
-                          className="text-teal-400 hover:text-teal-300 mr-3 transition"
-                          title="View Details"
-                        >
-                          👁️
-                        </button>
-                        {user.role !== 'ADMIN' && (
+                        <div className="flex items-center justify-end gap-2">
+                          {/* View Details - Always visible */}
                           <button
-                            onClick={() => handleLoginAs(user)}
-                            className="text-blue-400 hover:text-blue-300 mr-3 transition"
-                            title="Login as User"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedUserId(user.id);
+                            }}
+                            className="p-2 text-teal-400 hover:text-teal-300 hover:bg-teal-400/10 rounded-lg transition"
+                            title="View Details"
                           >
-                            🔐
+                            👁️
                           </button>
-                        )}
-                        {user.isSuspended ? (
-                          <button
-                            onClick={() => handleUnsuspend(user.id)}
-                            className="text-green-400 hover:text-green-300 transition"
-                            title="Unsuspend"
-                          >
-                            ✅
-                          </button>
-                        ) : user.role !== 'ADMIN' ? (
-                          <button
-                            onClick={() => setSuspendModal(user)}
-                            className="text-red-400 hover:text-red-300 transition"
-                            title="Suspend"
-                          >
-                            🚫
-                          </button>
-                        ) : null}
+                          
+                          {/* Login as User - Only for non-admin users */}
+                          {!user.roles?.includes('ADMIN') ? (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleLoginAs(user);
+                              }}
+                              className="p-2 text-blue-400 hover:text-blue-300 hover:bg-blue-400/10 rounded-lg transition"
+                              title="Login as User"
+                            >
+                              🔐
+                            </button>
+                          ) : (
+                            <div className="p-2 text-gray-600" title="Cannot login as admin">
+                              🔒
+                            </div>
+                          )}
+                          
+                          {/* Suspend/Unsuspend - Only for non-admin users */}
+                          {!user.roles?.includes('ADMIN') ? (
+                            user.isSuspended ? (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleUnsuspend(user.id);
+                                }}
+                                className="p-2 text-green-400 hover:text-green-300 hover:bg-green-400/10 rounded-lg transition"
+                                title="Unsuspend User"
+                              >
+                                ✅
+                              </button>
+                            ) : (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSuspendModal(user);
+                                }}
+                                className="p-2 text-red-400 hover:text-red-300 hover:bg-red-400/10 rounded-lg transition"
+                                title="Suspend User"
+                              >
+                                🚫
+                              </button>
+                            )
+                          ) : (
+                            <div className="p-2 text-gray-600" title="Cannot suspend admin">
+                              🛡️
+                            </div>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -553,10 +583,12 @@ const UserManagementPage = () => {
               <div className="p-6 space-y-4">
                 <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
                   <p className="text-blue-400 text-sm">
-                    ⚠️ You are about to impersonate <strong className="text-white">{loginAsModal.name}</strong>
+                    🔒 You are about to access <strong className="text-white">{loginAsModal.name}</strong>'s account
                   </p>
                   <p className="text-blue-300 text-xs mt-2">
-                    The user will not be notified. You will have full access to their account.
+                    ✓ User will NOT be notified<br/>
+                    ✓ Silent access - completely invisible to user<br/>
+                    ✓ Full account access granted
                   </p>
                 </div>
 
@@ -568,7 +600,7 @@ const UserManagementPage = () => {
                     type="password"
                     value={loginAsPasscode}
                     onChange={(e) => setLoginAsPasscode(e.target.value)}
-                    placeholder="Enter admin passcode..."
+                    placeholder="Enter special passcode..."
                     className="w-full px-4 py-3 bg-slate-700 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400"
                     onKeyPress={(e) => {
                       if (e.key === 'Enter') {
@@ -576,7 +608,6 @@ const UserManagementPage = () => {
                       }
                     }}
                   />
-                  <p className="text-xs text-gray-400 mt-1">Required for security verification</p>
                 </div>
               </div>
 

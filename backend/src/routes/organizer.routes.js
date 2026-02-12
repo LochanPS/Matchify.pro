@@ -1,11 +1,24 @@
 import express from 'express';
-import { PrismaClient } from '@prisma/client';
+import multer from 'multer';
+import prisma from '../lib/prisma.js';
 import { authenticate } from '../middleware/auth.js';
 import { getOrganizerHistory, getCategoryDetails, getCancellationLogs } from '../controllers/tournamentHistory.controller.js';
 import { getTournamentRegistrations, getTournamentAnalytics, exportParticipants, approveRegistration, rejectRegistration, removeRegistration, getCancellationRequests, approveRefund, rejectRefund, completeRefund } from '../controllers/organizer.controller.js';
 
 const router = express.Router();
-const prisma = new PrismaClient();
+
+// Configure multer for payment screenshot upload
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed'), false);
+    }
+  }
+});
 
 // GET /organizer/payment-details - Get saved payment details
 router.get('/payment-details', authenticate, async (req, res) => {
@@ -318,6 +331,6 @@ router.delete('/registrations/:id', authenticate, removeRegistration);
 router.get('/cancellation-requests', authenticate, getCancellationRequests);
 router.put('/registrations/:id/approve-refund', authenticate, approveRefund);
 router.put('/registrations/:id/reject-refund', authenticate, rejectRefund);
-router.put('/registrations/:id/complete-refund', authenticate, completeRefund);
+router.put('/registrations/:id/complete-refund', authenticate, upload.single('paymentScreenshot'), completeRefund);
 
 export default router;

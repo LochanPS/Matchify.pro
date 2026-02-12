@@ -1,6 +1,6 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma.js';
 import {
   generateAccessToken,
   generateRefreshToken,
@@ -9,7 +9,6 @@ import {
 } from '../utils/jwt.js';
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 // POST /auth/register
 router.post('/register', async (req, res) => {
@@ -344,6 +343,7 @@ router.get('/me', async (req, res) => {
         name: true,
         phone: true,
         roles: true,
+        playerCode: true,
         umpireCode: true,
         city: true,
         state: true,

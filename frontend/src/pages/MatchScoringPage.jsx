@@ -43,7 +43,7 @@ const MatchScoringPage = () => {
       const matchData = response.data.match;
       setMatch(matchData);
       
-      if (matchData.score) {
+      if (matchData.score && matchData.score.sets) {
         setScore(matchData.score);
         setTimerData(matchData.score.timer);
         setIsPaused(matchData.score.timer?.isPaused || false);
@@ -51,9 +51,11 @@ const MatchScoringPage = () => {
         const parsed = typeof matchData.scoreJson === 'string' 
           ? JSON.parse(matchData.scoreJson) 
           : matchData.scoreJson;
-        setScore(parsed);
-        setTimerData(parsed.timer);
-        setIsPaused(parsed.timer?.isPaused || false);
+        if (parsed && parsed.sets) {
+          setScore(parsed);
+          setTimerData(parsed.timer);
+          setIsPaused(parsed.timer?.isPaused || false);
+        }
       }
     } catch (err) {
       console.error('Error fetching match:', err);
@@ -71,7 +73,8 @@ const MatchScoringPage = () => {
   const handleStartMatch = async () => {
     try {
       setSaving(true);
-      const response = await api.put(`/matches/${matchId}/start`);
+      setError(null); // Clear any previous errors
+      const response = await api.post(`/matches/${matchId}/start`);
       setMatch(response.data.match);
       if (response.data.match.score) {
         setScore(response.data.match.score);
@@ -111,7 +114,8 @@ const MatchScoringPage = () => {
     newScore.sets[currentSetIndex] = currentSet;
 
     // Check if set is won based on match configuration
-    const { pointsPerSet, extension } = newScore.matchConfig;
+    const matchConfig = newScore.matchConfig || { pointsPerSet: 21, extension: true, setsToWin: 2, maxSets: 3 };
+    const { pointsPerSet, extension } = matchConfig;
     const p1 = currentSet.player1;
     const p2 = currentSet.player2;
     
@@ -145,10 +149,11 @@ const MatchScoringPage = () => {
       
       // Check if this is the final set or if we should ask for continuation
       const setsWon = getSetsWonFromScore(newScore);
-      const matchWon = setsWon.p1Sets >= newScore.matchConfig.setsToWin || 
-                      setsWon.p2Sets >= newScore.matchConfig.setsToWin;
+      const setsToWin = matchConfig.setsToWin || 2;
+      const maxSets = matchConfig.maxSets || 3;
+      const matchWon = setsWon.p1Sets >= setsToWin || setsWon.p2Sets >= setsToWin;
       
-      if (matchWon || currentSetIndex >= newScore.matchConfig.maxSets - 1) {
+      if (matchWon || currentSetIndex >= maxSets - 1) {
         // Match is complete - automatically detect winner and show confirmation
         const matchWinnerId = winner === 1 ? match.player1?.id : match.player2?.id;
         const matchWinnerName = winner === 1 ? match.player1?.name : match.player2?.name;
@@ -244,16 +249,29 @@ const MatchScoringPage = () => {
   const handleEndMatch = async (winnerId) => {
     try {
       setSaving(true);
-      await api.put(`/matches/${matchId}/end`, { winnerId, finalScore: score });
-      setShowEndModal(false);
-      // Navigate to tournament main page after ending match
-      if (match?.tournament?.id) {
-        navigate(`/tournaments/${match.tournament.id}`);
-      } else if (match?.tournamentId) {
-        navigate(`/tournaments/${match.tournamentId}`);
-      } else {
-        navigate('/dashboard');
-      }
+      const response = await api.put(`/matches/${matchId}/end`, { winnerId, finalScore: score });
+      
+      // Store match summary for display
+      const summary = response.data.summary;
+      
+      // Navigate to draws page (plural) - the tournament management page with all categories
+      const drawsUrl = match?.tournament?.id
+        ? `/tournaments/${match.tournament.id}/draws`
+        : match?.tournamentId
+        ? `/tournaments/${match.tournamentId}/draws`
+        : '/dashboard';
+      
+      console.log('✅ Match completed! Navigating to:', drawsUrl);
+      
+      // Navigate to draws page where organizer can start next match
+      navigate(drawsUrl, { 
+        state: { 
+          matchComplete: true,
+          winner: summary.winner,
+          duration: summary.duration,
+          categoryId: match?.category?.id || match?.categoryId
+        }
+      });
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to end match');
     } finally {
@@ -263,13 +281,27 @@ const MatchScoringPage = () => {
 
   // Calculate sets won
   const getSetsWon = () => {
-    return getSetsWonFromScore(score);
+    try {
+      return getSetsWonFromScore(score);
+    } catch (error) {
+      console.error('Error calculating sets won:', error);
+      return { p1Sets: 0, p2Sets: 0 };
+    }
   };
 
   // Helper function to calculate sets won from any score object
   const getSetsWonFromScore = (scoreObj) => {
-    const { pointsPerSet, extension } = scoreObj.matchConfig;
+    // Provide defaults if matchConfig is missing
+    const matchConfig = scoreObj.matchConfig || {
+      pointsPerSet: 21,
+      extension: true
+    };
+    const { pointsPerSet, extension } = matchConfig;
     let p1Sets = 0, p2Sets = 0;
+    
+    if (!scoreObj.sets || scoreObj.sets.length === 0) {
+      return { p1Sets: 0, p2Sets: 0 };
+    }
     
     scoreObj.sets.forEach(set => {
       if (set.winner === 1) {
@@ -296,9 +328,10 @@ const MatchScoringPage = () => {
     if (!completedSetData) return;
     
     const newScore = { ...completedSetData.newScore };
+    const maxSets = newScore.matchConfig?.maxSets || 3;
     
     // Add new set if we haven't reached max sets
-    if (newScore.currentSet < newScore.matchConfig.maxSets - 1) {
+    if (newScore.currentSet < maxSets - 1) {
       newScore.sets.push({ player1: 0, player2: 0 });
       newScore.currentSet = newScore.currentSet + 1;
     }
@@ -354,9 +387,13 @@ const MatchScoringPage = () => {
   }
 
   const { p1Sets, p2Sets } = getSetsWon();
-  const currentSet = score.sets[score.currentSet] || { player1: 0, player2: 0 };
+  const currentSet = score.sets && score.sets[score.currentSet] ? score.sets[score.currentSet] : { player1: 0, player2: 0 };
   const isInProgress = match.status === 'IN_PROGRESS';
   const isCompleted = match.status === 'COMPLETED';
+  const canStart = match.status === 'PENDING' || match.status === 'SCHEDULED' || match.status === 'READY';
+  
+  // Allow scoring even before match is officially started (for umpire convenience)
+  const canScore = !isCompleted && !isPaused;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
@@ -420,7 +457,7 @@ const MatchScoringPage = () => {
       <div className="max-w-4xl mx-auto px-4 py-6">
         <div className="text-center mb-6">
           <p className="text-gray-400 text-sm">{match.tournament?.name} • {match.category?.name}</p>
-          <p className="text-gray-500 text-xs mt-1">Match #{match.matchNumber} • Court {match.courtNumber || 'TBD'}</p>
+          <p className="text-gray-500 text-xs mt-1">Match #{match.matchNumber}</p>
         </div>
 
         {/* Timer Display */}
@@ -445,7 +482,7 @@ const MatchScoringPage = () => {
         <div className="bg-slate-800/70 backdrop-blur-sm border border-white/10 rounded-3xl p-6 mb-6">
           {/* Sets Score */}
           <div className="flex justify-center gap-4 mb-6">
-            {score.sets.map((set, idx) => (
+            {score.sets && score.sets.length > 0 && score.sets.map((set, idx) => (
               <div 
                 key={idx} 
                 className={`px-4 py-2 rounded-xl text-center min-w-[80px] ${
@@ -500,7 +537,7 @@ const MatchScoringPage = () => {
             {/* Player 1 Controls */}
             <div className={`bg-slate-800/50 border rounded-2xl p-6 ${isPaused ? 'border-amber-500/30 opacity-50' : 'border-white/10'}`}>
               <h4 className="text-center text-white font-semibold mb-4">{match.player1?.name || 'Player 1'}</h4>
-              {isInProgress ? (
+              {canScore ? (
                 <div className="space-y-3">
                   <button
                     onClick={() => addPoint(1)}
@@ -521,7 +558,7 @@ const MatchScoringPage = () => {
                 </div>
               ) : (
                 <div className="text-center py-8 text-gray-500">
-                  Start match to score
+                  Match completed
                 </div>
               )}
             </div>
@@ -529,7 +566,7 @@ const MatchScoringPage = () => {
             {/* Player 2 Controls */}
             <div className={`bg-slate-800/50 border rounded-2xl p-6 ${isPaused ? 'border-amber-500/30 opacity-50' : 'border-white/10'}`}>
               <h4 className="text-center text-white font-semibold mb-4">{match.player2?.name || 'Player 2'}</h4>
-              {isInProgress ? (
+              {canScore ? (
                 <div className="space-y-3">
                   <button
                     onClick={() => addPoint(2)}
@@ -550,7 +587,7 @@ const MatchScoringPage = () => {
                 </div>
               ) : (
                 <div className="text-center py-8 text-gray-500">
-                  Start match to score
+                  Match completed
                 </div>
               )}
             </div>
@@ -558,22 +595,25 @@ const MatchScoringPage = () => {
         )}
 
         {/* Start Match Button */}
-        {match.status === 'PENDING' && (
+        {canStart && (
           <div className="mt-6">
             <button
               onClick={handleStartMatch}
               disabled={saving}
-              className="w-full py-4 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-xl text-xl font-bold hover:shadow-lg hover:shadow-purple-500/30 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+              className="w-full py-6 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-white rounded-2xl text-2xl font-black hover:shadow-2xl hover:shadow-emerald-500/50 hover:scale-[1.02] transition-all flex items-center justify-center gap-3 disabled:opacity-50 animate-pulse"
             >
               {saving ? (
-                <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                <div className="w-8 h-8 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
               ) : (
                 <>
-                  <Play className="w-6 h-6" />
-                  Start Match
+                  <Play className="w-8 h-8" />
+                  START MATCH
                 </>
               )}
             </button>
+            <p className="text-center text-gray-400 text-sm mt-3">
+              You can score now • Click "Start Match" to begin timer
+            </p>
           </div>
         )}
 
@@ -659,7 +699,7 @@ const MatchScoringPage = () => {
                   
                   <div className="pt-2 border-t border-white/10">
                     <p className="text-center text-gray-500 text-sm">
-                      Match configured for {score.matchConfig.maxSets === 1 ? '1 set' : `best of ${score.matchConfig.maxSets} sets`}
+                      Match configured for {score.matchConfig?.maxSets === 1 ? '1 set' : `best of ${score.matchConfig?.maxSets || 3} sets`}
                     </p>
                     <p className="text-center text-gray-400 text-xs mt-1">
                       You can end the match early or continue as planned

@@ -44,8 +44,7 @@ class UrgentEmailHelpers {
    * This would be called by a cron job
    */
   async scheduleMatchReminders() {
-    const { PrismaClient } = await import('@prisma/client');
-    const prisma = new PrismaClient();
+    const prisma = (await import('../lib/prisma.js')).default;
 
     try {
       const fifteenMinutesLater = new Date(Date.now() + 15 * 60 * 1000);
@@ -104,8 +103,7 @@ class UrgentEmailHelpers {
    * This would be called by a cron job
    */
   async scheduleTournamentReminders() {
-    const { PrismaClient } = await import('@prisma/client');
-    const prisma = new PrismaClient();
+    const prisma = (await import('../lib/prisma.js')).default;
 
     try {
       const tomorrow = new Date();

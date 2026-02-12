@@ -174,19 +174,23 @@ const MyPoints = () => {
             <ul className="space-y-3 text-base">
               <li className="flex items-center justify-between py-3 border-b border-white/10">
                 <span className="text-gray-300">Winner</span>
-                <span className="font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-lg">+100 points</span>
+                <span className="font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-lg">+10 points</span>
               </li>
               <li className="flex items-center justify-between py-3 border-b border-white/10">
                 <span className="text-gray-300">Runner-up</span>
-                <span className="font-bold text-blue-400 bg-blue-500/10 px-3 py-1 rounded-lg">+70 points</span>
+                <span className="font-bold text-blue-400 bg-blue-500/10 px-3 py-1 rounded-lg">+8 points</span>
               </li>
               <li className="flex items-center justify-between py-3 border-b border-white/10">
                 <span className="text-gray-300">Semi-finalist</span>
-                <span className="font-bold text-purple-400 bg-purple-500/10 px-3 py-1 rounded-lg">+50 points</span>
+                <span className="font-bold text-purple-400 bg-purple-500/10 px-3 py-1 rounded-lg">+6 points</span>
+              </li>
+              <li className="flex items-center justify-between py-3 border-b border-white/10">
+                <span className="text-gray-300">Quarter-finalist</span>
+                <span className="font-bold text-amber-400 bg-amber-500/10 px-3 py-1 rounded-lg">+4 points</span>
               </li>
               <li className="flex items-center justify-between py-3">
-                <span className="text-gray-300">Quarter-finalist</span>
-                <span className="font-bold text-amber-400 bg-amber-500/10 px-3 py-1 rounded-lg">+30 points</span>
+                <span className="text-gray-300">Participation</span>
+                <span className="font-bold text-gray-400 bg-gray-500/10 px-3 py-1 rounded-lg">+2 points</span>
               </li>
             </ul>
           </div>

@@ -1,5 +1,5 @@
 import express from 'express';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../../lib/prisma.js';
 import { authenticate, requireAdmin } from '../../middleware/auth.js';
 import { 
   protectTournamentCancellation, 
@@ -8,7 +8,6 @@ import {
 } from '../../middleware/tournamentProtection.js';
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 // Get tournament cancellation risk assessment
 router.get('/:tournamentId/cancellation-risk', authenticate, requireAdmin, async (req, res) => {

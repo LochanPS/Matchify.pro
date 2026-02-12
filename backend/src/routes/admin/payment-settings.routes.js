@@ -1,11 +1,10 @@
 import express from 'express';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../../lib/prisma.js';
 import { authenticate, requireAdmin } from '../../middleware/auth.js';
 import multer from 'multer';
 import { v2 as cloudinary } from 'cloudinary';
 
 const router = express.Router();
-const prisma = new PrismaClient();
 
 // Configure multer for memory storage
 const upload = multer({ storage: multer.memoryStorage() });
@@ -46,14 +45,18 @@ router.get('/public', async (req, res) => {
 // Get current payment settings (ADMIN ONLY)
 router.get('/', authenticate, requireAdmin, async (req, res) => {
   try {
-    const settings = await prisma.paymentSettings.findFirst({
-      where: { isActive: true }
+    let settings = await prisma.paymentSettings.findFirst({
+      orderBy: { createdAt: 'desc' }
     });
 
+    // If no settings exist, create default ones
     if (!settings) {
-      return res.status(404).json({
-        success: false,
-        message: 'Payment settings not found'
+      settings = await prisma.paymentSettings.create({
+        data: {
+          upiId: '',
+          accountHolder: '',
+          isActive: false
+        }
       });
     }
 
@@ -76,25 +79,25 @@ router.put('/', authenticate, requireAdmin, upload.single('qrCode'), async (req,
     const { upiId, accountHolder } = req.body;
     const file = req.file;
 
-    // Get current settings
-    const currentSettings = await prisma.paymentSettings.findFirst({
-      where: { isActive: true }
-    });
-
-    if (!currentSettings) {
-      return res.status(404).json({
+    if (!upiId || !accountHolder) {
+      return res.status(400).json({
         success: false,
-        message: 'Payment settings not found'
+        message: 'UPI ID and Account Holder name are required'
       });
     }
 
-    let qrCodeUrl = currentSettings.qrCodeUrl;
-    let qrCodePublicId = currentSettings.qrCodePublicId;
+    // Get current settings
+    let currentSettings = await prisma.paymentSettings.findFirst({
+      orderBy: { createdAt: 'desc' }
+    });
+
+    let qrCodeUrl = currentSettings?.qrCodeUrl;
+    let qrCodePublicId = currentSettings?.qrCodePublicId;
 
     // Upload new QR code if provided
     if (file) {
       // Delete old QR code from Cloudinary if exists
-      if (currentSettings.qrCodePublicId) {
+      if (currentSettings?.qrCodePublicId) {
         try {
           await cloudinary.uploader.destroy(currentSettings.qrCodePublicId);
         } catch (error) {
@@ -121,16 +124,31 @@ router.put('/', authenticate, requireAdmin, upload.single('qrCode'), async (req,
       qrCodePublicId = uploadResult.public_id;
     }
 
-    // Update settings
-    const updatedSettings = await prisma.paymentSettings.update({
-      where: { id: currentSettings.id },
-      data: {
-        upiId: upiId || currentSettings.upiId,
-        accountHolder: accountHolder || currentSettings.accountHolder,
-        qrCodeUrl,
-        qrCodePublicId
-      }
-    });
+    let updatedSettings;
+
+    // Update or create settings
+    if (currentSettings) {
+      updatedSettings = await prisma.paymentSettings.update({
+        where: { id: currentSettings.id },
+        data: {
+          upiId,
+          accountHolder,
+          qrCodeUrl,
+          qrCodePublicId,
+          isActive: true
+        }
+      });
+    } else {
+      updatedSettings = await prisma.paymentSettings.create({
+        data: {
+          upiId,
+          accountHolder,
+          qrCodeUrl,
+          qrCodePublicId,
+          isActive: true
+        }
+      });
+    }
 
     res.json({
       success: true,
@@ -141,7 +159,8 @@ router.put('/', authenticate, requireAdmin, upload.single('qrCode'), async (req,
     console.error('Error updating payment settings:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to update payment settings'
+      message: 'Failed to update payment settings',
+      error: error.message
     });
   }
 });

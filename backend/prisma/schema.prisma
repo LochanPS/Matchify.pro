@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -15,6 +15,7 @@ model User {
   name                 String
   phone                String?             @unique
   roles                String              @default("PLAYER,UMPIRE,ORGANIZER") // Will store comma-separated roles
+  playerCode           String?             @unique // Unique player code like #ABC1234
   umpireCode           String?             @unique // Unique umpire code like #123ABCD
   profilePhoto         String?
   city                 String?
@@ -60,7 +61,6 @@ model User {
   tournaments          Tournament[]
   walletTransactions   WalletTransaction[]
   umpiredMatches       Match[]             @relation("UmpireMatches")
-  matchifyCredits      MatchifyCredits?
   tournamentUmpires    TournamentUmpire[]  @relation("TournamentUmpires")
   
   // KYC relations
@@ -183,6 +183,7 @@ model Tournament {
   organizer             User               @relation(fields: [organizerId], references: [id])
   posters               TournamentPoster[]
   umpires               TournamentUmpire[]
+  tournamentPayment     TournamentPayment?
 
   @@index([city, state, status])
   @@index([startDate, registrationCloseDate])
@@ -269,6 +270,10 @@ model Registration {
   refundRequestedAt  DateTime?
   refundProcessedAt  DateTime?
   refundRejectionReason String?
+  refundPaymentScreenshot String? // Organizer's payment proof when sending refund
+  refundPaymentScreenshotPublicId String? // Cloudinary public ID
+  isQuickAdded       Boolean    @default(false) // True if added by super admin without payment
+  quickAddedBy       String?    // Admin user ID who quick added this player
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
   partnerToken       String?
@@ -276,6 +281,7 @@ model Registration {
   category           Category   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   tournament         Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
   user               User       @relation(fields: [userId], references: [id])
+  paymentVerification PaymentVerification?
 
   @@unique([userId, categoryId])
   @@index([userId])
@@ -322,7 +328,9 @@ model Match {
   tournamentId   String
   categoryId     String
   round          Int
+  roundNumber    Int?       // Added for tournament-system-reliability spec
   matchNumber    Int
+  stage          String?    // 'GROUP' for round robin, 'KNOCKOUT' for knockout stage
   courtNumber    Int?
   player1Id      String?
   player2Id      String?
@@ -333,6 +341,7 @@ model Match {
   player1Seed    Int?
   player2Seed    Int?
   parentMatchId  String?
+  childPosition  Int?       // Added for tournament-system-reliability spec: 1 or 2 to indicate position in parent match
   winnerPosition String?
   umpireId       String?
   scheduledTime  DateTime?
@@ -350,9 +359,13 @@ model Match {
   umpire         User?      @relation("UmpireMatches", fields: [umpireId], references: [id])
 
   @@index([tournamentId, categoryId])
+  @@index([tournamentId, round])
+  @@index([tournamentId, roundNumber])
+  @@index([parentMatchId])
   @@index([status])
   @@index([round])
   @@index([umpireId])
+  @@index([stage])
 }
 
 model ScoreCorrectionRequest {
@@ -466,48 +479,6 @@ model SmsLog {
   @@map("sms_logs")
 }
 
-// ============================================
-// MATCHIFY CREDITS SYSTEM (RBI Compliant)
-// ============================================
-
-model MatchifyCredits {
-  id              String              @id @default(uuid())
-  userId          String              @unique
-  balance         Float               @default(0)
-  lifetimeEarned  Float               @default(0)
-  lifetimeUsed    Float               @default(0)
-  createdAt       DateTime            @default(now())
-  updatedAt       DateTime            @updatedAt
-  user            User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  transactions    CreditTransaction[]
-
-  @@index([userId])
-  @@map("matchify_credits")
-}
-
-model CreditTransaction {
-  id              String          @id @default(uuid())
-  creditsId       String
-  type            String          // ADMIN_GRANT, PROMOTIONAL, PLATFORM_FEE_DEDUCTION, EXPIRED, ADJUSTMENT
-  amount          Float           // Positive for credits, negative for deductions
-  balanceBefore   Float
-  balanceAfter    Float
-  description     String
-  referenceId     String?         // Tournament ID, Admin ID, etc.
-  referenceType   String?         // TOURNAMENT, ADMIN, PROMOTION
-  grantedBy       String?         // Admin user ID who granted credits
-  expiresAt       DateTime?       // Optional expiry for promotional credits
-  status          String          @default("COMPLETED") // COMPLETED, EXPIRED, REVERSED
-  createdAt       DateTime        @default(now())
-  credits         MatchifyCredits @relation(fields: [creditsId], references: [id], onDelete: Cascade)
-
-  @@index([creditsId])
-  @@index([type])
-  @@index([createdAt])
-  @@index([status])
-  @@map("credit_transactions")
-}
-
 
 // ============================================
 // ACADEMY LISTING SYSTEM
@@ -576,7 +547,7 @@ model OrganizerKYC {
   videoRoomUrl        String?   // Daily.co room URL
   
   // Review
-  status              KYCStatus @default(PENDING)
+  status              String    @default("PENDING") // PENDING, IN_PROGRESS, APPROVED, REJECTED
   reviewedBy          String?   // Admin user ID
   reviewer            User?     @relation("KYCReviewer", fields: [reviewedBy], references: [id])
   reviewedAt          DateTime?
@@ -590,13 +561,6 @@ model OrganizerKYC {
   @@index([organizerId])
   @@index([status])
   @@map("organizer_kyc")
-}
-
-enum KYCStatus {
-  PENDING           // Waiting for video call
-  IN_PROGRESS       // Video call ongoing
-  APPROVED          // KYC verified
-  REJECTED          // KYC failed
 }
 
 // ============================================
@@ -696,6 +660,9 @@ model TournamentPayment {
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
   
+  // Relations
+  tournament            Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  
   @@index([tournamentId])
   @@index([organizerId])
   @@index([payout50Status1])
@@ -727,6 +694,9 @@ model PaymentVerification {
   // Metadata
   submittedAt       DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
+  
+  // Relations
+  registration      Registration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
   
   @@index([registrationId])
   @@index([tournamentId])

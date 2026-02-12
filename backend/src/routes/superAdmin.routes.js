@@ -12,6 +12,10 @@ import {
   getAllRegistrations,
   updateUserWallet
 } from '../controllers/superAdmin.controller.js';
+import {
+  quickAddPlayer,
+  getQuickAddedPlayers
+} from '../controllers/quickAdd.controller.js';
 
 const router = express.Router();
 
@@ -44,5 +48,9 @@ router.delete('/tournaments/:tournamentId', deleteTournament);
 
 // Registrations
 router.get('/registrations', getAllRegistrations);
+
+// Quick Add Players (Super Admin Only)
+router.post('/tournaments/:tournamentId/quick-add-player', quickAddPlayer);
+router.get('/tournaments/:tournamentId/quick-added-players', getQuickAddedPlayers);
 
 export default router;

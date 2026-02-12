@@ -1,7 +1,6 @@
 import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma.js';
 import { createNotification } from '../services/notification.service.js';
-
-const prisma = new PrismaClient();
 
 // GET /api/organizer/tournaments - Get organizer's tournaments with stats
 export const getOrganizerTournaments = async (req, res) => {
@@ -891,6 +890,15 @@ export const completeRefund = async (req, res) => {
   try {
     const { id } = req.params;
     const organizerId = req.user.id;
+    const paymentScreenshotFile = req.file; // Multer file upload
+
+    // Validate payment screenshot is provided
+    if (!paymentScreenshotFile) {
+      return res.status(400).json({
+        success: false,
+        error: 'Payment screenshot is required as proof of refund',
+      });
+    }
 
     // Find registration and verify organizer owns the tournament
     const registration = await prisma.registration.findUnique({
@@ -923,12 +931,60 @@ export const completeRefund = async (req, res) => {
       });
     }
 
-    // Update registration - mark refund as completed
+    // Upload payment screenshot to Cloudinary
+    let paymentScreenshotUrl = null;
+    let paymentScreenshotPublicId = null;
+
+    const cloudinary = (await import('../config/cloudinary.js')).default;
+    const isCloudinaryConfigured = process.env.CLOUDINARY_CLOUD_NAME && 
+                                    process.env.CLOUDINARY_API_KEY && 
+                                    process.env.CLOUDINARY_API_SECRET &&
+                                    !process.env.CLOUDINARY_CLOUD_NAME.includes('your-');
+
+    if (isCloudinaryConfigured) {
+      try {
+        const result = await new Promise((resolve, reject) => {
+          const uploadStream = cloudinary.uploader.upload_stream(
+            {
+              folder: `matchify/refund-payments/${registration.tournamentId}`,
+              transformation: [
+                { width: 1000, height: 1000, crop: 'limit' },
+                { quality: 'auto:good' },
+              ],
+            },
+            (error, result) => {
+              if (error) reject(error);
+              else resolve(result);
+            }
+          );
+          uploadStream.end(paymentScreenshotFile.buffer);
+        });
+
+        paymentScreenshotUrl = result.secure_url;
+        paymentScreenshotPublicId = result.public_id;
+        console.log('✅ Payment screenshot uploaded to Cloudinary:', paymentScreenshotUrl);
+      } catch (cloudinaryError) {
+        console.error('❌ Cloudinary upload failed:', cloudinaryError.message);
+        return res.status(500).json({
+          success: false,
+          error: 'Failed to upload payment screenshot. Please try again.',
+        });
+      }
+    } else {
+      return res.status(500).json({
+        success: false,
+        error: 'Cloudinary is not configured. Cannot upload payment screenshot.',
+      });
+    }
+
+    // Update registration - mark refund as completed with payment proof
     const updatedRegistration = await prisma.registration.update({
       where: { id },
       data: {
         refundStatus: 'completed',
         refundProcessedAt: new Date(),
+        refundPaymentScreenshot: paymentScreenshotUrl,
+        refundPaymentScreenshotPublicId: paymentScreenshotPublicId,
       },
     });
 
@@ -937,7 +993,13 @@ export const completeRefund = async (req, res) => {
       userId: registration.userId,
       type: 'REFUND_COMPLETED',
       title: 'Refund Sent! ✅',
-      message: `Your refund of ₹${registration.amountTotal} for "${registration.category.name}" in "${registration.tournament.name}" has been sent to your UPI ID: ${registration.refundUpiId}. Please check your account.`,
+      message: `Your refund of ₹${registration.amountTotal} for "${registration.category.name}" in "${registration.tournament.name}" has been sent to your UPI ID: ${registration.refundUpiId}. Please check your account and confirm receipt.`,
+      data: {
+        registrationId: registration.id,
+        tournamentId: registration.tournamentId,
+        amount: registration.amountTotal,
+        paymentScreenshot: paymentScreenshotUrl,
+      },
     });
 
     res.json({

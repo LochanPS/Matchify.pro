@@ -120,6 +120,7 @@ const DrawPage = () => {
     // Get all round robin matches (stage = 'GROUP')
     const roundRobinMatches = matches.filter(m => m.stage === 'GROUP');
     
+    console.log('📊 Match Status:', {
       roundRobinMatches: roundRobinMatches.length,
       completedRoundRobin: roundRobinMatches.filter(m => m.status === 'COMPLETED').length,
       knockoutMatches: matches.filter(m => m.stage === 'KNOCKOUT').length

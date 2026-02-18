@@ -27,8 +27,6 @@ const UnifiedDashboard = () => {
     userRoles = ['PLAYER'];
   }
   
-  console.log('User roles:', userRoles); // Debug log
-  
   // Get active role from URL or default to first role
   const roleFromUrl = searchParams.get('role');
   const [activeRole, setActiveRole] = useState(

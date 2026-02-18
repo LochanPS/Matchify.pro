@@ -1731,14 +1731,6 @@ export const endCategory = async (req, res) => {
     const { tournamentId, categoryId } = req.params;
     const userId = req.user.userId || req.user.id;
 
-    console.log('🔍 DEBUG - endCategory called:');
-    console.log('1. tournamentId:', tournamentId);
-    console.log('2. categoryId:', categoryId);
-    console.log('3. userId:', userId);
-    console.log('4. Full params:', req.params);
-    console.log('5. Request path:', req.path);
-    console.log('6. Request method:', req.method);
-
     // Verify tournament exists and user is authorized
     const tournament = await prisma.tournament.findUnique({
       where: { id: tournamentId }

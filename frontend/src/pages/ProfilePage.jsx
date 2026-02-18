@@ -355,9 +355,51 @@ export default function ProfilePage() {
             {/* Profile Info */}
             <div className="flex-1 text-center lg:text-left">
               <h1 className="text-3xl font-bold text-white mb-2">{profile?.name || 'No Name Set'}</h1>
-              {profile?.playerCode && (
-                <p className="text-lg text-purple-400 font-mono mb-3">{profile.playerCode}</p>
+              
+              {/* Player Code & Umpire Code */}
+              {(profile?.playerCode || profile?.umpireCode) && (
+                <div className="flex flex-wrap gap-2 mb-3 justify-center lg:justify-start">
+                  {profile?.playerCode && (
+                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/20 border border-blue-500/30 rounded-xl">
+                      <span className="text-blue-400/80 text-sm">Player Code:</span>
+                      <span className="text-blue-400 font-mono font-bold text-lg tracking-wider">{profile.playerCode}</span>
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(profile.playerCode);
+                          setSuccess('Player code copied!');
+                          setTimeout(() => setSuccess(''), 2000);
+                        }}
+                        className="p-1.5 hover:bg-blue-500/20 rounded-lg transition-colors ml-1"
+                        title="Copy player code"
+                      >
+                        <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                      </button>
+                    </div>
+                  )}
+                  {profile?.umpireCode && (
+                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/20 border border-amber-500/30 rounded-xl">
+                      <span className="text-amber-400/80 text-sm">Umpire Code:</span>
+                      <span className="text-amber-400 font-mono font-bold text-lg tracking-wider">{profile.umpireCode}</span>
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(profile.umpireCode);
+                          setSuccess('Umpire code copied!');
+                          setTimeout(() => setSuccess(''), 2000);
+                        }}
+                        className="p-1.5 hover:bg-amber-500/20 rounded-lg transition-colors ml-1"
+                        title="Copy umpire code"
+                      >
+                        <svg className="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                      </button>
+                    </div>
+                  )}
+                </div>
               )}
+              
               <div className="flex items-center justify-center lg:justify-start gap-2 mb-4">
                 <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${
                   profile?.role === 'PLAYER' ? 'bg-green-500/20 text-green-300 border border-green-500/30' :

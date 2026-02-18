@@ -120,9 +120,6 @@ const DrawPage = () => {
     // Get all round robin matches (stage = 'GROUP')
     const roundRobinMatches = matches.filter(m => m.stage === 'GROUP');
     
-    // Debug logging
-    console.log('🔍 Round Robin Check:', {
-      totalMatches: matches.length,
       roundRobinMatches: roundRobinMatches.length,
       completedRoundRobin: roundRobinMatches.filter(m => m.status === 'COMPLETED').length,
       knockoutMatches: matches.filter(m => m.stage === 'KNOCKOUT').length
@@ -399,16 +396,8 @@ const DrawPage = () => {
     setEndingTournament(true);
     setError(null);
     
-    // DEBUG: Log the values
-    console.log('🔍 DEBUG - End Category:');
-    console.log('1. tournamentId:', tournamentId);
-    console.log('2. activeCategory:', activeCategory);
-    console.log('3. activeCategory.id:', activeCategory?.id);
-    console.log('4. Full URL will be:', `/tournaments/${tournamentId}/categories/${activeCategory?.id}/end`);
-    
     try {
       const url = `/tournaments/${tournamentId}/categories/${activeCategory.id}/end`;
-      console.log('5. Making API call to:', url);
       
       const response = await api.put(url);
       
@@ -2593,25 +2582,6 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                     const hasPlayers = match.player1?.id && match.player2?.id;
                     const isCompleted = dbMatch?.status === 'COMPLETED';
                     
-                    // Debug log for first completed match
-                    if (isCompleted && mi === 0) {
-                      console.log('🔍 First completed match data:', {
-                        matchNumber: dbMatch.matchNumber,
-                        status: dbMatch.status,
-                        winnerId: dbMatch.winnerId,
-                        score: dbMatch.score,
-                        scoreType: typeof dbMatch.score,
-                        hasScore: !!dbMatch.score
-                      });
-                    }
-                    
-                    // Debug log
-                    if (mi === 0) {
-                      console.log('🔍 Group', group.groupName, '- Total DB matches:', matches?.length);
-                      console.log('🔍 First match:', match.player1?.name, 'vs', match.player2?.name);
-                      console.log('🔍 DB Match found:', dbMatch);
-                      console.log('🔍 isCompleted:', isCompleted);
-                    }
                     const isInProgress = dbMatch?.status === 'IN_PROGRESS';
                     const hasUmpire = dbMatch?.umpireId;
                     

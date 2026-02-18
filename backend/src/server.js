@@ -34,6 +34,12 @@ import matchRoutes from './routes/match.routes.js';
 import pointsRoutes from './routes/points.routes.js';
 // leaderboardRoutes removed - using direct routes in server.js instead
 import adminRoutes from './routes/admin.routes.js';
+import paymentSettingsRoutes from './routes/admin/payment-settings.routes.js';
+import paymentVerificationRoutes from './routes/admin/payment-verification.routes.js';
+import tournamentPaymentsRoutes from './routes/admin/tournament-payments.routes.js';
+import revenueAnalyticsRoutes from './routes/admin/revenue-analytics.routes.js';
+import tournamentManagementRoutes from './routes/admin/tournament-management.routes.js';
+import deleteAllDataRoutes from './routes/admin/delete-all-data.routes.js';
 import smsRoutes from './routes/sms.routes.js';
 import academyRoutes from './routes/academy.routes.js';
 import userRoutes from './routes/user.routes.js';
@@ -240,6 +246,14 @@ app.use('/api/organizer', organizerRoutes);
 
 // Admin routes
 app.use('/api/admin', adminRoutes);
+
+// Admin sub-routes
+app.use('/api/admin/payment-settings', paymentSettingsRoutes);
+app.use('/api/admin/payment-verifications', paymentVerificationRoutes);
+app.use('/api/admin/tournament-payments', tournamentPaymentsRoutes);
+app.use('/api/admin/revenue', revenueAnalyticsRoutes);
+app.use('/api/admin/tournament-management', tournamentManagementRoutes);
+app.use('/api/admin/delete-all-info', deleteAllDataRoutes);
 
 // SMS routes
 app.use('/api/sms', smsRoutes);

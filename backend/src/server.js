@@ -244,16 +244,16 @@ app.use('/api/notifications', notificationRoutes);
 // Organizer routes
 app.use('/api/organizer', organizerRoutes);
 
-// Admin routes
-app.use('/api/admin', adminRoutes);
-
-// Admin sub-routes
+// Admin sub-routes (MUST BE BEFORE main admin routes for specificity)
 app.use('/api/admin/payment-settings', paymentSettingsRoutes);
 app.use('/api/admin/payment-verifications', paymentVerificationRoutes);
 app.use('/api/admin/tournament-payments', tournamentPaymentsRoutes);
 app.use('/api/admin/revenue', revenueAnalyticsRoutes);
 app.use('/api/admin/tournament-management', tournamentManagementRoutes);
-app.use('/api/admin', deleteAllDataRoutes); // Changed: remove /delete-all-info prefix
+app.use('/api/admin', deleteAllDataRoutes);
+
+// Admin routes (general - must be AFTER specific routes)
+app.use('/api/admin', adminRoutes);
 
 // SMS routes
 app.use('/api/sms', smsRoutes);

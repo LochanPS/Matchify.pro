@@ -280,7 +280,7 @@ export const login = async (req, res) => {
 
       // If admin user doesn't exist in database, use hardcoded values
       const adminId = adminUser ? adminUser.id : 'admin';
-      const adminName = adminUser ? adminUser.name : 'Super Admin';
+      const adminName = adminUser ? adminUser.name : 'Admin';
 
       // Generate admin JWT with actual user ID if available
       const token = jwt.sign(

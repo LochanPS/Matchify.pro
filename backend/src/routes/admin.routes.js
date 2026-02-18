@@ -316,7 +316,7 @@ router.post('/return-to-admin', authenticate, async (req, res) => {
         user: {
           id: 'admin',
           email: 'ADMIN@gmail.com',
-          name: 'Super Admin',
+          name: 'Admin',
           roles: ['ADMIN'],
           isAdmin: true
         }

@@ -466,9 +466,9 @@ class AdminController {
         });
       }
 
-      // Handle hardcoded super admin
+      // Handle hardcoded admin
       if (adminId === 'admin') {
-        console.log('👑 Returning to hardcoded super admin');
+        console.log('👑 Returning to hardcoded admin');
         
         // Generate admin JWT
         const token = jwt.sign(
@@ -496,7 +496,7 @@ class AdminController {
           console.error('⚠️ Audit log failed (non-critical):', auditError.message);
         }
 
-        console.log('✅ Returning super admin success response');
+        console.log('✅ Returning admin success response');
         return res.json({
           success: true,
           message: 'Returned to admin account',
@@ -504,7 +504,7 @@ class AdminController {
           user: {
             id: 'admin',
             email: 'ADMIN@gmail.com',
-            name: 'Super Admin',
+            name: 'Admin',
             roles: ['ADMIN'],
             isAdmin: true,
           },
@@ -1165,7 +1165,7 @@ class AdminController {
 
       // Log this export action
       try {
-        // Handle super admin case - use the real admin user ID instead of 'admin'
+        // Handle admin case - use the real admin user ID instead of 'admin'
         let auditAdminId = req.user.id;
         if (req.user.id === 'admin') {
           const realAdmin = await prisma.user.findFirst({

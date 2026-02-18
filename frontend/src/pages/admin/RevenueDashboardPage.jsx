@@ -404,12 +404,12 @@ const RevenueDashboardPage = () => {
                 type="password"
                 value={deletePassword}
                 onChange={(e) => setDeletePassword(e.target.value)}
-                placeholder="Enter special password"
+                placeholder="Pradyu@123(123)"
                 className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-red-500"
                 disabled={deleting}
               />
               <p className="text-xs text-gray-500 mt-2">
-                Special password required for this operation
+                Password: Pradyu@123(123)
               </p>
             </div>
 

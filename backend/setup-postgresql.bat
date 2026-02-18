@@ -3,37 +3,73 @@ echo ========================================
 echo MATCHIFY.PRO - PostgreSQL Setup
 echo ========================================
 echo.
-
-echo Step 1: Updating .env file...
-powershell -Command "(Get-Content .env) -replace 'DATABASE_URL=file:./prisma/dev.db', 'DATABASE_URL=\"postgresql://postgres:matchify123@localhost:5432/matchify_dev\"' | Set-Content .env"
-echo ✓ .env updated!
+echo This script will help you set up PostgreSQL for local development.
 echo.
-
+echo Prerequisites:
+echo - PostgreSQL must be installed
+echo - PostgreSQL service must be running
+echo.
+pause
+echo.
+echo Step 1: Deleting old SQLite migrations...
+if exist "prisma\migrations" (
+    rmdir /s /q "prisma\migrations"
+    echo ✓ Old migrations deleted
+) else (
+    echo ✓ No old migrations found
+)
+echo.
 echo Step 2: Generating Prisma Client...
 call npx prisma generate
-echo ✓ Prisma Client generated!
+if %errorlevel% neq 0 (
+    echo ✗ Failed to generate Prisma Client
+    pause
+    exit /b 1
+)
+echo ✓ Prisma Client generated
 echo.
-
-echo Step 3: Running database migrations...
-call npx prisma migrate dev --name restore_full_schema
-echo ✓ Migrations complete!
+echo Step 3: Creating initial migration...
 echo.
-
-echo Step 4: Creating admin user...
-call node create-admin-user-now.js
-echo ✓ Admin user created!
+echo This will create the database schema in PostgreSQL.
+echo Make sure your DATABASE_URL in .env is correct!
 echo.
-
+pause
+call npx prisma migrate dev --name init
+if %errorlevel% neq 0 (
+    echo.
+    echo ✗ Migration failed!
+    echo.
+    echo Common issues:
+    echo - PostgreSQL is not running
+    echo - Database does not exist (create it first: CREATE DATABASE matchify_dev;)
+    echo - Wrong credentials in DATABASE_URL
+    echo.
+    pause
+    exit /b 1
+)
+echo.
+echo ✓ Migration completed successfully!
+echo.
+echo Step 4: Seeding database (optional)...
+echo.
+set /p seed="Do you want to seed the database with test data? (y/n): "
+if /i "%seed%"=="y" (
+    call npm run prisma:seed
+    if %errorlevel% neq 0 (
+        echo ✗ Seeding failed
+    ) else (
+        echo ✓ Database seeded successfully
+    )
+)
+echo.
 echo ========================================
-echo ✓ SETUP COMPLETE!
+echo PostgreSQL Setup Complete!
 echo ========================================
 echo.
-echo Your database is ready with:
-echo   - Player codes
-echo   - Umpire codes
-echo   - All dashboards
-echo   - All features restored!
+echo You can now start the application with:
+echo   npm run dev
 echo.
-echo Now restart your backend server!
+echo Or view the database with:
+echo   npx prisma studio
 echo.
 pause

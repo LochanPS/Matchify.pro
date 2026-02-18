@@ -6,7 +6,7 @@
 
 ### Prerequisites
 - Node.js 18+
-- PostgreSQL 14+
+- PostgreSQL 14+ (for both local and production)
 - npm or yarn
 
 ### Backend Setup
@@ -14,12 +14,15 @@
 cd backend
 npm install
 cp .env.example .env
-# Edit .env with your database credentials
+# Edit .env with your PostgreSQL credentials
+# Default: postgresql://postgres:postgres@localhost:5432/matchify_dev
 npm run prisma:generate
 npm run prisma:migrate
 npm run dev
 ```
 **Backend runs on:** http://localhost:5000
+
+**Note:** You need PostgreSQL installed and a database created named `matchify_dev`
 
 ### Frontend Setup
 ```bash
@@ -71,17 +74,18 @@ matchify/
 
 ## 🔥 What's Next? (Day 2-3)
 
-- Create Prisma schema (all 12 tables)
-- Set up PostgreSQL on Railway
-- Run initial database migration
-- Seed test data
+- ✅ Create Prisma schema (all tables)
+- ✅ Set up PostgreSQL (local and production)
+- ✅ Run initial database migration
+- ✅ Seed test data
+- 🔄 **Migration to PostgreSQL completed!**
 
 ## 📚 Tech Stack
 
 **Backend:**
 - Node.js + Express
 - Prisma ORM
-- PostgreSQL
+- PostgreSQL (Production & Development)
 - JWT Authentication
 - Razorpay (Payments)
 - Cloudinary (Images)
@@ -94,7 +98,7 @@ matchify/
 - Axios
 
 **Deployment:**
-- Railway (Backend + DB)
+- Render (Backend + PostgreSQL Database)
 - Vercel (Frontend)
 
 ## 🤝 Contributing

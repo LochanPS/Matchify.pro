@@ -145,13 +145,13 @@ const CreateTournament = () => {
   const handleSaveAndExit = () => {
     saveDraft();
     setShowExitModal(false);
-    navigate('/organizer/dashboard');
+    navigate('/dashboard?role=ORGANIZER');
   };
 
   const handleDiscardAndExit = () => {
     clearDraft();
     setShowExitModal(false);
-    navigate('/organizer/dashboard');
+    navigate('/dashboard?role=ORGANIZER');
   };
 
   const renderStep = () => {

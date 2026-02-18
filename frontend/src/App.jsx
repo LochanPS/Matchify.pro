@@ -27,7 +27,9 @@ import TournamentManagementPage from './pages/TournamentManagementPage'
 import ManageCategoriesPage from './pages/ManageCategoriesPage'
 import PlayerDashboard from './pages/PlayerDashboard'
 import OrganizerDashboard from './pages/OrganizerDashboard'
+import OrganizerProfilePage from './pages/OrganizerProfilePage'
 import UmpireDashboard from './pages/UmpireDashboard'
+import UnifiedDashboard from './pages/UnifiedDashboard'
 import UmpireScoring from './pages/UmpireScoring'
 import MatchScoringPage from './pages/MatchScoringPage'
 import AdminDashboard from './pages/AdminDashboard'
@@ -42,8 +44,6 @@ import LiveMatches from './pages/LiveMatches'
 import LiveMatchDetail from './pages/LiveMatchDetail'
 import OrganizerTournamentHistory from './pages/OrganizerTournamentHistory'
 import TournamentCategoryDetails from './pages/TournamentCategoryDetails'
-import AdminInvites from './pages/AdminInvites'
-import AcceptInvite from './pages/AcceptInvite'
 import NotificationsPage from './pages/NotificationsPage'
 import AdminLayout from './pages/admin/AdminLayout'
 import AdminDashboardPage from './pages/admin/AdminDashboardPage'
@@ -64,9 +64,10 @@ import OrganizerPayoutsPage from './pages/admin/OrganizerPayoutsPage'
 import RevenueDashboardPage from './pages/admin/RevenueDashboardPage'
 import QRSettingsPage from './pages/admin/QRSettingsPage'
 
-import KYCSubmission from './pages/organizer/KYCSubmission'
-import VideoCallPage from './pages/organizer/VideoCallPage'
-import AdminKYCDashboard from './pages/admin/AdminKYCDashboard'
+// KYC features disabled
+// import KYCSubmission from './pages/organizer/KYCSubmission'
+// import VideoCallPage from './pages/organizer/VideoCallPage'
+// import AdminKYCDashboard from './pages/admin/AdminKYCDashboard'
 
 // Inner component that can access AuthContext
 function AppContent() {
@@ -129,9 +130,6 @@ function AppContent() {
             </ProtectedRoute>
           } />
           
-          {/* Invite acceptance (public) */}
-          <Route path="/invite/accept/:token" element={<AcceptInvite />} />
-          
           {/* Scoring routes */}
           <Route path="/matches" element={<MatchListPage />} />
           <Route path="/matches/live" element={<LiveMatches />} />
@@ -140,7 +138,7 @@ function AppContent() {
           <Route path="/tournament/:tournamentId/live" element={<LiveTournamentDashboard />} />
           <Route path="/scoring/:matchId" element={
             <ProtectedRoute>
-              <RoleRoute allowedRoles={['UMPIRE', 'ORGANIZER']} blockAdmin={true}>
+              <RoleRoute allowedRoles={['UMPIRE', 'ORGANIZER']}>
                 <ScoringConsolePage />
               </RoleRoute>
             </ProtectedRoute>
@@ -149,7 +147,7 @@ function AppContent() {
           {/* Conduct Match Page - for organizers to assign umpire and start match */}
           <Route path="/match/:matchId/conduct" element={
             <ProtectedRoute>
-              <RoleRoute allowedRoles={['ORGANIZER']} blockAdmin={true}>
+              <RoleRoute allowedRoles={['ORGANIZER']}>
                 <ConductMatchPage />
               </RoleRoute>
             </ProtectedRoute>
@@ -163,7 +161,7 @@ function AppContent() {
             path="/tournaments/:id/register"
             element={
               <ProtectedRoute>
-                <RoleRoute allowedRoles={['PLAYER', 'ORGANIZER', 'UMPIRE']} blockAdmin={true}>
+                <RoleRoute allowedRoles={['PLAYER', 'ORGANIZER', 'UMPIRE']}>
                   <TournamentRegistrationPage />
                 </RoleRoute>
               </ProtectedRoute>
@@ -173,7 +171,7 @@ function AppContent() {
             path="/registrations"
             element={
               <ProtectedRoute>
-                <RoleRoute allowedRoles={['PLAYER', 'ORGANIZER', 'UMPIRE']} blockAdmin={true}>
+                <RoleRoute allowedRoles={['PLAYER', 'ORGANIZER', 'UMPIRE']}>
                   <MyRegistrationsPage />
                 </RoleRoute>
               </ProtectedRoute>
@@ -185,7 +183,7 @@ function AppContent() {
             path="/tournaments/create"
             element={
               <ProtectedRoute>
-                <RoleRoute allowedRoles={['ORGANIZER']} blockAdmin={true}>
+                <RoleRoute allowedRoles={['ORGANIZER']}>
                   <CreateTournament />
                 </RoleRoute>
               </ProtectedRoute>
@@ -195,7 +193,7 @@ function AppContent() {
             path="/tournaments/:id/categories"
             element={
               <ProtectedRoute>
-                <RoleRoute allowedRoles={['ORGANIZER']} blockAdmin={true}>
+                <RoleRoute allowedRoles={['ORGANIZER']}>
                   <ManageCategoriesPage />
                 </RoleRoute>
               </ProtectedRoute>
@@ -205,7 +203,7 @@ function AppContent() {
             path="/tournaments/:id/edit"
             element={
               <ProtectedRoute>
-                <RoleRoute allowedRoles={['ORGANIZER']} blockAdmin={true}>
+                <RoleRoute allowedRoles={['ORGANIZER']}>
                   <EditTournament />
                 </RoleRoute>
               </ProtectedRoute>
@@ -264,7 +262,7 @@ function AppContent() {
             path="/my-points"
             element={
               <ProtectedRoute>
-                <RoleRoute allowedRoles={['PLAYER', 'ORGANIZER', 'UMPIRE']} blockAdmin={true}>
+                <RoleRoute allowedRoles={['PLAYER', 'ORGANIZER', 'UMPIRE']}>
                   <MyPoints />
                 </RoleRoute>
               </ProtectedRoute>
@@ -275,27 +273,32 @@ function AppContent() {
             path="/dashboard"
             element={
               <ProtectedRoute>
-                <RoleRoute allowedRoles={['PLAYER']} blockAdmin={true}>
-                  <PlayerDashboard />
+                <RoleRoute allowedRoles={['PLAYER', 'ORGANIZER', 'UMPIRE']}>
+                  <UnifiedDashboard />
                 </RoleRoute>
               </ProtectedRoute>
             }
           />
+          
+          {/* Legacy dashboard routes - redirect to unified dashboard */}
+          <Route path="/player-dashboard" element={<Navigate to="/dashboard?role=PLAYER" replace />} />
+          <Route path="/organizer/dashboard" element={<Navigate to="/dashboard?role=ORGANIZER" replace />} />
+          <Route path="/umpire/dashboard" element={<Navigate to="/dashboard?role=UMPIRE" replace />} />
           
           {/* Player View Draws - Read Only */}
           <Route
             path="/player/tournaments/:id/draws"
             element={
               <ProtectedRoute>
-                <RoleRoute allowedRoles={['PLAYER', 'ORGANIZER', 'UMPIRE']} blockAdmin={true}>
+                <RoleRoute allowedRoles={['PLAYER', 'ORGANIZER', 'UMPIRE']}>
                   <PlayerViewDrawsPage />
                 </RoleRoute>
               </ProtectedRoute>
             }
           />
           
-          {/* Organizer KYC Routes */}
-          <Route
+          {/* Organizer KYC Routes - DISABLED */}
+          {/* <Route
             path="/organizer/kyc/submit"
             element={
               <ProtectedRoute>
@@ -315,14 +318,14 @@ function AppContent() {
                 </RoleRoute>
               </ProtectedRoute>
             }
-          />
+          /> */}
           
           <Route
-            path="/organizer/dashboard"
+            path="/organizer/profile/:id?"
             element={
               <ProtectedRoute>
-                <RoleRoute allowedRoles={['ORGANIZER']} blockAdmin={true}>
-                  <OrganizerDashboard />
+                <RoleRoute allowedRoles={['ORGANIZER']}>
+                  <OrganizerProfilePage />
                 </RoleRoute>
               </ProtectedRoute>
             }
@@ -332,7 +335,7 @@ function AppContent() {
             path="/organizer/history"
             element={
               <ProtectedRoute>
-                <RoleRoute allowedRoles={['ORGANIZER']} blockAdmin={true}>
+                <RoleRoute allowedRoles={['ORGANIZER']}>
                   <OrganizerTournamentHistory />
                 </RoleRoute>
               </ProtectedRoute>
@@ -343,7 +346,7 @@ function AppContent() {
             path="/organizer/categories/:categoryId"
             element={
               <ProtectedRoute>
-                <RoleRoute allowedRoles={['ORGANIZER']} blockAdmin={true}>
+                <RoleRoute allowedRoles={['ORGANIZER']}>
                   <TournamentCategoryDetails />
                 </RoleRoute>
               </ProtectedRoute>
@@ -354,7 +357,7 @@ function AppContent() {
             path="/organizer/tournaments/:id"
             element={
               <ProtectedRoute>
-                <RoleRoute allowedRoles={['ORGANIZER']} blockAdmin={true}>
+                <RoleRoute allowedRoles={['ORGANIZER']}>
                   <TournamentManagementPage />
                 </RoleRoute>
               </ProtectedRoute>
@@ -365,19 +368,8 @@ function AppContent() {
             path="/organizer/cancellation/:registrationId"
             element={
               <ProtectedRoute>
-                <RoleRoute allowedRoles={['ORGANIZER']} blockAdmin={true}>
+                <RoleRoute allowedRoles={['ORGANIZER']}>
                   <CancellationRequestPage />
-                </RoleRoute>
-              </ProtectedRoute>
-            }
-          />
-          
-          <Route
-            path="/umpire/dashboard"
-            element={
-              <ProtectedRoute>
-                <RoleRoute allowedRoles={['UMPIRE']} blockAdmin={true}>
-                  <UmpireDashboard />
                 </RoleRoute>
               </ProtectedRoute>
             }
@@ -387,7 +379,7 @@ function AppContent() {
             path="/umpire/scoring/:matchId"
             element={
               <ProtectedRoute>
-                <RoleRoute allowedRoles={['UMPIRE']} blockAdmin={true}>
+                <RoleRoute allowedRoles={['UMPIRE']}>
                   <UmpireScoring />
                 </RoleRoute>
               </ProtectedRoute>
@@ -398,7 +390,7 @@ function AppContent() {
             path="/match/:matchId/score"
             element={
               <ProtectedRoute>
-                <RoleRoute allowedRoles={['UMPIRE', 'ORGANIZER']} blockAdmin={true}>
+                <RoleRoute allowedRoles={['UMPIRE', 'ORGANIZER']}>
                   <MatchScoringPage />
                 </RoleRoute>
               </ProtectedRoute>
@@ -421,16 +413,6 @@ function AppContent() {
             element={<Navigate to="/admin-dashboard" replace />}
           />
           
-          <Route
-            path="/admin/invites"
-            element={
-              <ProtectedRoute>
-                <RoleRoute allowedRoles={['ADMIN']}>
-                  <AdminInvites />
-                </RoleRoute>
-              </ProtectedRoute>
-            }
-          />
           
           {/* New Admin Panel Routes */}
           <Route path="/admin" element={<AdminLayout />}>
@@ -438,7 +420,7 @@ function AppContent() {
             <Route path="invites" element={<InviteManagementPage />} />
             <Route path="audit-logs" element={<AuditLogsPage />} />
             <Route path="academies" element={<AcademyApprovalsPage />} />
-            <Route path="kyc" element={<AdminKYCDashboard />} />
+            {/* <Route path="kyc" element={<AdminKYCDashboard />} /> */}
             
             {/* Payment System Routes */}
             <Route path="payment-verifications" element={<PaymentVerificationPage />} />

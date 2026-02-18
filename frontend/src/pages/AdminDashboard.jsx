@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { superAdminAPI } from '../api/superAdmin';
+import api from '../utils/api';
 import {
   Users, Trophy, TrendingUp, LogOut, QrCode, CreditCard, Building2
 } from 'lucide-react';
@@ -37,7 +37,7 @@ export default function AdminDashboard() {
   const fetchStats = async () => {
     setLoading(true);
     try {
-      const statsRes = await superAdminAPI.getStats();
+      const statsRes = await api.get('/admin/stats');
       const statsData = statsRes.data.stats;
       
       setStats({

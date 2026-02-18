@@ -7,40 +7,75 @@ const router = express.Router();
 // Get complete revenue overview
 router.get('/overview', authenticate, requireAdmin, async (req, res) => {
   try {
-    // For SQLite with simplified schema, return mock data
-    // In production with full schema, this would query actual data
+    // Get all tournament payments
+    const payments = await prisma.tournamentPayment.findMany({
+      select: {
+        totalCollected: true,
+        platformFeeAmount: true,
+        platformFeePercent: true,
+        organizerShare: true,
+        payout50Percent1: true,
+        payout50Percent2: true,
+        payout50Status1: true,
+        payout50Status2: true,
+        totalRegistrations: true
+      }
+    });
+
+    // Calculate totals
+    const totalCollected = payments.reduce((sum, p) => sum + (p.totalCollected || 0), 0);
+    const platformFeesTotal = payments.reduce((sum, p) => sum + (p.platformFeeAmount || 0), 0);
+    const organizerShareTotal = payments.reduce((sum, p) => sum + (p.organizerShare || 0), 0);
+    
+    // Calculate already paid to organizers
+    const alreadyPaid = payments.reduce((sum, p) => {
+      let paid = 0;
+      if (p.payout50Status1 === 'paid') paid += (p.payout50Percent1 || 0);
+      if (p.payout50Status2 === 'paid') paid += (p.payout50Percent2 || 0);
+      return sum + paid;
+    }, 0);
+    
+    const pendingPayout = organizerShareTotal - alreadyPaid;
+    const balanceInHand = totalCollected - alreadyPaid;
+    
+    // Get stats
+    const totalTournaments = await prisma.tournamentPayment.count();
+    const totalRegistrations = payments.reduce((sum, p) => sum + (p.totalRegistrations || 0), 0);
+    
+    const averagePerTournament = totalTournaments > 0 ? totalCollected / totalTournaments : 0;
+    const averagePerRegistration = totalRegistrations > 0 ? totalCollected / totalRegistrations : 0;
     
     res.json({
       success: true,
       data: {
         // Your earnings
         platformFees: {
-          total: 0,
+          total: platformFeesTotal,
           percentage: 5,
           description: '5% of all tournament registrations'
         },
         
         // Money flow
-        totalCollected: 0,
-        pendingVerification: 0,
-        paidToOrganizers: 0,
-        balanceInHand: 0,
+        totalCollected: totalCollected,
+        organizerShare: organizerShareTotal,
+        pendingPayouts: pendingPayout,
+        balanceInHand: balanceInHand,
         
         // Breakdown
         breakdown: {
-          collected: 0,
-          yourShare: 0,
-          organizerShare: 0,
-          alreadyPaid: 0,
-          pendingPayout: 0
+          collected: totalCollected,
+          yourShare: platformFeesTotal,
+          organizerShare: organizerShareTotal,
+          alreadyPaid: alreadyPaid,
+          pendingPayout: pendingPayout
         },
         
         // Stats
         stats: {
-          tournaments: 0,
-          registrations: 0,
-          averagePerTournament: 0,
-          averagePerRegistration: 0
+          tournaments: totalTournaments,
+          registrations: totalRegistrations,
+          averagePerTournament: averagePerTournament,
+          averagePerRegistration: averagePerRegistration
         }
       }
     });
@@ -293,13 +328,78 @@ router.get('/by-location', authenticate, requireAdmin, async (req, res) => {
 // Get revenue timeline (daily/weekly/monthly)
 router.get('/timeline', authenticate, requireAdmin, async (req, res) => {
   try {
-    // For SQLite with simplified schema, return empty timeline
-    // In production with full schema, this would query actual data
+    const { period = 'daily' } = req.query;
+    
+    // Get all payments with registration details
+    const payments = await prisma.paymentVerification.findMany({
+      where: { status: 'approved' },
+      include: {
+        registration: {
+          select: {
+            tournamentId: true,
+            amountTotal: true
+          }
+        }
+      },
+      orderBy: { verifiedAt: 'desc' }
+    });
+
+    // Get tournament payment info for platform fee percentage
+    const tournamentIds = [...new Set(payments.map(p => p.registration.tournamentId))];
+    const tournamentPayments = await prisma.tournamentPayment.findMany({
+      where: { tournamentId: { in: tournamentIds } },
+      select: {
+        tournamentId: true,
+        platformFeePercent: true
+      }
+    });
+
+    // Group by period
+    const timelineMap = new Map();
+    
+    payments.forEach(payment => {
+      if (!payment.verifiedAt) return;
+      
+      const date = new Date(payment.verifiedAt);
+      let periodKey;
+      
+      if (period === 'daily') {
+        periodKey = date.toISOString().split('T')[0]; // YYYY-MM-DD
+      } else if (period === 'weekly') {
+        const weekStart = new Date(date);
+        weekStart.setDate(date.getDate() - date.getDay());
+        periodKey = weekStart.toISOString().split('T')[0];
+      } else if (period === 'monthly') {
+        periodKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      }
+      
+      if (!timelineMap.has(periodKey)) {
+        timelineMap.set(periodKey, {
+          period: periodKey,
+          totalCollected: 0,
+          platformFees: 0,
+          registrations: 0
+        });
+      }
+      
+      const data = timelineMap.get(periodKey);
+      const amount = payment.amount || 0;
+      const tournamentPayment = tournamentPayments.find(tp => tp.tournamentId === payment.registration.tournamentId);
+      const platformFeePercent = tournamentPayment?.platformFeePercent || 5;
+      const platformFee = amount * (platformFeePercent / 100);
+      
+      data.totalCollected += amount;
+      data.platformFees += platformFee;
+      data.registrations += 1;
+    });
+
+    const formattedData = Array.from(timelineMap.values())
+      .sort((a, b) => b.period.localeCompare(a.period));
     
     res.json({
       success: true,
-      data: [],
-      period: req.query.period || 'daily'
+      data: formattedData,
+      period: period
     });
   } catch (error) {
     console.error('Error fetching revenue timeline:', error);

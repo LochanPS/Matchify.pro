@@ -1,12 +1,12 @@
-import axios from 'axios';
+import api from '../utils/api';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 export const drawAPI = {
   // Fetch bracket structure for a category
   getBracket: async (tournamentId, categoryId) => {
-    const response = await axios.get(
-      `${API_URL}/tournaments/${tournamentId}/categories/${categoryId}/bracket`
+    const response = await api.get(
+      `/tournaments/${tournamentId}/categories/${categoryId}/bracket`
     );
     return response.data;
   },
@@ -14,39 +14,52 @@ export const drawAPI = {
   // Fetch all matches for a category
   getMatches: async (tournamentId, categoryId, params = {}) => {
     const queryString = new URLSearchParams(params).toString();
-    const response = await axios.get(
-      `${API_URL}/tournaments/${tournamentId}/categories/${categoryId}/matches?${queryString}`
+    const response = await api.get(
+      `/tournaments/${tournamentId}/categories/${categoryId}/matches?${queryString}`
     );
     return response.data;
   },
 
   // Generate draw (organizer only)
   generateDraw: async (tournamentId, categoryId) => {
-    const response = await axios.post(
-      `${API_URL}/tournaments/${tournamentId}/categories/${categoryId}/draw`
+    const response = await api.post(
+      `/tournaments/${tournamentId}/categories/${categoryId}/draw`
     );
     return response.data;
   },
 
-  // Get draw (with bracket JSON)
+  // Get draw (with bracket JSON) - PUBLIC endpoint, works without auth
   getDraw: async (tournamentId, categoryId) => {
-    const response = await axios.get(
-      `${API_URL}/tournaments/${tournamentId}/categories/${categoryId}/draw`
-    );
-    return response.data;
+    try {
+      const response = await api.get(
+        `/tournaments/${tournamentId}/categories/${categoryId}/draw`
+      );
+      return response.data;
+    } catch (error) {
+      // If auth fails, retry without auth headers for public access
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        console.log('Retrying draw fetch without authentication...');
+        const response = await api.get(
+          `/tournaments/${tournamentId}/categories/${categoryId}/draw`,
+          { headers: { Authorization: undefined } }
+        );
+        return response.data;
+      }
+      throw error;
+    }
   },
 
   // Delete draw (organizer only)
   deleteDraw: async (tournamentId, categoryId) => {
-    const response = await axios.delete(
-      `${API_URL}/tournaments/${tournamentId}/categories/${categoryId}/draw`
+    const response = await api.delete(
+      `/tournaments/${tournamentId}/categories/${categoryId}/draw`
     );
     return response.data;
   },
 
   // Bulk assign all registered players to available slots
   bulkAssignAllPlayers: async (tournamentId, categoryId) => {
-    const response = await axios.post(`${API_URL}/draws/bulk-assign-all`, {
+    const response = await api.post(`/draws/bulk-assign-all`, {
       tournamentId,
       categoryId
     });
@@ -55,7 +68,7 @@ export const drawAPI = {
 
   // Shuffle all assigned players randomly
   shuffleAssignedPlayers: async (tournamentId, categoryId) => {
-    const response = await axios.post(`${API_URL}/draws/shuffle-players`, {
+    const response = await api.post(`/draws/shuffle-players`, {
       tournamentId,
       categoryId
     });

@@ -5,7 +5,26 @@ import { Link, useNavigate } from 'react-router-dom';
 
 const RevenueDashboardPage = () => {
   const navigate = useNavigate();
-  const [overview, setOverview] = useState(null);
+  const [overview, setOverview] = useState({
+    platformFees: { total: 0, percentage: 5, description: '' },
+    totalCollected: 0,
+    organizerShare: 0,
+    pendingPayouts: 0,
+    balanceInHand: 0,
+    breakdown: {
+      collected: 0,
+      yourShare: 0,
+      organizerShare: 0,
+      alreadyPaid: 0,
+      pendingPayout: 0
+    },
+    stats: {
+      tournaments: 0,
+      registrations: 0,
+      averagePerTournament: 0,
+      averagePerRegistration: 0
+    }
+  });
   const [timeline, setTimeline] = useState([]);
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState('daily');
@@ -24,8 +43,14 @@ const RevenueDashboardPage = () => {
         getRevenueOverview(),
         getRevenueTimeline({ period }),
       ]);
-      setOverview(overviewData.data);
-      setTimeline(timelineData.data);
+      
+      // Only update if data exists
+      if (overviewData?.data) {
+        setOverview(overviewData.data);
+      }
+      if (timelineData?.data) {
+        setTimeline(timelineData.data);
+      }
     } catch (error) {
       console.error('Error fetching revenue data:', error);
       toast.error('Failed to load revenue data');

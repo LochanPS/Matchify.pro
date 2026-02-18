@@ -3,12 +3,14 @@ import prisma from '../lib/prisma.js';
 import bcrypt from 'bcryptjs';
 import { createNotification } from '../services/notification.service.js';
 
-// POST /api/super-admin/tournaments/:tournamentId/quick-add-player
+// POST /api/admin/tournaments/:tournamentId/quick-add-player
 export const quickAddPlayer = async (req, res) => {
   try {
     const { tournamentId } = req.params;
     const { name, email, phone, categoryId, gender } = req.body;
     const adminId = req.user.id;
+
+    console.log('🎯 Quick Add Player Request:', { tournamentId, name, email, categoryId });
 
     // Validate required fields
     if (!name || !email || !phone || !categoryId) {
@@ -42,6 +44,11 @@ export const quickAddPlayer = async (req, res) => {
       });
     }
 
+    // ADMIN OVERRIDE: Quick Add bypasses max participants limit
+    // Admin can add unlimited players regardless of category maxParticipants
+    console.log(`✅ Category found: ${category.name}, Current registrations: ${category.registrationCount || 0}, Max: ${category.maxParticipants || 'Unlimited'}`);
+    console.log('✅ Admin Quick Add - Bypassing all limits');
+
     // Check if user already exists
     let user = await prisma.user.findUnique({
       where: { email }
@@ -49,6 +56,7 @@ export const quickAddPlayer = async (req, res) => {
 
     // If user doesn't exist, create a temporary account
     if (!user) {
+      console.log('📝 Creating new user account...');
       const defaultPassword = await bcrypt.hash('QuickAdd@123', 10);
       
       user = await prisma.user.create({
@@ -77,6 +85,9 @@ export const quickAddPlayer = async (req, res) => {
           matchesLost: 0
         }
       });
+      console.log('✅ New user created:', user.email);
+    } else {
+      console.log('✅ Existing user found:', user.email);
     }
 
     // Check if already registered in this category
@@ -90,12 +101,14 @@ export const quickAddPlayer = async (req, res) => {
     });
 
     if (existingRegistration) {
+      console.log('❌ User already registered in this category');
       return res.status(400).json({
         success: false,
         error: 'Player is already registered in this category'
       });
     }
 
+    console.log('📝 Creating registration...');
     // Create registration with quick-added flag
     const registration = await prisma.registration.create({
       data: {
@@ -130,6 +143,7 @@ export const quickAddPlayer = async (req, res) => {
         }
       }
     });
+    console.log('✅ Registration created successfully');
 
     // Update category registration count
     await prisma.category.update({
@@ -140,6 +154,7 @@ export const quickAddPlayer = async (req, res) => {
         }
       }
     });
+    console.log('✅ Category registration count updated');
 
     // Send notification to the player
     await createNotification({
@@ -154,7 +169,9 @@ export const quickAddPlayer = async (req, res) => {
         categoryName: category.name
       })
     });
+    console.log('✅ Notification sent');
 
+    console.log('🎉 Quick Add completed successfully!');
     res.json({
       success: true,
       message: 'Player added successfully',
@@ -162,15 +179,17 @@ export const quickAddPlayer = async (req, res) => {
       userCreated: !existingRegistration
     });
   } catch (error) {
-    console.error('Quick add player error:', error);
+    console.error('❌ Quick add player error:', error);
+    console.error('Error details:', error.message);
+    console.error('Error stack:', error.stack);
     res.status(500).json({
       success: false,
-      error: 'Failed to add player'
+      error: 'Failed to add player: ' + error.message
     });
   }
 };
 
-// GET /api/super-admin/tournaments/:tournamentId/quick-added-players
+// GET /api/admin/tournaments/:tournamentId/quick-added-players
 export const getQuickAddedPlayers = async (req, res) => {
   try {
     const { tournamentId } = req.params;

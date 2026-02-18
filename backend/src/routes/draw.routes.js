@@ -1,6 +1,6 @@
 import express from 'express';
 import { generateDraw, getDraw, deleteDraw, createConfiguredDraw, getCategoryPlayers, assignPlayersToDraw, bulkAssignAllPlayers, shuffleAssignedPlayers, arrangeKnockoutMatchups, continueToKnockout } from '../controllers/draw.controller.js';
-import { authenticate } from '../middleware/auth.js';
+import { authenticate, optionalAuth } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -29,7 +29,7 @@ router.post(
   generateDraw
 );
 
-// Get draw (public)
+// Get draw (PUBLIC - no authentication required for viewing)
 router.get(
   '/tournaments/:tournamentId/categories/:categoryId/draw',
   getDraw

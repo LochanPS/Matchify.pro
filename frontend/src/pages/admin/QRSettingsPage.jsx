@@ -3,7 +3,11 @@ import { getPaymentSettings, updatePaymentSettings } from '../../api/payment';
 import { toast } from 'react-hot-toast';
 
 const QRSettingsPage = () => {
-  const [settings, setSettings] = useState(null);
+  const [settings, setSettings] = useState({
+    upiId: '',
+    accountHolder: '',
+    qrCodeUrl: null
+  });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
@@ -21,14 +25,16 @@ const QRSettingsPage = () => {
     try {
       setLoading(true);
       const response = await getPaymentSettings();
-      setSettings(response.data);
-      setFormData({
-        upiId: response.data.upiId,
-        accountHolder: response.data.accountHolder,
-      });
+      if (response?.data) {
+        setSettings(response.data);
+        setFormData({
+          upiId: response.data.upiId || '',
+          accountHolder: response.data.accountHolder || '',
+        });
+      }
     } catch (error) {
       console.error('Error fetching settings:', error);
-      toast.error('Failed to load payment settings');
+      // Don't show error toast - settings might not exist yet
     } finally {
       setLoading(false);
     }

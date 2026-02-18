@@ -25,21 +25,6 @@ const authenticate = async (req, res, next) => {
       adminId: decoded.adminId
     });
 
-    // Check if this is a super admin token
-    if (decoded.isAdmin && decoded.userId === 'admin') {
-      req.user = {
-        id: 'admin',
-        userId: 'admin',
-        email: decoded.email,
-        role: 'ADMIN',
-        roles: ['ADMIN'],
-        name: 'Super Admin',
-        isAdmin: true,
-        isVerified: true
-      };
-      return next();
-    }
-
     // Get user from database
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId }

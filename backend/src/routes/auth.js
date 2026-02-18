@@ -47,14 +47,14 @@ router.post('/register', async (req, res) => {
       });
     }
 
-    // Process roles
+    // Process roles - Default to all three roles
     const validRoles = ['PLAYER', 'ORGANIZER', 'UMPIRE'];
-    let userRoles = ['PLAYER']; // Default
+    let userRoles = ['PLAYER', 'ORGANIZER', 'UMPIRE']; // Default to all roles
     
     if (roles && Array.isArray(roles)) {
       userRoles = roles.filter(r => validRoles.includes(r));
       if (userRoles.length === 0) {
-        userRoles = ['PLAYER']; // Fallback to PLAYER if no valid roles
+        userRoles = ['PLAYER', 'ORGANIZER', 'UMPIRE']; // Fallback to all roles
       }
     } else if (roles && typeof roles === 'string') {
       // Handle single role as string (backward compatibility)
@@ -100,12 +100,12 @@ router.post('/register', async (req, res) => {
     // Determine initial wallet balance based on roles
     const initialBalance = userRoles.includes('ORGANIZER') ? 25 : 0;
 
-    // Create user with first role as primary role (for backward compatibility)
+    // Create user with all roles as comma-separated string
     const user = await prisma.user.create({
       data: {
         email,
         password: hashedPassword,
-        roles: userRoles[0], // Use 'roles' field as expected by schema
+        roles: userRoles.join(','), // Store as comma-separated string
         name,
         phone,
         dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
@@ -203,8 +203,19 @@ router.post('/login', async (req, res) => {
       });
     }
 
+    // Parse roles - handle both 'roles' and 'role' fields
+    let userRoles = ['PLAYER']; // Default
+    if (user.roles) {
+      userRoles = user.roles.split(',').map(r => r.trim());
+    } else if (user.role) {
+      userRoles = [user.role];
+    }
+    
+    const primaryRole = userRoles[0];
+    const isAdmin = userRoles.includes('ADMIN');
+
     // Give 25 free credits to organizers on first login if they have 0 balance
-    if (user.role === 'ORGANIZER' && user.walletBalance === 0) {
+    if (userRoles.includes('ORGANIZER') && user.walletBalance === 0) {
       await prisma.user.update({
         where: { id: user.id },
         data: { walletBalance: 25 }
@@ -213,7 +224,7 @@ router.post('/login', async (req, res) => {
     }
 
     // Generate tokens
-    const accessToken = generateAccessToken(user.id, user.role);
+    const accessToken = generateAccessToken(user.id, primaryRole);
     const refreshToken = generateRefreshToken(user.id);
 
     // Update refresh token in database
@@ -227,7 +238,12 @@ router.post('/login', async (req, res) => {
 
     res.json({
       message: 'Login successful',
-      user: userWithoutPassword,
+      user: {
+        ...userWithoutPassword,
+        roles: userRoles,
+        currentRole: primaryRole,
+        isAdmin: isAdmin
+      },
       accessToken,
       refreshToken
     });
@@ -382,3 +398,68 @@ router.get('/me', async (req, res) => {
 });
 
 export default router;
+
+// GET /auth/verification-status - Get verification status
+router.get('/verification-status', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({
+        error: 'Access token required'
+      });
+    }
+
+    const token = authHeader.substring(7);
+    const decoded = verifyAccessToken(token);
+
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+      select: {
+        isVerifiedPlayer: true,
+        isVerifiedOrganizer: true,
+        isVerifiedUmpire: true,
+        tournamentsRegistered: true,
+        matchesUmpired: true,
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        error: 'User not found'
+      });
+    }
+
+    const verificationStatus = {
+      player: {
+        isVerified: user.isVerifiedPlayer,
+        progress: user.tournamentsRegistered,
+        required: 12,
+        percentage: Math.min((user.tournamentsRegistered / 12) * 100, 100),
+        remaining: Math.max(12 - user.tournamentsRegistered, 0)
+      },
+      organizer: {
+        isVerified: user.isVerifiedOrganizer,
+        requiresAdminApproval: true,
+        message: 'Organizer verification requires manual admin approval'
+      },
+      umpire: {
+        isVerified: user.isVerifiedUmpire,
+        progress: user.matchesUmpired,
+        required: 10,
+        percentage: Math.min((user.matchesUmpired / 10) * 100, 100),
+        remaining: Math.max(10 - user.matchesUmpired, 0)
+      }
+    };
+
+    res.json({
+      success: true,
+      verification: verificationStatus
+    });
+  } catch (error) {
+    console.error('Get verification status error:', error);
+    res.status(401).json({
+      error: 'Invalid or expired token'
+    });
+  }
+});

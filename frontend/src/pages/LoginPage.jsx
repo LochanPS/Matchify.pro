@@ -42,12 +42,11 @@ const LoginPage = () => {
       const userRoles = Array.isArray(user.roles) ? user.roles : [user.role];
       const primaryRole = userRoles[0];
       
-      switch (primaryRole) {
-        case 'PLAYER': navigate('/dashboard'); break;
-        case 'ORGANIZER': navigate('/organizer/dashboard'); break;
-        case 'UMPIRE': navigate('/umpire/dashboard'); break;
-        case 'ADMIN': navigate('/admin/dashboard'); break;
-        default: navigate('/');
+      // Redirect to unified dashboard with role parameter, or admin dashboard
+      if (primaryRole === 'ADMIN') {
+        navigate('/admin-dashboard');
+      } else {
+        navigate(`/dashboard?role=${primaryRole}`);
       }
     } catch (err) {
       // Check if user is banned

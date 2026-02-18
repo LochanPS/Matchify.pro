@@ -153,7 +153,7 @@ const ManageCategoriesPage = () => {
           <AlertTriangle className="w-12 h-12 text-red-400 mx-auto mb-4" />
           <p className="text-red-400 text-lg mb-4">{error || 'Tournament not found'}</p>
           <button
-            onClick={() => navigate('/organizer/dashboard')}
+            onClick={() => navigate('/dashboard?role=ORGANIZER')}
             className="btn-premium"
           >
             Back to Dashboard

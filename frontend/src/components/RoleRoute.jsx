@@ -1,7 +1,7 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
-const RoleRoute = ({ children, allowedRoles, blockAdmin = false }) => {
+const RoleRoute = ({ children, allowedRoles }) => {
   const { user, loading } = useAuth();
 
   if (loading) {
@@ -55,69 +55,16 @@ const RoleRoute = ({ children, allowedRoles, blockAdmin = false }) => {
     });
   }
 
-  // Check if admin is impersonating
-  const isImpersonating = () => {
-    try {
-      const token = localStorage.getItem('token');
-      if (token) {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        return !!payload.isImpersonating;
-      }
-    } catch (error) {
-      return false;
-    }
-    return false;
-  };
-
-  // Block admins from accessing non-admin features (UNLESS they are impersonating)
-  if (blockAdmin && userRoles.includes('ADMIN') && !isImpersonating()) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50">
-        <div className="text-center max-w-2xl mx-auto p-8">
-          <div className="text-6xl mb-4">⚠️</div>
-          <h1 className="text-3xl font-bold text-warning-600 mb-4">Admin Access Restricted</h1>
-          <p className="text-gray-700 mb-4 text-lg">
-            Admins cannot access player, organizer, or umpire features.
-          </p>
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6 text-left">
-            <h2 className="font-semibold text-blue-900 mb-3">Why this restriction?</h2>
-            <ul className="space-y-2 text-sm text-blue-800">
-              <li>• Admins have platform-wide oversight and moderation powers</li>
-              <li>• Participating in tournaments could create conflicts of interest</li>
-              <li>• Separate accounts ensure fair play and transparency</li>
-            </ul>
-          </div>
-          <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 mb-6 text-left">
-            <h2 className="font-semibold text-gray-900 mb-3">What you can do:</h2>
-            <ul className="space-y-2 text-sm text-gray-700">
-              <li>✓ Create a separate player account to participate in tournaments</li>
-              <li>✓ Create a separate organizer account to host tournaments</li>
-              <li>✓ Use your admin account only for platform management</li>
-            </ul>
-          </div>
-          <div className="flex gap-4 justify-center">
-            <button
-              onClick={() => window.location.href = '/admin/dashboard'}
-              className="btn-primary"
-            >
-              Go to Admin Dashboard
-            </button>
-            <button
-              onClick={() => window.history.back()}
-              className="btn-secondary"
-            >
-              Go Back
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   // Check if user has ANY of the allowed roles
+  // ADMIN has access to everything
   // PLAYER role now includes ORGANIZER capabilities
   const hasAllowedRole = allowedRoles.some(role => {
     const roleUpper = role.toUpperCase();
+    
+    // ADMIN can access everything
+    if (userRoles.includes('ADMIN')) {
+      return true;
+    }
     
     // If currentRole is set, check if it matches
     if (currentRole && currentRole === roleUpper) {

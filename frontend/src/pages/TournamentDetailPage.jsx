@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { tournamentAPI } from '../api/tournament';
-import { superAdminAPI } from '../api/superAdmin';
 import { useAuth } from '../contexts/AuthContext';
 import { formatDateLongIndian, formatDateTimeIndian } from '../utils/dateFormat';
 import { getImageUrl } from '../utils/imageUrl';
@@ -147,7 +146,7 @@ const TournamentDetailPage = () => {
   const [umpireError, setUmpireError] = useState('');
   const [umpireSuccess, setUmpireSuccess] = useState('');
 
-  // Quick Add Player state (Super Admin only)
+  // Quick Add Player state (Admin only)
   const [showQuickAddModal, setShowQuickAddModal] = useState(false);
   const [quickAddData, setQuickAddData] = useState({
     name: '',
@@ -341,7 +340,7 @@ const TournamentDetailPage = () => {
 
     try {
       setQuickAddLoading(true);
-      const response = await superAdminAPI.quickAddPlayer(id, quickAddData);
+      const response = await api.post(`/admin/tournaments/${id}/quick-add-player`, quickAddData);
       
       if (response.data.success) {
         setQuickAddSuccess(`Player "${quickAddData.name}" added successfully!`);
@@ -368,9 +367,10 @@ const TournamentDetailPage = () => {
     }
   };
 
-  const isSuperAdmin = () => {
+  const isAdmin = () => {
     if (!user) return false;
-    return user.isAdmin === true || (user.roles && user.roles.includes('SUPER_ADMIN'));
+    const userRoles = Array.isArray(user.roles) ? user.roles : [user.role];
+    return userRoles.includes('ADMIN');
   };
 
   const canRegister = () => {
@@ -880,12 +880,12 @@ const TournamentDetailPage = () => {
               </div>
             )}
 
-            {/* Super Admin Actions */}
-            {isSuperAdmin() && (
+            {/* Admin Actions */}
+            {isAdmin() && (
               <div className="bg-gradient-to-br from-purple-900/50 to-indigo-900/50 backdrop-blur-sm border border-purple-500/30 rounded-2xl p-6">
                 <div className="flex items-center gap-2 mb-4">
                   <SparklesIcon className="h-5 w-5 text-purple-400" />
-                  <h3 className="font-bold text-white">Super Admin Actions</h3>
+                  <h3 className="font-bold text-white">Admin Actions</h3>
                 </div>
                 <div className="space-y-3">
                   <button
@@ -1227,7 +1227,7 @@ const TournamentDetailPage = () => {
         </div>
       )}
 
-      {/* Quick Add Player Modal (Super Admin Only) */}
+      {/* Quick Add Player Modal (Admin Only) */}
       {showQuickAddModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-purple-500/30">

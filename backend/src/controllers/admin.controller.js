@@ -200,7 +200,7 @@ class AdminController {
     try {
       const { id } = req.params;
       const { reason, durationDays } = req.body;
-      const adminId = req.user.id;
+      const adminId = req.user.userId || req.user.id;
 
       // Validation
       if (!reason || !durationDays) {
@@ -227,7 +227,8 @@ class AdminController {
       }
 
       // Cannot suspend admins
-      if (user.role === 'ADMIN') {
+      const userRoles = user.roles ? user.roles.split(',') : [];
+      if (userRoles.includes('ADMIN')) {
         return res.status(403).json({
           success: false,
           message: 'Cannot suspend admin users',
@@ -244,6 +245,7 @@ class AdminController {
         data: {
           suspendedUntil,
           suspensionReason: reason,
+          isSuspended: true
         },
       });
 
@@ -290,7 +292,7 @@ class AdminController {
   static async unsuspendUser(req, res) {
     try {
       const { id } = req.params;
-      const adminId = req.user.id;
+      const adminId = req.user.userId || req.user.id;
 
       const user = await prisma.user.findUnique({ where: { id } });
       if (!user) {
@@ -306,6 +308,7 @@ class AdminController {
         data: {
           suspendedUntil: null,
           suspensionReason: null,
+          isSuspended: false
         },
       });
 
@@ -483,7 +486,7 @@ class AdminController {
             entityId: req.user.userId,
             details: {
               returnedFrom: req.user.email,
-              adminType: 'hardcoded_super_admin'
+              adminType: 'admin'
             },
             ipAddress: req.ip,
             userAgent: req.get('user-agent'),

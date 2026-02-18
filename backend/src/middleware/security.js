@@ -58,7 +58,18 @@ export const securityHeaders = (req, res, next) => {
 export const validateTokenFormat = (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1];
   
+  // Only validate if token is present - don't block requests without tokens
   if (token && !/^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+$/.test(token)) {
+    // For GET requests to public endpoints, ignore invalid tokens
+    if (req.method === 'GET' && (
+      req.path.includes('/draw') ||
+      req.path.includes('/tournaments') ||
+      req.path.includes('/leaderboard') ||
+      req.path.includes('/health')
+    )) {
+      return next();
+    }
+    
     return res.status(401).json({
       success: false,
       message: 'Invalid token format'
@@ -75,8 +86,20 @@ export const logSuspiciousActivity = (req, res, next) => {
     return next();
   }
   
-  // Skip for auth routes to avoid false positives
-  if (req.path.includes('/auth/') || req.path.includes('/register') || req.path.includes('/login')) {
+  // Skip for public routes to avoid false positives
+  const publicRoutes = [
+    '/auth/',
+    '/register',
+    '/login',
+    '/health',
+    '/api/health',
+    '/api/tournaments',
+    '/api/leaderboard',
+    '/draw' // Allow draw viewing
+  ];
+  
+  const isPublicRoute = publicRoutes.some(route => req.path.includes(route));
+  if (isPublicRoute) {
     return next();
   }
   

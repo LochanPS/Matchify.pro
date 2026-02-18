@@ -87,7 +87,7 @@ export default function CancellationRequestsPage() {
       <header className="relative border-b border-white/10 bg-slate-900/50 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <button
-            onClick={() => navigate('/organizer/dashboard')}
+            onClick={() => navigate('/dashboard?role=ORGANIZER')}
             className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-4 group"
           >
             <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />

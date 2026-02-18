@@ -96,8 +96,8 @@ const RegisterPage = () => {
         return;
       }
       
-      // Default to player dashboard
-      navigate('/dashboard');
+      // Redirect to unified dashboard
+      navigate('/dashboard?role=PLAYER');
     } catch (err) {
       console.error('Registration error:', err);
       // Show specific error message from backend

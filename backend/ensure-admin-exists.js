@@ -6,7 +6,7 @@ async function ensureAdminExists() {
     console.log('🔍 Checking for admin user...\n');
 
     const adminEmail = 'ADMIN@gmail.com';
-    const adminPassword = 'Pradyu@123(123)'; // Same as delete password
+    const adminPassword = 'ADMIN@123(123)'; // Admin password
 
     // Check if admin exists
     let admin = await prisma.user.findUnique({

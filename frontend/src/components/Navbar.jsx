@@ -58,29 +58,37 @@ const Navbar = () => {
 
   const getAvailableRoles = () => {
     if (!user) return [];
+    
     let roles = [];
-    if (user.roles && Array.isArray(user.roles)) roles = user.roles;
-    else if (typeof user.roles === 'string') roles = user.roles.split(',').map(r => r.trim());
-    else if (user.role) roles = [user.role];
+    
+    // Handle different role formats
+    if (Array.isArray(user.roles)) {
+      roles = user.roles;
+    } else if (typeof user.roles === 'string') {
+      roles = user.roles.split(',').map(r => r.trim());
+    } else if (user.role) {
+      roles = [user.role];
+    }
     
     // Normalize role names to uppercase
     roles = roles.map(r => r.toUpperCase());
     
     // Ensure PLAYER is always there as base role
-    if (!roles.includes('PLAYER')) roles.unshift('PLAYER');
+    if (!roles.includes('PLAYER')) {
+      roles.unshift('PLAYER');
+    }
+    
     return roles;
   };
 
   const handleRoleSwitch = (role) => {
     if (switchRole) switchRole(role);
     setShowRoleMenu(false);
-    // Navigate to appropriate dashboard
-    switch (role) {
-      case 'PLAYER': navigate('/dashboard'); break;
-      case 'ORGANIZER': navigate('/organizer/dashboard'); break;
-      case 'UMPIRE': navigate('/umpire/dashboard'); break;
-      case 'ADMIN': navigate('/admin/dashboard'); break;
-      default: navigate('/dashboard'); break;
+    // Navigate to unified dashboard with role parameter
+    if (role === 'ADMIN') {
+      navigate('/admin-dashboard');
+    } else {
+      navigate(`/dashboard?role=${role}`);
     }
   };
 
@@ -96,13 +104,11 @@ const Navbar = () => {
 
   const getDashboardLink = () => {
     const role = getCurrentRole();
-    switch (role) {
-      case 'PLAYER': return '/dashboard';
-      case 'ORGANIZER': return '/organizer/dashboard';
-      case 'UMPIRE': return '/umpire/dashboard';
-      case 'ADMIN': return '/admin/dashboard';
-      default: return '/';
+    if (role === 'ADMIN') {
+      return '/admin-dashboard';
     }
+    // Return unified dashboard with role parameter
+    return `/dashboard?role=${role || 'PLAYER'}`;
   };
 
   const isActiveLink = (path) => {

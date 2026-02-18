@@ -18,7 +18,7 @@ async function createAdminUser() {
         city: 'Bangalore',
         state: 'Karnataka',
         country: 'India',
-        roles: 'ADMIN',
+        roles: 'ADMIN,PLAYER,ORGANIZER,UMPIRE',
         isVerified: true,
         isActive: true,
         totalPoints: 0,

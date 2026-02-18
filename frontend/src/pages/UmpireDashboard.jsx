@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../utils/api';
+import VerifiedBadge from '../components/VerifiedBadge';
 import {
   ClipboardDocumentListIcon,
   CheckCircleIcon,
@@ -27,6 +28,7 @@ export default function UmpireDashboard() {
   const { user } = useAuth();
   const [matches, setMatches] = useState([]);
   const [umpireCode, setUmpireCode] = useState(null);
+  const [playerCode, setPlayerCode] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [showLevelInfo, setShowLevelInfo] = useState(false);
   const [stats, setStats] = useState({
@@ -47,8 +49,9 @@ export default function UmpireDashboard() {
   const fetchUmpireCode = async () => {
     try {
       const response = await api.get('/auth/me');
-      if (response.data.user?.umpireCode) {
+      if (response.data.user) {
         setUmpireCode(response.data.user.umpireCode);
+        setPlayerCode(response.data.user.playerCode);
       }
       // Store full user profile
       setUserProfile(response.data.user);
@@ -61,7 +64,7 @@ export default function UmpireDashboard() {
         }));
       }
     } catch (error) {
-      console.error('Error fetching umpire code:', error);
+      console.error('Error fetching codes:', error);
     }
   };
 
@@ -160,24 +163,45 @@ export default function UmpireDashboard() {
               <div>
                 <div className="flex items-center gap-3 mb-2">
                   <h1 className="text-3xl font-bold text-white">Umpire Dashboard</h1>
+                  {stats.isVerifiedUmpire && (
+                    <VerifiedBadge type="umpire" size="lg" />
+                  )}
                 </div>
                 <p className="text-white/60">Welcome back, {user?.name}!</p>
                 <p className="text-white/40 text-sm mt-1">{user?.email}</p>
-                {umpireCode && (
-                  <div className="mt-3 inline-flex items-center gap-2 px-4 py-2 bg-amber-500/20 border border-amber-500/30 rounded-xl">
-                    <span className="text-amber-400/80 text-sm">Umpire Code:</span>
-                    <span className="text-amber-400 font-mono font-bold text-lg tracking-wider">{umpireCode}</span>
-                    <button
-                      onClick={() => navigator.clipboard.writeText(umpireCode)}
-                      className="p-1.5 hover:bg-amber-500/20 rounded-lg transition-colors ml-1"
-                      title="Copy code"
-                    >
-                      <svg className="w-4 h-4 text-amber-400/60 hover:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                      </svg>
-                    </button>
-                  </div>
-                )}
+                {/* Player Code & Umpire Code - Show for all users */}
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {playerCode && (
+                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/20 border border-blue-500/30 rounded-xl">
+                      <span className="text-blue-400/80 text-sm">Player Code:</span>
+                      <span className="text-blue-400 font-mono font-bold text-lg tracking-wider">{playerCode}</span>
+                      <button
+                        onClick={() => navigator.clipboard.writeText(playerCode)}
+                        className="p-1.5 hover:bg-blue-500/20 rounded-lg transition-colors ml-1"
+                        title="Copy player code"
+                      >
+                        <svg className="w-4 h-4 text-blue-400/60 hover:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                      </button>
+                    </div>
+                  )}
+                  {umpireCode && (
+                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/20 border border-amber-500/30 rounded-xl">
+                      <span className="text-amber-400/80 text-sm">Umpire Code:</span>
+                      <span className="text-amber-400 font-mono font-bold text-lg tracking-wider">{umpireCode}</span>
+                      <button
+                        onClick={() => navigator.clipboard.writeText(umpireCode)}
+                        className="p-1.5 hover:bg-amber-500/20 rounded-lg transition-colors ml-1"
+                        title="Copy umpire code"
+                      >
+                        <svg className="w-4 h-4 text-amber-400/60 hover:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>

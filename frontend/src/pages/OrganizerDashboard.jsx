@@ -5,6 +5,7 @@ import api from '../utils/api';
 import { formatDateIndian } from '../utils/dateFormat';
 import { X, Users, Mail, Phone, MapPin, Trophy, Trash2, Edit3, AlertTriangle } from 'lucide-react';
 import { getTournamentDrafts, deleteTournamentDraft } from '../hooks/useTournamentForm';
+import VerifiedBadge from '../components/VerifiedBadge';
 import {
   TrophyIcon,
   BoltIcon,
@@ -26,8 +27,22 @@ export default function OrganizerDashboard() {
   const [showParticipantsModal, setShowParticipantsModal] = useState(false);
   const [allParticipants, setAllParticipants] = useState([]);
   const [deleteDraftModal, setDeleteDraftModal] = useState(null);
+  const [playerCode, setPlayerCode] = useState(null);
+  const [umpireCode, setUmpireCode] = useState(null);
 
-  useEffect(() => { fetchOrganizerData(); loadDrafts(); }, []);
+  useEffect(() => { fetchOrganizerData(); loadDrafts(); fetchUserCodes(); }, []);
+
+  const fetchUserCodes = async () => {
+    try {
+      const response = await api.get('/auth/me');
+      if (response.data.user) {
+        setPlayerCode(response.data.user.playerCode);
+        setUmpireCode(response.data.user.umpireCode);
+      }
+    } catch (error) {
+      console.error('Error fetching user codes:', error);
+    }
+  };
 
   const loadDrafts = () => setDrafts(getTournamentDrafts());
   const handleDeleteDraft = (draftId) => { deleteTournamentDraft(draftId); loadDrafts(); setDeleteDraftModal(null); };
@@ -37,7 +52,7 @@ export default function OrganizerDashboard() {
     try {
       const dashboardRes = await api.get('/organizer/dashboard');
       const dashboardData = dashboardRes.data.data;
-      const tournamentsRes = await api.get('/multi-tournaments');
+      const tournamentsRes = await api.get('/tournaments');
       const organizerTournaments = tournamentsRes.data.tournaments.filter(t => t.organizerId === user.id);
       setTournaments(organizerTournaments);
       setAllParticipants(dashboardData.recent_registrations || []);
@@ -49,7 +64,7 @@ export default function OrganizerDashboard() {
       });
     } catch (error) {
       try {
-        const tournamentsRes = await api.get('/multi-tournaments');
+        const tournamentsRes = await api.get('/tournaments');
         const organizerTournaments = tournamentsRes.data.tournaments.filter(t => t.organizerId === user.id);
         setTournaments(organizerTournaments);
         setStats({ totalTournaments: organizerTournaments.length, activeTournaments: organizerTournaments.filter(t => t.status === 'ongoing').length, totalParticipants: organizerTournaments.reduce((sum, t) => sum + (t._count?.registrations || 0), 0), revenue: 0 });
@@ -93,22 +108,90 @@ export default function OrganizerDashboard() {
                 <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center"><span className="text-white text-sm">📋</span></div>
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-white">Organizer Dashboard</h1>
+                <div className="flex items-center gap-3 mb-2">
+                  <h1 className="text-3xl font-bold text-white">Organizer Dashboard</h1>
+                  {user?.isVerifiedOrganizer && (
+                    <VerifiedBadge type="organizer" size="lg" />
+                  )}
+                </div>
                 <p className="text-white/60">Welcome back, {user?.name}!</p>
                 <p className="text-white/40 text-sm mt-1">{user?.email}</p>
               </div>
             </div>
-            <Link 
+            <Link
               to="/tournaments/create"
               className="px-6 py-3 rounded-xl shadow-lg hover:scale-105 transition-all flex items-center gap-2 font-semibold bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:shadow-green-500/50"
             >
               <PlusIcon className="w-5 h-5" />Create Tournament
+            </Link>
+            <Link
+              to="/organizer/profile"
+              className="px-6 py-3 rounded-xl shadow-lg hover:scale-105 transition-all flex items-center gap-2 font-semibold bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:shadow-blue-500/50"
+            >
+              View Profile
             </Link>
           </div>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 -mt-8">
+        {/* My Codes Section */}
+        <div className="bg-gradient-to-br from-indigo-900/50 to-purple-900/50 backdrop-blur-sm border border-indigo-500/30 rounded-2xl p-6 mb-8">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
+              <span className="text-white text-lg">🎫</span>
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-white">My Codes</h3>
+              <p className="text-indigo-300 text-sm">Share these codes for registration and assignments</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Player Code */}
+            {playerCode && (
+              <div className="bg-slate-800/50 border border-blue-500/30 rounded-xl p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-blue-400/80 text-sm font-medium">Player Code</span>
+                  <span className="text-xs text-gray-400">For partner registration</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-blue-400 font-mono font-bold text-2xl tracking-wider flex-1">{playerCode}</span>
+                  <button
+                    onClick={() => navigator.clipboard.writeText(playerCode)}
+                    className="p-2 hover:bg-blue-500/20 rounded-lg transition-colors"
+                    title="Copy player code"
+                  >
+                    <svg className="w-5 h-5 text-blue-400/60 hover:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            )}
+            {/* Umpire Code */}
+            {umpireCode && (
+              <div className="bg-slate-800/50 border border-amber-500/30 rounded-xl p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-amber-400/80 text-sm font-medium">Umpire Code</span>
+                  <span className="text-xs text-gray-400">For umpire assignments</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-amber-400 font-mono font-bold text-2xl tracking-wider flex-1">{umpireCode}</span>
+                  <button
+                    onClick={() => navigator.clipboard.writeText(umpireCode)}
+                    className="p-2 hover:bg-amber-500/20 rounded-lg transition-colors"
+                    title="Copy umpire code"
+                  >
+                    <svg className="w-5 h-5 text-amber-400/60 hover:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
         {/* Stats Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {statCards.map((stat, index) => (

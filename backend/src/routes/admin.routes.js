@@ -2,6 +2,8 @@ import express from 'express';
 import { authenticate, requireAdmin } from '../middleware/auth.js';
 import prisma from '../lib/prisma.js';
 import jwt from 'jsonwebtoken';
+import { quickAddPlayer, getQuickAddedPlayers } from '../controllers/quickAdd.controller.js';
+import AdminController from '../controllers/admin.controller.js';
 
 const router = express.Router();
 
@@ -445,5 +447,13 @@ router.post('/award-points/:tournamentId/:categoryId', authenticate, async (req,
     });
   }
 });
+
+// Quick Add Player routes (Admin only)
+router.post('/tournaments/:tournamentId/quick-add-player', authenticate, requireAdmin, quickAddPlayer);
+router.get('/tournaments/:tournamentId/quick-added-players', authenticate, requireAdmin, getQuickAddedPlayers);
+
+// User suspension routes (Admin only)
+router.post('/users/:id/suspend', authenticate, requireAdmin, AdminController.suspendUser);
+router.post('/users/:id/unsuspend', authenticate, requireAdmin, AdminController.unsuspendUser);
 
 export default router;

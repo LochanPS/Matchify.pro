@@ -5,6 +5,19 @@ import morgan from 'morgan';
 import compression from 'compression';
 import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
+import { v2 as cloudinary } from 'cloudinary';
+
+// Load environment variables first
+dotenv.config();
+
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+console.log('✅ Cloudinary configured:', process.env.CLOUDINARY_CLOUD_NAME);
 
 // Import routes
 import authRoutes from './routes/auth.js';
@@ -21,15 +34,14 @@ import matchRoutes from './routes/match.routes.js';
 import pointsRoutes from './routes/points.routes.js';
 // leaderboardRoutes removed - using direct routes in server.js instead
 import adminRoutes from './routes/admin.routes.js';
-import superAdminRoutes from './routes/superAdmin.routes.js';
 import smsRoutes from './routes/sms.routes.js';
 import academyRoutes from './routes/academy.routes.js';
 import userRoutes from './routes/user.routes.js';
 
 // Import multi-role routes
-import multiRoleAuthRoutes from './routes/multiRoleAuth.routes.js';
-import multiRoleTournamentRoutes from './routes/multiRoleTournament.routes.js';
-import multiRoleMatchRoutes from './routes/multiRoleMatch.routes.js';
+// import multiRoleAuthRoutes from './routes/multiRoleAuth.routes.js';
+// import multiRoleTournamentRoutes from './routes/multiRoleTournament.routes.js';
+// import multiRoleMatchRoutes from './routes/multiRoleMatch.routes.js';
 
 // Import middleware
 import { authenticate, authorize } from './middleware/auth.js';
@@ -45,9 +57,6 @@ import {
 import { initEmailService } from './services/email.service.js';
 import { initializeSocket } from './services/socketService.js';
 import { createServer } from 'http';
-
-// Load environment variables
-dotenv.config();
 
 // Initialize email service
 initEmailService();
@@ -203,7 +212,7 @@ app.get('/api', (req, res) => {
 
 // Auth routes (both old and new multi-role) - with stricter rate limiting
 app.use('/api/auth', authLimiter, authRoutes);
-app.use('/api/multi-auth', authLimiter, multiRoleAuthRoutes);
+// app.use('/api/multi-auth', authLimiter, multiRoleAuthRoutes);
 
 // Profile routes
 app.use('/api/profile', profileRoutes);
@@ -211,9 +220,11 @@ app.use('/api/profile', profileRoutes);
 // Wallet routes
 app.use('/api/wallet', walletRoutes);
 
+// Draw routes - MUST BE BEFORE TOURNAMENT ROUTES to avoid middleware conflicts
+app.use('/api', drawRoutes);
+
 // Tournament routes (both old and new multi-role)
 app.use('/api/tournaments', tournamentRoutes);
-app.use('/api/multi-tournaments', multiRoleTournamentRoutes);
 
 // Registration routes
 app.use('/api/registrations', registrationRoutes);
@@ -230,9 +241,6 @@ app.use('/api/organizer', organizerRoutes);
 // Admin routes
 app.use('/api/admin', adminRoutes);
 
-// Super Admin routes (for ADMIN@gmail.com)
-app.use('/api/super-admin', authenticate, superAdminRoutes);
-
 // SMS routes
 app.use('/api/sms', smsRoutes);
 
@@ -242,26 +250,7 @@ app.use('/api/academies', academyRoutes);
 // User routes
 app.use('/api/users', userRoutes);
 
-// KYC routes
-import kycRoutes from './routes/kyc.routes.js';
-import adminKycRoutes from './routes/admin-kyc.routes.js';
-app.use('/api/kyc', kycRoutes);
-app.use('/api/admin/kyc', adminKycRoutes);
-
-// Payment system routes (Admin only)
-import paymentSettingsRoutes from './routes/admin/payment-settings.routes.js';
-import paymentVerificationRoutes from './routes/admin/payment-verification.routes.js';
-import tournamentPaymentsRoutes from './routes/admin/tournament-payments.routes.js';
-import revenueAnalyticsRoutes from './routes/admin/revenue-analytics.routes.js';
-import deleteAllDataRoutes from './routes/admin/delete-all-data.routes.js';
-app.use('/api/admin/payment-settings', paymentSettingsRoutes);
-app.use('/api/admin/payment-verifications', paymentVerificationRoutes);
-app.use('/api/admin/tournament-payments', tournamentPaymentsRoutes);
-app.use('/api/admin/revenue', revenueAnalyticsRoutes);
-app.use('/api/admin', deleteAllDataRoutes);
-
-// Draw routes
-app.use('/api', drawRoutes);
+// KYC routes - DISABLED (KYC feature removed)
 
 // ============================================
 // LEADERBOARD ROUTES (MUST BE BEFORE MATCH ROUTES)
@@ -335,7 +324,7 @@ app.get('/api/leaderboard', async (req, res) => {
 // Match routes (both old and new multi-role)
 app.use('/api', matchRoutes);  // For tournament-related match routes
 app.use('/api/matches', matchRoutes);  // For /matches/:matchId routes
-app.use('/api/multi-matches', multiRoleMatchRoutes);
+// app.use('/api/multi-matches', multiRoleMatchRoutes);
 
 // Points routes (after leaderboard)
 app.use('/api', pointsRoutes);

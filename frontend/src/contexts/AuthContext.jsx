@@ -84,14 +84,19 @@ export const AuthProvider = ({ children }) => {
         
         if (!parsedUser.roles && !parsedUser.role) {
           console.warn('⚠️ User missing roles field, adding default roles');
-          parsedUser.roles = 'PLAYER,ORGANIZER,UMPIRE';
+          parsedUser.roles = ['PLAYER', 'ORGANIZER', 'UMPIRE'];
+          needsUpdate = true;
+        }
+        
+        // Ensure roles is an array
+        if (parsedUser.roles && typeof parsedUser.roles === 'string') {
+          parsedUser.roles = parsedUser.roles.split(',').map(r => r.trim());
           needsUpdate = true;
         }
         
         // Set default currentRole to PLAYER if not set
         if (!parsedUser.currentRole) {
-          const roles = parsedUser.roles ? parsedUser.roles.split(',').map(r => r.trim()) : [];
-          parsedUser.currentRole = roles[0] || 'PLAYER';
+          parsedUser.currentRole = parsedUser.roles && parsedUser.roles[0] ? parsedUser.roles[0] : 'PLAYER';
           needsUpdate = true;
         }
         
@@ -122,18 +127,39 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
+      console.log('🔐 Login attempt:', email);
       const response = await api.post('/auth/login', { email, password });
-      const { user: userData, accessToken } = response.data;
+      console.log('✅ Login response:', response.data);
+      
+      const { user: userData, accessToken, token } = response.data;
+      const authToken = accessToken || token; // Support both field names
+      
+      console.log('📦 Token received:', authToken ? 'YES' : 'NO');
+      console.log('👤 User data received:', userData ? 'YES' : 'NO');
+      
+      if (!authToken) {
+        throw new Error('No token received from server');
+      }
+      
+      // Ensure roles is an array
+      if (userData.roles && typeof userData.roles === 'string') {
+        userData.roles = userData.roles.split(',').map(r => r.trim());
+      }
       
       // Set default currentRole to PLAYER if not set
       if (!userData.currentRole) {
-        const roles = userData.roles ? userData.roles.split(',').map(r => r.trim()) : [];
-        userData.currentRole = roles[0] || 'PLAYER';
+        userData.currentRole = userData.roles && userData.roles[0] ? userData.roles[0] : 'PLAYER';
       }
       
-      localStorage.setItem('token', accessToken);
+      console.log('💾 Saving to localStorage...');
+      localStorage.setItem('token', authToken);
       localStorage.setItem('user', JSON.stringify(userData));
+      console.log('✅ Saved to localStorage');
+      console.log('   Token in storage:', localStorage.getItem('token') ? 'YES' : 'NO');
+      console.log('   User in storage:', localStorage.getItem('user') ? 'YES' : 'NO');
+      
       setUser(userData);
+      console.log('✅ User set in state');
       
       // Don't show profile completion for admin
       if (userData.isAdmin) {
@@ -147,6 +173,7 @@ export const AuthProvider = ({ children }) => {
       
       return userData;
     } catch (error) {
+      console.error('❌ Login error:', error);
       throw error;
     }
   };
@@ -154,15 +181,20 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       const response = await api.post('/auth/register', userData);
-      const { user: newUser, accessToken } = response.data;
+      const { user: newUser, accessToken, token } = response.data;
+      const authToken = accessToken || token; // Support both field names
+      
+      // Ensure roles is an array
+      if (newUser.roles && typeof newUser.roles === 'string') {
+        newUser.roles = newUser.roles.split(',').map(r => r.trim());
+      }
       
       // Set default currentRole to PLAYER if not set
       if (!newUser.currentRole) {
-        const roles = newUser.roles ? newUser.roles.split(',').map(r => r.trim()) : [];
-        newUser.currentRole = roles[0] || 'PLAYER';
+        newUser.currentRole = newUser.roles && newUser.roles[0] ? newUser.roles[0] : 'PLAYER';
       }
       
-      localStorage.setItem('token', accessToken);
+      localStorage.setItem('token', authToken);
       localStorage.setItem('user', JSON.stringify(newUser));
       setUser(newUser);
       
@@ -212,8 +244,8 @@ export const AuthProvider = ({ children }) => {
     if (!user) return null;
     if (user.currentRole) return user.currentRole;
     
-    // Parse roles and return first one as default
-    const roles = user.roles ? user.roles.split(',') : [];
+    // Get roles array
+    const roles = Array.isArray(user.roles) ? user.roles : (user.roles ? user.roles.split(',').map(r => r.trim()) : []);
     return roles[0] || 'PLAYER';
   };
 

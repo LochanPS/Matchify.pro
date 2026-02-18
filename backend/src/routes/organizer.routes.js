@@ -334,3 +334,103 @@ router.put('/registrations/:id/reject-refund', authenticate, rejectRefund);
 router.put('/registrations/:id/complete-refund', authenticate, upload.single('paymentScreenshot'), completeRefund);
 
 export default router;
+
+// GET /organizer/profile/:id - Get organizer profile
+router.get('/profile/:id?', authenticate, async (req, res) => {
+  try {
+    const organizerId = req.params.id || req.user.id;
+
+    const user = await prisma.user.findUnique({
+      where: { id: organizerId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        city: true,
+        state: true,
+        country: true,
+        profilePhoto: true,
+        isVerifiedOrganizer: true,
+        createdAt: true,
+        organizerProfile: {
+          select: {
+            organization: true,
+            tournamentsOrganized: true,
+            totalRevenue: true,
+            rating: true,
+            savedUpiId: true,
+            savedAccountHolder: true,
+            savedPaymentQRUrl: true,
+          }
+        },
+        _count: {
+          select: {
+            tournamentsOrganized: true,
+          }
+        }
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({ success: false, error: 'Organizer not found' });
+    }
+
+    // Get total registrations across all tournaments
+    const tournaments = await prisma.tournament.findMany({
+      where: { organizerId },
+      select: {
+        _count: {
+          select: {
+            registrations: true
+          }
+        }
+      }
+    });
+
+    const totalParticipants = tournaments.reduce((sum, t) => sum + t._count.registrations, 0);
+
+    // Get revenue stats
+    const payments = await prisma.tournamentPayment.findMany({
+      where: {
+        tournament: {
+          organizerId
+        }
+      },
+      select: {
+        totalAmount: true,
+        payout50Percent1: true,
+        payout50Percent2: true,
+        payout50Status1: true,
+        payout50Status2: true,
+      }
+    });
+
+    const totalRevenue = payments.reduce((sum, p) => sum + (p.totalAmount || 0), 0);
+    const paidOut = payments.reduce((sum, p) => {
+      let paid = 0;
+      if (p.payout50Status1 === 'PAID') paid += p.payout50Percent1 || 0;
+      if (p.payout50Status2 === 'PAID') paid += p.payout50Percent2 || 0;
+      return sum + paid;
+    }, 0);
+    const pending = totalRevenue - paidOut;
+
+    res.json({
+      success: true,
+      profile: {
+        ...user,
+        organizerProfile: user.organizerProfile || {},
+        stats: {
+          tournamentsOrganized: user._count.tournamentsOrganized,
+          totalParticipants,
+          totalRevenue,
+          paidOut,
+          pendingPayout: pending,
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Get organizer profile error:', error);
+    res.status(500).json({ success: false, error: 'Failed to get organizer profile' });
+  }
+});

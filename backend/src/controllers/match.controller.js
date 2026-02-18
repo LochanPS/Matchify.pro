@@ -1076,24 +1076,11 @@ const endMatch = async (req, res) => {
     // Update umpire statistics if an umpire was assigned
     if (match.umpireId) {
       try {
-        // Increment matchesUmpired count
-        const updatedUser = await prisma.user.update({
-          where: { id: match.umpireId },
-          data: {
-            matchesUmpired: { increment: 1 }
-          }
-        });
-
-        // Check if umpire should be verified (10+ matches)
-        if (updatedUser.matchesUmpired >= 10 && !updatedUser.isVerifiedUmpire) {
-          await prisma.user.update({
-            where: { id: match.umpireId },
-            data: { isVerifiedUmpire: true }
-          });
-          console.log(`✅ Umpire ${match.umpireId} verified after ${updatedUser.matchesUmpired} matches`);
-        }
-
-        console.log(`✅ Updated umpire stats: ${updatedUser.matchesUmpired} matches umpired`);
+        // Use verification service to increment and check
+        const { incrementMatchesUmpired } = await import('../services/verification.service.js');
+        await incrementMatchesUmpired(match.umpireId);
+        
+        console.log(`✅ Updated umpire stats and checked verification`);
       } catch (umpireError) {
         console.error('❌ Error updating umpire statistics:', umpireError);
         // Don't fail the match completion if umpire stats update fails

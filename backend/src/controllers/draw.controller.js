@@ -322,11 +322,11 @@ const getDraw = async (req, res) => {
       bracketData.groups.forEach((group, groupIndex) => {
         if (group.matches && Array.isArray(group.matches)) {
           group.matches.forEach((match, matchIndex) => {
-            // Find the corresponding match in database
+            // Find the corresponding match in database by match number
+            // Round robin matches are stored with unique match numbers
             const dbMatch = matches.find(m => 
               m.stage === 'GROUP' &&
-              m.groupIndex === groupIndex &&
-              m.matchNumber === (matchIndex + 1)
+              m.matchNumber === match.matchNumber
             );
 
             if (dbMatch) {
@@ -361,7 +361,7 @@ const getDraw = async (req, res) => {
               match.dbMatch = {
                 id: dbMatch.id,
                 matchNumber: dbMatch.matchNumber,
-                score: dbMatch.scoreJson, // Field is called scoreJson in database
+                scoreJson: dbMatch.scoreJson, // Use scoreJson consistently
                 winnerId: dbMatch.winnerId,
                 courtNumber: dbMatch.courtNumber,
                 startTime: dbMatch.startTime,
@@ -383,8 +383,7 @@ const getDraw = async (req, res) => {
             group.matches.forEach((match, matchIndex) => {
               const dbMatch = matches.find(m => 
                 m.stage === 'GROUP' &&
-                m.groupIndex === groupIndex &&
-                m.matchNumber === (matchIndex + 1)
+                m.matchNumber === match.matchNumber
               );
 
               if (dbMatch) {
@@ -416,7 +415,7 @@ const getDraw = async (req, res) => {
                 match.dbMatch = {
                   id: dbMatch.id,
                   matchNumber: dbMatch.matchNumber,
-                  score: dbMatch.scoreJson, // Field is called scoreJson in database
+                  scoreJson: dbMatch.scoreJson,
                   winnerId: dbMatch.winnerId,
                   courtNumber: dbMatch.courtNumber,
                   startTime: dbMatch.startTime,

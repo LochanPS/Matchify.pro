@@ -88,17 +88,10 @@ router.post('/delete-all-info', authenticate, async (req, res) => {
     // 19. Delete organizer requests
     deletionResults.organizerRequests = await prisma.organizerRequest.deleteMany({});
     
-    // 20. Delete admin invites
-    deletionResults.adminInvites = await prisma.adminInvite.deleteMany({});
+    // 20. Delete payment settings
+    deletionResults.paymentSettings = await prisma.paymentSettings.deleteMany({});
     
-    // 21. Delete super admin invites
-    deletionResults.superAdminInvites = await prisma.superAdminInvite.deleteMany({});
-    
-    // 22. Delete super admin invite usage
-    deletionResults.superAdminInviteUsage = await prisma.superAdminInviteUsage.deleteMany({});
-    
-    
-    // 23. Reset all users' wallet balances and credits to 0 (except admin)
+    // 21. Reset all users' wallet balances and credits to 0 (except admin)
     const adminEmail = 'ADMIN@gmail.com';
     deletionResults.usersReset = await prisma.user.updateMany({
       where: {
@@ -115,7 +108,7 @@ router.post('/delete-all-info', authenticate, async (req, res) => {
       }
     });
     
-    // 24. Delete all users except admin
+    // 22. Delete all users except admin
     deletionResults.usersDeleted = await prisma.user.deleteMany({
       where: {
         email: { not: adminEmail }
@@ -146,9 +139,7 @@ router.post('/delete-all-info', authenticate, async (req, res) => {
         academies: deletionResults.academies.count,
         organizerKYC: deletionResults.organizerKYC.count,
         organizerRequests: deletionResults.organizerRequests.count,
-        adminInvites: deletionResults.adminInvites.count,
-        superAdminInvites: deletionResults.superAdminInvites.count,
-        superAdminInviteUsage: deletionResults.superAdminInviteUsage.count,
+        paymentSettings: deletionResults.paymentSettings.count,
         usersDeleted: deletionResults.usersDeleted.count,
         adminPreserved: true
       }

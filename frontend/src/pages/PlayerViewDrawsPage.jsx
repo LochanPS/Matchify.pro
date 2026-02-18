@@ -71,13 +71,33 @@ const PlayerViewDrawsPage = () => {
 
   const fetchDraw = async (categoryId) => {
     try {
+      console.log(`🔍 Fetching draw for tournament ${id}, category ${categoryId}`);
       const response = await api.get(`/tournaments/${id}/categories/${categoryId}/draw`);
-      setDraw(response.data.draw);
-    } catch (err) {
-      if (err.response?.status !== 404) {
-        console.error('Error fetching draw:', err);
+      console.log('✅ Draw response:', response.data);
+      
+      // Check if response has draw data
+      if (response.data && response.data.success && response.data.draw) {
+        setDraw(response.data.draw);
+        console.log('✅ Draw set successfully:', response.data.draw);
+      } else {
+        console.warn('⚠️ Response missing draw data:', response.data);
+        setDraw(null);
       }
-      setDraw(null);
+    } catch (err) {
+      console.error('❌ Error fetching draw:', err);
+      console.error('Error response:', err.response);
+      console.error('Error status:', err.response?.status);
+      console.error('Error data:', err.response?.data);
+      
+      // Only set draw to null if it's truly not found
+      if (err.response?.status === 404) {
+        console.log('Draw not found (404)');
+        setDraw(null);
+      } else {
+        // For other errors, show error message but don't hide existing draw
+        console.error('Unexpected error fetching draw:', err);
+        setError(`Failed to load draw: ${err.response?.data?.error || err.message}`);
+      }
     }
   };
 
@@ -92,7 +112,13 @@ const PlayerViewDrawsPage = () => {
   };
 
   const onViewMatchDetails = (matchData, bracketMatch) => {
-    setSelectedMatchDetails({ ...matchData, bracketMatch });
+    // Normalize the score field - backend sends scoreJson, but we need it as score
+    const normalizedMatchData = {
+      ...matchData,
+      score: matchData.scoreJson || matchData.score,
+      bracketMatch
+    };
+    setSelectedMatchDetails(normalizedMatchData);
     setShowMatchDetailsModal(true);
   };
 
@@ -167,10 +193,10 @@ const PlayerViewDrawsPage = () => {
             <p className="text-gray-400">This tournament doesn't have any categories yet.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            {/* Category Selector */}
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+            {/* Category Selector - Reduced width */}
             <div className="lg:col-span-1">
-              <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-4">
+              <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-4 sticky top-4">
                 <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Categories</h3>
                 <div className="space-y-2">
                   {categories.map((category) => (
@@ -193,8 +219,8 @@ const PlayerViewDrawsPage = () => {
               </div>
             </div>
 
-            {/* Draw Display - READ ONLY */}
-            <div className="lg:col-span-3">
+            {/* Draw Display - Expanded width */}
+            <div className="lg:col-span-4">
               {selectedCategory ? (
                 <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden">
                   <div className="px-6 py-4 border-b border-white/10">
@@ -223,6 +249,20 @@ const PlayerViewDrawsPage = () => {
                   <div className="p-6">
                     {draw ? (
                       <DrawBracket draw={draw} onViewMatchDetails={onViewMatchDetails} />
+                    ) : error ? (
+                      <div className="text-center py-12">
+                        <div className="w-20 h-20 bg-red-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                          <AlertTriangle className="w-10 h-10 text-red-400" />
+                        </div>
+                        <h3 className="text-xl font-semibold text-white mb-2">Error Loading Draw</h3>
+                        <p className="text-gray-400">{error}</p>
+                        <button
+                          onClick={() => fetchDraw(selectedCategory.id)}
+                          className="mt-4 px-4 py-2 bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-xl hover:bg-blue-500/30 transition-all"
+                        >
+                          Try Again
+                        </button>
+                      </div>
                     ) : (
                       <div className="text-center py-12">
                         <div className="w-20 h-20 bg-slate-700/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -605,59 +645,121 @@ const KnockoutBracket = ({ data, onViewMatchDetails }) => {
   };
 
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto pb-4">
       <div className="flex gap-6 min-w-max p-4">
         {data.rounds.map((round, ri) => (
-          <div key={ri} className="flex flex-col">
-            <h4 className="text-sm font-semibold text-emerald-400 text-center mb-3">
-              {getRoundName(ri, data.rounds.length)}
-            </h4>
+          <div key={ri} className="flex flex-col min-w-[260px]">
+            {/* Round Header */}
+            <div className="mb-6 text-center">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 rounded-xl">
+                <Trophy className="w-4 h-4 text-emerald-400" />
+                <h4 className="text-sm font-bold text-emerald-300 uppercase tracking-wider">
+                  {getRoundName(ri, data.rounds.length)}
+                </h4>
+              </div>
+            </div>
+            
+            {/* Matches */}
             <div 
-              className="flex flex-col justify-around flex-1 gap-2" 
-              style={{ paddingTop: ri > 0 ? `${Math.pow(2, ri) * 16}px` : 0 }}
+              className="flex flex-col justify-around flex-1 gap-3" 
+              style={{ paddingTop: ri > 0 ? `${Math.pow(2, ri) * 18}px` : 0 }}
             >
               {round.matches.map((match, mi) => {
                 const isCompleted = match.winner && (match.player1?.name !== 'TBD' && match.player2?.name !== 'TBD');
+                const player1Name = getPlayerDisplay(match.player1);
+                const player2Name = getPlayerDisplay(match.player2);
+                const isPlayer1Winner = match.winner === 1;
+                const isPlayer2Winner = match.winner === 2;
                 
                 return (
                   <div 
                     key={mi} 
-                    className="bg-slate-700/50 border border-white/10 rounded-lg p-2 w-56 relative" 
-                    style={{ marginBottom: ri > 0 ? `${Math.pow(2, ri) * 32}px` : 0 }}
+                    className="relative group" 
+                    style={{ marginBottom: ri > 0 ? `${Math.pow(2, ri) * 36}px` : 0 }}
                   >
-                    <div className={`px-2 py-1.5 rounded mb-1 text-sm ${
-                      match.winner === 1 
-                        ? 'bg-emerald-500/20 text-emerald-300 font-semibold' 
-                        : 'bg-slate-600/50 text-white'
-                    }`}>
-                      {getPlayerDisplay(match.player1)}
+                    <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm border border-white/10 rounded-xl overflow-hidden shadow-lg hover:shadow-emerald-500/10 transition-all">
+                      {/* Match Number Badge */}
+                      <div className="bg-slate-700/50 px-3 py-1.5 border-b border-white/5">
+                        <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                          Match #{match.matchNumber || mi + 1}
+                        </span>
+                      </div>
+                      
+                      {/* Players */}
+                      <div className="p-2.5 space-y-1.5">
+                        {/* Player 1 */}
+                        <div className={`flex items-center justify-between px-3 py-2 rounded-lg transition-all ${
+                          isPlayer1Winner
+                            ? 'bg-gradient-to-r from-emerald-500/20 to-emerald-600/20 border-2 border-emerald-500/50 shadow-lg shadow-emerald-500/20' 
+                            : 'bg-slate-700/30 border border-white/5'
+                        }`}>
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            {isPlayer1Winner && (
+                              <Trophy className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                            )}
+                            <span className={`text-sm font-medium truncate ${
+                              isPlayer1Winner ? 'text-emerald-300' : player1Name === 'TBD' ? 'text-gray-500 italic' : 'text-white'
+                            }`}>
+                              {player1Name}
+                            </span>
+                          </div>
+                          {isPlayer1Winner && (
+                            <span className="ml-2 px-1.5 py-0.5 bg-emerald-500/30 text-emerald-300 rounded text-xs font-bold">
+                              W
+                            </span>
+                          )}
+                        </div>
+                        
+                        {/* VS Divider */}
+                        <div className="flex items-center justify-center py-0.5">
+                          <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">vs</span>
+                        </div>
+                        
+                        {/* Player 2 */}
+                        <div className={`flex items-center justify-between px-3 py-2 rounded-lg transition-all ${
+                          isPlayer2Winner
+                            ? 'bg-gradient-to-r from-emerald-500/20 to-emerald-600/20 border-2 border-emerald-500/50 shadow-lg shadow-emerald-500/20' 
+                            : 'bg-slate-700/30 border border-white/5'
+                        }`}>
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            {isPlayer2Winner && (
+                              <Trophy className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                            )}
+                            <span className={`text-sm font-medium truncate ${
+                              isPlayer2Winner ? 'text-emerald-300' : player2Name === 'TBD' ? 'text-gray-500 italic' : 'text-white'
+                            }`}>
+                              {player2Name}
+                            </span>
+                          </div>
+                          {isPlayer2Winner && (
+                            <span className="ml-2 px-1.5 py-0.5 bg-emerald-500/30 text-emerald-300 rounded text-xs font-bold">
+                              W
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      
+                      {/* View Details Button for Completed Matches */}
+                      {isCompleted && match.dbMatch && onViewMatchDetails && (
+                        <div className="px-2.5 pb-2.5">
+                          <button
+                            onClick={() => {
+                              const bracketMatchData = {
+                                matchNumber: match.matchNumber,
+                                round: ri + 1,
+                                player1: match.player1,
+                                player2: match.player2
+                              };
+                              onViewMatchDetails(match.dbMatch, bracketMatchData);
+                            }}
+                            className="w-full py-1.5 rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30 transition-all text-xs font-semibold flex items-center justify-center gap-1.5 group-hover:border-blue-500/50"
+                          >
+                            <Eye className="w-3 h-3" />
+                            View Details
+                          </button>
+                        </div>
+                      )}
                     </div>
-                    <div className={`px-2 py-1.5 rounded text-sm ${
-                      match.winner === 2 
-                        ? 'bg-emerald-500/20 text-emerald-300 font-semibold' 
-                        : 'bg-slate-600/50 text-white'
-                    }`}>
-                      {getPlayerDisplay(match.player2)}
-                    </div>
-                    
-                    {/* View Details Button for Completed Matches */}
-                    {isCompleted && match.dbMatch && onViewMatchDetails && (
-                      <button
-                        onClick={() => {
-                          const bracketMatchData = {
-                            matchNumber: match.matchNumber,
-                            round: ri + 1,
-                            player1: match.player1,
-                            player2: match.player2
-                          };
-                          onViewMatchDetails(match.dbMatch, bracketMatchData);
-                        }}
-                        className="absolute top-2 right-2 w-7 h-7 rounded-full bg-blue-500/30 border border-blue-500/50 hover:bg-blue-500/50 flex items-center justify-center transition-all"
-                        title="View match details"
-                      >
-                        <Eye className="w-4 h-4 text-blue-300" />
-                      </button>
-                    )}
                   </div>
                 );
               })}
@@ -673,80 +775,250 @@ const KnockoutBracket = ({ data, onViewMatchDetails }) => {
 const RoundRobinDraw = ({ data, onViewMatchDetails }) => {
   if (!data?.groups) return <p className="text-gray-400 text-center">No group data</p>;
 
+  // Helper function to calculate total points scored by a player across all matches
+  const calculateTotalPointsScored = (playerId, groupMatches) => {
+    let totalPoints = 0;
+    
+    groupMatches.forEach(match => {
+      // Handle both scoreJson and score fields for compatibility
+      const scoreData = match.dbMatch?.scoreJson || match.dbMatch?.score;
+      if (!scoreData) return;
+      
+      try {
+        const parsedScore = typeof scoreData === 'string' ? JSON.parse(scoreData) : scoreData;
+        
+        if (!parsedScore?.sets || !Array.isArray(parsedScore.sets)) return;
+        
+        // Check if this player is in this match
+        const isPlayer1 = match.player1?.id === playerId;
+        const isPlayer2 = match.player2?.id === playerId;
+        
+        if (!isPlayer1 && !isPlayer2) return;
+        
+        // Sum up all points scored by this player in all sets
+        parsedScore.sets.forEach(set => {
+          const p1Score = set.player1Score !== undefined ? set.player1Score : set.player1;
+          const p2Score = set.player2Score !== undefined ? set.player2Score : set.player2;
+          
+          if (isPlayer1 && p1Score !== undefined) {
+            totalPoints += p1Score;
+          } else if (isPlayer2 && p2Score !== undefined) {
+            totalPoints += p2Score;
+          }
+        });
+      } catch (error) {
+        console.error('Error calculating points for player:', error);
+      }
+    });
+    
+    return totalPoints;
+  };
+
   return (
     <div className="space-y-6">
       {data.groups.map((group, gi) => (
-        <div key={gi} className="bg-slate-700/30 rounded-xl p-4">
-          <h4 className="text-lg font-semibold text-white mb-3">
-            Group {String.fromCharCode(65 + gi)}
-          </h4>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-white/10">
-                  <th className="text-left py-2 px-3 text-gray-400">#</th>
-                  <th className="text-left py-2 px-3 text-gray-400">Player</th>
-                  <th className="text-center py-2 px-3 text-gray-400">P</th>
-                  <th className="text-center py-2 px-3 text-gray-400">W</th>
-                  <th className="text-center py-2 px-3 text-gray-400">L</th>
-                  <th className="text-center py-2 px-3 text-gray-400">Pts</th>
-                </tr>
-              </thead>
-              <tbody>
-                {group.participants.map((p, pi) => (
-                  <tr key={pi} className="border-b border-white/5">
-                    <td className="py-2 px-3 text-gray-500">{pi + 1}</td>
-                    <td className="py-2 px-3 text-white">{p.name || `Slot ${pi + 1}`}</td>
-                    <td className="py-2 px-3 text-center text-gray-400">{p.played || 0}</td>
-                    <td className="py-2 px-3 text-center text-emerald-400">{p.wins || 0}</td>
-                    <td className="py-2 px-3 text-center text-red-400">{p.losses || 0}</td>
-                    <td className="py-2 px-3 text-center text-amber-400 font-semibold">{p.points || 0}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          
-          {/* Group Matches */}
-          {group.matches && group.matches.length > 0 && (
-            <div className="mt-4 space-y-2">
-              <h5 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">Matches</h5>
-              {group.matches.map((match, mi) => {
-                const isCompleted = match.winner && (match.player1?.name !== 'TBD' && match.player2?.name !== 'TBD');
-                
-                return (
-                  <div key={mi} className="bg-slate-800/50 rounded-lg p-3 flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className={`text-sm ${match.winner === 1 ? 'text-emerald-300 font-semibold' : 'text-white'}`}>
-                        {match.player1?.name || 'TBD'}
-                      </div>
-                      <div className={`text-sm ${match.winner === 2 ? 'text-emerald-300 font-semibold' : 'text-white'}`}>
-                        {match.player2?.name || 'TBD'}
-                      </div>
-                    </div>
-                    
-                    {isCompleted && match.dbMatch && onViewMatchDetails && (
-                      <button
-                        onClick={() => {
-                          const bracketMatchData = {
-                            matchNumber: match.matchNumber,
-                            groupName: group.groupName,
-                            player1: match.player1,
-                            player2: match.player2
-                          };
-                          onViewMatchDetails(match.dbMatch, bracketMatchData);
-                        }}
-                        className="px-3 py-1.5 rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30 transition-all text-xs font-medium flex items-center gap-1"
-                      >
-                        <Eye className="w-3 h-3" />
-                        View
-                      </button>
-                    )}
-                  </div>
-                );
-              })}
+        <div key={gi} className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden shadow-lg">
+          {/* Group Header */}
+          <div className="bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-b border-purple-500/30 px-6 py-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/30">
+                <span className="text-xl font-bold text-white">{String.fromCharCode(65 + gi)}</span>
+              </div>
+              <div>
+                <h4 className="text-lg font-bold text-white">Group {String.fromCharCode(65 + gi)}</h4>
+                <p className="text-xs text-purple-300">{group.participants?.length || 0} Players</p>
+              </div>
             </div>
-          )}
+          </div>
+
+          <div className="p-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Standings Table */}
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <Trophy className="w-4 h-4 text-amber-400" />
+                  <h5 className="text-sm font-bold text-gray-300 uppercase tracking-wider">Standings</h5>
+                </div>
+                <div className="bg-slate-900/50 rounded-xl border border-white/5 overflow-hidden">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="bg-slate-800/50 border-b border-white/5">
+                        <th className="text-left py-3 px-3 text-gray-400 font-semibold text-xs">#</th>
+                        <th className="text-left py-3 px-3 text-gray-400 font-semibold text-xs">Player</th>
+                        <th className="text-center py-3 px-2 text-gray-400 font-semibold text-xs">P</th>
+                        <th className="text-center py-3 px-2 text-gray-400 font-semibold text-xs">W</th>
+                        <th className="text-center py-3 px-2 text-gray-400 font-semibold text-xs">L</th>
+                        <th className="text-center py-3 px-2 text-gray-400 font-semibold text-xs">TP</th>
+                        <th className="text-center py-3 px-2 text-gray-400 font-semibold text-xs">Pts</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {group.participants.map((p, pi) => {
+                        const totalPointsScored = calculateTotalPointsScored(p.id, group.matches || []);
+                        
+                        return (
+                          <tr key={pi} className="border-b border-white/5 hover:bg-slate-800/30 transition-colors">
+                            <td className="py-3 px-3">
+                              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-slate-700/50 text-gray-400 text-xs font-semibold">
+                                {pi + 1}
+                              </span>
+                            </td>
+                            <td className="py-3 px-3">
+                              <span className="text-white font-medium text-sm">{p.name || `Slot ${pi + 1}`}</span>
+                            </td>
+                            <td className="py-3 px-2 text-center">
+                              <span className="text-gray-400 font-medium text-xs">{p.played || 0}</span>
+                            </td>
+                            <td className="py-3 px-2 text-center">
+                              <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 font-bold text-xs">
+                                {p.wins || 0}
+                              </span>
+                            </td>
+                            <td className="py-3 px-2 text-center">
+                              <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-red-500/20 text-red-400 font-bold text-xs">
+                                {p.losses || 0}
+                              </span>
+                            </td>
+                            <td className="py-3 px-2 text-center">
+                              <span className="inline-flex items-center justify-center min-w-[28px] h-7 px-2 rounded-lg bg-blue-500/20 text-blue-400 font-bold text-xs">
+                                {totalPointsScored}
+                              </span>
+                            </td>
+                            <td className="py-3 px-2 text-center">
+                              <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 font-bold text-xs">
+                                {p.points || 0}
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+                {/* Legend */}
+                <div className="mt-3 flex flex-wrap gap-3 text-xs text-gray-400">
+                  <span><span className="font-semibold text-gray-300">P</span> = Played</span>
+                  <span><span className="font-semibold text-gray-300">W</span> = Wins</span>
+                  <span><span className="font-semibold text-gray-300">L</span> = Losses</span>
+                  <span><span className="font-semibold text-blue-400">TP</span> = Total Points Scored</span>
+                  <span><span className="font-semibold text-amber-400">Pts</span> = Ranking Points</span>
+                </div>
+              </div>
+
+              {/* Matches */}
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <GitBranch className="w-4 h-4 text-blue-400" />
+                  <h5 className="text-sm font-bold text-gray-300 uppercase tracking-wider">Matches</h5>
+                </div>
+                {group.matches && group.matches.length > 0 ? (
+                  <div className="space-y-3">
+                    {group.matches.map((match, mi) => {
+                      const isCompleted = match.winner && (match.player1?.name !== 'TBD' && match.player2?.name !== 'TBD');
+                      const isPlayer1Winner = match.winner === 1;
+                      const isPlayer2Winner = match.winner === 2;
+                      
+                      return (
+                        <div key={mi} className="bg-slate-900/50 border border-white/5 rounded-xl overflow-hidden hover:border-white/10 transition-all group">
+                          {/* Match Header */}
+                          <div className="bg-slate-800/50 px-3 py-2 border-b border-white/5 flex items-center justify-between">
+                            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                              Match #{match.matchNumber || mi + 1}
+                            </span>
+                            {isCompleted && (
+                              <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded text-xs font-bold">
+                                Completed
+                              </span>
+                            )}
+                          </div>
+                          
+                          {/* Players */}
+                          <div className="p-3 space-y-2">
+                            {/* Player 1 */}
+                            <div className={`flex items-center justify-between px-3 py-2 rounded-lg transition-all ${
+                              isPlayer1Winner
+                                ? 'bg-gradient-to-r from-emerald-500/20 to-emerald-600/20 border-2 border-emerald-500/50' 
+                                : 'bg-slate-800/30 border border-white/5'
+                            }`}>
+                              <div className="flex items-center gap-2 flex-1 min-w-0">
+                                {isPlayer1Winner && (
+                                  <Trophy className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                                )}
+                                <span className={`text-sm font-medium truncate ${
+                                  isPlayer1Winner ? 'text-emerald-300' : 'text-white'
+                                }`}>
+                                  {match.player1?.name || 'TBD'}
+                                </span>
+                              </div>
+                              {isPlayer1Winner && (
+                                <span className="ml-2 px-1.5 py-0.5 bg-emerald-500/30 text-emerald-300 rounded text-xs font-bold">
+                                  W
+                                </span>
+                              )}
+                            </div>
+                            
+                            {/* VS Divider */}
+                            <div className="flex items-center justify-center py-0.5">
+                              <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">vs</span>
+                            </div>
+                            
+                            {/* Player 2 */}
+                            <div className={`flex items-center justify-between px-3 py-2 rounded-lg transition-all ${
+                              isPlayer2Winner
+                                ? 'bg-gradient-to-r from-emerald-500/20 to-emerald-600/20 border-2 border-emerald-500/50' 
+                                : 'bg-slate-800/30 border border-white/5'
+                            }`}>
+                              <div className="flex items-center gap-2 flex-1 min-w-0">
+                                {isPlayer2Winner && (
+                                  <Trophy className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                                )}
+                                <span className={`text-sm font-medium truncate ${
+                                  isPlayer2Winner ? 'text-emerald-300' : 'text-white'
+                                }`}>
+                                  {match.player2?.name || 'TBD'}
+                                </span>
+                              </div>
+                              {isPlayer2Winner && (
+                                <span className="ml-2 px-1.5 py-0.5 bg-emerald-500/30 text-emerald-300 rounded text-xs font-bold">
+                                  W
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          
+                          {/* View Details Button */}
+                          {isCompleted && match.dbMatch && onViewMatchDetails && (
+                            <div className="px-3 pb-3">
+                              <button
+                                onClick={() => {
+                                  const bracketMatchData = {
+                                    matchNumber: match.matchNumber,
+                                    groupName: group.groupName,
+                                    player1: match.player1,
+                                    player2: match.player2
+                                  };
+                                  onViewMatchDetails(match.dbMatch, bracketMatchData);
+                                }}
+                                className="w-full py-1.5 rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30 transition-all text-xs font-semibold flex items-center justify-center gap-1.5 group-hover:border-blue-500/50"
+                              >
+                                <Eye className="w-3 h-3" />
+                                View Details
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="bg-slate-900/50 border border-white/5 rounded-xl p-8 text-center">
+                    <GitBranch className="w-10 h-10 text-gray-600 mx-auto mb-3" />
+                    <p className="text-gray-500 text-sm">No matches scheduled</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       ))}
     </div>

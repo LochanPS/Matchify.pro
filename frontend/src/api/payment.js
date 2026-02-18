@@ -1,19 +1,19 @@
-import axios from 'axios';
+import api from '../utils/api';
 
 // Payment Settings
 export const getPaymentSettings = async () => {
-  const response = await axios.get('/admin/payment-settings');
+  const response = await api.get('/admin/payment-settings');
   return response.data;
 };
 
 // Public Payment Settings (for players to see QR code)
 export const getPublicPaymentSettings = async () => {
-  const response = await axios.get('/admin/payment-settings/public');
+  const response = await api.get('/admin/payment-settings/public');
   return response.data;
 };
 
 export const updatePaymentSettings = async (formData) => {
-  const response = await axios.put('/admin/payment-settings', formData, {
+  const response = await api.put('/admin/payment-settings', formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
@@ -23,43 +23,43 @@ export const updatePaymentSettings = async (formData) => {
 
 // Payment Verifications
 export const getPaymentVerifications = async (params = {}) => {
-  const response = await axios.get('/admin/payment-verifications', { params });
+  const response = await api.get('/admin/payment-verifications', { params });
   return response.data;
 };
 
 export const getPaymentVerificationStats = async () => {
-  const response = await axios.get('/admin/payment-verifications/stats');
+  const response = await api.get('/admin/payment-verifications/stats');
   return response.data;
 };
 
 export const approvePayment = async (id) => {
-  const response = await axios.post(`/admin/payment-verifications/${id}/approve`);
+  const response = await api.post(`/admin/payment-verifications/${id}/approve`);
   return response.data;
 };
 
 export const rejectPayment = async (id, reason) => {
-  const response = await axios.post(`/admin/payment-verifications/${id}/reject`, { reason });
+  const response = await api.post(`/admin/payment-verifications/${id}/reject`, { reason });
   return response.data;
 };
 
 // Tournament Payments
 export const getTournamentPayments = async (params = {}) => {
-  const response = await axios.get('/admin/tournament-payments', { params });
+  const response = await api.get('/admin/tournament-payments', { params });
   return response.data;
 };
 
 export const getTournamentPayment = async (tournamentId) => {
-  const response = await axios.get(`/admin/tournament-payments/${tournamentId}`);
+  const response = await api.get(`/admin/tournament-payments/${tournamentId}`);
   return response.data;
 };
 
 export const getTournamentPaymentStats = async () => {
-  const response = await axios.get('/admin/tournament-payments/stats/overview');
+  const response = await api.get('/admin/tournament-payments/stats/overview');
   return response.data;
 };
 
 export const markPayout50_1Paid = async (tournamentId, notes) => {
-  const response = await axios.post(
+  const response = await api.post(
     `/admin/tournament-payments/${tournamentId}/payout-50-1/mark-paid`,
     { notes }
   );
@@ -67,7 +67,7 @@ export const markPayout50_1Paid = async (tournamentId, notes) => {
 };
 
 export const markPayout50_2Paid = async (tournamentId, notes) => {
-  const response = await axios.post(
+  const response = await api.post(
     `/admin/tournament-payments/${tournamentId}/payout-50-2/mark-paid`,
     { notes }
   );
@@ -75,7 +75,7 @@ export const markPayout50_2Paid = async (tournamentId, notes) => {
 };
 
 export const getPendingPayouts = async (type) => {
-  const response = await axios.get('/admin/tournament-payments/pending/payouts', {
+  const response = await api.get('/admin/tournament-payments/pending/payouts', {
     params: { type },
   });
   return response.data;
@@ -83,39 +83,39 @@ export const getPendingPayouts = async (type) => {
 
 // Revenue Analytics
 export const getRevenueOverview = async (params = {}) => {
-  const response = await axios.get('/admin/revenue/overview', { params });
+  const response = await api.get('/admin/revenue/overview', { params });
   return response.data;
 };
 
 export const getRevenueByTournament = async (params = {}) => {
-  const response = await axios.get('/admin/revenue/by-tournament', { params });
+  const response = await api.get('/admin/revenue/by-tournament', { params });
   return response.data;
 };
 
 export const getRevenueByOrganizer = async () => {
-  const response = await axios.get('/admin/revenue/by-organizer');
+  const response = await api.get('/admin/revenue/by-organizer');
   return response.data;
 };
 
 export const getRevenueByLocation = async (groupBy = 'city') => {
-  const response = await axios.get('/admin/revenue/by-location', {
+  const response = await api.get('/admin/revenue/by-location', {
     params: { groupBy },
   });
   return response.data;
 };
 
 export const getRevenueTimeline = async (params = {}) => {
-  const response = await axios.get('/admin/revenue/timeline', { params });
+  const response = await api.get('/admin/revenue/timeline', { params });
   return response.data;
 };
 
 export const getDetailedPayments = async (params = {}) => {
-  const response = await axios.get('/admin/revenue/payments/detailed', { params });
+  const response = await api.get('/admin/revenue/payments/detailed', { params });
   return response.data;
 };
 
 // Delete All Data
 export const deleteAllData = async (password) => {
-  const response = await axios.post('/admin/delete-all-info', { password });
+  const response = await api.post('/admin/delete-all-info', { password });
   return response.data;
 };

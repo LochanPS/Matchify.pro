@@ -1011,6 +1011,12 @@ const verifyPayment = async (req, res) => {
       },
     });
 
+    // If payment verified, increment tournament registration count for player verification
+    if (status === 'verified') {
+      const { incrementTournamentRegistration } = await import('../services/verification.service.js');
+      await incrementTournamentRegistration(registration.userId);
+    }
+
     // Notify player
     await prisma.notification.create({
       data: {

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../utils/api';
+import VerifiedBadge from '../components/VerifiedBadge';
 import {
   TrophyIcon,
   ChartBarIcon,
@@ -25,6 +26,7 @@ const PlayerDashboard = () => {
   const [registrations, setRegistrations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [playerCode, setPlayerCode] = useState(null);
+  const [umpireCode, setUmpireCode] = useState(null);
   const [showLevelInfo, setShowLevelInfo] = useState(false);
   const [userProfile, setUserProfile] = useState(null);
 
@@ -57,11 +59,12 @@ const PlayerDashboard = () => {
   const fetchPlayerCode = async () => {
     try {
       const response = await api.get('/auth/me');
-      if (response.data.user?.playerCode) {
+      if (response.data.user) {
         setPlayerCode(response.data.user.playerCode);
+        setUmpireCode(response.data.user.umpireCode);
       }
     } catch (error) {
-      console.error('Error fetching player code:', error);
+      console.error('Error fetching codes:', error);
     }
   };
 
@@ -160,6 +163,9 @@ const PlayerDashboard = () => {
               <div>
                 <div className="flex items-center gap-3 mb-2">
                   <h1 className="text-3xl font-bold text-white">{user?.name}</h1>
+                  {userProfile?.isVerifiedPlayer && (
+                    <VerifiedBadge type="player" size="lg" />
+                  )}
                   <div className="flex gap-2">
                     {userRoles.map((role, index) => (
                       <span key={index} className="px-3 py-1 bg-white/10 backdrop-blur-sm text-white/90 text-xs font-medium rounded-full border border-white/20">
@@ -183,22 +189,39 @@ const PlayerDashboard = () => {
                     </span>
                   )}
                 </div>
-                {/* Player Code - Show for all players */}
-                {playerCode && (
-                  <div className="mt-3 inline-flex items-center gap-2 px-4 py-2 bg-blue-500/20 border border-blue-500/30 rounded-xl">
-                    <span className="text-blue-400/80 text-sm">Player Code:</span>
-                    <span className="text-blue-400 font-mono font-bold text-lg tracking-wider">{playerCode}</span>
-                    <button
-                      onClick={() => navigator.clipboard.writeText(playerCode)}
-                      className="p-1.5 hover:bg-blue-500/20 rounded-lg transition-colors ml-1"
-                      title="Copy code"
-                    >
-                      <svg className="w-4 h-4 text-amber-400/60 hover:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                      </svg>
-                    </button>
-                  </div>
-                )}
+                {/* Player Code & Umpire Code - Show for all users */}
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {playerCode && (
+                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/20 border border-blue-500/30 rounded-xl">
+                      <span className="text-blue-400/80 text-sm">Player Code:</span>
+                      <span className="text-blue-400 font-mono font-bold text-lg tracking-wider">{playerCode}</span>
+                      <button
+                        onClick={() => navigator.clipboard.writeText(playerCode)}
+                        className="p-1.5 hover:bg-blue-500/20 rounded-lg transition-colors ml-1"
+                        title="Copy player code"
+                      >
+                        <svg className="w-4 h-4 text-blue-400/60 hover:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                      </button>
+                    </div>
+                  )}
+                  {umpireCode && (
+                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/20 border border-amber-500/30 rounded-xl">
+                      <span className="text-amber-400/80 text-sm">Umpire Code:</span>
+                      <span className="text-amber-400 font-mono font-bold text-lg tracking-wider">{umpireCode}</span>
+                      <button
+                        onClick={() => navigator.clipboard.writeText(umpireCode)}
+                        className="p-1.5 hover:bg-amber-500/20 rounded-lg transition-colors ml-1"
+                        title="Copy umpire code"
+                      >
+                        <svg className="w-4 h-4 text-amber-400/60 hover:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
             
@@ -398,6 +421,39 @@ const PlayerDashboard = () => {
                 </p>
               </div>
 
+              {/* Verification Status */}
+              <div className="bg-slate-700/50 rounded-xl p-4">
+                <p className="text-gray-400 text-sm mb-2">Verification Status</p>
+                {userProfile?.isVerifiedPlayer ? (
+                  <div className="flex items-center gap-2">
+                    <ShieldCheckIcon className="w-6 h-6 text-blue-400" />
+                    <div>
+                      <p className="text-blue-400 font-bold">Verified Player</p>
+                      <p className="text-gray-500 text-xs">Trusted member</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <p className="text-yellow-400 font-bold mb-2">Not Verified</p>
+                    {(user?.tournamentsRegistered || 0) < 12 ? (
+                      <div>
+                        <p className="text-gray-500 text-xs mb-2">
+                          Register for {12 - (user?.tournamentsRegistered || 0)} more {12 - (user?.tournamentsRegistered || 0) === 1 ? 'tournament' : 'tournaments'} to get verified
+                        </p>
+                        <div className="w-full h-1.5 bg-slate-600 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-500"
+                            style={{ width: `${((user?.tournamentsRegistered || 0) / 12) * 100}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-gray-500 text-xs">Verification pending</p>
+                    )}
+                  </div>
+                )}
+              </div>
+
               {/* Achievements */}
               <div>
                 <p className="text-gray-400 text-sm mb-3">Achievements</p>
@@ -424,6 +480,12 @@ const PlayerDashboard = () => {
                     <div className="flex items-center gap-2 text-sm">
                       <span className="text-lg">🔥</span>
                       <span className="text-white">10 Wins</span>
+                    </div>
+                  )}
+                  {(user?.tournamentsPlayed || 0) >= 12 && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="text-lg">✅</span>
+                      <span className="text-white">Verified Player</span>
                     </div>
                   )}
                   {(user?.tournamentsPlayed || 0) >= 25 && (

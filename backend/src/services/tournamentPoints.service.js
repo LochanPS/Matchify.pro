@@ -4,18 +4,18 @@ import prisma from '../lib/prisma.js';
 /**
  * Tournament Points System
  * 
- * Points awarded based on tournament placement:
- * - Winner: 10 points
- * - Runner-up: 8 points
- * - Semi-finalists: 6 points
- * - Quarter-finalists: 4 points
- * - Participation: 2 points
+ * Points awarded based on match wins:
+ * - Knockout match win: 2 points
+ * - Round robin match win: 1 point
+ * 
+ * This rewards players for each match they win, with knockout matches
+ * being worth more since they are elimination matches.
  */
 
 class TournamentPointsService {
   
   /**
-   * Award points to players based on their tournament placement
+   * Award points to players based on their match wins
    * @param {string} tournamentId - Tournament ID
    * @param {string} categoryId - Category ID
    */
@@ -23,7 +23,7 @@ class TournamentPointsService {
     try {
       console.log(`🏆 Awarding tournament points for category ${categoryId}`);
 
-      // Get category with winner and runner-up
+      // Get category
       const category = await prisma.category.findUnique({
         where: { id: categoryId },
         include: {
@@ -38,74 +38,61 @@ class TournamentPointsService {
         return;
       }
 
-      // Get all matches for this category to determine placements
+      // Get all completed matches for this category
       const matches = await prisma.match.findMany({
         where: {
           tournamentId,
           categoryId,
-          status: 'COMPLETED'
-        },
-        orderBy: { round: 'asc' }
-      });
-
-      // Get all registrations (for participation points)
-      const registrations = await prisma.registration.findMany({
-        where: {
-          tournamentId,
-          categoryId,
-          status: 'confirmed'
+          status: 'COMPLETED',
+          winnerId: { not: null }
         },
         select: {
-          userId: true,
-          partnerId: true
+          id: true,
+          winnerId: true,
+          stage: true,
+          round: true
         }
       });
 
-      // Collect all unique player IDs
-      const allPlayerIds = new Set();
-      registrations.forEach(reg => {
-        allPlayerIds.add(reg.userId);
-        if (reg.partnerId) allPlayerIds.add(reg.partnerId);
+      console.log(`📊 Found ${matches.length} completed matches`);
+
+      // Calculate points for each player based on their wins
+      const playerPoints = new Map();
+
+      matches.forEach(match => {
+        const winnerId = match.winnerId;
+        if (!winnerId) return;
+
+        // Determine points based on match stage
+        let points = 0;
+        if (match.stage === 'KNOCKOUT') {
+          points = 2; // Knockout match win = 2 points
+        } else if (match.stage === 'GROUP') {
+          points = 1; // Round robin match win = 1 point
+        } else {
+          // Fallback: if stage is not set, assume knockout
+          points = 2;
+        }
+
+        // Add points to player's total
+        if (playerPoints.has(winnerId)) {
+          playerPoints.set(winnerId, playerPoints.get(winnerId) + points);
+        } else {
+          playerPoints.set(winnerId, points);
+        }
       });
 
-      // Determine placements
-      const placements = this.determinePlacements(matches, category);
+      console.log(`💰 Calculated points for ${playerPoints.size} players`);
 
-      // Award points
+      // Award points to each player
       const pointsAwarded = [];
-
-      // Winner (10 points)
-      if (placements.winner) {
-        await this.awardPoints(placements.winner, 10, tournamentId, categoryId, 'WINNER');
-        pointsAwarded.push({ userId: placements.winner, points: 10, placement: 'Winner' });
-        allPlayerIds.delete(placements.winner);
-      }
-
-      // Runner-up (8 points)
-      if (placements.runnerUp) {
-        await this.awardPoints(placements.runnerUp, 8, tournamentId, categoryId, 'RUNNER_UP');
-        pointsAwarded.push({ userId: placements.runnerUp, points: 8, placement: 'Runner-up' });
-        allPlayerIds.delete(placements.runnerUp);
-      }
-
-      // Semi-finalists (6 points each)
-      for (const playerId of placements.semiFinalists) {
-        await this.awardPoints(playerId, 6, tournamentId, categoryId, 'SEMI_FINALIST');
-        pointsAwarded.push({ userId: playerId, points: 6, placement: 'Semi-finalist' });
-        allPlayerIds.delete(playerId);
-      }
-
-      // Quarter-finalists (4 points each)
-      for (const playerId of placements.quarterFinalists) {
-        await this.awardPoints(playerId, 4, tournamentId, categoryId, 'QUARTER_FINALIST');
-        pointsAwarded.push({ userId: playerId, points: 4, placement: 'Quarter-finalist' });
-        allPlayerIds.delete(playerId);
-      }
-
-      // Participation (2 points for everyone else)
-      for (const playerId of allPlayerIds) {
-        await this.awardPoints(playerId, 2, tournamentId, categoryId, 'PARTICIPATION');
-        pointsAwarded.push({ userId: playerId, points: 2, placement: 'Participant' });
+      for (const [userId, points] of playerPoints.entries()) {
+        await this.awardPoints(userId, points, tournamentId, categoryId, 'MATCH_WINS');
+        pointsAwarded.push({ 
+          userId, 
+          points, 
+          placement: `${points} points from match wins` 
+        });
       }
 
       console.log(`✅ Points awarded to ${pointsAwarded.length} players`);
@@ -264,6 +251,7 @@ class TournamentPointsService {
    */
   getPlacementText(placement) {
     const texts = {
+      'MATCH_WINS': 'winning matches in the tournament',
       'WINNER': 'winning the tournament',
       'RUNNER_UP': 'being the runner-up',
       'SEMI_FINALIST': 'reaching the semi-finals',

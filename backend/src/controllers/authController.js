@@ -506,3 +506,55 @@ export const addRole = async (req, res) => {
     res.status(500).json({ error: 'Failed to add role', details: error.message });
   }
 };
+
+// GET VERIFICATION STATUS - Get user's verification status and progress
+export const getVerificationStatus = async (req, res) => {
+  try {
+    const userId = req.user.userId; // From JWT middleware
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        isVerifiedPlayer: true,
+        isVerifiedOrganizer: true,
+        isVerifiedUmpire: true,
+        tournamentsRegistered: true,
+        matchesUmpired: true,
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const verificationStatus = {
+      player: {
+        isVerified: user.isVerifiedPlayer,
+        progress: user.tournamentsRegistered,
+        required: 12,
+        percentage: Math.min((user.tournamentsRegistered / 12) * 100, 100),
+        remaining: Math.max(12 - user.tournamentsRegistered, 0)
+      },
+      organizer: {
+        isVerified: user.isVerifiedOrganizer,
+        requiresAdminApproval: true,
+        message: 'Organizer verification requires manual admin approval'
+      },
+      umpire: {
+        isVerified: user.isVerifiedUmpire,
+        progress: user.matchesUmpired,
+        required: 10,
+        percentage: Math.min((user.matchesUmpired / 10) * 100, 100),
+        remaining: Math.max(10 - user.matchesUmpired, 0)
+      }
+    };
+
+    res.json({
+      success: true,
+      verification: verificationStatus
+    });
+  } catch (error) {
+    console.error('Get verification status error:', error);
+    res.status(500).json({ error: 'Failed to get verification status', details: error.message });
+  }
+};

@@ -253,7 +253,7 @@ app.use('/api/admin/payment-verifications', paymentVerificationRoutes);
 app.use('/api/admin/tournament-payments', tournamentPaymentsRoutes);
 app.use('/api/admin/revenue', revenueAnalyticsRoutes);
 app.use('/api/admin/tournament-management', tournamentManagementRoutes);
-app.use('/api/admin/delete-all-info', deleteAllDataRoutes);
+app.use('/api/admin', deleteAllDataRoutes); // Changed: remove /delete-all-info prefix
 
 // SMS routes
 app.use('/api/sms', smsRoutes);

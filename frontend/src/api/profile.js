@@ -1,27 +1,15 @@
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-
-// Get auth token from localStorage
-const getAuthHeader = () => {
-  const token = localStorage.getItem('token');
-  return { Authorization: `Bearer ${token}` };
-};
+import api from '../utils/api';
 
 export const profileAPI = {
   // Get own profile
   getProfile: async () => {
-    const response = await axios.get(`${API_URL}/profile`, {
-      headers: getAuthHeader(),
-    });
+    const response = await api.get('/profile');
     return response.data.user;
   },
 
   // Update profile
   updateProfile: async (data) => {
-    const response = await axios.put(`${API_URL}/profile`, data, {
-      headers: getAuthHeader(),
-    });
+    const response = await api.put('/profile', data);
     return response.data.user;
   },
 
@@ -30,9 +18,8 @@ export const profileAPI = {
     const formData = new FormData();
     formData.append('photo', file);
     
-    const response = await axios.post(`${API_URL}/profile/photo`, formData, {
+    const response = await api.post('/profile/photo', formData, {
       headers: {
-        ...getAuthHeader(),
         'Content-Type': 'multipart/form-data',
       },
     });
@@ -41,18 +28,15 @@ export const profileAPI = {
 
   // Delete profile photo
   deletePhoto: async () => {
-    const response = await axios.delete(`${API_URL}/profile/photo`, {
-      headers: getAuthHeader(),
-    });
+    const response = await api.delete('/profile/photo');
     return response.data;
   },
 
   // Change password
   changePassword: async (currentPassword, newPassword) => {
-    const response = await axios.put(
-      `${API_URL}/profile/password`,
-      { currentPassword, newPassword },
-      { headers: getAuthHeader() }
+    const response = await api.put(
+      '/profile/password',
+      { currentPassword, newPassword }
     );
     return response.data;
   },

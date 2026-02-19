@@ -4068,10 +4068,25 @@ const AssignUmpireModal = ({ match, umpires, onClose, onAssign }) => {
   };
 
   // Navigate to conduct match page with selected umpire
-  const handleConductMatch = () => {
+  const handleConductMatch = async () => {
     if (!selectedUmpire || !match?.id) return;
-    // Navigate to the umpire scoring page
-    navigate(`/match/${match.id}/conduct?umpireId=${selectedUmpire}`);
+    
+    try {
+      // Assign umpire to the match
+      await api.put(`/matches/${match.id}/umpire`, { umpireId: selectedUmpire });
+      
+      // Close modal and refresh
+      onClose();
+      
+      // Show success message
+      alert(`Umpire assigned successfully! The umpire can now start the match from their dashboard.`);
+      
+      // Optionally refresh the page to show updated match status
+      window.location.reload();
+    } catch (error) {
+      console.error('Error assigning umpire:', error);
+      alert('Failed to assign umpire. Please try again.');
+    }
   };
 
   const selectedUmpireData = umpires.find(u => u.id === selectedUmpire);

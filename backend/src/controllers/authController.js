@@ -6,7 +6,7 @@ import prisma from '../lib/prisma.js';
  * Generate unique player code
  * Format: #ABC1234 (# + 3 letters + 4 numbers)
  */
-async function generatePlayerCode() {
+export async function generatePlayerCode() {
   const numbers = '0123456789';
   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   let isUnique = false;
@@ -44,7 +44,7 @@ async function generatePlayerCode() {
  * Generate unique umpire code
  * Format: #123ABCD (# + 3 numbers + 4 letters)
  */
-async function generateUmpireCode() {
+export async function generateUmpireCode() {
   const numbers = '0123456789';
   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   let isUnique = false;

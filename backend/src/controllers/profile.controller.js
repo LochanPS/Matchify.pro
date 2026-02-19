@@ -3,6 +3,7 @@ import prisma from '../lib/prisma.js';
 import bcrypt from 'bcryptjs';
 import cloudinary from '../config/cloudinary.js';
 import { updateProfileSchema, changePasswordSchema, profilePhotoSchema } from '../validators/profile.validator.js';
+import { generatePlayerCode, generateUmpireCode } from './authController.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -23,7 +24,7 @@ export const getProfile = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    const user = await prisma.user.findUnique({
+    let user = await prisma.user.findUnique({
       where: { id: userId },
       select: {
         id: true,
@@ -54,6 +55,49 @@ export const getProfile = async (req, res) => {
 
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Auto-generate codes for users without them (safety net)
+    if (!user.playerCode || !user.umpireCode) {
+      const updates = {};
+      if (!user.playerCode) {
+        updates.playerCode = await generatePlayerCode();
+      }
+      if (!user.umpireCode) {
+        updates.umpireCode = await generateUmpireCode();
+      }
+      
+      user = await prisma.user.update({
+        where: { id: userId },
+        data: updates,
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          phone: true,
+          roles: true,
+          playerCode: true,
+          umpireCode: true,
+          profilePhoto: true,
+          city: true,
+          state: true,
+          country: true,
+          dateOfBirth: true,
+          gender: true,
+          totalPoints: true,
+          tournamentsPlayed: true,
+          matchesWon: true,
+          matchesLost: true,
+          walletBalance: true,
+          isActive: true,
+          isVerified: true,
+          isSuspended: true,
+          createdAt: true,
+          updatedAt: true
+        }
+      });
+      
+      console.log(`✅ Auto-generated codes for user: ${user.email}`);
     }
 
     // Calculate additional stats

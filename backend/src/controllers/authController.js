@@ -332,6 +332,30 @@ export const login = async (req, res) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
+    // Auto-generate codes for users without them (for existing users)
+    let updatedUser = user;
+    if (!user.playerCode || !user.umpireCode) {
+      const updates = {};
+      if (!user.playerCode) {
+        updates.playerCode = await generatePlayerCode();
+      }
+      if (!user.umpireCode) {
+        updates.umpireCode = await generateUmpireCode();
+      }
+      
+      updatedUser = await prisma.user.update({
+        where: { id: user.id },
+        data: updates,
+        include: {
+          playerProfile: true,
+          organizerProfile: true,
+          umpireProfile: true,
+        },
+      });
+      
+      console.log(`✅ Auto-generated codes for user: ${user.email}`);
+    }
+
     // Parse roles from comma-separated string
     const userRoles = user.roles ? user.roles.split(',') : ['PLAYER'];
 
@@ -346,26 +370,26 @@ export const login = async (req, res) => {
       message: 'Login successful',
       token,
       user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        phone: user.phone,
-        city: user.city,
-        state: user.state,
-        country: user.country,
-        gender: user.gender,
-        dateOfBirth: user.dateOfBirth,
-        profilePhoto: user.profilePhoto,
-        walletBalance: user.walletBalance,
-        totalPoints: user.totalPoints,
-        playerCode: user.playerCode,
-        umpireCode: user.umpireCode,
+        id: updatedUser.id,
+        email: updatedUser.email,
+        name: updatedUser.name,
+        phone: updatedUser.phone,
+        city: updatedUser.city,
+        state: updatedUser.state,
+        country: updatedUser.country,
+        gender: updatedUser.gender,
+        dateOfBirth: updatedUser.dateOfBirth,
+        profilePhoto: updatedUser.profilePhoto,
+        walletBalance: updatedUser.walletBalance,
+        totalPoints: updatedUser.totalPoints,
+        playerCode: updatedUser.playerCode,
+        umpireCode: updatedUser.umpireCode,
         roles: userRoles,
         isAdmin: false,
         profiles: {
-          player: user.playerProfile,
-          organizer: user.organizerProfile,
-          umpire: user.umpireProfile,
+          player: updatedUser.playerProfile,
+          organizer: updatedUser.organizerProfile,
+          umpire: updatedUser.umpireProfile,
         },
       },
     });

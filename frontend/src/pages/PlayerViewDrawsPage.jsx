@@ -194,29 +194,175 @@ const PlayerViewDrawsPage = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-            {/* Category Selector - Reduced width */}
-            <div className="lg:col-span-1">
-              <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-4 sticky top-4">
-                <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Categories</h3>
-                <div className="space-y-2">
+            {/* Category Selector & Fixtures - Compact Layout */}
+            <div className="lg:col-span-1 space-y-4">
+              {/* Categories Section - Compact */}
+              <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-3 sticky top-4">
+                <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 px-1">Categories</h3>
+                <div className="space-y-1.5">
                   {categories.map((category) => (
                     <button
                       key={category.id}
                       onClick={() => setSelectedCategory(category)}
-                      className={`w-full text-left px-4 py-3 rounded-xl transition-all ${
+                      className={`w-full text-left px-3 py-2 rounded-lg transition-all ${
                         selectedCategory?.id === category.id
                           ? 'bg-emerald-500/20 border border-emerald-500/50 text-white'
                           : 'bg-slate-700/30 border border-white/5 text-gray-300 hover:bg-slate-700/50'
                       }`}
                     >
-                      <div className="font-medium">{category.name}</div>
-                      <div className="text-xs text-gray-400 mt-1">
-                        {category.registrationCount || 0} / {category.maxParticipants || '∞'} entries
+                      <div className="font-medium text-sm">{category.name}</div>
+                      <div className="text-xs text-gray-400 mt-0.5">
+                        {category.registrationCount || 0} / {category.maxParticipants || '∞'}
                       </div>
                     </button>
                   ))}
                 </div>
               </div>
+
+              {/* Fixtures Section */}
+              {selectedCategory && draw && (
+                <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-3">
+                  <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 px-1">Fixtures</h3>
+                  <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
+                    {(() => {
+                      const rawData = draw.bracketJson || draw.bracket;
+                      const data = typeof rawData === 'string' ? JSON.parse(rawData) : rawData;
+                      const format = draw.format || data?.format;
+                      
+                      // Collect all matches based on format
+                      let allMatches = [];
+                      
+                      if (format === 'ROUND_ROBIN' && data?.groups) {
+                        data.groups.forEach((group, gi) => {
+                          if (group.matches) {
+                            group.matches.forEach(match => {
+                              allMatches.push({
+                                ...match,
+                                groupName: `Group ${String.fromCharCode(65 + gi)}`
+                              });
+                            });
+                          }
+                        });
+                      } else if (format === 'ROUND_ROBIN_KNOCKOUT') {
+                        // Group stage matches
+                        if (data?.groups) {
+                          data.groups.forEach((group, gi) => {
+                            if (group.matches) {
+                              group.matches.forEach(match => {
+                                allMatches.push({
+                                  ...match,
+                                  groupName: `Group ${String.fromCharCode(65 + gi)}`,
+                                  stage: 'Group'
+                                });
+                              });
+                            }
+                          });
+                        }
+                        // Knockout stage matches
+                        if (data?.knockout?.rounds) {
+                          data.knockout.rounds.forEach((round, ri) => {
+                            round.matches.forEach(match => {
+                              const total = data.knockout.rounds.length;
+                              const r = total - ri;
+                              let roundName = `Round ${ri + 1}`;
+                              if (r === 1) roundName = 'Final';
+                              else if (r === 2) roundName = 'Semi Finals';
+                              else if (r === 3) roundName = 'Quarter Finals';
+                              
+                              allMatches.push({
+                                ...match,
+                                roundName,
+                                stage: 'Knockout'
+                              });
+                            });
+                          });
+                        }
+                      } else if (data?.rounds) {
+                        // Pure knockout
+                        data.rounds.forEach((round, ri) => {
+                          round.matches.forEach(match => {
+                            const total = data.rounds.length;
+                            const r = total - ri;
+                            let roundName = `Round ${ri + 1}`;
+                            if (r === 1) roundName = 'Final';
+                            else if (r === 2) roundName = 'Semi Finals';
+                            else if (r === 3) roundName = 'Quarter Finals';
+                            
+                            allMatches.push({
+                              ...match,
+                              roundName
+                            });
+                          });
+                        });
+                      }
+                      
+                      if (allMatches.length === 0) {
+                        return (
+                          <div className="text-center py-4">
+                            <p className="text-gray-500 text-xs">No matches yet</p>
+                          </div>
+                        );
+                      }
+                      
+                      return allMatches.map((match, idx) => {
+                        const isCompleted = match.winner && (match.player1?.name !== 'TBD' && match.player2?.name !== 'TBD');
+                        const player1Name = match.player1?.partnerName 
+                          ? `${match.player1.name} & ${match.player1.partnerName}`
+                          : match.player1?.name || 'TBD';
+                        const player2Name = match.player2?.partnerName 
+                          ? `${match.player2.name} & ${match.player2.partnerName}`
+                          : match.player2?.name || 'TBD';
+                        
+                        return (
+                          <div key={idx} className="bg-slate-900/50 border border-white/5 rounded-lg p-2 hover:border-white/10 transition-all">
+                            <div className="flex items-center justify-between mb-1.5">
+                              <span className="text-xs font-semibold text-gray-400">
+                                #{match.matchNumber || idx + 1}
+                              </span>
+                              {match.stage && (
+                                <span className={`text-xs px-1.5 py-0.5 rounded ${
+                                  match.stage === 'Knockout' 
+                                    ? 'bg-amber-500/20 text-amber-400' 
+                                    : 'bg-purple-500/20 text-purple-400'
+                                }`}>
+                                  {match.stage}
+                                </span>
+                              )}
+                              {isCompleted && (
+                                <span className="text-xs px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 rounded">
+                                  ✓
+                                </span>
+                              )}
+                            </div>
+                            {(match.groupName || match.roundName) && (
+                              <p className="text-xs text-gray-500 mb-1.5">{match.groupName || match.roundName}</p>
+                            )}
+                            <div className="space-y-1">
+                              <div className={`text-xs px-2 py-1 rounded ${
+                                match.winner === 1 
+                                  ? 'bg-emerald-500/20 text-emerald-300 font-semibold' 
+                                  : 'bg-slate-700/30 text-gray-300'
+                              }`}>
+                                {player1Name}
+                              </div>
+                              <div className="text-center">
+                                <span className="text-xs text-gray-500">vs</span>
+                              </div>
+                              <div className={`text-xs px-2 py-1 rounded ${
+                                match.winner === 2 
+                                  ? 'bg-emerald-500/20 text-emerald-300 font-semibold' 
+                                  : 'bg-slate-700/30 text-gray-300'
+                              }`}>
+                                {player2Name}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      });
+                    })()}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Draw Display - Expanded width */}

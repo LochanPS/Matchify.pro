@@ -572,7 +572,7 @@ export default function UmpireDashboard() {
                     
                     {match.status !== 'COMPLETED' && (
                       <Link
-                        to={`/umpire/scoring/${match.id}`}
+                        to={`/match/${match.id}/conduct`}
                         className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-2.5 px-4 rounded-xl text-sm font-medium hover:shadow-lg hover:scale-105 transition-all"
                       >
                         <PlayIcon className="w-4 h-4" />
@@ -632,7 +632,7 @@ export default function UmpireDashboard() {
                       </span>
                       {match.status !== 'COMPLETED' ? (
                         <Link
-                          to={`/umpire/scoring/${match.id}`}
+                          to={`/match/${match.id}/conduct`}
                           className="flex items-center gap-1 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl text-sm font-medium hover:shadow-lg transition-all"
                         >
                           Score

@@ -144,10 +144,10 @@ function AppContent() {
             </ProtectedRoute>
           } />
           
-          {/* Conduct Match Page - for organizers to assign umpire and start match */}
+          {/* Conduct Match Page - for organizers to assign umpire and umpires to review settings before starting */}
           <Route path="/match/:matchId/conduct" element={
             <ProtectedRoute>
-              <RoleRoute allowedRoles={['ORGANIZER']}>
+              <RoleRoute allowedRoles={['ORGANIZER', 'UMPIRE']}>
                 <ConductMatchPage />
               </RoleRoute>
             </ProtectedRoute>

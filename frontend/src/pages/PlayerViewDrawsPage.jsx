@@ -219,146 +219,127 @@ const PlayerViewDrawsPage = () => {
                 </div>
               </div>
 
-              {/* Fixtures Section */}
+              {/* Fixtures Section - Quick Navigation */}
               {selectedCategory && draw && (
                 <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-3">
-                  <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 px-1">Fixtures</h3>
-                  <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
+                  <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 px-1">Quick Navigation</h3>
+                  <div className="space-y-1.5">
                     {(() => {
                       const rawData = draw.bracketJson || draw.bracket;
                       const data = typeof rawData === 'string' ? JSON.parse(rawData) : rawData;
                       const format = draw.format || data?.format;
                       
-                      // Collect all matches based on format
-                      let allMatches = [];
+                      const navigationItems = [];
                       
                       if (format === 'ROUND_ROBIN' && data?.groups) {
+                        // Show groups
                         data.groups.forEach((group, gi) => {
-                          if (group.matches) {
-                            group.matches.forEach(match => {
-                              allMatches.push({
-                                ...match,
-                                groupName: `Group ${String.fromCharCode(65 + gi)}`
-                              });
-                            });
-                          }
+                          const groupName = `Group ${String.fromCharCode(65 + gi)}`;
+                          const totalMatches = group.matches?.length || 0;
+                          const completedMatches = group.matches?.filter(m => m.winner)?.length || 0;
+                          
+                          navigationItems.push({
+                            id: `group-${gi}`,
+                            label: groupName,
+                            subtitle: `${completedMatches}/${totalMatches} matches`,
+                            icon: '👥',
+                            color: 'purple'
+                          });
                         });
                       } else if (format === 'ROUND_ROBIN_KNOCKOUT') {
-                        // Group stage matches
+                        // Group stage
                         if (data?.groups) {
                           data.groups.forEach((group, gi) => {
-                            if (group.matches) {
-                              group.matches.forEach(match => {
-                                allMatches.push({
-                                  ...match,
-                                  groupName: `Group ${String.fromCharCode(65 + gi)}`,
-                                  stage: 'Group'
-                                });
-                              });
-                            }
-                          });
-                        }
-                        // Knockout stage matches
-                        if (data?.knockout?.rounds) {
-                          data.knockout.rounds.forEach((round, ri) => {
-                            round.matches.forEach(match => {
-                              const total = data.knockout.rounds.length;
-                              const r = total - ri;
-                              let roundName = `Round ${ri + 1}`;
-                              if (r === 1) roundName = 'Final';
-                              else if (r === 2) roundName = 'Semi Finals';
-                              else if (r === 3) roundName = 'Quarter Finals';
-                              
-                              allMatches.push({
-                                ...match,
-                                roundName,
-                                stage: 'Knockout'
-                              });
+                            const groupName = `Group ${String.fromCharCode(65 + gi)}`;
+                            const totalMatches = group.matches?.length || 0;
+                            const completedMatches = group.matches?.filter(m => m.winner)?.length || 0;
+                            
+                            navigationItems.push({
+                              id: `group-${gi}`,
+                              label: groupName,
+                              subtitle: `${completedMatches}/${totalMatches} matches`,
+                              icon: '👥',
+                              color: 'purple'
                             });
                           });
                         }
-                      } else if (data?.rounds) {
-                        // Pure knockout
-                        data.rounds.forEach((round, ri) => {
-                          round.matches.forEach(match => {
-                            const total = data.rounds.length;
+                        
+                        // Knockout stage
+                        if (data?.knockout?.rounds) {
+                          data.knockout.rounds.forEach((round, ri) => {
+                            const total = data.knockout.rounds.length;
                             const r = total - ri;
                             let roundName = `Round ${ri + 1}`;
                             if (r === 1) roundName = 'Final';
                             else if (r === 2) roundName = 'Semi Finals';
                             else if (r === 3) roundName = 'Quarter Finals';
                             
-                            allMatches.push({
-                              ...match,
-                              roundName
+                            const totalMatches = round.matches?.length || 0;
+                            const completedMatches = round.matches?.filter(m => m.winner)?.length || 0;
+                            
+                            navigationItems.push({
+                              id: `knockout-${ri}`,
+                              label: roundName,
+                              subtitle: `${completedMatches}/${totalMatches} matches`,
+                              icon: '🏆',
+                              color: 'amber'
                             });
+                          });
+                        }
+                      } else if (data?.rounds) {
+                        // Pure knockout
+                        data.rounds.forEach((round, ri) => {
+                          const total = data.rounds.length;
+                          const r = total - ri;
+                          let roundName = `Round ${ri + 1}`;
+                          if (r === 1) roundName = 'Final';
+                          else if (r === 2) roundName = 'Semi Finals';
+                          else if (r === 3) roundName = 'Quarter Finals';
+                          
+                          const totalMatches = round.matches?.length || 0;
+                          const completedMatches = round.matches?.filter(m => m.winner)?.length || 0;
+                          
+                          navigationItems.push({
+                            id: `round-${ri}`,
+                            label: roundName,
+                            subtitle: `${completedMatches}/${totalMatches} matches`,
+                            icon: '🏆',
+                            color: 'emerald'
                           });
                         });
                       }
                       
-                      if (allMatches.length === 0) {
+                      if (navigationItems.length === 0) {
                         return (
                           <div className="text-center py-4">
-                            <p className="text-gray-500 text-xs">No matches yet</p>
+                            <p className="text-gray-500 text-xs">No fixtures yet</p>
                           </div>
                         );
                       }
                       
-                      return allMatches.map((match, idx) => {
-                        const isCompleted = match.winner && (match.player1?.name !== 'TBD' && match.player2?.name !== 'TBD');
-                        const player1Name = match.player1?.partnerName 
-                          ? `${match.player1.name} & ${match.player1.partnerName}`
-                          : match.player1?.name || 'TBD';
-                        const player2Name = match.player2?.partnerName 
-                          ? `${match.player2.name} & ${match.player2.partnerName}`
-                          : match.player2?.name || 'TBD';
-                        
-                        return (
-                          <div key={idx} className="bg-slate-900/50 border border-white/5 rounded-lg p-2 hover:border-white/10 transition-all">
-                            <div className="flex items-center justify-between mb-1.5">
-                              <span className="text-xs font-semibold text-gray-400">
-                                #{match.matchNumber || idx + 1}
-                              </span>
-                              {match.stage && (
-                                <span className={`text-xs px-1.5 py-0.5 rounded ${
-                                  match.stage === 'Knockout' 
-                                    ? 'bg-amber-500/20 text-amber-400' 
-                                    : 'bg-purple-500/20 text-purple-400'
-                                }`}>
-                                  {match.stage}
-                                </span>
-                              )}
-                              {isCompleted && (
-                                <span className="text-xs px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 rounded">
-                                  ✓
-                                </span>
-                              )}
+                      return navigationItems.map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => {
+                            const element = document.getElementById(item.id);
+                            if (element) {
+                              element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }
+                          }}
+                          className={`w-full text-left px-3 py-2 rounded-lg transition-all bg-slate-700/30 border border-white/5 hover:bg-slate-700/50 hover:border-${item.color}-500/30 group`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className="text-base">{item.icon}</span>
+                            <div className="flex-1 min-w-0">
+                              <div className="font-medium text-sm text-white truncate">{item.label}</div>
+                              <div className="text-xs text-gray-400">{item.subtitle}</div>
                             </div>
-                            {(match.groupName || match.roundName) && (
-                              <p className="text-xs text-gray-500 mb-1.5">{match.groupName || match.roundName}</p>
-                            )}
-                            <div className="space-y-1">
-                              <div className={`text-xs px-2 py-1 rounded ${
-                                match.winner === 1 
-                                  ? 'bg-emerald-500/20 text-emerald-300 font-semibold' 
-                                  : 'bg-slate-700/30 text-gray-300'
-                              }`}>
-                                {player1Name}
-                              </div>
-                              <div className="text-center">
-                                <span className="text-xs text-gray-500">vs</span>
-                              </div>
-                              <div className={`text-xs px-2 py-1 rounded ${
-                                match.winner === 2 
-                                  ? 'bg-emerald-500/20 text-emerald-300 font-semibold' 
-                                  : 'bg-slate-700/30 text-gray-300'
-                              }`}>
-                                {player2Name}
-                              </div>
+                            <div className={`w-6 h-6 rounded-full bg-${item.color}-500/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity`}>
+                              <span className="text-xs">→</span>
                             </div>
                           </div>
-                        );
-                      });
+                        </button>
+                      ));
                     })()}
                   </div>
                 </div>
@@ -794,7 +775,7 @@ const KnockoutBracket = ({ data, onViewMatchDetails }) => {
     <div className="overflow-x-auto pb-4">
       <div className="flex gap-6 min-w-max p-4">
         {data.rounds.map((round, ri) => (
-          <div key={ri} className="flex flex-col min-w-[260px]">
+          <div key={ri} id={`round-${ri}`} className="flex flex-col min-w-[260px]">
             {/* Round Header */}
             <div className="mb-6 text-center">
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 rounded-xl">
@@ -963,7 +944,7 @@ const RoundRobinDraw = ({ data, onViewMatchDetails }) => {
   return (
     <div className="space-y-6">
       {data.groups.map((group, gi) => (
-        <div key={gi} className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden shadow-lg">
+        <div key={gi} id={`group-${gi}`} className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden shadow-lg">
           {/* Group Header */}
           <div className="bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-b border-purple-500/30 px-6 py-4">
             <div className="flex items-center gap-3">
@@ -1173,10 +1154,26 @@ const RoundRobinDraw = ({ data, onViewMatchDetails }) => {
 
 // Groups + Knockout Draw Component
 const GroupsKnockoutDraw = ({ data, onViewMatchDetails }) => {
+  const getRoundName = (idx, total) => {
+    const r = total - idx;
+    if (r === 1) return 'Final';
+    if (r === 2) return 'Semi Finals';
+    if (r === 3) return 'Quarter Finals';
+    return `Round ${idx + 1}`;
+  };
+
+  const getPlayerDisplay = (player) => {
+    if (!player || !player.name || player.name === 'TBD') return 'TBD';
+    if (player.partnerName) {
+      return `${player.name} & ${player.partnerName}`;
+    }
+    return player.name;
+  };
+
   return (
     <div className="space-y-8">
       {/* Group Stage */}
-      <div>
+      <div id="group-stage">
         <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
           <span className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-lg text-sm">Stage 1</span>
           Group Stage (Round Robin)
@@ -1186,12 +1183,134 @@ const GroupsKnockoutDraw = ({ data, onViewMatchDetails }) => {
 
       {/* Knockout Stage */}
       {data.knockout && (
-        <div>
+        <div id="knockout-stage">
           <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
             <span className="px-3 py-1 bg-amber-500/20 text-amber-400 rounded-lg text-sm">Stage 2</span>
             Knockout Stage
           </h3>
-          <KnockoutBracket data={data.knockout} onViewMatchDetails={onViewMatchDetails} />
+          <div className="overflow-x-auto pb-4">
+            <div className="flex gap-6 min-w-max p-4">
+              {data.knockout.rounds.map((round, ri) => (
+                <div key={ri} id={`knockout-${ri}`} className="flex flex-col min-w-[260px]">
+                  {/* Round Header */}
+                  <div className="mb-6 text-center">
+                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 rounded-xl">
+                      <Trophy className="w-4 h-4 text-emerald-400" />
+                      <h4 className="text-sm font-bold text-emerald-300 uppercase tracking-wider">
+                        {getRoundName(ri, data.knockout.rounds.length)}
+                      </h4>
+                    </div>
+                  </div>
+                  
+                  {/* Matches */}
+                  <div 
+                    className="flex flex-col justify-around flex-1 gap-3" 
+                    style={{ paddingTop: ri > 0 ? `${Math.pow(2, ri) * 18}px` : 0 }}
+                  >
+                    {round.matches.map((match, mi) => {
+                      const isCompleted = match.winner && (match.player1?.name !== 'TBD' && match.player2?.name !== 'TBD');
+                      const player1Name = getPlayerDisplay(match.player1);
+                      const player2Name = getPlayerDisplay(match.player2);
+                      const isPlayer1Winner = match.winner === 1;
+                      const isPlayer2Winner = match.winner === 2;
+                      
+                      return (
+                        <div 
+                          key={mi} 
+                          className="relative group" 
+                          style={{ marginBottom: ri > 0 ? `${Math.pow(2, ri) * 36}px` : 0 }}
+                        >
+                          <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm border border-white/10 rounded-xl overflow-hidden shadow-lg hover:shadow-emerald-500/10 transition-all">
+                            {/* Match Number Badge */}
+                            <div className="bg-slate-700/50 px-3 py-1.5 border-b border-white/5">
+                              <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                                Match #{match.matchNumber || mi + 1}
+                              </span>
+                            </div>
+                            
+                            {/* Players */}
+                            <div className="p-2.5 space-y-1.5">
+                              {/* Player 1 */}
+                              <div className={`flex items-center justify-between px-3 py-2 rounded-lg transition-all ${
+                                isPlayer1Winner
+                                  ? 'bg-gradient-to-r from-emerald-500/20 to-emerald-600/20 border-2 border-emerald-500/50 shadow-lg shadow-emerald-500/20' 
+                                  : 'bg-slate-700/30 border border-white/5'
+                              }`}>
+                                <div className="flex items-center gap-2 flex-1 min-w-0">
+                                  {isPlayer1Winner && (
+                                    <Trophy className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                                  )}
+                                  <span className={`text-sm font-medium truncate ${
+                                    isPlayer1Winner ? 'text-emerald-300' : player1Name === 'TBD' ? 'text-gray-500 italic' : 'text-white'
+                                  }`}>
+                                    {player1Name}
+                                  </span>
+                                </div>
+                                {isPlayer1Winner && (
+                                  <span className="ml-2 px-1.5 py-0.5 bg-emerald-500/30 text-emerald-300 rounded text-xs font-bold">
+                                    W
+                                  </span>
+                                )}
+                              </div>
+                              
+                              {/* VS Divider */}
+                              <div className="flex items-center justify-center py-0.5">
+                                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">vs</span>
+                              </div>
+                              
+                              {/* Player 2 */}
+                              <div className={`flex items-center justify-between px-3 py-2 rounded-lg transition-all ${
+                                isPlayer2Winner
+                                  ? 'bg-gradient-to-r from-emerald-500/20 to-emerald-600/20 border-2 border-emerald-500/50 shadow-lg shadow-emerald-500/20' 
+                                  : 'bg-slate-700/30 border border-white/5'
+                              }`}>
+                                <div className="flex items-center gap-2 flex-1 min-w-0">
+                                  {isPlayer2Winner && (
+                                    <Trophy className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                                  )}
+                                  <span className={`text-sm font-medium truncate ${
+                                    isPlayer2Winner ? 'text-emerald-300' : player2Name === 'TBD' ? 'text-gray-500 italic' : 'text-white'
+                                  }`}>
+                                    {player2Name}
+                                  </span>
+                                </div>
+                                {isPlayer2Winner && (
+                                  <span className="ml-2 px-1.5 py-0.5 bg-emerald-500/30 text-emerald-300 rounded text-xs font-bold">
+                                    W
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            
+                            {/* View Details Button for Completed Matches */}
+                            {isCompleted && match.dbMatch && onViewMatchDetails && (
+                              <div className="px-2.5 pb-2.5">
+                                <button
+                                  onClick={() => {
+                                    const bracketMatchData = {
+                                      matchNumber: match.matchNumber,
+                                      round: ri + 1,
+                                      player1: match.player1,
+                                      player2: match.player2
+                                    };
+                                    onViewMatchDetails(match.dbMatch, bracketMatchData);
+                                  }}
+                                  className="w-full py-1.5 rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30 transition-all text-xs font-semibold flex items-center justify-center gap-1.5 group-hover:border-blue-500/50"
+                                >
+                                  <Eye className="w-3 h-3" />
+                                  View Details
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       )}
     </div>

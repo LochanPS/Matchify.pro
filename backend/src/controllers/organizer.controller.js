@@ -129,10 +129,19 @@ export const getTournamentRegistrations = async (req, res) => {
       orderBy: { createdAt: 'desc' },
     });
 
+    // Format registrations to include guest info
+    const formattedRegistrations = registrations.map(reg => ({
+      ...reg,
+      displayName: reg.userId && reg.user ? reg.user.name : reg.guestName,
+      displayEmail: reg.userId && reg.user ? reg.user.email : reg.guestEmail,
+      displayPhone: reg.userId && reg.user ? reg.user.phone : reg.guestPhone,
+      isGuest: !reg.userId
+    }));
+
     res.json({
       success: true,
-      count: registrations.length,
-      registrations,
+      count: formattedRegistrations.length,
+      registrations: formattedRegistrations,
     });
   } catch (error) {
     console.error('Get tournament registrations error:', error);

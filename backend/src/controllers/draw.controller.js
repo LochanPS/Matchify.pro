@@ -4,6 +4,41 @@ import bracketService from '../services/bracket.service.js';
 import matchService from '../services/match.service.js';
 
 /**
+ * Helper function to get player name from registration
+ * Handles both user registrations and guest registrations
+ */
+const getPlayerName = (registration) => {
+  // If userId exists, use user.name
+  if (registration.userId && registration.user) {
+    return registration.user.name;
+  }
+  // Otherwise, use guestName
+  return registration.guestName || 'Unknown';
+};
+
+/**
+ * Helper function to get player email from registration
+ */
+const getPlayerEmail = (registration) => {
+  if (registration.userId && registration.user) {
+    return registration.user.email;
+  }
+  return registration.guestEmail || null;
+};
+
+/**
+ * Helper function to get player ID from registration
+ * For guest registrations, use registration ID as player ID
+ */
+const getPlayerId = (registration) => {
+  if (registration.userId) {
+    return registration.userId;
+  }
+  // For guests, use registration ID prefixed with 'guest-'
+  return `guest-${registration.id}`;
+};
+
+/**
  * Helper function to check if category is completed
  * Returns error response if category is completed
  */
@@ -111,13 +146,20 @@ const generateDraw = async (req, res) => {
     const participantsWithSeeds = [];
     
     for (const registration of registrations) {
-      const seedScore = await seedingService.calculateSeedScore(registration.user.id);
+      const playerId = getPlayerId(registration);
+      const playerName = getPlayerName(registration);
+      const playerEmail = getPlayerEmail(registration);
+      
+      // Only calculate seed score for real users, guests get default score of 0
+      const seedScore = registration.userId 
+        ? await seedingService.calculateSeedScore(registration.userId)
+        : 0;
       
       participantsWithSeeds.push({
-        id: registration.user.id,
+        id: playerId,
         registrationId: registration.id,
-        name: registration.user.name,
-        email: registration.user.email,
+        name: playerName,
+        email: playerEmail,
         seedScore: seedScore,
         seed: 0 // Will be assigned after sorting
       });
@@ -603,11 +645,11 @@ const getCategoryPlayers = async (req, res) => {
     });
 
     const players = registrations.map((reg, index) => ({
-      id: reg.user.id,
+      id: getPlayerId(reg),
       registrationId: reg.id,
-      name: reg.user.name,
-      email: reg.user.email,
-      phone: reg.user.phone,
+      name: getPlayerName(reg),
+      email: getPlayerEmail(reg),
+      phone: reg.userId && reg.user ? reg.user.phone : reg.guestPhone,
       seed: index + 1
     }));
 
@@ -1304,15 +1346,15 @@ const bulkAssignAllPlayers = async (req, res) => {
           const match = firstRound.matches[slotInfo.matchIdx];
           
           match[slotInfo.position] = {
-            id: reg.user.id,
-            name: reg.user.name,
+            id: getPlayerId(reg),
+            name: getPlayerName(reg),
             seed: slotInfo.slot
           };
           
           assignments.push({
             slot: slotInfo.slot,
-            playerId: reg.user.id,
-            playerName: reg.user.name,
+            playerId: getPlayerId(reg),
+            playerName: getPlayerName(reg),
             matchIdx: slotInfo.matchIdx,
             position: slotInfo.position
           });
@@ -1369,8 +1411,8 @@ const bulkAssignAllPlayers = async (req, res) => {
           if (!participant.id && playerIndex < registrations.length) {
             const reg = registrations[playerIndex];
             group.participants[idx] = {
-              id: reg.user.id,
-              name: reg.user.name,
+              id: getPlayerId(reg),
+              name: getPlayerName(reg),
               seed: slotNum,
               played: 0,
               wins: 0,
@@ -1379,8 +1421,8 @@ const bulkAssignAllPlayers = async (req, res) => {
             };
             assignments.push({
               slot: slotNum,
-              playerId: reg.user.id,
-              playerName: reg.user.name
+              playerId: getPlayerId(reg),
+              playerName: getPlayerName(reg)
             });
             playerIndex++;
           }

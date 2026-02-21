@@ -646,28 +646,41 @@ const deleteTournament = async (req, res) => {
     // Notify all registered participants about the cancellation
     if (tournament.registrations.length > 0) {
       // Get unique users (a user might have multiple registrations for different categories)
-      const uniqueUserIds = [...new Set(tournament.registrations.map(r => r.userId))];
+      // Filter out guest registrations (userId is null)
+      const uniqueUserIds = [...new Set(
+        tournament.registrations
+          .filter(r => r.userId !== null) // Only include registrations with actual user accounts
+          .map(r => r.userId)
+      )];
       
-      // Create notifications for all participants
-      const notificationPromises = uniqueUserIds.map(participantId => 
-        prisma.notification.create({
-          data: {
-            userId: participantId,
-            type: 'TOURNAMENT_CANCELLED',
-            title: 'Tournament Cancelled',
-            message: `The tournament "${tournament.name}" has been cancelled by the organizer.`,
-            data: JSON.stringify({
-              tournamentId: id,
-              tournamentName: tournament.name,
-              reason: reason || 'No reason provided'
-            }),
-            read: false
-          }
-        })
-      );
+      // Create notifications for all participants (only those with user accounts)
+      if (uniqueUserIds.length > 0) {
+        const notificationPromises = uniqueUserIds.map(participantId => 
+          prisma.notification.create({
+            data: {
+              userId: participantId,
+              type: 'TOURNAMENT_CANCELLED',
+              title: 'Tournament Cancelled',
+              message: `The tournament "${tournament.name}" has been cancelled by the organizer.`,
+              data: JSON.stringify({
+                tournamentId: id,
+                tournamentName: tournament.name,
+                reason: reason || 'No reason provided'
+              }),
+              read: false
+            }
+          })
+        );
+        
+        await Promise.all(notificationPromises);
+        console.log(`Sent cancellation notifications to ${uniqueUserIds.length} participants`);
+      }
       
-      await Promise.all(notificationPromises);
-      console.log(`Sent cancellation notifications to ${uniqueUserIds.length} participants`);
+      // Log guest registrations that won't receive notifications
+      const guestCount = tournament.registrations.filter(r => r.userId === null).length;
+      if (guestCount > 0) {
+        console.log(`Note: ${guestCount} guest registrations will not receive notifications`);
+      }
     }
 
     // Try to delete posters from Cloudinary (don't fail if it errors)

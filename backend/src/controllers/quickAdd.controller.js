@@ -7,16 +7,16 @@ import { createNotification } from '../services/notification.service.js';
 export const quickAddPlayer = async (req, res) => {
   try {
     const { tournamentId } = req.params;
-    const { name, email, phone, categoryId, gender } = req.body;
+    const { name, categoryId } = req.body;
     const adminId = req.user.id;
 
-    console.log('🎯 Quick Add Player Request:', { tournamentId, name, email, categoryId });
+    console.log('🎯 Quick Add Player Request:', { tournamentId, name, categoryId });
 
-    // Validate required fields
-    if (!name || !email || !phone || !categoryId) {
+    // Validate required fields - ONLY name and category
+    if (!name || !categoryId) {
       return res.status(400).json({
         success: false,
-        error: 'Name, email, phone, and category are required'
+        error: 'Name and category are required'
       });
     }
 
@@ -44,98 +44,30 @@ export const quickAddPlayer = async (req, res) => {
       });
     }
 
-    // ADMIN OVERRIDE: Quick Add bypasses max participants limit
     console.log(`✅ Category found: ${category.name}, Current registrations: ${category.registrationCount || 0}, Max: ${category.maxParticipants || 'Unlimited'}`);
     console.log('✅ Admin Quick Add - Bypassing all limits');
 
-    // Check if user exists with this email
-    let user = await prisma.user.findUnique({
-      where: { email }
-    });
-
-    let userId = null;
-    let isGuestRegistration = false;
-
-    if (user) {
-      // User exists - use their account
-      console.log('✅ Existing user found:', user.email);
-      userId = user.id;
-
-      // Check if already registered in this category
-      const existingRegistration = await prisma.registration.findFirst({
-        where: {
-          userId: user.id,
-          categoryId: categoryId
-        }
-      });
-
-      if (existingRegistration) {
-        console.log('❌ User already registered in this category');
-        return res.status(400).json({
-          success: false,
-          error: 'Player is already registered in this category'
-        });
-      }
-    } else {
-      // User doesn't exist - create guest registration (NO user account)
-      console.log('📝 Creating guest registration (no user account)...');
-      isGuestRegistration = true;
-
-      // Check if guest with same email already registered in this category
-      const existingGuestRegistration = await prisma.registration.findFirst({
-        where: {
-          guestEmail: email,
-          categoryId: categoryId
-        }
-      });
-
-      if (existingGuestRegistration) {
-        console.log('❌ Guest already registered in this category');
-        return res.status(400).json({
-          success: false,
-          error: 'Player is already registered in this category'
-        });
-      }
-    }
-
-    console.log('📝 Creating registration...');
-    // Create registration
-    const registrationData = {
-      tournamentId: tournamentId,
-      categoryId: categoryId,
-      amountTotal: 0,
-      amountWallet: 0,
-      amountRazorpay: 0,
-      status: 'confirmed',
-      paymentStatus: 'quick_added',
-      isQuickAdded: true,
-      quickAddedBy: adminId
-    };
-
-    if (isGuestRegistration) {
-      // Guest registration - no userId
-      registrationData.userId = null;
-      registrationData.guestName = name;
-      registrationData.guestEmail = email;
-      registrationData.guestPhone = phone;
-      registrationData.guestGender = gender || 'Male';
-    } else {
-      // User registration
-      registrationData.userId = userId;
-    }
-
+    console.log('📝 Creating guest registration with name only...');
+    
+    // Create guest registration with ONLY name
     const registration = await prisma.registration.create({
-      data: registrationData,
+      data: {
+        userId: null, // No user account
+        tournamentId: tournamentId,
+        categoryId: categoryId,
+        guestName: name, // Only store the name
+        guestEmail: null, // No email
+        guestPhone: null, // No phone
+        guestGender: null, // No gender
+        amountTotal: 0,
+        amountWallet: 0,
+        amountRazorpay: 0,
+        status: 'confirmed',
+        paymentStatus: 'quick_added',
+        isQuickAdded: true,
+        quickAddedBy: adminId
+      },
       include: {
-        user: user ? {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            phone: true,
-            gender: true
-          }
-        } : undefined,
         category: {
           select: {
             id: true,
@@ -159,39 +91,14 @@ export const quickAddPlayer = async (req, res) => {
     });
     console.log('✅ Category registration count updated');
 
-    // Send notification only if user exists
-    if (user) {
-      await createNotification({
-        userId: user.id,
-        type: 'QUICK_ADDED',
-        title: 'Added to Tournament',
-        message: `You have been added to ${tournament.name} - ${category.name} category by admin`,
-        data: JSON.stringify({
-          tournamentId: tournament.id,
-          tournamentName: tournament.name,
-          categoryId: category.id,
-          categoryName: category.name
-        })
-      });
-      console.log('✅ Notification sent');
-    } else {
-      console.log('ℹ️ Guest registration - no notification sent');
-    }
-
     console.log('🎉 Quick Add completed successfully!');
     res.json({
       success: true,
-      message: isGuestRegistration 
-        ? 'Guest player added successfully (no account created)' 
-        : 'Player added successfully',
+      message: 'Player added successfully',
       registration: {
         ...registration,
-        // Add guest info to response for display
-        displayName: isGuestRegistration ? name : registration.user?.name,
-        displayEmail: isGuestRegistration ? email : registration.user?.email,
-        displayPhone: isGuestRegistration ? phone : registration.user?.phone,
-        displayGender: isGuestRegistration ? (gender || 'Male') : registration.user?.gender,
-        isGuest: isGuestRegistration
+        displayName: name,
+        isGuest: true
       }
     });
   } catch (error) {
@@ -216,15 +123,6 @@ export const getQuickAddedPlayers = async (req, res) => {
         isQuickAdded: true
       },
       include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            phone: true,
-            gender: true
-          }
-        },
         category: {
           select: {
             id: true,
@@ -239,14 +137,11 @@ export const getQuickAddedPlayers = async (req, res) => {
       }
     });
 
-    // Format response to include guest info
+    // Format response - only show name
     const formattedRegistrations = registrations.map(reg => ({
       ...reg,
-      displayName: reg.userId ? reg.user?.name : reg.guestName,
-      displayEmail: reg.userId ? reg.user?.email : reg.guestEmail,
-      displayPhone: reg.userId ? reg.user?.phone : reg.guestPhone,
-      displayGender: reg.userId ? reg.user?.gender : reg.guestGender,
-      isGuest: !reg.userId
+      displayName: reg.guestName, // Only name is stored
+      isGuest: true
     }));
 
     res.json({

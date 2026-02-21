@@ -94,12 +94,10 @@ const createRegistration = async (req, res) => {
 
       // Check if already registered
       // Allow re-registration if previous registration was rejected or cancelled
-      const existing = await prisma.registration.findUnique({
+      const existing = await prisma.registration.findFirst({
         where: {
-          userId_categoryId: {
-            userId,
-            categoryId: catId,
-          },
+          userId: userId,
+          categoryId: catId,
         },
       });
 
@@ -161,12 +159,10 @@ const createRegistration = async (req, res) => {
       }
 
       // Check if there's an existing rejected/cancelled registration
-      const existingRejected = await prisma.registration.findUnique({
+      const existingRejected = await prisma.registration.findFirst({
         where: {
-          userId_categoryId: {
-            userId,
-            categoryId: category.id,
-          },
+          userId: userId,
+          categoryId: category.id,
         },
       });
 
@@ -613,12 +609,10 @@ const createRegistrationWithScreenshot = async (req, res) => {
 
       // Check if already registered
       // Allow re-registration if previous registration was rejected or cancelled
-      const existing = await prisma.registration.findUnique({
+      const existing = await prisma.registration.findFirst({
         where: {
-          userId_categoryId: {
-            userId,
-            categoryId: catId,
-          },
+          userId: userId,
+          categoryId: catId,
         },
       });
 
@@ -738,12 +732,10 @@ const createRegistrationWithScreenshot = async (req, res) => {
       }
 
       // Check if there's an existing rejected/cancelled registration
-      const existingRejected = await prisma.registration.findUnique({
+      const existingRejected = await prisma.registration.findFirst({
         where: {
-          userId_categoryId: {
-            userId,
-            categoryId: category.id,
-          },
+          userId: userId,
+          categoryId: category.id,
         },
       });
 

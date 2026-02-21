@@ -150,10 +150,7 @@ const TournamentDetailPage = () => {
   const [showQuickAddModal, setShowQuickAddModal] = useState(false);
   const [quickAddData, setQuickAddData] = useState({
     name: '',
-    email: '',
-    phone: '',
-    categoryId: '',
-    gender: 'Male'
+    categoryId: ''
   });
   const [quickAddLoading, setQuickAddLoading] = useState(false);
   const [quickAddError, setQuickAddError] = useState('');
@@ -332,9 +329,9 @@ const TournamentDetailPage = () => {
     setQuickAddError('');
     setQuickAddSuccess('');
 
-    // Validation
-    if (!quickAddData.name || !quickAddData.email || !quickAddData.phone || !quickAddData.categoryId) {
-      setQuickAddError('All fields are required');
+    // Validation - only name and category required
+    if (!quickAddData.name || !quickAddData.categoryId) {
+      setQuickAddError('Name and category are required');
       return;
     }
 
@@ -347,10 +344,7 @@ const TournamentDetailPage = () => {
         // Reset form
         setQuickAddData({
           name: '',
-          email: '',
-          phone: '',
-          categoryId: '',
-          gender: 'Male'
+          categoryId: ''
         });
         // Refresh tournament data to update registration count
         setTimeout(() => {
@@ -1281,32 +1275,6 @@ const TournamentDetailPage = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Email Address <span className="text-red-400">*</span>
-                </label>
-                <input
-                  type="email"
-                  value={quickAddData.email}
-                  onChange={(e) => setQuickAddData({ ...quickAddData, email: e.target.value })}
-                  placeholder="player@example.com"
-                  className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Phone Number <span className="text-red-400">*</span>
-                </label>
-                <input
-                  type="tel"
-                  value={quickAddData.phone}
-                  onChange={(e) => setQuickAddData({ ...quickAddData, phone: e.target.value })}
-                  placeholder="+91 9876543210"
-                  className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
                   Category <span className="text-red-400">*</span>
                 </label>
                 <select
@@ -1322,25 +1290,6 @@ const TournamentDetailPage = () => {
                     </option>
                   ))}
                 </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Gender
-                </label>
-                <select
-                  value={quickAddData.gender}
-                  onChange={(e) => setQuickAddData({ ...quickAddData, gender: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                >
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-              <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4">
-                <p className="text-blue-300 text-sm">
-                  <strong>Note:</strong> This player will be added without payment. A temporary account will be created if the email doesn't exist.
-                </p>
               </div>
               <div className="flex gap-3 pt-2">
                 <button

@@ -241,7 +241,7 @@ model Category {
 
 model Registration {
   id                 String     @id @default(uuid())
-  userId             String
+  userId             String?    // Optional - null for guest registrations
   tournamentId       String
   categoryId         String
   partnerId          String?
@@ -269,20 +269,25 @@ model Registration {
   refundPaymentScreenshotPublicId String? // Cloudinary public ID
   isQuickAdded       Boolean    @default(false) // True if added by super admin without payment
   quickAddedBy       String?    // Admin user ID who quick added this player
+  // Guest registration fields (when userId is null)
+  guestName          String?    // Name for guest registrations
+  guestEmail         String?    // Email for guest registrations
+  guestPhone         String?    // Phone for guest registrations
+  guestGender        String?    // Gender for guest registrations
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
   partnerToken       String?
   partner            User?      @relation("PartnerRegistrations", fields: [partnerId], references: [id])
   category           Category   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   tournament         Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
-  user               User       @relation(fields: [userId], references: [id])
+  user               User?      @relation(fields: [userId], references: [id])
   paymentVerification PaymentVerification?
 
-  @@unique([userId, categoryId])
   @@index([userId])
   @@index([tournamentId])
   @@index([categoryId])
   @@index([partnerId])
+  @@index([guestEmail])
 }
 
 model Notification {

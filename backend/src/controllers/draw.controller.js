@@ -277,13 +277,33 @@ const getDraw = async (req, res) => {
 
     // Fetch all unique player IDs from matches
     const playerIds = new Set();
+    const guestPlayerIds = new Set();
+    
     matches.forEach(match => {
-      if (match.player1Id) playerIds.add(match.player1Id);
-      if (match.player2Id) playerIds.add(match.player2Id);
-      if (match.winnerId) playerIds.add(match.winnerId);
+      if (match.player1Id) {
+        if (match.player1Id.startsWith('guest-')) {
+          guestPlayerIds.add(match.player1Id);
+        } else {
+          playerIds.add(match.player1Id);
+        }
+      }
+      if (match.player2Id) {
+        if (match.player2Id.startsWith('guest-')) {
+          guestPlayerIds.add(match.player2Id);
+        } else {
+          playerIds.add(match.player2Id);
+        }
+      }
+      if (match.winnerId) {
+        if (match.winnerId.startsWith('guest-')) {
+          guestPlayerIds.add(match.winnerId);
+        } else {
+          playerIds.add(match.winnerId);
+        }
+      }
     });
 
-    // Fetch player data
+    // Fetch player data from User table
     const players = await prisma.user.findMany({
       where: {
         id: { in: Array.from(playerIds) }
@@ -294,10 +314,40 @@ const getDraw = async (req, res) => {
       }
     });
 
-    // Create a player lookup map
+    // Fetch guest player data from Registration table
+    const guestRegistrationIds = Array.from(guestPlayerIds).map(id => id.replace('guest-', ''));
+    const guestRegistrations = await prisma.registration.findMany({
+      where: {
+        id: { in: guestRegistrationIds }
+      },
+      select: {
+        id: true,
+        guestName: true,
+        userId: true,
+        user: {
+          select: {
+            id: true,
+            name: true
+          }
+        }
+      }
+    });
+
+    // Create a player lookup map (combines users and guests)
     const playerMap = {};
+    
+    // Add regular users
     players.forEach(player => {
       playerMap[player.id] = player;
+    });
+    
+    // Add guest players
+    guestRegistrations.forEach(reg => {
+      const guestId = `guest-${reg.id}`;
+      playerMap[guestId] = {
+        id: guestId,
+        name: reg.userId && reg.user ? reg.user.name : (reg.guestName || 'Unknown')
+      };
     });
 
     // Parse the stored bracket JSON
@@ -362,6 +412,15 @@ const getDraw = async (req, res) => {
     } else if (bracketData.format === 'ROUND_ROBIN' && bracketData.groups) {
       // Update round robin bracket with match results
       bracketData.groups.forEach((group, groupIndex) => {
+        // Update participant names in the group
+        if (group.participants && Array.isArray(group.participants)) {
+          group.participants.forEach((participant, pIndex) => {
+            if (participant.id && playerMap[participant.id]) {
+              participant.name = playerMap[participant.id].name;
+            }
+          });
+        }
+        
         if (group.matches && Array.isArray(group.matches)) {
           group.matches.forEach((match, matchIndex) => {
             // Find the corresponding match in database by match number
@@ -421,6 +480,15 @@ const getDraw = async (req, res) => {
       // Update round robin groups in mixed format
       if (bracketData.groups) {
         bracketData.groups.forEach((group, groupIndex) => {
+          // Update participant names in the group
+          if (group.participants && Array.isArray(group.participants)) {
+            group.participants.forEach((participant, pIndex) => {
+              if (participant.id && playerMap[participant.id]) {
+                participant.name = playerMap[participant.id].name;
+              }
+            });
+          }
+          
           if (group.matches && Array.isArray(group.matches)) {
             group.matches.forEach((match, matchIndex) => {
               const dbMatch = matches.find(m => 

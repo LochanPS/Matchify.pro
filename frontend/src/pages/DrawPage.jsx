@@ -917,7 +917,9 @@ const DrawPage = () => {
                           
                           {/* Player Info */}
                           <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-white truncate">{registration.user?.name || 'Unknown'}</p>
+                            <p className="font-semibold text-white truncate">
+                              {registration.displayName || registration.user?.name || registration.guestName || 'Unknown'}
+                            </p>
                             <div className="flex items-center gap-2 mt-1 flex-wrap">
                               {registration.status === 'confirmed' ? (
                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-500/20 border border-green-500/30 rounded-full text-xs text-green-300">
@@ -928,6 +930,13 @@ const DrawPage = () => {
                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-500/20 border border-amber-500/30 rounded-full text-xs text-amber-300">
                                   <AlertCircle className="w-3 h-3" />
                                   Pending
+                                </span>
+                              )}
+                              
+                              {/* Show guest badge if it's a guest registration */}
+                              {registration.isGuest && (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-purple-500/20 border border-purple-500/30 rounded-full text-xs text-purple-300">
+                                  Guest
                                 </span>
                               )}
                               

@@ -1,0 +1,94 @@
+/* ===== MOBILE RESPONSIVENESS DISABLED ===== */
+/* 
+ * Desktop version will be shown on ALL devices (mobile, tablet, desktop)
+ * Users can pinch-to-zoom on mobile to see content
+ * This provides a consistent experience across all devices
+ * 
+ * To re-enable mobile responsiveness:
+ * - Restore the original mobile-fixes.css from git history
+ * - Or uncomment the code at the bottom of this file
+ */
+
+/* ===== BASIC FIXES (Keep these) ===== */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  /* Allow horizontal scrolling on mobile (for desktop view) */
+  overflow-x: auto;
+  /* Smooth scrolling */
+  scroll-behavior: smooth;
+  /* Better text rendering */
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  /* Allow pinch-to-zoom */
+  touch-action: manipulation;
+}
+
+body {
+  /* Allow horizontal scrolling on mobile (for desktop view) */
+  overflow-x: auto;
+  /* Minimum font size */
+  font-size: 16px;
+  line-height: 1.5;
+  /* Better font rendering */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Ensure images don't overflow */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Better scrolling on mobile */
+* {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  * {
+    background: white !important;
+    color: black !important;
+  }
+}
+
+/* ===== END OF ACTIVE CSS ===== */
+
+/* 
+ * ===== MOBILE-SPECIFIC CSS (DISABLED) =====
+ * 
+ * All the code below is commented out.
+ * Everyone will see the desktop version.
+ * 
+ * To re-enable, remove the comment markers below.
+ */
+
+/*
+
+[All mobile-specific CSS has been removed]
+
+To restore mobile responsiveness:
+1. Go to GitHub: https://github.com/LochanPS/Matchify.pro
+2. Find commit: 7015bae or 2871f98
+3. Restore the mobile-fixes.css file from that commit
+
+*/

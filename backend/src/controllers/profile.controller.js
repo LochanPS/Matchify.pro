@@ -1,0 +1,502 @@
+import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma.js';
+import bcrypt from 'bcryptjs';
+import cloudinary from '../config/cloudinary.js';
+import { updateProfileSchema, changePasswordSchema, profilePhotoSchema } from '../validators/profile.validator.js';
+import { generatePlayerCode, generateUmpireCode } from './authController.js';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Check if Cloudinary is properly configured
+const isCloudinaryConfigured = () => {
+  return process.env.CLOUDINARY_CLOUD_NAME && 
+         process.env.CLOUDINARY_API_KEY && 
+         process.env.CLOUDINARY_API_SECRET &&
+         process.env.CLOUDINARY_CLOUD_NAME !== 'your-cloudinary-cloud-name';
+};
+
+// GET /profile - Fetch own profile
+export const getProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    let user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        phone: true,
+        roles: true,
+        playerCode: true,
+        umpireCode: true,
+        profilePhoto: true,
+        city: true,
+        state: true,
+        country: true,
+        dateOfBirth: true,
+        gender: true,
+        totalPoints: true,
+        tournamentsPlayed: true,
+        matchesWon: true,
+        matchesLost: true,
+        walletBalance: true,
+        isActive: true,
+        isVerified: true,
+        isSuspended: true,
+        createdAt: true,
+        updatedAt: true
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Auto-generate codes for users without them (safety net)
+    if (!user.playerCode || !user.umpireCode) {
+      const updates = {};
+      if (!user.playerCode) {
+        updates.playerCode = await generatePlayerCode();
+      }
+      if (!user.umpireCode) {
+        updates.umpireCode = await generateUmpireCode();
+      }
+      
+      user = await prisma.user.update({
+        where: { id: userId },
+        data: updates,
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          phone: true,
+          roles: true,
+          playerCode: true,
+          umpireCode: true,
+          profilePhoto: true,
+          city: true,
+          state: true,
+          country: true,
+          dateOfBirth: true,
+          gender: true,
+          totalPoints: true,
+          tournamentsPlayed: true,
+          matchesWon: true,
+          matchesLost: true,
+          walletBalance: true,
+          isActive: true,
+          isVerified: true,
+          isSuspended: true,
+          createdAt: true,
+          updatedAt: true
+        }
+      });
+      
+      console.log(`✅ Auto-generated codes for user: ${user.email}`);
+    }
+
+    // Calculate additional stats
+    const stats = {
+      tournaments: user.tournamentsPlayed,
+      matches: user.matchesWon + user.matchesLost,
+      points: user.totalPoints,
+      winRate: user.matchesWon + user.matchesLost > 0 
+        ? Math.round((user.matchesWon / (user.matchesWon + user.matchesLost)) * 100) 
+        : 0
+    };
+
+    const profile = {
+      ...user,
+      stats
+    };
+
+    res.json({
+      message: 'Profile retrieved successfully',
+      user: profile
+    });
+  } catch (error) {
+    console.error('Get profile error:', error);
+    res.status(500).json({ 
+      error: 'Failed to fetch profile',
+      details: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
+  }
+};
+
+// PUT /profile - Update profile
+export const updateProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    console.log('Profile update request body:', req.body);
+
+    // Validate input with Zod
+    const validationResult = updateProfileSchema.safeParse(req.body);
+    
+    if (!validationResult.success) {
+      console.log('Validation errors:', validationResult.error.errors);
+      return res.status(400).json({
+        error: 'Validation failed',
+        details: validationResult.error.errors.map(err => ({
+          field: err.path.join('.'),
+          message: err.message
+        }))
+      });
+    }
+
+    const validatedData = validationResult.data;
+    console.log('Validated data:', validatedData);
+
+    // Get current user to check existing name and dateOfBirth
+    const currentUser = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { name: true, dateOfBirth: true }
+    });
+
+    // Check if trying to update name when it already exists
+    if (validatedData.name && currentUser.name) {
+      return res.status(400).json({ 
+        error: 'Name cannot be changed once set. This is a permanent field.' 
+      });
+    }
+
+    // Check if trying to update dateOfBirth when it already exists
+    if (validatedData.dateOfBirth && currentUser.dateOfBirth) {
+      return res.status(400).json({ 
+        error: 'Date of Birth cannot be changed once set. This is a permanent field.' 
+      });
+    }
+
+    // Check if phone already exists (if updating phone)
+    if (validatedData.phone && validatedData.phone !== '') {
+      // Clean phone number (remove +91 if present)
+      const cleanPhone = validatedData.phone.replace(/^\+91/, '').replace(/\s/g, '');
+      
+      const existingUser = await prisma.user.findFirst({
+        where: {
+          phone: cleanPhone,
+          id: { not: userId }
+        }
+      });
+
+      if (existingUser) {
+        return res.status(409).json({ error: 'Phone number is already in use by another user' });
+      }
+    }
+
+    // Prepare update data - name and dateOfBirth can only be set if currently empty
+    const updateData = {};
+    if (validatedData.name && !currentUser.name) updateData.name = validatedData.name;
+    if (validatedData.dateOfBirth && !currentUser.dateOfBirth) {
+      updateData.dateOfBirth = new Date(validatedData.dateOfBirth);
+    }
+    // Clean phone number before saving
+    if (validatedData.phone !== undefined && validatedData.phone !== '') {
+      updateData.phone = validatedData.phone.replace(/^\+91/, '').replace(/\s/g, '');
+    }
+    if (validatedData.city !== undefined) updateData.city = validatedData.city || null;
+    if (validatedData.state !== undefined) updateData.state = validatedData.state || null;
+    if (validatedData.country !== undefined) updateData.country = validatedData.country || null;
+    if (validatedData.gender !== undefined && validatedData.gender !== '') updateData.gender = validatedData.gender;
+
+    // Update user
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: updateData,
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        phone: true,
+        roles: true,
+        playerCode: true,
+        umpireCode: true,
+        profilePhoto: true,
+        city: true,
+        state: true,
+        country: true,
+        dateOfBirth: true,
+        gender: true,
+        totalPoints: true,
+        tournamentsPlayed: true,
+        matchesWon: true,
+        matchesLost: true,
+        walletBalance: true,
+        isActive: true,
+        isVerified: true,
+        createdAt: true,
+        updatedAt: true
+      }
+    });
+
+    res.json({
+      message: 'Profile updated successfully',
+      user: updatedUser
+    });
+  } catch (error) {
+    console.error('Update profile error:', error);
+    res.status(500).json({ 
+      error: 'Failed to update profile',
+      details: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
+  }
+};
+
+// POST /profile/photo - Upload profile photo
+export const uploadProfilePhoto = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    // Validate file with Zod
+    const fileValidation = profilePhotoSchema.safeParse({
+      mimetype: req.file.mimetype,
+      size: req.file.size
+    });
+
+    if (!fileValidation.success) {
+      return res.status(400).json({
+        error: 'File validation failed',
+        details: fileValidation.error.errors.map(err => ({
+          field: err.path.join('.'),
+          message: err.message
+        }))
+      });
+    }
+
+    // Get current user to delete old photo
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { profilePhoto: true }
+    });
+
+    let photoUrl;
+
+    // Check if Cloudinary is configured
+    if (isCloudinaryConfigured()) {
+      // Delete old photo from Cloudinary if exists
+      if (user.profilePhoto && user.profilePhoto.includes('cloudinary')) {
+        try {
+          const urlParts = user.profilePhoto.split('/');
+          const publicIdWithExtension = urlParts[urlParts.length - 1];
+          const publicId = `matchify/profiles/${publicIdWithExtension.split('.')[0]}`;
+          await cloudinary.uploader.destroy(publicId);
+        } catch (deleteError) {
+          console.warn('Failed to delete old profile photo:', deleteError.message);
+        }
+      }
+
+      // Upload to Cloudinary
+      const result = await new Promise((resolve, reject) => {
+        cloudinary.uploader.upload_stream(
+          {
+            folder: 'matchify/profiles',
+            public_id: `user_${userId}_${Date.now()}`,
+            transformation: [
+              { width: 400, height: 400, crop: 'fill', gravity: 'face' },
+              { quality: 'auto', fetch_format: 'auto' }
+            ],
+            allowed_formats: ['jpg', 'jpeg', 'png', 'webp']
+          },
+          (error, result) => {
+            if (error) {
+              console.error('Cloudinary upload error:', error);
+              reject(error);
+            } else {
+              resolve(result);
+            }
+          }
+        ).end(req.file.buffer);
+      });
+      
+      photoUrl = result.secure_url;
+    } else {
+      // Fallback: Save to local uploads folder
+      console.log('Cloudinary not configured, using local storage');
+      
+      const uploadsDir = path.join(__dirname, '../../uploads/profiles');
+      
+      // Create uploads directory if it doesn't exist
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+      }
+
+      // Delete old local photo if exists
+      if (user.profilePhoto && user.profilePhoto.includes('/uploads/profiles/')) {
+        try {
+          const oldFileName = user.profilePhoto.split('/uploads/profiles/')[1];
+          const oldFilePath = path.join(uploadsDir, oldFileName);
+          if (fs.existsSync(oldFilePath)) {
+            fs.unlinkSync(oldFilePath);
+          }
+        } catch (deleteError) {
+          console.warn('Failed to delete old local photo:', deleteError.message);
+        }
+      }
+
+      // Generate unique filename
+      const fileExtension = req.file.mimetype.split('/')[1];
+      const fileName = `user_${userId}_${Date.now()}.${fileExtension}`;
+      const filePath = path.join(uploadsDir, fileName);
+
+      // Write file to disk
+      fs.writeFileSync(filePath, req.file.buffer);
+
+      // Generate URL for the uploaded file
+      const baseUrl = process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 5000}`;
+      photoUrl = `${baseUrl}/uploads/profiles/${fileName}`;
+    }
+
+    // Update user with new photo URL
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: { profilePhoto: photoUrl },
+      select: {
+        id: true,
+        profilePhoto: true,
+        name: true
+      }
+    });
+
+    res.json({
+      message: 'Profile photo updated successfully',
+      profilePhoto: updatedUser.profilePhoto,
+      user: updatedUser
+    });
+  } catch (error) {
+    console.error('Upload photo error:', error);
+    res.status(500).json({ 
+      error: 'Failed to upload profile photo',
+      details: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
+  }
+};
+
+// POST /profile/password - Change password
+export const changePassword = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // Validate input with Zod
+    const validationResult = changePasswordSchema.safeParse(req.body);
+    
+    if (!validationResult.success) {
+      return res.status(400).json({
+        error: 'Validation failed',
+        details: validationResult.error.errors.map(err => ({
+          field: err.path.join('.'),
+          message: err.message
+        }))
+      });
+    }
+
+    const { currentPassword, newPassword } = validationResult.data;
+
+    // Get user with password
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, password: true }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Verify current password
+    const isValidPassword = await bcrypt.compare(currentPassword, user.password);
+    if (!isValidPassword) {
+      return res.status(401).json({ error: 'Current password is incorrect' });
+    }
+
+    // Check if new password is different from current
+    const isSamePassword = await bcrypt.compare(newPassword, user.password);
+    if (isSamePassword) {
+      return res.status(400).json({ error: 'New password must be different from current password' });
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
+
+    // Update password
+    await prisma.user.update({
+      where: { id: userId },
+      data: { password: hashedPassword }
+    });
+
+    res.json({ message: 'Password changed successfully' });
+  } catch (error) {
+    console.error('Change password error:', error);
+    res.status(500).json({ 
+      error: 'Failed to change password',
+      details: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
+  }
+};
+
+// DELETE /profile/photo - Delete profile photo
+export const deleteProfilePhoto = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // Get current user
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { profilePhoto: true }
+    });
+
+    if (!user.profilePhoto) {
+      return res.status(400).json({ error: 'No profile photo to delete' });
+    }
+
+    // Delete photo from storage
+    try {
+      if (user.profilePhoto.includes('cloudinary') && isCloudinaryConfigured()) {
+        // Delete from Cloudinary
+        const urlParts = user.profilePhoto.split('/');
+        const publicIdWithExtension = urlParts[urlParts.length - 1];
+        const publicId = `matchify/profiles/${publicIdWithExtension.split('.')[0]}`;
+        await cloudinary.uploader.destroy(publicId);
+      } else if (user.profilePhoto.includes('/uploads/profiles/')) {
+        // Delete local file
+        const fileName = user.profilePhoto.split('/uploads/profiles/')[1];
+        const uploadsDir = path.join(__dirname, '../../uploads/profiles');
+        const filePath = path.join(uploadsDir, fileName);
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
+      }
+    } catch (deleteError) {
+      console.warn('Failed to delete photo from storage:', deleteError.message);
+    }
+
+    // Update user to remove photo URL
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: { profilePhoto: null },
+      select: {
+        id: true,
+        profilePhoto: true,
+        name: true
+      }
+    });
+
+    res.json({
+      message: 'Profile photo deleted successfully',
+      user: updatedUser
+    });
+  } catch (error) {
+    console.error('Delete photo error:', error);
+    res.status(500).json({ 
+      error: 'Failed to delete profile photo',
+      details: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
+  }
+};

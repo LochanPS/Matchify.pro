@@ -661,6 +661,15 @@ const getDraw = async (req, res) => {
       'X-Content-Type-Options': 'nosniff'
     });
 
+    // SAFETY CHECK: Ensure bracketData is valid before sending
+    if (!bracketData || typeof bracketData !== 'object') {
+      console.warn('⚠️ Invalid bracketData, sending minimal structure');
+      bracketData = {
+        format: draw.format || 'KNOCKOUT',
+        rounds: []
+      };
+    }
+
     res.json({
       success: true,
       draw: {
@@ -674,10 +683,19 @@ const getDraw = async (req, res) => {
     });
    
   } catch (error) {
-    console.error('Get draw error:', error);
+    console.error('❌ Get draw error:', error);
+    console.error('Error stack:', error.stack);
+    console.error('Error details:', {
+      tournamentId: req.params.tournamentId,
+      categoryId: req.params.categoryId,
+      message: error.message
+    });
+    
+    // Return a safe error response instead of crashing
     res.status(500).json({ 
       success: false,
-      error: 'Failed to fetch draw' 
+      error: 'Failed to fetch draw',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 };

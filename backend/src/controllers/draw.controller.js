@@ -750,6 +750,220 @@ const deleteDraw = async (req, res) => {
 };
 
 /**
+ * Restart draw - Reset all match results while keeping bracket structure
+ * POST /api/tournaments/:tournamentId/categories/:categoryId/draw/restart
+ */
+const restartDraw = async (req, res) => {
+  try {
+    const { tournamentId, categoryId } = req.params;
+    const userId = req.user.id;
+
+    console.log('🔄 Restarting draw for tournament:', tournamentId, 'category:', categoryId);
+
+    // Verify tournament exists and user is the organizer
+    const tournament = await prisma.tournament.findUnique({
+      where: { id: tournamentId }
+    });
+
+    if (!tournament) {
+      return res.status(404).json({ 
+        success: false,
+        error: 'Tournament not found' 
+      });
+    }
+
+    if (tournament.organizerId !== userId) {
+      return res.status(403).json({ 
+        success: false,
+        error: 'Only the organizer can restart draws' 
+      });
+    }
+
+    // Check if any matches are currently IN_PROGRESS
+    const inProgressMatches = await prisma.match.findMany({
+      where: {
+        tournamentId,
+        categoryId,
+        status: 'IN_PROGRESS'
+      }
+    });
+
+    if (inProgressMatches.length > 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'Cannot restart draw while matches are in progress. Please complete or cancel ongoing matches first.'
+      });
+    }
+
+    // Get the draw
+    const draw = await prisma.draw.findUnique({
+      where: {
+        tournamentId_categoryId: { tournamentId, categoryId }
+      }
+    });
+
+    if (!draw) {
+      return res.status(404).json({
+        success: false,
+        error: 'Draw not found'
+      });
+    }
+
+    // Reset all matches - clear results but keep player assignments and structure
+    console.log('🧹 Resetting all match results...');
+    const matches = await prisma.match.findMany({
+      where: { tournamentId, categoryId }
+    });
+
+    for (const match of matches) {
+      const updateData = {
+        winnerId: null,
+        scoreJson: null,
+        startedAt: null,
+        completedAt: null,
+        umpireId: null,
+        updatedAt: new Date()
+      };
+
+      // Set status based on player assignment
+      if (match.player1Id && match.player2Id) {
+        updateData.status = 'READY';
+      } else {
+        updateData.status = 'PENDING';
+      }
+
+      await prisma.match.update({
+        where: { id: match.id },
+        data: updateData
+      });
+    }
+
+    console.log(`✅ Reset ${matches.length} matches`);
+
+    // Reset bracket JSON - clear winners but keep structure
+    console.log('🔧 Resetting bracket JSON...');
+    let bracketJson = JSON.parse(draw.bracketJson);
+
+    // Reset knockout bracket
+    if (bracketJson.rounds && Array.isArray(bracketJson.rounds)) {
+      bracketJson.rounds.forEach(round => {
+        if (round.matches && Array.isArray(round.matches)) {
+          round.matches.forEach(match => {
+            match.winner = null;
+            match.winnerId = null;
+            match.score = null;
+            match.scoreJson = null;
+            match.completed = false;
+            match.status = match.player1 && match.player2 ? 'ready' : 'pending';
+            
+            // Clear dbMatch data
+            if (match.dbMatch) {
+              match.dbMatch.winnerId = null;
+              match.dbMatch.scoreJson = null;
+              match.dbMatch.score = null;
+              match.dbMatch.startedAt = null;
+              match.dbMatch.completedAt = null;
+              match.dbMatch.status = match.player1 && match.player2 ? 'READY' : 'PENDING';
+            }
+          });
+        }
+      });
+    }
+
+    // Reset round robin groups
+    if (bracketJson.groups && Array.isArray(bracketJson.groups)) {
+      bracketJson.groups.forEach(group => {
+        // Reset participant standings
+        if (group.participants && Array.isArray(group.participants)) {
+          group.participants.forEach(p => {
+            p.played = 0;
+            p.wins = 0;
+            p.losses = 0;
+            p.points = 0;
+          });
+        }
+        
+        // Reset group matches
+        if (group.matches && Array.isArray(group.matches)) {
+          group.matches.forEach(match => {
+            match.winner = null;
+            match.winnerId = null;
+            match.score = null;
+            match.scoreJson = null;
+            match.completed = false;
+            match.status = 'pending';
+            
+            if (match.dbMatch) {
+              match.dbMatch.winnerId = null;
+              match.dbMatch.scoreJson = null;
+              match.dbMatch.score = null;
+              match.dbMatch.startedAt = null;
+              match.dbMatch.completedAt = null;
+              match.dbMatch.status = 'PENDING';
+            }
+          });
+        }
+      });
+    }
+
+    // Reset hybrid format knockout stage
+    if (bracketJson.knockout && bracketJson.knockout.rounds) {
+      bracketJson.knockout.rounds.forEach(round => {
+        if (round.matches && Array.isArray(round.matches)) {
+          round.matches.forEach(match => {
+            match.winner = null;
+            match.winnerId = null;
+            match.score = null;
+            match.scoreJson = null;
+            match.completed = false;
+            match.status = match.player1 && match.player2 ? 'ready' : 'pending';
+            
+            if (match.dbMatch) {
+              match.dbMatch.winnerId = null;
+              match.dbMatch.scoreJson = null;
+              match.dbMatch.score = null;
+              match.dbMatch.startedAt = null;
+              match.dbMatch.completedAt = null;
+              match.dbMatch.status = match.player1 && match.player2 ? 'READY' : 'PENDING';
+            }
+          });
+        }
+      });
+    }
+
+    // Update the draw with reset bracket JSON
+    await prisma.draw.update({
+      where: {
+        tournamentId_categoryId: { tournamentId, categoryId }
+      },
+      data: {
+        bracketJson: JSON.stringify(bracketJson),
+        updatedAt: new Date()
+      }
+    });
+
+    console.log('✅ Draw restarted successfully');
+
+    res.json({
+      success: true,
+      message: 'Draw restarted successfully. All match results have been cleared.',
+      data: {
+        matchesReset: matches.length,
+        playersKept: true,
+        structurePreserved: true
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Error restarting draw:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to restart draw'
+    });
+  }
+};
+
+/**
  * Get registered players for a category (for draw assignment)
  * GET /api/tournaments/:tournamentId/categories/:categoryId/players
  */
@@ -2515,6 +2729,7 @@ export {
   generateDraw,
   getDraw,
   deleteDraw,
+  restartDraw,
   createConfiguredDraw,
   getCategoryPlayers,
   assignPlayersToDraw,

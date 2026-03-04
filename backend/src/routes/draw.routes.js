@@ -1,5 +1,5 @@
 import express from 'express';
-import { generateDraw, getDraw, deleteDraw, createConfiguredDraw, getCategoryPlayers, assignPlayersToDraw, bulkAssignAllPlayers, shuffleAssignedPlayers, arrangeKnockoutMatchups, continueToKnockout } from '../controllers/draw.controller.js';
+import { generateDraw, getDraw, deleteDraw, restartDraw, createConfiguredDraw, getCategoryPlayers, assignPlayersToDraw, bulkAssignAllPlayers, shuffleAssignedPlayers, arrangeKnockoutMatchups, continueToKnockout } from '../controllers/draw.controller.js';
 import { authenticate, optionalAuth } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -21,6 +21,9 @@ router.post('/tournaments/:tournamentId/categories/:categoryId/draw/arrange-knoc
 
 // Continue to knockout stage automatically (organizer only)
 router.post('/tournaments/:tournamentId/categories/:categoryId/draw/continue-to-knockout', authenticate, continueToKnockout);
+
+// Restart draw - reset all match results (organizer only)
+router.post('/tournaments/:tournamentId/categories/:categoryId/draw/restart', authenticate, restartDraw);
 
 // Generate draw (organizer only)
 router.post(

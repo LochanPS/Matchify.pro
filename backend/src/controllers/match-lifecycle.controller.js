@@ -224,6 +224,15 @@ export const getMatchDetails = async (req, res) => {
     });
   } catch (error) {
     console.error('Get match details error:', error);
+    
+    // Return 404 if match not found
+    if (error.message === 'Match not found') {
+      return res.status(404).json({
+        success: false,
+        error: 'Match not found'
+      });
+    }
+    
     res.status(500).json({
       success: false,
       error: error.message || 'Failed to get match details'

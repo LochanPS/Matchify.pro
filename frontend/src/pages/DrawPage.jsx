@@ -288,35 +288,53 @@ const DrawPage = () => {
       }
     } catch (err) {
       console.error('❌ Error fetching bracket:', err);
-      console.error('Error details:', {
+      
+      // Enhanced error logging with full details
+      const errorDetails = {
+        message: err.message,
         status: err.response?.status,
         statusText: err.response?.statusText,
-        data: err.response?.data,
-        message: err.message,
-        url: err.config?.url
-      });
+        url: err.config?.url,
+        method: err.config?.method,
+        responseData: err.response?.data,
+        hasResponse: !!err.response,
+        hasRequest: !!err.request
+      };
       
-      // Log the full error object for debugging
+      console.error('📋 Full Error Details:', errorDetails);
+      
+      // Log specific error type
       if (err.response) {
-        console.error('Full response error:', {
+        console.error('🔴 Server Response Error:', {
           status: err.response.status,
-          headers: err.response.headers,
-          data: err.response.data
+          statusText: err.response.statusText,
+          data: err.response.data,
+          headers: err.response.headers
         });
       } else if (err.request) {
-        console.error('No response received:', err.request);
+        console.error('🔴 No Response Received (Network Error):', {
+          request: err.request,
+          message: 'The request was made but no response was received'
+        });
       } else {
-        console.error('Error setting up request:', err.message);
+        console.error('🔴 Request Setup Error:', err.message);
       }
       
+      // Handle different error scenarios
       if (err.response?.status === 404) {
-        console.log('ℹ️ Draw not found (404) - showing "Draw Not Generated Yet"');
+        console.log('ℹ️ Draw not found (404) - This is normal if draw hasn\'t been created yet');
+        console.log('ℹ️ Showing "Draw Not Generated Yet" message');
         setError(null);
         setBracket(null);
+      } else if (err.code === 'ERR_NETWORK' || !err.response) {
+        console.error('⚠️ Network error - Cannot reach server');
+        setError('Network error: Cannot connect to server. Please check your connection and try again.');
+        // Don't clear bracket on network errors - keep existing data
       } else {
-        // For other errors, show error message but don't clear existing bracket
-        console.error('⚠️ API error occurred, showing error message');
-        setError('Failed to load bracket. Please try refreshing the page.');
+        // For other errors, show specific error message
+        const errorMessage = err.response?.data?.error || err.response?.data?.message || 'Failed to load bracket';
+        console.error('⚠️ API error occurred:', errorMessage);
+        setError(`${errorMessage}. Please try refreshing the page.`);
         // Don't clear bracket here - keep existing data if available
       }
     } finally {

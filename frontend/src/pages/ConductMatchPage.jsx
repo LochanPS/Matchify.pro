@@ -57,8 +57,27 @@ const ConductMatchPage = () => {
         }
       }
     } catch (err) {
-      console.error('Error fetching match:', err);
-      setError('Failed to load match details');
+      console.error('❌ Error fetching match:', err);
+      
+      // Enhanced error logging
+      const errorDetails = {
+        message: err.message,
+        status: err.response?.status,
+        statusText: err.response?.statusText,
+        url: err.config?.url,
+        responseData: err.response?.data
+      };
+      console.error('📋 Full Error Details:', errorDetails);
+      
+      // Handle specific error cases
+      if (err.response?.status === 404) {
+        setError('Match not found. It may have been deleted or the ID is incorrect.');
+      } else if (err.code === 'ERR_NETWORK' || !err.response) {
+        setError('Network error: Cannot connect to server. Please check your connection.');
+      } else {
+        const errorMessage = err.response?.data?.error || err.response?.data?.message || 'Failed to load match details';
+        setError(errorMessage);
+      }
     } finally {
       setLoading(false);
       console.log('✅ ConductMatchPage ready - Configuration section should be visible');

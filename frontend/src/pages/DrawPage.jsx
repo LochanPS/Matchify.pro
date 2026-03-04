@@ -292,8 +292,22 @@ const DrawPage = () => {
         status: err.response?.status,
         statusText: err.response?.statusText,
         data: err.response?.data,
-        message: err.message
+        message: err.message,
+        url: err.config?.url
       });
+      
+      // Log the full error object for debugging
+      if (err.response) {
+        console.error('Full response error:', {
+          status: err.response.status,
+          headers: err.response.headers,
+          data: err.response.data
+        });
+      } else if (err.request) {
+        console.error('No response received:', err.request);
+      } else {
+        console.error('Error setting up request:', err.message);
+      }
       
       if (err.response?.status === 404) {
         console.log('ℹ️ Draw not found (404) - showing "Draw Not Generated Yet"');

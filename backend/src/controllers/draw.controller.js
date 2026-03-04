@@ -184,14 +184,7 @@ const generateDraw = async (req, res) => {
     // Generate bracket
     const bracket = bracketService.generateSingleEliminationBracket(participantsWithSeeds);
 
-    // Generate match records from bracket
-    const matches = await matchService.generateMatchesFromBracket(
-      bracket,
-      tournamentId,
-      categoryId
-    );
-
-    // 🧹 CLEANUP: Delete any old matches from previous draws
+    // 🧹 CLEANUP: Delete any old matches from previous draws BEFORE creating new ones
     console.log('🧹 Cleaning up old matches before creating new draw...');
     const deletedCount = await prisma.match.deleteMany({
       where: {
@@ -200,6 +193,15 @@ const generateDraw = async (req, res) => {
       }
     });
     console.log(`✅ Deleted ${deletedCount.count} old matches`);
+
+    // Generate match records from bracket
+    const matches = await matchService.generateMatchesFromBracket(
+      bracket,
+      tournamentId,
+      categoryId
+    );
+
+    console.log(`✅ Created ${matches.length} new matches in database`);
 
     // Save draw to database
     const draw = await prisma.draw.create({
@@ -1375,8 +1377,100 @@ const createConfiguredDraw = async (req, res) => {
       create: { tournamentId, categoryId, format, bracketJson: JSON.stringify(bracketJson) }
     });
 
-    // DON'T create Match records automatically - they will be created when players are assigned
-    // This prevents stale data and ensures matches only exist when there are actual players
+    // 🔥 CRITICAL FIX: Create Match records immediately when draw is created
+    // This ensures matches exist in the database even before players are assigned
+    // Previously, matches were only created during player assignment, causing 404 errors
+    
+    console.log('📝 Creating Match records for draw...');
+    
+    // Delete any existing matches first
+    await prisma.match.deleteMany({
+      where: { tournamentId, categoryId }
+    });
+    
+    const matchRecords = [];
+    
+    if (format === 'KNOCKOUT') {
+      // Create match records for all knockout rounds
+      const totalRounds = bracketJson.rounds.length;
+      
+      for (let roundIdx = 0; roundIdx < bracketJson.rounds.length; roundIdx++) {
+        const round = bracketJson.rounds[roundIdx];
+        const reverseRoundNumber = totalRounds - roundIdx;
+        
+        for (let matchIdx = 0; matchIdx < round.matches.length; matchIdx++) {
+          const match = round.matches[matchIdx];
+          
+          matchRecords.push({
+            tournamentId,
+            categoryId,
+            round: reverseRoundNumber,
+            matchNumber: matchIdx + 1,
+            stage: 'KNOCKOUT',
+            player1Id: match.player1?.id || null,
+            player2Id: match.player2?.id || null,
+            player1Seed: match.player1?.seed || null,
+            player2Seed: match.player2?.seed || null,
+            status: 'PENDING'
+          });
+        }
+      }
+    } else if (format === 'ROUND_ROBIN' || format === 'ROUND_ROBIN_KNOCKOUT') {
+      // Create match records for all round robin matches
+      for (const group of bracketJson.groups) {
+        for (const match of group.matches) {
+          matchRecords.push({
+            tournamentId,
+            categoryId,
+            matchNumber: match.matchNumber,
+            round: 1,
+            stage: 'GROUP',
+            player1Id: match.player1?.id || null,
+            player2Id: match.player2?.id || null,
+            player1Seed: match.player1?.seed || null,
+            player2Seed: match.player2?.seed || null,
+            status: 'PENDING'
+          });
+        }
+      }
+      
+      // For ROUND_ROBIN_KNOCKOUT, also create knockout stage matches
+      if (format === 'ROUND_ROBIN_KNOCKOUT' && bracketJson.knockout && bracketJson.knockout.rounds) {
+        let knockoutMatchNum = bracketJson.groups.reduce((sum, g) => sum + g.matches.length, 1);
+        const totalKnockoutRounds = bracketJson.knockout.rounds.length;
+        
+        for (let roundIdx = 0; roundIdx < bracketJson.knockout.rounds.length; roundIdx++) {
+          const round = bracketJson.knockout.rounds[roundIdx];
+          const reverseRoundNumber = totalKnockoutRounds - roundIdx;
+          
+          for (const match of round.matches) {
+            matchRecords.push({
+              tournamentId,
+              categoryId,
+              matchNumber: knockoutMatchNum++,
+              round: reverseRoundNumber,
+              stage: 'KNOCKOUT',
+              player1Id: null,
+              player2Id: null,
+              player1Seed: null,
+              player2Seed: null,
+              status: 'PENDING'
+            });
+          }
+        }
+      }
+    }
+    
+    // Create all matches in one batch
+    if (matchRecords.length > 0) {
+      await prisma.match.createMany({ data: matchRecords });
+      console.log(`✅ Created ${matchRecords.length} Match records`);
+    }
+    
+    // Set parent relationships for knockout matches
+    if (format === 'KNOCKOUT' || format === 'ROUND_ROBIN_KNOCKOUT') {
+      await setKnockoutParentRelationships(tournamentId, categoryId);
+    }
 
     res.status(201).json({
       success: true,

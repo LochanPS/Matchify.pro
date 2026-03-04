@@ -23,12 +23,26 @@ const ConductMatchPage = () => {
   const [extension, setExtension] = useState(true);
 
   useEffect(() => {
+    // Guard clause: Only fetch match details when matchId exists
+    if (!matchId) {
+      console.warn('⚠️ Skipping match fetch - matchId not available');
+      return;
+    }
+    
     console.log('🎯 ConductMatchPage loaded for matchId:', matchId);
     console.log('🎯 umpireId from URL:', umpireId);
     fetchMatchDetails();
   }, [matchId]);
 
   const fetchMatchDetails = async () => {
+    // Guard clause: Ensure matchId exists before fetching
+    if (!matchId) {
+      console.warn('⚠️ Cannot fetch match details - matchId is missing');
+      setError('Match ID is missing');
+      setLoading(false);
+      return;
+    }
+    
     try {
       setLoading(true);
       console.log('📡 Fetching match details for matchId:', matchId);

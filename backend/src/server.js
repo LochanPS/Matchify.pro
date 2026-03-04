@@ -84,12 +84,20 @@ app.use(helmet({
 const allowedOrigins = [
   FRONTEND_URL,
   'https://matchify-pro.vercel.app',
+  'https://matchify.vercel.app',
   'http://localhost:5173',
   'http://localhost:5174',
   'http://localhost:5175',
   'http://localhost:3000',
   process.env.CORS_ORIGIN
 ].filter(Boolean);
+
+// Regex patterns for dynamic origins
+const allowedOriginPatterns = [
+  /^https:\/\/matchify-.*\.vercel\.app$/,  // All Matchify Vercel preview deployments
+  /^https:\/\/.*\.vercel\.app$/,            // All Vercel deployments
+  /^https:\/\/.*\.onrender\.com$/           // All Render deployments
+];
 
 app.use(cors({
   origin: function(origin, callback) {
@@ -101,16 +109,13 @@ app.use(cors({
       return callback(null, true);
     }
     
-    // Allow Vercel preview deployments
-    if (origin.includes('.vercel.app')) {
+    // Check if origin matches any allowed pattern
+    const isAllowedPattern = allowedOriginPatterns.some(pattern => pattern.test(origin));
+    if (isAllowedPattern) {
       return callback(null, true);
     }
     
-    // Allow Render deployments
-    if (origin.includes('.onrender.com')) {
-      return callback(null, true);
-    }
-    
+    console.warn('⚠️ CORS blocked origin:', origin);
     callback(new Error('Not allowed by CORS'));
   },
   credentials: true,

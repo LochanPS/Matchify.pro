@@ -691,7 +691,25 @@ router.put('/:matchId/end', authenticate, async (req, res) => {
       });
       
       if (draw) {
-        const bracketJson = typeof draw.bracketJson === 'string' ? JSON.parse(draw.bracketJson) : draw.bracketJson;
+        // SAFETY CHECK: Validate bracket JSON before parsing
+        if (!draw.bracketJson) {
+          console.warn('⚠️ No bracketJson found in draw, skipping bracket update');
+          throw new Error('No bracketJson found');
+        }
+
+        let bracketJson;
+        try {
+          bracketJson = typeof draw.bracketJson === 'string' ? JSON.parse(draw.bracketJson) : draw.bracketJson;
+        } catch (parseError) {
+          console.error('❌ Failed to parse bracketJson:', parseError);
+          throw new Error('Invalid bracketJson format');
+        }
+
+        // SAFETY CHECK: Validate bracket structure
+        if (!bracketJson || typeof bracketJson !== 'object') {
+          console.error('❌ Invalid bracket structure');
+          throw new Error('Invalid bracket structure');
+        }
         
         if (bracketJson.format === 'ROUND_ROBIN' || bracketJson.format === 'ROUND_ROBIN_KNOCKOUT') {
           console.log('🔍 Round Robin match completed, updating standings and match result...');
@@ -878,9 +896,20 @@ router.put('/:matchId/end', authenticate, async (req, res) => {
           // Update knockout bracket match result
           console.log('🔍 Knockout match completed, updating bracket JSON...');
           
+          // SAFETY CHECK: Validate rounds array exists
+          if (!bracketJson.rounds || !Array.isArray(bracketJson.rounds)) {
+            console.error('❌ Invalid bracket structure: rounds array missing');
+            throw new Error('Invalid bracket structure: rounds array missing');
+          }
+          
           // Find the match in the bracket
           let completedMatchInBracket = null;
           for (const round of bracketJson.rounds) {
+            if (!round.matches || !Array.isArray(round.matches)) {
+              console.warn('⚠️ Round missing matches array, skipping');
+              continue;
+            }
+            
             const matchInBracket = round.matches.find(m => m.matchNumber === match.matchNumber);
             if (matchInBracket) {
               matchInBracket.status = 'completed';
@@ -906,7 +935,10 @@ router.put('/:matchId/end', authenticate, async (req, res) => {
             });
             
             if (parentDbMatch) {
+              let parentMatchFound = false;
               for (const round of bracketJson.rounds) {
+                if (!round.matches || !Array.isArray(round.matches)) continue;
+                
                 const parentMatchInBracket = round.matches.find(m => m.matchNumber === parentDbMatch.matchNumber);
                 if (parentMatchInBracket) {
                   // Determine which position the winner should take
@@ -929,10 +961,25 @@ router.put('/:matchId/end', authenticate, async (req, res) => {
                     parentMatchInBracket.status = 'ready';
                     console.log(`✅ Parent match ${parentDbMatch.matchNumber} is now READY`);
                   }
+                  parentMatchFound = true;
                   break;
                 }
               }
+              
+              if (!parentMatchFound) {
+                console.warn(`⚠️ Parent match ${parentDbMatch.matchNumber} not found in bracket JSON`);
+              }
+            } else {
+              console.warn(`⚠️ Parent match with ID ${match.parentMatchId} not found in database`);
             }
+          }
+          
+          // SAFETY CHECK: Validate bracket JSON before saving
+          try {
+            JSON.stringify(bracketJson);
+          } catch (stringifyError) {
+            console.error('❌ Bracket JSON cannot be stringified:', stringifyError);
+            throw new Error('Invalid bracket JSON structure');
           }
           
           // Update the draw
@@ -940,6 +987,8 @@ router.put('/:matchId/end', authenticate, async (req, res) => {
             where: { tournamentId_categoryId: { tournamentId: match.tournamentId, categoryId: match.categoryId } },
             data: { bracketJson: JSON.stringify(bracketJson), updatedAt: new Date() }
           });
+          
+          console.log('✅ Bracket JSON updated successfully');
         }
       }
     } catch (standingsError) {

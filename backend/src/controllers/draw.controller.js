@@ -361,12 +361,54 @@ const getDraw = async (req, res) => {
     });
 
     // Parse the stored bracket JSON
-    let bracketData = JSON.parse(draw.bracketJson);
+    let bracketData;
+    try {
+      bracketData = JSON.parse(draw.bracketJson);
+      
+      // SAFETY CHECK: Validate bracket structure
+      if (!bracketData || typeof bracketData !== 'object') {
+        console.error('❌ Invalid bracket structure in database');
+        return res.status(500).json({ 
+          success: false,
+          error: 'Invalid bracket structure' 
+        });
+      }
+      
+      // SAFETY CHECK: Ensure required format field exists
+      if (!bracketData.format) {
+        console.error('❌ Bracket missing format field');
+        return res.status(500).json({ 
+          success: false,
+          error: 'Invalid bracket format' 
+        });
+      }
+    } catch (parseError) {
+      console.error('❌ Failed to parse bracket JSON:', parseError);
+      return res.status(500).json({ 
+        success: false,
+        error: 'Failed to parse bracket data' 
+        });
+    }
 
     // Update bracket with live match data
     if (bracketData.format === 'KNOCKOUT' && bracketData.rounds) {
+      // SAFETY CHECK: Validate rounds is an array
+      if (!Array.isArray(bracketData.rounds)) {
+        console.error('❌ Bracket rounds is not an array');
+        return res.status(500).json({ 
+          success: false,
+          error: 'Invalid bracket structure' 
+        });
+      }
+      
       // Update knockout bracket with match results
       bracketData.rounds.forEach((round, roundIndex) => {
+        // SAFETY CHECK: Validate round has matches array
+        if (!round.matches || !Array.isArray(round.matches)) {
+          console.warn(`⚠️ Round ${roundIndex} missing matches array`);
+          return;
+        }
+        
         round.matches.forEach((match, matchIndex) => {
           // Find the corresponding match in database
           const dbMatch = matches.find(m => 

@@ -2124,9 +2124,6 @@ const arrangeKnockoutMatchups = async (req, res) => {
           { matchNumber: 'asc' }
         ]
       });
-          { matchNumber: 'asc' }
-        ]
-      });
     }
 
     // STEP 7: Reset knockout match player assignments (but preserve parent relationships)

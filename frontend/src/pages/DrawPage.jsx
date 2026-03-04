@@ -80,6 +80,8 @@ const DrawPage = () => {
   const [registeredPlayers, setRegisteredPlayers] = useState([]);
 
   useEffect(() => {
+    console.log('🔄 useEffect triggered - fetchTournamentData');
+    console.log('Tournament ID from params:', tournamentId);
     fetchTournamentData();
     
     // Check if we're returning from match completion
@@ -97,6 +99,8 @@ const DrawPage = () => {
   }, [tournamentId]);
 
   useEffect(() => {
+    console.log('🔄 useEffect triggered - fetchBracket');
+    console.log('Active category:', activeCategory?.id, activeCategory?.name);
     if (activeCategory) {
       fetchBracket();
     }
@@ -168,24 +172,32 @@ const DrawPage = () => {
   const fetchTournamentData = async () => {
     try {
       setLoading(true);
+      console.log('🔄 Fetching tournament data for ID:', tournamentId);
+      
       const tournamentData = await tournamentAPI.getTournament(tournamentId);
       setTournament(tournamentData.data);
+      console.log('✅ Tournament data fetched:', tournamentData.data.name);
 
       const categoriesData = await tournamentAPI.getCategories(tournamentId);
       const cats = categoriesData.categories || [];
       setCategories(cats);
+      console.log('✅ Categories fetched:', cats.length, 'categories');
 
       const active = categoryId
         ? cats.find(c => c.id === categoryId)
         : cats[0];
       
       if (active) {
+        console.log('✅ Active category set:', active.id, active.name);
         setActiveCategory(active);
       } else if (cats.length > 0) {
+        console.log('✅ Active category set to first:', cats[0].id, cats[0].name);
         setActiveCategory(cats[0]);
+      } else {
+        console.log('⚠️ No categories found');
       }
     } catch (err) {
-      console.error('Error fetching tournament data:', err);
+      console.error('❌ Error fetching tournament data:', err);
       setError('Failed to load tournament data');
     } finally {
       setLoading(false);
@@ -193,7 +205,16 @@ const DrawPage = () => {
   };
 
   const fetchBracket = async () => {
-    if (!activeCategory) return;
+    if (!activeCategory) {
+      console.log('⚠️ fetchBracket called but no activeCategory');
+      return;
+    }
+
+    console.log('🔄 Fetching bracket for:', {
+      tournamentId,
+      categoryId: activeCategory.id,
+      categoryName: activeCategory.name
+    });
 
     setLoading(true);
     setError(null);
@@ -207,26 +228,64 @@ const DrawPage = () => {
           'Pragma': 'no-cache'
         }
       });
+      
+      console.log('✅ Draw API response:', response.data);
+      
       const draw = response.data.draw;
+      
+      if (!draw) {
+        console.log('⚠️ No draw data in response');
+        setError(null);
+        setBracket(null);
+        return;
+      }
+      
       // Parse bracketJson if it's a string
       const bracketData = draw.bracketJson || draw.bracket;
-      setBracket(typeof bracketData === 'string' ? JSON.parse(bracketData) : bracketData);
+      
+      if (!bracketData) {
+        console.log('⚠️ No bracketJson in draw data');
+        setError(null);
+        setBracket(null);
+        return;
+      }
+      
+      const parsedBracket = typeof bracketData === 'string' ? JSON.parse(bracketData) : bracketData;
+      console.log('✅ Bracket parsed successfully:', {
+        format: parsedBracket.format,
+        hasRounds: !!parsedBracket.rounds,
+        hasGroups: !!parsedBracket.groups
+      });
+      
+      setBracket(parsedBracket);
       
       // Also fetch matches for scoring
       try {
         const matchesResponse = await api.get(`/tournaments/${tournamentId}/categories/${activeCategory.id}/matches`);
         setMatches(matchesResponse.data.matches || []);
+        console.log('✅ Matches fetched:', matchesResponse.data.matches?.length || 0);
       } catch (matchErr) {
-        console.log('No matches found');
+        console.log('⚠️ No matches found:', matchErr.message);
         setMatches([]);
       }
     } catch (err) {
-      console.error('Error fetching bracket:', err);
+      console.error('❌ Error fetching bracket:', err);
+      console.error('Error details:', {
+        status: err.response?.status,
+        statusText: err.response?.statusText,
+        data: err.response?.data,
+        message: err.message
+      });
+      
       if (err.response?.status === 404) {
+        console.log('ℹ️ Draw not found (404) - showing "Draw Not Generated Yet"');
         setError(null);
         setBracket(null);
       } else {
-        setError('Failed to load bracket');
+        // For other errors, show error message but don't clear existing bracket
+        console.error('⚠️ API error occurred, showing error message');
+        setError('Failed to load bracket. Please try refreshing the page.');
+        // Don't clear bracket here - keep existing data if available
       }
     } finally {
       setLoading(false);

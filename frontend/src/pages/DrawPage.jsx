@@ -100,11 +100,23 @@ const DrawPage = () => {
 
   useEffect(() => {
     console.log('🔄 useEffect triggered - fetchBracket');
+    console.log('Tournament ID:', tournamentId);
     console.log('Active category:', activeCategory?.id, activeCategory?.name);
-    if (activeCategory) {
-      fetchBracket();
+    
+    // SAFETY CHECK: Only fetch bracket when both tournamentId and activeCategory.id exist
+    if (!tournamentId) {
+      console.warn('⚠️ Skipping bracket fetch - tournamentId not available');
+      return;
     }
-  }, [activeCategory]);
+    
+    if (!activeCategory?.id) {
+      console.warn('⚠️ Skipping bracket fetch - activeCategory not ready');
+      return;
+    }
+    
+    console.log('✅ Both tournamentId and activeCategory ready, fetching bracket...');
+    fetchBracket();
+  }, [tournamentId, activeCategory]);
 
   // Fetch stats when bracket changes
   useEffect(() => {
@@ -205,8 +217,14 @@ const DrawPage = () => {
   };
 
   const fetchBracket = async () => {
-    if (!activeCategory) {
-      console.log('⚠️ fetchBracket called but no activeCategory');
+    // SAFETY CHECK: Ensure both tournamentId and activeCategory.id exist
+    if (!tournamentId) {
+      console.warn('⚠️ fetchBracket called but tournamentId is missing');
+      return;
+    }
+    
+    if (!activeCategory?.id) {
+      console.warn('⚠️ fetchBracket called but activeCategory is not ready');
       return;
     }
 

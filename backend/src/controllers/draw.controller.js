@@ -367,38 +367,41 @@ const getDraw = async (req, res) => {
       
       // SAFETY CHECK: Validate bracket structure
       if (!bracketData || typeof bracketData !== 'object') {
-        console.error('❌ Invalid bracket structure in database');
-        return res.status(500).json({ 
-          success: false,
-          error: 'Invalid bracket structure' 
-        });
+        console.error('❌ Invalid bracket structure in database, attempting recovery...');
+        // Try to recover by creating a minimal valid structure
+        bracketData = {
+          format: draw.format || 'KNOCKOUT',
+          rounds: []
+        };
       }
       
       // SAFETY CHECK: Ensure required format field exists
       if (!bracketData.format) {
-        console.error('❌ Bracket missing format field');
-        return res.status(500).json({ 
-          success: false,
-          error: 'Invalid bracket format' 
-        });
+        console.warn('⚠️ Bracket missing format field, using draw format');
+        bracketData.format = draw.format || 'KNOCKOUT';
       }
     } catch (parseError) {
       console.error('❌ Failed to parse bracket JSON:', parseError);
-      return res.status(500).json({ 
-        success: false,
-        error: 'Failed to parse bracket data' 
-        });
+      // Recovery: Create a minimal valid bracket structure
+      console.log('🔧 Creating recovery bracket structure...');
+      bracketData = {
+        format: draw.format || 'KNOCKOUT',
+        rounds: []
+      };
     }
 
     // Update bracket with live match data
-    if (bracketData.format === 'KNOCKOUT' && bracketData.rounds) {
+    if (bracketData.format === 'KNOCKOUT') {
+      // SAFETY CHECK: Ensure rounds array exists
+      if (!bracketData.rounds) {
+        console.warn('⚠️ KNOCKOUT bracket missing rounds array, initializing empty array');
+        bracketData.rounds = [];
+      }
+      
       // SAFETY CHECK: Validate rounds is an array
       if (!Array.isArray(bracketData.rounds)) {
-        console.error('❌ Bracket rounds is not an array');
-        return res.status(500).json({ 
-          success: false,
-          error: 'Invalid bracket structure' 
-        });
+        console.error('❌ Bracket rounds is not an array, recovering...');
+        bracketData.rounds = [];
       }
       
       // Update knockout bracket with match results

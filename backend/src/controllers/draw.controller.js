@@ -532,6 +532,53 @@ const getDraw = async (req, res) => {
             }
           });
         }
+        
+        // 🔥 CRITICAL FIX: Recalculate standings from completed matches
+        // Reset participant stats first
+        if (group.participants && Array.isArray(group.participants)) {
+          group.participants.forEach(p => {
+            p.played = 0;
+            p.wins = 0;
+            p.losses = 0;
+            p.points = 0;
+          });
+        }
+        
+        // Get all completed matches for this group
+        const groupMatches = matches.filter(m => 
+          m.stage === 'GROUP' &&
+          m.status === 'COMPLETED' &&
+          group.matches && group.matches.some(gm => gm.matchNumber === m.matchNumber)
+        );
+        
+        // Calculate standings from completed matches
+        groupMatches.forEach(m => {
+          const player1 = group.participants.find(p => p.id === m.player1Id);
+          const player2 = group.participants.find(p => p.id === m.player2Id);
+          
+          if (player1 && player2) {
+            player1.played++;
+            player2.played++;
+            
+            if (m.winnerId === m.player1Id) {
+              player1.wins++;
+              player1.points += 2; // Win = 2 points
+              player2.losses++;
+            } else if (m.winnerId === m.player2Id) {
+              player2.wins++;
+              player2.points += 2; // Win = 2 points
+              player1.losses++;
+            }
+          }
+        });
+        
+        // Sort participants by points (descending), then by wins
+        if (group.participants && Array.isArray(group.participants)) {
+          group.participants.sort((a, b) => {
+            if (b.points !== a.points) return b.points - a.points;
+            return b.wins - a.wins;
+          });
+        }
       });
     } else if (bracketData.format === 'ROUND_ROBIN_KNOCKOUT') {
       // Update round robin groups in mixed format
@@ -593,6 +640,53 @@ const getDraw = async (req, res) => {
                   status: dbMatch.status
                 };
               }
+            });
+          }
+          
+          // 🔥 CRITICAL FIX: Recalculate standings from completed matches
+          // Reset participant stats first
+          if (group.participants && Array.isArray(group.participants)) {
+            group.participants.forEach(p => {
+              p.played = 0;
+              p.wins = 0;
+              p.losses = 0;
+              p.points = 0;
+            });
+          }
+          
+          // Get all completed matches for this group
+          const groupMatches = matches.filter(m => 
+            m.stage === 'GROUP' &&
+            m.status === 'COMPLETED' &&
+            group.matches && group.matches.some(gm => gm.matchNumber === m.matchNumber)
+          );
+          
+          // Calculate standings from completed matches
+          groupMatches.forEach(m => {
+            const player1 = group.participants.find(p => p.id === m.player1Id);
+            const player2 = group.participants.find(p => p.id === m.player2Id);
+            
+            if (player1 && player2) {
+              player1.played++;
+              player2.played++;
+              
+              if (m.winnerId === m.player1Id) {
+                player1.wins++;
+                player1.points += 2; // Win = 2 points
+                player2.losses++;
+              } else if (m.winnerId === m.player2Id) {
+                player2.wins++;
+                player2.points += 2; // Win = 2 points
+                player1.losses++;
+              }
+            }
+          });
+          
+          // Sort participants by points (descending), then by wins
+          if (group.participants && Array.isArray(group.participants)) {
+            group.participants.sort((a, b) => {
+              if (b.points !== a.points) return b.points - a.points;
+              return b.wins - a.wins;
             });
           }
         });

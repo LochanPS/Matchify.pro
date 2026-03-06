@@ -260,6 +260,14 @@ const MatchScoringPage = () => {
   const handleEndMatch = async (winnerId) => {
     try {
       setSaving(true);
+      
+      // 🔍 DEBUG: Log what we're sending to the API
+      console.log('🏁 Ending match - Sending to API:');
+      console.log('   Winner ID:', winnerId);
+      console.log('   Final Score:', JSON.stringify(score, null, 2));
+      console.log('   Score has sets:', !!score.sets);
+      console.log('   Number of sets:', score.sets?.length);
+      
       const response = await api.put(`/matches/${matchId}/end`, { winnerId, finalScore: score });
       
       // Store match summary for display

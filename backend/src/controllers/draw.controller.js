@@ -541,6 +541,7 @@ const getDraw = async (req, res) => {
             p.wins = 0;
             p.losses = 0;
             p.points = 0;
+            p.totalPoints = 0; // TP = Total Points Scored in matches
           });
         }
         
@@ -593,16 +594,43 @@ const getDraw = async (req, res) => {
             player1.played++;
             player2.played++;
             
+            // Calculate TP (Total Points Scored) from scoreJson
+            if (m.scoreJson) {
+              try {
+                const scoreData = typeof m.scoreJson === 'string' ? JSON.parse(m.scoreJson) : m.scoreJson;
+                console.log(`   Score data:`, scoreData);
+                
+                if (scoreData && scoreData.sets && Array.isArray(scoreData.sets)) {
+                  let player1TotalPoints = 0;
+                  let player2TotalPoints = 0;
+                  
+                  scoreData.sets.forEach(set => {
+                    player1TotalPoints += (set.player1 || 0);
+                    player2TotalPoints += (set.player2 || 0);
+                  });
+                  
+                  player1.totalPoints = (player1.totalPoints || 0) + player1TotalPoints;
+                  player2.totalPoints = (player2.totalPoints || 0) + player2TotalPoints;
+                  
+                  console.log(`   ${player1.name} scored ${player1TotalPoints} points (total: ${player1.totalPoints})`);
+                  console.log(`   ${player2.name} scored ${player2TotalPoints} points (total: ${player2.totalPoints})`);
+                }
+              } catch (parseError) {
+                console.error(`   Error parsing scoreJson for match ${m.matchNumber}:`, parseError);
+              }
+            }
+            
+            // Calculate wins/losses and ranking points
             if (m.winnerId === m.player1Id) {
               player1.wins++;
               player1.points += 2; // Win = 2 points
               player2.losses++;
-              console.log(`   ${player1.name} wins! Now has ${player1.points} points`);
+              console.log(`   ${player1.name} wins! Now has ${player1.points} ranking points`);
             } else if (m.winnerId === m.player2Id) {
               player2.wins++;
               player2.points += 2; // Win = 2 points
               player1.losses++;
-              console.log(`   ${player2.name} wins! Now has ${player2.points} points`);
+              console.log(`   ${player2.name} wins! Now has ${player2.points} ranking points`);
             }
           }
         });
@@ -610,7 +638,7 @@ const getDraw = async (req, res) => {
         // Log final standings
         console.log(`   Final standings for group ${groupIndex}:`);
         group.participants.forEach(p => {
-          console.log(`   - ${p.name}: ${p.points}pts (${p.wins}W-${p.losses}L, ${p.played}P)`);
+          console.log(`   - ${p.name}: ${p.points}pts (${p.wins}W-${p.losses}L, ${p.played}P, TP:${p.totalPoints || 0})`);
         });
         
         // Sort participants by points (descending), then by wins
@@ -692,6 +720,7 @@ const getDraw = async (req, res) => {
               p.wins = 0;
               p.losses = 0;
               p.points = 0;
+              p.totalPoints = 0; // TP = Total Points Scored in matches
             });
           }
           
@@ -744,16 +773,43 @@ const getDraw = async (req, res) => {
               player1.played++;
               player2.played++;
               
+              // Calculate TP (Total Points Scored) from scoreJson
+              if (m.scoreJson) {
+                try {
+                  const scoreData = typeof m.scoreJson === 'string' ? JSON.parse(m.scoreJson) : m.scoreJson;
+                  console.log(`   Score data:`, scoreData);
+                  
+                  if (scoreData && scoreData.sets && Array.isArray(scoreData.sets)) {
+                    let player1TotalPoints = 0;
+                    let player2TotalPoints = 0;
+                    
+                    scoreData.sets.forEach(set => {
+                      player1TotalPoints += (set.player1 || 0);
+                      player2TotalPoints += (set.player2 || 0);
+                    });
+                    
+                    player1.totalPoints = (player1.totalPoints || 0) + player1TotalPoints;
+                    player2.totalPoints = (player2.totalPoints || 0) + player2TotalPoints;
+                    
+                    console.log(`   ${player1.name} scored ${player1TotalPoints} points (total: ${player1.totalPoints})`);
+                    console.log(`   ${player2.name} scored ${player2TotalPoints} points (total: ${player2.totalPoints})`);
+                  }
+                } catch (parseError) {
+                  console.error(`   Error parsing scoreJson for match ${m.matchNumber}:`, parseError);
+                }
+              }
+              
+              // Calculate wins/losses and ranking points
               if (m.winnerId === m.player1Id) {
                 player1.wins++;
                 player1.points += 2; // Win = 2 points
                 player2.losses++;
-                console.log(`   ${player1.name} wins! Now has ${player1.points} points`);
+                console.log(`   ${player1.name} wins! Now has ${player1.points} ranking points`);
               } else if (m.winnerId === m.player2Id) {
                 player2.wins++;
                 player2.points += 2; // Win = 2 points
                 player1.losses++;
-                console.log(`   ${player2.name} wins! Now has ${player2.points} points`);
+                console.log(`   ${player2.name} wins! Now has ${player2.points} ranking points`);
               }
             }
           });
@@ -761,7 +817,7 @@ const getDraw = async (req, res) => {
           // Log final standings
           console.log(`   Final standings for group ${groupIndex}:`);
           group.participants.forEach(p => {
-            console.log(`   - ${p.name}: ${p.points}pts (${p.wins}W-${p.losses}L, ${p.played}P)`);
+            console.log(`   - ${p.name}: ${p.points}pts (${p.wins}W-${p.losses}L, ${p.played}P, TP:${p.totalPoints || 0})`);
           });
           
           // Sort participants by points (descending), then by wins

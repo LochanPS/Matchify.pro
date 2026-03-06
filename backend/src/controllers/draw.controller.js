@@ -545,16 +545,49 @@ const getDraw = async (req, res) => {
         }
         
         // Get all completed matches for this group
-        const groupMatches = matches.filter(m => 
+        // Try multiple strategies to find matches
+        console.log(`🔍 Recalculating standings for group ${groupIndex}...`);
+        console.log(`   Total matches in database: ${matches.length}`);
+        console.log(`   Group has ${group.matches?.length || 0} matches in bracketJson`);
+        
+        // Strategy 1: Match by stage and match number
+        let groupMatches = matches.filter(m => 
           m.stage === 'GROUP' &&
           m.status === 'COMPLETED' &&
           group.matches && group.matches.some(gm => gm.matchNumber === m.matchNumber)
         );
         
+        console.log(`   Strategy 1 (stage + matchNumber): Found ${groupMatches.length} matches`);
+        
+        // Strategy 2: If no matches found, try without stage filter (for old data)
+        if (groupMatches.length === 0) {
+          groupMatches = matches.filter(m => 
+            m.status === 'COMPLETED' &&
+            group.matches && group.matches.some(gm => gm.matchNumber === m.matchNumber)
+          );
+          console.log(`   Strategy 2 (matchNumber only): Found ${groupMatches.length} matches`);
+        }
+        
+        // Strategy 3: If still no matches, match by player IDs
+        if (groupMatches.length === 0 && group.participants) {
+          const participantIds = group.participants.map(p => p.id).filter(Boolean);
+          groupMatches = matches.filter(m => 
+            m.status === 'COMPLETED' &&
+            participantIds.includes(m.player1Id) &&
+            participantIds.includes(m.player2Id)
+          );
+          console.log(`   Strategy 3 (player IDs): Found ${groupMatches.length} matches`);
+        }
+        
+        console.log(`   Final: Using ${groupMatches.length} completed matches for standings`);
+        
         // Calculate standings from completed matches
         groupMatches.forEach(m => {
           const player1 = group.participants.find(p => p.id === m.player1Id);
           const player2 = group.participants.find(p => p.id === m.player2Id);
+          
+          console.log(`   Match ${m.matchNumber}: ${m.player1Id} vs ${m.player2Id}, winner: ${m.winnerId}`);
+          console.log(`   Found player1: ${!!player1}, Found player2: ${!!player2}`);
           
           if (player1 && player2) {
             player1.played++;
@@ -564,12 +597,20 @@ const getDraw = async (req, res) => {
               player1.wins++;
               player1.points += 2; // Win = 2 points
               player2.losses++;
+              console.log(`   ${player1.name} wins! Now has ${player1.points} points`);
             } else if (m.winnerId === m.player2Id) {
               player2.wins++;
               player2.points += 2; // Win = 2 points
               player1.losses++;
+              console.log(`   ${player2.name} wins! Now has ${player2.points} points`);
             }
           }
+        });
+        
+        // Log final standings
+        console.log(`   Final standings for group ${groupIndex}:`);
+        group.participants.forEach(p => {
+          console.log(`   - ${p.name}: ${p.points}pts (${p.wins}W-${p.losses}L, ${p.played}P)`);
         });
         
         // Sort participants by points (descending), then by wins
@@ -655,16 +696,49 @@ const getDraw = async (req, res) => {
           }
           
           // Get all completed matches for this group
-          const groupMatches = matches.filter(m => 
+          // Try multiple strategies to find matches
+          console.log(`🔍 Recalculating standings for group ${groupIndex} (ROUND_ROBIN_KNOCKOUT)...`);
+          console.log(`   Total matches in database: ${matches.length}`);
+          console.log(`   Group has ${group.matches?.length || 0} matches in bracketJson`);
+          
+          // Strategy 1: Match by stage and match number
+          let groupMatches = matches.filter(m => 
             m.stage === 'GROUP' &&
             m.status === 'COMPLETED' &&
             group.matches && group.matches.some(gm => gm.matchNumber === m.matchNumber)
           );
           
+          console.log(`   Strategy 1 (stage + matchNumber): Found ${groupMatches.length} matches`);
+          
+          // Strategy 2: If no matches found, try without stage filter (for old data)
+          if (groupMatches.length === 0) {
+            groupMatches = matches.filter(m => 
+              m.status === 'COMPLETED' &&
+              group.matches && group.matches.some(gm => gm.matchNumber === m.matchNumber)
+            );
+            console.log(`   Strategy 2 (matchNumber only): Found ${groupMatches.length} matches`);
+          }
+          
+          // Strategy 3: If still no matches, match by player IDs
+          if (groupMatches.length === 0 && group.participants) {
+            const participantIds = group.participants.map(p => p.id).filter(Boolean);
+            groupMatches = matches.filter(m => 
+              m.status === 'COMPLETED' &&
+              participantIds.includes(m.player1Id) &&
+              participantIds.includes(m.player2Id)
+            );
+            console.log(`   Strategy 3 (player IDs): Found ${groupMatches.length} matches`);
+          }
+          
+          console.log(`   Final: Using ${groupMatches.length} completed matches for standings`);
+          
           // Calculate standings from completed matches
           groupMatches.forEach(m => {
             const player1 = group.participants.find(p => p.id === m.player1Id);
             const player2 = group.participants.find(p => p.id === m.player2Id);
+            
+            console.log(`   Match ${m.matchNumber}: ${m.player1Id} vs ${m.player2Id}, winner: ${m.winnerId}`);
+            console.log(`   Found player1: ${!!player1}, Found player2: ${!!player2}`);
             
             if (player1 && player2) {
               player1.played++;
@@ -674,12 +748,20 @@ const getDraw = async (req, res) => {
                 player1.wins++;
                 player1.points += 2; // Win = 2 points
                 player2.losses++;
+                console.log(`   ${player1.name} wins! Now has ${player1.points} points`);
               } else if (m.winnerId === m.player2Id) {
                 player2.wins++;
                 player2.points += 2; // Win = 2 points
                 player1.losses++;
+                console.log(`   ${player2.name} wins! Now has ${player2.points} points`);
               }
             }
+          });
+          
+          // Log final standings
+          console.log(`   Final standings for group ${groupIndex}:`);
+          group.participants.forEach(p => {
+            console.log(`   - ${p.name}: ${p.points}pts (${p.wins}W-${p.losses}L, ${p.played}P)`);
           });
           
           // Sort participants by points (descending), then by wins

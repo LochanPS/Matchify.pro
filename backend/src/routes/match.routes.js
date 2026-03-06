@@ -492,6 +492,21 @@ router.put('/:matchId/end', authenticate, async (req, res) => {
     const { matchId } = req.params;
     const { winnerId, finalScore } = req.body;
     const userId = req.user.userId || req.user.id;
+    
+    // 🔍 DEBUG: Log match completion request
+    console.log(`\n🏁 Match End Request - Match ${matchId}`);
+    console.log(`   Winner ID: ${winnerId}`);
+    console.log(`   Has finalScore: ${!!finalScore}`);
+    console.log(`   finalScore.sets: ${finalScore?.sets ? JSON.stringify(finalScore.sets) : 'MISSING'}`);
+    
+    // ⚠️ VALIDATION: Ensure scoreJson is provided
+    if (!finalScore || !finalScore.sets || !Array.isArray(finalScore.sets) || finalScore.sets.length === 0) {
+      console.error(`❌ Match ${matchId} - Cannot complete without score data!`);
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Cannot complete match without score data. Please ensure all sets are recorded.' 
+      });
+    }
 
     const match = await prisma.match.findUnique({
       where: { id: matchId },
@@ -539,13 +554,16 @@ router.put('/:matchId/end', authenticate, async (req, res) => {
     const loser = winnerId === match.player1Id ? player2 : player1;
 
     // Update match
+    const scoreJsonString = JSON.stringify(finalScore);
+    console.log(`   Saving scoreJson (${scoreJsonString.length} chars): ${scoreJsonString.substring(0, 100)}...`);
+    
     const updatedMatch = await prisma.match.update({
       where: { id: matchId },
       data: {
         status: 'COMPLETED',
         winnerId: winnerId,
         completedAt: new Date(),
-        scoreJson: JSON.stringify(finalScore),
+        scoreJson: scoreJsonString,
         updatedAt: new Date()
       },
       include: {
@@ -553,6 +571,8 @@ router.put('/:matchId/end', authenticate, async (req, res) => {
         category: true
       }
     });
+    
+    console.log(`✅ Match ${matchId} completed successfully with scoreJson saved`);
 
     // 1. Update Player Statistics
     if (player1 && player2) {
@@ -1172,6 +1192,21 @@ router.post('/:matchId/complete', authenticate, async (req, res) => {
     const { matchId } = req.params;
     const { winnerId, scoreData } = req.body;
     const userId = req.user.userId;
+    
+    // 🔍 DEBUG: Log match completion request
+    console.log(`\n🏁 Match Complete Request (POST) - Match ${matchId}`);
+    console.log(`   Winner ID: ${winnerId}`);
+    console.log(`   Has scoreData: ${!!scoreData}`);
+    console.log(`   scoreData.sets: ${scoreData?.sets ? JSON.stringify(scoreData.sets) : 'MISSING'}`);
+    
+    // ⚠️ VALIDATION: Ensure scoreData is provided
+    if (!scoreData || !scoreData.sets || !Array.isArray(scoreData.sets) || scoreData.sets.length === 0) {
+      console.error(`❌ Match ${matchId} - Cannot complete without score data!`);
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Cannot complete match without score data. Please ensure all sets are recorded.' 
+      });
+    }
 
     const match = await prisma.match.findUnique({
       where: { id: matchId },
@@ -1203,16 +1238,21 @@ router.post('/:matchId/complete', authenticate, async (req, res) => {
       });
     }
 
+    const scoreJsonString = JSON.stringify(scoreData);
+    console.log(`   Saving scoreJson (${scoreJsonString.length} chars): ${scoreJsonString.substring(0, 100)}...`);
+    
     const updatedMatch = await prisma.match.update({
       where: { id: matchId },
       data: {
         status: 'COMPLETED',
         winnerId,
-        scoreJson: scoreData ? JSON.stringify(scoreData) : match.scoreJson,
+        scoreJson: scoreJsonString,
         completedAt: new Date(),
         updatedAt: new Date()
       }
     });
+    
+    console.log(`✅ Match ${matchId} completed successfully with scoreJson saved`);
 
     // WINNER ADVANCEMENT: Update tournament progression (advance winner to next round)
     if (match.parentMatchId && match.winnerPosition) {

@@ -24,7 +24,7 @@ import api from '../utils/api';
 import SingleEliminationBracket from '../components/brackets/SingleEliminationBracket';
 import { useAuth } from '../contexts/AuthContext';
 import { ArrowLeftIcon, TrophyIcon } from '@heroicons/react/24/outline';
-import { Loader, Zap, Layers, X, Plus, Settings, Users, CheckCircle, AlertTriangle, Trash2, UserPlus, Gavel, AlertCircle, Play, Trophy, Clock } from 'lucide-react';
+import { Loader, Zap, Layers, X, Plus, Settings, Users, CheckCircle, AlertTriangle, Trash2, UserPlus, Gavel, AlertCircle, Play, Trophy, Clock, Eye, Edit } from 'lucide-react';
 
 const DrawPage = () => {
   const { tournamentId, categoryId } = useParams();
@@ -2239,7 +2239,7 @@ const getCompleteMatchScore = (scoreData) => {
 // Knockout Display - HORIZONTAL PYRAMID (LEFT TO RIGHT)
 // STANDARD LAYOUT: Round 1 → Quarters → Semis → Final (left to right)
 // This layout is used for ALL knockout brackets regardless of size or format
-const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onViewMatchDetails, categoryFormat }) => {
+const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onViewMatchDetails, onChangeResult, categoryFormat }) => {
   if (!data?.rounds) return <p className="text-gray-400 text-center p-8">No bracket data</p>;
 
   const totalRounds = data.rounds.length;
@@ -2252,252 +2252,252 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
     return `Round ${idx + 1}`;
   };
 
-  // Check if user can score matches (organizer or umpire)
-  const canScore = isOrganizer || user?.roles?.includes('umpire') || user?.role === 'UMPIRE';
-
   // Find match record by round and position within that round
   const findMatch = (displayIdx, matchIdx) => {
     if (!matches || !Array.isArray(matches)) {
-      console.log('⚠️ No matches array available');
       return null;
     }
     
-    // Calculate database round number
-    // Frontend: Round 0 = First round (QF/SF), Round 1 = Next round, etc.
-    // Backend: Round 3 = QF, Round 2 = SF, Round 1 = Final (reverse order)
     const totalRounds = data.rounds.length;
-    const dbRound = totalRounds - displayIdx; // Reverse: last display round = round 1 in DB
+    const dbRound = totalRounds - displayIdx;
     
-    console.log('🔍 Looking for knockout match:', {
-      displayIdx,
-      matchIdx,
-      dbRound,
-      totalMatches: matches.length,
-      knockoutMatches: matches.filter(m => m.stage === 'KNOCKOUT').length
-    });
-    
-    // Get all knockout matches for this round, sorted by matchNumber
     const roundMatches = matches
       .filter(m => m.round === dbRound && m.stage === 'KNOCKOUT')
       .sort((a, b) => a.matchNumber - b.matchNumber);
     
-    console.log(`   Found ${roundMatches.length} matches in round ${dbRound}`);
-    
-    // Get the match at the specified index within this round
-    const found = roundMatches[matchIdx];
-    
-    if (!found) {
-      console.log('⚠️ No DB match found at index', matchIdx, 'in round', dbRound);
-    } else {
-      console.log('✅ Found knockout match:', {
-        id: found.id,
-        matchNumber: found.matchNumber,
-        round: found.round,
-        player1: found.player1?.name,
-        player2: found.player2?.name,
-        status: found.status
-      });
+    return roundMatches[matchIdx];
+  };
+
+  const getPlayerDisplay = (player) => {
+    if (!player || !player.name || player.name === 'TBD') return 'TBD';
+    if (player.partnerName) {
+      return `${player.name} & ${player.partnerName}`;
     }
-    
-    return found;
+    return player.name;
   };
 
-  // Open scoring page in new tab
-  const openScoring = (matchId) => {
-    window.open(`/match/${matchId}/score`, '_blank');
-  };
-
-  // Calculate horizontal pyramid positions - Round 1 LEFT, Final RIGHT
-  const calculatePositions = () => {
-    const positions = [];
-    const CARD_WIDTH = 280;
-    const CARD_HEIGHT = 180;
-    const HORIZONTAL_GAP = 350; // Gap between rounds (left to right)
-    const BASE_VERTICAL_SPACING = 220; // Vertical spacing for first round
-    
-    data.rounds.forEach((round, roundIndex) => {
-      const matchCount = round.matches.length;
-      
-      // X position: moves right with each round
-      const x = roundIndex * HORIZONTAL_GAP + 100;
-      
-      // Vertical spacing: increases with each round (pyramid effect)
-      // First round has tight spacing, final has matches far apart vertically
-      const verticalSpacing = BASE_VERTICAL_SPACING * Math.pow(2, roundIndex);
-      
-      // Total height for this round
-      const totalHeight = (matchCount - 1) * verticalSpacing;
-      
-      // Starting Y (centered vertically)
-      const startY = -totalHeight / 2;
-      
-      round.matches.forEach((match, matchIndex) => {
-        const y = startY + (matchIndex * verticalSpacing);
-        const displayIdx = roundIndex;
-        
-        positions.push({
-          match,
-          x,
-          y,
-          roundIndex,
-          matchIndex,
-          displayIdx,
-          roundName: getRoundName(displayIdx, data.rounds.length),
-          matchCount
-        });
-      });
-    });
-    
-    return positions;
-  };
-
-  const positions = calculatePositions();
-  
-  // Calculate SVG dimensions
-  const minX = 0;
-  const maxX = Math.max(...positions.map(p => p.x)) + 400;
-  const minY = Math.min(...positions.map(p => p.y)) - 150;
-  const maxY = Math.max(...positions.map(p => p.y)) + 250;
-  
-  const viewBoxWidth = maxX - minX;
-  const viewBoxHeight = maxY - minY;
-
-  // Draw connector lines from left matches to right (parent matches)
-  const drawConnectors = () => {
-    const lines = [];
-    
-    positions.forEach((pos) => {
-      // Find parent match (next round to the right)
-      const parentRoundIndex = pos.roundIndex + 1;
-      if (parentRoundIndex < data.rounds.length) {
-        const parentPositions = positions.filter(p => p.roundIndex === parentRoundIndex);
-        const parentIndex = Math.floor(pos.matchIndex / 2);
-        const parentPos = parentPositions[parentIndex];
-        
-        if (parentPos) {
-          const startX = pos.x + 280; // Right edge of current card
-          const startY = pos.y + 90; // Middle of card
-          const endX = parentPos.x; // Left edge of parent card
-          const endY = parentPos.y + 90; // Middle of parent card
-          
-          const midX = (startX + endX) / 2;
-          
-          lines.push(
-            <path
-              key={`line-${pos.roundIndex}-${pos.matchIndex}`}
-              d={`M ${startX} ${startY} L ${midX} ${startY} L ${midX} ${endY} L ${endX} ${endY}`}
-              stroke="rgba(168, 85, 247, 0.3)"
-              strokeWidth="2"
-              fill="none"
-            />
-          );
-        }
-      }
-    });
-    
-    return lines;
+  // Open conduct page for match
+  const handleConductMatch = (matchId) => {
+    window.open(`/match/${matchId}/conduct`, '_blank');
   };
 
   return (
-    <div className="relative py-12 overflow-x-auto">
-      <div className="flex justify-center min-w-max">
-        <svg
-          width={viewBoxWidth}
-          height={viewBoxHeight}
-          viewBox={`${minX} ${minY} ${viewBoxWidth} ${viewBoxHeight}`}
-          className="mx-auto"
-        >
-          {/* Connector lines */}
-          <g>{drawConnectors()}</g>
-
-          {/* Match cards */}
-          <g>
-            {positions.map((pos) => {
-              const match = pos.match;
-              const dbMatch = findMatch(pos.displayIdx, pos.matchIndex);
-              
-              console.log('🎯 KNOCKOUT MATCH DATA:', {
-                matchNumber: match.matchNumber,
-                hasDbMatch: !!dbMatch,
-                dbPlayer1: dbMatch?.player1?.name,
-                dbPlayer2: dbMatch?.player2?.name,
-                dbStatus: dbMatch?.status
-              });
-              
-              // Get players from database match
-              const player1 = dbMatch?.player1 || { name: 'TBD' };
-              const player2 = dbMatch?.player2 || { name: 'TBD' };
-              
-              const hasPlayers = dbMatch?.player1 && dbMatch?.player2;
-              const isLive = dbMatch?.status === 'IN_PROGRESS';
-              const isCompleted = dbMatch?.status === 'COMPLETED';
-              const hasUmpire = dbMatch?.umpireId;
-              
-              const cardWidth = 280;
-              const cardHeight = 180;
-              const x = pos.x;
-              const y = pos.y;
-
-              return (
-                <g key={`${pos.roundIndex}-${pos.matchIndex}`} transform={`translate(${x}, ${y})`}>
-                  {/* Card background with glow effect */}
-                  <defs>
-                    <filter id={`glow-${pos.roundIndex}-${pos.matchIndex}`} x="-50%" y="-50%" width="200%" height="200%">
-                      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
-                      <feMerge>
-                        <feMergeNode in="coloredBlur"/>
-                        <feMergeNode in="SourceGraphic"/>
-                      </feMerge>
-                    </filter>
-                  </defs>
-                  
-                  <rect
-                    width={cardWidth}
-                    height={cardHeight}
-                    rx="12"
-                    fill="rgba(51, 65, 85, 0.95)"
-                    stroke={isLive ? '#10b981' : isCompleted ? '#f59e0b' : 'rgba(168, 85, 247, 0.4)'}
-                    strokeWidth="2"
-                    filter={isLive || isCompleted ? `url(#glow-${pos.roundIndex}-${pos.matchIndex})` : 'none'}
-                  />
-
-                  {/* Round name header */}
-                  <rect width={cardWidth} height="30" rx="12" fill="rgba(30, 41, 59, 0.9)" />
-                  <text x={cardWidth / 2} y="20" textAnchor="middle" fill="#fbbf24" fontSize="12" fontWeight="700">
-                    {pos.roundName}
-                  </text>
-
-                  {/* Match number */}
-                  <text x="12" y="50" fill="#9ca3af" fontSize="11" fontWeight="600">
-                    Match {match.matchNumber}
-                  </text>
-
-                  {/* Status badges */}
-                  {isLive && (
-                    <>
-                      <rect x={cardWidth - 60} y="35" width="50" height="20" rx="10" fill="rgba(16, 185, 129, 0.2)" stroke="rgba(16, 185, 129, 0.5)" strokeWidth="1" />
-                      <text x={cardWidth - 35} y="49" textAnchor="middle" fill="#10b981" fontSize="10" fontWeight="700">LIVE</text>
-                    </>
-                  )}
-                  {isCompleted && !isLive && (
-                    <>
-                      <rect x={cardWidth - 65} y="35" width="55" height="20" rx="10" fill="rgba(245, 158, 11, 0.2)" stroke="rgba(245, 158, 11, 0.5)" strokeWidth="1" />
-                      <text x={cardWidth - 37.5} y="49" textAnchor="middle" fill="#f59e0b" fontSize="10" fontWeight="700">DONE</text>
-                    </>
-                  )}
-
-                  {/* Player 1 */}
-                  <g transform="translate(0, 60)">
-                    <rect
-                      width={cardWidth}
-                      height="50"
-                      fill={match.winner === 1 || dbMatch?.winnerId === player1?.id ? 'rgba(168, 85, 247, 0.2)' : 'transparent'}
-                    />
-                    {categoryFormat === 'doubles' ? (
-                      <>
-                        <text x={cardWidth / 2} y="20" textAnchor="middle" fill={match.winner === 1 || dbMatch?.winnerId === player1?.id ? '#ffffff' : '#d1d5db'} fontSize="13" fontWeight="700">
-                          {(player1?.name || 'TBD').substring(0, 24)}
-                        </text>
+    <div className="overflow-x-auto pb-4">
+      <div className="flex gap-6 min-w-max p-4">
+        {data.rounds.map((round, ri) => (
+          <div key={ri} id={`round-${ri}`} className="flex flex-col min-w-[260px]">
+            {/* Round Header */}
+            <div className="mb-6 text-center">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 rounded-xl">
+                <Trophy className="w-4 h-4 text-emerald-400" />
+                <h4 className="text-sm font-bold text-emerald-300 uppercase tracking-wider">
+                  {getRoundName(ri, data.rounds.length)}
+                </h4>
+              </div>
+            </div>
+            
+            {/* Matches */}
+            <div 
+              className="flex flex-col justify-around flex-1 gap-3" 
+              style={{ paddingTop: ri > 0 ? `${Math.pow(2, ri) * 18}px` : 0 }}
+            >
+              {round.matches.map((match, mi) => {
+                const dbMatch = findMatch(ri, mi);
+                
+                const player1 = dbMatch?.player1 || match.player1 || { name: 'TBD' };
+                const player2 = dbMatch?.player2 || match.player2 || { name: 'TBD' };
+                
+                const player1Name = getPlayerDisplay(player1);
+                const player2Name = getPlayerDisplay(player2);
+                
+                const isCompleted = dbMatch?.status === 'COMPLETED';
+                const isLive = dbMatch?.status === 'IN_PROGRESS';
+                const isReady = dbMatch?.status === 'READY' && player1.name !== 'TBD' && player2.name !== 'TBD';
+                const hasUmpire = dbMatch?.umpireId;
+                
+                const isPlayer1Winner = dbMatch?.winnerId === player1?.id;
+                const isPlayer2Winner = dbMatch?.winnerId === player2?.id;
+                
+                return (
+                  <div 
+                    key={mi} 
+                    className="relative group" 
+                    style={{ marginBottom: ri > 0 ? `${Math.pow(2, ri) * 36}px` : 0 }}
+                  >
+                    <div className={`bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm border rounded-xl overflow-hidden shadow-lg transition-all ${
+                      isLive ? 'border-emerald-500 shadow-emerald-500/20' :
+                      isReady ? 'border-blue-500/50 shadow-blue-500/10' :
+                      isCompleted ? 'border-amber-500/30' :
+                      'border-white/10'
+                    }`}>
+                      {/* Match Number Badge */}
+                      <div className="bg-slate-700/50 px-3 py-1.5 border-b border-white/5 flex items-center justify-between">
+                        <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                          Match #{match.matchNumber || mi + 1}
+                        </span>
+                        
+                        {/* Status Badge */}
+                        {isLive && (
+                          <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 rounded text-xs font-bold flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span>
+                            LIVE
+                          </span>
+                        )}
+                        {isCompleted && !isLive && (
+                          <span className="px-2 py-0.5 bg-amber-500/20 text-amber-400 border border-amber-500/50 rounded text-xs font-bold">
+                            COMPLETED
+                          </span>
+                        )}
+                        {isReady && !isLive && !isCompleted && (
+                          <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 border border-blue-500/50 rounded text-xs font-bold">
+                            READY
+                          </span>
+                        )}
+                      </div>
+                      
+                      {/* Players */}
+                      <div className="p-2.5 space-y-1.5">
+                        {/* Player 1 */}
+                        <div className={`flex items-center justify-between px-3 py-2 rounded-lg transition-all ${
+                          isPlayer1Winner
+                            ? 'bg-gradient-to-r from-emerald-500/20 to-emerald-600/20 border-2 border-emerald-500/50 shadow-lg shadow-emerald-500/20' 
+                            : 'bg-slate-700/30 border border-white/5'
+                        }`}>
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            {isPlayer1Winner && (
+                              <Trophy className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                            )}
+                            <span className={`text-sm font-medium truncate ${
+                              isPlayer1Winner ? 'text-emerald-300' : player1Name === 'TBD' ? 'text-gray-500 italic' : 'text-white'
+                            }`}>
+                              {player1Name}
+                            </span>
+                          </div>
+                          {isPlayer1Winner && (
+                            <span className="ml-2 px-1.5 py-0.5 bg-emerald-500/30 text-emerald-300 rounded text-xs font-bold">
+                              W
+                            </span>
+                          )}
+                        </div>
+                        
+                        {/* VS Divider */}
+                        <div className="flex items-center justify-center py-0.5">
+                          <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">vs</span>
+                        </div>
+                        
+                        {/* Player 2 */}
+                        <div className={`flex items-center justify-between px-3 py-2 rounded-lg transition-all ${
+                          isPlayer2Winner
+                            ? 'bg-gradient-to-r from-emerald-500/20 to-emerald-600/20 border-2 border-emerald-500/50 shadow-lg shadow-emerald-500/20' 
+                            : 'bg-slate-700/30 border border-white/5'
+                        }`}>
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            {isPlayer2Winner && (
+                              <Trophy className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                            )}
+                            <span className={`text-sm font-medium truncate ${
+                              isPlayer2Winner ? 'text-emerald-300' : player2Name === 'TBD' ? 'text-gray-500 italic' : 'text-white'
+                            }`}>
+                              {player2Name}
+                            </span>
+                          </div>
+                          {isPlayer2Winner && (
+                            <span className="ml-2 px-1.5 py-0.5 bg-emerald-500/30 text-emerald-300 rounded text-xs font-bold">
+                              W
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      
+                      {/* Organizer Actions */}
+                      {isOrganizer && dbMatch && (
+                        <div className="px-2.5 pb-2.5 flex gap-1.5">
+                          {/* Assign Umpire Button */}
+                          {!isCompleted && player1.name !== 'TBD' && player2.name !== 'TBD' && (
+                            <button
+                              onClick={() => {
+                                const bracketMatchData = {
+                                  matchNumber: match.matchNumber,
+                                  round: ri + 1,
+                                  player1: player1,
+                                  player2: player2
+                                };
+                                onAssignUmpire(dbMatch, bracketMatchData);
+                              }}
+                              className={`flex-1 py-1.5 rounded-lg border transition-all text-xs font-semibold flex items-center justify-center gap-1.5 ${
+                                hasUmpire
+                                  ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/30'
+                                  : 'bg-blue-500/20 text-blue-400 border-blue-500/30 hover:bg-blue-500/30'
+                              }`}
+                              title={hasUmpire ? 'Umpire assigned' : 'Assign umpire'}
+                            >
+                              <Gavel className="w-3 h-3" />
+                              {hasUmpire ? 'Umpire ✓' : 'Umpire'}
+                            </button>
+                          )}
+                          
+                          {/* Conduct Match Button */}
+                          {!isCompleted && player1.name !== 'TBD' && player2.name !== 'TBD' && (
+                            <button
+                              onClick={() => handleConductMatch(dbMatch.id)}
+                              className="flex-1 py-1.5 rounded-lg bg-purple-500/20 text-purple-400 border border-purple-500/30 hover:bg-purple-500/30 transition-all text-xs font-semibold flex items-center justify-center gap-1.5"
+                              title="Conduct match"
+                            >
+                              <Play className="w-3 h-3" />
+                              Conduct
+                            </button>
+                          )}
+                          
+                          {/* View Details Button for Completed Matches */}
+                          {isCompleted && (
+                            <button
+                              onClick={() => {
+                                const bracketMatchData = {
+                                  matchNumber: match.matchNumber,
+                                  round: ri + 1,
+                                  player1: player1,
+                                  player2: player2
+                                };
+                                onViewMatchDetails(dbMatch, bracketMatchData);
+                              }}
+                              className="flex-1 py-1.5 rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30 transition-all text-xs font-semibold flex items-center justify-center gap-1.5"
+                            >
+                              <Eye className="w-3 h-3" />
+                              View Details
+                            </button>
+                          )}
+                          
+                          {/* Change Result Button for Completed Matches */}
+                          {isCompleted && onChangeResult && (
+                            <button
+                              onClick={() => {
+                                const bracketMatchData = {
+                                  matchNumber: match.matchNumber,
+                                  round: ri + 1,
+                                  player1: player1,
+                                  player2: player2
+                                };
+                                onChangeResult(dbMatch, bracketMatchData);
+                              }}
+                              className="py-1.5 px-2 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/30 hover:bg-amber-500/30 transition-all text-xs font-semibold flex items-center justify-center"
+                              title="Change result"
+                            >
+                              <Edit className="w-3 h-3" />
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
                       </>
                     ) : (
                       <text x="12" y="20" fill={match.winner === 1 || dbMatch?.winnerId === player1?.id ? '#ffffff' : '#d1d5db'} fontSize="14" fontWeight="700">

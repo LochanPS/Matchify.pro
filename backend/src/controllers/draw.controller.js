@@ -605,8 +605,12 @@ const getDraw = async (req, res) => {
                   let player2TotalPoints = 0;
                   
                   scoreData.sets.forEach(set => {
-                    player1TotalPoints += (set.player1 || 0);
-                    player2TotalPoints += (set.player2 || 0);
+                    // Support multiple scoreJson formats: player1/player2, p1/p2, score1/score2
+                    const p1Score = set.player1 ?? set.p1 ?? set.score1 ?? 0;
+                    const p2Score = set.player2 ?? set.p2 ?? set.score2 ?? 0;
+                    
+                    player1TotalPoints += p1Score;
+                    player2TotalPoints += p2Score;
                   });
                   
                   player1.totalPoints = (player1.totalPoints || 0) + player1TotalPoints;
@@ -784,8 +788,12 @@ const getDraw = async (req, res) => {
                     let player2TotalPoints = 0;
                     
                     scoreData.sets.forEach(set => {
-                      player1TotalPoints += (set.player1 || 0);
-                      player2TotalPoints += (set.player2 || 0);
+                      // Support multiple scoreJson formats: player1/player2, p1/p2, score1/score2
+                      const p1Score = set.player1 ?? set.p1 ?? set.score1 ?? 0;
+                      const p2Score = set.player2 ?? set.p2 ?? set.score2 ?? 0;
+                      
+                      player1TotalPoints += p1Score;
+                      player2TotalPoints += p2Score;
                     });
                     
                     player1.totalPoints = (player1.totalPoints || 0) + player1TotalPoints;

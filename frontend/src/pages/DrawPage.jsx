@@ -2437,7 +2437,7 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                           )}
                           
                           {/* Conduct Match Button */}
-                          {!isCompleted && player1.name !== 'TBD' && player2.name !== 'TBD' && (
+                          {!isCompleted && (player1.name !== 'TBD' || player2.name !== 'TBD') && (
                             <button
                               onClick={() => handleConductMatch(dbMatch.id)}
                               className="flex-1 py-1.5 rounded-lg bg-purple-500/20 text-purple-400 border border-purple-500/30 hover:bg-purple-500/30 transition-all text-xs font-semibold flex items-center justify-center gap-1.5"

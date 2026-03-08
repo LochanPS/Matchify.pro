@@ -1393,7 +1393,7 @@ router.get('/tournament/:tournamentId', authenticate, async (req, res) => {
 
     res.json({
       success: true,
-      data: matchesWithPlayers
+      matches: matchesWithPlayers
     });
   } catch (error) {
     console.error('Error fetching tournament matches:', error);

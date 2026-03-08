@@ -32,14 +32,18 @@ const PlayerDashboard = () => {
 
   useEffect(() => {
     fetchPlayerData();
-    fetchPlayerCode();
-    fetchUserProfile();
+    fetchUserProfileAndCodes(); // Consolidated to avoid duplicate /auth/me calls
   }, []);
 
-  const fetchUserProfile = async () => {
+  // Consolidated function to fetch user profile and codes in a single API call
+  const fetchUserProfileAndCodes = async () => {
     try {
       const response = await api.get('/auth/me');
-      setUserProfile(response.data.user);
+      if (response.data.user) {
+        setUserProfile(response.data.user);
+        setPlayerCode(response.data.user.playerCode);
+        setUmpireCode(response.data.user.umpireCode);
+      }
     } catch (error) {
       console.error('Error fetching user profile:', error);
     }
@@ -53,18 +57,6 @@ const PlayerDashboard = () => {
       console.error('Error fetching player data:', error);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const fetchPlayerCode = async () => {
-    try {
-      const response = await api.get('/auth/me');
-      if (response.data.user) {
-        setPlayerCode(response.data.user.playerCode);
-        setUmpireCode(response.data.user.umpireCode);
-      }
-    } catch (error) {
-      console.error('Error fetching codes:', error);
     }
   };
 

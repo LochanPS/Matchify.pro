@@ -43,7 +43,12 @@ export const NotificationProvider = ({ children }) => {
       console.log('📊 Unread count response:', response.data);
       setUnreadCount(response.data.count || 0);
     } catch (error) {
-      console.error('Error fetching unread count:', error);
+      // Silently handle 429 rate limit errors to prevent console spam
+      if (error.response?.status === 429) {
+        console.warn('⚠️ Rate limit reached for notifications. Will retry on next interval.');
+      } else {
+        console.error('Error fetching unread count:', error);
+      }
     }
   };
 
@@ -102,12 +107,12 @@ export const NotificationProvider = ({ children }) => {
     }
   };
 
-  // Poll for new notifications every 30 seconds
+  // Poll for new notifications every 90 seconds (reduced from 30s to minimize rate limiting)
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
       fetchUnreadCount();
-      const interval = setInterval(fetchUnreadCount, 30000);
+      const interval = setInterval(fetchUnreadCount, 90000);
       return () => clearInterval(interval);
     }
   }, []);

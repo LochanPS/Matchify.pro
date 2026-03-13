@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import prisma from '../lib/prisma.js';
 import bcrypt from 'bcryptjs';
 import { createNotification } from '../services/notification.service.js';
+import { createOrUpdateTournamentPayment } from '../services/paymentTrackingService.js';
 
 // POST /api/admin/tournaments/:tournamentId/quick-add-player
 export const quickAddPlayer = async (req, res) => {
@@ -72,9 +73,9 @@ export const quickAddPlayer = async (req, res) => {
         guestEmail: null, // No email
         guestPhone: null, // No phone
         guestGender: null, // No gender
-        amountTotal: 0,
+        amountTotal: category.entryFee, // Include entry fee for revenue calculation
         amountWallet: 0,
-        amountRazorpay: 0,
+        amountRazorpay: category.entryFee, // Assume admin payment method
         status: 'confirmed',
         paymentStatus: 'quick_added',
         isQuickAdded: true,
@@ -103,6 +104,10 @@ export const quickAddPlayer = async (req, res) => {
       }
     });
     console.log('✅ Category registration count updated');
+
+    // Update tournament payment totals to include this registration's entry fee
+    await createOrUpdateTournamentPayment(tournamentId);
+    console.log('✅ Tournament payment totals updated');
 
     console.log('🎉 Quick Add completed successfully!');
     res.json({

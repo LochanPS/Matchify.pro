@@ -51,13 +51,13 @@ export async function createOrUpdateTournamentPayment(tournamentId) {
     const totalRegistrations = tournament.registrations.length;
 
     // Calculate payment split
-    const platformFeePercent = 5;
-    const platformFeeAmount = Math.round(totalCollected * 0.05); // 5% of total
+    const platformFeePercent = 3;
+    const platformFeeAmount = Math.round(totalCollected * 0.03); // 3% of total
     const organizerShare = totalCollected - platformFeeAmount; // For display only
 
-    // CRITICAL: 30% and 65% are of TOTAL, not organizer share
+    // CRITICAL: 30% and 67% are of TOTAL, not organizer share
     const payout50Percent1 = Math.round(totalCollected * 0.30); // 30% of TOTAL
-    const payout50Percent2 = Math.round(totalCollected * 0.65); // 65% of TOTAL
+    const payout50Percent2 = Math.round(totalCollected * 0.67); // 67% of TOTAL
 
     // Create or update tournament payment record
     const existingPayment = await prisma.tournamentPayment.findUnique({

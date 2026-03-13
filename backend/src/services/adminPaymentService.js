@@ -103,10 +103,10 @@ class AdminPaymentService {
 
       // Calculate payment breakdown
       const totalAmount = registration.amountTotal;
-      const platformFee = totalAmount * 0.05; // 5% of total
-      const organizerShare = totalAmount - platformFee; // For display only (95%)
+      const platformFee = totalAmount * 0.03; // 3% of total
+      const organizerShare = totalAmount - platformFee; // For display only (97%)
       const firstPayment = totalAmount * 0.30; // 30% of TOTAL
-      const secondPayment = totalAmount * 0.65; // 65% of TOTAL
+      const secondPayment = totalAmount * 0.67; // 67% of TOTAL
 
       // Create or update tournament payment record
       await this.updateTournamentPayment(registration.tournamentId, {
@@ -377,7 +377,7 @@ class AdminPaymentService {
       // Calculate summary
       const totalReceived = payments.reduce((sum, p) => sum + p.amountTotal, 0);
       const totalTransactions = payments.length;
-      const platformEarnings = totalReceived * 0.05;
+      const platformEarnings = totalReceived * 0.03;
 
       // Generate summary report
       const summaryData = {
@@ -429,8 +429,8 @@ class AdminPaymentService {
       });
 
       const totalReceived = payments.reduce((sum, p) => sum + p.amountTotal, 0);
-      const platformEarnings = totalReceived * 0.05;
-      const organizerPayments = totalReceived * 0.95;
+      const platformEarnings = totalReceived * 0.03;
+      const organizerPayments = totalReceived * 0.97;
 
       const monthlyData = {
         month: monthStr,
@@ -474,7 +474,7 @@ class AdminPaymentService {
       });
 
       const todayReceived = todayPayments.reduce((sum, p) => sum + p.amountTotal, 0);
-      const platformEarnings = todayReceived * 0.05;
+      const platformEarnings = todayReceived * 0.03;
 
       // Pending verifications with details
       const pendingVerifications = await prisma.registration.findMany({
@@ -593,8 +593,8 @@ class AdminPaymentService {
       // Calculate monthly revenue (total collected from players)
       const monthlyRevenue = monthlyPayments.reduce((sum, p) => sum + p.amountTotal, 0);
       
-      // Calculate platform earnings (5% of total revenue)
-      const monthlyEarnings = monthlyRevenue * 0.05;
+      // Calculate platform earnings (3% of total revenue)
+      const monthlyEarnings = monthlyRevenue * 0.03;
 
       // Count unique organizers paid this month
       const paidOrganizers = await prisma.tournamentPayment.count({

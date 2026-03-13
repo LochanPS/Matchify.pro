@@ -180,13 +180,13 @@ const RevenueDashboardPage = () => {
               </span>
             </div>
             <div className="flex justify-between items-center p-4 bg-teal-900/30 rounded-lg border border-teal-700">
-              <span className="text-teal-300">Your Share (5%)</span>
+              <span className="text-teal-300">Your Share (3%)</span>
               <span className="text-teal-400 font-bold text-lg">
                 ₹{overview.breakdown.yourShare.toLocaleString()}
               </span>
             </div>
             <div className="flex justify-between items-center p-4 bg-slate-900 rounded-lg">
-              <span className="text-gray-400">Organizer Total (30% + 65%)</span>
+              <span className="text-gray-400">Organizer Total (30% + 67%)</span>
               <span className="text-white font-bold text-lg">
                 ₹{overview.breakdown.organizerShare.toLocaleString()}
               </span>

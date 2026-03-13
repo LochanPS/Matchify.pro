@@ -286,10 +286,10 @@ async function updateTournamentPayment(tournamentId, amount) {
   }
 
   const totalCollected = tournamentPayment.totalCollected + amount;
-  const platformFeeAmount = totalCollected * 0.05; // 5% of total
+  const platformFeeAmount = totalCollected * 0.03; // 3% of total
   const organizerShare = totalCollected - platformFeeAmount; // For display only
   const payout50Percent1 = totalCollected * 0.30; // 30% of TOTAL
-  const payout50Percent2 = totalCollected * 0.65; // 65% of TOTAL
+  const payout50Percent2 = totalCollected * 0.67; // 67% of TOTAL
 
   await prisma.tournamentPayment.update({
     where: { tournamentId },

@@ -4,9 +4,9 @@
  */
 
 function testPaymentCalculation(totalAmount) {
-  const platformFee = Math.round(totalAmount * 0.05);
+  const platformFee = Math.round(totalAmount * 0.03);
   const firstPayout = Math.round(totalAmount * 0.30);
-  const secondPayout = Math.round(totalAmount * 0.65);
+  const secondPayout = Math.round(totalAmount * 0.67);
   const sum = platformFee + firstPayout + secondPayout;
   
   console.log(`\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);

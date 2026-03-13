@@ -47,10 +47,10 @@ async function fixPaymentCalculations() {
       } = payment;
 
       // Recalculate with CORRECT formula
-      const platformFeeAmount = Math.round(totalCollected * 0.05); // 5% of TOTAL
-      const organizerShare = totalCollected - platformFeeAmount; // For display (95%)
+      const platformFeeAmount = Math.round(totalCollected * 0.03); // 3% of TOTAL
+      const organizerShare = totalCollected - platformFeeAmount; // For display (97%)
       const payout50Percent1 = Math.round(totalCollected * 0.30); // 30% of TOTAL
-      const payout50Percent2 = Math.round(totalCollected * 0.65); // 65% of TOTAL
+      const payout50Percent2 = Math.round(totalCollected * 0.67); // 67% of TOTAL
 
       // Verify the math
       const total = platformFeeAmount + payout50Percent1 + payout50Percent2;
@@ -110,9 +110,9 @@ async function fixPaymentCalculations() {
       console.log('');
       
       // Verify the calculation
-      const expectedPlatform = sample.totalCollected * 0.05;
+      const expectedPlatform = sample.totalCollected * 0.03;
       const expectedFirst = sample.totalCollected * 0.30;
-      const expectedSecond = sample.totalCollected * 0.65;
+      const expectedSecond = sample.totalCollected * 0.67;
       const isCorrect = 
         Math.abs(sample.platformFeeAmount - expectedPlatform) < 1 &&
         Math.abs(sample.payout50Percent1 - expectedFirst) < 1 &&

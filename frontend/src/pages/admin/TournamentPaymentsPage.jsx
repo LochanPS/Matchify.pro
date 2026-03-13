@@ -80,7 +80,7 @@ const TournamentPaymentsPage = () => {
             <p className="text-3xl font-bold text-yellow-400 mt-2">{stats.pending50Payouts1}</p>
           </div>
           <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-lg">
-            <p className="text-gray-400 text-sm">Pending Second 65% Payouts</p>
+            <p className="text-gray-400 text-sm">Pending Second 67% Payouts</p>
             <p className="text-3xl font-bold text-orange-400 mt-2">{stats.pending50Payouts2}</p>
           </div>
         </div>
@@ -158,13 +158,13 @@ const TournamentPaymentsPage = () => {
                       <span className="text-white font-medium">{payment.totalRegistrations}</span>
                     </div>
                     <div className="flex justify-between items-center p-2 bg-teal-900/30 rounded">
-                      <span className="text-teal-300 text-sm font-medium">Your Fee (5%)</span>
+                      <span className="text-teal-300 text-sm font-medium">Your Fee (3%)</span>
                       <span className="text-teal-400 font-bold">
                         ₹{payment.platformFeeAmount.toLocaleString()}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-gray-400 text-sm">Organizer Total (30% + 65%)</span>
+                      <span className="text-gray-400 text-sm">Organizer Total (30% + 67%)</span>
                       <span className="text-white font-bold">
                         ₹{payment.organizerShare.toLocaleString()}
                       </span>
@@ -199,7 +199,7 @@ const TournamentPaymentsPage = () => {
                     {/* Second 65% Payout */}
                     <div className="p-3 bg-slate-900 rounded-lg">
                       <div className="flex justify-between items-center mb-2">
-                        <span className="text-gray-400 text-sm">Second 65%</span>
+                        <span className="text-gray-400 text-sm">Second 67%</span>
                         <span className={`px-2 py-1 rounded text-xs font-medium ${
                           payment.payout50Status2 === 'paid'
                             ? 'bg-green-900/50 text-green-400'

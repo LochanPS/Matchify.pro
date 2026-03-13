@@ -114,13 +114,13 @@ const TermsOfService = () => {
               <p>Tournament entry fees are distributed as follows:</p>
               <ul className="list-disc list-inside space-y-2 ml-4 bg-slate-900/50 p-4 rounded-lg border border-slate-700">
                 <li><span className="text-teal-400 font-semibold">30%</span> - Paid to organizer before tournament starts</li>
-                <li><span className="text-cyan-400 font-semibold">65%</span> - Paid to organizer after tournament completion</li>
-                <li><span className="text-purple-400 font-semibold">5%</span> - Platform service fee retained by Matchify.pro</li>
+                <li><span className="text-cyan-400 font-semibold">67%</span> - Paid to organizer after tournament completion</li>
+                <li><span className="text-purple-400 font-semibold">3%</span> - Platform service fee retained by Matchify.pro</li>
               </ul>
               
               <p className="font-semibold text-white mt-4">4.3 Platform Service Fee</p>
               <p>
-                Matchify.pro charges a 5% service fee on all tournament entry fees. This fee covers platform maintenance, payment processing, customer support, and technology infrastructure. The service fee is non-refundable.
+                Matchify.pro charges a 3% service fee on all tournament entry fees. This fee covers platform maintenance, payment processing, customer support, and technology infrastructure. The service fee is non-refundable.
               </p>
               
               <p className="font-semibold text-white">4.4 Payment Verification</p>

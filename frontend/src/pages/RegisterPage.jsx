@@ -564,10 +564,10 @@ const TermsContent = () => (
       <ul className="list-disc pl-6 space-y-2 mt-2">
         <li>Connects Players with Tournament Organizers</li>
         <li>Facilitates tournament registration and payment processing</li>
-        <li>Charges a <strong>5% platform fee</strong> on all entry fees</li>
+        <li>Charges a <strong>3% platform fee</strong> on all entry fees</li>
         <li>Acts as an intermediary, NOT a tournament organizer</li>
         <li>Handles all payments to prevent scams</li>
-        <li>Pays organizers in 2 installments: <strong>30% before + 65% after tournament</strong></li>
+        <li>Pays organizers in 2 installments: <strong>30% before + 67% after tournament</strong></li>
       </ul>
 
       <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-3 mt-3">
@@ -575,10 +575,10 @@ const TermsContent = () => (
         <ol className="list-decimal pl-6 space-y-1 text-xs mt-2">
           <li>Players pay 100% entry fee to Matchify.pro admin</li>
           <li>Admin verifies payment and confirms registration</li>
-          <li>Admin keeps 5% as platform fee</li>
+          <li>Admin keeps 3% as platform fee</li>
           <li>Admin pays organizer 30% before tournament starts</li>
           <li>Tournament happens</li>
-          <li>Admin pays organizer remaining 65% after tournament ends</li>
+          <li>Admin pays organizer remaining 67% after tournament ends</li>
         </ol>
       </div>
     </section>
@@ -595,11 +595,11 @@ const TermsContent = () => (
           <div className="border-t border-emerald-500/20 my-2"></div>
           <div className="flex justify-between">
             <span>Platform keeps:</span>
-            <span className="font-semibold text-purple-300">5% (Platform Fee)</span>
+            <span className="font-semibold text-purple-300">3% (Platform Fee)</span>
           </div>
           <div className="flex justify-between">
             <span>Organizer gets (Total):</span>
-            <span className="font-semibold text-cyan-300">95%</span>
+            <span className="font-semibold text-cyan-300">97%</span>
           </div>
           <div className="border-t border-emerald-500/20 my-2"></div>
           <div className="pl-4 space-y-1">
@@ -609,7 +609,7 @@ const TermsContent = () => (
             </div>
             <div className="flex justify-between text-xs">
               <span>→ Second Payment (AFTER tournament):</span>
-              <span className="font-semibold text-white">65%</span>
+              <span className="font-semibold text-white">67%</span>
             </div>
           </div>
         </div>
@@ -618,10 +618,10 @@ const TermsContent = () => (
       <p className="text-sm mb-3"><strong>Example:</strong> If entry fee is ₹1,000</p>
       <ul className="list-none pl-6 space-y-1 text-sm bg-slate-700/50 rounded-lg p-3">
         <li>• Player pays: <strong className="text-white">₹1,000</strong> to Matchify.pro admin</li>
-        <li>• Platform keeps: <strong className="text-purple-300">₹50</strong> (5%)</li>
-        <li>• Organizer gets: <strong className="text-cyan-300">₹950</strong> (95%)</li>
+        <li>• Platform keeps: <strong className="text-purple-300">₹30</strong> (3%)</li>
+        <li>• Organizer gets: <strong className="text-cyan-300">₹970</strong> (97%)</li>
         <li className="pl-4 text-xs">→ Before tournament: <strong className="text-white">₹300</strong> (30%)</li>
-        <li className="pl-4 text-xs">→ After tournament: <strong className="text-white">₹650</strong> (65%)</li>
+        <li className="pl-4 text-xs">→ After tournament: <strong className="text-white">₹670</strong> (67%)</li>
       </ul>
 
       <h4 className="font-semibold text-white mt-4 mb-2">Payment Process:</h4>
@@ -630,7 +630,7 @@ const TermsContent = () => (
         <li><strong>Payment Proof:</strong> Upload screenshot of UPI payment</li>
         <li><strong>Verification:</strong> Admin verifies payment within 24-48 hours</li>
         <li><strong>Confirmation:</strong> Registration confirmed after payment approval</li>
-        <li><strong>To Organizer:</strong> Admin pays organizer in 2 installments (30% + 65%)</li>
+        <li><strong>To Organizer:</strong> Admin pays organizer in 2 installments (30% + 67%)</li>
       </ul>
 
       <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 mt-3">

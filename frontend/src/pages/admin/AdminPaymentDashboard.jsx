@@ -200,8 +200,8 @@ ${today},16:45,RECEIVED,Amit Singh,State Championship,1200,APPROVED,Entry fee`;
                   <div className="text-gray-300 text-sm space-y-1">
                     <p>• <strong>Players pay entry fees</strong> → You verify their payment screenshots</p>
                     <p>• <strong>30% goes to organizers</strong> before tournament starts</p>
-                    <p>• <strong>65% goes to organizers</strong> after tournament ends</p>
-                    <p>• <strong>5% stays with MATCHIFY.PRO</strong> as platform fee</p>
+                    <p>• <strong>67% goes to organizers</strong> after tournament ends</p>
+                    <p>• <strong>3% stays with MATCHIFY.PRO</strong> as platform fee</p>
                   </div>
                 </div>
               </div>
@@ -261,7 +261,7 @@ ${today},16:45,RECEIVED,Amit Singh,State Championship,1200,APPROVED,Entry fee`;
               <p className="text-gray-400 text-sm mb-2">Platform Earnings</p>
               <div className="bg-purple-500/10 rounded-lg p-2 mt-3">
                 <p className="text-purple-300 text-xs">
-                  🏆 MATCHIFY.PRO keeps 5% of all tournament entry fees as platform fee
+                  🏆 MATCHIFY.PRO keeps 3% of all tournament entry fees as platform fee
                 </p>
               </div>
             </div>

@@ -1,6 +1,5 @@
 import { PrismaClient } from '@prisma/client';
 import prisma from '../lib/prisma.js';
-import bcrypt from 'bcryptjs';
 import { createNotification } from '../services/notification.service.js';
 import { createOrUpdateTournamentPayment } from '../services/paymentTrackingService.js';
 
@@ -63,46 +62,52 @@ export const quickAddPlayer = async (req, res) => {
 
     console.log(`📝 Creating guest registration: ${displayName}...`);
     
-    // Create guest registration with ONLY name (or combined names for doubles)
-    const registration = await prisma.registration.create({
-      data: {
-        userId: null, // No user account
-        tournamentId: tournamentId,
-        categoryId: categoryId,
-        guestName: displayName, // Store combined name for doubles, single name for singles
-        guestEmail: null, // No email
-        guestPhone: null, // No phone
-        guestGender: null, // No gender
-        amountTotal: category.entryFee, // Include entry fee for revenue calculation
-        amountWallet: 0,
-        amountRazorpay: category.entryFee, // Assume admin payment method
-        status: 'confirmed',
-        paymentStatus: 'quick_added',
-        isQuickAdded: true,
-        quickAddedBy: adminId
-      },
-      include: {
-        category: {
-          select: {
-            id: true,
-            name: true,
-            format: true,
-            gender: true
+    // Use transaction to ensure data consistency
+    const result = await prisma.$transaction(async (tx) => {
+      // Create guest registration with entry fee
+      const registration = await tx.registration.create({
+        data: {
+          userId: null, // No user account
+          tournamentId: tournamentId,
+          categoryId: categoryId,
+          guestName: displayName, // Store combined name for doubles, single name for singles
+          guestEmail: null, // No email
+          guestPhone: null, // No phone
+          guestGender: null, // No gender
+          amountTotal: category.entryFee, // Include entry fee for revenue calculation
+          amountWallet: 0,
+          amountRazorpay: category.entryFee, // Assume admin payment method
+          status: 'confirmed',
+          paymentStatus: 'quick_added',
+          isQuickAdded: true,
+          quickAddedBy: adminId
+        },
+        include: {
+          category: {
+            select: {
+              id: true,
+              name: true,
+              format: true,
+              gender: true
+            }
           }
         }
-      }
-    });
-    console.log('✅ Registration created successfully');
+      });
 
-    // Update category registration count
-    await prisma.category.update({
-      where: { id: categoryId },
-      data: {
-        registrationCount: {
-          increment: 1
+      // Update category registration count
+      await tx.category.update({
+        where: { id: categoryId },
+        data: {
+          registrationCount: {
+            increment: 1
+          }
         }
-      }
+      });
+
+      return registration;
     });
+    
+    console.log('✅ Registration created successfully');
     console.log('✅ Category registration count updated');
 
     // Update tournament payment totals to include this registration's entry fee
@@ -116,7 +121,7 @@ export const quickAddPlayer = async (req, res) => {
         ? 'Team added successfully' 
         : 'Player added successfully',
       registration: {
-        ...registration,
+        ...result,
         displayName: displayName,
         isGuest: true
       }

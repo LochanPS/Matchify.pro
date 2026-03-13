@@ -2,21 +2,21 @@ import { PrismaClient } from '@prisma/client';
 import prisma from '../lib/prisma.js';
 
 /**
- * Payment Split Formula (CRITICAL - DO NOT CHANGE):
- * - Platform Fee: 5% of total revenue
+ * Payment Split Formula (UPDATED):
+ * - Platform Fee: 3% of total revenue
  * - First Payout to Organizer: 30% of total revenue
- * - Second Payout to Organizer: 65% of total revenue
- * - Total: 5% + 30% + 65% = 100%
+ * - Second Payout to Organizer: 67% of total revenue
+ * - Total: 3% + 30% + 67% = 100%
  * 
  * Example: ₹100 total
- * - Platform: ₹5 (5%)
+ * - Platform: ₹3 (3%)
  * - First Payout: ₹30 (30%)
- * - Second Payout: ₹65 (65%)
+ * - Second Payout: ₹67 (67%)
  * 
  * Example: ₹160,000 total
- * - Platform: ₹8,000 (5%)
+ * - Platform: ₹4,800 (3%)
  * - First Payout: ₹48,000 (30%)
- * - Second Payout: ₹104,000 (65%)
+ * - Second Payout: ₹107,200 (67%)
  */
 
 export async function createOrUpdateTournamentPayment(tournamentId) {
@@ -27,7 +27,7 @@ export async function createOrUpdateTournamentPayment(tournamentId) {
       include: {
         registrations: {
           where: { 
-            paymentStatus: { in: ['approved', 'completed', 'verified'] },
+            paymentStatus: { in: ['approved', 'completed', 'verified', 'quick_added'] },
             status: 'confirmed'
           }
         },
@@ -39,14 +39,10 @@ export async function createOrUpdateTournamentPayment(tournamentId) {
       throw new Error('Tournament not found');
     }
 
-    // Calculate total collected from approved registrations
-    let totalCollected = 0;
-    for (const registration of tournament.registrations) {
-      const category = tournament.categories.find(c => c.id === registration.categoryId);
-      if (category) {
-        totalCollected += category.entryFee;
-      }
-    }
+    // Calculate total collected from confirmed registrations
+    const totalCollected = tournament.registrations.reduce((sum, registration) => {
+      return sum + registration.amountTotal;
+    }, 0);
 
     const totalRegistrations = tournament.registrations.length;
 

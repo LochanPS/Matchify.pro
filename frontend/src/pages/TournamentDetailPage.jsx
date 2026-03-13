@@ -173,12 +173,12 @@ const TournamentDetailPage = () => {
           setShowPosterModal(false);
           break;
         case 'ArrowLeft':
-          if (tournament.posters && selectedPoster > 0) {
+          if (tournament?.posters && selectedPoster > 0) {
             setSelectedPoster(selectedPoster - 1);
           }
           break;
         case 'ArrowRight':
-          if (tournament.posters && selectedPoster < tournament.posters.length - 1) {
+          if (tournament?.posters && selectedPoster < tournament.posters.length - 1) {
             setSelectedPoster(selectedPoster + 1);
           }
           break;
@@ -195,7 +195,7 @@ const TournamentDetailPage = () => {
       document.removeEventListener('keydown', handleKeyDown);
       document.body.style.overflow = 'unset';
     };
-  }, [showPosterModal, selectedPoster, tournament.posters]);
+  }, [showPosterModal, selectedPoster, tournament?.posters]);
 
   const fetchTournament = async () => {
     try {

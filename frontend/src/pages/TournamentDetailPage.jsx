@@ -490,7 +490,7 @@ const TournamentDetailPage = () => {
               <div className="w-full md:w-80 flex-shrink-0">
                 <div className="rounded-2xl overflow-hidden shadow-2xl border-4 border-white/20 cursor-pointer hover:scale-105 transition-transform duration-300 group relative">
                   <img
-                    src={getImageUrl(tournament.posters[selectedPoster].imageUrl)}
+                    src={getImageUrl(tournament.posters?.[selectedPoster]?.imageUrl)}
                     alt={tournament.name}
                     className="w-full h-64 md:h-80 object-cover"
                     onClick={() => setShowPosterModal(true)}
@@ -502,7 +502,7 @@ const TournamentDetailPage = () => {
                     </div>
                   </div>
                 </div>
-                {tournament.posters.length > 1 && (
+                {tournament.posters?.length > 1 && (
                   <div className="flex gap-2 mt-3 overflow-x-auto pb-2">
                     {tournament.posters.map((poster, index) => (
                       <button
@@ -1399,7 +1399,7 @@ const TournamentDetailPage = () => {
       )}
 
       {/* Poster Modal */}
-      {showPosterModal && tournament.posters && tournament.posters.length > 0 && (
+      {showPosterModal && tournament?.posters && tournament.posters.length > 0 && (
         <div 
           className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-4"
           onClick={() => setShowPosterModal(false)}
@@ -1417,14 +1417,14 @@ const TournamentDetailPage = () => {
 
             {/* Full Size Poster */}
             <img
-              src={getImageUrl(tournament.posters[selectedPoster].imageUrl)}
+              src={getImageUrl(tournament.posters?.[selectedPoster]?.imageUrl)}
               alt={tournament.name}
               className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             />
 
             {/* Navigation for Multiple Posters */}
-            {tournament.posters.length > 1 && (
+            {tournament.posters?.length > 1 && (
               <>
                 {/* Previous Button */}
                 {selectedPoster > 0 && (
@@ -1442,7 +1442,7 @@ const TournamentDetailPage = () => {
                 )}
 
                 {/* Next Button */}
-                {selectedPoster < tournament.posters.length - 1 && (
+                {selectedPoster < (tournament.posters?.length || 0) - 1 && (
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -1458,7 +1458,7 @@ const TournamentDetailPage = () => {
 
                 {/* Poster Counter */}
                 <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
-                  {selectedPoster + 1} / {tournament.posters.length}
+                  {selectedPoster + 1} / {tournament.posters?.length || 0}
                 </div>
               </>
             )}

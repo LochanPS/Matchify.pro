@@ -1,0 +1,30 @@
+<h2>⚠️ Account Suspension Notice</h2>
+
+<p>Hi {{userName}},</p>
+
+<p>Your Matchify.pro account has been suspended.</p>
+
+<div class="info-box">
+    <h3>Suspension Details</h3>
+    <p><strong>Reason:</strong> {{reason}}</p>
+    <p><strong>Duration:</strong> {{duration}}</p>
+    <p><strong>Effective Date:</strong> {{effectiveDate}}</p>
+    {{#if endDate}}
+    <p><strong>Suspension Ends:</strong> {{endDate}}</p>
+    {{/if}}
+</div>
+
+<p><strong>What this means:</strong></p>
+<ul>
+    <li>You cannot register for new tournaments</li>
+    <li>Existing registrations remain valid</li>
+    <li>You can still view your profile and history</li>
+</ul>
+
+{{#if appealUrl}}
+<a href="{{appealUrl}}" class="button">Submit Appeal</a>
+{{/if}}
+
+<p>If you believe this is a mistake, please contact <a href="mailto:support@matchify.pro">support@matchify.pro</a>.</p>
+
+<p>Best regards,<br>Team Matchify</p>

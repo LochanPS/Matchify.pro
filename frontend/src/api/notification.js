@@ -1,0 +1,33 @@
+import api from '../utils/api';
+
+// Get user notifications
+export const getNotifications = async (unreadOnly = false, limit = 50) => {
+  const response = await api.get('/notifications', {
+    params: { unreadOnly, limit },
+  });
+  return response.data;
+};
+
+// Mark notification as read
+export const markAsRead = async (notificationId) => {
+  const response = await api.put(`/notifications/${notificationId}/read`);
+  return response.data;
+};
+
+// Mark all notifications as read
+export const markAllAsRead = async () => {
+  const response = await api.put('/notifications/read-all');
+  return response.data;
+};
+
+// Delete a notification
+export const deleteNotification = async (notificationId) => {
+  const response = await api.delete(`/notifications/${notificationId}`);
+  return response.data;
+};
+
+// Delete all notifications
+export const deleteAllNotifications = async () => {
+  const response = await api.delete('/notifications/all');
+  return response.data;
+};

@@ -1,0 +1,48 @@
+services:
+  - type: web
+    name: matchify-backend
+    env: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm ci --prefer-offline --no-audit && npx prisma generate && npx prisma migrate deploy
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: FIREBASE_ENABLED
+        value: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: matchify-db
+          property: connectionString
+      - key: FRONTEND_URL
+        value: https://matchify.vercel.app
+      - key: CORS_ORIGIN
+        value: https://matchify.vercel.app
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: JWT_REFRESH_EXPIRES_IN
+        value: 30d
+      - key: ADMIN_EMAIL
+        value: ADMIN@gmail.com
+      - key: ADMIN_PASSWORD
+        value: ADMIN@123(123)
+      - key: CLOUDINARY_CLOUD_NAME
+        value: dfg8tdgmf
+      - key: CLOUDINARY_API_KEY
+        value: 417764488597768
+      - key: CLOUDINARY_API_SECRET
+        value: ithriq7poX0T-4_j3PWmhlVmHqI
+
+databases:
+  - name: matchify-db
+    databaseName: matchify
+    plan: free
+    region: singapore
+    postgresVersion: 15

@@ -255,7 +255,7 @@ ${today},16:45,RECEIVED,Amit Singh,State Championship,1200,APPROVED,Entry fee`;
                 <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center">
                   <span className="text-purple-400 text-xl">💰</span>
                 </div>
-                <span className="text-purple-400 text-sm font-medium">5%</span>
+                <span className="text-purple-400 text-sm font-medium">3%</span>
               </div>
               <h3 className="text-2xl font-bold text-white mb-1">₹{paymentData.platformEarnings.toLocaleString()}</h3>
               <p className="text-gray-400 text-sm mb-2">Platform Earnings</p>
@@ -281,7 +281,7 @@ ${today},16:45,RECEIVED,Amit Singh,State Championship,1200,APPROVED,Entry fee`;
               <div className="bg-red-500/10 rounded-lg p-2 mt-3">
                 <p className="text-red-300 text-xs">
                   {paymentData.overduePayments > 0 
-                    ? '🚨 65% payments overdue to organizers (tournaments already ended)'
+                    ? '🚨 67% payments overdue to organizers (tournaments already ended)'
                     : '✅ All organizer payments are up to date'
                   }
                 </p>
@@ -318,8 +318,8 @@ ${today},16:45,RECEIVED,Amit Singh,State Championship,1200,APPROVED,Entry fee`;
                       <h4 className="text-blue-400 font-semibold mb-2">What you need to do as admin:</h4>
                       <div className="text-gray-300 text-sm space-y-1">
                         <p>🔍 <strong>Verify Payments:</strong> Check player payment screenshots and approve/reject them</p>
-                        <p>💰 <strong>Pay Organizers:</strong> Send 30% before tournament, 65% after tournament ends</p>
-                        <p>⚠️ <strong>Handle Overdue:</strong> Pay organizers who haven't received their 65% payment</p>
+                        <p>💰 <strong>Pay Organizers:</strong> Send 30% before tournament, 67% after tournament ends</p>
+                        <p>⚠️ <strong>Handle Overdue:</strong> Pay organizers who haven't received their 67% payment</p>
                       </div>
                     </div>
                   </div>
@@ -343,7 +343,7 @@ ${today},16:45,RECEIVED,Amit Singh,State Championship,1200,APPROVED,Entry fee`;
                               <p className="font-semibold text-white">{item.count} {item.description}</p>
                               <p className="text-sm text-gray-400">
                                 {item.type === 'verify' ? '🔍 Review payment screenshots from players for MATCHIFY.PRO tournaments' :
-                                 item.type === 'pay' ? '💰 Pay organizers their share (30% before / 65% after tournament)' : 
+                                 item.type === 'pay' ? '💰 Pay organizers their share (30% before / 67% after tournament)' : 
                                  '🚨 Urgent: Pay overdue amounts to tournament organizers'}
                               </p>
                               {item.details && (
@@ -475,7 +475,7 @@ ${today},16:45,RECEIVED,Amit Singh,State Championship,1200,APPROVED,Entry fee`;
                   <div className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg">
                     <div>
                       <span className="text-gray-400 text-sm">Platform Earnings</span>
-                      <p className="text-xs text-gray-500">Your 5% commission (₹{stats?.monthlyRevenue || 0} × 5%)</p>
+                      <p className="text-xs text-gray-500">Your 3% commission (₹{stats?.monthlyRevenue || 0} × 3%)</p>
                     </div>
                     <span className="text-green-400 font-medium">₹{stats?.monthlyEarnings?.toLocaleString() || 0}</span>
                   </div>
@@ -517,11 +517,11 @@ ${today},16:45,RECEIVED,Amit Singh,State Championship,1200,APPROVED,Entry fee`;
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="w-2 h-2 bg-purple-400 rounded-full"></span>
-                      <span>65% paid to organizer after tournament</span>
+                      <span>67% paid to organizer after tournament</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="w-2 h-2 bg-pink-400 rounded-full"></span>
-                      <span>5% stays with MATCHIFY.PRO</span>
+                      <span>3% stays with MATCHIFY.PRO</span>
                     </div>
                   </div>
                 </div>

@@ -276,7 +276,7 @@ const PaymentQRStep = ({ formData, updateFormData, updateMultipleFields, onNext,
               <ul className="list-disc list-inside space-y-1">
                 <li>Players pay entry fees to the admin account first</li>
                 <li>Admin collects all payments and verifies them</li>
-                <li>Admin uses your QR code to pay your tournament earnings (30% before, 65% after)</li>
+                <li>Admin uses your QR code to pay your tournament earnings (30% before, 67% after)</li>
                 <li>You receive payments directly from admin based on the tournament results</li>
               </ul>
             </div>

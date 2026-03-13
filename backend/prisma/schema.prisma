@@ -1,0 +1,657 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                   String              @id @default(uuid())
+  email                String              @unique
+  alternateEmail       String?
+  password             String
+  name                 String
+  phone                String?             @unique
+  roles                String              @default("PLAYER,UMPIRE,ORGANIZER") // Will store comma-separated roles
+  playerCode           String?             @unique // Unique player code like #ABC1234
+  umpireCode           String?             @unique // Unique umpire code like #123ABCD
+  profilePhoto         String?
+  city                 String?
+  state                String?
+  country              String              @default("India")
+  dateOfBirth          DateTime?
+  gender               String?
+  walletBalance        Float               @default(0)
+  totalPoints          Int                 @default(0)
+  tournamentsPlayed    Int                 @default(0)
+  matchesWon           Int                 @default(0)
+  matchesLost          Int                 @default(0)
+  isActive             Boolean             @default(true)
+  isVerified           Boolean             @default(false)
+  isSuspended          Boolean             @default(false)
+  suspendedUntil       DateTime?
+  suspensionReason     String?
+  refreshToken         String?
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+  
+  // Blue Tick Verification System
+  isVerifiedOrganizer  Boolean             @default(false) // Admin approved after interview
+  isVerifiedPlayer     Boolean             @default(false) // Auto at 12+ tournaments
+  isVerifiedUmpire     Boolean             @default(false) // Auto at 10+ matches
+  tournamentsRegistered Int                @default(0)     // Count for player verification
+  matchesUmpired       Int                @default(0)     // Count for umpire verification
+  
+  // KYC for admins
+  availableForKYC      Boolean             @default(false) // Admin toggle for KYC availability
+  
+  // Profile relations
+  playerProfile        PlayerProfile?
+  organizerProfile     OrganizerProfile?
+  umpireProfile        UmpireProfile?
+  
+  // Existing relations
+  adminAuditLogs       AuditLog[]          @relation("AdminAuditLogs")
+  notifications        Notification[]      @relation("UserNotifications")
+  partnerRegistrations Registration[]      @relation("PartnerRegistrations")
+  registrations        Registration[]
+  tournaments          Tournament[]
+  walletTransactions   WalletTransaction[]
+  umpiredMatches       Match[]             @relation("UmpireMatches")
+  tournamentUmpires    TournamentUmpire[]  @relation("TournamentUmpires")
+  
+  // KYC relations
+  kycSubmissions       OrganizerKYC[]      @relation("OrganizerKYC")
+  kycReviews           OrganizerKYC[]      @relation("KYCReviewer")
+  
+  // Organizer request relations
+  organizerRequest     OrganizerRequest?   @relation("UserOrganizerRequest")
+  reviewedRequests     OrganizerRequest[]  @relation("AdminReviewedRequests")
+
+  @@index([email])
+  @@index([phone])
+  @@index([roles])
+}
+
+model PlayerProfile {
+  id                String   @id @default(uuid())
+  userId            String   @unique
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  matchifyPoints    Int      @default(0)
+  tournamentsPlayed Int      @default(0)
+  matchesWon        Int      @default(0)
+  matchesLost       Int      @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model OrganizerProfile {
+  id                   String   @id @default(uuid())
+  userId               String   @unique
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization         String?
+  tournamentsOrganized Int      @default(0)
+  totalRevenue         Float    @default(0)
+  rating               Float?
+  // Saved payment details for quick tournament creation
+  savedUpiId           String?
+  savedAccountHolder   String?
+  savedPaymentQRUrl    String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+model UmpireProfile {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  matchesUmpired  Int      @default(0)
+  certification   String?
+  rating          Float?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model WalletTransaction {
+  id                String   @id @default(uuid())
+  userId            String
+  type              String
+  amount            Float
+  balanceBefore     Float
+  balanceAfter      Float
+  description       String
+  referenceId       String?
+  paymentGateway    String?
+  razorpayOrderId   String?
+  razorpayPaymentId String?
+  razorpaySignature String?
+  status            String   @default("PENDING")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([type])
+}
+
+model Tournament {
+  id                    String             @id @default(uuid())
+  organizerId           String
+  name                  String
+  description           String
+  venue                 String
+  address               String
+  city                  String
+  state                 String
+  pincode               String
+  zone                  String
+  country               String             @default("India")
+  registrationOpenDate  String             // Store as string to avoid timezone conversion
+  registrationCloseDate String             // Store as string to avoid timezone conversion
+  startDate             String             // Store as string to avoid timezone conversion
+  endDate               String             // Store as string to avoid timezone conversion
+  format                String
+  privacy               String             @default("public")
+  status                String             @default("draft")
+  totalCourts           Int?
+  matchStartTime        String?
+  matchEndTime          String?
+  matchDuration         Int?
+  shuttleType           String?            // "PLASTIC" or "FEATHER"
+  shuttleBrand          String?            // Brand name like "Yonex", "Li-Ning", etc.
+  totalRegistrations    Int                @default(0)
+  totalRevenue          Float              @default(0)
+  paymentQRUrl          String?
+  paymentQRPublicId     String?
+  upiId                 String?
+  accountHolderName     String?
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+  categories            Category[]
+  draws                 Draw[]
+  matches               Match[]
+  registrations         Registration[]
+  organizer             User               @relation(fields: [organizerId], references: [id])
+  posters               TournamentPoster[]
+  umpires               TournamentUmpire[]
+  tournamentPayment     TournamentPayment?
+
+  @@index([city, state, status])
+  @@index([startDate, registrationCloseDate])
+  @@index([organizerId])
+}
+
+model TournamentUmpire {
+  id           String     @id @default(uuid())
+  tournamentId String
+  umpireId     String
+  addedAt      DateTime   @default(now())
+  tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  umpire       User       @relation("TournamentUmpires", fields: [umpireId], references: [id], onDelete: Cascade)
+
+  @@unique([tournamentId, umpireId])
+  @@index([tournamentId])
+  @@index([umpireId])
+}
+
+model TournamentPoster {
+  id           String     @id @default(uuid())
+  tournamentId String
+  imageUrl     String
+  publicId     String
+  displayOrder Int        @default(0)
+  createdAt    DateTime   @default(now())
+  tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+
+  @@index([tournamentId, displayOrder])
+}
+
+model Category {
+  id                String         @id @default(uuid())
+  tournamentId      String
+  name              String
+  format            String
+  ageGroup          String?
+  gender            String
+  entryFee          Float
+  maxParticipants   Int?
+  tournamentFormat  String         @default("KNOCKOUT") // KNOCKOUT or ROUND_ROBIN
+  scoringFormat     String         @default("21x3")
+  registrationCount Int            @default(0)
+  status            String         @default("open")
+  winnerId          String?        // Winner of the category (set after finals)
+  runnerUpId        String?        // Runner-up of the category
+  prizeWinner       Float?
+  prizeRunnerUp     Float?
+  prizeSemiFinalist Float?
+  prizeDescription  String?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  tournament        Tournament     @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  draws             Draw[]
+  matches           Match[]
+  registrations     Registration[]
+
+  @@index([tournamentId, format, gender])
+}
+
+model Registration {
+  id                 String     @id @default(uuid())
+  userId             String?    // Optional - null for guest registrations
+  tournamentId       String
+  categoryId         String
+  partnerId          String?
+  partnerEmail       String?
+  partnerConfirmed   Boolean    @default(false)
+  amountTotal        Float
+  amountWallet       Float      @default(0)
+  amountRazorpay     Float      @default(0)
+  razorpayOrderId    String?
+  razorpayPaymentId  String?
+  razorpaySignature  String?
+  paymentScreenshot  String?    // Screenshot of payment for organizer verification
+  status             String     @default("pending") // pending, confirmed, cancelled, cancellation_requested
+  paymentStatus      String     @default("pending") // pending, submitted, verified, rejected
+  cancelledAt        DateTime?
+  cancellationReason String?
+  refundUpiId        String?    // Player's UPI ID for refund
+  refundQrCode       String?    // Player's QR code image for refund
+  refundAmount       Float?
+  refundStatus       String?    // pending, approved, rejected, completed
+  refundRequestedAt  DateTime?
+  refundProcessedAt  DateTime?
+  refundRejectionReason String?
+  refundPaymentScreenshot String? // Organizer's payment proof when sending refund
+  refundPaymentScreenshotPublicId String? // Cloudinary public ID
+  isQuickAdded       Boolean    @default(false) // True if added by super admin without payment
+  quickAddedBy       String?    // Admin user ID who quick added this player
+  // Guest registration fields (when userId is null)
+  guestName          String?    // Name for guest registrations
+  guestEmail         String?    // Email for guest registrations
+  guestPhone         String?    // Phone for guest registrations
+  guestGender        String?    // Gender for guest registrations
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+  partnerToken       String?
+  partner            User?      @relation("PartnerRegistrations", fields: [partnerId], references: [id])
+  category           Category   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  tournament         Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  user               User?      @relation(fields: [userId], references: [id])
+  paymentVerification PaymentVerification?
+
+  @@index([userId])
+  @@index([tournamentId])
+  @@index([categoryId])
+  @@index([partnerId])
+  @@index([guestEmail])
+}
+
+model Notification {
+  id        String    @id @default(uuid())
+  userId    String
+  type      String    // REGISTRATION_CONFIRMED, PARTNER_INVITATION, etc.
+  title     String
+  message   String
+  data      String?   // JSON string for additional context
+  read      Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  readAt    DateTime?
+  user      User      @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([read])
+  @@index([createdAt(sort: Desc)])
+}
+
+model Draw {
+  id           String     @id @default(uuid())
+  tournamentId String
+  categoryId   String
+  format       String
+  bracketJson  String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  category     Category   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+
+  @@unique([tournamentId, categoryId])
+  @@index([tournamentId])
+  @@index([categoryId])
+}
+
+model Match {
+  id             String     @id @default(uuid())
+  tournamentId   String
+  categoryId     String
+  round          Int
+  roundNumber    Int?       // Added for tournament-system-reliability spec
+  matchNumber    Int
+  matchIndex     Int?       // Index-based position for draw engine v2
+  stage          String?    // 'GROUP' for round robin, 'KNOCKOUT' for knockout stage
+  groupIndex     Int?       // Group index for round robin matches
+  groupName      String?    // Group name (A, B, C, etc.)
+  slot1Index     Int?       // Slot index for player 1 (for round robin)
+  slot2Index     Int?       // Slot index for player 2 (for round robin)
+  slotNumber     Int?       // Slot number for knockout first round
+  courtNumber    Int?
+  player1Id      String?
+  player2Id      String?
+  team1Player1Id String?
+  team1Player2Id String?
+  team2Player1Id String?
+  team2Player2Id String?
+  player1Seed    Int?
+  player2Seed    Int?
+  parentMatchId  String?
+  childPosition  Int?       // Added for tournament-system-reliability spec: 1 or 2 to indicate position in parent match
+  winnerPosition String?
+  umpireId       String?
+  scheduledTime  DateTime?
+  status         String     @default("PENDING")
+  winnerId       String?
+  scoreJson      String?
+  startedAt      DateTime?
+  completedAt    DateTime?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  parentMatch    Match?     @relation("MatchProgression", fields: [parentMatchId], references: [id])
+  childMatches   Match[]    @relation("MatchProgression")
+  category       Category   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  tournament     Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  umpire         User?      @relation("UmpireMatches", fields: [umpireId], references: [id])
+
+  @@index([tournamentId, categoryId])
+  @@index([tournamentId, round])
+  @@index([tournamentId, roundNumber])
+  @@index([parentMatchId])
+  @@index([status])
+  @@index([round])
+  @@index([umpireId])
+  @@index([stage])
+  @@index([matchIndex])
+  @@index([groupIndex])
+}
+
+model ScoreCorrectionRequest {
+  id             String    @id @default(uuid())
+  matchId        String
+  umpireId       String
+  correctionType String
+  details        String
+  proposedScore  String
+  status         String    @default("pending")
+  reviewedBy     String?
+  reviewedAt     DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([matchId])
+  @@index([umpireId])
+  @@index([status])
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  adminId    String
+  action     String
+  entityType String
+  entityId   String?
+  details    String
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+  admin      User     @relation("AdminAuditLogs", fields: [adminId], references: [id])
+
+  @@index([adminId])
+  @@index([action])
+  @@index([entityType])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+
+model SmsLog {
+  id           String   @id @default(uuid())
+  phoneNumber  String   // E.164 format (+91XXXXXXXXXX)
+  templateName String
+  message      String
+  status       String   // sent, failed, delivered, undelivered
+  twilioSid    String?  // Twilio message SID
+  error        String?
+  createdAt    DateTime @default(now())
+
+  @@index([phoneNumber, createdAt])
+  @@index([status, createdAt])
+  @@map("sms_logs")
+}
+
+
+// ============================================
+// ACADEMY LISTING SYSTEM
+// ============================================
+
+model Academy {
+  id                String          @id @default(uuid())
+  name              String
+  address           String
+  city              String
+  state             String
+  pincode           String?
+  sports            String          // JSON array of sports
+  sportDetails      String          // JSON object with sport-specific details
+  description       String?
+  phone             String
+  email             String?
+  website           String?
+  photos            String?         // JSON array of photo URLs
+  academyQrCode     String?         // Academy's own QR code for payments
+  paymentScreenshot String          // Cloudinary URL of payment screenshot
+  status            String          @default("pending") // pending, approved, rejected, deleted
+  isBlocked         Boolean         @default(false)     // Admin can block academies
+  blockReason       String?         // Reason for blocking
+  blockedAt         DateTime?       // When it was blocked
+  blockedBy         String?         // Admin who blocked
+  isDeleted         Boolean         @default(false)     // Soft delete flag
+  deletedAt         DateTime?       // When it was deleted
+  deletedBy         String?         // Admin who deleted
+  deletionReason    String?         // Reason for deletion
+  rejectionReason   String?
+  submittedBy       String?         // User ID who submitted (optional, can be guest)
+  submittedByName   String?         // Name of submitter
+  submittedByEmail  String?         // Email of submitter
+  submittedByPhone  String?         // Phone of submitter
+  reviewedBy        String?         // Admin who reviewed
+  reviewedAt        DateTime?
+  isVerified        Boolean         @default(false)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@index([status])
+  @@index([city, state])
+  @@index([createdAt])
+  @@index([isDeleted])
+  @@map("academies")
+}
+
+
+// ============================================
+// ORGANIZER KYC VERIFICATION SYSTEM
+// ============================================
+
+model OrganizerKYC {
+  id                  String    @id @default(uuid())
+  organizerId         String    @unique
+  organizer           User      @relation("OrganizerKYC", fields: [organizerId], references: [id], onDelete: Cascade)
+  
+  // Document
+  aadhaarImageUrl     String
+  aadhaarNumber       String?   // Optional: last 4 digits only for display
+  
+  // Video Call
+  videoCallStartedAt  DateTime?
+  videoCallEndedAt    DateTime?
+  videoRoomUrl        String?   // Daily.co room URL
+  
+  // Review
+  status              String    @default("PENDING") // PENDING, IN_PROGRESS, APPROVED, REJECTED
+  reviewedBy          String?   // Admin user ID
+  reviewer            User?     @relation("KYCReviewer", fields: [reviewedBy], references: [id])
+  reviewedAt          DateTime?
+  rejectionReason     String?
+  adminNotes          String?
+  
+  // Metadata
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  
+  @@index([organizerId])
+  @@index([status])
+  @@map("organizer_kyc")
+}
+
+// ============================================
+// ORGANIZER REQUEST & VERIFICATION SYSTEM
+// ============================================
+
+model OrganizerRequest {
+  id                  String    @id @default(uuid())
+  userId              String    @unique
+  user                User      @relation("UserOrganizerRequest", fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Application details
+  reason              String    // Why they want to become organizer
+  experience          String?   // Previous organizing experience
+  preferredContact    String    // WhatsApp, Phone, GoogleMeet
+  
+  // Status
+  status              String    @default("pending") // pending, approved, rejected
+  
+  // Interview details
+  interviewScheduled  DateTime?
+  interviewNotes      String?   // Admin's notes from interview
+  
+  // Review
+  reviewedBy          String?   // Admin user ID
+  reviewer            User?     @relation("AdminReviewedRequests", fields: [reviewedBy], references: [id])
+  reviewedAt          DateTime?
+  rejectionReason     String?
+  
+  // Metadata
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("organizer_requests")
+}
+
+
+// ============================================
+// MATCHIFY PAYMENT SETTINGS (Admin QR Code)
+// ============================================
+
+model PaymentSettings {
+  id              String   @id @default(uuid())
+  upiId           String   // Admin's UPI ID
+  accountHolder   String   // Admin's name
+  qrCodeUrl       String?  // Cloudinary URL of QR code
+  qrCodePublicId  String?  // Cloudinary public ID
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@map("payment_settings")
+}
+
+// ============================================
+// TOURNAMENT PAYMENT TRACKING
+// ============================================
+
+model TournamentPayment {
+  id                    String   @id @default(uuid())
+  tournamentId          String   @unique
+  organizerId           String
+  
+  // Payment collection
+  totalCollected        Float    @default(0)
+  totalRegistrations    Int      @default(0)
+  
+  // Platform fee (5%)
+  platformFeePercent    Float    @default(5)
+  platformFeeAmount     Float    @default(0)
+  
+  // Organizer payouts (50% + 50%)
+  organizerShare        Float    @default(0) // 95% of total
+  payout50Percent1      Float    @default(0) // First 50% of organizer share (before tournament)
+  payout50Percent2      Float    @default(0) // Second 50% of organizer share (after tournament)
+  
+  // Payout status - First 50%
+  payout50Status1       String   @default("pending") // pending, paid
+  payout50PaidAt1       DateTime?
+  payout50PaidBy1       String?  // Admin ID who marked as paid
+  payout50Notes1        String?
+  
+  // Payout status - Second 50%
+  payout50Status2       String   @default("pending") // pending, paid
+  payout50PaidAt2       DateTime?
+  payout50PaidBy2       String?  // Admin ID who marked as paid
+  payout50Notes2        String?
+  
+  // Organizer payout details
+  organizerUpiId        String?
+  organizerAccountHolder String?
+  organizerBankDetails  String?  // JSON for bank account details
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  // Relations
+  tournament            Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  
+  @@index([tournamentId])
+  @@index([organizerId])
+  @@index([payout50Status1])
+  @@index([payout50Status2])
+  @@map("tournament_payments")
+}
+
+// ============================================
+// PAYMENT VERIFICATION (Player Screenshots)
+// ============================================
+
+model PaymentVerification {
+  id                String    @id @default(uuid())
+  registrationId    String    @unique
+  tournamentId      String
+  userId            String
+  
+  // Payment details
+  amount            Float
+  paymentScreenshot String    // Cloudinary URL
+  screenshotPublicId String?  // Cloudinary public ID
+  
+  // Verification
+  status            String    @default("pending") // pending, approved, rejected
+  verifiedBy        String?   // Admin ID
+  verifiedAt        DateTime?
+  rejectionReason   String?
+  
+  // Metadata
+  submittedAt       DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  // Relations
+  registration      Registration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+  
+  @@index([registrationId])
+  @@index([tournamentId])
+  @@index([userId])
+  @@index([status])
+  @@index([submittedAt])
+  @@map("payment_verifications")
+}

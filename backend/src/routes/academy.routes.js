@@ -1,0 +1,57 @@
+import express from 'express';
+import multer from 'multer';
+import { authenticate, optionalAuth } from '../middleware/auth.js';
+import {
+  createAcademy,
+  getAcademies,
+  getPendingAcademies,
+  getAllAcademiesAdmin,
+  approveAcademy,
+  rejectAcademy,
+  blockAcademy,
+  unblockAcademy,
+  deleteAcademy,
+  getAcademyById
+} from '../controllers/academy.controller.js';
+
+const router = express.Router();
+
+// Configure multer for memory storage (for Cloudinary upload)
+const storage = multer.memoryStorage();
+const upload = multer({
+  storage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed'), false);
+    }
+  }
+});
+
+// Public routes
+router.get('/', getAcademies);
+router.get('/admin/pending', authenticate, getPendingAcademies);
+router.get('/:id', getAcademyById);
+
+// Submit academy (optional auth - can be guest or logged in user)
+router.post('/', 
+  optionalAuth,
+  upload.fields([
+    { name: 'paymentScreenshot', maxCount: 1 },
+    { name: 'academyQrCode', maxCount: 1 },
+    { name: 'photos', maxCount: 20 }
+  ]),
+  createAcademy
+);
+
+// Admin routes
+router.get('/admin/all', authenticate, getAllAcademiesAdmin);
+router.post('/admin/:id/approve', authenticate, approveAcademy);
+router.post('/admin/:id/reject', authenticate, rejectAcademy);
+router.post('/admin/:id/block', authenticate, blockAcademy);
+router.post('/admin/:id/unblock', authenticate, unblockAcademy);
+router.delete('/admin/:id', authenticate, deleteAcademy);
+
+export default router;

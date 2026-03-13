@@ -1,0 +1,25 @@
+<h2>⚠️ Tournament Cancelled</h2>
+
+<p>Hi {{playerName}},</p>
+
+<p>We regret to inform you that <strong>{{tournamentName}}</strong> has been cancelled.</p>
+
+<div class="info-box">
+    <h3>Cancellation Details</h3>
+    <p><strong>Reason:</strong> {{cancellationReason}}</p>
+    <p><strong>Cancelled by:</strong> {{cancelledBy}}</p>
+    <p><strong>Date:</strong> {{cancellationDate}}</p>
+</div>
+
+<h3>💰 Refund Information</h3>
+<p>Your refund of <strong>₹{{refundAmount}}</strong> has been processed:</p>
+<ul>
+    <li>Wallet Credits: ₹{{walletRefund}}</li>
+    <li>Razorpay Refund: ₹{{gatewayRefund}} (will reflect in 5-7 business days)</li>
+</ul>
+
+<a href="{{walletUrl}}" class="button">Check Wallet Balance</a>
+
+<p>We apologize for any inconvenience. We hope to see you at future tournaments!</p>
+
+<p>Best regards,<br>Team Matchify</p>

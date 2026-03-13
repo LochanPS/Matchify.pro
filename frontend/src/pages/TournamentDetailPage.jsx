@@ -117,6 +117,7 @@ const DeleteTournamentModal = ({ isOpen, onClose, onConfirm, tournamentName, isD
           </div>
         </div>
       </div>
+
     </div>
   );
 };
@@ -129,6 +130,7 @@ const TournamentDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedPoster, setSelectedPoster] = useState(0);
+  const [showPosterModal, setShowPosterModal] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -160,6 +162,40 @@ const TournamentDetailPage = () => {
   useEffect(() => {
     fetchTournament();
   }, [id]);
+
+  // Keyboard navigation for poster modal
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (!showPosterModal) return;
+      
+      switch (event.key) {
+        case 'Escape':
+          setShowPosterModal(false);
+          break;
+        case 'ArrowLeft':
+          if (tournament.posters && selectedPoster > 0) {
+            setSelectedPoster(selectedPoster - 1);
+          }
+          break;
+        case 'ArrowRight':
+          if (tournament.posters && selectedPoster < tournament.posters.length - 1) {
+            setSelectedPoster(selectedPoster + 1);
+          }
+          break;
+      }
+    };
+
+    if (showPosterModal) {
+      document.addEventListener('keydown', handleKeyDown);
+      // Prevent body scroll when modal is open
+      document.body.style.overflow = 'hidden';
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'unset';
+    };
+  }, [showPosterModal, selectedPoster, tournament.posters]);
 
   const fetchTournament = async () => {
     try {
@@ -452,12 +488,19 @@ const TournamentDetailPage = () => {
             {/* Poster */}
             {tournament.posters && tournament.posters.length > 0 && (
               <div className="w-full md:w-80 flex-shrink-0">
-                <div className="rounded-2xl overflow-hidden shadow-2xl border-4 border-white/20">
+                <div className="rounded-2xl overflow-hidden shadow-2xl border-4 border-white/20 cursor-pointer hover:scale-105 transition-transform duration-300 group relative">
                   <img
                     src={getImageUrl(tournament.posters[selectedPoster].imageUrl)}
                     alt={tournament.name}
                     className="w-full h-64 md:h-80 object-cover"
+                    onClick={() => setShowPosterModal(true)}
                   />
+                  {/* Click hint overlay */}
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/90 text-gray-800 px-3 py-1 rounded-full text-sm font-medium">
+                      Click to enlarge
+                    </div>
+                  </div>
                 </div>
                 {tournament.posters.length > 1 && (
                   <div className="flex gap-2 mt-3 overflow-x-auto pb-2">
@@ -1351,6 +1394,74 @@ const TournamentDetailPage = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Poster Modal */}
+      {showPosterModal && tournament.posters && tournament.posters.length > 0 && (
+        <div 
+          className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          onClick={() => setShowPosterModal(false)}
+        >
+          <div className="relative max-w-4xl max-h-[90vh] w-full h-full flex items-center justify-center">
+            {/* Close Button */}
+            <button
+              onClick={() => setShowPosterModal(false)}
+              className="absolute top-4 right-4 z-10 w-10 h-10 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center text-white transition-colors"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            {/* Full Size Poster */}
+            <img
+              src={getImageUrl(tournament.posters[selectedPoster].imageUrl)}
+              alt={tournament.name}
+              className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            />
+
+            {/* Navigation for Multiple Posters */}
+            {tournament.posters.length > 1 && (
+              <>
+                {/* Previous Button */}
+                {selectedPoster > 0 && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedPoster(selectedPoster - 1);
+                    }}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center text-white transition-colors"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
+                )}
+
+                {/* Next Button */}
+                {selectedPoster < tournament.posters.length - 1 && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedPoster(selectedPoster + 1);
+                    }}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center text-white transition-colors"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                )}
+
+                {/* Poster Counter */}
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
+                  {selectedPoster + 1} / {tournament.posters.length}
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

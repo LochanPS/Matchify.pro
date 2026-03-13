@@ -131,13 +131,13 @@ const Navbar = () => {
   // If user is admin, use the same navbar style as regular users
   if (user?.isAdmin) {
     return (
-      <header className="sticky top-0 z-50 bg-slate-900/95 backdrop-blur-lg border-b border-white/10 shadow-lg shadow-black/20">
+      <header className="sticky top-0 z-50 bg-slate-900/98 backdrop-blur-xl border-b border-white/10 shadow-lg shadow-black/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-8">
+            <div className="flex items-center gap-10">
               {/* Logo - Same as regular users */}
               <Link to="/admin-dashboard" className="flex items-center justify-center group">
-                <div className="relative flex items-center gap-2">
+                <div className="relative flex items-center gap-3">
                   <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-14 h-14 bg-green-500/50 blur-xl rounded-full opacity-80 group-hover:opacity-100 transition-all duration-300"></div>
                   <div className="relative h-11 w-12 flex-shrink-0 group-hover:scale-110 transition-all duration-300">
                     <svg viewBox="0 0 120 140" className="w-full h-full drop-shadow-[0_0_12px_rgba(34,197,94,0.8)]">
@@ -171,7 +171,7 @@ const Navbar = () => {
               </Link>
 
               {/* Admin Navigation */}
-              <nav className="hidden md:flex items-center gap-1">
+              <nav className="hidden md:flex items-center gap-2">
                 <NavLink to="/admin-dashboard" active={location.pathname === '/admin-dashboard' || location.pathname === '/admin/dashboard'}>
                   <LayoutDashboard className="w-4 h-4" />
                   Dashboard
@@ -217,15 +217,15 @@ const Navbar = () => {
   }
 
   return (
-    <header className="sticky top-0 z-50 bg-slate-900/95 backdrop-blur-lg border-b border-white/10 shadow-lg shadow-black/20">
+    <header className="sticky top-0 z-50 bg-slate-900/98 backdrop-blur-xl border-b border-white/10 shadow-lg shadow-black/20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16">
           
           {/* Left: Logo + Nav */}
-          <div className="flex items-center gap-8">
+          <div className="flex items-center gap-10">
             {/* Logo */}
             <Link to="/" className="flex items-center justify-center group">
-              <div className="relative flex items-center gap-2">
+              <div className="relative flex items-center gap-3">
                 {/* Glow effect behind logo */}
                 <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-14 h-14 bg-green-500/50 blur-xl rounded-full opacity-80 group-hover:opacity-100 transition-all duration-300"></div>
                 
@@ -269,7 +269,7 @@ const Navbar = () => {
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center gap-1">
+            <nav className="hidden md:flex items-center gap-2">
               <NavLink to="/tournaments" active={isActiveLink('/tournaments')}>
                 <Trophy className="w-4 h-4" />
                 Tournaments
@@ -425,13 +425,13 @@ const Navbar = () => {
               <div className="flex items-center gap-3">
                 <Link
                   to="/login"
-                  className="text-gray-300 hover:text-white px-4 py-2 text-sm font-medium transition-colors rounded-xl hover:bg-white/10"
+                  className="text-gray-300 hover:text-white px-5 py-2.5 text-sm font-medium transition-all duration-200 rounded-xl hover:bg-white/10 hover:scale-105"
                 >
                   Sign in
                 </Link>
                 <Link
                   to="/register"
-                  className="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl hover:shadow-lg hover:shadow-emerald-500/30 hover:scale-105 transition-all text-sm font-semibold"
+                  className="px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl hover:shadow-lg hover:shadow-emerald-500/30 hover:scale-105 transition-all duration-200 text-sm font-semibold"
                 >
                   Sign up
                 </Link>
@@ -520,10 +520,10 @@ const Navbar = () => {
 const NavLink = ({ to, children, active }) => (
   <Link
     to={to}
-    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
+    className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
       active 
-        ? 'text-emerald-400 bg-emerald-500/20 shadow-sm' 
-        : 'text-gray-300 hover:text-white hover:bg-white/10'
+        ? 'text-emerald-400 bg-emerald-500/20 shadow-sm border border-emerald-500/30' 
+        : 'text-gray-300 hover:text-white hover:bg-white/10 hover:scale-105'
     }`}
   >
     {children}

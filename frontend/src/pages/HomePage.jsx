@@ -214,13 +214,13 @@ function HomePage() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
           <div className="text-center">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-800/80 backdrop-blur-sm rounded-full text-white/90 text-sm font-medium mb-8 border border-green-500/30 shadow-lg">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-800/80 backdrop-blur-sm rounded-full text-white/90 text-sm font-medium mb-10 border border-green-500/30 shadow-lg">
               <SparklesIcon className="w-4 h-4 text-green-400" />
               India's #1 Badminton Platform
             </div>
 
             {/* Logo & Title */}
-            <div className="mb-8">
+            <div className="mb-10">
               {/* Glowing Logo Container */}
               <div className="relative inline-flex flex-col items-center">
                 {/* Glow effect */}
@@ -228,7 +228,7 @@ function HomePage() {
                 
                 {/* SVG Shield Logo */}
                 <div className="relative mb-6 transform hover:scale-110 transition-transform">
-                  <svg viewBox="0 0 120 140" className="h-32 w-auto drop-shadow-[0_0_30px_rgba(34,197,94,0.8)]">
+                  <svg viewBox="0 0 120 140" className="h-32 w-auto drop-shadow-[0_0_40px_rgba(34,197,94,0.9)]">
                     {/* Shield */}
                     <defs>
                       <linearGradient id="heroShieldFill" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -254,7 +254,7 @@ function HomePage() {
                 </div>
                 
                 {/* Text Logo */}
-                <h1 className="relative text-5xl md:text-7xl lg:text-8xl font-black tracking-tight">
+                <h1 className="relative text-6xl md:text-8xl lg:text-9xl font-black tracking-tight">
                   <span className="text-transparent bg-clip-text bg-gradient-to-b from-green-300 via-green-400 to-green-600" style={{textShadow: '0 0 40px rgba(34,197,94,0.5)'}}>
                     MATCHIFY
                   </span>
@@ -266,12 +266,12 @@ function HomePage() {
             </div>
             
             {/* Subtitle */}
-            <p className="text-xl md:text-2xl lg:text-3xl text-white/90 mb-6 font-light max-w-3xl mx-auto">
+            <p className="text-xl md:text-2xl lg:text-3xl text-white/80 mb-6 font-light max-w-3xl mx-auto">
               Where Champions Are Made
             </p>
             
             {/* Description */}
-            <p className="text-lg text-white/70 mb-12 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-lg text-white/60 mb-12 max-w-2xl mx-auto leading-relaxed">
               Join thousands of players across India. Register for tournaments, track progress, and compete with the best.
             </p>
 
@@ -339,13 +339,13 @@ function HomePage() {
       </div>
 
       {/* Features Section */}
-      <div className="py-20 relative z-10">
+      <div className="py-24 relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <span className="inline-block px-4 py-2 bg-green-500/20 text-green-400 rounded-full text-sm font-semibold mb-4 border border-green-500/30">
               ✨ Features
             </span>
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            <h2 className="text-5xl md:text-6xl font-bold text-white mb-4">
               Everything You Need to
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-400"> Win</span>
             </h2>
@@ -355,7 +355,7 @@ function HomePage() {
             {features.map((feature, index) => (
               <div 
                 key={index}
-                className="group relative bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 hover:border-green-500/50 hover:shadow-xl hover:shadow-green-500/10 transition-all duration-300 hover:scale-[1.02]"
+                className="group relative bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 hover:border-green-500/50 hover:shadow-2xl hover:shadow-green-500/10 hover:-translate-y-1 transition-all duration-300"
               >
                 <div className={`inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br ${feature.color} rounded-xl shadow-lg mb-4 group-hover:scale-110 transition-all duration-300`}>
                   <feature.icon className="w-6 h-6 text-white" />
@@ -398,7 +398,7 @@ function HomePage() {
       </div>
 
       {/* How It Works Section */}
-      <div className="py-20 relative z-10">
+      <div className="py-24 relative z-10">
         {/* Section Background */}
         <div className="absolute inset-0">
           <div className="absolute top-1/4 right-10 w-64 h-64 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
@@ -410,11 +410,11 @@ function HomePage() {
             <span className="inline-block px-4 py-2 bg-purple-500/20 text-purple-400 rounded-full text-sm font-semibold mb-4 border border-purple-500/30">
               🎯 Simple Process
             </span>
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            <h2 className="text-5xl md:text-6xl font-bold text-white mb-4">
               How It
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400"> Works</span>
             </h2>
-            <p className="text-gray-400 text-lg">Get started in 4 easy steps</p>
+            <p className="text-white/60 text-lg">Get started in 4 easy steps</p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -425,7 +425,7 @@ function HomePage() {
                   <div className="hidden lg:block absolute top-20 left-full w-full h-0.5 bg-gradient-to-r from-purple-500/50 to-transparent -z-10"></div>
                 )}
                 
-                <div className="relative bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:border-purple-500/50 transition-all duration-300 hover:scale-105 hover:shadow-[0_0_30px_rgba(168,85,247,0.3)]">
+                <div className="relative bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:border-purple-500/50 hover:-translate-y-1 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/10">
                   {/* Step Number */}
                   <div className={`absolute -top-4 -right-4 w-12 h-12 bg-gradient-to-br ${item.color} rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg`}>
                     {item.step}
@@ -439,7 +439,7 @@ function HomePage() {
                   <h3 className="text-xl font-bold text-white mb-2">
                     {item.title}
                   </h3>
-                  <p className="text-gray-400 text-sm">
+                  <p className="text-white/60 text-sm">
                     {item.description}
                   </p>
                 </div>
@@ -450,11 +450,11 @@ function HomePage() {
       </div>
 
       {/* Benefits Section */}
-      <div className="py-16 relative z-10 overflow-hidden">
+      <div className="py-24 relative z-10 overflow-hidden">
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-3xl p-8 md:p-12 shadow-xl">
             <div className="text-center mb-10">
-              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+              <h2 className="text-5xl md:text-6xl font-bold text-white mb-4">
                 Why Choose
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-400"> Matchify.pro</span>
               </h2>
@@ -462,7 +462,7 @@ function HomePage() {
             
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               {benefits.map((benefit, index) => (
-                <div key={index} className="flex items-center gap-3 bg-slate-900/50 rounded-xl p-4 border border-slate-700/50 hover:border-green-500/50 hover:shadow-lg hover:shadow-green-500/10 transition-all group">
+                <div key={index} className="flex items-center gap-3 bg-slate-900/50 rounded-xl p-4 border border-slate-700/50 hover:border-green-500/50 hover:shadow-lg hover:shadow-green-500/10 hover:-translate-y-1 transition-all group">
                   <div className={`flex-shrink-0 w-10 h-10 ${benefit.color} bg-slate-800 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform`}>
                     <benefit.icon className="w-6 h-6" />
                   </div>
@@ -475,13 +475,13 @@ function HomePage() {
       </div>
 
       {/* Testimonials Section */}
-      <div className="py-20 relative z-10">
+      <div className="py-24 relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="text-center mb-16">
             <span className="inline-block px-4 py-2 bg-teal-500/20 text-teal-400 rounded-full text-sm font-semibold mb-4 border border-teal-500/30">
               💬 Testimonials
             </span>
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            <h2 className="text-5xl md:text-6xl font-bold text-white mb-4">
               What Players
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-cyan-400"> Say</span>
             </h2>
@@ -490,7 +490,7 @@ function HomePage() {
           <div className="grid md:grid-cols-3 gap-6">
             {testimonials.map((testimonial, index) => (
               <div key={index} className="group relative">
-                <div className="relative bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 hover:border-teal-500/50 hover:shadow-xl hover:shadow-teal-500/10 transition-all duration-300">
+                <div className="relative bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-8 hover:border-teal-500/50 hover:shadow-2xl hover:shadow-teal-500/10 hover:-translate-y-1 transition-all duration-300">
                   {/* Stars */}
                   <div className="flex gap-1 mb-4">
                     {[...Array(testimonial.rating)].map((_, i) => (
@@ -499,12 +499,12 @@ function HomePage() {
                   </div>
                   
                   {/* Quote */}
-                  <p className="text-white/70 mb-6 leading-relaxed">
+                  <p className="text-white/60 mb-6 leading-relaxed">
                     "{testimonial.text}"
                   </p>
                   
                   {/* Author */}
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-4">
                     <div className="w-12 h-12 bg-gradient-to-br from-teal-400 to-cyan-400 rounded-full flex items-center justify-center text-2xl shadow-lg">
                       {testimonial.image}
                     </div>
@@ -521,13 +521,13 @@ function HomePage() {
       </div>
 
       {/* CTA Section */}
-      <div className="py-20 relative z-10">
+      <div className="py-24 relative z-10">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-3xl p-10 shadow-xl">
+          <div className="bg-gradient-to-br from-slate-800/60 to-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-3xl p-12 shadow-2xl shadow-green-500/20 hover:shadow-green-500/30 transition-all duration-300">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-green-600 to-emerald-600 rounded-2xl shadow-lg shadow-green-500/30 mb-6">
               <span className="text-3xl">🚀</span>
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+            <h2 className="text-5xl md:text-6xl font-bold text-white mb-4">
               Ready to Start Your Journey?
             </h2>
             <p className="text-lg text-white/60 mb-8 max-w-2xl mx-auto">

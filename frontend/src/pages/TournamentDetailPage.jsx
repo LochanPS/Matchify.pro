@@ -486,14 +486,17 @@ const TournamentDetailPage = () => {
 
           <div className="flex flex-col md:flex-row gap-8 items-start">
             {/* Poster */}
-            {tournament.posters && tournament.posters.length > 0 && (
+            {tournament?.posters && tournament.posters.length > 0 && (
               <div className="w-full md:w-80 flex-shrink-0">
                 <div className="rounded-2xl overflow-hidden shadow-2xl border-4 border-white/20 cursor-pointer hover:scale-105 transition-transform duration-300 group relative">
                   <img
                     src={getImageUrl(tournament.posters?.[selectedPoster]?.imageUrl)}
                     alt={tournament.name}
                     className="w-full h-64 md:h-80 object-cover"
-                    onClick={() => setShowPosterModal(true)}
+                    onClick={() => {
+                      console.log('Poster clicked!', { showPosterModal, tournament: tournament?.name, posters: tournament?.posters?.length });
+                      setShowPosterModal(true);
+                    }}
                   />
                   {/* Click hint overlay */}
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
@@ -1399,6 +1402,7 @@ const TournamentDetailPage = () => {
       )}
 
       {/* Poster Modal */}
+      {console.log('Modal render check:', { showPosterModal, hasTournament: !!tournament, hasPosters: !!tournament?.posters, posterCount: tournament?.posters?.length })}
       {showPosterModal && tournament?.posters && tournament.posters.length > 0 && (
         <div 
           className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-50 p-4"

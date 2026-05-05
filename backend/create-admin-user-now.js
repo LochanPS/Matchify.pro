@@ -11,7 +11,7 @@ async function createAdminUser() {
 
     const admin = await prisma.user.create({
       data: {
-        name: 'Super Admin',
+        name: 'Admin',
         email: 'ADMIN@gmail.com',
         phone: '9999999999',
         password: password,
@@ -32,7 +32,7 @@ async function createAdminUser() {
     console.log('');
     console.log('📧 Email: ADMIN@gmail.com');
     console.log('🔑 Password: ADMIN@123(123)');
-    console.log('👤 Name: Super Admin');
+    console.log('👤 Name: Admin');
     console.log(`🆔 ID: ${admin.id}`);
     console.log('');
     console.log('✅ You can now use "Return to Admin" button!');

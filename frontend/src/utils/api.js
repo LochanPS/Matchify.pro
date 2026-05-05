@@ -1,6 +1,9 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://matchify-probackend.vercel.app/api';
+// HARDCODED FIX: Force the correct API URL
+const API_BASE_URL = 'https://matchify-probackend.vercel.app/api';
+
+console.log('🔧 API Base URL:', API_BASE_URL);
 
 const api = axios.create({
   baseURL: API_BASE_URL,

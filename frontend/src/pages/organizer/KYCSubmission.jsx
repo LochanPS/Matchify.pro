@@ -85,7 +85,7 @@ export default function KYCSubmission() {
     const formData = new FormData();
     formData.append('aadhaar', file);
 
-    const response = await fetch('http://localhost:5000/api/kyc/upload-aadhaar', {
+    const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://matchify-probackend.vercel.app/api'}/kyc/upload-aadhaar`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`

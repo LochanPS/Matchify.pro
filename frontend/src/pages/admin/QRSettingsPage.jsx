@@ -116,7 +116,7 @@ const QRSettingsPage = () => {
             {settings?.qrCodeUrl ? (
               <div className="bg-slate-900 rounded-lg p-4 border border-slate-700">
                 <img
-                  src={settings.qrCodeUrl.startsWith('http') ? settings.qrCodeUrl : `http://localhost:5000${settings.qrCodeUrl}`}
+                  src={settings.qrCodeUrl.startsWith('http') ? settings.qrCodeUrl : `${(import.meta.env.VITE_API_URL || 'https://matchify-probackend.vercel.app/api').replace('/api', '')}${settings.qrCodeUrl}`}
                   alt="Payment QR Code"
                   className="w-full max-w-sm mx-auto"
                   onError={(e) => {

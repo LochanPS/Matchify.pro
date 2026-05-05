@@ -8,60 +8,115 @@ import {
   ArrowRightIcon,
   PlayIcon,
   BoltIcon,
-  ShieldCheckIcon
+  ShieldCheckIcon,
+  RocketLaunchIcon,
+  FireIcon,
+  LightBulbIcon
 } from '@heroicons/react/24/outline';
 import { StarIcon } from '@heroicons/react/24/solid';
 
-// Inject keyframes once
+// Inject enhanced keyframes and styles
 const injectStyles = () => {
   if (document.head.querySelector('style[data-homepage]')) return;
   const style = document.createElement('style');
   style.setAttribute('data-homepage', 'true');
   style.textContent = `
     @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(24px); }
+      from { opacity: 0; transform: translateY(30px); }
       to   { opacity: 1; transform: translateY(0); }
     }
     @keyframes floatY {
       0%, 100% { transform: translateY(0px); }
-      50%       { transform: translateY(-12px); }
+      50%       { transform: translateY(-15px); }
     }
     @keyframes pulseGlow {
-      0%, 100% { opacity: 0.4; }
-      50%       { opacity: 0.8; }
+      0%, 100% { opacity: 0.5; }
+      50%       { opacity: 1; }
     }
-    @keyframes scanline {
-      0%   { transform: translateY(-100%); }
-      100% { transform: translateY(100vh); }
+    @keyframes shimmer {
+      0% { background-position: -1000px 0; }
+      100% { background-position: 1000px 0; }
     }
-    .anim-fade-up  { animation: fadeUp 0.7s ease-out forwards; opacity: 0; }
-    .anim-float    { animation: floatY 5s ease-in-out infinite; }
-    .anim-glow     { animation: pulseGlow 3s ease-in-out infinite; }
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .anim-fade-up  { animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
+    .anim-float    { animation: floatY 6s ease-in-out infinite; }
+    .anim-glow     { animation: pulseGlow 4s ease-in-out infinite; }
+    .anim-rotate   { animation: rotate 20s linear infinite; }
+    .anim-scale-in { animation: scaleIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
     .delay-100  { animation-delay: 0.1s; }
     .delay-200  { animation-delay: 0.2s; }
     .delay-300  { animation-delay: 0.3s; }
     .delay-400  { animation-delay: 0.4s; }
     .delay-500  { animation-delay: 0.5s; }
+    .delay-600  { animation-delay: 0.6s; }
+    .delay-700  { animation-delay: 0.7s; }
+    .delay-800  { animation-delay: 0.8s; }
     .neon-text-green {
-      text-shadow: 0 0 20px rgba(0,255,136,0.6), 0 0 60px rgba(0,255,136,0.3);
+      text-shadow: 0 0 30px rgba(0,255,136,0.8), 0 0 60px rgba(0,255,136,0.5), 0 0 100px rgba(0,255,136,0.3);
     }
     .neon-text-cyan {
-      text-shadow: 0 0 20px rgba(0,212,255,0.6), 0 0 60px rgba(0,212,255,0.3);
+      text-shadow: 0 0 30px rgba(0,212,255,0.8), 0 0 60px rgba(0,212,255,0.5), 0 0 100px rgba(0,212,255,0.3);
+    }
+    .neon-text-purple {
+      text-shadow: 0 0 30px rgba(168,85,247,0.8), 0 0 60px rgba(168,85,247,0.5);
     }
     .card-glow:hover {
-      box-shadow: 0 0 30px rgba(0,255,136,0.12), 0 8px 32px rgba(0,0,0,0.4);
+      box-shadow: 0 0 40px rgba(0,255,136,0.15), 0 10px 40px rgba(0,0,0,0.5);
+      transform: translateY(-4px);
     }
     .btn-glow {
-      box-shadow: 0 0 20px rgba(0,255,136,0.4), 0 4px 16px rgba(0,0,0,0.3);
+      box-shadow: 0 0 30px rgba(0,255,136,0.5), 0 6px 20px rgba(0,0,0,0.4);
     }
     .btn-glow:hover {
-      box-shadow: 0 0 40px rgba(0,255,136,0.6), 0 8px 24px rgba(0,0,0,0.4);
+      box-shadow: 0 0 50px rgba(0,255,136,0.7), 0 10px 30px rgba(0,0,0,0.5);
+      transform: translateY(-2px);
     }
     .grid-bg {
       background-image:
-        linear-gradient(rgba(0,255,136,0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,255,136,0.04) 1px, transparent 1px);
-      background-size: 60px 60px;
+        linear-gradient(rgba(0,255,136,0.05) 1.5px, transparent 1.5px),
+        linear-gradient(90deg, rgba(0,255,136,0.05) 1.5px, transparent 1.5px);
+      background-size: 50px 50px;
+      animation: gridMove 20s linear infinite;
+    }
+    @keyframes gridMove {
+      0% { background-position: 0 0; }
+      100% { background-position: 50px 50px; }
+    }
+    .shimmer-text {
+      background: linear-gradient(90deg, #00ff88 0%, #00d4ff 50%, #00ff88 100%);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shimmer 3s linear infinite;
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .gradient-border {
+      position: relative;
+      background: rgba(255, 255, 255, 0.03);
+    }
+    .gradient-border::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 2px;
+      background: linear-gradient(135deg, #00ff88, #00d4ff, #a855f7);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      opacity: 0.5;
     }
   `;
   document.head.appendChild(style);
@@ -118,173 +173,188 @@ function HomePage() {
   ];
 
   return (
-    <div className="min-h-screen relative overflow-x-hidden" style={{ background: '#07071a' }}>
+    <div className="min-h-screen relative overflow-x-hidden" style={{ background: 'linear-gradient(180deg, #0a0a1f 0%, #07071a 50%, #0a0a1f 100%)' }}>
 
-      {/* ── GLOBAL BACKGROUND ── */}
+      {/* ── ENHANCED GLOBAL BACKGROUND ── */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         <div className="grid-bg absolute inset-0" />
-        {/* ambient glows */}
-        <div className="anim-glow absolute top-0 right-0 w-80 h-80 rounded-full blur-3xl" style={{ background: 'radial-gradient(circle, rgba(0,255,136,0.12) 0%, transparent 70%)' }} />
-        <div className="anim-glow delay-300 absolute bottom-0 left-0 w-80 h-80 rounded-full blur-3xl" style={{ background: 'radial-gradient(circle, rgba(99,102,241,0.12) 0%, transparent 70%)' }} />
-        <div className="anim-glow delay-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full blur-3xl" style={{ background: 'radial-gradient(circle, rgba(6,182,212,0.06) 0%, transparent 70%)' }} />
+        {/* Animated gradient orbs */}
+        <div className="anim-glow anim-float absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl" 
+          style={{ background: 'radial-gradient(circle, rgba(0,255,136,0.15) 0%, transparent 70%)' }} />
+        <div className="anim-glow anim-float delay-300 absolute bottom-0 left-0 w-96 h-96 rounded-full blur-3xl" 
+          style={{ background: 'radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 70%)' }} />
+        <div className="anim-glow anim-float delay-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-3xl" 
+          style={{ background: 'radial-gradient(circle, rgba(6,182,212,0.08) 0%, transparent 70%)' }} />
+        <div className="anim-glow anim-float delay-700 absolute top-1/4 right-1/4 w-80 h-80 rounded-full blur-3xl" 
+          style={{ background: 'radial-gradient(circle, rgba(168,85,247,0.1) 0%, transparent 70%)' }} />
+        
+        {/* Floating particles */}
+        {[...Array(20)].map((_, i) => (
+          <div key={i} className="anim-float absolute w-1 h-1 rounded-full bg-green-400/30"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 5}s`,
+              animationDuration: `${5 + Math.random() * 10}s`
+            }} />
+        ))}
       </div>
 
       {/* ════════════════════════════════════════
-          HERO
+          ENHANCED HERO SECTION
       ════════════════════════════════════════ */}
-      <section className="relative z-10 pt-16 pb-12 px-4 flex flex-col items-center text-center">
+      <section className="relative z-10 pt-24 pb-20 px-5 flex flex-col items-center text-center">
 
-        {/* pill badge */}
-        <div className="anim-fade-up inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-semibold tracking-widest uppercase mb-8"
-          style={{ background: 'rgba(0,255,136,0.08)', borderColor: 'rgba(0,255,136,0.25)', color: '#00ff88' }}>
-          <SparklesIcon className="w-3.5 h-3.5" />
-          India's #1 Badminton Platform
+        {/* Animated badge with icon */}
+        <div className="anim-scale-in inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full border text-xs font-bold tracking-wider uppercase mb-8 relative overflow-hidden"
+          style={{ background: 'rgba(0,255,136,0.1)', borderColor: 'rgba(0,255,136,0.3)', color: '#00ff88' }}>
+          <div className="absolute inset-0 shimmer-text opacity-20" />
+          <RocketLaunchIcon className="w-5 h-5 anim-float" />
+          <span className="relative z-10">India's #1 Badminton Platform</span>
+          <FireIcon className="w-5 h-5 text-orange-400 anim-glow" />
         </div>
 
-        {/* shield logo */}
-        <div className="anim-float anim-fade-up delay-100 mb-6 relative">
-          <div className="absolute inset-0 blur-2xl rounded-full" style={{ background: 'rgba(0,255,136,0.3)', transform: 'scale(0.6)' }} />
-          <svg viewBox="0 0 120 140" className="relative h-20 w-auto sm:h-28" style={{ filter: 'drop-shadow(0 0 20px rgba(0,255,136,0.7))' }}>
-            <defs>
-              <linearGradient id="sg1" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%"   stopColor="#00ff88" />
-                <stop offset="60%"  stopColor="#00c853" />
-                <stop offset="100%" stopColor="#007c35" />
-              </linearGradient>
-            </defs>
-            <path d="M60 8 L110 25 L110 70 Q110 115 60 132 Q10 115 10 70 L10 25 Z" fill="url(#sg1)" stroke="rgba(0,255,136,0.6)" strokeWidth="2.5"/>
-            <text x="60" y="88" textAnchor="middle" fill="#003320" fontSize="55" fontWeight="900" fontFamily="Arial Black,sans-serif">M</text>
-            <ellipse cx="103" cy="20" rx="11" ry="14" fill="#3b82f6" stroke="#60a5fa" strokeWidth="1.5" transform="rotate(45,103,20)"/>
-            <line x1="103" y1="29" x2="113" y2="44" stroke="#818cf8" strokeWidth="2.5" strokeLinecap="round"/>
-            <line x1="96" y1="14" x2="110" y2="26" stroke="#93c5fd" strokeWidth="0.8"/>
-            <line x1="99" y1="9"  x2="109" y2="29" stroke="#93c5fd" strokeWidth="0.8"/>
-            <line x1="94" y1="20" x2="112" y2="20" stroke="#93c5fd" strokeWidth="0.8"/>
-            <ellipse cx="116" cy="47" rx="3.5" ry="2.5" fill="#ec4899"/>
-            <path d="M116 44 L113 38 M116 44 L116 37 M116 44 L119 38" stroke="#f9a8d4" strokeWidth="1.2" fill="none"/>
-          </svg>
-        </div>
-
-        {/* main title — SAFE on 375px */}
-        <div className="anim-fade-up delay-200 mb-4 w-full">
-          <h1 className="font-black leading-none tracking-tighter"
-            style={{ fontSize: 'clamp(2.2rem, 12vw, 7rem)' }}>
-            <span className="neon-text-green" style={{ color: '#00ff88' }}>MATCHIFY</span>
-            <span className="neon-text-cyan"  style={{ color: '#00d4ff' }}>.PRO</span>
+        {/* Enhanced main title with gradient */}
+        <div className="anim-fade-up delay-100 mb-6 w-full px-2 relative">
+          {/* Glow effect behind text */}
+          <div className="absolute inset-0 blur-3xl opacity-30" 
+            style={{ background: 'radial-gradient(ellipse, rgba(0,255,136,0.4) 0%, transparent 70%)' }} />
+          
+          <h1 className="font-black leading-[0.85] tracking-tighter relative"
+            style={{ fontSize: 'clamp(3rem, 15vw, 8rem)' }}>
+            <span className="neon-text-green block shimmer-text" style={{ color: '#00ff88' }}>
+              MATCHIFY
+            </span>
+            <span className="neon-text-cyan block mt-2" style={{ color: '#00d4ff' }}>
+              .PRO
+            </span>
           </h1>
+          
+          {/* Decorative elements */}
+          <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-32 h-32 rounded-full blur-2xl opacity-20 anim-glow"
+            style={{ background: 'radial-gradient(circle, #00ff88 0%, transparent 70%)' }} />
         </div>
 
-        {/* tagline */}
-        <p className="anim-fade-up delay-300 text-base sm:text-xl font-light mb-3 max-w-xs sm:max-w-md" style={{ color: 'rgba(255,255,255,0.75)' }}>
-          Where Champions Are Made
-        </p>
-        <p className="anim-fade-up delay-400 text-sm sm:text-base mb-10 max-w-xs sm:max-w-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
-          Join thousands of players across India. Register for tournaments, track progress, and compete with the best.
+        {/* Enhanced tagline with icon */}
+        <div className="anim-fade-up delay-200 mb-4">
+          <p className="text-xl sm:text-2xl font-bold mb-2 flex items-center justify-center gap-2" 
+            style={{ color: 'rgba(255,255,255,0.95)' }}>
+            <TrophyIcon className="w-6 h-6 text-amber-400 anim-float" />
+            Where Champions Are Made
+            <SparklesIcon className="w-6 h-6 text-cyan-400 anim-glow" />
+          </p>
+        </div>
+        
+        <p className="anim-fade-up delay-300 text-base sm:text-lg mb-10 max-w-md leading-relaxed px-4" 
+          style={{ color: 'rgba(255,255,255,0.6)' }}>
+          Join <span className="font-bold text-green-400">10,000+</span> players across India. 
+          Register for tournaments, track progress, and compete with the best.
         </p>
 
-        {/* CTAs */}
-        <div className="anim-fade-up delay-500 flex flex-col sm:flex-row gap-3 w-full max-w-xs sm:max-w-none sm:w-auto">
+        {/* CTAs - MOBILE OPTIMIZED */}
+        <div className="anim-fade-up delay-400 flex flex-col gap-3 w-full max-w-sm px-2">
           {user ? (
             <>
               <Link to={getDashboardLink()}
-                className="btn-glow flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all duration-300 hover:scale-105"
+                className="btn-glow flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-bold text-base transition-all duration-300 active:scale-95"
                 style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#003320' }}>
-                <TrophyIcon className="w-5 h-5" />
-                Go to Dashboard
-                <ArrowRightIcon className="w-4 h-4" />
+                <PlayIcon className="w-5 h-5" />
+                Get Started Free
+                <ArrowRightIcon className="w-5 h-5" />
               </Link>
-              <div className="flex items-center justify-center gap-3 px-5 py-3 rounded-xl border"
+              <div className="flex items-center justify-center gap-3 px-6 py-4 rounded-xl border"
                 style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.1)' }}>
-                <div className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm"
+                <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-base"
                   style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#003320' }}>
                   {user.name?.charAt(0).toUpperCase()}
                 </div>
                 <div className="text-left">
                   <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Welcome back</p>
-                  <p className="text-sm font-semibold text-white">{user.name}</p>
+                  <p className="text-base font-semibold text-white">{user.name}</p>
                 </div>
               </div>
             </>
           ) : (
             <>
               <Link to="/register"
-                className="btn-glow flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all duration-300 hover:scale-105"
+                className="btn-glow flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-bold text-base transition-all duration-300 active:scale-95"
                 style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#003320' }}>
                 <PlayIcon className="w-5 h-5" />
                 Get Started Free
-                <ArrowRightIcon className="w-4 h-4" />
+                <ArrowRightIcon className="w-5 h-5" />
               </Link>
               <Link to="/login"
-                className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm border transition-all duration-300 hover:scale-105"
-                style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.85)' }}>
+                className="flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-semibold text-base border transition-all duration-300 active:scale-95"
+                style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.9)' }}>
                 Sign In
               </Link>
             </>
           )}
         </div>
 
-        {/* social proof */}
-        <div className="anim-fade-up delay-500 mt-8 flex flex-wrap justify-center items-center gap-4">
+        {/* social proof - MOBILE OPTIMIZED */}
+        <div className="anim-fade-up delay-500 mt-10 flex flex-col sm:flex-row justify-center items-center gap-4">
           <div className="flex items-center gap-2">
-            <div className="flex -space-x-1.5">
+            <div className="flex -space-x-2">
               {[...Array(4)].map((_, i) => (
-                <div key={i} className="w-7 h-7 rounded-full border-2 flex items-center justify-center text-xs font-bold"
+                <div key={i} className="w-8 h-8 rounded-full border-2 flex items-center justify-center text-xs font-bold"
                   style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', borderColor: '#07071a', color: '#003320' }}>
                   {['R','P','A','K'][i]}
                 </div>
               ))}
             </div>
-            <span className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>1000+ players joined</span>
+            <span className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.6)' }}>1000+ players joined</span>
           </div>
-          <div className="flex items-center gap-1">
-            {[...Array(5)].map((_, i) => <StarIcon key={i} className="w-4 h-4 text-amber-400" />)}
-            <span className="text-xs ml-1" style={{ color: 'rgba(255,255,255,0.5)' }}>4.9 / 5</span>
+          <div className="flex items-center gap-1.5">
+            {[...Array(5)].map((_, i) => <StarIcon key={i} className="w-5 h-5 text-amber-400" />)}
+            <span className="text-sm font-medium ml-1" style={{ color: 'rgba(255,255,255,0.6)' }}>4.9 / 5</span>
           </div>
         </div>
       </section>
 
       {/* ════════════════════════════════════════
-          STATS BAR
+          STATS BAR - MOBILE OPTIMIZED
       ════════════════════════════════════════ */}
-      <section className="relative z-10 py-8 px-4">
-        <div className="max-w-2xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <section className="relative z-10 py-10 px-5">
+        <div className="max-w-2xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-4">
           {stats.map((s, i) => (
-            <div key={i} className="flex flex-col items-center gap-1 py-4 px-2 rounded-2xl border"
+            <div key={i} className="flex flex-col items-center gap-2 py-5 px-3 rounded-2xl border"
               style={{ background: 'rgba(0,255,136,0.04)', borderColor: 'rgba(0,255,136,0.12)' }}>
-              <span className="text-xl">{s.icon}</span>
-              <span className="text-xl sm:text-2xl font-black" style={{ color: '#00ff88' }}>{s.value}</span>
-              <span className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>{s.label}</span>
+              <span className="text-2xl">{s.icon}</span>
+              <span className="text-2xl sm:text-3xl font-black" style={{ color: '#00ff88' }}>{s.value}</span>
+              <span className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>{s.label}</span>
             </div>
           ))}
         </div>
       </section>
 
       {/* ════════════════════════════════════════
-          FEATURES
+          FEATURES - MOBILE OPTIMIZED
       ════════════════════════════════════════ */}
-      <section className="relative z-10 py-12 px-4">
+      <section className="relative z-10 py-14 px-5">
         <div className="max-w-2xl mx-auto">
           {/* heading */}
-          <div className="text-center mb-8">
-            <span className="inline-block px-3 py-1 rounded-full text-xs font-bold tracking-widest uppercase mb-3"
+          <div className="text-center mb-10">
+            <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold tracking-wider uppercase mb-4"
               style={{ background: 'rgba(0,255,136,0.1)', color: '#00ff88', border: '1px solid rgba(0,255,136,0.2)' }}>
               ✦ Features
             </span>
-            <h2 className="text-2xl sm:text-4xl font-black text-white mb-2">
+            <h2 className="text-3xl sm:text-4xl font-black text-white mb-3 leading-tight">
               Everything to <span style={{ color: '#00ff88' }}>Dominate</span>
             </h2>
-            <p className="text-sm" style={{ color: 'rgba(255,255,255,0.45)' }}>Built for competitive badminton players & organizers</p>
+            <p className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>Built for competitive badminton players & organizers</p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             {features.map((f, i) => (
-              <div key={i} className="card-glow group relative rounded-2xl p-5 border transition-all duration-300 hover:-translate-y-1"
+              <div key={i} className="card-glow group relative rounded-2xl p-6 border transition-all duration-300 active:scale-95"
                 style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.08)' }}>
                 {/* icon */}
-                <div className={`inline-flex items-center justify-center w-11 h-11 bg-gradient-to-br ${f.color} rounded-xl mb-4 group-hover:scale-110 transition-transform duration-300`}>
-                  <f.icon className="w-5 h-5 text-white" />
+                <div className={`inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br ${f.color} rounded-xl mb-4 group-hover:scale-110 transition-transform duration-300`}>
+                  <f.icon className="w-6 h-6 text-white" />
                 </div>
-                <h3 className="text-base font-bold text-white mb-1">{f.title}</h3>
-                <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>{f.desc}</p>
+                <h3 className="text-base font-bold text-white mb-2">{f.title}</h3>
+                <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.55)' }}>{f.desc}</p>
               </div>
             ))}
           </div>
@@ -292,31 +362,31 @@ function HomePage() {
       </section>
 
       {/* ════════════════════════════════════════
-          HOW IT WORKS
+          HOW IT WORKS - MOBILE OPTIMIZED
       ════════════════════════════════════════ */}
-      <section className="relative z-10 py-12 px-4">
+      <section className="relative z-10 py-14 px-5">
         <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-8">
-            <span className="inline-block px-3 py-1 rounded-full text-xs font-bold tracking-widest uppercase mb-3"
+          <div className="text-center mb-10">
+            <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold tracking-wider uppercase mb-4"
               style={{ background: 'rgba(99,102,241,0.12)', color: '#818cf8', border: '1px solid rgba(99,102,241,0.25)' }}>
               🎯 Process
             </span>
-            <h2 className="text-2xl sm:text-4xl font-black text-white mb-2">
+            <h2 className="text-3xl sm:text-4xl font-black text-white mb-3 leading-tight">
               How It <span style={{ color: '#a78bfa' }}>Works</span>
             </h2>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             {steps.map((s, i) => (
-              <div key={i} className="card-glow relative rounded-2xl p-4 border transition-all duration-300 hover:-translate-y-1"
+              <div key={i} className="card-glow relative rounded-2xl p-5 border transition-all duration-300 active:scale-95"
                 style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.08)' }}>
                 {/* step number badge */}
-                <div className={`inline-flex items-center justify-center w-7 h-7 bg-gradient-to-br ${s.color} rounded-lg text-white text-xs font-black mb-3`}>
+                <div className={`inline-flex items-center justify-center w-8 h-8 bg-gradient-to-br ${s.color} rounded-lg text-white text-xs font-black mb-3`}>
                   {s.step}
                 </div>
-                <div className="text-3xl mb-2">{s.icon}</div>
-                <h3 className="text-sm font-bold text-white mb-1">{s.title}</h3>
-                <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>{s.desc}</p>
+                <div className="text-3xl mb-3">{s.icon}</div>
+                <h3 className="text-sm font-bold text-white mb-1.5">{s.title}</h3>
+                <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>{s.desc}</p>
               </div>
             ))}
           </div>
@@ -324,24 +394,24 @@ function HomePage() {
       </section>
 
       {/* ════════════════════════════════════════
-          WHY MATCHIFY
+          WHY MATCHIFY - MOBILE OPTIMIZED
       ════════════════════════════════════════ */}
-      <section className="relative z-10 py-12 px-4">
-        <div className="max-w-2xl mx-auto rounded-3xl p-5 sm:p-8 border"
+      <section className="relative z-10 py-14 px-5">
+        <div className="max-w-2xl mx-auto rounded-3xl p-6 sm:p-8 border"
           style={{ background: 'rgba(0,255,136,0.03)', borderColor: 'rgba(0,255,136,0.1)' }}>
-          <div className="text-center mb-6">
-            <h2 className="text-2xl sm:text-3xl font-black text-white mb-1">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl sm:text-3xl font-black text-white mb-2 leading-tight">
               Why <span style={{ color: '#00ff88' }}>Matchify.pro</span>?
             </h2>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-4">
             {benefits.map((b, i) => (
-              <div key={i} className="flex items-center gap-3 rounded-xl p-3.5 border transition-all duration-300 hover:-translate-y-0.5"
+              <div key={i} className="flex items-center gap-3 rounded-xl p-4 border transition-all duration-300 active:scale-95"
                 style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.07)' }}>
-                <div className={`flex-shrink-0 w-9 h-9 ${b.bg} ${b.color} rounded-lg flex items-center justify-center`}>
+                <div className={`flex-shrink-0 w-10 h-10 ${b.bg} ${b.color} rounded-lg flex items-center justify-center`}>
                   <b.icon className="w-5 h-5" />
                 </div>
-                <span className="text-xs sm:text-sm font-medium text-white">{b.text}</span>
+                <span className="text-xs sm:text-sm font-semibold text-white leading-tight">{b.text}</span>
               </div>
             ))}
           </div>
@@ -349,36 +419,36 @@ function HomePage() {
       </section>
 
       {/* ════════════════════════════════════════
-          TESTIMONIALS
+          TESTIMONIALS - MOBILE OPTIMIZED
       ════════════════════════════════════════ */}
-      <section className="relative z-10 py-12 px-4">
+      <section className="relative z-10 py-14 px-5">
         <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-8">
-            <span className="inline-block px-3 py-1 rounded-full text-xs font-bold tracking-widest uppercase mb-3"
+          <div className="text-center mb-10">
+            <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold tracking-wider uppercase mb-4"
               style={{ background: 'rgba(6,182,212,0.1)', color: '#22d3ee', border: '1px solid rgba(6,182,212,0.25)' }}>
               💬 Players Say
             </span>
-            <h2 className="text-2xl sm:text-4xl font-black text-white">
+            <h2 className="text-3xl sm:text-4xl font-black text-white leading-tight">
               Real <span style={{ color: '#22d3ee' }}>Reviews</span>
             </h2>
           </div>
 
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-5">
             {testimonials.map((t, i) => (
-              <div key={i} className="card-glow rounded-2xl p-5 border transition-all duration-300"
+              <div key={i} className="card-glow rounded-2xl p-6 border transition-all duration-300"
                 style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.07)' }}>
-                <div className="flex gap-0.5 mb-3">
-                  {[...Array(5)].map((_, j) => <StarIcon key={j} className="w-4 h-4 text-amber-400" />)}
+                <div className="flex gap-1 mb-4">
+                  {[...Array(5)].map((_, j) => <StarIcon key={j} className="w-5 h-5 text-amber-400" />)}
                 </div>
-                <p className="text-sm leading-relaxed mb-4" style={{ color: 'rgba(255,255,255,0.65)' }}>"{t.text}"</p>
+                <p className="text-sm leading-relaxed mb-5" style={{ color: 'rgba(255,255,255,0.7)' }}>"{t.text}"</p>
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full flex items-center justify-center text-xl flex-shrink-0"
+                  <div className="w-11 h-11 rounded-full flex items-center justify-center text-xl flex-shrink-0"
                     style={{ background: 'rgba(6,182,212,0.15)', border: '1px solid rgba(6,182,212,0.3)' }}>
                     {t.emoji}
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-white">{t.name}</p>
-                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>{t.role} · {t.city}</p>
+                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>{t.role} · {t.city}</p>
                   </div>
                 </div>
               </div>
@@ -388,35 +458,35 @@ function HomePage() {
       </section>
 
       {/* ════════════════════════════════════════
-          CTA BANNER
+          CTA BANNER - MOBILE OPTIMIZED
       ════════════════════════════════════════ */}
-      <section className="relative z-10 py-12 px-4">
-        <div className="max-w-2xl mx-auto text-center rounded-3xl p-6 sm:p-10 border overflow-hidden relative"
+      <section className="relative z-10 py-14 px-5">
+        <div className="max-w-2xl mx-auto text-center rounded-3xl p-8 sm:p-10 border overflow-hidden relative"
           style={{ background: 'linear-gradient(135deg, rgba(0,255,136,0.07) 0%, rgba(99,102,241,0.07) 100%)', borderColor: 'rgba(0,255,136,0.2)' }}>
           {/* bg glow */}
           <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(0,255,136,0.08) 0%, transparent 70%)' }} />
 
           <div className="relative">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-5 text-2xl"
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-6 text-3xl"
               style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)' }}>
               🚀
             </div>
-            <h2 className="text-2xl sm:text-4xl font-black text-white mb-3">
+            <h2 className="text-3xl sm:text-4xl font-black text-white mb-4 leading-tight">
               Ready to Start?
             </h2>
-            <p className="text-sm mb-8" style={{ color: 'rgba(255,255,255,0.55)' }}>
+            <p className="text-sm mb-8 px-4" style={{ color: 'rgba(255,255,255,0.6)' }}>
               Join India's fastest-growing badminton community today.
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <div className="flex flex-col gap-3 max-w-sm mx-auto">
               <Link to={user ? getDashboardLink() : '/register'}
-                className="btn-glow flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all duration-300 hover:scale-105"
+                className="btn-glow flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-bold text-base transition-all duration-300 active:scale-95"
                 style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#003320' }}>
                 {user ? 'Go to Dashboard' : 'Create Free Account'}
-                <ArrowRightIcon className="w-4 h-4" />
+                <ArrowRightIcon className="w-5 h-5" />
               </Link>
               <Link to="/tournaments"
-                className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm border transition-all duration-300 hover:scale-105"
-                style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.85)' }}>
+                className="flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-semibold text-base border transition-all duration-300 active:scale-95"
+                style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.9)' }}>
                 Browse Tournaments
               </Link>
             </div>
@@ -425,14 +495,14 @@ function HomePage() {
       </section>
 
       {/* ════════════════════════════════════════
-          FOOTER
+          FOOTER - MOBILE OPTIMIZED
       ════════════════════════════════════════ */}
-      <footer className="relative z-10 border-t py-10 px-4" style={{ borderColor: 'rgba(255,255,255,0.07)', background: 'rgba(0,0,0,0.3)' }}>
-        <div className="max-w-2xl mx-auto flex flex-col items-center gap-5">
+      <footer className="relative z-10 border-t py-12 px-5" style={{ borderColor: 'rgba(255,255,255,0.07)', background: 'rgba(0,0,0,0.3)' }}>
+        <div className="max-w-2xl mx-auto flex flex-col items-center gap-6">
 
           {/* brand */}
           <div className="flex items-center gap-2">
-            <svg viewBox="0 0 120 140" className="h-9 w-auto" style={{ filter: 'drop-shadow(0 0 10px rgba(0,255,136,0.5))' }}>
+            <svg viewBox="0 0 120 140" className="h-10 w-auto" style={{ filter: 'drop-shadow(0 0 10px rgba(0,255,136,0.5))' }}>
               <defs>
                 <linearGradient id="fg1" x1="0%" y1="0%" x2="100%" y2="100%">
                   <stop offset="0%" stopColor="#00ff88" />
@@ -442,21 +512,21 @@ function HomePage() {
               <path d="M60 8 L110 25 L110 70 Q110 115 60 132 Q10 115 10 70 L10 25 Z" fill="url(#fg1)" stroke="rgba(0,255,136,0.5)" strokeWidth="2"/>
               <text x="60" y="88" textAnchor="middle" fill="#003320" fontSize="55" fontWeight="900" fontFamily="Arial Black,sans-serif">M</text>
             </svg>
-            <span className="font-black text-lg">
+            <span className="font-black text-xl">
               <span style={{ color: '#00ff88' }}>MATCHIFY</span>
               <span style={{ color: '#00d4ff' }}>.PRO</span>
             </span>
           </div>
 
-          <p className="text-xs text-center" style={{ color: 'rgba(255,255,255,0.35)' }}>
+          <p className="text-xs text-center leading-relaxed" style={{ color: 'rgba(255,255,255,0.4)' }}>
             Built with ❤️ for the Indian Badminton Community
           </p>
 
           {/* founders */}
-          <div className="rounded-2xl px-6 py-4 border text-center w-full max-w-xs"
+          <div className="rounded-2xl px-6 py-5 border text-center w-full max-w-xs"
             style={{ background: 'rgba(0,255,136,0.04)', borderColor: 'rgba(0,255,136,0.12)' }}>
-            <p className="text-xs tracking-widest uppercase mb-2" style={{ color: 'rgba(255,255,255,0.35)' }}>Co-Founded By</p>
-            <p className="text-base font-black mb-2" style={{ color: '#00ff88' }}>PS Brothers</p>
+            <p className="text-xs tracking-wider uppercase mb-2" style={{ color: 'rgba(255,255,255,0.4)' }}>Co-Founded By</p>
+            <p className="text-lg font-black mb-2" style={{ color: '#00ff88' }}>PS Brothers</p>
             <div className="flex justify-center items-center gap-4 text-sm font-semibold text-white">
               <span>PS Lochan</span>
               <span style={{ color: 'rgba(255,255,255,0.2)' }}>|</span>
@@ -464,14 +534,14 @@ function HomePage() {
             </div>
           </div>
 
-          <div className="flex gap-5 text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
+          <div className="flex gap-6 text-sm" style={{ color: 'rgba(255,255,255,0.45)' }}>
             <a href="#" className="hover:text-white transition-colors">About</a>
             <a href="#" className="hover:text-white transition-colors">Contact</a>
             <a href="#" className="hover:text-white transition-colors">Privacy</a>
             <Link to="/terms" className="hover:text-white transition-colors">Terms</Link>
           </div>
 
-          <p className="text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>© 2026 Matchify.pro · All rights reserved</p>
+          <p className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>© 2026 Matchify.pro · All rights reserved</p>
         </div>
       </footer>
     </div>

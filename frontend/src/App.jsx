@@ -92,7 +92,7 @@ function AppContent() {
   const shouldShowNavbar = !location.pathname.startsWith('/admin-dashboard');
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen" style={{ background: '#07071a' }}>
       <ImpersonationBanner />
       <div className={isImpersonating() ? 'pt-[60px]' : ''}> {/* Add padding only when impersonating */}
         {shouldShowNavbar && <Navbar />}
@@ -446,19 +446,20 @@ function App() {
           toastOptions={{
             duration: 3000,
             style: {
-              background: '#1e293b',
-              color: '#fff',
-              border: '1px solid #334155',
+              background: '#0d1a10',
+              color: '#f1f5f9',
+              border: '1px solid rgba(0,255,136,0.2)',
+              boxShadow: '0 0 20px rgba(0,255,136,0.1)',
             },
             success: {
               iconTheme: {
-                primary: '#14b8a6',
-                secondary: '#fff',
+                primary: '#00ff88',
+                secondary: '#003320',
               },
             },
             error: {
               iconTheme: {
-                primary: '#ef4444',
+                primary: '#ff5050',
                 secondary: '#fff',
               },
             },

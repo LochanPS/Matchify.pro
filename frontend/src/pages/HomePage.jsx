@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import MatchifyLogo from '../components/MatchifyLogo';
 import {
   TrophyIcon,
   UserGroupIcon,
@@ -205,34 +206,36 @@ function HomePage() {
       ════════════════════════════════════════ */}
       <section className="relative z-10 pt-24 pb-20 px-5 flex flex-col items-center text-center">
 
-        {/* Animated badge with icon */}
-        <div className="anim-scale-in inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full border text-xs font-bold tracking-wider uppercase mb-8 relative overflow-hidden"
-          style={{ background: 'rgba(0,255,136,0.1)', borderColor: 'rgba(0,255,136,0.3)', color: '#00ff88' }}>
-          <div className="absolute inset-0 shimmer-text opacity-20" />
-          <RocketLaunchIcon className="w-5 h-5 anim-float" />
-          <span className="relative z-10">India's #1 Badminton Platform</span>
-          <FireIcon className="w-5 h-5 text-orange-400 anim-glow" />
+        {/* Brand logo mark — centered, floating */}
+        <div className="anim-scale-in mb-6 flex justify-center relative">
+          {/* Glow orb behind logo */}
+          <div className="absolute inset-0 m-auto w-40 h-40 rounded-full blur-3xl anim-glow"
+            style={{ background: 'radial-gradient(circle, rgba(0,255,136,0.25) 0%, transparent 70%)' }} />
+          <div className="anim-float relative z-10">
+            <MatchifyLogo size={96} variant="icon" glow={true} />
+          </div>
         </div>
 
-        {/* Enhanced main title with gradient */}
-        <div className="anim-fade-up delay-100 mb-6 w-full px-2 relative">
-          {/* Glow effect behind text */}
-          <div className="absolute inset-0 blur-3xl opacity-30" 
-            style={{ background: 'radial-gradient(ellipse, rgba(0,255,136,0.4) 0%, transparent 70%)' }} />
-          
+        {/* Animated badge */}
+        <div className="anim-scale-in delay-100 inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full border text-xs font-bold tracking-wider uppercase mb-6 relative overflow-hidden"
+          style={{ background: 'rgba(0,255,136,0.1)', borderColor: 'rgba(0,255,136,0.3)', color: '#00ff88' }}>
+          <div className="absolute inset-0 shimmer-text opacity-20" />
+          <RocketLaunchIcon className="w-4 h-4" />
+          <span className="relative z-10">India's #1 Badminton Platform</span>
+          <FireIcon className="w-4 h-4 text-orange-400 anim-glow" />
+        </div>
+
+        {/* Main title */}
+        <div className="anim-fade-up delay-200 mb-5 w-full px-2 relative">
           <h1 className="font-black leading-[0.85] tracking-tighter relative"
-            style={{ fontSize: 'clamp(3rem, 15vw, 8rem)' }}>
+            style={{ fontSize: 'clamp(2.8rem, 13vw, 7.5rem)' }}>
             <span className="neon-text-green block shimmer-text" style={{ color: '#00ff88' }}>
               MATCHIFY
             </span>
-            <span className="neon-text-cyan block mt-2" style={{ color: '#00d4ff' }}>
+            <span className="neon-text-cyan block mt-1" style={{ color: '#00d4ff' }}>
               .PRO
             </span>
           </h1>
-          
-          {/* Decorative elements */}
-          <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-32 h-32 rounded-full blur-2xl opacity-20 anim-glow"
-            style={{ background: 'radial-gradient(circle, #00ff88 0%, transparent 70%)' }} />
         </div>
 
         {/* Enhanced tagline with icon */}

@@ -22,6 +22,15 @@ const UnifiedDashboard = () => {
     userRoles = [user.role];
   }
   
+  // CRITICAL: Admin users should NEVER see this dashboard
+  // Redirect them to admin dashboard immediately
+  const isAdmin = userRoles.includes('ADMIN') || user?.isAdmin;
+  if (isAdmin) {
+    console.log('🚫 Admin user redirected from unified dashboard to admin dashboard');
+    navigate('/admin-dashboard', { replace: true });
+    return null;
+  }
+  
   // Default to PLAYER if no roles found
   if (userRoles.length === 0) {
     userRoles = ['PLAYER'];

@@ -40,6 +40,14 @@ const RoleRoute = ({ children, allowedRoles }) => {
   };
   
   const userRoles = getUserRoles();
+  const isAdmin = userRoles.includes('ADMIN') || user.isAdmin;
+  
+  // CRITICAL: Admin users should ONLY access admin routes
+  // If admin tries to access non-admin routes, redirect to admin dashboard
+  if (isAdmin && !allowedRoles.includes('ADMIN')) {
+    console.log('🚫 Admin user blocked from accessing non-admin route');
+    return <Navigate to="/admin-dashboard" replace />;
+  }
   
   // Also check currentRole if set
   const currentRole = user.currentRole ? user.currentRole.toUpperCase() : null;
@@ -50,20 +58,19 @@ const RoleRoute = ({ children, allowedRoles }) => {
       userRoles,
       currentRole,
       allowedRoles,
+      isAdmin,
       hasRolesField: !!user.roles,
       hasRoleField: !!user.role
     });
   }
 
   // Check if user has ANY of the allowed roles
-  // ADMIN has access to everything
-  // PLAYER role now includes ORGANIZER capabilities
   const hasAllowedRole = allowedRoles.some(role => {
     const roleUpper = role.toUpperCase();
     
-    // ADMIN can access everything
-    if (userRoles.includes('ADMIN')) {
-      return true;
+    // ADMIN can ONLY access ADMIN routes
+    if (roleUpper === 'ADMIN') {
+      return isAdmin;
     }
     
     // If currentRole is set, check if it matches

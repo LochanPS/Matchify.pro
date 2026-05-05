@@ -1,3 +1,4 @@
+import { getErrorMessage } from '../utils/errorMessage';
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
@@ -96,7 +97,7 @@ const ManageCategoriesPage = () => {
       if (err.response?.data?.feeLocked) {
         setError(`Entry fee is locked: ${err.response.data.details}`);
       } else {
-        setError(err.response?.data?.error || 'Failed to update category');
+        setError(getErrorMessage(err, 'Failed to update category'));
       }
     } finally {
       setSaving(false);

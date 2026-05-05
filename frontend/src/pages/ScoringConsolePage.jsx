@@ -1,3 +1,4 @@
+import { getErrorMessage } from '../utils/errorMessage';
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getMatch, startMatch, addPoint, undoLastPoint, pauseTimer, resumeTimer } from '../api/matches';
@@ -46,7 +47,7 @@ const ScoringConsolePage = () => {
       }
       setLoading(false);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to load match');
+      setError(getErrorMessage(err, 'Failed to load match'));
       setLoading(false);
     }
   };
@@ -77,7 +78,7 @@ const ScoringConsolePage = () => {
       setTimerData(newScore?.timer || data.timer);
       setMatch(prev => ({ ...prev, status: 'IN_PROGRESS', startedAt: new Date().toISOString() }));
       setProcessing(false);
-    } catch (err) { setError(err.response?.data?.error || 'Failed to start match'); setProcessing(false); }
+    } catch (err) { setError(getErrorMessage(err, 'Failed to start match')); setProcessing(false); }
   };
 
   const handleAddPoint = async (player) => {
@@ -87,7 +88,7 @@ const ScoringConsolePage = () => {
       setScore(data.score || data.scoreData);
       if (data.matchComplete) { setMatchComplete(true); setWinner(data.winner); setMatch(prev => ({ ...prev, status: 'COMPLETED' })); }
       setProcessing(false);
-    } catch (err) { setError(err.response?.data?.error || 'Failed to add point'); setProcessing(false); }
+    } catch (err) { setError(getErrorMessage(err, 'Failed to add point')); setProcessing(false); }
   };
 
   const handleUndo = async () => {
@@ -98,7 +99,7 @@ const ScoringConsolePage = () => {
       setMatchComplete(false); setWinner(null);
       setMatch(prev => ({ ...prev, status: 'IN_PROGRESS' }));
       setProcessing(false);
-    } catch (err) { setError(err.response?.data?.error || 'Failed to undo point'); setProcessing(false); }
+    } catch (err) { setError(getErrorMessage(err, 'Failed to undo point')); setProcessing(false); }
   };
 
   const handlePauseTimer = async () => {
@@ -111,7 +112,7 @@ const ScoringConsolePage = () => {
       setScore(prev => prev ? { ...prev, timer: data.timer } : prev);
       setProcessing(false);
     } catch (err) { 
-      setError(err.response?.data?.error || 'Failed to pause timer'); 
+      setError(getErrorMessage(err, 'Failed to pause timer')); 
       setProcessing(false); 
     }
   };
@@ -126,7 +127,7 @@ const ScoringConsolePage = () => {
       setScore(prev => prev ? { ...prev, timer: data.timer } : prev);
       setProcessing(false);
     } catch (err) { 
-      setError(err.response?.data?.error || 'Failed to resume timer'); 
+      setError(getErrorMessage(err, 'Failed to resume timer')); 
       setProcessing(false); 
     }
   };

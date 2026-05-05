@@ -1,3 +1,4 @@
+import { getErrorMessage } from '../../utils/errorMessage';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import adminService from '../../services/adminService';
@@ -23,7 +24,7 @@ const AdminDashboardPage = () => {
       setStats(statsData.stats);
       setPaymentSettings(paymentData.data);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to load data');
+      setError(getErrorMessage(err, 'Failed to load data'));
     } finally {
       setLoading(false);
     }
@@ -31,7 +32,7 @@ const AdminDashboardPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-900 p-8">
+      <div className="min-h-screen bg-slate-900 p-4 sm:p-8">
         <div className="animate-pulse">
           <div className="h-8 bg-slate-700 rounded w-1/4 mb-8"></div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -46,7 +47,7 @@ const AdminDashboardPage = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-slate-900 p-8">
+      <div className="min-h-screen bg-slate-900 p-4 sm:p-8">
         <div className="bg-red-900/20 border border-red-700 rounded-lg p-4 text-red-400">
           {error}
         </div>
@@ -55,7 +56,7 @@ const AdminDashboardPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 p-8">
+    <div className="min-h-screen bg-slate-900 p-4 sm:p-8">
       {/* Back Button */}
       <button
         onClick={() => window.history.back()}
@@ -74,12 +75,12 @@ const AdminDashboardPage = () => {
       {/* PROMINENT QR SETTINGS CARD */}
       <div className="mb-8">
         <Link to="/admin/qr-settings">
-          <div className="bg-gradient-to-r from-teal-600 to-cyan-600 rounded-xl p-8 border-2 border-teal-400 shadow-2xl shadow-teal-500/50 hover:shadow-teal-500/70 transition-all cursor-pointer group">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-6">
-                <div className="text-7xl group-hover:scale-110 transition-transform">📱</div>
+          <div className="bg-gradient-to-r from-teal-600 to-cyan-600 rounded-xl p-5 sm:p-8 border-2 border-teal-400 shadow-2xl shadow-teal-500/50 hover:shadow-teal-500/70 transition-all cursor-pointer group">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-4 sm:gap-6">
+                <div className="text-5xl sm:text-7xl group-hover:scale-110 transition-transform">📱</div>
                 <div>
-                  <h2 className="text-3xl font-bold text-white mb-2">Payment QR Code Settings</h2>
+                  <h2 className="text-xl sm:text-3xl font-bold text-white mb-2">Payment QR Code Settings</h2>
                   <p className="text-teal-100 text-lg mb-4">
                     Control ALL tournament payments across Matchify.pro
                   </p>
@@ -108,8 +109,8 @@ const AdminDashboardPage = () => {
                 →
               </div>
             </div>
-            <div className="mt-6 pt-6 border-t border-white/20">
-              <div className="grid grid-cols-3 gap-4 text-center">
+            <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-white/20">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 text-center">
                 <div>
                   <p className="text-teal-100 text-sm">Your Power</p>
                   <p className="text-white font-bold text-lg">Upload QR Code</p>

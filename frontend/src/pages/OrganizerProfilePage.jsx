@@ -96,7 +96,7 @@ export default function OrganizerProfilePage() {
 
           <div className="flex flex-col md:flex-row items-center gap-6">
             <div className="relative">
-              <div className="w-32 h-32 bg-gradient-to-br from-blue-400 via-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center text-5xl font-bold text-white shadow-2xl shadow-indigo-500/30">
+              <div className="w-20 h-20 sm:w-32 sm:h-32 bg-gradient-to-br from-blue-400 via-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center text-3xl sm:text-5xl font-bold text-white shadow-2xl shadow-indigo-500/30">
                 {profile.profilePhoto ? (
                   <img src={profile.profilePhoto} alt={profile.name} className="w-full h-full object-cover rounded-2xl" />
                 ) : (
@@ -112,7 +112,7 @@ export default function OrganizerProfilePage() {
 
             <div className="flex-1 text-center md:text-left">
               <div className="flex items-center gap-3 justify-center md:justify-start mb-2">
-                <h1 className="text-4xl font-bold text-white">{profile.name}</h1>
+                <h1 className="text-2xl sm:text-4xl font-bold text-white">{profile.name}</h1>
                 {profile.isVerifiedOrganizer && (
                   <VerifiedBadge type="organizer" size="lg" showText />
                 )}

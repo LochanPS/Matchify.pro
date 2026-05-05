@@ -444,7 +444,7 @@ const PlayerViewDrawsPage = () => {
               <div className="text-center mb-8">
                 <p className="text-purple-300 text-sm uppercase tracking-widest mb-3 font-semibold">Final Score</p>
                 <div className="inline-flex items-center gap-4 px-8 py-4 bg-slate-900/60 rounded-2xl border border-purple-500/20">
-                  <span className="text-7xl font-black text-white tracking-tight">
+                  <span className="text-4xl sm:text-7xl font-black text-white tracking-tight">
                     {selectedMatchDetails.score ? (() => {
                       try {
                         const scoreData = typeof selectedMatchDetails.score === 'string' 

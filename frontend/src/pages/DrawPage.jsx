@@ -1,3 +1,4 @@
+import { getErrorMessage } from '../utils/errorMessage';
 /**
  * DrawPage - Tournament Bracket Display
  * 
@@ -407,7 +408,7 @@ const DrawPage = () => {
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       console.error('Error creating draw:', err);
-      setError(err.response?.data?.error || 'Failed to create draw');
+      setError(getErrorMessage(err, 'Failed to create draw'));
     } finally {
       setGenerating(false);
     }
@@ -433,7 +434,7 @@ const DrawPage = () => {
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       console.error('Error deleting draw:', err);
-      setError(err.response?.data?.error || 'Failed to delete draw');
+      setError(getErrorMessage(err, 'Failed to delete draw'));
     } finally {
       setDeleting(false);
     }
@@ -458,7 +459,7 @@ const DrawPage = () => {
       setTimeout(() => setSuccess(null), 5000);
     } catch (err) {
       console.error('Error restarting draw:', err);
-      setError(err.response?.data?.error || 'Failed to restart draw');
+      setError(getErrorMessage(err, 'Failed to restart draw'));
     } finally {
       setRestarting(false);
     }
@@ -496,7 +497,7 @@ const DrawPage = () => {
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       console.error('Error arranging knockout matchups:', err);
-      setError(err.response?.data?.error || 'Failed to arrange knockout matchups');
+      setError(getErrorMessage(err, 'Failed to arrange knockout matchups'));
     } finally {
       setAssigning(false);
     }
@@ -531,7 +532,7 @@ const DrawPage = () => {
       console.error('❌ Error data:', err.response?.data);
       console.error('❌ Error status:', err.response?.status);
       console.error('❌ Full error:', err);
-      setError(err.response?.data?.error || 'Failed to end category');
+      setError(getErrorMessage(err, 'Failed to end category'));
     } finally {
       setEndingTournament(false);
     }
@@ -604,7 +605,7 @@ const DrawPage = () => {
         fetchBracket();
       } catch (err) {
         console.error('Error creating match:', err);
-        setError(err.response?.data?.error || 'Failed to create match. Please try again.');
+        setError(getErrorMessage(err, 'Failed to create match. Please try again.'));
       }
     }
   };
@@ -627,7 +628,7 @@ const DrawPage = () => {
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       console.error('Error assigning umpire:', err);
-      setError(err.response?.data?.error || 'Failed to assign umpire');
+      setError(getErrorMessage(err, 'Failed to assign umpire'));
     }
   };
 
@@ -669,7 +670,7 @@ const DrawPage = () => {
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       console.error('Error changing match result:', err);
-      setError(err.response?.data?.error || 'Failed to change match result');
+      setError(getErrorMessage(err, 'Failed to change match result'));
     } finally {
       setChangingResult(false);
     }
@@ -707,7 +708,7 @@ const DrawPage = () => {
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       console.error('Error assigning players:', err);
-      setError(err.response?.data?.error || 'Failed to assign players');
+      setError(getErrorMessage(err, 'Failed to assign players'));
     } finally {
       setAssigning(false);
     }
@@ -1281,7 +1282,7 @@ const DrawPage = () => {
                     setTimeout(() => setSuccess(null), 5000);
                   } catch (err) {
                     console.error('Error continuing to knockout:', err);
-                    setError(err.response?.data?.error || 'Failed to continue to knockout stage');
+                    setError(getErrorMessage(err, 'Failed to continue to knockout stage'));
                   } finally {
                     setAssigning(false);
                   }
@@ -1438,7 +1439,7 @@ const DrawPage = () => {
                     setTimeout(() => setSuccess(null), 5000);
                   } catch (err) {
                     console.error('Error creating knockout:', err);
-                    setError(err.response?.data?.error || 'Failed to create knockout stage');
+                    setError(getErrorMessage(err, 'Failed to create knockout stage'));
                   } finally {
                     setAssigning(false);
                   }
@@ -1615,10 +1616,10 @@ const DrawPage = () => {
               <div className="text-center mb-8">
                 <p className="text-purple-300 text-sm uppercase tracking-widest mb-3 font-semibold">Final Score</p>
                 <div className="inline-flex items-center gap-4 px-8 py-4 bg-slate-900/60 rounded-2xl border border-purple-500/20">
-                  <span className="text-7xl font-black text-white tracking-tight">
+                  <span className="text-4xl sm:text-7xl font-black text-white tracking-tight">
                     {selectedMatchDetails.score && (() => {
-                      const scoreData = typeof selectedMatchDetails.score === 'string' 
-                        ? JSON.parse(selectedMatchDetails.score) 
+                      const scoreData = typeof selectedMatchDetails.score === 'string'
+                        ? JSON.parse(selectedMatchDetails.score)
                         : selectedMatchDetails.score;
                       let p1SetsWon = 0;
                       let p2SetsWon = 0;
@@ -3635,7 +3636,7 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       console.error('Error bulk assigning players:', err);
-      setError(err.response?.data?.error || 'Failed to assign all players');
+      setError(getErrorMessage(err, 'Failed to assign all players'));
     }
   };
 
@@ -3662,7 +3663,7 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       console.error('Error shuffling players:', err);
-      setError(err.response?.data?.error || 'Failed to shuffle players');
+      setError(getErrorMessage(err, 'Failed to shuffle players'));
     }
   };
 

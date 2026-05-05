@@ -1,3 +1,4 @@
+import { getErrorMessage } from '../utils/errorMessage';
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -198,7 +199,7 @@ export default function TournamentRegistrationPage() {
       setShowSuccessModal(true);
     } catch (err) {
       console.error('Registration error:', err);
-      setError(err.response?.data?.error || 'Registration failed. Please try again.');
+      setError(getErrorMessage(err, 'Registration failed. Please try again.'));
     } finally {
       setSubmitting(false);
     }
@@ -243,7 +244,7 @@ export default function TournamentRegistrationPage() {
       }
     } catch (err) {
       console.error('Error fetching partner:', err);
-      setError(err.response?.data?.error || 'Failed to find player with this code');
+      setError(getErrorMessage(err, 'Failed to find player with this code'));
       setPartnerInfo(prev => ({
         ...prev,
         [categoryId]: null

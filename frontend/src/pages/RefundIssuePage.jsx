@@ -1,3 +1,4 @@
+import { getErrorMessage } from '../utils/errorMessage';
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
@@ -26,7 +27,7 @@ export default function RefundIssuePage() {
       setRegistration(response.data.registration);
     } catch (err) {
       console.error('Error fetching registration:', err);
-      setError(err.response?.data?.error || 'Failed to load registration');
+      setError(getErrorMessage(err, 'Failed to load registration'));
     } finally {
       setLoading(false);
     }

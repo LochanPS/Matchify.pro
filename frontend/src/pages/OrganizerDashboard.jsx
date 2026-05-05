@@ -193,14 +193,14 @@ export default function OrganizerDashboard() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
           {statCards.map((stat, index) => (
-            <div key={index} onClick={stat.onClick} className={`bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:border-purple-500/50 transition-all duration-300 ${stat.clickable ? 'cursor-pointer' : ''}`}>
-              <div className={`inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br ${stat.color} rounded-xl shadow-lg mb-4`}>
-                <stat.icon className="w-6 h-6 text-white" />
+            <div key={index} onClick={stat.onClick} className={`bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-4 sm:p-6 hover:border-purple-500/50 transition-all duration-300 ${stat.clickable ? 'cursor-pointer' : ''}`}>
+              <div className={`inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br ${stat.color} rounded-xl shadow-lg mb-3 sm:mb-4`}>
+                <stat.icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
-              <p className="text-3xl font-bold text-white">{stat.value}</p>
-              <p className="text-gray-400 text-sm mt-1">{stat.label}</p>
+              <p className="text-2xl sm:text-3xl font-bold text-white">{stat.value}</p>
+              <p className="text-gray-400 text-xs sm:text-sm mt-1">{stat.label}</p>
               {stat.clickable && <p className="text-xs text-purple-400 mt-2">Click to view details</p>}
             </div>
           ))}

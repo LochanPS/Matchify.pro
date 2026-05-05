@@ -1,0 +1,34 @@
+/**
+ * Safely extract a human-readable error string from any error object.
+ * Prevents React crash when backend returns object/array instead of string.
+ */
+export function getErrorMessage(err, fallback = 'Something went wrong. Please try again.') {
+  if (!err) return fallback;
+
+  const data = err?.response?.data;
+  if (data) {
+    const raw = data.error || data.message || data.msg;
+
+    if (typeof raw === 'string' && raw.trim()) return raw.trim();
+
+    // Validation array: [{ message: "..." }, ...]
+    if (Array.isArray(raw)) {
+      const msgs = raw.map(e => e?.message || e?.msg || String(e)).filter(Boolean);
+      if (msgs.length) return msgs.join('. ');
+    }
+
+    // Object with message key
+    if (raw && typeof raw === 'object') {
+      const msg = raw.message || raw.msg || raw.error;
+      if (typeof msg === 'string') return msg;
+    }
+
+    // Entire data is a string
+    if (typeof data === 'string') return data;
+  }
+
+  // Axios/network error
+  if (err?.message && typeof err.message === 'string') return err.message;
+
+  return fallback;
+}

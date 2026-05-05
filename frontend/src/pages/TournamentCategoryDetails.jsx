@@ -87,7 +87,7 @@ export default function TournamentCategoryDetails() {
     <div className="max-w-6xl mx-auto px-4 py-8">
       {/* Header */}
       <div className="bg-white rounded-lg shadow p-6 mb-6">
-        <div className="flex justify-between items-start">
+        <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
           <div>
             <button
               onClick={() => navigate(-1)}
@@ -95,7 +95,7 @@ export default function TournamentCategoryDetails() {
             >
               ← Back
             </button>
-            <h1 className="text-3xl font-bold mb-2">{category.category.name}</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold mb-2">{category.category.name}</h1>
             <p className="text-gray-600">Tournament: {category.category.tournament.name}</p>
             <p className="text-sm text-gray-500">
               Format: {category.category.format.toUpperCase()} | Entry Fee: ₹{category.category.entryFee}
@@ -111,18 +111,18 @@ export default function TournamentCategoryDetails() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="bg-white rounded-lg shadow p-6">
-          <p className="text-gray-600 mb-2">Total Participants</p>
-          <p className="text-4xl font-bold">{category.stats.totalParticipants}</p>
+      <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-6">
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+          <p className="text-gray-600 mb-2 text-sm sm:text-base">Total Participants</p>
+          <p className="text-2xl sm:text-4xl font-bold">{category.stats.totalParticipants}</p>
         </div>
-        <div className="bg-white rounded-lg shadow p-6">
-          <p className="text-gray-600 mb-2">Total Matches</p>
-          <p className="text-4xl font-bold">{category.stats.totalMatches}</p>
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+          <p className="text-gray-600 mb-2 text-sm sm:text-base">Total Matches</p>
+          <p className="text-2xl sm:text-4xl font-bold">{category.stats.totalMatches}</p>
         </div>
-        <div className="bg-white rounded-lg shadow p-6">
-          <p className="text-gray-600 mb-2">Completed</p>
-          <p className="text-4xl font-bold">{category.stats.completedMatches}</p>
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+          <p className="text-gray-600 mb-2 text-sm sm:text-base">Completed</p>
+          <p className="text-2xl sm:text-4xl font-bold">{category.stats.completedMatches}</p>
         </div>
       </div>
 

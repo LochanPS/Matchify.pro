@@ -1,3 +1,4 @@
+import { getErrorMessage } from '../utils/errorMessage';
 import { useState } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -36,7 +37,7 @@ const LoginPage = () => {
       if (err.response?.status === 403 && err.response?.data?.isSuspended) {
         setBannedModal({ reason: err.response.data.suspensionReason || 'Violation of terms of service', message: err.response.data.message });
       } else {
-        setError(err.response?.data?.error || 'Login failed. Please try again.');
+        setError(getErrorMessage(err, 'Login failed. Please try again.'));
       }
     } finally {
       setLoading(false);

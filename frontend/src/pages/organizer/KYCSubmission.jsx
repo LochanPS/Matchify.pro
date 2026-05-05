@@ -123,7 +123,7 @@ export default function KYCSubmission() {
       navigate('/organizer/kyc/video-call');
     } catch (err) {
       console.error('KYC submission error:', err);
-      setError(err.response?.data?.message || err.message || 'Failed to submit KYC. Please try again.');
+      setError(getErrorMessage(err, 'Failed to submit KYC. Please try again.'));
     } finally {
       setUploading(false);
     }

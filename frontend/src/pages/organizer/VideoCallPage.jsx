@@ -75,7 +75,7 @@ export default function VideoCallPage() {
       setStatus('in-call');
     } catch (err) {
       console.error('Request call error:', err);
-      setError(err.response?.data?.message || 'Failed to request video call');
+      setError(getErrorMessage(err, 'Failed to request video call'));
       setStatus('idle');
     }
   };

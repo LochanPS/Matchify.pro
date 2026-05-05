@@ -27,7 +27,7 @@ const SpectatorViewPage = () => {
       setMatchComplete(data.match.status === 'COMPLETED');
       setLoading(false);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to load match');
+      setError(getErrorMessage(err, 'Failed to load match'));
       setLoading(false);
     }
   };

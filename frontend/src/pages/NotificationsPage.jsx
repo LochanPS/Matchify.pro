@@ -95,37 +95,39 @@ const NotificationsPage = () => {
             <span>Back</span>
           </button>
 
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center flex-shrink-0">
                 <Bell className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-white">Notifications</h1>
+                <h1 className="text-2xl sm:text-3xl font-bold text-white">Notifications</h1>
                 <p className="text-gray-400 mt-1">
                   {notifications.filter(n => !n.read).length} unread
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 flex-wrap">
               {notifications.some(n => !n.read) && (
                 <button
                   onClick={markAllAsRead}
-                  className="px-4 py-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 rounded-xl flex items-center gap-2 transition-colors"
+                  className="px-3 py-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 rounded-xl flex items-center gap-2 transition-colors text-sm"
                 >
                   <CheckCheck className="w-4 h-4" />
-                  Mark all read
+                  <span className="hidden sm:inline">Mark all read</span>
+                  <span className="sm:hidden">Mark read</span>
                 </button>
               )}
-              
+
               {notifications.length > 0 && (
                 <button
                   onClick={() => setShowDeleteAllConfirm(true)}
-                  className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-xl flex items-center gap-2 transition-colors"
+                  className="px-3 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-xl flex items-center gap-2 transition-colors text-sm"
                 >
                   <Trash2 className="w-4 h-4" />
-                  Delete All
+                  <span className="hidden sm:inline">Delete All</span>
+                  <span className="sm:hidden">Delete</span>
                 </button>
               )}
             </div>

@@ -1,3 +1,4 @@
+import { getErrorMessage } from '../utils/errorMessage';
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../utils/api';
@@ -154,7 +155,7 @@ const ConductMatchPage = () => {
       navigate(`/match/${matchId}/score`);
     } catch (err) {
       console.error('❌ Error starting match:', err);
-      setError(err.response?.data?.error || 'Failed to start match');
+      setError(getErrorMessage(err, 'Failed to start match'));
       setAssigning(false);
     }
   };
@@ -181,7 +182,7 @@ const ConductMatchPage = () => {
       navigate(`/tournaments/${match.tournamentId}/draws`);
     } catch (err) {
       console.error('❌ Error giving bye:', err);
-      setError(err.response?.data?.error || 'Failed to give bye');
+      setError(getErrorMessage(err, 'Failed to give bye'));
       setGivingBye(false);
     }
   };
@@ -283,10 +284,10 @@ const ConductMatchPage = () => {
             <div className="flex-1 text-center">
               <div className="relative inline-block mb-4">
                 {player1?.profilePhoto ? (
-                  <img src={player1.profilePhoto} alt={player1.name} className="w-28 h-28 rounded-2xl object-cover border-4 border-blue-500/30 shadow-2xl shadow-blue-500/20" />
+                  <img src={player1.profilePhoto} alt={player1.name} className="w-20 h-20 sm:w-28 sm:h-28 rounded-2xl object-cover border-4 border-blue-500/30 shadow-2xl shadow-blue-500/20" />
                 ) : (
-                  <div className="w-28 h-28 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-blue-500/30 border-4 border-blue-500/30">
-                    <span className="text-4xl font-bold text-white">{player1?.name?.charAt(0)?.toUpperCase() || 'P1'}</span>
+                  <div className="w-20 h-20 sm:w-28 sm:h-28 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-blue-500/30 border-4 border-blue-500/30">
+                    <span className="text-2xl sm:text-4xl font-bold text-white">{player1?.name?.charAt(0)?.toUpperCase() || 'P1'}</span>
                   </div>
                 )}
                 <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-lg">1</div>
@@ -310,10 +311,10 @@ const ConductMatchPage = () => {
             <div className="flex-1 text-center">
               <div className="relative inline-block mb-4">
                 {player2?.profilePhoto ? (
-                  <img src={player2.profilePhoto} alt={player2.name} className="w-28 h-28 rounded-2xl object-cover border-4 border-purple-500/30 shadow-2xl shadow-purple-500/20" />
+                  <img src={player2.profilePhoto} alt={player2.name} className="w-20 h-20 sm:w-28 sm:h-28 rounded-2xl object-cover border-4 border-purple-500/30 shadow-2xl shadow-purple-500/20" />
                 ) : (
-                  <div className="w-28 h-28 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-purple-500/30 border-4 border-purple-500/30">
-                    <span className="text-4xl font-bold text-white">{player2?.name?.charAt(0)?.toUpperCase() || 'P2'}</span>
+                  <div className="w-20 h-20 sm:w-28 sm:h-28 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-purple-500/30 border-4 border-purple-500/30">
+                    <span className="text-2xl sm:text-4xl font-bold text-white">{player2?.name?.charAt(0)?.toUpperCase() || 'P2'}</span>
                   </div>
                 )}
                 <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-lg">2</div>

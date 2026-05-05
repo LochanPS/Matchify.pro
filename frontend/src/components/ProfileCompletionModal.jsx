@@ -1,3 +1,4 @@
+import { getErrorMessage } from '../utils/errorMessage';
 import { useState, useRef, useEffect } from 'react';
 import api from '../utils/api';
 
@@ -541,7 +542,7 @@ export default function ProfileCompletionModal({ user, onComplete }) {
       }
     } catch (err) {
       console.error('Profile update error:', err);
-      setError(err.response?.data?.error || 'Failed to update profile');
+      setError(getErrorMessage(err, 'Failed to update profile'));
     } finally {
       setLoading(false);
     }

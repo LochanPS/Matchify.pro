@@ -1,3 +1,4 @@
+import { getErrorMessage } from '../../utils/errorMessage';
 import { useState } from 'react';
 import { X, Eye, EyeOff, Lock } from 'lucide-react';
 import { profileAPI } from '../../api/profile';
@@ -53,7 +54,7 @@ export default function PasswordModal({ isOpen, onClose }) {
         setSuccess(false);
       }, 2000);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to change password');
+      setError(getErrorMessage(err, 'Failed to change password'));
     } finally {
       setLoading(false);
     }

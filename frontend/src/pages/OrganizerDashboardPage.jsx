@@ -177,7 +177,7 @@ export default function OrganizerDashboardPage() {
             {/* Left: Profile Info */}
             <div className="flex items-start gap-6 flex-1">
               <div className="relative">
-                <div className="w-32 h-32 bg-gradient-to-br from-blue-400 via-indigo-500 to-purple-600 rounded-3xl flex items-center justify-center text-5xl font-bold text-white shadow-2xl shadow-purple-500/30 ring-4 ring-white/10">
+                <div className="w-20 h-20 sm:w-32 sm:h-32 bg-gradient-to-br from-blue-400 via-indigo-500 to-purple-600 rounded-3xl flex items-center justify-center text-3xl sm:text-5xl font-bold text-white shadow-2xl shadow-purple-500/30 ring-4 ring-white/10">
                   {userProfile?.profilePhoto ? (
                     <img src={userProfile.profilePhoto} alt={userProfile.name} className="w-full h-full object-cover rounded-3xl" />
                   ) : (
@@ -191,7 +191,7 @@ export default function OrganizerDashboardPage() {
               
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-3">
-                  <h1 className="text-4xl font-bold text-white">Organizer Dashboard</h1>
+                  <h1 className="text-2xl sm:text-4xl font-bold text-white">Organizer Dashboard</h1>
                 </div>
                 <p className="text-xl text-purple-300 font-medium mb-4">Welcome back, {userProfile?.name || 'Organizer'}!</p>
                 

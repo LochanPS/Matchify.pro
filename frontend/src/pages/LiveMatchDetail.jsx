@@ -127,7 +127,7 @@ const LiveMatchDetail = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 py-4 flex items-center justify-between gap-2">
           <button 
             onClick={() => navigate(-1)}
             className="text-gray-600 hover:text-gray-900 flex items-center"
@@ -152,7 +152,7 @@ const LiveMatchDetail = () => {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
         <MatchInfo match={match} duration={duration} />
         <Scoreboard match={match} />
         <MatchTimeline match={match} />
@@ -247,7 +247,7 @@ const Scoreboard = ({ match }) => {
   return (
     <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-lg shadow-xl p-8 mb-6 relative">
       {/* Players */}
-      <div className="grid grid-cols-2 gap-8 mb-8 relative">
+      <div className="grid grid-cols-2 gap-3 sm:gap-8 mb-6 sm:mb-8 relative">
         {/* Player/Team 1 */}
         <PlayerCard 
           name="Player 1"
@@ -290,18 +290,18 @@ const PlayerCard = ({ name, score, isServing, isLeading }) => {
 
       {/* Player Photo */}
       <div className="mb-4">
-        <div className="w-32 h-32 rounded-full mx-auto border-4 border-white shadow-lg bg-gray-300 flex items-center justify-center">
-          <span className="text-4xl text-gray-600">👤</span>
+        <div className="w-20 h-20 sm:w-32 sm:h-32 rounded-full mx-auto border-4 border-white shadow-lg bg-gray-300 flex items-center justify-center">
+          <span className="text-3xl sm:text-4xl text-gray-600">👤</span>
         </div>
       </div>
 
       {/* Player Name */}
-      <h3 className="text-2xl font-bold text-white mb-1">
+      <h3 className="text-lg sm:text-2xl font-bold text-white mb-1 truncate px-2">
         {name}
       </h3>
 
       {/* Current Set Score */}
-      <div className="text-6xl font-bold text-white mt-4">
+      <div className="text-4xl sm:text-6xl font-bold text-white mt-4">
         {score}
       </div>
     </div>

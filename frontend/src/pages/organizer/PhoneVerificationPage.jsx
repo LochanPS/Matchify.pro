@@ -85,7 +85,7 @@ export default function PhoneVerificationPage() {
       setStep('phone');
       setSuccess('Aadhaar uploaded successfully!');
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to upload Aadhaar');
+      setError(getErrorMessage(err, 'Failed to upload Aadhaar'));
     } finally {
       setLoading(false);
     }
@@ -116,7 +116,7 @@ export default function PhoneVerificationPage() {
         setSuccess('📱 Phone number submitted! Admin will send OTP to your phone via WhatsApp/SMS.');
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to submit phone number');
+      setError(getErrorMessage(err, 'Failed to submit phone number'));
     } finally {
       setLoading(false);
     }
@@ -138,7 +138,7 @@ export default function PhoneVerificationPage() {
         navigate('/organizer/kyc/payment');
       }, 1500);
     } catch (err) {
-      setError(err.response?.data?.message || 'Invalid OTP');
+      setError(getErrorMessage(err, 'Invalid OTP'));
     } finally {
       setLoading(false);
     }

@@ -61,7 +61,7 @@ const ScoreBoard = ({ score, player1Name = 'Player 1', player2Name = 'Player 2',
             )}
             <p className="text-lg font-semibold truncate">{player1Name}</p>
           </div>
-          <p className="text-7xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">{currentScore?.player1 || 0}</p>
+          <p className="text-4xl sm:text-7xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">{currentScore?.player1 || 0}</p>
         </div>
 
         {/* Separator */}
@@ -77,7 +77,7 @@ const ScoreBoard = ({ score, player1Name = 'Player 1', player2Name = 'Player 2',
               <Circle className="w-3 h-3 fill-yellow-400 text-yellow-400 animate-pulse" />
             )}
           </div>
-          <p className="text-7xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">{currentScore?.player2 || 0}</p>
+          <p className="text-4xl sm:text-7xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">{currentScore?.player2 || 0}</p>
         </div>
       </div>
 

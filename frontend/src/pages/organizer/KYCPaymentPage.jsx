@@ -62,7 +62,7 @@ export default function KYCPaymentPage() {
         navigate('/organizer/kyc/submit');
       }, 2000);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to submit payment. Please try again.');
+      setError(getErrorMessage(err, 'Failed to submit payment. Please try again.'));
     } finally {
       setUploading(false);
     }

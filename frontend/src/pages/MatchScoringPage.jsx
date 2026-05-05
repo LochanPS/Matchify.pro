@@ -1,3 +1,4 @@
+import { getErrorMessage } from '../utils/errorMessage';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
@@ -92,7 +93,7 @@ const MatchScoringPage = () => {
         setTimerData(response.data.match.score.timer);
       }
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to start match');
+      setError(getErrorMessage(err, 'Failed to start match'));
     } finally {
       setSaving(false);
     }
@@ -225,7 +226,7 @@ const MatchScoringPage = () => {
       setTimerData(data.timer);
       setIsPaused(true);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to pause timer');
+      setError(getErrorMessage(err, 'Failed to pause timer'));
     } finally {
       setSaving(false);
     }
@@ -239,7 +240,7 @@ const MatchScoringPage = () => {
       setTimerData(data.timer);
       setIsPaused(false);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to resume timer');
+      setError(getErrorMessage(err, 'Failed to resume timer'));
     } finally {
       setSaving(false);
     }
@@ -292,7 +293,7 @@ const MatchScoringPage = () => {
         }
       });
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to end match');
+      setError(getErrorMessage(err, 'Failed to end match'));
     } finally {
       setSaving(false);
     }
@@ -531,7 +532,7 @@ const MatchScoringPage = () => {
 
             {/* Current Score */}
             <div className="text-center">
-              <div className="text-6xl font-black text-white mb-2">
+              <div className="text-4xl sm:text-6xl font-black text-white mb-2">
                 {currentSet.player1} <span className="text-gray-500">-</span> {currentSet.player2}
               </div>
               <p className="text-amber-400 font-semibold">Set {score.currentSet + 1}</p>
@@ -552,9 +553,9 @@ const MatchScoringPage = () => {
 
         {/* Scoring Controls */}
         {!isCompleted && (
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-2 gap-3 sm:gap-6">
             {/* Player 1 Controls */}
-            <div className={`bg-slate-800/50 border rounded-2xl p-6 ${isPaused ? 'border-amber-500/30 opacity-50' : 'border-white/10'}`}>
+            <div className={`bg-slate-800/50 border rounded-2xl p-3 sm:p-6 ${isPaused ? 'border-amber-500/30 opacity-50' : 'border-white/10'}`}>
               <h4 className="text-center text-white font-semibold mb-4">{match.player1?.name || 'Player 1'}</h4>
               {canScore ? (
                 <div className="space-y-3">
@@ -583,7 +584,7 @@ const MatchScoringPage = () => {
             </div>
 
             {/* Player 2 Controls */}
-            <div className={`bg-slate-800/50 border rounded-2xl p-6 ${isPaused ? 'border-amber-500/30 opacity-50' : 'border-white/10'}`}>
+            <div className={`bg-slate-800/50 border rounded-2xl p-3 sm:p-6 ${isPaused ? 'border-amber-500/30 opacity-50' : 'border-white/10'}`}>
               <h4 className="text-center text-white font-semibold mb-4">{match.player2?.name || 'Player 2'}</h4>
               {canScore ? (
                 <div className="space-y-3">

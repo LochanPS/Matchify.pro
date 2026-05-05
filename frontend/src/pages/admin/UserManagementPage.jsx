@@ -1,3 +1,4 @@
+import { getErrorMessage } from '../../utils/errorMessage';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AlertTriangle, CheckCircle, X, UserX, UserCheck, ArrowLeft } from 'lucide-react';
@@ -44,7 +45,7 @@ const UserManagementPage = () => {
       setUsers(data.users);
       setPagination(data.pagination);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to load users');
+      setError(getErrorMessage(err, 'Failed to load users'));
     } finally {
       setLoading(false);
     }
@@ -119,7 +120,7 @@ const UserManagementPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 p-8">
+    <div className="min-h-screen bg-slate-900 p-4 sm:p-8">
       {/* Back Button */}
       <button
         onClick={() => navigate(-1)}

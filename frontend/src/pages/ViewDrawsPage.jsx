@@ -1,3 +1,4 @@
+import { getErrorMessage } from '../utils/errorMessage';
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { tournamentAPI } from '../api/tournament';
@@ -113,7 +114,7 @@ const ViewDrawsPage = () => {
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       console.error('Error creating draw:', err);
-      setError(err.response?.data?.error || 'Failed to create draw');
+      setError(getErrorMessage(err, 'Failed to create draw'));
     } finally {
       setGenerating(false);
     }

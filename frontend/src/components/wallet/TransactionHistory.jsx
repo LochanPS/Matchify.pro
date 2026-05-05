@@ -1,3 +1,4 @@
+import { getErrorMessage } from '../../utils/errorMessage';
 import { useState, useEffect } from 'react';
 import { walletAPI } from '../../api/wallet';
 import { 
@@ -57,7 +58,7 @@ const TransactionHistory = ({ onRefresh }) => {
       setPagination(response.data.pagination);
     } catch (err) {
       console.error('Error fetching transactions:', err);
-      setError(err.response?.data?.error || 'Failed to load transactions');
+      setError(getErrorMessage(err, 'Failed to load transactions'));
     } finally {
       setLoading(false);
     }

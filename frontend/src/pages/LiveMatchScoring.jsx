@@ -278,12 +278,12 @@ const LiveMatchScoring = () => {
         </div>
 
         {/* Current Set Score */}
-        <div className="bg-slate-800 rounded-xl p-8 mb-6 border border-slate-700">
+        <div className="bg-slate-800 rounded-xl p-4 sm:p-8 mb-6 border border-slate-700">
           <div className="flex items-center justify-between">
             {/* Player 1 */}
             <div className="text-center">
-              <div className="bg-slate-700 rounded-xl p-6 mb-4">
-                <p className="text-4xl font-bold text-white mb-2">{setsWon.player1}</p>
+              <div className="bg-slate-700 rounded-xl p-4 sm:p-6 mb-4">
+                <p className="text-2xl sm:text-4xl font-bold text-white mb-2">{setsWon.player1}</p>
                 <p className="text-gray-400">Sets Won</p>
               </div>
               <h3 className="text-xl font-bold text-white mb-2">{match.player1.name}</h3>
@@ -292,7 +292,7 @@ const LiveMatchScoring = () => {
             {/* Current Set Score */}
             <div className="text-center">
               <p className="text-gray-400 mb-2">Set {currentSet}</p>
-              <div className="text-8xl font-bold text-white">
+              <div className="text-5xl sm:text-8xl font-bold text-white">
                 {sets[currentSet - 1]?.player1 || 0} - {sets[currentSet - 1]?.player2 || 0}
               </div>
               {matchCompleted && winner && (
@@ -306,8 +306,8 @@ const LiveMatchScoring = () => {
 
             {/* Player 2 */}
             <div className="text-center">
-              <div className="bg-slate-700 rounded-xl p-6 mb-4">
-                <p className="text-4xl font-bold text-white mb-2">{setsWon.player2}</p>
+              <div className="bg-slate-700 rounded-xl p-4 sm:p-6 mb-4">
+                <p className="text-2xl sm:text-4xl font-bold text-white mb-2">{setsWon.player2}</p>
                 <p className="text-gray-400">Sets Won</p>
               </div>
               <h3 className="text-xl font-bold text-white mb-2">{match.player2.name}</h3>

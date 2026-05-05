@@ -1,3 +1,4 @@
+import { getErrorMessage } from '../utils/errorMessage';
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
@@ -51,7 +52,7 @@ export default function CancellationRequestPage() {
       setRegistration(response.data.registration);
     } catch (err) {
       console.error('Error fetching registration:', err);
-      setError(err.response?.data?.error || 'Failed to load cancellation request');
+      setError(getErrorMessage(err, 'Failed to load cancellation request'));
     } finally {
       setLoading(false);
     }

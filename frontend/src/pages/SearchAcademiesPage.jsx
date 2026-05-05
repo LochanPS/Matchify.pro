@@ -27,7 +27,7 @@ const SearchAcademiesPage = () => {
             </div>
             
             {/* Main Title */}
-            <h1 className="text-5xl md:text-7xl font-black mb-4 drop-shadow-2xl">
+            <h1 className="text-3xl sm:text-5xl md:text-7xl font-black mb-4 drop-shadow-2xl">
               <span className="bg-gradient-to-r from-teal-400 via-cyan-400 to-teal-400 bg-clip-text text-transparent animate-gradient">
                 Academies
               </span>
@@ -48,9 +48,9 @@ const SearchAcademiesPage = () => {
             {/* Main Card */}
             <div className="relative bg-slate-800/90 backdrop-blur-xl border border-teal-400/40 rounded-3xl p-12 md:p-16 shadow-2xl text-center">
               {/* Icon with Animation */}
-              <div className="relative w-28 h-28 mx-auto mb-10">
+              <div className="relative w-20 h-20 sm:w-28 sm:h-28 mx-auto mb-10">
                 <div className="absolute inset-0 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-3xl blur-2xl opacity-50 animate-pulse"></div>
-                <div className="relative w-28 h-28 bg-gradient-to-br from-teal-500/30 to-cyan-500/30 rounded-3xl flex items-center justify-center border border-teal-500/50 backdrop-blur-sm">
+                <div className="relative w-20 h-20 sm:w-28 sm:h-28 bg-gradient-to-br from-teal-500/30 to-cyan-500/30 rounded-3xl flex items-center justify-center border border-teal-500/50 backdrop-blur-sm">
                   <Building2 className="w-14 h-14 text-teal-400" />
                 </div>
               </div>
@@ -62,7 +62,7 @@ const SearchAcademiesPage = () => {
               </div>
 
               {/* Main Message */}
-              <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
+              <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
                 Academy Directory Feature
               </h2>
               <p className="text-gray-300 text-lg md:text-xl leading-relaxed mb-12 max-w-3xl mx-auto">

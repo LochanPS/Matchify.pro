@@ -1,3 +1,4 @@
+import { getErrorMessage } from '../utils/errorMessage';
 import { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { getPartnerInvitation, confirmPartner } from '../api/partner';
@@ -36,7 +37,7 @@ const PartnerConfirmationPage = () => {
       const data = await getPartnerInvitation(token);
       setInvitation(data.invitation);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to load invitation');
+      setError(getErrorMessage(err, 'Failed to load invitation'));
     } finally {
       setLoading(false);
     }
@@ -64,7 +65,7 @@ const PartnerConfirmationPage = () => {
         }
       }, 3000);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to process invitation');
+      setError(getErrorMessage(err, 'Failed to process invitation'));
       
       if (err.response?.data?.requiresLogin) {
         navigate(`/login?redirect=/partner/confirm/${token}?action=accept`);

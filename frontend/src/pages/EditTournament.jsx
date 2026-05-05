@@ -1,3 +1,4 @@
+import { getErrorMessage } from '../utils/errorMessage';
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { tournamentAPI } from '../api/tournament';
@@ -137,7 +138,7 @@ const EditTournament = () => {
       setSuccess('Dates updated successfully!');
       fetchTournament();
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to update dates');
+      setError(getErrorMessage(err, 'Failed to update dates'));
     } finally {
       setSaving(false);
     }
@@ -161,7 +162,7 @@ const EditTournament = () => {
       setSuccess('Payment info updated successfully!');
       fetchTournament();
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to update payment info');
+      setError(getErrorMessage(err, 'Failed to update payment info'));
     } finally {
       setSaving(false);
     }

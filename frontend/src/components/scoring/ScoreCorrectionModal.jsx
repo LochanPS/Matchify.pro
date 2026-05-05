@@ -1,3 +1,4 @@
+import { getErrorMessage } from '../../utils/errorMessage';
 import React, { useState } from 'react';
 import { X, AlertTriangle, CheckCircle } from 'lucide-react';
 import axios from 'axios';
@@ -46,7 +47,7 @@ const ScoreCorrectionModal = ({ matchId, currentScore, onClose, onSuccess }) => 
       }
     } catch (err) {
       console.error('Error submitting correction:', err);
-      setError(err.response?.data?.error || 'Failed to submit correction request');
+      setError(getErrorMessage(err, 'Failed to submit correction request'));
     } finally {
       setSubmitting(false);
     }

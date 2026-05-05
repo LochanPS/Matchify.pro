@@ -1,3 +1,4 @@
+import { getErrorMessage } from '../../utils/errorMessage';
 import { useEffect, useState } from 'react';
 import adminService from '../../services/adminService';
 
@@ -16,7 +17,7 @@ const UserDetailsModal = ({ userId, onClose }) => {
       const data = await adminService.getUserDetails(userId);
       setUser(data.user);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to load user details');
+      setError(getErrorMessage(err, 'Failed to load user details'));
     } finally {
       setLoading(false);
     }

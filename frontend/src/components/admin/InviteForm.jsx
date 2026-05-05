@@ -1,3 +1,4 @@
+import { getErrorMessage } from '../../utils/errorMessage';
 import { useState } from 'react';
 import adminService from '../../services/adminService';
 
@@ -29,7 +30,7 @@ const InviteForm = ({ onInviteCreated }) => {
       // Notify parent to refresh invite list
       if (onInviteCreated) onInviteCreated();
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to create invite');
+      setError(getErrorMessage(err, 'Failed to create invite'));
     } finally {
       setLoading(false);
     }

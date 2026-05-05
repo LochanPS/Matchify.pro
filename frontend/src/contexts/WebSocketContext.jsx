@@ -28,31 +28,34 @@ export const WebSocketProvider = ({ children }) => {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    // Connect to backend WebSocket server
+    // Get WebSocket URL
     const wsUrl = getWebSocketUrl();
     
-    // Determine if we're in production
-    const isProduction = wsUrl.includes('onrender.com') || wsUrl.includes('vercel.app');
+    // Check if we're on Vercel (serverless - no WebSocket support)
+    const isVercel = wsUrl.includes('vercel.app');
+    
+    // Skip WebSocket connection on Vercel
+    if (isVercel) {
+      console.log('ℹ️ WebSocket disabled on Vercel (serverless environment)');
+      console.log('💡 Real-time features work via polling in production');
+      return;
+    }
+    
+    // Only connect WebSocket for local development or non-Vercel deployments
+    console.log('🔌 Initializing WebSocket connection to:', wsUrl);
     
     const socketInstance = io(wsUrl, {
       autoConnect: true,
       reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000,
-      timeout: 20000, // 20 second timeout
-      transports: ['websocket', 'polling'], // Allow fallback to polling
+      reconnectionAttempts: 3,
+      reconnectionDelay: 2000,
+      timeout: 10000,
+      transports: ['websocket', 'polling'],
       withCredentials: true,
-      forceNew: true,
-      // Additional options for production
-      ...(isProduction && {
-        secure: true,
-        rejectUnauthorized: false
-      })
     });
 
     socketInstance.on('connect', () => {
       console.log('✅ WebSocket connected:', socketInstance.id);
-      console.log('🔗 Connected to:', wsUrl);
       setIsConnected(true);
     });
 
@@ -62,24 +65,13 @@ export const WebSocketProvider = ({ children }) => {
     });
 
     socketInstance.on('connect_error', (error) => {
-      console.error('❌ WebSocket connection error:', error.message);
-      console.error('🔗 Failed to connect to:', wsUrl);
-      console.error('🔍 Error details:', error);
-    });
-
-    socketInstance.on('reconnect', (attemptNumber) => {
-      console.log('🔄 WebSocket reconnected after', attemptNumber, 'attempts');
-    });
-
-    socketInstance.on('reconnect_error', (error) => {
-      console.error('🔄 WebSocket reconnection failed:', error.message);
+      console.warn('⚠️ WebSocket connection error:', error.message);
     });
 
     setSocket(socketInstance);
 
     // Cleanup on unmount
     return () => {
-      console.log('🧹 Cleaning up WebSocket connection');
       socketInstance.disconnect();
     };
   }, []);

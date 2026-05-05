@@ -428,28 +428,34 @@ app.use((err, req, res, next) => {
 // SERVER STARTUP
 // ============================================
 
-const httpServer = createServer(app);
+// On Vercel: skip HTTP server + Socket.IO (serverless — no persistent connections)
+// On Render/local: start normally with Socket.IO
+if (!process.env.VERCEL) {
+  const httpServer = createServer(app);
 
-// Initialize Socket.IO
-const io = initializeSocket(httpServer);
-console.log('✅ Socket.IO initialized');
+  // Initialize Socket.IO
+  const io = initializeSocket(httpServer);
+  console.log('✅ Socket.IO initialized');
 
-httpServer.listen(PORT, () => {
-  console.log('');
-  console.log('╔═══════════════════════════════════════╗');
-  console.log('║      Matchify.pro SERVER STARTED 🎾      ║');
-  console.log('╠═══════════════════════════════════════╣');
-  console.log(`║  Port: ${PORT.toString().padEnd(28)} ║`);
-  console.log(`║  Environment: ${(process.env.NODE_ENV || 'development').padEnd(20)} ║`);
-  console.log(`║  Frontend: ${FRONTEND_URL.padEnd(21)} ║`);
-  console.log('║  WebSocket: ✅ Enabled                ║');
-  console.log('╚═══════════════════════════════════════╝');
-  console.log('');
-  console.log('🚀 Ready to serve badminton tournaments!');
-  console.log('📊 Health check: http://localhost:' + PORT + '/health');
-  console.log('🔗 API docs: http://localhost:' + PORT + '/api');
-  console.log('🔴 WebSocket: ws://localhost:' + PORT);
-  console.log('');
-});
+  httpServer.listen(PORT, () => {
+    console.log('');
+    console.log('╔═══════════════════════════════════════╗');
+    console.log('║      Matchify.pro SERVER STARTED 🎾      ║');
+    console.log('╠═══════════════════════════════════════╣');
+    console.log(`║  Port: ${PORT.toString().padEnd(28)} ║`);
+    console.log(`║  Environment: ${(process.env.NODE_ENV || 'development').padEnd(20)} ║`);
+    console.log(`║  Frontend: ${FRONTEND_URL.padEnd(21)} ║`);
+    console.log('║  WebSocket: ✅ Enabled                ║');
+    console.log('╚═══════════════════════════════════════╝');
+    console.log('');
+    console.log('🚀 Ready to serve badminton tournaments!');
+    console.log('📊 Health check: http://localhost:' + PORT + '/health');
+    console.log('🔗 API docs: http://localhost:' + PORT + '/api');
+    console.log('🔴 WebSocket: ws://localhost:' + PORT);
+    console.log('');
+  });
+}
+
+export default app;
 
 export default app;

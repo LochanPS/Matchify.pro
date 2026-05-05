@@ -397,8 +397,6 @@ router.get('/me', async (req, res) => {
   }
 });
 
-export default router;
-
 // GET /auth/verification-status - Get verification status
 router.get('/verification-status', async (req, res) => {
   try {
@@ -463,3 +461,5 @@ router.get('/verification-status', async (req, res) => {
     });
   }
 });
+
+export default router;

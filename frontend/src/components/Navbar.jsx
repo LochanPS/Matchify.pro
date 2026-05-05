@@ -49,8 +49,12 @@ const Navbar = () => {
   const getCurrentRole = () => {
     if (!user) return null;
     
-    // Check if user is admin first
-    if (user.isAdmin || (user.roles && (Array.isArray(user.roles) ? user.roles.includes('ADMIN') : user.roles === 'ADMIN'))) {
+    // Check if user is admin first - multiple detection methods
+    const isAdmin = user.isAdmin || 
+                   (user.roles && (Array.isArray(user.roles) ? user.roles.includes('ADMIN') : user.roles === 'ADMIN' || user.roles.includes('ADMIN'))) ||
+                   user.currentRole === 'ADMIN';
+    
+    if (isAdmin) {
       return 'ADMIN';
     }
     

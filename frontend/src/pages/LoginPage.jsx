@@ -79,11 +79,35 @@ const LoginPage = () => {
     setError('');
     try {
       const user = await login(formData.email, formData.password);
-      if (redirectUrl) { navigate(redirectUrl); return; }
-      const primary = (Array.isArray(user.roles) ? user.roles : [user.role])[0];
-      if (primary === 'ADMIN') navigate('/admin-dashboard');
-      else navigate(`/dashboard?role=${primary}`);
+      
+      console.log('🔍 Login successful, user data:', user);
+      console.log('🔍 User roles:', user.roles);
+      console.log('🔍 User isAdmin:', user.isAdmin);
+      console.log('🔍 User currentRole:', user.currentRole);
+      
+      if (redirectUrl) { 
+        navigate(redirectUrl); 
+        return; 
+      }
+      
+      // Check if user is admin - multiple ways to detect
+      const isAdmin = user.isAdmin || 
+                     (Array.isArray(user.roles) && user.roles.includes('ADMIN')) ||
+                     (typeof user.roles === 'string' && user.roles.includes('ADMIN')) ||
+                     user.currentRole === 'ADMIN';
+      
+      console.log('🔍 Is admin?', isAdmin);
+      
+      if (isAdmin) {
+        console.log('✅ Redirecting to admin dashboard');
+        navigate('/admin-dashboard');
+      } else {
+        const primary = Array.isArray(user.roles) ? user.roles[0] : (user.currentRole || user.role || 'PLAYER');
+        console.log('✅ Redirecting to unified dashboard with role:', primary);
+        navigate(`/dashboard?role=${primary}`);
+      }
     } catch (err) {
+      console.error('❌ Login error:', err);
       if (err.response?.status === 403 && err.response?.data?.isSuspended) {
         setBannedModal({
           reason: err.response.data.suspensionReason || 'Violation of terms of service',

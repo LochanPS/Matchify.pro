@@ -27,10 +27,31 @@ export default function AdminDashboard() {
   };
 
   useEffect(() => {
-    if (!user?.isAdmin) {
+    console.log('🔍 AdminDashboard: Checking user access');
+    console.log('🔍 User:', user);
+    console.log('🔍 User isAdmin:', user?.isAdmin);
+    console.log('🔍 User roles:', user?.roles);
+    
+    // Check if user is admin - multiple detection methods
+    const isAdmin = user?.isAdmin || 
+                   (user?.roles && (Array.isArray(user.roles) ? user.roles.includes('ADMIN') : user.roles === 'ADMIN' || user.roles.includes('ADMIN'))) ||
+                   user?.currentRole === 'ADMIN';
+    
+    console.log('🔍 Is admin?', isAdmin);
+    
+    if (!user) {
+      console.log('❌ No user found, redirecting to login');
       navigate('/login');
       return;
     }
+    
+    if (!isAdmin) {
+      console.log('❌ User is not admin, redirecting to dashboard');
+      navigate('/dashboard');
+      return;
+    }
+    
+    console.log('✅ User is admin, fetching stats');
     fetchStats();
   }, [user, navigate]);
 

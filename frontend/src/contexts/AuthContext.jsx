@@ -94,6 +94,16 @@ export const AuthProvider = ({ children }) => {
           needsUpdate = true;
         }
         
+        // Ensure isAdmin is set if user has ADMIN role
+        if (!parsedUser.isAdmin && parsedUser.roles) {
+          parsedUser.isAdmin = Array.isArray(parsedUser.roles) 
+            ? parsedUser.roles.includes('ADMIN')
+            : parsedUser.roles === 'ADMIN' || parsedUser.roles.includes('ADMIN');
+          if (parsedUser.isAdmin) {
+            needsUpdate = true;
+          }
+        }
+        
         // Set default currentRole to PLAYER if not set
         if (!parsedUser.currentRole) {
           parsedUser.currentRole = parsedUser.roles && parsedUser.roles[0] ? parsedUser.roles[0] : 'PLAYER';
@@ -102,7 +112,7 @@ export const AuthProvider = ({ children }) => {
         
         if (needsUpdate) {
           localStorage.setItem('user', JSON.stringify(parsedUser));
-          console.log('✅ User data updated with roles and currentRole');
+          console.log('✅ User data updated with roles, isAdmin, and currentRole');
         }
         
         setUser(parsedUser);
@@ -146,12 +156,25 @@ export const AuthProvider = ({ children }) => {
         userData.roles = userData.roles.split(',').map(r => r.trim());
       }
       
-      // Set default currentRole to PLAYER if not set
+      // Ensure isAdmin is set if user has ADMIN role
+      if (!userData.isAdmin && userData.roles) {
+        userData.isAdmin = Array.isArray(userData.roles) 
+          ? userData.roles.includes('ADMIN')
+          : userData.roles === 'ADMIN' || userData.roles.includes('ADMIN');
+      }
+      
+      // Set default currentRole
       if (!userData.currentRole) {
         userData.currentRole = userData.roles && userData.roles[0] ? userData.roles[0] : 'PLAYER';
       }
       
       console.log('💾 Saving to localStorage...');
+      console.log('📦 User data to save:', {
+        email: userData.email,
+        roles: userData.roles,
+        isAdmin: userData.isAdmin,
+        currentRole: userData.currentRole
+      });
       localStorage.setItem('token', authToken);
       localStorage.setItem('user', JSON.stringify(userData));
       console.log('✅ Saved to localStorage');

@@ -21,6 +21,8 @@ console.log('✅ Cloudinary configured:', process.env.CLOUDINARY_CLOUD_NAME);
 
 // Import routes
 import authRoutes from './routes/auth.js';
+console.log('✅ Auth routes imported:', !!authRoutes);
+console.log('✅ Auth routes type:', typeof authRoutes);
 import profileRoutes from './routes/profile.js';
 import walletRoutes from './routes/wallet.js';
 import webhookRoutes from './routes/webhook.js';
@@ -247,7 +249,9 @@ app.get('/api', (req, res) => {
 });
 
 // Auth routes (both old and new multi-role) - with stricter rate limiting
-app.use('/api/auth', authLimiter, authRoutes);
+console.log('🔧 Mounting auth routes at /api/auth');
+app.use('/api/auth', authRoutes);  // Temporarily removed authLimiter for debugging
+console.log('✅ Auth routes mounted');
 // app.use('/api/multi-auth', authLimiter, multiRoleAuthRoutes);
 
 // Profile routes

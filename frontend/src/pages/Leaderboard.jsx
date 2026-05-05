@@ -100,8 +100,8 @@ export default function Leaderboard() {
     <div className="min-h-screen" style={{ background: '#07071a' }}>
       {/* Animated Background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full blur-3xl opacity-8" style={{ background: '#00ff88' }}></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full blur-3xl opacity-6" style={{ background: '#00d4ff' }}></div>
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full blur-3xl opacity-[0.03]" style={{ background: '#00ff88' }}></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full blur-3xl opacity-[0.02]" style={{ background: '#00d4ff' }}></div>
       </div>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -144,7 +144,7 @@ export default function Leaderboard() {
 
         {/* My Rank Card */}
         {myRanks && (
-          <div className="mb-8 rounded-2xl p-4 sm:p-6 border" style={{ background: 'rgba(0,255,136,0.05)', borderColor: 'rgba(0,255,136,0.2)' }}>
+          <div className="mb-8 rounded-2xl p-4 sm:p-6 border" style={{ background: 'rgba(13,26,42,0.6)', borderColor: 'rgba(0,255,136,0.15)', backdropFilter: 'blur(10px)' }}>
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="flex items-center gap-4">
                 <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)' }}>
@@ -176,18 +176,18 @@ export default function Leaderboard() {
                 {/* All Ranks Summary */}
                 <div className="mt-3 flex gap-2 justify-end">
                   {myRanks.ranks.city && (
-                    <div className="px-3 py-1 bg-slate-700/50 rounded-lg">
+                    <div className="px-3 py-1 rounded-lg" style={{ background: 'rgba(255,255,255,0.05)' }}>
                       <p className="text-xs text-gray-400">City</p>
                       <p className="text-sm font-bold text-white">#{myRanks.ranks.city}</p>
                     </div>
                   )}
                   {myRanks.ranks.state && (
-                    <div className="px-3 py-1 bg-slate-700/50 rounded-lg">
+                    <div className="px-3 py-1 rounded-lg" style={{ background: 'rgba(255,255,255,0.05)' }}>
                       <p className="text-xs text-gray-400">State</p>
                       <p className="text-sm font-bold text-white">#{myRanks.ranks.state}</p>
                     </div>
                   )}
-                  <div className="px-3 py-1 bg-slate-700/50 rounded-lg">
+                  <div className="px-3 py-1 rounded-lg" style={{ background: 'rgba(255,255,255,0.05)' }}>
                     <p className="text-xs text-gray-400">Country</p>
                     <p className="text-sm font-bold text-white">#{myRanks.ranks.country}</p>
                   </div>

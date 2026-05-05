@@ -250,6 +250,58 @@ app.get('/api', (req, res) => {
 
 // Auth routes (both old and new multi-role) - with stricter rate limiting
 console.log('🔧 Mounting auth routes at /api/auth');
+
+// TEST: Add a simple test route first
+app.post('/api/auth/test', (req, res) => {
+  res.json({ message: 'Test route works!' });
+});
+
+// TEST: Add login route directly
+app.post('/api/auth/login', async (req, res) => {
+  console.log('🔐 Direct login route hit!');
+  try {
+    const { email, password } = req.body;
+    
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password required' });
+    }
+    
+    // Import bcrypt and prisma
+    const bcrypt = await import('bcryptjs');
+    const { default: prisma } = await import('./lib/prisma.js');
+    
+    const user = await prisma.user.findUnique({ where: { email } });
+    
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+    
+    const isValid = await bcrypt.default.compare(password, user.password);
+    
+    if (!isValid) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+    
+    // Import JWT utils
+    const { generateAccessToken, generateRefreshToken } = await import('./utils/jwt.js');
+    
+    const accessToken = generateAccessToken(user.id, user.roles);
+    const refreshToken = generateRefreshToken(user.id);
+    
+    const { password: _, ...userWithoutPassword } = user;
+    
+    res.json({
+      message: 'Login successful',
+      user: userWithoutPassword,
+      accessToken,
+      refreshToken
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ error: 'Login failed', details: error.message });
+  }
+});
+
 app.use('/api/auth', authRoutes);  // Temporarily removed authLimiter for debugging
 console.log('✅ Auth routes mounted');
 // app.use('/api/multi-auth', authLimiter, multiRoleAuthRoutes);

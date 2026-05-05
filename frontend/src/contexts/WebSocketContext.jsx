@@ -26,14 +26,16 @@ export const WebSocketProvider = ({ children }) => {
   useEffect(() => {
     const wsUrl = getWebSocketUrl();
 
-    // Vercel serverless does not support persistent WebSocket connections.
-    // Skip entirely to avoid infinite reconnect loops in the console.
-    if (wsUrl.includes('vercel.app')) {
-      console.log('ℹ️ WebSocket disabled: Vercel backend (serverless, no WS support). Real-time features via polling.');
+    // WebSocket only works in local development.
+    // Production (Vercel serverless, Render) = no persistent WS support.
+    // Skip to prevent infinite reconnect error spam.
+    const isLocalDev = wsUrl.includes('localhost') || wsUrl.includes('127.0.0.1');
+    if (!isLocalDev) {
+      console.log('ℹ️ WebSocket disabled in production (no persistent connections on serverless).');
       return;
     }
 
-    console.log('🔌 Initializing WebSocket connection to:', wsUrl);
+    console.log('🔌 WebSocket connecting to:', wsUrl);
 
     const socketInstance = io(wsUrl, {
       autoConnect: true,

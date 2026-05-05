@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { profileAPI } from '../api/profile';
+import { getErrorMessage } from '../utils/errorMessage';
 import ImageUpload from '../components/common/ImageUpload';
 import ProfileStats from '../components/profile/ProfileStats';
 import PasswordModal from '../components/profile/PasswordModal';
@@ -264,10 +265,7 @@ export default function ProfilePage() {
       setTimeout(() => setSuccess(''), 3000);
     } catch (error) {
       console.error('Failed to update profile:', error);
-      const errorMsg = error.response?.data?.error || 
-                       error.response?.data?.details?.map(d => d.message).join(', ') ||
-                       'Failed to update profile. Please try again.';
-      setError(errorMsg);
+      setError(getErrorMessage(error, 'Failed to update profile. Please try again.'));
     } finally {
       setSaving(false);
     }

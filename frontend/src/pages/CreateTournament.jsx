@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useTournamentForm, deleteTournamentDraft } from '../hooks/useTournamentForm';
 import { tournamentAPI } from '../api/tournament';
 import api from '../utils/api';
+import { getErrorMessage } from '../utils/errorMessage';
 import TournamentStepper from '../components/tournament/TournamentStepper';
 import BasicInfoStep from '../components/tournament/steps/BasicInfoStep';
 import DatesStep from '../components/tournament/steps/DatesStep';
@@ -133,11 +134,7 @@ const CreateTournament = () => {
       });
     } catch (err) {
       console.error('Error creating tournament:', err);
-      setError(
-        err.response?.data?.error || 
-        err.response?.data?.errors?.join(', ') ||
-        'Failed to create tournament. Please try again.'
-      );
+      setError(getErrorMessage(err, 'Failed to create tournament. Please try again.'));
       setIsSubmitting(false);
     }
   };

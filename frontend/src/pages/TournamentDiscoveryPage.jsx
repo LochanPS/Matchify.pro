@@ -89,15 +89,14 @@ export default function TournamentDiscoveryPage() {
   const hasActiveFilters = Object.values(filters).some(v => v) || searchQuery;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    <div className="min-h-screen" style={{ background:'#07071a' }}>
       {/* Hero Header */}
-      <div className="relative bg-gradient-to-r from-slate-900 via-purple-900 to-slate-900 overflow-hidden">
-        <div className="absolute inset-0">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+      <div className="relative overflow-hidden" style={{ background:'linear-gradient(135deg,#07071a 0%,#0d1a2a 100%)' }}>
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-0 left-1/4 w-80 h-80 rounded-full blur-3xl" style={{ background:'radial-gradient(circle,rgba(0,255,136,0.08) 0%,transparent 70%)' }}></div>
+          <div className="absolute bottom-0 right-1/4 w-80 h-80 rounded-full blur-3xl" style={{ background:'radial-gradient(circle,rgba(0,212,255,0.06) 0%,transparent 70%)' }}></div>
         </div>
-        
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
           {/* Back Button */}
           <button
             onClick={() => navigate(-1)}
@@ -112,10 +111,10 @@ export default function TournamentDiscoveryPage() {
               <SparklesIcon className="w-4 h-4 text-amber-400" />
               Find Your Next Competition
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+            <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold text-white mb-4">
               Discover Tournaments
             </h1>
-            <p className="text-xl text-white/60 max-w-2xl mx-auto">
+            <p className="text-sm sm:text-xl text-white/60 max-w-2xl mx-auto">
               Find and register for badminton tournaments near you
             </p>
           </div>
@@ -258,12 +257,12 @@ export default function TournamentDiscoveryPage() {
 
         {/* Tournament Grid */}
         {loading ? (
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-16 text-center">
+          <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-8 sm:p-16 text-center">
             <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
             <p className="text-gray-400 mt-6 font-medium">Loading tournaments...</p>
           </div>
         ) : tournaments.length === 0 ? (
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-16 text-center">
+          <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-8 sm:p-16 text-center">
             <div className="w-24 h-24 bg-slate-700/50 rounded-3xl flex items-center justify-center mx-auto mb-6">
               <TrophyIcon className="w-12 h-12 text-gray-500" />
             </div>

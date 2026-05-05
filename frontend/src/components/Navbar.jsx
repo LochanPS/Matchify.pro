@@ -131,7 +131,7 @@ const Navbar = () => {
   // If user is admin, use the same navbar style as regular users
   if (user?.isAdmin) {
     return (
-      <header className="sticky top-0 z-50 bg-slate-900/95 backdrop-blur-lg border-b border-white/10 shadow-lg shadow-black/20">
+      <header className="sticky top-0 z-50 backdrop-blur-lg border-b shadow-lg shadow-black/40" style={{ background:'rgba(7,7,26,0.96)', borderColor:'rgba(0,255,136,0.1)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-8">
@@ -431,7 +431,8 @@ const Navbar = () => {
                 </Link>
                 <Link
                   to="/register"
-                  className="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl hover:shadow-lg hover:shadow-emerald-500/30 hover:scale-105 transition-all text-sm font-semibold"
+                  className="px-5 py-2.5 rounded-xl hover:scale-105 transition-all text-sm font-bold"
+                  style={{ background:'linear-gradient(135deg,#00c853,#00ff88)', color:'#003320', boxShadow:'0 0 16px rgba(0,255,136,0.3)' }}
                 >
                   Sign up
                 </Link>
@@ -443,7 +444,7 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       {user && showMobileMenu && (
-        <div className="md:hidden border-t border-white/10 bg-slate-900">
+        <div className="md:hidden border-t" style={{ background:'rgba(7,7,26,0.98)', borderColor:'rgba(0,255,136,0.1)' }}>
           <div className="px-4 py-3 space-y-1">
             {/* Role Switcher for Mobile */}
             <div className="pb-3 mb-3 border-b border-white/10">

@@ -128,20 +128,20 @@ const PlayerDashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    <div className="min-h-screen" style={{ background:'#07071a' }}>
       {/* Hero Header */}
-      <div className="relative bg-gradient-to-r from-slate-900 via-purple-900 to-slate-900 overflow-hidden">
-        <div className="absolute inset-0">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+      <div className="relative overflow-hidden" style={{ background:'linear-gradient(135deg,#07071a 0%,#0d1a2a 50%,#07071a 100%)' }}>
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-0 left-1/4 w-80 h-80 rounded-full blur-3xl" style={{ background:'radial-gradient(circle,rgba(0,255,136,0.08) 0%,transparent 70%)' }}></div>
+          <div className="absolute bottom-0 right-1/4 w-80 h-80 rounded-full blur-3xl" style={{ background:'radial-gradient(circle,rgba(0,212,255,0.06) 0%,transparent 70%)' }}></div>
         </div>
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             {/* Profile Info */}
-            <div className="flex items-center gap-6">
-              <div className="relative">
-                <div className="w-24 h-24 bg-gradient-to-br from-green-400 via-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center text-4xl font-bold text-white shadow-2xl shadow-emerald-500/30">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 w-full sm:w-auto">
+              <div className="relative flex-shrink-0">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-green-400 via-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center text-4xl font-bold text-white shadow-2xl shadow-emerald-500/30">
                   {user?.profilePhoto ? (
                     <img src={user.profilePhoto} alt={user.name} className="w-full h-full object-cover rounded-2xl" />
                   ) : (
@@ -152,9 +152,9 @@ const PlayerDashboard = () => {
                   <span className="text-white text-sm">🏸</span>
                 </div>
               </div>
-              <div>
-                <div className="flex items-center gap-3 mb-2">
-                  <h1 className="text-3xl font-bold text-white">{user?.name}</h1>
+              <div className="text-center sm:text-left">
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-3 mb-2">
+                  <h1 className="text-2xl sm:text-3xl font-bold text-white">{user?.name}</h1>
                   {userProfile?.isVerifiedPlayer && (
                     <VerifiedBadge type="player" size="lg" />
                   )}
@@ -166,8 +166,8 @@ const PlayerDashboard = () => {
                     ))}
                   </div>
                 </div>
-                <p className="text-white/60">{user?.email}</p>
-                <div className="flex items-center gap-4 mt-3 text-white/50 text-sm">
+                <p className="text-white/60 text-sm break-all">{user?.email}</p>
+                <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-3 text-white/50 text-sm justify-center sm:justify-start">
                   {user?.city && (
                     <span className="flex items-center gap-1">
                       <MapPinIcon className="w-4 h-4" />
@@ -231,17 +231,17 @@ const PlayerDashboard = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 -mt-8">
         {/* Stats Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
           {stats.map((stat, index) => (
-            <div 
+            <div
               key={index}
-              className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:border-purple-500/50 transition-all duration-300"
+              className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-4 sm:p-6 hover:border-purple-500/50 transition-all duration-300"
             >
-              <div className={`inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br ${stat.color} rounded-xl shadow-lg mb-4`}>
-                <stat.icon className="w-6 h-6 text-white" />
+              <div className={`inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br ${stat.color} rounded-xl shadow-lg mb-3 sm:mb-4`}>
+                <stat.icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
-              <p className="text-3xl font-bold text-white">{stat.value}</p>
-              <p className="text-gray-400 text-sm mt-1">{stat.label}</p>
+              <p className="text-2xl sm:text-3xl font-bold text-white">{stat.value}</p>
+              <p className="text-gray-400 text-xs sm:text-sm mt-1">{stat.label}</p>
             </div>
           ))}
         </div>

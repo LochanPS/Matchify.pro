@@ -85,15 +85,15 @@ const UnifiedDashboard = () => {
   const ActiveComponent = roleConfig[activeRole]?.component || PlayerDashboard;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    <div className="min-h-screen" style={{ background:'#07071a' }}>
       {/* Role Switcher - Fixed at top */}
       {userRoles.length > 1 && (
-        <div className="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-sm border-b border-white/10">
+        <div className="sticky top-0 z-40 backdrop-blur-sm border-b" style={{ background:'rgba(7,7,26,0.95)', borderColor:'rgba(0,255,136,0.1)' }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <span className="text-gray-400 text-sm font-medium">YOUR ROLES:</span>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   {userRoles.map((role) => {
                     const config = roleConfig[role];
                     if (!config) return null;
@@ -137,7 +137,7 @@ const UnifiedDashboard = () => {
 
       {/* Single Role Display */}
       {userRoles.length === 1 && (
-        <div className="bg-slate-900/95 backdrop-blur-sm border-b border-white/10">
+        <div className="backdrop-blur-sm border-b" style={{ background:'rgba(7,7,26,0.95)', borderColor:'rgba(0,255,136,0.1)' }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
             <div className="flex items-center gap-2">
               <span className="text-gray-400 text-sm font-medium">YOUR ROLE:</span>

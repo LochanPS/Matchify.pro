@@ -116,89 +116,67 @@ const RegisterPage = () => {
   ];
 
   return (
-    <div className="min-h-screen flex bg-slate-900">
-      {/* Left Side - Branding with exciting effects */}
-      <div className="hidden lg:flex lg:w-2/5 relative overflow-hidden">
-        {/* Animated gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-purple-900/50 to-slate-900"></div>
-        
-        {/* Animated blobs */}
-        <div className="absolute inset-0">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-screen filter blur-3xl opacity-30 animate-pulse"></div>
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-emerald-500 rounded-full mix-blend-screen filter blur-3xl opacity-30 animate-pulse animation-delay-2000"></div>
-          <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-pink-500 rounded-full mix-blend-screen filter blur-3xl opacity-20 animate-pulse animation-delay-4000"></div>
-        </div>
-
-        {/* Grid pattern overlay */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
-        
-        <div className="relative z-10 flex flex-col justify-center items-center w-full p-12">
-          {/* Logo with glow effect */}
-          <div className="relative mb-8">
-            <div className="absolute inset-0 bg-gradient-to-br from-emerald-400 to-cyan-500 rounded-3xl blur-2xl opacity-50 animate-pulse"></div>
-            <div className="relative w-28 h-28 bg-gradient-to-br from-emerald-400 via-green-500 to-teal-600 rounded-3xl flex items-center justify-center shadow-2xl shadow-emerald-500/50 transform hover:scale-105 transition-transform">
-              <span className="text-6xl">🏸</span>
-            </div>
+    <div className="min-h-screen flex" style={{ background: '#07071a' }}>
+      {/* Left Side */}
+      <div className="hidden lg:flex lg:w-2/5 relative overflow-hidden flex-col justify-center items-center p-12"
+        style={{ background: 'linear-gradient(135deg,#07071a 0%,#0d1a2a 50%,#07071a 100%)' }}>
+        <div className="absolute inset-0" style={{ backgroundImage:'linear-gradient(rgba(0,255,136,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,136,0.04) 1px,transparent 1px)', backgroundSize:'60px 60px' }}/>
+        <div className="absolute top-1/4 left-1/4 w-80 h-80 rounded-full blur-3xl" style={{ background:'radial-gradient(circle,rgba(0,255,136,0.1) 0%,transparent 70%)' }}/>
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full blur-3xl" style={{ background:'radial-gradient(circle,rgba(0,212,255,0.07) 0%,transparent 70%)' }}/>
+        <div className="relative z-10 flex flex-col items-center text-center">
+          <div className="mb-5" style={{ filter:'drop-shadow(0 0 25px rgba(0,255,136,0.6))' }}>
+            <svg viewBox="0 0 120 140" className="h-20 w-auto">
+              <defs><linearGradient id="rls" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#00ff88"/><stop offset="100%" stopColor="#007c35"/></linearGradient></defs>
+              <path d="M60 8 L110 25 L110 70 Q110 115 60 132 Q10 115 10 70 L10 25 Z" fill="url(#rls)" stroke="rgba(0,255,136,0.5)" strokeWidth="2.5"/>
+              <text x="60" y="88" textAnchor="middle" fill="#003320" fontSize="55" fontWeight="900" fontFamily="Arial Black,sans-serif">M</text>
+            </svg>
           </div>
-          
-          {/* Brand name with gradient */}
-          <h1 className="text-5xl font-black mb-4">
-            <span className="bg-gradient-to-r from-white via-purple-200 to-white bg-clip-text text-transparent">MATCHIFY</span>
-            <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">.pro</span>
+          <h1 className="text-4xl font-black mb-2">
+            <span style={{ color:'#00ff88', textShadow:'0 0 25px rgba(0,255,136,0.5)' }}>MATCHIFY</span>
+            <span style={{ color:'#00d4ff', textShadow:'0 0 25px rgba(0,212,255,0.5)' }}>.PRO</span>
           </h1>
-          
-          <p className="text-xl text-white/60 text-center max-w-md mb-4">
-            Join India's fastest growing badminton community
-          </p>
-
-          {/* Exciting tagline */}
-          <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 border border-emerald-500/30 rounded-full mb-10">
-            <Rocket className="w-5 h-5 text-emerald-400 animate-bounce" />
-            <span className="text-emerald-300 font-medium">Start Your Journey Today!</span>
+          <p className="text-sm mb-6" style={{ color:'rgba(255,255,255,0.45)' }}>India's fastest growing badminton community</p>
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8 text-xs font-bold" style={{ background:'rgba(0,255,136,0.08)', border:'1px solid rgba(0,255,136,0.2)', color:'#00ff88' }}>
+            <Rocket className="w-3.5 h-3.5" /> Start Your Journey Today!
           </div>
-          
-          {/* Benefits with glowing effects */}
-          <div className="space-y-4 w-full max-w-xs">
+          <div className="space-y-3 w-full max-w-xs">
             {[
-              { icon: <Gift className="w-5 h-5" />, text: '₹10 welcome bonus', color: 'text-amber-400' },
-              { icon: <Star className="w-5 h-5" />, text: 'Free to join', color: 'text-purple-400' },
-              { icon: <Users className="w-5 h-5" />, text: 'Multiple roles supported', color: 'text-cyan-400' },
-              { icon: <Trophy className="w-5 h-5" />, text: 'Track your progress', color: 'text-pink-400' },
-            ].map((item, i) => (
-              <div key={i} className="flex items-center gap-3 p-3 bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-xl hover:border-white/20 transition-all group">
-                <span className={`${item.color} group-hover:scale-110 transition-transform`}>{item.icon}</span>
-                <span className="text-white/70 group-hover:text-white transition-colors">{item.text}</span>
+              { icon:<Gift className="w-4 h-4"/>, text:'₹10 welcome bonus',       c:'#f59e0b' },
+              { icon:<Star className="w-4 h-4"/>, text:'Free to join',              c:'#a78bfa' },
+              { icon:<Users className="w-4 h-4"/>,text:'Multiple roles included',   c:'#00d4ff' },
+              { icon:<Trophy className="w-4 h-4"/>,text:'Track your progress',      c:'#00ff88' },
+            ].map((item,i)=>(
+              <div key={i} className="flex items-center gap-3 p-3 rounded-xl border" style={{ background:'rgba(255,255,255,0.03)', borderColor:'rgba(255,255,255,0.08)' }}>
+                <span style={{ color:item.c }}>{item.icon}</span>
+                <span className="text-sm" style={{ color:'rgba(255,255,255,0.65)' }}>{item.text}</span>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      {/* Right Side - Register Form with dark theme */}
-      <div className="w-full lg:w-3/5 flex items-center justify-center p-6 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 overflow-y-auto relative">
-        {/* Subtle background effects */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl"></div>
-        
+      {/* Right Side */}
+      <div className="w-full lg:w-3/5 flex items-center justify-center p-4 sm:p-6 overflow-y-auto relative">
+        <div className="absolute top-0 right-0 w-72 h-72 rounded-full blur-3xl" style={{ background:'radial-gradient(circle,rgba(0,255,136,0.05) 0%,transparent 70%)' }}/>
+        <div className="absolute bottom-0 left-0 w-72 h-72 rounded-full blur-3xl" style={{ background:'radial-gradient(circle,rgba(0,212,255,0.04) 0%,transparent 70%)' }}/>
         <div className="w-full max-w-xl py-8 relative z-10">
           {/* Mobile Logo */}
-          <div className="lg:hidden text-center mb-8">
-            <Link to="/" className="inline-flex items-center gap-3">
-              <div className="w-14 h-14 bg-gradient-to-br from-emerald-400 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/30">
-                <span className="text-3xl">🏸</span>
-              </div>
-              <span className="text-2xl font-bold text-white">MATCHIFY<span className="text-emerald-400">.pro</span></span>
+          <div className="lg:hidden text-center mb-6">
+            <Link to="/" className="inline-flex items-center gap-2">
+              <svg viewBox="0 0 120 140" className="h-9 w-auto" style={{ filter:'drop-shadow(0 0 10px rgba(0,255,136,0.6))' }}>
+                <defs><linearGradient id="rmlg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#00ff88"/><stop offset="100%" stopColor="#007c35"/></linearGradient></defs>
+                <path d="M60 8 L110 25 L110 70 Q110 115 60 132 Q10 115 10 70 L10 25 Z" fill="url(#rmlg)" stroke="rgba(0,255,136,0.5)" strokeWidth="2"/>
+                <text x="60" y="88" textAnchor="middle" fill="#003320" fontSize="55" fontWeight="900" fontFamily="Arial Black,sans-serif">M</text>
+              </svg>
+              <span className="text-lg font-black"><span style={{ color:'#00ff88' }}>MATCHIFY</span><span style={{ color:'#00d4ff' }}>.PRO</span></span>
             </Link>
           </div>
-
-          {/* Welcome text with gradient */}
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-emerald-500/10 border border-emerald-500/30 rounded-full mb-4">
-              <SparklesIcon className="w-4 h-4 text-emerald-400 animate-pulse" />
-              <span className="text-emerald-300 text-sm font-medium">Join the Champions!</span>
+          <div className="text-center mb-6">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold mb-3" style={{ background:'rgba(0,255,136,0.08)', border:'1px solid rgba(0,255,136,0.2)', color:'#00ff88' }}>
+              <SparklesIcon className="w-3.5 h-3.5" /> Join the Champions!
             </div>
-            <h2 className="text-4xl font-bold text-white mb-2">Create Account</h2>
-            <p className="text-gray-400">Start your badminton journey today</p>
+            <h2 className="text-2xl sm:text-3xl font-black text-white mb-1">Create Account</h2>
+            <p className="text-sm" style={{ color:'rgba(255,255,255,0.4)' }}>Start your badminton journey today</p>
           </div>
 
           {error && (
@@ -218,7 +196,7 @@ const RegisterPage = () => {
                 {roles.map((role) => (
                   <div
                     key={role.id}
-                    className="relative p-4 rounded-xl border-2 border-emerald-500/50 bg-emerald-500/10 shadow-lg shadow-emerald-500/10"
+                    className="relative p-4 rounded-xl border" style={{ background:'rgba(0,255,136,0.06)', borderColor:'rgba(0,255,136,0.25)' }}
                   >
                     <CheckCircleIcon className="absolute top-2 right-2 w-5 h-5 text-emerald-400" />
                     <div className="text-2xl mb-2">{role.icon}</div>
@@ -244,7 +222,7 @@ const RegisterPage = () => {
                     name="name"
                     type="text"
                     required
-                    className="w-full pl-12 pr-4 py-4 bg-slate-800/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                    className="w-full pl-12 pr-4 py-4 rounded-xl text-white text-sm placeholder-white/25 outline-none transition-all focus:ring-1 focus:ring-green-500/50" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1)"
                     placeholder="Your full name"
                     value={formData.name}
                     onChange={handleChange}
@@ -265,7 +243,7 @@ const RegisterPage = () => {
                       name="email"
                       type="email"
                       required
-                      className="w-full pl-12 pr-4 py-4 bg-slate-800/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                      className="w-full pl-12 pr-4 py-4 rounded-xl text-white text-sm placeholder-white/25 outline-none transition-all focus:ring-1 focus:ring-green-500/50" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1)"
                       placeholder="you@example.com"
                       value={formData.email}
                       onChange={handleChange}
@@ -286,7 +264,7 @@ const RegisterPage = () => {
                       type="tel"
                       required
                       maxLength={10}
-                      className="w-full pl-12 pr-4 py-4 bg-slate-800/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                      className="w-full pl-12 pr-4 py-4 rounded-xl text-white text-sm placeholder-white/25 outline-none transition-all focus:ring-1 focus:ring-green-500/50" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1)"
                       placeholder="9876543210"
                       value={formData.phone}
                       onChange={handleChange}
@@ -308,7 +286,7 @@ const RegisterPage = () => {
                   <input
                     name="alternateEmail"
                     type="email"
-                    className="w-full pl-12 pr-4 py-4 bg-slate-800/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                    className="w-full pl-12 pr-4 py-4 rounded-xl text-white text-sm placeholder-white/25 outline-none transition-all focus:ring-1 focus:ring-green-500/50" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1)"
                     placeholder="Optional alternate email"
                     value={formData.alternateEmail}
                     onChange={handleChange}
@@ -329,7 +307,7 @@ const RegisterPage = () => {
                       name="password"
                       type={showPassword ? 'text' : 'password'}
                       required
-                      className="w-full pl-12 pr-12 py-4 bg-slate-800/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                      className="w-full pl-12 pr-12 py-4 rounded-xl text-white text-sm placeholder-white/25 outline-none transition-all focus:ring-1 focus:ring-green-500/50" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1)"
                       placeholder="••••••••"
                       value={formData.password}
                       onChange={handleChange}
@@ -366,7 +344,7 @@ const RegisterPage = () => {
                       name="confirmPassword"
                       type={showConfirmPassword ? 'text' : 'password'}
                       required
-                      className="w-full pl-12 pr-12 py-4 bg-slate-800/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                      className="w-full pl-12 pr-12 py-4 rounded-xl text-white text-sm placeholder-white/25 outline-none transition-all focus:ring-1 focus:ring-green-500/50" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1)"
                       placeholder="••••••••"
                       value={formData.confirmPassword}
                       onChange={handleChange}
@@ -412,13 +390,13 @@ const RegisterPage = () => {
               </span>
             </label>
 
-            {/* Exciting submit button */}
-            <div className="relative group">
-              <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 via-cyan-500 to-emerald-500 rounded-xl blur-lg opacity-70 group-hover:opacity-100 transition-opacity animate-pulse"></div>
+            {/* Submit button */}
+            <div>
               <button
                 type="submit"
                 disabled={loading}
-                className="relative w-full py-4 bg-gradient-to-r from-emerald-500 via-cyan-500 to-emerald-500 bg-size-200 bg-pos-0 hover:bg-pos-100 text-white font-bold rounded-xl shadow-2xl shadow-emerald-500/30 hover:shadow-emerald-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-lg"
+                className="w-full py-3.5 rounded-xl font-bold text-sm transition-all duration-300 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                style={{ background:'linear-gradient(135deg,#00c853,#00ff88)', color:'#003320', boxShadow:'0 0 20px rgba(0,255,136,0.35)' }}
               >
                 {loading ? (
                   <>
@@ -439,7 +417,7 @@ const RegisterPage = () => {
           <div className="mt-8 text-center">
             <p className="text-gray-400">
               Already have an account?{' '}
-              <Link to={redirectUrl ? `/login?redirect=${encodeURIComponent(redirectUrl)}` : '/login'} className="text-transparent bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text font-bold hover:from-purple-300 hover:to-cyan-300 transition-all">
+              <Link to={redirectUrl ? `/login?redirect=${encodeURIComponent(redirectUrl)}` : '/login'} className="font-bold" style={{ color:'#00ff88' }}>
                 Sign in here
               </Link>
             </p>

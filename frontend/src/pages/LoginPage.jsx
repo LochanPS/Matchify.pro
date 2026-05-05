@@ -2,15 +2,15 @@ import { useState } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { EyeIcon, EyeSlashIcon, EnvelopeIcon, LockClosedIcon, ArrowRightIcon, SparklesIcon } from '@heroicons/react/24/outline';
-import { Zap, Trophy, Users, MapPin, Ban, X, AlertTriangle } from 'lucide-react';
+import { Zap, Trophy, Users, MapPin, Ban, AlertTriangle } from 'lucide-react';
 
 const LoginPage = () => {
-  const [formData, setFormData] = useState({ email: '', password: '' });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [formData, setFormData]     = useState({ email: '', password: '' });
+  const [error, setError]           = useState('');
+  const [loading, setLoading]       = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [bannedModal, setBannedModal] = useState(null);
-  
+  const [bannedModal, setBannedModal]   = useState(null);
+
   const { login } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -23,38 +23,18 @@ const LoginPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.email || !formData.password) {
-      setError('All fields are required');
-      return;
-    }
-    
+    if (!formData.email || !formData.password) { setError('All fields are required'); return; }
     setLoading(true);
     setError('');
-    
     try {
       const user = await login(formData.email, formData.password);
-      
-      if (redirectUrl) {
-        navigate(redirectUrl);
-        return;
-      }
-      
-      const userRoles = Array.isArray(user.roles) ? user.roles : [user.role];
-      const primaryRole = userRoles[0];
-      
-      // Redirect to unified dashboard with role parameter, or admin dashboard
-      if (primaryRole === 'ADMIN') {
-        navigate('/admin-dashboard');
-      } else {
-        navigate(`/dashboard?role=${primaryRole}`);
-      }
+      if (redirectUrl) { navigate(redirectUrl); return; }
+      const primary = (Array.isArray(user.roles) ? user.roles : [user.role])[0];
+      if (primary === 'ADMIN') navigate('/admin-dashboard');
+      else navigate(`/dashboard?role=${primary}`);
     } catch (err) {
-      // Check if user is banned
       if (err.response?.status === 403 && err.response?.data?.isSuspended) {
-        setBannedModal({
-          reason: err.response.data.suspensionReason || 'Violation of terms of service',
-          message: err.response.data.message
-        });
+        setBannedModal({ reason: err.response.data.suspensionReason || 'Violation of terms of service', message: err.response.data.message });
       } else {
         setError(err.response?.data?.error || 'Login failed. Please try again.');
       }
@@ -63,246 +43,201 @@ const LoginPage = () => {
     }
   };
 
+  const inputCls = "w-full pl-11 pr-4 py-3.5 rounded-xl text-white text-sm placeholder-white/25 outline-none transition-all focus:ring-1";
+  const inputStyle = { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' };
+  const inputFocusStyle = { '--tw-ring-color': '#00ff88' };
+
   return (
-    <div className="min-h-screen flex bg-slate-900">
-      {/* Left Side - Branding with exciting effects */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
-        {/* Animated gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-purple-900/50 to-slate-900"></div>
-        
-        {/* Animated blobs */}
-        <div className="absolute inset-0">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-screen filter blur-3xl opacity-30 animate-pulse"></div>
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-500 rounded-full mix-blend-screen filter blur-3xl opacity-30 animate-pulse animation-delay-2000"></div>
-          <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-pink-500 rounded-full mix-blend-screen filter blur-3xl opacity-20 animate-pulse animation-delay-4000"></div>
-        </div>
+    <div className="min-h-screen flex" style={{ background: '#07071a' }}>
 
-        {/* Grid pattern overlay */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
-        
-        <div className="relative z-10 flex flex-col justify-center items-center w-full p-12">
-          {/* Logo with glow effect */}
-          <div className="relative mb-8">
-            <div className="absolute inset-0 bg-gradient-to-br from-emerald-400 to-cyan-500 rounded-3xl blur-2xl opacity-50 animate-pulse"></div>
-            <div className="relative w-28 h-28 bg-gradient-to-br from-emerald-400 via-green-500 to-teal-600 rounded-3xl flex items-center justify-center shadow-2xl shadow-emerald-500/50 transform hover:scale-105 transition-transform">
-              <span className="text-6xl">🏸</span>
-            </div>
+      {/* ── LEFT PANEL (desktop only) ── */}
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden flex-col justify-center items-center p-12"
+        style={{ background: 'linear-gradient(135deg, #07071a 0%, #0d1a2a 50%, #07071a 100%)' }}>
+
+        {/* grid bg */}
+        <div className="absolute inset-0"
+          style={{ backgroundImage: 'linear-gradient(rgba(0,255,136,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,136,0.04) 1px,transparent 1px)', backgroundSize: '60px 60px' }} />
+
+        {/* ambient glows */}
+        <div className="absolute top-1/4 left-1/4 w-80 h-80 rounded-full blur-3xl" style={{ background: 'radial-gradient(circle, rgba(0,255,136,0.1) 0%, transparent 70%)' }} />
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full blur-3xl" style={{ background: 'radial-gradient(circle, rgba(0,212,255,0.08) 0%, transparent 70%)' }} />
+
+        <div className="relative z-10 flex flex-col items-center text-center">
+          {/* shield logo */}
+          <div className="mb-6" style={{ filter: 'drop-shadow(0 0 30px rgba(0,255,136,0.6))' }}>
+            <svg viewBox="0 0 120 140" className="h-24 w-auto">
+              <defs>
+                <linearGradient id="ls1" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#00ff88" />
+                  <stop offset="100%" stopColor="#007c35" />
+                </linearGradient>
+              </defs>
+              <path d="M60 8 L110 25 L110 70 Q110 115 60 132 Q10 115 10 70 L10 25 Z" fill="url(#ls1)" stroke="rgba(0,255,136,0.5)" strokeWidth="2.5"/>
+              <text x="60" y="88" textAnchor="middle" fill="#003320" fontSize="55" fontWeight="900" fontFamily="Arial Black,sans-serif">M</text>
+            </svg>
           </div>
-          
-          {/* Brand name with gradient */}
-          <h1 className="text-6xl font-black mb-4">
-            <span className="bg-gradient-to-r from-white via-purple-200 to-white bg-clip-text text-transparent">MATCHIFY</span>
-            <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">.pro</span>
+
+          <h1 className="text-5xl font-black mb-3">
+            <span style={{ color: '#00ff88', textShadow: '0 0 30px rgba(0,255,136,0.5)' }}>MATCHIFY</span>
+            <span style={{ color: '#00d4ff', textShadow: '0 0 30px rgba(0,212,255,0.5)' }}>.PRO</span>
           </h1>
-          
-          <p className="text-xl text-white/60 text-center max-w-md mb-4">
-            India's Premier Badminton Tournament Platform
-          </p>
+          <p className="text-base mb-8" style={{ color: 'rgba(255,255,255,0.5)' }}>India's Premier Badminton Platform</p>
 
-          {/* Exciting tagline */}
-          <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-full mb-12">
-            <SparklesIcon className="w-5 h-5 text-purple-400 animate-pulse" />
-            <span className="text-purple-300 font-medium">Where Champions Are Made</span>
-            <SparklesIcon className="w-5 h-5 text-pink-400 animate-pulse" />
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-10 text-sm font-medium"
+            style={{ background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.2)', color: '#00ff88' }}>
+            <SparklesIcon className="w-4 h-4" />
+            Where Champions Are Made
           </div>
-          
-          {/* Stats with glowing cards */}
-          <div className="grid grid-cols-3 gap-6 w-full max-w-md">
-            <div className="relative group">
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl blur-lg opacity-0 group-hover:opacity-50 transition-opacity"></div>
-              <div className="relative bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-4 text-center hover:border-purple-500/50 transition-all">
-                <Users className="w-6 h-6 text-purple-400 mx-auto mb-2" />
-                <p className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">1000+</p>
-                <p className="text-white/50 text-sm">Players</p>
+
+          {/* stats */}
+          <div className="grid grid-cols-3 gap-4 w-full max-w-sm">
+            {[
+              { icon: Users,  val: '1000+', label: 'Players',      c: '#00ff88' },
+              { icon: Trophy, val: '50+',   label: 'Tournaments',  c: '#f59e0b' },
+              { icon: MapPin, val: '25+',   label: 'Cities',       c: '#00d4ff' },
+            ].map(({ icon: Icon, val, label, c }, i) => (
+              <div key={i} className="rounded-2xl p-4 text-center border"
+                style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.08)' }}>
+                <Icon className="w-5 h-5 mx-auto mb-2" style={{ color: c }} />
+                <p className="text-2xl font-black" style={{ color: c }}>{val}</p>
+                <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>{label}</p>
               </div>
-            </div>
-            <div className="relative group">
-              <div className="absolute inset-0 bg-gradient-to-br from-amber-500 to-orange-500 rounded-2xl blur-lg opacity-0 group-hover:opacity-50 transition-opacity"></div>
-              <div className="relative bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-4 text-center hover:border-amber-500/50 transition-all">
-                <Trophy className="w-6 h-6 text-amber-400 mx-auto mb-2" />
-                <p className="text-3xl font-bold bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent">50+</p>
-                <p className="text-white/50 text-sm">Tournaments</p>
-              </div>
-            </div>
-            <div className="relative group">
-              <div className="absolute inset-0 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-2xl blur-lg opacity-0 group-hover:opacity-50 transition-opacity"></div>
-              <div className="relative bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-4 text-center hover:border-cyan-500/50 transition-all">
-                <MapPin className="w-6 h-6 text-cyan-400 mx-auto mb-2" />
-                <p className="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">25+</p>
-                <p className="text-white/50 text-sm">Cities</p>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* Right Side - Login Form with dark theme */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 relative overflow-hidden">
-        {/* Subtle background effects */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl"></div>
-        
+      {/* ── RIGHT PANEL — form ── */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-8 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-72 h-72 rounded-full blur-3xl" style={{ background: 'radial-gradient(circle, rgba(0,255,136,0.06) 0%, transparent 70%)' }} />
+        <div className="absolute bottom-0 left-0 w-72 h-72 rounded-full blur-3xl" style={{ background: 'radial-gradient(circle, rgba(0,212,255,0.05) 0%, transparent 70%)' }} />
+
         <div className="w-full max-w-md relative z-10">
-          {/* Mobile Logo */}
+
+          {/* mobile logo */}
           <div className="lg:hidden text-center mb-8">
-            <Link to="/" className="inline-flex items-center gap-3">
-              <div className="w-14 h-14 bg-gradient-to-br from-emerald-400 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/30">
-                <span className="text-3xl">🏸</span>
-              </div>
-              <span className="text-2xl font-bold text-white">MATCHIFY<span className="text-emerald-400">.pro</span></span>
+            <Link to="/" className="inline-flex items-center gap-2">
+              <svg viewBox="0 0 120 140" className="h-10 w-auto" style={{ filter: 'drop-shadow(0 0 10px rgba(0,255,136,0.6))' }}>
+                <defs><linearGradient id="mlg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#00ff88"/><stop offset="100%" stopColor="#007c35"/></linearGradient></defs>
+                <path d="M60 8 L110 25 L110 70 Q110 115 60 132 Q10 115 10 70 L10 25 Z" fill="url(#mlg)" stroke="rgba(0,255,136,0.5)" strokeWidth="2"/>
+                <text x="60" y="88" textAnchor="middle" fill="#003320" fontSize="55" fontWeight="900" fontFamily="Arial Black,sans-serif">M</text>
+              </svg>
+              <span className="text-xl font-black">
+                <span style={{ color: '#00ff88' }}>MATCHIFY</span>
+                <span style={{ color: '#00d4ff' }}>.PRO</span>
+              </span>
             </Link>
           </div>
 
-          {/* Welcome text with gradient */}
+          {/* heading */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-purple-500/10 border border-purple-500/30 rounded-full mb-4">
-              <Zap className="w-4 h-4 text-purple-400" />
-              <span className="text-purple-300 text-sm font-medium">Ready to Play?</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold mb-4"
+              style={{ background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.2)', color: '#00ff88' }}>
+              <Zap className="w-3.5 h-3.5" />
+              Ready to Play?
             </div>
-            <h2 className="text-4xl font-bold text-white mb-2">Welcome Back!</h2>
-            <p className="text-gray-400">Sign in to continue your journey</p>
+            <h2 className="text-2xl sm:text-3xl font-black text-white mb-1">Welcome Back</h2>
+            <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>Sign in to continue your journey</p>
           </div>
 
           {error && (
-            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm flex items-center gap-2">
-              <span className="text-lg">⚠️</span>
-              {error}
+            <div className="mb-5 p-3.5 rounded-xl flex items-center gap-2 text-sm"
+              style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.3)', color: '#f87171' }}>
+              <span>⚠️</span> {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* email */}
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
-              <div className="relative group">
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-cyan-500/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
-                <div className="relative">
-                  <EnvelopeIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 group-focus-within:text-purple-400 transition-colors z-10" />
-                  <input
-                    name="email"
-                    type="email"
-                    required
-                    autoComplete="email"
-                    className="w-full pl-12 pr-4 py-4 bg-slate-800 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all [&:-webkit-autofill]:bg-slate-800 [&:-webkit-autofill]:text-white [&:-webkit-autofill]:[-webkit-text-fill-color:white] [&:-webkit-autofill]:[-webkit-box-shadow:0_0_0_1000px_rgb(30,41,59)_inset] [&:-webkit-autofill]:border-white/10"
-                    placeholder="you@example.com"
-                    value={formData.email}
-                    onChange={handleChange}
-                  />
-                </div>
+              <label className="block text-sm font-medium mb-1.5" style={{ color: 'rgba(255,255,255,0.7)' }}>Email</label>
+              <div className="relative">
+                <EnvelopeIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 w-[18px] h-[18px]" style={{ color: 'rgba(255,255,255,0.3)' }} />
+                <input name="email" type="email" required autoComplete="email"
+                  className={inputCls} style={inputStyle}
+                  placeholder="you@example.com"
+                  value={formData.email} onChange={handleChange} />
               </div>
             </div>
 
+            {/* password */}
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Password</label>
-              <div className="relative group">
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-cyan-500/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
-                <div className="relative">
-                  <LockClosedIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 group-focus-within:text-purple-400 transition-colors z-10" />
-                  <input
-                    name="password"
-                    type={showPassword ? 'text' : 'password'}
-                    required
-                    autoComplete="current-password"
-                    className="w-full pl-12 pr-12 py-4 bg-slate-800 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all [&:-webkit-autofill]:bg-slate-800 [&:-webkit-autofill]:text-white [&:-webkit-autofill]:[-webkit-text-fill-color:white] [&:-webkit-autofill]:[-webkit-box-shadow:0_0_0_1000px_rgb(30,41,59)_inset] [&:-webkit-autofill]:border-white/10"
-                    placeholder="••••••••"
-                    value={formData.password}
-                    onChange={handleChange}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-purple-400 transition-colors z-10"
-                  >
-                    {showPassword ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
-                  </button>
-                </div>
+              <label className="block text-sm font-medium mb-1.5" style={{ color: 'rgba(255,255,255,0.7)' }}>Password</label>
+              <div className="relative">
+                <LockClosedIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px]" style={{ color: 'rgba(255,255,255,0.3)' }} />
+                <input name="password" type={showPassword ? 'text' : 'password'} required autoComplete="current-password"
+                  className={`${inputCls} pr-11`} style={inputStyle}
+                  placeholder="••••••••"
+                  value={formData.password} onChange={handleChange} />
+                <button type="button" onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                  {showPassword ? <EyeSlashIcon className="w-[18px] h-[18px]" /> : <EyeIcon className="w-[18px] h-[18px]" />}
+                </button>
               </div>
             </div>
 
+            {/* remember / forgot */}
             <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2 cursor-pointer group">
-                <input type="checkbox" className="w-4 h-4 rounded border-white/20 bg-slate-800 text-purple-500 focus:ring-purple-500 focus:ring-offset-0" />
-                <span className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors">Remember me</span>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" className="w-4 h-4 rounded accent-green-500" style={{ background: 'rgba(255,255,255,0.05)' }} />
+                <span className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Remember me</span>
               </label>
-              <a href="#" className="text-sm text-purple-400 hover:text-purple-300 font-medium transition-colors">Forgot password?</a>
+              <a href="#" className="text-xs font-medium" style={{ color: '#00ff88' }}>Forgot password?</a>
             </div>
 
-            {/* Exciting submit button */}
-            <div className="relative group">
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-pink-500 to-cyan-500 rounded-xl blur-lg opacity-70 group-hover:opacity-100 transition-opacity animate-pulse"></div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="relative w-full py-4 bg-gradient-to-r from-purple-600 via-pink-500 to-purple-600 bg-size-200 bg-pos-0 hover:bg-pos-100 text-white font-bold rounded-xl shadow-2xl shadow-purple-500/30 hover:shadow-purple-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-lg"
-              >
-                {loading ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    Signing in...
-                  </>
-                ) : (
-                  <>
-                    <Zap className="w-5 h-5" />
-                    Let's Go!
-                    <ArrowRightIcon className="w-5 h-5" />
-                  </>
-                )}
-              </button>
-            </div>
+            {/* submit */}
+            <button type="submit" disabled={loading}
+              className="w-full py-3.5 rounded-xl font-bold text-sm transition-all duration-300 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#003320', boxShadow: '0 0 20px rgba(0,255,136,0.35)' }}>
+              {loading ? (
+                <><div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" /> Signing in...</>
+              ) : (
+                <><Zap className="w-4 h-4" /> Let's Go! <ArrowRightIcon className="w-4 h-4" /></>
+              )}
+            </button>
           </form>
 
-          <div className="mt-8 text-center">
-            <p className="text-gray-400">
-              Don't have an account?{' '}
-              <Link to={redirectUrl ? `/register?redirect=${encodeURIComponent(redirectUrl)}` : '/register'} className="text-transparent bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text font-bold hover:from-purple-300 hover:to-cyan-300 transition-all">
-                Create one now
-              </Link>
-            </p>
-          </div>
+          <p className="mt-6 text-center text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>
+            Don't have an account?{' '}
+            <Link to={redirectUrl ? `/register?redirect=${encodeURIComponent(redirectUrl)}` : '/register'}
+              className="font-bold" style={{ color: '#00ff88' }}>
+              Create one now
+            </Link>
+          </p>
         </div>
       </div>
 
-      {/* Banned User Modal */}
+      {/* ── BANNED MODAL ── */}
       {bannedModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="relative w-full max-w-md">
-            <div className="absolute -inset-2 bg-gradient-to-r from-red-500 via-rose-500 to-red-500 rounded-3xl blur-xl opacity-60"></div>
-            <div className="relative bg-slate-800 rounded-2xl border border-red-500/30 overflow-hidden">
-              <div className="p-6 border-b border-white/10 bg-red-500/10">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 bg-red-500/20 rounded-full flex items-center justify-center">
-                    <Ban className="w-7 h-7 text-red-400" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-red-400">Account Suspended</h3>
-                    <p className="text-sm text-gray-400">Your Matchify.pro account has been suspended</p>
-                  </div>
-                </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)' }}>
+          <div className="w-full max-w-md rounded-2xl overflow-hidden border" style={{ background: '#0d0d24', borderColor: 'rgba(239,68,68,0.3)' }}>
+            <div className="p-5 border-b flex items-center gap-4" style={{ borderColor: 'rgba(255,255,255,0.07)', background: 'rgba(239,68,68,0.08)' }}>
+              <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: 'rgba(239,68,68,0.15)' }}>
+                <Ban className="w-6 h-6 text-red-400" />
               </div>
-              <div className="p-6 space-y-4">
-                <div className="p-4 bg-slate-700/50 rounded-xl border border-white/10">
-                  <p className="text-sm text-gray-400 mb-2">Reason for suspension:</p>
-                  <p className="text-white font-medium">{bannedModal.reason}</p>
-                </div>
-                <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl">
-                  <div className="flex items-start gap-3">
-                    <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-amber-400 font-medium text-sm">What can you do?</p>
-                      <p className="text-sm text-gray-400 mt-1">
-                        If you believe this suspension is a mistake, please contact our support team at <span className="text-purple-400">support@matchify.pro</span>
-                      </p>
-                    </div>
-                  </div>
-                </div>
+              <div>
+                <h3 className="font-bold text-red-400">Account Suspended</h3>
+                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Your account has been suspended</p>
               </div>
-              <div className="p-6 bg-slate-900/50 border-t border-white/10">
-                <button
-                  onClick={() => setBannedModal(null)}
-                  className="w-full px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl transition-colors font-medium"
-                >
-                  Close
-                </button>
+            </div>
+            <div className="p-5 space-y-4">
+              <div className="p-4 rounded-xl" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                <p className="text-xs mb-1" style={{ color: 'rgba(255,255,255,0.4)' }}>Reason:</p>
+                <p className="text-sm font-medium text-white">{bannedModal.reason}</p>
               </div>
+              <div className="p-4 rounded-xl flex items-start gap-3" style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.25)' }}>
+                <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
+                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                  Contact <span style={{ color: '#00ff88' }}>support@matchify.pro</span> if this is a mistake.
+                </p>
+              </div>
+            </div>
+            <div className="p-5 border-t" style={{ borderColor: 'rgba(255,255,255,0.07)' }}>
+              <button onClick={() => setBannedModal(null)}
+                className="w-full py-3 rounded-xl text-sm font-medium transition-all"
+                style={{ background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.7)' }}>
+                Close
+              </button>
             </div>
           </div>
         </div>

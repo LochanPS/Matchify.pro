@@ -81,90 +81,73 @@ export default function Leaderboard() {
     if (rank === 1) return 'bg-gradient-to-r from-yellow-500 to-amber-600 text-white shadow-lg shadow-yellow-500/50';
     if (rank === 2) return 'bg-gradient-to-r from-gray-400 to-gray-500 text-white shadow-lg shadow-gray-400/50';
     if (rank === 3) return 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/50';
-    if (rank <= 10) return 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md';
+    if (rank <= 10) return 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-md';
     return 'bg-slate-700 text-gray-300 border border-slate-600';
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#07071a' }}>
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="text-gray-400 mt-4 font-medium">Loading leaderboard...</p>
+          <div className="w-16 h-16 border-4 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: 'rgba(0,255,136,0.3)', borderTopColor: 'transparent' }}></div>
+          <p className="mt-4 font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>Loading leaderboard...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    <div className="min-h-screen" style={{ background: '#07071a' }}>
       {/* Animated Background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-yellow-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-2000"></div>
-        <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-4000"></div>
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full blur-3xl opacity-8" style={{ background: '#00ff88' }}></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full blur-3xl opacity-6" style={{ background: '#00d4ff' }}></div>
       </div>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-10">
           <div className="inline-flex items-center gap-3 mb-4">
-            <Trophy className="w-12 h-12 text-yellow-400" />
-            <h1 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-purple-400 to-pink-400">
+            <Trophy className="w-8 h-8 sm:w-12 sm:h-12 text-yellow-400" />
+            <h1 className="font-black" style={{ fontSize: 'clamp(1.8rem,8vw,3.5rem)', background: 'linear-gradient(135deg,#00ff88,#00d4ff)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
               Leaderboard
             </h1>
-            <Trophy className="w-12 h-12 text-yellow-400" />
+            <Trophy className="w-8 h-8 sm:w-12 sm:h-12 text-yellow-400" />
           </div>
-          <p className="text-gray-400 text-lg">Top players ranked by tournament points</p>
-          
-          {/* Geographical Filter Tabs - All Always Enabled */}
-          <div className="mt-8 flex justify-center gap-4">
-            <button
-              onClick={() => setScope('city')}
-              className={`px-6 py-3 rounded-xl font-bold transition-all ${
-                scope === 'city'
-                  ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/30'
-                  : 'bg-slate-700/50 text-gray-300 hover:bg-slate-700'
-              }`}
-            >
-              🏙️ City {userCity && `(${userCity})`}
-            </button>
-            <button
-              onClick={() => setScope('state')}
-              className={`px-6 py-3 rounded-xl font-bold transition-all ${
-                scope === 'state'
-                  ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/30'
-                  : 'bg-slate-700/50 text-gray-300 hover:bg-slate-700'
-              }`}
-            >
-              🗺️ State {userState && `(${userState})`}
-            </button>
-            <button
-              onClick={() => setScope('country')}
-              className={`px-6 py-3 rounded-xl font-bold transition-all ${
-                scope === 'country'
-                  ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/30'
-                  : 'bg-slate-700/50 text-gray-300 hover:bg-slate-700'
-              }`}
-            >
-              🇮🇳 Country (India)
-            </button>
+          <p className="text-sm sm:text-base" style={{ color: 'rgba(255,255,255,0.5)' }}>Top players ranked by tournament points</p>
+
+          {/* Geographical Filter Tabs */}
+          <div className="mt-6 flex flex-wrap justify-center gap-2">
+            {[
+              { key: 'city', label: `🏙️ City${userCity ? ` (${userCity})` : ''}` },
+              { key: 'state', label: `🗺️ State${userState ? ` (${userState})` : ''}` },
+              { key: 'country', label: '🇮🇳 Country' },
+            ].map(({ key, label }) => (
+              <button
+                key={key}
+                onClick={() => setScope(key)}
+                className="px-4 sm:px-6 py-2.5 rounded-xl font-bold transition-all text-sm sm:text-base"
+                style={scope === key
+                  ? { background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#003320', boxShadow: '0 0 16px rgba(0,255,136,0.3)' }
+                  : { background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.08)' }
+                }
+              >{label}</button>
+            ))}
           </div>
-          
-          {/* Current Scope Display */}
-          <div className="mt-4">
-            <p className="text-gray-400 text-sm">
-              Showing rankings for: <span className="text-purple-400 font-bold">{getScopeLabel()}</span>
+
+          <div className="mt-3">
+            <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>
+              Showing rankings for: <span className="font-bold" style={{ color: '#00ff88' }}>{getScopeLabel()}</span>
             </p>
           </div>
         </div>
 
         {/* My Rank Card */}
         {myRanks && (
-          <div className="mb-8 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-2xl p-6 backdrop-blur-sm">
-            <div className="flex items-center justify-between">
+          <div className="mb-8 rounded-2xl p-4 sm:p-6 border" style={{ background: 'rgba(0,255,136,0.05)', borderColor: 'rgba(0,255,136,0.2)' }}>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)' }}>
                   {myRanks.profilePhoto ? (
                     <img src={myRanks.profilePhoto} alt={myRanks.name} className="w-full h-full rounded-full object-cover" />
                   ) : (
@@ -172,7 +155,7 @@ export default function Leaderboard() {
                   )}
                 </div>
                 <div>
-                  <p className="text-sm text-purple-300 font-semibold">Your Ranks</p>
+                  <p className="text-sm font-semibold" style={{ color: '#00ff88' }}>Your Ranks</p>
                   <h3 className="text-2xl font-bold text-white">{myRanks.name}</h3>
                   <p className="text-gray-400 text-sm">
                     {myRanks.tournamentsPlayed} tournaments • {myRanks.matchesWon}W-{myRanks.matchesLost}L
@@ -216,7 +199,7 @@ export default function Leaderboard() {
 
         {/* Top 3 Podium */}
         {leaderboard.length >= 3 && (
-          <div className="mb-12 grid grid-cols-3 gap-4 max-w-4xl mx-auto">
+          <div className="mb-8 sm:mb-12 grid grid-cols-3 gap-2 sm:gap-4 max-w-4xl mx-auto">
             {/* 2nd Place */}
             <div className="mt-8">
               <div className="relative bg-gradient-to-br from-gray-300/20 to-gray-400/20 border border-gray-300/30 rounded-2xl p-6 text-center backdrop-blur-sm shadow-2xl shadow-gray-300/20">
@@ -293,85 +276,70 @@ export default function Leaderboard() {
         )}
 
         {/* Full Leaderboard Table */}
-        <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden">
+        <div className="rounded-2xl overflow-hidden border" style={{ background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.08)' }}>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="bg-slate-700/50 border-b border-white/10">
-                  <th className="px-6 py-4 text-left text-sm font-bold text-gray-300">Rank</th>
-                  <th className="px-6 py-4 text-left text-sm font-bold text-gray-300">Player</th>
-                  <th className="px-6 py-4 text-center text-sm font-bold text-gray-300">Points</th>
-                  <th className="px-6 py-4 text-center text-sm font-bold text-gray-300">Tournaments</th>
-                  <th className="px-6 py-4 text-center text-sm font-bold text-gray-300">Matches</th>
-                  <th className="px-6 py-4 text-center text-sm font-bold text-gray-300">Win Rate</th>
+                <tr className="border-b" style={{ background: 'rgba(0,255,136,0.05)', borderColor: 'rgba(255,255,255,0.08)' }}>
+                  <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.5)' }}>Rank</th>
+                  <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.5)' }}>Player</th>
+                  <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.5)' }}>Pts</th>
+                  <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider hidden sm:table-cell" style={{ color: 'rgba(255,255,255,0.5)' }}>Played</th>
+                  <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider hidden sm:table-cell" style={{ color: 'rgba(255,255,255,0.5)' }}>W-L</th>
+                  <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.5)' }}>Win%</th>
                 </tr>
               </thead>
               <tbody>
-                {leaderboard.map((player, index) => (
+                {leaderboard.map((player) => (
                   <tr
                     key={player.id}
-                    className={`border-b border-white/5 hover:bg-slate-700/30 transition-colors cursor-pointer ${
-                      myRanks?.id === player.id ? 'bg-purple-500/10' : ''
-                    }`}
+                    className="border-b transition-colors cursor-pointer"
+                    style={{
+                      borderColor: 'rgba(255,255,255,0.04)',
+                      background: myRanks?.id === player.id ? 'rgba(0,255,136,0.06)' : 'transparent',
+                    }}
                     onClick={() => navigate(`/profile/${player.id}`)}
                   >
-                    {/* Rank */}
-                    <td className="px-6 py-4">
-                      <div className={`inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-bold min-w-[80px] ${getRankBadge(player.rank)}`}>
+                    <td className="px-4 py-3">
+                      <div className={`inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg font-bold text-sm ${getRankBadge(player.rank)}`}>
                         {getRankIcon(player.rank)}
                       </div>
                     </td>
 
-                    {/* Player */}
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center flex-shrink-0">
+                        <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)' }}>
                           {player.profilePhoto ? (
                             <img src={player.profilePhoto} alt={player.name} className="w-full h-full rounded-full object-cover" />
                           ) : (
-                            <span className="text-lg font-bold text-white">{player.name?.charAt(0)}</span>
+                            <span className="text-sm font-bold" style={{ color: '#003320' }}>{player.name?.charAt(0)}</span>
                           )}
                         </div>
                         <div>
-                          <p className="font-bold text-white">{player.name}</p>
-                          {player.city && player.state && (
-                            <p className="text-sm text-gray-400">{player.city}, {player.state}</p>
-                          )}
+                          <p className="font-bold text-white text-sm">{player.name}</p>
+                          {player.city && <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>{player.city}</p>}
                         </div>
                       </div>
                     </td>
 
-                    {/* Points */}
-                    <td className="px-6 py-4 text-center">
-                      <div className="flex items-center justify-center gap-2">
-                        <Star className="w-5 h-5 text-yellow-400" />
-                        <span className="text-2xl font-black text-yellow-400">{player.totalPoints}</span>
-                      </div>
+                    <td className="px-4 py-3 text-center">
+                      <span className="text-lg font-black text-yellow-400">{player.totalPoints}</span>
                     </td>
 
-                    {/* Tournaments */}
-                    <td className="px-6 py-4 text-center">
-                      <div className="flex items-center justify-center gap-2">
-                        <Trophy className="w-4 h-4 text-purple-400" />
-                        <span className="text-white font-semibold">{player.tournamentsPlayed}</span>
-                      </div>
+                    <td className="px-4 py-3 text-center hidden sm:table-cell">
+                      <span className="text-white font-semibold text-sm">{player.tournamentsPlayed}</span>
                     </td>
 
-                    {/* Matches */}
-                    <td className="px-6 py-4 text-center">
-                      <div className="text-white font-semibold">
-                        <span className="text-green-400">{player.matchesWon}W</span>
-                        <span className="text-gray-500 mx-1">-</span>
-                        <span className="text-red-400">{player.matchesLost}L</span>
-                      </div>
+                    <td className="px-4 py-3 text-center hidden sm:table-cell">
+                      <span className="text-sm font-semibold">
+                        <span style={{ color: '#00ff88' }}>{player.matchesWon}W</span>
+                        <span style={{ color: 'rgba(255,255,255,0.3)' }}> - </span>
+                        <span style={{ color: '#ff5050' }}>{player.matchesLost}L</span>
+                      </span>
                     </td>
 
-                    {/* Win Rate */}
-                    <td className="px-6 py-4 text-center">
-                      <div className="inline-flex items-center gap-2 px-3 py-1 bg-slate-700/50 rounded-lg">
-                        <TrendingUp className="w-4 h-4 text-emerald-400" />
-                        <span className="text-white font-bold">{player.winRate}%</span>
-                      </div>
+                    <td className="px-4 py-3 text-center">
+                      <span className="text-sm font-bold" style={{ color: '#00d4ff' }}>{player.winRate}%</span>
                     </td>
                   </tr>
                 ))}
@@ -385,7 +353,8 @@ export default function Leaderboard() {
           <div className="text-center mt-8">
             <button
               onClick={() => setLimit(limit + 50)}
-              className="px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-bold hover:shadow-lg hover:shadow-purple-500/30 transition-all"
+              className="px-8 py-3 rounded-xl font-bold transition-all"
+              style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#003320', boxShadow: '0 0 20px rgba(0,255,136,0.3)' }}
             >
               Load More Players
             </button>
@@ -393,37 +362,25 @@ export default function Leaderboard() {
         )}
 
         {/* Points Info */}
-        <div className="mt-12 bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
-          <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-            <Award className="w-6 h-6 text-yellow-400" />
+        <div className="mt-10 rounded-2xl p-5 sm:p-6 border" style={{ background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.08)' }}>
+          <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+            <Award className="w-5 h-5 text-yellow-400" />
             How Points Are Earned
           </h3>
-          <div className="grid md:grid-cols-5 gap-4">
-            <div className="text-center p-4 bg-slate-700/30 rounded-xl">
-              <Crown className="w-8 h-8 text-yellow-400 mx-auto mb-2" />
-              <p className="text-2xl font-bold text-yellow-400">10</p>
-              <p className="text-sm text-gray-400">Winner</p>
-            </div>
-            <div className="text-center p-4 bg-slate-700/30 rounded-xl">
-              <Medal className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-              <p className="text-2xl font-bold text-gray-300">8</p>
-              <p className="text-sm text-gray-400">Runner-up</p>
-            </div>
-            <div className="text-center p-4 bg-slate-700/30 rounded-xl">
-              <Medal className="w-8 h-8 text-amber-600 mx-auto mb-2" />
-              <p className="text-2xl font-bold text-amber-600">6</p>
-              <p className="text-sm text-gray-400">Semi-finalist</p>
-            </div>
-            <div className="text-center p-4 bg-slate-700/30 rounded-xl">
-              <Award className="w-8 h-8 text-purple-400 mx-auto mb-2" />
-              <p className="text-2xl font-bold text-purple-400">4</p>
-              <p className="text-sm text-gray-400">Quarter-finalist</p>
-            </div>
-            <div className="text-center p-4 bg-slate-700/30 rounded-xl">
-              <Target className="w-8 h-8 text-blue-400 mx-auto mb-2" />
-              <p className="text-2xl font-bold text-blue-400">2</p>
-              <p className="text-sm text-gray-400">Participation</p>
-            </div>
+          <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
+            {[
+              { icon: <Crown className="w-7 h-7 text-yellow-400 mx-auto mb-1" />, pts: 10, label: 'Winner', color: '#fbbf24' },
+              { icon: <Medal className="w-7 h-7 text-gray-300 mx-auto mb-1" />, pts: 8, label: 'Runner-up', color: '#d1d5db' },
+              { icon: <Medal className="w-7 h-7 text-amber-600 mx-auto mb-1" />, pts: 6, label: 'Semi', color: '#d97706' },
+              { icon: <Award className="w-7 h-7 mx-auto mb-1" style={{ color: '#00d4ff' }} />, pts: 4, label: 'Quarter', color: '#00d4ff' },
+              { icon: <Target className="w-7 h-7 mx-auto mb-1" style={{ color: '#00ff88' }} />, pts: 2, label: 'Participant', color: '#00ff88' },
+            ].map(({ icon, pts, label, color }) => (
+              <div key={label} className="text-center p-3 rounded-xl" style={{ background: 'rgba(255,255,255,0.04)' }}>
+                {icon}
+                <p className="text-xl font-bold" style={{ color }}>{pts}</p>
+                <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.5)' }}>{label}</p>
+              </div>
+            ))}
           </div>
         </div>
       </div>

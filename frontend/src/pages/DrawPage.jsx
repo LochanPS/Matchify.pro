@@ -2279,7 +2279,14 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
 
   // Open conduct page for match
   const handleConductMatch = (matchId) => {
-    navigate(`/match/${matchId}/conduct`);
+    console.log('🎯 Conduct button clicked for matchId:', matchId);
+    console.log('🎯 Navigating to:', `/match/${matchId}/conduct`);
+    try {
+      navigate(`/match/${matchId}/conduct`);
+      console.log('✅ Navigation successful');
+    } catch (error) {
+      console.error('❌ Navigation error:', error);
+    }
   };
 
   return (

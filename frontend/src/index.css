@@ -118,7 +118,8 @@
   }
   
   body {
-    @apply bg-gray-50 text-gray-900;
+    background: #07071a;
+    color: #f1f5f9;
     line-height: 1.5;
     letter-spacing: -0.011em;
   }

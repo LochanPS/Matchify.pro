@@ -1,622 +1,477 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { 
-  TrophyIcon, 
-  UserGroupIcon, 
-  ChartBarIcon, 
-  MapPinIcon,
-  CalendarIcon,
+import {
+  TrophyIcon,
+  UserGroupIcon,
+  ChartBarIcon,
   SparklesIcon,
   ArrowRightIcon,
   PlayIcon,
-  CheckCircleIcon,
   BoltIcon,
   ShieldCheckIcon
 } from '@heroicons/react/24/outline';
 import { StarIcon } from '@heroicons/react/24/solid';
 
-function HomePage() {
-  const { user } = useAuth();
-
-  // Add custom animations to the page
+// Inject keyframes once
+const injectStyles = () => {
+  if (document.head.querySelector('style[data-homepage]')) return;
   const style = document.createElement('style');
+  style.setAttribute('data-homepage', 'true');
   style.textContent = `
-    @keyframes fade-in-up {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
-    
-    .animate-fade-in-up {
-      animation: fade-in-up 0.6s ease-out forwards;
-      opacity: 0;
+    @keyframes floatY {
+      0%, 100% { transform: translateY(0px); }
+      50%       { transform: translateY(-12px); }
     }
-    
-    @keyframes blob {
-      0%, 100% { transform: translate(0, 0) scale(1); }
-      25% { transform: translate(20px, -20px) scale(1.1); }
-      50% { transform: translate(-20px, 20px) scale(0.9); }
-      75% { transform: translate(20px, 20px) scale(1.05); }
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 0.4; }
+      50%       { opacity: 0.8; }
     }
-    
-    .animate-blob {
-      animation: blob 7s infinite;
+    @keyframes scanline {
+      0%   { transform: translateY(-100%); }
+      100% { transform: translateY(100vh); }
     }
-    
-    @keyframes float {
-      0%, 100% { transform: translateY(0px) rotate(0deg); }
-      50% { transform: translateY(-20px) rotate(5deg); }
+    .anim-fade-up  { animation: fadeUp 0.7s ease-out forwards; opacity: 0; }
+    .anim-float    { animation: floatY 5s ease-in-out infinite; }
+    .anim-glow     { animation: pulseGlow 3s ease-in-out infinite; }
+    .delay-100  { animation-delay: 0.1s; }
+    .delay-200  { animation-delay: 0.2s; }
+    .delay-300  { animation-delay: 0.3s; }
+    .delay-400  { animation-delay: 0.4s; }
+    .delay-500  { animation-delay: 0.5s; }
+    .neon-text-green {
+      text-shadow: 0 0 20px rgba(0,255,136,0.6), 0 0 60px rgba(0,255,136,0.3);
     }
-    
-    .animate-float {
-      animation: float 6s ease-in-out infinite;
+    .neon-text-cyan {
+      text-shadow: 0 0 20px rgba(0,212,255,0.6), 0 0 60px rgba(0,212,255,0.3);
     }
-    
-    @keyframes pulse {
-      0%, 100% { opacity: 0.3; }
-      50% { opacity: 0.5; }
+    .card-glow:hover {
+      box-shadow: 0 0 30px rgba(0,255,136,0.12), 0 8px 32px rgba(0,0,0,0.4);
     }
-    
-    .animate-pulse {
-      animation: pulse 4s ease-in-out infinite;
+    .btn-glow {
+      box-shadow: 0 0 20px rgba(0,255,136,0.4), 0 4px 16px rgba(0,0,0,0.3);
     }
-    
-    .animation-delay-2000 {
-      animation-delay: 2s;
+    .btn-glow:hover {
+      box-shadow: 0 0 40px rgba(0,255,136,0.6), 0 8px 24px rgba(0,0,0,0.4);
     }
-    
-    .animation-delay-4000 {
-      animation-delay: 4s;
+    .grid-bg {
+      background-image:
+        linear-gradient(rgba(0,255,136,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,255,136,0.04) 1px, transparent 1px);
+      background-size: 60px 60px;
     }
   `;
-  if (!document.head.querySelector('style[data-homepage-animations]')) {
-    style.setAttribute('data-homepage-animations', 'true');
-    document.head.appendChild(style);
-  }
+  document.head.appendChild(style);
+};
+
+function HomePage() {
+  const { user } = useAuth();
+  injectStyles();
 
   const getDashboardLink = () => {
     if (!user) return '/login';
-    const userRoles = Array.isArray(user.roles) ? user.roles : [user.role];
-    const primaryRole = userRoles[0];
-    
-    switch (primaryRole) {
-      case 'PLAYER': return '/dashboard';
+    const primary = (Array.isArray(user.roles) ? user.roles : [user.role])[0];
+    switch (primary) {
+      case 'PLAYER':    return '/dashboard';
       case 'ORGANIZER': return '/organizer/dashboard';
-      case 'UMPIRE': return '/umpire/dashboard';
-      case 'ADMIN': return '/admin/dashboard';
-      default: return '/dashboard';
+      case 'UMPIRE':    return '/umpire/dashboard';
+      case 'ADMIN':     return '/admin/dashboard';
+      default:          return '/dashboard';
     }
   };
 
   const features = [
-    {
-      icon: TrophyIcon,
-      title: 'Tournament Management',
-      description: 'Create tournaments with automated draws, live scoring, and real-time updates.',
-      color: 'from-amber-500 to-orange-600'
-    },
-    {
-      icon: UserGroupIcon,
-      title: 'Partner Matching',
-      description: 'Find doubles partners and build your badminton network across India.',
-      color: 'from-blue-500 to-indigo-600'
-    },
-    {
-      icon: ChartBarIcon,
-      title: 'Rankings & Points',
-      description: 'Track progress with Matchify Points and climb category leaderboards.',
-      color: 'from-green-500 to-emerald-600'
-    },
-    {
-      icon: SparklesIcon,
-      title: 'Live Scoring',
-      description: 'Real-time score updates, match statistics, and instant notifications.',
-      color: 'from-cyan-500 to-teal-600'
-    }
+    { icon: TrophyIcon,    title: 'Tournament Engine',   desc: 'Automated draws, brackets & live scoring for any format.',       color: 'from-amber-500 to-orange-500',  glow: 'rgba(251,146,60,0.2)'  },
+    { icon: UserGroupIcon, title: 'Partner Network',     desc: 'Find doubles partners across your city instantly.',              color: 'from-cyan-500 to-blue-500',     glow: 'rgba(6,182,212,0.2)'   },
+    { icon: ChartBarIcon,  title: 'Live Rankings',       desc: 'Matchify Points system — climb city & national leaderboards.',   color: 'from-violet-500 to-purple-600', glow: 'rgba(139,92,246,0.2)'  },
+    { icon: SparklesIcon,  title: 'Real-Time Scoring',   desc: 'Point-by-point live updates with instant notifications.',        color: 'from-green-500 to-emerald-500', glow: 'rgba(16,185,129,0.2)'  },
   ];
 
   const stats = [
-    { value: '1000+', label: 'Active Players', icon: '🏸' },
-    { value: '50+', label: 'Tournaments', icon: '🏆' },
-    { value: '25+', label: 'Cities', icon: '🌆' },
-    { value: '₹10L+', label: 'Prize Money', icon: '💰' }
+    { value: '1000+', label: 'Players',      icon: '🏸' },
+    { value: '50+',   label: 'Tournaments',  icon: '🏆' },
+    { value: '25+',   label: 'Cities',       icon: '📍' },
+    { value: '₹10L+', label: 'Prize Pool',   icon: '💰' },
   ];
 
-  const howItWorks = [
-    {
-      step: '1',
-      title: 'Create Account',
-      description: 'Sign up in seconds and complete your player profile',
-      icon: '👤',
-      color: 'from-blue-500 to-cyan-500'
-    },
-    {
-      step: '2',
-      title: 'Find Tournament',
-      description: 'Browse tournaments in your city and skill level',
-      icon: '🔍',
-      color: 'from-purple-500 to-pink-500'
-    },
-    {
-      step: '3',
-      title: 'Register & Pay',
-      description: 'Quick registration with secure UPI payment',
-      icon: '💳',
-      color: 'from-green-500 to-emerald-500'
-    },
-    {
-      step: '4',
-      title: 'Play & Win',
-      description: 'Compete, track scores, and climb the rankings',
-      icon: '🏆',
-      color: 'from-amber-500 to-orange-500'
-    }
+  const steps = [
+    { step: '01', title: 'Create Account', desc: 'Sign up in seconds',               icon: '👤', color: 'from-blue-500 to-cyan-400'    },
+    { step: '02', title: 'Find Tournament', desc: 'Browse by city & level',           icon: '🔍', color: 'from-violet-500 to-purple-400' },
+    { step: '03', title: 'Register & Pay',  desc: 'Secure UPI payment',               icon: '💳', color: 'from-green-500 to-emerald-400' },
+    { step: '04', title: 'Play & Win',      desc: 'Compete & climb rankings',         icon: '🏆', color: 'from-amber-500 to-orange-400'  },
   ];
 
   const testimonials = [
-    {
-      name: 'Rahul Sharma',
-      role: 'State Level Player',
-      image: '👨',
-      rating: 5,
-      text: 'Matchify.pro made tournament registration so easy! Love the live scoring feature.',
-      location: 'Bangalore'
-    },
-    {
-      name: 'Priya Patel',
-      role: 'Club Player',
-      image: '👩',
-      rating: 5,
-      text: 'Found amazing doubles partners through this platform. The community is fantastic!',
-      location: 'Mumbai'
-    },
-    {
-      name: 'Arjun Kumar',
-      role: 'Tournament Organizer',
-      image: '👨',
-      rating: 5,
-      text: 'Managing tournaments has never been easier. Automated draws save so much time!',
-      location: 'Delhi'
-    }
+    { name: 'Rahul Sharma',  role: 'State Level Player',     city: 'Bangalore', emoji: '👨', text: 'Matchify made tournament registration effortless. The live scoring is incredible!' },
+    { name: 'Priya Patel',   role: 'Club Player',            city: 'Mumbai',    emoji: '👩', text: 'Found amazing doubles partners through this platform. The community is top-notch!' },
+    { name: 'Arjun Kumar',   role: 'Tournament Organizer',   city: 'Delhi',     emoji: '👨', text: 'Automated draws alone save me 3 hours per event. A game-changer for organisers.' },
   ];
 
   const benefits = [
-    { icon: BoltIcon, text: 'Instant Registration', color: 'text-amber-400' },
-    { icon: ShieldCheckIcon, text: 'Secure Payments', color: 'text-green-400' },
-    { icon: TrophyIcon, text: 'Fair Play System', color: 'text-blue-400' },
-    { icon: ChartBarIcon, text: 'Performance Tracking', color: 'text-purple-400' }
+    { icon: BoltIcon,         text: 'Instant Registration', color: 'text-amber-400',  bg: 'bg-amber-400/10'  },
+    { icon: ShieldCheckIcon,  text: 'Secure Payments',      color: 'text-green-400',  bg: 'bg-green-400/10'  },
+    { icon: TrophyIcon,       text: 'Fair Play System',     color: 'text-cyan-400',   bg: 'bg-cyan-400/10'   },
+    { icon: ChartBarIcon,     text: 'Performance Tracking', color: 'text-violet-400', bg: 'bg-violet-400/10' },
   ];
 
   return (
-    <div className="min-h-screen bg-slate-900 relative overflow-hidden">
-      {/* Professional Dark Background */}
-      <div className="fixed inset-0 z-0">
-        {/* Base Gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900"></div>
-        
-        {/* Subtle Accent Gradients */}
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-br from-green-500/10 to-transparent rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-gradient-to-tr from-amber-500/10 to-transparent rounded-full blur-3xl"></div>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-br from-teal-500/5 to-transparent rounded-full blur-3xl"></div>
-        
-        {/* Professional Grid Pattern */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(34,197,94,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(34,197,94,0.03)_1px,transparent_1px)] bg-[size:80px_80px]"></div>
+    <div className="min-h-screen relative overflow-x-hidden" style={{ background: '#07071a' }}>
+
+      {/* ── GLOBAL BACKGROUND ── */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="grid-bg absolute inset-0" />
+        {/* ambient glows */}
+        <div className="anim-glow absolute top-0 right-0 w-80 h-80 rounded-full blur-3xl" style={{ background: 'radial-gradient(circle, rgba(0,255,136,0.12) 0%, transparent 70%)' }} />
+        <div className="anim-glow delay-300 absolute bottom-0 left-0 w-80 h-80 rounded-full blur-3xl" style={{ background: 'radial-gradient(circle, rgba(99,102,241,0.12) 0%, transparent 70%)' }} />
+        <div className="anim-glow delay-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full blur-3xl" style={{ background: 'radial-gradient(circle, rgba(6,182,212,0.06) 0%, transparent 70%)' }} />
       </div>
 
-      {/* Hero Section */}
-      <div className="relative z-10 overflow-hidden">
+      {/* ════════════════════════════════════════
+          HERO
+      ════════════════════════════════════════ */}
+      <section className="relative z-10 pt-16 pb-12 px-4 flex flex-col items-center text-center">
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
-          <div className="text-center">
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-800/80 backdrop-blur-sm rounded-full text-white/90 text-sm font-medium mb-10 border border-green-500/30 shadow-lg">
-              <SparklesIcon className="w-4 h-4 text-green-400" />
-              India's #1 Badminton Platform
-            </div>
-
-            {/* Logo & Title */}
-            <div className="mb-10">
-              {/* Glowing Logo Container */}
-              <div className="relative inline-flex flex-col items-center">
-                {/* Glow effect */}
-                <div className="absolute top-0 w-40 h-40 bg-green-500/40 blur-3xl rounded-full opacity-80"></div>
-                
-                {/* SVG Shield Logo */}
-                <div className="relative mb-6 transform hover:scale-110 transition-transform">
-                  <svg viewBox="0 0 120 140" className="h-32 w-auto drop-shadow-[0_0_40px_rgba(34,197,94,0.9)]">
-                    {/* Shield */}
-                    <defs>
-                      <linearGradient id="heroShieldFill" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#22c55e" />
-                        <stop offset="50%" stopColor="#16a34a" />
-                        <stop offset="100%" stopColor="#15803d" />
-                      </linearGradient>
-                    </defs>
-                    <path d="M60 8 L110 25 L110 70 Q110 115 60 132 Q10 115 10 70 L10 25 Z" fill="url(#heroShieldFill)" stroke="#4ade80" strokeWidth="3"/>
-                    {/* M Letter */}
-                    <text x="60" y="85" textAnchor="middle" fill="#166534" fontSize="55" fontWeight="900" fontFamily="Arial Black, sans-serif">M</text>
-                    {/* Badminton Racket */}
-                    <ellipse cx="105" cy="18" rx="12" ry="16" fill="#3b82f6" stroke="#60a5fa" strokeWidth="1.5" transform="rotate(45, 105, 18)"/>
-                    <line x1="105" y1="28" x2="115" y2="45" stroke="#6366f1" strokeWidth="3" strokeLinecap="round"/>
-                    {/* Racket strings */}
-                    <line x1="98" y1="12" x2="112" y2="24" stroke="#93c5fd" strokeWidth="0.8"/>
-                    <line x1="100" y1="8" x2="110" y2="28" stroke="#93c5fd" strokeWidth="0.8"/>
-                    <line x1="96" y1="18" x2="114" y2="18" stroke="#93c5fd" strokeWidth="0.8"/>
-                    {/* Shuttlecock */}
-                    <ellipse cx="118" cy="48" rx="4" ry="3" fill="#ec4899"/>
-                    <path d="M118 45 L115 38 M118 45 L118 36 M118 45 L121 38" stroke="#f9a8d4" strokeWidth="1.5" fill="none"/>
-                  </svg>
-                </div>
-                
-                {/* Text Logo */}
-                <h1 className="relative text-6xl md:text-8xl lg:text-9xl font-black tracking-tight">
-                  <span className="text-transparent bg-clip-text bg-gradient-to-b from-green-300 via-green-400 to-green-600" style={{textShadow: '0 0 40px rgba(34,197,94,0.5)'}}>
-                    MATCHIFY
-                  </span>
-                  <span className="text-transparent bg-clip-text bg-gradient-to-b from-amber-300 via-amber-400 to-amber-600" style={{textShadow: '0 0 40px rgba(245,158,11,0.5)'}}>
-                    .PRO
-                  </span>
-                </h1>
-              </div>
-            </div>
-            
-            {/* Subtitle */}
-            <p className="text-xl md:text-2xl lg:text-3xl text-white/80 mb-6 font-light max-w-3xl mx-auto">
-              Where Champions Are Made
-            </p>
-            
-            {/* Description */}
-            <p className="text-lg text-white/60 mb-12 max-w-2xl mx-auto leading-relaxed">
-              Join thousands of players across India. Register for tournaments, track progress, and compete with the best.
-            </p>
-
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              {user ? (
-                <>
-                  <Link
-                    to={getDashboardLink()}
-                    className="group inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold rounded-xl shadow-lg shadow-green-500/30 hover:shadow-green-500/50 hover:scale-105 transition-all"
-                  >
-                    <TrophyIcon className="w-6 h-6" />
-                    Go to Dashboard
-                    <ArrowRightIcon className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                  </Link>
-                  <div className="flex items-center gap-3 px-6 py-3 bg-slate-800/80 backdrop-blur-sm rounded-xl border border-slate-700 shadow-lg">
-                    <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center text-white font-bold">
-                      {user.name?.charAt(0).toUpperCase()}
-                    </div>
-                    <div className="text-left">
-                      <p className="text-white/60 text-sm">Welcome back</p>
-                      <p className="text-white font-medium">{user.name}</p>
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <Link
-                    to="/register"
-                    className="group inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold rounded-xl shadow-lg shadow-green-500/30 hover:shadow-green-500/50 hover:scale-105 transition-all"
-                  >
-                    <PlayIcon className="w-6 h-6" />
-                    Get Started Free
-                    <ArrowRightIcon className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                  </Link>
-                  <Link
-                    to="/login"
-                    className="inline-flex items-center gap-2 px-8 py-4 bg-slate-800/80 backdrop-blur-sm text-white font-semibold rounded-xl border border-slate-700 hover:bg-slate-800 hover:border-slate-600 transition-all"
-                  >
-                    Sign In
-                  </Link>
-                </>
-              )}
-            </div>
-
-            {/* Trust Badges */}
-            <div className="mt-16 flex flex-wrap justify-center items-center gap-8 text-white/50">
-              <div className="flex items-center gap-2">
-                <div className="flex -space-x-2">
-                  {[...Array(4)].map((_, i) => (
-                    <div key={i} className="w-8 h-8 rounded-full bg-gradient-to-br from-green-400 to-emerald-400 border-2 border-slate-900 shadow-lg"></div>
-                  ))}
-                </div>
-                <span className="text-sm font-medium">1000+ players joined</span>
-              </div>
-              <div className="flex items-center gap-1">
-                {[...Array(5)].map((_, i) => (
-                  <StarIcon key={i} className="w-5 h-5 text-amber-400" />
-                ))}
-                <span className="text-sm ml-2 font-medium">4.9/5 rating</span>
-              </div>
-            </div>
-          </div>
+        {/* pill badge */}
+        <div className="anim-fade-up inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-semibold tracking-widest uppercase mb-8"
+          style={{ background: 'rgba(0,255,136,0.08)', borderColor: 'rgba(0,255,136,0.25)', color: '#00ff88' }}>
+          <SparklesIcon className="w-3.5 h-3.5" />
+          India's #1 Badminton Platform
         </div>
-      </div>
 
-      {/* Features Section */}
-      <div className="py-24 relative z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <span className="inline-block px-4 py-2 bg-green-500/20 text-green-400 rounded-full text-sm font-semibold mb-4 border border-green-500/30">
-              ✨ Features
-            </span>
-            <h2 className="text-5xl md:text-6xl font-bold text-white mb-4">
-              Everything You Need to
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-400"> Win</span>
-            </h2>
-          </div>
+        {/* shield logo */}
+        <div className="anim-float anim-fade-up delay-100 mb-6 relative">
+          <div className="absolute inset-0 blur-2xl rounded-full" style={{ background: 'rgba(0,255,136,0.3)', transform: 'scale(0.6)' }} />
+          <svg viewBox="0 0 120 140" className="relative h-20 w-auto sm:h-28" style={{ filter: 'drop-shadow(0 0 20px rgba(0,255,136,0.7))' }}>
+            <defs>
+              <linearGradient id="sg1" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%"   stopColor="#00ff88" />
+                <stop offset="60%"  stopColor="#00c853" />
+                <stop offset="100%" stopColor="#007c35" />
+              </linearGradient>
+            </defs>
+            <path d="M60 8 L110 25 L110 70 Q110 115 60 132 Q10 115 10 70 L10 25 Z" fill="url(#sg1)" stroke="rgba(0,255,136,0.6)" strokeWidth="2.5"/>
+            <text x="60" y="88" textAnchor="middle" fill="#003320" fontSize="55" fontWeight="900" fontFamily="Arial Black,sans-serif">M</text>
+            <ellipse cx="103" cy="20" rx="11" ry="14" fill="#3b82f6" stroke="#60a5fa" strokeWidth="1.5" transform="rotate(45,103,20)"/>
+            <line x1="103" y1="29" x2="113" y2="44" stroke="#818cf8" strokeWidth="2.5" strokeLinecap="round"/>
+            <line x1="96" y1="14" x2="110" y2="26" stroke="#93c5fd" strokeWidth="0.8"/>
+            <line x1="99" y1="9"  x2="109" y2="29" stroke="#93c5fd" strokeWidth="0.8"/>
+            <line x1="94" y1="20" x2="112" y2="20" stroke="#93c5fd" strokeWidth="0.8"/>
+            <ellipse cx="116" cy="47" rx="3.5" ry="2.5" fill="#ec4899"/>
+            <path d="M116 44 L113 38 M116 44 L116 37 M116 44 L119 38" stroke="#f9a8d4" strokeWidth="1.2" fill="none"/>
+          </svg>
+        </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {features.map((feature, index) => (
-              <div 
-                key={index}
-                className="group relative bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 hover:border-green-500/50 hover:shadow-2xl hover:shadow-green-500/10 hover:-translate-y-1 transition-all duration-300"
-              >
-                <div className={`inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br ${feature.color} rounded-xl shadow-lg mb-4 group-hover:scale-110 transition-all duration-300`}>
-                  <feature.icon className="w-6 h-6 text-white" />
+        {/* main title — SAFE on 375px */}
+        <div className="anim-fade-up delay-200 mb-4 w-full">
+          <h1 className="font-black leading-none tracking-tighter"
+            style={{ fontSize: 'clamp(2.2rem, 12vw, 7rem)' }}>
+            <span className="neon-text-green" style={{ color: '#00ff88' }}>MATCHIFY</span>
+            <span className="neon-text-cyan"  style={{ color: '#00d4ff' }}>.PRO</span>
+          </h1>
+        </div>
+
+        {/* tagline */}
+        <p className="anim-fade-up delay-300 text-base sm:text-xl font-light mb-3 max-w-xs sm:max-w-md" style={{ color: 'rgba(255,255,255,0.75)' }}>
+          Where Champions Are Made
+        </p>
+        <p className="anim-fade-up delay-400 text-sm sm:text-base mb-10 max-w-xs sm:max-w-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>
+          Join thousands of players across India. Register for tournaments, track progress, and compete with the best.
+        </p>
+
+        {/* CTAs */}
+        <div className="anim-fade-up delay-500 flex flex-col sm:flex-row gap-3 w-full max-w-xs sm:max-w-none sm:w-auto">
+          {user ? (
+            <>
+              <Link to={getDashboardLink()}
+                className="btn-glow flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all duration-300 hover:scale-105"
+                style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#003320' }}>
+                <TrophyIcon className="w-5 h-5" />
+                Go to Dashboard
+                <ArrowRightIcon className="w-4 h-4" />
+              </Link>
+              <div className="flex items-center justify-center gap-3 px-5 py-3 rounded-xl border"
+                style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.1)' }}>
+                <div className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm"
+                  style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#003320' }}>
+                  {user.name?.charAt(0).toUpperCase()}
                 </div>
-                <h3 className="text-lg font-bold text-white mb-2">
-                  {feature.title}
-                </h3>
-                <p className="text-white/60 text-sm leading-relaxed">
-                  {feature.description}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Stats Section */}
-      <div className="py-16 relative z-10 overflow-hidden bg-gradient-to-br from-green-600 to-emerald-600">
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:64px_64px]"></div>
-        
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-10">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">
-              Trusted Across India
-            </h2>
-          </div>
-          
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {stats.map((stat, index) => (
-              <div key={index} className="text-center group animate-fade-in-up" style={{animationDelay: `${index * 100}ms`}}>
-                <div className="inline-flex items-center justify-center w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl mb-3 group-hover:scale-110 group-hover:bg-white/30 transition-all duration-300 border border-white/30">
-                  <span className="text-2xl">{stat.icon}</span>
-                </div>
-                <div className="text-3xl md:text-4xl font-bold text-white mb-1">{stat.value}</div>
-                <div className="text-white/90 text-sm font-medium">{stat.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* How It Works Section */}
-      <div className="py-24 relative z-10">
-        {/* Section Background */}
-        <div className="absolute inset-0">
-          <div className="absolute top-1/4 right-10 w-64 h-64 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
-          <div className="absolute bottom-1/4 left-10 w-64 h-64 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse animation-delay-2000"></div>
-        </div>
-        
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="text-center mb-16">
-            <span className="inline-block px-4 py-2 bg-purple-500/20 text-purple-400 rounded-full text-sm font-semibold mb-4 border border-purple-500/30">
-              🎯 Simple Process
-            </span>
-            <h2 className="text-5xl md:text-6xl font-bold text-white mb-4">
-              How It
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400"> Works</span>
-            </h2>
-            <p className="text-white/60 text-lg">Get started in 4 easy steps</p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {howItWorks.map((item, index) => (
-              <div key={index} className="relative group">
-                {/* Connecting Line */}
-                {index < howItWorks.length - 1 && (
-                  <div className="hidden lg:block absolute top-20 left-full w-full h-0.5 bg-gradient-to-r from-purple-500/50 to-transparent -z-10"></div>
-                )}
-                
-                <div className="relative bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:border-purple-500/50 hover:-translate-y-1 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/10">
-                  {/* Step Number */}
-                  <div className={`absolute -top-4 -right-4 w-12 h-12 bg-gradient-to-br ${item.color} rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg`}>
-                    {item.step}
-                  </div>
-                  
-                  {/* Icon */}
-                  <div className="text-6xl mb-4 group-hover:scale-110 transition-transform duration-300">
-                    {item.icon}
-                  </div>
-                  
-                  <h3 className="text-xl font-bold text-white mb-2">
-                    {item.title}
-                  </h3>
-                  <p className="text-white/60 text-sm">
-                    {item.description}
-                  </p>
+                <div className="text-left">
+                  <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Welcome back</p>
+                  <p className="text-sm font-semibold text-white">{user.name}</p>
                 </div>
               </div>
-            ))}
-          </div>
+            </>
+          ) : (
+            <>
+              <Link to="/register"
+                className="btn-glow flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all duration-300 hover:scale-105"
+                style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#003320' }}>
+                <PlayIcon className="w-5 h-5" />
+                Get Started Free
+                <ArrowRightIcon className="w-4 h-4" />
+              </Link>
+              <Link to="/login"
+                className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm border transition-all duration-300 hover:scale-105"
+                style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.85)' }}>
+                Sign In
+              </Link>
+            </>
+          )}
         </div>
-      </div>
 
-      {/* Benefits Section */}
-      <div className="py-24 relative z-10 overflow-hidden">
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-3xl p-8 md:p-12 shadow-xl">
-            <div className="text-center mb-10">
-              <h2 className="text-5xl md:text-6xl font-bold text-white mb-4">
-                Why Choose
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-400"> Matchify.pro</span>
-              </h2>
-            </div>
-            
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {benefits.map((benefit, index) => (
-                <div key={index} className="flex items-center gap-3 bg-slate-900/50 rounded-xl p-4 border border-slate-700/50 hover:border-green-500/50 hover:shadow-lg hover:shadow-green-500/10 hover:-translate-y-1 transition-all group">
-                  <div className={`flex-shrink-0 w-10 h-10 ${benefit.color} bg-slate-800 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform`}>
-                    <benefit.icon className="w-6 h-6" />
-                  </div>
-                  <span className="text-white font-medium">{benefit.text}</span>
+        {/* social proof */}
+        <div className="anim-fade-up delay-500 mt-8 flex flex-wrap justify-center items-center gap-4">
+          <div className="flex items-center gap-2">
+            <div className="flex -space-x-1.5">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="w-7 h-7 rounded-full border-2 flex items-center justify-center text-xs font-bold"
+                  style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', borderColor: '#07071a', color: '#003320' }}>
+                  {['R','P','A','K'][i]}
                 </div>
               ))}
             </div>
+            <span className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>1000+ players joined</span>
+          </div>
+          <div className="flex items-center gap-1">
+            {[...Array(5)].map((_, i) => <StarIcon key={i} className="w-4 h-4 text-amber-400" />)}
+            <span className="text-xs ml-1" style={{ color: 'rgba(255,255,255,0.5)' }}>4.9 / 5</span>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Testimonials Section */}
-      <div className="py-24 relative z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="text-center mb-16">
-            <span className="inline-block px-4 py-2 bg-teal-500/20 text-teal-400 rounded-full text-sm font-semibold mb-4 border border-teal-500/30">
-              💬 Testimonials
+      {/* ════════════════════════════════════════
+          STATS BAR
+      ════════════════════════════════════════ */}
+      <section className="relative z-10 py-8 px-4">
+        <div className="max-w-2xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {stats.map((s, i) => (
+            <div key={i} className="flex flex-col items-center gap-1 py-4 px-2 rounded-2xl border"
+              style={{ background: 'rgba(0,255,136,0.04)', borderColor: 'rgba(0,255,136,0.12)' }}>
+              <span className="text-xl">{s.icon}</span>
+              <span className="text-xl sm:text-2xl font-black" style={{ color: '#00ff88' }}>{s.value}</span>
+              <span className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>{s.label}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════
+          FEATURES
+      ════════════════════════════════════════ */}
+      <section className="relative z-10 py-12 px-4">
+        <div className="max-w-2xl mx-auto">
+          {/* heading */}
+          <div className="text-center mb-8">
+            <span className="inline-block px-3 py-1 rounded-full text-xs font-bold tracking-widest uppercase mb-3"
+              style={{ background: 'rgba(0,255,136,0.1)', color: '#00ff88', border: '1px solid rgba(0,255,136,0.2)' }}>
+              ✦ Features
             </span>
-            <h2 className="text-5xl md:text-6xl font-bold text-white mb-4">
-              What Players
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-cyan-400"> Say</span>
+            <h2 className="text-2xl sm:text-4xl font-black text-white mb-2">
+              Everything to <span style={{ color: '#00ff88' }}>Dominate</span>
+            </h2>
+            <p className="text-sm" style={{ color: 'rgba(255,255,255,0.45)' }}>Built for competitive badminton players & organizers</p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {features.map((f, i) => (
+              <div key={i} className="card-glow group relative rounded-2xl p-5 border transition-all duration-300 hover:-translate-y-1"
+                style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.08)' }}>
+                {/* icon */}
+                <div className={`inline-flex items-center justify-center w-11 h-11 bg-gradient-to-br ${f.color} rounded-xl mb-4 group-hover:scale-110 transition-transform duration-300`}>
+                  <f.icon className="w-5 h-5 text-white" />
+                </div>
+                <h3 className="text-base font-bold text-white mb-1">{f.title}</h3>
+                <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>{f.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════
+          HOW IT WORKS
+      ════════════════════════════════════════ */}
+      <section className="relative z-10 py-12 px-4">
+        <div className="max-w-2xl mx-auto">
+          <div className="text-center mb-8">
+            <span className="inline-block px-3 py-1 rounded-full text-xs font-bold tracking-widest uppercase mb-3"
+              style={{ background: 'rgba(99,102,241,0.12)', color: '#818cf8', border: '1px solid rgba(99,102,241,0.25)' }}>
+              🎯 Process
+            </span>
+            <h2 className="text-2xl sm:text-4xl font-black text-white mb-2">
+              How It <span style={{ color: '#a78bfa' }}>Works</span>
             </h2>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            {testimonials.map((testimonial, index) => (
-              <div key={index} className="group relative">
-                <div className="relative bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-8 hover:border-teal-500/50 hover:shadow-2xl hover:shadow-teal-500/10 hover:-translate-y-1 transition-all duration-300">
-                  {/* Stars */}
-                  <div className="flex gap-1 mb-4">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <StarIcon key={i} className="w-5 h-5 text-amber-400" />
-                    ))}
+          <div className="grid grid-cols-2 gap-4">
+            {steps.map((s, i) => (
+              <div key={i} className="card-glow relative rounded-2xl p-4 border transition-all duration-300 hover:-translate-y-1"
+                style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.08)' }}>
+                {/* step number badge */}
+                <div className={`inline-flex items-center justify-center w-7 h-7 bg-gradient-to-br ${s.color} rounded-lg text-white text-xs font-black mb-3`}>
+                  {s.step}
+                </div>
+                <div className="text-3xl mb-2">{s.icon}</div>
+                <h3 className="text-sm font-bold text-white mb-1">{s.title}</h3>
+                <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.45)' }}>{s.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════
+          WHY MATCHIFY
+      ════════════════════════════════════════ */}
+      <section className="relative z-10 py-12 px-4">
+        <div className="max-w-2xl mx-auto rounded-3xl p-5 sm:p-8 border"
+          style={{ background: 'rgba(0,255,136,0.03)', borderColor: 'rgba(0,255,136,0.1)' }}>
+          <div className="text-center mb-6">
+            <h2 className="text-2xl sm:text-3xl font-black text-white mb-1">
+              Why <span style={{ color: '#00ff88' }}>Matchify.pro</span>?
+            </h2>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            {benefits.map((b, i) => (
+              <div key={i} className="flex items-center gap-3 rounded-xl p-3.5 border transition-all duration-300 hover:-translate-y-0.5"
+                style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.07)' }}>
+                <div className={`flex-shrink-0 w-9 h-9 ${b.bg} ${b.color} rounded-lg flex items-center justify-center`}>
+                  <b.icon className="w-5 h-5" />
+                </div>
+                <span className="text-xs sm:text-sm font-medium text-white">{b.text}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════
+          TESTIMONIALS
+      ════════════════════════════════════════ */}
+      <section className="relative z-10 py-12 px-4">
+        <div className="max-w-2xl mx-auto">
+          <div className="text-center mb-8">
+            <span className="inline-block px-3 py-1 rounded-full text-xs font-bold tracking-widest uppercase mb-3"
+              style={{ background: 'rgba(6,182,212,0.1)', color: '#22d3ee', border: '1px solid rgba(6,182,212,0.25)' }}>
+              💬 Players Say
+            </span>
+            <h2 className="text-2xl sm:text-4xl font-black text-white">
+              Real <span style={{ color: '#22d3ee' }}>Reviews</span>
+            </h2>
+          </div>
+
+          <div className="flex flex-col gap-4">
+            {testimonials.map((t, i) => (
+              <div key={i} className="card-glow rounded-2xl p-5 border transition-all duration-300"
+                style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.07)' }}>
+                <div className="flex gap-0.5 mb-3">
+                  {[...Array(5)].map((_, j) => <StarIcon key={j} className="w-4 h-4 text-amber-400" />)}
+                </div>
+                <p className="text-sm leading-relaxed mb-4" style={{ color: 'rgba(255,255,255,0.65)' }}>"{t.text}"</p>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center text-xl flex-shrink-0"
+                    style={{ background: 'rgba(6,182,212,0.15)', border: '1px solid rgba(6,182,212,0.3)' }}>
+                    {t.emoji}
                   </div>
-                  
-                  {/* Quote */}
-                  <p className="text-white/60 mb-6 leading-relaxed">
-                    "{testimonial.text}"
-                  </p>
-                  
-                  {/* Author */}
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-teal-400 to-cyan-400 rounded-full flex items-center justify-center text-2xl shadow-lg">
-                      {testimonial.image}
-                    </div>
-                    <div>
-                      <p className="text-white font-semibold">{testimonial.name}</p>
-                      <p className="text-white/50 text-sm">{testimonial.role} • {testimonial.location}</p>
-                    </div>
+                  <div>
+                    <p className="text-sm font-semibold text-white">{t.name}</p>
+                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>{t.role} · {t.city}</p>
                   </div>
                 </div>
               </div>
             ))}
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* CTA Section */}
-      <div className="py-24 relative z-10">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
-          <div className="bg-gradient-to-br from-slate-800/60 to-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-3xl p-12 shadow-2xl shadow-green-500/20 hover:shadow-green-500/30 transition-all duration-300">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-green-600 to-emerald-600 rounded-2xl shadow-lg shadow-green-500/30 mb-6">
-              <span className="text-3xl">🚀</span>
+      {/* ════════════════════════════════════════
+          CTA BANNER
+      ════════════════════════════════════════ */}
+      <section className="relative z-10 py-12 px-4">
+        <div className="max-w-2xl mx-auto text-center rounded-3xl p-6 sm:p-10 border overflow-hidden relative"
+          style={{ background: 'linear-gradient(135deg, rgba(0,255,136,0.07) 0%, rgba(99,102,241,0.07) 100%)', borderColor: 'rgba(0,255,136,0.2)' }}>
+          {/* bg glow */}
+          <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(0,255,136,0.08) 0%, transparent 70%)' }} />
+
+          <div className="relative">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-5 text-2xl"
+              style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)' }}>
+              🚀
             </div>
-            <h2 className="text-5xl md:text-6xl font-bold text-white mb-4">
-              Ready to Start Your Journey?
+            <h2 className="text-2xl sm:text-4xl font-black text-white mb-3">
+              Ready to Start?
             </h2>
-            <p className="text-lg text-white/60 mb-8 max-w-2xl mx-auto">
+            <p className="text-sm mb-8" style={{ color: 'rgba(255,255,255,0.55)' }}>
               Join India's fastest-growing badminton community today.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                to={user ? getDashboardLink() : "/register"}
-                className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold rounded-xl shadow-lg shadow-green-500/30 hover:shadow-green-500/50 hover:scale-105 transition-all"
-              >
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Link to={user ? getDashboardLink() : '/register'}
+                className="btn-glow flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all duration-300 hover:scale-105"
+                style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#003320' }}>
                 {user ? 'Go to Dashboard' : 'Create Free Account'}
-                <ArrowRightIcon className="w-5 h-5" />
+                <ArrowRightIcon className="w-4 h-4" />
               </Link>
-              <Link
-                to="/tournaments"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-slate-700/50 backdrop-blur-sm text-white font-semibold rounded-xl border border-slate-600 hover:bg-slate-700 hover:border-slate-500 transition-all"
-              >
+              <Link to="/tournaments"
+                className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm border transition-all duration-300 hover:scale-105"
+                style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.85)' }}>
                 Browse Tournaments
               </Link>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Footer */}
-      <footer className="border-t border-slate-800 py-12 relative z-10 bg-slate-900/50 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col items-center">
-            <div className="flex items-center gap-3 mb-4">
-              <svg viewBox="0 0 120 140" className="h-12 w-auto drop-shadow-[0_0_15px_rgba(34,197,94,0.5)]">
-                <defs>
-                  <linearGradient id="footerShieldFill" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#22c55e" />
-                    <stop offset="50%" stopColor="#16a34a" />
-                    <stop offset="100%" stopColor="#15803d" />
-                  </linearGradient>
-                </defs>
-                <path d="M60 8 L110 25 L110 70 Q110 115 60 132 Q10 115 10 70 L10 25 Z" fill="url(#footerShieldFill)" stroke="#4ade80" strokeWidth="3"/>
-                <text x="60" y="85" textAnchor="middle" fill="#166534" fontSize="55" fontWeight="900" fontFamily="Arial Black, sans-serif">M</text>
-                <ellipse cx="105" cy="18" rx="12" ry="16" fill="#3b82f6" stroke="#60a5fa" strokeWidth="1.5" transform="rotate(45, 105, 18)"/>
-                <line x1="105" y1="28" x2="115" y2="45" stroke="#6366f1" strokeWidth="3" strokeLinecap="round"/>
-                <ellipse cx="118" cy="48" rx="4" ry="3" fill="#ec4899"/>
-              </svg>
-              <span className="text-xl font-black">
-                <span className="text-transparent bg-clip-text bg-gradient-to-b from-green-400 to-green-500">MATCHIFY</span>
-                <span className="text-transparent bg-clip-text bg-gradient-to-b from-amber-400 to-amber-500">.PRO</span>
-              </span>
-            </div>
-            <p className="text-white/50 mb-6 text-center text-sm">
-              Built with ❤️ for the Indian Badminton Community
-            </p>
-            
-            {/* Co-Founders Section */}
-            <div className="relative mb-6 max-w-xl mx-auto">
-              <div className="relative bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl px-6 py-4 shadow-xl">
-                <p className="text-xs text-white/50 font-medium mb-2 tracking-widest uppercase text-center">Co-Founded By</p>
-                <h3 className="text-2xl md:text-3xl font-bold text-center mb-3">
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-400">
-                    PS Brothers
-                  </span>
-                </h3>
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-green-400"></div>
-                    <span className="text-base md:text-lg font-semibold text-white">
-                      PS Lochan
-                    </span>
-                  </div>
-                  <div className="hidden sm:block w-px h-5 bg-slate-700"></div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-emerald-400"></div>
-                    <span className="text-base md:text-lg font-semibold text-white">
-                      PS Pradyumna
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="flex gap-6 mb-6 text-sm">
-              <a href="#" className="text-white/50 hover:text-white transition-colors">About</a>
-              <a href="#" className="text-white/50 hover:text-white transition-colors">Contact</a>
-              <a href="#" className="text-white/50 hover:text-white transition-colors">Privacy</a>
-              <a href="#" className="text-white/50 hover:text-white transition-colors">Terms</a>
-            </div>
-            <p className="text-xs text-white/30">
-              © 2026 Matchify.pro. All rights reserved.
-            </p>
+      {/* ════════════════════════════════════════
+          FOOTER
+      ════════════════════════════════════════ */}
+      <footer className="relative z-10 border-t py-10 px-4" style={{ borderColor: 'rgba(255,255,255,0.07)', background: 'rgba(0,0,0,0.3)' }}>
+        <div className="max-w-2xl mx-auto flex flex-col items-center gap-5">
+
+          {/* brand */}
+          <div className="flex items-center gap-2">
+            <svg viewBox="0 0 120 140" className="h-9 w-auto" style={{ filter: 'drop-shadow(0 0 10px rgba(0,255,136,0.5))' }}>
+              <defs>
+                <linearGradient id="fg1" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#00ff88" />
+                  <stop offset="100%" stopColor="#007c35" />
+                </linearGradient>
+              </defs>
+              <path d="M60 8 L110 25 L110 70 Q110 115 60 132 Q10 115 10 70 L10 25 Z" fill="url(#fg1)" stroke="rgba(0,255,136,0.5)" strokeWidth="2"/>
+              <text x="60" y="88" textAnchor="middle" fill="#003320" fontSize="55" fontWeight="900" fontFamily="Arial Black,sans-serif">M</text>
+            </svg>
+            <span className="font-black text-lg">
+              <span style={{ color: '#00ff88' }}>MATCHIFY</span>
+              <span style={{ color: '#00d4ff' }}>.PRO</span>
+            </span>
           </div>
+
+          <p className="text-xs text-center" style={{ color: 'rgba(255,255,255,0.35)' }}>
+            Built with ❤️ for the Indian Badminton Community
+          </p>
+
+          {/* founders */}
+          <div className="rounded-2xl px-6 py-4 border text-center w-full max-w-xs"
+            style={{ background: 'rgba(0,255,136,0.04)', borderColor: 'rgba(0,255,136,0.12)' }}>
+            <p className="text-xs tracking-widest uppercase mb-2" style={{ color: 'rgba(255,255,255,0.35)' }}>Co-Founded By</p>
+            <p className="text-base font-black mb-2" style={{ color: '#00ff88' }}>PS Brothers</p>
+            <div className="flex justify-center items-center gap-4 text-sm font-semibold text-white">
+              <span>PS Lochan</span>
+              <span style={{ color: 'rgba(255,255,255,0.2)' }}>|</span>
+              <span>PS Pradyumna</span>
+            </div>
+          </div>
+
+          <div className="flex gap-5 text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
+            <a href="#" className="hover:text-white transition-colors">About</a>
+            <a href="#" className="hover:text-white transition-colors">Contact</a>
+            <a href="#" className="hover:text-white transition-colors">Privacy</a>
+            <Link to="/terms" className="hover:text-white transition-colors">Terms</Link>
+          </div>
+
+          <p className="text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>© 2026 Matchify.pro · All rights reserved</p>
         </div>
       </footer>
     </div>

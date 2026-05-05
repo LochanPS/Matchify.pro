@@ -182,7 +182,7 @@ const RegisterPage = () => {
           {error && (
             <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm flex items-center gap-2">
               <span className="text-lg">⚠️</span>
-              {error}
+              {typeof error === 'string' ? error : 'Registration failed. Please try again.'}
             </div>
           )}
 
@@ -222,7 +222,7 @@ const RegisterPage = () => {
                     name="name"
                     type="text"
                     required
-                    className="w-full pl-12 pr-4 py-4 rounded-xl text-white text-sm placeholder-white/25 outline-none transition-all focus:ring-1 focus:ring-green-500/50" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1)"
+                    className="w-full pl-12 pr-4 py-4 rounded-xl text-white text-sm placeholder-white/25 outline-none transition-all focus:ring-1 focus:ring-green-500/50" style={{ background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)' }}
                     placeholder="Your full name"
                     value={formData.name}
                     onChange={handleChange}
@@ -243,7 +243,7 @@ const RegisterPage = () => {
                       name="email"
                       type="email"
                       required
-                      className="w-full pl-12 pr-4 py-4 rounded-xl text-white text-sm placeholder-white/25 outline-none transition-all focus:ring-1 focus:ring-green-500/50" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1)"
+                      className="w-full pl-12 pr-4 py-4 rounded-xl text-white text-sm placeholder-white/25 outline-none transition-all focus:ring-1 focus:ring-green-500/50" style={{ background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)' }}
                       placeholder="you@example.com"
                       value={formData.email}
                       onChange={handleChange}
@@ -264,7 +264,7 @@ const RegisterPage = () => {
                       type="tel"
                       required
                       maxLength={10}
-                      className="w-full pl-12 pr-4 py-4 rounded-xl text-white text-sm placeholder-white/25 outline-none transition-all focus:ring-1 focus:ring-green-500/50" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1)"
+                      className="w-full pl-12 pr-4 py-4 rounded-xl text-white text-sm placeholder-white/25 outline-none transition-all focus:ring-1 focus:ring-green-500/50" style={{ background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)' }}
                       placeholder="9876543210"
                       value={formData.phone}
                       onChange={handleChange}
@@ -286,7 +286,7 @@ const RegisterPage = () => {
                   <input
                     name="alternateEmail"
                     type="email"
-                    className="w-full pl-12 pr-4 py-4 rounded-xl text-white text-sm placeholder-white/25 outline-none transition-all focus:ring-1 focus:ring-green-500/50" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1)"
+                    className="w-full pl-12 pr-4 py-4 rounded-xl text-white text-sm placeholder-white/25 outline-none transition-all focus:ring-1 focus:ring-green-500/50" style={{ background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)' }}
                     placeholder="Optional alternate email"
                     value={formData.alternateEmail}
                     onChange={handleChange}
@@ -307,7 +307,7 @@ const RegisterPage = () => {
                       name="password"
                       type={showPassword ? 'text' : 'password'}
                       required
-                      className="w-full pl-12 pr-12 py-4 rounded-xl text-white text-sm placeholder-white/25 outline-none transition-all focus:ring-1 focus:ring-green-500/50" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1)"
+                      className="w-full pl-12 pr-12 py-4 rounded-xl text-white text-sm placeholder-white/25 outline-none transition-all focus:ring-1 focus:ring-green-500/50" style={{ background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)' }}
                       placeholder="••••••••"
                       value={formData.password}
                       onChange={handleChange}
@@ -344,7 +344,7 @@ const RegisterPage = () => {
                       name="confirmPassword"
                       type={showConfirmPassword ? 'text' : 'password'}
                       required
-                      className="w-full pl-12 pr-12 py-4 rounded-xl text-white text-sm placeholder-white/25 outline-none transition-all focus:ring-1 focus:ring-green-500/50" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1)"
+                      className="w-full pl-12 pr-12 py-4 rounded-xl text-white text-sm placeholder-white/25 outline-none transition-all focus:ring-1 focus:ring-green-500/50" style={{ background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)' }}
                       placeholder="••••••••"
                       value={formData.confirmPassword}
                       onChange={handleChange}

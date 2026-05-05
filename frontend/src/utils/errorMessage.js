@@ -5,7 +5,14 @@
 export function getErrorMessage(err, fallback = 'Something went wrong. Please try again.') {
   if (!err) return fallback;
 
+  const status = err?.response?.status;
   const data = err?.response?.data;
+
+  // Generic 404 from Express catch-all (route not found) → user-friendly message
+  if (status === 404 && data?.error === 'Not Found' && (data?.message?.includes('Cannot') || data?.message?.includes('not found'))) {
+    return 'Service unavailable. Please check your connection and try again.';
+  }
+
   if (data) {
     const raw = data.error || data.message || data.msg;
 

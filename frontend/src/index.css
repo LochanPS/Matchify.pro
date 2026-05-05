@@ -634,6 +634,18 @@
   animation: gradient-x 3s ease infinite;
 }
 
+@keyframes twinkle {
+  0%, 100% { opacity: 0.25; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.4); }
+}
+@keyframes drift {
+  0%   { transform: translateY(0px) translateX(0px); }
+  33%  { transform: translateY(-8px) translateX(4px); }
+  66%  { transform: translateY(4px) translateX(-4px); }
+  100% { transform: translateY(0px) translateX(0px); }
+}
+.animate-twinkle { animation: twinkle 3s ease-in-out infinite; }
+.animate-drift   { animation: drift 6s ease-in-out infinite; }
 
 /* ===== UTILITY CLASSES ===== */
 @layer utilities {

@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { 
-  EyeIcon, 
-  EyeSlashIcon, 
-  EnvelopeIcon, 
-  LockClosedIcon, 
+import {
+  EyeIcon,
+  EyeSlashIcon,
+  EnvelopeIcon,
+  LockClosedIcon,
   UserIcon,
   PhoneIcon,
   ArrowRightIcon,
@@ -14,6 +14,57 @@ import {
   XMarkIcon
 } from '@heroicons/react/24/outline';
 import { Zap, Trophy, Users, Rocket, Star, Gift } from 'lucide-react';
+import { getErrorMessage } from '../utils/errorMessage';
+
+// Fixed star positions — deterministic, no re-render flicker
+const STARS = [
+  { x:4,  y:8,  s:2,   c:'#00ff88', d:0,   dur:2.8 },
+  { x:12, y:22, s:1.5, c:'#00d4ff', d:0.4, dur:3.2 },
+  { x:22, y:5,  s:1,   c:'#fff',    d:0.8, dur:2.5 },
+  { x:33, y:18, s:2.5, c:'#00ff88', d:1.2, dur:3.5 },
+  { x:45, y:30, s:1,   c:'#00d4ff', d:0.3, dur:2.2 },
+  { x:55, y:6,  s:1.5, c:'#fff',    d:1.6, dur:3.8 },
+  { x:65, y:25, s:2,   c:'#00ff88', d:0.7, dur:2.9 },
+  { x:75, y:12, s:1,   c:'#00d4ff', d:1.1, dur:3.1 },
+  { x:85, y:38, s:2.5, c:'#fff',    d:0.5, dur:2.6 },
+  { x:92, y:15, s:1.5, c:'#00ff88', d:1.9, dur:3.4 },
+  { x:8,  y:55, s:1,   c:'#00d4ff', d:0.2, dur:3.0 },
+  { x:18, y:70, s:2,   c:'#00ff88', d:1.4, dur:2.7 },
+  { x:28, y:85, s:1.5, c:'#fff',    d:0.6, dur:3.6 },
+  { x:40, y:60, s:1,   c:'#00d4ff', d:1.8, dur:2.4 },
+  { x:50, y:78, s:2,   c:'#00ff88', d:0.9, dur:3.3 },
+  { x:62, y:50, s:1.5, c:'#fff',    d:1.3, dur:2.8 },
+  { x:72, y:68, s:1,   c:'#00d4ff', d:0.1, dur:3.7 },
+  { x:82, y:82, s:2.5, c:'#00ff88', d:1.7, dur:2.3 },
+  { x:90, y:55, s:1,   c:'#fff',    d:0.4, dur:3.5 },
+  { x:96, y:72, s:1.5, c:'#00d4ff', d:2.0, dur:2.9 },
+  { x:3,  y:40, s:2,   c:'#00ff88', d:1.0, dur:3.2 },
+  { x:38, y:92, s:1,   c:'#fff',    d:1.5, dur:2.6 },
+  { x:58, y:88, s:1.5, c:'#00d4ff', d:0.3, dur:3.9 },
+  { x:78, y:45, s:2,   c:'#00ff88', d:1.6, dur:2.5 },
+  { x:95, y:90, s:1,   c:'#fff',    d:0.8, dur:3.1 },
+];
+
+const StarField = () => (
+  <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+    {STARS.map((s, i) => (
+      <div
+        key={i}
+        className="absolute rounded-full animate-twinkle"
+        style={{
+          left: `${s.x}%`,
+          top: `${s.y}%`,
+          width: `${s.s}px`,
+          height: `${s.s}px`,
+          background: s.c,
+          boxShadow: `0 0 ${s.s * 3}px ${s.c}`,
+          animationDuration: `${s.dur}s`,
+          animationDelay: `${s.d}s`,
+        }}
+      />
+    ))}
+  </div>
+);
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -101,8 +152,7 @@ const RegisterPage = () => {
     } catch (err) {
       console.error('Registration error:', err);
       // Show specific error message from backend
-      const errorMessage = err.response?.data?.error || err.response?.data?.message || 'Registration failed. Please try again.';
-      setError(errorMessage);
+      setError(getErrorMessage(err, 'Registration failed. Please try again.'));
     } finally {
       setLoading(false);
     }
@@ -121,10 +171,11 @@ const RegisterPage = () => {
       <div className="hidden lg:flex lg:w-2/5 relative overflow-hidden flex-col justify-center items-center p-12"
         style={{ background: 'linear-gradient(135deg,#07071a 0%,#0d1a2a 50%,#07071a 100%)' }}>
         <div className="absolute inset-0" style={{ backgroundImage:'linear-gradient(rgba(0,255,136,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,136,0.04) 1px,transparent 1px)', backgroundSize:'60px 60px' }}/>
+        <StarField />
         <div className="absolute top-1/4 left-1/4 w-80 h-80 rounded-full blur-3xl" style={{ background:'radial-gradient(circle,rgba(0,255,136,0.1) 0%,transparent 70%)' }}/>
         <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full blur-3xl" style={{ background:'radial-gradient(circle,rgba(0,212,255,0.07) 0%,transparent 70%)' }}/>
         <div className="relative z-10 flex flex-col items-center text-center">
-          <div className="mb-5" style={{ filter:'drop-shadow(0 0 25px rgba(0,255,136,0.6))' }}>
+          <div className="mb-5 animate-float" style={{ filter:'drop-shadow(0 0 30px rgba(0,255,136,0.7))' }}>
             <svg viewBox="0 0 120 140" className="h-20 w-auto">
               <defs><linearGradient id="rls" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#00ff88"/><stop offset="100%" stopColor="#007c35"/></linearGradient></defs>
               <path d="M60 8 L110 25 L110 70 Q110 115 60 132 Q10 115 10 70 L10 25 Z" fill="url(#rls)" stroke="rgba(0,255,136,0.5)" strokeWidth="2.5"/>
@@ -157,20 +208,42 @@ const RegisterPage = () => {
 
       {/* Right Side */}
       <div className="w-full lg:w-3/5 flex items-center justify-center p-4 sm:p-6 overflow-y-auto relative">
-        <div className="absolute top-0 right-0 w-72 h-72 rounded-full blur-3xl" style={{ background:'radial-gradient(circle,rgba(0,255,136,0.05) 0%,transparent 70%)' }}/>
-        <div className="absolute bottom-0 left-0 w-72 h-72 rounded-full blur-3xl" style={{ background:'radial-gradient(circle,rgba(0,212,255,0.04) 0%,transparent 70%)' }}/>
+
+        {/* Mobile star field */}
+        <div className="lg:hidden absolute inset-0">
+          <StarField />
+        </div>
+
+        <div className="absolute top-0 right-0 w-72 h-72 rounded-full blur-3xl pointer-events-none" style={{ background:'radial-gradient(circle,rgba(0,255,136,0.06) 0%,transparent 70%)' }}/>
+        <div className="absolute bottom-0 left-0 w-72 h-72 rounded-full blur-3xl pointer-events-none" style={{ background:'radial-gradient(circle,rgba(0,212,255,0.05) 0%,transparent 70%)' }}/>
+
         <div className="w-full max-w-xl py-8 relative z-10">
           {/* Mobile Logo */}
           <div className="lg:hidden text-center mb-6">
-            <Link to="/" className="inline-flex items-center gap-2">
-              <svg viewBox="0 0 120 140" className="h-9 w-auto" style={{ filter:'drop-shadow(0 0 10px rgba(0,255,136,0.6))' }}>
-                <defs><linearGradient id="rmlg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#00ff88"/><stop offset="100%" stopColor="#007c35"/></linearGradient></defs>
-                <path d="M60 8 L110 25 L110 70 Q110 115 60 132 Q10 115 10 70 L10 25 Z" fill="url(#rmlg)" stroke="rgba(0,255,136,0.5)" strokeWidth="2"/>
-                <text x="60" y="88" textAnchor="middle" fill="#003320" fontSize="55" fontWeight="900" fontFamily="Arial Black,sans-serif">M</text>
-              </svg>
-              <span className="text-lg font-black"><span style={{ color:'#00ff88' }}>MATCHIFY</span><span style={{ color:'#00d4ff' }}>.PRO</span></span>
+            <Link to="/" className="inline-flex flex-col items-center gap-1">
+              <div style={{ filter:'drop-shadow(0 0 16px rgba(0,255,136,0.8))' }}>
+                <svg viewBox="0 0 120 140" className="h-14 w-auto">
+                  <defs><linearGradient id="rmlg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#00ff88"/><stop offset="100%" stopColor="#007c35"/></linearGradient></defs>
+                  <path d="M60 8 L110 25 L110 70 Q110 115 60 132 Q10 115 10 70 L10 25 Z" fill="url(#rmlg)" stroke="rgba(0,255,136,0.5)" strokeWidth="2"/>
+                  <text x="60" y="88" textAnchor="middle" fill="#003320" fontSize="55" fontWeight="900" fontFamily="Arial Black,sans-serif">M</text>
+                </svg>
+              </div>
+              <span className="text-2xl font-black tracking-tight">
+                <span style={{ color:'#00ff88', textShadow:'0 0 20px rgba(0,255,136,0.5)' }}>MATCHIFY</span>
+                <span style={{ color:'#00d4ff', textShadow:'0 0 20px rgba(0,212,255,0.5)' }}>.PRO</span>
+              </span>
+              <span className="text-xs" style={{ color:'rgba(255,255,255,0.35)' }}>India's Premier Badminton Platform</span>
             </Link>
           </div>
+
+          {/* Glass card */}
+          <div className="rounded-2xl p-5 sm:p-7" style={{
+            background: 'rgba(13,13,36,0.85)',
+            border: '1px solid rgba(0,255,136,0.12)',
+            backdropFilter: 'blur(20px)',
+            boxShadow: '0 0 40px rgba(0,255,136,0.05), 0 25px 50px rgba(0,0,0,0.4)',
+          }}>
+
           <div className="text-center mb-6">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold mb-3" style={{ background:'rgba(0,255,136,0.08)', border:'1px solid rgba(0,255,136,0.2)', color:'#00ff88' }}>
               <SparklesIcon className="w-3.5 h-3.5" /> Join the Champions!
@@ -180,9 +253,10 @@ const RegisterPage = () => {
           </div>
 
           {error && (
-            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm flex items-center gap-2">
-              <span className="text-lg">⚠️</span>
-              {typeof error === 'string' ? error : 'Registration failed. Please try again.'}
+            <div className="mb-5 p-4 rounded-xl text-sm flex items-start gap-2"
+              style={{ background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.3)', color:'#f87171' }}>
+              <span className="flex-shrink-0 text-base">⚠️</span>
+              <span>{typeof error === 'string' ? error : 'Registration failed. Please try again.'}</span>
             </div>
           )}
 
@@ -414,14 +488,23 @@ const RegisterPage = () => {
             </div>
           </form>
 
-          <div className="mt-8 text-center">
-            <p className="text-gray-400">
+          <div className="mt-6 text-center">
+            {/* Divider */}
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex-1 h-px" style={{ background:'rgba(255,255,255,0.08)' }}/>
+              <span className="text-xs" style={{ color:'rgba(255,255,255,0.3)' }}>or</span>
+              <div className="flex-1 h-px" style={{ background:'rgba(255,255,255,0.08)' }}/>
+            </div>
+            <p className="text-sm" style={{ color:'rgba(255,255,255,0.4)' }}>
               Already have an account?{' '}
-              <Link to={redirectUrl ? `/login?redirect=${encodeURIComponent(redirectUrl)}` : '/login'} className="font-bold" style={{ color:'#00ff88' }}>
-                Sign in here
+              <Link to={redirectUrl ? `/login?redirect=${encodeURIComponent(redirectUrl)}` : '/login'}
+                className="font-bold transition-colors hover:underline" style={{ color:'#00ff88' }}>
+                Sign in here →
               </Link>
             </p>
           </div>
+
+          </div>{/* end glass card */}
         </div>
       </div>
 

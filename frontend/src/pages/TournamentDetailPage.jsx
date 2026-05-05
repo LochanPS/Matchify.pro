@@ -854,11 +854,14 @@ const TournamentDetailPage = () => {
               {tournament.status === 'published' && (
                 <button
                   onClick={() => {
-                    // Organizers go to full management page, others go to read-only view
-                    if (user && user.id === tournament.organizerId) {
-                      navigate(`/tournaments/${id}/draws`);
+                    // Everyone goes to the same draws page
+                    // The page will show/hide management buttons based on role
+                    if (tournament.categories && tournament.categories.length > 0) {
+                      // Navigate to first category's draw
+                      navigate(`/tournaments/${id}/draws/${tournament.categories[0].id}`);
                     } else {
-                      navigate(`/player/tournaments/${id}/draws`);
+                      // No categories yet, go to draws overview
+                      navigate(`/tournaments/${id}/draws`);
                     }
                   }}
                   className="w-full mt-4 flex items-center justify-center gap-2 bg-amber-500/20 text-amber-400 border border-amber-500/30 px-4 py-3 rounded-xl hover:bg-amber-500/30 font-semibold transition-all"

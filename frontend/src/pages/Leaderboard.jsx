@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
-import { Trophy, Medal, Award, TrendingUp, Users, Target, Zap, Crown, Star } from 'lucide-react';
+import { Trophy, Medal, Award, TrendingUp, Users, Target, Zap, Crown, Star, ArrowLeft } from 'lucide-react';
 
 export default function Leaderboard() {
   const navigate = useNavigate();
@@ -105,6 +105,19 @@ export default function Leaderboard() {
       </div>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Back Button */}
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 mb-6 transition-all relative overflow-hidden group"
+        >
+          <div 
+            className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+            style={{ background: 'rgba(255,255,255,0.05)' }}
+          />
+          <ArrowLeft className="w-5 h-5 text-emerald-400 relative z-10" />
+          <span className="text-sm font-semibold text-gray-300 relative z-10">Back</span>
+        </button>
+
         {/* Header */}
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-3 mb-4">

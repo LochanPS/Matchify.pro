@@ -95,7 +95,10 @@ export default function AdminDashboard() {
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-8">
-              <h1 className="text-2xl font-bold text-white">MATCHIFY.PRO</h1>
+              <h1 className="text-2xl font-bold">
+                <span style={{ color: '#ffffff' }}>matchify</span>
+                <span style={{ color: '#00ff88' }}>.pro</span>
+              </h1>
               <div className="flex items-center gap-2">
                 <span className="px-3 py-1 bg-red-600 text-white text-sm font-bold rounded">
                   ADMIN

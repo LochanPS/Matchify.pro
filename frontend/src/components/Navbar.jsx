@@ -142,7 +142,7 @@ const Navbar = () => {
             <div className="flex items-center gap-8">
               {/* Logo */}
               <Link to="/admin-dashboard" className="group hover:opacity-90 transition-opacity">
-                <MatchifyLogo size={42} variant="horizontal" />
+                <MatchifyLogo size={42} variant="full" />
               </Link>
 
               {/* Admin Navigation */}
@@ -200,7 +200,7 @@ const Navbar = () => {
           <div className="flex items-center gap-8">
             {/* Logo */}
             <Link to="/" className="group hover:opacity-90 transition-opacity">
-              <MatchifyLogo size={42} variant="horizontal" />
+              <MatchifyLogo size={42} variant="full" />
             </Link>
 
             {/* Desktop Navigation */}

@@ -55,6 +55,82 @@ const HomePageMobile = () => {
     <div className="min-h-screen relative overflow-hidden" style={{ 
       background: 'linear-gradient(180deg, #0a0a1f 0%, #07071a 30%, #0d1a2a 60%, #07071a 100%)' 
     }}>
+      {/* Sticky Header with Sign In & Sign Up */}
+      {!user && (
+        <div 
+          className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md border-b"
+          style={{ 
+            background: 'linear-gradient(135deg, rgba(7,7,26,0.95), rgba(13,26,42,0.95))', 
+            borderColor: 'rgba(0,200,83,0.2)',
+            boxShadow: '0 4px 20px rgba(0,200,83,0.1)',
+            animation: 'slideDown 0.5s ease-out'
+          }}
+        >
+          <div className="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
+            {/* Logo */}
+            <Link to="/" className="flex items-center gap-2">
+              <div className="relative">
+                <div 
+                  className="absolute inset-0 blur-lg opacity-60"
+                  style={{ 
+                    background: 'radial-gradient(circle, rgba(0,200,83,0.6) 0%, transparent 70%)',
+                    animation: 'glow 3s ease-in-out infinite'
+                  }}
+                />
+                <MatchifyLogo size={28} variant="icon" />
+              </div>
+              <span 
+                className="font-bold text-base"
+                style={{ 
+                  background: 'linear-gradient(135deg, #00c853, #00ff88)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text'
+                }}
+              >
+                matchify.pro
+              </span>
+            </Link>
+
+            {/* Sign In & Sign Up Buttons */}
+            <div className="flex items-center gap-2">
+              <Link 
+                to="/login"
+                className="px-4 py-2 rounded-lg font-semibold text-sm transition-all relative overflow-hidden group"
+                style={{ 
+                  background: 'linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.05))', 
+                  border: '1px solid rgba(255,255,255,0.15)',
+                  color: '#ffffff',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                }}
+              >
+                <div 
+                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                  style={{ background: 'rgba(255,255,255,0.05)' }}
+                />
+                <span className="relative z-10">Sign in</span>
+              </Link>
+              
+              <Link 
+                to="/register"
+                className="px-4 py-2 rounded-lg font-bold text-sm transition-all relative overflow-hidden group"
+                style={{ 
+                  background: 'linear-gradient(135deg, #00c853, #00ff88)',
+                  color: '#003320',
+                  boxShadow: '0 4px 12px rgba(0,200,83,0.4), inset 0 1px 0 rgba(255,255,255,0.3)'
+                }}
+              >
+                <div 
+                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                  style={{ background: 'rgba(255,255,255,0.2)' }}
+                />
+                <span className="relative z-10">Sign up</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Animated Background Elements */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         {/* Large Gradient Orbs */}
@@ -126,15 +202,35 @@ const HomePageMobile = () => {
           0% { background-position: -200% center; }
           100% { background-position: 200% center; }
         }
+        @keyframes slideDown {
+          0% { transform: translateY(-100%); opacity: 0; }
+          100% { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes fadeIn {
+          0% { opacity: 0; transform: translateY(20px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes scaleIn {
+          0% { opacity: 0; transform: scale(0.9); }
+          100% { opacity: 1; transform: scale(1); }
+        }
+        @keyframes slideUp {
+          0% { opacity: 0; transform: translateY(30px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.05); }
+        }
       `}</style>
 
       {/* Mobile-optimized container */}
-      <div className="relative z-10 max-w-md mx-auto px-4 py-6">
+      <div className="relative z-10 max-w-md mx-auto px-4" style={{ paddingTop: user ? '24px' : '80px', paddingBottom: '24px' }}>
         
         {/* Hero Section */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-8" style={{ animation: 'fadeIn 0.8s ease-out' }}>
           {/* Logo with Glow */}
-          <div className="flex justify-center mb-4 relative">
+          <div className="flex justify-center mb-4 relative" style={{ animation: 'scaleIn 0.6s ease-out' }}>
             <div 
               className="absolute inset-0 blur-2xl opacity-60"
               style={{ 
@@ -154,7 +250,8 @@ const HomePageMobile = () => {
               background: 'linear-gradient(135deg, rgba(0,200,83,0.2), rgba(0,255,136,0.15))', 
               border: '2px solid rgba(0,200,83,0.5)', 
               color: '#00ff88',
-              boxShadow: '0 0 20px rgba(0,200,83,0.3), inset 0 0 20px rgba(0,200,83,0.1)'
+              boxShadow: '0 0 20px rgba(0,200,83,0.3), inset 0 0 20px rgba(0,200,83,0.1)',
+              animation: 'slideDown 0.8s ease-out 0.2s both'
             }}
           >
             <div 
@@ -165,12 +262,12 @@ const HomePageMobile = () => {
                 animation: 'shimmer 3s infinite'
               }}
             />
-            <FireIcon className="w-4 h-4 relative z-10" style={{ filter: 'drop-shadow(0 0 4px currentColor)' }} />
+            <FireIcon className="w-4 h-4 relative z-10" style={{ filter: 'drop-shadow(0 0 4px currentColor)', animation: 'pulse 2s ease-in-out infinite' }} />
             <span className="relative z-10">India's #1 Badminton Platform</span>
           </div>
 
           {/* Main Heading with Gradient Text */}
-          <h1 className="text-5xl font-black mb-3 leading-tight relative">
+          <h1 className="text-5xl font-black mb-3 leading-tight relative" style={{ animation: 'fadeIn 1s ease-out 0.3s both' }}>
             <span 
               className="block text-white"
               style={{ 
@@ -197,15 +294,15 @@ const HomePageMobile = () => {
           </h1>
 
           {/* Tagline */}
-          <p className="text-sm text-gray-400 mb-2 px-4">
+          <p className="text-sm text-gray-400 mb-2 px-4" style={{ animation: 'fadeIn 1s ease-out 0.4s both' }}>
             Join <span className="font-bold text-emerald-400">10,000+</span> players across India
           </p>
-          <p className="text-sm text-gray-400 mb-6 px-4">
+          <p className="text-sm text-gray-400 mb-6 px-4" style={{ animation: 'fadeIn 1s ease-out 0.5s both' }}>
             Register for tournaments, track progress, compete with the best
           </p>
 
           {/* Social Proof */}
-          <div className="flex items-center justify-center gap-3 mb-6">
+          <div className="flex items-center justify-center gap-3 mb-6" style={{ animation: 'slideUp 0.8s ease-out 0.6s both' }}>
             <div className="flex -space-x-2">
               {['R','P','A','K'].map((letter, i) => (
                 <div 
@@ -214,7 +311,8 @@ const HomePageMobile = () => {
                   style={{ 
                     background: 'linear-gradient(135deg,#00c853,#00ff88)', 
                     borderColor: '#07071a', 
-                    color: '#003320' 
+                    color: '#003320',
+                    animation: `scaleIn 0.5s ease-out ${0.7 + i * 0.1}s both`
                   }}
                 >
                   {letter}
@@ -222,14 +320,20 @@ const HomePageMobile = () => {
               ))}
             </div>
             <div className="flex items-center gap-1">
-              {[...Array(5)].map((_, i) => <StarIcon key={i} className="w-4 h-4 text-amber-400" />)}
+              {[...Array(5)].map((_, i) => (
+                <StarIcon 
+                  key={i} 
+                  className="w-4 h-4 text-amber-400" 
+                  style={{ animation: `scaleIn 0.3s ease-out ${1 + i * 0.1}s both` }}
+                />
+              ))}
               <span className="text-xs font-medium text-gray-400 ml-1">4.9/5</span>
             </div>
           </div>
 
           {/* CTA Buttons with Enhanced Depth */}
           {user ? (
-            <div className="space-y-3 mb-8">
+            <div className="space-y-3 mb-8" style={{ animation: 'slideUp 0.8s ease-out 0.7s both' }}>
               <Link 
                 to={getDashboardLink()}
                 className="flex items-center justify-center gap-2 w-full py-4 rounded-xl font-bold text-base transition-all relative overflow-hidden group"
@@ -275,7 +379,7 @@ const HomePageMobile = () => {
               </div>
             </div>
           ) : (
-            <div className="space-y-3 mb-8">
+            <div className="space-y-3 mb-8" style={{ animation: 'slideUp 0.8s ease-out 0.7s both' }}>
               <Link 
                 to="/register"
                 className="flex items-center justify-center gap-2 w-full py-4 rounded-xl font-bold text-base transition-all relative overflow-hidden group"
@@ -284,11 +388,11 @@ const HomePageMobile = () => {
                   backgroundSize: '200% auto',
                   color: '#003320',
                   boxShadow: '0 8px 25px rgba(0,200,83,0.4), 0 0 40px rgba(0,200,83,0.2), inset 0 1px 0 rgba(255,255,255,0.3)',
-                  animation: 'shimmer 3s linear infinite'
+                  animation: 'shimmer 3s linear infinite, pulse 3s ease-in-out infinite'
                 }}
               >
                 <div 
-                  className="absolute inset-0 opacity-0 group-active:opacity-100 transition-opacity"
+                  className="absolute inset-0 opacity-0 group-active:opacity-100 transition-opacity duration-200"
                   style={{ background: 'radial-gradient(circle at center, rgba(255,255,255,0.3), transparent)' }}
                 />
                 <PlayIcon className="w-5 h-5 relative z-10" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
@@ -298,7 +402,7 @@ const HomePageMobile = () => {
               
               <Link 
                 to="/login"
-                className="flex items-center justify-center gap-2 w-full py-4 rounded-xl font-semibold text-base border transition-all relative overflow-hidden"
+                className="flex items-center justify-center gap-2 w-full py-4 rounded-xl font-semibold text-base border transition-all relative overflow-hidden group"
                 style={{ 
                   background: 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.15))', 
                   borderColor: 'rgba(99,102,241,0.4)', 
@@ -306,6 +410,10 @@ const HomePageMobile = () => {
                   boxShadow: '0 4px 15px rgba(99,102,241,0.2), inset 0 1px 0 rgba(255,255,255,0.1)'
                 }}
               >
+                <div 
+                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                  style={{ background: 'rgba(99,102,241,0.1)' }}
+                />
                 <span className="relative z-10">Sign In</span>
               </Link>
             </div>
@@ -319,7 +427,8 @@ const HomePageMobile = () => {
             background: 'linear-gradient(135deg, rgba(0,200,83,0.15) 0%, rgba(99,102,241,0.15) 100%)',
             border: '2px solid rgba(0,200,83,0.3)',
             backdropFilter: 'blur(20px)',
-            boxShadow: '0 8px 32px rgba(0,200,83,0.2), inset 0 1px 0 rgba(255,255,255,0.1)'
+            boxShadow: '0 8px 32px rgba(0,200,83,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
+            animation: 'fadeIn 0.8s ease-out 0.8s both'
           }}
         >
           {/* Animated Background Glow */}
@@ -363,10 +472,11 @@ const HomePageMobile = () => {
                     style={{ 
                       background: color.bg,
                       border: `2px solid ${color.border}`,
-                      boxShadow: `0 4px 15px ${color.shadow}, inset 0 1px 0 rgba(255,255,255,0.1)`
+                      boxShadow: `0 4px 15px ${color.shadow}, inset 0 1px 0 rgba(255,255,255,0.1)`,
+                      animation: `scaleIn 0.5s ease-out ${0.9 + i * 0.1}s both`
                     }}
                   >
-                    <div className="text-3xl mb-2" style={{ filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.3))' }}>{s.icon}</div>
+                    <div className="text-3xl mb-2" style={{ filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.3))', animation: 'float 3s ease-in-out infinite' }}>{s.icon}</div>
                     <p className="text-3xl font-black mb-1" style={{ color: color.text, textShadow: `0 0 20px ${color.shadow}` }}>
                       {s.value}
                     </p>
@@ -385,7 +495,8 @@ const HomePageMobile = () => {
             background: 'linear-gradient(135deg, rgba(99,102,241,0.15) 0%, rgba(139,92,246,0.15) 100%)',
             border: '2px solid rgba(99,102,241,0.3)',
             backdropFilter: 'blur(20px)',
-            boxShadow: '0 8px 32px rgba(99,102,241,0.2), inset 0 1px 0 rgba(255,255,255,0.1)'
+            boxShadow: '0 8px 32px rgba(99,102,241,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
+            animation: 'fadeIn 0.8s ease-out 1s both'
           }}
         >
           {/* Animated Glow */}
@@ -437,17 +548,19 @@ const HomePageMobile = () => {
                 return (
                   <div 
                     key={i}
-                    className="p-4 rounded-xl relative overflow-hidden"
+                    className="p-4 rounded-xl relative overflow-hidden group transition-transform duration-300 hover:scale-105"
                     style={{ 
                       background: scheme.bg,
                       border: `2px solid ${scheme.border}`,
-                      boxShadow: `0 4px 15px ${scheme.shadow}, inset 0 1px 0 rgba(255,255,255,0.1)`
+                      boxShadow: `0 4px 15px ${scheme.shadow}, inset 0 1px 0 rgba(255,255,255,0.1)`,
+                      animation: `slideUp 0.5s ease-out ${1.1 + i * 0.1}s both`
                     }}
                   >
                     <div 
                       className={`inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br ${scheme.gradient} rounded-xl mb-3 relative`}
                       style={{ 
-                        boxShadow: `0 4px 12px ${scheme.shadow}, inset 0 1px 0 rgba(255,255,255,0.3)`
+                        boxShadow: `0 4px 12px ${scheme.shadow}, inset 0 1px 0 rgba(255,255,255,0.3)`,
+                        animation: 'pulse 3s ease-in-out infinite'
                       }}
                     >
                       <f.icon className="w-6 h-6 text-white" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
@@ -468,6 +581,7 @@ const HomePageMobile = () => {
             background: 'rgba(13,26,42,0.8)',
             border: '1px solid rgba(0,200,83,0.2)',
             backdropFilter: 'blur(10px)',
+            animation: 'fadeIn 0.8s ease-out 1.2s both'
           }}
         >
           <div className="text-center mb-5">
@@ -502,6 +616,7 @@ const HomePageMobile = () => {
             background: 'rgba(13,26,42,0.8)',
             border: '1px solid rgba(0,200,83,0.2)',
             backdropFilter: 'blur(10px)',
+            animation: 'fadeIn 0.8s ease-out 1.3s both'
           }}
         >
           <div className="text-center mb-5">
@@ -557,6 +672,7 @@ const HomePageMobile = () => {
             background: 'rgba(13,26,42,0.8)',
             border: '1px solid rgba(0,200,83,0.2)',
             backdropFilter: 'blur(10px)',
+            animation: 'fadeIn 0.8s ease-out 1.4s both'
           }}
         >
           <div className="text-center mb-5">
@@ -617,7 +733,8 @@ const HomePageMobile = () => {
             background: 'linear-gradient(135deg, rgba(0,200,83,0.2) 0%, rgba(99,102,241,0.2) 50%, rgba(245,158,11,0.2) 100%)',
             border: '2px solid rgba(0,200,83,0.4)',
             backdropFilter: 'blur(20px)',
-            boxShadow: '0 8px 32px rgba(0,200,83,0.3), inset 0 1px 0 rgba(255,255,255,0.1)'
+            boxShadow: '0 8px 32px rgba(0,200,83,0.3), inset 0 1px 0 rgba(255,255,255,0.1)',
+            animation: 'scaleIn 0.8s ease-out 1.5s both'
           }}
         >
           {/* Animated Rainbow Glow */}

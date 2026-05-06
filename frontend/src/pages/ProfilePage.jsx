@@ -663,62 +663,62 @@ export default function ProfilePage() {
               {profile?.name || 'No Name Set'}
             </h2>
               
-            {/* Matchify Code */}
-            {profile?.matchifyCode && (
-              <div className="mb-4">
+            {/* Matchify Code - Always show with fallback */}
+            <div className="mb-4">
+              <div 
+                className="p-4 rounded-xl relative overflow-hidden"
+                style={{ 
+                  background: 'linear-gradient(135deg, rgba(0,200,83,0.25), rgba(0,255,136,0.2))',
+                  border: '2px solid rgba(0,200,83,0.5)',
+                  boxShadow: '0 4px 15px rgba(0,200,83,0.4), inset 0 1px 0 rgba(255,255,255,0.2)'
+                }}
+              >
                 <div 
-                  className="p-4 rounded-xl relative overflow-hidden"
-                  style={{ 
-                    background: 'linear-gradient(135deg, rgba(0,200,83,0.2), rgba(0,255,136,0.15))',
-                    border: '2px solid rgba(0,200,83,0.4)',
-                    boxShadow: '0 4px 15px rgba(0,200,83,0.3), inset 0 1px 0 rgba(255,255,255,0.1)'
+                  className="absolute inset-0 opacity-20"
+                  style={{
+                    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)',
+                    backgroundSize: '200% 100%',
+                    animation: 'shimmer 3s infinite'
                   }}
-                >
-                  <div 
-                    className="absolute inset-0 opacity-20"
-                    style={{
-                      background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
-                      backgroundSize: '200% 100%',
-                      animation: 'shimmer 4s infinite'
-                    }}
-                  />
-                  <div className="flex items-center justify-between relative z-10">
-                    <div>
-                      <p className="text-xs font-bold mb-1" style={{ color: '#6ee7b7' }}>Matchify Code:</p>
-                      <p 
-                        className="text-2xl font-mono font-black tracking-wider"
-                        style={{ 
-                          color: '#00ff88',
-                          textShadow: '0 0 20px rgba(0,200,83,0.5)'
-                        }}
-                      >
-                        {profile.matchifyCode}
-                      </p>
-                      <p className="text-xs mt-1" style={{ color: '#6ee7b7' }}>
-                        Your universal Matchify.pro ID
-                      </p>
-                    </div>
+                />
+                <div className="flex items-center justify-between relative z-10">
+                  <div className="flex-1">
+                    <p className="text-xs font-bold mb-1" style={{ color: '#6ee7b7' }}>Matchify ID</p>
+                    <p 
+                      className="text-2xl font-mono font-black tracking-wider"
+                      style={{ 
+                        color: '#00ff88',
+                        textShadow: '0 0 20px rgba(0,200,83,0.6)'
+                      }}
+                    >
+                      {profile?.matchifyCode || 'Loading...'}
+                    </p>
+                    <p className="text-xs mt-1" style={{ color: '#6ee7b7' }}>
+                      Your universal Matchify.pro ID
+                    </p>
+                  </div>
+                  {profile?.matchifyCode && (
                     <button
                       onClick={() => {
                         navigator.clipboard.writeText(profile.matchifyCode);
-                        setSuccess('Matchify code copied!');
+                        setSuccess('Matchify ID copied!');
                         setTimeout(() => setSuccess(''), 2000);
                       }}
-                      className="p-3 rounded-lg transition-all"
+                      className="p-3 rounded-lg transition-all hover:scale-110"
                       style={{ 
                         background: 'rgba(0,200,83,0.3)',
-                        border: '1px solid rgba(0,200,83,0.5)'
+                        border: '1px solid rgba(0,200,83,0.6)'
                       }}
-                      title="Copy matchify code"
+                      title="Copy Matchify ID"
                     >
                       <svg className="w-6 h-6 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                       </svg>
                     </button>
-                  </div>
+                  )}
                 </div>
               </div>
-            )}
+            </div>
               
             {/* Contact Information */}
             <div className="space-y-3 mb-4">

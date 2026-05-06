@@ -1,8 +1,8 @@
 {
   "name": "matchify-frontend",
   "private": true,
-  "version": "1.0.2",
-  "description": "Matchify Tournament Platform Frontend",
+  "version": "1.0.3",
+  "description": "Matchify Tournament Platform Frontend - Matchify ID Update",
   "type": "module",
   "scripts": {
     "dev": "vite",

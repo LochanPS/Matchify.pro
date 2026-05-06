@@ -99,7 +99,7 @@ export default function MatchifyLogo({
         fill="url(#shuttleGrad)"
         filter="url(#softGlow)"
       />
-      <ellipse cx="50" cy="68" rx="7" cy="5" fill="#007c35" />
+      <ellipse cx="50" cy="68" rx="7" ry="5" fill="#007c35" />
       <ellipse cx="47" cy="66" rx="3" ry="2" fill="rgba(255,255,255,0.4)" />
     </svg>
   );

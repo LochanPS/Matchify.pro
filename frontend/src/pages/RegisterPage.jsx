@@ -176,15 +176,11 @@ const RegisterPage = () => {
         <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full blur-3xl" style={{ background:'radial-gradient(circle,rgba(0,212,255,0.07) 0%,transparent 70%)' }}/>
         <div className="relative z-10 flex flex-col items-center text-center">
           <div className="mb-5 animate-float" style={{ filter:'drop-shadow(0 0 30px rgba(0,255,136,0.7))' }}>
-            <svg viewBox="0 0 120 140" className="h-20 w-auto">
-              <defs><linearGradient id="rls" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#00ff88"/><stop offset="100%" stopColor="#007c35"/></linearGradient></defs>
-              <path d="M60 8 L110 25 L110 70 Q110 115 60 132 Q10 115 10 70 L10 25 Z" fill="url(#rls)" stroke="rgba(0,255,136,0.5)" strokeWidth="2.5"/>
-              <text x="60" y="88" textAnchor="middle" fill="#003320" fontSize="55" fontWeight="900" fontFamily="Arial Black,sans-serif">M</text>
-            </svg>
+            <img src="/logo.png" alt="matchify.pro" className="h-20 w-auto" />
           </div>
           <h1 className="text-4xl font-black mb-2">
-            <span style={{ color:'#00ff88', textShadow:'0 0 25px rgba(0,255,136,0.5)' }}>MATCHIFY</span>
-            <span style={{ color:'#00d4ff', textShadow:'0 0 25px rgba(0,212,255,0.5)' }}>.PRO</span>
+            <span style={{ color:'#ffffff', textShadow:'0 0 25px rgba(255,255,255,0.3)' }}>matchify</span>
+            <span style={{ color:'#00ff88', textShadow:'0 0 25px rgba(0,255,136,0.5)' }}>.pro</span>
           </h1>
           <p className="text-sm mb-6" style={{ color:'rgba(255,255,255,0.45)' }}>India's fastest growing badminton community</p>
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8 text-xs font-bold" style={{ background:'rgba(0,255,136,0.08)', border:'1px solid rgba(0,255,136,0.2)', color:'#00ff88' }}>
@@ -222,15 +218,11 @@ const RegisterPage = () => {
           <div className="lg:hidden text-center mb-6">
             <Link to="/" className="inline-flex flex-col items-center gap-1">
               <div style={{ filter:'drop-shadow(0 0 16px rgba(0,255,136,0.8))' }}>
-                <svg viewBox="0 0 120 140" className="h-14 w-auto">
-                  <defs><linearGradient id="rmlg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#00ff88"/><stop offset="100%" stopColor="#007c35"/></linearGradient></defs>
-                  <path d="M60 8 L110 25 L110 70 Q110 115 60 132 Q10 115 10 70 L10 25 Z" fill="url(#rmlg)" stroke="rgba(0,255,136,0.5)" strokeWidth="2"/>
-                  <text x="60" y="88" textAnchor="middle" fill="#003320" fontSize="55" fontWeight="900" fontFamily="Arial Black,sans-serif">M</text>
-                </svg>
+                <img src="/logo.png" alt="matchify.pro" className="h-14 w-auto" />
               </div>
               <span className="text-2xl font-black tracking-tight">
-                <span style={{ color:'#00ff88', textShadow:'0 0 20px rgba(0,255,136,0.5)' }}>MATCHIFY</span>
-                <span style={{ color:'#00d4ff', textShadow:'0 0 20px rgba(0,212,255,0.5)' }}>.PRO</span>
+                <span style={{ color:'#ffffff', textShadow:'0 0 20px rgba(255,255,255,0.3)' }}>matchify</span>
+                <span style={{ color:'#00ff88', textShadow:'0 0 20px rgba(0,255,136,0.5)' }}>.pro</span>
               </span>
               <span className="text-xs" style={{ color:'rgba(255,255,255,0.35)' }}>India's Premier Badminton Platform</span>
             </Link>

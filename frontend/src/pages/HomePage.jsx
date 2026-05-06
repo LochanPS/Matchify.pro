@@ -505,19 +505,10 @@ function HomePage() {
 
           {/* brand */}
           <div className="flex items-center gap-2">
-            <svg viewBox="0 0 120 140" className="h-10 w-auto" style={{ filter: 'drop-shadow(0 0 10px rgba(0,255,136,0.5))' }}>
-              <defs>
-                <linearGradient id="fg1" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#00ff88" />
-                  <stop offset="100%" stopColor="#007c35" />
-                </linearGradient>
-              </defs>
-              <path d="M60 8 L110 25 L110 70 Q110 115 60 132 Q10 115 10 70 L10 25 Z" fill="url(#fg1)" stroke="rgba(0,255,136,0.5)" strokeWidth="2"/>
-              <text x="60" y="88" textAnchor="middle" fill="#003320" fontSize="55" fontWeight="900" fontFamily="Arial Black,sans-serif">M</text>
-            </svg>
+            <img src="/logo.png" alt="matchify.pro" className="h-10 w-auto" style={{ filter: 'drop-shadow(0 0 10px rgba(0,255,136,0.5))' }} />
             <span className="font-black text-xl">
-              <span style={{ color: '#00ff88' }}>MATCHIFY</span>
-              <span style={{ color: '#00d4ff' }}>.PRO</span>
+              <span style={{ color: '#ffffff' }}>matchify</span>
+              <span style={{ color: '#00ff88' }}>.pro</span>
             </span>
           </div>
 

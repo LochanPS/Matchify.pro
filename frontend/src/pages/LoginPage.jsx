@@ -140,21 +140,12 @@ const LoginPage = () => {
         <div className="relative z-10 flex flex-col items-center text-center">
           {/* Logo */}
           <div className="mb-6 animate-float" style={{ filter: 'drop-shadow(0 0 30px rgba(0,255,136,0.7))' }}>
-            <svg viewBox="0 0 120 140" className="h-24 w-auto">
-              <defs>
-                <linearGradient id="ls1" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#00ff88" />
-                  <stop offset="100%" stopColor="#007c35" />
-                </linearGradient>
-              </defs>
-              <path d="M60 8 L110 25 L110 70 Q110 115 60 132 Q10 115 10 70 L10 25 Z" fill="url(#ls1)" stroke="rgba(0,255,136,0.5)" strokeWidth="2.5"/>
-              <text x="60" y="88" textAnchor="middle" fill="#003320" fontSize="55" fontWeight="900" fontFamily="Arial Black,sans-serif">M</text>
-            </svg>
+            <img src="/logo.png" alt="matchify.pro" className="h-24 w-auto" />
           </div>
 
           <h1 className="text-5xl font-black mb-3">
-            <span style={{ color: '#00ff88', textShadow: '0 0 30px rgba(0,255,136,0.6)' }}>MATCHIFY</span>
-            <span style={{ color: '#00d4ff', textShadow: '0 0 30px rgba(0,212,255,0.6)' }}>.PRO</span>
+            <span style={{ color: '#ffffff', textShadow: '0 0 30px rgba(255,255,255,0.3)' }}>matchify</span>
+            <span style={{ color: '#00ff88', textShadow: '0 0 30px rgba(0,255,136,0.6)' }}>.pro</span>
           </h1>
           <p className="text-base mb-8" style={{ color: 'rgba(255,255,255,0.5)' }}>India's Premier Badminton Platform</p>
 
@@ -204,20 +195,11 @@ const LoginPage = () => {
           <div className="lg:hidden text-center mb-8">
             <Link to="/" className="inline-flex flex-col items-center gap-2">
               <div style={{ filter: 'drop-shadow(0 0 16px rgba(0,255,136,0.8))' }}>
-                <svg viewBox="0 0 120 140" className="h-14 w-auto">
-                  <defs>
-                    <linearGradient id="mlg" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#00ff88" />
-                      <stop offset="100%" stopColor="#007c35" />
-                    </linearGradient>
-                  </defs>
-                  <path d="M60 8 L110 25 L110 70 Q110 115 60 132 Q10 115 10 70 L10 25 Z" fill="url(#mlg)" stroke="rgba(0,255,136,0.5)" strokeWidth="2"/>
-                  <text x="60" y="88" textAnchor="middle" fill="#003320" fontSize="55" fontWeight="900" fontFamily="Arial Black,sans-serif">M</text>
-                </svg>
+                <img src="/logo.png" alt="matchify.pro" className="h-14 w-auto" />
               </div>
               <span className="text-2xl font-black tracking-tight">
-                <span style={{ color: '#00ff88', textShadow: '0 0 20px rgba(0,255,136,0.5)' }}>MATCHIFY</span>
-                <span style={{ color: '#00d4ff', textShadow: '0 0 20px rgba(0,212,255,0.5)' }}>.PRO</span>
+                <span style={{ color: '#ffffff', textShadow: '0 0 20px rgba(255,255,255,0.3)' }}>matchify</span>
+                <span style={{ color: '#00ff88', textShadow: '0 0 20px rgba(0,255,136,0.5)' }}>.pro</span>
               </span>
               <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>India's Premier Badminton Platform</span>
             </Link>

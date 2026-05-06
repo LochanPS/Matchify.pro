@@ -10,9 +10,26 @@ import { v2 as cloudinary } from 'cloudinary';
 // Load environment variables first
 dotenv.config();
 
-// Validate environment variables before starting server
-import { validateEnvironment, getEnvironmentStatus } from './utils/validateEnv.js';
-validateEnvironment();
+// Validate environment variables before starting server (only in non-Vercel environments)
+// Vercel serverless functions don't have a traditional startup, so we skip validation there
+if (!process.env.VERCEL) {
+  try {
+    const { validateEnvironment } = await import('./utils/validateEnv.js');
+    validateEnvironment();
+  } catch (error) {
+    console.warn('⚠️ Environment validation skipped:', error.message);
+  }
+}
+
+// Import getEnvironmentStatus for health check
+let getEnvironmentStatus;
+try {
+  const envModule = await import('./utils/validateEnv.js');
+  getEnvironmentStatus = envModule.getEnvironmentStatus;
+} catch (error) {
+  console.warn('⚠️ Environment status check unavailable');
+  getEnvironmentStatus = () => ({ configured: [], missing: [], warnings: [] });
+}
 
 // Configure Cloudinary
 cloudinary.config({
@@ -196,8 +213,17 @@ app.get('/health', (req, res) => {
 
 // API Health check endpoint (for testing)
 app.get('/api/health', (req, res) => {
-  const envStatus = getEnvironmentStatus();
-  const hasIssues = envStatus.missing.length > 0;
+  let envStatus = { configured: [], missing: [], warnings: [] };
+  let hasIssues = false;
+  
+  try {
+    if (getEnvironmentStatus) {
+      envStatus = getEnvironmentStatus();
+      hasIssues = envStatus.missing.length > 0;
+    }
+  } catch (error) {
+    console.warn('Health check: Environment status unavailable');
+  }
   
   res.status(hasIssues ? 503 : 200).json({
     status: hasIssues ? 'degraded' : 'healthy',
@@ -207,9 +233,9 @@ app.get('/api/health', (req, res) => {
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
     environment: process.env.NODE_ENV || 'development',
-    version: '1.0.0',
+    version: '1.0.1',
     authRoutesLoaded: !!authRoutes,
-    deploymentTime: '2026-05-06T18:00:00Z',
+    deploymentTime: '2026-05-06T19:00:00Z',
     configuration: {
       database: !!process.env.DATABASE_URL,
       jwt: !!process.env.JWT_SECRET && !!process.env.JWT_REFRESH_SECRET,
@@ -287,46 +313,109 @@ app.post('/api/auth/test', (req, res) => {
 // TEST: Add login route directly
 app.post('/api/auth/login', async (req, res) => {
   console.log('🔐 Direct login route hit!');
+  console.log('Request body:', req.body);
+  console.log('Environment check:', {
+    hasDatabase: !!process.env.DATABASE_URL,
+    hasJWT: !!process.env.JWT_SECRET,
+    hasRefreshSecret: !!process.env.JWT_REFRESH_SECRET
+  });
+  
   try {
     const { email, password } = req.body;
     
     if (!email || !password) {
+      console.log('❌ Missing email or password');
       return res.status(400).json({ error: 'Email and password required' });
     }
     
+    // Check environment variables
+    if (!process.env.DATABASE_URL) {
+      console.error('❌ DATABASE_URL not set');
+      return res.status(503).json({ 
+        error: 'Database not configured',
+        code: 'DATABASE_NOT_CONFIGURED'
+      });
+    }
+    
+    if (!process.env.JWT_SECRET || !process.env.JWT_REFRESH_SECRET) {
+      console.error('❌ JWT secrets not set');
+      return res.status(503).json({ 
+        error: 'Authentication not configured',
+        code: 'JWT_NOT_CONFIGURED'
+      });
+    }
+    
+    console.log('✅ Environment variables present');
+    
     // Import bcrypt and prisma
+    console.log('📦 Importing dependencies...');
     const bcrypt = await import('bcryptjs');
     const { default: prisma } = await import('./lib/prisma.js');
     
+    console.log('🔍 Looking up user:', email);
     const user = await prisma.user.findUnique({ where: { email } });
     
     if (!user) {
+      console.log('❌ User not found');
       return res.status(401).json({ error: 'Invalid credentials' });
     }
+    
+    console.log('✅ User found:', user.id);
     
     const isValid = await bcrypt.default.compare(password, user.password);
     
     if (!isValid) {
+      console.log('❌ Invalid password');
       return res.status(401).json({ error: 'Invalid credentials' });
     }
+    
+    console.log('✅ Password valid');
     
     // Import JWT utils
     const { generateAccessToken, generateRefreshToken } = await import('./utils/jwt.js');
     
-    const accessToken = generateAccessToken(user.id, user.roles);
+    // Parse roles
+    let userRoles = ['PLAYER'];
+    if (user.roles) {
+      userRoles = user.roles.split(',').map(r => r.trim());
+    }
+    
+    console.log('🎭 User roles:', userRoles);
+    
+    const accessToken = generateAccessToken(user.id, userRoles[0]);
     const refreshToken = generateRefreshToken(user.id);
+    
+    console.log('✅ Tokens generated');
+    
+    // Update refresh token
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { refreshToken }
+    });
     
     const { password: _, ...userWithoutPassword } = user;
     
+    console.log('✅ Login successful for:', email);
+    
     res.json({
       message: 'Login successful',
-      user: userWithoutPassword,
+      user: {
+        ...userWithoutPassword,
+        roles: userRoles,
+        currentRole: userRoles[0],
+        isAdmin: userRoles.includes('ADMIN')
+      },
       accessToken,
       refreshToken
     });
   } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({ error: 'Login failed', details: error.message });
+    console.error('❌ Login error:', error);
+    console.error('Error stack:', error.stack);
+    res.status(500).json({ 
+      error: 'Login failed', 
+      details: error.message,
+      code: error.code || 'INTERNAL_ERROR'
+    });
   }
 });
 

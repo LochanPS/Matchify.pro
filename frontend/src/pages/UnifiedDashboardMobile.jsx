@@ -238,6 +238,22 @@ const UnifiedDashboardMobile = () => {
           0% { background-position: -200% center; }
           100% { background-position: 200% center; }
         }
+        @keyframes fadeIn {
+          0% { opacity: 0; transform: translateY(20px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes scaleIn {
+          0% { opacity: 0; transform: scale(0.9); }
+          100% { opacity: 1; transform: scale(1); }
+        }
+        @keyframes slideUp {
+          0% { opacity: 0; transform: translateY(30px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.05); }
+        }
       `}</style>
 
       {/* Mobile Header */}
@@ -327,23 +343,10 @@ const UnifiedDashboardMobile = () => {
           </div>
         </div>
 
-        {/* Role Switcher - Only show if multiple roles */}
+        {/* Role Switcher - Compact version below profile photo */}
         {userRoles.length > 1 && (
           <div className="px-4 pb-3 relative">
-            <div className="flex items-center gap-2 mb-2">
-              <span 
-                className="text-xs font-bold tracking-wider"
-                style={{ 
-                  background: 'linear-gradient(135deg, #a855f7, #c084fc)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text'
-                }}
-              >
-                YOUR ROLES:
-              </span>
-            </div>
-            <div className="flex gap-2 overflow-x-auto pb-1">
+            <div className="flex items-center justify-center gap-2">
               {userRoles.map((role) => {
                 const config = roleConfig[role];
                 if (!config) return null;
@@ -354,15 +357,15 @@ const UnifiedDashboardMobile = () => {
                   <button
                     key={role}
                     onClick={() => handleRoleSwitch(role)}
-                    className="flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all flex-shrink-0 relative overflow-hidden"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-all flex-shrink-0 relative overflow-hidden"
                     style={{
                       background: isActive 
                         ? `linear-gradient(135deg, ${config.color}, ${config.color}dd)` 
                         : config.bg,
-                      border: `2px solid ${config.border}`,
+                      border: `1.5px solid ${config.border}`,
                       color: isActive ? '#ffffff' : config.color,
                       boxShadow: isActive 
-                        ? `0 4px 15px ${config.border}, inset 0 1px 0 rgba(255,255,255,0.2)` 
+                        ? `0 2px 10px ${config.border}, inset 0 1px 0 rgba(255,255,255,0.2)` 
                         : 'none'
                     }}
                   >
@@ -376,33 +379,11 @@ const UnifiedDashboardMobile = () => {
                         }}
                       />
                     )}
-                    <span className="text-lg relative z-10" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }}>
-                      {config.icon}
-                    </span>
-                    <span className="text-sm relative z-10">{config.name}</span>
-                    {isActive && (
-                      <span 
-                        className="w-2 h-2 bg-white rounded-full animate-pulse relative z-10"
-                        style={{ boxShadow: '0 0 8px rgba(255,255,255,0.8)' }}
-                      ></span>
-                    )}
+                    <span className="text-base relative z-10">{config.icon}</span>
+                    <span className="text-xs relative z-10">{config.name}</span>
                   </button>
                 );
               })}
-            </div>
-            
-            {/* Active Role Indicator */}
-            <div className="mt-2 flex items-center gap-2 text-xs">
-              <span className="text-gray-400">Active:</span>
-              <span 
-                className="font-bold"
-                style={{ 
-                  color: roleConfig[activeRole]?.color,
-                  textShadow: `0 0 10px ${roleConfig[activeRole]?.border}`
-                }}
-              >
-                {roleConfig[activeRole]?.name}
-              </span>
             </div>
           </div>
         )}
@@ -485,7 +466,8 @@ const UnifiedDashboardMobile = () => {
             background: 'linear-gradient(135deg, rgba(0,200,83,0.15) 0%, rgba(99,102,241,0.15) 100%)',
             border: '2px solid rgba(0,200,83,0.3)',
             backdropFilter: 'blur(20px)',
-            boxShadow: '0 8px 32px rgba(0,200,83,0.2), inset 0 1px 0 rgba(255,255,255,0.1)'
+            boxShadow: '0 8px 32px rgba(0,200,83,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
+            animation: 'fadeIn 0.8s ease-out 0.2s both'
           }}
         >
           {/* Animated Background Glow */}
@@ -542,38 +524,56 @@ const UnifiedDashboardMobile = () => {
               {user?.name}
             </h2>
             
-            {/* Role Badges with Shimmer */}
-            <div className="flex flex-wrap gap-2 justify-center mb-3">
-              {userRoles.map((role, index) => (
-                <span 
-                  key={index}
-                  className="px-3 py-1 rounded-full text-xs font-bold relative overflow-hidden"
-                  style={{ 
-                    background: roleConfig[role]?.bg, 
-                    border: `2px solid ${roleConfig[role]?.border}`,
-                    color: roleConfig[role]?.color,
-                    boxShadow: `0 2px 10px ${roleConfig[role]?.border}`
-                  }}
-                >
-                  <div 
-                    className="absolute inset-0 opacity-20"
-                    style={{
-                      background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)',
-                      backgroundSize: '200% 100%',
-                      animation: 'shimmer 3s infinite'
-                    }}
-                  />
-                  <span className="relative z-10">{role}</span>
-                </span>
-              ))}
-            </div>
-            
             <p className="text-sm text-gray-300 mb-1">{user?.email}</p>
             
             {user?.city && (
-              <div className="flex items-center gap-1 text-sm text-gray-400">
+              <div className="flex items-center gap-1 text-sm text-gray-400 mb-3">
                 <MapPinIcon className="w-4 h-4" />
                 <span>{user.city}, {user.state}</span>
+              </div>
+            )}
+            
+            {/* Compact Role Switcher - Only if multiple roles */}
+            {userRoles.length > 1 && (
+              <div className="flex items-center justify-center gap-2 mb-3">
+                {userRoles.map((role) => {
+                  const config = roleConfig[role];
+                  if (!config) return null;
+                  
+                  const isActive = role === activeRole;
+                  
+                  return (
+                    <button
+                      key={role}
+                      onClick={() => handleRoleSwitch(role)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-semibold transition-all relative overflow-hidden"
+                      style={{
+                        background: isActive 
+                          ? `linear-gradient(135deg, ${config.color}, ${config.color}dd)` 
+                          : config.bg,
+                        border: `1.5px solid ${config.border}`,
+                        color: isActive ? '#ffffff' : config.color,
+                        boxShadow: isActive 
+                          ? `0 2px 10px ${config.border}, inset 0 1px 0 rgba(255,255,255,0.2)` 
+                          : 'none',
+                        fontSize: '11px'
+                      }}
+                    >
+                      {isActive && (
+                        <div 
+                          className="absolute inset-0 opacity-30"
+                          style={{
+                            background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
+                            backgroundSize: '200% 100%',
+                            animation: 'shimmer 3s infinite'
+                          }}
+                        />
+                      )}
+                      <span className="text-sm relative z-10">{config.icon}</span>
+                      <span className="relative z-10">{config.name}</span>
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -700,50 +700,454 @@ const UnifiedDashboardMobile = () => {
           </Link>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 gap-3 mb-6">
-          {stats.map((stat, index) => {
-            const colorSchemes = [
-              { gradient: 'from-green-500 to-emerald-600', bg: 'linear-gradient(135deg, rgba(16,185,129,0.2), rgba(5,150,105,0.15))', border: 'rgba(16,185,129,0.4)', shadow: 'rgba(16,185,129,0.3)' },
-              { gradient: 'from-amber-500 to-orange-600', bg: 'linear-gradient(135deg, rgba(245,158,11,0.2), rgba(251,146,60,0.15))', border: 'rgba(245,158,11,0.4)', shadow: 'rgba(245,158,11,0.3)' },
-              { gradient: 'from-violet-500 to-purple-600', bg: 'linear-gradient(135deg, rgba(139,92,246,0.2), rgba(168,85,247,0.15))', border: 'rgba(139,92,246,0.4)', shadow: 'rgba(139,92,246,0.3)' },
-              { gradient: 'from-cyan-500 to-blue-600', bg: 'linear-gradient(135deg, rgba(6,182,212,0.2), rgba(37,99,235,0.15))', border: 'rgba(6,182,212,0.4)', shadow: 'rgba(6,182,212,0.3)' }
-            ];
-            const scheme = colorSchemes[index];
-            
-            return (
-              <div
-                key={index}
-                className="p-4 rounded-xl relative overflow-hidden"
-                style={{
-                  background: scheme.bg,
-                  border: `2px solid ${scheme.border}`,
-                  boxShadow: `0 4px 15px ${scheme.shadow}, inset 0 1px 0 rgba(255,255,255,0.1)`
+        {/* Navigation Section */}
+        <div 
+          className="rounded-2xl p-5 mb-6 relative overflow-hidden"
+          style={{
+            background: 'linear-gradient(135deg, rgba(0,200,83,0.15) 0%, rgba(99,102,241,0.15) 100%)',
+            border: '2px solid rgba(0,200,83,0.3)',
+            backdropFilter: 'blur(20px)',
+            boxShadow: '0 8px 32px rgba(0,200,83,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
+            animation: 'fadeIn 0.8s ease-out 0.3s both'
+          }}
+        >
+          {/* Animated Glow */}
+          <div 
+            className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl opacity-30"
+            style={{ 
+              background: 'radial-gradient(circle, rgba(0,255,136,0.6), transparent)',
+              animation: 'glow 4s ease-in-out infinite'
+            }}
+          />
+          
+          <div className="relative z-10">
+            <h3 
+              className="text-lg font-black mb-4"
+              style={{ 
+                background: 'linear-gradient(135deg, #ffffff, #00ff88)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text'
+              }}
+            >
+              Quick Navigation
+            </h3>
+            <div className="grid grid-cols-3 gap-3">
+              <Link
+                to="/tournaments"
+                className="flex flex-col items-center gap-2 p-4 rounded-xl transition-all relative overflow-hidden group"
+                style={{ 
+                  background: 'linear-gradient(135deg, rgba(59,130,246,0.2), rgba(37,99,235,0.15))',
+                  border: '2px solid rgba(59,130,246,0.3)',
+                  boxShadow: '0 4px 15px rgba(59,130,246,0.2)',
+                  animation: 'scaleIn 0.5s ease-out 0.4s both'
                 }}
               >
                 <div 
-                  className="absolute inset-0 opacity-20"
-                  style={{
-                    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
-                    backgroundSize: '200% 100%',
-                    animation: 'shimmer 4s infinite',
-                    animationDelay: `${index * 0.5}s`
-                  }}
+                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                  style={{ background: 'rgba(59,130,246,0.1)' }}
                 />
                 <div 
-                  className={`inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br ${scheme.gradient} rounded-xl mb-3 relative z-10`}
+                  className="w-12 h-12 rounded-xl flex items-center justify-center relative z-10"
                   style={{ 
-                    boxShadow: `0 4px 12px ${scheme.shadow}, inset 0 1px 0 rgba(255,255,255,0.3)`
+                    background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+                    boxShadow: '0 4px 12px rgba(59,130,246,0.4), inset 0 1px 0 rgba(255,255,255,0.3)',
+                    animation: 'pulse 3s ease-in-out infinite'
                   }}
                 >
-                  <stat.icon className="w-6 h-6 text-white" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
+                  <TrophyIcon className="w-6 h-6 text-white" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
                 </div>
-                <p className="text-3xl font-black text-white mb-1 relative z-10">{stat.value}</p>
-                <p className="text-xs text-gray-400 relative z-10">{stat.label}</p>
-              </div>
-            );
-          })}
+                <span className="text-xs font-bold text-white text-center relative z-10">Tournaments</span>
+              </Link>
+
+              <Link
+                to="/leaderboard"
+                className="flex flex-col items-center gap-2 p-4 rounded-xl transition-all relative overflow-hidden group"
+                style={{ 
+                  background: 'linear-gradient(135deg, rgba(245,158,11,0.2), rgba(251,146,60,0.15))',
+                  border: '2px solid rgba(245,158,11,0.3)',
+                  boxShadow: '0 4px 15px rgba(245,158,11,0.2)',
+                  animation: 'scaleIn 0.5s ease-out 0.5s both'
+                }}
+              >
+                <div 
+                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                  style={{ background: 'rgba(245,158,11,0.1)' }}
+                />
+                <div 
+                  className="w-12 h-12 rounded-xl flex items-center justify-center relative z-10"
+                  style={{ 
+                    background: 'linear-gradient(135deg, #f59e0b, #ea580c)',
+                    boxShadow: '0 4px 12px rgba(245,158,11,0.4), inset 0 1px 0 rgba(255,255,255,0.3)',
+                    animation: 'pulse 3s ease-in-out infinite',
+                    animationDelay: '0.5s'
+                  }}
+                >
+                  <ChartBarIcon className="w-6 h-6 text-white" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
+                </div>
+                <span className="text-xs font-bold text-white text-center relative z-10">Leaderboard</span>
+              </Link>
+
+              <Link
+                to="/academies"
+                className="flex flex-col items-center gap-2 p-4 rounded-xl transition-all relative overflow-hidden group"
+                style={{ 
+                  background: 'linear-gradient(135deg, rgba(168,85,247,0.2), rgba(139,92,246,0.15))',
+                  border: '2px solid rgba(168,85,247,0.3)',
+                  boxShadow: '0 4px 15px rgba(168,85,247,0.2)',
+                  animation: 'scaleIn 0.5s ease-out 0.6s both'
+                }}
+              >
+                <div 
+                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                  style={{ background: 'rgba(168,85,247,0.1)' }}
+                />
+                <div 
+                  className="w-12 h-12 rounded-xl flex items-center justify-center relative z-10"
+                  style={{ 
+                    background: 'linear-gradient(135deg, #a855f7, #8b5cf6)',
+                    boxShadow: '0 4px 12px rgba(168,85,247,0.4), inset 0 1px 0 rgba(255,255,255,0.3)',
+                    animation: 'pulse 3s ease-in-out infinite',
+                    animationDelay: '1s'
+                  }}
+                >
+                  <UserIcon className="w-6 h-6 text-white" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
+                </div>
+                <span className="text-xs font-bold text-white text-center relative z-10">Academies</span>
+              </Link>
+            </div>
+          </div>
         </div>
+
+        {/* Role-Specific Stats */}
+        {activeRole === 'PLAYER' && (
+          <div 
+            className="rounded-2xl p-5 mb-6 relative overflow-hidden"
+            style={{
+              background: 'linear-gradient(135deg, rgba(0,200,83,0.15) 0%, rgba(16,185,129,0.15) 100%)',
+              border: '2px solid rgba(0,200,83,0.3)',
+              backdropFilter: 'blur(20px)',
+              boxShadow: '0 8px 32px rgba(0,200,83,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
+              animation: 'slideUp 0.8s ease-out 0.4s both'
+            }}
+          >
+            {/* Animated Glow */}
+            <div 
+              className="absolute bottom-0 left-0 w-48 h-48 rounded-full blur-3xl opacity-20"
+              style={{ 
+                background: 'radial-gradient(circle, rgba(0,200,83,0.8), transparent)',
+                animation: 'glow 4s ease-in-out infinite'
+              }}
+            />
+            
+            <div className="relative z-10">
+              <div className="flex items-center gap-3 mb-4">
+                <div 
+                  className="w-10 h-10 rounded-xl flex items-center justify-center"
+                  style={{ 
+                    background: 'linear-gradient(135deg, rgba(0,200,83,0.3), rgba(0,255,136,0.2))',
+                    border: '1px solid rgba(0,200,83,0.4)',
+                    boxShadow: '0 4px 12px rgba(0,200,83,0.3)'
+                  }}
+                >
+                  <span className="text-xl">🏸</span>
+                </div>
+                <h3 
+                  className="text-lg font-black"
+                  style={{ 
+                    background: 'linear-gradient(135deg, #ffffff, #00ff88)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text'
+                  }}
+                >
+                  Player Stats
+                </h3>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                {stats.map((stat, index) => {
+                  const colorSchemes = [
+                    { gradient: 'from-green-500 to-emerald-600', bg: 'linear-gradient(135deg, rgba(16,185,129,0.2), rgba(5,150,105,0.15))', border: 'rgba(16,185,129,0.4)', shadow: 'rgba(16,185,129,0.3)' },
+                    { gradient: 'from-amber-500 to-orange-600', bg: 'linear-gradient(135deg, rgba(245,158,11,0.2), rgba(251,146,60,0.15))', border: 'rgba(245,158,11,0.4)', shadow: 'rgba(245,158,11,0.3)' },
+                    { gradient: 'from-violet-500 to-purple-600', bg: 'linear-gradient(135deg, rgba(139,92,246,0.2), rgba(168,85,247,0.15))', border: 'rgba(139,92,246,0.4)', shadow: 'rgba(139,92,246,0.3)' },
+                    { gradient: 'from-cyan-500 to-blue-600', bg: 'linear-gradient(135deg, rgba(6,182,212,0.2), rgba(37,99,235,0.15))', border: 'rgba(6,182,212,0.4)', shadow: 'rgba(6,182,212,0.3)' }
+                  ];
+                  const scheme = colorSchemes[index];
+                  
+                  return (
+                    <div
+                      key={index}
+                      className="p-4 rounded-xl relative overflow-hidden"
+                      style={{
+                        background: scheme.bg,
+                        border: `2px solid ${scheme.border}`,
+                        boxShadow: `0 4px 15px ${scheme.shadow}, inset 0 1px 0 rgba(255,255,255,0.1)`,
+                        animation: `scaleIn 0.5s ease-out ${0.5 + index * 0.1}s both`
+                      }}
+                    >
+                      <div 
+                        className="absolute inset-0 opacity-20"
+                        style={{
+                          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
+                          backgroundSize: '200% 100%',
+                          animation: 'shimmer 4s infinite',
+                          animationDelay: `${index * 0.5}s`
+                        }}
+                      />
+                      <div 
+                        className={`inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br ${scheme.gradient} rounded-xl mb-3 relative z-10`}
+                        style={{ 
+                          boxShadow: `0 4px 12px ${scheme.shadow}, inset 0 1px 0 rgba(255,255,255,0.3)`
+                        }}
+                      >
+                        <stat.icon className="w-6 h-6 text-white" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
+                      </div>
+                      <p className="text-3xl font-black text-white mb-1 relative z-10">{stat.value}</p>
+                      <p className="text-xs text-gray-400 relative z-10">{stat.label}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeRole === 'ORGANIZER' && (
+          <div 
+            className="rounded-2xl p-5 mb-6 relative overflow-hidden"
+            style={{
+              background: 'linear-gradient(135deg, rgba(168,85,247,0.15) 0%, rgba(139,92,246,0.15) 100%)',
+              border: '2px solid rgba(168,85,247,0.3)',
+              backdropFilter: 'blur(20px)',
+              boxShadow: '0 8px 32px rgba(168,85,247,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
+              animation: 'slideUp 0.8s ease-out 0.4s both'
+            }}
+          >
+            {/* Animated Glow */}
+            <div 
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 rounded-full blur-3xl opacity-20"
+              style={{ 
+                background: 'radial-gradient(circle, rgba(168,85,247,0.8), transparent)',
+                animation: 'glow 5s ease-in-out infinite'
+              }}
+            />
+            
+            <div className="relative z-10">
+              <div className="flex items-center gap-3 mb-4">
+                <div 
+                  className="w-10 h-10 rounded-xl flex items-center justify-center"
+                  style={{ 
+                    background: 'linear-gradient(135deg, rgba(168,85,247,0.3), rgba(139,92,246,0.2))',
+                    border: '1px solid rgba(168,85,247,0.4)',
+                    boxShadow: '0 4px 12px rgba(168,85,247,0.3)'
+                  }}
+                >
+                  <span className="text-xl">🏆</span>
+                </div>
+                <h3 
+                  className="text-lg font-black"
+                  style={{ 
+                    background: 'linear-gradient(135deg, #ffffff, #c4b5fd)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text'
+                  }}
+                >
+                  Organizer Stats
+                </h3>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div
+                  className="p-4 rounded-xl relative overflow-hidden"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(168,85,247,0.2), rgba(139,92,246,0.15))',
+                    border: '2px solid rgba(168,85,247,0.4)',
+                    boxShadow: '0 4px 15px rgba(168,85,247,0.3), inset 0 1px 0 rgba(255,255,255,0.1)',
+                    animation: 'scaleIn 0.5s ease-out 0.5s both'
+                  }}
+                >
+                  <div 
+                    className="absolute inset-0 opacity-20"
+                    style={{
+                      background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
+                      backgroundSize: '200% 100%',
+                      animation: 'shimmer 4s infinite'
+                    }}
+                  />
+                  <div 
+                    className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl mb-3 relative z-10"
+                    style={{ 
+                      boxShadow: '0 4px 12px rgba(168,85,247,0.4), inset 0 1px 0 rgba(255,255,255,0.3)'
+                    }}
+                  >
+                    <TrophyIcon className="w-6 h-6 text-white" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
+                  </div>
+                  <p className="text-3xl font-black text-white mb-1 relative z-10">{user?.tournamentsOrganized || 0}</p>
+                  <p className="text-xs text-gray-400 relative z-10">Tournaments Organized</p>
+                </div>
+
+                <div
+                  className="p-4 rounded-xl relative overflow-hidden"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(99,102,241,0.2), rgba(79,70,229,0.15))',
+                    border: '2px solid rgba(99,102,241,0.4)',
+                    boxShadow: '0 4px 15px rgba(99,102,241,0.3), inset 0 1px 0 rgba(255,255,255,0.1)',
+                    animation: 'scaleIn 0.5s ease-out 0.6s both'
+                  }}
+                >
+                  <div 
+                    className="absolute inset-0 opacity-20"
+                    style={{
+                      background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
+                      backgroundSize: '200% 100%',
+                      animation: 'shimmer 4s infinite',
+                      animationDelay: '0.5s'
+                    }}
+                  />
+                  <div 
+                    className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-xl mb-3 relative z-10"
+                    style={{ 
+                      boxShadow: '0 4px 12px rgba(99,102,241,0.4), inset 0 1px 0 rgba(255,255,255,0.3)'
+                    }}
+                  >
+                    <UserIcon className="w-6 h-6 text-white" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
+                  </div>
+                  <p className="text-3xl font-black text-white mb-1 relative z-10">{user?.totalParticipants || 0}</p>
+                  <p className="text-xs text-gray-400 relative z-10">Total Participants</p>
+                </div>
+              </div>
+
+              <Link
+                to="/organize-tournament"
+                className="flex items-center justify-center gap-2 w-full py-3 rounded-xl font-semibold text-sm transition-all relative overflow-hidden group mt-4"
+                style={{ 
+                  background: 'linear-gradient(135deg, rgba(168,85,247,0.2), rgba(139,92,246,0.15))', 
+                  border: '2px solid rgba(168,85,247,0.4)',
+                  color: '#c4b5fd',
+                  boxShadow: '0 4px 15px rgba(168,85,247,0.2)'
+                }}
+              >
+                <div 
+                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                  style={{ background: 'rgba(168,85,247,0.1)' }}
+                />
+                <TrophyIcon className="w-5 h-5 relative z-10" />
+                <span className="relative z-10">Create New Tournament</span>
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {activeRole === 'UMPIRE' && (
+          <div 
+            className="rounded-2xl p-5 mb-6 relative overflow-hidden"
+            style={{
+              background: 'linear-gradient(135deg, rgba(59,130,246,0.15) 0%, rgba(37,99,235,0.15) 100%)',
+              border: '2px solid rgba(59,130,246,0.3)',
+              backdropFilter: 'blur(20px)',
+              boxShadow: '0 8px 32px rgba(59,130,246,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
+              animation: 'slideUp 0.8s ease-out 0.4s both'
+            }}
+          >
+            {/* Animated Glow */}
+            <div 
+              className="absolute top-0 right-0 w-48 h-48 rounded-full blur-3xl opacity-20"
+              style={{ 
+                background: 'radial-gradient(circle, rgba(59,130,246,0.8), transparent)',
+                animation: 'glow 4s ease-in-out infinite'
+              }}
+            />
+            
+            <div className="relative z-10">
+              <div className="flex items-center gap-3 mb-4">
+                <div 
+                  className="w-10 h-10 rounded-xl flex items-center justify-center"
+                  style={{ 
+                    background: 'linear-gradient(135deg, rgba(59,130,246,0.3), rgba(37,99,235,0.2))',
+                    border: '1px solid rgba(59,130,246,0.4)',
+                    boxShadow: '0 4px 12px rgba(59,130,246,0.3)'
+                  }}
+                >
+                  <span className="text-xl">⚖️</span>
+                </div>
+                <h3 
+                  className="text-lg font-black"
+                  style={{ 
+                    background: 'linear-gradient(135deg, #ffffff, #93c5fd)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text'
+                  }}
+                >
+                  Umpire Stats
+                </h3>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div
+                  className="p-4 rounded-xl relative overflow-hidden"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(59,130,246,0.2), rgba(37,99,235,0.15))',
+                    border: '2px solid rgba(59,130,246,0.4)',
+                    boxShadow: '0 4px 15px rgba(59,130,246,0.3), inset 0 1px 0 rgba(255,255,255,0.1)',
+                    animation: 'scaleIn 0.5s ease-out 0.5s both'
+                  }}
+                >
+                  <div 
+                    className="absolute inset-0 opacity-20"
+                    style={{
+                      background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
+                      backgroundSize: '200% 100%',
+                      animation: 'shimmer 4s infinite'
+                    }}
+                  />
+                  <div 
+                    className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl mb-3 relative z-10"
+                    style={{ 
+                      boxShadow: '0 4px 12px rgba(59,130,246,0.4), inset 0 1px 0 rgba(255,255,255,0.3)'
+                    }}
+                  >
+                    <FireIcon className="w-6 h-6 text-white" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
+                  </div>
+                  <p className="text-3xl font-black text-white mb-1 relative z-10">{user?.matchesUmpired || 0}</p>
+                  <p className="text-xs text-gray-400 relative z-10">Matches Umpired</p>
+                </div>
+
+                <div
+                  className="p-4 rounded-xl relative overflow-hidden"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(6,182,212,0.2), rgba(14,165,233,0.15))',
+                    border: '2px solid rgba(6,182,212,0.4)',
+                    boxShadow: '0 4px 15px rgba(6,182,212,0.3), inset 0 1px 0 rgba(255,255,255,0.1)',
+                    animation: 'scaleIn 0.5s ease-out 0.6s both'
+                  }}
+                >
+                  <div 
+                    className="absolute inset-0 opacity-20"
+                    style={{
+                      background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
+                      backgroundSize: '200% 100%',
+                      animation: 'shimmer 4s infinite',
+                      animationDelay: '0.5s'
+                    }}
+                  />
+                  <div 
+                    className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl mb-3 relative z-10"
+                    style={{ 
+                      boxShadow: '0 4px 12px rgba(6,182,212,0.4), inset 0 1px 0 rgba(255,255,255,0.3)'
+                    }}
+                  >
+                    <TrophyIcon className="w-6 h-6 text-white" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
+                  </div>
+                  <p className="text-3xl font-black text-white mb-1 relative z-10">{user?.tournamentsUmpired || 0}</p>
+                  <p className="text-xs text-gray-400 relative z-10">Tournaments</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Profile Information */}
         <div 
@@ -752,7 +1156,8 @@ const UnifiedDashboardMobile = () => {
             background: 'linear-gradient(135deg, rgba(99,102,241,0.15) 0%, rgba(139,92,246,0.15) 100%)',
             border: '2px solid rgba(99,102,241,0.3)',
             backdropFilter: 'blur(20px)',
-            boxShadow: '0 8px 32px rgba(99,102,241,0.2), inset 0 1px 0 rgba(255,255,255,0.1)'
+            boxShadow: '0 8px 32px rgba(99,102,241,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
+            animation: 'fadeIn 0.8s ease-out 0.7s both'
           }}
         >
           {/* Animated Glow */}
@@ -844,7 +1249,8 @@ const UnifiedDashboardMobile = () => {
             background: 'linear-gradient(135deg, rgba(6,182,212,0.15) 0%, rgba(14,165,233,0.15) 100%)',
             border: '2px solid rgba(6,182,212,0.3)',
             backdropFilter: 'blur(20px)',
-            boxShadow: '0 8px 32px rgba(6,182,212,0.2), inset 0 1px 0 rgba(255,255,255,0.1)'
+            boxShadow: '0 8px 32px rgba(6,182,212,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
+            animation: 'fadeIn 0.8s ease-out 0.8s both'
           }}
         >
           {/* Animated Glow */}
@@ -1010,7 +1416,8 @@ const UnifiedDashboardMobile = () => {
             background: 'linear-gradient(135deg, rgba(245,158,11,0.15) 0%, rgba(251,146,60,0.15) 100%)',
             border: '2px solid rgba(245,158,11,0.3)',
             backdropFilter: 'blur(20px)',
-            boxShadow: '0 8px 32px rgba(245,158,11,0.2), inset 0 1px 0 rgba(255,255,255,0.1)'
+            boxShadow: '0 8px 32px rgba(245,158,11,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
+            animation: 'fadeIn 0.8s ease-out 0.9s both'
           }}
         >
           {/* Animated Glow */}

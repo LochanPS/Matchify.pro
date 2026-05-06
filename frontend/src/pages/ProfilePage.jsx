@@ -663,111 +663,62 @@ export default function ProfilePage() {
               {profile?.name || 'No Name Set'}
             </h2>
               
-            {/* Player Code & Umpire Code */}
-            {(profile?.playerCode || profile?.umpireCode) && (
-              <div className="flex flex-col gap-3 mb-4">{profile?.playerCode && (
-                    <div 
-                      className="p-3 rounded-xl relative overflow-hidden"
-                      style={{ 
-                        background: 'linear-gradient(135deg, rgba(59,130,246,0.2), rgba(37,99,235,0.15))',
-                        border: '2px solid rgba(59,130,246,0.4)',
-                        boxShadow: '0 4px 15px rgba(59,130,246,0.3), inset 0 1px 0 rgba(255,255,255,0.1)'
-                      }}
-                    >
-                      <div 
-                        className="absolute inset-0 opacity-20"
-                        style={{
-                          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
-                          backgroundSize: '200% 100%',
-                          animation: 'shimmer 4s infinite'
+            {/* Matchify Code */}
+            {profile?.matchifyCode && (
+              <div className="mb-4">
+                <div 
+                  className="p-4 rounded-xl relative overflow-hidden"
+                  style={{ 
+                    background: 'linear-gradient(135deg, rgba(0,200,83,0.2), rgba(0,255,136,0.15))',
+                    border: '2px solid rgba(0,200,83,0.4)',
+                    boxShadow: '0 4px 15px rgba(0,200,83,0.3), inset 0 1px 0 rgba(255,255,255,0.1)'
+                  }}
+                >
+                  <div 
+                    className="absolute inset-0 opacity-20"
+                    style={{
+                      background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
+                      backgroundSize: '200% 100%',
+                      animation: 'shimmer 4s infinite'
+                    }}
+                  />
+                  <div className="flex items-center justify-between relative z-10">
+                    <div>
+                      <p className="text-xs font-bold mb-1" style={{ color: '#6ee7b7' }}>Matchify Code:</p>
+                      <p 
+                        className="text-2xl font-mono font-black tracking-wider"
+                        style={{ 
+                          color: '#00ff88',
+                          textShadow: '0 0 20px rgba(0,200,83,0.5)'
                         }}
-                      />
-                      <div className="flex items-center justify-between relative z-10">
-                        <div>
-                          <p className="text-xs font-bold mb-1" style={{ color: '#93c5fd' }}>Player Code:</p>
-                          <p 
-                            className="text-lg font-mono font-black tracking-wider"
-                            style={{ 
-                              color: '#60a5fa',
-                              textShadow: '0 0 20px rgba(59,130,246,0.5)'
-                            }}
-                          >
-                            {profile.playerCode}
-                          </p>
-                        </div>
-                        <button
-                          onClick={() => {
-                            navigator.clipboard.writeText(profile.playerCode);
-                            setSuccess('Player code copied!');
-                            setTimeout(() => setSuccess(''), 2000);
-                          }}
-                          className="p-2 rounded-lg transition-all"
-                          style={{ 
-                            background: 'rgba(59,130,246,0.3)',
-                            border: '1px solid rgba(59,130,246,0.5)'
-                          }}
-                          title="Copy player code"
-                        >
-                          <svg className="w-5 h-5 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                          </svg>
-                        </button>
-                      </div>
+                      >
+                        {profile.matchifyCode}
+                      </p>
+                      <p className="text-xs mt-1" style={{ color: '#6ee7b7' }}>
+                        Your universal Matchify.pro ID
+                      </p>
                     </div>
-                  )}
-                  {profile?.umpireCode && (
-                    <div 
-                      className="p-3 rounded-xl relative overflow-hidden"
-                      style={{ 
-                        background: 'linear-gradient(135deg, rgba(245,158,11,0.2), rgba(251,146,60,0.15))',
-                        border: '2px solid rgba(245,158,11,0.4)',
-                        boxShadow: '0 4px 15px rgba(245,158,11,0.3), inset 0 1px 0 rgba(255,255,255,0.1)'
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(profile.matchifyCode);
+                        setSuccess('Matchify code copied!');
+                        setTimeout(() => setSuccess(''), 2000);
                       }}
+                      className="p-3 rounded-lg transition-all"
+                      style={{ 
+                        background: 'rgba(0,200,83,0.3)',
+                        border: '1px solid rgba(0,200,83,0.5)'
+                      }}
+                      title="Copy matchify code"
                     >
-                      <div 
-                        className="absolute inset-0 opacity-20"
-                        style={{
-                          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
-                          backgroundSize: '200% 100%',
-                          animation: 'shimmer 4s infinite',
-                          animationDelay: '1s'
-                        }}
-                      />
-                      <div className="flex items-center justify-between relative z-10">
-                        <div>
-                          <p className="text-xs font-bold mb-1" style={{ color: '#fcd34d' }}>Umpire Code:</p>
-                          <p 
-                            className="text-lg font-mono font-black tracking-wider"
-                            style={{ 
-                              color: '#fbbf24',
-                              textShadow: '0 0 20px rgba(245,158,11,0.5)'
-                            }}
-                          >
-                            {profile.umpireCode}
-                          </p>
-                        </div>
-                        <button
-                          onClick={() => {
-                            navigator.clipboard.writeText(profile.umpireCode);
-                            setSuccess('Umpire code copied!');
-                            setTimeout(() => setSuccess(''), 2000);
-                          }}
-                          className="p-2 rounded-lg transition-all"
-                          style={{ 
-                            background: 'rgba(245,158,11,0.3)',
-                            border: '1px solid rgba(245,158,11,0.5)'
-                          }}
-                          title="Copy umpire code"
-                        >
-                          <svg className="w-5 h-5 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                  )}
+                      <svg className="w-6 h-6 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
-              )}
+              </div>
+            )}
               
             {/* Contact Information */}
             <div className="space-y-3 mb-4">

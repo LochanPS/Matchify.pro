@@ -16,8 +16,9 @@ model User {
   name                 String
   phone                String?             @unique
   roles                String              @default("PLAYER,UMPIRE,ORGANIZER") // Will store comma-separated roles
-  playerCode           String?             @unique // Unique player code like #ABC1234
-  umpireCode           String?             @unique // Unique umpire code like #123ABCD
+  matchifyCode         String?             @unique // Universal Matchify code: #A10000, #A10001, etc.
+  playerCode           String?             @unique // DEPRECATED - Kept for migration
+  umpireCode           String?             @unique // DEPRECATED - Kept for migration
   profilePhoto         String?
   city                 String?
   state                String?

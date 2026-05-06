@@ -27,8 +27,7 @@ const UnifiedDashboardMobile = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [registrations, setRegistrations] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [playerCode, setPlayerCode] = useState(null);
-  const [umpireCode, setUmpireCode] = useState(null);
+  const [matchifyCode, setMatchifyCode] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [showMenu, setShowMenu] = useState(false);
   const [showPhotoViewer, setShowPhotoViewer] = useState(false);
@@ -85,8 +84,7 @@ const UnifiedDashboardMobile = () => {
       
       if (profileRes.data.user) {
         setUserProfile(profileRes.data.user);
-        setPlayerCode(profileRes.data.user.playerCode);
-        setUmpireCode(profileRes.data.user.umpireCode);
+        setMatchifyCode(profileRes.data.user.matchifyCode);
       }
       
       setRegistrations(regRes.data.registrations || []);
@@ -819,15 +817,15 @@ const UnifiedDashboardMobile = () => {
             )}
           </div>
 
-          {/* Player & Umpire Codes */}
-          <div className="space-y-3 mb-5 relative z-10">
-            {playerCode && (
+          {/* Matchify Code */}
+          <div className="mb-5 relative z-10">
+            {matchifyCode && (
               <div 
-                className="p-3 rounded-xl relative overflow-hidden"
+                className="p-4 rounded-xl relative overflow-hidden"
                 style={{ 
-                  background: 'linear-gradient(135deg, rgba(59,130,246,0.2), rgba(37,99,235,0.15))',
-                  border: '2px solid rgba(59,130,246,0.4)',
-                  boxShadow: '0 4px 15px rgba(59,130,246,0.3), inset 0 1px 0 rgba(255,255,255,0.1)'
+                  background: 'linear-gradient(135deg, rgba(0,200,83,0.2), rgba(0,255,136,0.15))',
+                  border: '2px solid rgba(0,200,83,0.4)',
+                  boxShadow: '0 4px 15px rgba(0,200,83,0.3), inset 0 1px 0 rgba(255,255,255,0.1)'
                 }}
               >
                 <div 
@@ -840,79 +838,32 @@ const UnifiedDashboardMobile = () => {
                 />
                 <div className="flex items-center justify-between relative z-10">
                   <div>
-                    <p className="text-xs font-bold mb-1" style={{ color: '#93c5fd' }}>Player Code:</p>
+                    <p className="text-xs font-bold mb-1" style={{ color: '#6ee7b7' }}>Matchify Code:</p>
                     <p 
-                      className="text-lg font-mono font-black tracking-wider"
+                      className="text-2xl font-mono font-black tracking-wider"
                       style={{ 
-                        color: '#60a5fa',
-                        textShadow: '0 0 20px rgba(59,130,246,0.5)'
+                        color: '#00ff88',
+                        textShadow: '0 0 20px rgba(0,200,83,0.5)'
                       }}
                     >
-                      {playerCode}
+                      {matchifyCode}
+                    </p>
+                    <p className="text-xs mt-1" style={{ color: '#6ee7b7' }}>
+                      Your universal Matchify.pro ID
                     </p>
                   </div>
                   <button
                     onClick={() => {
-                      navigator.clipboard.writeText(playerCode);
-                      alert('Player code copied!');
+                      navigator.clipboard.writeText(matchifyCode);
+                      alert('Matchify code copied!');
                     }}
-                    className="p-2 rounded-lg transition-all"
+                    className="p-3 rounded-lg transition-all"
                     style={{ 
-                      background: 'rgba(59,130,246,0.3)',
-                      border: '1px solid rgba(59,130,246,0.5)'
+                      background: 'rgba(0,200,83,0.3)',
+                      border: '1px solid rgba(0,200,83,0.5)'
                     }}
                   >
-                    <svg className="w-5 h-5 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-            )}
-            
-            {umpireCode && (
-              <div 
-                className="p-3 rounded-xl relative overflow-hidden"
-                style={{ 
-                  background: 'linear-gradient(135deg, rgba(245,158,11,0.2), rgba(251,146,60,0.15))',
-                  border: '2px solid rgba(245,158,11,0.4)',
-                  boxShadow: '0 4px 15px rgba(245,158,11,0.3), inset 0 1px 0 rgba(255,255,255,0.1)'
-                }}
-              >
-                <div 
-                  className="absolute inset-0 opacity-20"
-                  style={{
-                    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
-                    backgroundSize: '200% 100%',
-                    animation: 'shimmer 4s infinite',
-                    animationDelay: '1s'
-                  }}
-                />
-                <div className="flex items-center justify-between relative z-10">
-                  <div>
-                    <p className="text-xs font-bold mb-1" style={{ color: '#fcd34d' }}>Umpire Code:</p>
-                    <p 
-                      className="text-lg font-mono font-black tracking-wider"
-                      style={{ 
-                        color: '#fbbf24',
-                        textShadow: '0 0 20px rgba(245,158,11,0.5)'
-                      }}
-                    >
-                      {umpireCode}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(umpireCode);
-                      alert('Umpire code copied!');
-                    }}
-                    className="p-2 rounded-lg transition-all"
-                    style={{ 
-                      background: 'rgba(245,158,11,0.3)',
-                      border: '1px solid rgba(245,158,11,0.5)'
-                    }}
-                  >
-                    <svg className="w-5 h-5 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-6 h-6 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                     </svg>
                   </button>

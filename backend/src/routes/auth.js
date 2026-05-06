@@ -7,6 +7,7 @@ import {
   verifyRefreshToken,
   verifyAccessToken
 } from '../utils/jwt.js';
+import { generateMatchifyCode } from '../utils/matchifyCode.js';
 
 const router = express.Router();
 
@@ -97,6 +98,9 @@ router.post('/register', async (req, res) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 12);
 
+    // Generate matchify code
+    const matchifyCode = await generateMatchifyCode();
+
     // Determine initial wallet balance based on roles
     const initialBalance = userRoles.includes('ORGANIZER') ? 25 : 0;
 
@@ -112,6 +116,7 @@ router.post('/register', async (req, res) => {
         city,
         state,
         gender,
+        matchifyCode, // Add matchify code
         walletBalance: initialBalance
       }
     });
@@ -360,6 +365,7 @@ router.get('/me', async (req, res) => {
         name: true,
         phone: true,
         roles: true,
+        matchifyCode: true,
         playerCode: true,
         umpireCode: true,
         city: true,

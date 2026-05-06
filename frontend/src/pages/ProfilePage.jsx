@@ -605,86 +605,174 @@ export default function ProfilePage() {
             <p className="text-xs text-gray-400 mt-2">Max 5MB • JPG, PNG, GIF</p>
           </div>
         </div>
+
+        {/* Profile Info Card */}
+        <div 
+          className="rounded-2xl p-5 mb-6 relative overflow-hidden"
+          style={{
+            background: 'linear-gradient(135deg, rgba(0,200,83,0.15) 0%, rgba(99,102,241,0.15) 100%)',
+            border: '2px solid rgba(0,200,83,0.3)',
+            backdropFilter: 'blur(20px)',
+            boxShadow: '0 8px 32px rgba(0,200,83,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
+            animation: 'fadeIn 0.8s ease-out 0.3s both'
+          }}
+        >
+          {/* Animated Background Glow */}
+          <div 
+            className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl opacity-30"
+            style={{ 
+              background: 'radial-gradient(circle, rgba(0,255,136,0.6), transparent)',
+              animation: 'glow 4s ease-in-out infinite'
+            }}
+          />
+          <div 
+            className="absolute bottom-0 left-0 w-32 h-32 rounded-full blur-3xl opacity-30"
+            style={{ 
+              background: 'radial-gradient(circle, rgba(99,102,241,0.6), transparent)',
+              animation: 'glow 4s ease-in-out infinite reverse'
+            }}
+          />
+          
+          <div className="relative z-10">
+            {/* User Name */}
+            <h2 
+              className="text-2xl font-black mb-3 text-center"
+              style={{ 
+                background: 'linear-gradient(135deg, #ffffff, #00ff88)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+                textShadow: 'none',
+                filter: 'drop-shadow(0 2px 10px rgba(0,200,83,0.3))'
+              }}
+            >
+              {profile?.name || 'No Name Set'}
+            </h2>
               
-              {/* Player Code & Umpire Code */}
-              {(profile?.playerCode || profile?.umpireCode) && (
-                <div className="flex flex-wrap gap-2 mb-3 justify-center lg:justify-start">
-                  {profile?.playerCode && (
-                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/20 border border-blue-500/30 rounded-xl">
-                      <span className="text-blue-400/80 text-sm">Player Code:</span>
-                      <span className="text-blue-400 font-mono font-bold text-lg tracking-wider">{profile.playerCode}</span>
-                      <button
-                        onClick={() => {
-                          navigator.clipboard.writeText(profile.playerCode);
-                          setSuccess('Player code copied!');
-                          setTimeout(() => setSuccess(''), 2000);
+            {/* Player Code & Umpire Code */}
+            {(profile?.playerCode || profile?.umpireCode) && (
+              <div className="flex flex-col gap-3 mb-4">{profile?.playerCode && (
+                    <div 
+                      className="p-3 rounded-xl relative overflow-hidden"
+                      style={{ 
+                        background: 'linear-gradient(135deg, rgba(59,130,246,0.2), rgba(37,99,235,0.15))',
+                        border: '2px solid rgba(59,130,246,0.4)',
+                        boxShadow: '0 4px 15px rgba(59,130,246,0.3), inset 0 1px 0 rgba(255,255,255,0.1)'
+                      }}
+                    >
+                      <div 
+                        className="absolute inset-0 opacity-20"
+                        style={{
+                          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
+                          backgroundSize: '200% 100%',
+                          animation: 'shimmer 4s infinite'
                         }}
-                        className="p-1.5 hover:bg-blue-500/20 rounded-lg transition-colors ml-1"
-                        title="Copy player code"
-                      >
-                        <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                        </svg>
-                      </button>
+                      />
+                      <div className="flex items-center justify-between relative z-10">
+                        <div>
+                          <p className="text-xs font-bold mb-1" style={{ color: '#93c5fd' }}>Player Code:</p>
+                          <p 
+                            className="text-lg font-mono font-black tracking-wider"
+                            style={{ 
+                              color: '#60a5fa',
+                              textShadow: '0 0 20px rgba(59,130,246,0.5)'
+                            }}
+                          >
+                            {profile.playerCode}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(profile.playerCode);
+                            setSuccess('Player code copied!');
+                            setTimeout(() => setSuccess(''), 2000);
+                          }}
+                          className="p-2 rounded-lg transition-all"
+                          style={{ 
+                            background: 'rgba(59,130,246,0.3)',
+                            border: '1px solid rgba(59,130,246,0.5)'
+                          }}
+                          title="Copy player code"
+                        >
+                          <svg className="w-5 h-5 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                          </svg>
+                        </button>
+                      </div>
                     </div>
                   )}
                   {profile?.umpireCode && (
-                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/20 border border-amber-500/30 rounded-xl">
-                      <span className="text-amber-400/80 text-sm">Umpire Code:</span>
-                      <span className="text-amber-400 font-mono font-bold text-lg tracking-wider">{profile.umpireCode}</span>
-                      <button
-                        onClick={() => {
-                          navigator.clipboard.writeText(profile.umpireCode);
-                          setSuccess('Umpire code copied!');
-                          setTimeout(() => setSuccess(''), 2000);
+                    <div 
+                      className="p-3 rounded-xl relative overflow-hidden"
+                      style={{ 
+                        background: 'linear-gradient(135deg, rgba(245,158,11,0.2), rgba(251,146,60,0.15))',
+                        border: '2px solid rgba(245,158,11,0.4)',
+                        boxShadow: '0 4px 15px rgba(245,158,11,0.3), inset 0 1px 0 rgba(255,255,255,0.1)'
+                      }}
+                    >
+                      <div 
+                        className="absolute inset-0 opacity-20"
+                        style={{
+                          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
+                          backgroundSize: '200% 100%',
+                          animation: 'shimmer 4s infinite',
+                          animationDelay: '1s'
                         }}
-                        className="p-1.5 hover:bg-amber-500/20 rounded-lg transition-colors ml-1"
-                        title="Copy umpire code"
-                      >
-                        <svg className="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                        </svg>
-                      </button>
+                      />
+                      <div className="flex items-center justify-between relative z-10">
+                        <div>
+                          <p className="text-xs font-bold mb-1" style={{ color: '#fcd34d' }}>Umpire Code:</p>
+                          <p 
+                            className="text-lg font-mono font-black tracking-wider"
+                            style={{ 
+                              color: '#fbbf24',
+                              textShadow: '0 0 20px rgba(245,158,11,0.5)'
+                            }}
+                          >
+                            {profile.umpireCode}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(profile.umpireCode);
+                            setSuccess('Umpire code copied!');
+                            setTimeout(() => setSuccess(''), 2000);
+                          }}
+                          className="p-2 rounded-lg transition-all"
+                          style={{ 
+                            background: 'rgba(245,158,11,0.3)',
+                            border: '1px solid rgba(245,158,11,0.5)'
+                          }}
+                          title="Copy umpire code"
+                        >
+                          <svg className="w-5 h-5 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                          </svg>
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
               )}
               
-              <div className="flex items-center justify-center lg:justify-start gap-2 mb-4">
-                <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${
-                  profile?.role === 'PLAYER' ? 'bg-green-500/20 text-green-300 border border-green-500/30' :
-                  profile?.role === 'ORGANIZER' ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' :
-                  profile?.role === 'UMPIRE' ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' :
-                  'bg-red-500/20 text-red-300 border border-red-500/30'
-                }`}>
-                  {profile?.role}
-                </span>
-                {profile?.isVerified && (
-                  <span className="inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full bg-green-500/20 text-green-300 border border-green-500/30">
-                    <CheckBadgeIcon className="w-4 h-4" />
-                    Verified
-                  </span>
-                )}
+            {/* Contact Information */}
+            <div className="space-y-3 mb-4">
+              <div className="flex items-center gap-3 text-gray-300">
+                <Mail className="w-5 h-5 text-emerald-400" />
+                <span className="text-sm">{profile?.email}</span>
               </div>
-              
-              <div className="flex flex-wrap gap-4 justify-center lg:justify-start text-white/60">
-                <div className="flex items-center gap-2">
-                  <Mail size={16} />
-                  <span>{profile?.email}</span>
+              {profile?.phone && (
+                <div className="flex items-center gap-3 text-gray-300">
+                  <Phone className="w-5 h-5 text-blue-400" />
+                  <span className="text-sm">{profile?.phone}</span>
                 </div>
-                {profile?.phone && (
-                  <div className="flex items-center gap-2">
-                    <Phone size={16} />
-                    <span>{profile?.phone}</span>
-                  </div>
-                )}
-                {(profile?.city || profile?.state) && (
-                  <div className="flex items-center gap-2">
-                    <MapPin size={16} />
-                    <span>{[profile?.city, profile?.state].filter(Boolean).join(', ')}</span>
-                  </div>
-                )}
-              </div>
+              )}
+              {(profile?.city || profile?.state) && (
+                <div className="flex items-center gap-3 text-gray-300">
+                  <MapPin className="w-5 h-5 text-purple-400" />
+                  <span className="text-sm">{[profile?.city, profile?.state].filter(Boolean).join(', ')}</span>
+                </div>
+              )}
             </div>
 
             {/* Action Buttons */}
@@ -693,17 +781,36 @@ export default function ProfilePage() {
                 <>
                   <button
                     onClick={() => setIsEditing(true)}
-                    className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:shadow-lg hover:scale-105 transition-all flex items-center gap-2 font-medium"
+                    className="flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-bold text-sm transition-all relative overflow-hidden group"
+                    style={{ 
+                      background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+                      color: '#ffffff',
+                      boxShadow: '0 4px 15px rgba(59,130,246,0.4), inset 0 1px 0 rgba(255,255,255,0.2)'
+                    }}
                   >
-                    <PencilSquareIcon className="w-5 h-5" />
-                    Edit Profile
+                    <div 
+                      className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                      style={{ background: 'rgba(255,255,255,0.1)' }}
+                    />
+                    <PencilSquareIcon className="w-5 h-5 relative z-10" />
+                    <span className="relative z-10">Edit Profile</span>
                   </button>
                   <button
                     onClick={() => setShowPasswordModal(true)}
-                    className="px-5 py-2.5 bg-white/10 backdrop-blur-sm text-white rounded-xl border border-white/20 hover:bg-white/20 transition-all flex items-center gap-2 font-medium"
+                    className="flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-bold text-sm transition-all relative overflow-hidden group"
+                    style={{ 
+                      background: 'linear-gradient(135deg, rgba(168,85,247,0.2), rgba(139,92,246,0.15))', 
+                      border: '2px solid rgba(168,85,247,0.4)',
+                      color: '#c4b5fd',
+                      boxShadow: '0 4px 15px rgba(168,85,247,0.2)'
+                    }}
                   >
-                    <KeyIcon className="w-5 h-5" />
-                    Password
+                    <div 
+                      className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                      style={{ background: 'rgba(168,85,247,0.1)' }}
+                    />
+                    <KeyIcon className="w-5 h-5 relative z-10" />
+                    <span className="relative z-10">Password</span>
                   </button>
                 </>
               ) : (
@@ -711,59 +818,92 @@ export default function ProfilePage() {
                   <button
                     onClick={handleSave}
                     disabled={saving}
-                    className="px-5 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:shadow-lg hover:scale-105 transition-all flex items-center gap-2 font-medium disabled:opacity-50"
+                    className="flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-bold text-sm transition-all relative overflow-hidden group disabled:opacity-50"
+                    style={{ 
+                      background: 'linear-gradient(135deg, #00c853, #00ff88)',
+                      color: '#003320',
+                      boxShadow: '0 4px 15px rgba(0,200,83,0.4), inset 0 1px 0 rgba(255,255,255,0.2)'
+                    }}
                   >
-                    <Save size={18} />
-                    {saving ? 'Saving...' : 'Save'}
+                    <div 
+                      className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                      style={{ background: 'rgba(255,255,255,0.1)' }}
+                    />
+                    <Save className="w-5 h-5 relative z-10" />
+                    <span className="relative z-10">{saving ? 'Saving...' : 'Save'}</span>
                   </button>
                   <button
                     onClick={handleCancel}
-                    className="px-5 py-2.5 bg-white/10 backdrop-blur-sm text-white rounded-xl border border-white/20 hover:bg-white/20 transition-all flex items-center gap-2 font-medium"
+                    className="flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-bold text-sm transition-all relative overflow-hidden group"
+                    style={{ 
+                      background: 'linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.05))', 
+                      border: '2px solid rgba(255,255,255,0.15)',
+                      color: '#ffffff'
+                    }}
                   >
-                    <X size={18} />
-                    Cancel
+                    <div 
+                      className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                      style={{ background: 'rgba(255,255,255,0.05)' }}
+                    />
+                    <X className="w-5 h-5 relative z-10" />
+                    <span className="relative z-10">Cancel</span>
                   </button>
                 </>
               )}
             </div>
           </div>
         </div>
-      </div>
-
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 -mt-8">
-        {/* Success/Error Messages */}
-        {error && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-2xl text-red-400 flex items-center gap-3">
-            <span className="text-xl">⚠️</span>
-            {error}
-          </div>
-        )}
-        {success && (
-          <div className="mb-6 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl text-emerald-400 flex items-center gap-3">
-            <span className="text-xl">✅</span>
-            {success}
-          </div>
-        )}
 
         {/* Edit Form */}
         {isEditing && (
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-6 mb-8">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
+          <div 
+            className="rounded-2xl p-6 mb-6 relative overflow-hidden"
+            style={{
+              background: 'linear-gradient(135deg, rgba(59,130,246,0.15) 0%, rgba(37,99,235,0.15) 100%)',
+              border: '2px solid rgba(59,130,246,0.3)',
+              backdropFilter: 'blur(20px)',
+              boxShadow: '0 8px 32px rgba(59,130,246,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
+              animation: 'fadeIn 0.8s ease-out 0.4s both'
+            }}
+          >
+            <div className="flex items-center gap-3 mb-6 relative z-10">
+              <div 
+                className="w-10 h-10 rounded-xl flex items-center justify-center"
+                style={{ 
+                  background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+                  boxShadow: '0 4px 12px rgba(59,130,246,0.4)'
+                }}
+              >
                 <User className="w-5 h-5 text-white" />
               </div>
-              <h2 className="text-lg font-bold text-white">Edit Profile Information</h2>
+              <h2 
+                className="text-lg font-black"
+                style={{ 
+                  background: 'linear-gradient(135deg, #ffffff, #93c5fd)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text'
+                }}
+              >
+                Edit Profile Information
+              </h2>
             </div>
             
             {/* Notice about permanent fields */}
-            <div className="mb-6 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl flex items-start gap-3">
+            <div 
+              className="mb-6 p-4 rounded-xl flex items-start gap-3 relative z-10"
+              style={{
+                background: 'linear-gradient(135deg, rgba(245,158,11,0.2), rgba(251,146,60,0.15))',
+                border: '2px solid rgba(245,158,11,0.4)'
+              }}
+            >
               <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
               <p className="text-sm text-amber-300">
                 <strong>Important:</strong> Name and Date of Birth can only be set once and cannot be changed later.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-6 relative z-10">
               {/* Name Field */}
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">

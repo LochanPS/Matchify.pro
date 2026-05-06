@@ -61,6 +61,61 @@ const LoginPageMobile = () => {
     <div className="min-h-screen flex flex-col relative overflow-hidden" style={{ 
       background: 'linear-gradient(180deg, #0a0a1f 0%, #07071a 30%, #0d1a2a 60%, #07071a 100%)' 
     }}>
+      {/* Sticky Header with Sign In & Sign Up */}
+      <div 
+        className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md border-b"
+        style={{ 
+          background: 'linear-gradient(135deg, rgba(7,7,26,0.95), rgba(13,26,42,0.95))', 
+          borderColor: 'rgba(0,200,83,0.2)',
+          boxShadow: '0 4px 20px rgba(0,200,83,0.1)',
+          animation: 'slideDown 0.5s ease-out'
+        }}
+      >
+        <div className="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
+          {/* Logo */}
+          <Link to="/" className="flex items-center gap-2">
+            <div className="relative">
+              <div 
+                className="absolute inset-0 blur-lg opacity-60"
+                style={{ 
+                  background: 'radial-gradient(circle, rgba(0,200,83,0.6) 0%, transparent 70%)',
+                  animation: 'glow 3s ease-in-out infinite'
+                }}
+              />
+              <MatchifyLogo size={28} variant="icon" />
+            </div>
+            <span 
+              className="font-bold text-base"
+              style={{ 
+                background: 'linear-gradient(135deg, #00c853, #00ff88)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text'
+              }}
+            >
+              matchify.pro
+            </span>
+          </Link>
+
+          {/* Sign Up Button */}
+          <Link 
+            to={redirectUrl ? `/register?redirect=${encodeURIComponent(redirectUrl)}` : '/register'}
+            className="px-4 py-2 rounded-lg font-bold text-sm transition-all relative overflow-hidden group"
+            style={{ 
+              background: 'linear-gradient(135deg, #00c853, #00ff88)',
+              color: '#003320',
+              boxShadow: '0 4px 12px rgba(0,200,83,0.4), inset 0 1px 0 rgba(255,255,255,0.3)'
+            }}
+          >
+            <div 
+              className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
+              style={{ background: 'rgba(255,255,255,0.2)' }}
+            />
+            <span className="relative z-10">Sign up</span>
+          </Link>
+        </div>
+      </div>
+
       {/* Animated Background Elements */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         {/* Large Gradient Orbs */}
@@ -124,14 +179,34 @@ const LoginPageMobile = () => {
           0% { background-position: -200% center; }
           100% { background-position: 200% center; }
         }
+        @keyframes slideDown {
+          0% { transform: translateY(-100%); opacity: 0; }
+          100% { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes fadeIn {
+          0% { opacity: 0; transform: translateY(20px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes scaleIn {
+          0% { opacity: 0; transform: scale(0.9); }
+          100% { opacity: 1; transform: scale(1); }
+        }
+        @keyframes slideUp {
+          0% { opacity: 0; transform: translateY(30px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.05); }
+        }
       `}</style>
 
       {/* Mobile-optimized container */}
-      <div className="relative z-10 flex-1 flex flex-col max-w-md mx-auto w-full px-4 py-6">
+      <div className="relative z-10 flex-1 flex flex-col max-w-md mx-auto w-full px-4" style={{ paddingTop: '80px', paddingBottom: '24px' }}>
         
         {/* Logo Section with Glow */}
-        <div className="text-center mb-8 mt-4">
-          <div className="flex justify-center mb-3 relative">
+        <div className="text-center mb-8 mt-4" style={{ animation: 'fadeIn 0.6s ease-out 0.3s both' }}>
+          <div className="flex justify-center mb-3 relative" style={{ animation: 'scaleIn 0.6s ease-out 0.4s both' }}>
             <div 
               className="absolute inset-0 blur-2xl opacity-60"
               style={{ 
@@ -153,7 +228,8 @@ const LoginPageMobile = () => {
             background: 'linear-gradient(135deg, rgba(0,200,83,0.12) 0%, rgba(99,102,241,0.12) 100%)',
             border: '2px solid rgba(0,200,83,0.3)',
             backdropFilter: 'blur(20px)',
-            boxShadow: '0 8px 32px rgba(0,200,83,0.2), inset 0 1px 0 rgba(255,255,255,0.1)'
+            boxShadow: '0 8px 32px rgba(0,200,83,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
+            animation: 'slideUp 0.8s ease-out 0.5s both'
           }}
         >
           {/* Animated Background Glow */}
@@ -309,11 +385,11 @@ const LoginPageMobile = () => {
                 backgroundSize: '200% auto',
                 color: '#003320',
                 boxShadow: '0 8px 25px rgba(0,200,83,0.4), 0 0 40px rgba(0,200,83,0.2), inset 0 1px 0 rgba(255,255,255,0.3)',
-                animation: 'shimmer 3s linear infinite'
+                animation: 'shimmer 3s linear infinite, pulse 3s ease-in-out infinite'
               }}
             >
               <div 
-                className="absolute inset-0 opacity-0 group-active:opacity-100 transition-opacity"
+                className="absolute inset-0 opacity-0 group-active:opacity-100 transition-opacity duration-200"
                 style={{ background: 'radial-gradient(circle at center, rgba(255,255,255,0.3), transparent)' }}
               />
               {loading ? (
@@ -356,13 +432,14 @@ const LoginPageMobile = () => {
         </div>
 
         {/* Stats with Vibrant Colors */}
-        <div className="grid grid-cols-3 gap-3 mb-6">
+        <div className="grid grid-cols-3 gap-3 mb-6" style={{ animation: 'fadeIn 0.8s ease-out 0.8s both' }}>
           <div 
             className="p-4 rounded-xl text-center relative overflow-hidden"
             style={{ 
               background: 'linear-gradient(135deg, rgba(0,200,83,0.2), rgba(0,255,136,0.15))',
               border: '2px solid rgba(0,200,83,0.4)',
-              boxShadow: '0 4px 15px rgba(0,200,83,0.3), inset 0 1px 0 rgba(255,255,255,0.1)'
+              boxShadow: '0 4px 15px rgba(0,200,83,0.3), inset 0 1px 0 rgba(255,255,255,0.1)',
+              animation: 'scaleIn 0.5s ease-out 0.9s both'
             }}
           >
             <p className="text-2xl font-black mb-1" style={{ color: '#00ff88', textShadow: '0 0 20px rgba(0,200,83,0.5)' }}>1000+</p>
@@ -373,7 +450,8 @@ const LoginPageMobile = () => {
             style={{ 
               background: 'linear-gradient(135deg, rgba(245,158,11,0.2), rgba(251,146,60,0.15))',
               border: '2px solid rgba(245,158,11,0.4)',
-              boxShadow: '0 4px 15px rgba(245,158,11,0.3), inset 0 1px 0 rgba(255,255,255,0.1)'
+              boxShadow: '0 4px 15px rgba(245,158,11,0.3), inset 0 1px 0 rgba(255,255,255,0.1)',
+              animation: 'scaleIn 0.5s ease-out 1.0s both'
             }}
           >
             <p className="text-2xl font-black mb-1" style={{ color: '#fbbf24', textShadow: '0 0 20px rgba(245,158,11,0.5)' }}>50+</p>
@@ -384,7 +462,8 @@ const LoginPageMobile = () => {
             style={{ 
               background: 'linear-gradient(135deg, rgba(6,182,212,0.2), rgba(14,165,233,0.15))',
               border: '2px solid rgba(6,182,212,0.4)',
-              boxShadow: '0 4px 15px rgba(6,182,212,0.3), inset 0 1px 0 rgba(255,255,255,0.1)'
+              boxShadow: '0 4px 15px rgba(6,182,212,0.3), inset 0 1px 0 rgba(255,255,255,0.1)',
+              animation: 'scaleIn 0.5s ease-out 1.1s both'
             }}
           >
             <p className="text-2xl font-black mb-1" style={{ color: '#22d3ee', textShadow: '0 0 20px rgba(6,182,212,0.5)' }}>25+</p>

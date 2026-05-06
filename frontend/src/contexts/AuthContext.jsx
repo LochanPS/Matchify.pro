@@ -66,25 +66,14 @@ export const AuthProvider = ({ children }) => {
     const token = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
     
-    console.log('🔄 AuthContext: Initializing...', {
-      hasToken: !!token,
-      hasStoredUser: !!storedUser
-    });
-    
     if (token && storedUser) {
       try {
         const parsedUser = JSON.parse(storedUser);
-        console.log('✅ AuthContext: User found in localStorage', {
-          email: parsedUser.email,
-          hasRoles: !!parsedUser.roles,
-          hasCurrentRole: !!parsedUser.currentRole
-        });
         
         // Fix legacy user data - add roles if missing
         let needsUpdate = false;
         
         if (!parsedUser.roles && !parsedUser.role) {
-          console.warn('⚠️ User missing roles field, adding default roles');
           parsedUser.roles = ['PLAYER', 'ORGANIZER', 'UMPIRE'];
           needsUpdate = true;
         }
@@ -113,40 +102,31 @@ export const AuthProvider = ({ children }) => {
         
         if (needsUpdate) {
           localStorage.setItem('user', JSON.stringify(parsedUser));
-          console.log('✅ User data updated with roles, isAdmin, and currentRole');
         }
         
         setUser(parsedUser);
-        console.log('✅ AuthContext: User set in state');
         
         // Fetch fresh user data from server to ensure we have latest profile info
         fetchUserProfile().finally(() => {
           setLoading(false);
-          console.log('✅ AuthContext: Loading complete');
         });
       } catch (error) {
-        console.error('❌ Error parsing stored user:', error);
+        console.error('Error parsing stored user:', error);
         localStorage.removeItem('user');
         localStorage.removeItem('token');
         setLoading(false);
       }
     } else {
-      console.log('❌ AuthContext: No token or user in localStorage');
       setLoading(false);
     }
   }, []);
 
   const login = async (email, password) => {
     try {
-      console.log('🔐 Login attempt:', email);
       const response = await api.post('/auth/login', { email, password });
-      console.log('✅ Login response:', response.data);
       
       const { user: userData, accessToken, token } = response.data;
       const authToken = accessToken || token; // Support both field names
-      
-      console.log('📦 Token received:', authToken ? 'YES' : 'NO');
-      console.log('👤 User data received:', userData ? 'YES' : 'NO');
       
       if (!authToken) {
         throw new Error('No token received from server');
@@ -169,21 +149,10 @@ export const AuthProvider = ({ children }) => {
         userData.currentRole = userData.roles && userData.roles[0] ? userData.roles[0] : 'PLAYER';
       }
       
-      console.log('💾 Saving to localStorage...');
-      console.log('📦 User data to save:', {
-        email: userData.email,
-        roles: userData.roles,
-        isAdmin: userData.isAdmin,
-        currentRole: userData.currentRole
-      });
       localStorage.setItem('token', authToken);
       localStorage.setItem('user', JSON.stringify(userData));
-      console.log('✅ Saved to localStorage');
-      console.log('   Token in storage:', localStorage.getItem('token') ? 'YES' : 'NO');
-      console.log('   User in storage:', localStorage.getItem('user') ? 'YES' : 'NO');
       
       setUser(userData);
-      console.log('✅ User set in state');
       
       // Don't show profile completion for admin
       if (userData.isAdmin) {
@@ -202,7 +171,7 @@ export const AuthProvider = ({ children }) => {
       
       return userData;
     } catch (error) {
-      console.error('❌ Login error:', error);
+      console.error('Login error:', error);
       throw error;
     }
   };

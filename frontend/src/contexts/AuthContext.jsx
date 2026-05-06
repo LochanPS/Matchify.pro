@@ -39,6 +39,13 @@ export const AuthProvider = ({ children }) => {
         setUser(freshUser);
         localStorage.setItem('user', JSON.stringify(freshUser));
         
+        // Check if profile photo is missing - MANDATORY
+        if (!freshUser.profilePhoto) {
+          setShowProfilePhotoModal(true);
+        } else {
+          setShowProfilePhotoModal(false);
+        }
+        
         // Check if profile is incomplete
         if (!isProfileComplete(freshUser)) {
           setShowProfileCompletion(true);
@@ -105,6 +112,16 @@ export const AuthProvider = ({ children }) => {
         }
         
         setUser(parsedUser);
+        
+        // Check if profile photo is missing - MANDATORY (for non-admin users)
+        if (!parsedUser.isAdmin && !parsedUser.profilePhoto) {
+          setShowProfilePhotoModal(true);
+        }
+        
+        // Check if profile is incomplete
+        if (!parsedUser.isAdmin && !isProfileComplete(parsedUser)) {
+          setShowProfileCompletion(true);
+        }
         
         // Fetch fresh user data from server to ensure we have latest profile info
         fetchUserProfile().finally(() => {
@@ -195,6 +212,11 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('token', authToken);
       localStorage.setItem('user', JSON.stringify(newUser));
       setUser(newUser);
+      
+      // Check if profile photo is missing - MANDATORY
+      if (!newUser.profilePhoto) {
+        setShowProfilePhotoModal(true);
+      }
       
       // Show profile completion modal for new users
       if (!isProfileComplete(newUser)) {

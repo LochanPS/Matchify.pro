@@ -102,42 +102,159 @@ const RegisterPageMobile = () => {
   ];
 
   return (
-    <div className="min-h-screen" style={{ background: '#07071a' }}>
-      {/* Mobile-optimized container */}
-      <div className="max-w-md mx-auto px-4 py-6">
+    <div className="min-h-screen relative overflow-hidden" style={{ 
+      background: 'linear-gradient(180deg, #0a0a1f 0%, #07071a 30%, #0d1a2a 60%, #07071a 100%)' 
+    }}>
+      {/* Animated Background Elements */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        {/* Large Gradient Orbs */}
+        <div 
+          className="absolute top-0 left-0 w-80 h-80 rounded-full blur-3xl opacity-30 animate-pulse"
+          style={{ 
+            background: 'radial-gradient(circle, rgba(0,200,83,0.4) 0%, rgba(0,255,136,0.2) 40%, transparent 70%)',
+            animation: 'float 8s ease-in-out infinite'
+          }}
+        />
+        <div 
+          className="absolute bottom-1/3 right-0 w-72 h-72 rounded-full blur-3xl opacity-25 animate-pulse"
+          style={{ 
+            background: 'radial-gradient(circle, rgba(168,85,247,0.4) 0%, rgba(139,92,246,0.2) 40%, transparent 70%)',
+            animation: 'float 10s ease-in-out infinite reverse',
+            animationDelay: '2s'
+          }}
+        />
+        <div 
+          className="absolute top-1/2 left-1/3 w-64 h-64 rounded-full blur-3xl opacity-20 animate-pulse"
+          style={{ 
+            background: 'radial-gradient(circle, rgba(245,158,11,0.4) 0%, rgba(251,146,60,0.2) 40%, transparent 70%)',
+            animation: 'float 12s ease-in-out infinite',
+            animationDelay: '4s'
+          }}
+        />
         
-        {/* Logo Section */}
+        {/* Floating Particles */}
+        {[...Array(12)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute rounded-full"
+            style={{
+              width: `${Math.random() * 6 + 2}px`,
+              height: `${Math.random() * 6 + 2}px`,
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              background: ['#00c853', '#a855f7', '#f59e0b'][Math.floor(Math.random() * 3)],
+              opacity: Math.random() * 0.5 + 0.2,
+              animation: `float ${Math.random() * 10 + 5}s ease-in-out infinite`,
+              animationDelay: `${Math.random() * 5}s`,
+              boxShadow: `0 0 ${Math.random() * 20 + 10}px currentColor`
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Add keyframes for animations */}
+      <style>{`
+        @keyframes float {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          25% { transform: translate(20px, -20px) scale(1.05); }
+          50% { transform: translate(-15px, 15px) scale(0.95); }
+          75% { transform: translate(15px, 10px) scale(1.02); }
+        }
+        @keyframes glow {
+          0%, 100% { opacity: 0.5; filter: brightness(1); }
+          50% { opacity: 1; filter: brightness(1.3); }
+        }
+        @keyframes shimmer {
+          0% { background-position: -200% center; }
+          100% { background-position: 200% center; }
+        }
+      `}</style>
+
+      {/* Mobile-optimized container */}
+      <div className="relative z-10 max-w-md mx-auto px-4 py-6">
+        
+        {/* Logo Section with Glow */}
         <div className="text-center mb-6">
-          <div className="flex justify-center mb-3">
-            <MatchifyLogo size={48} variant="full" />
+          <div className="flex justify-center mb-3 relative">
+            <div 
+              className="absolute inset-0 blur-2xl opacity-60"
+              style={{ 
+                background: 'radial-gradient(circle, rgba(0,200,83,0.6) 0%, transparent 70%)',
+                animation: 'glow 3s ease-in-out infinite'
+              }}
+            />
+            <div className="relative">
+              <MatchifyLogo size={48} variant="full" />
+            </div>
           </div>
-          <p className="text-xs text-gray-400">India's Premier Badminton Platform</p>
+          <p className="text-xs text-gray-300 font-medium">India's Premier Badminton Platform</p>
         </div>
 
-        {/* Main Card */}
+        {/* Main Card with Enhanced Depth */}
         <div 
-          className="rounded-2xl p-5 mb-4"
+          className="rounded-2xl p-5 mb-4 relative overflow-hidden"
           style={{
-            background: 'rgba(13,26,42,0.8)',
-            border: '1px solid rgba(0,200,83,0.2)',
-            backdropFilter: 'blur(10px)',
+            background: 'linear-gradient(135deg, rgba(0,200,83,0.12) 0%, rgba(168,85,247,0.12) 100%)',
+            border: '2px solid rgba(0,200,83,0.3)',
+            backdropFilter: 'blur(20px)',
+            boxShadow: '0 8px 32px rgba(0,200,83,0.2), inset 0 1px 0 rgba(255,255,255,0.1)'
           }}
         >
-          {/* Header */}
-          <div className="text-center mb-5">
-            <div 
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold mb-3"
-              style={{ 
-                background: 'rgba(0,200,83,0.1)', 
-                border: '1px solid rgba(0,200,83,0.3)', 
-                color: '#00c853' 
-              }}
-            >
-              ✨ Join the Champions!
+          {/* Animated Background Glow */}
+          <div 
+            className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl opacity-30"
+            style={{ 
+              background: 'radial-gradient(circle, rgba(0,255,136,0.6), transparent)',
+              animation: 'glow 4s ease-in-out infinite'
+            }}
+          />
+          <div 
+            className="absolute bottom-0 left-0 w-32 h-32 rounded-full blur-3xl opacity-30"
+            style={{ 
+              background: 'radial-gradient(circle, rgba(168,85,247,0.6), transparent)',
+              animation: 'glow 4s ease-in-out infinite reverse'
+            }}
+          />
+          
+          <div className="relative z-10">
+            {/* Header */}
+            <div className="text-center mb-5">
+              <div 
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold mb-3 relative overflow-hidden"
+                style={{ 
+                  background: 'linear-gradient(135deg, rgba(0,200,83,0.2), rgba(0,255,136,0.15))', 
+                  border: '2px solid rgba(0,200,83,0.5)', 
+                  color: '#00ff88',
+                  boxShadow: '0 0 20px rgba(0,200,83,0.3), inset 0 0 20px rgba(0,200,83,0.1)'
+                }}
+              >
+                <div 
+                  className="absolute inset-0 opacity-30"
+                  style={{
+                    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
+                    backgroundSize: '200% 100%',
+                    animation: 'shimmer 3s infinite'
+                  }}
+                />
+                <span className="relative z-10">✨ Join the Champions!</span>
+              </div>
+              <h1 
+                className="text-3xl font-black mb-1"
+                style={{ 
+                  background: 'linear-gradient(135deg, #ffffff 0%, #00ff88 50%, #ffffff 100%)',
+                  backgroundSize: '200% auto',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                  animation: 'shimmer 4s linear infinite',
+                  textShadow: 'none',
+                  filter: 'drop-shadow(0 2px 10px rgba(0,200,83,0.3))'
+                }}
+              >
+                Create Account
+              </h1>
+              <p className="text-sm text-gray-300 font-medium">Start your badminton journey</p>
             </div>
-            <h1 className="text-2xl font-bold text-white mb-1">Create Account</h1>
-            <p className="text-sm text-gray-400">Start your badminton journey</p>
-          </div>
 
           {/* Error Message */}
           {error && (
@@ -156,29 +273,44 @@ const RegisterPageMobile = () => {
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             
-            {/* Roles Info */}
+            {/* Roles Info with Vibrant Colors */}
             <div>
               <label className="block text-sm font-semibold text-white mb-2">
                 You Get All 3 Roles ✓
               </label>
               <div className="grid grid-cols-3 gap-2">
-                {roles.map((role) => (
-                  <div
-                    key={role.title}
-                    className="p-3 rounded-xl text-center"
-                    style={{ 
-                      background: 'rgba(0,200,83,0.08)', 
-                      border: '1px solid rgba(0,200,83,0.2)' 
-                    }}
-                  >
-                    <CheckCircleIcon className="w-4 h-4 text-emerald-400 mx-auto mb-1" />
-                    <div className="text-xl mb-1">{role.icon}</div>
-                    <p className="text-xs font-semibold text-white">{role.title}</p>
-                    <p className="text-xs text-gray-500">{role.desc}</p>
-                  </div>
-                ))}
+                {roles.map((role, idx) => {
+                  const colors = [
+                    { bg: 'linear-gradient(135deg, rgba(0,200,83,0.2), rgba(0,255,136,0.15))', border: 'rgba(0,200,83,0.5)', shadow: 'rgba(0,200,83,0.3)' },
+                    { bg: 'linear-gradient(135deg, rgba(168,85,247,0.2), rgba(139,92,246,0.15))', border: 'rgba(168,85,247,0.5)', shadow: 'rgba(168,85,247,0.3)' },
+                    { bg: 'linear-gradient(135deg, rgba(6,182,212,0.2), rgba(14,165,233,0.15))', border: 'rgba(6,182,212,0.5)', shadow: 'rgba(6,182,212,0.3)' }
+                  ];
+                  const color = colors[idx];
+                  
+                  return (
+                    <div
+                      key={role.title}
+                      className="p-3 rounded-xl text-center relative overflow-hidden"
+                      style={{ 
+                        background: color.bg,
+                        border: `2px solid ${color.border}`,
+                        boxShadow: `0 4px 15px ${color.shadow}, inset 0 1px 0 rgba(255,255,255,0.1)`
+                      }}
+                    >
+                      <CheckCircleIcon className="w-4 h-4 text-emerald-400 mx-auto mb-1" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,200,83,0.5))' }} />
+                      <div className="text-xl mb-1" style={{ filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.3))' }}>{role.icon}</div>
+                      <p className="text-xs font-semibold text-white">{role.title}</p>
+                      <p className="text-xs text-gray-300">{role.desc}</p>
+                    </div>
+                  );
+                })}
               </div>
-              <p className="mt-2 text-xs text-emerald-400 text-center">
+              <p className="mt-2 text-xs font-semibold text-center" style={{ 
+                background: 'linear-gradient(135deg, #00c853, #00ff88)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text'
+              }}>
                 Switch roles anytime from dashboard
               </p>
             </div>
@@ -343,24 +475,30 @@ const RegisterPageMobile = () => {
               </span>
             </label>
 
-            {/* Submit Button */}
+            {/* Submit Button with Enhanced Glow */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-4 rounded-xl font-bold text-base transition-all disabled:opacity-50"
+              className="w-full py-4 rounded-xl font-bold text-base transition-all disabled:opacity-50 relative overflow-hidden group"
               style={{ 
-                background: 'linear-gradient(135deg, #00c853, #00ff88)', 
+                background: 'linear-gradient(135deg, #00c853 0%, #00ff88 50%, #00c853 100%)',
+                backgroundSize: '200% auto',
                 color: '#003320',
-                boxShadow: '0 4px 15px rgba(0,200,83,0.3)'
+                boxShadow: '0 8px 25px rgba(0,200,83,0.4), 0 0 40px rgba(0,200,83,0.2), inset 0 1px 0 rgba(255,255,255,0.3)',
+                animation: 'shimmer 3s linear infinite'
               }}
             >
+              <div 
+                className="absolute inset-0 opacity-0 group-active:opacity-100 transition-opacity"
+                style={{ background: 'radial-gradient(circle at center, rgba(255,255,255,0.3), transparent)' }}
+              />
               {loading ? (
-                <span className="flex items-center justify-center gap-2">
+                <span className="flex items-center justify-center gap-2 relative z-10">
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                   Creating...
                 </span>
               ) : (
-                'Create Account'
+                <span className="relative z-10" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }}>Create Account</span>
               )}
             </button>
           </form>
@@ -368,44 +506,64 @@ const RegisterPageMobile = () => {
           {/* Sign In Link */}
           <div className="mt-5 text-center">
             <div className="flex items-center gap-3 mb-3">
-              <div className="flex-1 h-px bg-gray-700"/>
-              <span className="text-xs text-gray-500">or</span>
-              <div className="flex-1 h-px bg-gray-700"/>
+              <div className="flex-1 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)' }}/>
+              <span className="text-xs text-gray-400 font-medium">or</span>
+              <div className="flex-1 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)' }}/>
             </div>
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-gray-300">
               Already have an account?{' '}
               <Link 
                 to={redirectUrl ? `/login?redirect=${encodeURIComponent(redirectUrl)}` : '/login'}
-                className="font-bold text-emerald-400"
+                className="font-bold"
+                style={{ 
+                  background: 'linear-gradient(135deg, #00c853, #00ff88)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text'
+                }}
               >
                 Sign in →
               </Link>
             </p>
           </div>
+          </div>
         </div>
 
-        {/* Benefits */}
+        {/* Benefits with Vibrant Colors */}
         <div className="grid grid-cols-2 gap-3 mb-4">
           <div 
-            className="p-3 rounded-xl text-center"
-            style={{ background: 'rgba(0,200,83,0.05)', border: '1px solid rgba(0,200,83,0.1)' }}
+            className="p-4 rounded-xl text-center relative overflow-hidden"
+            style={{ 
+              background: 'linear-gradient(135deg, rgba(0,200,83,0.2), rgba(0,255,136,0.15))',
+              border: '2px solid rgba(0,200,83,0.4)',
+              boxShadow: '0 4px 15px rgba(0,200,83,0.3), inset 0 1px 0 rgba(255,255,255,0.1)'
+            }}
           >
-            <div className="text-2xl mb-1">🎁</div>
-            <p className="text-xs font-semibold text-white">Free to Join</p>
-            <p className="text-xs text-gray-500">No hidden fees</p>
+            <div className="text-3xl mb-2" style={{ filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.3))' }}>🎁</div>
+            <p className="text-sm font-bold text-white mb-1">Free to Join</p>
+            <p className="text-xs text-gray-300">No hidden fees</p>
           </div>
           <div 
-            className="p-3 rounded-xl text-center"
-            style={{ background: 'rgba(0,200,83,0.05)', border: '1px solid rgba(0,200,83,0.1)' }}
+            className="p-4 rounded-xl text-center relative overflow-hidden"
+            style={{ 
+              background: 'linear-gradient(135deg, rgba(245,158,11,0.2), rgba(251,146,60,0.15))',
+              border: '2px solid rgba(245,158,11,0.4)',
+              boxShadow: '0 4px 15px rgba(245,158,11,0.3), inset 0 1px 0 rgba(255,255,255,0.1)'
+            }}
           >
-            <div className="text-2xl mb-1">🏆</div>
-            <p className="text-xs font-semibold text-white">Track Progress</p>
-            <p className="text-xs text-gray-500">Live stats</p>
+            <div className="text-3xl mb-2" style={{ filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.3))' }}>🏆</div>
+            <p className="text-sm font-bold text-white mb-1">Track Progress</p>
+            <p className="text-xs text-gray-300">Live stats</p>
           </div>
         </div>
 
         {/* Footer */}
-        <p className="text-center text-xs text-gray-500">
+        <p className="text-center text-xs font-medium" style={{ 
+          background: 'linear-gradient(135deg, #ffffff, #00ff88, #ffffff)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          backgroundClip: 'text'
+        }}>
           By signing up, you join India's fastest growing badminton community
         </p>
       </div>

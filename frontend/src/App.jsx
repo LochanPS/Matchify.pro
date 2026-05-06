@@ -57,6 +57,8 @@ import NotificationDetailPage from './pages/NotificationDetailPage'
 import RefundIssuePage from './pages/RefundIssuePage'
 import SearchAcademiesPage from './pages/SearchAcademiesPage'
 import AddAcademyPage from './pages/AddAcademyPage'
+import TermsOfService from './pages/TermsOfService'
+import PrivacyPolicy from './pages/PrivacyPolicy'
 
 // Payment System Pages
 import PaymentVerificationPage from './pages/admin/PaymentVerificationPage'
@@ -117,6 +119,8 @@ function AppContent() {
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/terms" element={<TermsOfService />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/tournaments" element={<TournamentDiscoveryPage />} />
           <Route path="/academies" element={<SearchAcademiesPage />} />
           <Route path="/academies/add" element={<AddAcademyPage />} />

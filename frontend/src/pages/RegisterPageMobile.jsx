@@ -546,9 +546,9 @@ const RegisterPageMobile = () => {
               />
               <span className="text-xs text-gray-400">
                 I agree to the{' '}
-                <a href="/terms" className="text-emerald-400 underline">Terms</a>
+                <Link to="/terms" className="text-emerald-400 underline">Terms</Link>
                 {' '}and{' '}
-                <a href="/privacy" className="text-emerald-400 underline">Privacy Policy</a>
+                <Link to="/privacy" className="text-emerald-400 underline">Privacy Policy</Link>
               </span>
             </label>
 

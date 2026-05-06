@@ -772,6 +772,55 @@ const UnifiedDashboardMobile = () => {
               </div>
             )}
             
+            {/* Matchify Code */}
+            {matchifyCode && (
+              <div 
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg mb-3 relative overflow-hidden"
+                style={{ 
+                  background: 'linear-gradient(135deg, rgba(0,200,83,0.25), rgba(0,255,136,0.2))',
+                  border: '2px solid rgba(0,200,83,0.5)',
+                  boxShadow: '0 4px 12px rgba(0,200,83,0.4), inset 0 1px 0 rgba(255,255,255,0.2)'
+                }}
+              >
+                <div 
+                  className="absolute inset-0 opacity-20"
+                  style={{
+                    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)',
+                    backgroundSize: '200% 100%',
+                    animation: 'shimmer 3s infinite'
+                  }}
+                />
+                <div className="relative z-10">
+                  <p className="text-xs font-bold" style={{ color: '#6ee7b7' }}>Matchify ID</p>
+                  <p 
+                    className="text-lg font-mono font-black tracking-wider"
+                    style={{ 
+                      color: '#00ff88',
+                      textShadow: '0 0 15px rgba(0,200,83,0.6)'
+                    }}
+                  >
+                    {matchifyCode}
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(matchifyCode);
+                    alert('Matchify ID copied!');
+                  }}
+                  className="p-2 rounded-lg transition-all relative z-10"
+                  style={{ 
+                    background: 'rgba(0,200,83,0.3)',
+                    border: '1px solid rgba(0,200,83,0.6)'
+                  }}
+                  title="Copy Matchify ID"
+                >
+                  <svg className="w-5 h-5 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                </button>
+              </div>
+            )}
+            
             {/* Compact Role Switcher - Only if multiple roles */}
             {userRoles.length > 1 && (
               <div className="flex items-center justify-center gap-2 mb-3">

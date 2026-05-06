@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Bell, CheckCheck, Trash2, ChevronRight, ArrowLeft } from 'lucide-react';
 import { useNotifications } from '../contexts/NotificationContext';
 import { formatDistanceToNow, format } from 'date-fns';
+import MatchifyLogo from '../components/MatchifyLogo';
 
 const NotificationsPage = () => {
   const navigate = useNavigate();
@@ -48,6 +49,22 @@ const NotificationsPage = () => {
     return icons[type] || '🔔';
   };
 
+  const getNotificationColor = (type) => {
+    const colors = {
+      REGISTRATION_CONFIRMED: { bg: 'linear-gradient(135deg, rgba(16,185,129,0.2), rgba(5,150,105,0.15))', border: 'rgba(16,185,129,0.4)', shadow: 'rgba(16,185,129,0.3)' },
+      REGISTRATION_REJECTED: { bg: 'linear-gradient(135deg, rgba(239,68,68,0.2), rgba(220,38,38,0.15))', border: 'rgba(239,68,68,0.4)', shadow: 'rgba(239,68,68,0.3)' },
+      REGISTRATION_PENDING: { bg: 'linear-gradient(135deg, rgba(245,158,11,0.2), rgba(251,146,60,0.15))', border: 'rgba(245,158,11,0.4)', shadow: 'rgba(245,158,11,0.3)' },
+      PAYMENT_VERIFICATION_REQUIRED: { bg: 'linear-gradient(135deg, rgba(59,130,246,0.2), rgba(37,99,235,0.15))', border: 'rgba(59,130,246,0.4)', shadow: 'rgba(59,130,246,0.3)' },
+      PARTNER_INVITATION: { bg: 'linear-gradient(135deg, rgba(168,85,247,0.2), rgba(139,92,246,0.15))', border: 'rgba(168,85,247,0.4)', shadow: 'rgba(168,85,247,0.3)' },
+      PARTNER_ACCEPTED: { bg: 'linear-gradient(135deg, rgba(16,185,129,0.2), rgba(5,150,105,0.15))', border: 'rgba(16,185,129,0.4)', shadow: 'rgba(16,185,129,0.3)' },
+      DRAW_PUBLISHED: { bg: 'linear-gradient(135deg, rgba(6,182,212,0.2), rgba(14,165,233,0.15))', border: 'rgba(6,182,212,0.4)', shadow: 'rgba(6,182,212,0.3)' },
+      MATCH_ASSIGNED: { bg: 'linear-gradient(135deg, rgba(59,130,246,0.2), rgba(37,99,235,0.15))', border: 'rgba(59,130,246,0.4)', shadow: 'rgba(59,130,246,0.3)' },
+      POINTS_AWARDED: { bg: 'linear-gradient(135deg, rgba(245,158,11,0.2), rgba(251,146,60,0.15))', border: 'rgba(245,158,11,0.4)', shadow: 'rgba(245,158,11,0.3)' },
+      TOURNAMENT_REMINDER: { bg: 'linear-gradient(135deg, rgba(168,85,247,0.2), rgba(139,92,246,0.15))', border: 'rgba(168,85,247,0.4)', shadow: 'rgba(168,85,247,0.3)' },
+    };
+    return colors[type] || { bg: 'linear-gradient(135deg, rgba(99,102,241,0.2), rgba(79,70,229,0.15))', border: 'rgba(99,102,241,0.4)', shadow: 'rgba(99,102,241,0.3)' };
+  };
+
   const handleNotificationClick = (notification) => {
     // Mark as read
     if (!notification.read) {
@@ -77,180 +94,462 @@ const NotificationsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      {/* Animated Background */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-2000"></div>
+    <div className="min-h-screen relative overflow-hidden" style={{ 
+      background: 'linear-gradient(180deg, #0a0a1f 0%, #07071a 30%, #0d1a2a 60%, #07071a 100%)' 
+    }}>
+      {/* Animated Background Elements */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        {/* Large Gradient Orbs */}
+        <div 
+          className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl opacity-30 animate-pulse"
+          style={{ 
+            background: 'radial-gradient(circle, rgba(0,200,83,0.4) 0%, rgba(0,255,136,0.2) 40%, transparent 70%)',
+            animation: 'float 8s ease-in-out infinite'
+          }}
+        />
+        <div 
+          className="absolute top-1/4 left-0 w-80 h-80 rounded-full blur-3xl opacity-25 animate-pulse"
+          style={{ 
+            background: 'radial-gradient(circle, rgba(168,85,247,0.4) 0%, rgba(139,92,246,0.2) 40%, transparent 70%)',
+            animation: 'float 10s ease-in-out infinite reverse',
+            animationDelay: '2s'
+          }}
+        />
+        <div 
+          className="absolute bottom-1/4 right-1/4 w-72 h-72 rounded-full blur-3xl opacity-20 animate-pulse"
+          style={{ 
+            background: 'radial-gradient(circle, rgba(6,182,212,0.4) 0%, rgba(14,165,233,0.2) 40%, transparent 70%)',
+            animation: 'float 12s ease-in-out infinite',
+            animationDelay: '4s'
+          }}
+        />
+        
+        {/* Floating Particles */}
+        {[...Array(15)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute rounded-full"
+            style={{
+              width: `${Math.random() * 6 + 2}px`,
+              height: `${Math.random() * 6 + 2}px`,
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              background: ['#00c853', '#a855f7', '#06b6d4', '#f59e0b'][Math.floor(Math.random() * 4)],
+              opacity: Math.random() * 0.5 + 0.2,
+              animation: `float ${Math.random() * 10 + 5}s ease-in-out infinite`,
+              animationDelay: `${Math.random() * 5}s`,
+              boxShadow: `0 0 ${Math.random() * 20 + 10}px currentColor`
+            }}
+          />
+        ))}
       </div>
 
-      <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
+      {/* Add keyframes for animations */}
+      <style>{`
+        @keyframes float {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          25% { transform: translate(20px, -20px) scale(1.05); }
+          50% { transform: translate(-15px, 15px) scale(0.95); }
+          75% { transform: translate(15px, 10px) scale(1.02); }
+        }
+        @keyframes glow {
+          0%, 100% { opacity: 0.5; filter: brightness(1); }
+          50% { opacity: 1; filter: brightness(1.3); }
+        }
+        @keyframes shimmer {
+          0% { background-position: -200% center; }
+          100% { background-position: 200% center; }
+        }
+        @keyframes fadeIn {
+          0% { opacity: 0; transform: translateY(20px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes scaleIn {
+          0% { opacity: 0; transform: scale(0.9); }
+          100% { opacity: 1; transform: scale(1); }
+        }
+        @keyframes slideUp {
+          0% { opacity: 0; transform: translateY(30px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideDown {
+          0% { transform: translateY(-100%); opacity: 0; }
+          100% { transform: translateY(0); opacity: 1; }
+        }
+      `}</style>
+
+      {/* Sticky Header */}
+      <div 
+        className="sticky top-0 z-50 backdrop-blur-md border-b relative"
+        style={{ 
+          background: 'linear-gradient(135deg, rgba(7,7,26,0.95), rgba(13,26,42,0.95))', 
+          borderColor: 'rgba(0,200,83,0.3)',
+          boxShadow: '0 4px 20px rgba(0,200,83,0.1)',
+          animation: 'slideDown 0.5s ease-out'
+        }}
+      >
+        <div className="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
+          {/* Back Button & Logo */}
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-gray-400 hover:text-white mb-4 transition-colors"
+            className="flex items-center gap-2 transition-all relative overflow-hidden group"
           >
-            <ArrowLeft className="w-5 h-5" />
-            <span>Back</span>
+            <div 
+              className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+              style={{ background: 'rgba(255,255,255,0.05)' }}
+            />
+            <ArrowLeft className="w-5 h-5 text-emerald-400 relative z-10" />
+            <div className="relative">
+              <div 
+                className="absolute inset-0 blur-lg opacity-60"
+                style={{ 
+                  background: 'radial-gradient(circle, rgba(0,200,83,0.6) 0%, transparent 70%)',
+                  animation: 'glow 3s ease-in-out infinite'
+                }}
+              />
+              <MatchifyLogo size={24} variant="icon" />
+            </div>
           </button>
 
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center flex-shrink-0">
-                <Bell className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-white">Notifications</h1>
-                <p className="text-gray-400 mt-1">
-                  {notifications.filter(n => !n.read).length} unread
-                </p>
-              </div>
-            </div>
+          {/* Title */}
+          <h1 
+            className="text-lg font-bold"
+            style={{ 
+              background: 'linear-gradient(135deg, #ffffff, #00ff88)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text'
+            }}
+          >
+            Notifications
+          </h1>
 
-            <div className="flex items-center gap-2 flex-wrap">
-              {notifications.some(n => !n.read) && (
-                <button
-                  onClick={markAllAsRead}
-                  className="px-3 py-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 rounded-xl flex items-center gap-2 transition-colors text-sm"
-                >
-                  <CheckCheck className="w-4 h-4" />
-                  <span className="hidden sm:inline">Mark all read</span>
-                  <span className="sm:hidden">Mark read</span>
-                </button>
-              )}
-
-              {notifications.length > 0 && (
-                <button
-                  onClick={() => setShowDeleteAllConfirm(true)}
-                  className="px-3 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-xl flex items-center gap-2 transition-colors text-sm"
-                >
-                  <Trash2 className="w-4 h-4" />
-                  <span className="hidden sm:inline">Delete All</span>
-                  <span className="sm:hidden">Delete</span>
-                </button>
-              )}
+          {/* Unread Count Badge */}
+          {notifications.filter(n => !n.read).length > 0 && (
+            <div 
+              className="px-3 py-1 rounded-full text-xs font-bold"
+              style={{ 
+                background: 'linear-gradient(135deg, #00c853, #00ff88)',
+                color: '#003320',
+                boxShadow: '0 2px 8px rgba(0,200,83,0.4)'
+              }}
+            >
+              {notifications.filter(n => !n.read).length}
             </div>
-          </div>
+          )}
         </div>
+      </div>
+
+      <div className="relative max-w-md mx-auto px-4 py-6">
+        {/* Action Buttons */}
+        {notifications.length > 0 && (
+          <div 
+            className="flex items-center gap-2 mb-6"
+            style={{ animation: 'fadeIn 0.8s ease-out 0.2s both' }}
+          >
+            {notifications.some(n => !n.read) && (
+              <button
+                onClick={markAllAsRead}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold text-sm transition-all relative overflow-hidden group"
+                style={{ 
+                  background: 'linear-gradient(135deg, rgba(0,200,83,0.2), rgba(0,255,136,0.15))', 
+                  border: '2px solid rgba(0,200,83,0.4)',
+                  color: '#00ff88',
+                  boxShadow: '0 4px 15px rgba(0,200,83,0.2)'
+                }}
+              >
+                <div 
+                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                  style={{ background: 'rgba(0,200,83,0.1)' }}
+                />
+                <CheckCheck className="w-4 h-4 relative z-10" />
+                <span className="relative z-10">Mark All Read</span>
+              </button>
+            )}
+
+            <button
+              onClick={() => setShowDeleteAllConfirm(true)}
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold text-sm transition-all relative overflow-hidden group"
+              style={{ 
+                background: 'linear-gradient(135deg, rgba(239,68,68,0.2), rgba(220,38,38,0.15))', 
+                border: '2px solid rgba(239,68,68,0.4)',
+                color: '#f87171',
+                boxShadow: '0 4px 15px rgba(239,68,68,0.2)'
+              }}
+            >
+              <div 
+                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                style={{ background: 'rgba(239,68,68,0.1)' }}
+              />
+              <Trash2 className="w-4 h-4 relative z-10" />
+              <span className="relative z-10">Delete All</span>
+            </button>
+          </div>
+        )}
 
         {/* Notifications List */}
         {loading ? (
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-12 text-center">
-            <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-            <p className="text-gray-400 mt-4">Loading notifications...</p>
+          <div 
+            className="rounded-2xl p-12 text-center relative overflow-hidden"
+            style={{
+              background: 'linear-gradient(135deg, rgba(0,200,83,0.15) 0%, rgba(99,102,241,0.15) 100%)',
+              border: '2px solid rgba(0,200,83,0.3)',
+              backdropFilter: 'blur(20px)',
+              boxShadow: '0 8px 32px rgba(0,200,83,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
+              animation: 'scaleIn 0.8s ease-out'
+            }}
+          >
+            <div 
+              className="w-12 h-12 border-4 rounded-full animate-spin mx-auto"
+              style={{ 
+                borderColor: 'rgba(0,200,83,0.3)',
+                borderTopColor: '#00ff88'
+              }}
+            ></div>
+            <p className="text-gray-300 mt-4 font-semibold">Loading notifications...</p>
           </div>
         ) : notifications.length === 0 ? (
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-12 text-center">
-            <Bell className="w-16 h-16 mx-auto mb-4 text-gray-600" />
-            <h3 className="text-xl font-semibold text-white mb-2">No notifications yet</h3>
-            <p className="text-gray-400">You'll see notifications here when you have updates</p>
+          <div 
+            className="rounded-2xl p-12 text-center relative overflow-hidden"
+            style={{
+              background: 'linear-gradient(135deg, rgba(99,102,241,0.15) 0%, rgba(139,92,246,0.15) 100%)',
+              border: '2px solid rgba(99,102,241,0.3)',
+              backdropFilter: 'blur(20px)',
+              boxShadow: '0 8px 32px rgba(99,102,241,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
+              animation: 'scaleIn 0.8s ease-out'
+            }}
+          >
+            {/* Animated Glow */}
+            <div 
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 rounded-full blur-3xl opacity-20"
+              style={{ 
+                background: 'radial-gradient(circle, rgba(139,92,246,0.8), transparent)',
+                animation: 'glow 5s ease-in-out infinite'
+              }}
+            />
+            
+            <div className="relative z-10">
+              <div 
+                className="text-6xl mb-4 inline-block"
+                style={{ 
+                  filter: 'drop-shadow(0 0 20px rgba(168,85,247,0.6))',
+                  animation: 'float 3s ease-in-out infinite'
+                }}
+              >
+                🔔
+              </div>
+              <h3 className="text-xl font-black text-white mb-2">No notifications yet</h3>
+              <p className="text-sm text-gray-300">You'll see notifications here when you have updates</p>
+            </div>
           </div>
         ) : (
           <div className="space-y-3">
-            {notifications.map((notification) => (
-              <div
-                key={notification.id}
-                onClick={() => handleNotificationClick(notification)}
-                className={`bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:bg-slate-800/70 transition-all cursor-pointer ${
-                  !notification.read ? 'ring-2 ring-purple-500/50 bg-purple-500/5' : ''
-                }`}
-              >
-                <div className="flex items-start gap-4">
-                  {/* Icon */}
-                  <div className="flex-shrink-0">
-                    <div className="w-12 h-12 bg-gradient-to-br from-slate-700 to-slate-800 rounded-xl flex items-center justify-center text-2xl">
-                      {getNotificationIcon(notification.type)}
-                    </div>
-                  </div>
+            {notifications.map((notification, index) => {
+              const colorScheme = getNotificationColor(notification.type);
+              
+              return (
+                <div
+                  key={notification.id}
+                  onClick={() => handleNotificationClick(notification)}
+                  className="rounded-2xl p-4 relative overflow-hidden cursor-pointer transition-all duration-200 hover:scale-[1.02]"
+                  style={{
+                    background: colorScheme.bg,
+                    border: `2px solid ${colorScheme.border}`,
+                    boxShadow: `0 4px 15px ${colorScheme.shadow}, inset 0 1px 0 rgba(255,255,255,0.1)`,
+                    animation: `slideUp 0.5s ease-out ${index * 0.1}s both`
+                  }}
+                >
+                  {/* Shimmer Effect */}
+                  <div 
+                    className="absolute inset-0 opacity-20"
+                    style={{
+                      background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
+                      backgroundSize: '200% 100%',
+                      animation: 'shimmer 4s infinite',
+                      animationDelay: `${index * 0.5}s`
+                    }}
+                  />
 
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-white mb-1">
+                  {/* Unread Indicator Glow */}
+                  {!notification.read && (
+                    <div 
+                      className="absolute top-0 right-0 w-24 h-24 rounded-full blur-2xl opacity-40"
+                      style={{ 
+                        background: 'radial-gradient(circle, rgba(0,200,83,0.8), transparent)',
+                        animation: 'glow 3s ease-in-out infinite'
+                      }}
+                    />
+                  )}
+
+                  <div className="flex items-start gap-3 relative z-10">
+                    {/* Icon */}
+                    <div className="flex-shrink-0">
+                      <div 
+                        className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl relative"
+                        style={{ 
+                          background: `${colorScheme.bg}`,
+                          border: `2px solid ${colorScheme.border}`,
+                          boxShadow: `0 4px 12px ${colorScheme.shadow}`,
+                          filter: 'brightness(1.2)'
+                        }}
+                      >
+                        <span style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }}>
+                          {getNotificationIcon(notification.type)}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <h3 className="text-base font-bold text-white leading-tight">
                           {notification.title}
                         </h3>
-                        <p className="text-gray-400 text-sm mb-3">
-                          {notification.message}
-                        </p>
-                        <div className="flex items-center gap-3 text-xs text-gray-500">
-                          <span className="flex items-center gap-1">
-                            <span className="text-purple-400">
-                              {formatDistanceToNow(new Date(notification.createdAt), {
-                                addSuffix: true,
-                              })}
-                            </span>
+                        {!notification.read && (
+                          <div 
+                            className="w-2 h-2 rounded-full flex-shrink-0 mt-1"
+                            style={{ 
+                              background: '#00ff88',
+                              boxShadow: '0 0 10px rgba(0,255,136,0.8)'
+                            }}
+                          ></div>
+                        )}
+                      </div>
+                      
+                      <p className="text-sm text-gray-300 mb-3 leading-relaxed">
+                        {notification.message}
+                      </p>
+                      
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-xs">
+                          <span 
+                            className="font-semibold"
+                            style={{ color: '#00ff88' }}
+                          >
+                            {formatDistanceToNow(new Date(notification.createdAt), {
+                              addSuffix: true,
+                            })}
                           </span>
-                          <span>•</span>
-                          <span>
-                            {format(new Date(notification.createdAt), 'MMM dd, yyyy • h:mm a')}
+                          <span className="text-gray-500">•</span>
+                          <span className="text-gray-400">
+                            {format(new Date(notification.createdAt), 'MMM dd, h:mm a')}
                           </span>
                         </div>
-                      </div>
 
-                      {/* Actions */}
-                      <div className="flex items-center gap-2 flex-shrink-0">
-                        {!notification.read && (
-                          <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                        )}
-                        <ChevronRight className="w-5 h-5 text-gray-500" />
-                        <button
-                          onClick={(e) => handleDelete(e, notification.id)}
-                          className="p-2 hover:bg-red-500/20 rounded-lg transition-colors"
-                        >
-                          <Trash2 className="w-4 h-4 text-gray-500 hover:text-red-400" />
-                        </button>
+                        {/* Actions */}
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={(e) => handleDelete(e, notification.id)}
+                            className="p-2 rounded-lg transition-all relative overflow-hidden group"
+                            style={{ 
+                              background: 'rgba(239,68,68,0.2)',
+                              border: '1px solid rgba(239,68,68,0.3)'
+                            }}
+                          >
+                            <div 
+                              className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                              style={{ background: 'rgba(239,68,68,0.2)' }}
+                            />
+                            <Trash2 className="w-4 h-4 text-red-400 relative z-10" />
+                          </button>
+                          <ChevronRight className="w-5 h-5 text-gray-400" />
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
 
       {/* Delete All Confirmation Modal */}
       {showDeleteAllConfirm && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-800 border border-white/10 rounded-2xl p-6 max-w-md w-full shadow-2xl">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 bg-red-500/20 rounded-xl flex items-center justify-center">
-                <Trash2 className="w-6 h-6 text-red-400" />
-              </div>
-              <h3 className="text-xl font-bold text-white">Delete All Notifications?</h3>
-            </div>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div 
+            className="rounded-2xl p-6 max-w-md w-full relative overflow-hidden"
+            style={{
+              background: 'linear-gradient(135deg, rgba(7,7,26,0.98), rgba(13,26,42,0.98))',
+              border: '2px solid rgba(239,68,68,0.4)',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(239,68,68,0.2)',
+              animation: 'scaleIn 0.3s ease-out'
+            }}
+          >
+            {/* Animated Glow */}
+            <div 
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 rounded-full blur-3xl opacity-20"
+              style={{ 
+                background: 'radial-gradient(circle, rgba(239,68,68,0.8), transparent)',
+                animation: 'glow 3s ease-in-out infinite'
+              }}
+            />
             
-            <p className="text-gray-400 mb-6">
-              This will permanently delete all {notifications.length} notification{notifications.length !== 1 ? 's' : ''}. This action cannot be undone.
-            </p>
+            <div className="relative z-10">
+              <div className="flex items-center gap-3 mb-4">
+                <div 
+                  className="w-12 h-12 rounded-xl flex items-center justify-center"
+                  style={{ 
+                    background: 'linear-gradient(135deg, rgba(239,68,68,0.3), rgba(220,38,38,0.2))',
+                    border: '2px solid rgba(239,68,68,0.5)',
+                    boxShadow: '0 4px 12px rgba(239,68,68,0.4)'
+                  }}
+                >
+                  <Trash2 className="w-6 h-6 text-red-400" />
+                </div>
+                <h3 className="text-xl font-black text-white">Delete All Notifications?</h3>
+              </div>
+              
+              <p className="text-gray-300 mb-6 leading-relaxed">
+                This will permanently delete all <span className="font-bold text-white">{notifications.length}</span> notification{notifications.length !== 1 ? 's' : ''}. This action cannot be undone.
+              </p>
 
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowDeleteAllConfirm(false)}
-                disabled={deleting}
-                className="flex-1 px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl transition-colors disabled:opacity-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDeleteAll}
-                disabled={deleting}
-                className="flex-1 px-4 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                {deleting ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    Deleting...
-                  </>
-                ) : (
-                  <>
-                    <Trash2 className="w-4 h-4" />
-                    Delete All
-                  </>
-                )}
-              </button>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowDeleteAllConfirm(false)}
+                  disabled={deleting}
+                  className="flex-1 px-4 py-3 rounded-xl font-semibold transition-all relative overflow-hidden group disabled:opacity-50"
+                  style={{ 
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.05))', 
+                    border: '2px solid rgba(255,255,255,0.15)',
+                    color: '#ffffff'
+                  }}
+                >
+                  <div 
+                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                    style={{ background: 'rgba(255,255,255,0.05)' }}
+                  />
+                  <span className="relative z-10">Cancel</span>
+                </button>
+                <button
+                  onClick={handleDeleteAll}
+                  disabled={deleting}
+                  className="flex-1 px-4 py-3 rounded-xl font-bold transition-all relative overflow-hidden group disabled:opacity-50 flex items-center justify-center gap-2"
+                  style={{ 
+                    background: 'linear-gradient(135deg, #ef4444, #dc2626)',
+                    color: '#ffffff',
+                    boxShadow: '0 4px 15px rgba(239,68,68,0.4), inset 0 1px 0 rgba(255,255,255,0.2)'
+                  }}
+                >
+                  <div 
+                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                    style={{ background: 'rgba(255,255,255,0.1)' }}
+                  />
+                  {deleting ? (
+                    <>
+                      <div 
+                        className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin relative z-10"
+                      ></div>
+                      <span className="relative z-10">Deleting...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="w-4 h-4 relative z-10" />
+                      <span className="relative z-10">Delete All</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         </div>

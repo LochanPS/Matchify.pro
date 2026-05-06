@@ -393,64 +393,279 @@ const UnifiedDashboardMobile = () => {
       {showMenu && (
         <div 
           className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+          style={{ animation: 'fadeIn 0.3s ease-out' }}
           onClick={() => setShowMenu(false)}
         >
           <div 
-            className="absolute right-0 top-0 bottom-0 w-80 max-w-[85vw] p-6"
-            style={{ background: '#07071a', borderLeft: '1px solid rgba(0,200,83,0.2)' }}
+            className="absolute right-0 top-0 bottom-0 w-80 max-w-[85vw] relative overflow-hidden"
+            style={{ 
+              background: 'linear-gradient(180deg, #07071a 0%, #0d1a2a 50%, #07071a 100%)',
+              borderLeft: '2px solid rgba(0,200,83,0.3)',
+              boxShadow: '-10px 0 40px rgba(0,0,0,0.5)',
+              animation: 'slideInRight 0.3s ease-out'
+            }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-bold text-white">Menu</h3>
-              <button
-                onClick={() => setShowMenu(false)}
-                className="p-2 rounded-lg"
-                style={{ background: 'rgba(255,255,255,0.05)' }}
-              >
-                <XMarkIcon className="w-6 h-6 text-gray-400" />
-              </button>
+            {/* Animated Background Elements */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden">
+              <div 
+                className="absolute top-0 right-0 w-64 h-64 rounded-full blur-3xl opacity-20"
+                style={{ 
+                  background: 'radial-gradient(circle, rgba(0,200,83,0.6), transparent)',
+                  animation: 'glow 4s ease-in-out infinite'
+                }}
+              />
+              <div 
+                className="absolute bottom-0 left-0 w-64 h-64 rounded-full blur-3xl opacity-15"
+                style={{ 
+                  background: 'radial-gradient(circle, rgba(168,85,247,0.6), transparent)',
+                  animation: 'glow 5s ease-in-out infinite reverse'
+                }}
+              />
             </div>
 
-            <div className="space-y-2">
-              <Link
-                to="/profile"
-                onClick={() => setShowMenu(false)}
-                className="flex items-center gap-3 p-3 rounded-xl text-white transition-colors"
-                style={{ background: 'rgba(255,255,255,0.05)' }}
+            <style>{`
+              @keyframes slideInRight {
+                0% { transform: translateX(100%); }
+                100% { transform: translateX(0); }
+              }
+            `}</style>
+
+            <div className="relative z-10 h-full flex flex-col p-6">
+              {/* Header */}
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-2">
+                  <div className="relative">
+                    <div 
+                      className="absolute inset-0 blur-lg opacity-60"
+                      style={{ 
+                        background: 'radial-gradient(circle, rgba(0,200,83,0.6) 0%, transparent 70%)',
+                        animation: 'glow 3s ease-in-out infinite'
+                      }}
+                    />
+                    <MatchifyLogo size={28} variant="icon" />
+                  </div>
+                  <h3 
+                    className="text-lg font-black"
+                    style={{ 
+                      background: 'linear-gradient(135deg, #ffffff, #00ff88)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      backgroundClip: 'text'
+                    }}
+                  >
+                    Menu
+                  </h3>
+                </div>
+                <button
+                  onClick={() => setShowMenu(false)}
+                  className="p-2 rounded-lg transition-all relative overflow-hidden group"
+                  style={{ 
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.05))',
+                    border: '1px solid rgba(255,255,255,0.1)'
+                  }}
+                >
+                  <div 
+                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                    style={{ background: 'rgba(255,255,255,0.05)' }}
+                  />
+                  <XMarkIcon className="w-6 h-6 text-gray-300 relative z-10" />
+                </button>
+              </div>
+
+              {/* User Profile Section */}
+              <div 
+                className="rounded-xl p-4 mb-6 relative overflow-hidden"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(0,200,83,0.15) 0%, rgba(99,102,241,0.15) 100%)',
+                  border: '2px solid rgba(0,200,83,0.3)',
+                  boxShadow: '0 4px 15px rgba(0,200,83,0.2), inset 0 1px 0 rgba(255,255,255,0.1)'
+                }}
               >
-                <UserIcon className="w-5 h-5" />
-                <span>Edit Profile</span>
-              </Link>
-              
-              <Link
-                to="/tournaments"
-                onClick={() => setShowMenu(false)}
-                className="flex items-center gap-3 p-3 rounded-xl text-white transition-colors"
-                style={{ background: 'rgba(255,255,255,0.05)' }}
+                <div 
+                  className="absolute inset-0 opacity-20"
+                  style={{
+                    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
+                    backgroundSize: '200% 100%',
+                    animation: 'shimmer 4s infinite'
+                  }}
+                />
+                <div className="flex items-center gap-3 relative z-10">
+                  <div 
+                    className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-base"
+                    style={{ 
+                      background: 'linear-gradient(135deg,#00c853,#00ff88)', 
+                      color: '#003320',
+                      boxShadow: '0 4px 12px rgba(0,200,83,0.4), inset 0 1px 0 rgba(255,255,255,0.3)'
+                    }}
+                  >
+                    {user?.profilePhoto ? (
+                      <img src={user.profilePhoto} alt={user.name} className="w-full h-full object-cover rounded-full" />
+                    ) : (
+                      user?.name?.charAt(0)?.toUpperCase() || 'P'
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-black text-white truncate">{user?.name}</p>
+                    <p className="text-xs text-gray-300 truncate">{user?.email}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Menu Items */}
+              <div className="flex-1 overflow-y-auto space-y-2">
+                <Link
+                  to="/profile"
+                  onClick={() => setShowMenu(false)}
+                  className="flex items-center gap-3 p-3 rounded-xl text-white transition-all relative overflow-hidden group"
+                  style={{ 
+                    background: 'linear-gradient(135deg, rgba(0,200,83,0.15), rgba(0,255,136,0.1))',
+                    border: '1px solid rgba(0,200,83,0.2)'
+                  }}
+                >
+                  <div 
+                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                    style={{ background: 'rgba(0,200,83,0.1)' }}
+                  />
+                  <div 
+                    className="w-10 h-10 rounded-lg flex items-center justify-center relative z-10"
+                    style={{ 
+                      background: 'linear-gradient(135deg, rgba(0,200,83,0.3), rgba(0,255,136,0.2))',
+                      border: '1px solid rgba(0,200,83,0.4)'
+                    }}
+                  >
+                    <UserIcon className="w-5 h-5 text-emerald-300" />
+                  </div>
+                  <span className="font-semibold relative z-10">Edit Profile</span>
+                  <ArrowRightIcon className="w-4 h-4 ml-auto text-emerald-300 relative z-10" />
+                </Link>
+                
+                <Link
+                  to="/tournaments"
+                  onClick={() => setShowMenu(false)}
+                  className="flex items-center gap-3 p-3 rounded-xl text-white transition-all relative overflow-hidden group"
+                  style={{ 
+                    background: 'linear-gradient(135deg, rgba(59,130,246,0.15), rgba(37,99,235,0.1))',
+                    border: '1px solid rgba(59,130,246,0.2)'
+                  }}
+                >
+                  <div 
+                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                    style={{ background: 'rgba(59,130,246,0.1)' }}
+                  />
+                  <div 
+                    className="w-10 h-10 rounded-lg flex items-center justify-center relative z-10"
+                    style={{ 
+                      background: 'linear-gradient(135deg, rgba(59,130,246,0.3), rgba(37,99,235,0.2))',
+                      border: '1px solid rgba(59,130,246,0.4)'
+                    }}
+                  >
+                    <TrophyIcon className="w-5 h-5 text-blue-300" />
+                  </div>
+                  <span className="font-semibold relative z-10">Browse Tournaments</span>
+                  <ArrowRightIcon className="w-4 h-4 ml-auto text-blue-300 relative z-10" />
+                </Link>
+                
+                <Link
+                  to="/leaderboard"
+                  onClick={() => setShowMenu(false)}
+                  className="flex items-center gap-3 p-3 rounded-xl text-white transition-all relative overflow-hidden group"
+                  style={{ 
+                    background: 'linear-gradient(135deg, rgba(245,158,11,0.15), rgba(251,146,60,0.1))',
+                    border: '1px solid rgba(245,158,11,0.2)'
+                  }}
+                >
+                  <div 
+                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                    style={{ background: 'rgba(245,158,11,0.1)' }}
+                  />
+                  <div 
+                    className="w-10 h-10 rounded-lg flex items-center justify-center relative z-10"
+                    style={{ 
+                      background: 'linear-gradient(135deg, rgba(245,158,11,0.3), rgba(251,146,60,0.2))',
+                      border: '1px solid rgba(245,158,11,0.4)'
+                    }}
+                  >
+                    <ChartBarIcon className="w-5 h-5 text-amber-300" />
+                  </div>
+                  <span className="font-semibold relative z-10">Leaderboard</span>
+                  <ArrowRightIcon className="w-4 h-4 ml-auto text-amber-300 relative z-10" />
+                </Link>
+                
+                <Link
+                  to="/registrations"
+                  onClick={() => setShowMenu(false)}
+                  className="flex items-center gap-3 p-3 rounded-xl text-white transition-all relative overflow-hidden group"
+                  style={{ 
+                    background: 'linear-gradient(135deg, rgba(168,85,247,0.15), rgba(139,92,246,0.1))',
+                    border: '1px solid rgba(168,85,247,0.2)'
+                  }}
+                >
+                  <div 
+                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                    style={{ background: 'rgba(168,85,247,0.1)' }}
+                  />
+                  <div 
+                    className="w-10 h-10 rounded-lg flex items-center justify-center relative z-10"
+                    style={{ 
+                      background: 'linear-gradient(135deg, rgba(168,85,247,0.3), rgba(139,92,246,0.2))',
+                      border: '1px solid rgba(168,85,247,0.4)'
+                    }}
+                  >
+                    <CalendarIcon className="w-5 h-5 text-purple-300" />
+                  </div>
+                  <span className="font-semibold relative z-10">My Registrations</span>
+                  <ArrowRightIcon className="w-4 h-4 ml-auto text-purple-300 relative z-10" />
+                </Link>
+
+                <Link
+                  to="/academies"
+                  onClick={() => setShowMenu(false)}
+                  className="flex items-center gap-3 p-3 rounded-xl text-white transition-all relative overflow-hidden group"
+                  style={{ 
+                    background: 'linear-gradient(135deg, rgba(6,182,212,0.15), rgba(14,165,233,0.1))',
+                    border: '1px solid rgba(6,182,212,0.2)'
+                  }}
+                >
+                  <div 
+                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                    style={{ background: 'rgba(6,182,212,0.1)' }}
+                  />
+                  <div 
+                    className="w-10 h-10 rounded-lg flex items-center justify-center relative z-10"
+                    style={{ 
+                      background: 'linear-gradient(135deg, rgba(6,182,212,0.3), rgba(14,165,233,0.2))',
+                      border: '1px solid rgba(6,182,212,0.4)'
+                    }}
+                  >
+                    <UserIcon className="w-5 h-5 text-cyan-300" />
+                  </div>
+                  <span className="font-semibold relative z-10">Academies</span>
+                  <ArrowRightIcon className="w-4 h-4 ml-auto text-cyan-300 relative z-10" />
+                </Link>
+              </div>
+
+              {/* Footer - Logout Button */}
+              <button
+                onClick={() => {
+                  setShowMenu(false);
+                  // Add logout logic here
+                  navigate('/logout');
+                }}
+                className="w-full flex items-center justify-center gap-2 p-3 rounded-xl font-bold transition-all relative overflow-hidden group mt-4"
+                style={{ 
+                  background: 'linear-gradient(135deg, rgba(239,68,68,0.2), rgba(220,38,38,0.15))', 
+                  border: '2px solid rgba(239,68,68,0.4)',
+                  color: '#f87171',
+                  boxShadow: '0 4px 15px rgba(239,68,68,0.2)'
+                }}
               >
-                <TrophyIcon className="w-5 h-5" />
-                <span>Browse Tournaments</span>
-              </Link>
-              
-              <Link
-                to="/leaderboard"
-                onClick={() => setShowMenu(false)}
-                className="flex items-center gap-3 p-3 rounded-xl text-white transition-colors"
-                style={{ background: 'rgba(255,255,255,0.05)' }}
-              >
-                <ChartBarIcon className="w-5 h-5" />
-                <span>Leaderboard</span>
-              </Link>
-              
-              <Link
-                to="/registrations"
-                onClick={() => setShowMenu(false)}
-                className="flex items-center gap-3 p-3 rounded-xl text-white transition-colors"
-                style={{ background: 'rgba(255,255,255,0.05)' }}
-              >
-                <CalendarIcon className="w-5 h-5" />
-                <span>My Registrations</span>
-              </Link>
+                <div 
+                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                  style={{ background: 'rgba(239,68,68,0.1)' }}
+                />
+                <span className="relative z-10">Logout</span>
+              </button>
             </div>
           </div>
         </div>

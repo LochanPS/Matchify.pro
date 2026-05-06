@@ -1,3 +1,6 @@
+// Matchify.pro - Premier Badminton Tournament Platform
+// Version: 1.0.3 - Matchify ID System Update
+// Last Updated: May 6, 2026
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { NotificationProvider } from './contexts/NotificationContext'

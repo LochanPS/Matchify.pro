@@ -13,9 +13,9 @@ router.get('/points/my', authenticate, async (req, res) => {
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: {
-        matchify_points: true,
+        totalPoints: true,
         registrations: {
-          where: { status: 'CONFIRMED' },
+          where: { status: 'confirmed' },
           select: { id: true }
         }
       }
@@ -28,14 +28,14 @@ router.get('/points/my', authenticate, async (req, res) => {
     // Calculate rank
     const higherRankedCount = await prisma.user.count({
       where: {
-        matchify_points: { gt: user.matchify_points },
-        role: 'PLAYER'
+        totalPoints: { gt: user.totalPoints },
+        roles: { contains: 'PLAYER' }
       }
     });
 
     const rank = higherRankedCount + 1;
 
-    // Get points history (mock data for now - will be real when points system is implemented)
+    // Get points history
     const logs = await prisma.pointsLog.findMany({
       where: { userId },
       include: {
@@ -67,7 +67,7 @@ router.get('/points/my', authenticate, async (req, res) => {
     }));
 
     res.json({
-      total_points: user.matchify_points,
+      total_points: user.totalPoints,
       rank,
       tournaments_played: user.registrations.length,
       logs: formattedLogs
@@ -84,13 +84,13 @@ router.get('/points/user/:userId', async (req, res) => {
     const { userId } = req.params;
 
     const user = await prisma.user.findUnique({
-      where: { id: parseInt(userId) },
+      where: { id: userId },
       select: {
         id: true,
         name: true,
-        matchify_points: true,
+        totalPoints: true,
         registrations: {
-          where: { status: 'CONFIRMED' },
+          where: { status: 'confirmed' },
           select: { id: true }
         }
       }
@@ -103,8 +103,8 @@ router.get('/points/user/:userId', async (req, res) => {
     // Calculate rank
     const higherRankedCount = await prisma.user.count({
       where: {
-        matchify_points: { gt: user.matchify_points },
-        role: 'PLAYER'
+        totalPoints: { gt: user.totalPoints },
+        roles: { contains: 'PLAYER' }
       }
     });
 
@@ -112,7 +112,7 @@ router.get('/points/user/:userId', async (req, res) => {
 
     // Get points history
     const logs = await prisma.pointsLog.findMany({
-      where: { userId: parseInt(userId) },
+      where: { userId },
       include: {
         tournament: {
           select: {
@@ -146,7 +146,7 @@ router.get('/points/user/:userId', async (req, res) => {
         id: user.id,
         name: user.name
       },
-      total_points: user.matchify_points,
+      total_points: user.totalPoints,
       rank,
       tournaments_played: user.registrations.length,
       logs: formattedLogs

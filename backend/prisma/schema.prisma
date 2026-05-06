@@ -180,6 +180,7 @@ model Tournament {
   posters               TournamentPoster[]
   umpires               TournamentUmpire[]
   tournamentPayment     TournamentPayment?
+  pointsLogs            PointsLog[]
 
   @@index([city, state, status])
   @@index([startDate, registrationCloseDate])
@@ -236,6 +237,7 @@ model Category {
   draws             Draw[]
   matches           Match[]
   registrations     Registration[]
+  pointsLogs        PointsLog[]
 
   @@index([tournamentId, format, gender])
 }
@@ -655,4 +657,30 @@ model PaymentVerification {
   @@index([status])
   @@index([submittedAt])
   @@map("payment_verifications")
+}
+
+// ============================================
+// MATCHIFY POINTS SYSTEM
+// ============================================
+
+model PointsLog {
+  id           String     @id @default(uuid())
+  userId       String
+  tournamentId String
+  categoryId   String
+  points       Float      // Points earned
+  reason       String     // WINNER, RUNNER_UP, SEMI_FINALIST, QUARTER_FINALIST, PARTICIPANT
+  multiplier   Float      @default(1.0) // For future use (e.g., premium tournaments)
+  description  String?    // Additional context
+  earned_at    DateTime   @default(now())
+  
+  // Relations
+  tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  category     Category   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([tournamentId])
+  @@index([categoryId])
+  @@index([earned_at])
+  @@map("points_logs")
 }

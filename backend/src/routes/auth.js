@@ -233,16 +233,17 @@ router.post('/login', async (req, res) => {
       data: { refreshToken }
     });
 
-    // Remove sensitive data from response
-    const { password: _, refreshToken: __, ...userWithoutPassword } = user;
+    // Remove sensitive data from response and fix roles field
+    const { password: _, refreshToken: __, roles: ___, ...userWithoutPassword } = user;
 
+    // CRITICAL FIX: Ensure roles is always an array in response
     res.json({
       message: 'Login successful',
       user: {
         ...userWithoutPassword,
-        roles: userRoles,
-        currentRole: primaryRole,
-        isAdmin: isAdmin
+        roles: userRoles, // Array of roles (not the string from DB)
+        currentRole: primaryRole, // Primary role string
+        isAdmin: isAdmin // Boolean flag
       },
       accessToken,
       refreshToken

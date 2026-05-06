@@ -5,8 +5,9 @@ import { profileAPI } from '../api/profile';
 import { getErrorMessage } from '../utils/errorMessage';
 import ProfileStats from '../components/profile/ProfileStats';
 import PasswordModal from '../components/profile/PasswordModal';
+import PhotoViewer from '../components/PhotoViewer';
 import { formatDateIndian, formatDateLongIndian } from '../utils/dateFormat';
-import { Edit2, Save, X, Key, Phone, Mail, MapPin, User, AlertTriangle, Camera, Upload } from 'lucide-react';
+import { Edit2, Save, X, Key, Phone, Mail, MapPin, User, AlertTriangle, Camera, Upload, ZoomIn } from 'lucide-react';
 import MatchifyLogo from '../components/MatchifyLogo';
 import {
   UserCircleIcon,
@@ -158,6 +159,7 @@ export default function ProfilePage() {
   const [showCitySuggestions, setShowCitySuggestions] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [photoInputRef, setPhotoInputRef] = useState(null);
+  const [showPhotoViewer, setShowPhotoViewer] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     dateOfBirth: '',
@@ -530,8 +532,9 @@ export default function ProfilePage() {
           <div className="relative z-10">
             {/* Profile Photo */}
             <div className="relative inline-block mb-4">
-              <div 
-                className="w-32 h-32 rounded-full flex items-center justify-center font-bold text-4xl relative overflow-hidden"
+              <button
+                onClick={() => profile?.profilePhoto && setShowPhotoViewer(true)}
+                className="w-32 h-32 rounded-full flex items-center justify-center font-bold text-4xl relative overflow-hidden transition-all hover:scale-105 cursor-pointer group"
                 style={{ 
                   background: profile?.profilePhoto 
                     ? 'transparent' 
@@ -543,24 +546,35 @@ export default function ProfilePage() {
                 }}
               >
                 {profile?.profilePhoto ? (
-                  <img 
-                    src={profile.profilePhoto} 
-                    alt={profile.name} 
-                    className="w-full h-full object-cover rounded-full" 
-                  />
+                  <>
+                    <img 
+                      src={profile.profilePhoto} 
+                      alt={profile.name} 
+                      className="w-full h-full object-cover rounded-full" 
+                    />
+                    {/* Hover Overlay */}
+                    <div 
+                      className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                    >
+                      <div className="text-center">
+                        <ZoomIn className="w-8 h-8 text-white mx-auto mb-1" />
+                        <span className="text-white text-xs font-bold">View</span>
+                      </div>
+                    </div>
+                  </>
                 ) : (
                   <span>{profile?.name?.charAt(0)?.toUpperCase() || 'P'}</span>
                 )}
                 
                 {/* Glow Effect */}
                 <div 
-                  className="absolute inset-0 rounded-full blur-xl opacity-60"
+                  className="absolute inset-0 rounded-full blur-xl opacity-60 pointer-events-none"
                   style={{ 
                     background: 'radial-gradient(circle, rgba(168,85,247,0.8) 0%, transparent 70%)',
                     animation: 'glow 3s ease-in-out infinite'
                   }}
                 />
-              </div>
+              </button>
               
               {/* Upload Button Overlay */}
               <input
@@ -1060,6 +1074,14 @@ export default function ProfilePage() {
       <PasswordModal
         isOpen={showPasswordModal}
         onClose={() => setShowPasswordModal(false)}
+      />
+
+      {/* Photo Viewer Modal */}
+      <PhotoViewer
+        isOpen={showPhotoViewer}
+        onClose={() => setShowPhotoViewer(false)}
+        photoUrl={profile?.profilePhoto}
+        userName={profile?.name}
       />
 
       {/* Confirmation Modal for Name/DOB */}

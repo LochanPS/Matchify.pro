@@ -32,11 +32,11 @@ export const profileAPI = {
     return response.data;
   },
 
-  // Change password
+  // Change password (no current password required)
   changePassword: async (currentPassword, newPassword) => {
     const response = await api.put(
       '/profile/password',
-      { currentPassword, newPassword }
+      { newPassword }
     );
     return response.data;
   },

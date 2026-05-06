@@ -52,14 +52,15 @@ export default function MandatoryProfilePhotoModal({ isOpen }) {
       const formData = new FormData();
       formData.append('photo', selectedFile);
 
-      const response = await profileAPI.uploadProfilePhoto(formData);
+      const response = await profileAPI.uploadPhoto(selectedFile);
       
       // Update user context with new profile photo
-      const updatedUser = { ...user, profilePhoto: response.data.profilePhoto };
+      const updatedUser = { ...user, profilePhoto: response.profilePhoto };
       updateUser(updatedUser);
 
       // Success - modal will close automatically because user now has photo
     } catch (err) {
+      console.error('Upload error:', err);
       setError(err.response?.data?.error || 'Failed to upload photo. Please try again.');
     } finally {
       setUploading(false);

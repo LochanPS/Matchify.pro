@@ -5,12 +5,10 @@ import { profileAPI } from '../../api/profile';
 
 export default function PasswordModal({ isOpen, onClose }) {
   const [formData, setFormData] = useState({
-    currentPassword: '',
     newPassword: '',
     confirmPassword: '',
   });
   const [showPasswords, setShowPasswords] = useState({
-    current: false,
     new: false,
     confirm: false,
   });
@@ -36,19 +34,12 @@ export default function PasswordModal({ isOpen, onClose }) {
       return;
     }
 
-    if (formData.currentPassword === formData.newPassword) {
-      setError('New password must be different from current password');
-      return;
-    }
-
     setLoading(true);
     try {
-      await profileAPI.changePassword(
-        formData.currentPassword,
-        formData.newPassword
-      );
+      // Call API without current password
+      await profileAPI.changePassword(null, formData.newPassword);
       setSuccess(true);
-      setFormData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      setFormData({ newPassword: '', confirmPassword: '' });
       setTimeout(() => {
         onClose();
         setSuccess(false);
@@ -65,7 +56,7 @@ export default function PasswordModal({ isOpen, onClose }) {
   };
 
   const handleClose = () => {
-    setFormData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    setFormData({ newPassword: '', confirmPassword: '' });
     setError('');
     setSuccess(false);
     onClose();
@@ -113,32 +104,6 @@ export default function PasswordModal({ isOpen, onClose }) {
                 <span>⚠️</span> {error}
               </div>
             )}
-
-            {/* Current Password */}
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Current Password
-              </label>
-              <div className="relative">
-                <input
-                  type={showPasswords.current ? 'text' : 'password'}
-                  value={formData.currentPassword}
-                  onChange={(e) =>
-                    setFormData({ ...formData, currentPassword: e.target.value })
-                  }
-                  required
-                  className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl pr-12 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                  placeholder="Enter current password"
-                />
-                <button
-                  type="button"
-                  onClick={() => togglePassword('current')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
-                >
-                  {showPasswords.current ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
-              </div>
-            </div>
 
             {/* New Password */}
             <div>
@@ -197,7 +162,6 @@ export default function PasswordModal({ isOpen, onClose }) {
               <p className="font-medium text-gray-300 mb-2">Password Requirements:</p>
               <ul className="list-disc list-inside space-y-1">
                 <li>At least 6 characters long</li>
-                <li>Different from current password</li>
                 <li>Must match confirmation</li>
               </ul>
             </div>

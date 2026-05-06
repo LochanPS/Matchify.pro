@@ -4,6 +4,7 @@ import { NotificationProvider } from './contexts/NotificationContext'
 import { Toaster } from 'react-hot-toast'
 import Navbar from './components/Navbar'
 import ProfileCompletionModal from './components/ProfileCompletionModal'
+import MandatoryProfilePhotoModal from './components/MandatoryProfilePhotoModal'
 import ImpersonationBanner from './components/ImpersonationBanner'
 import ProtectedRoute from './components/ProtectedRoute'
 import RoleRoute from './components/RoleRoute'
@@ -71,7 +72,7 @@ import QRSettingsPage from './pages/admin/QRSettingsPage'
 
 // Inner component that can access AuthContext
 function AppContent() {
-  const { user, showProfileCompletion, completeProfile } = useAuth();
+  const { user, showProfileCompletion, showProfilePhotoModal, completeProfile } = useAuth();
   const location = useLocation();
   
   // Check if impersonating
@@ -97,6 +98,11 @@ function AppContent() {
       <div className={isImpersonating() ? 'pt-[60px]' : ''}> {/* Add padding only when impersonating */}
         {shouldShowNavbar && <Navbar />}
       </div>
+      
+      {/* Mandatory Profile Photo Modal - CANNOT BE CLOSED */}
+      {showProfilePhotoModal && user && !user.isAdmin && (
+        <MandatoryProfilePhotoModal isOpen={showProfilePhotoModal} />
+      )}
       
       {/* Profile Completion Modal - shows when user has incomplete profile */}
       {showProfileCompletion && user && (

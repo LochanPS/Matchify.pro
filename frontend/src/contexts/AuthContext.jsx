@@ -13,6 +13,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showProfileCompletion, setShowProfileCompletion] = useState(false);
+  const [showProfilePhotoModal, setShowProfilePhotoModal] = useState(false);
 
   // Fetch fresh user data from server
   const fetchUserProfile = async () => {
@@ -189,6 +190,11 @@ export const AuthProvider = ({ children }) => {
         return userData;
       }
       
+      // Check if profile photo is missing - MANDATORY
+      if (!userData.profilePhoto) {
+        setShowProfilePhotoModal(true);
+      }
+      
       // Check if profile is incomplete after login
       if (!isProfileComplete(userData)) {
         setShowProfileCompletion(true);
@@ -248,6 +254,12 @@ export const AuthProvider = ({ children }) => {
   const updateUser = (updatedUser) => {
     setUser(updatedUser);
     localStorage.setItem('user', JSON.stringify(updatedUser));
+    
+    // Hide profile photo modal if photo is now uploaded
+    if (updatedUser.profilePhoto) {
+      setShowProfilePhotoModal(false);
+    }
+    
     // Hide modal if profile is now complete
     if (isProfileComplete(updatedUser)) {
       setShowProfileCompletion(false);
@@ -292,6 +304,8 @@ export const AuthProvider = ({ children }) => {
       loading,
       showProfileCompletion,
       setShowProfileCompletion,
+      showProfilePhotoModal,
+      setShowProfilePhotoModal,
       completeProfile,
       isProfileComplete: () => isProfileComplete(user)
     }}>

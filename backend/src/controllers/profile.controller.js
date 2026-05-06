@@ -385,22 +385,16 @@ export const changePassword = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    // Validate input with Zod
-    const validationResult = changePasswordSchema.safeParse(req.body);
-    
-    if (!validationResult.success) {
+    const { newPassword } = req.body;
+
+    // Simple validation
+    if (!newPassword || newPassword.length < 6) {
       return res.status(400).json({
-        error: 'Validation failed',
-        details: validationResult.error.errors.map(err => ({
-          field: err.path.join('.'),
-          message: err.message
-        }))
+        error: 'New password must be at least 6 characters'
       });
     }
 
-    const { currentPassword, newPassword } = validationResult.data;
-
-    // Get user with password
+    // Get user
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { id: true, password: true }
@@ -408,18 +402,6 @@ export const changePassword = async (req, res) => {
 
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
-    }
-
-    // Verify current password
-    const isValidPassword = await bcrypt.compare(currentPassword, user.password);
-    if (!isValidPassword) {
-      return res.status(401).json({ error: 'Current password is incorrect' });
-    }
-
-    // Check if new password is different from current
-    const isSamePassword = await bcrypt.compare(newPassword, user.password);
-    if (isSamePassword) {
-      return res.status(400).json({ error: 'New password must be different from current password' });
     }
 
     // Hash new password

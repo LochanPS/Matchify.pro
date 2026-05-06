@@ -170,6 +170,16 @@ router.post('/login', async (req, res) => {
       });
     }
 
+    // Check if database is configured
+    if (!process.env.DATABASE_URL) {
+      console.error('❌ DATABASE_URL not configured');
+      return res.status(503).json({
+        error: 'Service temporarily unavailable',
+        message: 'Database not configured. Please contact support.',
+        code: 'DATABASE_NOT_CONFIGURED'
+      });
+    }
+
     // Find user
     const user = await prisma.user.findUnique({
       where: { email }
@@ -205,6 +215,16 @@ router.post('/login', async (req, res) => {
     if (!isPasswordValid) {
       return res.status(401).json({
         error: 'Invalid email or password'
+      });
+    }
+
+    // Check if JWT secrets are configured
+    if (!process.env.JWT_SECRET || !process.env.JWT_REFRESH_SECRET) {
+      console.error('❌ JWT secrets not configured');
+      return res.status(503).json({
+        error: 'Service temporarily unavailable',
+        message: 'Authentication system not configured. Please contact support.',
+        code: 'JWT_NOT_CONFIGURED'
       });
     }
 
@@ -255,9 +275,29 @@ router.post('/login', async (req, res) => {
     });
   } catch (error) {
     console.error('Login error:', error);
+    
+    // Check for specific database errors
+    if (error.code === 'P1001') {
+      return res.status(503).json({
+        error: 'Database connection failed',
+        message: 'Unable to connect to database. Please try again later.',
+        code: 'DATABASE_CONNECTION_ERROR'
+      });
+    }
+    
+    if (error.code === 'P2021') {
+      return res.status(503).json({
+        error: 'Database table not found',
+        message: 'Database schema not initialized. Please contact support.',
+        code: 'DATABASE_SCHEMA_ERROR'
+      });
+    }
+    
     res.status(500).json({
       error: 'Login failed',
-      details: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+      message: process.env.NODE_ENV === 'development' ? error.message : 'An unexpected error occurred. Please try again.',
+      code: 'INTERNAL_SERVER_ERROR',
+      ...(process.env.NODE_ENV === 'development' && { details: error.message })
     });
   }
 });

@@ -10,6 +10,10 @@ import { v2 as cloudinary } from 'cloudinary';
 // Load environment variables first
 dotenv.config();
 
+// Validate environment variables before starting server
+import { validateEnvironment, getEnvironmentStatus } from './utils/validateEnv.js';
+validateEnvironment();
+
 // Configure Cloudinary
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -192,15 +196,39 @@ app.get('/health', (req, res) => {
 
 // API Health check endpoint (for testing)
 app.get('/api/health', (req, res) => {
-  res.status(200).json({
-    status: 'healthy',
-    message: 'MATCHIFY.PRO API is running',
+  const envStatus = getEnvironmentStatus();
+  const hasIssues = envStatus.missing.length > 0;
+  
+  res.status(hasIssues ? 503 : 200).json({
+    status: hasIssues ? 'degraded' : 'healthy',
+    message: hasIssues 
+      ? 'MATCHIFY.PRO API is running but has configuration issues' 
+      : 'MATCHIFY.PRO API is running',
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
     environment: process.env.NODE_ENV || 'development',
     version: '1.0.0',
     authRoutesLoaded: !!authRoutes,
-    deploymentTime: '2026-05-05T18:25:00Z'
+    deploymentTime: '2026-05-06T18:00:00Z',
+    configuration: {
+      database: !!process.env.DATABASE_URL,
+      jwt: !!process.env.JWT_SECRET && !!process.env.JWT_REFRESH_SECRET,
+      cors: !!process.env.CORS_ORIGIN,
+      cloudinary: !!process.env.CLOUDINARY_CLOUD_NAME,
+      razorpay: !!process.env.RAZORPAY_KEY_ID,
+      sendgrid: !!process.env.SENDGRID_API_KEY
+    },
+    environmentVariables: {
+      configured: envStatus.configured.length,
+      missing: envStatus.missing.length,
+      warnings: envStatus.warnings.length
+    },
+    ...(hasIssues && {
+      issues: {
+        missing: envStatus.missing,
+        warnings: envStatus.warnings
+      }
+    })
   });
 });
 

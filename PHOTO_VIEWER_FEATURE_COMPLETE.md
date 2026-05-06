@@ -151,7 +151,7 @@ This component is **reusable** and can be used anywhere in the app:
 
 ### Where to Add:
 1. ✅ **Profile Page** (DONE)
-2. **Dashboard** - Click user photo to view
+2. ✅ **Dashboard** (DONE)
 3. **Notifications** - Click sender photo to view
 4. **Side Menu** - Click profile photo to view
 5. **Leaderboard** - Click player photo to view
@@ -296,6 +296,10 @@ const [zoom, setZoom] = useState(1);  // Zoom level (0.5 to 3)
 - ✅ Ready for Vercel deployment
 - ✅ No build errors
 - ✅ No diagnostics issues
+
+### Implemented In:
+- ✅ **Profile Page** - Main profile photo (132px)
+- ✅ **Dashboard** - Profile card photo (96px)
 
 ### URLs:
 - **Frontend:** https://matchify-ebbzod065-destroyerforevers-projects.vercel.app

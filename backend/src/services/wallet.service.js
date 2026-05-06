@@ -123,6 +123,35 @@ class WalletService {
     return result;
   }
 
+  // Mark transaction as failed
+  async markTransactionFailed(orderId, errorDescription) {
+    // Find transaction
+    const transaction = await prisma.walletTransaction.findFirst({
+      where: { razorpayOrderId: orderId },
+    });
+
+    if (!transaction) {
+      throw new Error('Transaction not found');
+    }
+
+    if (transaction.status !== TRANSACTION_STATUS.PENDING) {
+      // Already processed, skip
+      return transaction;
+    }
+
+    // Update transaction status to failed
+    const updatedTransaction = await prisma.walletTransaction.update({
+      where: { id: transaction.id },
+      data: {
+        status: TRANSACTION_STATUS.FAILED,
+        description: `${transaction.description} - Failed: ${errorDescription}`,
+        updatedAt: new Date(),
+      },
+    });
+
+    return updatedTransaction;
+  }
+
   // Get user transactions (paginated)
   async getTransactions(userId, page = 1, limit = 20, type = null) {
     const skip = (page - 1) * limit;

@@ -26,7 +26,10 @@ router.post('/razorpay', express.raw({ type: 'application/json' }), async (req, 
     }
 
     const event = JSON.parse(req.body.toString());
-    console.log('Webhook event received:', event.event);
+    
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('Webhook event received:', event.event);
+    }
 
     // Handle payment.captured event
     if (event.event === 'payment.captured') {
@@ -39,7 +42,9 @@ router.post('/razorpay', express.raw({ type: 'application/json' }), async (req, 
           signature // This will be verified again in service
         );
         
-        console.log('Payment captured and processed:', payment.id);
+        if (process.env.NODE_ENV !== 'production') {
+          console.log('Payment captured and processed:', payment.id);
+        }
       } catch (error) {
         console.error('Error processing captured payment:', error.message);
         // Don't return error to Razorpay, as payment was successful
@@ -49,16 +54,29 @@ router.post('/razorpay', express.raw({ type: 'application/json' }), async (req, 
     // Handle payment.failed event
     if (event.event === 'payment.failed') {
       const payment = event.payload.payment.entity;
-      console.log('Payment failed:', payment.id);
       
-      // TODO: Mark transaction as failed in database
-      // This can be implemented later when needed
+      try {
+        // Mark transaction as failed in database
+        await walletService.markTransactionFailed(
+          payment.order_id,
+          payment.error_description || 'Payment failed'
+        );
+        
+        if (process.env.NODE_ENV !== 'production') {
+          console.log('Payment failed:', payment.id);
+        }
+      } catch (error) {
+        console.error('Error marking payment as failed:', error.message);
+      }
     }
 
     // Handle order.paid event (backup for payment.captured)
     if (event.event === 'order.paid') {
       const order = event.payload.order.entity;
-      console.log('Order paid:', order.id);
+      
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('Order paid:', order.id);
+      }
       
       // This is a backup event, payment.captured should handle the main logic
     }

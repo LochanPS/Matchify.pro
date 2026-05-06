@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import api from '../utils/api';
 import MatchifyLogo from '../components/MatchifyLogo';
+import PhotoViewer from '../components/PhotoViewer';
 import {
   TrophyIcon,
   ChartBarIcon,
@@ -30,6 +31,7 @@ const UnifiedDashboardMobile = () => {
   const [umpireCode, setUmpireCode] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [showMenu, setShowMenu] = useState(false);
+  const [showPhotoViewer, setShowPhotoViewer] = useState(false);
 
   // Get user roles
   let userRoles = [];
@@ -713,8 +715,9 @@ const UnifiedDashboardMobile = () => {
           
           {/* Profile Photo & Name */}
           <div className="flex flex-col items-center text-center mb-5 relative z-10">
-            <div 
-              className="w-24 h-24 rounded-full flex items-center justify-center font-bold text-3xl mb-3 relative"
+            <button
+              onClick={() => user?.profilePhoto && setShowPhotoViewer(true)}
+              className="w-24 h-24 rounded-full flex items-center justify-center font-bold text-3xl mb-3 relative transition-all hover:scale-105 cursor-pointer group"
               style={{ 
                 background: 'linear-gradient(135deg,#00c853,#00ff88)', 
                 color: '#003320',
@@ -722,18 +725,31 @@ const UnifiedDashboardMobile = () => {
               }}
             >
               <div 
-                className="absolute inset-0 rounded-full blur-xl opacity-60"
+                className="absolute inset-0 rounded-full blur-xl opacity-60 pointer-events-none"
                 style={{ 
                   background: 'radial-gradient(circle, rgba(0,200,83,0.8) 0%, transparent 70%)',
                   animation: 'glow 3s ease-in-out infinite'
                 }}
               />
               {user?.profilePhoto ? (
-                <img src={user.profilePhoto} alt={user.name} className="w-full h-full object-cover rounded-full relative z-10" />
+                <>
+                  <img src={user.profilePhoto} alt={user.name} className="w-full h-full object-cover rounded-full relative z-10" />
+                  {/* Hover Overlay */}
+                  <div 
+                    className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                  >
+                    <div className="text-center">
+                      <svg className="w-8 h-8 text-white mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                      </svg>
+                      <span className="text-white text-xs font-bold">View</span>
+                    </div>
+                  </div>
+                </>
               ) : (
                 <span className="relative z-10">{user?.name?.charAt(0)?.toUpperCase() || 'P'}</span>
               )}
-            </div>
+            </button>
             
             <h2 
               className="text-2xl font-black mb-1"
@@ -1731,6 +1747,14 @@ const UnifiedDashboardMobile = () => {
         {/* Footer Spacing */}
         <div className="h-6"></div>
       </div>
+
+      {/* Photo Viewer Modal */}
+      <PhotoViewer
+        isOpen={showPhotoViewer}
+        onClose={() => setShowPhotoViewer(false)}
+        photoUrl={user?.profilePhoto}
+        userName={user?.name}
+      />
     </div>
   );
 };

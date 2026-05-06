@@ -3,11 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { profileAPI } from '../api/profile';
 import { getErrorMessage } from '../utils/errorMessage';
-import ImageUpload from '../components/common/ImageUpload';
 import ProfileStats from '../components/profile/ProfileStats';
 import PasswordModal from '../components/profile/PasswordModal';
 import { formatDateIndian, formatDateLongIndian } from '../utils/dateFormat';
-import { Edit2, Save, X, Key, Phone, Mail, MapPin, User, AlertTriangle } from 'lucide-react';
+import { Edit2, Save, X, Key, Phone, Mail, MapPin, User, AlertTriangle, Camera, Upload } from 'lucide-react';
+import MatchifyLogo from '../components/MatchifyLogo';
 import {
   UserCircleIcon,
   PencilSquareIcon,
@@ -156,6 +156,8 @@ export default function ProfilePage() {
   const [success, setSuccess] = useState('');
   const [citySuggestions, setCitySuggestions] = useState([]);
   const [showCitySuggestions, setShowCitySuggestions] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [photoInputRef, setPhotoInputRef] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     dateOfBirth: '',
@@ -193,7 +195,10 @@ export default function ProfilePage() {
   };
 
   const handlePhotoUpload = async (file) => {
+    if (!file) return;
+    
     try {
+      setUploadingPhoto(true);
       const data = await profileAPI.uploadPhoto(file);
       const updatedProfile = { ...profile, profilePhoto: data.profilePhoto };
       setProfile(updatedProfile);
@@ -203,21 +208,32 @@ export default function ProfilePage() {
       return data;
     } catch (error) {
       console.error('Photo upload failed:', error);
+      setError('Failed to upload photo. Please try again.');
+      setTimeout(() => setError(''), 3000);
       throw error;
+    } finally {
+      setUploadingPhoto(false);
     }
   };
 
-  const handlePhotoRemove = async () => {
-    try {
-      await profileAPI.deletePhoto();
-      const updatedProfile = { ...profile, profilePhoto: null };
-      setProfile(updatedProfile);
-      updateUser(updatedProfile);
-      setSuccess('Profile photo removed successfully!');
-      setTimeout(() => setSuccess(''), 3000);
-    } catch (error) {
-      console.error('Photo removal failed:', error);
-      throw error;
+  const handlePhotoInputChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file size (5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setError('File size must be less than 5MB');
+        setTimeout(() => setError(''), 3000);
+        return;
+      }
+      
+      // Validate file type
+      if (!['image/jpeg', 'image/png', 'image/gif'].includes(file.type)) {
+        setError('Only JPG, PNG, and GIF files are allowed');
+        setTimeout(() => setError(''), 3000);
+        return;
+      }
+      
+      handlePhotoUpload(file);
     }
   };
 
@@ -312,47 +328,283 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background:'#07071a' }}>
+      <div className="min-h-screen relative overflow-hidden flex items-center justify-center" style={{ 
+        background: 'linear-gradient(180deg, #0a0a1f 0%, #07071a 30%, #0d1a2a 60%, #07071a 100%)' 
+      }}>
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="text-gray-500 mt-4 font-medium">Loading profile...</p>
+          <div 
+            className="w-16 h-16 border-4 rounded-full animate-spin mx-auto"
+            style={{ 
+              borderColor: 'rgba(0,200,83,0.3)',
+              borderTopColor: '#00ff88'
+            }}
+          ></div>
+          <p className="text-gray-300 mt-4 font-semibold">Loading profile...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen" style={{ background:'#07071a' }}>
-      {/* Hero Header */}
-      <div className="relative overflow-hidden" style={{ background:'linear-gradient(135deg,#07071a 0%,#0d1a2a 100%)' }}>
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 left-1/4 w-80 h-80 rounded-full blur-3xl" style={{ background:'radial-gradient(circle,rgba(0,255,136,0.08) 0%,transparent 70%)' }}></div>
-          <div className="absolute bottom-0 right-1/4 w-80 h-80 rounded-full blur-3xl" style={{ background:'radial-gradient(circle,rgba(0,212,255,0.06) 0%,transparent 70%)' }}></div>
-        </div>
+    <div className="min-h-screen relative overflow-hidden" style={{ 
+      background: 'linear-gradient(180deg, #0a0a1f 0%, #07071a 30%, #0d1a2a 60%, #07071a 100%)' 
+    }}>
+      {/* Animated Background Elements */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        {/* Large Gradient Orbs */}
+        <div 
+          className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl opacity-30 animate-pulse"
+          style={{ 
+            background: 'radial-gradient(circle, rgba(0,200,83,0.4) 0%, rgba(0,255,136,0.2) 40%, transparent 70%)',
+            animation: 'float 8s ease-in-out infinite'
+          }}
+        />
+        <div 
+          className="absolute top-1/4 left-0 w-80 h-80 rounded-full blur-3xl opacity-25 animate-pulse"
+          style={{ 
+            background: 'radial-gradient(circle, rgba(168,85,247,0.4) 0%, rgba(139,92,246,0.2) 40%, transparent 70%)',
+            animation: 'float 10s ease-in-out infinite reverse',
+            animationDelay: '2s'
+          }}
+        />
+        <div 
+          className="absolute bottom-1/4 right-1/4 w-72 h-72 rounded-full blur-3xl opacity-20 animate-pulse"
+          style={{ 
+            background: 'radial-gradient(circle, rgba(6,182,212,0.4) 0%, rgba(14,165,233,0.2) 40%, transparent 70%)',
+            animation: 'float 12s ease-in-out infinite',
+            animationDelay: '4s'
+          }}
+        />
         
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          {/* Back Button */}
+        {/* Floating Particles */}
+        {[...Array(15)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute rounded-full"
+            style={{
+              width: `${Math.random() * 6 + 2}px`,
+              height: `${Math.random() * 6 + 2}px`,
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              background: ['#00c853', '#a855f7', '#06b6d4', '#f59e0b'][Math.floor(Math.random() * 4)],
+              opacity: Math.random() * 0.5 + 0.2,
+              animation: `float ${Math.random() * 10 + 5}s ease-in-out infinite`,
+              animationDelay: `${Math.random() * 5}s`,
+              boxShadow: `0 0 ${Math.random() * 20 + 10}px currentColor`
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Add keyframes for animations */}
+      <style>{`
+        @keyframes float {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          25% { transform: translate(20px, -20px) scale(1.05); }
+          50% { transform: translate(-15px, 15px) scale(0.95); }
+          75% { transform: translate(15px, 10px) scale(1.02); }
+        }
+        @keyframes glow {
+          0%, 100% { opacity: 0.5; filter: brightness(1); }
+          50% { opacity: 1; filter: brightness(1.3); }
+        }
+        @keyframes shimmer {
+          0% { background-position: -200% center; }
+          100% { background-position: 200% center; }
+        }
+        @keyframes fadeIn {
+          0% { opacity: 0; transform: translateY(20px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes scaleIn {
+          0% { opacity: 0; transform: scale(0.9); }
+          100% { opacity: 1; transform: scale(1); }
+        }
+        @keyframes slideUp {
+          0% { opacity: 0; transform: translateY(30px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideDown {
+          0% { transform: translateY(-100%); opacity: 0; }
+          100% { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes pulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.05); }
+        }
+      `}</style>
+
+      {/* Sticky Header */}
+      <div 
+        className="sticky top-0 z-50 backdrop-blur-md border-b relative"
+        style={{ 
+          background: 'linear-gradient(135deg, rgba(7,7,26,0.95), rgba(13,26,42,0.95))', 
+          borderColor: 'rgba(0,200,83,0.3)',
+          boxShadow: '0 4px 20px rgba(0,200,83,0.1)',
+          animation: 'slideDown 0.5s ease-out'
+        }}
+      >
+        <div className="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
+          {/* Back Button & Logo */}
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-white/70 hover:text-white mb-6 transition-colors group"
+            className="flex items-center gap-2 transition-all relative overflow-hidden group"
           >
-            <ArrowLeftIcon className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
-            <span>Back</span>
+            <div 
+              className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+              style={{ background: 'rgba(255,255,255,0.05)' }}
+            />
+            <ArrowLeftIcon className="w-5 h-5 text-emerald-400 relative z-10" />
+            <span className="text-sm font-semibold text-gray-300 relative z-10">Back</span>
           </button>
 
-          <div className="flex flex-col lg:flex-row items-center gap-8">
+          {/* Title */}
+          <h1 
+            className="text-lg font-bold"
+            style={{ 
+              background: 'linear-gradient(135deg, #ffffff, #00ff88)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text'
+            }}
+          >
+            Profile
+          </h1>
+
+          {/* Spacer */}
+          <div className="w-16"></div>
+        </div>
+      </div>
+
+      <div className="relative max-w-md mx-auto px-4 py-6">
+        {/* Success/Error Messages */}
+        {error && (
+          <div 
+            className="mb-6 p-4 rounded-xl text-red-400 flex items-center gap-3 relative overflow-hidden"
+            style={{
+              background: 'linear-gradient(135deg, rgba(239,68,68,0.2), rgba(220,38,38,0.15))',
+              border: '2px solid rgba(239,68,68,0.4)',
+              boxShadow: '0 4px 15px rgba(239,68,68,0.2)',
+              animation: 'slideUp 0.5s ease-out'
+            }}
+          >
+            <span className="text-xl">⚠️</span>
+            <span className="font-semibold">{error}</span>
+          </div>
+        )}
+        {success && (
+          <div 
+            className="mb-6 p-4 rounded-xl text-emerald-400 flex items-center gap-3 relative overflow-hidden"
+            style={{
+              background: 'linear-gradient(135deg, rgba(16,185,129,0.2), rgba(5,150,105,0.15))',
+              border: '2px solid rgba(16,185,129,0.4)',
+              boxShadow: '0 4px 15px rgba(16,185,129,0.2)',
+              animation: 'slideUp 0.5s ease-out'
+            }}
+          >
+            <span className="text-xl">✅</span>
+            <span className="font-semibold">{success}</span>
+          </div>
+        )}
+
+        {/* Profile Photo Section */}
+        <div 
+          className="rounded-2xl p-6 mb-6 text-center relative overflow-hidden"
+          style={{
+            background: 'linear-gradient(135deg, rgba(168,85,247,0.15) 0%, rgba(139,92,246,0.15) 100%)',
+            border: '2px solid rgba(168,85,247,0.3)',
+            backdropFilter: 'blur(20px)',
+            boxShadow: '0 8px 32px rgba(168,85,247,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
+            animation: 'fadeIn 0.8s ease-out 0.2s both'
+          }}
+        >
+          {/* Animated Glow */}
+          <div 
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 rounded-full blur-3xl opacity-20"
+            style={{ 
+              background: 'radial-gradient(circle, rgba(168,85,247,0.8), transparent)',
+              animation: 'glow 5s ease-in-out infinite'
+            }}
+          />
+          
+          <div className="relative z-10">
             {/* Profile Photo */}
-            <div className="flex-shrink-0">
-              <ImageUpload
-                currentImage={profile?.profilePhoto}
-                onUpload={handlePhotoUpload}
-                onRemove={handlePhotoRemove}
+            <div className="relative inline-block mb-4">
+              <div 
+                className="w-32 h-32 rounded-full flex items-center justify-center font-bold text-4xl relative overflow-hidden"
+                style={{ 
+                  background: profile?.profilePhoto 
+                    ? 'transparent' 
+                    : 'linear-gradient(135deg,#00c853,#00ff88)', 
+                  color: '#003320',
+                  boxShadow: '0 8px 25px rgba(168,85,247,0.5), 0 0 40px rgba(168,85,247,0.3), inset 0 2px 0 rgba(255,255,255,0.3)',
+                  border: '4px solid rgba(168,85,247,0.5)',
+                  animation: 'float 3s ease-in-out infinite'
+                }}
+              >
+                {profile?.profilePhoto ? (
+                  <img 
+                    src={profile.profilePhoto} 
+                    alt={profile.name} 
+                    className="w-full h-full object-cover rounded-full" 
+                  />
+                ) : (
+                  <span>{profile?.name?.charAt(0)?.toUpperCase() || 'P'}</span>
+                )}
+                
+                {/* Glow Effect */}
+                <div 
+                  className="absolute inset-0 rounded-full blur-xl opacity-60"
+                  style={{ 
+                    background: 'radial-gradient(circle, rgba(168,85,247,0.8) 0%, transparent 70%)',
+                    animation: 'glow 3s ease-in-out infinite'
+                  }}
+                />
+              </div>
+              
+              {/* Upload Button Overlay */}
+              <input
+                type="file"
+                ref={(ref) => setPhotoInputRef(ref)}
+                onChange={handlePhotoInputChange}
+                accept="image/jpeg,image/png,image/gif"
+                className="hidden"
               />
             </div>
 
-            {/* Profile Info */}
-            <div className="flex-1 text-center lg:text-left">
-              <h1 className="text-3xl font-bold text-white mb-2">{profile?.name || 'No Name Set'}</h1>
+            {/* Change Photo Button */}
+            <button
+              onClick={() => photoInputRef?.click()}
+              disabled={uploadingPhoto}
+              className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-base transition-all relative overflow-hidden group mx-auto disabled:opacity-50"
+              style={{ 
+                background: 'linear-gradient(135deg, #a855f7, #8b5cf6)',
+                color: '#ffffff',
+                boxShadow: '0 4px 15px rgba(168,85,247,0.4), inset 0 1px 0 rgba(255,255,255,0.2)'
+              }}
+            >
+              <div 
+                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                style={{ background: 'rgba(255,255,255,0.1)' }}
+              />
+              {uploadingPhoto ? (
+                <>
+                  <div 
+                    className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin relative z-10"
+                  ></div>
+                  <span className="relative z-10">Uploading...</span>
+                </>
+              ) : (
+                <>
+                  <Camera className="w-5 h-5 relative z-10" />
+                  <span className="relative z-10">Change Photo</span>
+                </>
+              )}
+            </button>
+            
+            <p className="text-xs text-gray-400 mt-2">Max 5MB • JPG, PNG, GIF</p>
+          </div>
+        </div>
               
               {/* Player Code & Umpire Code */}
               {(profile?.playerCode || profile?.umpireCode) && (

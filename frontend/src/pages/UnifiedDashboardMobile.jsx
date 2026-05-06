@@ -392,17 +392,17 @@ const UnifiedDashboardMobile = () => {
       {/* Side Menu Overlay */}
       {showMenu && (
         <div 
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 flex items-center justify-center"
           style={{ animation: 'fadeIn 0.3s ease-out' }}
           onClick={() => setShowMenu(false)}
         >
           <div 
-            className="absolute right-0 top-0 bottom-0 w-80 max-w-[85vw] relative overflow-hidden"
+            className="w-[90vw] max-w-md h-[85vh] relative overflow-hidden rounded-2xl"
             style={{ 
               background: 'linear-gradient(180deg, #07071a 0%, #0d1a2a 50%, #07071a 100%)',
-              borderLeft: '2px solid rgba(0,200,83,0.3)',
-              boxShadow: '-10px 0 40px rgba(0,0,0,0.5)',
-              animation: 'slideInRight 0.3s ease-out'
+              border: '2px solid rgba(0,200,83,0.3)',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(0,200,83,0.2)',
+              animation: 'scaleIn 0.3s ease-out'
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -434,7 +434,7 @@ const UnifiedDashboardMobile = () => {
             <div className="relative z-10 h-full flex flex-col p-6">
               {/* Header */}
               <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   <div className="relative">
                     <div 
                       className="absolute inset-0 blur-lg opacity-60"
@@ -443,10 +443,10 @@ const UnifiedDashboardMobile = () => {
                         animation: 'glow 3s ease-in-out infinite'
                       }}
                     />
-                    <MatchifyLogo size={28} variant="icon" />
+                    <MatchifyLogo size={32} variant="icon" />
                   </div>
                   <h3 
-                    className="text-lg font-black"
+                    className="text-xl font-black"
                     style={{ 
                       background: 'linear-gradient(135deg, #ffffff, #00ff88)',
                       WebkitBackgroundClip: 'text',
@@ -459,7 +459,7 @@ const UnifiedDashboardMobile = () => {
                 </div>
                 <button
                   onClick={() => setShowMenu(false)}
-                  className="p-2 rounded-lg transition-all relative overflow-hidden group"
+                  className="p-2.5 rounded-xl transition-all relative overflow-hidden group"
                   style={{ 
                     background: 'linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.05))',
                     border: '1px solid rgba(255,255,255,0.1)'
@@ -475,7 +475,7 @@ const UnifiedDashboardMobile = () => {
 
               {/* User Profile Section */}
               <div 
-                className="rounded-xl p-4 mb-6 relative overflow-hidden"
+                className="rounded-xl p-5 mb-6 relative overflow-hidden"
                 style={{
                   background: 'linear-gradient(135deg, rgba(0,200,83,0.15) 0%, rgba(99,102,241,0.15) 100%)',
                   border: '2px solid rgba(0,200,83,0.3)',
@@ -490,9 +490,9 @@ const UnifiedDashboardMobile = () => {
                     animation: 'shimmer 4s infinite'
                   }}
                 />
-                <div className="flex items-center gap-3 relative z-10">
+                <div className="flex items-center gap-4 relative z-10">
                   <div 
-                    className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-base"
+                    className="w-16 h-16 rounded-full flex items-center justify-center font-bold text-xl flex-shrink-0"
                     style={{ 
                       background: 'linear-gradient(135deg,#00c853,#00ff88)', 
                       color: '#003320',
@@ -506,21 +506,22 @@ const UnifiedDashboardMobile = () => {
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-black text-white truncate">{user?.name}</p>
-                    <p className="text-xs text-gray-300 truncate">{user?.email}</p>
+                    <p className="text-base font-black text-white truncate">{user?.name}</p>
+                    <p className="text-sm text-gray-300 truncate">{user?.email}</p>
                   </div>
                 </div>
               </div>
 
               {/* Menu Items */}
-              <div className="flex-1 overflow-y-auto space-y-2">
+              <div className="flex-1 overflow-y-auto space-y-3 pr-1">
                 <Link
                   to="/profile"
                   onClick={() => setShowMenu(false)}
-                  className="flex items-center gap-3 p-3 rounded-xl text-white transition-all relative overflow-hidden group"
+                  className="flex items-center gap-4 p-4 rounded-xl text-white transition-all relative overflow-hidden group"
                   style={{ 
                     background: 'linear-gradient(135deg, rgba(0,200,83,0.15), rgba(0,255,136,0.1))',
-                    border: '1px solid rgba(0,200,83,0.2)'
+                    border: '2px solid rgba(0,200,83,0.3)',
+                    boxShadow: '0 2px 10px rgba(0,200,83,0.1)'
                   }}
                 >
                   <div 
@@ -528,25 +529,27 @@ const UnifiedDashboardMobile = () => {
                     style={{ background: 'rgba(0,200,83,0.1)' }}
                   />
                   <div 
-                    className="w-10 h-10 rounded-lg flex items-center justify-center relative z-10"
+                    className="w-12 h-12 rounded-xl flex items-center justify-center relative z-10 flex-shrink-0"
                     style={{ 
                       background: 'linear-gradient(135deg, rgba(0,200,83,0.3), rgba(0,255,136,0.2))',
-                      border: '1px solid rgba(0,200,83,0.4)'
+                      border: '1px solid rgba(0,200,83,0.4)',
+                      boxShadow: '0 2px 8px rgba(0,200,83,0.3)'
                     }}
                   >
-                    <UserIcon className="w-5 h-5 text-emerald-300" />
+                    <UserIcon className="w-6 h-6 text-emerald-300" />
                   </div>
-                  <span className="font-semibold relative z-10">Edit Profile</span>
-                  <ArrowRightIcon className="w-4 h-4 ml-auto text-emerald-300 relative z-10" />
+                  <span className="font-bold text-base relative z-10 flex-1">Edit Profile</span>
+                  <ArrowRightIcon className="w-5 h-5 text-emerald-300 relative z-10 flex-shrink-0" />
                 </Link>
                 
                 <Link
                   to="/tournaments"
                   onClick={() => setShowMenu(false)}
-                  className="flex items-center gap-3 p-3 rounded-xl text-white transition-all relative overflow-hidden group"
+                  className="flex items-center gap-4 p-4 rounded-xl text-white transition-all relative overflow-hidden group"
                   style={{ 
                     background: 'linear-gradient(135deg, rgba(59,130,246,0.15), rgba(37,99,235,0.1))',
-                    border: '1px solid rgba(59,130,246,0.2)'
+                    border: '2px solid rgba(59,130,246,0.3)',
+                    boxShadow: '0 2px 10px rgba(59,130,246,0.1)'
                   }}
                 >
                   <div 
@@ -554,25 +557,27 @@ const UnifiedDashboardMobile = () => {
                     style={{ background: 'rgba(59,130,246,0.1)' }}
                   />
                   <div 
-                    className="w-10 h-10 rounded-lg flex items-center justify-center relative z-10"
+                    className="w-12 h-12 rounded-xl flex items-center justify-center relative z-10 flex-shrink-0"
                     style={{ 
                       background: 'linear-gradient(135deg, rgba(59,130,246,0.3), rgba(37,99,235,0.2))',
-                      border: '1px solid rgba(59,130,246,0.4)'
+                      border: '1px solid rgba(59,130,246,0.4)',
+                      boxShadow: '0 2px 8px rgba(59,130,246,0.3)'
                     }}
                   >
-                    <TrophyIcon className="w-5 h-5 text-blue-300" />
+                    <TrophyIcon className="w-6 h-6 text-blue-300" />
                   </div>
-                  <span className="font-semibold relative z-10">Browse Tournaments</span>
-                  <ArrowRightIcon className="w-4 h-4 ml-auto text-blue-300 relative z-10" />
+                  <span className="font-bold text-base relative z-10 flex-1">Browse Tournaments</span>
+                  <ArrowRightIcon className="w-5 h-5 text-blue-300 relative z-10 flex-shrink-0" />
                 </Link>
                 
                 <Link
                   to="/leaderboard"
                   onClick={() => setShowMenu(false)}
-                  className="flex items-center gap-3 p-3 rounded-xl text-white transition-all relative overflow-hidden group"
+                  className="flex items-center gap-4 p-4 rounded-xl text-white transition-all relative overflow-hidden group"
                   style={{ 
                     background: 'linear-gradient(135deg, rgba(245,158,11,0.15), rgba(251,146,60,0.1))',
-                    border: '1px solid rgba(245,158,11,0.2)'
+                    border: '2px solid rgba(245,158,11,0.3)',
+                    boxShadow: '0 2px 10px rgba(245,158,11,0.1)'
                   }}
                 >
                   <div 
@@ -580,25 +585,27 @@ const UnifiedDashboardMobile = () => {
                     style={{ background: 'rgba(245,158,11,0.1)' }}
                   />
                   <div 
-                    className="w-10 h-10 rounded-lg flex items-center justify-center relative z-10"
+                    className="w-12 h-12 rounded-xl flex items-center justify-center relative z-10 flex-shrink-0"
                     style={{ 
                       background: 'linear-gradient(135deg, rgba(245,158,11,0.3), rgba(251,146,60,0.2))',
-                      border: '1px solid rgba(245,158,11,0.4)'
+                      border: '1px solid rgba(245,158,11,0.4)',
+                      boxShadow: '0 2px 8px rgba(245,158,11,0.3)'
                     }}
                   >
-                    <ChartBarIcon className="w-5 h-5 text-amber-300" />
+                    <ChartBarIcon className="w-6 h-6 text-amber-300" />
                   </div>
-                  <span className="font-semibold relative z-10">Leaderboard</span>
-                  <ArrowRightIcon className="w-4 h-4 ml-auto text-amber-300 relative z-10" />
+                  <span className="font-bold text-base relative z-10 flex-1">Leaderboard</span>
+                  <ArrowRightIcon className="w-5 h-5 text-amber-300 relative z-10 flex-shrink-0" />
                 </Link>
                 
                 <Link
                   to="/registrations"
                   onClick={() => setShowMenu(false)}
-                  className="flex items-center gap-3 p-3 rounded-xl text-white transition-all relative overflow-hidden group"
+                  className="flex items-center gap-4 p-4 rounded-xl text-white transition-all relative overflow-hidden group"
                   style={{ 
                     background: 'linear-gradient(135deg, rgba(168,85,247,0.15), rgba(139,92,246,0.1))',
-                    border: '1px solid rgba(168,85,247,0.2)'
+                    border: '2px solid rgba(168,85,247,0.3)',
+                    boxShadow: '0 2px 10px rgba(168,85,247,0.1)'
                   }}
                 >
                   <div 
@@ -606,25 +613,27 @@ const UnifiedDashboardMobile = () => {
                     style={{ background: 'rgba(168,85,247,0.1)' }}
                   />
                   <div 
-                    className="w-10 h-10 rounded-lg flex items-center justify-center relative z-10"
+                    className="w-12 h-12 rounded-xl flex items-center justify-center relative z-10 flex-shrink-0"
                     style={{ 
                       background: 'linear-gradient(135deg, rgba(168,85,247,0.3), rgba(139,92,246,0.2))',
-                      border: '1px solid rgba(168,85,247,0.4)'
+                      border: '1px solid rgba(168,85,247,0.4)',
+                      boxShadow: '0 2px 8px rgba(168,85,247,0.3)'
                     }}
                   >
-                    <CalendarIcon className="w-5 h-5 text-purple-300" />
+                    <CalendarIcon className="w-6 h-6 text-purple-300" />
                   </div>
-                  <span className="font-semibold relative z-10">My Registrations</span>
-                  <ArrowRightIcon className="w-4 h-4 ml-auto text-purple-300 relative z-10" />
+                  <span className="font-bold text-base relative z-10 flex-1">My Registrations</span>
+                  <ArrowRightIcon className="w-5 h-5 text-purple-300 relative z-10 flex-shrink-0" />
                 </Link>
 
                 <Link
                   to="/academies"
                   onClick={() => setShowMenu(false)}
-                  className="flex items-center gap-3 p-3 rounded-xl text-white transition-all relative overflow-hidden group"
+                  className="flex items-center gap-4 p-4 rounded-xl text-white transition-all relative overflow-hidden group"
                   style={{ 
                     background: 'linear-gradient(135deg, rgba(6,182,212,0.15), rgba(14,165,233,0.1))',
-                    border: '1px solid rgba(6,182,212,0.2)'
+                    border: '2px solid rgba(6,182,212,0.3)',
+                    boxShadow: '0 2px 10px rgba(6,182,212,0.1)'
                   }}
                 >
                   <div 
@@ -632,16 +641,17 @@ const UnifiedDashboardMobile = () => {
                     style={{ background: 'rgba(6,182,212,0.1)' }}
                   />
                   <div 
-                    className="w-10 h-10 rounded-lg flex items-center justify-center relative z-10"
+                    className="w-12 h-12 rounded-xl flex items-center justify-center relative z-10 flex-shrink-0"
                     style={{ 
                       background: 'linear-gradient(135deg, rgba(6,182,212,0.3), rgba(14,165,233,0.2))',
-                      border: '1px solid rgba(6,182,212,0.4)'
+                      border: '1px solid rgba(6,182,212,0.4)',
+                      boxShadow: '0 2px 8px rgba(6,182,212,0.3)'
                     }}
                   >
-                    <UserIcon className="w-5 h-5 text-cyan-300" />
+                    <UserIcon className="w-6 h-6 text-cyan-300" />
                   </div>
-                  <span className="font-semibold relative z-10">Academies</span>
-                  <ArrowRightIcon className="w-4 h-4 ml-auto text-cyan-300 relative z-10" />
+                  <span className="font-bold text-base relative z-10 flex-1">Academies</span>
+                  <ArrowRightIcon className="w-5 h-5 text-cyan-300 relative z-10 flex-shrink-0" />
                 </Link>
               </div>
 
@@ -652,7 +662,7 @@ const UnifiedDashboardMobile = () => {
                   // Add logout logic here
                   navigate('/logout');
                 }}
-                className="w-full flex items-center justify-center gap-2 p-3 rounded-xl font-bold transition-all relative overflow-hidden group mt-4"
+                className="w-full flex items-center justify-center gap-2 p-4 rounded-xl font-bold text-base transition-all relative overflow-hidden group mt-6"
                 style={{ 
                   background: 'linear-gradient(135deg, rgba(239,68,68,0.2), rgba(220,38,38,0.15))', 
                   border: '2px solid rgba(239,68,68,0.4)',

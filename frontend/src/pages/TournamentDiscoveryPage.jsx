@@ -89,84 +89,190 @@ export default function TournamentDiscoveryPage() {
   const hasActiveFilters = Object.values(filters).some(v => v) || searchQuery;
 
   return (
-    <div className="min-h-screen" style={{ background:'#07071a' }}>
+    <div className="min-h-screen relative overflow-hidden" style={{ background:'linear-gradient(180deg, #0a0a1f 0%, #07071a 30%, #0d1a2a 60%, #07071a 100%)' }}>
+      {/* Animated Background Elements */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div 
+          className="absolute top-0 right-0 w-72 h-72 rounded-full blur-3xl opacity-30"
+          style={{ 
+            background: 'radial-gradient(circle, rgba(0,200,83,0.6), transparent)',
+            animation: 'glow 4s ease-in-out infinite'
+          }}
+        />
+        <div 
+          className="absolute bottom-1/3 left-0 w-64 h-64 rounded-full blur-3xl opacity-25"
+          style={{ 
+            background: 'radial-gradient(circle, rgba(168,85,247,0.6), transparent)',
+            animation: 'glow 5s ease-in-out infinite reverse'
+          }}
+        />
+        <div 
+          className="absolute top-1/2 right-1/4 w-56 h-56 rounded-full blur-3xl opacity-20"
+          style={{ 
+            background: 'radial-gradient(circle, rgba(6,182,212,0.6), transparent)',
+            animation: 'glow 6s ease-in-out infinite'
+          }}
+        />
+        {[...Array(12)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute rounded-full"
+            style={{
+              width: `${Math.random() * 4 + 2}px`,
+              height: `${Math.random() * 4 + 2}px`,
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              background: ['#00c853', '#a855f7', '#06b6d4', '#f59e0b'][Math.floor(Math.random() * 4)],
+              opacity: Math.random() * 0.5 + 0.2,
+              animation: `float ${Math.random() * 10 + 5}s ease-in-out infinite`,
+              animationDelay: `${Math.random() * 5}s`,
+              boxShadow: `0 0 ${Math.random() * 15 + 5}px currentColor`
+            }}
+          />
+        ))}
+      </div>
+
+      <style>{`
+        @keyframes float {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          25% { transform: translate(15px, -15px) scale(1.05); }
+          50% { transform: translate(-10px, 10px) scale(0.95); }
+          75% { transform: translate(10px, 5px) scale(1.02); }
+        }
+        @keyframes glow {
+          0%, 100% { opacity: 0.3; filter: brightness(1); }
+          50% { opacity: 0.6; filter: brightness(1.3); }
+        }
+        @keyframes shimmer {
+          0% { background-position: -200% center; }
+          100% { background-position: 200% center; }
+        }
+      `}</style>
+
       {/* Hero Header */}
-      <div className="relative overflow-hidden" style={{ background:'linear-gradient(135deg,#07071a 0%,#0d1a2a 100%)' }}>
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 left-1/4 w-80 h-80 rounded-full blur-3xl" style={{ background:'radial-gradient(circle,rgba(0,255,136,0.08) 0%,transparent 70%)' }}></div>
-          <div className="absolute bottom-0 right-1/4 w-80 h-80 rounded-full blur-3xl" style={{ background:'radial-gradient(circle,rgba(0,212,255,0.06) 0%,transparent 70%)' }}></div>
-        </div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
+      <div className="relative">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
           {/* Back Button */}
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-white/70 hover:text-white mb-6 transition-colors group"
+            className="flex items-center gap-2 text-white/70 hover:text-white mb-4 sm:mb-6 transition-all group"
           >
             <ArrowLeftIcon className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
-            <span>Back</span>
+            <span className="font-medium">Back</span>
           </button>
 
           <div className="text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-white/80 text-sm font-medium mb-6 border border-white/20">
-              <SparklesIcon className="w-4 h-4 text-amber-400" />
+            <div 
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold mb-4 sm:mb-6 relative overflow-hidden"
+              style={{
+                background: 'linear-gradient(135deg, rgba(245,158,11,0.2), rgba(251,146,60,0.15))',
+                border: '2px solid rgba(245,158,11,0.4)',
+                color: '#fbbf24',
+                boxShadow: '0 4px 15px rgba(245,158,11,0.3)'
+              }}
+            >
+              <SparklesIcon className="w-4 h-4" />
               Find Your Next Competition
             </div>
-            <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold text-white mb-4">
+            <h1 
+              className="text-3xl sm:text-4xl md:text-5xl font-black mb-3 sm:mb-4"
+              style={{
+                background: 'linear-gradient(135deg, #00c853, #00ff88, #00c853)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+                textShadow: '0 0 40px rgba(0,200,83,0.3)'
+              }}
+            >
               Discover Tournaments
             </h1>
-            <p className="text-sm sm:text-xl text-white/60 max-w-2xl mx-auto">
+            <p className="text-sm sm:text-lg text-white/70 max-w-2xl mx-auto font-medium">
               Find and register for badminton tournaments near you
             </p>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 -mt-8">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Search Card */}
-        <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-6 mb-8">
-          <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1 relative">
-              <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+        <div 
+          className="rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8 relative overflow-hidden"
+          style={{
+            background: 'linear-gradient(135deg, rgba(0,200,83,0.1) 0%, rgba(99,102,241,0.1) 100%)',
+            border: '2px solid rgba(0,200,83,0.2)',
+            backdropFilter: 'blur(20px)',
+            boxShadow: '0 8px 32px rgba(0,200,83,0.15)'
+          }}
+        >
+          <form onSubmit={handleSearch} className="flex flex-col gap-3 sm:gap-4">
+            <div className="relative">
+              <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-emerald-400" />
               <input
                 type="text"
-                placeholder="Search tournaments by name, city..."
+                placeholder="Search tournaments by name..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-4 bg-slate-700/50 border border-white/10 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all text-white placeholder-gray-400"
+                className="w-full pl-12 pr-4 py-3.5 sm:py-4 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all text-white placeholder-gray-400 font-medium"
+                style={{
+                  background: 'rgba(0,0,0,0.3)',
+                  border: '1.5px solid rgba(0,200,83,0.3)',
+                  boxShadow: '0 4px 15px rgba(0,0,0,0.2)'
+                }}
               />
             </div>
-            <button
-              type="button"
-              onClick={() => setShowFilters(!showFilters)}
-              className={`px-6 py-4 rounded-xl flex items-center justify-center gap-2 font-medium transition-all ${
-                showFilters 
-                  ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/30' 
-                  : 'bg-slate-700/50 text-gray-300 hover:bg-slate-700 border border-white/10'
-              }`}
-            >
-              <FunnelIcon className="h-5 w-5" />
-              Filters
-              {hasActiveFilters && (
-                <span className="w-2 h-2 bg-amber-400 rounded-full"></span>
-              )}
-            </button>
-            <button
-              type="submit"
-              className="px-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:shadow-lg hover:shadow-purple-500/30 hover:scale-105 transition-all font-semibold"
-            >
-              Search
-            </button>
+            
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setShowFilters(!showFilters)}
+                className="flex-1 px-4 sm:px-6 py-3.5 sm:py-4 rounded-xl flex items-center justify-center gap-2 font-bold transition-all relative overflow-hidden"
+                style={
+                  showFilters 
+                    ? { 
+                        background: 'linear-gradient(135deg, #a855f7, #8b5cf6)',
+                        color: '#ffffff',
+                        boxShadow: '0 6px 20px rgba(168,85,247,0.4)'
+                      }
+                    : { 
+                        background: 'rgba(255,255,255,0.05)',
+                        border: '1.5px solid rgba(255,255,255,0.1)',
+                        color: '#ffffff'
+                      }
+                }
+              >
+                <FunnelIcon className="h-5 w-5" />
+                <span className="hidden sm:inline">Filters</span>
+                {hasActiveFilters && (
+                  <span className="w-2 h-2 bg-amber-400 rounded-full animate-pulse"></span>
+                )}
+              </button>
+              <button
+                type="submit"
+                className="flex-1 px-4 sm:px-8 py-3.5 sm:py-4 rounded-xl font-bold transition-all relative overflow-hidden group"
+                style={{ 
+                  background: 'linear-gradient(135deg, #a855f7, #8b5cf6)',
+                  color: '#ffffff',
+                  boxShadow: '0 6px 20px rgba(168,85,247,0.4)'
+                }}
+              >
+                <div 
+                  className="absolute inset-0 opacity-0 group-active:opacity-100 transition-opacity"
+                  style={{ background: 'radial-gradient(circle at center, rgba(255,255,255,0.3), transparent)' }}
+                />
+                <span className="relative z-10">Search</span>
+              </button>
+            </div>
           </form>
 
           {/* Filters Panel */}
           {showFilters && (
-            <div className="mt-6 pt-6 border-t border-white/10">
+            <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-white/10">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="font-semibold text-white">Filter Options</h3>
+                <h3 className="font-bold text-white text-sm sm:text-base">Filter Options</h3>
                 {hasActiveFilters && (
                   <button
                     onClick={clearFilters}
-                    className="text-sm text-purple-400 hover:text-purple-300 flex items-center gap-1 font-medium"
+                    className="text-xs sm:text-sm text-emerald-400 hover:text-emerald-300 flex items-center gap-1 font-bold transition-colors"
                   >
                     <XMarkIcon className="h-4 w-4" />
                     Clear All
@@ -174,24 +280,33 @@ export default function TournamentDiscoveryPage() {
                 )}
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">City</label>
+                  <label className="block text-xs sm:text-sm font-bold text-emerald-400 mb-2">City</label>
                   <input
                     type="text"
                     value={filters.city}
                     onChange={(e) => handleFilterChange('city', e.target.value)}
                     placeholder="Any city"
-                    className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all text-white placeholder-gray-500"
+                    className="w-full px-4 py-3 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all text-white placeholder-gray-500 font-medium"
+                    style={{
+                      background: 'rgba(0,0,0,0.3)',
+                      border: '1.5px solid rgba(0,200,83,0.3)'
+                    }}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">Status</label>
+                  <label className="block text-xs sm:text-sm font-bold text-purple-400 mb-2">Status</label>
                   <select
                     value={filters.status}
                     onChange={(e) => handleFilterChange('status', e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-800 border border-purple-500/50 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all text-white shadow-[0_0_15px_rgba(168,85,247,0.3)] hover:shadow-[0_0_20px_rgba(168,85,247,0.4)]"
+                    className="w-full px-4 py-3 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all text-white font-medium"
+                    style={{
+                      background: 'rgba(0,0,0,0.3)',
+                      border: '1.5px solid rgba(168,85,247,0.5)',
+                      boxShadow: '0 4px 15px rgba(168,85,247,0.2)'
+                    }}
                   >
                     <option value="">All Statuses</option>
                     <option value="published">Open for Registration</option>
@@ -201,11 +316,16 @@ export default function TournamentDiscoveryPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">Format</label>
+                  <label className="block text-xs sm:text-sm font-bold text-cyan-400 mb-2">Format</label>
                   <select
                     value={filters.format}
                     onChange={(e) => handleFilterChange('format', e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-800 border border-purple-500/50 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all text-white shadow-[0_0_15px_rgba(168,85,247,0.3)] hover:shadow-[0_0_20px_rgba(168,85,247,0.4)]"
+                    className="w-full px-4 py-3 rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all text-white font-medium"
+                    style={{
+                      background: 'rgba(0,0,0,0.3)',
+                      border: '1.5px solid rgba(6,182,212,0.5)',
+                      boxShadow: '0 4px 15px rgba(6,182,212,0.2)'
+                    }}
                   >
                     <option value="">All Formats</option>
                     <option value="singles">Singles Only</option>
@@ -215,22 +335,30 @@ export default function TournamentDiscoveryPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">From Date</label>
+                  <label className="block text-xs sm:text-sm font-bold text-orange-400 mb-2">From Date</label>
                   <input
                     type="date"
                     value={filters.startDate}
                     onChange={(e) => handleFilterChange('startDate', e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all text-white"
+                    className="w-full px-4 py-3 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all text-white font-medium"
+                    style={{
+                      background: 'rgba(0,0,0,0.3)',
+                      border: '1.5px solid rgba(245,158,11,0.3)'
+                    }}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-2">To Date</label>
+                  <label className="block text-xs sm:text-sm font-bold text-orange-400 mb-2">To Date</label>
                   <input
                     type="date"
                     value={filters.endDate}
                     onChange={(e) => handleFilterChange('endDate', e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all text-white"
+                    className="w-full px-4 py-3 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all text-white font-medium"
+                    style={{
+                      background: 'rgba(0,0,0,0.3)',
+                      border: '1.5px solid rgba(245,158,11,0.3)'
+                    }}
                   />
                 </div>
               </div>
@@ -240,14 +368,23 @@ export default function TournamentDiscoveryPage() {
 
         {/* Results Count */}
         {!loading && (
-          <div className="flex items-center justify-between mb-6">
-            <p className="text-gray-400">
-              Found <span className="font-semibold text-white">{total}</span> tournament{total !== 1 ? 's' : ''}
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
+            <p 
+              className="text-sm sm:text-base font-bold"
+              style={{
+                background: 'linear-gradient(135deg, #00c853, #00ff88)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text'
+              }}
+            >
+              Found <span className="text-white">{total}</span> tournament{total !== 1 ? 's' : ''}
             </p>
             {hasActiveFilters && (
               <button
                 onClick={clearFilters}
-                className="text-sm text-purple-600 hover:text-purple-700 font-medium"
+                className="text-xs sm:text-sm font-bold transition-colors"
+                style={{ color: '#00ff88' }}
               >
                 Clear filters
               </button>
@@ -257,21 +394,52 @@ export default function TournamentDiscoveryPage() {
 
         {/* Tournament Grid */}
         {loading ? (
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-8 sm:p-16 text-center">
-            <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-            <p className="text-gray-400 mt-6 font-medium">Loading tournaments...</p>
+          <div 
+            className="rounded-2xl p-8 sm:p-16 text-center relative overflow-hidden"
+            style={{
+              background: 'linear-gradient(135deg, rgba(0,200,83,0.1) 0%, rgba(99,102,241,0.1) 100%)',
+              border: '2px solid rgba(0,200,83,0.2)',
+              backdropFilter: 'blur(20px)'
+            }}
+          >
+            <div 
+              className="w-16 h-16 border-4 rounded-full animate-spin mx-auto"
+              style={{ 
+                borderColor: 'rgba(0,200,83,0.3)',
+                borderTopColor: '#00c853'
+              }}
+            ></div>
+            <p className="text-white/70 mt-6 font-bold">Loading tournaments...</p>
           </div>
         ) : tournaments.length === 0 ? (
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-8 sm:p-16 text-center">
-            <div className="w-24 h-24 bg-slate-700/50 rounded-3xl flex items-center justify-center mx-auto mb-6">
-              <TrophyIcon className="w-12 h-12 text-gray-500" />
+          <div 
+            className="rounded-2xl p-8 sm:p-16 text-center relative overflow-hidden"
+            style={{
+              background: 'linear-gradient(135deg, rgba(0,200,83,0.1) 0%, rgba(99,102,241,0.1) 100%)',
+              border: '2px solid rgba(0,200,83,0.2)',
+              backdropFilter: 'blur(20px)'
+            }}
+          >
+            <div 
+              className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl flex items-center justify-center mx-auto mb-6"
+              style={{
+                background: 'linear-gradient(135deg, rgba(0,200,83,0.2), rgba(168,85,247,0.2))',
+                border: '2px solid rgba(0,200,83,0.3)'
+              }}
+            >
+              <TrophyIcon className="w-10 h-10 sm:w-12 sm:h-12 text-emerald-400" />
             </div>
-            <h3 className="text-xl font-bold text-white mb-2">No tournaments found</h3>
-            <p className="text-gray-400 mb-6">Try adjusting your filters or check back later</p>
+            <h3 className="text-lg sm:text-xl font-black text-white mb-2">No tournaments found</h3>
+            <p className="text-sm sm:text-base text-white/60 mb-6 font-medium">Try adjusting your filters or check back later</p>
             {hasActiveFilters && (
               <button
                 onClick={clearFilters}
-                className="px-6 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-colors font-medium"
+                className="px-6 py-3 rounded-xl font-bold transition-all"
+                style={{ 
+                  background: 'linear-gradient(135deg, #00c853, #00ff88)',
+                  color: '#003320',
+                  boxShadow: '0 6px 20px rgba(0,200,83,0.4)'
+                }}
               >
                 Clear all filters
               </button>
@@ -279,7 +447,7 @@ export default function TournamentDiscoveryPage() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {tournaments.map((tournament, index) => (
                 <TournamentCard key={tournament.id} tournament={tournament} navigate={navigate} index={index} />
               ))}
@@ -287,11 +455,16 @@ export default function TournamentDiscoveryPage() {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-center gap-3 mt-10">
+              <div className="flex items-center justify-center gap-2 sm:gap-3 mt-8 sm:mt-10">
                 <button
                   onClick={() => setPage(p => Math.max(1, p - 1))}
                   disabled={page === 1}
-                  className="px-5 py-2.5 bg-slate-700/50 border border-white/10 rounded-xl hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium text-gray-300 transition-all"
+                  className="px-4 sm:px-5 py-2.5 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed font-bold text-sm sm:text-base transition-all"
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1.5px solid rgba(255,255,255,0.1)',
+                    color: '#ffffff'
+                  }}
                 >
                   Previous
                 </button>
@@ -303,11 +476,20 @@ export default function TournamentDiscoveryPage() {
                       <button
                         key={pageNum}
                         onClick={() => setPage(pageNum)}
-                        className={`w-10 h-10 rounded-xl font-medium transition-all ${
+                        className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl font-bold text-sm sm:text-base transition-all"
+                        style={
                           page === pageNum
-                            ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/30'
-                            : 'bg-slate-700/50 border border-white/10 text-gray-300 hover:bg-slate-700'
-                        }`}
+                            ? { 
+                                background: 'linear-gradient(135deg, #00c853, #00ff88)',
+                                color: '#003320',
+                                boxShadow: '0 4px 15px rgba(0,200,83,0.4)'
+                              }
+                            : { 
+                                background: 'rgba(255,255,255,0.05)',
+                                border: '1.5px solid rgba(255,255,255,0.1)',
+                                color: '#ffffff'
+                              }
+                        }
                       >
                         {pageNum}
                       </button>
@@ -318,7 +500,12 @@ export default function TournamentDiscoveryPage() {
                 <button
                   onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                   disabled={page === totalPages}
-                  className="px-5 py-2.5 bg-slate-700/50 border border-white/10 rounded-xl hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium text-gray-300 transition-all"
+                  className="px-4 sm:px-5 py-2.5 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed font-bold text-sm sm:text-base transition-all"
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1.5px solid rgba(255,255,255,0.1)',
+                    color: '#ffffff'
+                  }}
                 >
                   Next
                 </button>
@@ -336,11 +523,11 @@ export default function TournamentDiscoveryPage() {
 function TournamentCard({ tournament, navigate, index }) {
   const getStatusStyle = (status) => {
     const styles = {
-      published: { bg: 'bg-green-500/90', text: 'Open' },
-      ongoing: { bg: 'bg-blue-500/90', text: 'Ongoing' },
-      completed: { bg: 'bg-gray-500/90', text: 'Completed' },
-      cancelled: { bg: 'bg-red-500/90', text: 'Cancelled' },
-      draft: { bg: 'bg-amber-500/90', text: 'Draft' }
+      published: { bg: 'linear-gradient(135deg, #00c853, #00ff88)', text: 'Open', color: '#003320' },
+      ongoing: { bg: 'linear-gradient(135deg, #3b82f6, #60a5fa)', text: 'Ongoing', color: '#ffffff' },
+      completed: { bg: 'linear-gradient(135deg, #6b7280, #9ca3af)', text: 'Completed', color: '#ffffff' },
+      cancelled: { bg: 'linear-gradient(135deg, #ef4444, #dc2626)', text: 'Cancelled', color: '#ffffff' },
+      draft: { bg: 'linear-gradient(135deg, #f59e0b, #fbbf24)', text: 'Draft', color: '#ffffff' }
     };
     return styles[status?.toLowerCase()] || styles.draft;
   };
@@ -374,37 +561,66 @@ function TournamentCard({ tournament, navigate, index }) {
 
   return (
     <div 
-      className="group bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl hover:border-purple-500/50 hover:shadow-xl hover:shadow-purple-500/10 hover:scale-[1.02] transition-all duration-300 overflow-hidden cursor-pointer"
+      className="group relative overflow-hidden cursor-pointer rounded-2xl transition-all duration-300 hover:scale-[1.02]"
       onClick={() => navigate(`/tournaments/${tournament.id}`)}
+      style={{
+        background: 'linear-gradient(135deg, rgba(0,200,83,0.1) 0%, rgba(99,102,241,0.1) 100%)',
+        border: '2px solid rgba(0,200,83,0.2)',
+        backdropFilter: 'blur(20px)',
+        boxShadow: '0 8px 32px rgba(0,200,83,0.15)'
+      }}
     >
+      {/* Hover Glow Effect */}
+      <div 
+        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
+        style={{
+          background: 'radial-gradient(circle at center, rgba(0,200,83,0.1), transparent)',
+          filter: 'blur(20px)'
+        }}
+      />
+
       {/* Poster */}
-      <div className="h-52 relative overflow-hidden">
+      <div className="h-44 sm:h-52 relative overflow-hidden">
         {posterUrl ? (
           <>
             <img
               src={posterUrl}
               alt={tournament.name}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
             />
-            {/* Light overlay only at bottom for text readability */}
-            <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black/50 to-transparent"></div>
+            {/* Gradient overlay for text readability */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
           </>
         ) : (
-          <div className={`w-full h-full bg-gradient-to-br ${gradient} flex items-center justify-center`}>
-            <span className="text-6xl opacity-30">🏸</span>
+          <div className={`w-full h-full bg-gradient-to-br ${gradient} flex items-center justify-center relative overflow-hidden`}>
+            <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
+            <span className="text-6xl opacity-40 relative z-10">🏸</span>
           </div>
         )}
         
         {/* Status Badge */}
-        <div className="absolute top-4 right-4">
-          <span className={`px-3 py-1.5 ${statusStyle.bg} text-white text-xs font-semibold rounded-full backdrop-blur-sm shadow-lg`}>
+        <div className="absolute top-3 right-3">
+          <span 
+            className="px-3 py-1.5 text-xs font-black rounded-full backdrop-blur-sm shadow-lg"
+            style={{
+              background: statusStyle.bg,
+              color: statusStyle.color
+            }}
+          >
             {statusStyle.text}
           </span>
         </div>
 
         {/* Format Badge */}
-        <div className="absolute bottom-4 left-4">
-          <span className="px-3 py-1.5 bg-black/40 backdrop-blur-sm text-white text-xs font-medium rounded-full border border-white/20">
+        <div className="absolute bottom-3 left-3">
+          <span 
+            className="px-3 py-1.5 text-xs font-bold rounded-full backdrop-blur-sm"
+            style={{
+              background: 'rgba(0,0,0,0.5)',
+              border: '1.5px solid rgba(255,255,255,0.3)',
+              color: '#ffffff'
+            }}
+          >
             {tournament.format === 'both' ? '🏸 Singles & Doubles' : 
              tournament.format === 'singles' ? '🏸 Singles' : '👥 Doubles'}
           </span>
@@ -412,31 +628,40 @@ function TournamentCard({ tournament, navigate, index }) {
       </div>
 
       {/* Content */}
-      <div className="p-5">
-        <h3 className="font-bold text-lg text-white mb-3 line-clamp-2 group-hover:text-amber-400 transition-colors min-h-[3.5rem]">
+      <div className="p-4 sm:p-5 relative z-10">
+        <h3 className="font-black text-base sm:text-lg text-white mb-3 line-clamp-2 group-hover:text-emerald-400 transition-colors min-h-[3rem] sm:min-h-[3.5rem]">
           {tournament.name}
         </h3>
 
-        <div className="space-y-2.5 mb-5">
-          <div className="flex items-center gap-3 text-sm text-gray-400">
-            <div className="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+        <div className="space-y-2 sm:space-y-2.5 mb-4 sm:mb-5">
+          <div className="flex items-center gap-3 text-xs sm:text-sm text-white/80">
+            <div 
+              className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+              style={{ background: 'rgba(168,85,247,0.2)' }}
+            >
               <MapPinIcon className="h-4 w-4 text-purple-400" />
             </div>
-            <span className="truncate">{tournament.city}, {tournament.state}</span>
+            <span className="truncate font-medium">{tournament.city}, {tournament.state}</span>
           </div>
 
-          <div className="flex items-center gap-3 text-sm text-gray-400">
-            <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+          <div className="flex items-center gap-3 text-xs sm:text-sm text-white/80">
+            <div 
+              className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+              style={{ background: 'rgba(59,130,246,0.2)' }}
+            >
               <CalendarIcon className="h-4 w-4 text-blue-400" />
             </div>
-            <span>{formatDateIndian(tournament.startDate)}</span>
+            <span className="font-medium">{formatDateIndian(tournament.startDate)}</span>
           </div>
 
-          <div className="flex items-center gap-3 text-sm text-gray-400">
-            <div className="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+          <div className="flex items-center gap-3 text-xs sm:text-sm text-white/80">
+            <div 
+              className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+              style={{ background: 'rgba(0,200,83,0.2)' }}
+            >
               <UserGroupIcon className="h-4 w-4 text-green-400" />
             </div>
-            <span>{tournament._count?.categories || 0} Categories • {tournament._count?.registrations || 0} Registered</span>
+            <span className="font-medium">{tournament._count?.categories || 0} Categories • {tournament._count?.registrations || 0} Registered</span>
           </div>
         </div>
 
@@ -446,10 +671,19 @@ function TournamentCard({ tournament, navigate, index }) {
             e.stopPropagation();
             navigate(`/tournaments/${tournament.id}`);
           }}
-          className="w-full py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:shadow-lg hover:shadow-purple-500/30 transition-all font-semibold flex items-center justify-center gap-2 group-hover:scale-[1.02]"
+          className="w-full py-3 sm:py-3.5 rounded-xl font-black text-sm sm:text-base transition-all flex items-center justify-center gap-2 group-hover:scale-[1.02] relative overflow-hidden"
+          style={{ 
+            background: 'linear-gradient(135deg, #a855f7, #8b5cf6)',
+            color: '#ffffff',
+            boxShadow: '0 6px 20px rgba(168,85,247,0.4)'
+          }}
         >
-          View Details
-          <ArrowRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          <span className="relative z-10">View Details</span>
+          <ArrowRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform relative z-10" />
+          <div 
+            className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
+            style={{ background: 'radial-gradient(circle at center, rgba(255,255,255,0.2), transparent)' }}
+          />
         </button>
       </div>
     </div>

@@ -436,9 +436,9 @@ const TournamentDetailPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #0a0a1f 0%, #07071a 50%, #0a0a1f 100%)' }}>
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <div className="w-16 h-16 border-4 rounded-full animate-spin mx-auto" style={{ borderColor: 'rgba(16,185,129,0.3)', borderTopColor: '#10b981' }}></div>
           <p className="text-gray-400 mt-4 font-medium">Loading tournament...</p>
         </div>
       </div>
@@ -455,7 +455,8 @@ const TournamentDetailPage = () => {
           <p className="text-red-600 text-lg font-semibold mb-4">{error || 'Tournament not found'}</p>
           <button
             onClick={() => navigate('/tournaments')}
-            className="px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:shadow-lg transition-all font-semibold"
+            className="px-6 py-3 rounded-xl font-bold transition-all text-sm"
+            style={{ background: 'linear-gradient(135deg,#10b981,#059669)', color: '#ffffff', boxShadow: '0 4px 15px rgba(16,185,129,0.3)' }}
           >
             Back to Tournaments
           </button>
@@ -467,12 +468,12 @@ const TournamentDetailPage = () => {
   const statusStyle = getStatusStyle(tournament.status);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      {/* Hero Header with Poster - Mobile Optimized */}
-      <div className="relative bg-gradient-to-r from-slate-900 via-purple-900 to-slate-900 overflow-hidden">
-        <div className="absolute inset-0">
-          <div className="absolute top-0 left-1/4 w-64 h-64 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-          <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #0a0a1f 0%, #07071a 50%, #0a0a1f 100%)' }}>
+      {/* Hero Header with Poster - Mobile Optimized - EMERALD THEME */}
+      <div className="relative overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(16,185,129,0.15) 0%, rgba(6,182,212,0.1) 100%)' }}>
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-0 left-1/4 w-64 h-64 rounded-full blur-3xl opacity-10" style={{ background: 'radial-gradient(circle, #10b981, transparent)' }}></div>
+          <div className="absolute bottom-0 right-1/4 w-64 h-64 rounded-full blur-3xl opacity-10" style={{ background: 'radial-gradient(circle, #06b6d4, transparent)' }}></div>
         </div>
         
         <div className="relative max-w-7xl mx-auto px-4 py-5">

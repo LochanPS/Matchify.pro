@@ -24,6 +24,7 @@ model User {
   state                String?
   country              String              @default("India")
   dateOfBirth          DateTime?
+  birthYear            Int?                // Birth year only (e.g., 1995, 2000)
   gender               String?
   walletBalance        Float               @default(0)
   totalPoints          Int                 @default(0)

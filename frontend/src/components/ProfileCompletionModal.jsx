@@ -548,7 +548,7 @@ export default function ProfileCompletionModal({ user, onComplete }) {
     }
   };
 
-  // Highlight matching text helper - Emerald Theme
+  // Highlight matching text helper - Emerald Theme (v2)
   const highlightMatch = (text, query) => {
     if (!query) return text;
     return text.split(new RegExp(`(${query})`, 'gi')).map((part, i) => (

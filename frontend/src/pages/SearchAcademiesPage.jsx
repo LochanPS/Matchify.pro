@@ -81,7 +81,7 @@ const SearchAcademiesPage = () => {
                     <h3 className="text-2xl md:text-3xl font-bold text-white">Academy Owners</h3>
                   </div>
                   
-                  <p className="text-gray-300 text-lg mb-8 leading-relaxed">
+                  <p className="text-gray-300 text-base sm:text-lg mb-8 leading-relaxed px-2">
                     Own a badminton academy? Join MATCHIFY.PRO and showcase your facility 
                     to thousands of passionate players!
                   </p>
@@ -95,7 +95,7 @@ const SearchAcademiesPage = () => {
                       <span className="text-emerald-400 font-semibold text-xl">Get in Touch</span>
                     </div>
                     
-                    <p className="text-gray-300 mb-6 text-lg">
+                    <p className="text-gray-300 mb-6 text-base sm:text-lg px-2">
                       Send us your academy details and we'll get back to you soon:
                     </p>
                     

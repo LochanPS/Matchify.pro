@@ -605,6 +605,25 @@ const Navbar = () => {
               Find Your Next Competition
             </button>
 
+            {/* Logout Button */}
+            <button
+              onClick={() => { handleLogout(); setShowMobileMenu(false); }}
+              className="w-full flex items-center justify-center gap-3 px-6 py-4 rounded-xl font-bold text-base transition-all relative overflow-hidden group"
+              style={{ 
+                background: 'linear-gradient(135deg, rgba(239,68,68,0.2), rgba(220,38,38,0.15))',
+                border: '2px solid rgba(239,68,68,0.4)',
+                color: '#f87171',
+                boxShadow: '0 4px 15px rgba(239,68,68,0.3)'
+              }}
+            >
+              <div 
+                className="absolute inset-0 opacity-0 group-active:opacity-100 transition-opacity"
+                style={{ background: 'rgba(239,68,68,0.1)' }}
+              />
+              <LogOut className="w-5 h-5 relative z-10" />
+              <span className="relative z-10">Logout</span>
+            </button>
+
             {/* Back Button */}
             <button
               onClick={() => { navigate(-1); setShowMobileMenu(false); }}

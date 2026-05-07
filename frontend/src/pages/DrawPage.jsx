@@ -764,69 +764,69 @@ const DrawPage = () => {
             </div>
 
             {isOrganizer && (
-              <div className="flex gap-3">
+              <div className="flex gap-2 flex-wrap">
                 {bracket && (
                   <>
-                    {/* Assign Players button - Disabled when tournament is completed */}
+                    {/* Assign Players button - Disabled when tournament is completed - COMPACT */}
                     {(bracket?.format === 'KNOCKOUT' || bracket?.format === 'ROUND_ROBIN' || bracket?.format === 'ROUND_ROBIN_KNOCKOUT') && (
                       <button
                         onClick={openAssignModal}
                         disabled={isCategoryCompleted}
                         title={isCategoryCompleted ? 'Category has ended - draw is locked' : 'Assign players to draw'}
-                        className={`px-5 py-3 rounded-xl shadow-lg transition-all flex items-center gap-2 font-semibold ${
+                        className={`px-3 py-2 rounded-xl shadow-lg transition-all flex items-center gap-1.5 font-semibold text-xs ${
                           isCategoryCompleted
                             ? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50'
                             : 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:scale-105'
                         }`}
                       >
-                        <UserPlus className="w-5 h-5" />
+                        <UserPlus className="w-4 h-4" />
                         Assign Players
                       </button>
                     )}
-                    {/* Edit Group Sizes button - Disabled when tournament is completed */}
+                    {/* Edit Group Sizes button - Disabled when tournament is completed - COMPACT */}
                     {(bracket?.format === 'ROUND_ROBIN' || bracket?.format === 'ROUND_ROBIN_KNOCKOUT') && !hasPlayedMatches && (
                       <button
                         onClick={() => setShowConfigModal(true)}
                         disabled={isCategoryCompleted}
                         title={isCategoryCompleted ? 'Category has ended - draw is locked' : 'Edit group sizes and configuration'}
-                        className={`px-5 py-3 rounded-xl shadow-lg transition-all flex items-center gap-2 font-semibold ${
+                        className={`px-3 py-2 rounded-xl shadow-lg transition-all flex items-center gap-1.5 font-semibold text-xs ${
                           isCategoryCompleted
                             ? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50'
                             : 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-blue-500/30 hover:shadow-blue-500/50 hover:scale-105'
                         }`}
                       >
-                        <Layers className="w-5 h-5" />
-                        Edit Group Sizes
+                        <Layers className="w-4 h-4" />
+                        Edit Groups
                       </button>
                     )}
-                    {/* Arrange Knockout Matchups button - Disabled when tournament is completed */}
+                    {/* Arrange Knockout Matchups button - Disabled when tournament is completed - COMPACT */}
                     {bracket?.format === 'ROUND_ROBIN_KNOCKOUT' && (
                       <button
                         onClick={() => setShowArrangeMatchupsModal(true)}
                         disabled={isCategoryCompleted}
                         title={isCategoryCompleted ? 'Category has ended - draw is locked' : 'Arrange knockout stage matchups'}
-                        className={`px-5 py-3 rounded-xl shadow-lg transition-all flex items-center gap-2 font-semibold ${
+                        className={`px-3 py-2 rounded-xl shadow-lg transition-all flex items-center gap-1.5 font-semibold text-xs ${
                           isCategoryCompleted
                             ? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50'
                             : 'bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-purple-500/30 hover:shadow-purple-500/50 hover:scale-105'
                         }`}
                       >
-                        <Settings className="w-5 h-5" />
-                        Arrange Knockout
+                        <Settings className="w-4 h-4" />
+                        Arrange KO
                       </button>
                     )}
-                    {/* End Category Button - Hide when already completed */}
+                    {/* End Category Button - Hide when already completed - COMPACT */}
                     {!isCategoryCompleted && (
                       <button
                         onClick={() => setShowEndTournamentModal(true)}
-                        className="px-5 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl shadow-lg shadow-green-500/30 hover:shadow-green-500/50 hover:scale-105 transition-all flex items-center gap-2 font-semibold"
+                        className="px-3 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl shadow-lg shadow-green-500/30 hover:shadow-green-500/50 hover:scale-105 transition-all flex items-center gap-1.5 font-semibold text-xs"
                         title="Mark this category as complete"
                       >
-                        <Trophy className="w-5 h-5" />
+                        <Trophy className="w-4 h-4" />
                         End Category
                       </button>
                     )}
-                    {/* Restart Draws button - Disabled when tournament is completed */}
+                    {/* Restart Draws button - Disabled when tournament is completed - COMPACT */}
                     <button
                       onClick={() => hasPlayedMatches && !isCategoryCompleted && setShowRestartModal(true)}
                       disabled={!hasPlayedMatches || isCategoryCompleted}
@@ -837,16 +837,16 @@ const DrawPage = () => {
                             ? 'No matches have been played yet' 
                             : 'Restart all matches'
                       }
-                      className={`px-5 py-3 rounded-xl shadow-lg transition-all flex items-center gap-2 font-semibold ${
+                      className={`px-3 py-2 rounded-xl shadow-lg transition-all flex items-center gap-1.5 font-semibold text-xs ${
                         !hasPlayedMatches || isCategoryCompleted
                           ? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50' 
                           : 'bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-orange-500/30 hover:shadow-orange-500/50 hover:scale-105'
                       }`}
                     >
-                      <Zap className="w-5 h-5" />
-                      Restart Draws
+                      <Zap className="w-4 h-4" />
+                      Restart
                     </button>
-                    {/* Delete Draw button - Disabled when tournament is completed */}
+                    {/* Delete Draw button - Disabled when tournament is completed - COMPACT */}
                     <button
                       onClick={() => !hasPlayedMatches && !isCategoryCompleted && setShowDeleteModal(true)}
                       disabled={hasPlayedMatches || isCategoryCompleted}
@@ -857,23 +857,23 @@ const DrawPage = () => {
                             ? 'Cannot delete draw - matches have been played' 
                             : 'Delete Draw'
                       }
-                      className={`px-5 py-3 rounded-xl shadow-lg transition-all flex items-center gap-2 font-semibold ${
+                      className={`px-3 py-2 rounded-xl shadow-lg transition-all flex items-center gap-1.5 font-semibold text-xs ${
                         hasPlayedMatches || isCategoryCompleted
                           ? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50' 
                           : 'bg-gradient-to-r from-red-500 to-rose-600 text-white shadow-red-500/30 hover:shadow-red-500/50 hover:scale-105'
                       }`}
                     >
-                      <Trash2 className="w-5 h-5" />
-                      Delete Draw
+                      <Trash2 className="w-4 h-4" />
+                      Delete
                     </button>
                   </>
                 )}
                 {!bracket && !isCategoryCompleted && (
                   <button
                     onClick={() => setShowConfigModal(true)}
-                    className="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl shadow-lg shadow-amber-500/30 hover:shadow-amber-500/50 hover:scale-105 transition-all flex items-center gap-2 font-semibold"
+                    className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl shadow-lg shadow-amber-500/30 hover:shadow-amber-500/50 hover:scale-105 transition-all flex items-center gap-1.5 font-semibold text-xs"
                   >
-                    <Plus className="w-5 h-5" />
+                    <Plus className="w-4 h-4" />
                     Create Draw
                   </button>
                 )}
@@ -902,22 +902,22 @@ const DrawPage = () => {
         </div>
       </div>
 
-      {/* Tournament Statistics Header */}
+      {/* Tournament Statistics Header - ULTRA COMPACT FOR MOBILE */}
       {activeCategory && (
         <div className="bg-slate-800/50 backdrop-blur-sm border-b border-white/10">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
               {/* Total Players */}
-              <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-500/20 rounded-xl p-4 relative">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                    <Users className="w-5 h-5 text-blue-400" />
+              <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-500/20 rounded-xl p-2.5 relative">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Users className="w-4 h-4 text-blue-400" />
                   </div>
-                  <div className="text-left flex-1">
-                    <p className="text-2xl font-bold text-white">{tournamentStats.totalPlayers}</p>
-                    <p className="text-blue-300 text-sm font-medium">Total Players</p>
+                  <div className="text-left flex-1 min-w-0">
+                    <p className="text-lg font-bold text-white leading-none">{tournamentStats.totalPlayers}</p>
+                    <p className="text-blue-300 text-xs font-medium leading-tight">Players</p>
                   </div>
-                  {/* View Players Button */}
+                  {/* View Players Button - COMPACT */}
                   <button
                     onClick={async () => {
                       if (showPlayersModal) {
@@ -940,13 +940,13 @@ const DrawPage = () => {
                         }
                       }
                     }}
-                    className="w-8 h-8 bg-blue-500/30 hover:bg-blue-500/50 rounded-lg flex items-center justify-center transition-all hover:scale-110 group"
+                    className="w-6 h-6 bg-blue-500/30 hover:bg-blue-500/50 rounded-lg flex items-center justify-center transition-all hover:scale-110 group flex-shrink-0"
                     title="View all players"
                   >
                     {showPlayersModal ? (
-                      <X className="w-4 h-4 text-blue-300 group-hover:text-white" />
+                      <X className="w-3 h-3 text-blue-300 group-hover:text-white" />
                     ) : (
-                      <svg className="w-4 h-4 text-blue-300 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-3 h-3 text-blue-300 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                       </svg>
                     )}
@@ -954,41 +954,41 @@ const DrawPage = () => {
                 </div>
               </div>
 
-              {/* Confirmed Players */}
-              <div className="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 rounded-xl p-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-emerald-500/20 rounded-lg flex items-center justify-center">
-                    <CheckCircle className="w-5 h-5 text-emerald-400" />
+              {/* Confirmed Players - COMPACT */}
+              <div className="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 rounded-xl p-2.5">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-emerald-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <CheckCircle className="w-4 h-4 text-emerald-400" />
                   </div>
-                  <div>
-                    <p className="text-2xl font-bold text-white">{tournamentStats.confirmedPlayers}</p>
-                    <p className="text-emerald-300 text-sm font-medium">Confirmed</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Total Matches */}
-              <div className="bg-gradient-to-br from-purple-500/10 to-violet-500/10 border border-purple-500/20 rounded-xl p-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center">
-                    <Gavel className="w-5 h-5 text-purple-400" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-white">{tournamentStats.totalMatches}</p>
-                    <p className="text-purple-300 text-sm font-medium">Total Matches</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-lg font-bold text-white leading-none">{tournamentStats.confirmedPlayers}</p>
+                    <p className="text-emerald-300 text-xs font-medium leading-tight">Confirmed</p>
                   </div>
                 </div>
               </div>
 
-              {/* Completed Matches */}
-              <div className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-xl p-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-amber-500/20 rounded-lg flex items-center justify-center">
-                    <TrophyIcon className="w-5 h-5 text-amber-400" />
+              {/* Total Matches - COMPACT */}
+              <div className="bg-gradient-to-br from-purple-500/10 to-violet-500/10 border border-purple-500/20 rounded-xl p-2.5">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Gavel className="w-4 h-4 text-purple-400" />
                   </div>
-                  <div>
-                    <p className="text-2xl font-bold text-white">{tournamentStats.completedMatches}</p>
-                    <p className="text-amber-300 text-sm font-medium">Completed</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-lg font-bold text-white leading-none">{tournamentStats.totalMatches}</p>
+                    <p className="text-purple-300 text-xs font-medium leading-tight">Matches</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Completed Matches - COMPACT */}
+              <div className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-xl p-2.5">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-amber-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <TrophyIcon className="w-4 h-4 text-amber-400" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-lg font-bold text-white leading-none">{tournamentStats.completedMatches}</p>
+                    <p className="text-amber-300 text-xs font-medium leading-tight">Completed</p>
                   </div>
                 </div>
               </div>
@@ -1116,29 +1116,22 @@ const DrawPage = () => {
         )}
       </div>
 
-      {/* Category Tabs */}
+      {/* Category Tabs - ULTRA COMPACT FOR MOBILE */}
       {categories.length > 0 && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-2">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 mt-2">
+          <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-1.5">
             <div className="flex gap-2 overflow-x-auto">
               {categories.map((category) => (
                 <button
                   key={category.id}
                   onClick={() => handleCategoryChange(category)}
-                  className={`flex-shrink-0 px-6 py-3 rounded-xl text-sm font-semibold transition-all ${
+                  className={`flex-shrink-0 px-4 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap ${
                     activeCategory?.id === category.id
                       ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/30'
                       : 'text-gray-400 hover:text-white hover:bg-slate-700/50'
                   }`}
                 >
                   {category.name}
-                  <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${
-                    activeCategory?.id === category.id
-                      ? 'bg-white/20 text-white'
-                      : 'bg-slate-700 text-gray-400'
-                  }`}>
-                    {category.format}
-                  </span>
                 </button>
               ))}
             </div>

@@ -832,47 +832,102 @@ const TournamentDetailPage = () => {
               </div>
             </div>
 
-            {/* Quick Stats - Compact */}
-            <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-xl p-4">
-              <h3 className="font-bold text-white text-sm mb-3">Quick Stats</h3>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between p-2.5 bg-purple-500/20 border border-purple-500/30 rounded-lg">
-                  <span className="text-gray-300 font-medium text-sm">Categories</span>
-                  <span className="font-bold text-purple-400 text-sm">{tournament.categories?.length || 0}</span>
+            {/* Quick Stats - Colorful Mobile Design */}
+            <div 
+              className="rounded-2xl p-5 relative overflow-hidden"
+              style={{
+                background: 'linear-gradient(135deg, rgba(15,23,42,0.95) 0%, rgba(30,41,59,0.95) 100%)',
+                border: '2px solid rgba(100,116,139,0.3)',
+                backdropFilter: 'blur(20px)',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
+              }}
+            >
+              <h3 className="font-black text-white text-lg mb-4">Quick Stats</h3>
+              <div className="space-y-3">
+                {/* Categories - Purple */}
+                <div 
+                  className="flex items-center justify-between p-4 rounded-xl transition-all hover:scale-[1.02]"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(139,92,246,0.3) 0%, rgba(124,58,237,0.2) 100%)',
+                    border: '2px solid rgba(139,92,246,0.4)',
+                    boxShadow: '0 4px 15px rgba(139,92,246,0.2)'
+                  }}
+                >
+                  <span className="text-white/90 font-bold text-base">Categories</span>
+                  <span 
+                    className="font-black text-2xl"
+                    style={{ color: '#c4b5fd' }}
+                  >
+                    {tournament.categories?.length || 0}
+                  </span>
                 </div>
-                <div className="flex items-center justify-between p-2.5 bg-blue-500/20 border border-blue-500/30 rounded-lg">
-                  <span className="text-gray-300 font-medium text-sm">Registrations</span>
-                  <span className="font-bold text-blue-400 text-sm">{tournament._count?.registrations || 0}</span>
+
+                {/* Registrations - Blue */}
+                <div 
+                  className="flex items-center justify-between p-4 rounded-xl transition-all hover:scale-[1.02]"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(59,130,246,0.3) 0%, rgba(37,99,235,0.2) 100%)',
+                    border: '2px solid rgba(59,130,246,0.4)',
+                    boxShadow: '0 4px 15px rgba(59,130,246,0.2)'
+                  }}
+                >
+                  <span className="text-white/90 font-bold text-base">Registrations</span>
+                  <span 
+                    className="font-black text-2xl"
+                    style={{ color: '#93c5fd' }}
+                  >
+                    {tournament._count?.registrations || 0}
+                  </span>
                 </div>
-                <div className="flex items-center justify-between p-2.5 bg-green-500/20 border border-green-500/30 rounded-lg">
-                  <span className="text-gray-300 font-medium text-sm">Zone</span>
-                  <span className="font-bold text-green-400 text-sm">{tournament.zone}</span>
+
+                {/* Zone - Green */}
+                <div 
+                  className="flex items-center justify-between p-4 rounded-xl transition-all hover:scale-[1.02]"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(16,185,129,0.3) 0%, rgba(5,150,105,0.2) 100%)',
+                    border: '2px solid rgba(16,185,129,0.4)',
+                    boxShadow: '0 4px 15px rgba(16,185,129,0.2)'
+                  }}
+                >
+                  <span className="text-white/90 font-bold text-base">Zone</span>
+                  <span 
+                    className="font-black text-xl"
+                    style={{ color: '#6ee7b7' }}
+                  >
+                    {tournament.zone}
+                  </span>
                 </div>
               </div>
               
-              {/* View Draws Button - Available for all users */}
+              {/* View Draws Button - Amber/Gold */}
               {tournament.status === 'published' && (
                 <button
                   onClick={() => {
-                    // Everyone goes to the same draws page
-                    // The page will show/hide management buttons based on role
                     if (tournament.categories && tournament.categories.length > 0) {
-                      // Navigate to first category's draw
                       navigate(`/tournaments/${id}/draws/${tournament.categories[0].id}`);
                     } else {
-                      // No categories yet, go to draws overview
                       navigate(`/tournaments/${id}/draws`);
                     }
                   }}
-                  className="w-full mt-3 flex items-center justify-center gap-2 bg-amber-500/20 text-amber-400 border border-amber-500/30 px-4 py-2.5 rounded-lg hover:bg-amber-500/30 font-bold text-sm transition-all"
+                  className="w-full mt-4 flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl font-black text-base transition-all hover:scale-[1.02] relative overflow-hidden group"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(245,158,11,0.3) 0%, rgba(217,119,6,0.2) 100%)',
+                    border: '2px solid rgba(245,158,11,0.5)',
+                    color: '#fbbf24',
+                    boxShadow: '0 4px 15px rgba(245,158,11,0.3)'
+                  }}
                 >
-                  <GitBranch className="w-4 h-4" />
-                  View Draws
+                  <GitBranch className="w-5 h-5" />
+                  <span>View Draws</span>
+                  <div 
+                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                    style={{ background: 'radial-gradient(circle at center, rgba(245,158,11,0.2), transparent)' }}
+                  />
                 </button>
               )}
             </div>
             
-            {/* Organizer Management - Compact */}
+            {/* Organizer Management - Colorful Mobile Design */}
             {console.log('🔍 Organizer Check:', {
               userId: user?.id,
               organizerId: tournament.organizerId,
@@ -881,15 +936,23 @@ const TournamentDetailPage = () => {
               userEmail: user?.email
             })}
             {user && user.id === tournament.organizerId && (
-              <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-xl p-4">
-                <h3 className="font-bold text-white text-sm mb-3">Manage Tournament</h3>
-                <div className="space-y-2">
+              <div 
+                className="rounded-2xl p-5 relative overflow-hidden"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(15,23,42,0.95) 0%, rgba(30,41,59,0.95) 100%)',
+                  border: '2px solid rgba(100,116,139,0.3)',
+                  backdropFilter: 'blur(20px)',
+                  boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
+                }}
+              >
+                <h3 className="font-black text-white text-lg mb-4">Manage Tournament</h3>
+                <div className="space-y-3">
                   {tournament.status === 'draft' && (
                     <>
                       <button
                         onClick={() => setShowPublishConfirmModal(true)}
                         disabled={publishing || tournament.categories?.length === 0}
-                        className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-2.5 rounded-lg hover:shadow-lg hover:shadow-green-500/30 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed font-bold text-sm transition-all"
+                        className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white px-5 py-3.5 rounded-xl hover:shadow-lg hover:shadow-green-500/30 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed font-black text-base transition-all"
                       >
                         {publishing ? 'Publishing...' : '🚀 Publish Tournament'}
                       </button>
@@ -898,41 +961,101 @@ const TournamentDetailPage = () => {
                       )}
                     </>
                   )}
+                  
+                  {/* Edit Tournament - Purple */}
                   <button
                     onClick={() => navigate(`/tournaments/${id}/edit`)}
-                    className="w-full flex items-center justify-center gap-2 bg-purple-500/20 text-purple-400 border border-purple-500/30 px-4 py-2.5 rounded-lg hover:bg-purple-500/30 font-bold text-sm transition-all"
+                    className="w-full flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl font-black text-base transition-all hover:scale-[1.02] relative overflow-hidden group"
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(139,92,246,0.3) 0%, rgba(124,58,237,0.2) 100%)',
+                      border: '2px solid rgba(139,92,246,0.5)',
+                      color: '#c4b5fd',
+                      boxShadow: '0 4px 15px rgba(139,92,246,0.3)'
+                    }}
                   >
-                    <Edit className="w-4 h-4" />
-                    Edit Tournament
+                    <Edit className="w-5 h-5" />
+                    <span>Edit Tournament</span>
+                    <div 
+                      className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                      style={{ background: 'radial-gradient(circle at center, rgba(139,92,246,0.2), transparent)' }}
+                    />
                   </button>
+
+                  {/* View Draws - Amber/Gold */}
                   <button
                     onClick={() => navigate(`/tournaments/${id}/draws`)}
-                    className="w-full flex items-center justify-center gap-2 bg-amber-500/20 text-amber-400 border border-amber-500/30 px-4 py-2.5 rounded-lg hover:bg-amber-500/30 font-bold text-sm transition-all"
+                    className="w-full flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl font-black text-base transition-all hover:scale-[1.02] relative overflow-hidden group"
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(245,158,11,0.3) 0%, rgba(217,119,6,0.2) 100%)',
+                      border: '2px solid rgba(245,158,11,0.5)',
+                      color: '#fbbf24',
+                      boxShadow: '0 4px 15px rgba(245,158,11,0.3)'
+                    }}
                   >
-                    <GitBranch className="w-4 h-4" />
-                    View Draws
+                    <GitBranch className="w-5 h-5" />
+                    <span>View Draws</span>
+                    <div 
+                      className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                      style={{ background: 'radial-gradient(circle at center, rgba(245,158,11,0.2), transparent)' }}
+                    />
                   </button>
+
+                  {/* View Registrations - Blue */}
                   <button
                     onClick={() => navigate(`/organizer/tournaments/${id}`)}
-                    className="w-full flex items-center justify-center gap-2 bg-blue-500/20 text-blue-400 border border-blue-500/30 px-4 py-2.5 rounded-lg hover:bg-blue-500/30 font-bold text-sm transition-all"
+                    className="w-full flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl font-black text-base transition-all hover:scale-[1.02] relative overflow-hidden group"
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(59,130,246,0.3) 0%, rgba(37,99,235,0.2) 100%)',
+                      border: '2px solid rgba(59,130,246,0.5)',
+                      color: '#93c5fd',
+                      boxShadow: '0 4px 15px rgba(59,130,246,0.3)'
+                    }}
                   >
-                    <Eye className="w-4 h-4" />
-                    View Registrations
+                    <Eye className="w-5 h-5" />
+                    <span>View Registrations</span>
+                    <div 
+                      className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                      style={{ background: 'radial-gradient(circle at center, rgba(59,130,246,0.2), transparent)' }}
+                    />
                   </button>
+
+                  {/* Add Umpire - Teal/Cyan */}
                   <button
                     onClick={openUmpireModal}
-                    className="w-full flex items-center justify-center gap-2 bg-teal-500/20 text-teal-400 border border-teal-500/30 px-4 py-2.5 rounded-lg hover:bg-teal-500/30 font-bold text-sm transition-all"
+                    className="w-full flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl font-black text-base transition-all hover:scale-[1.02] relative overflow-hidden group"
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(20,184,166,0.3) 0%, rgba(13,148,136,0.2) 100%)',
+                      border: '2px solid rgba(20,184,166,0.5)',
+                      color: '#5eead4',
+                      boxShadow: '0 4px 15px rgba(20,184,166,0.3)'
+                    }}
                   >
-                    <Users className="w-4 h-4" />
-                    Add Umpire
+                    <Users className="w-5 h-5" />
+                    <span>Add Umpire</span>
+                    <div 
+                      className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                      style={{ background: 'radial-gradient(circle at center, rgba(20,184,166,0.2), transparent)' }}
+                    />
                   </button>
+
+                  {/* Delete Tournament - Red */}
                   <button
                     onClick={() => setShowDeleteModal(true)}
                     disabled={deleting}
-                    className="w-full flex items-center justify-center gap-2 bg-red-500/20 text-red-400 border border-red-500/30 px-4 py-2.5 rounded-lg hover:bg-red-500/30 disabled:opacity-50 font-bold text-sm transition-all"
+                    className="w-full flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl font-black text-base transition-all hover:scale-[1.02] disabled:opacity-50 relative overflow-hidden group"
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(239,68,68,0.3) 0%, rgba(220,38,38,0.2) 100%)',
+                      border: '2px solid rgba(239,68,68,0.5)',
+                      color: '#fca5a5',
+                      boxShadow: '0 4px 15px rgba(239,68,68,0.3)'
+                    }}
                   >
-                    <TrashIcon className="h-4 w-4" />
-                    Delete Tournament
+                    <TrashIcon className="h-5 w-5" />
+                    <span>Delete Tournament</span>
+                    <div 
+                      className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                      style={{ background: 'radial-gradient(circle at center, rgba(239,68,68,0.2), transparent)' }}
+                    />
                   </button>
                 </div>
               </div>

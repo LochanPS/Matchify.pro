@@ -20,6 +20,7 @@ const isCloudinaryConfigured = () => {
 };
 
 // GET /profile - Fetch own profile
+// Updated: Now includes matchifyCode in response
 export const getProfile = async (req, res) => {
   try {
     const userId = req.user.id;

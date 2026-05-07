@@ -116,7 +116,7 @@ export default function CategorySelector({ categories, selectedCategories, onSel
               
               {category.format === 'doubles' && isSelected && !isAlreadyRegistered && (
                 <div className="mt-2 text-sm text-purple-400 font-medium">
-                  ⚠️ Partner player code required for doubles category
+                  ⚠️ Partner Matchify.pro ID required for doubles category
                 </div>
               )}
             </div>

@@ -1041,27 +1041,27 @@ const verifyPayment = async (req, res) => {
   }
 };
 
-// GET /api/registrations/partner-by-code/:playerCode - Get partner info by player code
+// GET /api/registrations/partner-by-code/:playerCode - Get partner info by Matchify.pro ID
 const getPartnerByCode = async (req, res) => {
   try {
     const { playerCode } = req.params;
 
-    // Validate player code format: #ABC1234
-    if (!/^#[A-Z]{3}\d{4}$/i.test(playerCode)) {
+    // Validate Matchify.pro ID format: #A10000, #A10001, etc. (# + A + 5 digits)
+    if (!/^#A\d{5}$/i.test(playerCode)) {
       return res.status(400).json({
         success: false,
-        error: 'Invalid player code format. Use #ABC1234 (# + 3 letters + 4 numbers)'
+        error: 'Invalid Matchify.pro ID format. Use #A10000 format (# + A + 5 digits)'
       });
     }
 
-    // Find user by player code
+    // Find user by matchifyCode (Matchify.pro ID)
     const user = await prisma.user.findUnique({
-      where: { playerCode: playerCode.toUpperCase() },
+      where: { matchifyCode: playerCode.toUpperCase() },
       select: {
         id: true,
         name: true,
         email: true,
-        playerCode: true,
+        matchifyCode: true,
         phone: true,
         city: true,
         state: true,
@@ -1072,7 +1072,7 @@ const getPartnerByCode = async (req, res) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        error: 'No player found with this code'
+        error: 'No player found with this Matchify.pro ID'
       });
     }
 
@@ -1081,7 +1081,7 @@ const getPartnerByCode = async (req, res) => {
       user
     });
   } catch (error) {
-    console.error('Error fetching partner by code:', error);
+    console.error('Error fetching partner by Matchify.pro ID:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to fetch partner information'

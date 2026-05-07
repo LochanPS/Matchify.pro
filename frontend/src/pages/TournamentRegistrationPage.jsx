@@ -145,21 +145,21 @@ export default function TournamentRegistrationPage() {
       const code = partnerCodes[catId];
       if (!code) {
         const cat = categories.find(c => c.id === catId);
-        setError(`Partner player code is required for ${cat?.name}`);
+        setError(`Partner Matchify.pro ID is required for ${cat?.name}`);
         return;
       }
       
-      // Validate player code format: #ABC1234 (# + 3 letters + 4 numbers)
-      if (!/^#[A-Z]{3}\d{4}$/i.test(code)) {
+      // Validate Matchify.pro ID format: #A10000 (# + A + 5 digits)
+      if (!/^#A\d{5}$/i.test(code)) {
         const cat = categories.find(c => c.id === catId);
-        setError(`Please enter a valid player code for ${cat?.name} (Format: #ABC1234)`);
+        setError(`Please enter a valid Matchify.pro ID for ${cat?.name} (Format: #A10000)`);
         return;
       }
 
       // Check if partner info was fetched
       if (!partnerInfo[catId]) {
         const cat = categories.find(c => c.id === catId);
-        setError(`Please verify the player code for ${cat?.name} by clicking the search button`);
+        setError(`Please verify the Matchify.pro ID for ${cat?.name} by clicking the search button`);
         return;
       }
     }
@@ -221,9 +221,9 @@ export default function TournamentRegistrationPage() {
     try {
       setError('');
       
-      // Validate format first
-      if (!/^#[A-Z]{3}\d{4}$/i.test(code)) {
-        setError('Invalid player code format. Use #ABC1234 (# + 3 letters + 4 numbers)');
+      // Validate format first: #A10000 (# + A + 5 digits)
+      if (!/^#A\d{5}$/i.test(code)) {
+        setError('Invalid Matchify.pro ID format. Use #A10000 (# + A + 5 digits)');
         return;
       }
 
@@ -236,7 +236,7 @@ export default function TournamentRegistrationPage() {
           [categoryId]: response.user
         }));
       } else {
-        setError('Player not found with this code');
+        setError('Player not found with this Matchify.pro ID');
         setPartnerInfo(prev => ({
           ...prev,
           [categoryId]: null
@@ -244,7 +244,7 @@ export default function TournamentRegistrationPage() {
       }
     } catch (err) {
       console.error('Error fetching partner:', err);
-      setError(getErrorMessage(err, 'Failed to find player with this code'));
+      setError(getErrorMessage(err, 'Failed to find player with this Matchify.pro ID'));
       setPartnerInfo(prev => ({
         ...prev,
         [categoryId]: null
@@ -404,7 +404,7 @@ export default function TournamentRegistrationPage() {
                       return (
                         <div key={catId} className="space-y-3">
                           <label className="block text-sm font-medium text-gray-300">
-                            Partner Player Code for <span className="text-purple-400">{category?.name}</span>
+                            Partner Matchify.pro ID for <span className="text-purple-400">{category?.name}</span>
                             <span className="text-red-400"> *</span>
                           </label>
                           <div className="flex gap-2">
@@ -412,15 +412,15 @@ export default function TournamentRegistrationPage() {
                               type="text"
                               value={partnerCodes[catId] || ''}
                               onChange={(e) => handlePartnerCodeChange(catId, e.target.value)}
-                              placeholder="#ABC1234"
-                              maxLength={8}
+                              placeholder="#A10000"
+                              maxLength={7}
                               className="flex-1 px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent uppercase font-mono"
                               required
                             />
                             <button
                               type="button"
                               onClick={() => fetchPartnerByCode(catId, partnerCodes[catId])}
-                              disabled={!partnerCodes[catId] || partnerCodes[catId].length !== 8}
+                              disabled={!partnerCodes[catId] || partnerCodes[catId].length !== 7}
                               className="px-6 py-3 bg-purple-600 hover:bg-purple-700 disabled:bg-slate-700 disabled:cursor-not-allowed text-white rounded-xl transition-colors font-medium"
                             >
                               Search
@@ -444,7 +444,7 @@ export default function TournamentRegistrationPage() {
                                 )}
                                 <div className="flex-1">
                                   <p className="text-white font-semibold">{partner.name}</p>
-                                  <p className="text-gray-400 text-sm">{partner.email}</p>
+                                  <p className="text-gray-400 text-sm">{partner.matchifyCode || partner.email}</p>
                                   {partner.city && partner.state && (
                                     <p className="text-gray-500 text-xs">{partner.city}, {partner.state}</p>
                                   )}
@@ -455,7 +455,7 @@ export default function TournamentRegistrationPage() {
                           )}
                           
                           <p className="text-xs text-gray-500">
-                            Enter your partner's player code. They will receive a confirmation to accept the partnership.
+                            Enter your partner's Matchify.pro ID. They will receive a confirmation to accept the partnership.
                           </p>
                         </div>
                       );

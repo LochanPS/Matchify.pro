@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { X, CheckCheck, Trash2, Bell, ChevronRight } from 'lucide-react';
+import { X, CheckCheck, Bell, ChevronRight } from 'lucide-react';
 import { useNotifications } from '../contexts/NotificationContext';
 import { formatDistanceToNow, format } from 'date-fns';
 
@@ -12,7 +12,6 @@ const NotificationDropdown = ({ onClose }) => {
     fetchNotifications,
     markAsRead,
     markAllAsRead,
-    deleteNotification,
   } = useNotifications();
 
   useEffect(() => {
@@ -143,15 +142,15 @@ const NotificationDropdown = ({ onClose }) => {
   };
 
   return (
-    <div className="absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-96 max-w-md bg-slate-800 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 z-50 max-h-[600px] overflow-hidden flex flex-col">
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-white/10">
+    <div className="absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-96 max-w-md bg-slate-800 backdrop-blur-xl rounded-2xl shadow-2xl border border-emerald-500/30 z-50 max-h-[600px] overflow-hidden flex flex-col">
+      {/* Header - Emerald Theme */}
+      <div className="flex items-center justify-between p-4 border-b border-emerald-500/20 bg-gradient-to-r from-emerald-500/10 to-green-500/10">
         <h3 className="text-lg font-semibold text-white">Notifications</h3>
         <div className="flex items-center space-x-2">
           {notifications.some(n => !n.read) && (
             <button
               onClick={markAllAsRead}
-              className="text-sm text-purple-400 hover:text-purple-300 flex items-center transition-colors"
+              className="text-sm text-emerald-400 hover:text-emerald-300 flex items-center transition-colors font-medium"
             >
               <CheckCheck className="w-4 h-4 mr-1" />
               <span className="hidden sm:inline">Mark all read</span>
@@ -170,7 +169,7 @@ const NotificationDropdown = ({ onClose }) => {
       <div className="overflow-y-auto flex-1">
         {loading ? (
           <div className="p-8 text-center">
-            <div className="w-8 h-8 border-3 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <div className="w-8 h-8 border-3 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
             <p className="text-gray-400 mt-3">Loading notifications...</p>
           </div>
         ) : notifications.length === 0 ? (
@@ -185,8 +184,8 @@ const NotificationDropdown = ({ onClose }) => {
               return (
                 <div
                   key={notification.id}
-                  className={`p-4 hover:bg-white/5 transition cursor-pointer ${
-                    !notification.read ? 'bg-purple-500/10 border-l-2 border-purple-500' : ''
+                  className={`p-4 hover:bg-emerald-500/5 transition cursor-pointer ${
+                    !notification.read ? 'bg-emerald-500/10 border-l-4 border-emerald-500' : ''
                   }`}
                   onClick={() => handleNotificationClick(notification)}
                 >
@@ -195,10 +194,10 @@ const NotificationDropdown = ({ onClose }) => {
                       {getNotificationIcon(notification.type)}
                     </span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-white">
+                      <p className={`text-sm font-medium ${!notification.read ? 'text-white' : 'text-gray-300'}`}>
                         {notification.title}
                       </p>
-                      <p className="text-sm text-gray-400 mt-1">
+                      <p className="text-sm text-gray-400 mt-1 line-clamp-2">
                         {notification.message}
                       </p>
                       <p className="text-xs text-gray-500 mt-2 flex items-center gap-2">
@@ -213,20 +212,9 @@ const NotificationDropdown = ({ onClose }) => {
                         </span>
                       </p>
                     </div>
-                    <div className="flex items-center gap-1 flex-shrink-0">
-                      {hasAction && (
-                        <ChevronRight className="w-4 h-4 text-gray-500" />
-                      )}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          deleteNotification(notification.id);
-                        }}
-                        className="p-1 hover:bg-red-500/20 rounded-lg transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4 text-gray-500 hover:text-red-400" />
-                      </button>
-                    </div>
+                    {hasAction && (
+                      <ChevronRight className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                    )}
                   </div>
                 </div>
               );
@@ -237,13 +225,13 @@ const NotificationDropdown = ({ onClose }) => {
 
       {/* Footer */}
       {notifications.length > 0 && (
-        <div className="p-3 border-t border-white/10 text-center">
+        <div className="p-3 border-t border-emerald-500/20 text-center bg-gradient-to-r from-emerald-500/5 to-green-500/5">
           <button
             onClick={() => {
               onClose();
               navigate('/notifications');
             }}
-            className="text-sm text-purple-400 hover:text-purple-300 font-medium transition-colors"
+            className="text-sm text-emerald-400 hover:text-emerald-300 font-medium transition-colors"
           >
             View all notifications
           </button>

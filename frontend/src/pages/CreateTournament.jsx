@@ -215,79 +215,148 @@ const CreateTournament = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      {/* Hero Header */}
-      <div className="relative bg-gradient-to-r from-slate-900 via-emerald-900 to-slate-900 overflow-hidden">
-        <div className="absolute inset-0">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-teal-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
-        </div>
-        
-        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-          {/* Back Button with Halo Effect */}
-          <div className="relative inline-block mb-4">
-            <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/30 to-teal-500/30 blur-lg rounded-xl"></div>
-            <button
-              onClick={() => hasFormData ? setShowExitModal(true) : navigate(-1)}
-              className="relative flex items-center gap-2 px-4 py-2 bg-slate-800/80 border border-emerald-500/30 rounded-xl text-emerald-400 hover:text-emerald-300 hover:border-emerald-500/50 transition-all group"
+    <div className="min-h-screen relative overflow-hidden pb-6" style={{ background:'linear-gradient(180deg, #0a0a1f 0%, #07071a 30%, #0d1a2a 60%, #07071a 100%)' }}>
+      {/* Animated Background Elements */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div 
+          className="absolute top-0 right-0 w-72 h-72 rounded-full blur-3xl opacity-30"
+          style={{ 
+            background: 'radial-gradient(circle, rgba(0,200,83,0.6), transparent)',
+            animation: 'glow 4s ease-in-out infinite'
+          }}
+        />
+        <div 
+          className="absolute bottom-1/3 left-0 w-64 h-64 rounded-full blur-3xl opacity-25"
+          style={{ 
+            background: 'radial-gradient(circle, rgba(168,85,247,0.6), transparent)',
+            animation: 'glow 5s ease-in-out infinite reverse'
+          }}
+        />
+        <div 
+          className="absolute top-1/2 right-1/4 w-56 h-56 rounded-full blur-3xl opacity-20"
+          style={{ 
+            background: 'radial-gradient(circle, rgba(6,182,212,0.6), transparent)',
+            animation: 'glow 6s ease-in-out infinite'
+          }}
+        />
+        {[...Array(12)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute rounded-full"
+            style={{
+              width: `${Math.random() * 4 + 2}px`,
+              height: `${Math.random() * 4 + 2}px`,
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              background: ['#00c853', '#a855f7', '#06b6d4', '#f59e0b'][Math.floor(Math.random() * 4)],
+              opacity: Math.random() * 0.5 + 0.2,
+              animation: `float ${Math.random() * 10 + 5}s ease-in-out infinite`,
+              animationDelay: `${Math.random() * 5}s`,
+              boxShadow: `0 0 ${Math.random() * 15 + 5}px currentColor`
+            }}
+          />
+        ))}
+      </div>
+
+      <style>{`
+        @keyframes float {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          25% { transform: translate(15px, -15px) scale(1.05); }
+          50% { transform: translate(-10px, 10px) scale(0.95); }
+          75% { transform: translate(10px, 5px) scale(1.02); }
+        }
+        @keyframes glow {
+          0%, 100% { opacity: 0.3; filter: brightness(1); }
+          50% { opacity: 0.6; filter: brightness(1.3); }
+        }
+        @keyframes shimmer {
+          0% { background-position: -200% center; }
+          100% { background-position: 200% center; }
+        }
+      `}</style>
+
+      {/* Hero Header - Compact Mobile-First */}
+      <div className="relative pt-20">
+        <div className="relative max-w-7xl mx-auto px-4 py-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div 
+              className="w-12 h-12 rounded-2xl flex items-center justify-center"
+              style={{
+                background: 'linear-gradient(135deg, #00c853, #00ff88)',
+                boxShadow: '0 8px 25px rgba(0,200,83,0.4)'
+              }}
             >
-              <ArrowLeft className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
-              <span className="font-medium">Back</span>
-            </button>
+              <Trophy className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 
+                className="text-xl font-black"
+                style={{
+                  background: 'linear-gradient(135deg, #00c853, #00ff88)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text'
+                }}
+              >
+                Create New Tournament
+              </h1>
+              <p className="text-xs text-white/60">Fill in the details to create your tournament</p>
+            </div>
           </div>
 
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-5">
-              <div className="w-14 h-14 bg-gradient-to-br from-emerald-400 via-teal-500 to-cyan-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-emerald-500/30">
-                <Trophy className="w-7 h-7 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-white">Create New Tournament</h1>
-                <p className="text-white/60 text-sm">Fill in the details to create your badminton tournament</p>
-              </div>
+          {/* Auto-save indicator */}
+          {hasFormData && (
+            <div 
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold mb-3"
+              style={{
+                background: 'linear-gradient(135deg, rgba(0,200,83,0.2), rgba(0,255,136,0.15))',
+                border: '2px solid rgba(0,200,83,0.4)',
+                color: '#00ff88',
+                boxShadow: '0 4px 15px rgba(0,200,83,0.3)'
+              }}
+            >
+              <CheckCircle className="w-3.5 h-3.5" />
+              Auto-saved
             </div>
-            
-            <div className="flex items-center gap-3">
-              {hasFormData && (
-                <div className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
-                  <CheckCircle className="w-4 h-4 text-emerald-400" />
-                  <span className="text-sm text-white/80 font-medium">Auto-saved</span>
-                </div>
-              )}
-              {hasFormData && (
-                <button
-                  onClick={() => setShowExitModal(true)}
-                  className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-xl border border-white/20 text-white/80 hover:text-white transition-all text-sm font-medium"
-                >
-                  <Save className="w-4 h-4" />
-                  Save & Exit
-                </button>
-              )}
-            </div>
-          </div>
+          )}
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 -mt-4">
+      <div className="relative max-w-7xl mx-auto px-4 py-4">
 
-        {/* Error Message */}
+        {/* Error Message - Compact */}
         {error && (
-          <div className="relative mb-6 group">
-            <div className="absolute -inset-1 bg-gradient-to-r from-red-500/30 to-rose-500/30 rounded-2xl blur-lg opacity-70"></div>
-            <div className="relative bg-red-500/10 border border-red-500/30 rounded-2xl p-5 flex items-start gap-4">
-              <div className="w-10 h-10 bg-red-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
-                <AlertTriangle className="w-5 h-5 text-red-400" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-red-400 mb-1">Error creating tournament</h3>
-                <p className="text-sm text-red-300/80">{error}</p>
-              </div>
+          <div 
+            className="mb-4 rounded-2xl p-4 flex items-start gap-3"
+            style={{
+              background: 'linear-gradient(135deg, rgba(239,68,68,0.15), rgba(220,38,38,0.1))',
+              border: '2px solid rgba(239,68,68,0.3)',
+              boxShadow: '0 4px 15px rgba(239,68,68,0.2)'
+            }}
+          >
+            <div 
+              className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+              style={{ background: 'rgba(239,68,68,0.2)' }}
+            >
+              <AlertTriangle className="w-4 h-4 text-red-400" />
+            </div>
+            <div>
+              <h3 className="font-bold text-red-400 text-sm mb-1">Error creating tournament</h3>
+              <p className="text-xs text-red-300/80">{error}</p>
             </div>
           </div>
         )}
 
-        {/* Stepper */}
-        <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl shadow-xl shadow-gray-200/50 border border-white/10 p-6 mb-6">
+        {/* Stepper - Compact */}
+        <div 
+          className="rounded-2xl p-4 mb-4"
+          style={{
+            background: 'linear-gradient(135deg, rgba(0,200,83,0.1) 0%, rgba(99,102,241,0.1) 100%)',
+            border: '2px solid rgba(0,200,83,0.2)',
+            backdropFilter: 'blur(20px)',
+            boxShadow: '0 8px 32px rgba(0,200,83,0.15)'
+          }}
+        >
           <TournamentStepper
             currentStep={currentStep}
             goToStep={goToStep}
@@ -295,16 +364,31 @@ const CreateTournament = () => {
           />
         </div>
 
-        {/* Step Content */}
-        <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl shadow-xl shadow-gray-200/50 border border-white/10 p-6 md:p-8">
+        {/* Step Content - Compact */}
+        <div 
+          className="rounded-2xl p-4"
+          style={{
+            background: 'linear-gradient(135deg, rgba(0,200,83,0.1) 0%, rgba(99,102,241,0.1) 100%)',
+            border: '2px solid rgba(0,200,83,0.2)',
+            backdropFilter: 'blur(20px)',
+            boxShadow: '0 8px 32px rgba(0,200,83,0.15)'
+          }}
+        >
           {renderStep()}
         </div>
 
-        {/* Help Text */}
-        <div className="mt-6 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-50 rounded-xl">
-            <Sparkles className="w-4 h-4 text-emerald-600" />
-            <span className="text-sm text-emerald-700 font-medium">Your progress is automatically saved. You can continue later from your dashboard.</span>
+        {/* Help Text - Compact */}
+        <div className="mt-4 text-center">
+          <div 
+            className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium"
+            style={{
+              background: 'linear-gradient(135deg, rgba(0,200,83,0.15), rgba(0,255,136,0.1))',
+              border: '1px solid rgba(0,200,83,0.3)',
+              color: '#00ff88'
+            }}
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            Your progress is automatically saved
           </div>
         </div>
       </div>

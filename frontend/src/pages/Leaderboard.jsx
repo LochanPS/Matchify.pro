@@ -98,11 +98,45 @@ export default function Leaderboard() {
 
   return (
     <div className="min-h-screen" style={{ background: '#07071a' }}>
-      {/* Animated Background */}
+      {/* Animated Background - Enhanced with More Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full blur-3xl opacity-[0.03]" style={{ background: '#00ff88' }}></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full blur-3xl opacity-[0.02]" style={{ background: '#00d4ff' }}></div>
+        {/* Large Glowing Orbs */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full blur-3xl opacity-[0.08]" style={{ background: '#00ff88', animation: 'glow 4s ease-in-out infinite' }}></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full blur-3xl opacity-[0.06]" style={{ background: '#00d4ff', animation: 'glow 5s ease-in-out infinite reverse' }}></div>
+        <div className="absolute top-1/2 right-1/3 w-80 h-80 rounded-full blur-3xl opacity-[0.05]" style={{ background: '#a855f7', animation: 'glow 6s ease-in-out infinite' }}></div>
+        
+        {/* Floating Particles */}
+        {[...Array(20)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute rounded-full"
+            style={{
+              width: `${Math.random() * 6 + 2}px`,
+              height: `${Math.random() * 6 + 2}px`,
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              background: ['#00ff88', '#a855f7', '#00d4ff', '#fbbf24'][Math.floor(Math.random() * 4)],
+              opacity: Math.random() * 0.6 + 0.2,
+              animation: `float ${Math.random() * 15 + 8}s ease-in-out infinite`,
+              animationDelay: `${Math.random() * 5}s`,
+              boxShadow: `0 0 ${Math.random() * 20 + 10}px currentColor`
+            }}
+          />
+        ))}
       </div>
+
+      <style>{`
+        @keyframes float {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          25% { transform: translate(20px, -20px) scale(1.1); }
+          50% { transform: translate(-15px, 15px) scale(0.9); }
+          75% { transform: translate(15px, 10px) scale(1.05); }
+        }
+        @keyframes glow {
+          0%, 100% { opacity: 0.08; filter: brightness(1); }
+          50% { opacity: 0.15; filter: brightness(1.5); }
+        }
+      `}</style>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Back Button */}
@@ -121,9 +155,20 @@ export default function Leaderboard() {
         {/* Header - MOBILE PERFECT */}
         <div className="text-center mb-4">
           <div className="inline-flex items-center gap-2 mb-2">
-            <Trophy className="w-6 h-6 text-yellow-400" />
-            <h1 className="text-2xl font-black text-emerald-400">Leaderboard</h1>
-            <Trophy className="w-6 h-6 text-yellow-400" />
+            <Trophy className="w-6 h-6 text-yellow-400 drop-shadow-lg" style={{ filter: 'drop-shadow(0 0 8px rgba(251, 191, 36, 0.6))' }} />
+            <h1 
+              className="text-2xl font-black"
+              style={{
+                background: 'linear-gradient(135deg, #00ff88, #00d4ff, #a855f7)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+                filter: 'drop-shadow(0 0 20px rgba(0, 255, 136, 0.3))'
+              }}
+            >
+              Leaderboard
+            </h1>
+            <Trophy className="w-6 h-6 text-yellow-400 drop-shadow-lg" style={{ filter: 'drop-shadow(0 0 8px rgba(251, 191, 36, 0.6))' }} />
           </div>
           <p className="text-xs text-gray-400">Top players ranked by tournament points</p>
 

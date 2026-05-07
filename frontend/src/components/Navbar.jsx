@@ -228,9 +228,9 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-16">
 
           {/* Left: Logo + Nav */}
-          <div className="flex items-center gap-8">
+          <div className="flex items-center gap-6 sm:gap-8">
             {/* Logo */}
-            <Link to="/" className="group hover:opacity-90 transition-opacity">
+            <Link to="/" className="group hover:opacity-90 transition-opacity flex-shrink-0">
               <MatchifyLogo size={42} variant="full" />
             </Link>
 
@@ -260,7 +260,7 @@ const Navbar = () => {
           </div>
 
           {/* Right: Actions */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 sm:gap-4">
             {user ? (
               <>
                 {/* Role Switcher - Always show, allow adding roles */}

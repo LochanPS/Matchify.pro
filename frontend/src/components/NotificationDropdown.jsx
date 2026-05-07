@@ -142,7 +142,7 @@ const NotificationDropdown = ({ onClose }) => {
   };
 
   return (
-    <div className="absolute right-0 mt-2 w-96 bg-slate-800 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 z-50 max-h-[600px] overflow-hidden flex flex-col">
+    <div className="absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-96 max-w-md bg-slate-800 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 z-50 max-h-[600px] overflow-hidden flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-white/10">
         <h3 className="text-lg font-semibold text-white">Notifications</h3>
@@ -153,7 +153,7 @@ const NotificationDropdown = ({ onClose }) => {
               className="text-sm text-purple-400 hover:text-purple-300 flex items-center transition-colors"
             >
               <CheckCheck className="w-4 h-4 mr-1" />
-              Mark all read
+              <span className="hidden sm:inline">Mark all read</span>
             </button>
           )}
           <button

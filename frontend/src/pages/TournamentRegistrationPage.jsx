@@ -390,38 +390,48 @@ export default function TournamentRegistrationPage() {
                 />
               </div>
 
-              {/* Partner Player Code Inputs */}
+              {/* Partner Matchify.pro ID Inputs - MOBILE OPTIMIZED */}
               {selectedDoublesCategories.length > 0 && (
-                <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
+                <div className="rounded-2xl p-4 border" style={{ background: 'rgba(16,185,129,0.05)', borderColor: 'rgba(16,185,129,0.2)' }}>
                   <div className="flex items-center gap-2 mb-4">
-                    <UserGroupIcon className="h-6 w-6 text-purple-400" />
-                    <h3 className="text-lg font-semibold text-white">Partner Details</h3>
+                    <UserGroupIcon className="h-5 w-5 text-emerald-400" />
+                    <h3 className="text-base font-bold text-white">Partner Details</h3>
                   </div>
-                  <div className="space-y-6">
+                  <div className="space-y-4">
                     {selectedDoublesCategories.map(catId => {
                       const category = categories.find(c => c.id === catId);
                       const partner = partnerInfo[catId];
                       return (
-                        <div key={catId} className="space-y-3">
-                          <label className="block text-sm font-medium text-gray-300">
-                            Partner Matchify.pro ID for <span className="text-purple-400">{category?.name}</span>
+                        <div key={catId} className="space-y-2">
+                          <label className="block text-sm font-semibold" style={{ color: '#10b981' }}>
+                            Partner Matchify.pro ID for <span className="text-white">{category?.name}</span>
                             <span className="text-red-400"> *</span>
                           </label>
-                          <div className="flex gap-2">
+                          <div className="flex flex-col sm:flex-row gap-2">
                             <input
                               type="text"
                               value={partnerCodes[catId] || ''}
                               onChange={(e) => handlePartnerCodeChange(catId, e.target.value)}
                               placeholder="#A10000"
                               maxLength={7}
-                              className="flex-1 px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent uppercase font-mono"
+                              className="flex-1 px-3 py-3 rounded-xl text-white placeholder-gray-500 focus:ring-2 uppercase font-mono text-sm"
+                              style={{ 
+                                background: 'rgba(0,0,0,0.3)', 
+                                border: '1.5px solid rgba(16,185,129,0.3)',
+                                outline: 'none'
+                              }}
                               required
                             />
                             <button
                               type="button"
                               onClick={() => fetchPartnerByCode(catId, partnerCodes[catId])}
                               disabled={!partnerCodes[catId] || partnerCodes[catId].length !== 7}
-                              className="px-6 py-3 bg-purple-600 hover:bg-purple-700 disabled:bg-slate-700 disabled:cursor-not-allowed text-white rounded-xl transition-colors font-medium"
+                              className="px-5 py-3 rounded-xl font-bold text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                              style={
+                                !partnerCodes[catId] || partnerCodes[catId].length !== 7
+                                  ? { background: 'rgba(100,100,100,0.3)', color: 'rgba(255,255,255,0.4)' }
+                                  : { background: 'linear-gradient(135deg,#10b981,#059669)', color: '#ffffff', boxShadow: '0 4px 15px rgba(16,185,129,0.3)' }
+                              }
                             >
                               Search
                             </button>
@@ -429,33 +439,33 @@ export default function TournamentRegistrationPage() {
                           
                           {/* Show partner info if found */}
                           {partner && (
-                            <div className="p-4 bg-green-500/10 border border-green-500/30 rounded-xl">
+                            <div className="p-3 rounded-xl border" style={{ background: 'rgba(16,185,129,0.1)', borderColor: 'rgba(16,185,129,0.3)' }}>
                               <div className="flex items-center gap-3">
                                 {partner.profilePhoto ? (
                                   <img 
                                     src={partner.profilePhoto} 
                                     alt={partner.name}
-                                    className="w-12 h-12 rounded-full object-cover"
+                                    className="w-10 h-10 rounded-full object-cover"
                                   />
                                 ) : (
-                                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg">
+                                  <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm" style={{ background: 'linear-gradient(135deg,#10b981,#059669)' }}>
                                     {partner.name?.charAt(0)?.toUpperCase()}
                                   </div>
                                 )}
-                                <div className="flex-1">
-                                  <p className="text-white font-semibold">{partner.name}</p>
-                                  <p className="text-gray-400 text-sm">{partner.matchifyCode || partner.email}</p>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-white font-semibold text-sm truncate">{partner.name}</p>
+                                  <p className="text-emerald-400 text-xs font-mono">{partner.matchifyCode || partner.email}</p>
                                   {partner.city && partner.state && (
-                                    <p className="text-gray-500 text-xs">{partner.city}, {partner.state}</p>
+                                    <p className="text-gray-500 text-xs truncate">{partner.city}, {partner.state}</p>
                                   )}
                                 </div>
-                                <CheckCircleIcon className="w-6 h-6 text-green-400" />
+                                <CheckCircleIcon className="w-5 h-5 text-emerald-400 flex-shrink-0" />
                               </div>
                             </div>
                           )}
                           
-                          <p className="text-xs text-gray-500">
-                            Enter your partner's Matchify.pro ID. They will receive a confirmation to accept the partnership.
+                          <p className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                            Enter your partner's Matchify.pro ID. They will receive a confirmation.
                           </p>
                         </div>
                       );

@@ -41,8 +41,8 @@ const RegisterPageMobile = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.email || !formData.password || !formData.phone || !formData.dateOfBirth) {
-      setError('All fields are required');
+    if (!formData.name || !formData.email || !formData.password || !formData.phone) {
+      setError('Name, Email, Phone and Password are required');
       return;
     }
     if (!/^[0-9]{10}$/.test(formData.phone)) {
@@ -466,12 +466,11 @@ const RegisterPageMobile = () => {
             {/* Date of Birth */}
             <div>
               <label className="block text-sm font-semibold text-white mb-2">
-                Date of Birth
+                Date of Birth (Optional)
               </label>
               <input
                 name="dateOfBirth"
                 type="date"
-                required
                 className="w-full px-4 py-3 rounded-xl text-white text-sm placeholder-gray-500 outline-none [color-scheme:dark]"
                 style={{ 
                   background: 'rgba(255,255,255,0.05)', 
@@ -480,7 +479,6 @@ const RegisterPageMobile = () => {
                 value={formData.dateOfBirth}
                 onChange={handleChange}
               />
-              <p className="mt-1 text-xs text-amber-400">⚠️ Cannot be changed later</p>
             </div>
 
             {/* Password */}

@@ -1,11 +1,11 @@
 import express from 'express';
 import prisma from '../lib/prisma.js';
-import { authenticateToken, requireAdmin } from '../middleware/auth.js';
+import { authenticate, requireAdmin } from '../middleware/auth.js';
 
 const router = express.Router();
 
 // GET /admin/refund-requests - Get all refund requests
-router.get('/', authenticateToken, requireAdmin, async (req, res) => {
+router.get('/', authenticate, requireAdmin, async (req, res) => {
   try {
     const { status } = req.query; // 'pending' or 'processed'
 
@@ -84,7 +84,7 @@ router.get('/', authenticateToken, requireAdmin, async (req, res) => {
 });
 
 // POST /admin/refund-requests/:id/process - Mark refund as processed
-router.post('/:id/process', authenticateToken, requireAdmin, async (req, res) => {
+router.post('/:id/process', authenticate, requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
 

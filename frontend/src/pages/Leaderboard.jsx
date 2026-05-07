@@ -118,19 +118,17 @@ export default function Leaderboard() {
           <span className="text-sm font-semibold text-gray-300 relative z-10">Back</span>
         </button>
 
-        {/* Header */}
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-3 mb-4">
-            <Trophy className="w-8 h-8 sm:w-12 sm:h-12 text-yellow-400" />
-            <h1 className="font-black" style={{ fontSize: 'clamp(1.8rem,8vw,3.5rem)', background: 'linear-gradient(135deg,#00ff88,#00d4ff)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-              Leaderboard
-            </h1>
-            <Trophy className="w-8 h-8 sm:w-12 sm:h-12 text-yellow-400" />
+        {/* Header - MOBILE PERFECT */}
+        <div className="text-center mb-4">
+          <div className="inline-flex items-center gap-2 mb-2">
+            <Trophy className="w-6 h-6 text-yellow-400" />
+            <h1 className="text-2xl font-black text-emerald-400">Leaderboard</h1>
+            <Trophy className="w-6 h-6 text-yellow-400" />
           </div>
-          <p className="text-sm sm:text-base" style={{ color: 'rgba(255,255,255,0.5)' }}>Top players ranked by tournament points</p>
+          <p className="text-xs text-gray-400">Top players ranked by tournament points</p>
 
-          {/* Geographical Filter Tabs */}
-          <div className="mt-6 flex flex-wrap justify-center gap-2">
+          {/* Geographical Filter Tabs - COMPACT */}
+          <div className="mt-3 flex flex-wrap justify-center gap-2">
             {[
               { key: 'city', label: `🏙️ City${userCity ? ` (${userCity})` : ''}` },
               { key: 'state', label: `🗺️ State${userState ? ` (${userState})` : ''}` },
@@ -139,138 +137,106 @@ export default function Leaderboard() {
               <button
                 key={key}
                 onClick={() => setScope(key)}
-                className="px-4 sm:px-6 py-2.5 rounded-xl font-bold transition-all text-sm sm:text-base"
+                className="px-3 py-2 rounded-xl font-bold transition-all text-xs"
                 style={scope === key
-                  ? { background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#003320', boxShadow: '0 0 16px rgba(0,255,136,0.3)' }
+                  ? { background: 'linear-gradient(135deg,#10b981,#059669)', color: '#ffffff', boxShadow: '0 0 12px rgba(16,185,129,0.3)' }
                   : { background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.08)' }
                 }
               >{label}</button>
             ))}
           </div>
 
-          <div className="mt-3">
-            <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>
-              Showing rankings for: <span className="font-bold" style={{ color: '#00ff88' }}>{getScopeLabel()}</span>
+          <div className="mt-2">
+            <p className="text-xs text-gray-400">
+              Showing: <span className="font-bold text-emerald-400">{getScopeLabel()}</span>
             </p>
           </div>
         </div>
 
-        {/* My Rank Card */}
+        {/* My Rank Card - COMPACT */}
         {myRanks && (
-          <div className="mb-8 rounded-2xl p-4 sm:p-6 border" style={{ background: 'rgba(13,26,42,0.6)', borderColor: 'rgba(0,255,136,0.15)', backdropFilter: 'blur(10px)' }}>
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)' }}>
+          <div className="mb-4 rounded-xl p-3 border" style={{ background: 'rgba(13,26,42,0.6)', borderColor: 'rgba(0,255,136,0.15)', backdropFilter: 'blur(10px)' }}>
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#10b981,#059669)' }}>
                   {myRanks.profilePhoto ? (
                     <img src={myRanks.profilePhoto} alt={myRanks.name} className="w-full h-full rounded-full object-cover" />
                   ) : (
-                    <span className="text-2xl font-bold text-white">{myRanks.name?.charAt(0)}</span>
+                    <span className="text-lg font-bold text-white">{myRanks.name?.charAt(0)}</span>
                   )}
                 </div>
                 <div>
-                  <p className="text-sm font-semibold" style={{ color: '#00ff88' }}>Your Ranks</p>
-                  <h3 className="text-2xl font-bold text-white">{myRanks.name}</h3>
-                  <p className="text-gray-400 text-sm">
+                  <p className="text-xs font-semibold text-emerald-400">Your Ranks</p>
+                  <h3 className="text-base font-bold text-white">{myRanks.name}</h3>
+                  <p className="text-xs text-gray-400">
                     {myRanks.tournamentsPlayed} tournaments • {myRanks.matchesWon}W-{myRanks.matchesLost}L
                   </p>
                 </div>
               </div>
               <div className="text-right">
-                {/* Current Scope Rank (Large) */}
-                <div className={`inline-flex items-center gap-2 px-6 py-3 rounded-xl ${getRankBadge(getCurrentRank())}`}>
+                <div className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg ${getRankBadge(getCurrentRank())}`}>
                   {getRankIcon(getCurrentRank())}
-                  <span className="text-2xl font-bold">#{getCurrentRank()}</span>
+                  <span className="text-lg font-bold">#{getCurrentRank()}</span>
                 </div>
-                <p className="text-xs text-gray-400 mt-1">{scope === 'city' ? 'City' : scope === 'state' ? 'State' : 'Country'} Rank</p>
-                
-                <p className="text-3xl font-black text-yellow-400 mt-2">{myRanks.totalPoints} pts</p>
-                <p className="text-sm text-gray-400">Win Rate: {myRanks.winRate}%</p>
-                
-                {/* All Ranks Summary */}
-                <div className="mt-3 flex gap-2 justify-end">
-                  {myRanks.ranks.city && (
-                    <div className="px-3 py-1 rounded-lg" style={{ background: 'rgba(255,255,255,0.05)' }}>
-                      <p className="text-xs text-gray-400">City</p>
-                      <p className="text-sm font-bold text-white">#{myRanks.ranks.city}</p>
-                    </div>
-                  )}
-                  {myRanks.ranks.state && (
-                    <div className="px-3 py-1 rounded-lg" style={{ background: 'rgba(255,255,255,0.05)' }}>
-                      <p className="text-xs text-gray-400">State</p>
-                      <p className="text-sm font-bold text-white">#{myRanks.ranks.state}</p>
-                    </div>
-                  )}
-                  <div className="px-3 py-1 rounded-lg" style={{ background: 'rgba(255,255,255,0.05)' }}>
-                    <p className="text-xs text-gray-400">Country</p>
-                    <p className="text-sm font-bold text-white">#{myRanks.ranks.country}</p>
-                  </div>
-                </div>
+                <p className="text-xl font-black text-yellow-400 mt-1">{myRanks.totalPoints} pts</p>
               </div>
             </div>
           </div>
         )}
 
-        {/* Top 3 Podium - Duolingo Style (Compact & Clean) */}
+        {/* Top 3 Podium - MOBILE PERFECT */}
         {leaderboard.length >= 3 && (
-          <div className="mb-6 max-w-4xl mx-auto">
-            <div className="flex items-end justify-center gap-2 sm:gap-3" style={{ height: '180px' }}>
-              {/* 2nd Place - Silver */}
+          <div className="mb-4">
+            <div className="flex items-end justify-center gap-2" style={{ height: '140px' }}>
+              {/* 2nd Place */}
               <div className="flex flex-col items-center" style={{ width: '30%' }}>
-                <div className="relative">
-                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-gray-300 to-gray-500 flex items-center justify-center ring-2 ring-gray-300/50 shadow-lg mb-2">
-                    {leaderboard[1].profilePhoto ? (
-                      <img src={leaderboard[1].profilePhoto} alt={leaderboard[1].name} className="w-full h-full rounded-full object-cover" />
-                    ) : (
-                      <span className="text-xl font-bold text-white">{leaderboard[1].name?.charAt(0)}</span>
-                    )}
-                  </div>
-                  <div className="absolute -top-1 -right-1 w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center shadow-md">
-                    <Medal className="w-4 h-4 text-gray-700" />
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gray-300 to-gray-500 flex items-center justify-center ring-2 ring-gray-300/50 shadow-lg mb-1 relative">
+                  {leaderboard[1].profilePhoto ? (
+                    <img src={leaderboard[1].profilePhoto} alt={leaderboard[1].name} className="w-full h-full rounded-full object-cover" />
+                  ) : (
+                    <span className="text-base font-bold text-white">{leaderboard[1].name?.charAt(0)}</span>
+                  )}
+                  <div className="absolute -top-1 -right-1 w-5 h-5 bg-gray-300 rounded-full flex items-center justify-center">
+                    <Medal className="w-3 h-3 text-gray-700" />
                   </div>
                 </div>
-                <h3 className="text-sm font-bold text-white mb-1 truncate w-full text-center">{leaderboard[1].name.split(' ')[0]}</h3>
-                <p className="text-2xl font-black text-emerald-400">{leaderboard[1].totalPoints}</p>
+                <h3 className="text-xs font-bold text-white mb-0.5 truncate w-full text-center">{leaderboard[1].name.split(' ')[0]}</h3>
+                <p className="text-lg font-black text-emerald-400">{leaderboard[1].totalPoints}</p>
                 <p className="text-xs text-gray-400">points</p>
               </div>
 
-              {/* 1st Place - Gold (Taller) */}
+              {/* 1st Place */}
               <div className="flex flex-col items-center" style={{ width: '34%' }}>
-                <div className="relative mb-1">
-                  <Crown className="w-7 h-7 sm:w-8 sm:h-8 text-yellow-400 mx-auto mb-1 drop-shadow-lg" />
-                </div>
-                <div className="relative">
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-yellow-400 to-amber-500 flex items-center justify-center ring-3 ring-yellow-400/60 shadow-2xl shadow-yellow-400/40 mb-2">
-                    {leaderboard[0].profilePhoto ? (
-                      <img src={leaderboard[0].profilePhoto} alt={leaderboard[0].name} className="w-full h-full rounded-full object-cover" />
-                    ) : (
-                      <span className="text-2xl font-bold text-white">{leaderboard[0].name?.charAt(0)}</span>
-                    )}
-                  </div>
-                  <div className="absolute -top-1 -right-1 w-7 h-7 bg-yellow-400 rounded-full flex items-center justify-center shadow-lg">
-                    <Trophy className="w-4 h-4 text-yellow-900" />
+                <Crown className="w-6 h-6 text-yellow-400 mb-1" />
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-yellow-400 to-amber-500 flex items-center justify-center ring-2 ring-yellow-400/60 shadow-xl mb-1 relative">
+                  {leaderboard[0].profilePhoto ? (
+                    <img src={leaderboard[0].profilePhoto} alt={leaderboard[0].name} className="w-full h-full rounded-full object-cover" />
+                  ) : (
+                    <span className="text-xl font-bold text-white">{leaderboard[0].name?.charAt(0)}</span>
+                  )}
+                  <div className="absolute -top-1 -right-1 w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center">
+                    <Trophy className="w-3 h-3 text-yellow-900" />
                   </div>
                 </div>
-                <h3 className="text-base font-bold text-white mb-1 truncate w-full text-center">{leaderboard[0].name.split(' ')[0]}</h3>
-                <p className="text-3xl font-black text-yellow-400 drop-shadow-lg">{leaderboard[0].totalPoints}</p>
+                <h3 className="text-sm font-bold text-white mb-0.5 truncate w-full text-center">{leaderboard[0].name.split(' ')[0]}</h3>
+                <p className="text-2xl font-black text-yellow-400">{leaderboard[0].totalPoints}</p>
                 <p className="text-xs text-gray-400">points</p>
               </div>
 
-              {/* 3rd Place - Bronze */}
+              {/* 3rd Place */}
               <div className="flex flex-col items-center" style={{ width: '30%' }}>
-                <div className="relative">
-                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-orange-500 to-orange-700 flex items-center justify-center ring-2 ring-orange-500/50 shadow-lg mb-2">
-                    {leaderboard[2].profilePhoto ? (
-                      <img src={leaderboard[2].profilePhoto} alt={leaderboard[2].name} className="w-full h-full rounded-full object-cover" />
-                    ) : (
-                      <span className="text-xl font-bold text-white">{leaderboard[2].name?.charAt(0)}</span>
-                    )}
-                  </div>
-                  <div className="absolute -top-1 -right-1 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center shadow-md">
-                    <Medal className="w-4 h-4 text-orange-900" />
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-orange-700 flex items-center justify-center ring-2 ring-orange-500/50 shadow-lg mb-1 relative">
+                  {leaderboard[2].profilePhoto ? (
+                    <img src={leaderboard[2].profilePhoto} alt={leaderboard[2].name} className="w-full h-full rounded-full object-cover" />
+                  ) : (
+                    <span className="text-base font-bold text-white">{leaderboard[2].name?.charAt(0)}</span>
+                  )}
+                  <div className="absolute -top-1 -right-1 w-5 h-5 bg-orange-500 rounded-full flex items-center justify-center">
+                    <Medal className="w-3 h-3 text-orange-900" />
                   </div>
                 </div>
-                <h3 className="text-sm font-bold text-white mb-1 truncate w-full text-center">{leaderboard[2].name.split(' ')[0]}</h3>
-                <p className="text-2xl font-black text-emerald-400">{leaderboard[2].totalPoints}</p>
+                <h3 className="text-xs font-bold text-white mb-0.5 truncate w-full text-center">{leaderboard[2].name.split(' ')[0]}</h3>
+                <p className="text-lg font-black text-emerald-400">{leaderboard[2].totalPoints}</p>
                 <p className="text-xs text-gray-400">points</p>
               </div>
             </div>

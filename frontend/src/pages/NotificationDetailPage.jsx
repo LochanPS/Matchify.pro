@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Trash2, ExternalLink, Calendar, Clock } from 'lucide-react';
+import { ArrowLeft, Trash2, ExternalLink, Calendar, Clock, Upload } from 'lucide-react';
 import { useNotifications } from '../contexts/NotificationContext';
 import { format } from 'date-fns';
+import RefundDetailsModal from '../components/RefundDetailsModal';
 
 const NotificationDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { notifications, markAsRead, deleteNotification } = useNotifications();
   const [notification, setNotification] = useState(null);
+  const [showRefundModal, setShowRefundModal] = useState(false);
 
   useEffect(() => {
     const found = notifications.find(n => n.id === id);
@@ -28,6 +30,7 @@ const NotificationDetailPage = () => {
     const icons = {
       REGISTRATION_CONFIRMED: '✅',
       REGISTRATION_REJECTED: '❌',
+      PAYMENT_REJECTED: '❌',
       REGISTRATION_REMOVED: '🚫',
       REGISTRATION_PENDING: '⏳',
       PAYMENT_VERIFICATION_REQUIRED: '💳',
@@ -72,6 +75,7 @@ const NotificationDetailPage = () => {
       
       case 'REGISTRATION_CONFIRMED':
       case 'REGISTRATION_REJECTED':
+      case 'PAYMENT_REJECTED':
       case 'REGISTRATION_REMOVED':
       case 'REFUND_APPROVED':
       case 'REFUND_REJECTED':
@@ -128,6 +132,7 @@ const NotificationDetailPage = () => {
         return 'View Tournament';
       case 'REGISTRATION_CONFIRMED':
       case 'REGISTRATION_REJECTED':
+      case 'PAYMENT_REJECTED':
       case 'REGISTRATION_REMOVED':
         return 'View My Registrations';
       case 'DRAW_PUBLISHED':
@@ -348,7 +353,17 @@ const NotificationDetailPage = () => {
             )}
 
             {/* Action Button */}
-            {actionPath && (
+            {notification.type === 'PAYMENT_REJECTED' && data.action === 'PROVIDE_REFUND_DETAILS' ? (
+              <div className="mt-8">
+                <button
+                  onClick={() => setShowRefundModal(true)}
+                  className="w-full px-6 py-4 bg-gradient-to-r from-emerald-500 to-green-500 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-emerald-500/30 transition-all flex items-center justify-center gap-2 group"
+                >
+                  <Upload className="w-5 h-5" />
+                  <span>Submit Refund Details</span>
+                </button>
+              </div>
+            ) : actionPath && (
               <div className="mt-8">
                 <button
                   onClick={handleTakeAction}
@@ -362,6 +377,23 @@ const NotificationDetailPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Refund Details Modal */}
+      {showRefundModal && data.registrationId && (
+        <RefundDetailsModal
+          registration={{
+            id: data.registrationId,
+            refundAmount: data.refundAmount,
+            tournament: { name: data.tournamentName || 'Tournament' },
+            cancellationReason: data.reason
+          }}
+          onClose={() => setShowRefundModal(false)}
+          onSuccess={() => {
+            setShowRefundModal(false);
+            navigate('/registrations');
+          }}
+        />
+      )}
     </div>
   );
 };

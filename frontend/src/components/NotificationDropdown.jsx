@@ -23,6 +23,7 @@ const NotificationDropdown = ({ onClose }) => {
     const icons = {
       REGISTRATION_CONFIRMED: '✅',
       REGISTRATION_REJECTED: '❌',
+      PAYMENT_REJECTED: '❌',
       REGISTRATION_REMOVED: '🚫',
       REGISTRATION_PENDING: '⏳',
       PAYMENT_VERIFICATION_REQUIRED: '💳',

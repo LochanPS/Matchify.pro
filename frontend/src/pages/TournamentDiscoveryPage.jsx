@@ -184,9 +184,20 @@ export default function TournamentDiscoveryPage() {
         }
       `}</style>
 
-      {/* Hero Header - Compact Mobile-First */}
+      {/* Hero Header - Compact Mobile-First with Back Button */}
       <div className="relative pt-20">
         <div className="relative max-w-7xl mx-auto px-4 py-6">
+          {/* Back Button */}
+          <button
+            onClick={() => navigate('/')}
+            className="flex items-center gap-2 mb-4 text-white/70 hover:text-white transition-colors group"
+          >
+            <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            <span className="text-sm font-semibold">Back</span>
+          </button>
+
           <div className="text-center">
             <div 
               className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold mb-3 relative overflow-hidden"

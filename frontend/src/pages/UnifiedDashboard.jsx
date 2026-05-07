@@ -74,19 +74,19 @@ const UnifiedDashboard = () => {
     ORGANIZER: {
       name: 'Organizer',
       icon: '🏆',
-      color: 'from-purple-500 to-violet-600',
-      bgColor: 'bg-purple-500/20',
-      borderColor: 'border-purple-500/30',
-      textColor: 'text-purple-400',
+      color: 'from-emerald-500 to-emerald-600',
+      bgColor: 'bg-emerald-500/20',
+      borderColor: 'border-emerald-500/30',
+      textColor: 'text-emerald-400',
       component: OrganizerDashboard
     },
     UMPIRE: {
       name: 'Umpire',
       icon: '⚖️',
-      color: 'from-blue-500 to-cyan-600',
-      bgColor: 'bg-blue-500/20',
-      borderColor: 'border-blue-500/30',
-      textColor: 'text-blue-400',
+      color: 'from-emerald-500 to-emerald-600',
+      bgColor: 'bg-emerald-500/20',
+      borderColor: 'border-emerald-500/30',
+      textColor: 'text-emerald-400',
       component: UmpireDashboard
     }
   };

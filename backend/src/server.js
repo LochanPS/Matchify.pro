@@ -9,7 +9,7 @@ import { v2 as cloudinary } from 'cloudinary';
 
 // Load environment variables first
 dotenv.config();
-// Refund system active - v1.0
+// Birth year feature deployed - v1.1
 
 // Validate environment variables before starting server (only in non-Vercel environments)
 // Vercel serverless functions don't have a traditional startup, so we skip validation there

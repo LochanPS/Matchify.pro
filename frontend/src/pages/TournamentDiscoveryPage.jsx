@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   MagnifyingGlassIcon, 
@@ -9,7 +9,9 @@ import {
   XMarkIcon,
   TrophyIcon,
   ArrowRightIcon,
-  SparklesIcon
+  SparklesIcon,
+  ClockIcon,
+  CurrencyRupeeIcon
 } from '@heroicons/react/24/outline';
 import { Loader } from 'lucide-react';
 import { tournamentAPI } from '../api/tournament';
@@ -20,8 +22,9 @@ export default function TournamentDiscoveryPage() {
   const [tournaments, setTournaments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
   const [total, setTotal] = useState(0);
+  const observerTarget = useRef(null);
   
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState({
@@ -35,34 +38,67 @@ export default function TournamentDiscoveryPage() {
   });
   const [showFilters, setShowFilters] = useState(false);
 
+  // Infinite scroll observer
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && hasMore && !loading) {
+          setPage(prev => prev + 1);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (observerTarget.current) {
+      observer.observe(observerTarget.current);
+    }
+
+    return () => {
+      if (observerTarget.current) {
+        observer.unobserve(observerTarget.current);
+      }
+    };
+  }, [hasMore, loading]);
+
   useEffect(() => {
     fetchTournaments();
   }, [page]);
 
   useEffect(() => {
-    if (page === 1) {
-      fetchTournaments();
-    } else {
-      setPage(1);
-    }
-  }, [filters]);
+    // Reset when filters change
+    setTournaments([]);
+    setPage(1);
+    setHasMore(true);
+  }, [filters, searchQuery]);
 
   const fetchTournaments = async () => {
+    if (!hasMore && page > 1) return;
+    
     setLoading(true);
     try {
-      const params = { page: page.toString(), limit: '12' };
+      const params = { page: page.toString(), limit: '10' };
       Object.keys(filters).forEach(key => {
         if (filters[key]) params[key] = filters[key];
       });
       if (searchQuery) params.search = searchQuery;
 
       const response = await tournamentAPI.getTournaments(params);
-      setTournaments(response.data?.tournaments || []);
-      setTotalPages(response.data?.pagination?.totalPages || 1);
+      const newTournaments = response.data?.tournaments || [];
+      
+      if (page === 1) {
+        setTournaments(newTournaments);
+      } else {
+        setTournaments(prev => [...prev, ...newTournaments]);
+      }
+      
       setTotal(response.data?.pagination?.total || 0);
+      setHasMore(newTournaments.length === 10); // If we got less than limit, no more pages
     } catch (error) {
       console.error('Error fetching tournaments:', error);
-      setTournaments([]);
+      if (page === 1) {
+        setTournaments([]);
+      }
+      setHasMore(false);
     } finally {
       setLoading(false);
     }
@@ -70,19 +106,19 @@ export default function TournamentDiscoveryPage() {
 
   const handleSearch = (e) => {
     e.preventDefault();
+    setTournaments([]);
     setPage(1);
+    setHasMore(true);
     fetchTournaments();
   };
 
   const handleFilterChange = (key, value) => {
     setFilters(prev => ({ ...prev, [key]: value }));
-    setPage(1);
   };
 
   const clearFilters = () => {
     setFilters({ city: '', state: '', zone: '', status: '', format: '', startDate: '', endDate: '' });
     setSearchQuery('');
-    setPage(1);
   };
 
   const hasActiveFilters = Object.values(filters).some(v => v) || searchQuery;
@@ -422,8 +458,8 @@ export default function TournamentDiscoveryPage() {
           </div>
         )}
 
-        {/* Tournament Grid */}
-        {loading ? (
+        {/* Tournament Grid - Infinite Scroll */}
+        {loading && page === 1 ? (
           <div 
             className="rounded-2xl p-8 sm:p-16 text-center relative overflow-hidden"
             style={{
@@ -483,64 +519,36 @@ export default function TournamentDiscoveryPage() {
               ))}
             </div>
 
-            {/* Pagination - Compact */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-center gap-2 mt-6">
-                <button
-                  onClick={() => setPage(p => Math.max(1, p - 1))}
-                  disabled={page === 1}
-                  className="px-4 py-2 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed font-bold text-sm transition-all"
-                  style={{
-                    background: 'rgba(255,255,255,0.05)',
-                    border: '1.5px solid rgba(255,255,255,0.1)',
-                    color: '#ffffff'
-                  }}
-                >
-                  Previous
-                </button>
-                
-                <div className="flex items-center gap-1.5">
-                  {[...Array(Math.min(5, totalPages))].map((_, i) => {
-                    const pageNum = i + 1;
-                    return (
-                      <button
-                        key={pageNum}
-                        onClick={() => setPage(pageNum)}
-                        className="w-9 h-9 rounded-xl font-bold text-sm transition-all"
-                        style={
-                          page === pageNum
-                            ? { 
-                                background: 'linear-gradient(135deg, #00c853, #00ff88)',
-                                color: '#003320',
-                                boxShadow: '0 4px 15px rgba(0,200,83,0.4)'
-                              }
-                            : { 
-                                background: 'rgba(255,255,255,0.05)',
-                                border: '1.5px solid rgba(255,255,255,0.1)',
-                                color: '#ffffff'
-                              }
-                        }
-                      >
-                        {pageNum}
-                      </button>
-                    );
-                  })}
+            {/* Infinite Scroll Loading Indicator */}
+            <div ref={observerTarget} className="py-8 text-center">
+              {loading && page > 1 && (
+                <div className="flex flex-col items-center gap-3">
+                  <div 
+                    className="w-12 h-12 border-4 rounded-full animate-spin"
+                    style={{ 
+                      borderColor: 'rgba(0,200,83,0.3)',
+                      borderTopColor: '#00c853'
+                    }}
+                  ></div>
+                  <p className="text-white/70 font-bold text-sm">Loading more tournaments...</p>
                 </div>
-                
-                <button
-                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                  disabled={page === totalPages}
-                  className="px-4 py-2 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed font-bold text-sm transition-all"
-                  style={{
-                    background: 'rgba(255,255,255,0.05)',
-                    border: '1.5px solid rgba(255,255,255,0.1)',
-                    color: '#ffffff'
-                  }}
-                >
-                  Next
-                </button>
-              </div>
-            )}
+              )}
+              {!loading && !hasMore && tournaments.length > 0 && (
+                <div className="flex flex-col items-center gap-2">
+                  <div 
+                    className="w-10 h-10 rounded-full flex items-center justify-center"
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(0,200,83,0.2), rgba(168,85,247,0.2))',
+                      border: '2px solid rgba(0,200,83,0.3)'
+                    }}
+                  >
+                    <SparklesIcon className="w-5 h-5 text-emerald-400" />
+                  </div>
+                  <p className="text-white/60 font-bold text-sm">You've reached the end!</p>
+                  <p className="text-white/40 text-xs">That's all the tournaments for now</p>
+                </div>
+              )}
+            </div>
           </>
         )}
       </div>
@@ -549,7 +557,7 @@ export default function TournamentDiscoveryPage() {
 }
 
 
-// Tournament Card Component - Mobile-First Compact Design
+// Tournament Card Component - Enhanced with More Details, No Registration Count
 function TournamentCard({ tournament, navigate, index }) {
   const getStatusStyle = (status) => {
     const styles = {
@@ -586,6 +594,15 @@ function TournamentCard({ tournament, navigate, index }) {
   };
 
   const posterUrl = getPosterUrl();
+
+  // Get minimum entry fee from categories
+  const getMinEntryFee = () => {
+    if (!tournament.categories || tournament.categories.length === 0) return null;
+    const fees = tournament.categories.map(c => c.entryFee).filter(f => f > 0);
+    return fees.length > 0 ? Math.min(...fees) : null;
+  };
+
+  const minFee = getMinEntryFee();
 
   return (
     <div 
@@ -654,23 +671,28 @@ function TournamentCard({ tournament, navigate, index }) {
         </div>
       </div>
 
-      {/* Content - Compact */}
+      {/* Content - Enhanced with More Details */}
       <div className="p-4 relative z-10">
-        <h3 className="font-black text-base text-white mb-2.5 line-clamp-2 group-hover:text-emerald-400 transition-colors min-h-[2.5rem]">
+        <h3 className="font-black text-base text-white mb-3 line-clamp-2 group-hover:text-emerald-400 transition-colors min-h-[2.5rem]">
           {tournament.name}
         </h3>
 
         <div className="space-y-2 mb-3">
-          <div className="flex items-center gap-2.5 text-xs text-white/80">
+          {/* Location */}
+          <div className="flex items-start gap-2.5 text-xs text-white/80">
             <div 
               className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
               style={{ background: 'rgba(168,85,247,0.2)' }}
             >
               <MapPinIcon className="h-3.5 w-3.5 text-purple-400" />
             </div>
-            <span className="truncate font-medium">{tournament.city}, {tournament.state}</span>
+            <div className="flex-1 min-w-0">
+              <p className="font-bold text-white/90 text-xs truncate">{tournament.venue}</p>
+              <p className="font-medium text-white/60 text-xs truncate">{tournament.city}, {tournament.state}</p>
+            </div>
           </div>
 
+          {/* Tournament Dates */}
           <div className="flex items-center gap-2.5 text-xs text-white/80">
             <div 
               className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
@@ -678,17 +700,47 @@ function TournamentCard({ tournament, navigate, index }) {
             >
               <CalendarIcon className="h-3.5 w-3.5 text-blue-400" />
             </div>
-            <span className="font-medium">{formatDateIndian(tournament.startDate)}</span>
+            <div className="flex-1">
+              <p className="font-medium text-white/90 text-xs">{formatDateIndian(tournament.startDate)}</p>
+              {tournament.endDate && tournament.endDate !== tournament.startDate && (
+                <p className="font-medium text-white/60 text-xs">to {formatDateIndian(tournament.endDate)}</p>
+              )}
+            </div>
           </div>
 
+          {/* Registration Deadline */}
+          {tournament.registrationCloseDate && (
+            <div className="flex items-center gap-2.5 text-xs text-white/80">
+              <div 
+                className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+                style={{ background: 'rgba(245,158,11,0.2)' }}
+              >
+                <ClockIcon className="h-3.5 w-3.5 text-orange-400" />
+              </div>
+              <div className="flex-1">
+                <p className="font-medium text-white/60 text-xs">Registration closes</p>
+                <p className="font-bold text-orange-400 text-xs">{formatDateIndian(tournament.registrationCloseDate)}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Categories & Entry Fee */}
           <div className="flex items-center gap-2.5 text-xs text-white/80">
             <div 
               className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
               style={{ background: 'rgba(0,200,83,0.2)' }}
             >
-              <UserGroupIcon className="h-3.5 w-3.5 text-green-400" />
+              <TrophyIcon className="h-3.5 w-3.5 text-green-400" />
             </div>
-            <span className="font-medium">{tournament._count?.categories || 0} Categories • {tournament._count?.registrations || 0} Registered</span>
+            <div className="flex-1 flex items-center justify-between">
+              <span className="font-medium text-white/90">{tournament._count?.categories || 0} {tournament._count?.categories === 1 ? 'Category' : 'Categories'}</span>
+              {minFee && (
+                <div className="flex items-center gap-1 font-bold text-emerald-400">
+                  <CurrencyRupeeIcon className="h-3.5 w-3.5" />
+                  <span>{minFee}+</span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 

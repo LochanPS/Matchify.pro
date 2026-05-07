@@ -202,129 +202,132 @@ function HomePage() {
       </div>
 
       {/* ════════════════════════════════════════
-          ENHANCED HERO SECTION
+          ENHANCED HERO SECTION - FIXED WIDTH FOR ALL DEVICES
       ════════════════════════════════════════ */}
-      <section className="relative z-10 pt-24 pb-20 px-5 flex flex-col items-center text-center">
+      <section className="relative z-10 pt-20 pb-16 px-4 flex flex-col items-center text-center">
+        {/* FIXED MAX-WIDTH CONTAINER - Ensures consistent sizing on all devices */}
+        <div className="w-full" style={{ maxWidth: '420px' }}>
 
-        {/* Brand logo mark — centered, floating */}
-        <div className="anim-scale-in mb-6 flex justify-center relative">
-          {/* Glow orb behind logo */}
-          <div className="absolute inset-0 m-auto w-40 h-40 rounded-full blur-3xl anim-glow"
-            style={{ background: 'radial-gradient(circle, rgba(0,255,136,0.25) 0%, transparent 70%)' }} />
-          <div className="anim-float relative z-10">
-            <MatchifyLogo size={96} variant="icon" glow={true} />
-          </div>
-        </div>
-
-        {/* Animated badge */}
-        <div className="anim-scale-in delay-100 inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full border text-xs font-bold tracking-wider uppercase mb-6 relative overflow-hidden"
-          style={{ background: 'rgba(0,255,136,0.1)', borderColor: 'rgba(0,255,136,0.3)', color: '#00ff88' }}>
-          <div className="absolute inset-0 shimmer-text opacity-20" />
-          <RocketLaunchIcon className="w-4 h-4" />
-          <span className="relative z-10">India's #1 Badminton Platform</span>
-          <FireIcon className="w-4 h-4 text-orange-400 anim-glow" />
-        </div>
-
-        {/* Main title */}
-        <div className="anim-fade-up delay-200 mb-5 w-full px-2 relative">
-          <h1 className="font-black leading-[0.85] tracking-tighter relative"
-            style={{ fontSize: 'clamp(2.8rem, 13vw, 7.5rem)' }}>
-            <span className="neon-text-green block shimmer-text" style={{ color: '#00ff88' }}>
-              MATCHIFY
-            </span>
-            <span className="neon-text-cyan block mt-1" style={{ color: '#00d4ff' }}>
-              .PRO
-            </span>
-          </h1>
-        </div>
-
-        {/* Enhanced tagline with icon */}
-        <div className="anim-fade-up delay-200 mb-4">
-          <p className="text-xl sm:text-2xl font-bold mb-2 flex items-center justify-center gap-2" 
-            style={{ color: 'rgba(255,255,255,0.95)' }}>
-            <TrophyIcon className="w-6 h-6 text-amber-400 anim-float" />
-            Where Champions Are Made
-            <SparklesIcon className="w-6 h-6 text-cyan-400 anim-glow" />
-          </p>
-        </div>
-        
-        <p className="anim-fade-up delay-300 text-base sm:text-lg mb-10 max-w-md leading-relaxed px-4" 
-          style={{ color: 'rgba(255,255,255,0.6)' }}>
-          Join <span className="font-bold text-green-400">10,000+</span> players across India. 
-          Register for tournaments, track progress, and compete with the best.
-        </p>
-
-        {/* CTAs - MOBILE OPTIMIZED */}
-        <div className="anim-fade-up delay-400 flex flex-col gap-3 w-full max-w-sm px-2">
-          {user ? (
-            <>
-              <Link to={getDashboardLink()}
-                className="btn-glow flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-bold text-base transition-all duration-300 active:scale-95"
-                style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#003320' }}>
-                <PlayIcon className="w-5 h-5" />
-                Get Started Free
-                <ArrowRightIcon className="w-5 h-5" />
-              </Link>
-              <div className="flex items-center justify-center gap-3 px-6 py-4 rounded-xl border"
-                style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.1)' }}>
-                <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-base"
-                  style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#003320' }}>
-                  {user.name?.charAt(0).toUpperCase()}
-                </div>
-                <div className="text-left">
-                  <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Welcome back</p>
-                  <p className="text-base font-semibold text-white">{user.name}</p>
-                </div>
-              </div>
-            </>
-          ) : (
-            <>
-              <Link to="/register"
-                className="btn-glow flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-bold text-base transition-all duration-300 active:scale-95"
-                style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#003320' }}>
-                <PlayIcon className="w-5 h-5" />
-                Get Started Free
-                <ArrowRightIcon className="w-5 h-5" />
-              </Link>
-              <Link to="/login"
-                className="flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-semibold text-base border transition-all duration-300 active:scale-95"
-                style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.9)' }}>
-                Sign In
-              </Link>
-            </>
-          )}
-        </div>
-
-        {/* social proof - MOBILE OPTIMIZED */}
-        <div className="anim-fade-up delay-500 mt-10 flex flex-col sm:flex-row justify-center items-center gap-4">
-          <div className="flex items-center gap-2">
-            <div className="flex -space-x-2">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="w-8 h-8 rounded-full border-2 flex items-center justify-center text-xs font-bold"
-                  style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', borderColor: '#07071a', color: '#003320' }}>
-                  {['R','P','A','K'][i]}
-                </div>
-              ))}
+          {/* Brand logo mark — centered, floating - FIXED SIZE */}
+          <div className="anim-scale-in mb-5 flex justify-center relative">
+            {/* Glow orb behind logo */}
+            <div className="absolute inset-0 m-auto w-32 h-32 rounded-full blur-3xl anim-glow"
+              style={{ background: 'radial-gradient(circle, rgba(0,255,136,0.25) 0%, transparent 70%)' }} />
+            <div className="anim-float relative z-10">
+              <MatchifyLogo size={80} variant="icon" glow={true} />
             </div>
-            <span className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.6)' }}>1000+ players joined</span>
           </div>
-          <div className="flex items-center gap-1.5">
-            {[...Array(5)].map((_, i) => <StarIcon key={i} className="w-5 h-5 text-amber-400" />)}
-            <span className="text-sm font-medium ml-1" style={{ color: 'rgba(255,255,255,0.6)' }}>4.9 / 5</span>
+
+          {/* Animated badge - FIXED SIZE */}
+          <div className="anim-scale-in delay-100 inline-flex items-center gap-2 px-4 py-2 rounded-full border text-xs font-bold tracking-wider uppercase mb-5 relative overflow-hidden"
+            style={{ background: 'rgba(0,255,136,0.1)', borderColor: 'rgba(0,255,136,0.3)', color: '#00ff88' }}>
+            <div className="absolute inset-0 shimmer-text opacity-20" />
+            <RocketLaunchIcon className="w-4 h-4" />
+            <span className="relative z-10">India's #1 Badminton Platform</span>
+            <FireIcon className="w-4 h-4 text-orange-400 anim-glow" />
           </div>
+
+          {/* Main title - FIXED SIZE (no clamp, no vw) */}
+          <div className="anim-fade-up delay-200 mb-4 w-full relative">
+            <h1 className="font-black leading-[0.85] tracking-tighter relative" style={{ fontSize: '3.5rem' }}>
+              <span className="neon-text-green block shimmer-text" style={{ color: '#00ff88' }}>
+                MATCHIFY
+              </span>
+              <span className="neon-text-cyan block mt-1" style={{ color: '#00d4ff' }}>
+                .PRO
+              </span>
+            </h1>
+          </div>
+
+          {/* Enhanced tagline with icon - FIXED SIZE */}
+          <div className="anim-fade-up delay-200 mb-3">
+            <p className="text-lg font-bold mb-2 flex items-center justify-center gap-2" 
+              style={{ color: 'rgba(255,255,255,0.95)' }}>
+              <TrophyIcon className="w-5 h-5 text-amber-400 anim-float" />
+              Where Champions Are Made
+              <SparklesIcon className="w-5 h-5 text-cyan-400 anim-glow" />
+            </p>
+          </div>
+          
+          <p className="anim-fade-up delay-300 text-sm mb-8 leading-relaxed px-2" 
+            style={{ color: 'rgba(255,255,255,0.6)' }}>
+            Join <span className="font-bold text-green-400">10,000+</span> players across India. 
+            Register for tournaments, track progress, and compete with the best.
+          </p>
+
+          {/* CTAs - FIXED WIDTH */}
+          <div className="anim-fade-up delay-400 flex flex-col gap-3 w-full">
+            {user ? (
+              <>
+                <Link to={getDashboardLink()}
+                  className="btn-glow flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-bold text-base transition-all duration-300 active:scale-95"
+                  style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#003320' }}>
+                  <PlayIcon className="w-5 h-5" />
+                  Get Started Free
+                  <ArrowRightIcon className="w-5 h-5" />
+                </Link>
+                <div className="flex items-center justify-center gap-3 px-5 py-3.5 rounded-xl border"
+                  style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.1)' }}>
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-base"
+                    style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#003320' }}>
+                    {user.name?.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="text-left">
+                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Welcome back</p>
+                    <p className="text-base font-semibold text-white">{user.name}</p>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <Link to="/register"
+                  className="btn-glow flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-bold text-base transition-all duration-300 active:scale-95"
+                  style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#003320' }}>
+                  <PlayIcon className="w-5 h-5" />
+                  Get Started Free
+                  <ArrowRightIcon className="w-5 h-5" />
+                </Link>
+                <Link to="/login"
+                  className="flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-semibold text-base border transition-all duration-300 active:scale-95"
+                  style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.9)' }}>
+                  Sign In
+                </Link>
+              </>
+            )}
+          </div>
+
+          {/* social proof - FIXED SIZE */}
+          <div className="anim-fade-up delay-500 mt-8 flex flex-col items-center gap-3">
+            <div className="flex items-center gap-2">
+              <div className="flex -space-x-2">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="w-8 h-8 rounded-full border-2 flex items-center justify-center text-xs font-bold"
+                    style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', borderColor: '#07071a', color: '#003320' }}>
+                    {['R','P','A','K'][i]}
+                  </div>
+                ))}
+              </div>
+              <span className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.6)' }}>1000+ players joined</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              {[...Array(5)].map((_, i) => <StarIcon key={i} className="w-5 h-5 text-amber-400" />)}
+              <span className="text-sm font-medium ml-1" style={{ color: 'rgba(255,255,255,0.6)' }}>4.9 / 5</span>
+            </div>
+          </div>
+
         </div>
       </section>
 
       {/* ════════════════════════════════════════
-          STATS BAR - MOBILE OPTIMIZED
+          STATS BAR - FIXED WIDTH FOR ALL DEVICES
       ════════════════════════════════════════ */}
-      <section className="relative z-10 py-10 px-5">
-        <div className="max-w-2xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <section className="relative z-10 py-8 px-4">
+        <div className="mx-auto grid grid-cols-2 gap-3" style={{ maxWidth: '420px' }}>
           {stats.map((s, i) => (
-            <div key={i} className="flex flex-col items-center gap-2 py-5 px-3 rounded-2xl border"
+            <div key={i} className="flex flex-col items-center gap-1.5 py-4 px-3 rounded-2xl border"
               style={{ background: 'rgba(0,255,136,0.04)', borderColor: 'rgba(0,255,136,0.12)' }}>
               <span className="text-2xl">{s.icon}</span>
-              <span className="text-2xl sm:text-3xl font-black" style={{ color: '#00ff88' }}>{s.value}</span>
+              <span className="text-2xl font-black" style={{ color: '#00ff88' }}>{s.value}</span>
               <span className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>{s.label}</span>
             </div>
           ))}
@@ -332,28 +335,28 @@ function HomePage() {
       </section>
 
       {/* ════════════════════════════════════════
-          FEATURES - MOBILE OPTIMIZED
+          FEATURES - FIXED WIDTH FOR ALL DEVICES
       ════════════════════════════════════════ */}
-      <section className="relative z-10 py-14 px-5">
-        <div className="max-w-2xl mx-auto">
+      <section className="relative z-10 py-12 px-4">
+        <div className="mx-auto" style={{ maxWidth: '420px' }}>
           {/* heading */}
-          <div className="text-center mb-10">
-            <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold tracking-wider uppercase mb-4"
+          <div className="text-center mb-8">
+            <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold tracking-wider uppercase mb-3"
               style={{ background: 'rgba(0,255,136,0.1)', color: '#00ff88', border: '1px solid rgba(0,255,136,0.2)' }}>
               ✦ Features
             </span>
-            <h2 className="text-3xl sm:text-4xl font-black text-white mb-3 leading-tight">
+            <h2 className="text-2xl font-black text-white mb-2 leading-tight">
               Everything to <span style={{ color: '#00ff88' }}>Dominate</span>
             </h2>
             <p className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>Built for competitive badminton players & organizers</p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 gap-4">
             {features.map((f, i) => (
-              <div key={i} className="card-glow group relative rounded-2xl p-6 border transition-all duration-300 active:scale-95"
+              <div key={i} className="card-glow group relative rounded-2xl p-5 border transition-all duration-300 active:scale-95"
                 style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.08)' }}>
                 {/* icon */}
-                <div className={`inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br ${f.color} rounded-xl mb-4 group-hover:scale-110 transition-transform duration-300`}>
+                <div className={`inline-flex items-center justify-center w-11 h-11 bg-gradient-to-br ${f.color} rounded-xl mb-3 group-hover:scale-110 transition-transform duration-300`}>
                   <f.icon className="w-6 h-6 text-white" />
                 </div>
                 <h3 className="text-base font-bold text-white mb-2">{f.title}</h3>
@@ -365,30 +368,30 @@ function HomePage() {
       </section>
 
       {/* ════════════════════════════════════════
-          HOW IT WORKS - MOBILE OPTIMIZED
+          HOW IT WORKS - FIXED WIDTH FOR ALL DEVICES
       ════════════════════════════════════════ */}
-      <section className="relative z-10 py-14 px-5">
-        <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-10">
-            <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold tracking-wider uppercase mb-4"
+      <section className="relative z-10 py-12 px-4">
+        <div className="mx-auto" style={{ maxWidth: '420px' }}>
+          <div className="text-center mb-8">
+            <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold tracking-wider uppercase mb-3"
               style={{ background: 'rgba(99,102,241,0.12)', color: '#818cf8', border: '1px solid rgba(99,102,241,0.25)' }}>
               🎯 Process
             </span>
-            <h2 className="text-3xl sm:text-4xl font-black text-white mb-3 leading-tight">
+            <h2 className="text-2xl font-black text-white mb-2 leading-tight">
               How It <span style={{ color: '#a78bfa' }}>Works</span>
             </h2>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             {steps.map((s, i) => (
-              <div key={i} className="card-glow relative rounded-2xl p-5 border transition-all duration-300 active:scale-95"
+              <div key={i} className="card-glow relative rounded-2xl p-4 border transition-all duration-300 active:scale-95"
                 style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.08)' }}>
                 {/* step number badge */}
-                <div className={`inline-flex items-center justify-center w-8 h-8 bg-gradient-to-br ${s.color} rounded-lg text-white text-xs font-black mb-3`}>
+                <div className={`inline-flex items-center justify-center w-7 h-7 bg-gradient-to-br ${s.color} rounded-lg text-white text-xs font-black mb-2`}>
                   {s.step}
                 </div>
-                <div className="text-3xl mb-3">{s.icon}</div>
-                <h3 className="text-sm font-bold text-white mb-1.5">{s.title}</h3>
+                <div className="text-2xl mb-2">{s.icon}</div>
+                <h3 className="text-sm font-bold text-white mb-1">{s.title}</h3>
                 <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>{s.desc}</p>
               </div>
             ))}
@@ -397,24 +400,23 @@ function HomePage() {
       </section>
 
       {/* ════════════════════════════════════════
-          WHY MATCHIFY - MOBILE OPTIMIZED
+          WHY MATCHIFY - FIXED WIDTH FOR ALL DEVICES
       ════════════════════════════════════════ */}
-      <section className="relative z-10 py-14 px-5">
-        <div className="max-w-2xl mx-auto rounded-3xl p-6 sm:p-8 border"
-          style={{ background: 'rgba(0,255,136,0.03)', borderColor: 'rgba(0,255,136,0.1)' }}>
-          <div className="text-center mb-8">
-            <h2 className="text-2xl sm:text-3xl font-black text-white mb-2 leading-tight">
+      <section className="relative z-10 py-12 px-4">
+        <div className="mx-auto rounded-3xl p-5 border" style={{ maxWidth: '420px', background: 'rgba(0,255,136,0.03)', borderColor: 'rgba(0,255,136,0.1)' }}>
+          <div className="text-center mb-6">
+            <h2 className="text-xl font-black text-white mb-2 leading-tight">
               Why <span style={{ color: '#00ff88' }}>Matchify.pro</span>?
             </h2>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             {benefits.map((b, i) => (
-              <div key={i} className="flex items-center gap-3 rounded-xl p-4 border transition-all duration-300 active:scale-95"
+              <div key={i} className="flex items-center gap-2.5 rounded-xl p-3 border transition-all duration-300 active:scale-95"
                 style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.07)' }}>
-                <div className={`flex-shrink-0 w-10 h-10 ${b.bg} ${b.color} rounded-lg flex items-center justify-center`}>
+                <div className={`flex-shrink-0 w-9 h-9 ${b.bg} ${b.color} rounded-lg flex items-center justify-center`}>
                   <b.icon className="w-5 h-5" />
                 </div>
-                <span className="text-xs sm:text-sm font-semibold text-white leading-tight">{b.text}</span>
+                <span className="text-xs font-semibold text-white leading-tight">{b.text}</span>
               </div>
             ))}
           </div>
@@ -422,30 +424,30 @@ function HomePage() {
       </section>
 
       {/* ════════════════════════════════════════
-          TESTIMONIALS - MOBILE OPTIMIZED
+          TESTIMONIALS - FIXED WIDTH FOR ALL DEVICES
       ════════════════════════════════════════ */}
-      <section className="relative z-10 py-14 px-5">
-        <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-10">
-            <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold tracking-wider uppercase mb-4"
+      <section className="relative z-10 py-12 px-4">
+        <div className="mx-auto" style={{ maxWidth: '420px' }}>
+          <div className="text-center mb-8">
+            <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold tracking-wider uppercase mb-3"
               style={{ background: 'rgba(6,182,212,0.1)', color: '#22d3ee', border: '1px solid rgba(6,182,212,0.25)' }}>
               💬 Players Say
             </span>
-            <h2 className="text-3xl sm:text-4xl font-black text-white leading-tight">
+            <h2 className="text-2xl font-black text-white leading-tight">
               Real <span style={{ color: '#22d3ee' }}>Reviews</span>
             </h2>
           </div>
 
-          <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-4">
             {testimonials.map((t, i) => (
-              <div key={i} className="card-glow rounded-2xl p-6 border transition-all duration-300"
+              <div key={i} className="card-glow rounded-2xl p-5 border transition-all duration-300"
                 style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.07)' }}>
-                <div className="flex gap-1 mb-4">
-                  {[...Array(5)].map((_, j) => <StarIcon key={j} className="w-5 h-5 text-amber-400" />)}
+                <div className="flex gap-1 mb-3">
+                  {[...Array(5)].map((_, j) => <StarIcon key={j} className="w-4 h-4 text-amber-400" />)}
                 </div>
-                <p className="text-sm leading-relaxed mb-5" style={{ color: 'rgba(255,255,255,0.7)' }}>"{t.text}"</p>
+                <p className="text-sm leading-relaxed mb-4" style={{ color: 'rgba(255,255,255,0.7)' }}>"{t.text}"</p>
                 <div className="flex items-center gap-3">
-                  <div className="w-11 h-11 rounded-full flex items-center justify-center text-xl flex-shrink-0"
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg flex-shrink-0"
                     style={{ background: 'rgba(6,182,212,0.15)', border: '1px solid rgba(6,182,212,0.3)' }}>
                     {t.emoji}
                   </div>
@@ -461,34 +463,33 @@ function HomePage() {
       </section>
 
       {/* ════════════════════════════════════════
-          CTA BANNER - MOBILE OPTIMIZED
+          CTA BANNER - FIXED WIDTH FOR ALL DEVICES
       ════════════════════════════════════════ */}
-      <section className="relative z-10 py-14 px-5">
-        <div className="max-w-2xl mx-auto text-center rounded-3xl p-8 sm:p-10 border overflow-hidden relative"
-          style={{ background: 'linear-gradient(135deg, rgba(0,255,136,0.07) 0%, rgba(99,102,241,0.07) 100%)', borderColor: 'rgba(0,255,136,0.2)' }}>
+      <section className="relative z-10 py-12 px-4">
+        <div className="mx-auto text-center rounded-3xl p-6 border overflow-hidden relative" style={{ maxWidth: '420px', background: 'linear-gradient(135deg, rgba(0,255,136,0.07) 0%, rgba(99,102,241,0.07) 100%)', borderColor: 'rgba(0,255,136,0.2)' }}>
           {/* bg glow */}
           <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(0,255,136,0.08) 0%, transparent 70%)' }} />
 
           <div className="relative">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-6 text-3xl"
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-5 text-2xl"
               style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)' }}>
               🚀
             </div>
-            <h2 className="text-3xl sm:text-4xl font-black text-white mb-4 leading-tight">
+            <h2 className="text-2xl font-black text-white mb-3 leading-tight">
               Ready to Start?
             </h2>
-            <p className="text-sm mb-8 px-4" style={{ color: 'rgba(255,255,255,0.6)' }}>
+            <p className="text-sm mb-6" style={{ color: 'rgba(255,255,255,0.6)' }}>
               Join India's fastest-growing badminton community today.
             </p>
-            <div className="flex flex-col gap-3 max-w-sm mx-auto">
+            <div className="flex flex-col gap-3">
               <Link to={user ? getDashboardLink() : '/register'}
-                className="btn-glow flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-bold text-base transition-all duration-300 active:scale-95"
+                className="btn-glow flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-bold text-base transition-all duration-300 active:scale-95"
                 style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#003320' }}>
                 {user ? 'Go to Dashboard' : 'Create Free Account'}
                 <ArrowRightIcon className="w-5 h-5" />
               </Link>
               <Link to="/tournaments"
-                className="flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-semibold text-base border transition-all duration-300 active:scale-95"
+                className="flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-semibold text-base border transition-all duration-300 active:scale-95"
                 style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.9)' }}>
                 Browse Tournaments
               </Link>
@@ -498,15 +499,15 @@ function HomePage() {
       </section>
 
       {/* ════════════════════════════════════════
-          FOOTER - MOBILE OPTIMIZED
+          FOOTER - FIXED WIDTH FOR ALL DEVICES
       ════════════════════════════════════════ */}
-      <footer className="relative z-10 border-t py-12 px-5" style={{ borderColor: 'rgba(255,255,255,0.07)', background: 'rgba(0,0,0,0.3)' }}>
-        <div className="max-w-2xl mx-auto flex flex-col items-center gap-6">
+      <footer className="relative z-10 border-t py-10 px-4" style={{ borderColor: 'rgba(255,255,255,0.07)', background: 'rgba(0,0,0,0.3)' }}>
+        <div className="mx-auto flex flex-col items-center gap-5" style={{ maxWidth: '420px' }}>
 
           {/* brand */}
           <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="matchify.pro" className="h-10 w-auto" style={{ filter: 'drop-shadow(0 0 10px rgba(0,255,136,0.5))' }} />
-            <span className="font-black text-xl">
+            <img src="/logo.png" alt="matchify.pro" className="h-9 w-auto" style={{ filter: 'drop-shadow(0 0 10px rgba(0,255,136,0.5))' }} />
+            <span className="font-black text-lg">
               <span style={{ color: '#ffffff' }}>matchify</span>
               <span style={{ color: '#00ff88' }}>.pro</span>
             </span>
@@ -517,18 +518,18 @@ function HomePage() {
           </p>
 
           {/* founders */}
-          <div className="rounded-2xl px-6 py-5 border text-center w-full max-w-xs"
+          <div className="rounded-2xl px-5 py-4 border text-center w-full"
             style={{ background: 'rgba(0,255,136,0.04)', borderColor: 'rgba(0,255,136,0.12)' }}>
             <p className="text-xs tracking-wider uppercase mb-2" style={{ color: 'rgba(255,255,255,0.4)' }}>Co-Founded By</p>
             <p className="text-lg font-black mb-2" style={{ color: '#00ff88' }}>PS Brothers</p>
-            <div className="flex justify-center items-center gap-4 text-sm font-semibold text-white">
+            <div className="flex justify-center items-center gap-3 text-sm font-semibold text-white">
               <span>PS Lochan</span>
               <span style={{ color: 'rgba(255,255,255,0.2)' }}>|</span>
               <span>PS Pradyumna</span>
             </div>
           </div>
 
-          <div className="flex gap-6 text-sm" style={{ color: 'rgba(255,255,255,0.45)' }}>
+          <div className="flex gap-5 text-sm" style={{ color: 'rgba(255,255,255,0.45)' }}>
             <a href="#" className="hover:text-white transition-colors">About</a>
             <a href="#" className="hover:text-white transition-colors">Contact</a>
             <a href="#" className="hover:text-white transition-colors">Privacy</a>

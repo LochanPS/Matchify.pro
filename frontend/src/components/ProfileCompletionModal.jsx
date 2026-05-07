@@ -548,12 +548,12 @@ export default function ProfileCompletionModal({ user, onComplete }) {
     }
   };
 
-  // Highlight matching text helper
+  // Highlight matching text helper - Emerald Theme
   const highlightMatch = (text, query) => {
     if (!query) return text;
     return text.split(new RegExp(`(${query})`, 'gi')).map((part, i) => (
       part.toLowerCase() === query.toLowerCase() ? (
-        <span key={i} className="font-bold text-purple-400">{part}</span>
+        <span key={i} className="font-bold text-emerald-400">{part}</span>
       ) : (
         <span key={i}>{part}</span>
       )
@@ -562,18 +562,18 @@ export default function ProfileCompletionModal({ user, onComplete }) {
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      {/* Halo effect background */}
+      {/* Halo effect background - Emerald Theme */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div className="w-[500px] h-[500px] bg-gradient-to-r from-purple-500/30 via-indigo-500/30 to-purple-500/30 rounded-full blur-3xl"></div>
+        <div className="w-[500px] h-[500px] bg-gradient-to-r from-emerald-500/30 via-green-500/30 to-emerald-500/30 rounded-full blur-3xl"></div>
       </div>
       
       <div className="relative bg-slate-800 border border-white/10 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden max-h-[90vh] overflow-y-auto">
-        {/* Header with gradient */}
-        <div className="relative bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 p-6 text-white overflow-hidden">
+        {/* Header with gradient - Emerald Theme */}
+        <div className="relative bg-gradient-to-r from-emerald-600 via-green-600 to-emerald-600 p-6 text-white overflow-hidden">
           <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:20px_20px]"></div>
           <div className="relative">
             <h2 className="text-2xl font-bold">Complete Your Profile</h2>
-            <p className="text-purple-200 mt-1">
+            <p className="text-emerald-100 mt-1">
               Please provide your details to continue
             </p>
           </div>
@@ -602,7 +602,7 @@ export default function ProfileCompletionModal({ user, onComplete }) {
                 value={formData.phone}
                 onChange={(e) => handleChange('phone', e.target.value.replace(/\D/g, '').slice(0, 10))}
                 placeholder="9876543210"
-                className="flex-1 px-4 py-3 bg-slate-700/50 border border-white/10 rounded-r-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                className="flex-1 px-4 py-3 bg-slate-700/50 border border-white/10 rounded-r-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
                 required
               />
             </div>
@@ -620,7 +620,7 @@ export default function ProfileCompletionModal({ user, onComplete }) {
               onChange={(e) => handleCityInputChange(e.target.value)}
               onFocus={() => cityInput.trim() && setShowCitySuggestions(filteredCities.length > 0)}
               placeholder="Type to search city..."
-              className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+              className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
               autoComplete="off"
             />
             
@@ -635,8 +635,8 @@ export default function ProfileCompletionModal({ user, onComplete }) {
                     key={city}
                     type="button"
                     onClick={() => handleCitySelect(city)}
-                    className={`w-full px-4 py-3 text-left hover:bg-purple-500/20 transition-colors flex items-center justify-between ${
-                      formData.city === city ? 'bg-purple-500/20 text-purple-400 font-medium' : 'text-gray-300'
+                    className={`w-full px-4 py-3 text-left hover:bg-emerald-500/20 transition-colors flex items-center justify-between ${
+                      formData.city === city ? 'bg-emerald-500/20 text-emerald-400 font-medium' : 'text-gray-300'
                     }`}
                   >
                     <span>{highlightMatch(city, cityInput)}</span>
@@ -663,7 +663,7 @@ export default function ProfileCompletionModal({ user, onComplete }) {
                 onChange={(e) => handleStateInputChange(e.target.value)}
                 onFocus={() => setShowStateSuggestions(true)}
                 placeholder="Type to search state..."
-                className={`w-full px-4 py-3 bg-slate-700/50 border rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${
+                className={`w-full px-4 py-3 bg-slate-700/50 border rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all ${
                   formData.state ? 'border-emerald-500/50' : 'border-white/10'
                 }`}
                 autoComplete="off"
@@ -684,8 +684,8 @@ export default function ProfileCompletionModal({ user, onComplete }) {
                     key={state}
                     type="button"
                     onClick={() => handleStateSelect(state)}
-                    className={`w-full px-4 py-3 text-left hover:bg-purple-500/20 transition-colors ${
-                      formData.state === state ? 'bg-purple-500/20 text-purple-400 font-medium' : 'text-gray-300'
+                    className={`w-full px-4 py-3 text-left hover:bg-emerald-500/20 transition-colors ${
+                      formData.state === state ? 'bg-emerald-500/20 text-emerald-400 font-medium' : 'text-gray-300'
                     }`}
                   >
                     {highlightMatch(state, stateInput)}
@@ -709,7 +709,7 @@ export default function ProfileCompletionModal({ user, onComplete }) {
                     value={g.toLowerCase()}
                     checked={formData.gender === g.toLowerCase()}
                     onChange={(e) => handleChange('gender', e.target.value)}
-                    className="w-4 h-4 text-purple-500 bg-slate-700 border-white/20 focus:ring-purple-500 focus:ring-offset-0"
+                    className="w-4 h-4 text-emerald-500 bg-slate-700 border-white/20 focus:ring-emerald-500 focus:ring-offset-0"
                   />
                   <span className="text-gray-300 group-hover:text-white transition-colors">{g}</span>
                 </label>
@@ -727,17 +727,17 @@ export default function ProfileCompletionModal({ user, onComplete }) {
               value={formData.dateOfBirth}
               onChange={(e) => handleChange('dateOfBirth', e.target.value)}
               max={new Date().toISOString().split('T')[0]}
-              className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all [color-scheme:dark]"
+              className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all [color-scheme:dark]"
             />
           </div>
 
-          {/* Submit Button with halo effect */}
+          {/* Submit Button with halo effect - Emerald Theme */}
           <div className="relative group pt-2">
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-500 via-indigo-500 to-purple-500 rounded-xl blur-lg opacity-50 group-hover:opacity-75 transition-opacity"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 via-green-500 to-emerald-500 rounded-xl blur-lg opacity-50 group-hover:opacity-75 transition-opacity"></div>
             <button
               type="submit"
               disabled={loading}
-              className="relative w-full py-4 bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 text-white font-bold rounded-xl hover:shadow-lg hover:shadow-purple-500/30 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+              className="relative w-full py-4 bg-gradient-to-r from-emerald-600 via-green-600 to-emerald-600 text-white font-bold rounded-xl hover:shadow-lg hover:shadow-emerald-500/30 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>

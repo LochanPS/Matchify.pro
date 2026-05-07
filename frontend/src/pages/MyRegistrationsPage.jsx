@@ -139,10 +139,10 @@ export default function MyRegistrationsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #0a0a1f 0%, #07071a 50%, #0a0a1f 100%)' }}>
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="text-gray-500 mt-4 font-medium">Loading registrations...</p>
+          <div className="w-16 h-16 border-4 rounded-full animate-spin mx-auto" style={{ borderColor: 'rgba(16,185,129,0.3)', borderTopColor: '#10b981' }}></div>
+          <p className="text-gray-400 mt-4 font-medium">Loading registrations...</p>
         </div>
       </div>
     );
@@ -156,49 +156,64 @@ export default function MyRegistrationsPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      {/* Hero Header */}
-      <div className="relative bg-gradient-to-r from-slate-900 via-purple-900 to-slate-900 overflow-hidden">
-        <div className="absolute inset-0">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #0a0a1f 0%, #07071a 50%, #0a0a1f 100%)' }}>
+      {/* Hero Header - EMERALD THEME */}
+      <div className="relative overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(16,185,129,0.15) 0%, rgba(6,182,212,0.1) 100%)' }}>
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl opacity-10" style={{ background: 'radial-gradient(circle, #10b981, transparent)' }}></div>
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 rounded-full blur-3xl opacity-10" style={{ background: 'radial-gradient(circle, #06b6d4, transparent)' }}></div>
         </div>
         
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Back Button */}
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-white/70 hover:text-white mb-6 transition-colors group"
+            className="flex items-center gap-2 mb-4 transition-colors group" style={{ color: 'rgba(255,255,255,0.6)' }}
+            onMouseEnter={(e) => e.currentTarget.style.color = '#ffffff'}
+            onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.6)'}
           >
             <ArrowLeftIcon className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
             <span>Back</span>
           </button>
 
-          <div className="flex items-center gap-5">
-            <div className="w-16 h-16 bg-gradient-to-br from-amber-400 via-orange-500 to-red-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-orange-500/30">
-              <Trophy className="w-8 h-8 text-white" />
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-2xl" style={{ background: 'linear-gradient(135deg,#10b981,#059669)', boxShadow: '0 8px 25px rgba(16,185,129,0.3)' }}>
+              <Trophy className="w-7 h-7 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-white">My Registrations</h1>
-              <p className="text-white/60">View and manage your tournament registrations</p>
+              <h1 className="text-2xl font-bold text-white">My Registrations</h1>
+              <p className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>View and manage your tournament registrations</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 -mt-6">
-        {/* Filter Tabs */}
-        <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl shadow-xl p-2 mb-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* Filter Tabs - EMERALD THEME */}
+        <div className="rounded-2xl shadow-xl p-2 mb-6" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
           <div className="flex gap-2">
             {filterTabs.map(tab => (
               <button
                 key={tab.key}
                 onClick={() => setFilter(tab.key)}
-                className={`flex-1 px-6 py-3.5 text-sm font-semibold rounded-xl transition-all ${
+                className="flex-1 px-4 py-3 text-sm font-bold rounded-xl transition-all"
+                style={
                   filter === tab.key
-                    ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/30'
-                    : 'text-gray-400 hover:text-white hover:bg-slate-700/50'
-                }`}
+                    ? { background: 'linear-gradient(135deg,#10b981,#059669)', color: '#ffffff', boxShadow: '0 4px 15px rgba(16,185,129,0.3)' }
+                    : { color: 'rgba(255,255,255,0.5)', background: 'transparent' }
+                }
+                onMouseEnter={(e) => {
+                  if (filter !== tab.key) {
+                    e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+                    e.currentTarget.style.color = '#ffffff';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (filter !== tab.key) {
+                    e.currentTarget.style.background = 'transparent';
+                    e.currentTarget.style.color = 'rgba(255,255,255,0.5)';
+                  }
+                }}
               >
                 {tab.label}
               </button>
@@ -208,15 +223,16 @@ export default function MyRegistrationsPage() {
 
         {/* Registrations List */}
         {registrations.length === 0 ? (
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl shadow-xl shadow-gray-200/50 border border-white/10 p-16 text-center">
-            <div className="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-3xl flex items-center justify-center mx-auto mb-6">
-              <TrophyIcon className="w-12 h-12 text-gray-400" />
+          <div className="rounded-2xl shadow-xl p-12 text-center" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)' }}>
+            <div className="w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-5" style={{ background: 'rgba(16,185,129,0.1)', border: '2px solid rgba(16,185,129,0.2)' }}>
+              <TrophyIcon className="w-10 h-10 text-emerald-400" />
             </div>
             <h3 className="text-xl font-bold text-white mb-2">No registrations found</h3>
-            <p className="text-gray-500 mb-6">You haven't registered for any tournaments yet</p>
+            <p className="text-gray-400 mb-6 text-sm">You haven't registered for any tournaments yet</p>
             <button
               onClick={() => navigate('/tournaments')}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-semibold hover:shadow-lg hover:scale-105 transition-all"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all text-sm"
+              style={{ background: 'linear-gradient(135deg,#10b981,#059669)', color: '#ffffff', boxShadow: '0 4px 15px rgba(16,185,129,0.3)' }}
             >
               Browse Tournaments
               <ArrowRight className="w-4 h-4" />
@@ -231,39 +247,48 @@ export default function MyRegistrationsPage() {
               return (
                 <div
                   key={registration.id}
-                  className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl shadow-sm border border-white/10 p-6 hover:shadow-xl hover:border-gray-200 transition-all"
+                  className="rounded-2xl p-5 transition-all"
+                  style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)' }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = 'rgba(16,185,129,0.3)';
+                    e.currentTarget.style.boxShadow = '0 8px 25px rgba(16,185,129,0.1)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
+                    e.currentTarget.style.boxShadow = 'none';
+                  }}
                 >
-                  <div className="flex items-start justify-between gap-6">
-                    <div className="flex-1">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
                       {/* Tournament Name */}
                       <Link 
                         to={`/tournaments/${registration.tournament.id}`}
-                        className="text-xl font-bold text-white mb-3 hover:text-purple-600 transition-colors block"
+                        className="text-lg font-bold text-white mb-3 hover:text-emerald-400 transition-colors block truncate"
                       >
                         {registration.tournament.name}
                       </Link>
 
                       {/* Tournament Details */}
-                      <div className="flex flex-wrap gap-4 text-sm text-gray-400 mb-4">
+                      <div className="flex flex-wrap gap-3 text-sm text-gray-400 mb-3">
                         <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 bg-purple-500/20 border border-purple-500/30 rounded-lg flex items-center justify-center">
+                          <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'rgba(168,85,247,0.15)', border: '1px solid rgba(168,85,247,0.3)' }}>
                             <MapPin className="h-4 w-4 text-purple-400" />
                           </div>
-                          <span>{registration.tournament.city}, {registration.tournament.state}</span>
+                          <span className="text-xs">{registration.tournament.city}, {registration.tournament.state}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 bg-blue-500/20 border border-blue-500/30 rounded-lg flex items-center justify-center">
+                          <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'rgba(59,130,246,0.15)', border: '1px solid rgba(59,130,246,0.3)' }}>
                             <Calendar className="h-4 w-4 text-blue-400" />
                           </div>
-                          <span>{formatDateIndian(registration.tournament.startDate)}</span>
+                          <span className="text-xs">{formatDateIndian(registration.tournament.startDate)}</span>
                         </div>
                       </div>
 
                       {/* Category */}
-                      <div className="mb-4">
-                        <span className="inline-flex items-center gap-2 px-4 py-2 bg-slate-700/50 border border-white/10 rounded-xl">
-                          <span className="font-semibold text-white">{registration.category.name}</span>
-                          <span className="text-xs text-purple-300 bg-purple-500/20 border border-purple-500/30 px-2 py-0.5 rounded-full">
+                      <div className="mb-3">
+                        <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl" style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)' }}>
+                          <span className="font-bold text-white text-sm">{registration.category.name}</span>
+                          <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: 'rgba(6,182,212,0.2)', color: '#22d3ee', border: '1px solid rgba(6,182,212,0.3)' }}>
                             {registration.category.format} • {registration.category.gender}
                           </span>
                         </span>
@@ -271,40 +296,40 @@ export default function MyRegistrationsPage() {
 
                       {/* Partner Info */}
                       {registration.category.format === 'doubles' && (
-                        <div className="mb-4 p-4 bg-slate-700/30 rounded-xl border border-white/10">
-                          <p className="text-sm font-semibold text-gray-300 mb-2">Doubles Partner</p>
+                        <div className="mb-3 p-3 rounded-xl" style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                          <p className="text-xs font-bold text-gray-300 mb-1.5">Doubles Partner</p>
                           {!registration.partnerConfirmed && registration.partnerEmail && (
                             <div className="flex items-center text-amber-400">
                               <span className="mr-2">⏳</span>
-                              <span className="text-sm">Waiting for {registration.partnerEmail} to accept</span>
+                              <span className="text-xs">Waiting for {registration.partnerEmail} to accept</span>
                             </div>
                           )}
                           {registration.partnerConfirmed && registration.partner && (
-                            <div className="flex items-center text-green-400">
+                            <div className="flex items-center text-emerald-400">
                               <Users className="h-4 w-4 mr-2" />
-                              <span className="text-sm font-medium">{registration.partner.name}</span>
-                              <span className="ml-2 text-xs bg-green-500/20 text-green-300 px-2 py-0.5 rounded-full border border-green-500/30">Confirmed</span>
+                              <span className="text-xs font-semibold">{registration.partner.name}</span>
+                              <span className="ml-2 text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(16,185,129,0.2)', color: '#10b981', border: '1px solid rgba(16,185,129,0.3)' }}>Confirmed</span>
                             </div>
                           )}
                         </div>
                       )}
 
                       {/* Payment Details */}
-                      <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-3">
                         <div className="flex items-center gap-2">
                           <CreditCard className="h-4 w-4 text-gray-400" />
-                          <span className="text-gray-400">Amount:</span>
-                          <span className="font-bold text-white">₹{registration.amountTotal}</span>
+                          <span className="text-gray-400 text-xs">Amount:</span>
+                          <span className="font-bold text-white text-sm">₹{registration.amountTotal}</span>
                         </div>
-                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${paymentStyle.bg} ${paymentStyle.text}`}>
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${paymentStyle.bg} ${paymentStyle.text}`}>
                           {registration.paymentStatus}
                         </span>
                       </div>
                     </div>
 
                     {/* Status and Actions */}
-                    <div className="flex flex-col items-end gap-3">
-                      <span className={`px-4 py-2 rounded-xl text-sm font-semibold ${statusStyle.bg} ${statusStyle.text}`}>
+                    <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                      <span className={`px-3 py-1.5 rounded-xl text-xs font-bold ${statusStyle.bg} ${statusStyle.text}`}>
                         {statusStyle.label}
                       </span>
 
@@ -312,12 +337,13 @@ export default function MyRegistrationsPage() {
                         <button
                           onClick={() => openCancelModal(registration)}
                           disabled={cancelling === registration.id}
-                          className="flex items-center gap-2 px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 rounded-xl transition-colors disabled:opacity-50 border border-red-500/30"
+                          className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-xl transition-colors disabled:opacity-50"
+                          style={{ color: '#ef4444', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)' }}
                         >
                           {cancelling === registration.id ? (
-                            <Loader className="h-4 w-4 animate-spin" />
+                            <Loader className="h-3.5 w-3.5 animate-spin" />
                           ) : (
-                            <XCircle className="h-4 w-4" />
+                            <XCircle className="h-3.5 w-3.5" />
                           )}
                           {cancelling === registration.id ? 'Cancelling...' : 'Cancel'}
                         </button>
@@ -325,21 +351,22 @@ export default function MyRegistrationsPage() {
 
                       <button
                         onClick={() => navigate(`/tournaments/${registration.tournament.id}`)}
-                        className="flex items-center gap-2 px-4 py-2 text-sm text-purple-400 hover:bg-purple-500/10 rounded-xl transition-colors font-medium border border-purple-500/30"
+                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-xl transition-colors font-bold"
+                        style={{ color: '#10b981', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)' }}
                       >
                         View Tournament
-                        <ArrowRight className="w-4 h-4" />
+                        <ArrowRight className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </div>
 
                   {/* Refund Info */}
                   {registration.status === 'cancelled' && registration.refundAmount > 0 && (
-                    <div className="mt-4 pt-4 border-t border-white/10">
-                      <div className="text-sm text-gray-400">
-                        Refund: <span className="font-semibold text-green-400">₹{registration.refundAmount}</span>
+                    <div className="mt-3 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                      <div className="text-xs text-gray-400">
+                        Refund: <span className="font-bold text-emerald-400">₹{registration.refundAmount}</span>
                         {' • '}
-                        Status: <span className="font-semibold text-gray-300">{registration.refundStatus}</span>
+                        Status: <span className="font-bold text-gray-300">{registration.refundStatus}</span>
                       </div>
                     </div>
                   )}

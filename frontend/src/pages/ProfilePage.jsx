@@ -162,7 +162,7 @@ export default function ProfilePage() {
   const [showPhotoViewer, setShowPhotoViewer] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
-    dateOfBirth: '',
+    birthYear: '',
     phone: '',
     city: '',
     state: '',
@@ -181,7 +181,7 @@ export default function ProfilePage() {
       setProfile(data);
       setFormData({
         name: data.name || '',
-        dateOfBirth: data.dateOfBirth ? data.dateOfBirth.split('T')[0] : '',
+        birthYear: data.birthYear || '',
         phone: data.phone || '',
         city: data.city || '',
         state: data.state || '',
@@ -240,8 +240,8 @@ export default function ProfilePage() {
   };
 
   const needsConfirmation = () => {
-    const settingDOB = !profile?.dateOfBirth && formData.dateOfBirth;
-    return settingDOB;
+    const settingBirthYear = !profile?.birthYear && formData.birthYear;
+    return settingBirthYear;
   };
 
   const handleSave = async () => {
@@ -267,7 +267,7 @@ export default function ProfilePage() {
     try {
       const cleanedData = {};
       if (dataToSave.name) cleanedData.name = dataToSave.name;
-      if (!profile?.dateOfBirth && dataToSave.dateOfBirth) cleanedData.dateOfBirth = dataToSave.dateOfBirth;
+      if (!profile?.birthYear && dataToSave.birthYear) cleanedData.birthYear = dataToSave.birthYear;
       if (dataToSave.phone) cleanedData.phone = dataToSave.phone.replace(/^\+91/, '').replace(/\s/g, '');
       if (dataToSave.gender) cleanedData.gender = dataToSave.gender;
       if (dataToSave.city !== undefined) cleanedData.city = dataToSave.city;
@@ -291,7 +291,7 @@ export default function ProfilePage() {
   const handleCancel = () => {
     setFormData({
       name: profile?.name || '',
-      dateOfBirth: profile?.dateOfBirth ? profile.dateOfBirth.split('T')[0] : '',
+      birthYear: profile?.birthYear || '',
       phone: profile?.phone || '',
       city: profile?.city || '',
       state: profile?.state || '',
@@ -325,7 +325,7 @@ export default function ProfilePage() {
   };
 
   const canEditName = true; // Name is always editable
-  const canEditDOB = !profile?.dateOfBirth;
+  const canEditBirthYear = !profile?.birthYear;
 
   if (loading) {
     return (
@@ -863,7 +863,7 @@ export default function ProfilePage() {
             >
               <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
               <p className="text-sm text-amber-300">
-                <strong>Important:</strong> Date of Birth can only be set once and cannot be changed later.
+                <strong>Important:</strong> Birth Year can only be set once and cannot be changed later.
               </p>
             </div>
 
@@ -883,26 +883,38 @@ export default function ProfilePage() {
                 />
               </div>
 
-              {/* Date of Birth Field */}
+              {/* Birth Year Field */}
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Date of Birth {!canEditDOB && <span className="text-gray-500">(locked)</span>}
+                  Birth Year {!canEditBirthYear && <span className="text-gray-500">(locked)</span>}
                 </label>
-                {canEditDOB ? (
+                {canEditBirthYear ? (
                   <>
-                    <input
-                      type="date"
-                      name="dateOfBirth"
-                      value={formData.dateOfBirth}
+                    <select
+                      name="birthYear"
+                      value={formData.birthYear}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 bg-blue-500/10 border border-blue-500/30 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all [color-scheme:dark]"
-                    />
+                      className="w-full px-4 py-3 bg-blue-500/10 border border-blue-500/30 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all appearance-none cursor-pointer"
+                      style={{
+                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%233b82f6'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
+                        backgroundRepeat: 'no-repeat',
+                        backgroundPosition: 'right 0.75rem center',
+                        backgroundSize: '1.5rem'
+                      }}
+                    >
+                      <option value="" className="bg-slate-800">Select your birth year</option>
+                      {Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i).map(year => (
+                        <option key={year} value={year} className="bg-slate-800">
+                          {year}
+                        </option>
+                      ))}
+                    </select>
                     <p className="text-xs text-blue-400 mt-1">⚠️ This can only be set once</p>
                   </>
                 ) : (
                   <input
                     type="text"
-                    value={profile?.dateOfBirth ? formatDateIndian(profile.dateOfBirth) : 'Not provided'}
+                    value={profile?.birthYear || 'Not provided'}
                     disabled
                     className="w-full px-4 py-3 border border-white/5 rounded-xl bg-slate-700/30 text-gray-500 cursor-not-allowed"
                   />
@@ -1048,11 +1060,11 @@ export default function ProfilePage() {
               </p>
 
               <div className="bg-slate-700/50 border border-white/10 rounded-xl p-4 mb-6 space-y-3">
-                {!profile?.dateOfBirth && pendingData?.dateOfBirth && (
+                {!profile?.birthYear && pendingData?.birthYear && (
                   <div>
-                    <p className="text-sm text-gray-400">Date of Birth</p>
-                    <p className="font-semibold text-white">
-                      {formatDateLongIndian(pendingData.dateOfBirth)}
+                    <p className="text-sm text-gray-400">Birth Year</p>
+                    <p className="font-semibold text-white text-xl">
+                      {pendingData.birthYear}
                     </p>
                   </div>
                 )}

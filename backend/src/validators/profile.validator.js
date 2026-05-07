@@ -5,6 +5,8 @@ export const updateProfileSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters').max(100, 'Name must be less than 100 characters').optional(),
   // Date of birth can only be set once (if empty)
   dateOfBirth: z.string().optional(),
+  // Birth year can only be set once (if empty)
+  birthYear: z.union([z.string(), z.number()]).optional(),
   // Phone - accept any string, we'll clean it in the controller
   phone: z.string().optional(),
   city: z.string().max(50, 'City must be less than 50 characters').optional(),

@@ -387,7 +387,7 @@ export default function ProfileCompletionModal({ user, onComplete }) {
     city: user?.city || '',
     state: user?.state || '',
     gender: user?.gender || '',
-    dateOfBirth: user?.dateOfBirth ? user.dateOfBirth.split('T')[0] : '',
+    birthYear: user?.birthYear || '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -717,18 +717,32 @@ export default function ProfileCompletionModal({ user, onComplete }) {
             </div>
           </div>
 
-          {/* Date of Birth */}
+          {/* Birth Year */}
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
-              Date of Birth
+              Birth Year
             </label>
-            <input
-              type="date"
-              value={formData.dateOfBirth}
-              onChange={(e) => handleChange('dateOfBirth', e.target.value)}
-              max={new Date().toISOString().split('T')[0]}
-              className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all [color-scheme:dark]"
-            />
+            <select
+              value={formData.birthYear}
+              onChange={(e) => handleChange('birthYear', e.target.value)}
+              className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all appearance-none cursor-pointer"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2310b981'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: 'right 0.75rem center',
+                backgroundSize: '1.5rem'
+              }}
+            >
+              <option value="" className="bg-slate-800">Select your birth year</option>
+              {Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i).map(year => (
+                <option key={year} value={year} className="bg-slate-800">
+                  {year}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-gray-500 mt-2">
+              Select the year you were born
+            </p>
           </div>
 
           {/* Submit Button with halo effect - Emerald Theme */}

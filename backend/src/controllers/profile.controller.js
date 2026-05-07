@@ -41,6 +41,7 @@ export const getProfile = async (req, res) => {
         state: true,
         country: true,
         dateOfBirth: true,
+        birthYear: true,
         gender: true,
         totalPoints: true,
         tournamentsPlayed: true,
@@ -86,6 +87,7 @@ export const getProfile = async (req, res) => {
           state: true,
           country: true,
           dateOfBirth: true,
+          birthYear: true,
           gender: true,
           totalPoints: true,
           tournamentsPlayed: true,
@@ -155,11 +157,18 @@ export const updateProfile = async (req, res) => {
     const validatedData = validationResult.data;
     console.log('Validated data:', validatedData);
 
-    // Get current user to check existing dateOfBirth
+    // Get current user to check existing dateOfBirth and birthYear
     const currentUser = await prisma.user.findUnique({
       where: { id: userId },
-      select: { dateOfBirth: true }
+      select: { dateOfBirth: true, birthYear: true }
     });
+
+    // Check if trying to update birthYear when it already exists
+    if (validatedData.birthYear && currentUser.birthYear) {
+      return res.status(400).json({ 
+        error: 'Birth Year cannot be changed once set. This is a permanent field.' 
+      });
+    }
 
     // Check if trying to update dateOfBirth when it already exists
     if (validatedData.dateOfBirth && currentUser.dateOfBirth) {
@@ -185,9 +194,12 @@ export const updateProfile = async (req, res) => {
       }
     }
 
-    // Prepare update data - dateOfBirth can only be set if currently empty, name is always editable
+    // Prepare update data - dateOfBirth and birthYear can only be set if currently empty, name is always editable
     const updateData = {};
     if (validatedData.name) updateData.name = validatedData.name;
+    if (validatedData.birthYear && !currentUser.birthYear) {
+      updateData.birthYear = parseInt(validatedData.birthYear);
+    }
     if (validatedData.dateOfBirth && !currentUser.dateOfBirth) {
       updateData.dateOfBirth = new Date(validatedData.dateOfBirth);
     }
@@ -218,6 +230,7 @@ export const updateProfile = async (req, res) => {
         state: true,
         country: true,
         dateOfBirth: true,
+        birthYear: true,
         gender: true,
         totalPoints: true,
         tournamentsPlayed: true,

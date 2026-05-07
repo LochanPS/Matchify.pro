@@ -18,6 +18,7 @@ const RegisterPageMobile = () => {
     name: '',
     email: '',
     phone: '',
+    dateOfBirth: '',
     password: '',
     confirmPassword: '',
   });
@@ -40,7 +41,7 @@ const RegisterPageMobile = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.email || !formData.password || !formData.phone) {
+    if (!formData.name || !formData.email || !formData.password || !formData.phone || !formData.dateOfBirth) {
       setError('All fields are required');
       return;
     }
@@ -460,6 +461,26 @@ const RegisterPageMobile = () => {
                   onChange={handleChange}
                 />
               </div>
+            </div>
+
+            {/* Date of Birth */}
+            <div>
+              <label className="block text-sm font-semibold text-white mb-2">
+                Date of Birth
+              </label>
+              <input
+                name="dateOfBirth"
+                type="date"
+                required
+                className="w-full px-4 py-3 rounded-xl text-white text-sm placeholder-gray-500 outline-none [color-scheme:dark]"
+                style={{ 
+                  background: 'rgba(255,255,255,0.05)', 
+                  border: '1px solid rgba(255,255,255,0.1)' 
+                }}
+                value={formData.dateOfBirth}
+                onChange={handleChange}
+              />
+              <p className="mt-1 text-xs text-amber-400">⚠️ Cannot be changed later</p>
             </div>
 
             {/* Password */}

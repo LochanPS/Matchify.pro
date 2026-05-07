@@ -155,18 +155,11 @@ export const updateProfile = async (req, res) => {
     const validatedData = validationResult.data;
     console.log('Validated data:', validatedData);
 
-    // Get current user to check existing name and dateOfBirth
+    // Get current user to check existing dateOfBirth
     const currentUser = await prisma.user.findUnique({
       where: { id: userId },
-      select: { name: true, dateOfBirth: true }
+      select: { dateOfBirth: true }
     });
-
-    // Check if trying to update name when it already exists
-    if (validatedData.name && currentUser.name) {
-      return res.status(400).json({ 
-        error: 'Name cannot be changed once set. This is a permanent field.' 
-      });
-    }
 
     // Check if trying to update dateOfBirth when it already exists
     if (validatedData.dateOfBirth && currentUser.dateOfBirth) {
@@ -192,9 +185,9 @@ export const updateProfile = async (req, res) => {
       }
     }
 
-    // Prepare update data - name and dateOfBirth can only be set if currently empty
+    // Prepare update data - dateOfBirth can only be set if currently empty, name is always editable
     const updateData = {};
-    if (validatedData.name && !currentUser.name) updateData.name = validatedData.name;
+    if (validatedData.name) updateData.name = validatedData.name;
     if (validatedData.dateOfBirth && !currentUser.dateOfBirth) {
       updateData.dateOfBirth = new Date(validatedData.dateOfBirth);
     }

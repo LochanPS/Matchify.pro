@@ -240,9 +240,8 @@ export default function ProfilePage() {
   };
 
   const needsConfirmation = () => {
-    const settingName = !profile?.name && formData.name;
     const settingDOB = !profile?.dateOfBirth && formData.dateOfBirth;
-    return settingName || settingDOB;
+    return settingDOB;
   };
 
   const handleSave = async () => {
@@ -267,7 +266,7 @@ export default function ProfilePage() {
     
     try {
       const cleanedData = {};
-      if (!profile?.name && dataToSave.name) cleanedData.name = dataToSave.name;
+      if (dataToSave.name) cleanedData.name = dataToSave.name;
       if (!profile?.dateOfBirth && dataToSave.dateOfBirth) cleanedData.dateOfBirth = dataToSave.dateOfBirth;
       if (dataToSave.phone) cleanedData.phone = dataToSave.phone.replace(/^\+91/, '').replace(/\s/g, '');
       if (dataToSave.gender) cleanedData.gender = dataToSave.gender;
@@ -325,7 +324,7 @@ export default function ProfilePage() {
     setCitySuggestions([]);
   };
 
-  const canEditName = !profile?.name;
+  const canEditName = true; // Name is always editable
   const canEditDOB = !profile?.dateOfBirth;
 
   if (loading) {
@@ -864,36 +863,24 @@ export default function ProfilePage() {
             >
               <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
               <p className="text-sm text-amber-300">
-                <strong>Important:</strong> Name and Date of Birth can only be set once and cannot be changed later.
+                <strong>Important:</strong> Date of Birth can only be set once and cannot be changed later.
               </p>
             </div>
 
             <div className="grid grid-cols-1 gap-6 relative z-10">
-              {/* Name Field */}
+              {/* Name Field - Always Editable */}
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Full Name {!canEditName && <span className="text-gray-500">(locked)</span>}
+                  Full Name
                 </label>
-                {canEditName ? (
-                  <>
-                    <input
-                      type="text"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 bg-blue-500/10 border border-blue-500/30 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                      placeholder="Enter your full name (one-time only)"
-                    />
-                    <p className="text-xs text-blue-400 mt-1">⚠️ This can only be set once</p>
-                  </>
-                ) : (
-                  <input
-                    type="text"
-                    value={profile?.name || ''}
-                    disabled
-                    className="w-full px-4 py-3 border border-white/5 rounded-xl bg-slate-700/30 text-gray-500 cursor-not-allowed"
-                  />
-                )}
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                  placeholder="Enter your full name"
+                />
               </div>
 
               {/* Date of Birth Field */}
@@ -1061,12 +1048,6 @@ export default function ProfilePage() {
               </p>
 
               <div className="bg-slate-700/50 border border-white/10 rounded-xl p-4 mb-6 space-y-3">
-                {!profile?.name && pendingData?.name && (
-                  <div>
-                    <p className="text-sm text-gray-400">Full Name</p>
-                    <p className="font-semibold text-white">{pendingData.name}</p>
-                  </div>
-                )}
                 {!profile?.dateOfBirth && pendingData?.dateOfBirth && (
                   <div>
                     <p className="text-sm text-gray-400">Date of Birth</p>

@@ -59,6 +59,7 @@ import pointsRoutes from './routes/points.routes.js';
 import adminRoutes from './routes/admin.routes.js';
 import paymentSettingsRoutes from './routes/admin/payment-settings.routes.js';
 import paymentVerificationRoutes from './routes/admin/payment-verification.routes.js';
+import refundRequestsRoutes from './routes/refundRequests.routes.js';
 import tournamentPaymentsRoutes from './routes/admin/tournament-payments.routes.js';
 import revenueAnalyticsRoutes from './routes/admin/revenue-analytics.routes.js';
 import tournamentManagementRoutes from './routes/admin/tournament-management.routes.js';
@@ -450,6 +451,7 @@ app.use('/api/organizer', organizerRoutes);
 // Admin sub-routes (MUST BE BEFORE main admin routes for specificity)
 app.use('/api/admin/payment-settings', paymentSettingsRoutes);
 app.use('/api/admin/payment-verifications', paymentVerificationRoutes);
+app.use('/api/admin/refund-requests', refundRequestsRoutes);
 app.use('/api/admin/tournament-payments', tournamentPaymentsRoutes);
 app.use('/api/admin/revenue', revenueAnalyticsRoutes);
 app.use('/api/admin/tournament-management', tournamentManagementRoutes);

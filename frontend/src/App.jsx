@@ -65,6 +65,7 @@ import PrivacyPolicy from './pages/PrivacyPolicy'
 
 // Payment System Pages
 import PaymentVerificationPage from './pages/admin/PaymentVerificationPage'
+import RefundRequestsPage from './pages/admin/RefundRequestsPage'
 import TournamentPaymentsPage from './pages/admin/TournamentPaymentsPage'
 import OrganizerPayoutsPage from './pages/admin/OrganizerPayoutsPage'
 import RevenueDashboardPage from './pages/admin/RevenueDashboardPage'
@@ -437,6 +438,7 @@ function AppContent() {
             
             {/* Payment System Routes */}
             <Route path="payment-verifications" element={<PaymentVerificationPage />} />
+            <Route path="refund-requests" element={<RefundRequestsPage />} />
             <Route path="tournament-payments" element={<TournamentPaymentsPage />} />
             <Route path="organizer-payouts" element={<OrganizerPayoutsPage />} />
             <Route path="revenue" element={<RevenueDashboardPage />} />

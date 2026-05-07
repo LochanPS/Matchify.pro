@@ -238,26 +238,32 @@ router.post('/:id/reject', authenticate, requireAdmin, async (req, res) => {
       }
     });
 
-    // Update registration status
+    // Update registration status - Set to 'rejected' and prepare for refund
     await prisma.registration.update({
       where: { id: verification.registrationId },
       data: {
         paymentStatus: 'rejected',
-        status: 'cancelled'
+        status: 'rejected', // Changed from 'cancelled' to 'rejected'
+        refundAmount: verification.amount,
+        refundStatus: 'pending',
+        refundRequestedAt: new Date(),
+        cancellationReason: reason // Store rejection reason
       }
     });
 
-    // Send notification to user
+    // Send notification to user - Ask for refund details
     await prisma.notification.create({
       data: {
         userId: verification.userId,
         type: 'PAYMENT_REJECTED',
-        title: 'Payment Rejected',
-        message: `Your payment was rejected. Reason: ${reason}`,
+        title: '❌ Payment Rejected - Refund Required',
+        message: `Your payment for tournament registration was rejected. Reason: ${reason}\n\nPlease provide your refund details (QR Code, UPI ID, Name) to receive your refund of ₹${verification.amount}.`,
         data: JSON.stringify({
           registrationId: verification.registrationId,
           tournamentId: verification.tournamentId,
-          reason
+          reason,
+          refundAmount: verification.amount,
+          action: 'PROVIDE_REFUND_DETAILS'
         })
       }
     });

@@ -9,9 +9,10 @@ const Sidebar = () => {
       section: 'PAYMENT SYSTEM',
       items: [
         { path: '/admin/payment-verifications', icon: '💳', label: 'Payment Verification' },
+        { path: '/admin/refund-requests', icon: '💸', label: 'Refund Requests' },
         { path: '/admin/tournament-payments', icon: '🏆', label: 'Tournament Payments' },
-        { path: '/admin/organizer-payouts', icon: '💸', label: 'Organizer Payouts' },
-        { path: '/admin/revenue', icon: '💰', label: 'Revenue Analytics' },
+        { path: '/admin/organizer-payouts', icon: '💰', label: 'Organizer Payouts' },
+        { path: '/admin/revenue', icon: '📊', label: 'Revenue Analytics' },
         { path: '/admin/qr-settings', icon: '📱', label: 'QR Code Settings' },
       ]
     },

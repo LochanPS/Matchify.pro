@@ -4,6 +4,7 @@ import { registrationAPI } from '../api/registration';
 import { Loader, Calendar, MapPin, Users, CreditCard, XCircle, Trophy, ArrowRight, ArrowLeft, X, CheckCircle, AlertTriangle, Upload, QrCode, Clock } from 'lucide-react';
 import { formatDateIndian } from '../utils/dateFormat';
 import { TrophyIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
+import RefundDetailsModal from '../components/RefundDetailsModal';
 
 export default function MyRegistrationsPage() {
   const navigate = useNavigate();
@@ -15,6 +16,7 @@ export default function MyRegistrationsPage() {
   const [cancelForm, setCancelForm] = useState({ reason: '', upiId: '', qrCode: null });
   const [cancelFormErrors, setCancelFormErrors] = useState({});
   const [resultModal, setResultModal] = useState(null); // { type: 'success' | 'error', message, refundAmount }
+  const [showRefundDetailsModal, setShowRefundDetailsModal] = useState(null); // registration object
   const qrCodeInputRef = useRef(null);
 
   useEffect(() => {
@@ -120,6 +122,7 @@ export default function MyRegistrationsPage() {
     const styles = {
       confirmed: { bg: 'bg-green-500/20', text: 'text-green-300', label: 'Confirmed' },
       pending: { bg: 'bg-amber-500/20', text: 'text-amber-300', label: 'Pending' },
+      rejected: { bg: 'bg-red-500/20', text: 'text-red-300', label: 'Rejected - Refund Pending' },
       cancelled: { bg: 'bg-red-500/20', text: 'text-red-300', label: 'Cancelled' },
       cancellation_requested: { bg: 'bg-orange-500/20', text: 'text-orange-300', label: 'Cancellation Requested' },
     };
@@ -349,6 +352,26 @@ export default function MyRegistrationsPage() {
                         </button>
                       )}
 
+                      {/* Show "Submit Refund Details" button for rejected registrations without refund details */}
+                      {registration.status === 'rejected' && !registration.refundUpiId && (
+                        <button
+                          onClick={() => setShowRefundDetailsModal(registration)}
+                          className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-xl transition-colors font-bold"
+                          style={{ color: '#10b981', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)' }}
+                        >
+                          <Upload className="h-3.5 w-3.5" />
+                          Submit Refund Details
+                        </button>
+                      )}
+
+                      {/* Show status for rejected registrations with refund details submitted */}
+                      {registration.status === 'rejected' && registration.refundUpiId && (
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-xl" style={{ color: '#10b981', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)' }}>
+                          <CheckCircle className="h-3.5 w-3.5" />
+                          Refund Details Submitted
+                        </div>
+                      )}
+
                       <button
                         onClick={() => navigate(`/tournaments/${registration.tournament.id}`)}
                         className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-xl transition-colors font-bold"
@@ -571,6 +594,15 @@ export default function MyRegistrationsPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Refund Details Modal */}
+      {showRefundDetailsModal && (
+        <RefundDetailsModal
+          registration={showRefundDetailsModal}
+          onClose={() => setShowRefundDetailsModal(null)}
+          onSuccess={fetchRegistrations}
+        />
       )}
     </div>
   );

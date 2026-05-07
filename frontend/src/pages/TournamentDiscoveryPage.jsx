@@ -9,13 +9,11 @@ import {
   XMarkIcon,
   TrophyIcon,
   ArrowRightIcon,
-  SparklesIcon,
-  ArrowLeftIcon
+  SparklesIcon
 } from '@heroicons/react/24/outline';
 import { Loader } from 'lucide-react';
 import { tournamentAPI } from '../api/tournament';
 import { formatDateIndian } from '../utils/dateFormat';
-import Navbar from '../components/Navbar';
 
 export default function TournamentDiscoveryPage() {
   const navigate = useNavigate();
@@ -90,10 +88,7 @@ export default function TournamentDiscoveryPage() {
   const hasActiveFilters = Object.values(filters).some(v => v) || searchQuery;
 
   return (
-    <div className="min-h-screen relative overflow-hidden" style={{ background:'linear-gradient(180deg, #0a0a1f 0%, #07071a 30%, #0d1a2a 60%, #07071a 100%)' }}>
-      {/* Navbar */}
-      <Navbar />
-      
+    <div className="min-h-screen relative overflow-hidden pb-6" style={{ background:'linear-gradient(180deg, #0a0a1f 0%, #07071a 30%, #0d1a2a 60%, #07071a 100%)' }}>
       {/* Animated Background Elements */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div 
@@ -153,12 +148,12 @@ export default function TournamentDiscoveryPage() {
         }
       `}</style>
 
-      {/* Hero Header */}
-      <div className="relative">
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 pt-20 sm:pt-24">
+      {/* Hero Header - Compact Mobile-First */}
+      <div className="relative pt-20">
+        <div className="relative max-w-7xl mx-auto px-4 py-6">
           <div className="text-center">
             <div 
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold mb-4 sm:mb-6 relative overflow-hidden"
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold mb-3 relative overflow-hidden"
               style={{
                 background: 'linear-gradient(135deg, rgba(245,158,11,0.2), rgba(251,146,60,0.15))',
                 border: '2px solid rgba(245,158,11,0.4)',
@@ -166,11 +161,11 @@ export default function TournamentDiscoveryPage() {
                 boxShadow: '0 4px 15px rgba(245,158,11,0.3)'
               }}
             >
-              <SparklesIcon className="w-4 h-4" />
+              <SparklesIcon className="w-3.5 h-3.5" />
               Find Your Next Competition
             </div>
             <h1 
-              className="text-3xl sm:text-4xl md:text-5xl font-black mb-3 sm:mb-4"
+              className="text-2xl sm:text-3xl font-black mb-2"
               style={{
                 background: 'linear-gradient(135deg, #00c853, #00ff88, #00c853)',
                 WebkitBackgroundClip: 'text',
@@ -181,17 +176,17 @@ export default function TournamentDiscoveryPage() {
             >
               Discover Tournaments
             </h1>
-            <p className="text-sm sm:text-lg text-white/70 max-w-2xl mx-auto font-medium">
+            <p className="text-xs sm:text-sm text-white/70 max-w-2xl mx-auto font-medium">
               Find and register for badminton tournaments near you
             </p>
           </div>
         </div>
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        {/* Search Card */}
+      <div className="relative max-w-7xl mx-auto px-4 py-4">
+        {/* Search Card - Compact */}
         <div 
-          className="rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8 relative overflow-hidden"
+          className="rounded-2xl p-4 mb-4 relative overflow-hidden"
           style={{
             background: 'linear-gradient(135deg, rgba(0,200,83,0.1) 0%, rgba(99,102,241,0.1) 100%)',
             border: '2px solid rgba(0,200,83,0.2)',
@@ -199,15 +194,15 @@ export default function TournamentDiscoveryPage() {
             boxShadow: '0 8px 32px rgba(0,200,83,0.15)'
           }}
         >
-          <form onSubmit={handleSearch} className="flex flex-col gap-3 sm:gap-4">
+          <form onSubmit={handleSearch} className="flex flex-col gap-3">
             <div className="relative">
-              <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-emerald-400" />
+              <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-400" />
               <input
                 type="text"
                 placeholder="Search tournaments by name..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3.5 sm:py-4 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all text-white placeholder-gray-400 font-medium"
+                className="w-full pl-10 pr-3 py-3 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all text-white text-sm placeholder-gray-400 font-medium"
                 style={{
                   background: 'rgba(0,0,0,0.3)',
                   border: '1.5px solid rgba(0,200,83,0.3)',
@@ -216,11 +211,11 @@ export default function TournamentDiscoveryPage() {
               />
             </div>
             
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               <button
                 type="button"
                 onClick={() => setShowFilters(!showFilters)}
-                className="flex-1 px-4 sm:px-6 py-3.5 sm:py-4 rounded-xl flex items-center justify-center gap-2 font-bold transition-all relative overflow-hidden"
+                className="flex-1 px-4 py-3 rounded-xl flex items-center justify-center gap-2 font-bold text-sm transition-all relative overflow-hidden"
                 style={
                   showFilters 
                     ? { 
@@ -235,15 +230,15 @@ export default function TournamentDiscoveryPage() {
                       }
                 }
               >
-                <FunnelIcon className="h-5 w-5" />
-                <span className="hidden sm:inline">Filters</span>
+                <FunnelIcon className="h-4 w-4" />
+                <span>Filters</span>
                 {hasActiveFilters && (
                   <span className="w-2 h-2 bg-amber-400 rounded-full animate-pulse"></span>
                 )}
               </button>
               <button
                 type="submit"
-                className="flex-1 px-4 sm:px-8 py-3.5 sm:py-4 rounded-xl font-bold transition-all relative overflow-hidden group"
+                className="flex-1 px-6 py-3 rounded-xl font-bold text-sm transition-all relative overflow-hidden group"
                 style={{ 
                   background: 'linear-gradient(135deg, #a855f7, #8b5cf6)',
                   color: '#ffffff',
@@ -259,31 +254,31 @@ export default function TournamentDiscoveryPage() {
             </div>
           </form>
 
-          {/* Filters Panel */}
+          {/* Filters Panel - Compact */}
           {showFilters && (
-            <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-white/10">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="font-bold text-white text-sm sm:text-base">Filter Options</h3>
+            <div className="mt-4 pt-4 border-t border-white/10">
+              <div className="flex justify-between items-center mb-3">
+                <h3 className="font-bold text-white text-sm">Filter Options</h3>
                 {hasActiveFilters && (
                   <button
                     onClick={clearFilters}
-                    className="text-xs sm:text-sm text-emerald-400 hover:text-emerald-300 flex items-center gap-1 font-bold transition-colors"
+                    className="text-xs text-emerald-400 hover:text-emerald-300 flex items-center gap-1 font-bold transition-colors"
                   >
-                    <XMarkIcon className="h-4 w-4" />
+                    <XMarkIcon className="h-3.5 w-3.5" />
                     Clear All
                   </button>
                 )}
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+              <div className="grid grid-cols-1 gap-3">
                 <div>
-                  <label className="block text-xs sm:text-sm font-bold text-emerald-400 mb-2">City</label>
+                  <label className="block text-xs font-bold text-emerald-400 mb-1.5">City</label>
                   <input
                     type="text"
                     value={filters.city}
                     onChange={(e) => handleFilterChange('city', e.target.value)}
                     placeholder="Any city"
-                    className="w-full px-4 py-3 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all text-white placeholder-gray-500 font-medium"
+                    className="w-full px-3 py-2.5 text-sm rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all text-white placeholder-gray-500 font-medium"
                     style={{
                       background: 'rgba(0,0,0,0.3)',
                       border: '1.5px solid rgba(0,200,83,0.3)'
@@ -292,11 +287,11 @@ export default function TournamentDiscoveryPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs sm:text-sm font-bold text-purple-400 mb-2">Status</label>
+                  <label className="block text-xs font-bold text-purple-400 mb-1.5">Status</label>
                   <select
                     value={filters.status}
                     onChange={(e) => handleFilterChange('status', e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all text-white font-medium"
+                    className="w-full px-3 py-2.5 text-sm rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all text-white font-medium"
                     style={{
                       background: 'rgba(0,0,0,0.3)',
                       border: '1.5px solid rgba(168,85,247,0.5)',
@@ -311,11 +306,11 @@ export default function TournamentDiscoveryPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs sm:text-sm font-bold text-cyan-400 mb-2">Format</label>
+                  <label className="block text-xs font-bold text-cyan-400 mb-1.5">Format</label>
                   <select
                     value={filters.format}
                     onChange={(e) => handleFilterChange('format', e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all text-white font-medium"
+                    className="w-full px-3 py-2.5 text-sm rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all text-white font-medium"
                     style={{
                       background: 'rgba(0,0,0,0.3)',
                       border: '1.5px solid rgba(6,182,212,0.5)',
@@ -329,43 +324,45 @@ export default function TournamentDiscoveryPage() {
                   </select>
                 </div>
 
-                <div>
-                  <label className="block text-xs sm:text-sm font-bold text-orange-400 mb-2">From Date</label>
-                  <input
-                    type="date"
-                    value={filters.startDate}
-                    onChange={(e) => handleFilterChange('startDate', e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all text-white font-medium"
-                    style={{
-                      background: 'rgba(0,0,0,0.3)',
-                      border: '1.5px solid rgba(245,158,11,0.3)'
-                    }}
-                  />
-                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-xs font-bold text-orange-400 mb-1.5">From Date</label>
+                    <input
+                      type="date"
+                      value={filters.startDate}
+                      onChange={(e) => handleFilterChange('startDate', e.target.value)}
+                      className="w-full px-3 py-2.5 text-sm rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all text-white font-medium"
+                      style={{
+                        background: 'rgba(0,0,0,0.3)',
+                        border: '1.5px solid rgba(245,158,11,0.3)'
+                      }}
+                    />
+                  </div>
 
-                <div>
-                  <label className="block text-xs sm:text-sm font-bold text-orange-400 mb-2">To Date</label>
-                  <input
-                    type="date"
-                    value={filters.endDate}
-                    onChange={(e) => handleFilterChange('endDate', e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all text-white font-medium"
-                    style={{
-                      background: 'rgba(0,0,0,0.3)',
-                      border: '1.5px solid rgba(245,158,11,0.3)'
-                    }}
-                  />
+                  <div>
+                    <label className="block text-xs font-bold text-orange-400 mb-1.5">To Date</label>
+                    <input
+                      type="date"
+                      value={filters.endDate}
+                      onChange={(e) => handleFilterChange('endDate', e.target.value)}
+                      className="w-full px-3 py-2.5 text-sm rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all text-white font-medium"
+                      style={{
+                        background: 'rgba(0,0,0,0.3)',
+                        border: '1.5px solid rgba(245,158,11,0.3)'
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
           )}
         </div>
 
-        {/* Results Count */}
+        {/* Results Count - Compact */}
         {!loading && (
-          <div className="flex items-center justify-between mb-4 sm:mb-6">
+          <div className="flex items-center justify-between mb-3">
             <p 
-              className="text-sm sm:text-base font-bold"
+              className="text-sm font-bold"
               style={{
                 background: 'linear-gradient(135deg, #00c853, #00ff88)',
                 WebkitBackgroundClip: 'text',
@@ -378,7 +375,7 @@ export default function TournamentDiscoveryPage() {
             {hasActiveFilters && (
               <button
                 onClick={clearFilters}
-                className="text-xs sm:text-sm font-bold transition-colors"
+                className="text-xs font-bold transition-colors"
                 style={{ color: '#00ff88' }}
               >
                 Clear filters
@@ -442,19 +439,19 @@ export default function TournamentDiscoveryPage() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            <div className="grid grid-cols-1 gap-4">
               {tournaments.map((tournament, index) => (
                 <TournamentCard key={tournament.id} tournament={tournament} navigate={navigate} index={index} />
               ))}
             </div>
 
-            {/* Pagination */}
+            {/* Pagination - Compact */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-center gap-2 sm:gap-3 mt-8 sm:mt-10">
+              <div className="flex items-center justify-center gap-2 mt-6">
                 <button
                   onClick={() => setPage(p => Math.max(1, p - 1))}
                   disabled={page === 1}
-                  className="px-4 sm:px-5 py-2.5 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed font-bold text-sm sm:text-base transition-all"
+                  className="px-4 py-2 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed font-bold text-sm transition-all"
                   style={{
                     background: 'rgba(255,255,255,0.05)',
                     border: '1.5px solid rgba(255,255,255,0.1)',
@@ -464,14 +461,14 @@ export default function TournamentDiscoveryPage() {
                   Previous
                 </button>
                 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
                   {[...Array(Math.min(5, totalPages))].map((_, i) => {
                     const pageNum = i + 1;
                     return (
                       <button
                         key={pageNum}
                         onClick={() => setPage(pageNum)}
-                        className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl font-bold text-sm sm:text-base transition-all"
+                        className="w-9 h-9 rounded-xl font-bold text-sm transition-all"
                         style={
                           page === pageNum
                             ? { 
@@ -495,7 +492,7 @@ export default function TournamentDiscoveryPage() {
                 <button
                   onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                   disabled={page === totalPages}
-                  className="px-4 sm:px-5 py-2.5 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed font-bold text-sm sm:text-base transition-all"
+                  className="px-4 py-2 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed font-bold text-sm transition-all"
                   style={{
                     background: 'rgba(255,255,255,0.05)',
                     border: '1.5px solid rgba(255,255,255,0.1)',
@@ -514,7 +511,7 @@ export default function TournamentDiscoveryPage() {
 }
 
 
-// Tournament Card Component
+// Tournament Card Component - Mobile-First Compact Design
 function TournamentCard({ tournament, navigate, index }) {
   const getStatusStyle = (status) => {
     const styles = {
@@ -540,11 +537,9 @@ function TournamentCard({ tournament, navigate, index }) {
   const statusStyle = getStatusStyle(tournament.status);
   const hasPoster = tournament.posters && tournament.posters.length > 0 && tournament.posters[0]?.imageUrl;
   
-  // Get poster URL - handle both Cloudinary and local URLs
   const getPosterUrl = () => {
     if (!hasPoster) return null;
     const posterUrl = tournament.posters[0].imageUrl;
-    // If it's a local URL (starts with /uploads), prepend the API base URL
     if (posterUrl.startsWith('/uploads')) {
       const baseUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
       return `${baseUrl}${posterUrl}`;
@@ -556,7 +551,7 @@ function TournamentCard({ tournament, navigate, index }) {
 
   return (
     <div 
-      className="group relative overflow-hidden cursor-pointer rounded-2xl transition-all duration-300 hover:scale-[1.02]"
+      className="group relative overflow-hidden cursor-pointer rounded-2xl transition-all duration-300 hover:scale-[1.01]"
       onClick={() => navigate(`/tournaments/${tournament.id}`)}
       style={{
         background: 'linear-gradient(135deg, rgba(0,200,83,0.1) 0%, rgba(99,102,241,0.1) 100%)',
@@ -574,8 +569,8 @@ function TournamentCard({ tournament, navigate, index }) {
         }}
       />
 
-      {/* Poster */}
-      <div className="h-44 sm:h-52 relative overflow-hidden">
+      {/* Poster - Compact */}
+      <div className="h-36 relative overflow-hidden">
         {posterUrl ? (
           <>
             <img
@@ -583,20 +578,19 @@ function TournamentCard({ tournament, navigate, index }) {
               alt={tournament.name}
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
             />
-            {/* Gradient overlay for text readability */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
           </>
         ) : (
           <div className={`w-full h-full bg-gradient-to-br ${gradient} flex items-center justify-center relative overflow-hidden`}>
             <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
-            <span className="text-6xl opacity-40 relative z-10">🏸</span>
+            <span className="text-5xl opacity-40 relative z-10">🏸</span>
           </div>
         )}
         
-        {/* Status Badge */}
-        <div className="absolute top-3 right-3">
+        {/* Status Badge - Compact */}
+        <div className="absolute top-2 right-2">
           <span 
-            className="px-3 py-1.5 text-xs font-black rounded-full backdrop-blur-sm shadow-lg"
+            className="px-2.5 py-1 text-xs font-black rounded-full backdrop-blur-sm shadow-lg"
             style={{
               background: statusStyle.bg,
               color: statusStyle.color
@@ -606,10 +600,10 @@ function TournamentCard({ tournament, navigate, index }) {
           </span>
         </div>
 
-        {/* Format Badge */}
-        <div className="absolute bottom-3 left-3">
+        {/* Format Badge - Compact */}
+        <div className="absolute bottom-2 left-2">
           <span 
-            className="px-3 py-1.5 text-xs font-bold rounded-full backdrop-blur-sm"
+            className="px-2.5 py-1 text-xs font-bold rounded-full backdrop-blur-sm"
             style={{
               background: 'rgba(0,0,0,0.5)',
               border: '1.5px solid rgba(255,255,255,0.3)',
@@ -622,51 +616,51 @@ function TournamentCard({ tournament, navigate, index }) {
         </div>
       </div>
 
-      {/* Content */}
-      <div className="p-4 sm:p-5 relative z-10">
-        <h3 className="font-black text-base sm:text-lg text-white mb-3 line-clamp-2 group-hover:text-emerald-400 transition-colors min-h-[3rem] sm:min-h-[3.5rem]">
+      {/* Content - Compact */}
+      <div className="p-4 relative z-10">
+        <h3 className="font-black text-base text-white mb-2.5 line-clamp-2 group-hover:text-emerald-400 transition-colors min-h-[2.5rem]">
           {tournament.name}
         </h3>
 
-        <div className="space-y-2 sm:space-y-2.5 mb-4 sm:mb-5">
-          <div className="flex items-center gap-3 text-xs sm:text-sm text-white/80">
+        <div className="space-y-2 mb-3">
+          <div className="flex items-center gap-2.5 text-xs text-white/80">
             <div 
-              className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+              className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
               style={{ background: 'rgba(168,85,247,0.2)' }}
             >
-              <MapPinIcon className="h-4 w-4 text-purple-400" />
+              <MapPinIcon className="h-3.5 w-3.5 text-purple-400" />
             </div>
             <span className="truncate font-medium">{tournament.city}, {tournament.state}</span>
           </div>
 
-          <div className="flex items-center gap-3 text-xs sm:text-sm text-white/80">
+          <div className="flex items-center gap-2.5 text-xs text-white/80">
             <div 
-              className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+              className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
               style={{ background: 'rgba(59,130,246,0.2)' }}
             >
-              <CalendarIcon className="h-4 w-4 text-blue-400" />
+              <CalendarIcon className="h-3.5 w-3.5 text-blue-400" />
             </div>
             <span className="font-medium">{formatDateIndian(tournament.startDate)}</span>
           </div>
 
-          <div className="flex items-center gap-3 text-xs sm:text-sm text-white/80">
+          <div className="flex items-center gap-2.5 text-xs text-white/80">
             <div 
-              className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+              className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
               style={{ background: 'rgba(0,200,83,0.2)' }}
             >
-              <UserGroupIcon className="h-4 w-4 text-green-400" />
+              <UserGroupIcon className="h-3.5 w-3.5 text-green-400" />
             </div>
             <span className="font-medium">{tournament._count?.categories || 0} Categories • {tournament._count?.registrations || 0} Registered</span>
           </div>
         </div>
 
-        {/* View Button */}
+        {/* View Button - Compact */}
         <button
           onClick={(e) => {
             e.stopPropagation();
             navigate(`/tournaments/${tournament.id}`);
           }}
-          className="w-full py-3 sm:py-3.5 rounded-xl font-black text-sm sm:text-base transition-all flex items-center justify-center gap-2 group-hover:scale-[1.02] relative overflow-hidden"
+          className="w-full py-2.5 rounded-xl font-black text-sm transition-all flex items-center justify-center gap-2 group-hover:scale-[1.01] relative overflow-hidden"
           style={{ 
             background: 'linear-gradient(135deg, #a855f7, #8b5cf6)',
             color: '#ffffff',

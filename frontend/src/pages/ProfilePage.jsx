@@ -734,7 +734,7 @@ export default function ProfilePage() {
               )}
               {(profile?.city || profile?.state) && (
                 <div className="flex items-center gap-3 text-gray-300">
-                  <MapPin className="w-5 h-5 text-purple-400" />
+                  <MapPin className="w-5 h-5 text-emerald-400" />
                   <span className="text-sm">{[profile?.city, profile?.state].filter(Boolean).join(', ')}</span>
                 </div>
               )}
@@ -929,7 +929,7 @@ export default function ProfilePage() {
                   name="phone"
                   value={formData.phone}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
                   placeholder="Enter your phone number"
                 />
               </div>
@@ -940,7 +940,7 @@ export default function ProfilePage() {
                   name="gender"
                   value={formData.gender}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
                 >
                   <option value="" className="bg-slate-800">Select Gender</option>
                   <option value="MALE" className="bg-slate-800">Male</option>
@@ -965,13 +965,13 @@ export default function ProfilePage() {
                     setTimeout(() => setShowCitySuggestions(false), 300);
                   }}
                   autoComplete="off"
-                  className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
                   placeholder="Enter your city"
                 />
                 
                 {/* City Suggestions Dropdown */}
                 {showCitySuggestions && citySuggestions.length > 0 && (
-                  <div className="absolute z-50 w-full mt-1 bg-slate-800 border border-purple-500/30 rounded-xl shadow-2xl shadow-purple-500/20 overflow-hidden">
+                  <div className="absolute z-50 w-full mt-1 bg-slate-800 border border-emerald-500/30 rounded-xl shadow-2xl shadow-emerald-500/20 overflow-hidden">
                     {citySuggestions.map((item, index) => (
                       <div
                         key={index}
@@ -979,7 +979,7 @@ export default function ProfilePage() {
                           e.preventDefault();
                           handleCitySelect(item.city, item.state);
                         }}
-                        className="px-4 py-3 hover:bg-purple-500/20 cursor-pointer transition-colors border-b border-slate-700/50 last:border-b-0"
+                        className="px-4 py-3 hover:bg-emerald-500/20 cursor-pointer transition-colors border-b border-slate-700/50 last:border-b-0"
                       >
                         <div className="text-white font-medium">{item.city}</div>
                         <div className="text-gray-400 text-sm">{item.state}</div>
@@ -997,7 +997,7 @@ export default function ProfilePage() {
                   value={formData.state}
                   onChange={handleInputChange}
                   readOnly
-                  className="w-full px-4 py-3 bg-slate-700/30 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all cursor-not-allowed"
+                  className="w-full px-4 py-3 bg-slate-700/30 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all cursor-not-allowed"
                   placeholder="State (auto-filled)"
                 />
               </div>
@@ -1009,7 +1009,7 @@ export default function ProfilePage() {
                   name="country"
                   value={formData.country}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
                   placeholder="Enter your country"
                 />
               </div>

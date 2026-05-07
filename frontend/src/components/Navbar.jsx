@@ -411,13 +411,22 @@ const Navbar = () => {
 
       {/* Mobile Menu - Professional Design */}
       {user && showMobileMenu && (
-        <div 
-          ref={mobileMenuRef}
-          className="md:hidden fixed inset-0 top-16 z-40 overflow-y-auto"
-          style={{ 
-            background: 'linear-gradient(180deg, #1e1b4b 0%, #312e81 30%, #4c1d95 60%, #581c87 100%)'
-          }}
-        >
+        <>
+          {/* Full-screen overlay */}
+          <div 
+            className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+            onClick={() => setShowMobileMenu(false)}
+          />
+          
+          {/* Menu content - slides down from navbar */}
+          <div 
+            ref={mobileMenuRef}
+            className="md:hidden fixed left-0 right-0 top-0 z-50 overflow-y-auto max-h-screen"
+            style={{ 
+              paddingTop: '64px', // Space for navbar
+              background: 'linear-gradient(180deg, #1e1b4b 0%, #312e81 30%, #4c1d95 60%, #581c87 100%)'
+            }}
+          >
           {/* Animated Background Elements */}
           <div className="fixed inset-0 pointer-events-none overflow-hidden">
             <div 
@@ -611,6 +620,8 @@ const Navbar = () => {
             </button>
           </div>
         </div>
+      )}
+        </>
       )}
 
     </header>

@@ -94,8 +94,8 @@ function AppContent() {
     return false;
   };
 
-  // Hide Navbar for admin dashboard and unified dashboard (they have their own headers)
-  const shouldShowNavbar = !location.pathname.startsWith('/admin-dashboard') && !location.pathname.startsWith('/dashboard');
+  // Hide Navbar for admin dashboard only (unified dashboard shows navbar)
+  const shouldShowNavbar = !location.pathname.startsWith('/admin-dashboard');
 
   return (
     <div className="min-h-screen" style={{ background: '#07071a' }}>

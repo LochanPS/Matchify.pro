@@ -30,6 +30,7 @@ const Navbar = () => {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const userMenuRef = useRef(null);
   const roleMenuRef = useRef(null);
+  const mobileMenuRef = useRef(null);
 
   // Close menus when clicking outside
   useEffect(() => {
@@ -40,10 +41,35 @@ const Navbar = () => {
       if (roleMenuRef.current && !roleMenuRef.current.contains(event.target)) {
         setShowRoleMenu(false);
       }
+      // Close mobile menu when clicking outside
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target) && showMobileMenu) {
+        // Check if click is not on the menu button itself
+        const menuButton = document.querySelector('[data-mobile-menu-button]');
+        if (menuButton && !menuButton.contains(event.target)) {
+          setShowMobileMenu(false);
+        }
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  }, [showMobileMenu]);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setShowMobileMenu(false);
+  }, [location.pathname]);
+
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (showMobileMenu) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [showMobileMenu]);
 
   const handleLogout = () => {
     logout();
@@ -197,7 +223,7 @@ const Navbar = () => {
   }
 
   return (
-    <header className="sticky top-0 z-50 backdrop-blur-lg border-b shadow-lg shadow-black/40" style={{ background:'rgba(7,7,26,0.96)', borderColor:'rgba(0,255,136,0.1)' }}>
+    <header className="sticky top-0 z-50 backdrop-blur-lg border-b shadow-lg shadow-purple-900/40" style={{ background:'linear-gradient(135deg, rgba(88,28,135,0.95) 0%, rgba(67,20,100,0.95) 50%, rgba(49,15,75,0.95) 100%)', borderColor:'rgba(168,85,247,0.3)' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16">
 
@@ -277,7 +303,7 @@ const Navbar = () => {
                 {isOrganizer() && !location.pathname.startsWith('/academies') && (
                   <Link
                     to="/tournaments/create"
-                    className="hidden sm:flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl hover:shadow-lg hover:shadow-emerald-500/30 hover:scale-105 transition-all text-sm font-semibold"
+                    className="hidden sm:flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-500 to-violet-600 text-white rounded-xl hover:shadow-lg hover:shadow-purple-500/30 hover:scale-105 transition-all text-sm font-semibold"
                   >
                     <Plus className="w-4 h-4" />
                     Create
@@ -354,8 +380,9 @@ const Navbar = () => {
 
                 {/* Mobile Menu Button */}
                 <button
+                  data-mobile-menu-button
                   onClick={() => setShowMobileMenu(!showMobileMenu)}
-                  className="md:hidden p-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300"
+                  className="md:hidden p-2 rounded-lg hover:bg-purple-500/20 transition-colors text-purple-200"
                 >
                   {showMobileMenu ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
                 </button>
@@ -372,7 +399,7 @@ const Navbar = () => {
                 <Link
                   to="/register"
                   className="px-5 py-2.5 rounded-xl hover:scale-105 transition-all text-sm font-bold"
-                  style={{ background:'linear-gradient(135deg,#00c853,#00ff88)', color:'#003320', boxShadow:'0 0 16px rgba(0,255,136,0.3)' }}
+                  style={{ background:'linear-gradient(135deg,#a855f7,#c084fc)', color:'#ffffff', boxShadow:'0 0 16px rgba(168,85,247,0.4)' }}
                 >
                   Sign up
                 </Link>
@@ -385,9 +412,10 @@ const Navbar = () => {
       {/* Mobile Menu - Professional Design */}
       {user && showMobileMenu && (
         <div 
+          ref={mobileMenuRef}
           className="md:hidden fixed inset-0 top-16 z-40 overflow-y-auto"
           style={{ 
-            background: 'linear-gradient(180deg, #0a0a1f 0%, #07071a 30%, #0d1a2a 60%, #07071a 100%)'
+            background: 'linear-gradient(180deg, #1e1b4b 0%, #312e81 30%, #4c1d95 60%, #581c87 100%)'
           }}
         >
           {/* Animated Background Elements */}
@@ -395,14 +423,14 @@ const Navbar = () => {
             <div 
               className="absolute top-0 right-0 w-64 h-64 rounded-full blur-3xl opacity-30"
               style={{ 
-                background: 'radial-gradient(circle, rgba(0,200,83,0.6), transparent)',
+                background: 'radial-gradient(circle, rgba(168,85,247,0.8), transparent)',
                 animation: 'glow 4s ease-in-out infinite'
               }}
             />
             <div 
               className="absolute bottom-1/3 left-0 w-56 h-56 rounded-full blur-3xl opacity-25"
               style={{ 
-                background: 'radial-gradient(circle, rgba(168,85,247,0.6), transparent)',
+                background: 'radial-gradient(circle, rgba(192,132,252,0.8), transparent)',
                 animation: 'glow 5s ease-in-out infinite reverse'
               }}
             />
@@ -415,7 +443,7 @@ const Navbar = () => {
                   height: `${Math.random() * 4 + 2}px`,
                   left: `${Math.random() * 100}%`,
                   top: `${Math.random() * 100}%`,
-                  background: ['#00c853', '#a855f7', '#06b6d4'][Math.floor(Math.random() * 3)],
+                  background: ['#a855f7', '#c084fc', '#e879f9'][Math.floor(Math.random() * 3)],
                   opacity: Math.random() * 0.5 + 0.2,
                   animation: `float ${Math.random() * 10 + 5}s ease-in-out infinite`,
                   animationDelay: `${Math.random() * 5}s`,
@@ -447,10 +475,10 @@ const Navbar = () => {
             <div 
               className="rounded-2xl p-5 relative overflow-hidden"
               style={{
-                background: 'linear-gradient(135deg, rgba(0,200,83,0.15) 0%, rgba(99,102,241,0.15) 100%)',
-                border: '2px solid rgba(0,200,83,0.3)',
+                background: 'linear-gradient(135deg, rgba(168,85,247,0.2) 0%, rgba(192,132,252,0.2) 100%)',
+                border: '2px solid rgba(168,85,247,0.4)',
                 backdropFilter: 'blur(20px)',
-                boxShadow: '0 8px 32px rgba(0,200,83,0.2), inset 0 1px 0 rgba(255,255,255,0.1)'
+                boxShadow: '0 8px 32px rgba(168,85,247,0.3), inset 0 1px 0 rgba(255,255,255,0.1)'
               }}
             >
               <div 
@@ -464,7 +492,7 @@ const Navbar = () => {
               <p 
                 className="text-xs font-bold mb-3 relative z-10"
                 style={{ 
-                  background: 'linear-gradient(135deg, #00c853, #00ff88)',
+                  background: 'linear-gradient(135deg, #a855f7, #c084fc)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   backgroundClip: 'text'
@@ -483,11 +511,11 @@ const Navbar = () => {
                       className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all relative overflow-hidden"
                       style={{
                         background: isActive 
-                          ? 'linear-gradient(135deg, #00c853, #00ff88)' 
+                          ? 'linear-gradient(135deg, #a855f7, #c084fc)' 
                           : 'rgba(255,255,255,0.05)',
-                        border: `1.5px solid ${isActive ? 'rgba(0,200,83,0.5)' : 'rgba(255,255,255,0.1)'}`,
-                        color: isActive ? '#003320' : '#ffffff',
-                        boxShadow: isActive ? '0 4px 15px rgba(0,200,83,0.4)' : 'none'
+                        border: `1.5px solid ${isActive ? 'rgba(168,85,247,0.6)' : 'rgba(255,255,255,0.1)'}`,
+                        color: isActive ? '#ffffff' : '#e9d5ff',
+                        boxShadow: isActive ? '0 4px 15px rgba(168,85,247,0.5)' : 'none'
                       }}
                     >
                       {isActive && (
@@ -539,9 +567,9 @@ const Navbar = () => {
                 onClick={() => setShowMobileMenu(false)}
                 className="flex items-center justify-center gap-3 px-6 py-4 rounded-xl font-bold text-base transition-all relative overflow-hidden group"
                 style={{ 
-                  background: 'linear-gradient(135deg, #00c853, #00ff88)',
-                  color: '#003320',
-                  boxShadow: '0 8px 25px rgba(0,200,83,0.4), inset 0 1px 0 rgba(255,255,255,0.3)'
+                  background: 'linear-gradient(135deg, #a855f7, #c084fc)',
+                  color: '#ffffff',
+                  boxShadow: '0 8px 25px rgba(168,85,247,0.5), inset 0 1px 0 rgba(255,255,255,0.3)'
                 }}
               >
                 <div 
@@ -595,8 +623,8 @@ const NavLink = ({ to, children, active }) => (
     to={to}
     className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
       active 
-        ? 'text-emerald-400 bg-emerald-500/20 shadow-sm' 
-        : 'text-gray-300 hover:text-white hover:bg-white/10'
+        ? 'text-purple-300 bg-purple-500/30 shadow-sm shadow-purple-500/20' 
+        : 'text-purple-100 hover:text-white hover:bg-purple-500/20'
     }`}
   >
     {children}

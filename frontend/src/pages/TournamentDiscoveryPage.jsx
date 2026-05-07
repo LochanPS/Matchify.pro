@@ -15,6 +15,7 @@ import {
 import { Loader } from 'lucide-react';
 import { tournamentAPI } from '../api/tournament';
 import { formatDateIndian } from '../utils/dateFormat';
+import Navbar from '../components/Navbar';
 
 export default function TournamentDiscoveryPage() {
   const navigate = useNavigate();
@@ -90,6 +91,9 @@ export default function TournamentDiscoveryPage() {
 
   return (
     <div className="min-h-screen relative overflow-hidden" style={{ background:'linear-gradient(180deg, #0a0a1f 0%, #07071a 30%, #0d1a2a 60%, #07071a 100%)' }}>
+      {/* Navbar */}
+      <Navbar />
+      
       {/* Animated Background Elements */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div 
@@ -151,16 +155,7 @@ export default function TournamentDiscoveryPage() {
 
       {/* Hero Header */}
       <div className="relative">
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
-          {/* Back Button */}
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-white/70 hover:text-white mb-4 sm:mb-6 transition-all group"
-          >
-            <ArrowLeftIcon className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
-            <span className="font-medium">Back</span>
-          </button>
-
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 pt-20 sm:pt-24">
           <div className="text-center">
             <div 
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold mb-4 sm:mb-6 relative overflow-hidden"

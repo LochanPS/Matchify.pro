@@ -1,9 +1,17 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
+import { 
+  ArrowLeftIcon, 
+  TrophyIcon, 
+  UserGroupIcon, 
+  CheckCircleIcon,
+  ClockIcon
+} from '@heroicons/react/24/outline';
 
 const TournamentDraw = () => {
   const { tournamentId } = useParams();
+  const navigate = useNavigate();
   const [tournament, setTournament] = useState(null);
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -22,11 +30,11 @@ const TournamentDraw = () => {
       // Mock data for now - replace with actual API call
       const mockTournament = {
         id: tournamentId,
-        name: 'Championship Tournament 2024',
+        name: 'ACE BADMINTON TOURNAMENT',
         status: 'ongoing',
         categories: [
-          { id: '1', name: 'Men\'s Singles', format: 'singles' },
-          { id: '2', name: 'Women\'s Singles', format: 'singles' }
+          { id: '1', name: 'MEN\'S SINGLES', format: 'singles' },
+          { id: '2', name: 'MEN\'S DOUBLES', format: 'doubles' }
         ]
       };
 
@@ -36,8 +44,8 @@ const TournamentDraw = () => {
           round: 1,
           matchNumber: 1,
           categoryId: '1',
-          player1: { id: '1', name: 'Aliya Ali' },
-          player2: { id: '2', name: 'Smita Naik' },
+          player1: { id: '1', name: 'Slot 1' },
+          player2: { id: '2', name: 'Slot 2' },
           status: 'PENDING',
           umpireId: null,
           umpire: null,
@@ -49,26 +57,13 @@ const TournamentDraw = () => {
           round: 1,
           matchNumber: 2,
           categoryId: '1',
-          player1: { id: '3', name: 'Geeta Desai' },
-          player2: { id: '4', name: 'Mangala Prabhugaonkar' },
+          player1: { id: '3', name: 'Slot 3' },
+          player2: { id: '4', name: 'Slot 4' },
           status: 'PENDING',
           umpireId: null,
           umpire: null,
           scheduledTime: null,
           courtNumber: null
-        },
-        {
-          id: '3',
-          round: 1,
-          matchNumber: 3,
-          categoryId: '2',
-          player1: { id: '5', name: 'Priya Sharma' },
-          player2: { id: '6', name: 'Anita Patel' },
-          status: 'SCHEDULED',
-          umpireId: 'ump1',
-          umpire: { id: 'ump1', name: 'John Doe' },
-          scheduledTime: '2024-01-22T10:00:00Z',
-          courtNumber: 1
         }
       ];
 
@@ -90,14 +85,10 @@ const TournamentDraw = () => {
 
   const fetchUmpires = async () => {
     try {
-      // Mock umpires data
       const mockUmpires = [
         { id: 'ump1', name: 'John Doe', isAvailable: true },
-        { id: 'ump2', name: 'Jane Smith', isAvailable: true },
-        { id: 'ump3', name: 'Mike Johnson', isAvailable: false },
-        { id: 'ump4', name: 'Sarah Wilson', isAvailable: true }
+        { id: 'ump2', name: 'Jane Smith', isAvailable: true }
       ];
-      
       setUmpires(mockUmpires);
     } catch (error) {
       console.error('Error fetching umpires:', error);
@@ -106,16 +97,10 @@ const TournamentDraw = () => {
 
   const assignUmpire = async (matchId, umpireId) => {
     try {
-      // Update match with assigned umpire
       const updatedMatches = matches.map(match => {
         if (match.id === matchId) {
           const umpire = umpires.find(u => u.id === umpireId);
-          return {
-            ...match,
-            umpireId,
-            umpire,
-            status: 'SCHEDULED'
-          };
+          return { ...match, umpireId, umpire, status: 'SCHEDULED' };
         }
         return match;
       });
@@ -125,8 +110,6 @@ const TournamentDraw = () => {
       
       const umpire = umpires.find(u => u.id === umpireId);
       toast.success(`${umpire.name} assigned as umpire`);
-      
-      // TODO: API call to save umpire assignment
     } catch (error) {
       console.error('Error assigning umpire:', error);
       toast.error('Failed to assign umpire');
@@ -135,41 +118,10 @@ const TournamentDraw = () => {
 
   const startMatch = async (matchId) => {
     try {
-      // Navigate to live scoring
       window.open(`/match/${matchId}/live`, '_blank');
     } catch (error) {
       console.error('Error starting match:', error);
       toast.error('Failed to start match');
-    }
-  };
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'PENDING':
-        return 'bg-gray-600';
-      case 'SCHEDULED':
-        return 'bg-blue-600';
-      case 'IN_PROGRESS':
-        return 'bg-green-600';
-      case 'COMPLETED':
-        return 'bg-teal-600';
-      default:
-        return 'bg-gray-600';
-    }
-  };
-
-  const getStatusText = (status) => {
-    switch (status) {
-      case 'PENDING':
-        return 'Pending';
-      case 'SCHEDULED':
-        return 'Scheduled';
-      case 'IN_PROGRESS':
-        return 'Live';
-      case 'COMPLETED':
-        return 'Completed';
-      default:
-        return 'Unknown';
     }
   };
 
@@ -181,9 +133,9 @@ const TournamentDraw = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-slate-900">
+      <div className="flex items-center justify-center min-h-screen" style={{ background: 'linear-gradient(180deg, #1a1a2e 0%, #16213e 100%)' }}>
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-500 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto"></div>
           <p className="mt-4 text-gray-400">Loading tournament draw...</p>
         </div>
       </div>
@@ -191,182 +143,252 @@ const TournamentDraw = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 p-4">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <Link
-            to="/tournaments"
-            className="flex items-center gap-2 text-gray-400 hover:text-teal-400 transition"
+    <div className="min-h-screen pb-6" style={{ background: 'linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)' }}>
+      <div className="max-w-7xl mx-auto px-4 py-4">
+        {/* Header - Mobile Perfect */}
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 text-white/70 hover:text-white mb-4 transition-colors"
+        >
+          <ArrowLeftIcon className="h-5 w-5" />
+          <span className="text-sm font-medium">Back to Tournament</span>
+        </button>
+
+        {/* Tournament Title - Mobile Perfect */}
+        <div className="flex items-center gap-4 mb-6">
+          <div 
+            className="w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0"
+            style={{
+              background: 'linear-gradient(135deg, #a855f7 0%, #8b5cf6 100%)',
+              boxShadow: '0 8px 25px rgba(168,85,247,0.4)'
+            }}
           >
-            <span>←</span>
-            <span>Back to Tournaments</span>
-          </Link>
-          
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-white">{tournament?.name}</h1>
-            <p className="text-gray-400">Tournament Draw</p>
+            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
           </div>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl font-black text-white leading-tight mb-1">{tournament?.name}</h1>
+            <p className="text-sm text-white/60 font-medium">Tournament Draw & Brackets</p>
+          </div>
+        </div>
+
+        {/* Action Buttons - Mobile Perfect */}
+        <div className="flex gap-3 mb-6 overflow-x-auto pb-2">
+          <button
+            className="flex-shrink-0 flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-bold text-sm transition-all"
+            style={{
+              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+              color: '#ffffff',
+              boxShadow: '0 4px 15px rgba(16,185,129,0.4)'
+            }}
+          >
+            <UserGroupIcon className="w-5 h-5" />
+            <span>Assign Players</span>
+          </button>
           
-          <div className="flex gap-2">
-            <Link
-              to={`/tournament/${tournamentId}/results`}
-              className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg transition"
+          <button
+            className="flex-shrink-0 flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-bold text-sm transition-all"
+            style={{
+              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+              color: '#ffffff',
+              boxShadow: '0 4px 15px rgba(16,185,129,0.4)'
+            }}
+          >
+            <TrophyIcon className="w-5 h-5" />
+            <span>End Category</span>
+          </button>
+        </div>
+
+        {/* Stats Grid - Mobile Perfect */}
+        <div className="grid grid-cols-2 gap-3 mb-6">
+          {/* Total Players */}
+          <div 
+            className="rounded-2xl p-4 relative overflow-hidden"
+            style={{
+              background: 'linear-gradient(135deg, rgba(59,130,246,0.2) 0%, rgba(37,99,235,0.1) 100%)',
+              border: '2px solid rgba(59,130,246,0.3)',
+              backdropFilter: 'blur(10px)'
+            }}
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <div 
+                className="w-10 h-10 rounded-xl flex items-center justify-center"
+                style={{ background: 'rgba(59,130,246,0.3)' }}
+              >
+                <UserGroupIcon className="w-5 h-5 text-blue-400" />
+              </div>
+              <div className="flex-1">
+                <p className="text-2xl font-black text-white">0</p>
+                <p className="text-xs font-bold text-white/60">Total Players</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Confirmed */}
+          <div 
+            className="rounded-2xl p-4 relative overflow-hidden"
+            style={{
+              background: 'linear-gradient(135deg, rgba(16,185,129,0.2) 0%, rgba(5,150,105,0.1) 100%)',
+              border: '2px solid rgba(16,185,129,0.3)',
+              backdropFilter: 'blur(10px)'
+            }}
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <div 
+                className="w-10 h-10 rounded-xl flex items-center justify-center"
+                style={{ background: 'rgba(16,185,129,0.3)' }}
+              >
+                <CheckCircleIcon className="w-5 h-5 text-emerald-400" />
+              </div>
+              <div className="flex-1">
+                <p className="text-2xl font-black text-white">0</p>
+                <p className="text-xs font-bold text-white/60">Confirmed</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Total Matches */}
+          <div 
+            className="rounded-2xl p-4 relative overflow-hidden"
+            style={{
+              background: 'linear-gradient(135deg, rgba(139,92,246,0.2) 0%, rgba(124,58,237,0.1) 100%)',
+              border: '2px solid rgba(139,92,246,0.3)',
+              backdropFilter: 'blur(10px)'
+            }}
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <div 
+                className="w-10 h-10 rounded-xl flex items-center justify-center"
+                style={{ background: 'rgba(139,92,246,0.3)' }}
+              >
+                <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <p className="text-2xl font-black text-white">0</p>
+                <p className="text-xs font-bold text-white/60">Total Matches</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Completed */}
+          <div 
+            className="rounded-2xl p-4 relative overflow-hidden"
+            style={{
+              background: 'linear-gradient(135deg, rgba(245,158,11,0.2) 0%, rgba(217,119,6,0.1) 100%)',
+              border: '2px solid rgba(245,158,11,0.3)',
+              backdropFilter: 'blur(10px)'
+            }}
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <div 
+                className="w-10 h-10 rounded-xl flex items-center justify-center"
+                style={{ background: 'rgba(245,158,11,0.3)' }}
+              >
+                <TrophyIcon className="w-5 h-5 text-amber-400" />
+              </div>
+              <div className="flex-1">
+                <p className="text-2xl font-black text-white">0</p>
+                <p className="text-xs font-bold text-white/60">Completed</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Category Tabs - Mobile Perfect */}
+        <div className="flex gap-3 mb-6 overflow-x-auto pb-2">
+          {tournament?.categories.map(category => (
+            <button
+              key={category.id}
+              onClick={() => setSelectedCategory(category.id)}
+              className="flex-shrink-0 px-6 py-3 rounded-2xl font-black text-sm transition-all whitespace-nowrap"
+              style={
+                selectedCategory === category.id
+                  ? {
+                      background: 'linear-gradient(135deg, #a855f7 0%, #8b5cf6 100%)',
+                      color: '#ffffff',
+                      boxShadow: '0 4px 15px rgba(168,85,247,0.4)'
+                    }
+                  : {
+                      background: 'rgba(255,255,255,0.05)',
+                      border: '2px solid rgba(255,255,255,0.1)',
+                      color: '#ffffff'
+                    }
+              }
             >
-              View Results
-            </Link>
+              {category.name} <span className="text-xs opacity-70">{category.format}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Round Badge - Mobile Perfect */}
+        <div className="flex justify-center mb-6">
+          <div 
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl"
+            style={{
+              background: 'linear-gradient(135deg, rgba(16,185,129,0.3) 0%, rgba(5,150,105,0.2) 100%)',
+              border: '2px solid rgba(16,185,129,0.5)',
+              boxShadow: '0 4px 15px rgba(16,185,129,0.3)'
+            }}
+          >
+            <TrophyIcon className="w-5 h-5 text-emerald-400" />
+            <span className="font-black text-emerald-400 text-base">SEMI FINALS</span>
           </div>
         </div>
 
-        {/* Filters */}
-        <div className="bg-slate-800 rounded-xl p-6 mb-6 border border-slate-700">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-gray-400 text-sm mb-2">Category</label>
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full bg-slate-700 text-white border border-slate-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
-              >
-                {tournament?.categories.map(category => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            
-            <div>
-              <label className="block text-gray-400 text-sm mb-2">Round</label>
-              <select
-                value={selectedRound}
-                onChange={(e) => setSelectedRound(parseInt(e.target.value))}
-                className="w-full bg-slate-700 text-white border border-slate-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500"
-              >
-                {rounds.map(round => (
-                  <option key={round} value={round}>
-                    Round {round}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-        </div>
-
-        {/* Round Header */}
-        <div className="mb-6">
-          <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl p-6 text-center">
-            <h2 className="text-3xl font-bold text-white">Round {selectedRound}</h2>
-            <p className="text-purple-200 mt-2">
-              {filteredMatches.length} matches in this round
-            </p>
-          </div>
-        </div>
-
-        {/* Matches Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredMatches.map((match) => (
+        {/* Matches - Mobile Perfect */}
+        <div className="space-y-4">
+          {filteredMatches.map((match, index) => (
             <div
               key={match.id}
-              className="bg-slate-800 rounded-xl border-2 border-purple-500 overflow-hidden hover:shadow-lg hover:shadow-purple-500/20 transition"
+              className="rounded-2xl p-5 relative overflow-hidden"
+              style={{
+                background: 'linear-gradient(135deg, rgba(30,41,59,0.8) 0%, rgba(15,23,42,0.8) 100%)',
+                border: '2px solid rgba(100,116,139,0.3)',
+                backdropFilter: 'blur(20px)'
+              }}
             >
-              {/* Match Header */}
-              <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-white font-bold">Match {match.matchNumber}</h3>
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium text-white ${getStatusColor(match.status)}`}>
-                    {getStatusText(match.status)}
-                  </span>
-                </div>
+              <p className="text-xs font-bold text-white/40 mb-4">MATCH #{index + 1}</p>
+              
+              {/* Player 1 */}
+              <div 
+                className="rounded-xl p-4 mb-3"
+                style={{
+                  background: 'rgba(30,41,59,0.6)',
+                  border: '1px solid rgba(100,116,139,0.3)'
+                }}
+              >
+                <p className="text-base font-bold text-white">{match.player1.name}</p>
               </div>
 
-              {/* Players */}
-              <div className="p-6">
-                <div className="space-y-4 mb-6">
-                  <div className="text-center">
-                    <h4 className="text-xl font-bold text-white mb-1">
-                      {match.player1.name}
-                    </h4>
-                    <div className="h-px bg-gray-600 my-3"></div>
-                  </div>
-                  
-                  <div className="text-center">
-                    <h4 className="text-xl font-bold text-white">
-                      {match.player2.name}
-                    </h4>
-                  </div>
-                </div>
+              {/* VS */}
+              <p className="text-center text-xs font-bold text-white/40 mb-3">VS</p>
 
-                {/* Match Info */}
-                {match.scheduledTime && (
-                  <div className="mb-4 p-3 bg-slate-700 rounded-lg">
-                    <div className="text-sm text-gray-400 mb-1">Scheduled Time</div>
-                    <div className="text-white font-medium">
-                      {new Date(match.scheduledTime).toLocaleString()}
-                    </div>
-                  </div>
-                )}
-
-                {match.courtNumber && (
-                  <div className="mb-4 p-3 bg-slate-700 rounded-lg">
-                    <div className="text-sm text-gray-400 mb-1">Court</div>
-                    <div className="text-white font-medium">Court {match.courtNumber}</div>
-                  </div>
-                )}
-
-                {/* Umpire Section */}
-                <div className="mb-4">
-                  {match.umpire ? (
-                    <div className="p-3 bg-green-900/30 border border-green-700 rounded-lg">
-                      <div className="text-sm text-green-400 mb-1">Umpire Assigned</div>
-                      <div className="text-white font-medium">{match.umpire.name}</div>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => setShowUmpireModal(match.id)}
-                      className="w-full p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition flex items-center justify-center gap-2"
-                    >
-                      <span>👑</span>
-                      <span>Click to assign umpire</span>
-                    </button>
-                  )}
-                </div>
-
-                {/* Actions */}
-                <div className="space-y-2">
-                  {match.status === 'SCHEDULED' && (
-                    <button
-                      onClick={() => startMatch(match.id)}
-                      className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition"
-                    >
-                      Start Match
-                    </button>
-                  )}
-                  
-                  {match.status === 'IN_PROGRESS' && (
-                    <button
-                      onClick={() => startMatch(match.id)}
-                      className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-4 rounded-lg transition animate-pulse"
-                    >
-                      🔴 Join Live Match
-                    </button>
-                  )}
-                  
-                  <Link
-                    to={`/match/${match.id}/details`}
-                    className="block w-full bg-slate-600 hover:bg-slate-700 text-white text-center font-medium py-2 px-4 rounded-lg transition"
-                  >
-                    View Details
-                  </Link>
-                </div>
+              {/* Player 2 */}
+              <div 
+                className="rounded-xl p-4"
+                style={{
+                  background: 'rgba(30,41,59,0.6)',
+                  border: '1px solid rgba(100,116,139,0.3)'
+                }}
+              >
+                <p className="text-base font-bold text-white">{match.player2.name}</p>
               </div>
             </div>
           ))}
         </div>
 
         {filteredMatches.length === 0 && (
-          <div className="bg-slate-800 rounded-xl p-12 text-center border border-slate-700">
-            <p className="text-gray-400 text-lg">No matches found for this round</p>
+          <div 
+            className="rounded-2xl p-12 text-center"
+            style={{
+              background: 'linear-gradient(135deg, rgba(30,41,59,0.8) 0%, rgba(15,23,42,0.8) 100%)',
+              border: '2px solid rgba(100,116,139,0.3)'
+            }}
+          >
+            <p className="text-gray-400 text-base">No matches found for this round</p>
           </div>
         )}
       </div>
@@ -374,30 +396,44 @@ const TournamentDraw = () => {
       {/* Umpire Assignment Modal */}
       {showUmpireModal && (
         <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-800 rounded-xl p-8 max-w-md w-full border border-slate-700">
-            <h3 className="text-2xl font-bold text-white mb-6">Assign Umpire</h3>
+          <div 
+            className="rounded-2xl p-6 max-w-md w-full"
+            style={{
+              background: 'linear-gradient(135deg, rgba(30,41,59,0.95) 0%, rgba(15,23,42,0.95) 100%)',
+              border: '2px solid rgba(100,116,139,0.3)'
+            }}
+          >
+            <h3 className="text-xl font-black text-white mb-4">Assign Umpire</h3>
             
-            <div className="space-y-3 mb-6">
+            <div className="space-y-3 mb-4">
               {umpires.map((umpire) => (
                 <button
                   key={umpire.id}
                   onClick={() => assignUmpire(showUmpireModal, umpire.id)}
                   disabled={!umpire.isAvailable}
-                  className={`w-full p-4 rounded-lg border-2 transition text-left ${
+                  className="w-full p-4 rounded-xl transition text-left"
+                  style={
                     umpire.isAvailable
-                      ? 'border-teal-500 bg-teal-900/30 hover:bg-teal-900/50 text-white'
-                      : 'border-gray-600 bg-gray-900/30 text-gray-500 cursor-not-allowed'
-                  }`}
+                      ? {
+                          background: 'rgba(16,185,129,0.2)',
+                          border: '2px solid rgba(16,185,129,0.4)'
+                        }
+                      : {
+                          background: 'rgba(100,116,139,0.1)',
+                          border: '2px solid rgba(100,116,139,0.2)',
+                          opacity: 0.5
+                        }
+                  }
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="font-medium">{umpire.name}</div>
-                      <div className="text-sm text-gray-400">
+                      <div className="font-bold text-white">{umpire.name}</div>
+                      <div className="text-xs text-white/60">
                         {umpire.isAvailable ? 'Available' : 'Not Available'}
                       </div>
                     </div>
                     {umpire.isAvailable && (
-                      <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                      <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
                     )}
                   </div>
                 </button>
@@ -406,7 +442,12 @@ const TournamentDraw = () => {
             
             <button
               onClick={() => setShowUmpireModal(null)}
-              className="w-full bg-slate-600 hover:bg-slate-700 text-white font-bold py-3 px-4 rounded-lg transition"
+              className="w-full py-3 px-4 rounded-xl font-bold transition"
+              style={{
+                background: 'rgba(100,116,139,0.3)',
+                border: '2px solid rgba(100,116,139,0.4)',
+                color: '#ffffff'
+              }}
             >
               Cancel
             </button>

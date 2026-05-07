@@ -228,6 +228,20 @@ router.post('/login', async (req, res) => {
       });
     }
 
+    // CRITICAL: Ensure user has a matchifyCode (MANDATORY)
+    if (!user.matchifyCode) {
+      console.log(`⚠️ User ${user.email} missing matchifyCode - generating now...`);
+      const matchifyCode = await generateMatchifyCode();
+      
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { matchifyCode }
+      });
+      
+      user.matchifyCode = matchifyCode;
+      console.log(`✅ Generated matchifyCode for ${user.email}: ${matchifyCode}`);
+    }
+
     // Parse roles - handle both 'roles' and 'role' fields
     let userRoles = ['PLAYER']; // Default
     if (user.roles) {

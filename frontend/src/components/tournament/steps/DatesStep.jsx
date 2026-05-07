@@ -70,11 +70,11 @@ const DatesStep = ({ formData, updateMultipleFields, onNext, onPrev }) => {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <h2 
-        className="text-lg font-black mb-4"
+        className="text-xl font-black mb-5"
         style={{
-          background: 'linear-gradient(135deg, #00c853, #00ff88)',
+          background: 'linear-gradient(135deg, #10b981, #34d399)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
           backgroundClip: 'text'
@@ -83,99 +83,99 @@ const DatesStep = ({ formData, updateMultipleFields, onNext, onPrev }) => {
         Tournament Dates
       </h2>
 
-      {/* Registration Period */}
-      <div className="rounded-xl p-4" style={{ background: 'rgba(168,85,247,0.1)', border: '1.5px solid rgba(168,85,247,0.3)' }}>
-        <h3 className="font-bold text-purple-300 mb-3 text-sm">Registration Period</h3>
+      {/* Registration Period - Purple theme like screenshot */}
+      <div className="rounded-2xl p-5" style={{ background: 'rgba(139,92,246,0.15)', border: '1.5px solid rgba(139,92,246,0.3)' }}>
+        <h3 className="font-bold text-purple-300 mb-4 text-base">Registration Period</h3>
         
-        <div className="space-y-3">
+        <div className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-purple-400 mb-1.5">
+            <label className="block text-sm font-bold text-purple-400 mb-2">
               Registration Opens <span className="text-red-400">*</span>
             </label>
             <input
               type="datetime-local"
               value={formatDateForInput(formData.registrationOpenDate)}
               onChange={(e) => updateFormData('registrationOpenDate', e.target.value)}
-              className={`w-full px-3 py-2.5 text-sm rounded-xl text-white focus:ring-2 focus:ring-purple-500 transition-all ${
+              className={`w-full px-4 py-3 text-sm rounded-xl text-white focus:ring-2 focus:ring-purple-500 transition-all ${
                 errors.registrationOpenDate ? 'border-red-500' : ''
               }`}
               style={{
-                background: 'rgba(0,0,0,0.3)',
-                border: errors.registrationOpenDate ? '1.5px solid rgba(239,68,68,0.5)' : '1.5px solid rgba(168,85,247,0.3)'
+                background: 'rgba(0,0,0,0.4)',
+                border: errors.registrationOpenDate ? '1.5px solid rgba(239,68,68,0.5)' : '1.5px solid rgba(139,92,246,0.4)'
               }}
             />
             {errors.registrationOpenDate && (
-              <p className="mt-1 text-xs text-red-400">{errors.registrationOpenDate}</p>
+              <p className="mt-1.5 text-xs text-red-400">{errors.registrationOpenDate}</p>
             )}
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-purple-400 mb-1.5">
+            <label className="block text-sm font-bold text-purple-400 mb-2">
               Registration Closes <span className="text-red-400">*</span>
             </label>
             <input
               type="datetime-local"
               value={formatDateForInput(formData.registrationCloseDate)}
               onChange={(e) => updateFormData('registrationCloseDate', e.target.value)}
-              className={`w-full px-3 py-2.5 text-sm rounded-xl text-white focus:ring-2 focus:ring-purple-500 transition-all ${
+              className={`w-full px-4 py-3 text-sm rounded-xl text-white focus:ring-2 focus:ring-purple-500 transition-all ${
                 errors.registrationCloseDate ? 'border-red-500' : ''
               }`}
               style={{
-                background: 'rgba(0,0,0,0.3)',
-                border: errors.registrationCloseDate ? '1.5px solid rgba(239,68,68,0.5)' : '1.5px solid rgba(168,85,247,0.3)'
+                background: 'rgba(0,0,0,0.4)',
+                border: errors.registrationCloseDate ? '1.5px solid rgba(239,68,68,0.5)' : '1.5px solid rgba(139,92,246,0.4)'
               }}
             />
             {errors.registrationCloseDate && (
-              <p className="mt-1 text-xs text-red-400">{errors.registrationCloseDate}</p>
+              <p className="mt-1.5 text-xs text-red-400">{errors.registrationCloseDate}</p>
             )}
           </div>
         </div>
       </div>
 
-      {/* Tournament Period */}
-      <div className="rounded-xl p-4" style={{ background: 'rgba(0,200,83,0.1)', border: '1.5px solid rgba(0,200,83,0.3)' }}>
-        <h3 className="font-bold text-emerald-300 mb-3 text-sm">Tournament Period</h3>
+      {/* Tournament Period - Emerald theme like screenshot */}
+      <div className="rounded-2xl p-5" style={{ background: 'rgba(16,185,129,0.15)', border: '1.5px solid rgba(16,185,129,0.3)' }}>
+        <h3 className="font-bold text-emerald-300 mb-4 text-base">Tournament Period</h3>
         
-        <div className="space-y-3">
+        <div className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-emerald-400 mb-1.5">
+            <label className="block text-sm font-bold text-emerald-400 mb-2">
               Tournament Starts <span className="text-red-400">*</span>
             </label>
             <input
               type="datetime-local"
               value={formatDateForInput(formData.startDate)}
               onChange={(e) => updateFormData('startDate', e.target.value)}
-              className={`w-full px-3 py-2.5 text-sm rounded-xl text-white focus:ring-2 focus:ring-emerald-500 transition-all ${
+              className={`w-full px-4 py-3 text-sm rounded-xl text-white focus:ring-2 focus:ring-emerald-500 transition-all ${
                 errors.startDate ? 'border-red-500' : ''
               }`}
               style={{
-                background: 'rgba(0,0,0,0.3)',
-                border: errors.startDate ? '1.5px solid rgba(239,68,68,0.5)' : '1.5px solid rgba(0,200,83,0.3)'
+                background: 'rgba(0,0,0,0.4)',
+                border: errors.startDate ? '1.5px solid rgba(239,68,68,0.5)' : '1.5px solid rgba(16,185,129,0.4)'
               }}
             />
             {errors.startDate && (
-              <p className="mt-1 text-xs text-red-400">{errors.startDate}</p>
+              <p className="mt-1.5 text-xs text-red-400">{errors.startDate}</p>
             )}
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-emerald-400 mb-1.5">
+            <label className="block text-sm font-bold text-emerald-400 mb-2">
               Tournament Ends <span className="text-red-400">*</span>
             </label>
             <input
               type="datetime-local"
               value={formatDateForInput(formData.endDate)}
               onChange={(e) => updateFormData('endDate', e.target.value)}
-              className={`w-full px-3 py-2.5 text-sm rounded-xl text-white focus:ring-2 focus:ring-emerald-500 transition-all ${
+              className={`w-full px-4 py-3 text-sm rounded-xl text-white focus:ring-2 focus:ring-emerald-500 transition-all ${
                 errors.endDate ? 'border-red-500' : ''
               }`}
               style={{
-                background: 'rgba(0,0,0,0.3)',
-                border: errors.endDate ? '1.5px solid rgba(239,68,68,0.5)' : '1.5px solid rgba(0,200,83,0.3)'
+                background: 'rgba(0,0,0,0.4)',
+                border: errors.endDate ? '1.5px solid rgba(239,68,68,0.5)' : '1.5px solid rgba(16,185,129,0.4)'
               }}
             />
             {errors.endDate && (
-              <p className="mt-1 text-xs text-red-400">{errors.endDate}</p>
+              <p className="mt-1.5 text-xs text-red-400">{errors.endDate}</p>
             )}
           </div>
         </div>
@@ -183,9 +183,9 @@ const DatesStep = ({ formData, updateMultipleFields, onNext, onPrev }) => {
 
       {/* Date Summary */}
       {formData.startDate && formData.endDate && (
-        <div className="rounded-xl p-3" style={{ background: 'rgba(0,0,0,0.3)', border: '1.5px solid rgba(255,255,255,0.1)' }}>
-          <h4 className="font-bold text-white mb-2 text-xs">Timeline Summary</h4>
-          <div className="space-y-1 text-xs text-gray-400">
+        <div className="rounded-xl p-4" style={{ background: 'rgba(0,0,0,0.3)', border: '1.5px solid rgba(255,255,255,0.1)' }}>
+          <h4 className="font-bold text-white mb-2 text-sm">Timeline Summary</h4>
+          <div className="space-y-1 text-sm text-gray-400">
             <p>• Registration: {
               formData.registrationOpenDate && formData.registrationCloseDate
                 ? `${Math.ceil((new Date(formData.registrationCloseDate) - new Date(formData.registrationOpenDate)) / (1000 * 60 * 60 * 24))} days`
@@ -199,19 +199,19 @@ const DatesStep = ({ formData, updateMultipleFields, onNext, onPrev }) => {
       )}
 
       {/* Navigation */}
-      <div className="flex justify-between pt-4 border-t border-white/10">
+      <div className="flex justify-between pt-5 border-t border-white/10">
         <button
           onClick={onPrev}
-          className="px-5 py-2.5 rounded-xl font-bold text-sm transition-all"
-          style={{ background: 'rgba(100,116,139,0.5)', color: '#d1d5db' }}
+          className="px-6 py-3 rounded-xl font-bold text-sm transition-all"
+          style={{ background: 'rgba(71,85,105,0.6)', color: '#e2e8f0' }}
         >
           ← Back
         </button>
         <button
           onClick={handleNext}
-          className="px-5 py-2.5 rounded-xl font-bold text-sm transition-all"
+          className="px-6 py-3 rounded-xl font-bold text-sm transition-all"
           style={{ 
-            background: 'linear-gradient(135deg, #a855f7, #8b5cf6)',
+            background: 'linear-gradient(135deg, #a855f7, #c084fc)',
             color: '#ffffff',
             boxShadow: '0 6px 20px rgba(168,85,247,0.4)'
           }}

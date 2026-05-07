@@ -74,12 +74,12 @@ const PostersStep = ({ formData, updateFormData, onNext, onPrev }) => {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <div>
         <h2 
-          className="text-lg font-black mb-2"
+          className="text-xl font-black mb-1.5"
           style={{
-            background: 'linear-gradient(135deg, #00c853, #00ff88)',
+            background: 'linear-gradient(135deg, #10b981, #34d399)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text'
@@ -87,21 +87,20 @@ const PostersStep = ({ formData, updateFormData, onNext, onPrev }) => {
         >
           Tournament Posters
         </h2>
-        <p className="text-gray-400 text-xs">Upload up to 5 posters (optional)</p>
+        <p className="text-gray-400 text-sm">Upload up to 5 posters (optional)</p>
       </div>
 
-      {/* Upload Area */}
+      {/* Upload Area - EXACT match to screenshot */}
       <div
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
         onDragOver={handleDrag}
         onDrop={handleDrop}
-        className={`border-2 border-dashed rounded-xl p-6 text-center transition-colors ${
+        className={`border-2 border-dashed rounded-2xl p-8 text-center transition-all cursor-pointer ${
           dragActive
-            ? 'border-emerald-500 bg-emerald-500/10'
-            : 'border-white/20 hover:border-emerald-500/50'
+            ? 'border-emerald-400 bg-emerald-500/10'
+            : 'border-gray-600 hover:border-emerald-500/50 bg-transparent'
         }`}
-        style={{ background: 'rgba(0,0,0,0.3)' }}
       >
         <input
           ref={fileInputRef}
@@ -112,18 +111,18 @@ const PostersStep = ({ formData, updateFormData, onNext, onPrev }) => {
           className="hidden"
         />
         
-        <ArrowUpTrayIcon className="mx-auto h-10 w-10 text-gray-500" />
-        <p className="mt-2 text-sm text-gray-400">
+        <ArrowUpTrayIcon className="mx-auto h-12 w-12 text-gray-500 mb-3" />
+        <p className="text-base text-gray-400 mb-1">
           Drag and drop images here, or{' '}
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="text-emerald-400 hover:text-emerald-300 font-bold"
+            className="text-emerald-400 hover:text-emerald-300 font-bold underline"
           >
             browse
           </button>
         </p>
-        <p className="mt-1 text-xs text-gray-500">
+        <p className="text-sm text-gray-500">
           PNG, JPG, GIF up to 10MB (Max 5)
         </p>
       </div>
@@ -175,10 +174,10 @@ const PostersStep = ({ formData, updateFormData, onNext, onPrev }) => {
         </div>
       )}
 
-      {/* Info Box */}
-      <div className="rounded-xl p-3" style={{ background: 'rgba(168,85,247,0.1)', border: '1.5px solid rgba(168,85,247,0.3)' }}>
-        <h4 className="font-bold text-purple-300 mb-1.5 text-xs">Tips for great posters:</h4>
-        <ul className="text-xs text-gray-400 space-y-0.5">
+      {/* Info Box - Purple theme like screenshot */}
+      <div className="rounded-2xl p-4" style={{ background: 'rgba(139,92,246,0.15)', border: '1.5px solid rgba(139,92,246,0.3)' }}>
+        <h4 className="font-bold text-purple-300 mb-2 text-sm">Tips for great posters:</h4>
+        <ul className="text-sm text-gray-300 space-y-1">
           <li>• Use high-quality images (min 1200x1600px)</li>
           <li>• Primary poster shows first in listings</li>
           <li>• Include tournament name, dates, venue</li>
@@ -187,19 +186,19 @@ const PostersStep = ({ formData, updateFormData, onNext, onPrev }) => {
       </div>
 
       {/* Navigation */}
-      <div className="flex justify-between pt-4 border-t border-white/10">
+      <div className="flex justify-between pt-5 border-t border-white/10">
         <button
           onClick={onPrev}
-          className="px-5 py-2.5 rounded-xl font-bold text-sm transition-all"
-          style={{ background: 'rgba(100,116,139,0.5)', color: '#d1d5db' }}
+          className="px-6 py-3 rounded-xl font-bold text-sm transition-all"
+          style={{ background: 'rgba(71,85,105,0.6)', color: '#e2e8f0' }}
         >
           ← Back
         </button>
         <button
           onClick={handleNext}
-          className="px-5 py-2.5 rounded-xl font-bold text-sm transition-all"
+          className="px-6 py-3 rounded-xl font-bold text-sm transition-all"
           style={{ 
-            background: 'linear-gradient(135deg, #a855f7, #8b5cf6)',
+            background: 'linear-gradient(135deg, #a855f7, #c084fc)',
             color: '#ffffff',
             boxShadow: '0 6px 20px rgba(168,85,247,0.4)'
           }}

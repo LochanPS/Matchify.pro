@@ -164,7 +164,7 @@ const UnifiedDashboardMobile = () => {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden" style={{ 
+    <div className="min-h-screen relative overflow-hidden pt-16" style={{ 
       background: 'linear-gradient(180deg, #0a0a1f 0%, #07071a 30%, #0d1a2a 60%, #07071a 100%)' 
     }}>
       {/* Animated Background Elements */}
@@ -255,139 +255,6 @@ const UnifiedDashboardMobile = () => {
           50% { transform: scale(1.05); }
         }
       `}</style>
-
-      {/* Mobile Header */}
-      <div 
-        className="sticky top-0 z-50 backdrop-blur-md border-b relative"
-        style={{ 
-          background: 'linear-gradient(135deg, rgba(7,7,26,0.95), rgba(13,26,42,0.95))', 
-          borderColor: 'rgba(0,200,83,0.3)',
-          boxShadow: '0 4px 20px rgba(0,200,83,0.1)'
-        }}
-      >
-        <div className="flex items-center justify-between px-4 py-3">
-          {/* Logo */}
-          <div className="flex items-center gap-2">
-            <div className="relative">
-              <div 
-                className="absolute inset-0 blur-lg opacity-60"
-                style={{ 
-                  background: 'radial-gradient(circle, rgba(0,200,83,0.6) 0%, transparent 70%)',
-                  animation: 'glow 3s ease-in-out infinite'
-                }}
-              />
-              <MatchifyLogo size={32} variant="icon" />
-            </div>
-            <span 
-              className="font-bold text-lg"
-              style={{ 
-                background: 'linear-gradient(135deg, #00c853, #00ff88)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-                textShadow: '0 0 20px rgba(0,200,83,0.3)'
-              }}
-            >
-              matchify.pro
-            </span>
-          </div>
-
-          {/* Right Icons */}
-          <div className="flex items-center gap-3">
-            <button 
-              onClick={() => navigate('/notifications')}
-              className="p-2 rounded-lg transition-all relative overflow-hidden group"
-              style={{ 
-                background: 'linear-gradient(135deg, rgba(0,200,83,0.1), rgba(0,255,136,0.05))',
-                border: '1px solid rgba(0,200,83,0.2)'
-              }}
-            >
-              <div 
-                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                style={{ background: 'rgba(0,200,83,0.1)' }}
-              />
-              <BellIcon className="w-6 h-6 text-emerald-400 relative z-10" />
-            </button>
-            
-            {/* Profile Photo - Small in header */}
-            <button
-              onClick={() => setShowMenu(!showMenu)}
-              className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm relative overflow-hidden"
-              style={{ 
-                background: 'linear-gradient(135deg,#00c853,#00ff88)', 
-                color: '#003320',
-                boxShadow: '0 4px 12px rgba(0,200,83,0.4), inset 0 1px 0 rgba(255,255,255,0.3)'
-              }}
-            >
-              {user?.profilePhoto ? (
-                <img src={user.profilePhoto} alt={user.name} className="w-full h-full object-cover rounded-full" />
-              ) : (
-                user?.name?.charAt(0)?.toUpperCase() || 'P'
-              )}
-            </button>
-            
-            <button
-              onClick={() => setShowMenu(!showMenu)}
-              className="p-2 rounded-lg transition-all relative overflow-hidden group"
-              style={{ 
-                background: 'linear-gradient(135deg, rgba(168,85,247,0.1), rgba(139,92,246,0.05))',
-                border: '1px solid rgba(168,85,247,0.2)'
-              }}
-            >
-              <div 
-                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                style={{ background: 'rgba(16,185,129,0.1)' }}
-              />
-              <Bars3Icon className="w-6 h-6 text-emerald-400 relative z-10" />
-            </button>
-          </div>
-        </div>
-
-        {/* Role Switcher - Compact version below profile photo */}
-        {userRoles.length > 1 && (
-          <div className="px-4 pb-3 relative">
-            <div className="flex items-center justify-center gap-2">
-              {userRoles.map((role) => {
-                const config = roleConfig[role];
-                if (!config) return null;
-                
-                const isActive = role === activeRole;
-                
-                return (
-                  <button
-                    key={role}
-                    onClick={() => handleRoleSwitch(role)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition-all flex-shrink-0 relative overflow-hidden"
-                    style={{
-                      background: isActive 
-                        ? `linear-gradient(135deg, ${config.color}, ${config.color}dd)` 
-                        : config.bg,
-                      border: `1.5px solid ${config.border}`,
-                      color: isActive ? '#ffffff' : config.color,
-                      boxShadow: isActive 
-                        ? `0 2px 10px ${config.border}, inset 0 1px 0 rgba(255,255,255,0.2)` 
-                        : 'none'
-                    }}
-                  >
-                    {isActive && (
-                      <div 
-                        className="absolute inset-0 opacity-30"
-                        style={{
-                          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
-                          backgroundSize: '200% 100%',
-                          animation: 'shimmer 3s infinite'
-                        }}
-                      />
-                    )}
-                    <span className="text-base relative z-10">{config.icon}</span>
-                    <span className="text-xs relative z-10">{config.name}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-      </div>
 
       {/* Side Menu Overlay */}
       {showMenu && (

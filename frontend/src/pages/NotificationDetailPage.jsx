@@ -1,16 +1,221 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Trash2, ExternalLink, Calendar, Clock, Upload } from 'lucide-react';
+import { ArrowLeft, Trash2, ExternalLink, Calendar, Clock, Upload, CheckCircle, Loader, AlertTriangle } from 'lucide-react';
 import { useNotifications } from '../contexts/NotificationContext';
 import { format } from 'date-fns';
-import RefundDetailsModal from '../components/RefundDetailsModal';
+import api from '../utils/api';
+import { toast } from 'react-hot-toast';
+
+// Embedded Refund Details Form Component
+const RefundDetailsForm = ({ registrationId, refundAmount, tournamentName, rejectionReason, onSuccess }) => {
+  const [formData, setFormData] = useState({
+    upiId: '',
+    accountName: '',
+    qrCode: null
+  });
+  const [errors, setErrors] = useState({});
+  const [submitting, setSubmitting] = useState(false);
+  const qrCodeInputRef = useRef(null);
+
+  const handleQrCodeChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        setErrors(prev => ({ ...prev, qrCode: 'Please upload an image file' }));
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        setErrors(prev => ({ ...prev, qrCode: 'File size must be less than 5MB' }));
+        return;
+      }
+      setFormData(prev => ({ ...prev, qrCode: file }));
+      setErrors(prev => ({ ...prev, qrCode: null }));
+    }
+  };
+
+  const validate = () => {
+    const newErrors = {};
+    if (!formData.upiId || formData.upiId.trim().length < 5) {
+      newErrors.upiId = 'Please provide a valid UPI ID';
+    }
+    if (!formData.accountName || formData.accountName.trim().length < 2) {
+      newErrors.accountName = 'Please provide your account name';
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validate()) return;
+
+    try {
+      setSubmitting(true);
+      
+      const submitData = new FormData();
+      submitData.append('upiId', formData.upiId.trim());
+      submitData.append('accountName', formData.accountName.trim());
+      if (formData.qrCode) {
+        submitData.append('refundQrCode', formData.qrCode);
+      }
+
+      await api.post(`/registrations/${registrationId}/submit-refund-details`, submitData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      toast.success('Refund details submitted successfully!');
+      onSuccess();
+    } catch (error) {
+      console.error('Error submitting refund details:', error);
+      toast.error(error.response?.data?.error || 'Failed to submit refund details');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="bg-gradient-to-br from-emerald-500/10 to-green-500/10 border-2 border-emerald-500/30 rounded-2xl p-6 sm:p-8">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-12 h-12 bg-emerald-500/20 rounded-xl flex items-center justify-center">
+          <Upload className="w-6 h-6 text-emerald-400" />
+        </div>
+        <div>
+          <h3 className="text-xl font-bold text-white">Submit Your Refund Details</h3>
+          <p className="text-emerald-300 text-sm">Refund Amount: ₹{refundAmount}</p>
+        </div>
+      </div>
+
+      {rejectionReason && (
+        <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 mb-6">
+          <p className="text-red-400 text-sm">
+            <strong>Rejection Reason:</strong> {rejectionReason}
+          </p>
+        </div>
+      )}
+
+      <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mb-6">
+        <p className="text-amber-300 text-sm">
+          <strong>Note:</strong> Please provide your refund details below. The admin will process your refund to the UPI ID you provide.
+        </p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-5">
+        {/* UPI ID */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-300 mb-2">
+            Your UPI ID <span className="text-red-400">*</span>
+          </label>
+          <input
+            type="text"
+            value={formData.upiId}
+            onChange={(e) => setFormData(prev => ({ ...prev, upiId: e.target.value }))}
+            placeholder="e.g., yourname@upi, 9876543210@paytm"
+            className={`w-full px-4 py-3 bg-slate-700/50 border rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all ${
+              errors.upiId ? 'border-red-500' : 'border-white/10'
+            }`}
+          />
+          {errors.upiId && (
+            <p className="text-red-400 text-sm mt-1">{errors.upiId}</p>
+          )}
+        </div>
+
+        {/* Account Name */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-300 mb-2">
+            Account Holder Name <span className="text-red-400">*</span>
+          </label>
+          <input
+            type="text"
+            value={formData.accountName}
+            onChange={(e) => setFormData(prev => ({ ...prev, accountName: e.target.value }))}
+            placeholder="Your full name as per bank account"
+            className={`w-full px-4 py-3 bg-slate-700/50 border rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all ${
+              errors.accountName ? 'border-red-500' : 'border-white/10'
+            }`}
+          />
+          {errors.accountName && (
+            <p className="text-red-400 text-sm mt-1">{errors.accountName}</p>
+          )}
+        </div>
+
+        {/* QR Code Upload */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-300 mb-2">
+            Your Payment QR Code (Optional)
+          </label>
+          <p className="text-gray-500 text-sm mb-2">
+            Upload your UPI QR code to help the admin send the refund faster
+          </p>
+          <input
+            type="file"
+            ref={qrCodeInputRef}
+            onChange={handleQrCodeChange}
+            accept="image/*"
+            className="hidden"
+          />
+          <button
+            type="button"
+            onClick={() => qrCodeInputRef.current?.click()}
+            className={`w-full px-4 py-4 border-2 border-dashed rounded-xl flex flex-col items-center justify-center gap-2 transition-all ${
+              formData.qrCode 
+                ? 'border-emerald-500/50 bg-emerald-500/10' 
+                : 'border-white/20 hover:border-white/30 hover:bg-slate-700/30'
+            }`}
+          >
+            {formData.qrCode ? (
+              <>
+                <CheckCircle className="h-8 w-8 text-emerald-400" />
+                <span className="text-emerald-300 font-medium">{formData.qrCode.name}</span>
+                <span className="text-emerald-400/80 text-sm">Click to change</span>
+              </>
+            ) : (
+              <>
+                <Upload className="h-8 w-8 text-gray-500" />
+                <span className="text-gray-400 font-medium">Upload QR Code</span>
+                <span className="text-gray-500 text-sm">PNG, JPG up to 5MB</span>
+              </>
+            )}
+          </button>
+          {errors.qrCode && (
+            <p className="text-red-400 text-sm mt-1">{errors.qrCode}</p>
+          )}
+        </div>
+
+        {/* Submit Button */}
+        <button
+          type="submit"
+          disabled={submitting}
+          className="w-full px-6 py-4 rounded-xl font-semibold text-white transition-all disabled:opacity-50 flex items-center justify-center gap-2 relative overflow-hidden group"
+          style={{ background: 'linear-gradient(135deg,#10b981,#059669)', boxShadow: '0 4px 15px rgba(16,185,129,0.3)' }}
+        >
+          <div 
+            className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
+            style={{ background: 'rgba(255,255,255,0.1)' }}
+          />
+          {submitting ? (
+            <>
+              <Loader className="h-5 w-5 animate-spin relative z-10" />
+              <span className="relative z-10">Submitting...</span>
+            </>
+          ) : (
+            <>
+              <CheckCircle className="h-5 w-5 relative z-10" />
+              <span className="relative z-10">Submit Refund Details</span>
+            </>
+          )}
+        </button>
+      </form>
+    </div>
+  );
+};
 
 const NotificationDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { notifications, markAsRead, deleteNotification } = useNotifications();
   const [notification, setNotification] = useState(null);
-  const [showRefundModal, setShowRefundModal] = useState(false);
 
   useEffect(() => {
     const found = notifications.find(n => n.id === id);
@@ -352,18 +557,23 @@ const NotificationDetailPage = () => {
               </div>
             )}
 
-            {/* Action Button */}
-            {notification.type === 'PAYMENT_REJECTED' && data.action === 'PROVIDE_REFUND_DETAILS' ? (
+            {/* Refund Details Form - Embedded directly in notification page */}
+            {notification.type === 'PAYMENT_REJECTED' && data.action === 'PROVIDE_REFUND_DETAILS' && (
               <div className="mt-8">
-                <button
-                  onClick={() => setShowRefundModal(true)}
-                  className="w-full px-6 py-4 bg-gradient-to-r from-emerald-500 to-green-500 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-emerald-500/30 transition-all flex items-center justify-center gap-2 group"
-                >
-                  <Upload className="w-5 h-5" />
-                  <span>Submit Refund Details</span>
-                </button>
+                <RefundDetailsForm
+                  registrationId={data.registrationId}
+                  refundAmount={data.refundAmount}
+                  tournamentName={data.tournamentName || 'Tournament'}
+                  rejectionReason={data.reason}
+                  onSuccess={() => {
+                    navigate('/registrations');
+                  }}
+                />
               </div>
-            ) : actionPath && (
+            )}
+
+            {/* Action Button - For other notification types */}
+            {notification.type !== 'PAYMENT_REJECTED' && actionPath && (
               <div className="mt-8">
                 <button
                   onClick={handleTakeAction}
@@ -377,23 +587,6 @@ const NotificationDetailPage = () => {
           </div>
         </div>
       </div>
-
-      {/* Refund Details Modal */}
-      {showRefundModal && data.registrationId && (
-        <RefundDetailsModal
-          registration={{
-            id: data.registrationId,
-            refundAmount: data.refundAmount,
-            tournament: { name: data.tournamentName || 'Tournament' },
-            cancellationReason: data.reason
-          }}
-          onClose={() => setShowRefundModal(false)}
-          onSuccess={() => {
-            setShowRefundModal(false);
-            navigate('/registrations');
-          }}
-        />
-      )}
     </div>
   );
 };

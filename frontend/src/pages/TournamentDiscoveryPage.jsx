@@ -176,9 +176,47 @@ export default function TournamentDiscoveryPage() {
             >
               Discover Tournaments
             </h1>
-            <p className="text-xs sm:text-sm text-white/70 max-w-2xl mx-auto font-medium">
+            <p className="text-xs sm:text-sm text-white/70 max-w-2xl mx-auto font-medium mb-4">
               Find and register for badminton tournaments near you
             </p>
+
+            {/* Quick Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+              <button
+                onClick={() => navigate('/tournaments/create')}
+                className="flex-1 flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl font-bold text-sm transition-all relative overflow-hidden group"
+                style={{ 
+                  background: 'linear-gradient(135deg, #00c853, #00ff88)',
+                  color: '#003320',
+                  boxShadow: '0 8px 25px rgba(0,200,83,0.4)'
+                }}
+              >
+                <div 
+                  className="absolute inset-0 opacity-0 group-active:opacity-100 transition-opacity"
+                  style={{ background: 'radial-gradient(circle at center, rgba(255,255,255,0.3), transparent)' }}
+                />
+                <svg className="w-5 h-5 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                <span className="relative z-10">Create Tournament</span>
+              </button>
+              
+              <button
+                onClick={() => navigate('/dashboard')}
+                className="flex-1 flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl font-bold text-sm transition-all"
+                style={{ 
+                  background: 'linear-gradient(135deg, rgba(168,85,247,0.2), rgba(139,92,246,0.15))',
+                  border: '2px solid rgba(168,85,247,0.4)',
+                  color: '#c4b5fd',
+                  boxShadow: '0 4px 15px rgba(168,85,247,0.3)'
+                }}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+                <span>My Dashboard</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>

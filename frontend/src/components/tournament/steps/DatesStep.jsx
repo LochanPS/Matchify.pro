@@ -70,117 +70,128 @@ const DatesStep = ({ formData, updateMultipleFields, onNext, onPrev }) => {
   };
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-white">Tournament Dates</h2>
-      <p className="text-gray-400">Set up your tournament timeline</p>
+    <div className="space-y-4">
+      <h2 
+        className="text-lg font-black mb-4"
+        style={{
+          background: 'linear-gradient(135deg, #00c853, #00ff88)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          backgroundClip: 'text'
+        }}
+      >
+        Tournament Dates
+      </h2>
 
       {/* Registration Period */}
-      <div className="relative group">
-        <div className="absolute -inset-1 bg-gradient-to-r from-purple-500/20 to-indigo-500/20 rounded-2xl blur-lg opacity-50 group-hover:opacity-70 transition-opacity"></div>
-        <div className="relative bg-purple-500/10 border border-purple-500/30 rounded-xl p-4">
-          <h3 className="font-semibold text-purple-300 mb-4">Registration Period</h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">
-                Registration Opens <span className="text-red-500">*</span>
-              </label>
-              <div className="datetime-input-wrapper">
-                <input
-                  type="datetime-local"
-                  value={formatDateForInput(formData.registrationOpenDate)}
-                  onChange={(e) => updateFormData('registrationOpenDate', e.target.value)}
-                  className={`w-full px-4 py-3 bg-slate-700/50 border rounded-xl text-white focus:ring-2 focus:ring-purple-500 transition-all ${
-                    errors.registrationOpenDate ? 'border-red-500' : 'border-white/10'
-                  }`}
-                />
-              </div>
-              {errors.registrationOpenDate && (
-                <p className="mt-1 text-sm text-red-400">{errors.registrationOpenDate}</p>
-              )}
-            </div>
+      <div className="rounded-xl p-4" style={{ background: 'rgba(168,85,247,0.1)', border: '1.5px solid rgba(168,85,247,0.3)' }}>
+        <h3 className="font-bold text-purple-300 mb-3 text-sm">Registration Period</h3>
+        
+        <div className="space-y-3">
+          <div>
+            <label className="block text-xs font-bold text-purple-400 mb-1.5">
+              Registration Opens <span className="text-red-400">*</span>
+            </label>
+            <input
+              type="datetime-local"
+              value={formatDateForInput(formData.registrationOpenDate)}
+              onChange={(e) => updateFormData('registrationOpenDate', e.target.value)}
+              className={`w-full px-3 py-2.5 text-sm rounded-xl text-white focus:ring-2 focus:ring-purple-500 transition-all ${
+                errors.registrationOpenDate ? 'border-red-500' : ''
+              }`}
+              style={{
+                background: 'rgba(0,0,0,0.3)',
+                border: errors.registrationOpenDate ? '1.5px solid rgba(239,68,68,0.5)' : '1.5px solid rgba(168,85,247,0.3)'
+              }}
+            />
+            {errors.registrationOpenDate && (
+              <p className="mt-1 text-xs text-red-400">{errors.registrationOpenDate}</p>
+            )}
+          </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">
-                Registration Closes <span className="text-red-500">*</span>
-              </label>
-              <div className="datetime-input-wrapper">
-                <input
-                  type="datetime-local"
-                  value={formatDateForInput(formData.registrationCloseDate)}
-                  onChange={(e) => updateFormData('registrationCloseDate', e.target.value)}
-                  className={`w-full px-4 py-3 bg-slate-700/50 border rounded-xl text-white focus:ring-2 focus:ring-purple-500 transition-all ${
-                    errors.registrationCloseDate ? 'border-red-500' : 'border-white/10'
-                  }`}
-                />
-              </div>
-              {errors.registrationCloseDate && (
-                <p className="mt-1 text-sm text-red-400">{errors.registrationCloseDate}</p>
-              )}
-            </div>
+          <div>
+            <label className="block text-xs font-bold text-purple-400 mb-1.5">
+              Registration Closes <span className="text-red-400">*</span>
+            </label>
+            <input
+              type="datetime-local"
+              value={formatDateForInput(formData.registrationCloseDate)}
+              onChange={(e) => updateFormData('registrationCloseDate', e.target.value)}
+              className={`w-full px-3 py-2.5 text-sm rounded-xl text-white focus:ring-2 focus:ring-purple-500 transition-all ${
+                errors.registrationCloseDate ? 'border-red-500' : ''
+              }`}
+              style={{
+                background: 'rgba(0,0,0,0.3)',
+                border: errors.registrationCloseDate ? '1.5px solid rgba(239,68,68,0.5)' : '1.5px solid rgba(168,85,247,0.3)'
+              }}
+            />
+            {errors.registrationCloseDate && (
+              <p className="mt-1 text-xs text-red-400">{errors.registrationCloseDate}</p>
+            )}
           </div>
         </div>
       </div>
 
       {/* Tournament Period */}
-      <div className="relative group">
-        <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 rounded-2xl blur-lg opacity-50 group-hover:opacity-70 transition-opacity"></div>
-        <div className="relative bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4">
-          <h3 className="font-semibold text-emerald-300 mb-4">Tournament Period</h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">
-                Tournament Starts <span className="text-red-500">*</span>
-              </label>
-              <div className="datetime-input-wrapper">
-                <input
-                  type="datetime-local"
-                  value={formatDateForInput(formData.startDate)}
-                  onChange={(e) => updateFormData('startDate', e.target.value)}
-                  className={`w-full px-4 py-3 bg-slate-700/50 border rounded-xl text-white focus:ring-2 focus:ring-purple-500 transition-all ${
-                    errors.startDate ? 'border-red-500' : 'border-white/10'
-                  }`}
-                />
-              </div>
-              {errors.startDate && (
-                <p className="mt-1 text-sm text-red-400">{errors.startDate}</p>
-              )}
-            </div>
+      <div className="rounded-xl p-4" style={{ background: 'rgba(0,200,83,0.1)', border: '1.5px solid rgba(0,200,83,0.3)' }}>
+        <h3 className="font-bold text-emerald-300 mb-3 text-sm">Tournament Period</h3>
+        
+        <div className="space-y-3">
+          <div>
+            <label className="block text-xs font-bold text-emerald-400 mb-1.5">
+              Tournament Starts <span className="text-red-400">*</span>
+            </label>
+            <input
+              type="datetime-local"
+              value={formatDateForInput(formData.startDate)}
+              onChange={(e) => updateFormData('startDate', e.target.value)}
+              className={`w-full px-3 py-2.5 text-sm rounded-xl text-white focus:ring-2 focus:ring-emerald-500 transition-all ${
+                errors.startDate ? 'border-red-500' : ''
+              }`}
+              style={{
+                background: 'rgba(0,0,0,0.3)',
+                border: errors.startDate ? '1.5px solid rgba(239,68,68,0.5)' : '1.5px solid rgba(0,200,83,0.3)'
+              }}
+            />
+            {errors.startDate && (
+              <p className="mt-1 text-xs text-red-400">{errors.startDate}</p>
+            )}
+          </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">
-                Tournament Ends <span className="text-red-500">*</span>
-              </label>
-              <div className="datetime-input-wrapper">
-                <input
-                  type="datetime-local"
-                  value={formatDateForInput(formData.endDate)}
-                  onChange={(e) => updateFormData('endDate', e.target.value)}
-                  className={`w-full px-4 py-3 bg-slate-700/50 border rounded-xl text-white focus:ring-2 focus:ring-purple-500 transition-all ${
-                    errors.endDate ? 'border-red-500' : 'border-white/10'
-                  }`}
-                />
-              </div>
-              {errors.endDate && (
-                <p className="mt-1 text-sm text-red-400">{errors.endDate}</p>
-              )}
-            </div>
+          <div>
+            <label className="block text-xs font-bold text-emerald-400 mb-1.5">
+              Tournament Ends <span className="text-red-400">*</span>
+            </label>
+            <input
+              type="datetime-local"
+              value={formatDateForInput(formData.endDate)}
+              onChange={(e) => updateFormData('endDate', e.target.value)}
+              className={`w-full px-3 py-2.5 text-sm rounded-xl text-white focus:ring-2 focus:ring-emerald-500 transition-all ${
+                errors.endDate ? 'border-red-500' : ''
+              }`}
+              style={{
+                background: 'rgba(0,0,0,0.3)',
+                border: errors.endDate ? '1.5px solid rgba(239,68,68,0.5)' : '1.5px solid rgba(0,200,83,0.3)'
+              }}
+            />
+            {errors.endDate && (
+              <p className="mt-1 text-xs text-red-400">{errors.endDate}</p>
+            )}
           </div>
         </div>
       </div>
 
       {/* Date Summary */}
       {formData.startDate && formData.endDate && (
-        <div className="bg-slate-700/30 border border-white/10 rounded-xl p-4">
-          <h4 className="font-medium text-white mb-2">Timeline Summary</h4>
-          <div className="space-y-1 text-sm text-gray-400">
-            <p>• Registration window: {
+        <div className="rounded-xl p-3" style={{ background: 'rgba(0,0,0,0.3)', border: '1.5px solid rgba(255,255,255,0.1)' }}>
+          <h4 className="font-bold text-white mb-2 text-xs">Timeline Summary</h4>
+          <div className="space-y-1 text-xs text-gray-400">
+            <p>• Registration: {
               formData.registrationOpenDate && formData.registrationCloseDate
                 ? `${Math.ceil((new Date(formData.registrationCloseDate) - new Date(formData.registrationOpenDate)) / (1000 * 60 * 60 * 24))} days`
                 : 'Not set'
             }</p>
-            <p>• Tournament duration: {
+            <p>• Duration: {
               Math.ceil((new Date(formData.endDate) - new Date(formData.startDate)) / (1000 * 60 * 60 * 24))} days
             </p>
           </div>
@@ -188,16 +199,22 @@ const DatesStep = ({ formData, updateMultipleFields, onNext, onPrev }) => {
       )}
 
       {/* Navigation */}
-      <div className="flex justify-between pt-6 border-t border-white/10">
+      <div className="flex justify-between pt-4 border-t border-white/10">
         <button
           onClick={onPrev}
-          className="px-6 py-3 bg-slate-700 text-gray-300 rounded-xl hover:bg-slate-600 transition-colors font-medium"
+          className="px-5 py-2.5 rounded-xl font-bold text-sm transition-all"
+          style={{ background: 'rgba(100,116,139,0.5)', color: '#d1d5db' }}
         >
           ← Back
         </button>
         <button
           onClick={handleNext}
-          className="px-6 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-xl hover:shadow-lg hover:shadow-purple-500/25 transition-all font-semibold"
+          className="px-5 py-2.5 rounded-xl font-bold text-sm transition-all"
+          style={{ 
+            background: 'linear-gradient(135deg, #a855f7, #8b5cf6)',
+            color: '#ffffff',
+            boxShadow: '0 6px 20px rgba(168,85,247,0.4)'
+          }}
         >
           Next: Posters →
         </button>

@@ -128,58 +128,69 @@ const PaymentQRStep = ({ formData, updateFormData, updateMultipleFields, onNext,
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div>
-        <h2 className="text-xl font-semibold text-white mb-2">Payment QR Code <span className="text-red-500">*</span></h2>
-        <p className="text-gray-400">
-          Upload your UPI QR code so the admin can scan and pay your tournament earnings directly to you
+        <h2 
+          className="text-lg font-black mb-2"
+          style={{
+            background: 'linear-gradient(135deg, #00c853, #00ff88)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text'
+          }}
+        >
+          Payment QR Code <span className="text-red-400">*</span>
+        </h2>
+        <p className="text-gray-400 text-xs">
+          Upload UPI QR so admin can pay your earnings
         </p>
       </div>
 
       {/* Saved Details Notice */}
       {!loadingSaved && hasSavedDetails && (
-        <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 flex items-start gap-3">
-          <CheckCircleIcon className="w-5 h-5 text-emerald-400 mt-0.5" />
+        <div className="rounded-xl p-3 flex items-start gap-2" style={{ background: 'rgba(0,200,83,0.1)', border: '1.5px solid rgba(0,200,83,0.3)' }}>
+          <CheckCircleIcon className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
           <div>
-            <p className="text-sm font-medium text-emerald-300">Payment details auto-filled!</p>
-            <p className="text-sm text-emerald-400/80">We've filled in your saved UPI ID and account holder name. You still need to upload the QR code.</p>
+            <p className="text-xs font-bold text-emerald-300">Auto-filled!</p>
+            <p className="text-xs text-emerald-400/80">Saved details loaded. Upload QR code.</p>
           </div>
         </div>
       )}
 
       {error && (
-        <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-red-400">
+        <div className="rounded-xl p-3 text-red-400 text-xs" style={{ background: 'rgba(239,68,68,0.1)', border: '1.5px solid rgba(239,68,68,0.3)' }}>
           {error}
         </div>
       )}
 
       {/* QR Code Upload */}
-      <div className="space-y-4">
-        <label className="block text-sm font-medium text-gray-300">
-          UPI Payment QR Code <span className="text-red-500">*</span>
+      <div className="space-y-3">
+        <label className="block text-xs font-bold text-emerald-400">
+          UPI Payment QR Code <span className="text-red-400">*</span>
         </label>
 
         {!formData.paymentQR ? (
           <div
-            className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer ${
+            className={`border-2 border-dashed rounded-xl p-6 text-center transition-colors cursor-pointer ${
               dragActive 
-                ? 'border-purple-500 bg-purple-500/10' 
-                : 'border-white/20 hover:border-purple-500/50 hover:bg-purple-500/10 bg-slate-700/30'
+                ? 'border-emerald-500 bg-emerald-500/10' 
+                : 'border-white/20 hover:border-emerald-500/50'
             }`}
+            style={{ background: 'rgba(0,0,0,0.3)' }}
             onDragEnter={handleDrag}
             onDragLeave={handleDrag}
             onDragOver={handleDrag}
             onDrop={handleDrop}
             onClick={() => fileInputRef.current?.click()}
           >
-            <QrCodeIcon className="mx-auto h-12 w-12 text-gray-500" />
-            <div className="mt-4">
-              <span className="text-purple-400 hover:text-purple-300 font-medium">
+            <QrCodeIcon className="mx-auto h-10 w-10 text-gray-500" />
+            <div className="mt-3">
+              <span className="text-emerald-400 hover:text-emerald-300 font-bold text-sm">
                 Upload QR Code
               </span>
-              <span className="text-gray-500"> or drag and drop</span>
+              <span className="text-gray-500 text-sm"> or drag</span>
             </div>
-            <p className="mt-2 text-sm text-gray-500">
+            <p className="mt-1.5 text-xs text-gray-500">
               PNG, JPG up to 5MB
             </p>
             <input
@@ -194,15 +205,16 @@ const PaymentQRStep = ({ formData, updateFormData, updateMultipleFields, onNext,
           <div className="relative inline-block">
             <img
               src={formData.paymentQR.preview}
-              alt="Payment QR Code"
-              className="w-64 h-64 object-contain border-2 border-white/10 rounded-xl bg-slate-700/50 p-2"
+              alt="Payment QR"
+              className="w-48 h-48 object-contain rounded-xl p-2"
+              style={{ border: '1.5px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.3)' }}
             />
             <button
               type="button"
               onClick={removeQR}
               className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1.5 hover:bg-red-600 shadow-lg"
             >
-              <TrashIcon className="h-4 w-4" />
+              <TrashIcon className="h-3 w-3" />
             </button>
           </div>
         )}
@@ -210,93 +222,106 @@ const PaymentQRStep = ({ formData, updateFormData, updateMultipleFields, onNext,
 
       {/* UPI ID */}
       <div>
-        <label htmlFor="upiId" className="block text-sm font-medium text-gray-300 mb-2">
-          UPI ID <span className="text-red-500">*</span>
+        <label htmlFor="upiId" className="block text-xs font-bold text-cyan-400 mb-1.5">
+          UPI ID <span className="text-red-400">*</span>
         </label>
         <input
           type="text"
           id="upiId"
           value={formData.upiId || ''}
           onChange={(e) => updateFormData('upiId', e.target.value)}
-          className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
-          placeholder="e.g., yourname@upi or 9876543210@paytm"
+          className="w-full px-3 py-2.5 text-sm rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-cyan-500 transition-all"
+          style={{
+            background: 'rgba(0,0,0,0.3)',
+            border: '1.5px solid rgba(6,182,212,0.3)'
+          }}
+          placeholder="yourname@upi"
           required
         />
-        <p className="mt-1 text-sm text-gray-500">
-          Admin will use this UPI ID to pay your tournament earnings
+        <p className="mt-1 text-xs text-gray-500">
+          Admin uses this to pay your earnings
         </p>
       </div>
 
       {/* Account Holder Name */}
       <div>
-        <label htmlFor="accountHolderName" className="block text-sm font-medium text-gray-300 mb-2">
-          Account Holder Name <span className="text-red-500">*</span>
+        <label htmlFor="accountHolderName" className="block text-xs font-bold text-cyan-400 mb-1.5">
+          Account Holder Name <span className="text-red-400">*</span>
         </label>
         <input
           type="text"
           id="accountHolderName"
           value={formData.accountHolderName || ''}
           onChange={(e) => updateFormData('accountHolderName', e.target.value)}
-          className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
-          placeholder="e.g., John Doe"
+          className="w-full px-3 py-2.5 text-sm rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-cyan-500 transition-all"
+          style={{
+            background: 'rgba(0,0,0,0.3)',
+            border: '1.5px solid rgba(6,182,212,0.3)'
+          }}
+          placeholder="John Doe"
           required
         />
-        <p className="mt-1 text-sm text-gray-500">
-          This helps admin verify they're paying to the right person
+        <p className="mt-1 text-xs text-gray-500">
+          Helps admin verify payment recipient
         </p>
       </div>
 
       {/* Save for Future */}
-      <div className="flex items-center gap-3 p-4 bg-slate-700/30 border border-white/10 rounded-xl">
+      <div className="flex items-center gap-2.5 p-3 rounded-xl" style={{ background: 'rgba(0,0,0,0.3)', border: '1.5px solid rgba(255,255,255,0.1)' }}>
         <input
           type="checkbox"
           id="saveForFuture"
           checked={saveForFuture}
           onChange={(e) => setSaveForFuture(e.target.checked)}
-          className="w-5 h-5 rounded border-white/20 bg-slate-700 text-purple-600 focus:ring-purple-500"
+          className="w-4 h-4 rounded border-white/20 text-purple-600 focus:ring-purple-500"
+          style={{ background: 'rgba(0,0,0,0.5)' }}
         />
-        <label htmlFor="saveForFuture" className="text-sm text-gray-300">
-          <span className="font-medium">Save payment details for future tournaments</span>
+        <label htmlFor="saveForFuture" className="text-xs text-gray-300">
+          <span className="font-bold">Save for future tournaments</span>
           <br />
-          <span className="text-gray-500">UPI ID and account holder name will be auto-filled next time</span>
+          <span className="text-gray-500">Auto-fill next time</span>
         </label>
       </div>
 
       {/* Info Box */}
-      <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl p-4">
-        <div className="flex">
+      <div className="rounded-xl p-3" style={{ background: 'rgba(168,85,247,0.1)', border: '1.5px solid rgba(168,85,247,0.3)' }}>
+        <div className="flex gap-2">
           <div className="flex-shrink-0">
-            <svg className="h-5 w-5 text-purple-400" fill="currentColor" viewBox="0 0 20 20">
+            <svg className="h-4 w-4 text-purple-400 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
             </svg>
           </div>
-          <div className="ml-3">
-            <h3 className="text-sm font-medium text-purple-300">How it works</h3>
-            <div className="mt-2 text-sm text-gray-400">
-              <ul className="list-disc list-inside space-y-1">
-                <li>Players pay entry fees to the admin account first</li>
-                <li>Admin collects all payments and verifies them</li>
-                <li>Admin uses your QR code to pay your tournament earnings (30% before, 67% after)</li>
-                <li>You receive payments directly from admin based on the tournament results</li>
-              </ul>
-            </div>
+          <div>
+            <h3 className="text-xs font-bold text-purple-300 mb-1">How it works</h3>
+            <ul className="text-xs text-gray-400 space-y-0.5">
+              <li>• Players pay entry fees to admin</li>
+              <li>• Admin verifies all payments</li>
+              <li>• Admin uses your QR to pay earnings (30% before, 67% after)</li>
+              <li>• You receive payments based on results</li>
+            </ul>
           </div>
         </div>
       </div>
 
       {/* Navigation Buttons */}
-      <div className="flex justify-between pt-6 border-t border-white/10">
+      <div className="flex justify-between pt-4 border-t border-white/10">
         <button
           type="button"
           onClick={onPrev}
-          className="px-6 py-3 bg-slate-700 text-gray-300 rounded-xl hover:bg-slate-600 transition-colors font-medium"
+          className="px-5 py-2.5 rounded-xl font-bold text-sm transition-all"
+          style={{ background: 'rgba(100,116,139,0.5)', color: '#d1d5db' }}
         >
-          ← Previous
+          ← Back
         </button>
         <button
           type="button"
           onClick={handleNext}
-          className="px-6 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-xl hover:shadow-lg hover:shadow-purple-500/25 transition-all font-semibold"
+          className="px-5 py-2.5 rounded-xl font-bold text-sm transition-all"
+          style={{ 
+            background: 'linear-gradient(135deg, #a855f7, #8b5cf6)',
+            color: '#ffffff',
+            boxShadow: '0 6px 20px rgba(168,85,247,0.4)'
+          }}
         >
           Next: Review →
         </button>

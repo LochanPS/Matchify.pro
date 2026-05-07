@@ -74,10 +74,20 @@ const PostersStep = ({ formData, updateFormData, onNext, onPrev }) => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div>
-        <h2 className="text-2xl font-bold text-white">Tournament Posters</h2>
-        <p className="text-gray-400 mt-1">Upload up to 5 posters for your tournament (optional)</p>
+        <h2 
+          className="text-lg font-black mb-2"
+          style={{
+            background: 'linear-gradient(135deg, #00c853, #00ff88)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text'
+          }}
+        >
+          Tournament Posters
+        </h2>
+        <p className="text-gray-400 text-xs">Upload up to 5 posters (optional)</p>
       </div>
 
       {/* Upload Area */}
@@ -86,11 +96,12 @@ const PostersStep = ({ formData, updateFormData, onNext, onPrev }) => {
         onDragLeave={handleDrag}
         onDragOver={handleDrag}
         onDrop={handleDrop}
-        className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
+        className={`border-2 border-dashed rounded-xl p-6 text-center transition-colors ${
           dragActive
-            ? 'border-purple-500 bg-purple-500/10'
-            : 'border-white/20 hover:border-purple-500/50 bg-slate-700/30'
+            ? 'border-emerald-500 bg-emerald-500/10'
+            : 'border-white/20 hover:border-emerald-500/50'
         }`}
+        style={{ background: 'rgba(0,0,0,0.3)' }}
       >
         <input
           ref={fileInputRef}
@@ -101,60 +112,61 @@ const PostersStep = ({ formData, updateFormData, onNext, onPrev }) => {
           className="hidden"
         />
         
-        <ArrowUpTrayIcon className="mx-auto h-12 w-12 text-gray-500" />
+        <ArrowUpTrayIcon className="mx-auto h-10 w-10 text-gray-500" />
         <p className="mt-2 text-sm text-gray-400">
           Drag and drop images here, or{' '}
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="text-purple-400 hover:text-purple-300 font-medium"
+            className="text-emerald-400 hover:text-emerald-300 font-bold"
           >
             browse
           </button>
         </p>
         <p className="mt-1 text-xs text-gray-500">
-          PNG, JPG, GIF up to 10MB (Max 5 images)
+          PNG, JPG, GIF up to 10MB (Max 5)
         </p>
       </div>
 
       {/* Poster Preview Grid */}
       {formData.posters.length > 0 && (
         <div>
-          <h3 className="font-medium text-white mb-3">
+          <h3 className="font-bold text-white mb-2 text-sm">
             Uploaded Posters ({formData.posters.length}/5)
           </h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             {formData.posters.map((poster, index) => (
               <div
                 key={index}
-                className="relative group rounded-xl overflow-hidden border-2 border-white/10 hover:border-purple-500/50 transition-colors"
+                className="relative group rounded-xl overflow-hidden border-2 hover:border-emerald-500/50 transition-colors"
+                style={{ border: '1.5px solid rgba(255,255,255,0.1)' }}
               >
                 <img
                   src={poster.preview}
                   alt={`Poster ${index + 1}`}
-                  className="w-full h-48 object-cover"
+                  className="w-full h-32 object-cover"
                 />
                 
                 {poster.isPrimary && (
-                  <div className="absolute top-2 left-2 bg-purple-600 text-white text-xs px-2 py-1 rounded-lg">
+                  <div className="absolute top-1.5 left-1.5 text-white text-xs px-2 py-0.5 rounded-lg font-bold" style={{ background: 'linear-gradient(135deg, #a855f7, #8b5cf6)' }}>
                     Primary
                   </div>
                 )}
 
-                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-opacity flex items-center justify-center gap-2">
+                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-60 transition-opacity flex items-center justify-center gap-2">
                   {!poster.isPrimary && (
                     <button
                       onClick={() => setPrimaryPoster(index)}
-                      className="opacity-0 group-hover:opacity-100 bg-white text-gray-900 px-3 py-1 rounded-lg text-sm font-medium hover:bg-gray-100 transition-opacity"
+                      className="opacity-0 group-hover:opacity-100 bg-white text-gray-900 px-2 py-1 rounded-lg text-xs font-bold hover:bg-gray-100 transition-opacity"
                     >
                       Set Primary
                     </button>
                   )}
                   <button
                     onClick={() => removePoster(index)}
-                    className="opacity-0 group-hover:opacity-100 bg-red-600 text-white p-2 rounded-full hover:bg-red-700 transition-opacity"
+                    className="opacity-0 group-hover:opacity-100 bg-red-600 text-white p-1.5 rounded-full hover:bg-red-700 transition-opacity"
                   >
-                    <XMarkIcon className="h-5 w-5" />
+                    <XMarkIcon className="h-4 w-4" />
                   </button>
                 </div>
               </div>
@@ -164,27 +176,33 @@ const PostersStep = ({ formData, updateFormData, onNext, onPrev }) => {
       )}
 
       {/* Info Box */}
-      <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl p-4">
-        <h4 className="font-medium text-purple-300 mb-2">Tips for great posters:</h4>
-        <ul className="text-sm text-gray-400 space-y-1">
-          <li>• Use high-quality images (minimum 1200x1600 pixels)</li>
-          <li>• The primary poster will be shown first in listings</li>
-          <li>• Include tournament name, dates, and venue in the design</li>
-          <li>• You can add or change posters later from the tournament dashboard</li>
+      <div className="rounded-xl p-3" style={{ background: 'rgba(168,85,247,0.1)', border: '1.5px solid rgba(168,85,247,0.3)' }}>
+        <h4 className="font-bold text-purple-300 mb-1.5 text-xs">Tips for great posters:</h4>
+        <ul className="text-xs text-gray-400 space-y-0.5">
+          <li>• Use high-quality images (min 1200x1600px)</li>
+          <li>• Primary poster shows first in listings</li>
+          <li>• Include tournament name, dates, venue</li>
+          <li>• You can add/change posters later</li>
         </ul>
       </div>
 
       {/* Navigation */}
-      <div className="flex justify-between pt-6 border-t border-white/10">
+      <div className="flex justify-between pt-4 border-t border-white/10">
         <button
           onClick={onPrev}
-          className="px-6 py-3 bg-slate-700 text-gray-300 rounded-xl hover:bg-slate-600 transition-colors font-medium"
+          className="px-5 py-2.5 rounded-xl font-bold text-sm transition-all"
+          style={{ background: 'rgba(100,116,139,0.5)', color: '#d1d5db' }}
         >
           ← Back
         </button>
         <button
           onClick={handleNext}
-          className="px-6 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-xl hover:shadow-lg hover:shadow-purple-500/25 transition-all font-semibold"
+          className="px-5 py-2.5 rounded-xl font-bold text-sm transition-all"
+          style={{ 
+            background: 'linear-gradient(135deg, #a855f7, #8b5cf6)',
+            color: '#ffffff',
+            boxShadow: '0 6px 20px rgba(168,85,247,0.4)'
+          }}
         >
           Next: Categories →
         </button>

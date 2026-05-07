@@ -54,10 +54,20 @@ const CategoriesStep = ({ formData, updateFormData, onNext, onPrev }) => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div>
-        <h2 className="text-2xl font-bold text-white">Tournament Categories</h2>
-        <p className="text-gray-400 mt-1">Define the categories players can register for</p>
+        <h2 
+          className="text-lg font-black mb-2"
+          style={{
+            background: 'linear-gradient(135deg, #00c853, #00ff88)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text'
+          }}
+        >
+          Tournament Categories
+        </h2>
+        <p className="text-gray-400 text-xs">Define categories for players</p>
       </div>
 
       {!showForm ? (
@@ -65,94 +75,93 @@ const CategoriesStep = ({ formData, updateFormData, onNext, onPrev }) => {
           {/* Add Category Button */}
           <button
             onClick={() => setShowForm(true)}
-            className="w-full border-2 border-dashed border-white/20 rounded-xl p-6 hover:border-purple-500/50 hover:bg-purple-500/10 transition-colors flex items-center justify-center gap-2 text-gray-400 hover:text-purple-400"
+            className="w-full border-2 border-dashed rounded-xl p-4 hover:border-emerald-500/50 hover:bg-emerald-500/10 transition-colors flex items-center justify-center gap-2 text-gray-400 hover:text-emerald-400"
+            style={{ borderColor: 'rgba(255,255,255,0.2)', background: 'rgba(0,0,0,0.3)' }}
           >
-            <PlusIcon className="h-6 w-6" />
-            <span className="font-medium">Add Category</span>
+            <PlusIcon className="h-5 w-5" />
+            <span className="font-bold text-sm">Add Category</span>
           </button>
 
           {/* Categories List */}
           {formData.categories.length > 0 && (
-            <div className="space-y-4">
-              <h3 className="font-medium text-white">
+            <div className="space-y-3">
+              <h3 className="font-bold text-white text-sm">
                 Added Categories ({formData.categories.length})
               </h3>
               
               {formData.categories.map((category, index) => (
                 <div
                   key={index}
-                  className="border border-white/10 bg-slate-700/30 rounded-xl p-4 hover:border-purple-500/30 transition-colors"
+                  className="rounded-xl p-3 hover:border-emerald-500/30 transition-colors"
+                  style={{ background: 'rgba(0,0,0,0.3)', border: '1.5px solid rgba(255,255,255,0.1)' }}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <h4 className="font-semibold text-white mb-2">
+                      <h4 className="font-bold text-white mb-2 text-sm">
                         {category.name}
                       </h4>
                       
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm text-gray-400">
+                      <div className="grid grid-cols-2 gap-2 text-xs text-gray-400">
                         <div>
-                          <span className="font-medium text-gray-300">Format:</span> {category.format}
+                          <span className="font-bold text-gray-300">Format:</span> {category.format}
                         </div>
                         <div>
-                          <span className="font-medium text-gray-300">Gender:</span> {category.gender}
+                          <span className="font-bold text-gray-300">Gender:</span> {category.gender}
                         </div>
                         {category.ageGroup && (
                           <div>
-                            <span className="font-medium text-gray-300">Age:</span> {category.ageGroup}
+                            <span className="font-bold text-gray-300">Age:</span> {category.ageGroup}
                           </div>
                         )}
                         <div>
-                          <span className="font-medium text-gray-300">Entry Fee:</span> ₹{category.entryFee}
+                          <span className="font-bold text-gray-300">Fee:</span> ₹{category.entryFee}
                         </div>
                         {category.maxParticipants && (
                           <div>
-                            <span className="font-medium text-gray-300">Max Players:</span> {category.maxParticipants}
+                            <span className="font-bold text-gray-300">Max:</span> {category.maxParticipants}
                           </div>
                         )}
                         <div>
-                          <span className="font-medium text-gray-300">Scoring:</span> {category.scoringFormat}
+                          <span className="font-bold text-gray-300">Scoring:</span> {category.scoringFormat}
                         </div>
                       </div>
                       
                       {/* Prize Info */}
                       {(category.prizeWinner || category.prizeRunnerUp || category.prizeSemiFinalist) && (
-                        <div className="mt-3 pt-3 border-t border-white/10">
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="text-amber-400">✨</span>
-                            <span className="text-xs font-semibold text-amber-400">Cash Prize</span>
+                        <div className="mt-2 pt-2 border-t border-white/10">
+                          <div className="flex items-center gap-1.5 mb-1.5">
+                            <span className="text-amber-400 text-xs">✨</span>
+                            <span className="text-xs font-bold text-amber-400">Cash Prize</span>
                           </div>
-                          <div className="flex flex-wrap gap-3 mt-2 text-sm">
+                          <div className="flex flex-wrap gap-2 text-xs">
                             {category.prizeWinner && (
-                              <span className="text-amber-400">🥇 Winner: ₹{category.prizeWinner}</span>
+                              <span className="text-amber-400">🥇 ₹{category.prizeWinner}</span>
                             )}
                             {category.prizeRunnerUp && (
-                              <span className="text-blue-400">🥈 Runner-up: ₹{category.prizeRunnerUp}</span>
+                              <span className="text-blue-400">🥈 ₹{category.prizeRunnerUp}</span>
                             )}
                             {category.prizeSemiFinalist && (
-                              <span className="text-orange-400">🥉 Semi-finalist: ₹{category.prizeSemiFinalist}</span>
+                              <span className="text-orange-400">🥉 ₹{category.prizeSemiFinalist}</span>
                             )}
                           </div>
-                          {category.prizeDescription && (
-                            <p className="text-xs text-gray-500 mt-1">{category.prizeDescription}</p>
-                          )}
                         </div>
                       )}
                     </div>
 
-                    <div className="flex items-center gap-2 ml-4">
+                    <div className="flex items-center gap-1.5 ml-3">
                       <button
                         onClick={() => handleEditCategory(index)}
-                        className="p-2 text-purple-400 hover:bg-purple-500/20 rounded-lg transition-colors"
-                        title="Edit category"
+                        className="p-1.5 text-purple-400 hover:bg-purple-500/20 rounded-lg transition-colors"
+                        title="Edit"
                       >
-                        <PencilIcon className="h-5 w-5" />
+                        <PencilIcon className="h-4 w-4" />
                       </button>
                       <button
                         onClick={() => handleDeleteCategory(index)}
-                        className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
-                        title="Delete category"
+                        className="p-1.5 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
+                        title="Delete"
                       >
-                        <TrashIcon className="h-5 w-5" />
+                        <TrashIcon className="h-4 w-4" />
                       </button>
                     </div>
                   </div>
@@ -162,28 +171,34 @@ const CategoriesStep = ({ formData, updateFormData, onNext, onPrev }) => {
           )}
 
           {/* Info Box */}
-          <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl p-4">
-            <h4 className="font-medium text-purple-300 mb-2">Category Guidelines:</h4>
-            <ul className="text-sm text-gray-400 space-y-1">
-              <li>• Create separate categories for different formats (singles/doubles)</li>
-              <li>• Consider age groups (U-15, U-19, Open, 35+, etc.)</li>
-              <li>• Set appropriate entry fees for each category</li>
-              <li>• You can add more categories later from the tournament dashboard</li>
+          <div className="rounded-xl p-3" style={{ background: 'rgba(168,85,247,0.1)', border: '1.5px solid rgba(168,85,247,0.3)' }}>
+            <h4 className="font-bold text-purple-300 mb-1.5 text-xs">Category Guidelines:</h4>
+            <ul className="text-xs text-gray-400 space-y-0.5">
+              <li>• Separate categories for singles/doubles</li>
+              <li>• Consider age groups (U-15, U-19, Open, 35+)</li>
+              <li>• Set appropriate entry fees</li>
+              <li>• Add more categories later if needed</li>
             </ul>
           </div>
 
           {/* Navigation */}
-          <div className="flex justify-between pt-6 border-t border-white/10">
+          <div className="flex justify-between pt-4 border-t border-white/10">
             <button
               onClick={onPrev}
-              className="px-6 py-3 bg-slate-700 text-gray-300 rounded-xl hover:bg-slate-600 transition-colors font-medium"
+              className="px-5 py-2.5 rounded-xl font-bold text-sm transition-all"
+              style={{ background: 'rgba(100,116,139,0.5)', color: '#d1d5db' }}
             >
               ← Back
             </button>
             <button
               onClick={handleNext}
               disabled={formData.categories.length === 0}
-              className="px-6 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-xl hover:shadow-lg hover:shadow-purple-500/25 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-5 py-2.5 rounded-xl font-bold text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ 
+                background: 'linear-gradient(135deg, #a855f7, #8b5cf6)',
+                color: '#ffffff',
+                boxShadow: '0 6px 20px rgba(168,85,247,0.4)'
+              }}
             >
               Next: Payment QR →
             </button>

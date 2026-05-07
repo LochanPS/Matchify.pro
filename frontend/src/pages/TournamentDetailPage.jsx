@@ -590,8 +590,8 @@ const TournamentDetailPage = () => {
               <h2 className="text-base font-bold text-white mb-3">Tournament Details</h2>
               <div className="grid grid-cols-1 gap-4">
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 bg-purple-500/20 border border-purple-500/30 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <MapPinIcon className="h-5 w-5 text-purple-400" />
+                  <div className="w-10 h-10 bg-emerald-500/20 border border-emerald-500/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <MapPinIcon className="h-5 w-5 text-emerald-400" />
                   </div>
                   <div className="min-w-0">
                     <p className="font-bold text-white text-sm">Venue</p>
@@ -694,7 +694,7 @@ const TournamentDetailPage = () => {
                     return (
                     <div
                       key={category.id}
-                      className="border border-white/10 rounded-xl p-4 hover:border-purple-500/50 hover:shadow-[0_0_15px_rgba(168,85,247,0.15)] transition-all bg-slate-700/50"
+                      className="border border-white/10 rounded-xl p-4 hover:border-emerald-500/50 hover:shadow-[0_0_15px_rgba(16,185,129,0.15)] transition-all bg-slate-700/50"
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex-1 min-w-0">
@@ -702,7 +702,7 @@ const TournamentDetailPage = () => {
                             {category.name}
                           </h3>
                           <div className="flex flex-wrap gap-1.5 mb-2">
-                            <span className="px-2 py-0.5 bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded-full text-xs font-medium">
+                            <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full text-xs font-medium">
                               {category.format}
                             </span>
                             <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-full text-xs font-medium">
@@ -727,7 +727,7 @@ const TournamentDetailPage = () => {
                               <div className="flex items-center gap-1">
                                 <span className={`px-2 py-0.5 rounded-lg text-xs font-bold ${
                                   formatInfo.color === 'amber' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
-                                  formatInfo.color === 'purple' ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' :
+                                  formatInfo.color === 'emerald' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
                                   'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                                 }`}>
                                   {formatInfo.icon} {formatInfo.label}
@@ -793,22 +793,22 @@ const TournamentDetailPage = () => {
           <div className="space-y-4">
             {/* Register Button - Show for published tournaments */}
             {tournament.status === 'published' && (
-              <div className="bg-gradient-to-br from-purple-600 to-indigo-700 rounded-xl p-4 text-white shadow-xl shadow-purple-500/30">
+              <div className="bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-xl p-4 text-white shadow-xl shadow-emerald-500/30">
                 <h3 className="font-bold text-base mb-1">Ready to Compete?</h3>
-                <p className="text-purple-100 text-xs mb-3">
+                <p className="text-emerald-100 text-xs mb-3">
                   Registration closes on {formatDate(tournament.registrationCloseDate)}
                 </p>
                 {user && canRegister() ? (
                   <button
                     onClick={() => navigate(`/tournaments/${id}/register`)}
-                    className="w-full bg-white text-purple-700 px-5 py-3 rounded-xl hover:bg-purple-50 font-bold text-base transition-all hover:scale-105"
+                    className="w-full bg-white text-emerald-700 px-5 py-3 rounded-xl hover:bg-emerald-50 font-bold text-base transition-all hover:scale-105"
                   >
                     Register Now
                   </button>
                 ) : (
                   <button
                     onClick={() => setShowLoginModal(true)}
-                    className="w-full bg-white text-purple-700 px-5 py-3 rounded-xl hover:bg-purple-50 font-bold text-base transition-all hover:scale-105"
+                    className="w-full bg-white text-emerald-700 px-5 py-3 rounded-xl hover:bg-emerald-50 font-bold text-base transition-all hover:scale-105"
                   >
                     Register Now
                   </button>
@@ -1064,15 +1064,15 @@ const TournamentDetailPage = () => {
 
             {/* Admin Actions - Compact */}
             {isAdmin() && (
-              <div className="bg-gradient-to-br from-purple-900/50 to-indigo-900/50 backdrop-blur-sm border border-purple-500/30 rounded-xl p-4">
+              <div className="bg-gradient-to-br from-emerald-900/50 to-emerald-800/50 backdrop-blur-sm border border-emerald-500/30 rounded-xl p-4">
                 <div className="flex items-center gap-2 mb-3">
-                  <SparklesIcon className="h-4 w-4 text-purple-400" />
+                  <SparklesIcon className="h-4 w-4 text-emerald-400" />
                   <h3 className="font-bold text-white text-sm">Admin Actions</h3>
                 </div>
                 <div className="space-y-2">
                   <button
                     onClick={() => setShowQuickAddModal(true)}
-                    className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-4 py-2.5 rounded-lg hover:shadow-lg hover:shadow-purple-500/30 font-bold text-sm transition-all"
+                    className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-4 py-2.5 rounded-lg hover:shadow-lg hover:shadow-emerald-500/30 font-bold text-sm transition-all"
                   >
                     <UserPlusIcon className="h-4 w-4" />
                     Quick Add Player
@@ -1231,7 +1231,7 @@ const TournamentDetailPage = () => {
       {showLoginModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden">
-            <div className="bg-gradient-to-r from-purple-600 to-indigo-700 p-5 text-white">
+            <div className="bg-gradient-to-r from-emerald-600 to-emerald-700 p-5 text-white">
               <div className="flex items-center justify-center gap-2">
                 <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
                   <UserIcon className="h-5 w-5" />
@@ -1248,13 +1248,13 @@ const TournamentDetailPage = () => {
               <div className="space-y-2">
                 <Link
                   to={`/register?redirect=/tournaments/${id}/register`}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:shadow-lg hover:shadow-purple-500/30 transition-all font-bold text-sm"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl hover:shadow-lg hover:shadow-emerald-500/30 transition-all font-bold text-sm"
                 >
                   Create Account
                 </Link>
                 <Link
                   to={`/login?redirect=/tournaments/${id}/register`}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 border-2 border-purple-200 text-purple-700 rounded-xl hover:bg-purple-50 transition-all font-bold text-sm"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 border-2 border-emerald-200 text-emerald-700 rounded-xl hover:bg-emerald-50 transition-all font-bold text-sm"
                 >
                   Sign In
                 </Link>
@@ -1406,9 +1406,9 @@ const TournamentDetailPage = () => {
       {/* Quick Add Player Modal (Admin Only) */}
       {showQuickAddModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-purple-500/30">
-            <div className="relative bg-gradient-to-r from-purple-600 to-indigo-600 p-6 text-white overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-indigo-400/20 blur-xl"></div>
+          <div className="bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-emerald-500/30">
+            <div className="relative bg-gradient-to-r from-emerald-600 to-emerald-700 p-6 text-white overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-emerald-400/20 to-emerald-500/20 blur-xl"></div>
               <div className="relative flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
@@ -1416,7 +1416,7 @@ const TournamentDetailPage = () => {
                   </div>
                   <div>
                     <h2 className="text-xl font-bold">Quick Add Player</h2>
-                    <p className="text-purple-100 text-sm mt-1">Add player without payment</p>
+                    <p className="text-emerald-100 text-sm mt-1">Add player without payment</p>
                   </div>
                 </div>
                 <button

@@ -468,28 +468,28 @@ const TournamentDetailPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      {/* Hero Header with Poster */}
+      {/* Hero Header with Poster - Mobile Optimized */}
       <div className="relative bg-gradient-to-r from-slate-900 via-purple-900 to-slate-900 overflow-hidden">
         <div className="absolute inset-0">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+          <div className="absolute top-0 left-1/4 w-64 h-64 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
+          <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
         </div>
         
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="relative max-w-7xl mx-auto px-4 py-5">
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-white/70 hover:text-white mb-6 transition-colors"
+            className="flex items-center gap-2 text-white/70 hover:text-white mb-4 transition-colors"
           >
-            <ArrowLeftIcon className="h-5 w-5" />
-            Back to Tournaments
+            <ArrowLeftIcon className="h-4 w-4" />
+            <span className="text-sm">Back</span>
           </button>
 
-          <div className="flex flex-col md:flex-row gap-8 items-start">
-            {/* Poster */}
+          <div className="flex flex-col md:flex-row gap-5 items-start">
+            {/* Poster - Compact for Mobile */}
             {tournament?.posters && tournament.posters.length > 0 && (
-              <div className="w-full md:w-80 flex-shrink-0">
+              <div className="w-full md:w-64 flex-shrink-0">
                 <div 
-                  className="rounded-2xl overflow-hidden shadow-2xl border-4 border-white/20 cursor-pointer hover:scale-105 transition-transform duration-300 group relative"
+                  className="rounded-xl overflow-hidden shadow-xl border-2 border-white/20 cursor-pointer hover:scale-105 transition-transform duration-300 group relative"
                   onClick={() => {
                     console.log('Poster clicked! Opening modal...');
                     setShowPosterModal(true);
@@ -498,22 +498,22 @@ const TournamentDetailPage = () => {
                   <img
                     src={getImageUrl(tournament.posters?.[selectedPoster]?.imageUrl)}
                     alt={tournament.name}
-                    className="w-full h-64 md:h-80 object-cover"
+                    className="w-full h-48 md:h-64 object-cover"
                   />
                   {/* Click hint overlay */}
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/90 text-gray-800 px-3 py-1 rounded-full text-sm font-medium">
-                      Click to enlarge
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/90 text-gray-800 px-2 py-1 rounded-full text-xs font-medium">
+                      Tap to enlarge
                     </div>
                   </div>
                 </div>
                 {tournament.posters?.length > 1 && (
-                  <div className="flex gap-2 mt-3 overflow-x-auto pb-2">
+                  <div className="flex gap-2 mt-2 overflow-x-auto pb-2">
                     {tournament.posters.map((poster, index) => (
                       <button
                         key={poster.id}
                         onClick={() => setSelectedPoster(index)}
-                        className={`flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition-all ${
+                        className={`flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden border-2 transition-all ${
                           selectedPoster === index ? 'border-white scale-105' : 'border-white/30 opacity-70 hover:opacity-100'
                         }`}
                       >
@@ -529,39 +529,39 @@ const TournamentDetailPage = () => {
               </div>
             )}
 
-            {/* Tournament Info */}
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-4">
-                <span className={`px-4 py-1.5 rounded-full text-sm font-semibold ${statusStyle.bg} ${statusStyle.text}`}>
+            {/* Tournament Info - Compact */}
+            <div className="flex-1 w-full">
+              <div className="flex flex-wrap items-center gap-2 mb-3">
+                <span className={`px-3 py-1 rounded-full text-xs font-bold ${statusStyle.bg} ${statusStyle.text}`}>
                   {statusStyle.label}
                 </span>
-                <span className="px-3 py-1.5 bg-white/10 backdrop-blur-sm rounded-full text-white/80 text-sm border border-white/20">
+                <span className="px-2 py-1 bg-white/10 backdrop-blur-sm rounded-full text-white/80 text-xs border border-white/20">
                   {tournament.format === 'both' ? '🏸 Singles & Doubles' : 
                    tournament.format === 'singles' ? '🏸 Singles' : '👥 Doubles'}
                 </span>
               </div>
 
-              <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
+              <h1 className="text-xl md:text-2xl font-black text-white mb-3 leading-tight">
                 {tournament.name}
               </h1>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-white/80">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center">
-                    <MapPinIcon className="h-5 w-5 text-white" />
+              <div className="grid grid-cols-1 gap-3 text-white/80">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <MapPinIcon className="h-4 w-4 text-white" />
                   </div>
-                  <div>
-                    <p className="text-white font-medium">{tournament.venue}</p>
-                    <p className="text-sm text-white/60">{tournament.city}, {tournament.state}</p>
+                  <div className="min-w-0">
+                    <p className="text-white font-semibold text-sm truncate">{tournament.venue}</p>
+                    <p className="text-xs text-white/60 truncate">{tournament.city}, {tournament.state}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center">
-                    <CalendarIcon className="h-5 w-5 text-white" />
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <CalendarIcon className="h-4 w-4 text-white" />
                   </div>
-                  <div>
-                    <p className="text-white font-medium">{formatDate(tournament.startDate)}</p>
-                    <p className="text-sm text-white/60">to {formatDate(tournament.endDate)}</p>
+                  <div className="min-w-0">
+                    <p className="text-white font-semibold text-sm">{formatDate(tournament.startDate)}</p>
+                    <p className="text-xs text-white/60">to {formatDate(tournament.endDate)}</p>
                   </div>
                 </div>
               </div>
@@ -570,74 +570,74 @@ const TournamentDetailPage = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 -mt-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="max-w-7xl mx-auto px-4 py-5 -mt-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Description */}
-            <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
-              <h2 className="text-xl font-bold text-white mb-4">About Tournament</h2>
-              <p className="text-gray-400 whitespace-pre-wrap leading-relaxed break-words max-w-full overflow-hidden">
-                {tournament.description && tournament.description.length > 500 
-                  ? tournament.description.substring(0, 500) + '...' 
+          <div className="lg:col-span-2 space-y-4">
+            {/* Description - Compact */}
+            <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-xl p-4">
+              <h2 className="text-base font-bold text-white mb-3">About Tournament</h2>
+              <p className="text-gray-400 text-sm whitespace-pre-wrap leading-relaxed break-words max-w-full overflow-hidden">
+                {tournament.description && tournament.description.length > 300 
+                  ? tournament.description.substring(0, 300) + '...' 
                   : tournament.description || 'No description provided.'}
               </p>
             </div>
 
-            {/* Key Details */}
-            <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
-              <h2 className="text-xl font-bold text-white mb-4">Tournament Details</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-purple-500/20 border border-purple-500/30 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <MapPinIcon className="h-6 w-6 text-purple-400" />
+            {/* Key Details - Compact */}
+            <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-xl p-4">
+              <h2 className="text-base font-bold text-white mb-3">Tournament Details</h2>
+              <div className="grid grid-cols-1 gap-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 bg-purple-500/20 border border-purple-500/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <MapPinIcon className="h-5 w-5 text-purple-400" />
                   </div>
-                  <div>
-                    <p className="font-semibold text-white">Venue</p>
-                    <p className="text-gray-400">{tournament.venue}</p>
-                    <p className="text-sm text-gray-400">
+                  <div className="min-w-0">
+                    <p className="font-bold text-white text-sm">Venue</p>
+                    <p className="text-gray-400 text-sm">{tournament.venue}</p>
+                    <p className="text-xs text-gray-400 truncate">
                       {tournament.address}, {tournament.city}, {tournament.state} - {tournament.pincode}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-amber-500/20 border border-amber-500/30 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <CalendarIcon className="h-6 w-6 text-amber-400" />
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 bg-amber-500/20 border border-amber-500/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <CalendarIcon className="h-5 w-5 text-amber-400" />
                   </div>
-                  <div>
-                    <p className="font-semibold text-white">Tournament Schedule</p>
-                    <p className="text-gray-400">Start: {formatDate(tournament.startDate)}</p>
-                    <p className="text-gray-400">End: {formatDate(tournament.endDate)}</p>
+                  <div className="min-w-0">
+                    <p className="font-bold text-white text-sm">Tournament Schedule</p>
+                    <p className="text-gray-400 text-sm">Start: {formatDate(tournament.startDate)}</p>
+                    <p className="text-gray-400 text-sm">End: {formatDate(tournament.endDate)}</p>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-blue-500/20 border border-blue-500/30 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <ClockIcon className="h-6 w-6 text-blue-400" />
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 bg-blue-500/20 border border-blue-500/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <ClockIcon className="h-5 w-5 text-blue-400" />
                   </div>
-                  <div>
-                    <p className="font-semibold text-white">Registration Period</p>
-                    <p className="text-sm text-gray-400">Opens: {formatDateTime(tournament.registrationOpenDate)}</p>
-                    <p className="text-sm text-gray-400">Closes: {formatDateTime(tournament.registrationCloseDate)}</p>
+                  <div className="min-w-0">
+                    <p className="font-bold text-white text-sm">Registration Period</p>
+                    <p className="text-xs text-gray-400">Opens: {formatDateTime(tournament.registrationOpenDate)}</p>
+                    <p className="text-xs text-gray-400">Closes: {formatDateTime(tournament.registrationCloseDate)}</p>
                   </div>
                 </div>
 
                 {/* Shuttle Information */}
                 {(tournament.shuttleType || tournament.shuttleBrand) && (
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-emerald-500/20 border border-emerald-500/30 rounded-xl flex items-center justify-center flex-shrink-0">
-                      <span className="text-2xl">🏸</span>
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 bg-emerald-500/20 border border-emerald-500/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <span className="text-xl">🏸</span>
                     </div>
-                    <div>
-                      <p className="font-semibold text-white">Shuttle Information</p>
+                    <div className="min-w-0">
+                      <p className="font-bold text-white text-sm">Shuttle Information</p>
                       {tournament.shuttleType && (
-                        <p className="text-gray-400">
+                        <p className="text-gray-400 text-sm">
                           Type: <span className="text-white font-medium">{tournament.shuttleType}</span>
                         </p>
                       )}
                       {tournament.shuttleBrand && (
-                        <p className="text-gray-400">
+                        <p className="text-gray-400 text-sm">
                           Brand: <span className="text-white font-medium">{tournament.shuttleBrand}</span>
                         </p>
                       )}
@@ -647,17 +647,17 @@ const TournamentDetailPage = () => {
               </div>
             </div>
 
-            {/* Categories */}
-            <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center">
-                  <TrophyIcon className="w-5 h-5 text-white" />
+            {/* Categories - Compact */}
+            <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-xl p-4">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-8 h-8 bg-gradient-to-br from-amber-400 to-orange-500 rounded-lg flex items-center justify-center">
+                  <TrophyIcon className="w-4 h-4 text-white" />
                 </div>
-                <h2 className="text-xl font-bold text-white">Categories</h2>
+                <h2 className="text-base font-bold text-white">Categories</h2>
               </div>
               
               {tournament.categories && tournament.categories.length > 0 ? (
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {tournament.categories.map((category) => {
                     // Parse scoring format for display
                     const getScoringDisplay = () => {
@@ -693,38 +693,38 @@ const TournamentDetailPage = () => {
                     return (
                     <div
                       key={category.id}
-                      className="border border-white/10 rounded-2xl p-5 hover:border-purple-500/50 hover:shadow-[0_0_20px_rgba(168,85,247,0.2)] transition-all bg-slate-700/50"
+                      className="border border-white/10 rounded-xl p-4 hover:border-purple-500/50 hover:shadow-[0_0_15px_rgba(168,85,247,0.15)] transition-all bg-slate-700/50"
                     >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h3 className="font-bold text-white text-lg mb-2">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-bold text-white text-base mb-2 truncate">
                             {category.name}
                           </h3>
-                          <div className="flex flex-wrap gap-2 mb-3">
-                            <span className="px-3 py-1 bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded-full text-xs font-medium">
+                          <div className="flex flex-wrap gap-1.5 mb-2">
+                            <span className="px-2 py-0.5 bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded-full text-xs font-medium">
                               {category.format}
                             </span>
-                            <span className="px-3 py-1 bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-full text-xs font-medium">
+                            <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-full text-xs font-medium">
                               {category.gender}
                             </span>
                             {category.ageGroup && (
-                              <span className="px-3 py-1 bg-green-500/20 text-green-400 border border-green-500/30 rounded-full text-xs font-medium">
+                              <span className="px-2 py-0.5 bg-green-500/20 text-green-400 border border-green-500/30 rounded-full text-xs font-medium">
                                 {category.ageGroup}
                               </span>
                             )}
                             {category.maxParticipants && (
-                              <span className="px-3 py-1 bg-slate-600/50 text-gray-300 border border-white/10 rounded-full text-xs font-medium">
+                              <span className="px-2 py-0.5 bg-slate-600/50 text-gray-300 border border-white/10 rounded-full text-xs font-medium">
                                 Max {category.maxParticipants}
                               </span>
                             )}
                           </div>
                           
-                          {/* Tournament Format & Scoring Info */}
-                          <div className="mt-3 pt-3 border-t border-white/10">
-                            <div className="flex flex-wrap gap-4 text-sm">
+                          {/* Tournament Format & Scoring Info - Compact */}
+                          <div className="mt-2 pt-2 border-t border-white/10">
+                            <div className="flex flex-wrap gap-2 text-xs">
                               {/* Tournament Format */}
-                              <div className="flex items-center gap-2">
-                                <span className={`px-2 py-1 rounded-lg text-xs font-semibold ${
+                              <div className="flex items-center gap-1">
+                                <span className={`px-2 py-0.5 rounded-lg text-xs font-bold ${
                                   formatInfo.color === 'amber' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
                                   formatInfo.color === 'purple' ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' :
                                   'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
@@ -733,7 +733,7 @@ const TournamentDetailPage = () => {
                                 </span>
                               </div>
                               {/* Scoring Format */}
-                              <div className="flex items-center gap-2 text-gray-400">
+                              <div className="flex items-center gap-1 text-gray-400">
                                 <span className="text-xs">🎯</span>
                                 <span className="text-xs font-medium">{scoring.points} pts × {scoring.sets} {parseInt(scoring.sets) === 1 ? 'set' : 'sets'}</span>
                               </div>
@@ -741,12 +741,12 @@ const TournamentDetailPage = () => {
                           </div>
                           
                           {(category.prizeWinner || category.prizeRunnerUp || category.prizeSemiFinalist) && (
-                            <div className="mt-3 pt-3 border-t border-white/10">
-                              <div className="flex items-center gap-2 mb-2">
-                                <SparklesIcon className="w-4 h-4 text-amber-400" />
-                                <span className="text-xs font-semibold text-amber-400">Cash Prize</span>
+                            <div className="mt-2 pt-2 border-t border-white/10">
+                              <div className="flex items-center gap-1 mb-1">
+                                <SparklesIcon className="w-3 h-3 text-amber-400" />
+                                <span className="text-xs font-bold text-amber-400">Cash Prize</span>
                               </div>
-                              <div className="flex flex-wrap gap-3 text-sm">
+                              <div className="flex flex-wrap gap-2 text-xs">
                                 {category.prizeWinner && (
                                   <span className="text-green-400 font-medium">🥇 ₹{category.prizeWinner}</span>
                                 )}
@@ -763,12 +763,12 @@ const TournamentDetailPage = () => {
                             </div>
                           )}
                         </div>
-                        <div className="text-right">
-                          <div className="flex items-center gap-1 text-2xl font-bold text-white">
-                            <CurrencyRupeeIcon className="h-6 w-6" />
+                        <div className="text-right flex-shrink-0">
+                          <div className="flex items-center gap-0.5 text-xl font-bold text-white">
+                            <CurrencyRupeeIcon className="h-5 w-5" />
                             {category.entryFee}
                           </div>
-                          <p className="text-xs text-gray-400 mt-1">
+                          <p className="text-xs text-gray-400 mt-0.5">
                             {category.registrationCount || 0} registered
                           </p>
                         </div>
@@ -788,26 +788,26 @@ const TournamentDetailPage = () => {
             </div>
           </div>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
+          {/* Sidebar - Compact */}
+          <div className="space-y-4">
             {/* Register Button - Show for published tournaments */}
             {tournament.status === 'published' && (
-              <div className="bg-gradient-to-br from-purple-600 to-indigo-700 rounded-2xl p-6 text-white shadow-xl shadow-purple-500/30">
-                <h3 className="font-bold text-lg mb-2">Ready to Compete?</h3>
-                <p className="text-purple-100 text-sm mb-4">
+              <div className="bg-gradient-to-br from-purple-600 to-indigo-700 rounded-xl p-4 text-white shadow-xl shadow-purple-500/30">
+                <h3 className="font-bold text-base mb-1">Ready to Compete?</h3>
+                <p className="text-purple-100 text-xs mb-3">
                   Registration closes on {formatDate(tournament.registrationCloseDate)}
                 </p>
                 {user && canRegister() ? (
                   <button
                     onClick={() => navigate(`/tournaments/${id}/register`)}
-                    className="w-full bg-white text-purple-700 px-6 py-3.5 rounded-xl hover:bg-purple-50 font-bold text-lg transition-all hover:scale-105"
+                    className="w-full bg-white text-purple-700 px-5 py-3 rounded-xl hover:bg-purple-50 font-bold text-base transition-all hover:scale-105"
                   >
                     Register Now
                   </button>
                 ) : (
                   <button
                     onClick={() => setShowLoginModal(true)}
-                    className="w-full bg-white text-purple-700 px-6 py-3.5 rounded-xl hover:bg-purple-50 font-bold text-lg transition-all hover:scale-105"
+                    className="w-full bg-white text-purple-700 px-5 py-3 rounded-xl hover:bg-purple-50 font-bold text-base transition-all hover:scale-105"
                   >
                     Register Now
                   </button>
@@ -815,38 +815,38 @@ const TournamentDetailPage = () => {
               </div>
             )}
 
-            {/* Organizer Info */}
-            <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
-              <h3 className="font-bold text-white mb-4">Organized By</h3>
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl flex items-center justify-center text-white font-bold text-xl">
+            {/* Organizer Info - Compact */}
+            <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-xl p-4">
+              <h3 className="font-bold text-white text-sm mb-3">Organized By</h3>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-lg flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
                   {tournament.organizer.name?.charAt(0)?.toUpperCase()}
                 </div>
-                <div>
-                  <p className="font-semibold text-white">{tournament.organizer.name}</p>
-                  <p className="text-sm text-gray-400">{tournament.organizer.email}</p>
+                <div className="min-w-0">
+                  <p className="font-bold text-white text-sm truncate">{tournament.organizer.name}</p>
+                  <p className="text-xs text-gray-400 truncate">{tournament.organizer.email}</p>
                   {tournament.organizer.phone && (
-                    <p className="text-sm text-gray-400">{tournament.organizer.phone}</p>
+                    <p className="text-xs text-gray-400">{tournament.organizer.phone}</p>
                   )}
                 </div>
               </div>
             </div>
 
-            {/* Quick Stats */}
-            <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
-              <h3 className="font-bold text-white mb-4">Quick Stats</h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-3 bg-purple-500/20 border border-purple-500/30 rounded-xl">
-                  <span className="text-gray-300 font-medium">Categories</span>
-                  <span className="font-bold text-purple-400">{tournament.categories?.length || 0}</span>
+            {/* Quick Stats - Compact */}
+            <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-xl p-4">
+              <h3 className="font-bold text-white text-sm mb-3">Quick Stats</h3>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between p-2.5 bg-purple-500/20 border border-purple-500/30 rounded-lg">
+                  <span className="text-gray-300 font-medium text-sm">Categories</span>
+                  <span className="font-bold text-purple-400 text-sm">{tournament.categories?.length || 0}</span>
                 </div>
-                <div className="flex items-center justify-between p-3 bg-blue-500/20 border border-blue-500/30 rounded-xl">
-                  <span className="text-gray-300 font-medium">Registrations</span>
-                  <span className="font-bold text-blue-400">{tournament._count?.registrations || 0}</span>
+                <div className="flex items-center justify-between p-2.5 bg-blue-500/20 border border-blue-500/30 rounded-lg">
+                  <span className="text-gray-300 font-medium text-sm">Registrations</span>
+                  <span className="font-bold text-blue-400 text-sm">{tournament._count?.registrations || 0}</span>
                 </div>
-                <div className="flex items-center justify-between p-3 bg-green-500/20 border border-green-500/30 rounded-xl">
-                  <span className="text-gray-300 font-medium">Zone</span>
-                  <span className="font-bold text-green-400">{tournament.zone}</span>
+                <div className="flex items-center justify-between p-2.5 bg-green-500/20 border border-green-500/30 rounded-lg">
+                  <span className="text-gray-300 font-medium text-sm">Zone</span>
+                  <span className="font-bold text-green-400 text-sm">{tournament.zone}</span>
                 </div>
               </div>
               
@@ -864,7 +864,7 @@ const TournamentDetailPage = () => {
                       navigate(`/tournaments/${id}/draws`);
                     }
                   }}
-                  className="w-full mt-4 flex items-center justify-center gap-2 bg-amber-500/20 text-amber-400 border border-amber-500/30 px-4 py-3 rounded-xl hover:bg-amber-500/30 font-semibold transition-all"
+                  className="w-full mt-3 flex items-center justify-center gap-2 bg-amber-500/20 text-amber-400 border border-amber-500/30 px-4 py-2.5 rounded-lg hover:bg-amber-500/30 font-bold text-sm transition-all"
                 >
                   <GitBranch className="w-4 h-4" />
                   View Draws
@@ -872,7 +872,7 @@ const TournamentDetailPage = () => {
               )}
             </div>
             
-            {/* Organizer Management */}
+            {/* Organizer Management - Compact */}
             {console.log('🔍 Organizer Check:', {
               userId: user?.id,
               organizerId: tournament.organizerId,
@@ -881,15 +881,15 @@ const TournamentDetailPage = () => {
               userEmail: user?.email
             })}
             {user && user.id === tournament.organizerId && (
-              <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
-                <h3 className="font-bold text-white mb-4">Manage Tournament</h3>
-                <div className="space-y-3">
+              <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-xl p-4">
+                <h3 className="font-bold text-white text-sm mb-3">Manage Tournament</h3>
+                <div className="space-y-2">
                   {tournament.status === 'draft' && (
                     <>
                       <button
                         onClick={() => setShowPublishConfirmModal(true)}
                         disabled={publishing || tournament.categories?.length === 0}
-                        className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-3 rounded-xl hover:shadow-lg hover:shadow-green-500/30 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed font-semibold transition-all"
+                        className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white px-4 py-2.5 rounded-lg hover:shadow-lg hover:shadow-green-500/30 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed font-bold text-sm transition-all"
                       >
                         {publishing ? 'Publishing...' : '🚀 Publish Tournament'}
                       </button>
@@ -900,28 +900,28 @@ const TournamentDetailPage = () => {
                   )}
                   <button
                     onClick={() => navigate(`/tournaments/${id}/edit`)}
-                    className="w-full flex items-center justify-center gap-2 bg-purple-500/20 text-purple-400 border border-purple-500/30 px-4 py-3 rounded-xl hover:bg-purple-500/30 font-semibold transition-all"
+                    className="w-full flex items-center justify-center gap-2 bg-purple-500/20 text-purple-400 border border-purple-500/30 px-4 py-2.5 rounded-lg hover:bg-purple-500/30 font-bold text-sm transition-all"
                   >
                     <Edit className="w-4 h-4" />
                     Edit Tournament
                   </button>
                   <button
                     onClick={() => navigate(`/tournaments/${id}/draws`)}
-                    className="w-full flex items-center justify-center gap-2 bg-amber-500/20 text-amber-400 border border-amber-500/30 px-4 py-3 rounded-xl hover:bg-amber-500/30 font-semibold transition-all"
+                    className="w-full flex items-center justify-center gap-2 bg-amber-500/20 text-amber-400 border border-amber-500/30 px-4 py-2.5 rounded-lg hover:bg-amber-500/30 font-bold text-sm transition-all"
                   >
                     <GitBranch className="w-4 h-4" />
                     View Draws
                   </button>
                   <button
                     onClick={() => navigate(`/organizer/tournaments/${id}`)}
-                    className="w-full flex items-center justify-center gap-2 bg-blue-500/20 text-blue-400 border border-blue-500/30 px-4 py-3 rounded-xl hover:bg-blue-500/30 font-semibold transition-all"
+                    className="w-full flex items-center justify-center gap-2 bg-blue-500/20 text-blue-400 border border-blue-500/30 px-4 py-2.5 rounded-lg hover:bg-blue-500/30 font-bold text-sm transition-all"
                   >
                     <Eye className="w-4 h-4" />
                     View Registrations
                   </button>
                   <button
                     onClick={openUmpireModal}
-                    className="w-full flex items-center justify-center gap-2 bg-teal-500/20 text-teal-400 border border-teal-500/30 px-4 py-3 rounded-xl hover:bg-teal-500/30 font-semibold transition-all"
+                    className="w-full flex items-center justify-center gap-2 bg-teal-500/20 text-teal-400 border border-teal-500/30 px-4 py-2.5 rounded-lg hover:bg-teal-500/30 font-bold text-sm transition-all"
                   >
                     <Users className="w-4 h-4" />
                     Add Umpire
@@ -929,7 +929,7 @@ const TournamentDetailPage = () => {
                   <button
                     onClick={() => setShowDeleteModal(true)}
                     disabled={deleting}
-                    className="w-full flex items-center justify-center gap-2 bg-red-500/20 text-red-400 border border-red-500/30 px-4 py-3 rounded-xl hover:bg-red-500/30 disabled:opacity-50 font-semibold transition-all"
+                    className="w-full flex items-center justify-center gap-2 bg-red-500/20 text-red-400 border border-red-500/30 px-4 py-2.5 rounded-lg hover:bg-red-500/30 disabled:opacity-50 font-bold text-sm transition-all"
                   >
                     <TrashIcon className="h-4 w-4" />
                     Delete Tournament
@@ -938,17 +938,17 @@ const TournamentDetailPage = () => {
               </div>
             )}
 
-            {/* Admin Actions */}
+            {/* Admin Actions - Compact */}
             {isAdmin() && (
-              <div className="bg-gradient-to-br from-purple-900/50 to-indigo-900/50 backdrop-blur-sm border border-purple-500/30 rounded-2xl p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <SparklesIcon className="h-5 w-5 text-purple-400" />
-                  <h3 className="font-bold text-white">Admin Actions</h3>
+              <div className="bg-gradient-to-br from-purple-900/50 to-indigo-900/50 backdrop-blur-sm border border-purple-500/30 rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <SparklesIcon className="h-4 w-4 text-purple-400" />
+                  <h3 className="font-bold text-white text-sm">Admin Actions</h3>
                 </div>
-                <div className="space-y-3">
+                <div className="space-y-2">
                   <button
                     onClick={() => setShowQuickAddModal(true)}
-                    className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-4 py-3 rounded-xl hover:shadow-lg hover:shadow-purple-500/30 font-semibold transition-all"
+                    className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-4 py-2.5 rounded-lg hover:shadow-lg hover:shadow-purple-500/30 font-bold text-sm transition-all"
                   >
                     <UserPlusIcon className="h-4 w-4" />
                     Quick Add Player
@@ -1103,49 +1103,46 @@ const TournamentDetailPage = () => {
         </div>
       )}
 
-      {/* Login Required Modal */}
+      {/* Login Required Modal - Mobile Perfect */}
       {showLoginModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
-            <div className="bg-gradient-to-r from-purple-600 to-indigo-700 p-6 text-white">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                  <UserIcon className="h-6 w-6" />
+          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden">
+            <div className="bg-gradient-to-r from-purple-600 to-indigo-700 p-5 text-white">
+              <div className="flex items-center justify-center gap-2">
+                <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                  <UserIcon className="h-5 w-5" />
                 </div>
-                <div>
-                  <h2 className="text-xl font-bold">Sign In Required</h2>
-                  <p className="text-purple-100 text-sm mt-1">Create an account to register</p>
-                </div>
+                <h2 className="text-lg font-black">Sign In Required</h2>
               </div>
             </div>
 
-            <div className="p-6">
-              <p className="text-gray-700 mb-6">
-                To register for <span className="font-semibold">"{tournament?.name}"</span>, you need to sign in or create an account first.
+            <div className="p-5">
+              <p className="text-gray-700 text-sm mb-5 text-center">
+                To register for <span className="font-bold">"{tournament?.name}"</span>, you need to sign in or create an account first.
               </p>
 
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <Link
                   to={`/register?redirect=/tournaments/${id}/register`}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:shadow-lg hover:shadow-purple-500/30 transition-all font-semibold"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:shadow-lg hover:shadow-purple-500/30 transition-all font-bold text-sm"
                 >
                   Create Account
                 </Link>
                 <Link
                   to={`/login?redirect=/tournaments/${id}/register`}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 border-2 border-purple-200 text-purple-700 rounded-xl hover:bg-purple-50 transition-all font-semibold"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 border-2 border-purple-200 text-purple-700 rounded-xl hover:bg-purple-50 transition-all font-bold text-sm"
                 >
                   Sign In
                 </Link>
                 <button
                   onClick={() => setShowLoginModal(false)}
-                  className="w-full px-4 py-3 text-gray-400 hover:text-gray-700 transition-colors font-medium"
+                  className="w-full px-4 py-2.5 text-gray-400 hover:text-gray-700 transition-colors font-medium text-sm"
                 >
                   Cancel
                 </button>
               </div>
 
-              <p className="text-center text-sm text-gray-400 mt-4">
+              <p className="text-center text-xs text-gray-400 mt-3">
                 Registration is free and takes less than a minute!
               </p>
             </div>
@@ -1153,49 +1150,46 @@ const TournamentDetailPage = () => {
         </div>
       )}
 
-      {/* Publish Confirmation Modal */}
+      {/* Publish Confirmation Modal - Mobile Perfect */}
       {showPublishConfirmModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
-            <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-6 text-white">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                  <SparklesIcon className="h-6 w-6" />
+          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden">
+            <div className="bg-gradient-to-r from-emerald-500 to-green-600 p-5 text-white">
+              <div className="flex items-center justify-center gap-2">
+                <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                  <SparklesIcon className="h-5 w-5" />
                 </div>
-                <div>
-                  <h2 className="text-xl font-bold">Publish Tournament</h2>
-                  <p className="text-green-100 text-sm mt-1">Make it live for players</p>
-                </div>
+                <h2 className="text-lg font-black">Publish Tournament</h2>
               </div>
             </div>
 
-            <div className="p-6">
-              <p className="text-gray-700 mb-4">
-                You are about to publish <span className="font-semibold">"{tournament?.name}"</span>.
+            <div className="p-5">
+              <p className="text-gray-700 text-sm mb-3 text-center">
+                You are about to publish <span className="font-bold">"{tournament?.name}"</span>.
               </p>
               
-              <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-6">
-                <p className="text-green-800 text-sm">
+              <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 mb-5">
+                <p className="text-emerald-800 text-xs text-center">
                   Once published, your tournament will be visible to all players and they can start registering.
                 </p>
               </div>
 
-              <div className="flex gap-3">
+              <div className="flex gap-2">
                 <button
                   onClick={() => setShowPublishConfirmModal(false)}
-                  className="flex-1 px-4 py-3 border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors font-medium"
+                  className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors font-bold text-sm"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handlePublish}
                   disabled={publishing}
-                  className="flex-1 px-4 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:shadow-lg hover:shadow-green-500/30 transition-all font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="flex-1 px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-xl hover:shadow-lg hover:shadow-emerald-500/30 transition-all font-bold text-sm disabled:opacity-50 flex items-center justify-center gap-1.5"
                 >
                   {publishing ? (
                     <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                      Publishing...
+                      <div className="animate-spin rounded-full h-3.5 w-3.5 border-2 border-white border-t-transparent"></div>
+                      <span>Publishing...</span>
                     </>
                   ) : (
                     '🚀 Publish Now'
@@ -1207,30 +1201,30 @@ const TournamentDetailPage = () => {
         </div>
       )}
 
-      {/* Publish Result Modal */}
+      {/* Publish Result Modal - MOBILE PERFECT with Emerald Green */}
       {publishResultModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
-            <div className={`p-6 text-white ${publishResultModal.type === 'success' ? 'bg-gradient-to-r from-green-500 to-emerald-600' : 'bg-gradient-to-r from-red-500 to-rose-600'}`}>
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden">
+            <div className={`p-5 text-white ${publishResultModal.type === 'success' ? 'bg-gradient-to-r from-emerald-500 to-green-600' : 'bg-gradient-to-r from-red-500 to-rose-600'}`}>
+              <div className="flex items-center justify-center gap-2">
+                <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
                   {publishResultModal.type === 'success' ? (
-                    <TrophyIcon className="h-6 w-6" />
+                    <TrophyIcon className="h-5 w-5" />
                   ) : (
-                    <ExclamationTriangleIcon className="h-6 w-6" />
+                    <ExclamationTriangleIcon className="h-5 w-5" />
                   )}
                 </div>
-                <h2 className="text-xl font-bold">{publishResultModal.title}</h2>
+                <h2 className="text-lg font-black">{publishResultModal.title}</h2>
               </div>
             </div>
 
-            <div className="p-6">
-              <p className="text-gray-700 mb-6">{publishResultModal.message}</p>
+            <div className="p-5">
+              <p className="text-gray-700 text-sm mb-5 text-center leading-relaxed">{publishResultModal.message}</p>
               <button
                 onClick={() => setPublishResultModal(null)}
-                className={`w-full px-4 py-3 rounded-xl font-semibold transition-all ${
+                className={`w-full px-5 py-3 rounded-xl font-bold text-base transition-all ${
                   publishResultModal.type === 'success' 
-                    ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:shadow-lg hover:shadow-green-500/30' 
+                    ? 'bg-gradient-to-r from-emerald-500 to-green-600 text-white hover:shadow-lg hover:shadow-emerald-500/30' 
                     : 'bg-gradient-to-r from-red-500 to-rose-600 text-white hover:shadow-lg hover:shadow-red-500/30'
                 }`}
               >
@@ -1241,27 +1235,27 @@ const TournamentDetailPage = () => {
         </div>
       )}
 
-      {/* Delete Result Modal */}
+      {/* Delete Result Modal - Mobile Perfect */}
       {deleteResultModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
-            <div className={`p-6 text-white ${deleteResultModal.type === 'success' ? 'bg-gradient-to-r from-emerald-500 to-teal-600' : 'bg-gradient-to-r from-red-500 to-rose-600'}`}>
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden">
+            <div className={`p-5 text-white ${deleteResultModal.type === 'success' ? 'bg-gradient-to-r from-emerald-500 to-teal-600' : 'bg-gradient-to-r from-red-500 to-rose-600'}`}>
+              <div className="flex items-center justify-center gap-2">
+                <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
                   {deleteResultModal.type === 'success' ? (
-                    <SparklesIcon className="h-6 w-6" />
+                    <SparklesIcon className="h-5 w-5" />
                   ) : (
-                    <ExclamationTriangleIcon className="h-6 w-6" />
+                    <ExclamationTriangleIcon className="h-5 w-5" />
                   )}
                 </div>
-                <h2 className="text-xl font-bold">{deleteResultModal.title}</h2>
+                <h2 className="text-lg font-black">{deleteResultModal.title}</h2>
               </div>
             </div>
 
-            <div className="p-6">
-              <p className="text-gray-700 mb-2">{deleteResultModal.message}</p>
+            <div className="p-5">
+              <p className="text-gray-700 text-sm mb-2 text-center">{deleteResultModal.message}</p>
               {deleteResultModal.type === 'success' && (
-                <p className="text-sm text-gray-400 mb-6">
+                <p className="text-xs text-gray-400 mb-5 text-center">
                   All participants have received a notification from Matchify.pro about this cancellation.
                 </p>
               )}
@@ -1272,7 +1266,7 @@ const TournamentDetailPage = () => {
                   }
                   setDeleteResultModal(null);
                 }}
-                className={`w-full px-4 py-3 rounded-xl font-semibold transition-all ${
+                className={`w-full px-5 py-3 rounded-xl font-bold text-base transition-all ${
                   deleteResultModal.type === 'success' 
                     ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:shadow-lg hover:shadow-emerald-500/30' 
                     : 'bg-gradient-to-r from-red-500 to-rose-600 text-white hover:shadow-lg hover:shadow-red-500/30'

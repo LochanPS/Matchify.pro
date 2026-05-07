@@ -72,7 +72,8 @@ jspm_packages/
 .tern-port
 
 # Prisma
-prisma/migrations/
+# Note: migrations/ should be committed to git for production deployments
+# prisma/migrations/ - REMOVED - migrations must be tracked
 .env
 
 # IDE

@@ -744,7 +744,7 @@ const DrawPage = () => {
   const hasPlayedMatches = matches.some(m => m.status === 'COMPLETED' || m.status === 'IN_PROGRESS');
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-teal-950 to-slate-900 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-teal-950 via-emerald-950 to-teal-950 relative overflow-hidden">
       {/* Animated Background - Floating Particles */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-2 h-2 bg-emerald-400 rounded-full animate-float opacity-60"></div>
@@ -758,10 +758,10 @@ const DrawPage = () => {
       </div>
 
       {/* Hero Header */}
-      <div className="relative bg-gradient-to-r from-slate-900 via-teal-900 to-slate-900 overflow-hidden">
+      <div className="relative bg-gradient-to-r from-teal-900 via-emerald-900 to-teal-900 overflow-hidden">
         <div className="absolute inset-0">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-teal-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-teal-500 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
         </div>
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -785,69 +785,71 @@ const DrawPage = () => {
             </div>
 
             {isOrganizer && (
-              <div className="flex gap-2 flex-wrap">
+              <div className="grid grid-cols-2 gap-3 w-full max-w-2xl">
                 {bracket && (
                   <>
-                    {/* Assign Players button - Disabled when tournament is completed - COMPACT */}
+                    {/* Row 1: Assign Players & Edit Groups */}
                     {(bracket?.format === 'KNOCKOUT' || bracket?.format === 'ROUND_ROBIN' || bracket?.format === 'ROUND_ROBIN_KNOCKOUT') && (
                       <button
                         onClick={openAssignModal}
                         disabled={isCategoryCompleted}
                         title={isCategoryCompleted ? 'Category has ended - draw is locked' : 'Assign players to draw'}
-                        className={`px-3 py-2 rounded-xl shadow-lg transition-all flex items-center gap-1.5 font-semibold text-xs ${
+                        className={`px-4 py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm ${
                           isCategoryCompleted
                             ? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50'
                             : 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:scale-105'
                         }`}
                       >
-                        <UserPlus className="w-4 h-4" />
+                        <UserPlus className="w-5 h-5" />
                         Assign Players
                       </button>
                     )}
-                    {/* Edit Group Sizes button - Disabled when tournament is completed - COMPACT */}
+                    
                     {(bracket?.format === 'ROUND_ROBIN' || bracket?.format === 'ROUND_ROBIN_KNOCKOUT') && !hasPlayedMatches && (
                       <button
                         onClick={() => setShowConfigModal(true)}
                         disabled={isCategoryCompleted}
                         title={isCategoryCompleted ? 'Category has ended - draw is locked' : 'Edit group sizes and configuration'}
-                        className={`px-3 py-2 rounded-xl shadow-lg transition-all flex items-center gap-1.5 font-semibold text-xs ${
+                        className={`px-4 py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm ${
                           isCategoryCompleted
                             ? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50'
                             : 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:scale-105'
                         }`}
                       >
-                        <Layers className="w-4 h-4" />
+                        <Layers className="w-5 h-5" />
                         Edit Groups
                       </button>
                     )}
-                    {/* Arrange Knockout Matchups button - Disabled when tournament is completed - COMPACT */}
+                    
+                    {/* Row 2: Arrange KO & End Category */}
                     {bracket?.format === 'ROUND_ROBIN_KNOCKOUT' && (
                       <button
                         onClick={() => setShowArrangeMatchupsModal(true)}
                         disabled={isCategoryCompleted}
                         title={isCategoryCompleted ? 'Category has ended - draw is locked' : 'Arrange knockout stage matchups'}
-                        className={`px-3 py-2 rounded-xl shadow-lg transition-all flex items-center gap-1.5 font-semibold text-xs ${
+                        className={`px-4 py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm ${
                           isCategoryCompleted
                             ? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50'
                             : 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:scale-105'
                         }`}
                       >
-                        <Settings className="w-4 h-4" />
+                        <Settings className="w-5 h-5" />
                         Arrange KO
                       </button>
                     )}
-                    {/* End Category Button - Hide when already completed - COMPACT */}
+                    
                     {!isCategoryCompleted && (
                       <button
                         onClick={() => setShowEndTournamentModal(true)}
-                        className="px-3 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl shadow-lg shadow-green-500/30 hover:shadow-green-500/50 hover:scale-105 transition-all flex items-center gap-1.5 font-semibold text-xs"
+                        className="px-4 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:scale-105 transition-all flex items-center justify-center gap-2 font-bold text-sm"
                         title="Mark this category as complete"
                       >
-                        <Trophy className="w-4 h-4" />
+                        <Trophy className="w-5 h-5" />
                         End Category
                       </button>
                     )}
-                    {/* Restart Draws button - Disabled when tournament is completed - COMPACT */}
+                    
+                    {/* Row 3: Restart & Delete */}
                     <button
                       onClick={() => hasPlayedMatches && !isCategoryCompleted && setShowRestartModal(true)}
                       disabled={!hasPlayedMatches || isCategoryCompleted}
@@ -858,16 +860,16 @@ const DrawPage = () => {
                             ? 'No matches have been played yet' 
                             : 'Restart all matches'
                       }
-                      className={`px-3 py-2 rounded-xl shadow-lg transition-all flex items-center gap-1.5 font-semibold text-xs ${
+                      className={`px-4 py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm ${
                         !hasPlayedMatches || isCategoryCompleted
                           ? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50' 
-                          : 'bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-orange-500/30 hover:shadow-orange-500/50 hover:scale-105'
+                          : 'bg-gradient-to-r from-gray-600 to-gray-700 text-white shadow-gray-500/30 hover:shadow-gray-500/50 hover:scale-105'
                       }`}
                     >
-                      <Zap className="w-4 h-4" />
+                      <Zap className="w-5 h-5" />
                       Restart
                     </button>
-                    {/* Delete Draw button - Disabled when tournament is completed - COMPACT */}
+                    
                     <button
                       onClick={() => !hasPlayedMatches && !isCategoryCompleted && setShowDeleteModal(true)}
                       disabled={hasPlayedMatches || isCategoryCompleted}
@@ -878,13 +880,13 @@ const DrawPage = () => {
                             ? 'Cannot delete draw - matches have been played' 
                             : 'Delete Draw'
                       }
-                      className={`px-3 py-2 rounded-xl shadow-lg transition-all flex items-center gap-1.5 font-semibold text-xs ${
+                      className={`px-4 py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm ${
                         hasPlayedMatches || isCategoryCompleted
                           ? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50' 
                           : 'bg-gradient-to-r from-red-500 to-rose-600 text-white shadow-red-500/30 hover:shadow-red-500/50 hover:scale-105'
                       }`}
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-5 h-5" />
                       Delete
                     </button>
                   </>
@@ -892,9 +894,9 @@ const DrawPage = () => {
                 {!bracket && !isCategoryCompleted && (
                   <button
                     onClick={() => setShowConfigModal(true)}
-                    className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:scale-105 transition-all flex items-center gap-1.5 font-semibold text-xs"
+                    className="col-span-2 px-4 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:scale-105 transition-all flex items-center justify-center gap-2 font-bold text-sm"
                   >
-                    <Plus className="w-4 h-4" />
+                    <Plus className="w-5 h-5" />
                     Create Draw
                   </button>
                 )}

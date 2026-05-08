@@ -744,24 +744,24 @@ const DrawPage = () => {
   const hasPlayedMatches = matches.some(m => m.status === 'COMPLETED' || m.status === 'IN_PROGRESS');
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-900 via-emerald-800 to-teal-900 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-teal-950 to-slate-900 relative overflow-hidden">
       {/* Animated Background - Floating Particles */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-2 h-2 bg-emerald-400 rounded-full animate-float opacity-80"></div>
-        <div className="absolute top-40 right-20 w-3 h-3 bg-teal-400 rounded-full animate-float-delayed opacity-70" style={{animationDelay: '1s'}}></div>
-        <div className="absolute top-60 left-1/4 w-2 h-2 bg-emerald-300 rounded-full animate-float opacity-90" style={{animationDelay: '2s'}}></div>
-        <div className="absolute bottom-40 right-1/3 w-3 h-3 bg-teal-500 rounded-full animate-float-delayed opacity-80" style={{animationDelay: '0.5s'}}></div>
-        <div className="absolute bottom-20 left-1/3 w-2 h-2 bg-emerald-400 rounded-full animate-float opacity-70" style={{animationDelay: '1.5s'}}></div>
-        <div className="absolute top-1/3 right-10 w-2 h-2 bg-teal-300 rounded-full animate-float-delayed opacity-90" style={{animationDelay: '2.5s'}}></div>
-        <div className="absolute top-1/2 left-20 w-3 h-3 bg-emerald-500 rounded-full animate-float opacity-80" style={{animationDelay: '0.8s'}}></div>
-        <div className="absolute bottom-1/3 right-1/4 w-2 h-2 bg-teal-400 rounded-full animate-float-delayed opacity-70" style={{animationDelay: '1.8s'}}></div>
+        <div className="absolute top-20 left-10 w-2 h-2 bg-emerald-400 rounded-full animate-float opacity-60"></div>
+        <div className="absolute top-40 right-20 w-3 h-3 bg-teal-400 rounded-full animate-float-delayed opacity-50" style={{animationDelay: '1s'}}></div>
+        <div className="absolute top-60 left-1/4 w-2 h-2 bg-emerald-300 rounded-full animate-float opacity-70" style={{animationDelay: '2s'}}></div>
+        <div className="absolute bottom-40 right-1/3 w-3 h-3 bg-teal-500 rounded-full animate-float-delayed opacity-60" style={{animationDelay: '0.5s'}}></div>
+        <div className="absolute bottom-20 left-1/3 w-2 h-2 bg-emerald-400 rounded-full animate-float opacity-50" style={{animationDelay: '1.5s'}}></div>
+        <div className="absolute top-1/3 right-10 w-2 h-2 bg-teal-300 rounded-full animate-float-delayed opacity-70" style={{animationDelay: '2.5s'}}></div>
+        <div className="absolute top-1/2 left-20 w-3 h-3 bg-emerald-500 rounded-full animate-float opacity-60" style={{animationDelay: '0.8s'}}></div>
+        <div className="absolute bottom-1/3 right-1/4 w-2 h-2 bg-teal-400 rounded-full animate-float-delayed opacity-50" style={{animationDelay: '1.8s'}}></div>
       </div>
 
       {/* Hero Header */}
-      <div className="relative bg-gradient-to-r from-teal-800 via-emerald-700 to-teal-800 overflow-hidden">
+      <div className="relative bg-gradient-to-r from-slate-900 via-teal-950 to-slate-900 overflow-hidden">
         <div className="absolute inset-0">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob"></div>
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-teal-500 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob animation-delay-2000"></div>
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-teal-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
         </div>
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -2791,34 +2791,34 @@ const GroupsKnockoutDisplay = ({
       <div className="flex gap-2 p-1.5 bg-slate-800/50 rounded-xl border-2 border-white/10">
         <button
           onClick={() => setActiveStage('roundrobin')}
-          className={`flex-1 px-4 py-3 rounded-lg font-black transition-all flex items-center justify-center gap-2 text-sm ${
+          className={`flex-1 px-3 py-3 rounded-lg font-black transition-all flex items-center justify-center gap-2 text-xs sm:text-sm ${
             activeStage === 'roundrobin'
               ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/50'
               : 'bg-slate-700/30 text-gray-400 hover:bg-slate-700/50 hover:text-white'
           }`}
         >
-          <span className={`px-2 py-0.5 rounded-md text-xs font-black ${
+          <span className={`px-2 py-0.5 rounded-md text-xs font-black whitespace-nowrap ${
             activeStage === 'roundrobin' ? 'bg-white/20' : 'bg-slate-600/50'
           }`}>
             STAGE 1
           </span>
-          GROUPS
+          <span className="whitespace-nowrap">GROUPS</span>
         </button>
         
         <button
           onClick={() => setActiveStage('knockout')}
-          className={`flex-1 px-4 py-3 rounded-lg font-black transition-all flex items-center justify-center gap-2 text-sm ${
+          className={`flex-1 px-3 py-3 rounded-lg font-black transition-all flex items-center justify-center gap-2 text-xs sm:text-sm ${
             activeStage === 'knockout'
               ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/50'
               : 'bg-slate-700/30 text-gray-400 hover:bg-slate-700/50 hover:text-white'
           }`}
         >
-          <span className={`px-2 py-0.5 rounded-md text-xs font-black ${
+          <span className={`px-2 py-0.5 rounded-md text-xs font-black whitespace-nowrap ${
             activeStage === 'knockout' ? 'bg-white/20' : 'bg-slate-600/50'
           }`}>
             STAGE 2
           </span>
-          KNOCKOUT
+          <span className="whitespace-nowrap">KNOCKOUT</span>
         </button>
       </div>
 

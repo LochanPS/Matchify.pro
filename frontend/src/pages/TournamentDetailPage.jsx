@@ -124,25 +124,6 @@ const DeleteTournamentModal = ({ isOpen, onClose, onConfirm, tournamentName, isD
 };
 
 const TournamentDetailPage = () => {
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                  Cancelling...
-                </>
-              ) : (
-                <>
-                  <TrashIcon className="h-4 w-4" />
-                  Cancel Tournament
-                </>
-              )}
-            </button>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  );
-};
-
-const TournamentDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();

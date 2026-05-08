@@ -27,6 +27,15 @@ import { useAuth } from '../contexts/AuthContext';
 import { ArrowLeftIcon, TrophyIcon } from '@heroicons/react/24/outline';
 import { Loader, Zap, Layers, X, Plus, Settings, Users, CheckCircle, AlertTriangle, Trash2, UserPlus, Gavel, AlertCircle, Play, Trophy, Clock, Eye, Edit } from 'lucide-react';
 
+// Utility function to display player names with partner names for doubles
+const getPlayerDisplay = (player) => {
+  if (!player || !player.name || player.name === 'TBD') return 'TBD';
+  if (player.partnerName) {
+    return `${player.name} & ${player.partnerName}`;
+  }
+  return player.name;
+};
+
 const DrawPage = () => {
   const { tournamentId, categoryId } = useParams();
   const navigate = useNavigate();
@@ -1511,8 +1520,8 @@ const DrawPage = () => {
               <p className="text-gray-400 text-xs mb-2">Current Winner</p>
               <p className="text-white font-semibold">
                 {selectedMatchForChange.winnerId === selectedMatchForChange.bracketMatch.player1?.id 
-                  ? selectedMatchForChange.bracketMatch.player1?.name 
-                  : selectedMatchForChange.bracketMatch.player2?.name}
+                  ? getPlayerDisplay(selectedMatchForChange.bracketMatch.player1)
+                  : getPlayerDisplay(selectedMatchForChange.bracketMatch.player2)}
               </p>
             </div>
 
@@ -1528,7 +1537,7 @@ const DrawPage = () => {
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-white font-semibold">{selectedMatchForChange.bracketMatch.player1?.name}</span>
+                  <span className="text-white font-semibold">{getPlayerDisplay(selectedMatchForChange.bracketMatch.player1)}</span>
                   {selectedMatchForChange.winnerId === selectedMatchForChange.bracketMatch.player1?.id && (
                     <span className="text-emerald-400 text-sm">✓ Current</span>
                   )}
@@ -1545,7 +1554,7 @@ const DrawPage = () => {
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-white font-semibold">{selectedMatchForChange.bracketMatch.player2?.name}</span>
+                  <span className="text-white font-semibold">{getPlayerDisplay(selectedMatchForChange.bracketMatch.player2)}</span>
                   {selectedMatchForChange.winnerId === selectedMatchForChange.bracketMatch.player2?.id && (
                     <span className="text-emerald-400 text-sm">✓ Current</span>
                   )}
@@ -1671,7 +1680,7 @@ const DrawPage = () => {
                           ? 'text-emerald-300'
                           : 'text-white'
                       }`}>
-                        {selectedMatchDetails.bracketMatch.player1?.name}
+                        {getPlayerDisplay(selectedMatchDetails.bracketMatch.player1)}
                       </span>
                     </div>
                     {selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player1?.id && (
@@ -1720,7 +1729,7 @@ const DrawPage = () => {
                           ? 'text-emerald-300'
                           : 'text-white'
                       }`}>
-                        {selectedMatchDetails.bracketMatch.player2?.name}
+                        {getPlayerDisplay(selectedMatchDetails.bracketMatch.player2)}
                       </span>
                     </div>
                     {selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player2?.id && (
@@ -2261,14 +2270,6 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
     return roundMatches[matchIdx];
   };
 
-  const getPlayerDisplay = (player) => {
-    if (!player || !player.name || player.name === 'TBD') return 'TBD';
-    if (player.partnerName) {
-      return `${player.name} & ${player.partnerName}`;
-    }
-    return player.name;
-  };
-
   // Open conduct page for match
   const handleConductMatch = (matchId) => {
     console.log('🎯 Conduct button clicked for matchId:', matchId);
@@ -2569,7 +2570,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                       <span className={`font-bold text-sm truncate block ${
                         p.id ? 'text-white' : 'text-gray-500'
                       }`}>
-                        {p.name || `Slot ${pi + 1}`}
+                        {p.id ? getPlayerDisplay(p) : `Slot ${pi + 1}`}
                       </span>
                     </div>
                     
@@ -2646,7 +2647,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                         <div className={`py-2 px-3 rounded-lg text-center font-semibold text-sm ${
                           hasPlayers ? 'text-white bg-slate-700/50' : 'text-gray-500 bg-slate-800/30'
                         }`}>
-                          {match.player1?.name || 'TBD'}
+                          {getPlayerDisplay(match.player1) || 'TBD'}
                         </div>
                         <div className="text-center">
                           <span className="text-gray-400 text-xs font-black uppercase">VS</span>
@@ -2654,7 +2655,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                         <div className={`py-2 px-3 rounded-lg text-center font-semibold text-sm ${
                           hasPlayers ? 'text-white bg-slate-700/50' : 'text-gray-500 bg-slate-800/30'
                         }`}>
-                          {match.player2?.name || 'TBD'}
+                          {getPlayerDisplay(match.player2) || 'TBD'}
                         </div>
                       </div>
                       
@@ -2662,7 +2663,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                       {dbMatch?.winnerId && (
                         <div className="mt-2.5 p-2 bg-emerald-500/20 rounded-lg border border-emerald-500/30">
                           <div className="text-xs text-emerald-300 font-bold text-center">
-                            Winner: {dbMatch.winnerId === match.player1?.id ? match.player1?.name : match.player2?.name}
+                            Winner: {dbMatch.winnerId === match.player1?.id ? getPlayerDisplay(match.player1) : getPlayerDisplay(match.player2)}
                           </div>
                         </div>
                       )}
@@ -4040,7 +4041,7 @@ const AssignUmpireModal = ({ match, umpires, onClose, onAssign }) => {
               <div>
                 <h2 className="text-xl font-bold text-white">Assign Umpire & Start Match</h2>
                 <p className="text-gray-400 text-sm">
-                  Match {match?.matchNumber} • {match?.player1?.name || 'TBD'} vs {match?.player2?.name || 'TBD'}
+                  Match {match?.matchNumber} • {getPlayerDisplay(match?.player1)} vs {getPlayerDisplay(match?.player2)}
                 </p>
               </div>
             </div>

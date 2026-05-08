@@ -91,12 +91,8 @@ router.post('/delete-all-info', authenticate, async (req, res) => {
     // 20. Delete payment settings
     deletionResults.paymentSettings = await prisma.paymentSettings.deleteMany({});
     
-    // 21. Reset all users' wallet balances and credits to 0 (except admin)
-    const adminEmail = 'ADMIN@gmail.com';
+    // 21. Reset all users' tournament-related stats to 0 (PRESERVE ALL USER ACCOUNTS)
     deletionResults.usersReset = await prisma.user.updateMany({
-      where: {
-        email: { not: adminEmail }
-      },
       data: {
         walletBalance: 0,
         totalPoints: 0,
@@ -108,19 +104,14 @@ router.post('/delete-all-info', authenticate, async (req, res) => {
       }
     });
     
-    // 22. Delete all users except admin
-    deletionResults.usersDeleted = await prisma.user.deleteMany({
-      where: {
-        email: { not: adminEmail }
-      }
-    });
+    // DO NOT DELETE USERS - All user accounts are preserved
 
     console.log('✅ All data deleted successfully');
     console.log('📊 Deletion results:', deletionResults);
 
     res.json({
       success: true,
-      message: 'All data deleted successfully. System reset to initial state.',
+      message: 'All tournament data deleted successfully. All user accounts preserved.',
       deletionResults: {
         matches: deletionResults.matchScores.count,
         draws: deletionResults.draws.count,
@@ -140,8 +131,9 @@ router.post('/delete-all-info', authenticate, async (req, res) => {
         organizerKYC: deletionResults.organizerKYC.count,
         organizerRequests: deletionResults.organizerRequests.count,
         paymentSettings: deletionResults.paymentSettings.count,
-        usersDeleted: deletionResults.usersDeleted.count,
-        adminPreserved: true
+        usersReset: deletionResults.usersReset.count,
+        usersPreserved: true,
+        usersDeleted: 0
       }
     });
 

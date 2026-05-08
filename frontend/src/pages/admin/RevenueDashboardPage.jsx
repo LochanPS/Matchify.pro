@@ -353,11 +353,11 @@ const RevenueDashboardPage = () => {
           <div className="flex-1">
             <h3 className="text-xl font-bold text-red-400 mb-2">Danger Zone</h3>
             <p className="text-gray-300 mb-4">
-              Delete all system data including tournaments, registrations, payments, and users. 
+              Delete all tournament data including tournaments, registrations, payments, and revenue. 
               This action is irreversible and will reset all revenue to zero.
             </p>
-            <p className="text-sm text-gray-400 mb-4">
-              ⚠️ Admin account (ADMIN@gmail.com) will be preserved
+            <p className="text-sm text-emerald-400 mb-4">
+              ✓ All user accounts will be preserved (only tournament data will be deleted)
             </p>
             <button
               onClick={() => setShowDeleteModal(true)}
@@ -375,20 +375,23 @@ const RevenueDashboardPage = () => {
           <div className="bg-slate-800 rounded-2xl border-2 border-red-600 shadow-2xl max-w-md w-full p-8">
             <div className="text-center mb-6">
               <div className="text-6xl mb-4">⚠️</div>
-              <h2 className="text-2xl font-bold text-red-400 mb-2">Delete All Data?</h2>
+              <h2 className="text-2xl font-bold text-red-400 mb-2">Delete All Tournament Data?</h2>
               <p className="text-gray-300 mb-4">
                 This will permanently delete:
               </p>
               <ul className="text-left text-gray-400 text-sm space-y-2 mb-4">
                 <li>✗ All tournaments and matches</li>
                 <li>✗ All registrations and payments</li>
-                <li>✗ All users (except admin)</li>
-                <li>✗ All revenue data</li>
+                <li>✗ All revenue and expense data</li>
                 <li>✗ All notifications and logs</li>
+                <li>✗ All draws and categories</li>
               </ul>
-              <div className="bg-green-900/30 border border-green-700 rounded-lg p-3 mb-4">
-                <p className="text-green-400 text-sm">
-                  ✓ Admin account will be preserved
+              <div className="bg-emerald-900/30 border border-emerald-700 rounded-lg p-3 mb-4">
+                <p className="text-emerald-400 text-sm font-medium">
+                  ✓ All user accounts will be preserved
+                </p>
+                <p className="text-emerald-400 text-xs mt-1">
+                  Users can continue to login and register for new tournaments
                 </p>
               </div>
               <p className="text-red-400 font-bold text-lg">

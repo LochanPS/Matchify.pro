@@ -288,6 +288,9 @@ const getTournaments = async (req, res) => {
       // Sorting
       sortBy = 'startDate',
       sortOrder = 'asc',
+      
+      // Organizer filter - if true, show all tournaments for the organizer (including drafts)
+      myTournaments,
     } = req.query;
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
@@ -295,6 +298,20 @@ const getTournaments = async (req, res) => {
 
     // Build base filters
     const baseFilters = {};
+
+    // If this is NOT a "myTournaments" request, only show published tournaments
+    // This ensures public discovery only shows published tournaments
+    if (myTournaments !== 'true') {
+      baseFilters.status = 'published';
+    }
+
+    // If user is authenticated and requesting their tournaments, filter by organizer
+    if (myTournaments === 'true' && req.user) {
+      const userId = req.user.id || req.user.userId;
+      baseFilters.organizerId = userId;
+      // Remove the published-only filter for organizer's own tournaments
+      delete baseFilters.status;
+    }
 
     // Location filters (case-insensitive for SQLite)
     if (city) {
@@ -327,15 +344,16 @@ const getTournaments = async (req, res) => {
       const now = new Date();
       // For string date comparison, we'll filter in memory after fetching
       // This is a limitation of storing dates as strings
-      baseFilters.status = { in: ['draft', 'published'] }; // Only show upcoming tournaments
+      if (!baseFilters.status) {
+        baseFilters.status = { in: ['draft', 'published'] }; // Only show upcoming tournaments
+      }
     }
 
-    // Status filter (can be multiple: "draft,published,ongoing")
+    // Status filter (can be multiple: "draft,published,ongoing") - only if explicitly provided
     if (status) {
       const statuses = status.split(',').map(s => s.trim());
       baseFilters.status = { in: statuses };
     }
-    // Removed default status filter - show all tournaments by default
 
     // Format filter
     if (format) {
@@ -346,7 +364,6 @@ const getTournaments = async (req, res) => {
     if (privacy) {
       baseFilters.privacy = privacy;
     }
-    // Removed default privacy filter - show all tournaments by default
 
     // Search by name, description, venue, or city
     if (search) {

@@ -127,9 +127,11 @@ const CreateTournament = () => {
 
       clearDraft();
 
+      // Show success modal with publish option instead of navigating immediately
       navigate(`/tournaments/${tournamentId}`, {
         state: { 
-          message: 'Tournament created successfully! Categories and details have been saved.',
+          showPublishPrompt: true,
+          message: 'Tournament created successfully!',
         }
       });
     } catch (err) {

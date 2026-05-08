@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import { tournamentAPI } from '../api/tournament';
 import { useAuth } from '../contexts/AuthContext';
 import { formatDateLongIndian, formatDateTimeIndian } from '../utils/dateFormat';
@@ -127,6 +127,7 @@ const TournamentDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { state } = useLocation();
   const [tournament, setTournament] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -139,6 +140,7 @@ const TournamentDetailPage = () => {
   const [showPublishConfirmModal, setShowPublishConfirmModal] = useState(false);
   const [publishResultModal, setPublishResultModal] = useState(null);
   const [deleteResultModal, setDeleteResultModal] = useState(null);
+  const [showPublishPromptModal, setShowPublishPromptModal] = useState(false);
   
   // Umpire management state
   const [showUmpireModal, setShowUmpireModal] = useState(false);
@@ -163,6 +165,13 @@ const TournamentDetailPage = () => {
   useEffect(() => {
     fetchTournament();
   }, [id]);
+
+  // Show publish prompt if coming from tournament creation
+  useEffect(() => {
+    if (state?.showPublishPrompt && tournament?.status === 'draft') {
+      setShowPublishPromptModal(true);
+    }
+  }, [state, tournament]);
 
   // Keyboard navigation for poster modal
   useEffect(() => {
@@ -1434,6 +1443,75 @@ const TournamentDetailPage = () => {
               >
                 {deleteResultModal.type === 'success' ? 'Continue' : 'Got it'}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Publish Prompt Modal - After Tournament Creation */}
+      {showPublishPromptModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
+            <div 
+              className="p-6 text-white"
+              style={{ background: 'linear-gradient(135deg, #00c853, #00ff88)' }}
+            >
+              <div className="flex items-center justify-center gap-3 mb-2">
+                <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center">
+                  <TrophyIcon className="h-7 w-7" />
+                </div>
+                <h2 className="text-2xl font-black">Tournament Created!</h2>
+              </div>
+              <p className="text-white/90 text-sm text-center">
+                Your tournament has been saved successfully
+              </p>
+            </div>
+
+            <div className="p-6">
+              <p className="text-gray-700 text-base mb-4 text-center font-medium">
+                Would you like to publish your tournament now?
+              </p>
+              
+              <div 
+                className="rounded-xl p-4 mb-5"
+                style={{ 
+                  background: 'rgba(0, 200, 83, 0.1)',
+                  border: '1px solid rgba(0, 200, 83, 0.3)'
+                }}
+              >
+                <p className="text-sm mb-2" style={{ color: '#00c853' }}>
+                  <span className="font-bold">✓ Publish Now:</span> Make it visible to all players immediately
+                </p>
+                <p className="text-sm text-gray-600">
+                  <span className="font-bold">○ Save as Draft:</span> Keep it private, publish later from your dashboard
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <button
+                  onClick={() => {
+                    setShowPublishPromptModal(false);
+                    setShowPublishConfirmModal(true);
+                  }}
+                  className="w-full px-5 py-3.5 text-white rounded-xl font-bold text-base transition-all flex items-center justify-center gap-2"
+                  style={{ 
+                    background: 'linear-gradient(135deg, #00c853, #00ff88)',
+                    boxShadow: '0 4px 15px rgba(0, 200, 83, 0.3)'
+                  }}
+                >
+                  <SparklesIcon className="h-5 w-5" />
+                  Publish Now
+                </button>
+                <button
+                  onClick={() => {
+                    setShowPublishPromptModal(false);
+                    navigate('/dashboard?role=ORGANIZER');
+                  }}
+                  className="w-full px-5 py-3.5 border-2 border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors font-bold text-base"
+                >
+                  Save as Draft
+                </button>
+              </div>
             </div>
           </div>
         </div>

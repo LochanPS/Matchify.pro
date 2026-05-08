@@ -565,6 +565,119 @@ export default function OrganizerDashboardPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          {/* My Tournaments - Published & Draft */}
+          <div className="lg:col-span-2 bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden">
+            <div className="p-6 border-b border-white/10 flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-white">My Tournaments</h2>
+              <button
+                onClick={() => navigate('/tournaments/create')}
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white rounded-lg transition-all"
+                style={{ background: 'linear-gradient(135deg, #00c853, #00ff88)', boxShadow: '0 4px 15px rgba(0, 200, 83, 0.3)' }}
+              >
+                <Plus className="w-4 h-4" />
+                Create New
+              </button>
+            </div>
+            <div className="p-6">
+              {/* Published Tournaments */}
+              {dashboardData.upcoming_tournaments.filter(t => t.status === 'published' || t.status === 'ongoing').length > 0 && (
+                <div className="mb-6">
+                  <h3 className="text-sm font-bold text-white mb-3 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                    Published Tournaments
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {dashboardData.upcoming_tournaments
+                      .filter(t => t.status === 'published' || t.status === 'ongoing')
+                      .map((tournament) => (
+                        <div
+                          key={tournament.id}
+                          className="border border-white/10 rounded-xl p-4 hover:border-emerald-500/50 cursor-pointer transition bg-slate-700/30"
+                          onClick={() => navigate(`/tournaments/${tournament.id}`)}
+                        >
+                          <div className="flex justify-between items-start mb-2">
+                            <h4 className="font-semibold text-white text-sm">{tournament.name}</h4>
+                            <span className="px-2 py-1 text-xs rounded-full font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                              {tournament.status}
+                            </span>
+                          </div>
+                          <p className="text-xs text-gray-400 mb-2">
+                            {tournament.city}, {tournament.state}
+                          </p>
+                          <div className="flex justify-between items-center text-xs">
+                            <span className="text-gray-500">
+                              {new Date(tournament.start_date).toLocaleDateString()}
+                            </span>
+                            <span className="text-emerald-400 font-medium">
+                              {tournament.registration_count} registrations
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Draft Tournaments */}
+              {dashboardData.upcoming_tournaments.filter(t => t.status === 'draft').length > 0 && (
+                <div>
+                  <h3 className="text-sm font-bold text-white mb-3 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-amber-400"></span>
+                    Draft Tournaments
+                    <span className="text-xs text-gray-400 font-normal">(Not visible to public)</span>
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {dashboardData.upcoming_tournaments
+                      .filter(t => t.status === 'draft')
+                      .map((tournament) => (
+                        <div
+                          key={tournament.id}
+                          className="border border-amber-500/30 rounded-xl p-4 hover:border-amber-500/50 cursor-pointer transition bg-amber-500/5"
+                          onClick={() => navigate(`/tournaments/${tournament.id}`)}
+                        >
+                          <div className="flex justify-between items-start mb-2">
+                            <h4 className="font-semibold text-white text-sm">{tournament.name}</h4>
+                            <span className="px-2 py-1 text-xs rounded-full font-semibold bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                              Draft
+                            </span>
+                          </div>
+                          <p className="text-xs text-gray-400 mb-3">
+                            {tournament.city}, {tournament.state}
+                          </p>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/tournaments/${tournament.id}`);
+                            }}
+                            className="w-full px-3 py-2 text-xs font-bold text-white rounded-lg transition-all"
+                            style={{ background: 'linear-gradient(135deg, #00c853, #00ff88)', boxShadow: '0 2px 8px rgba(0, 200, 83, 0.3)' }}
+                          >
+                            Publish Tournament
+                          </button>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              )}
+
+              {/* No tournaments message */}
+              {dashboardData.upcoming_tournaments.length === 0 && (
+                <div className="text-center py-12">
+                  <Trophy className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                  <p className="text-gray-400 mb-4">No tournaments yet</p>
+                  <button
+                    onClick={() => navigate('/tournaments/create')}
+                    className="inline-flex items-center gap-2 px-6 py-3 text-white rounded-xl font-medium transition-all"
+                    style={{ background: 'linear-gradient(135deg, #00c853, #00ff88)', boxShadow: '0 4px 15px rgba(0, 200, 83, 0.3)' }}
+                  >
+                    <Plus className="w-5 h-5" />
+                    Create Your First Tournament
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
           {/* Upcoming Tournaments */}
           <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden">
             <div className="p-6 border-b border-white/10">

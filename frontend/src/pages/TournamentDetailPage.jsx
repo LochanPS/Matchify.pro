@@ -681,6 +681,44 @@ const TournamentDetailPage = () => {
         </div>
       </div>
 
+        {/* ── PRIZE BREAKDOWN BANNER (if prizes exist) ── */}
+        {(tournament.prizeWinner || tournament.prizeRunnerUp || tournament.prizeSemiFinalist) && (
+          <div className="px-4 py-4" style={{ background: 'rgba(7,7,26,0.98)', borderBottom: '1px solid rgba(245,158,11,0.2)' }}>
+            <div className="rounded-2xl p-4 relative overflow-hidden"
+              style={{ background: 'linear-gradient(135deg,rgba(245,158,11,0.15),rgba(251,146,60,0.1))', border: '1px solid rgba(245,158,11,0.3)' }}>
+              <div className="absolute top-0 right-0 w-24 h-24 rounded-full blur-2xl opacity-20"
+                style={{ background: 'radial-gradient(circle,rgba(251,191,36,0.8),transparent)' }} />
+              <p className="text-xs font-black uppercase tracking-widest mb-3" style={{ color: 'rgba(251,191,36,0.7)' }}>🏆 Prize Pool</p>
+              <div className="flex items-center gap-3 flex-wrap">
+                {tournament.prizeWinner && (
+                  <div className="flex-1 min-w-0 text-center px-3 py-2 rounded-xl"
+                    style={{ background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.3)' }}>
+                    <p className="text-xs font-semibold mb-0.5" style={{ color: 'rgba(255,255,255,0.5)' }}>Winner</p>
+                    <p className="text-lg font-black" style={{ color: '#fbbf24' }}>₹{Number(tournament.prizeWinner).toLocaleString('en-IN')}</p>
+                  </div>
+                )}
+                {tournament.prizeRunnerUp && (
+                  <div className="flex-1 min-w-0 text-center px-3 py-2 rounded-xl"
+                    style={{ background: 'rgba(156,163,175,0.1)', border: '1px solid rgba(156,163,175,0.25)' }}>
+                    <p className="text-xs font-semibold mb-0.5" style={{ color: 'rgba(255,255,255,0.5)' }}>Runner-up</p>
+                    <p className="text-lg font-black" style={{ color: '#d1d5db' }}>₹{Number(tournament.prizeRunnerUp).toLocaleString('en-IN')}</p>
+                  </div>
+                )}
+                {tournament.prizeSemiFinalist && (
+                  <div className="flex-1 min-w-0 text-center px-3 py-2 rounded-xl"
+                    style={{ background: 'rgba(180,83,9,0.1)', border: '1px solid rgba(180,83,9,0.25)' }}>
+                    <p className="text-xs font-semibold mb-0.5" style={{ color: 'rgba(255,255,255,0.5)' }}>Semi-Final</p>
+                    <p className="text-lg font-black" style={{ color: '#fb923c' }}>₹{Number(tournament.prizeSemiFinalist).toLocaleString('en-IN')}</p>
+                  </div>
+                )}
+              </div>
+              {tournament.prizeDescription && (
+                <p className="text-xs mt-3" style={{ color: 'rgba(255,255,255,0.5)' }}>{tournament.prizeDescription}</p>
+              )}
+            </div>
+          </div>
+        )}
+
       <div className="max-w-7xl mx-auto px-4 py-5 -mt-4">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
           {/* Main Content */}
@@ -689,9 +727,7 @@ const TournamentDetailPage = () => {
             <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-xl p-4">
               <h2 className="text-base font-bold text-white mb-3">About Tournament</h2>
               <p className="text-gray-400 text-sm whitespace-pre-wrap leading-relaxed break-words max-w-full overflow-hidden">
-                {tournament.description && tournament.description.length > 300 
-                  ? tournament.description.substring(0, 300) + '...' 
-                  : tournament.description || 'No description provided.'}
+                {tournament.description || 'No description provided.'}
               </p>
             </div>
 
@@ -884,6 +920,28 @@ const TournamentDetailPage = () => {
                           </p>
                         </div>
                       </div>
+                      {category.maxParticipants && (
+                        <div className="mt-2">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                              {category.registrationCount || 0}/{category.maxParticipants} spots filled
+                            </span>
+                            <span className="text-xs font-bold"
+                              style={{ color: (category.maxParticipants - (category.registrationCount || 0)) <= 5 ? '#ef4444' : '#00ff88' }}>
+                              {Math.max(0, category.maxParticipants - (category.registrationCount || 0))} left
+                            </span>
+                          </div>
+                          <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)' }}>
+                            <div className="h-full rounded-full transition-all"
+                              style={{
+                                width: `${Math.min(100, ((category.registrationCount || 0) / category.maxParticipants) * 100)}%`,
+                                background: ((category.registrationCount || 0) / category.maxParticipants) > 0.8
+                                  ? 'linear-gradient(90deg,#ef4444,#dc2626)'
+                                  : 'linear-gradient(90deg,#00ff88,#00c853)'
+                              }} />
+                          </div>
+                        </div>
+                      )}
                     </div>
                     );
                   })}

@@ -582,180 +582,208 @@ export default function TournamentDiscoveryPage() {
 }
 
 
-// Tournament Card Component - Enhanced with More Details, No Registration Count
+// Tournament Card Component - Event Poster Style
 function TournamentCard({ tournament, navigate, index }) {
   const getStatusStyle = (status) => {
     const styles = {
       published: { bg: 'linear-gradient(135deg, #00c853, #00ff88)', text: 'Open', color: '#003320' },
-      ongoing: { bg: 'linear-gradient(135deg, #3b82f6, #60a5fa)', text: 'Ongoing', color: '#ffffff' },
-      completed: { bg: 'linear-gradient(135deg, #6b7280, #9ca3af)', text: 'Completed', color: '#ffffff' },
+      ongoing: { bg: 'linear-gradient(135deg, #3b82f6, #60a5fa)', text: 'Live', color: '#ffffff' },
+      completed: { bg: 'linear-gradient(135deg, #6b7280, #9ca3af)', text: 'Done', color: '#ffffff' },
       cancelled: { bg: 'linear-gradient(135deg, #ef4444, #dc2626)', text: 'Cancelled', color: '#ffffff' },
-      draft: { bg: 'linear-gradient(135deg, #f59e0b, #fbbf24)', text: 'Draft', color: '#ffffff' }
+      draft: { bg: 'linear-gradient(135deg, #f59e0b, #fbbf24)', text: 'Draft', color: '#1a0a00' }
     };
     return styles[status?.toLowerCase()] || styles.draft;
   };
 
-  const gradients = [
-    'from-purple-500 via-violet-600 to-indigo-700',
-    'from-blue-500 via-cyan-600 to-teal-700',
-    'from-emerald-500 via-green-600 to-teal-700',
-    'from-orange-500 via-amber-600 to-yellow-700',
-    'from-pink-500 via-rose-600 to-red-700',
-    'from-indigo-500 via-purple-600 to-pink-700',
+  const fallbackGradients = [
+    ['#1a1a4e','#0d2d4a'],
+    ['#0d2d1a','#1a4e2d'],
+    ['#2d1a0d','#4e2d1a'],
+    ['#1a0d2d','#2d1a4e'],
+    ['#0d1a2d','#1a2d4e'],
+    ['#2d0d1a','#4e1a2d'],
   ];
+  const [c1, c2] = fallbackGradients[index % fallbackGradients.length];
 
-  const gradient = gradients[index % gradients.length];
   const statusStyle = getStatusStyle(tournament.status);
   const hasPoster = tournament.posters && tournament.posters.length > 0 && tournament.posters[0]?.imageUrl;
-  
+
   const getPosterUrl = () => {
     if (!hasPoster) return null;
-    const posterUrl = tournament.posters[0].imageUrl;
-    if (posterUrl.startsWith('/uploads')) {
-      const baseUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
-      return `${baseUrl}${posterUrl}`;
+    const url = tournament.posters[0].imageUrl;
+    if (url.startsWith('/uploads')) {
+      const base = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+      return `${base}${url}`;
     }
-    return posterUrl;
+    return url;
   };
-
   const posterUrl = getPosterUrl();
 
-  // Get minimum entry fee from categories
-  const getMinEntryFee = () => {
-    if (!tournament.categories || tournament.categories.length === 0) return null;
+  // Entry fee
+  const minFee = tournament.minEntryFee ?? (() => {
+    if (!tournament.categories?.length) return null;
     const fees = tournament.categories.map(c => c.entryFee).filter(f => f > 0);
     return fees.length > 0 ? Math.min(...fees) : null;
-  };
+  })();
 
-  const minFee = getMinEntryFee();
+  // Prize (winner prize)
+  const prize = tournament.prizeWinner ? Number(tournament.prizeWinner) : null;
+
+  // Reg deadline
+  const regDeadline = tournament.registrationCloseDate
+    ? formatDateIndian(tournament.registrationCloseDate)
+    : null;
+
+  // Days to start
+  const daysLeft = tournament.daysUntilStart ?? Math.ceil((new Date(tournament.startDate) - new Date()) / (1000*60*60*24));
+
+  // Category tags (deduplicated by gender+format)
+  const catTags = tournament.categories?.slice(0, 4).map(c => c.name) || [];
+
+  const isRegistrationOpen = tournament.isRegistrationOpen ?? true;
 
   return (
-    <div 
+    <div
       className="group relative overflow-hidden cursor-pointer rounded-2xl transition-all duration-300 hover:scale-[1.01]"
       onClick={() => navigate(`/tournaments/${tournament.id}`)}
       style={{
-        background: 'linear-gradient(135deg, rgba(0,200,83,0.1) 0%, rgba(99,102,241,0.1) 100%)',
-        border: '2px solid rgba(0,200,83,0.2)',
-        backdropFilter: 'blur(20px)',
-        boxShadow: '0 8px 32px rgba(0,200,83,0.15)'
+        background: `linear-gradient(135deg, ${c1} 0%, ${c2} 100%)`,
+        border: '1.5px solid rgba(255,255,255,0.08)',
+        boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
       }}
     >
-      {/* Hover Glow Effect */}
-      <div 
-        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
-        style={{
-          background: 'radial-gradient(circle at center, rgba(0,200,83,0.1), transparent)',
-          filter: 'blur(20px)'
-        }}
-      />
-
-      {/* Poster - Larger & More Visible */}
-      <div className="h-48 relative overflow-hidden">
+      {/* ── POSTER IMAGE ── */}
+      <div className="h-52 relative overflow-hidden">
         {posterUrl ? (
-          <>
-            <img
-              src={posterUrl}
-              alt={tournament.name}
-              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
-          </>
+          <img
+            src={posterUrl}
+            alt={tournament.name}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          />
         ) : (
-          <div className={`w-full h-full bg-gradient-to-br ${gradient} flex items-center justify-center relative overflow-hidden`}>
-            <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
-            <span className="text-5xl opacity-40 relative z-10">🏸</span>
+          <div className="w-full h-full flex items-center justify-center relative"
+            style={{ background: `linear-gradient(135deg, ${c1} 0%, ${c2} 100%)` }}>
+            <div className="absolute inset-0 opacity-10"
+              style={{ backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.15) 1px, transparent 1px)', backgroundSize: '18px 18px' }} />
+            <span className="text-7xl opacity-20">🏸</span>
           </div>
         )}
-        
-        {/* Status Badge - Compact */}
-        <div className="absolute top-2 right-2">
-          <span 
-            className="px-2.5 py-1 text-xs font-black rounded-full backdrop-blur-sm shadow-lg"
-            style={{
-              background: statusStyle.bg,
-              color: statusStyle.color
-            }}
-          >
+
+        {/* Bottom gradient overlay */}
+        <div className="absolute inset-0"
+          style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.25) 40%, rgba(0,0,0,0.75) 100%)' }} />
+
+        {/* Top badges row */}
+        <div className="absolute top-2.5 left-2.5 right-2.5 flex items-start justify-between gap-2">
+          {/* Prize badge - top left */}
+          {prize ? (
+            <div className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-black"
+              style={{ background: 'linear-gradient(135deg,rgba(245,158,11,0.95),rgba(251,146,60,0.95))', color: '#1a0a00', backdropFilter: 'blur(8px)', boxShadow: '0 2px 8px rgba(0,0,0,0.4)' }}>
+              🏆 ₹{prize >= 1000 ? `${(prize/1000).toFixed(prize%1000===0?0:1)}K` : prize} Prize
+            </div>
+          ) : (
+            <div />
+          )}
+          {/* Status badge - top right */}
+          <span className="px-2.5 py-1 text-xs font-black rounded-full flex-shrink-0"
+            style={{ background: statusStyle.bg, color: statusStyle.color, boxShadow: '0 2px 8px rgba(0,0,0,0.4)' }}>
             {statusStyle.text}
           </span>
         </div>
+
+        {/* Bottom overlay: city + days countdown */}
+        <div className="absolute bottom-0 left-0 right-0 px-3 pb-2.5 flex items-end justify-between gap-2">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <MapPinIcon className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#00ff88' }} />
+            <span className="text-xs font-bold truncate" style={{ color: 'rgba(255,255,255,0.9)', textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}>
+              {tournament.city}{tournament.state ? `, ${tournament.state}` : ''}
+            </span>
+          </div>
+          {daysLeft > 0 && daysLeft <= 60 && (
+            <div className="flex-shrink-0 px-2 py-0.5 rounded-full text-xs font-black"
+              style={{ background: daysLeft <= 7 ? 'rgba(239,68,68,0.9)' : 'rgba(0,0,0,0.7)', color: daysLeft <= 7 ? '#fff' : 'rgba(255,255,255,0.8)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.15)' }}>
+              {daysLeft === 0 ? 'Today!' : daysLeft === 1 ? 'Tomorrow' : `${daysLeft}d`}
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Content - Simplified: Name, Start Date, Categories */}
-      <div className="p-4 relative z-10">
-        <h3 className="font-black text-base text-white mb-3 line-clamp-2 group-hover:text-emerald-400 transition-colors min-h-[2.5rem]">
+      {/* ── CONTENT ── */}
+      <div className="p-4 space-y-3">
+        {/* Tournament name */}
+        <h3 className="font-black text-base text-white leading-snug line-clamp-2 group-hover:text-emerald-300 transition-colors"
+          style={{ textShadow: '0 1px 3px rgba(0,0,0,0.3)' }}>
           {tournament.name}
         </h3>
 
-        <div className="space-y-2 mb-3">
-          {/* Tournament Start Date Only */}
-          <div className="flex items-center gap-2.5 text-xs text-white/80">
-            <div 
-              className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
-              style={{ background: 'rgba(59,130,246,0.2)' }}
-            >
-              <CalendarIcon className="h-3.5 w-3.5 text-blue-400" />
+        {/* Entry fee + reg deadline row */}
+        <div className="flex items-center gap-2 flex-wrap">
+          {minFee !== null && minFee > 0 ? (
+            <div className="flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-black"
+              style={{ background: 'rgba(0,255,136,0.12)', border: '1px solid rgba(0,255,136,0.3)', color: '#00ff88' }}>
+              <CurrencyRupeeIcon className="w-3 h-3" />
+              {minFee === tournament.maxEntryFee || !tournament.maxEntryFee ? minFee : `${minFee}–${tournament.maxEntryFee}`} entry
             </div>
-            <div className="flex-1">
-              <p className="font-medium text-white/60 text-xs">Tournament starts</p>
-              <p className="font-bold text-white text-xs">{formatDateIndian(tournament.startDate)}</p>
+          ) : (
+            <div className="flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-black"
+              style={{ background: 'rgba(0,255,136,0.12)', border: '1px solid rgba(0,255,136,0.3)', color: '#00ff88' }}>
+              Free Entry
             </div>
-          </div>
-
-          {/* Number of Categories */}
-          <div className="flex items-center gap-2.5 text-xs text-white/80">
-            <div 
-              className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
-              style={{ background: 'rgba(0,200,83,0.2)' }}
-            >
-              <TrophyIcon className="h-3.5 w-3.5 text-green-400" />
-            </div>
-            <div className="flex-1">
-              <p className="font-bold text-emerald-400 text-xs">
-                {tournament._count?.categories || 0} {tournament._count?.categories === 1 ? 'Category' : 'Categories'}
-              </p>
-            </div>
-          </div>
-
-          {/* Category Names */}
-          {tournament.categories && tournament.categories.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mt-2">
-              {tournament.categories.map((category, idx) => (
-                <span 
-                  key={idx}
-                  className="px-2 py-1 text-xs font-bold rounded-lg"
-                  style={{
-                    background: 'rgba(168,85,247,0.2)',
-                    border: '1px solid rgba(168,85,247,0.4)',
-                    color: '#c4b5fd'
-                  }}
-                >
-                  {category.name}
-                </span>
-              ))}
+          )}
+          {regDeadline && (
+            <div className="flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-semibold"
+              style={{ background: 'rgba(0,212,255,0.1)', border: '1px solid rgba(0,212,255,0.25)', color: '#00d4ff' }}>
+              <ClockIcon className="w-3 h-3" />
+              Closes {regDeadline}
             </div>
           )}
         </div>
 
-        {/* View Button - Compact */}
+        {/* Date row */}
+        <div className="flex items-center gap-1.5 text-xs" style={{ color: 'rgba(255,255,255,0.55)' }}>
+          <CalendarIcon className="w-3.5 h-3.5 flex-shrink-0" />
+          <span>Starts {formatDateIndian(tournament.startDate)}</span>
+        </div>
+
+        {/* Category tags */}
+        {catTags.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {catTags.map((tag, i) => (
+              <span key={i} className="px-2 py-0.5 rounded-lg text-xs font-bold"
+                style={{ background: 'rgba(168,85,247,0.18)', border: '1px solid rgba(168,85,247,0.35)', color: '#c4b5fd' }}>
+                {tag}
+              </span>
+            ))}
+            {(tournament.categories?.length || 0) > 4 && (
+              <span className="px-2 py-0.5 rounded-lg text-xs font-semibold"
+                style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.4)' }}>
+                +{tournament.categories.length - 4} more
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* CTA Button */}
         <button
-          onClick={(e) => {
-            e.stopPropagation();
-            navigate(`/tournaments/${tournament.id}`);
-          }}
-          className="w-full py-2.5 rounded-xl font-black text-sm transition-all flex items-center justify-center gap-2 group-hover:scale-[1.01] relative overflow-hidden"
-          style={{ 
-            background: 'linear-gradient(135deg, #a855f7, #8b5cf6)',
-            color: '#ffffff',
-            boxShadow: '0 6px 20px rgba(168,85,247,0.4)'
+          onClick={(e) => { e.stopPropagation(); navigate(`/tournaments/${tournament.id}`); }}
+          className="w-full py-3 rounded-xl font-black text-sm transition-all flex items-center justify-center gap-2 group-hover:shadow-lg relative overflow-hidden"
+          style={{
+            background: isRegistrationOpen
+              ? 'linear-gradient(135deg, #00c853, #00ff88)'
+              : 'rgba(255,255,255,0.08)',
+            color: isRegistrationOpen ? '#07071a' : 'rgba(255,255,255,0.6)',
+            border: isRegistrationOpen ? 'none' : '1px solid rgba(255,255,255,0.12)',
+            boxShadow: isRegistrationOpen ? '0 4px 16px rgba(0,200,83,0.4)' : 'none',
           }}
         >
-          <span className="relative z-10">View Details</span>
+          <span className="relative z-10">
+            {isRegistrationOpen ? '🚀 Register Now' : 'View Details'}
+          </span>
           <ArrowRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform relative z-10" />
-          <div 
-            className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
-            style={{ background: 'radial-gradient(circle at center, rgba(255,255,255,0.2), transparent)' }}
-          />
+          {isRegistrationOpen && (
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
+              style={{ background: 'radial-gradient(circle at center, rgba(255,255,255,0.2), transparent)' }} />
+          )}
         </button>
       </div>
     </div>

@@ -242,10 +242,10 @@ const TournamentDetailPage = () => {
       return;
     }
 
-    // Validate format: #123ABCD (# + 3 digits + 4 letters)
-    const codePattern = /^#\d{3}[A-Za-z]{4}$/;
+    // Validate format: #A10000 (# + 1 letter + 5 digits)
+    const codePattern = /^#[A-Za-z]\d{5}$/;
     if (!codePattern.test(umpireCode.trim())) {
-      setUmpireError('Invalid code format. Use #123ABCD (# + 3 digits + 4 letters)');
+      setUmpireError('Invalid code format. Use #A10000 (# + 1 letter + 5 digits)');
       return;
     }
 
@@ -1124,7 +1124,7 @@ const TournamentDetailPage = () => {
               {/* Info box */}
               <div className="bg-slate-700/50 border border-white/10 rounded-xl p-4 mb-4">
                 <p className="text-gray-300 text-sm">
-                  Enter the umpire's 7-character code with # prefix (e.g., <span className="text-teal-400 font-mono">#123ABCD</span>)
+                  Enter the umpire's Matchify.pro ID with # prefix (e.g., <span className="text-teal-400 font-mono">#A10000</span>)
                 </p>
               </div>
 
@@ -1145,7 +1145,7 @@ const TournamentDetailPage = () => {
               {/* Input field */}
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Umpire Code
+                  Umpire Matchify.pro ID
                 </label>
                 <div className="relative">
                   <input
@@ -1155,8 +1155,8 @@ const TournamentDetailPage = () => {
                       setUmpireCode(e.target.value.toUpperCase());
                       setUmpireError('');
                     }}
-                    placeholder="#123ABCD"
-                    maxLength={8}
+                    placeholder="#A10000"
+                    maxLength={7}
                     className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all font-mono text-lg tracking-wider"
                   />
                 </div>

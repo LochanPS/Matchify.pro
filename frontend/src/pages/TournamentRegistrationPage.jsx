@@ -149,8 +149,8 @@ export default function TournamentRegistrationPage() {
         return;
       }
       
-      // Validate Matchify.pro ID format: #A10000 (# + A + 5 digits)
-      if (!/^#A\d{5}$/i.test(code)) {
+      // Validate Matchify.pro ID format: #A10000 (# + 1 letter + 5 digits)
+      if (!/^#[A-Za-z]\d{5}$/i.test(code)) {
         const cat = categories.find(c => c.id === catId);
         setError(`Please enter a valid Matchify.pro ID for ${cat?.name} (Format: #A10000)`);
         return;
@@ -221,9 +221,9 @@ export default function TournamentRegistrationPage() {
     try {
       setError('');
       
-      // Validate format first: #A10000 (# + A + 5 digits)
-      if (!/^#A\d{5}$/i.test(code)) {
-        setError('Invalid Matchify.pro ID format. Use #A10000 (# + A + 5 digits)');
+      // Validate format first: #A10000 (# + 1 letter + 5 digits)
+      if (!/^#[A-Za-z]\d{5}$/i.test(code)) {
+        setError('Invalid Matchify.pro ID format. Use #A10000 (# + 1 letter + 5 digits)');
         return;
       }
 

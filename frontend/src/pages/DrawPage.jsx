@@ -744,7 +744,19 @@ const DrawPage = () => {
   const hasPlayedMatches = matches.some(m => m.status === 'COMPLETED' || m.status === 'IN_PROGRESS');
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 relative overflow-hidden">
+      {/* Animated Background - Floating Particles */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-2 h-2 bg-emerald-400 rounded-full animate-float opacity-60"></div>
+        <div className="absolute top-40 right-20 w-3 h-3 bg-teal-400 rounded-full animate-float-delayed opacity-50" style={{animationDelay: '1s'}}></div>
+        <div className="absolute top-60 left-1/4 w-2 h-2 bg-emerald-300 rounded-full animate-float opacity-70" style={{animationDelay: '2s'}}></div>
+        <div className="absolute bottom-40 right-1/3 w-3 h-3 bg-teal-500 rounded-full animate-float-delayed opacity-60" style={{animationDelay: '0.5s'}}></div>
+        <div className="absolute bottom-20 left-1/3 w-2 h-2 bg-emerald-400 rounded-full animate-float opacity-50" style={{animationDelay: '1.5s'}}></div>
+        <div className="absolute top-1/3 right-10 w-2 h-2 bg-teal-300 rounded-full animate-float-delayed opacity-70" style={{animationDelay: '2.5s'}}></div>
+        <div className="absolute top-1/2 left-20 w-3 h-3 bg-emerald-500 rounded-full animate-float opacity-60" style={{animationDelay: '0.8s'}}></div>
+        <div className="absolute bottom-1/3 right-1/4 w-2 h-2 bg-teal-400 rounded-full animate-float-delayed opacity-50" style={{animationDelay: '1.8s'}}></div>
+      </div>
+
       {/* Hero Header */}
       <div className="relative bg-gradient-to-r from-slate-900 via-purple-900 to-slate-900 overflow-hidden">
         <div className="absolute inset-0">

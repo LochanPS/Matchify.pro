@@ -4427,105 +4427,130 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      {/* Animated Background for Modal - MORE VISIBLE */}
+      {/* Animated Background - MUCH BRIGHTER & MORE VISIBLE */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {/* Large pulsing orbs */}
         <div 
-          className="absolute top-10 right-10 w-80 h-80 rounded-full blur-3xl opacity-30"
+          className="absolute top-10 right-10 w-96 h-96 rounded-full blur-3xl"
           style={{ 
-            background: 'radial-gradient(circle, rgba(0,200,83,0.6) 0%, transparent 70%)',
-            animation: 'float 8s ease-in-out infinite'
+            background: 'radial-gradient(circle, rgba(0,200,83,0.5) 0%, rgba(0,255,136,0.3) 50%, transparent 70%)',
+            animation: 'float 8s ease-in-out infinite, pulse 4s ease-in-out infinite'
           }}
         />
         <div 
-          className="absolute bottom-10 left-10 w-72 h-72 rounded-full blur-3xl opacity-25"
+          className="absolute bottom-10 left-10 w-80 h-80 rounded-full blur-3xl"
           style={{ 
-            background: 'radial-gradient(circle, rgba(20,184,166,0.6) 0%, transparent 70%)',
-            animation: 'float 10s ease-in-out infinite reverse',
+            background: 'radial-gradient(circle, rgba(20,184,166,0.5) 0%, rgba(13,148,136,0.3) 50%, transparent 70%)',
+            animation: 'float 10s ease-in-out infinite reverse, pulse 5s ease-in-out infinite',
             animationDelay: '2s'
           }}
         />
-        {[...Array(12)].map((_, i) => (
+        <div 
+          className="absolute top-1/2 left-1/2 w-72 h-72 rounded-full blur-3xl"
+          style={{ 
+            background: 'radial-gradient(circle, rgba(16,185,129,0.4) 0%, transparent 70%)',
+            animation: 'float 12s ease-in-out infinite, pulse 6s ease-in-out infinite',
+            animationDelay: '4s'
+          }}
+        />
+        {/* Floating particles - MORE & BRIGHTER */}
+        {[...Array(18)].map((_, i) => (
           <div
             key={i}
             className="absolute rounded-full"
             style={{
-              width: `${Math.random() * 5 + 3}px`,
-              height: `${Math.random() * 5 + 3}px`,
+              width: `${Math.random() * 6 + 3}px`,
+              height: `${Math.random() * 6 + 3}px`,
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
-              background: ['#00c853', '#14b8a6', '#10b981'][Math.floor(Math.random() * 3)],
-              opacity: Math.random() * 0.4 + 0.4,
+              background: ['#00c853', '#14b8a6', '#10b981', '#00ff88'][Math.floor(Math.random() * 4)],
+              opacity: Math.random() * 0.5 + 0.5,
               animation: `float ${Math.random() * 8 + 4}s ease-in-out infinite`,
               animationDelay: `${Math.random() * 3}s`,
-              boxShadow: `0 0 ${Math.random() * 20 + 10}px currentColor`
+              boxShadow: `0 0 ${Math.random() * 25 + 15}px currentColor`
             }}
           />
         ))}
       </div>
 
-      <div className="relative bg-slate-800/95 backdrop-blur-xl border border-emerald-500/20 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl shadow-emerald-500/10">
-        <div className="p-3 border-b border-white/10">
+      <div className="relative bg-gradient-to-br from-slate-800/95 via-slate-800/95 to-slate-900/95 backdrop-blur-xl border-2 border-emerald-500/30 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl shadow-emerald-500/20">
+        {/* Header with gradient */}
+        <div className="p-3 border-b border-emerald-500/20 bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-emerald-500/10">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-sm font-bold text-white leading-tight">Arrange Knockout Matchups</h2>
+              <h2 className="text-[15px] font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 leading-tight">
+                Arrange Knockout Matchups
+              </h2>
               <p className="text-gray-400 text-[10px] leading-tight mt-0.5">Select players for knockout matches</p>
             </div>
-            <button onClick={onClose} className="text-gray-400 hover:text-white p-1.5 hover:bg-white/10 rounded-lg transition-colors">
+            <button onClick={onClose} className="text-gray-400 hover:text-white p-1.5 hover:bg-emerald-500/20 rounded-lg transition-all hover:scale-110">
               <X className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
 
         <div className="p-3">
-          {/* Unassigned Players */}
+          {/* Advancing Players with icon */}
           <div className="mb-3">
-            <h3 className="text-[9px] font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">Advancing Players ({advancingPlayers.length})</h3>
+            <h3 className="text-[10px] font-black text-emerald-400 mb-2 uppercase tracking-wider flex items-center gap-1.5">
+              <Trophy className="w-3 h-3" />
+              Advancing Players ({advancingPlayers.length})
+            </h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5">
               {unassignedPlayers.map(player => (
                 <div
                   key={player.id}
-                  className="p-1.5 bg-slate-700/50 rounded-lg border border-emerald-500/20"
+                  className="p-2 bg-gradient-to-br from-slate-700/50 to-slate-800/50 rounded-lg border border-emerald-500/30 hover:border-emerald-500/60 hover:shadow-lg hover:shadow-emerald-500/20 hover:scale-105 transition-all cursor-pointer"
                 >
-                  <div className="text-[11px] font-medium text-white leading-tight">{player.name}</div>
+                  <div className="text-[11px] font-bold text-white leading-tight">{player.name}</div>
                   {player.partnerName && (
                     <div className="text-[9px] text-emerald-300 leading-tight">& {player.partnerName}</div>
                   )}
-                  <div className="text-[8px] text-gray-400 mt-0.5">
-                    Pool {player.group} • #{player.rank} • {player.points}pts
+                  <div className="text-[8px] text-gray-400 mt-0.5 flex items-center gap-1">
+                    <span className="px-1 py-0.5 bg-emerald-500/20 rounded text-emerald-300 font-bold">Pool {player.group}</span>
+                    <span>#{player.rank}</span>
+                    <span>•</span>
+                    <span className="text-emerald-400 font-bold">{player.points}pts</span>
                   </div>
                 </div>
               ))}
               {unassignedPlayers.length === 0 && (
-                <div className="col-span-full text-center text-gray-400 text-[10px] py-3">
-                  All players assigned
+                <div className="col-span-full text-center text-emerald-400 text-[10px] py-3 font-semibold">
+                  ✓ All players assigned
                 </div>
               )}
             </div>
           </div>
 
-          {/* Knockout Matches */}
+          {/* Knockout Matches with icon */}
           <div>
-            <h3 className="text-[9px] font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">Knockout Matches</h3>
-            <div className="space-y-1.5">
+            <h3 className="text-[10px] font-black text-emerald-400 mb-2 uppercase tracking-wider flex items-center gap-1.5">
+              <Zap className="w-3 h-3" />
+              Knockout Matches
+            </h3>
+            <div className="space-y-2">
               {knockoutSlots.map((slot, index) => (
-                <div key={index} className="bg-slate-700/30 rounded-lg p-1.5 border border-white/10">
-                  <div className="text-[8px] text-gray-400 mb-1.5">Match {slot.matchNumber}</div>
-                  <div className="grid grid-cols-2 gap-1.5">
+                <div key={index} className="bg-gradient-to-br from-slate-700/30 to-slate-800/30 rounded-lg p-2 border-2 border-emerald-500/20 hover:border-emerald-500/40 transition-all">
+                  <div className="text-[9px] text-emerald-400 mb-2 font-bold flex items-center gap-1">
+                    <span className="w-5 h-5 bg-emerald-500/20 rounded flex items-center justify-center text-[10px]">{slot.matchNumber}</span>
+                    Match {slot.matchNumber}
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
                     {/* Player 1 Slot */}
                     <div className="space-y-1">
-                      <label className="text-[8px] text-gray-400">Player 1</label>
+                      <label className="text-[8px] text-emerald-400 font-bold uppercase tracking-wide">Player 1</label>
                       {slot.player1 ? (
-                        <div className="p-1.5 bg-emerald-600 rounded-lg flex items-center justify-between">
+                        <div className="p-2 bg-gradient-to-br from-emerald-600 to-teal-600 rounded-lg flex items-center justify-between shadow-lg shadow-emerald-500/30 border border-emerald-400/30">
                           <div className="flex-1 min-w-0">
-                            <div className="text-[11px] font-medium text-white leading-tight">{slot.player1.name}</div>
+                            <div className="text-[11px] font-bold text-white leading-tight">{slot.player1.name}</div>
                             {slot.player1.partnerName && (
-                              <div className="text-[9px] text-emerald-200 leading-tight">& {slot.player1.partnerName}</div>
+                              <div className="text-[9px] text-emerald-100 leading-tight">& {slot.player1.partnerName}</div>
                             )}
-                            <div className="text-[8px] text-emerald-200/70">Pool {slot.player1.group} • #{slot.player1.rank}</div>
+                            <div className="text-[8px] text-emerald-200/80">Pool {slot.player1.group} • #{slot.player1.rank}</div>
                           </div>
                           <button
                             onClick={() => removePlayerFromSlot(index, 1)}
-                            className="text-white/70 hover:text-white p-0.5 flex-shrink-0"
+                            className="text-white/70 hover:text-white p-1 hover:bg-white/20 rounded transition-all flex-shrink-0"
                           >
                             <X className="w-3 h-3" />
                           </button>
@@ -4537,7 +4562,7 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
                             if (player) assignPlayerToSlot(player, index, 1);
                           }}
                           value=""
-                          className="w-full p-1.5 bg-slate-800 border border-slate-600 rounded-lg text-white text-[11px]"
+                          className="w-full p-2 bg-slate-800/80 border-2 border-slate-600 hover:border-emerald-500/50 focus:border-emerald-500 rounded-lg text-white text-[11px] transition-all cursor-pointer"
                         >
                           <option value="">Select player...</option>
                           {unassignedPlayers.map(player => (
@@ -4551,19 +4576,19 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
 
                     {/* Player 2 Slot */}
                     <div className="space-y-1">
-                      <label className="text-[8px] text-gray-400">Player 2</label>
+                      <label className="text-[8px] text-emerald-400 font-bold uppercase tracking-wide">Player 2</label>
                       {slot.player2 ? (
-                        <div className="p-1.5 bg-emerald-600 rounded-lg flex items-center justify-between">
+                        <div className="p-2 bg-gradient-to-br from-emerald-600 to-teal-600 rounded-lg flex items-center justify-between shadow-lg shadow-emerald-500/30 border border-emerald-400/30">
                           <div className="flex-1 min-w-0">
-                            <div className="text-[11px] font-medium text-white leading-tight">{slot.player2.name}</div>
+                            <div className="text-[11px] font-bold text-white leading-tight">{slot.player2.name}</div>
                             {slot.player2.partnerName && (
-                              <div className="text-[9px] text-emerald-200 leading-tight">& {slot.player2.partnerName}</div>
+                              <div className="text-[9px] text-emerald-100 leading-tight">& {slot.player2.partnerName}</div>
                             )}
-                            <div className="text-[8px] text-emerald-200/70">Pool {slot.player2.group} • #{slot.player2.rank}</div>
+                            <div className="text-[8px] text-emerald-200/80">Pool {slot.player2.group} • #{slot.player2.rank}</div>
                           </div>
                           <button
                             onClick={() => removePlayerFromSlot(index, 2)}
-                            className="text-white/70 hover:text-white p-0.5 flex-shrink-0"
+                            className="text-white/70 hover:text-white p-1 hover:bg-white/20 rounded transition-all flex-shrink-0"
                           >
                             <X className="w-3 h-3" />
                           </button>
@@ -4575,7 +4600,7 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
                             if (player) assignPlayerToSlot(player, index, 2);
                           }}
                           value=""
-                          className="w-full p-1.5 bg-slate-800 border border-slate-600 rounded-lg text-white text-[11px]"
+                          className="w-full p-2 bg-slate-800/80 border-2 border-slate-600 hover:border-emerald-500/50 focus:border-emerald-500 rounded-lg text-white text-[11px] transition-all cursor-pointer"
                         >
                           <option value="">Select player...</option>
                           {unassignedPlayers.map(player => (
@@ -4593,14 +4618,14 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
           </div>
         </div>
 
-        <div className="p-3 border-t border-white/10 flex gap-2">
-          <button onClick={onClose} className="flex-1 px-4 py-1.5 bg-slate-700 text-white rounded-lg hover:bg-slate-600 transition-colors text-[11px] font-semibold">
+        <div className="p-3 border-t border-emerald-500/20 flex gap-2 bg-gradient-to-r from-emerald-500/5 via-teal-500/5 to-emerald-500/5">
+          <button onClick={onClose} className="flex-1 px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-600 hover:scale-105 transition-all text-[11px] font-bold shadow-lg">
             Cancel
           </button>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex-1 px-4 py-1.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg hover:shadow-lg hover:shadow-emerald-500/25 transition-all disabled:opacity-50 text-[11px] font-semibold"
+            className="flex-1 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg hover:shadow-xl hover:shadow-emerald-500/40 hover:scale-105 transition-all disabled:opacity-50 text-[11px] font-bold"
           >
             {saving ? 'Saving...' : 'Save Matchups'}
           </button>

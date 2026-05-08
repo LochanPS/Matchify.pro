@@ -167,14 +167,14 @@ const BasicInfoStep = ({ formData, updateFormData, onNext }) => {
       <div>
         <label className="block text-xs font-bold text-emerald-400 mb-1.5">
           Description <span className="text-red-400">*</span>
-          <span className="text-gray-500 text-xs ml-2">
-            ({formData.description.length}/500)
+          <span className={`text-xs ml-2 ${formData.description.length < 20 ? 'text-red-400' : 'text-gray-500'}`}>
+            ({formData.description.length}/20 min, 500 max)
           </span>
         </label>
         <textarea
           value={formData.description}
           onChange={(e) => updateFormData('description', e.target.value)}
-          placeholder="Describe your tournament..."
+          placeholder="Describe your tournament (minimum 20 characters)..."
           rows={3}
           maxLength={500}
           className={`w-full px-3 py-2.5 text-sm rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all resize-none ${
@@ -185,7 +185,17 @@ const BasicInfoStep = ({ formData, updateFormData, onNext }) => {
             border: errors.description ? '1.5px solid rgba(239,68,68,0.5)' : '1.5px solid rgba(0,200,83,0.3)'
           }}
         />
-        {errors.description && <p className="mt-1 text-xs text-red-400">{errors.description}</p>}
+        {errors.description && (
+          <div className="mt-2 rounded-lg p-2 flex items-start gap-2" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)' }}>
+            <span className="text-red-400 text-xs">⚠️</span>
+            <p className="text-xs text-red-400 font-medium">{errors.description}</p>
+          </div>
+        )}
+        {!errors.description && formData.description.length > 0 && formData.description.length < 20 && (
+          <p className="mt-1 text-xs text-amber-400">
+            ⚠️ Need {20 - formData.description.length} more characters
+          </p>
+        )}
       </div>
 
       {/* Format & Privacy */}

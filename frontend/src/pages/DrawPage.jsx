@@ -3568,7 +3568,8 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
     // Assign player to the new slot
     newAssignments[targetSlot.slot] = {
       playerId: selectedPlayer.id,
-      playerName: selectedPlayer.name
+      playerName: selectedPlayer.name,
+      partnerName: selectedPlayer.partnerName || null
     };
     
     setAssignments(newAssignments);
@@ -3846,6 +3847,9 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-white font-medium text-[11px] leading-tight">{player.name}</p>
+                          {player.partnerName && (
+                            <p className="text-emerald-300 text-[9px] leading-tight">& {player.partnerName}</p>
+                          )}
                         </div>
                         {isSelected ? (
                           <div className="w-3 h-3 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0">
@@ -3955,7 +3959,12 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                                 </div>
                                 <div className="flex-1 min-w-0">
                                   {assigned ? (
-                                    <p className="text-white font-medium text-[10px] leading-tight truncate">{assigned.playerName}</p>
+                                    <>
+                                      <p className="text-white font-medium text-[9px] leading-tight">{assigned.playerName}</p>
+                                      {assigned.partnerName && (
+                                        <p className="text-emerald-300 text-[8px] leading-tight">& {assigned.partnerName}</p>
+                                      )}
+                                    </>
                                   ) : (
                                     <p className="text-gray-500 text-[9px] leading-tight">Empty</p>
                                   )}

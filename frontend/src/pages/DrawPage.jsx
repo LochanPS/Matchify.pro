@@ -2917,17 +2917,17 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
 
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="bg-slate-800 rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto border-2 border-emerald-500/20 shadow-2xl">
         {/* Header */}
-        <div className="p-6 border-b border-white/10 bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-pink-600/20">
+        <div className="p-6 border-b-2 border-white/10 bg-gradient-to-r from-emerald-500/20 to-teal-500/20">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-                <Settings className="w-5 h-5 text-white" />
+              <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/50">
+                <Settings className="w-6 h-6 text-white" />
               </div>
               <h2 className="text-xl font-bold text-white">Configure Draw</h2>
             </div>
-            <button onClick={onClose} className="w-8 h-8 bg-white/10 hover:bg-white/20 rounded-lg flex items-center justify-center text-gray-300 hover:text-white transition-colors">
+            <button onClick={onClose} className="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-lg flex items-center justify-center text-gray-300 hover:text-white transition-colors">
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -2937,32 +2937,22 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
           {/* Format Selection */}
           <div>
             <label className="block text-sm font-semibold text-gray-200 mb-3 flex items-center gap-2">
-              <Layers className="w-4 h-4 text-purple-400" />
+              <Layers className="w-4 h-4 text-emerald-400" />
               Tournament Format
             </label>
             <div className="space-y-2">
-              {formatOptions.map((option, idx) => {
-                const gradients = [
-                  'from-blue-500/20 to-cyan-500/20 border-blue-500/30 hover:border-blue-400',
-                  'from-purple-500/20 to-pink-500/20 border-purple-500/30 hover:border-purple-400',
-                  'from-orange-500/20 to-red-500/20 border-orange-500/30 hover:border-orange-400'
-                ];
-                const selectedGradients = [
-                  'from-blue-500 to-cyan-500 border-blue-400 shadow-lg shadow-blue-500/30',
-                  'from-purple-500 to-pink-500 border-purple-400 shadow-lg shadow-purple-500/30',
-                  'from-orange-500 to-red-500 border-orange-400 shadow-lg shadow-orange-500/30'
-                ];
+              {formatOptions.map((option) => {
                 return (
                   <button
                     key={option.value}
                     onClick={() => setConfig({ ...config, format: option.value })}
-                    className={`w-full p-4 rounded-xl text-left transition-all border-2 ${
+                    className={`w-full p-4 rounded-xl text-left transition-all border-2 font-semibold ${
                       config.format === option.value
-                        ? `bg-gradient-to-r ${selectedGradients[idx]} text-white`
-                        : `bg-gradient-to-r ${gradients[idx]} text-gray-300 border-white/10`
+                        ? 'bg-gradient-to-r from-emerald-500 to-teal-600 border-emerald-400 text-white shadow-lg shadow-emerald-500/30'
+                        : 'bg-slate-700/50 text-gray-300 border-white/10 hover:border-emerald-500/30 hover:bg-slate-700'
                     }`}
                   >
-                    <div className="font-semibold">{option.label}</div>
+                    {option.label}
                   </button>
                 );
               })}
@@ -2972,7 +2962,7 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
           {/* Bracket Size */}
           <div>
             <label className="block text-sm font-semibold text-gray-200 mb-3 flex items-center gap-2">
-              <Users className="w-4 h-4 text-cyan-400" />
+              <Users className="w-4 h-4 text-emerald-400" />
               Total Players
             </label>
             <div className="relative">
@@ -2985,10 +2975,10 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
                   const value = e.target.value === '' ? 0 : parseInt(e.target.value);
                   setConfig({ ...config, bracketSize: isNaN(value) ? 0 : Math.max(0, Math.min(128, value)) });
                 }}
-                className="w-full px-4 py-4 bg-gradient-to-r from-slate-700 to-slate-600 border-2 border-cyan-500/30 rounded-xl text-white text-2xl font-bold focus:outline-none focus:border-cyan-400 focus:shadow-lg focus:shadow-cyan-500/20 transition-all"
-                placeholder="028"
+                className="w-full px-4 py-4 bg-slate-700/80 border-2 border-emerald-500/30 rounded-xl text-white text-2xl font-bold focus:outline-none focus:border-emerald-400 focus:shadow-lg focus:shadow-emerald-500/20 transition-all"
+                placeholder="0"
               />
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 text-cyan-400 text-sm font-medium">
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 text-emerald-400 text-sm font-medium">
                 players
               </div>
             </div>
@@ -2999,7 +2989,7 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
             <>
               <div>
                 <label className="block text-sm font-semibold text-gray-200 mb-3 flex items-center gap-2">
-                  <Layers className="w-4 h-4 text-green-400" />
+                  <Layers className="w-4 h-4 text-emerald-400" />
                   Number of Groups
                 </label>
                 <div className="relative">
@@ -3014,10 +3004,10 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
                       setConfig({ ...config, numberOfGroups: groups, customGroupSizes: null });
                       setUseCustomGroupSizes(false);
                     }}
-                    className="w-full px-4 py-4 bg-gradient-to-r from-slate-700 to-slate-600 border-2 border-green-500/30 rounded-xl text-white text-2xl font-bold focus:outline-none focus:border-green-400 focus:shadow-lg focus:shadow-green-500/20 transition-all"
-                    placeholder="04"
+                    className="w-full px-4 py-4 bg-slate-700/80 border-2 border-emerald-500/30 rounded-xl text-white text-2xl font-bold focus:outline-none focus:border-emerald-400 focus:shadow-lg focus:shadow-emerald-500/20 transition-all"
+                    placeholder="0"
                   />
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2 text-green-400 text-sm font-medium">
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 text-emerald-400 text-sm font-medium">
                     groups
                   </div>
                 </div>
@@ -3034,29 +3024,23 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
                         setConfig({ ...config, customGroupSizes: null });
                       }
                     }}
-                    className={`mt-3 w-full px-4 py-3 rounded-xl transition-all font-medium ${
+                    className={`mt-3 w-full px-4 py-3 rounded-xl transition-all font-semibold ${
                       useCustomGroupSizes
-                        ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/30'
-                        : 'bg-gradient-to-r from-slate-700 to-slate-600 text-gray-300 hover:from-slate-600 hover:to-slate-500 border-2 border-white/10'
+                        ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/30'
+                        : 'bg-slate-700/50 text-gray-300 hover:bg-slate-700 border-2 border-white/10'
                     }`}
                   >
-                    {useCustomGroupSizes ? '✓ Use Equal Groups' : 'Customize Group Sizes'}
+                    {useCustomGroupSizes ? '✓ Custom Sizes' : 'Customize Group Sizes'}
                   </button>
                 )}
 
                 {/* Custom Group Size Inputs */}
                 {useCustomGroupSizes && (
-                  <div className="mt-4 space-y-3 p-4 bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-2 border-purple-500/30 rounded-xl">
+                  <div className="mt-4 space-y-3 p-4 bg-emerald-500/10 border-2 border-emerald-500/30 rounded-xl">
                     {config.customGroupSizes?.map((size, idx) => {
-                      const poolColors = [
-                        'from-blue-500 to-cyan-500',
-                        'from-green-500 to-emerald-500',
-                        'from-orange-500 to-amber-500',
-                        'from-red-500 to-pink-500'
-                      ];
                       return (
                         <div key={idx} className="flex items-center gap-3">
-                          <div className={`w-20 h-12 bg-gradient-to-r ${poolColors[idx % 4]} rounded-lg flex items-center justify-center text-white font-bold shadow-lg`}>
+                          <div className="w-20 h-12 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center text-white font-bold shadow-lg">
                             Pool {String.fromCharCode(65 + idx)}
                           </div>
                           <input
@@ -3070,7 +3054,7 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
                               newSizes[idx] = isNaN(value) ? 0 : Math.max(0, Math.min(config.bracketSize, value));
                               setConfig({ ...config, customGroupSizes: newSizes });
                             }}
-                            className="flex-1 px-4 py-3 bg-slate-700 border-2 border-purple-500/30 rounded-xl text-white text-xl font-bold focus:outline-none focus:border-purple-400 focus:shadow-lg focus:shadow-purple-500/20 transition-all"
+                            className="flex-1 px-4 py-3 bg-slate-700 border-2 border-emerald-500/30 rounded-xl text-white text-xl font-bold focus:outline-none focus:border-emerald-400 focus:shadow-lg focus:shadow-emerald-500/20 transition-all"
                             placeholder="0"
                           />
                         </div>
@@ -3078,13 +3062,13 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
                     })}
                     <div className={`flex items-center justify-between p-3 rounded-lg ${
                       config.customGroupSizes?.reduce((a, b) => a + b, 0) === config.bracketSize
-                        ? 'bg-green-500/20 border-2 border-green-500/50'
+                        ? 'bg-emerald-500/20 border-2 border-emerald-500/50'
                         : 'bg-red-500/20 border-2 border-red-500/50'
                     }`}>
                       <span className="text-sm font-medium text-white">Total:</span>
                       <span className={`text-lg font-bold ${
                         config.customGroupSizes?.reduce((a, b) => a + b, 0) === config.bracketSize
-                          ? 'text-green-400'
+                          ? 'text-emerald-400'
                           : 'text-red-400'
                       }`}>
                         {config.customGroupSizes?.reduce((a, b) => a + b, 0)} / {config.bracketSize}
@@ -3097,25 +3081,19 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
               {config.format === 'ROUND_ROBIN_KNOCKOUT' && (
                 <div>
                   <label className="block text-sm font-semibold text-gray-200 mb-3 flex items-center gap-2">
-                    <TrophyIcon className="w-4 h-4 text-yellow-400" />
+                    <TrophyIcon className="w-4 h-4 text-emerald-400" />
                     Players Advancing from Each Group
                   </label>
                   <div className="grid grid-cols-4 gap-3">
-                    {[1, 2, 3, 4].map((num, idx) => {
-                      const colors = [
-                        'from-yellow-500 to-amber-500 border-yellow-400 shadow-yellow-500/30',
-                        'from-blue-500 to-cyan-500 border-blue-400 shadow-blue-500/30',
-                        'from-purple-500 to-pink-500 border-purple-400 shadow-purple-500/30',
-                        'from-green-500 to-emerald-500 border-green-400 shadow-green-500/30'
-                      ];
+                    {[1, 2, 3, 4].map((num) => {
                       return (
                         <button
                           key={num}
                           onClick={() => setConfig({ ...config, advanceFromGroup: num })}
                           className={`py-4 rounded-xl font-bold transition-all border-2 ${
                             config.advanceFromGroup === num
-                              ? `bg-gradient-to-br ${colors[idx]} text-white shadow-lg`
-                              : 'bg-slate-700 text-gray-400 border-white/10 hover:border-white/30'
+                              ? 'bg-gradient-to-br from-emerald-500 to-teal-600 border-emerald-400 text-white shadow-lg shadow-emerald-500/30'
+                              : 'bg-slate-700 text-gray-400 border-white/10 hover:border-emerald-500/30'
                           }`}
                         >
                           Top {num}
@@ -3129,17 +3107,17 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
           )}
         </div>
 
-        <div className="p-6 border-t border-white/10 bg-gradient-to-r from-slate-800/50 to-slate-700/50 flex gap-3">
+        <div className="p-6 border-t-2 border-white/10 flex gap-3">
           <button 
             onClick={onClose} 
-            className="flex-1 px-6 py-4 bg-slate-700 text-white rounded-xl hover:bg-slate-600 transition-all font-semibold border-2 border-white/10 hover:border-white/20"
+            className="flex-1 px-6 py-4 bg-slate-700 text-white rounded-xl hover:bg-slate-600 transition-all font-semibold"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex-1 px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-500 hover:to-purple-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed font-semibold shadow-lg shadow-blue-500/30 border-2 border-blue-400/50"
+            className="flex-1 px-6 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl hover:shadow-lg hover:shadow-emerald-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
           >
             {saving ? (
               <span className="flex items-center justify-center gap-2">
@@ -3160,15 +3138,17 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
       {alertMessage && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70">
           <div className="relative w-full max-w-md">
-            <div className="bg-slate-800 rounded-xl overflow-hidden">
+            <div className="bg-gradient-to-br from-slate-900 to-slate-800 border-2 border-emerald-500/30 rounded-2xl overflow-hidden shadow-2xl">
+              <div className="p-6 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border-b-2 border-white/10">
+                <h3 className="text-lg font-bold text-white">Matchify.pro</h3>
+              </div>
               <div className="p-6">
-                <h3 className="text-lg font-semibold text-white mb-3">Matchify.pro</h3>
                 <p className="text-gray-300">{alertMessage}</p>
               </div>
-              <div className="p-4 border-t border-white/10">
+              <div className="p-4 border-t-2 border-white/10">
                 <button
                   onClick={() => setAlertMessage(null)}
-                  className="w-full px-4 py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+                  className="w-full px-4 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:shadow-lg hover:shadow-emerald-500/30 text-white font-semibold transition-all"
                 >
                   OK
                 </button>
@@ -3187,11 +3167,11 @@ export default DrawPage;
 const DeleteDrawModal = ({ categoryName, onClose, onConfirm, deleting }) => {
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-slate-800 border border-white/10 rounded-2xl max-w-md w-full">
-        <div className="p-6 border-b border-white/10">
+      <div className="bg-gradient-to-br from-slate-900 to-slate-800 border-2 border-red-500/30 rounded-2xl max-w-md w-full shadow-2xl">
+        <div className="p-6 border-b-2 border-white/10">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-red-500/20 rounded-xl flex items-center justify-center">
-              <Trash2 className="w-6 h-6 text-red-400" />
+            <div className="w-14 h-14 bg-gradient-to-br from-red-500 to-rose-600 rounded-xl flex items-center justify-center shadow-lg shadow-red-500/50">
+              <Trash2 className="w-7 h-7 text-white" />
             </div>
             <div>
               <h2 className="text-xl font-bold text-white">Delete Draw</h2>
@@ -3201,10 +3181,10 @@ const DeleteDrawModal = ({ categoryName, onClose, onConfirm, deleting }) => {
         </div>
 
         <div className="p-6">
-          <p className="text-gray-300">
+          <p className="text-gray-300 mb-4">
             Are you sure you want to delete this draw? This action cannot be undone and all bracket data will be lost.
           </p>
-          <div className="mt-4 p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
+          <div className="p-4 bg-red-500/10 border-2 border-red-500/30 rounded-xl">
             <div className="flex items-start gap-3">
               <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
               <p className="text-sm text-red-300">
@@ -3214,17 +3194,18 @@ const DeleteDrawModal = ({ categoryName, onClose, onConfirm, deleting }) => {
           </div>
         </div>
 
-        <div className="p-6 border-t border-white/10 flex gap-3">
+        <div className="p-6 border-t-2 border-white/10 flex gap-3">
           <button 
             onClick={onClose} 
-            className="flex-1 px-4 py-3 bg-slate-700 text-gray-300 rounded-xl hover:bg-slate-600 transition-colors font-semibold"
+            disabled={deleting}
+            className="flex-1 px-4 py-3 bg-slate-700 text-white rounded-xl hover:bg-slate-600 transition-all font-semibold"
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
             disabled={deleting}
-            className="flex-1 px-4 py-3 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl hover:shadow-lg hover:shadow-red-500/25 transition-all font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+            className="flex-1 px-4 py-3 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl hover:shadow-lg hover:shadow-red-500/30 transition-all font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {deleting ? (
               <>
@@ -3234,7 +3215,7 @@ const DeleteDrawModal = ({ categoryName, onClose, onConfirm, deleting }) => {
             ) : (
               <>
                 <Trash2 className="w-4 h-4" />
-                Delete Draw
+                Delete
               </>
             )}
           </button>

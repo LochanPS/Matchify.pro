@@ -3803,9 +3803,9 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
         </div>
 
         <div className="flex-1 overflow-hidden flex">
-          {/* Players List */}
-          <div className="w-1/3 border-r border-white/10 p-3 overflow-y-auto scroll-smooth scrollbar-thin">
-            <h3 className="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wider">
+          {/* Players List - 35% width */}
+          <div className="w-[35%] border-r border-white/10 p-2 overflow-y-auto scroll-smooth scrollbar-thin">
+            <h3 className="text-[10px] font-semibold text-gray-400 mb-2 uppercase tracking-wider">
               Registered Players ({players.length})
             </h3>
             {loading ? (
@@ -3814,11 +3814,11 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
               </div>
             ) : players.length === 0 ? (
               <div className="text-center py-8">
-                <Users className="w-10 h-10 text-gray-600 mx-auto mb-2" />
-                <p className="text-gray-500 text-xs">No registered players</p>
+                <Users className="w-8 h-8 text-gray-600 mx-auto mb-2" />
+                <p className="text-gray-500 text-[10px]">No registered players</p>
               </div>
             ) : (
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 {players.map((player) => {
                   const assigned = isPlayerAssigned(player.id);
                   const isSelected = selectedPlayer?.id === player.id;
@@ -3826,18 +3826,18 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                     <div
                       key={player.id}
                       onClick={() => handleSelectPlayer(player)}
-                      className={`p-2 rounded-lg cursor-pointer transition-all ${
+                      className={`p-1.5 rounded-lg cursor-pointer transition-all ${
                         isSelected
-                          ? 'bg-emerald-500/30 border-2 border-emerald-500 shadow-lg shadow-emerald-500/20'
+                          ? 'bg-emerald-500/30 border border-emerald-500 shadow-lg shadow-emerald-500/20'
                           : assigned
                             ? 'bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20'
                             : 'bg-slate-700/50 border border-transparent hover:bg-slate-700 hover:shadow-lg hover:shadow-emerald-500/10'
                       }`}
                     >
-                      <div className="flex items-center gap-2">
-                        <div className={`w-6 h-6 rounded-lg flex items-center justify-center text-white font-bold text-xs ${
+                      <div className="flex items-center gap-1.5">
+                        <div className={`w-5 h-5 rounded flex items-center justify-center text-white font-bold text-[10px] flex-shrink-0 ${
                           isSelected
-                            ? 'bg-gradient-to-br from-emerald-400 to-teal-600 ring-2 ring-emerald-400'
+                            ? 'bg-gradient-to-br from-emerald-400 to-teal-600 ring-1 ring-emerald-400'
                             : assigned 
                               ? 'bg-gradient-to-br from-emerald-500 to-teal-600' 
                               : 'bg-gradient-to-br from-teal-500 to-emerald-600'
@@ -3845,15 +3845,14 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                           {player.seed}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-white font-medium truncate text-xs">{player.name}</p>
-                          <p className="text-gray-500 text-[10px] truncate">{player.email}</p>
+                          <p className="text-white font-medium text-[11px] leading-tight">{player.name}</p>
                         </div>
                         {isSelected ? (
-                          <div className="w-4 h-4 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0">
-                            <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+                          <div className="w-3 h-3 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0">
+                            <div className="w-1 h-1 bg-white rounded-full"></div>
                           </div>
                         ) : assigned ? (
-                          <CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                          <CheckCircle className="w-3 h-3 text-emerald-400 flex-shrink-0" />
                         ) : null}
                       </div>
                     </div>
@@ -3863,10 +3862,10 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
             )}
           </div>
 
-          {/* Slots Grid - For Round Robin: Show by Pools, For Knockout: Show by Matches */}
-          <div className="flex-1 p-3 overflow-y-auto scroll-smooth scrollbar-thin">
+          {/* Slots Grid - 65% width */}
+          <div className="flex-1 p-2 overflow-y-auto scroll-smooth scrollbar-thin">
             <div className="flex items-center justify-between mb-2">
-              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+              <h3 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
                 {bracket?.format === 'ROUND_ROBIN' || bracket?.format === 'ROUND_ROBIN_KNOCKOUT' 
                   ? `Pools (${bracket.groups?.length || 0})` 
                   : `Draw Slots (${slots.length})`}
@@ -3893,7 +3892,7 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
             
             {/* ROUND ROBIN: Pool-based view */}
             {(bracket?.format === 'ROUND_ROBIN' || bracket?.format === 'ROUND_ROBIN_KNOCKOUT') && bracket.groups ? (
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {bracket.groups.map((group, groupIndex) => {
                   const groupSlots = slots.filter(s => {
                     const slotIndex = s.slot - 1;
@@ -3908,32 +3907,28 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                   
                   return (
                     <div key={groupIndex} className="bg-slate-700/30 rounded-lg border border-white/10 overflow-hidden">
-                      {/* Pool Header */}
-                      <div className="px-3 py-2 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border-b border-white/10">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 bg-emerald-500/30 rounded-lg flex items-center justify-center">
-                              <span className="text-emerald-300 font-bold text-sm">
-                                {String.fromCharCode(65 + groupIndex)}
-                              </span>
-                            </div>
-                            <div>
-                              <h4 className="text-white font-bold text-xs">Pool {String.fromCharCode(65 + groupIndex)}</h4>
-                              <p className="text-emerald-300 text-[10px]">
-                                {assignedInPool} of {totalInPool} players assigned
-                              </p>
-                            </div>
+                      {/* Pool Header - Compact */}
+                      <div className="px-2 py-1.5 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border-b border-white/10 flex items-center justify-between">
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-6 h-6 bg-emerald-500/30 rounded flex items-center justify-center">
+                            <span className="text-emerald-300 font-bold text-xs">
+                              {String.fromCharCode(65 + groupIndex)}
+                            </span>
                           </div>
-                          <div className="text-right">
-                            <div className="px-2 py-1 bg-emerald-500/20 rounded">
-                              <span className="text-emerald-300 font-bold text-[10px]">{totalInPool} slots</span>
-                            </div>
+                          <div>
+                            <h4 className="text-white font-bold text-[11px] leading-tight">Pool {String.fromCharCode(65 + groupIndex)}</h4>
+                            <p className="text-emerald-300 text-[9px] leading-tight">
+                              {assignedInPool}/{totalInPool} assigned
+                            </p>
                           </div>
+                        </div>
+                        <div className="px-1.5 py-0.5 bg-emerald-500/20 rounded">
+                          <span className="text-emerald-300 font-bold text-[9px]">{totalInPool} slots</span>
                         </div>
                       </div>
                       
-                      {/* Pool Slots */}
-                      <div className="p-2 grid grid-cols-2 gap-1.5">
+                      {/* Pool Slots - Ultra Compact */}
+                      <div className="p-1.5 grid grid-cols-2 gap-1">
                         {groupSlots.map((slot) => {
                           const assigned = getAssignedPlayer(slot.slot);
                           const canAccept = selectedPlayer && !assigned && !slot.locked;
@@ -3942,7 +3937,7 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                             <div
                               key={slot.slot}
                               onClick={() => canAccept && handleSlotClick(slot)}
-                              className={`p-2 rounded-lg border transition-all ${
+                              className={`p-1.5 rounded border transition-all ${
                                 canAccept
                                   ? 'border-emerald-500/50 bg-emerald-500/10 cursor-pointer hover:bg-emerald-500/20 hover:border-emerald-500'
                                   : assigned
@@ -3950,22 +3945,20 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                                     : 'border-white/10 bg-slate-800/30'
                               } ${slot.locked ? 'opacity-50' : ''}`}
                             >
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                                  <div className={`w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold flex-shrink-0 ${
-                                    assigned 
-                                      ? 'bg-emerald-500/30 text-emerald-300' 
-                                      : 'bg-slate-600/30 text-gray-500'
-                                  }`}>
-                                    {slot.slot}
-                                  </div>
-                                  <div className="flex-1 min-w-0">
-                                    {assigned ? (
-                                      <p className="text-white font-medium text-[10px] truncate">{assigned.playerName}</p>
-                                    ) : (
-                                      <p className="text-gray-500 text-[10px]">Empty Slot</p>
-                                    )}
-                                  </div>
+                              <div className="flex items-center gap-1">
+                                <div className={`w-4 h-4 rounded flex items-center justify-center text-[9px] font-bold flex-shrink-0 ${
+                                  assigned 
+                                    ? 'bg-emerald-500/30 text-emerald-300' 
+                                    : 'bg-slate-600/30 text-gray-500'
+                                }`}>
+                                  {slot.slot}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  {assigned ? (
+                                    <p className="text-white font-medium text-[10px] leading-tight truncate">{assigned.playerName}</p>
+                                  ) : (
+                                    <p className="text-gray-500 text-[9px] leading-tight">Empty</p>
+                                  )}
                                 </div>
                                 {assigned && !slot.locked && (
                                   <button
@@ -3975,11 +3968,11 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                                     }}
                                     className="p-0.5 hover:bg-red-500/20 rounded transition-colors flex-shrink-0"
                                   >
-                                    <X className="w-3 h-3 text-red-400" />
+                                    <X className="w-2.5 h-2.5 text-red-400" />
                                   </button>
                                 )}
                                 {slot.locked && (
-                                  <span className="text-amber-400 text-[10px] flex-shrink-0">🔒</span>
+                                  <span className="text-[9px] flex-shrink-0">🔒</span>
                                 )}
                               </div>
                             </div>

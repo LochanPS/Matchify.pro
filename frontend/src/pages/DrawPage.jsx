@@ -871,7 +871,7 @@ const DrawPage = () => {
                 {!bracket && !isCategoryCompleted && (
                   <button
                     onClick={() => setShowConfigModal(true)}
-                    className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl shadow-lg shadow-amber-500/30 hover:shadow-amber-500/50 hover:scale-105 transition-all flex items-center gap-1.5 font-semibold text-xs"
+                    className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:scale-105 transition-all flex items-center gap-1.5 font-semibold text-xs"
                   >
                     <Plus className="w-4 h-4" />
                     Create Draw
@@ -1127,7 +1127,7 @@ const DrawPage = () => {
                   onClick={() => handleCategoryChange(category)}
                   className={`flex-shrink-0 px-4 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap ${
                     activeCategory?.id === category.id
-                      ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/30'
+                      ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/30'
                       : 'text-gray-400 hover:text-white hover:bg-slate-700/50'
                   }`}
                 >
@@ -1143,12 +1143,12 @@ const DrawPage = () => {
       <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {loading ? (
           <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-16 text-center">
-            <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
             <p className="text-gray-400 mt-6 font-medium">Loading bracket...</p>
           </div>
         ) : drawNotGenerated ? (
           <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-16 text-center">
-            <div className="w-24 h-24 bg-gradient-to-br from-amber-500/20 to-orange-500/20 rounded-3xl flex items-center justify-center mx-auto mb-6">
+            <div className="w-24 h-24 bg-gradient-to-br from-emerald-500/20 to-teal-500/20 rounded-3xl flex items-center justify-center mx-auto mb-6">
               <span className="text-5xl">📋</span>
             </div>
             <h3 className="text-2xl font-bold text-white mb-3">Draw Not Generated Yet</h3>
@@ -1160,7 +1160,7 @@ const DrawPage = () => {
             {isOrganizer && (
               <button
                 onClick={() => setShowConfigModal(true)}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-amber-500/25 hover:scale-105 transition-all"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-emerald-500/25 hover:scale-105 transition-all"
               >
                 <Plus className="w-5 h-5" />
                 Create Draw Now

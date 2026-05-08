@@ -133,7 +133,7 @@ const ViewDrawsPage = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-12 h-12 border-4 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-400">Loading draws...</p>
         </div>
       </div>
@@ -150,7 +150,7 @@ const ViewDrawsPage = () => {
             <span className="font-medium">Back to Tournament</span>
           </button>
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl shadow-lg shadow-amber-500/20">
+            <div className="p-3 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl shadow-lg shadow-emerald-500/20">
               <GitBranch className="w-6 h-6 text-white" />
             </div>
             <div>
@@ -182,7 +182,7 @@ const ViewDrawsPage = () => {
             <h3 className="text-xl font-semibold text-white mb-2">No Categories</h3>
             <p className="text-gray-400 mb-6">Add categories to this tournament to create draws.</p>
             {isOrganizer && (
-              <button onClick={() => navigate(`/tournaments/${id}/categories`)} className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl hover:shadow-lg transition-all font-semibold">
+              <button onClick={() => navigate(`/tournaments/${id}/categories`)} className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl hover:shadow-lg transition-all font-semibold">
                 Manage Categories
               </button>
             )}
@@ -200,7 +200,7 @@ const ViewDrawsPage = () => {
                       onClick={() => setSelectedCategory(category)}
                       className={`w-full text-left px-4 py-3 rounded-xl transition-all ${
                         selectedCategory?.id === category.id
-                          ? 'bg-indigo-500/20 border border-indigo-500/50 text-white'
+                          ? 'bg-emerald-500/20 border border-emerald-500/50 text-white'
                           : 'bg-slate-700/30 border border-white/5 text-gray-300 hover:bg-slate-700/50'
                       }`}
                     >
@@ -229,7 +229,7 @@ const ViewDrawsPage = () => {
                     {isOrganizer && (
                       <button
                         onClick={() => setShowConfigModal(true)}
-                        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl hover:shadow-lg hover:shadow-amber-500/25 transition-all font-semibold"
+                        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl hover:shadow-lg hover:shadow-emerald-500/25 transition-all font-semibold"
                       >
                         {draw ? <Settings className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
                         {draw ? 'Edit Draw' : 'Create Draw'}
@@ -242,15 +242,15 @@ const ViewDrawsPage = () => {
                       <DrawBracket draw={draw} categoryFormat={selectedCategory?.format} />
                     ) : (
                       <div className="text-center py-12">
-                        <div className="w-20 h-20 bg-amber-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                          <GitBranch className="w-10 h-10 text-amber-400" />
+                        <div className="w-20 h-20 bg-emerald-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                          <GitBranch className="w-10 h-10 text-emerald-400" />
                         </div>
                         <h3 className="text-xl font-semibold text-white mb-2">Draw Not Generated Yet</h3>
                         <p className="text-gray-400 mb-6">Click "Create Draw" to set up the tournament bracket.</p>
                         {isOrganizer && (
                           <button
                             onClick={() => setShowConfigModal(true)}
-                            className="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl hover:shadow-lg hover:shadow-amber-500/25 transition-all font-semibold"
+                            className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl hover:shadow-lg hover:shadow-emerald-500/25 transition-all font-semibold"
                           >
                             <Plus className="w-5 h-5 inline mr-2" />
                             Create Draw
@@ -330,7 +330,7 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
                   onClick={() => setConfig({ ...config, format: option.value })}
                   className={`w-full p-4 rounded-xl text-left transition-all ${
                     config.format === option.value
-                      ? 'bg-amber-500/20 border-2 border-amber-500'
+                      ? 'bg-emerald-500/20 border-2 border-emerald-500'
                       : 'bg-slate-700/50 border-2 border-transparent hover:border-white/20'
                   }`}
                 >
@@ -352,7 +352,7 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
             <select
               value={config.bracketSize}
               onChange={(e) => setConfig({ ...config, bracketSize: parseInt(e.target.value) })}
-              className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white focus:outline-none focus:border-amber-500"
+              className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white focus:outline-none focus:border-emerald-500"
             >
               {[4, 8, 16, 32, 64, 128].filter(n => n >= 4).map(size => (
                 <option key={size} value={size}>{size} Players</option>
@@ -372,7 +372,7 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
                       onClick={() => setConfig({ ...config, numberOfGroups: num, playersPerGroup: Math.floor(config.bracketSize / num) })}
                       className={`py-3 rounded-xl font-semibold transition-all ${
                         config.numberOfGroups === num
-                          ? 'bg-purple-500 text-white'
+                          ? 'bg-emerald-500 text-white'
                           : 'bg-slate-700/50 text-gray-300 hover:bg-slate-700'
                       }`}
                     >
@@ -438,7 +438,7 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex-1 px-4 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl hover:shadow-lg hover:shadow-amber-500/25 transition-all font-semibold disabled:opacity-50"
+            className="flex-1 px-4 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl hover:shadow-lg hover:shadow-emerald-500/25 transition-all font-semibold disabled:opacity-50"
           >
             {saving ? 'Creating...' : 'Create Draw'}
           </button>
@@ -629,7 +629,7 @@ const GroupsKnockoutDraw = ({ data, categoryFormat }) => {
       {/* Group Stage */}
       <div>
         <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-          <span className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-lg text-sm">Stage 1</span>
+          <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-lg text-sm">Stage 1</span>
           Group Stage (Round Robin)
         </h3>
         <RoundRobinDraw data={data} categoryFormat={categoryFormat} />
@@ -639,7 +639,7 @@ const GroupsKnockoutDraw = ({ data, categoryFormat }) => {
       {data.knockout && (
         <div>
           <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-            <span className="px-3 py-1 bg-amber-500/20 text-amber-400 rounded-lg text-sm">Stage 2</span>
+            <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-lg text-sm">Stage 2</span>
             Knockout Stage
           </h3>
           <KnockoutBracket data={data.knockout} categoryFormat={categoryFormat} />

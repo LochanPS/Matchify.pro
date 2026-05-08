@@ -751,10 +751,10 @@ const DrawPage = () => {
 
   if (loading && !tournament) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #0a0a1f 0%, #07071a 50%, #0d1a2a 100%)' }}>
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="text-gray-400 mt-4 font-medium">Loading draw...</p>
+          <div className="w-16 h-16 border-4 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: 'rgba(0,255,136,0.3)', borderTopColor: 'transparent' }}></div>
+          <p className="mt-4 font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>Loading draw...</p>
         </div>
       </div>
     );

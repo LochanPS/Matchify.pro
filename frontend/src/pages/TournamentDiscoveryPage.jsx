@@ -635,8 +635,8 @@ function TournamentCard({ tournament, navigate, index }) {
         }}
       />
 
-      {/* Poster - Compact */}
-      <div className="h-36 relative overflow-hidden">
+      {/* Poster - Larger & More Visible */}
+      <div className="h-48 relative overflow-hidden">
         {posterUrl ? (
           <>
             <img
@@ -665,45 +665,16 @@ function TournamentCard({ tournament, navigate, index }) {
             {statusStyle.text}
           </span>
         </div>
-
-        {/* Format Badge - Compact */}
-        <div className="absolute bottom-2 left-2">
-          <span 
-            className="px-2.5 py-1 text-xs font-bold rounded-full backdrop-blur-sm"
-            style={{
-              background: 'rgba(0,0,0,0.5)',
-              border: '1.5px solid rgba(255,255,255,0.3)',
-              color: '#ffffff'
-            }}
-          >
-            {tournament.format === 'both' ? '🏸 Singles & Doubles' : 
-             tournament.format === 'singles' ? '🏸 Singles' : '👥 Doubles'}
-          </span>
-        </div>
       </div>
 
-      {/* Content - Enhanced with More Details */}
+      {/* Content - Simplified: Name, Start Date, Categories */}
       <div className="p-4 relative z-10">
         <h3 className="font-black text-base text-white mb-3 line-clamp-2 group-hover:text-emerald-400 transition-colors min-h-[2.5rem]">
           {tournament.name}
         </h3>
 
         <div className="space-y-2 mb-3">
-          {/* Location */}
-          <div className="flex items-start gap-2.5 text-xs text-white/80">
-            <div 
-              className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
-              style={{ background: 'rgba(168,85,247,0.2)' }}
-            >
-              <MapPinIcon className="h-3.5 w-3.5 text-purple-400" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-bold text-white/90 text-xs truncate">{tournament.venue}</p>
-              <p className="font-medium text-white/60 text-xs truncate">{tournament.city}, {tournament.state}</p>
-            </div>
-          </div>
-
-          {/* Tournament Dates */}
+          {/* Tournament Start Date Only */}
           <div className="flex items-center gap-2.5 text-xs text-white/80">
             <div 
               className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
@@ -712,30 +683,12 @@ function TournamentCard({ tournament, navigate, index }) {
               <CalendarIcon className="h-3.5 w-3.5 text-blue-400" />
             </div>
             <div className="flex-1">
-              <p className="font-medium text-white/90 text-xs">{formatDateIndian(tournament.startDate)}</p>
-              {tournament.endDate && tournament.endDate !== tournament.startDate && (
-                <p className="font-medium text-white/60 text-xs">to {formatDateIndian(tournament.endDate)}</p>
-              )}
+              <p className="font-medium text-white/60 text-xs">Tournament starts</p>
+              <p className="font-bold text-white text-xs">{formatDateIndian(tournament.startDate)}</p>
             </div>
           </div>
 
-          {/* Registration Deadline */}
-          {tournament.registrationCloseDate && (
-            <div className="flex items-center gap-2.5 text-xs text-white/80">
-              <div 
-                className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
-                style={{ background: 'rgba(245,158,11,0.2)' }}
-              >
-                <ClockIcon className="h-3.5 w-3.5 text-orange-400" />
-              </div>
-              <div className="flex-1">
-                <p className="font-medium text-white/60 text-xs">Registration closes</p>
-                <p className="font-bold text-orange-400 text-xs">{formatDateIndian(tournament.registrationCloseDate)}</p>
-              </div>
-            </div>
-          )}
-
-          {/* Categories & Entry Fee */}
+          {/* Number of Categories */}
           <div className="flex items-center gap-2.5 text-xs text-white/80">
             <div 
               className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
@@ -743,16 +696,31 @@ function TournamentCard({ tournament, navigate, index }) {
             >
               <TrophyIcon className="h-3.5 w-3.5 text-green-400" />
             </div>
-            <div className="flex-1 flex items-center justify-between">
-              <span className="font-medium text-white/90">{tournament._count?.categories || 0} {tournament._count?.categories === 1 ? 'Category' : 'Categories'}</span>
-              {minFee && (
-                <div className="flex items-center gap-1 font-bold text-emerald-400">
-                  <CurrencyRupeeIcon className="h-3.5 w-3.5" />
-                  <span>{minFee}+</span>
-                </div>
-              )}
+            <div className="flex-1">
+              <p className="font-bold text-emerald-400 text-xs">
+                {tournament._count?.categories || 0} {tournament._count?.categories === 1 ? 'Category' : 'Categories'}
+              </p>
             </div>
           </div>
+
+          {/* Category Names */}
+          {tournament.categories && tournament.categories.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mt-2">
+              {tournament.categories.map((category, idx) => (
+                <span 
+                  key={idx}
+                  className="px-2 py-1 text-xs font-bold rounded-lg"
+                  style={{
+                    background: 'rgba(168,85,247,0.2)',
+                    border: '1px solid rgba(168,85,247,0.4)',
+                    color: '#c4b5fd'
+                  }}
+                >
+                  {category.name}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* View Button - Compact */}

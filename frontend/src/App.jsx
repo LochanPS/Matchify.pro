@@ -6,6 +6,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { NotificationProvider } from './contexts/NotificationContext'
 import { Toaster } from 'react-hot-toast'
 import Navbar from './components/Navbar'
+import ScrollToTop from './components/ScrollToTop'
 import ProfileCompletionModal from './components/ProfileCompletionModal'
 import MandatoryProfilePhotoModal from './components/MandatoryProfilePhotoModal'
 import ImpersonationBanner from './components/ImpersonationBanner'
@@ -100,6 +101,7 @@ function AppContent() {
 
   return (
     <div className="min-h-screen" style={{ background: '#07071a' }}>
+      <ScrollToTop />
       <ImpersonationBanner />
       <div className={isImpersonating() ? 'pt-[60px]' : ''}> {/* Add padding only when impersonating */}
         {shouldShowNavbar && <Navbar />}

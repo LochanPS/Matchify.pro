@@ -866,7 +866,7 @@ const DrawPage = () => {
           />
         </div>
         
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+        <div className="relative max-w-2xl mx-auto px-4 py-4">
           <button
             onClick={() => navigate(-1)}
             className="flex items-center gap-2 text-white/70 hover:text-white mb-4 transition-colors group"
@@ -1030,7 +1030,7 @@ const DrawPage = () => {
       {/* Tournament Statistics Header - ULTRA COMPACT FOR MOBILE */}
       {activeCategory && (
         <div className="bg-slate-800/50 backdrop-blur-sm border-b border-white/10">
-          <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2">
+          <div className="max-w-2xl mx-auto px-3 py-2">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
               {/* Total Players */}
               <div className="bg-gradient-to-br from-teal-500/10 to-emerald-500/10 border border-teal-500/20 rounded-xl p-2.5 relative">
@@ -1219,7 +1219,7 @@ const DrawPage = () => {
       )}
 
       {/* Messages */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+      <div className="max-w-2xl mx-auto px-4 mt-4">
         {error && (
           <div className="mb-4 bg-red-500/10 border border-red-500/30 rounded-xl p-4 flex items-center gap-3">
             <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0" />
@@ -1243,7 +1243,7 @@ const DrawPage = () => {
 
       {/* Category Tabs - ULTRA COMPACT FOR MOBILE */}
       {categories.length > 0 && (
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 mt-2">
+        <div className="max-w-2xl mx-auto px-3 mt-2">
           <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-1.5">
             <div className="flex gap-2 overflow-x-auto">
               {categories.map((category) => (
@@ -1265,7 +1265,7 @@ const DrawPage = () => {
       )}
 
       {/* Content */}
-      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-2xl mx-auto px-3 py-4">
         {loading ? (
           <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-16 text-center">
             <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
@@ -2674,61 +2674,77 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
               {group.participants
                 .sort((a, b) => (b.points || 0) - (a.points || 0))
                 .map((p, pi) => (
-                  <div 
-                    key={pi} 
-                    className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-all ${
-                      pi === 0 ? 'bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border-emerald-500/50' :
-                      'bg-slate-700/30 border-white/10'
-                    }`}
+                  <div
+                    key={pi}
+                    className="flex items-center rounded-xl border-2 transition-all"
+                    style={{
+                      padding: '10px 10px',
+                      gap: '8px',
+                      background: pi === 0
+                        ? 'linear-gradient(135deg, rgba(0,255,136,0.12), rgba(0,200,83,0.08))'
+                        : 'rgba(255,255,255,0.04)',
+                      borderColor: pi === 0 ? 'rgba(0,255,136,0.4)' : 'rgba(255,255,255,0.08)',
+                    }}
                   >
-                    {/* Rank */}
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black ${
-                      pi === 0 ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/50' :
-                      pi === 1 ? 'bg-gray-400 text-white' :
-                      pi === 2 ? 'bg-orange-500 text-white' :
-                      'bg-slate-600 text-gray-400'
-                    }`}>
+                    {/* Rank badge — fixed 28×28 */}
+                    <div
+                      className="flex-shrink-0 flex items-center justify-center rounded-lg font-black text-xs"
+                      style={{
+                        width: '28px', height: '28px',
+                        background:
+                          pi === 0 ? 'linear-gradient(135deg,#00c853,#00ff88)' :
+                          pi === 1 ? 'linear-gradient(135deg,#94a3b8,#64748b)' :
+                          pi === 2 ? 'linear-gradient(135deg,#cd7f32,#b45309)' :
+                          'rgba(255,255,255,0.08)',
+                        color: pi < 3 ? '#fff' : 'rgba(255,255,255,0.5)',
+                      }}
+                    >
                       {pi + 1}
                     </div>
-                    
-                    {/* Player Name */}
-                    <div className="flex-1 min-w-0">
+
+                    {/* Player Name — flex-1, strictly clipped */}
+                    <div className="flex-1 min-w-0 overflow-hidden">
                       {p.id ? (
                         <>
-                          <span className="font-bold text-sm text-white block leading-tight">
+                          <p className="font-bold text-white leading-tight text-sm truncate">
                             {p.name || `Slot ${pi + 1}`}
-                          </span>
+                          </p>
                           {p.partnerName && (
-                            <span className="text-emerald-300 text-xs block leading-tight">
+                            <p className="text-xs leading-tight truncate" style={{ color: '#00ff88' }}>
                               & {p.partnerName}
-                            </span>
+                            </p>
                           )}
                         </>
                       ) : (
-                        <span className="font-bold text-sm text-gray-500 block">
+                        <p className="font-bold text-sm leading-tight" style={{ color: 'rgba(255,255,255,0.35)' }}>
                           Slot {pi + 1}
-                        </span>
+                        </p>
                       )}
                     </div>
-                    
-                    {/* Stats: P / W / L / PTS */}
-                    <div className="flex items-center gap-1.5 text-xs font-bold">
-                      <div className="text-center w-8 py-1 rounded-lg" style={{ background: 'rgba(255,255,255,0.06)' }}>
-                        <div className="text-white">{(p.wins || 0) + (p.losses || 0)}</div>
-                        <div className="text-[9px]" style={{ color: 'rgba(255,255,255,0.35)' }}>P</div>
-                      </div>
-                      <div className="text-center w-8 py-1 rounded-lg" style={{ background: 'rgba(0,255,136,0.08)' }}>
-                        <div className="text-emerald-400">{p.wins || 0}</div>
-                        <div className="text-[9px]" style={{ color: 'rgba(0,255,136,0.5)' }}>W</div>
-                      </div>
-                      <div className="text-center w-8 py-1 rounded-lg" style={{ background: 'rgba(239,68,68,0.08)' }}>
-                        <div className="text-red-400">{p.losses || 0}</div>
-                        <div className="text-[9px]" style={{ color: 'rgba(239,68,68,0.5)' }}>L</div>
-                      </div>
-                      <div className="text-center w-10 py-1 rounded-lg" style={{ background: 'rgba(0,255,136,0.15)', border: '1px solid rgba(0,255,136,0.3)' }}>
-                        <div className="text-emerald-300 font-black">{p.points || 0}</div>
-                        <div className="text-[9px]" style={{ color: 'rgba(0,255,136,0.6)' }}>PTS</div>
-                      </div>
+
+                    {/* Stats: P · W · L · PTS — fixed total width, no gap overflow */}
+                    <div className="flex-shrink-0 flex items-center" style={{ gap: '4px' }}>
+                      {[
+                        { val: (p.wins || 0) + (p.losses || 0), label: 'P', bg: 'rgba(255,255,255,0.07)', color: '#fff', labelColor: 'rgba(255,255,255,0.35)' },
+                        { val: p.wins || 0, label: 'W', bg: 'rgba(0,255,136,0.1)', color: '#34d399', labelColor: 'rgba(0,255,136,0.55)' },
+                        { val: p.losses || 0, label: 'L', bg: 'rgba(239,68,68,0.1)', color: '#f87171', labelColor: 'rgba(239,68,68,0.55)' },
+                        { val: p.points || 0, label: 'PTS', bg: 'rgba(0,255,136,0.18)', color: '#6ee7b7', labelColor: 'rgba(0,255,136,0.65)', border: '1px solid rgba(0,255,136,0.3)', bold: true },
+                      ].map(({ val, label, bg, color, labelColor, border, bold }) => (
+                        <div
+                          key={label}
+                          className="flex flex-col items-center justify-center"
+                          style={{
+                            width: label === 'PTS' ? '36px' : '28px',
+                            height: '36px',
+                            background: bg,
+                            border: border || 'none',
+                            borderRadius: '8px',
+                          }}
+                        >
+                          <span style={{ fontSize: '12px', fontWeight: bold ? '900' : '700', color, lineHeight: 1 }}>{val}</span>
+                          <span style={{ fontSize: '9px', color: labelColor, lineHeight: 1, marginTop: '2px' }}>{label}</span>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 ))}

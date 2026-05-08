@@ -16,7 +16,6 @@ const SpectatorViewPage = () => {
   const [matchComplete, setMatchComplete] = useState(false);
   const [winner, setWinner] = useState(null);
 
-  // Fetch match data
   const fetchMatch = async () => {
     try {
       setLoading(true);
@@ -25,60 +24,30 @@ const SpectatorViewPage = () => {
       setMatch(data.match);
       setScore(data.match.scoreJson);
       setMatchComplete(data.match.status === 'COMPLETED');
-      setLoading(false);
     } catch (err) {
-      setError(getErrorMessage(err, 'Failed to load match'));
+      setError('Failed to load match');
+    } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchMatch();
-
-    // Setup WebSocket connection for live updates
     const cleanup = joinMatch(
       matchId,
-      // On score update
-      (data) => {
-        console.log('Live score update:', data);
-        setScore(data.score);
-        setIsLiveConnected(true);
-      },
-      // On match complete
-      (data) => {
-        console.log('Match completed:', data);
-        setScore(data.score);
-        setMatchComplete(true);
-        setWinner(data.winner);
-        setMatch(prev => ({ ...prev, status: 'COMPLETED' }));
-        setIsLiveConnected(true);
-      },
-      // On match status change
-      (data) => {
-        console.log('Match status changed:', data);
-        if (data.status === 'ONGOING') {
-          setMatch(prev => ({ ...prev, status: 'ONGOING' }));
-          if (data.score) {
-            setScore(data.score);
-          }
-        }
-        setIsLiveConnected(true);
-      }
+      (data) => { setScore(data.score); setIsLiveConnected(true); },
+      (data) => { setScore(data.score); setMatchComplete(true); setWinner(data.winner); setMatch(prev => ({ ...prev, status: 'COMPLETED' })); setIsLiveConnected(true); },
+      (data) => { if (data.status === 'ONGOING') { setMatch(prev => ({ ...prev, status: 'ONGOING' })); if (data.score) setScore(data.score); } setIsLiveConnected(true); }
     );
-
-    // Cleanup on unmount
-    return () => {
-      cleanup();
-      leaveMatch(matchId);
-    };
+    return () => { cleanup(); leaveMatch(matchId); };
   }, [matchId]);
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg,#0a0a1f 0%,#07071a 100%)' }}>
         <div className="text-center">
-          <RefreshCw className="w-12 h-12 text-blue-600 animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">Loading match...</p>
+          <RefreshCw className="w-10 h-10 animate-spin mx-auto mb-4" style={{ color: '#00ff88' }} />
+          <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>Loading match...</p>
         </div>
       </div>
     );
@@ -86,55 +55,58 @@ const SpectatorViewPage = () => {
 
   if (error || !match) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-600">{error || 'Match not found'}</p>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg,#0a0a1f 0%,#07071a 100%)' }}>
+        <div className="text-center p-8 rounded-2xl" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)' }}>
+          <p className="text-red-400 font-semibold">{error || 'Match not found'}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-gray-900">Live Match</h1>
+    <div className="min-h-screen relative" style={{ background: 'linear-gradient(180deg,#0a0a1f 0%,#07071a 40%,#0d1a2a 70%,#07071a 100%)' }}>
+      {/* Fixed bg glow */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-0 right-0 w-72 h-72 rounded-full blur-3xl opacity-15" style={{ background: 'radial-gradient(circle,rgba(0,255,136,0.4) 0%,transparent 70%)' }} />
+        <div className="absolute bottom-1/3 left-0 w-64 h-64 rounded-full blur-3xl opacity-10" style={{ background: 'radial-gradient(circle,rgba(0,212,255,0.4) 0%,transparent 70%)' }} />
+      </div>
+
+      {/* Sticky Header */}
+      <div className="sticky top-0 z-20" style={{ background: 'rgba(7,7,26,0.95)', borderBottom: '1px solid rgba(0,255,136,0.15)', backdropFilter: 'blur(20px)' }}>
+        <div className="px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-base font-black text-white">Live Match</h1>
             {isLiveConnected && (
-              <div className="flex items-center gap-2 px-3 py-1 bg-red-100 text-red-700 rounded-full">
-                <span className="w-2 h-2 bg-red-600 rounded-full animate-pulse"></span>
-                <span className="text-sm font-semibold">LIVE</span>
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)' }}>
+                <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
+                <span className="text-xs font-black text-red-400">LIVE</span>
               </div>
             )}
           </div>
-          <button
-            onClick={fetchMatch}
-            className="flex items-center gap-2 text-blue-600 hover:text-blue-700"
-          >
-            <RefreshCw className="w-5 h-5" />
-            <span>Refresh</span>
+          <button onClick={fetchMatch} className="flex items-center gap-1.5 text-xs font-semibold" style={{ color: '#00ff88' }}>
+            <RefreshCw className="w-4 h-4" /> Refresh
           </button>
         </div>
+      </div>
 
+      <div className="relative px-4 py-5 space-y-4">
         {/* Connection Status */}
         {!isLiveConnected && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6 flex items-start gap-3">
-            <Wifi className="w-5 h-5 text-yellow-600 mt-0.5" />
+          <div className="rounded-2xl p-4 flex items-start gap-3" style={{ background: 'rgba(251,191,36,0.1)', border: '1px solid rgba(251,191,36,0.3)' }}>
+            <Wifi className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: '#fbbf24' }} />
             <div>
-              <p className="font-semibold text-yellow-900">Connecting to live updates...</p>
-              <p className="text-yellow-700 text-sm">Scores will update automatically when connected</p>
+              <p className="text-sm font-bold" style={{ color: '#fbbf24' }}>Connecting to live updates...</p>
+              <p className="text-xs mt-0.5" style={{ color: 'rgba(251,191,36,0.7)' }}>Scores will update automatically when connected</p>
             </div>
           </div>
         )}
 
         {/* Match Completion Banner */}
         {matchComplete && winner && (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-6 mb-6 text-center">
-            <h2 className="text-3xl font-bold text-green-900 mb-2">
-              🏆 Match Complete! 🏆
-            </h2>
-            <p className="text-xl text-green-700">
+          <div className="rounded-2xl p-6 text-center" style={{ background: 'linear-gradient(135deg,rgba(0,255,136,0.15),rgba(0,200,83,0.1))', border: '2px solid rgba(0,255,136,0.4)' }}>
+            <div className="text-4xl mb-2">🏆</div>
+            <h2 className="text-xl font-black text-white mb-1">Match Complete!</h2>
+            <p className="text-sm font-semibold" style={{ color: '#00ff88' }}>
               {winner === 'player1' ? 'Player 1' : 'Player 2'} wins!
             </p>
           </div>
@@ -145,54 +117,41 @@ const SpectatorViewPage = () => {
 
         {/* Score Board */}
         {score && (
-          <div className="mb-6">
-            <ScoreBoard 
-              score={score}
-              player1Name="Player 1"
-              player2Name="Player 2"
-            />
+          <div>
+            <ScoreBoard score={score} player1Name="Player 1" player2Name="Player 2" />
           </div>
         )}
 
         {/* Spectator Info */}
-        <div className="bg-blue-50 rounded-lg p-6 text-center">
-          <Users className="w-12 h-12 text-blue-600 mx-auto mb-3" />
-          <h3 className="text-lg font-bold text-gray-900 mb-2">Spectator View</h3>
-          <p className="text-gray-600">
+        <div className="rounded-2xl p-5 text-center" style={{ background: 'rgba(0,212,255,0.08)', border: '1px solid rgba(0,212,255,0.2)' }}>
+          <Users className="w-10 h-10 mx-auto mb-3" style={{ color: '#00d4ff' }} />
+          <h3 className="text-sm font-black text-white mb-1">Spectator View</h3>
+          <p className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>
             You're watching this match live. Scores update automatically.
           </p>
         </div>
 
         {/* Score History */}
         {score && score.history && score.history.length > 0 && (
-          <div className="mt-6 bg-white rounded-xl shadow-lg p-6">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">Point History</h3>
-            <div className="max-h-64 overflow-y-auto">
-              <div className="space-y-2">
-                {score.history.slice().reverse().map((point, index) => (
-                  <div
-                    key={score.history.length - index}
-                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="text-sm font-semibold text-gray-500">
-                        #{score.history.length - index}
-                      </span>
-                      <span className={`font-semibold ${
-                        point.player === 'player1' ? 'text-blue-600' : 'text-green-600'
-                      }`}>
-                        {point.player === 'player1' ? 'Player 1' : 'Player 2'}
-                      </span>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-mono">
-                        {point.score.player1} - {point.score.player2}
-                      </p>
-                      <p className="text-xs text-gray-500">Set {point.set}</p>
-                    </div>
+          <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+            <div className="px-4 py-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+              <h3 className="text-sm font-black text-white">Point History</h3>
+            </div>
+            <div className="max-h-64 overflow-y-auto p-3 space-y-2">
+              {score.history.slice().reverse().map((point, i) => (
+                <div key={score.history.length - i} className="flex items-center justify-between p-3 rounded-xl" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-xs font-black w-6" style={{ color: 'rgba(255,255,255,0.35)' }}>#{score.history.length - i}</span>
+                    <span className="text-sm font-bold" style={{ color: point.player === 'player1' ? '#00d4ff' : '#00ff88' }}>
+                      {point.player === 'player1' ? 'Player 1' : 'Player 2'}
+                    </span>
                   </div>
-                ))}
-              </div>
+                  <div className="text-right">
+                    <p className="text-xs font-mono text-white">{point.score.player1} — {point.score.player2}</p>
+                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Set {point.set}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}

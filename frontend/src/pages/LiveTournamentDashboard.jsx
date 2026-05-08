@@ -8,26 +8,16 @@ const LiveTournamentDashboard = () => {
   const { tournamentId } = useParams();
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('all'); // all, ongoing, completed, pending
+  const [filter, setFilter] = useState('all');
   const [isLiveConnected, setIsLiveConnected] = useState(false);
 
   useEffect(() => {
     fetchMatches();
-
-    // Setup WebSocket for live updates
-    const cleanup = joinTournament(
-      tournamentId,
-      (data) => {
-        console.log('Tournament match update:', data);
-        fetchMatches(); // Refresh match list
-        setIsLiveConnected(true);
-      }
-    );
-
-    return () => {
-      cleanup();
-      leaveTournament(tournamentId);
-    };
+    const cleanup = joinTournament(tournamentId, (data) => {
+      fetchMatches();
+      setIsLiveConnected(true);
+    });
+    return () => { cleanup(); leaveTournament(tournamentId); };
   }, [tournamentId]);
 
   const fetchMatches = async () => {
@@ -35,40 +25,35 @@ const LiveTournamentDashboard = () => {
       setLoading(true);
       const data = await getTournamentMatches(tournamentId);
       setMatches(data.matches || []);
-      setLoading(false);
-    } catch (error) {
-      console.error('Failed to fetch matches:', error);
+    } catch (err) {
+      console.error('Failed to fetch matches:', err);
+    } finally {
       setLoading(false);
     }
   };
 
-  const getStatusBadge = (status) => {
-    const badges = {
-      'PENDING': { bg: 'bg-gray-100', text: 'text-gray-800', icon: Clock },
-      'READY': { bg: 'bg-yellow-100', text: 'text-yellow-800', icon: Clock },
-      'ONGOING': { bg: 'bg-blue-100', text: 'text-blue-800', icon: Play },
-      'IN_PROGRESS': { bg: 'bg-blue-100', text: 'text-blue-800', icon: Play },
-      'COMPLETED': { bg: 'bg-green-100', text: 'text-green-800', icon: CheckCircle },
-    };
-    return badges[status] || badges['PENDING'];
+  const getStatusInfo = (status) => {
+    switch (status) {
+      case 'ONGOING':
+      case 'IN_PROGRESS':
+        return { bg: 'rgba(0,255,136,0.15)', color: '#00ff88', border: 'rgba(0,255,136,0.3)', icon: Play };
+      case 'COMPLETED':
+        return { bg: 'rgba(0,212,255,0.15)', color: '#00d4ff', border: 'rgba(0,212,255,0.3)', icon: CheckCircle };
+      default:
+        return { bg: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)', border: 'rgba(255,255,255,0.12)', icon: Clock };
+    }
   };
 
   const getRoundName = (round) => {
-    const rounds = {
-      1: 'Round of 32',
-      2: 'Round of 16',
-      3: 'Quarter-Final',
-      4: 'Semi-Final',
-      5: 'Final',
-    };
+    const rounds = { 1: 'Round of 32', 2: 'Round of 16', 3: 'Quarter-Final', 4: 'Semi-Final', 5: 'Final' };
     return rounds[round] || `Round ${round}`;
   };
 
-  const filteredMatches = matches.filter(match => {
+  const filteredMatches = matches.filter(m => {
     if (filter === 'all') return true;
-    if (filter === 'ongoing') return match.status === 'ONGOING' || match.status === 'IN_PROGRESS';
-    if (filter === 'completed') return match.status === 'COMPLETED';
-    if (filter === 'pending') return match.status === 'PENDING' || match.status === 'READY';
+    if (filter === 'ongoing') return m.status === 'ONGOING' || m.status === 'IN_PROGRESS';
+    if (filter === 'completed') return m.status === 'COMPLETED';
+    if (filter === 'pending') return m.status === 'PENDING' || m.status === 'READY';
     return true;
   });
 
@@ -81,185 +66,144 @@ const LiveTournamentDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg,#0a0a1f 0%,#07071a 100%)' }}>
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading tournament...</p>
+          <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: 'rgba(0,255,136,0.3)', borderTopColor: '#00ff88' }} />
+          <p className="mt-4 text-sm font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>Loading tournament...</p>
         </div>
       </div>
     );
   }
 
+  const statCards = [
+    { label: 'Total', value: stats.total, color: '#00ff88', bg: 'rgba(0,255,136,0.12)', border: 'rgba(0,255,136,0.25)', icon: Trophy },
+    { label: 'Ongoing', value: stats.ongoing, color: '#fbbf24', bg: 'rgba(251,191,36,0.12)', border: 'rgba(251,191,36,0.25)', icon: Play },
+    { label: 'Completed', value: stats.completed, color: '#00d4ff', bg: 'rgba(0,212,255,0.12)', border: 'rgba(0,212,255,0.25)', icon: CheckCircle },
+    { label: 'Pending', value: stats.pending, color: 'rgba(255,255,255,0.5)', bg: 'rgba(255,255,255,0.06)', border: 'rgba(255,255,255,0.1)', icon: Clock },
+  ];
+
+  const filterButtons = [
+    { key: 'all', label: `All (${stats.total})` },
+    { key: 'ongoing', label: `Live (${stats.ongoing})` },
+    { key: 'completed', label: `Done (${stats.completed})` },
+    { key: 'pending', label: `Pending (${stats.pending})` },
+  ];
+
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Live Tournament Dashboard</h1>
-            <p className="text-gray-600">Real-time match updates and status</p>
-          </div>
+    <div className="min-h-screen relative" style={{ background: 'linear-gradient(180deg,#0a0a1f 0%,#07071a 40%,#0d1a2a 70%,#07071a 100%)' }}>
+      {/* Fixed particles bg */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-0 right-0 w-72 h-72 rounded-full blur-3xl opacity-15" style={{ background: 'radial-gradient(circle,rgba(0,255,136,0.4) 0%,transparent 70%)' }} />
+        <div className="absolute bottom-1/3 left-0 w-64 h-64 rounded-full blur-3xl opacity-10" style={{ background: 'radial-gradient(circle,rgba(0,212,255,0.4) 0%,transparent 70%)' }} />
+      </div>
+
+      {/* Sticky Header */}
+      <div className="sticky top-0 z-20" style={{ background: 'rgba(7,7,26,0.95)', borderBottom: '1px solid rgba(0,255,136,0.15)', backdropFilter: 'blur(20px)' }}>
+        <div className="px-4 py-3 flex items-center justify-between">
+          <h1 className="text-base font-black text-white">Live Tournament</h1>
           {isLiveConnected && (
-            <div className="flex items-center gap-2 px-4 py-2 bg-red-100 text-red-700 rounded-full">
-              <span className="w-2 h-2 bg-red-600 rounded-full animate-pulse"></span>
-              <span className="text-sm font-semibold">LIVE</span>
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full" style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)' }}>
+              <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+              <span className="text-xs font-black text-red-400">LIVE</span>
             </div>
           )}
         </div>
+      </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between">
+      <div className="relative px-4 py-5 space-y-4">
+        {/* Stats */}
+        <div className="grid grid-cols-2 gap-3">
+          {statCards.map(({ label, value, color, bg, border, icon: Icon }) => (
+            <div key={label} className="rounded-2xl p-4 flex items-center gap-3" style={{ background: bg, border: `1px solid ${border}` }}>
+              <Icon className="w-5 h-5 flex-shrink-0" style={{ color }} />
               <div>
-                <p className="text-sm text-gray-600 mb-1">Total Matches</p>
-                <p className="text-3xl font-bold text-gray-900">{stats.total}</p>
+                <p className="text-xl font-black" style={{ color }}>{value}</p>
+                <p className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>{label}</p>
               </div>
-              <Trophy className="w-12 h-12 text-gray-400" />
             </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Ongoing</p>
-                <p className="text-3xl font-bold text-blue-600">{stats.ongoing}</p>
-              </div>
-              <Play className="w-12 h-12 text-blue-400" />
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Completed</p>
-                <p className="text-3xl font-bold text-green-600">{stats.completed}</p>
-              </div>
-              <CheckCircle className="w-12 h-12 text-green-400" />
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600 mb-1">Pending</p>
-                <p className="text-3xl font-bold text-gray-600">{stats.pending}</p>
-              </div>
-              <Clock className="w-12 h-12 text-gray-400" />
-            </div>
-          </div>
+          ))}
         </div>
 
         {/* Filters */}
-        <div className="bg-white rounded-lg shadow p-4 mb-6">
-          <div className="flex gap-2">
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          {filterButtons.map(({ key, label }) => (
             <button
-              onClick={() => setFilter('all')}
-              className={`px-4 py-2 rounded-lg font-medium transition ${
-                filter === 'all'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
+              key={key}
+              onClick={() => setFilter(key)}
+              className="flex-shrink-0 px-3 py-2 rounded-xl text-xs font-bold transition-all"
+              style={{
+                background: filter === key ? 'linear-gradient(135deg,#00ff88,#00c853)' : 'rgba(255,255,255,0.06)',
+                color: filter === key ? '#07071a' : 'rgba(255,255,255,0.6)',
+                border: filter === key ? 'none' : '1px solid rgba(255,255,255,0.1)',
+              }}
             >
-              All ({stats.total})
+              {label}
             </button>
-            <button
-              onClick={() => setFilter('ongoing')}
-              className={`px-4 py-2 rounded-lg font-medium transition ${
-                filter === 'ongoing'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              Ongoing ({stats.ongoing})
-            </button>
-            <button
-              onClick={() => setFilter('completed')}
-              className={`px-4 py-2 rounded-lg font-medium transition ${
-                filter === 'completed'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              Completed ({stats.completed})
-            </button>
-            <button
-              onClick={() => setFilter('pending')}
-              className={`px-4 py-2 rounded-lg font-medium transition ${
-                filter === 'pending'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              Pending ({stats.pending})
-            </button>
-          </div>
+          ))}
         </div>
 
-        {/* Matches Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Match Cards */}
+        <div className="space-y-3">
           {filteredMatches.map((match) => {
-            const statusInfo = getStatusBadge(match.status);
+            const statusInfo = getStatusInfo(match.status);
             const StatusIcon = statusInfo.icon;
+            const isLive = match.status === 'ONGOING' || match.status === 'IN_PROGRESS';
 
             return (
               <div
                 key={match.id}
-                className="bg-white rounded-lg shadow hover:shadow-lg transition cursor-pointer"
+                className="rounded-2xl overflow-hidden cursor-pointer transition-all hover:scale-[1.01]"
+                style={{ background: 'rgba(255,255,255,0.04)', border: `1px solid ${isLive ? 'rgba(0,255,136,0.25)' : 'rgba(255,255,255,0.08)'}` }}
                 onClick={() => window.location.href = `/watch/${match.id}`}
               >
-                <div className="p-6">
-                  {/* Header */}
-                  <div className="flex items-center justify-between mb-4">
+                <div className="p-4">
+                  {/* Header row */}
+                  <div className="flex items-start justify-between gap-2 mb-3">
                     <div>
-                      <p className="text-sm text-gray-600">Match #{match.matchNumber}</p>
-                      <p className="font-semibold text-gray-900">{getRoundName(match.round)}</p>
+                      <p className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.4)' }}>Match #{match.matchNumber}</p>
+                      <p className="text-sm font-black text-white">{getRoundName(match.round)}</p>
+                      {match.category && (
+                        <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.45)' }}>{match.category.name}</p>
+                      )}
                     </div>
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 ${statusInfo.bg} ${statusInfo.text}`}>
+                    <span className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold flex-shrink-0" style={{ background: statusInfo.bg, color: statusInfo.color, border: `1px solid ${statusInfo.border}` }}>
                       <StatusIcon className="w-3 h-3" />
                       {match.status}
                     </span>
                   </div>
 
-                  {/* Category */}
-                  {match.category && (
-                    <div className="mb-4 pb-4 border-b">
-                      <p className="text-sm text-gray-600">{match.category.name}</p>
-                    </div>
-                  )}
-
-                  {/* Court */}
-                  {match.courtNumber && (
-                    <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
-                      <MapPin className="w-4 h-4" />
-                      <span>Court {match.courtNumber}</span>
-                    </div>
-                  )}
-
-                  {/* Score */}
-                  {match.scoreJson && (
-                    <div className="bg-gray-50 rounded-lg p-3 mb-3">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium">Current Score</span>
-                        <span className="text-lg font-bold text-blue-600">
-                          {match.scoreJson.currentScore?.player1 || 0} - {match.scoreJson.currentScore?.player2 || 0}
-                        </span>
+                  {/* Court + Score row */}
+                  <div className="flex items-center justify-between gap-3">
+                    {match.courtNumber && (
+                      <div className="flex items-center gap-1.5 text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                        <MapPin className="w-3.5 h-3.5" />
+                        Court {match.courtNumber}
                       </div>
-                      {match.scoreJson.currentSet && (
-                        <p className="text-xs text-gray-600 mt-1">Set {match.scoreJson.currentSet}</p>
-                      )}
-                    </div>
-                  )}
+                    )}
+                    {match.scoreJson && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Score</span>
+                        <span className="text-sm font-black" style={{ color: '#00ff88' }}>
+                          {match.scoreJson.currentScore?.player1 || 0} — {match.scoreJson.currentScore?.player2 || 0}
+                        </span>
+                        {match.scoreJson.currentSet && (
+                          <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>Set {match.scoreJson.currentSet}</span>
+                        )}
+                      </div>
+                    )}
+                  </div>
 
-                  {/* Action Button */}
+                  {/* Watch button */}
                   <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      window.location.href = `/watch/${match.id}`;
+                    onClick={(e) => { e.stopPropagation(); window.location.href = `/watch/${match.id}`; }}
+                    className="w-full mt-3 py-2.5 rounded-xl font-bold text-xs transition-all"
+                    style={{
+                      background: isLive ? 'linear-gradient(135deg,#00ff88,#00c853)' : 'rgba(255,255,255,0.08)',
+                      color: isLive ? '#07071a' : 'rgba(255,255,255,0.7)',
+                      border: isLive ? 'none' : '1px solid rgba(255,255,255,0.1)',
                     }}
-                    className="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
                   >
-                    {match.status === 'ONGOING' || match.status === 'IN_PROGRESS' ? 'Watch Live' : 'View Match'}
+                    {isLive ? '🔴 Watch Live' : 'View Match'}
                   </button>
                 </div>
               </div>
@@ -269,12 +213,10 @@ const LiveTournamentDashboard = () => {
 
         {/* Empty State */}
         {filteredMatches.length === 0 && (
-          <div className="text-center py-12 bg-white rounded-lg shadow">
-            <Users className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-600 text-lg">No matches found</p>
-            <p className="text-gray-500 text-sm mt-2">
-              {filter !== 'all' && 'Try changing the filter'}
-            </p>
+          <div className="rounded-2xl p-10 text-center" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+            <Users className="w-10 h-10 mx-auto mb-3" style={{ color: 'rgba(255,255,255,0.2)' }} />
+            <p className="text-sm font-semibold text-white">No matches found</p>
+            {filter !== 'all' && <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>Try changing the filter</p>}
           </div>
         )}
       </div>

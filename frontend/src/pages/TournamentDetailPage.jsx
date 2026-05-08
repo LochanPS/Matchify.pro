@@ -910,7 +910,7 @@ const TournamentDetailPage = () => {
                 </div>
               </div>
               
-              {/* View Draws Button - Amber/Gold */}
+              {/* View Draws Button - Emerald */}
               {tournament.status === 'published' && (
                 <button
                   onClick={() => {
@@ -922,17 +922,17 @@ const TournamentDetailPage = () => {
                   }}
                   className="w-full mt-4 flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl font-black text-base transition-all hover:scale-[1.02] relative overflow-hidden group"
                   style={{
-                    background: 'linear-gradient(135deg, rgba(245,158,11,0.3) 0%, rgba(217,119,6,0.2) 100%)',
-                    border: '2px solid rgba(245,158,11,0.5)',
-                    color: '#fbbf24',
-                    boxShadow: '0 4px 15px rgba(245,158,11,0.3)'
+                    background: 'linear-gradient(135deg, rgba(0,200,83,0.2) 0%, rgba(0,255,136,0.15) 100%)',
+                    border: '2px solid rgba(0,200,83,0.5)',
+                    color: '#00ff88',
+                    boxShadow: '0 4px 15px rgba(0,200,83,0.3)'
                   }}
                 >
                   <GitBranch className="w-5 h-5" />
                   <span>View Draws</span>
                   <div 
                     className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                    style={{ background: 'radial-gradient(circle at center, rgba(245,158,11,0.2), transparent)' }}
+                    style={{ background: 'radial-gradient(circle at center, rgba(0,200,83,0.2), transparent)' }}
                   />
                 </button>
               )}
@@ -973,79 +973,79 @@ const TournamentDetailPage = () => {
                     </>
                   )}
                   
-                  {/* Edit Tournament - Purple */}
+                  {/* Edit Tournament - Emerald */}
                   <button
                     onClick={() => navigate(`/tournaments/${id}/edit`)}
                     className="w-full flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl font-black text-base transition-all hover:scale-[1.02] relative overflow-hidden group"
                     style={{
-                      background: 'linear-gradient(135deg, rgba(139,92,246,0.3) 0%, rgba(124,58,237,0.2) 100%)',
-                      border: '2px solid rgba(139,92,246,0.5)',
-                      color: '#c4b5fd',
-                      boxShadow: '0 4px 15px rgba(139,92,246,0.3)'
+                      background: 'linear-gradient(135deg, rgba(0,200,83,0.2) 0%, rgba(0,255,136,0.15) 100%)',
+                      border: '2px solid rgba(0,200,83,0.5)',
+                      color: '#00ff88',
+                      boxShadow: '0 4px 15px rgba(0,200,83,0.3)'
                     }}
                   >
                     <Edit className="w-5 h-5" />
                     <span>Edit Tournament</span>
                     <div 
                       className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                      style={{ background: 'radial-gradient(circle at center, rgba(139,92,246,0.2), transparent)' }}
+                      style={{ background: 'radial-gradient(circle at center, rgba(0,200,83,0.2), transparent)' }}
                     />
                   </button>
 
-                  {/* View Draws - Amber/Gold */}
+                  {/* View Draws - Emerald */}
                   <button
                     onClick={() => navigate(`/tournaments/${id}/draws`)}
                     className="w-full flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl font-black text-base transition-all hover:scale-[1.02] relative overflow-hidden group"
                     style={{
-                      background: 'linear-gradient(135deg, rgba(245,158,11,0.3) 0%, rgba(217,119,6,0.2) 100%)',
-                      border: '2px solid rgba(245,158,11,0.5)',
-                      color: '#fbbf24',
-                      boxShadow: '0 4px 15px rgba(245,158,11,0.3)'
+                      background: 'linear-gradient(135deg, rgba(0,200,83,0.2) 0%, rgba(0,255,136,0.15) 100%)',
+                      border: '2px solid rgba(0,200,83,0.5)',
+                      color: '#00ff88',
+                      boxShadow: '0 4px 15px rgba(0,200,83,0.3)'
                     }}
                   >
                     <GitBranch className="w-5 h-5" />
                     <span>View Draws</span>
                     <div 
                       className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                      style={{ background: 'radial-gradient(circle at center, rgba(245,158,11,0.2), transparent)' }}
+                      style={{ background: 'radial-gradient(circle at center, rgba(0,200,83,0.2), transparent)' }}
                     />
                   </button>
 
-                  {/* View Registrations - Blue */}
+                  {/* View Registrations - Emerald */}
                   <button
                     onClick={() => navigate(`/organizer/tournaments/${id}`)}
                     className="w-full flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl font-black text-base transition-all hover:scale-[1.02] relative overflow-hidden group"
                     style={{
-                      background: 'linear-gradient(135deg, rgba(59,130,246,0.3) 0%, rgba(37,99,235,0.2) 100%)',
-                      border: '2px solid rgba(59,130,246,0.5)',
-                      color: '#93c5fd',
-                      boxShadow: '0 4px 15px rgba(59,130,246,0.3)'
+                      background: 'linear-gradient(135deg, rgba(0,200,83,0.2) 0%, rgba(0,255,136,0.15) 100%)',
+                      border: '2px solid rgba(0,200,83,0.5)',
+                      color: '#00ff88',
+                      boxShadow: '0 4px 15px rgba(0,200,83,0.3)'
                     }}
                   >
                     <Eye className="w-5 h-5" />
                     <span>View Registrations</span>
                     <div 
                       className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                      style={{ background: 'radial-gradient(circle at center, rgba(59,130,246,0.2), transparent)' }}
+                      style={{ background: 'radial-gradient(circle at center, rgba(0,200,83,0.2), transparent)' }}
                     />
                   </button>
 
-                  {/* Add Umpire - Teal/Cyan */}
+                  {/* Add Umpire - Emerald */}
                   <button
                     onClick={openUmpireModal}
                     className="w-full flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl font-black text-base transition-all hover:scale-[1.02] relative overflow-hidden group"
                     style={{
-                      background: 'linear-gradient(135deg, rgba(20,184,166,0.3) 0%, rgba(13,148,136,0.2) 100%)',
-                      border: '2px solid rgba(20,184,166,0.5)',
-                      color: '#5eead4',
-                      boxShadow: '0 4px 15px rgba(20,184,166,0.3)'
+                      background: 'linear-gradient(135deg, rgba(0,200,83,0.2) 0%, rgba(0,255,136,0.15) 100%)',
+                      border: '2px solid rgba(0,200,83,0.5)',
+                      color: '#00ff88',
+                      boxShadow: '0 4px 15px rgba(0,200,83,0.3)'
                     }}
                   >
                     <Users className="w-5 h-5" />
                     <span>Add Umpire</span>
                     <div 
                       className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                      style={{ background: 'radial-gradient(circle at center, rgba(20,184,166,0.2), transparent)' }}
+                      style={{ background: 'radial-gradient(circle at center, rgba(0,200,83,0.2), transparent)' }}
                     />
                   </button>
 

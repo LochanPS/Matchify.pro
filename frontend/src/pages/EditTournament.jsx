@@ -243,8 +243,8 @@ const EditTournament = () => {
           {/* Tournament Dates Section */}
           <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden">
             <div className="px-6 py-4 border-b border-white/10 flex items-center gap-3">
-              <div className="p-2 bg-blue-500/20 rounded-lg">
-                <Calendar className="w-5 h-5 text-blue-400" />
+              <div className="p-2 rounded-lg" style={{ background: 'rgba(0, 200, 83, 0.2)' }}>
+                <Calendar className="w-5 h-5" style={{ color: '#00ff88' }} />
               </div>
               <h2 className="text-lg font-semibold text-white">Tournament Dates</h2>
             </div>
@@ -308,7 +308,11 @@ const EditTournament = () => {
                 <button
                   onClick={handleSaveDates}
                   disabled={saving}
-                  className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-xl hover:shadow-lg hover:shadow-purple-500/25 transition-all font-semibold disabled:opacity-50"
+                  className="flex items-center gap-2 px-6 py-3 text-white rounded-xl transition-all font-semibold disabled:opacity-50"
+                  style={{
+                    background: 'linear-gradient(135deg, #00c853, #00ff88)',
+                    boxShadow: '0 4px 15px rgba(0, 200, 83, 0.3)'
+                  }}
                 >
                   {saving ? (
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -434,8 +438,8 @@ const EditTournament = () => {
           {/* Manage Categories Section */}
           <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden">
             <div className="px-6 py-4 border-b border-white/10 flex items-center gap-3">
-              <div className="p-2 bg-purple-500/20 rounded-lg">
-                <Layers className="w-5 h-5 text-purple-400" />
+              <div className="p-2 rounded-lg" style={{ background: 'rgba(0, 200, 83, 0.2)' }}>
+                <Layers className="w-5 h-5" style={{ color: '#00ff88' }} />
               </div>
               <h2 className="text-lg font-semibold text-white">Categories & Entry Fees</h2>
             </div>
@@ -446,7 +450,11 @@ const EditTournament = () => {
               <div className="flex items-center gap-4">
                 <button
                   onClick={() => navigate(`/tournaments/${id}/categories`)}
-                  className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-violet-600 text-white rounded-xl hover:shadow-lg hover:shadow-purple-500/25 transition-all font-semibold"
+                  className="flex items-center gap-2 px-6 py-3 text-white rounded-xl transition-all font-semibold"
+                  style={{
+                    background: 'linear-gradient(135deg, #00c853, #00ff88)',
+                    boxShadow: '0 4px 15px rgba(0, 200, 83, 0.3)'
+                  }}
                 >
                   <Layers className="w-5 h-5" />
                   Manage Categories

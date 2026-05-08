@@ -792,7 +792,7 @@ const DrawPage = () => {
                         className={`px-3 py-2 rounded-xl shadow-lg transition-all flex items-center gap-1.5 font-semibold text-xs ${
                           isCategoryCompleted
                             ? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50'
-                            : 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-blue-500/30 hover:shadow-blue-500/50 hover:scale-105'
+                            : 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:scale-105'
                         }`}
                       >
                         <Layers className="w-4 h-4" />
@@ -808,7 +808,7 @@ const DrawPage = () => {
                         className={`px-3 py-2 rounded-xl shadow-lg transition-all flex items-center gap-1.5 font-semibold text-xs ${
                           isCategoryCompleted
                             ? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50'
-                            : 'bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-purple-500/30 hover:shadow-purple-500/50 hover:scale-105'
+                            : 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:scale-105'
                         }`}
                       >
                         <Settings className="w-4 h-4" />

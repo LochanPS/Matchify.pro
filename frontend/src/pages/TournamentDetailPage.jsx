@@ -21,7 +21,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { Edit, Users, Eye, Layers, GitBranch } from 'lucide-react';
 
-// Delete Tournament Modal Component
+// Delete Tournament Modal Component - Emerald Theme with Fixed Text Visibility
 const DeleteTournamentModal = ({ isOpen, onClose, onConfirm, tournamentName, isDeleting }) => {
   const [reason, setReason] = useState('');
   const [error, setError] = useState('');
@@ -43,35 +43,36 @@ const DeleteTournamentModal = ({ isOpen, onClose, onConfirm, tournamentName, isD
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
-        <div className="bg-gradient-to-r from-red-500 to-rose-600 p-6 text-white">
+        {/* Header - Red gradient for cancel action */}
+        <div className="bg-gradient-to-r from-red-500 to-rose-600 p-5 text-white">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
               <ExclamationTriangleIcon className="h-6 w-6" />
             </div>
             <div>
-              <h2 className="text-xl font-bold">Cancel Tournament</h2>
-              <p className="text-red-100 text-sm mt-1">This action cannot be undone</p>
+              <h2 className="text-xl font-black">Cancel Tournament</h2>
+              <p className="text-red-100 text-sm mt-0.5">This action cannot be undone</p>
             </div>
           </div>
         </div>
 
-        <div className="p-6">
-          <p className="text-gray-700 mb-4">
-            You are about to cancel <span className="font-semibold">"{tournamentName}"</span>.
+        <div className="p-5">
+          <p className="text-gray-700 text-sm mb-3">
+            You are about to cancel <span className="font-bold text-gray-900">"{tournamentName}"</span>.
           </p>
           
-          <p className="text-gray-400 text-sm mb-4">
+          <p className="text-gray-500 text-xs mb-4">
             All registered participants will be notified about this cancellation with your reason.
           </p>
 
           {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm font-medium">
               {error}
             </div>
           )}
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+          <div className="mb-4">
+            <label className="block text-sm font-bold text-gray-700 mb-2">
               Reason for Cancellation <span className="text-red-500">*</span>
             </label>
             <textarea
@@ -82,28 +83,47 @@ const DeleteTournamentModal = ({ isOpen, onClose, onConfirm, tournamentName, isD
               }}
               placeholder="Please explain why you are cancelling this tournament..."
               rows={4}
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none transition-all"
+              className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-red-500 focus:border-red-500 resize-none transition-all text-sm"
+              style={{ color: '#111827' }}
             />
-            <p className="mt-1 text-xs text-gray-400">
+            <p className="mt-1.5 text-xs text-gray-500">
               This message will be sent to all registered participants.
             </p>
           </div>
 
-          <div className="flex gap-3 mt-6">
+          <div className="flex gap-3">
             <button
               onClick={onClose}
               disabled={isDeleting}
-              className="flex-1 px-4 py-3 border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 font-medium"
+              className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 font-bold text-sm"
             >
               Keep Tournament
             </button>
             <button
               onClick={handleSubmit}
-              disabled={isDeleting}
-              className="flex-1 px-4 py-3 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl hover:shadow-lg hover:shadow-red-500/30 transition-all disabled:opacity-50 flex items-center justify-center gap-2 font-semibold"
+              disabled={isDeleting || !reason.trim()}
+              className="flex-1 px-4 py-3 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl hover:shadow-lg hover:shadow-red-500/30 transition-all font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isDeleting ? (
                 <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                  <span>Cancelling...</span>
+                </>
+              ) : (
+                <>
+                  <TrashIcon className="h-4 w-4" />
+                  <span>Cancel Tournament</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const TournamentDetailPage = () => {
                   <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
                   Cancelling...
                 </>

@@ -242,10 +242,10 @@ const TournamentDetailPage = () => {
       return;
     }
 
-    // Validate format: #A10000 (# + 1 letter + 5 digits)
-    const codePattern = /^#[A-Za-z]\d{5}$/;
+    // Validate format: #123ABCD (# + 3 digits + 4 letters)
+    const codePattern = /^#\d{3}[A-Z]{4}$/i;
     if (!codePattern.test(umpireCode.trim())) {
-      setUmpireError('Invalid code format. Use #A10000 (# + 1 letter + 5 digits)');
+      setUmpireError('Invalid umpire code format. Must be # followed by 3 digits and 4 letters (e.g., #123ABCD)');
       return;
     }
 
@@ -1136,7 +1136,7 @@ const TournamentDetailPage = () => {
               {/* Info box */}
               <div className="bg-slate-700/50 border border-white/10 rounded-xl p-4 mb-4">
                 <p className="text-gray-300 text-sm">
-                  Enter the umpire's Matchify.pro ID with # prefix (e.g., <span className="text-teal-400 font-mono">#A10000</span>)
+                  Enter the umpire's Matchify.pro ID with # prefix (e.g., <span className="text-teal-400 font-mono">#123ABCD</span>)
                 </p>
               </div>
 
@@ -1167,8 +1167,8 @@ const TournamentDetailPage = () => {
                       setUmpireCode(e.target.value.toUpperCase());
                       setUmpireError('');
                     }}
-                    placeholder="#A10000"
-                    maxLength={7}
+                    placeholder="#123ABCD"
+                    maxLength={8}
                     className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all font-mono text-lg tracking-wider"
                   />
                 </div>

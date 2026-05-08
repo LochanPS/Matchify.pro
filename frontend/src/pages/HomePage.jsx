@@ -16,6 +16,20 @@ import {
 } from '@heroicons/react/24/outline';
 import { StarIcon } from '@heroicons/react/24/solid';
 
+// Pre-generated particle data — deterministic, no Math.random in render
+const HOME_PARTICLES = Array.from({ length: 20 }, (_, i) => ({
+  w: (i * 7 + 1) % 2 + 1,
+  h: (i * 11 + 1) % 2 + 1,
+  x: (i * 37 + 11) % 97,
+  y: (i * 53 + 7) % 91,
+  c: ["#00ff88", "#00d4ff", "rgba(255,255,255,0.8)"][i % 3],
+  o: ((i * 13) % 50) / 100 + 0.2,
+  dur: (i * 7) % 10 + 5,
+  delay: (i * 3) % 5,
+  glow: (i * 11) % 15 + 5,
+}));
+
+
 // Inject enhanced keyframes and styles
 const injectStyles = () => {
   if (document.head.querySelector('style[data-homepage]')) return;
@@ -190,14 +204,22 @@ function HomePage() {
           style={{ background: 'radial-gradient(circle, rgba(168,85,247,0.1) 0%, transparent 70%)' }} />
         
         {/* Floating particles */}
-        {[...Array(20)].map((_, i) => (
-          <div key={i} className="anim-float absolute w-1 h-1 rounded-full bg-green-400/30"
+        {HOME_PARTICLES.map((p, i) => (
+          <div
+            key={i}
+            className="absolute rounded-full"
             style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 5}s`,
-              animationDuration: `${5 + Math.random() * 10}s`
-            }} />
+              width: `${p.w}px`,
+              height: `${p.h}px`,
+              left: `${p.x}%`,
+              top: `${p.y}%`,
+              background: p.c,
+              opacity: p.o,
+              animation: `float ${p.dur}s ease-in-out infinite`,
+              animationDelay: `${p.delay}s`,
+              boxShadow: `0 0 ${p.glow}px ${p.c}`,
+            }}
+          />
         ))}
       </div>
 

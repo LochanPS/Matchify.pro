@@ -3,6 +3,20 @@ import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import { Trophy, Medal, Award, TrendingUp, Users, Target, Zap, Crown, Star, ArrowLeft } from 'lucide-react';
 
+// Pre-generated particle data — deterministic, no Math.random in render
+const LB_PARTICLES = Array.from({ length: 15 }, (_, i) => ({
+  w: (i * 7 + 1) % 3 + 1,
+  h: (i * 11 + 1) % 3 + 1,
+  x: (i * 37 + 11) % 97,
+  y: (i * 53 + 7) % 91,
+  c: ["#00ff88", "#f59e0b", "#00d4ff"][i % 3],
+  o: ((i * 13) % 50) / 100 + 0.2,
+  dur: (i * 7) % 8 + 4,
+  delay: (i * 3) % 4,
+  glow: (i * 11) % 15 + 5,
+}));
+
+
 export default function Leaderboard() {
   const navigate = useNavigate();
   const [leaderboard, setLeaderboard] = useState([]);
@@ -106,20 +120,20 @@ export default function Leaderboard() {
         <div className="absolute top-1/2 right-1/3 w-80 h-80 rounded-full blur-3xl opacity-[0.05]" style={{ background: '#a855f7', animation: 'glow 6s ease-in-out infinite' }}></div>
         
         {/* Floating Particles */}
-        {[...Array(20)].map((_, i) => (
+        {LB_PARTICLES.map((p, i) => (
           <div
             key={i}
             className="absolute rounded-full"
             style={{
-              width: `${Math.random() * 6 + 2}px`,
-              height: `${Math.random() * 6 + 2}px`,
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              background: ['#00ff88', '#a855f7', '#00d4ff', '#fbbf24'][Math.floor(Math.random() * 4)],
-              opacity: Math.random() * 0.6 + 0.2,
-              animation: `float ${Math.random() * 15 + 8}s ease-in-out infinite`,
-              animationDelay: `${Math.random() * 5}s`,
-              boxShadow: `0 0 ${Math.random() * 20 + 10}px currentColor`
+              width: `${p.w}px`,
+              height: `${p.h}px`,
+              left: `${p.x}%`,
+              top: `${p.y}%`,
+              background: p.c,
+              opacity: p.o,
+              animation: `float ${p.dur}s ease-in-out infinite`,
+              animationDelay: `${p.delay}s`,
+              boxShadow: `0 0 ${p.glow}px ${p.c}`,
             }}
           />
         ))}

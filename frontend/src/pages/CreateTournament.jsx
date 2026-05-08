@@ -14,6 +14,16 @@ import PaymentQRStep from '../components/tournament/steps/PaymentQRStep';
 import ReviewStep from '../components/tournament/steps/ReviewStep';
 import { Trophy, Save, X, AlertTriangle, CheckCircle, Sparkles, ArrowLeft } from 'lucide-react';
 
+// Pre-generated — deterministic, never re-randomized on render
+const CREATE_PARTICLES = Array.from({ length: 12 }, (_, i) => ({
+  w: (i * 7 + 3) % 4 + 2,  h: (i * 7 + 3) % 4 + 2,
+  x: (i * 37 + 11) % 97,   y: (i * 53 + 7) % 91,
+  c: ['#00c853', '#a855f7', '#06b6d4', '#f59e0b'][i % 4],
+  o: ((i * 13) % 50) / 100 + 0.2,
+  dur: (i * 7) % 10 + 5,   delay: (i * 3) % 5,
+  glow: (i * 11) % 15 + 5,
+}));
+
 const CreateTournament = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -262,20 +272,20 @@ const CreateTournament = () => {
             animation: 'glow 6s ease-in-out infinite'
           }}
         />
-        {[...Array(12)].map((_, i) => (
+        {CREATE_PARTICLES.map((p, i) => (
           <div
             key={i}
             className="absolute rounded-full"
             style={{
-              width: `${Math.random() * 4 + 2}px`,
-              height: `${Math.random() * 4 + 2}px`,
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              background: ['#00c853', '#a855f7', '#06b6d4', '#f59e0b'][Math.floor(Math.random() * 4)],
-              opacity: Math.random() * 0.5 + 0.2,
-              animation: `float ${Math.random() * 10 + 5}s ease-in-out infinite`,
-              animationDelay: `${Math.random() * 5}s`,
-              boxShadow: `0 0 ${Math.random() * 15 + 5}px currentColor`
+              width: `${p.w}px`,
+              height: `${p.h}px`,
+              left: `${p.x}%`,
+              top: `${p.y}%`,
+              background: p.c,
+              opacity: p.o,
+              animation: `float ${p.dur}s ease-in-out infinite`,
+              animationDelay: `${p.delay}s`,
+              boxShadow: `0 0 ${p.glow}px ${p.c}`,
             }}
           />
         ))}

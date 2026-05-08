@@ -21,6 +21,19 @@ import {
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 
+// Pre-generated particle data — deterministic, no Math.random in render
+const DASH_PARTICLES = Array.from({ length: 15 }, (_, i) => ({
+  w: (i * 7 + 1) % 3 + 1,
+  h: (i * 11 + 1) % 3 + 1,
+  x: (i * 37 + 11) % 97,
+  y: (i * 53 + 7) % 91,
+  c: ['#00ff88', '#00d4ff', '#a855f7'][i % 3],
+  o: ((i * 13) % 50) / 100 + 0.2,
+  dur: (i * 7) % 8 + 4,
+  delay: (i * 3) % 4,
+  glow: (i * 11) % 15 + 5,
+}));
+
 const UnifiedDashboardMobile = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -203,20 +216,20 @@ const UnifiedDashboardMobile = () => {
         />
         
         {/* Floating Particles */}
-        {[...Array(15)].map((_, i) => (
+        {DASH_PARTICLES.map((p, i) => (
           <div
             key={i}
             className="absolute rounded-full"
             style={{
-              width: `${Math.random() * 6 + 2}px`,
-              height: `${Math.random() * 6 + 2}px`,
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              background: ['#00c853', '#a855f7', '#06b6d4', '#f59e0b'][Math.floor(Math.random() * 4)],
-              opacity: Math.random() * 0.5 + 0.2,
-              animation: `float ${Math.random() * 10 + 5}s ease-in-out infinite`,
-              animationDelay: `${Math.random() * 5}s`,
-              boxShadow: `0 0 ${Math.random() * 20 + 10}px currentColor`
+              width: `${p.w}px`,
+              height: `${p.h}px`,
+              left: `${p.x}%`,
+              top: `${p.y}%`,
+              background: p.c,
+              opacity: p.o,
+              animation: `float ${p.dur}s ease-in-out infinite`,
+              animationDelay: `${p.delay}s`,
+              boxShadow: `0 0 ${p.glow}px ${p.c}`,
             }}
           />
         ))}

@@ -27,6 +27,32 @@ import { useAuth } from '../contexts/AuthContext';
 import { ArrowLeftIcon, TrophyIcon } from '@heroicons/react/24/outline';
 import { Loader, Zap, Layers, X, Plus, Settings, Users, CheckCircle, AlertTriangle, Trash2, UserPlus, Gavel, AlertCircle, Play, Trophy, Clock, Eye, Edit } from 'lucide-react';
 
+// Pre-generated particle data — deterministic, never re-randomized on render
+const DRAW_BG_PARTICLES = Array.from({ length: 15 }, (_, i) => ({
+  w: (i * 7 + 3) % 6 + 2,  h: (i * 11 + 1) % 6 + 2,
+  x: (i * 37 + 11) % 97,   y: (i * 53 + 7) % 91,
+  c: ['#00c853', '#14b8a6', '#06b6d4', '#10b981'][i % 4],
+  o: ((i * 13) % 50) / 100 + 0.2,
+  dur: (i * 7) % 10 + 5,   delay: (i * 3) % 5,
+  glow: (i * 11) % 20 + 10,
+}));
+const ASSIGN_PARTICLES = Array.from({ length: 8 }, (_, i) => ({
+  w: (i * 5 + 2) % 4 + 2,  h: (i * 5 + 2) % 4 + 2,
+  x: (i * 41 + 17) % 97,   y: (i * 59 + 13) % 91,
+  c: ['#00c853', '#14b8a6'][i % 2],
+  o: ((i * 17) % 40) / 100 + 0.2,
+  dur: (i * 9) % 8 + 4,    delay: (i * 4) % 3,
+  glow: (i * 13) % 15 + 5,
+}));
+const ARRANGE_PARTICLES = Array.from({ length: 18 }, (_, i) => ({
+  w: (i * 7 + 3) % 6 + 3,  h: (i * 7 + 3) % 6 + 3,
+  x: (i * 43 + 19) % 97,   y: (i * 61 + 11) % 91,
+  c: ['#00c853', '#14b8a6', '#10b981', '#00ff88'][i % 4],
+  o: ((i * 19) % 50) / 100 + 0.5,
+  dur: (i * 11) % 8 + 4,   delay: (i * 5) % 3,
+  glow: (i * 17) % 25 + 15,
+}));
+
 // Utility function to display player names with partner names for doubles
 const getPlayerDisplay = (player) => {
   if (!player || !player.name || player.name === 'TBD') return 'TBD';
@@ -783,20 +809,20 @@ const DrawPage = () => {
         />
         
         {/* Floating Particles */}
-        {[...Array(15)].map((_, i) => (
+        {DRAW_BG_PARTICLES.map((p, i) => (
           <div
             key={i}
             className="absolute rounded-full"
             style={{
-              width: `${Math.random() * 6 + 2}px`,
-              height: `${Math.random() * 6 + 2}px`,
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              background: ['#00c853', '#14b8a6', '#06b6d4', '#10b981'][Math.floor(Math.random() * 4)],
-              opacity: Math.random() * 0.5 + 0.2,
-              animation: `float ${Math.random() * 10 + 5}s ease-in-out infinite`,
-              animationDelay: `${Math.random() * 5}s`,
-              boxShadow: `0 0 ${Math.random() * 20 + 10}px currentColor`
+              width: `${p.w}px`,
+              height: `${p.h}px`,
+              left: `${p.x}%`,
+              top: `${p.y}%`,
+              background: p.c,
+              opacity: p.o,
+              animation: `float ${p.dur}s ease-in-out infinite`,
+              animationDelay: `${p.delay}s`,
+              boxShadow: `0 0 ${p.glow}px ${p.c}`,
             }}
           />
         ))}
@@ -3735,20 +3761,20 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
             animationDelay: '2s'
           }}
         />
-        {[...Array(8)].map((_, i) => (
+        {ASSIGN_PARTICLES.map((p, i) => (
           <div
             key={i}
             className="absolute rounded-full"
             style={{
-              width: `${Math.random() * 4 + 2}px`,
-              height: `${Math.random() * 4 + 2}px`,
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              background: ['#00c853', '#14b8a6'][Math.floor(Math.random() * 2)],
-              opacity: Math.random() * 0.4 + 0.2,
-              animation: `float ${Math.random() * 8 + 4}s ease-in-out infinite`,
-              animationDelay: `${Math.random() * 3}s`,
-              boxShadow: `0 0 ${Math.random() * 15 + 5}px currentColor`
+              width: `${p.w}px`,
+              height: `${p.h}px`,
+              left: `${p.x}%`,
+              top: `${p.y}%`,
+              background: p.c,
+              opacity: p.o,
+              animation: `float ${p.dur}s ease-in-out infinite`,
+              animationDelay: `${p.delay}s`,
+              boxShadow: `0 0 ${p.glow}px ${p.c}`,
             }}
           />
         ))}
@@ -4453,21 +4479,21 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
             animationDelay: '4s'
           }}
         />
-        {/* Floating particles - MORE & BRIGHTER */}
-        {[...Array(18)].map((_, i) => (
+        {/* Floating particles */}
+        {ARRANGE_PARTICLES.map((p, i) => (
           <div
             key={i}
             className="absolute rounded-full"
             style={{
-              width: `${Math.random() * 6 + 3}px`,
-              height: `${Math.random() * 6 + 3}px`,
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              background: ['#00c853', '#14b8a6', '#10b981', '#00ff88'][Math.floor(Math.random() * 4)],
-              opacity: Math.random() * 0.5 + 0.5,
-              animation: `float ${Math.random() * 8 + 4}s ease-in-out infinite`,
-              animationDelay: `${Math.random() * 3}s`,
-              boxShadow: `0 0 ${Math.random() * 25 + 15}px currentColor`
+              width: `${p.w}px`,
+              height: `${p.h}px`,
+              left: `${p.x}%`,
+              top: `${p.y}%`,
+              background: p.c,
+              opacity: p.o,
+              animation: `float ${p.dur}s ease-in-out infinite`,
+              animationDelay: `${p.delay}s`,
+              boxShadow: `0 0 ${p.glow}px ${p.c}`,
             }}
           />
         ))}

@@ -1363,11 +1363,16 @@ const addUmpireByCode = async (req, res) => {
     const { umpireCode } = req.body;
     const userId = req.user.id;
 
-    // Validate umpire code format (#123ABCD - # followed by 3 digits and 4 letters)
-    if (!umpireCode || !/^#\d{3}[A-Z]{4}$/i.test(umpireCode)) {
+    // Validate umpire code format - Support both formats:
+    // #123ABCD (3 digits + 4 letters) - NEW format
+    // #A10000 (1 letter + 5 digits) - OLD format for backward compatibility
+    const newFormat = /^#\d{3}[A-Z]{4}$/i;
+    const oldFormat = /^#[A-Z]\d{5}$/i;
+    
+    if (!umpireCode || (!newFormat.test(umpireCode) && !oldFormat.test(umpireCode))) {
       return res.status(400).json({
         success: false,
-        error: 'Invalid umpire code format. Must be # followed by 3 digits and 4 letters (e.g., #123ABCD)'
+        error: 'Invalid umpire code format. Must be #123ABCD (3 digits + 4 letters) or #A10000 (1 letter + 5 digits)'
       });
     }
 

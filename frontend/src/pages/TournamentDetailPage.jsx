@@ -242,10 +242,12 @@ const TournamentDetailPage = () => {
       return;
     }
 
-    // Validate format: #123ABCD (# + 3 digits + 4 letters)
-    const codePattern = /^#\d{3}[A-Z]{4}$/i;
-    if (!codePattern.test(umpireCode.trim())) {
-      setUmpireError('Invalid umpire code format. Must be # followed by 3 digits and 4 letters (e.g., #123ABCD)');
+    // Validate format: Support both #123ABCD (3 digits + 4 letters) and #A10000 (1 letter + 5 digits)
+    const newFormat = /^#\d{3}[A-Z]{4}$/i;  // #123ABCD
+    const oldFormat = /^#[A-Z]\d{5}$/i;      // #A10000
+    
+    if (!newFormat.test(umpireCode.trim()) && !oldFormat.test(umpireCode.trim())) {
+      setUmpireError('Invalid umpire code format. Use #123ABCD (3 digits + 4 letters) or #A10000 (1 letter + 5 digits)');
       return;
     }
 

@@ -99,6 +99,10 @@ function AppContent() {
   // Hide Navbar for admin dashboard only (unified dashboard shows navbar)
   const shouldShowNavbar = !location.pathname.startsWith('/admin-dashboard');
 
+  // Admin dashboard needs full-width layout — all other pages constrained to
+  // mobile-app width so they look identical on any phone or tablet.
+  const isAdminRoute = location.pathname.startsWith('/admin-dashboard');
+
   return (
     <div className="min-h-screen" style={{ background: '#07071a' }}>
       <ScrollToTop />
@@ -120,6 +124,11 @@ function AppContent() {
         />
       )}
       
+      {/* Page content — constrained to 480px on tablets/wide screens so the
+          app looks identical on every phone. On phones ≤480px this wrapper
+          is just 100% width — zero visual change for mobile users.
+          Admin dashboard excluded (it has its own full-width sidebar layout). */}
+      <div style={!isAdminRoute ? { maxWidth: '480px', margin: '0 auto', position: 'relative' } : {}}>
       <Routes>
             {/* Public routes */}
           <Route path="/" element={<HomePage />} />
@@ -450,7 +459,8 @@ function AppContent() {
           {/* Catch all route */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </div>
+      </div>{/* end page-width constraint */}
+    </div>
   );
 }
 

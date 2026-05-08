@@ -6,9 +6,13 @@
 /* This ensures consistent, readable text on ALL mobile devices */
 
 @layer base {
-  /* Set base font size for proper rem calculations */
+  /* Fluid base font-size — scales with screen width.
+     375px → 16.0px (unchanged for standard iPhones)
+     320px → 15px   (clamped min — small/old phones)
+     430px → 17px   (clamped max — large phones)
+     All Tailwind text-* classes inherit this automatically. */
   html {
-    font-size: 16px; /* 1rem = 16px */
+    font-size: clamp(15px, 4.27vw, 17px);
   }
   
   /* Ensure all text is readable on mobile */

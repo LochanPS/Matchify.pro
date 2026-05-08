@@ -2230,8 +2230,8 @@ const getCompleteMatchScore = (scoreData) => {
   }
 };
 
-// Knockout Display - MOBILE OPTIMIZED VERTICAL LAYOUT
-// Each round stacks vertically for easy mobile viewing
+// Knockout Display - HORIZONTAL PYRAMID FOR WINNER ADVANCEMENT
+// This layout is REQUIRED for automatic winner progression to work correctly
 const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onViewMatchDetails, onChangeResult, categoryFormat }) => {
   if (!data?.rounds) return <p className="text-gray-400 text-center p-8">No bracket data</p>;
 
@@ -2282,217 +2282,184 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
   };
 
   return (
-    <div className="space-y-6 p-3">
-      {/* MOBILE: Stack rounds vertically */}
-      {data.rounds.map((round, ri) => (
-        <div key={ri} className="space-y-3">
-          {/* Round Header - Emerald Theme */}
-          <div className="sticky top-0 z-10 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 backdrop-blur-sm border-2 border-emerald-500/30 rounded-xl p-3 shadow-lg">
-            <div className="flex items-center justify-center gap-2">
-              <Trophy className="w-5 h-5 text-emerald-400" />
-              <h4 className="text-base font-black text-emerald-300 uppercase tracking-wider">
-                {getRoundName(ri, data.rounds.length)}
-              </h4>
-              <span className="px-2 py-0.5 bg-emerald-500/30 text-emerald-300 rounded-full text-xs font-bold">
-                {round.matches.length} {round.matches.length === 1 ? 'Match' : 'Matches'}
-              </span>
+    <div className="overflow-x-auto pb-4">
+      {/* HORIZONTAL PYRAMID - Required for winner advancement logic */}
+      <div className="flex gap-4 min-w-max p-3">
+        {data.rounds.map((round, ri) => (
+          <div key={ri} className="flex flex-col min-w-[240px]">
+            {/* Round Header - Emerald Theme - MOBILE OPTIMIZED */}
+            <div className="mb-4 text-center">
+              <div className="inline-flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border-2 border-emerald-500/30 rounded-xl shadow-lg">
+                <Trophy className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                <h4 className="text-sm font-black text-emerald-300 uppercase tracking-wider whitespace-nowrap">
+                  {getRoundName(ri, data.rounds.length)}
+                </h4>
+              </div>
+            </div>
+            
+            {/* Matches - MOBILE OPTIMIZED CARDS */}
+            <div 
+              className="flex flex-col justify-around flex-1 gap-3" 
+              style={{ paddingTop: ri > 0 ? `${Math.pow(2, ri) * 16}px` : 0 }}
+            >
+              {round.matches.map((match, mi) => {
+                const dbMatch = findMatch(ri, mi);
+                
+                const player1 = dbMatch?.player1 || match.player1 || { name: 'TBD' };
+                const player2 = dbMatch?.player2 || match.player2 || { name: 'TBD' };
+                
+                const player1Name = getPlayerDisplay(player1);
+                const player2Name = getPlayerDisplay(player2);
+                
+                const isCompleted = dbMatch?.status === 'COMPLETED';
+                const isLive = dbMatch?.status === 'IN_PROGRESS';
+                const isReady = dbMatch?.status === 'READY' && player1.name !== 'TBD' && player2.name !== 'TBD';
+                const hasUmpire = dbMatch?.umpireId;
+                
+                const isPlayer1Winner = dbMatch?.winnerId === player1?.id;
+                const isPlayer2Winner = dbMatch?.winnerId === player2?.id;
+                
+                return (
+                  <div 
+                    key={mi} 
+                    className="relative" 
+                    style={{ marginBottom: ri > 0 ? `${Math.pow(2, ri) * 32}px` : 0 }}
+                  >
+                    <div className={`bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-sm border-2 rounded-xl overflow-hidden shadow-lg transition-all ${
+                      isLive ? 'border-emerald-500 shadow-emerald-500/30 animate-pulse' :
+                      isReady ? 'border-blue-500/50 shadow-blue-500/20' :
+                      isCompleted ? 'border-emerald-500/30 shadow-emerald-500/10' :
+                      'border-white/10'
+                    }`}>
+                      {/* Match Header - MOBILE OPTIMIZED TEXT */}
+                      <div className="bg-slate-700/60 px-3 py-2 border-b-2 border-white/10 flex items-center justify-between">
+                        <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest">
+                          #{match.matchNumber || mi + 1}
+                        </span>
+                        
+                        {/* Status Badge - MOBILE OPTIMIZED */}
+                        {isLive && (
+                          <span className="px-2 py-0.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-full text-[10px] font-black flex items-center gap-1 shadow-lg">
+                            <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>
+                            LIVE
+                          </span>
+                        )}
+                        {isCompleted && !isLive && (
+                          <span className="px-2 py-0.5 bg-emerald-500/30 text-emerald-300 border border-emerald-500/50 rounded-full text-[10px] font-black">
+                            ✓
+                          </span>
+                        )}
+                      </div>
+                      
+                      {/* Players - MOBILE OPTIMIZED */}
+                      <div className="p-2 space-y-1.5">
+                        {/* Player 1 */}
+                        <div className={`flex items-center justify-between px-2.5 py-2 rounded-lg transition-all ${
+                          isPlayer1Winner
+                            ? 'bg-gradient-to-r from-emerald-500/30 to-teal-500/30 border-2 border-emerald-500/60 shadow-lg' 
+                            : 'bg-slate-700/40 border border-white/10'
+                        }`}>
+                          <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                            {isPlayer1Winner && (
+                              <Trophy className="w-3 h-3 text-emerald-400 flex-shrink-0" />
+                            )}
+                            <span className={`text-xs font-bold truncate ${
+                              isPlayer1Winner ? 'text-emerald-200' : player1Name === 'TBD' ? 'text-gray-500 italic' : 'text-white'
+                            }`}>
+                              {player1Name}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        {/* VS Divider */}
+                        <div className="flex items-center justify-center py-0.5">
+                          <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest">VS</span>
+                        </div>
+                        
+                        {/* Player 2 */}
+                        <div className={`flex items-center justify-between px-2.5 py-2 rounded-lg transition-all ${
+                          isPlayer2Winner
+                            ? 'bg-gradient-to-r from-emerald-500/30 to-teal-500/30 border-2 border-emerald-500/60 shadow-lg' 
+                            : 'bg-slate-700/40 border border-white/10'
+                        }`}>
+                          <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                            {isPlayer2Winner && (
+                              <Trophy className="w-3 h-3 text-emerald-400 flex-shrink-0" />
+                            )}
+                            <span className={`text-xs font-bold truncate ${
+                              isPlayer2Winner ? 'text-emerald-200' : player2Name === 'TBD' ? 'text-gray-500 italic' : 'text-white'
+                            }`}>
+                              {player2Name}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Organizer Actions - MOBILE OPTIMIZED */}
+                      {isOrganizer && dbMatch && (
+                        <div className="px-2 pb-2 flex gap-1.5">
+                          {/* Assign Umpire Button */}
+                          {!isCompleted && player1.name !== 'TBD' && player2.name !== 'TBD' && (
+                            <button
+                              onClick={() => {
+                                const bracketMatchData = {
+                                  matchNumber: match.matchNumber,
+                                  round: ri + 1,
+                                  player1: player1,
+                                  player2: player2
+                                };
+                                onAssignUmpire(dbMatch, bracketMatchData);
+                              }}
+                              className={`flex-1 py-2 rounded-lg border-2 transition-all text-[10px] font-black flex items-center justify-center gap-1 ${
+                                hasUmpire
+                                  ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                                  : 'bg-blue-500/20 text-blue-300 border-blue-500/40'
+                              }`}
+                            >
+                              <Gavel className="w-3 h-3" />
+                              {hasUmpire ? 'READY' : 'UMPIRE'}
+                            </button>
+                          )}
+                          
+                          {/* Conduct Match Button */}
+                          {!isCompleted && (player1.name !== 'TBD' || player2.name !== 'TBD') && (
+                            <button
+                              onClick={() => handleConductMatch(dbMatch.id)}
+                              className="flex-1 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-600 text-white border-2 border-emerald-400/50 transition-all text-[10px] font-black flex items-center justify-center gap-1"
+                            >
+                              <Play className="w-3 h-3" />
+                              START
+                            </button>
+                          )}
+                          
+                          {/* View Details Button */}
+                          {isCompleted && (
+                            <button
+                              onClick={() => {
+                                const bracketMatchData = {
+                                  matchNumber: match.matchNumber,
+                                  round: ri + 1,
+                                  player1: player1,
+                                  player2: player2
+                                };
+                                onViewMatchDetails(dbMatch, bracketMatchData);
+                              }}
+                              className="flex-1 py-2 rounded-lg bg-blue-500/20 text-blue-300 border-2 border-blue-500/40 transition-all text-[10px] font-black flex items-center justify-center gap-1"
+                            >
+                              <Eye className="w-3 h-3" />
+                              VIEW
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
-          
-          {/* Matches - Full Width Cards */}
-          <div className="space-y-3">
-            {round.matches.map((match, mi) => {
-              const dbMatch = findMatch(ri, mi);
-              
-              const player1 = dbMatch?.player1 || match.player1 || { name: 'TBD' };
-              const player2 = dbMatch?.player2 || match.player2 || { name: 'TBD' };
-              
-              const player1Name = getPlayerDisplay(player1);
-              const player2Name = getPlayerDisplay(player2);
-              
-              const isCompleted = dbMatch?.status === 'COMPLETED';
-              const isLive = dbMatch?.status === 'IN_PROGRESS';
-              const isReady = dbMatch?.status === 'READY' && player1.name !== 'TBD' && player2.name !== 'TBD';
-              const hasUmpire = dbMatch?.umpireId;
-              
-              const isPlayer1Winner = dbMatch?.winnerId === player1?.id;
-              const isPlayer2Winner = dbMatch?.winnerId === player2?.id;
-              
-              return (
-                <div 
-                  key={mi} 
-                  className={`bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-sm border-2 rounded-2xl overflow-hidden shadow-xl transition-all ${
-                    isLive ? 'border-emerald-500 shadow-emerald-500/30 animate-pulse' :
-                    isReady ? 'border-blue-500/50 shadow-blue-500/20' :
-                    isCompleted ? 'border-emerald-500/30 shadow-emerald-500/10' :
-                    'border-white/10'
-                  }`}
-                >
-                  {/* Match Header */}
-                  <div className="bg-slate-700/60 px-4 py-2.5 border-b-2 border-white/10 flex items-center justify-between">
-                    <span className="text-xs font-black text-gray-300 uppercase tracking-widest">
-                      Match #{match.matchNumber || mi + 1}
-                    </span>
-                    
-                    {/* Status Badge */}
-                    {isLive && (
-                      <span className="px-3 py-1 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-full text-xs font-black flex items-center gap-1.5 shadow-lg shadow-emerald-500/50">
-                        <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
-                        LIVE
-                      </span>
-                    )}
-                    {isCompleted && !isLive && (
-                      <span className="px-3 py-1 bg-gradient-to-r from-emerald-500/30 to-teal-500/30 text-emerald-300 border-2 border-emerald-500/50 rounded-full text-xs font-black">
-                        ✓ DONE
-                      </span>
-                    )}
-                    {isReady && !isLive && !isCompleted && (
-                      <span className="px-3 py-1 bg-blue-500/30 text-blue-300 border-2 border-blue-500/50 rounded-full text-xs font-black">
-                        READY
-                      </span>
-                    )}
-                  </div>
-                  
-                  {/* Players */}
-                  <div className="p-4 space-y-2.5">
-                    {/* Player 1 */}
-                    <div className={`flex items-center justify-between px-4 py-3.5 rounded-xl transition-all ${
-                      isPlayer1Winner
-                        ? 'bg-gradient-to-r from-emerald-500/30 to-teal-500/30 border-2 border-emerald-500/60 shadow-lg shadow-emerald-500/30' 
-                        : 'bg-slate-700/40 border-2 border-white/10'
-                    }`}>
-                      <div className="flex items-center gap-2.5 flex-1 min-w-0">
-                        {isPlayer1Winner && (
-                          <Trophy className="w-5 h-5 text-emerald-400 flex-shrink-0 animate-bounce" />
-                        )}
-                        <span className={`text-sm font-bold truncate ${
-                          isPlayer1Winner ? 'text-emerald-200' : player1Name === 'TBD' ? 'text-gray-500 italic' : 'text-white'
-                        }`}>
-                          {player1Name}
-                        </span>
-                      </div>
-                      {isPlayer1Winner && (
-                        <span className="ml-2 px-2.5 py-1 bg-emerald-500/50 text-white rounded-lg text-xs font-black shadow-lg">
-                          WINNER
-                        </span>
-                      )}
-                    </div>
-                    
-                    {/* VS Divider */}
-                    <div className="flex items-center justify-center py-1">
-                      <span className="px-4 py-1 bg-slate-700/50 text-gray-400 rounded-full text-xs font-black uppercase tracking-widest">
-                        VS
-                      </span>
-                    </div>
-                    
-                    {/* Player 2 */}
-                    <div className={`flex items-center justify-between px-4 py-3.5 rounded-xl transition-all ${
-                      isPlayer2Winner
-                        ? 'bg-gradient-to-r from-emerald-500/30 to-teal-500/30 border-2 border-emerald-500/60 shadow-lg shadow-emerald-500/30' 
-                        : 'bg-slate-700/40 border-2 border-white/10'
-                    }`}>
-                      <div className="flex items-center gap-2.5 flex-1 min-w-0">
-                        {isPlayer2Winner && (
-                          <Trophy className="w-5 h-5 text-emerald-400 flex-shrink-0 animate-bounce" />
-                        )}
-                        <span className={`text-sm font-bold truncate ${
-                          isPlayer2Winner ? 'text-emerald-200' : player2Name === 'TBD' ? 'text-gray-500 italic' : 'text-white'
-                        }`}>
-                          {player2Name}
-                        </span>
-                      </div>
-                      {isPlayer2Winner && (
-                        <span className="ml-2 px-2.5 py-1 bg-emerald-500/50 text-white rounded-lg text-xs font-black shadow-lg">
-                          WINNER
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  
-                  {/* Organizer Actions */}
-                  {isOrganizer && dbMatch && (
-                    <div className="px-4 pb-4 flex gap-2">
-                      {/* Assign Umpire Button */}
-                      {!isCompleted && player1.name !== 'TBD' && player2.name !== 'TBD' && (
-                        <button
-                          onClick={() => {
-                            const bracketMatchData = {
-                              matchNumber: match.matchNumber,
-                              round: ri + 1,
-                              player1: player1,
-                              player2: player2
-                            };
-                            onAssignUmpire(dbMatch, bracketMatchData);
-                          }}
-                          className={`flex-1 py-3 rounded-xl border-2 transition-all text-xs font-black flex items-center justify-center gap-2 ${
-                            hasUmpire
-                              ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 hover:bg-emerald-500/30'
-                              : 'bg-blue-500/20 text-blue-300 border-blue-500/40 hover:bg-blue-500/30'
-                          }`}
-                          title={hasUmpire ? 'Umpire assigned' : 'Assign umpire'}
-                        >
-                          <Gavel className="w-4 h-4" />
-                          {hasUmpire ? 'UMPIRE ✓' : 'ASSIGN UMPIRE'}
-                        </button>
-                      )}
-                      
-                      {/* Conduct Match Button */}
-                      {!isCompleted && (player1.name !== 'TBD' || player2.name !== 'TBD') && (
-                        <button
-                          onClick={() => handleConductMatch(dbMatch.id)}
-                          className="flex-1 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white border-2 border-emerald-400/50 hover:shadow-lg hover:shadow-emerald-500/50 transition-all text-xs font-black flex items-center justify-center gap-2"
-                          title="Conduct match"
-                        >
-                          <Play className="w-4 h-4" />
-                          CONDUCT
-                        </button>
-                      )}
-                      
-                      {/* View Details Button for Completed Matches */}
-                      {isCompleted && (
-                        <button
-                          onClick={() => {
-                            const bracketMatchData = {
-                              matchNumber: match.matchNumber,
-                              round: ri + 1,
-                              player1: player1,
-                              player2: player2
-                            };
-                            onViewMatchDetails(dbMatch, bracketMatchData);
-                          }}
-                          className="flex-1 py-3 rounded-xl bg-blue-500/20 text-blue-300 border-2 border-blue-500/40 hover:bg-blue-500/30 transition-all text-xs font-black flex items-center justify-center gap-2"
-                        >
-                          <Eye className="w-4 h-4" />
-                          VIEW
-                        </button>
-                      )}
-                      
-                      {/* Change Result Button for Completed Matches */}
-                      {isCompleted && onChangeResult && (
-                        <button
-                          onClick={() => {
-                            const bracketMatchData = {
-                              matchNumber: match.matchNumber,
-                              round: ri + 1,
-                              player1: player1,
-                              player2: player2
-                            };
-                            onChangeResult(dbMatch, bracketMatchData);
-                          }}
-                          className="py-3 px-4 rounded-xl bg-amber-500/20 text-amber-300 border-2 border-amber-500/40 hover:bg-amber-500/30 transition-all text-xs font-black flex items-center justify-center"
-                          title="Change result"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </button>
-                      )}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 };

@@ -134,7 +134,28 @@ const CreateTournament = () => {
       });
     } catch (err) {
       console.error('Error creating tournament:', err);
-      setError(getErrorMessage(err, 'Failed to create tournament. Please try again.'));
+      
+      // Extract detailed error messages from backend
+      let errorMessage = 'Failed to create tournament. Please try again.';
+      
+      if (err?.response?.data) {
+        const data = err.response.data;
+        
+        // Backend returns validation errors in 'errors' array
+        if (data.errors && Array.isArray(data.errors)) {
+          errorMessage = data.errors.join('\n');
+        } 
+        // Single error message
+        else if (data.error) {
+          errorMessage = data.error;
+        }
+        // Message field
+        else if (data.message) {
+          errorMessage = data.message;
+        }
+      }
+      
+      setError(errorMessage);
       setIsSubmitting(false);
     }
   };
@@ -324,25 +345,38 @@ const CreateTournament = () => {
 
       <div className="relative max-w-7xl mx-auto px-4 py-4">
 
-        {/* Error Message - Compact */}
+        {/* Error Message - Shows actual validation errors */}
         {error && (
           <div 
-            className="mb-4 rounded-2xl p-4 flex items-start gap-3"
+            className="mb-4 rounded-2xl p-4"
             style={{
               background: 'linear-gradient(135deg, rgba(239,68,68,0.15), rgba(220,38,38,0.1))',
               border: '2px solid rgba(239,68,68,0.3)',
               boxShadow: '0 4px 15px rgba(239,68,68,0.2)'
             }}
           >
-            <div 
-              className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-              style={{ background: 'rgba(239,68,68,0.2)' }}
-            >
-              <AlertTriangle className="w-4 h-4 text-red-400" />
-            </div>
-            <div>
-              <h3 className="font-bold text-red-400 text-sm mb-1">Error creating tournament</h3>
-              <p className="text-xs text-red-300/80">{error}</p>
+            <div className="flex items-start gap-3">
+              <div 
+                className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                style={{ background: 'rgba(239,68,68,0.2)' }}
+              >
+                <AlertTriangle className="w-4 h-4 text-red-400" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-red-400 text-sm mb-2">Cannot create tournament</h3>
+                {error.includes('\n') ? (
+                  <ul className="space-y-1">
+                    {error.split('\n').map((err, idx) => (
+                      <li key={idx} className="text-xs text-red-300/90 flex items-start gap-2">
+                        <span className="text-red-400 mt-0.5">•</span>
+                        <span>{err}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-xs text-red-300/90">{error}</p>
+                )}
+              </div>
             </div>
           </div>
         )}

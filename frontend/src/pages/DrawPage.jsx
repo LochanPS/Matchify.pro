@@ -2657,11 +2657,22 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                     
                     {/* Player Name */}
                     <div className="flex-1 min-w-0">
-                      <span className={`font-bold text-sm truncate block ${
-                        p.id ? 'text-white' : 'text-gray-500'
-                      }`}>
-                        {p.id ? getPlayerDisplay(p) : `Slot ${pi + 1}`}
-                      </span>
+                      {p.id ? (
+                        <>
+                          <span className="font-bold text-sm text-white block leading-tight">
+                            {p.name || `Slot ${pi + 1}`}
+                          </span>
+                          {p.partnerName && (
+                            <span className="text-emerald-300 text-xs block leading-tight">
+                              & {p.partnerName}
+                            </span>
+                          )}
+                        </>
+                      ) : (
+                        <span className="font-bold text-sm text-gray-500 block">
+                          Slot {pi + 1}
+                        </span>
+                      )}
                     </div>
                     
                     {/* Stats */}

@@ -185,12 +185,12 @@ export default function TournamentDiscoveryPage() {
       `}</style>
 
       {/* Hero Header - Compact Mobile-First with Back Button */}
-      <div className="relative pt-20">
-        <div className="relative max-w-7xl mx-auto px-4 py-6">
+      <div className="relative pt-4">
+        <div className="relative max-w-7xl mx-auto px-4 py-3">
           {/* Back Button */}
           <button
             onClick={() => navigate('/')}
-            className="flex items-center gap-2 mb-4 text-white/70 hover:text-white transition-colors group"
+            className="flex items-center gap-2 mb-3 text-white/70 hover:text-white transition-colors group"
           >
             <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -200,7 +200,7 @@ export default function TournamentDiscoveryPage() {
 
           <div className="text-center">
             <div 
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold mb-3 relative overflow-hidden"
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold mb-2 relative overflow-hidden"
               style={{
                 background: 'linear-gradient(135deg, rgba(245,158,11,0.2), rgba(251,146,60,0.15))',
                 border: '2px solid rgba(245,158,11,0.4)',
@@ -223,7 +223,7 @@ export default function TournamentDiscoveryPage() {
             >
               Discover Tournaments
             </h1>
-            <p className="text-xs sm:text-sm text-white/70 max-w-2xl mx-auto font-medium mb-4">
+            <p className="text-xs sm:text-sm text-white/70 max-w-2xl mx-auto font-medium mb-3">
               Find and register for badminton tournaments near you
             </p>
 

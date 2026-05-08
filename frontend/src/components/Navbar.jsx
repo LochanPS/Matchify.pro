@@ -479,10 +479,10 @@ const Navbar = () => {
             }
           `}</style>
 
-          <div className="relative px-4 py-6 space-y-4">
+          <div className="relative px-4 py-3 space-y-3">
             {/* Role Switcher Card */}
             <div 
-              className="rounded-2xl p-5 relative overflow-hidden"
+              className="rounded-2xl p-4 relative overflow-hidden"
               style={{
                 background: 'linear-gradient(135deg, rgba(168,85,247,0.2) 0%, rgba(192,132,252,0.2) 100%)',
                 border: '2px solid rgba(168,85,247,0.4)',
@@ -499,7 +499,7 @@ const Navbar = () => {
                 }}
               />
               <p 
-                className="text-xs font-bold mb-3 relative z-10"
+                className="text-xs font-bold mb-2 relative z-10"
                 style={{ 
                   background: 'linear-gradient(135deg, #a855f7, #c084fc)',
                   WebkitBackgroundClip: 'text',

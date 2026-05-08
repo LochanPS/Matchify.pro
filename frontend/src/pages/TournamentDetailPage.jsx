@@ -1279,7 +1279,10 @@ const TournamentDetailPage = () => {
       {showPublishConfirmModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden">
-            <div className="bg-gradient-to-r from-emerald-500 to-green-600 p-5 text-white">
+            <div 
+              className="p-5 text-white"
+              style={{ background: 'linear-gradient(135deg, #00c853, #00ff88)' }}
+            >
               <div className="flex items-center justify-center gap-2">
                 <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
                   <SparklesIcon className="h-5 w-5" />
@@ -1293,8 +1296,14 @@ const TournamentDetailPage = () => {
                 You are about to publish <span className="font-bold">"{tournament?.name}"</span>.
               </p>
               
-              <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 mb-5">
-                <p className="text-emerald-800 text-xs text-center">
+              <div 
+                className="rounded-xl p-3 mb-5"
+                style={{ 
+                  background: 'rgba(0, 200, 83, 0.1)',
+                  border: '1px solid rgba(0, 200, 83, 0.3)'
+                }}
+              >
+                <p className="text-xs text-center" style={{ color: '#00c853' }}>
                   Once published, your tournament will be visible to all players and they can start registering.
                 </p>
               </div>
@@ -1309,7 +1318,11 @@ const TournamentDetailPage = () => {
                 <button
                   onClick={handlePublish}
                   disabled={publishing}
-                  className="flex-1 px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-xl hover:shadow-lg hover:shadow-emerald-500/30 transition-all font-bold text-sm disabled:opacity-50 flex items-center justify-center gap-1.5"
+                  className="flex-1 px-4 py-2.5 text-white rounded-xl transition-all font-bold text-sm disabled:opacity-50 flex items-center justify-center gap-1.5"
+                  style={{ 
+                    background: 'linear-gradient(135deg, #00c853, #00ff88)',
+                    boxShadow: '0 4px 15px rgba(0, 200, 83, 0.3)'
+                  }}
                 >
                   {publishing ? (
                     <>
@@ -1330,7 +1343,14 @@ const TournamentDetailPage = () => {
       {publishResultModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden">
-            <div className={`p-5 text-white ${publishResultModal.type === 'success' ? 'bg-gradient-to-r from-emerald-500 to-green-600' : 'bg-gradient-to-r from-red-500 to-rose-600'}`}>
+            <div 
+              className="p-5 text-white"
+              style={{ 
+                background: publishResultModal.type === 'success' 
+                  ? 'linear-gradient(135deg, #00c853, #00ff88)' 
+                  : 'linear-gradient(135deg, #ef4444, #dc2626)'
+              }}
+            >
               <div className="flex items-center justify-center gap-2">
                 <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
                   {publishResultModal.type === 'success' ? (
@@ -1347,11 +1367,15 @@ const TournamentDetailPage = () => {
               <p className="text-gray-700 text-sm mb-5 text-center leading-relaxed">{publishResultModal.message}</p>
               <button
                 onClick={() => setPublishResultModal(null)}
-                className={`w-full px-5 py-3 rounded-xl font-bold text-base transition-all ${
-                  publishResultModal.type === 'success' 
-                    ? 'bg-gradient-to-r from-emerald-500 to-green-600 text-white hover:shadow-lg hover:shadow-emerald-500/30' 
-                    : 'bg-gradient-to-r from-red-500 to-rose-600 text-white hover:shadow-lg hover:shadow-red-500/30'
-                }`}
+                className="w-full px-5 py-3 rounded-xl font-bold text-base transition-all text-white"
+                style={{
+                  background: publishResultModal.type === 'success' 
+                    ? 'linear-gradient(135deg, #00c853, #00ff88)' 
+                    : 'linear-gradient(135deg, #ef4444, #dc2626)',
+                  boxShadow: publishResultModal.type === 'success'
+                    ? '0 4px 15px rgba(0, 200, 83, 0.3)'
+                    : '0 4px 15px rgba(239, 68, 68, 0.3)'
+                }}
               >
                 {publishResultModal.type === 'success' ? 'Awesome!' : 'Got it'}
               </button>
@@ -1360,11 +1384,18 @@ const TournamentDetailPage = () => {
         </div>
       )}
 
-      {/* Delete Result Modal - Mobile Perfect */}
+      {/* Delete Result Modal - Mobile Perfect with Emerald Theme */}
       {deleteResultModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden">
-            <div className={`p-5 text-white ${deleteResultModal.type === 'success' ? 'bg-gradient-to-r from-emerald-500 to-teal-600' : 'bg-gradient-to-r from-red-500 to-rose-600'}`}>
+            <div 
+              className="p-5 text-white"
+              style={{ 
+                background: deleteResultModal.type === 'success' 
+                  ? 'linear-gradient(135deg, #00c853, #00ff88)' 
+                  : 'linear-gradient(135deg, #ef4444, #dc2626)'
+              }}
+            >
               <div className="flex items-center justify-center gap-2">
                 <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
                   {deleteResultModal.type === 'success' ? (
@@ -1391,11 +1422,15 @@ const TournamentDetailPage = () => {
                   }
                   setDeleteResultModal(null);
                 }}
-                className={`w-full px-5 py-3 rounded-xl font-bold text-base transition-all ${
-                  deleteResultModal.type === 'success' 
-                    ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:shadow-lg hover:shadow-emerald-500/30' 
-                    : 'bg-gradient-to-r from-red-500 to-rose-600 text-white hover:shadow-lg hover:shadow-red-500/30'
-                }`}
+                className="w-full px-5 py-3 rounded-xl font-bold text-base transition-all text-white"
+                style={{
+                  background: deleteResultModal.type === 'success' 
+                    ? 'linear-gradient(135deg, #00c853, #00ff88)' 
+                    : 'linear-gradient(135deg, #ef4444, #dc2626)',
+                  boxShadow: deleteResultModal.type === 'success'
+                    ? '0 4px 15px rgba(0, 200, 83, 0.3)'
+                    : '0 4px 15px rgba(239, 68, 68, 0.3)'
+                }}
               >
                 {deleteResultModal.type === 'success' ? 'Continue' : 'Got it'}
               </button>

@@ -3706,35 +3706,71 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-slate-800 border border-white/10 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-        <div className="p-6 border-b border-white/10">
+      {/* Animated Background for Modal */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div 
+          className="absolute top-10 right-10 w-64 h-64 rounded-full blur-3xl opacity-20"
+          style={{ 
+            background: 'radial-gradient(circle, rgba(0,200,83,0.5) 0%, transparent 70%)',
+            animation: 'float 8s ease-in-out infinite'
+          }}
+        />
+        <div 
+          className="absolute bottom-10 left-10 w-56 h-56 rounded-full blur-3xl opacity-15"
+          style={{ 
+            background: 'radial-gradient(circle, rgba(20,184,166,0.5) 0%, transparent 70%)',
+            animation: 'float 10s ease-in-out infinite reverse',
+            animationDelay: '2s'
+          }}
+        />
+        {[...Array(8)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute rounded-full"
+            style={{
+              width: `${Math.random() * 4 + 2}px`,
+              height: `${Math.random() * 4 + 2}px`,
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              background: ['#00c853', '#14b8a6'][Math.floor(Math.random() * 2)],
+              opacity: Math.random() * 0.4 + 0.2,
+              animation: `float ${Math.random() * 8 + 4}s ease-in-out infinite`,
+              animationDelay: `${Math.random() * 3}s`,
+              boxShadow: `0 0 ${Math.random() * 15 + 5}px currentColor`
+            }}
+          />
+        ))}
+      </div>
+
+      <div className="relative bg-slate-800/95 backdrop-blur-xl border border-emerald-500/20 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl shadow-emerald-500/10">
+        <div className="p-4 border-b border-white/10">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-emerald-500/20 rounded-xl flex items-center justify-center">
-                <UserPlus className="w-6 h-6 text-emerald-400" />
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-emerald-500/20 rounded-xl flex items-center justify-center">
+                <UserPlus className="w-5 h-5 text-emerald-400" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-white">Assign Players to Draw</h2>
-                <p className="text-gray-400 text-sm">Click a player, then click a slot to assign</p>
+                <h2 className="text-base font-bold text-white">Assign Players to Draw</h2>
+                <p className="text-gray-400 text-xs">Click a player, then click a slot to assign</p>
               </div>
             </div>
             <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-lg transition-colors">
-              <X className="w-5 h-5 text-gray-400" />
+              <X className="w-4 h-4 text-gray-400" />
             </button>
           </div>
           
           {/* Bulk Action Buttons */}
-          <div className="mt-4 flex gap-3">
+          <div className="mt-3 flex gap-2">
             <button
               onClick={handleAddAllPlayers}
               disabled={!canAddAll}
-              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-xl hover:shadow-lg hover:shadow-blue-500/25 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+              className="flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg hover:shadow-lg hover:shadow-emerald-500/25 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed text-xs"
               title={canAddAll ? `Add ${Math.min(unassignedPlayersCount, availableSlotsCount)} unassigned players to available slots` : 'No unassigned players or available slots'}
             >
-              <Users className="w-4 h-4" />
+              <Users className="w-3.5 h-3.5" />
               Add All Players
               {canAddAll && (
-                <span className="px-2 py-0.5 bg-white/20 rounded-full text-xs">
+                <span className="px-1.5 py-0.5 bg-white/20 rounded-full text-[10px]">
                   +{Math.min(unassignedPlayersCount, availableSlotsCount)}
                 </span>
               )}
@@ -3743,22 +3779,22 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
             <button
               onClick={handleShuffleAllPlayers}
               disabled={!canShuffle}
-              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-violet-600 text-white rounded-xl hover:shadow-lg hover:shadow-purple-500/25 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+              className="flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-teal-500 to-emerald-600 text-white rounded-lg hover:shadow-lg hover:shadow-teal-500/25 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed text-xs"
               title={canShuffle ? 'Randomly redistribute all assigned players (locked matches unchanged)' : 'Need at least 2 assigned players to shuffle'}
             >
-              <Zap className="w-4 h-4" />
+              <Zap className="w-3.5 h-3.5" />
               Shuffle All Players
             </button>
           </div>
           
           {selectedPlayer && (
-            <div className="mt-3 px-4 py-2 bg-purple-500/20 border border-purple-500/30 rounded-xl flex items-center justify-between">
-              <span className="text-purple-300 text-sm">
+            <div className="mt-2 px-3 py-2 bg-emerald-500/20 border border-emerald-500/30 rounded-lg flex items-center justify-between">
+              <span className="text-emerald-300 text-xs">
                 Selected: <span className="font-semibold text-white">{selectedPlayer.name}</span> — Click a slot to assign
               </span>
               <button 
                 onClick={() => setSelectedPlayer(null)}
-                className="text-purple-400 hover:text-purple-300 text-sm"
+                className="text-emerald-400 hover:text-emerald-300 text-xs"
               >
                 Cancel
               </button>
@@ -3768,21 +3804,21 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
 
         <div className="flex-1 overflow-hidden flex">
           {/* Players List */}
-          <div className="w-1/3 border-r border-white/10 p-4 overflow-y-auto scroll-smooth scrollbar-thin">
-            <h3 className="text-sm font-semibold text-gray-400 mb-3 uppercase tracking-wider">
+          <div className="w-1/3 border-r border-white/10 p-3 overflow-y-auto scroll-smooth scrollbar-thin">
+            <h3 className="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wider">
               Registered Players ({players.length})
             </h3>
             {loading ? (
               <div className="flex items-center justify-center py-8">
-                <div className="w-8 h-8 border-3 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-6 h-6 border-3 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
               </div>
             ) : players.length === 0 ? (
               <div className="text-center py-8">
-                <Users className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-                <p className="text-gray-500 text-sm">No registered players</p>
+                <Users className="w-10 h-10 text-gray-600 mx-auto mb-2" />
+                <p className="text-gray-500 text-xs">No registered players</p>
               </div>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 {players.map((player) => {
                   const assigned = isPlayerAssigned(player.id);
                   const isSelected = selectedPlayer?.id === player.id;
@@ -3790,34 +3826,34 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                     <div
                       key={player.id}
                       onClick={() => handleSelectPlayer(player)}
-                      className={`p-3 rounded-xl cursor-pointer transition-all ${
+                      className={`p-2 rounded-lg cursor-pointer transition-all ${
                         isSelected
-                          ? 'bg-purple-500/30 border-2 border-purple-500 shadow-lg shadow-purple-500/20'
+                          ? 'bg-emerald-500/30 border-2 border-emerald-500 shadow-lg shadow-emerald-500/20'
                           : assigned
                             ? 'bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20'
-                            : 'bg-slate-700/50 border border-transparent hover:bg-slate-700 hover:shadow-lg hover:shadow-purple-500/10'
+                            : 'bg-slate-700/50 border border-transparent hover:bg-slate-700 hover:shadow-lg hover:shadow-emerald-500/10'
                       }`}
                     >
-                      <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-sm ${
+                      <div className="flex items-center gap-2">
+                        <div className={`w-6 h-6 rounded-lg flex items-center justify-center text-white font-bold text-xs ${
                           isSelected
-                            ? 'bg-gradient-to-br from-purple-400 to-violet-600 ring-2 ring-purple-400'
+                            ? 'bg-gradient-to-br from-emerald-400 to-teal-600 ring-2 ring-emerald-400'
                             : assigned 
                               ? 'bg-gradient-to-br from-emerald-500 to-teal-600' 
-                              : 'bg-gradient-to-br from-purple-500 to-indigo-600'
+                              : 'bg-gradient-to-br from-teal-500 to-emerald-600'
                         }`}>
                           {player.seed}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-white font-medium truncate">{player.name}</p>
-                          <p className="text-gray-500 text-xs truncate">{player.email}</p>
+                          <p className="text-white font-medium truncate text-xs">{player.name}</p>
+                          <p className="text-gray-500 text-[10px] truncate">{player.email}</p>
                         </div>
                         {isSelected ? (
-                          <div className="w-5 h-5 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
-                            <div className="w-2 h-2 bg-white rounded-full"></div>
+                          <div className="w-4 h-4 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0">
+                            <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
                           </div>
                         ) : assigned ? (
-                          <CheckCircle className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+                          <CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0" />
                         ) : null}
                       </div>
                     </div>
@@ -3828,9 +3864,9 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
           </div>
 
           {/* Slots Grid - For Round Robin: Show by Pools, For Knockout: Show by Matches */}
-          <div className="flex-1 p-4 overflow-y-auto scroll-smooth scrollbar-thin">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">
+          <div className="flex-1 p-3 overflow-y-auto scroll-smooth scrollbar-thin">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
                 {bracket?.format === 'ROUND_ROBIN' || bracket?.format === 'ROUND_ROBIN_KNOCKOUT' 
                   ? `Pools (${bracket.groups?.length || 0})` 
                   : `Draw Slots (${slots.length})`}
@@ -3848,7 +3884,7 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                     });
                     setAssignments(newAssignments);
                   }}
-                  className="text-xs text-red-400 hover:text-red-300 hover:bg-red-500/10 px-2 py-1 rounded-lg transition-colors"
+                  className="text-[10px] text-red-400 hover:text-red-300 hover:bg-red-500/10 px-2 py-1 rounded-lg transition-colors"
                 >
                   Clear All
                 </button>
@@ -3857,7 +3893,7 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
             
             {/* ROUND ROBIN: Pool-based view */}
             {(bracket?.format === 'ROUND_ROBIN' || bracket?.format === 'ROUND_ROBIN_KNOCKOUT') && bracket.groups ? (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {bracket.groups.map((group, groupIndex) => {
                   const groupSlots = slots.filter(s => {
                     const slotIndex = s.slot - 1;
@@ -3871,33 +3907,33 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                   const totalInPool = groupSlots.length;
                   
                   return (
-                    <div key={groupIndex} className="bg-slate-700/30 rounded-xl border border-white/10 overflow-hidden">
+                    <div key={groupIndex} className="bg-slate-700/30 rounded-lg border border-white/10 overflow-hidden">
                       {/* Pool Header */}
-                      <div className="px-4 py-3 bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-b border-white/10">
+                      <div className="px-3 py-2 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border-b border-white/10">
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-purple-500/30 rounded-xl flex items-center justify-center">
-                              <span className="text-purple-300 font-bold text-lg">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 bg-emerald-500/30 rounded-lg flex items-center justify-center">
+                              <span className="text-emerald-300 font-bold text-sm">
                                 {String.fromCharCode(65 + groupIndex)}
                               </span>
                             </div>
                             <div>
-                              <h4 className="text-white font-bold">Pool {String.fromCharCode(65 + groupIndex)}</h4>
-                              <p className="text-purple-300 text-xs">
+                              <h4 className="text-white font-bold text-xs">Pool {String.fromCharCode(65 + groupIndex)}</h4>
+                              <p className="text-emerald-300 text-[10px]">
                                 {assignedInPool} of {totalInPool} players assigned
                               </p>
                             </div>
                           </div>
                           <div className="text-right">
-                            <div className="px-3 py-1 bg-purple-500/20 rounded-lg">
-                              <span className="text-purple-300 font-bold text-sm">{totalInPool} slots</span>
+                            <div className="px-2 py-1 bg-emerald-500/20 rounded">
+                              <span className="text-emerald-300 font-bold text-[10px]">{totalInPool} slots</span>
                             </div>
                           </div>
                         </div>
                       </div>
                       
                       {/* Pool Slots */}
-                      <div className="p-3 grid grid-cols-2 gap-2">
+                      <div className="p-2 grid grid-cols-2 gap-1.5">
                         {groupSlots.map((slot) => {
                           const assigned = getAssignedPlayer(slot.slot);
                           const canAccept = selectedPlayer && !assigned && !slot.locked;
@@ -3906,17 +3942,17 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                             <div
                               key={slot.slot}
                               onClick={() => canAccept && handleSlotClick(slot)}
-                              className={`p-3 rounded-lg border transition-all ${
+                              className={`p-2 rounded-lg border transition-all ${
                                 canAccept
-                                  ? 'border-purple-500/50 bg-purple-500/10 cursor-pointer hover:bg-purple-500/20 hover:border-purple-500'
+                                  ? 'border-emerald-500/50 bg-emerald-500/10 cursor-pointer hover:bg-emerald-500/20 hover:border-emerald-500'
                                   : assigned
                                     ? 'border-emerald-500/30 bg-emerald-500/10'
                                     : 'border-white/10 bg-slate-800/30'
                               } ${slot.locked ? 'opacity-50' : ''}`}
                             >
                               <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2 flex-1 min-w-0">
-                                  <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0 ${
+                                <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                                  <div className={`w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold flex-shrink-0 ${
                                     assigned 
                                       ? 'bg-emerald-500/30 text-emerald-300' 
                                       : 'bg-slate-600/30 text-gray-500'
@@ -3925,9 +3961,9 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     {assigned ? (
-                                      <p className="text-white font-medium text-sm truncate">{assigned.playerName}</p>
+                                      <p className="text-white font-medium text-[10px] truncate">{assigned.playerName}</p>
                                     ) : (
-                                      <p className="text-gray-500 text-sm">Empty Slot</p>
+                                      <p className="text-gray-500 text-[10px]">Empty Slot</p>
                                     )}
                                   </div>
                                 </div>
@@ -3937,13 +3973,13 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                                       e.stopPropagation();
                                       handleRemoveAssignment(slot.slot);
                                     }}
-                                    className="p-1 hover:bg-red-500/20 rounded transition-colors flex-shrink-0"
+                                    className="p-0.5 hover:bg-red-500/20 rounded transition-colors flex-shrink-0"
                                   >
-                                    <X className="w-4 h-4 text-red-400" />
+                                    <X className="w-3 h-3 text-red-400" />
                                   </button>
                                 )}
                                 {slot.locked && (
-                                  <span className="text-amber-400 text-xs flex-shrink-0">🔒</span>
+                                  <span className="text-amber-400 text-[10px] flex-shrink-0">🔒</span>
                                 )}
                               </div>
                             </div>
@@ -4038,30 +4074,30 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
           </div>
         </div>
 
-        <div className="p-6 border-t border-white/10 flex items-center justify-between">
-          <div className="text-sm text-gray-400">
+        <div className="p-4 border-t border-white/10 flex items-center justify-between">
+          <div className="text-xs text-gray-400">
             {assignedCount} of {slots.length} slots assigned
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-2">
             <button 
               onClick={onClose} 
-              className="px-6 py-3 bg-slate-700 text-gray-300 rounded-xl hover:bg-slate-600 transition-colors font-semibold"
+              className="px-4 py-2 bg-slate-700 text-gray-300 rounded-lg hover:bg-slate-600 transition-colors font-semibold text-xs"
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
               disabled={saving}
-              className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl hover:shadow-lg hover:shadow-emerald-500/25 transition-all font-semibold disabled:opacity-50 flex items-center gap-2"
+              className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg hover:shadow-lg hover:shadow-emerald-500/25 transition-all font-semibold disabled:opacity-50 flex items-center gap-1.5 text-xs"
             >
               {saving ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                   Saving...
                 </>
               ) : (
                 <>
-                  <CheckCircle className="w-5 h-5" />
+                  <CheckCircle className="w-4 h-4" />
                   Save Assignments
                 </>
               )}

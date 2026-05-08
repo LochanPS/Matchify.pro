@@ -137,7 +137,7 @@ export default function TournamentManagementPage() {
   const openCompleteRefundModal = (registration) => {
     setCompleteRefundModal({
       registrationId: registration.id,
-      playerName: registration.user.name,
+      playerName: registration.displayName || registration.user?.name || 'Unknown',
       amount: registration.amountTotal,
       upiId: registration.refundUpiId
     });
@@ -389,13 +389,16 @@ export default function TournamentManagementPage() {
                   <div className="flex items-center gap-3">
                     <div className="w-11 h-11 rounded-xl flex items-center justify-center font-black text-base flex-shrink-0"
                       style={{ background: 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,200,83,0.1))', border: '1px solid rgba(0,255,136,0.3)', color: '#00ff88' }}>
-                      {registration.user.name.charAt(0).toUpperCase()}
+                      {(registration.displayName || registration.user?.name || '?').charAt(0).toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-bold text-white text-sm truncate">{registration.user.name}</p>
-                      <p className="text-xs truncate" style={{ color: 'rgba(255,255,255,0.4)' }}>{registration.user.email}</p>
-                      {registration.user.phone && (
-                        <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>{registration.user.phone}</p>
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <p className="font-bold text-white text-sm truncate">{registration.displayName || registration.user?.name || 'Unknown'}</p>
+                        {registration.isGuest && <span className="text-xs px-1.5 py-0.5 rounded flex-shrink-0" style={{ background: 'rgba(168,85,247,0.2)', color: '#a855f7', border: '1px solid rgba(168,85,247,0.3)' }}>Guest</span>}
+                      </div>
+                      <p className="text-xs truncate" style={{ color: 'rgba(255,255,255,0.4)' }}>{registration.displayEmail || registration.user?.email || '—'}</p>
+                      {(registration.displayPhone || registration.user?.phone) && (
+                        <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>{registration.displayPhone || registration.user?.phone}</p>
                       )}
                     </div>
                     <div className="text-right flex-shrink-0">
@@ -431,7 +434,7 @@ export default function TournamentManagementPage() {
                   <div className="flex flex-wrap gap-2">
                     {registration.paymentScreenshot && (
                       <button
-                        onClick={() => setScreenshotModal({ url: getImageUrl(registration.paymentScreenshot), playerName: registration.user.name, amount: registration.amountTotal })}
+                        onClick={() => setScreenshotModal({ url: getImageUrl(registration.paymentScreenshot), playerName: registration.displayName || registration.user?.name || 'Unknown', amount: registration.amountTotal })}
                         className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all"
                         style={{ background: 'rgba(0,212,255,0.12)', border: '1px solid rgba(0,212,255,0.3)', color: '#00d4ff' }}>
                         <ZoomIn className="h-3.5 w-3.5" /> Screenshot
@@ -439,7 +442,7 @@ export default function TournamentManagementPage() {
                     )}
                     {registration.status === 'cancellation_requested' && (
                       <button
-                        onClick={() => setRefundQrModal({ url: getImageUrl(registration.refundQrCode), playerName: registration.user.name, upiId: registration.refundUpiId, reason: registration.cancellationReason, amount: registration.refundAmount || registration.amountTotal })}
+                        onClick={() => setRefundQrModal({ url: getImageUrl(registration.refundQrCode), playerName: registration.displayName || registration.user?.name || 'Unknown', upiId: registration.refundUpiId, reason: registration.cancellationReason, amount: registration.refundAmount || registration.amountTotal })}
                         className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all"
                         style={{ background: 'rgba(249,115,22,0.12)', border: '1px solid rgba(249,115,22,0.3)', color: '#fb923c' }}>
                         <Eye className="h-3.5 w-3.5" /> Refund Details
@@ -488,16 +491,19 @@ export default function TournamentManagementPage() {
                         <div className="flex items-start gap-3">
                           <div className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm flex-shrink-0"
                             style={{ background: 'rgba(0,255,136,0.15)', color: '#00ff88' }}>
-                            {registration.user.name.charAt(0).toUpperCase()}
+                            {(registration.displayName || registration.user?.name || '?').charAt(0).toUpperCase()}
                           </div>
                           <div>
-                            <div className="text-white font-bold text-sm">{registration.user.name}</div>
-                            <div className="text-xs flex items-center gap-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                              <Mail className="h-3 w-3" />{registration.user.email}
+                            <div className="flex items-center gap-1.5">
+                              <div className="text-white font-bold text-sm">{registration.displayName || registration.user?.name || 'Unknown'}</div>
+                              {registration.isGuest && <span className="text-xs px-1 py-0.5 rounded" style={{ background: 'rgba(168,85,247,0.2)', color: '#a855f7', border: '1px solid rgba(168,85,247,0.3)' }}>Guest</span>}
                             </div>
-                            {registration.user.phone && (
+                            <div className="text-xs flex items-center gap-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                              <Mail className="h-3 w-3" />{registration.displayEmail || registration.user?.email || '—'}
+                            </div>
+                            {(registration.displayPhone || registration.user?.phone) && (
                               <div className="text-xs flex items-center gap-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                                <Phone className="h-3 w-3" />{registration.user.phone}
+                                <Phone className="h-3 w-3" />{registration.displayPhone || registration.user?.phone}
                               </div>
                             )}
                           </div>
@@ -535,7 +541,7 @@ export default function TournamentManagementPage() {
                       </td>
                       <td className="px-5 py-4">
                         {registration.paymentScreenshot ? (
-                          <button onClick={() => setScreenshotModal({ url: getImageUrl(registration.paymentScreenshot), playerName: registration.user.name, amount: registration.amountTotal })} className="group relative">
+                          <button onClick={() => setScreenshotModal({ url: getImageUrl(registration.paymentScreenshot), playerName: registration.displayName || registration.user?.name || 'Unknown', amount: registration.amountTotal })} className="group relative">
                             <img src={getImageUrl(registration.paymentScreenshot)} alt="Payment"
                               className="w-12 h-12 object-cover rounded-xl transition-all group-hover:ring-2"
                               style={{ border: '1px solid rgba(255,255,255,0.1)' }} />
@@ -568,7 +574,7 @@ export default function TournamentManagementPage() {
                           {registration.status === 'cancelled' && !registration.refundStatus && <span className="text-xs italic" style={{ color: 'rgba(255,255,255,0.3)' }}>No actions</span>}
                           {registration.status === 'cancellation_requested' && (
                             <>
-                              <button onClick={() => setRefundQrModal({ url: getImageUrl(registration.refundQrCode), playerName: registration.user.name, upiId: registration.refundUpiId, reason: registration.cancellationReason, amount: registration.refundAmount || registration.amountTotal })}
+                              <button onClick={() => setRefundQrModal({ url: getImageUrl(registration.refundQrCode), playerName: registration.displayName || registration.user?.name || 'Unknown', upiId: registration.refundUpiId, reason: registration.cancellationReason, amount: registration.refundAmount || registration.amountTotal })}
                                 className="px-2.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-all w-full justify-center"
                                 style={{ background: 'rgba(249,115,22,0.12)', border: '1px solid rgba(249,115,22,0.3)', color: '#fb923c' }}>
                                 <Eye className="h-3.5 w-3.5" /> Details
@@ -647,7 +653,7 @@ export default function TournamentManagementPage() {
                   </div>
                   <h3 className="text-xl font-bold text-white mb-2">Remove Registration?</h3>
                   <p className="text-gray-400">
-                    Remove <span className="text-red-400 font-medium">{confirmModal.registration.user.name}</span>'s registration permanently.
+                    Remove <span className="text-red-400 font-medium">{confirmModal.registration.displayName || confirmModal.registration.user?.name || 'Unknown'}</span>'s registration permanently.
                   </p>
                 </div>
                 <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 mb-6">

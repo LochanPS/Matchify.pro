@@ -1,3 +1,12 @@
+// Deterministic star particles — no Math.random()
+const MGMT_PARTICLES = Array.from({ length: 18 }, (_, i) => ({
+  w: (i * 5 + 2) % 3 + 1,
+  x: (i * 37 + 11) % 97, y: (i * 53 + 7) % 93,
+  o: ((i * 13) % 35) / 100 + 0.15,
+  dur: (i * 7) % 8 + 4, delay: (i * 3) % 5,
+  c: ['#00ff88', '#00d4ff', '#a855f7', '#10b981'][i % 4],
+}));
+
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import {
@@ -225,19 +234,44 @@ export default function TournamentManagementPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #0a0a1f 0%, #07071a 50%, #0a0a1f 100%)' }}>
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-400">Loading registrations...</p>
+          <div className="w-14 h-14 border-4 border-t-transparent rounded-full animate-spin mx-auto mb-4"
+            style={{ borderColor: 'rgba(0,255,136,0.3)', borderTopColor: '#00ff88' }}></div>
+          <p className="font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>Loading registrations...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    <div className="min-h-screen relative overflow-x-hidden" style={{ background: 'linear-gradient(180deg, #0a0a1f 0%, #07071a 40%, #0d1a2a 70%, #07071a 100%)' }}>
+      {/* Animated background */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-0 right-0 w-80 h-80 rounded-full blur-3xl opacity-15"
+          style={{ background: 'radial-gradient(circle, rgba(0,255,136,0.4) 0%, transparent 70%)' }} />
+        <div className="absolute bottom-1/4 left-0 w-64 h-64 rounded-full blur-3xl opacity-10"
+          style={{ background: 'radial-gradient(circle, rgba(0,212,255,0.4) 0%, transparent 70%)' }} />
+        {MGMT_PARTICLES.map((p, i) => (
+          <div key={i} className="absolute rounded-full"
+            style={{
+              width: `${p.w}px`, height: `${p.w}px`,
+              left: `${p.x}%`, top: `${p.y}%`,
+              background: p.c, opacity: p.o,
+              animation: `floatMgmt ${p.dur}s ease-in-out infinite`,
+              animationDelay: `${p.delay}s`,
+              boxShadow: `0 0 4px ${p.c}`,
+            }} />
+        ))}
+      </div>
+      <style>{`
+        @keyframes floatMgmt {
+          0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)}
+        }
+      `}</style>
+
       {/* Header */}
-      <div className="bg-slate-900/95 backdrop-blur-lg border-b border-white/10 sticky top-0 z-10">
+      <div className="relative sticky top-0 z-20" style={{ background: 'rgba(7,7,26,0.95)', borderBottom: '1px solid rgba(0,255,136,0.15)', backdropFilter: 'blur(20px)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <button
             onClick={() => navigate(-1)}
@@ -259,13 +293,14 @@ export default function TournamentManagementPage() {
           )}
 
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl shadow-lg shadow-purple-500/30">
-                <Users className="w-6 h-6 text-white" />
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{ background: 'linear-gradient(135deg, #00ff88, #00c853)' }}>
+                <Users className="w-6 h-6" style={{ color: '#07071a' }} />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-white">Tournament Registrations</h1>
-                <p className="text-gray-400">
+                <h1 className="text-xl font-black text-white">Tournament Registrations</h1>
+                <p className="text-sm font-medium" style={{ color: '#00ff88' }}>
                   {filteredRegistrations.length} registration{filteredRegistrations.length !== 1 ? 's' : ''}
                 </p>
               </div>
@@ -274,7 +309,8 @@ export default function TournamentManagementPage() {
               <button
                 onClick={() => handleExport('json')}
                 disabled={exporting}
-                className="flex items-center gap-2 px-4 py-2.5 bg-slate-700/50 text-gray-300 rounded-xl hover:bg-slate-700 transition-all disabled:opacity-50 border border-white/10"
+                className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium disabled:opacity-50 transition-all"
+                style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.7)' }}
               >
                 <FileJson className="h-4 w-4" />
                 JSON
@@ -282,7 +318,8 @@ export default function TournamentManagementPage() {
               <button
                 onClick={() => handleExport('csv')}
                 disabled={exporting}
-                className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl hover:shadow-lg hover:shadow-emerald-500/30 transition-all disabled:opacity-50 font-medium"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm disabled:opacity-50 transition-all hover:scale-105"
+                style={{ background: 'linear-gradient(135deg, #00ff88, #00c853)', color: '#07071a' }}
               >
                 <FileSpreadsheet className="h-4 w-4" />
                 Export CSV
@@ -292,262 +329,271 @@ export default function TournamentManagementPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
 
         {/* Filters */}
-        <div className="mb-6 flex flex-wrap gap-2 items-center">
-          <div className="flex items-center gap-2 text-gray-400 mr-2">
+        <div className="mb-5 flex flex-wrap gap-2 items-center">
+          <div className="flex items-center gap-2 mr-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
             <Filter className="w-4 h-4" />
-            <span className="text-sm font-medium">Filter:</span>
+            <span className="text-sm font-semibold">Filter:</span>
           </div>
           {['all', 'confirmed', 'pending', 'cancellation_requested', 'cancelled'].map((status) => (
             <button
               key={status}
               onClick={() => setFilter(status)}
-              className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                filter === status
+              className="px-3 py-2 rounded-xl text-sm font-bold transition-all"
+              style={{
+                background: filter === status
                   ? status === 'cancellation_requested'
-                    ? 'bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-lg'
-                    : 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg'
-                  : 'bg-slate-800/50 text-gray-400 hover:bg-slate-700/50 border border-white/10'
-              }`}
+                    ? 'linear-gradient(135deg, rgba(249,115,22,0.3), rgba(245,158,11,0.2))'
+                    : 'linear-gradient(135deg, rgba(0,255,136,0.25), rgba(0,200,83,0.15))'
+                  : 'rgba(255,255,255,0.05)',
+                border: filter === status
+                  ? status === 'cancellation_requested' ? '1px solid rgba(249,115,22,0.5)' : '1px solid rgba(0,255,136,0.4)'
+                  : '1px solid rgba(255,255,255,0.1)',
+                color: filter === status
+                  ? status === 'cancellation_requested' ? '#fb923c' : '#00ff88'
+                  : 'rgba(255,255,255,0.5)',
+              }}
             >
               {status === 'cancellation_requested' ? 'Refund Requests' : status.charAt(0).toUpperCase() + status.slice(1)}
-              <span className="ml-1.5 text-xs opacity-75">
+              <span className="ml-1.5 text-xs opacity-70">
                 ({status === 'all' ? registrations.length : registrations.filter((r) => r.status === status).length})
               </span>
             </button>
           ))}
         </div>
 
-        {/* Registrations Table */}
-        <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-white/10 overflow-hidden">
+        {/* Registrations — mobile cards + desktop table */}
+        <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid rgba(0,255,136,0.12)', background: 'rgba(7,7,26,0.7)', backdropFilter: 'blur(20px)' }}>
           {filteredRegistrations.length === 0 ? (
             <div className="p-12 text-center">
-              <div className="w-20 h-20 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Users className="h-10 w-10 text-blue-400" />
+              <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4"
+                style={{ background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.2)' }}>
+                <Users className="h-10 w-10" style={{ color: '#00ff88' }} />
               </div>
-              <h3 className="text-xl font-semibold text-white mb-2">No registrations found</h3>
-              <p className="text-gray-400">
+              <h3 className="text-xl font-bold text-white mb-2">No registrations found</h3>
+              <p style={{ color: 'rgba(255,255,255,0.4)' }}>
                 {filter === 'all'
                   ? 'No one has registered for this tournament yet'
                   : `No ${filter === 'cancellation_requested' ? 'refund requests' : filter} registrations`}
               </p>
             </div>
           ) : (
-            <div className="overflow-x-auto custom-scrollbar">
+            <div>
+            {/* Mobile: Cards */}
+            <div className="block md:hidden divide-y" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
+              {filteredRegistrations.map((registration) => (
+                <div key={registration.id} className="p-4 space-y-3">
+                  {/* Player row */}
+                  <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 rounded-xl flex items-center justify-center font-black text-base flex-shrink-0"
+                      style={{ background: 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,200,83,0.1))', border: '1px solid rgba(0,255,136,0.3)', color: '#00ff88' }}>
+                      {registration.user.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-white text-sm truncate">{registration.user.name}</p>
+                      <p className="text-xs truncate" style={{ color: 'rgba(255,255,255,0.4)' }}>{registration.user.email}</p>
+                      {registration.user.phone && (
+                        <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>{registration.user.phone}</p>
+                      )}
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <p className="font-black text-white">₹{registration.amountTotal}</p>
+                      <div className="flex items-center gap-1 justify-end mt-0.5">
+                        {getStatusIcon(registration.status)}
+                        <span className={`text-xs font-bold ${getStatusBadge(registration.status).includes('emerald') ? 'text-emerald-400' : getStatusBadge(registration.status).includes('amber') ? 'text-amber-400' : getStatusBadge(registration.status).includes('orange') ? 'text-orange-400' : 'text-gray-400'}`}>
+                          {registration.status === 'cancellation_requested' ? 'Refund Req.' : registration.status}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  {/* Category + Partner */}
+                  <div className="flex flex-wrap gap-2 text-xs">
+                    <span className="px-2 py-1 rounded-lg font-semibold" style={{ background: 'rgba(0,255,136,0.1)', border: '1px solid rgba(0,255,136,0.2)', color: '#00ff88' }}>
+                      {registration.category.name}
+                    </span>
+                    <span className="px-2 py-1 rounded-lg font-semibold" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)' }}>
+                      {registration.category.format}
+                    </span>
+                    {registration.isQuickAdded && (
+                      <span className="px-2 py-1 rounded-lg font-semibold" style={{ background: 'rgba(168,85,247,0.15)', border: '1px solid rgba(168,85,247,0.3)', color: '#a855f7' }}>
+                        Quick Added
+                      </span>
+                    )}
+                    {registration.partner && (
+                      <span className="px-2 py-1 rounded-lg font-semibold" style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                        + {registration.partner.name}{registration.partnerConfirmed ? ' ✓' : ' (pending)'}
+                      </span>
+                    )}
+                  </div>
+                  {/* Actions */}
+                  <div className="flex flex-wrap gap-2">
+                    {registration.paymentScreenshot && (
+                      <button
+                        onClick={() => setScreenshotModal({ url: getImageUrl(registration.paymentScreenshot), playerName: registration.user.name, amount: registration.amountTotal })}
+                        className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all"
+                        style={{ background: 'rgba(0,212,255,0.12)', border: '1px solid rgba(0,212,255,0.3)', color: '#00d4ff' }}>
+                        <ZoomIn className="h-3.5 w-3.5" /> Screenshot
+                      </button>
+                    )}
+                    {registration.status === 'cancellation_requested' && (
+                      <button
+                        onClick={() => setRefundQrModal({ url: getImageUrl(registration.refundQrCode), playerName: registration.user.name, upiId: registration.refundUpiId, reason: registration.cancellationReason, amount: registration.refundAmount || registration.amountTotal })}
+                        className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all"
+                        style={{ background: 'rgba(249,115,22,0.12)', border: '1px solid rgba(249,115,22,0.3)', color: '#fb923c' }}>
+                        <Eye className="h-3.5 w-3.5" /> Refund Details
+                      </button>
+                    )}
+                    {registration.status === 'cancelled' && registration.refundStatus === 'approved' && (
+                      <button
+                        onClick={() => openCompleteRefundModal(registration)}
+                        disabled={actionLoading === registration.id}
+                        className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all disabled:opacity-50"
+                        style={{ background: 'rgba(0,255,136,0.12)', border: '1px solid rgba(0,255,136,0.3)', color: '#00ff88' }}>
+                        <CreditCard className="h-3.5 w-3.5" /> Complete Refund
+                      </button>
+                    )}
+                    {registration.status === 'cancelled' && registration.refundStatus === 'completed' && (
+                      <span className="flex items-center gap-1 text-xs font-medium" style={{ color: '#00ff88' }}>
+                        <CheckCircle className="h-3.5 w-3.5" /> Refund Done
+                      </span>
+                    )}
+                    {actionLoading === registration.id && (
+                      <div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: 'rgba(0,255,136,0.3)', borderTopColor: '#00ff88' }}></div>
+                    )}
+                  </div>
+                  <p className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>{formatDateIndian(registration.createdAt)}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop: Table */}
+            <div className="hidden md:block overflow-x-auto custom-scrollbar">
               <table className="min-w-full">
                 <thead>
-                  <tr className="border-b border-white/10 bg-slate-900/50">
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                      Player
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                      Category
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                      Partner
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                      Amount
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                      Payment
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                      Date
-                    </th>
-                    <th className="px-6 py-4 text-center text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                      Actions
-                    </th>
+                  <tr style={{ borderBottom: '1px solid rgba(0,255,136,0.1)', background: 'rgba(0,255,136,0.04)' }}>
+                    {['Player', 'Category', 'Partner', 'Amount', 'Payment', 'Status', 'Date', 'Actions'].map(h => (
+                      <th key={h} className="px-5 py-3.5 text-left text-xs font-black uppercase tracking-wider" style={{ color: 'rgba(0,255,136,0.7)' }}>{h}</th>
+                    ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5">
+                <tbody>
                   {filteredRegistrations.map((registration) => (
-                    <tr key={registration.id} className="hover:bg-white/5 transition-colors">
-                      <td className="px-6 py-4">
+                    <tr key={registration.id} className="transition-colors" style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}
+                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,255,136,0.03)'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                    >
+                      <td className="px-5 py-4">
                         <div className="flex items-start gap-3">
-                          <div className="w-10 h-10 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
-                            <span className="text-blue-400 font-semibold">
-                              {registration.user.name.charAt(0).toUpperCase()}
-                            </span>
+                          <div className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm flex-shrink-0"
+                            style={{ background: 'rgba(0,255,136,0.15)', color: '#00ff88' }}>
+                            {registration.user.name.charAt(0).toUpperCase()}
                           </div>
                           <div>
-                            <div className="text-white font-medium">{registration.user.name}</div>
-                            <div className="text-sm text-gray-500 flex items-center gap-1">
-                              <Mail className="h-3 w-3" />
-                              {registration.user.email}
+                            <div className="text-white font-bold text-sm">{registration.user.name}</div>
+                            <div className="text-xs flex items-center gap-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                              <Mail className="h-3 w-3" />{registration.user.email}
                             </div>
                             {registration.user.phone && (
-                              <div className="text-sm text-gray-500 flex items-center gap-1">
-                                <Phone className="h-3 w-3" />
-                                {registration.user.phone}
+                              <div className="text-xs flex items-center gap-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                                <Phone className="h-3 w-3" />{registration.user.phone}
                               </div>
                             )}
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="text-white">{registration.category.name}</div>
-                        <div className="text-sm text-gray-500">
-                          {registration.category.format} • {registration.category.gender}
-                        </div>
+                      <td className="px-5 py-4">
+                        <div className="text-white text-sm font-semibold">{registration.category.name}</div>
+                        <div className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>{registration.category.format} · {registration.category.gender}</div>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-5 py-4">
                         {registration.partner ? (
                           <div>
-                            <div className="text-white">{registration.partner.name}</div>
-                            <div className="text-sm">
-                              {registration.partnerConfirmed ? (
-                                <span className="text-emerald-400 flex items-center gap-1">
-                                  <CheckCircle className="w-3 h-3" /> Confirmed
-                                </span>
-                              ) : (
-                                <span className="text-amber-400 flex items-center gap-1">
-                                  <Clock className="w-3 h-3" /> Pending
-                                </span>
-                              )}
+                            <div className="text-white text-sm">{registration.partner.name}</div>
+                            <div className="text-xs">
+                              {registration.partnerConfirmed
+                                ? <span className="text-emerald-400 flex items-center gap-1"><CheckCircle className="w-3 h-3" /> Confirmed</span>
+                                : <span className="text-amber-400 flex items-center gap-1"><Clock className="w-3 h-3" /> Pending</span>}
                             </div>
                           </div>
                         ) : registration.partnerEmail ? (
                           <div>
-                            <div className="text-gray-400 text-sm">{registration.partnerEmail}</div>
-                            <span className="text-amber-400 text-sm flex items-center gap-1">
-                              <Clock className="w-3 h-3" /> Pending
-                            </span>
+                            <div className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>{registration.partnerEmail}</div>
+                            <span className="text-amber-400 text-xs flex items-center gap-1"><Clock className="w-3 h-3" /> Pending</span>
                           </div>
-                        ) : (
-                          <span className="text-gray-600">N/A</span>
-                        )}
+                        ) : <span style={{ color: 'rgba(255,255,255,0.25)' }}>N/A</span>}
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="text-white font-semibold">₹{registration.amountTotal}</div>
-                        <div className="flex items-center gap-2">
-                          <div className="text-xs text-gray-500">{registration.paymentStatus}</div>
+                      <td className="px-5 py-4">
+                        <div className="font-black text-white">₹{registration.amountTotal}</div>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          <span className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>{registration.paymentStatus}</span>
                           {registration.isQuickAdded && (
-                            <span className="px-2 py-1 bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded text-xs font-medium">
-                              Quick Added
-                            </span>
+                            <span className="px-1.5 py-0.5 rounded text-xs font-bold" style={{ background: 'rgba(168,85,247,0.2)', color: '#a855f7', border: '1px solid rgba(168,85,247,0.3)' }}>Quick</span>
                           )}
                         </div>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-5 py-4">
                         {registration.paymentScreenshot ? (
-                          <button
-                            onClick={() => setScreenshotModal({
-                              url: getImageUrl(registration.paymentScreenshot),
-                              playerName: registration.user.name,
-                              amount: registration.amountTotal
-                            })}
-                            className="group relative"
-                          >
-                            <img
-                              src={getImageUrl(registration.paymentScreenshot)}
-                              alt="Payment"
-                              className="w-14 h-14 object-cover rounded-xl border-2 border-white/10 group-hover:border-blue-500/50 transition-all shadow-lg"
-                            />
+                          <button onClick={() => setScreenshotModal({ url: getImageUrl(registration.paymentScreenshot), playerName: registration.user.name, amount: registration.amountTotal })} className="group relative">
+                            <img src={getImageUrl(registration.paymentScreenshot)} alt="Payment"
+                              className="w-12 h-12 object-cover rounded-xl transition-all group-hover:ring-2"
+                              style={{ border: '1px solid rgba(255,255,255,0.1)' }} />
                             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 rounded-xl flex items-center justify-center transition-all">
-                              <ZoomIn className="w-5 h-5 text-white opacity-0 group-hover:opacity-100 transition-all" />
+                              <ZoomIn className="w-4 h-4 text-white opacity-0 group-hover:opacity-100 transition-all" />
                             </div>
                           </button>
                         ) : (
-                          <div className="flex items-center gap-2 text-gray-500">
-                            <Image className="w-5 h-5" />
-                            <span className="text-xs">None</span>
+                          <div className="flex items-center gap-1.5" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                            <Image className="w-4 h-4" /><span className="text-xs">None</span>
                           </div>
                         )}
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
+                      <td className="px-5 py-4">
+                        <div className="flex items-center gap-1.5">
                           {getStatusIcon(registration.status)}
-                          <span className={`badge ${getStatusBadge(registration.status)}`}>
+                          <span className={`badge ${getStatusBadge(registration.status)} text-xs`}>
                             {registration.status === 'cancellation_requested' ? 'Refund' : registration.status}
                           </span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-gray-400 text-sm">
+                      <td className="px-5 py-4 text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
                         {formatDateIndian(registration.createdAt)}
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="flex flex-col items-center gap-2">
-                          {registration.status === 'pending' && (
-                            <span className="text-yellow-400 text-sm flex items-center gap-1">
-                              <Clock className="h-4 w-4" />
-                              Pending Admin Approval
-                            </span>
-                          )}
-                          {registration.status === 'confirmed' && (
-                            <span className="text-emerald-400 text-sm flex items-center gap-1">
-                              <CheckCircle className="h-4 w-4" />
-                              Registered
-                            </span>
-                          )}
-                          {registration.status === 'rejected' && (
-                            <span className="text-red-400 text-sm flex items-center gap-1">
-                              <XCircle className="h-4 w-4" />
-                              Rejected by Admin
-                            </span>
-                          )}
-                          {registration.status === 'cancelled' && (
-                            <span className="text-gray-400 text-sm flex items-center gap-1">
-                              <XCircle className="h-4 w-4" />
-                              Cancelled
-                            </span>
-                          )}
+                      <td className="px-5 py-4">
+                        <div className="flex flex-col items-center gap-1.5">
+                          {registration.status === 'pending' && <span className="text-amber-400 text-xs flex items-center gap-1"><Clock className="h-3.5 w-3.5" />Pending Admin</span>}
+                          {registration.status === 'confirmed' && <span className="text-emerald-400 text-xs flex items-center gap-1"><CheckCircle className="h-3.5 w-3.5" />Registered</span>}
+                          {registration.status === 'rejected' && <span className="text-red-400 text-xs flex items-center gap-1"><XCircle className="h-3.5 w-3.5" />Rejected</span>}
+                          {registration.status === 'cancelled' && !registration.refundStatus && <span className="text-xs italic" style={{ color: 'rgba(255,255,255,0.3)' }}>No actions</span>}
                           {registration.status === 'cancellation_requested' && (
                             <>
-                              <button
-                                onClick={() => setRefundQrModal({
-                                  url: getImageUrl(registration.refundQrCode),
-                                  playerName: registration.user.name,
-                                  upiId: registration.refundUpiId,
-                                  reason: registration.cancellationReason,
-                                  amount: registration.refundAmount || registration.amountTotal
-                                })}
-                                className="p-2 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 transition-colors w-full flex items-center justify-center gap-1"
-                                title="View Details"
-                              >
-                                <Eye className="h-4 w-4" />
-                                <span className="text-xs">Details</span>
+                              <button onClick={() => setRefundQrModal({ url: getImageUrl(registration.refundQrCode), playerName: registration.user.name, upiId: registration.refundUpiId, reason: registration.cancellationReason, amount: registration.refundAmount || registration.amountTotal })}
+                                className="px-2.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-all w-full justify-center"
+                                style={{ background: 'rgba(249,115,22,0.12)', border: '1px solid rgba(249,115,22,0.3)', color: '#fb923c' }}>
+                                <Eye className="h-3.5 w-3.5" /> Details
                               </button>
-                              <span className="text-orange-400 text-sm flex items-center gap-1">
-                                <AlertTriangle className="h-4 w-4" />
-                                Awaiting Admin Decision
-                              </span>
+                              <span className="text-orange-400 text-xs flex items-center gap-1"><AlertTriangle className="h-3.5 w-3.5" />Awaiting Admin</span>
                             </>
                           )}
                           {registration.status === 'cancelled' && registration.refundStatus === 'approved' && (
-                            <button
-                              onClick={() => openCompleteRefundModal(registration)}
-                              disabled={actionLoading === registration.id}
-                              className="p-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition-colors w-full flex items-center justify-center gap-1 disabled:opacity-50"
-                              title="Mark Refund as Completed"
-                            >
-                              <CreditCard className="h-4 w-4" />
-                              <span className="text-xs">Complete Refund</span>
+                            <button onClick={() => openCompleteRefundModal(registration)} disabled={actionLoading === registration.id}
+                              className="px-2.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 disabled:opacity-50 transition-all w-full justify-center"
+                              style={{ background: 'rgba(0,255,136,0.12)', border: '1px solid rgba(0,255,136,0.3)', color: '#00ff88' }}>
+                              <CreditCard className="h-3.5 w-3.5" /> Refund
                             </button>
                           )}
                           {registration.status === 'cancelled' && registration.refundStatus === 'completed' && (
-                            <span className="text-green-400 text-sm flex items-center gap-1">
-                              <CheckCircle className="h-4 w-4" />
-                              Refund Completed
-                            </span>
+                            <span className="text-emerald-400 text-xs flex items-center gap-1"><CheckCircle className="h-3.5 w-3.5" />Done</span>
                           )}
-                          {registration.status === 'cancelled' && !registration.refundStatus && (
-                            <span className="text-gray-500 text-sm italic">No actions</span>
-                          )}
-                          {actionLoading === registration.id && (
-                            <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                          )}
+                          {actionLoading === registration.id && <div className="w-4 h-4 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: 'rgba(0,255,136,0.3)', borderTopColor: '#00ff88' }}></div>}
                         </div>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+            </div>
             </div>
           )}
         </div>
@@ -556,50 +602,27 @@ export default function TournamentManagementPage() {
 
       {/* Screenshot Modal */}
       {screenshotModal && (
-        <div 
-          className="modal-overlay"
-          onClick={() => setScreenshotModal(null)}
-        >
-          <div 
-            className="bg-slate-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden border border-white/10 animate-scale-in"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-white/10 bg-gradient-to-r from-blue-500/10 to-purple-500/10">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setScreenshotModal(null)}>
+          <div className="rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden animate-scale-in"
+            style={{ background: '#0d1117', border: '1px solid rgba(0,255,136,0.2)' }}
+            onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
               <div>
-                <h3 className="text-lg font-bold text-white">Payment Screenshot</h3>
-                <p className="text-sm text-gray-400">
-                  From <span className="text-blue-400 font-medium">{screenshotModal.playerName}</span> • ₹{screenshotModal.amount}
+                <h3 className="text-base font-black text-white">Payment Screenshot</h3>
+                <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                  From <span style={{ color: '#00ff88' }}>{screenshotModal.playerName}</span> · ₹{screenshotModal.amount}
                 </p>
               </div>
-              <button
-                onClick={() => setScreenshotModal(null)}
-                className="p-2 hover:bg-white/10 rounded-xl transition-colors"
-              >
-                <X className="w-5 h-5 text-gray-400" />
+              <button onClick={() => setScreenshotModal(null)} className="w-9 h-9 rounded-xl flex items-center justify-center transition-all" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                <X className="w-4 h-4 text-gray-400" />
               </button>
             </div>
-            
-            {/* Image */}
-            <div className="p-4 bg-slate-900/50 max-h-[70vh] overflow-auto custom-scrollbar">
-              <img
-                src={screenshotModal.url}
-                alt="Payment Screenshot"
-                className="w-full h-auto rounded-xl shadow-lg"
-              />
+            <div className="p-4 max-h-[65vh] overflow-auto" style={{ background: 'rgba(0,0,0,0.3)' }}>
+              <img src={screenshotModal.url} alt="Payment Screenshot" className="w-full h-auto rounded-xl shadow-lg" />
             </div>
-            
-            {/* Footer */}
-            <div className="p-4 border-t border-white/10 bg-slate-800/50 flex items-center justify-between">
-              <p className="text-sm text-gray-400">
-                Verify the payment amount matches ₹{screenshotModal.amount}
-              </p>
-              <button
-                onClick={() => setScreenshotModal(null)}
-                className="px-4 py-2 bg-white/10 text-white rounded-xl hover:bg-white/20 transition-colors font-medium"
-              >
-                Close
-              </button>
+            <div className="p-4 flex items-center justify-between" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Verify amount matches ₹{screenshotModal.amount}</p>
+              <button onClick={() => setScreenshotModal(null)} className="px-4 py-2 rounded-xl text-white font-bold text-sm transition-all" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>Close</button>
             </div>
           </div>
         </div>
@@ -664,82 +687,49 @@ export default function TournamentManagementPage() {
 
       {/* Refund Details Modal */}
       {refundQrModal && (
-        <div 
-          className="modal-overlay"
-          onClick={() => setRefundQrModal(null)}
-        >
-          <div 
-            className="bg-slate-800 rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-hidden border border-white/10 animate-scale-in"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-white/10 bg-gradient-to-r from-orange-500/10 to-amber-500/10">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setRefundQrModal(null)}>
+          <div className="rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-hidden animate-scale-in"
+            style={{ background: '#0d1117', border: '1px solid rgba(249,115,22,0.3)' }}
+            onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.08)', background: 'rgba(249,115,22,0.08)' }}>
               <div>
-                <h3 className="text-lg font-bold text-white">Refund Request Details</h3>
-                <p className="text-sm text-gray-400">
-                  From <span className="text-orange-400 font-medium">{refundQrModal.playerName}</span>
+                <h3 className="text-base font-black text-white">Refund Request Details</h3>
+                <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                  From <span style={{ color: '#fb923c' }}>{refundQrModal.playerName}</span>
                 </p>
               </div>
-              <button
-                onClick={() => setRefundQrModal(null)}
-                className="p-2 hover:bg-white/10 rounded-xl transition-colors"
-              >
-                <X className="w-5 h-5 text-gray-400" />
+              <button onClick={() => setRefundQrModal(null)} className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                <X className="w-4 h-4 text-gray-400" />
               </button>
             </div>
-            
-            {/* Content */}
-            <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto custom-scrollbar">
-              {/* Refund Amount */}
-              <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4">
-                <div className="flex items-center gap-2 text-emerald-400 mb-1">
-                  <CreditCard className="w-5 h-5" />
-                  <span className="font-medium">Refund Amount</span>
+            <div className="p-5 space-y-3 max-h-[60vh] overflow-y-auto custom-scrollbar">
+              <div className="rounded-xl p-4" style={{ background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.2)' }}>
+                <div className="flex items-center gap-2 mb-1" style={{ color: '#00ff88' }}>
+                  <CreditCard className="w-4 h-4" /><span className="text-sm font-bold">Refund Amount</span>
                 </div>
-                <p className="text-2xl font-bold text-white">₹{refundQrModal.amount}</p>
+                <p className="text-2xl font-black text-white">₹{refundQrModal.amount}</p>
               </div>
-
-              {/* UPI ID */}
-              <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4">
-                <div className="flex items-center gap-2 text-blue-400 mb-1">
-                  <QrCode className="w-5 h-5" />
-                  <span className="font-medium">Player's UPI ID</span>
+              <div className="rounded-xl p-4" style={{ background: 'rgba(0,212,255,0.08)', border: '1px solid rgba(0,212,255,0.2)' }}>
+                <div className="flex items-center gap-2 mb-1" style={{ color: '#00d4ff' }}>
+                  <QrCode className="w-4 h-4" /><span className="text-sm font-bold">Player's UPI ID</span>
                 </div>
-                <p className="text-lg font-mono text-white">{refundQrModal.upiId || 'Not provided'}</p>
+                <p className="text-base font-mono text-white">{refundQrModal.upiId || 'Not provided'}</p>
               </div>
-
-              {/* Cancellation Reason */}
-              <div className="bg-white/5 border border-white/10 rounded-xl p-4">
-                <div className="flex items-center gap-2 text-gray-400 mb-1">
-                  <AlertTriangle className="w-5 h-5" />
-                  <span className="font-medium">Reason for Cancellation</span>
+              <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                <div className="flex items-center gap-2 mb-1" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                  <AlertTriangle className="w-4 h-4" /><span className="text-sm font-bold">Cancellation Reason</span>
                 </div>
-                <p className="text-white">{refundQrModal.reason || 'No reason provided'}</p>
+                <p className="text-white text-sm">{refundQrModal.reason || 'No reason provided'}</p>
               </div>
-
-              {/* QR Code */}
               {refundQrModal.url && (
-                <div className="bg-slate-900/80 border border-white/10 rounded-xl p-4">
-                  <p className="text-sm font-medium text-gray-400 mb-3 text-center">Player's Payment QR Code</p>
-                  <div className="p-3 bg-slate-800/50 border border-white/5 rounded-xl mx-auto max-w-xs">
-                    <img
-                      src={refundQrModal.url}
-                      alt="Refund QR Code"
-                      className="w-full rounded-lg shadow-lg"
-                    />
-                  </div>
+                <div className="rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                  <p className="text-xs font-bold text-center mb-3" style={{ color: 'rgba(255,255,255,0.4)' }}>Player's Payment QR Code</p>
+                  <img src={refundQrModal.url} alt="Refund QR Code" className="w-full max-w-xs mx-auto rounded-xl shadow-lg block" />
                 </div>
               )}
             </div>
-            
-            {/* Footer */}
-            <div className="p-4 border-t border-white/10 bg-slate-800/50">
-              <button
-                onClick={() => setRefundQrModal(null)}
-                className="w-full px-4 py-3 bg-white/10 text-white rounded-xl hover:bg-white/20 transition-colors font-medium"
-              >
-                Close
-              </button>
+            <div className="p-4" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+              <button onClick={() => setRefundQrModal(null)} className="w-full px-4 py-3 rounded-xl text-white font-bold transition-all" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}>Close</button>
             </div>
           </div>
         </div>

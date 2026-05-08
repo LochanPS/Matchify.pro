@@ -41,52 +41,49 @@ const DeleteTournamentModal = ({ isOpen, onClose, onConfirm, tournamentName, isD
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
-        {/* Header - Red gradient for cancel action */}
-        <div className="bg-gradient-to-r from-red-500 to-rose-600 p-5 text-white">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="rounded-2xl shadow-2xl max-w-md w-full overflow-hidden"
+        style={{ background: 'linear-gradient(180deg, #0f0f2e 0%, #0d1117 100%)', border: '2px solid rgba(239,68,68,0.4)' }}>
+        {/* Header */}
+        <div className="p-5 text-white" style={{ background: 'linear-gradient(135deg, rgba(239,68,68,0.3), rgba(220,38,38,0.2))', borderBottom: '1px solid rgba(239,68,68,0.3)' }}>
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-              <ExclamationTriangleIcon className="h-6 w-6" />
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: 'rgba(239,68,68,0.25)', border: '1px solid rgba(239,68,68,0.4)' }}>
+              <ExclamationTriangleIcon className="h-6 w-6 text-red-400" />
             </div>
             <div>
-              <h2 className="text-xl font-black">Cancel Tournament</h2>
-              <p className="text-red-100 text-sm mt-0.5">This action cannot be undone</p>
+              <h2 className="text-xl font-black text-white">Cancel Tournament</h2>
+              <p className="text-sm mt-0.5" style={{ color: 'rgba(252,165,165,0.8)' }}>This action cannot be undone</p>
             </div>
           </div>
         </div>
 
         <div className="p-5">
-          <p className="text-gray-700 text-sm mb-3">
-            You are about to cancel <span className="font-bold text-gray-900">"{tournamentName}"</span>.
+          <p className="text-sm mb-2" style={{ color: 'rgba(255,255,255,0.7)' }}>
+            You are about to cancel <span className="font-black text-white">"{tournamentName}"</span>.
           </p>
-          
-          <p className="text-gray-500 text-xs mb-4">
+          <p className="text-xs mb-4" style={{ color: 'rgba(255,255,255,0.4)' }}>
             All registered participants will be notified about this cancellation with your reason.
           </p>
 
           {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm font-medium">
+            <div className="mb-4 p-3 rounded-xl text-sm font-medium" style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', color: '#fca5a5' }}>
               {error}
             </div>
           )}
 
           <div className="mb-4">
-            <label className="block text-sm font-bold text-gray-700 mb-2">
-              Reason for Cancellation <span className="text-red-500">*</span>
+            <label className="block text-sm font-black text-white mb-2">
+              Reason for Cancellation <span className="text-red-400">*</span>
             </label>
             <textarea
               value={reason}
-              onChange={(e) => {
-                setReason(e.target.value);
-                setError('');
-              }}
+              onChange={(e) => { setReason(e.target.value); setError(''); }}
               placeholder="Please explain why you are cancelling this tournament..."
               rows={4}
-              className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-red-500 focus:border-red-500 resize-none transition-all text-sm"
-              style={{ color: '#111827' }}
+              className="w-full px-4 py-3 rounded-xl resize-none transition-all text-sm text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-red-500"
+              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(239,68,68,0.3)', color: 'white' }}
             />
-            <p className="mt-1.5 text-xs text-gray-500">
+            <p className="mt-1.5 text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
               This message will be sent to all registered participants.
             </p>
           </div>
@@ -95,14 +92,16 @@ const DeleteTournamentModal = ({ isOpen, onClose, onConfirm, tournamentName, isD
             <button
               onClick={onClose}
               disabled={isDeleting}
-              className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 font-bold text-sm"
+              className="flex-1 px-4 py-3 rounded-xl font-bold text-sm disabled:opacity-50 transition-all"
+              style={{ border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.7)' }}
             >
               Keep Tournament
             </button>
             <button
               onClick={handleSubmit}
               disabled={isDeleting || !reason.trim()}
-              className="flex-1 px-4 py-3 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl hover:shadow-lg hover:shadow-red-500/30 transition-all font-bold text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="flex-1 px-4 py-3 rounded-xl font-bold text-sm text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"
+              style={{ background: 'linear-gradient(135deg, #ef4444, #dc2626)', boxShadow: '0 4px 15px rgba(239,68,68,0.3)' }}
             >
               {isDeleting ? (
                 <>
@@ -1251,46 +1250,47 @@ const TournamentDetailPage = () => {
         </div>
       )}
 
-      {/* Login Required Modal - Mobile Perfect */}
+      {/* Login Required Modal */}
       {showLoginModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden">
-            <div className="bg-gradient-to-r from-emerald-600 to-emerald-700 p-5 text-white">
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden"
+            style={{ background: 'linear-gradient(180deg, #0f0f2e 0%, #0d1117 100%)', border: '1px solid rgba(0,255,136,0.3)' }}>
+            <div className="p-5 text-white" style={{ background: 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,200,83,0.12))', borderBottom: '1px solid rgba(0,255,136,0.15)' }}>
               <div className="flex items-center justify-center gap-2">
-                <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-                  <UserIcon className="h-5 w-5" />
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'rgba(0,255,136,0.2)' }}>
+                  <UserIcon className="h-5 w-5" style={{ color: '#00ff88' }} />
                 </div>
-                <h2 className="text-lg font-black">Sign In Required</h2>
+                <h2 className="text-lg font-black text-white">Sign In Required</h2>
               </div>
             </div>
-
             <div className="p-5">
-              <p className="text-gray-700 text-sm mb-5 text-center">
-                To register for <span className="font-bold">"{tournament?.name}"</span>, you need to sign in or create an account first.
+              <p className="text-sm mb-5 text-center" style={{ color: 'rgba(255,255,255,0.65)' }}>
+                To register for <span className="font-bold text-white">"{tournament?.name}"</span>, sign in or create an account.
               </p>
-
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 <Link
                   to={`/register?redirect=/tournaments/${id}/register`}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl hover:shadow-lg hover:shadow-emerald-500/30 transition-all font-bold text-sm"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold text-sm transition-all hover:scale-[1.02]"
+                  style={{ background: 'linear-gradient(135deg, #00ff88, #00c853)', color: '#07071a' }}
                 >
                   Create Account
                 </Link>
                 <Link
                   to={`/login?redirect=/tournaments/${id}/register`}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 border-2 border-emerald-200 text-emerald-700 rounded-xl hover:bg-emerald-50 transition-all font-bold text-sm"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold text-sm transition-all"
+                  style={{ border: '1px solid rgba(0,255,136,0.4)', color: '#00ff88', background: 'rgba(0,255,136,0.08)' }}
                 >
                   Sign In
                 </Link>
                 <button
                   onClick={() => setShowLoginModal(false)}
-                  className="w-full px-4 py-2.5 text-gray-400 hover:text-gray-700 transition-colors font-medium text-sm"
+                  className="w-full px-4 py-2.5 font-medium text-sm transition-colors"
+                  style={{ color: 'rgba(255,255,255,0.4)' }}
                 >
                   Cancel
                 </button>
               </div>
-
-              <p className="text-center text-xs text-gray-400 mt-3">
+              <p className="text-center text-xs mt-3" style={{ color: 'rgba(255,255,255,0.3)' }}>
                 Registration is free and takes less than a minute!
               </p>
             </div>
@@ -1298,63 +1298,40 @@ const TournamentDetailPage = () => {
         </div>
       )}
 
-      {/* Publish Confirmation Modal - Mobile Perfect */}
+      {/* Publish Confirmation Modal */}
       {showPublishConfirmModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden">
-            <div 
-              className="p-5 text-white"
-              style={{ background: 'linear-gradient(135deg, #00c853, #00ff88)' }}
-            >
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden"
+            style={{ background: 'linear-gradient(180deg, #0f0f2e 0%, #0d1117 100%)', border: '1px solid rgba(0,255,136,0.3)' }}>
+            <div className="p-5" style={{ background: 'linear-gradient(135deg, #00c853, #00ff88)' }}>
               <div className="flex items-center justify-center gap-2">
                 <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-                  <SparklesIcon className="h-5 w-5" />
+                  <SparklesIcon className="h-5 w-5 text-white" />
                 </div>
-                <h2 className="text-lg font-black">Publish Tournament</h2>
+                <h2 className="text-lg font-black text-white">Publish Tournament</h2>
               </div>
             </div>
-
             <div className="p-5">
-              <p className="text-gray-700 text-sm mb-3 text-center">
-                You are about to publish <span className="font-bold">"{tournament?.name}"</span>.
+              <p className="text-sm mb-3 text-center" style={{ color: 'rgba(255,255,255,0.7)' }}>
+                You are about to publish <span className="font-black text-white">"{tournament?.name}"</span>.
               </p>
-              
-              <div 
-                className="rounded-xl p-3 mb-5"
-                style={{ 
-                  background: 'rgba(0, 200, 83, 0.1)',
-                  border: '1px solid rgba(0, 200, 83, 0.3)'
-                }}
-              >
-                <p className="text-xs text-center" style={{ color: '#00c853' }}>
+              <div className="rounded-xl p-3 mb-5" style={{ background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.25)' }}>
+                <p className="text-xs text-center" style={{ color: '#00ff88' }}>
                   Once published, your tournament will be visible to all players and they can start registering.
                 </p>
               </div>
-
               <div className="flex gap-2">
-                <button
-                  onClick={() => setShowPublishConfirmModal(false)}
-                  className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors font-bold text-sm"
-                >
+                <button onClick={() => setShowPublishConfirmModal(false)}
+                  className="flex-1 px-4 py-2.5 rounded-xl font-bold text-sm transition-all"
+                  style={{ border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.7)' }}>
                   Cancel
                 </button>
-                <button
-                  onClick={handlePublish}
-                  disabled={publishing}
-                  className="flex-1 px-4 py-2.5 text-white rounded-xl transition-all font-bold text-sm disabled:opacity-50 flex items-center justify-center gap-1.5"
-                  style={{ 
-                    background: 'linear-gradient(135deg, #00c853, #00ff88)',
-                    boxShadow: '0 4px 15px rgba(0, 200, 83, 0.3)'
-                  }}
-                >
+                <button onClick={handlePublish} disabled={publishing}
+                  className="flex-1 px-4 py-2.5 text-white rounded-xl font-bold text-sm disabled:opacity-50 flex items-center justify-center gap-1.5 transition-all hover:scale-[1.02]"
+                  style={{ background: 'linear-gradient(135deg, #00c853, #00ff88)', color: '#07071a' }}>
                   {publishing ? (
-                    <>
-                      <div className="animate-spin rounded-full h-3.5 w-3.5 border-2 border-white border-t-transparent"></div>
-                      <span>Publishing...</span>
-                    </>
-                  ) : (
-                    '🚀 Publish Now'
-                  )}
+                    <><div className="animate-spin rounded-full h-3.5 w-3.5 border-2 border-white/50 border-t-white"></div><span style={{ color: '#07071a' }}>Publishing...</span></>
+                  ) : <span style={{ color: '#07071a' }}>🚀 Publish Now</span>}
                 </button>
               </div>
             </div>
@@ -1362,44 +1339,28 @@ const TournamentDetailPage = () => {
         </div>
       )}
 
-      {/* Publish Result Modal - MOBILE PERFECT with Emerald Green */}
+      {/* Publish Result Modal */}
       {publishResultModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden">
-            <div 
-              className="p-5 text-white"
-              style={{ 
-                background: publishResultModal.type === 'success' 
-                  ? 'linear-gradient(135deg, #00c853, #00ff88)' 
-                  : 'linear-gradient(135deg, #ef4444, #dc2626)'
-              }}
-            >
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden"
+            style={{ background: 'linear-gradient(180deg, #0f0f2e 0%, #0d1117 100%)', border: `1px solid ${publishResultModal.type === 'success' ? 'rgba(0,255,136,0.3)' : 'rgba(239,68,68,0.3)'}` }}>
+            <div className="p-5" style={{ background: publishResultModal.type === 'success' ? 'linear-gradient(135deg, #00c853, #00ff88)' : 'linear-gradient(135deg, #ef4444, #dc2626)' }}>
               <div className="flex items-center justify-center gap-2">
                 <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-                  {publishResultModal.type === 'success' ? (
-                    <TrophyIcon className="h-5 w-5" />
-                  ) : (
-                    <ExclamationTriangleIcon className="h-5 w-5" />
-                  )}
+                  {publishResultModal.type === 'success' ? <TrophyIcon className="h-5 w-5 text-white" /> : <ExclamationTriangleIcon className="h-5 w-5 text-white" />}
                 </div>
-                <h2 className="text-lg font-black">{publishResultModal.title}</h2>
+                <h2 className="text-lg font-black text-white">{publishResultModal.title}</h2>
               </div>
             </div>
-
             <div className="p-5">
-              <p className="text-gray-700 text-sm mb-5 text-center leading-relaxed">{publishResultModal.message}</p>
-              <button
-                onClick={() => setPublishResultModal(null)}
-                className="w-full px-5 py-3 rounded-xl font-bold text-base transition-all text-white"
+              <p className="text-sm mb-5 text-center leading-relaxed" style={{ color: 'rgba(255,255,255,0.7)' }}>{publishResultModal.message}</p>
+              <button onClick={() => setPublishResultModal(null)}
+                className="w-full px-5 py-3 rounded-xl font-black text-base transition-all hover:scale-[1.02]"
                 style={{
-                  background: publishResultModal.type === 'success' 
-                    ? 'linear-gradient(135deg, #00c853, #00ff88)' 
-                    : 'linear-gradient(135deg, #ef4444, #dc2626)',
-                  boxShadow: publishResultModal.type === 'success'
-                    ? '0 4px 15px rgba(0, 200, 83, 0.3)'
-                    : '0 4px 15px rgba(239, 68, 68, 0.3)'
-                }}
-              >
+                  background: publishResultModal.type === 'success' ? 'linear-gradient(135deg, #00c853, #00ff88)' : 'linear-gradient(135deg, #ef4444, #dc2626)',
+                  color: publishResultModal.type === 'success' ? '#07071a' : 'white',
+                  boxShadow: publishResultModal.type === 'success' ? '0 4px 15px rgba(0,200,83,0.3)' : '0 4px 15px rgba(239,68,68,0.3)'
+                }}>
                 {publishResultModal.type === 'success' ? 'Awesome!' : 'Got it'}
               </button>
             </div>
@@ -1407,54 +1368,34 @@ const TournamentDetailPage = () => {
         </div>
       )}
 
-      {/* Delete Result Modal - Mobile Perfect with Emerald Theme */}
+      {/* Delete Result Modal */}
       {deleteResultModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden">
-            <div 
-              className="p-5 text-white"
-              style={{ 
-                background: deleteResultModal.type === 'success' 
-                  ? 'linear-gradient(135deg, #00c853, #00ff88)' 
-                  : 'linear-gradient(135deg, #ef4444, #dc2626)'
-              }}
-            >
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden"
+            style={{ background: 'linear-gradient(180deg, #0f0f2e 0%, #0d1117 100%)', border: `1px solid ${deleteResultModal.type === 'success' ? 'rgba(0,255,136,0.3)' : 'rgba(239,68,68,0.3)'}` }}>
+            <div className="p-5" style={{ background: deleteResultModal.type === 'success' ? 'linear-gradient(135deg, #00c853, #00ff88)' : 'linear-gradient(135deg, #ef4444, #dc2626)' }}>
               <div className="flex items-center justify-center gap-2">
                 <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-                  {deleteResultModal.type === 'success' ? (
-                    <SparklesIcon className="h-5 w-5" />
-                  ) : (
-                    <ExclamationTriangleIcon className="h-5 w-5" />
-                  )}
+                  {deleteResultModal.type === 'success' ? <SparklesIcon className="h-5 w-5 text-white" /> : <ExclamationTriangleIcon className="h-5 w-5 text-white" />}
                 </div>
-                <h2 className="text-lg font-black">{deleteResultModal.title}</h2>
+                <h2 className="text-lg font-black text-white">{deleteResultModal.title}</h2>
               </div>
             </div>
-
             <div className="p-5">
-              <p className="text-gray-700 text-sm mb-2 text-center">{deleteResultModal.message}</p>
+              <p className="text-sm mb-2 text-center" style={{ color: 'rgba(255,255,255,0.7)' }}>{deleteResultModal.message}</p>
               {deleteResultModal.type === 'success' && (
-                <p className="text-xs text-gray-400 mb-5 text-center">
+                <p className="text-xs mb-5 text-center" style={{ color: 'rgba(255,255,255,0.4)' }}>
                   All participants have received a notification from Matchify.pro about this cancellation.
                 </p>
               )}
               <button
-                onClick={() => {
-                  if (deleteResultModal.redirectTo) {
-                    navigate(deleteResultModal.redirectTo);
-                  }
-                  setDeleteResultModal(null);
-                }}
-                className="w-full px-5 py-3 rounded-xl font-bold text-base transition-all text-white"
+                onClick={() => { if (deleteResultModal.redirectTo) navigate(deleteResultModal.redirectTo); setDeleteResultModal(null); }}
+                className="w-full px-5 py-3 rounded-xl font-black text-base transition-all hover:scale-[1.02]"
                 style={{
-                  background: deleteResultModal.type === 'success' 
-                    ? 'linear-gradient(135deg, #00c853, #00ff88)' 
-                    : 'linear-gradient(135deg, #ef4444, #dc2626)',
-                  boxShadow: deleteResultModal.type === 'success'
-                    ? '0 4px 15px rgba(0, 200, 83, 0.3)'
-                    : '0 4px 15px rgba(239, 68, 68, 0.3)'
-                }}
-              >
+                  background: deleteResultModal.type === 'success' ? 'linear-gradient(135deg, #00c853, #00ff88)' : 'linear-gradient(135deg, #ef4444, #dc2626)',
+                  color: deleteResultModal.type === 'success' ? '#07071a' : 'white',
+                  boxShadow: deleteResultModal.type === 'success' ? '0 4px 15px rgba(0,200,83,0.3)' : '0 4px 15px rgba(239,68,68,0.3)'
+                }}>
                 {deleteResultModal.type === 'success' ? 'Continue' : 'Got it'}
               </button>
             </div>
@@ -1464,65 +1405,44 @@ const TournamentDetailPage = () => {
 
       {/* Publish Prompt Modal - After Tournament Creation */}
       {showPublishPromptModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
-            <div 
-              className="p-6 text-white"
-              style={{ background: 'linear-gradient(135deg, #00c853, #00ff88)' }}
-            >
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="rounded-2xl shadow-2xl max-w-md w-full overflow-hidden"
+            style={{ background: 'linear-gradient(180deg, #0f0f2e 0%, #0d1117 100%)', border: '1px solid rgba(0,255,136,0.3)' }}>
+            <div className="p-6" style={{ background: 'linear-gradient(135deg, #00c853, #00ff88)' }}>
               <div className="flex items-center justify-center gap-3 mb-2">
                 <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center">
-                  <TrophyIcon className="h-7 w-7" />
+                  <TrophyIcon className="h-7 w-7 text-white" />
                 </div>
-                <h2 className="text-2xl font-black">Tournament Created!</h2>
+                <h2 className="text-2xl font-black text-white">Tournament Created!</h2>
               </div>
-              <p className="text-white/90 text-sm text-center">
+              <p className="text-sm text-center" style={{ color: 'rgba(255,255,255,0.9)' }}>
                 Your tournament has been saved successfully
               </p>
             </div>
-
             <div className="p-6">
-              <p className="text-gray-700 text-base mb-4 text-center font-medium">
+              <p className="text-base mb-4 text-center font-bold text-white">
                 Would you like to publish your tournament now?
               </p>
-              
-              <div 
-                className="rounded-xl p-4 mb-5"
-                style={{ 
-                  background: 'rgba(0, 200, 83, 0.1)',
-                  border: '1px solid rgba(0, 200, 83, 0.3)'
-                }}
-              >
-                <p className="text-sm mb-2" style={{ color: '#00c853' }}>
+              <div className="rounded-xl p-4 mb-5" style={{ background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.25)' }}>
+                <p className="text-sm mb-2" style={{ color: '#00ff88' }}>
                   <span className="font-bold">✓ Publish Now:</span> Make it visible to all players immediately
                 </p>
-                <p className="text-sm text-gray-600">
-                  <span className="font-bold">○ Save as Draft:</span> Keep it private, publish later from your dashboard
+                <p className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                  <span className="font-bold">○ Save as Draft:</span> Keep it private, publish later from dashboard
                 </p>
               </div>
-
               <div className="space-y-3">
                 <button
-                  onClick={() => {
-                    setShowPublishPromptModal(false);
-                    setShowPublishConfirmModal(true);
-                  }}
-                  className="w-full px-5 py-3.5 text-white rounded-xl font-bold text-base transition-all flex items-center justify-center gap-2"
-                  style={{ 
-                    background: 'linear-gradient(135deg, #00c853, #00ff88)',
-                    boxShadow: '0 4px 15px rgba(0, 200, 83, 0.3)'
-                  }}
-                >
+                  onClick={() => { setShowPublishPromptModal(false); setShowPublishConfirmModal(true); }}
+                  className="w-full px-5 py-3.5 rounded-xl font-black text-base flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"
+                  style={{ background: 'linear-gradient(135deg, #00c853, #00ff88)', color: '#07071a', boxShadow: '0 4px 15px rgba(0,200,83,0.3)' }}>
                   <SparklesIcon className="h-5 w-5" />
                   Publish Now
                 </button>
                 <button
-                  onClick={() => {
-                    setShowPublishPromptModal(false);
-                    navigate('/dashboard?role=ORGANIZER');
-                  }}
-                  className="w-full px-5 py-3.5 border-2 border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors font-bold text-base"
-                >
+                  onClick={() => { setShowPublishPromptModal(false); navigate('/dashboard?role=ORGANIZER'); }}
+                  className="w-full px-5 py-3.5 rounded-xl font-bold text-base transition-all"
+                  style={{ border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.7)' }}>
                   Save as Draft
                 </button>
               </div>

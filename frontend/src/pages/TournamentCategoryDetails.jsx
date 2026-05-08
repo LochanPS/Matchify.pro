@@ -1,6 +1,21 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import {
+  ArrowLeft, Trophy, Users, Swords, CheckCircle, Clock,
+  Download, Star, TrendingUp
+} from 'lucide-react';
+
+// Deterministic star particles
+const CAT_PARTICLES = Array.from({ length: 20 }, (_, i) => ({
+  w: (i * 7 + 3) % 4 + 1,
+  x: (i * 37 + 11) % 97,
+  y: (i * 53 + 7) % 93,
+  o: ((i * 13) % 40) / 100 + 0.2,
+  dur: (i * 7) % 8 + 4,
+  delay: (i * 3) % 5,
+  c: ['#00ff88', '#00d4ff', '#a855f7', '#10b981'][i % 4],
+}));
 
 export default function TournamentCategoryDetails() {
   const { categoryId } = useParams();
@@ -18,11 +33,8 @@ export default function TournamentCategoryDetails() {
       const token = localStorage.getItem('token');
       const response = await axios.get(
         `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/organizer/categories/${categoryId}/details`,
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-
       if (response.data.success) {
         setCategory(response.data.data);
       }
@@ -36,20 +48,19 @@ export default function TournamentCategoryDetails() {
 
   const downloadParticipants = () => {
     if (!category) return;
-
     const csv = [
-      ['Name', 'Email', 'Phone', 'City', 'State', 'Partner', 'Registered At'].join(','),
-      ...category.participants.map(p => [
+      ['#', 'Name', 'Email', 'Phone', 'City', 'State', 'Partner', 'Registered At'].join(','),
+      ...category.participants.map((p, i) => [
+        i + 1,
         p.player.name,
         p.player.email,
         p.player.phone || '',
         p.player.city || '',
         p.player.state || '',
         p.partner?.name || '-',
-        new Date(p.registeredAt).toLocaleDateString()
+        new Date(p.registeredAt).toLocaleDateString('en-IN'),
       ].join(','))
     ].join('\n');
-
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -61,20 +72,25 @@ export default function TournamentCategoryDetails() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #0a0a1f 0%, #07071a 50%, #0a0a1f 100%)' }}>
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-t-transparent rounded-full animate-spin mx-auto"
+            style={{ borderColor: 'rgba(0,255,136,0.3)', borderTopColor: '#00ff88' }}></div>
+          <p className="mt-4 text-sm font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>Loading category...</p>
+        </div>
       </div>
     );
   }
 
   if (error || !category) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="text-center py-12">
-          <p className="text-red-600 mb-4">{error || 'Category not found'}</p>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #0a0a1f 0%, #07071a 50%, #0a0a1f 100%)' }}>
+        <div className="text-center p-8 rounded-2xl border border-red-500/30" style={{ background: 'rgba(239,68,68,0.1)' }}>
+          <p className="text-red-400 text-lg font-semibold mb-4">{error || 'Category not found'}</p>
           <button
             onClick={() => navigate('/dashboard?role=ORGANIZER')}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="px-6 py-3 rounded-xl font-bold text-white transition-all"
+            style={{ background: 'linear-gradient(135deg, #00ff88, #00c853)', color: '#07071a' }}
           >
             Back to Dashboard
           </button>
@@ -83,113 +99,189 @@ export default function TournamentCategoryDetails() {
     );
   }
 
+  const stats = [
+    { label: 'Participants', value: category.stats.totalParticipants, icon: Users, color: '#00ff88', glow: 'rgba(0,255,136,0.2)' },
+    { label: 'Total Matches', value: category.stats.totalMatches, icon: Swords, color: '#00d4ff', glow: 'rgba(0,212,255,0.2)' },
+    { label: 'Completed', value: category.stats.completedMatches, icon: CheckCircle, color: '#a855f7', glow: 'rgba(168,85,247,0.2)' },
+  ];
+
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="bg-white rounded-lg shadow p-6 mb-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
-          <div>
-            <button
-              onClick={() => navigate(-1)}
-              className="text-blue-600 hover:underline mb-2 text-sm"
-            >
-              ← Back
-            </button>
-            <h1 className="text-2xl sm:text-3xl font-bold mb-2">{category.category.name}</h1>
-            <p className="text-gray-600">Tournament: {category.category.tournament.name}</p>
-            <p className="text-sm text-gray-500">
-              Format: {category.category.format.toUpperCase()} | Entry Fee: ₹{category.category.entryFee}
-            </p>
-          </div>
-          <button
-            onClick={downloadParticipants}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition"
+    <div className="min-h-screen relative overflow-x-hidden" style={{ background: 'linear-gradient(180deg, #0a0a1f 0%, #07071a 40%, #0d1a2a 70%, #07071a 100%)' }}>
+      {/* Animated star particles */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-0 right-0 w-72 h-72 rounded-full blur-3xl opacity-20"
+          style={{ background: 'radial-gradient(circle, rgba(0,255,136,0.4) 0%, transparent 70%)' }} />
+        <div className="absolute bottom-1/4 left-0 w-64 h-64 rounded-full blur-3xl opacity-15"
+          style={{ background: 'radial-gradient(circle, rgba(0,212,255,0.4) 0%, transparent 70%)' }} />
+        {CAT_PARTICLES.map((p, i) => (
+          <div key={i} className="absolute rounded-full"
+            style={{
+              width: `${p.w}px`, height: `${p.w}px`,
+              left: `${p.x}%`, top: `${p.y}%`,
+              background: p.c, opacity: p.o,
+              animation: `float ${p.dur}s ease-in-out infinite`,
+              animationDelay: `${p.delay}s`,
+              boxShadow: `0 0 6px ${p.c}`,
+            }} />
+        ))}
+      </div>
+
+      <style>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-12px); }
+        }
+      `}</style>
+
+      {/* Sticky Header */}
+      <div className="relative sticky top-0 z-20" style={{ background: 'rgba(7,7,26,0.95)', borderBottom: '1px solid rgba(0,255,136,0.15)', backdropFilter: 'blur(20px)' }}>
+        <div className="max-w-4xl mx-auto px-4 py-4">
+          <button onClick={() => navigate(-1)} className="flex items-center gap-2 mb-3 text-sm font-medium transition-colors" style={{ color: 'rgba(255,255,255,0.6)' }}
+            onMouseEnter={e => e.currentTarget.style.color = '#00ff88'}
+            onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.6)'}
           >
-            📥 Download CSV
+            <ArrowLeft className="w-4 h-4" />
+            Back
           </button>
-        </div>
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-6">
-        <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-          <p className="text-gray-600 mb-2 text-sm sm:text-base">Total Participants</p>
-          <p className="text-2xl sm:text-4xl font-bold">{category.stats.totalParticipants}</p>
-        </div>
-        <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-          <p className="text-gray-600 mb-2 text-sm sm:text-base">Total Matches</p>
-          <p className="text-2xl sm:text-4xl font-bold">{category.stats.totalMatches}</p>
-        </div>
-        <div className="bg-white rounded-lg shadow p-4 sm:p-6">
-          <p className="text-gray-600 mb-2 text-sm sm:text-base">Completed</p>
-          <p className="text-2xl sm:text-4xl font-bold">{category.stats.completedMatches}</p>
-        </div>
-      </div>
-
-      {/* Winner */}
-      {category.winner && (
-        <div className="bg-gradient-to-r from-yellow-50 to-yellow-100 rounded-lg shadow p-6 mb-6">
-          <h2 className="text-xl font-bold mb-4">🏆 Winner</h2>
-          {Array.isArray(category.winner) ? (
-            <div>
-              <p className="text-lg font-semibold">{category.winner[0].name} & {category.winner[1].name}</p>
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{ background: 'linear-gradient(135deg, #00ff88, #00c853)' }}>
+                <Trophy className="w-6 h-6" style={{ color: '#07071a' }} />
+              </div>
+              <div>
+                <h1 className="text-lg font-black text-white leading-tight">{category.category.name}</h1>
+                <p className="text-xs font-medium mt-0.5" style={{ color: '#00ff88' }}>
+                  {category.category.tournament.name}
+                </p>
+                <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                  {category.category.format.toUpperCase()} · ₹{category.category.entryFee} entry
+                </p>
+              </div>
             </div>
-          ) : (
-            <p className="text-lg font-semibold">{category.winner.name}</p>
-          )}
+            <button
+              onClick={downloadParticipants}
+              className="flex items-center gap-2 px-3 py-2.5 rounded-xl font-bold text-xs transition-all hover:scale-105 flex-shrink-0"
+              style={{ background: 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,200,83,0.15))', border: '1px solid rgba(0,255,136,0.4)', color: '#00ff88' }}
+            >
+              <Download className="w-4 h-4" />
+              CSV
+            </button>
+          </div>
         </div>
-      )}
+      </div>
 
-      {/* Participants Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="px-6 py-4 border-b">
-          <h2 className="text-xl font-bold">All Participants ({category.participants.length})</h2>
+      <div className="relative max-w-4xl mx-auto px-4 py-5 space-y-5">
+        {/* Stats */}
+        <div className="grid grid-cols-3 gap-3">
+          {stats.map((s, i) => (
+            <div key={i} className="rounded-2xl p-4 text-center transition-all hover:scale-[1.02]"
+              style={{ background: `linear-gradient(135deg, ${s.glow}, rgba(7,7,26,0.8))`, border: `1px solid ${s.color}30` }}>
+              <s.icon className="w-5 h-5 mx-auto mb-2" style={{ color: s.color }} />
+              <p className="text-2xl font-black" style={{ color: s.color }}>{s.value}</p>
+              <p className="text-xs font-medium mt-0.5" style={{ color: 'rgba(255,255,255,0.5)' }}>{s.label}</p>
+            </div>
+          ))}
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">#</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                {category.category.format !== 'SINGLES' && (
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Partner</th>
-                )}
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">City</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Registered</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {category.participants.map((participant, index) => (
-                <tr key={participant.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+
+        {/* Winner */}
+        {category.winner && (
+          <div className="rounded-2xl p-5 relative overflow-hidden"
+            style={{ background: 'linear-gradient(135deg, rgba(255,193,7,0.15), rgba(255,152,0,0.1))', border: '2px solid rgba(255,193,7,0.3)' }}>
+            <div className="absolute top-3 right-3">
+              <Star className="w-6 h-6 text-yellow-400 opacity-50" />
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl"
+                style={{ background: 'linear-gradient(135deg, rgba(255,193,7,0.3), rgba(255,152,0,0.2))' }}>
+                🏆
+              </div>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wider mb-1" style={{ color: 'rgba(255,193,7,0.7)' }}>Champion</p>
+                <p className="text-lg font-black text-white">
+                  {Array.isArray(category.winner)
+                    ? `${category.winner[0]?.name} & ${category.winner[1]?.name}`
+                    : category.winner.name}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Participants */}
+        <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid rgba(0,255,136,0.15)', background: 'rgba(7,7,26,0.6)', backdropFilter: 'blur(20px)' }}>
+          {/* Header */}
+          <div className="px-5 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'rgba(0,255,136,0.15)' }}>
+                <TrendingUp className="w-4 h-4" style={{ color: '#00ff88' }} />
+              </div>
+              <div>
+                <h2 className="text-base font-black text-white">All Participants</h2>
+                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>{category.participants.length} registered</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Mobile-first card list */}
+          <div className="p-4 space-y-3">
+            {category.participants.length === 0 ? (
+              <div className="text-center py-10">
+                <Users className="w-10 h-10 mx-auto mb-3" style={{ color: 'rgba(255,255,255,0.2)' }} />
+                <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>No participants yet</p>
+              </div>
+            ) : (
+              category.participants.map((participant, index) => (
+                <div key={participant.id}
+                  className="flex items-center gap-3 p-3.5 rounded-xl transition-all"
+                  style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(0,255,136,0.3)'; e.currentTarget.style.background = 'rgba(0,255,136,0.05)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}
+                >
+                  {/* Rank badge */}
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm flex-shrink-0"
+                    style={{
+                      background: index === 0 ? 'linear-gradient(135deg, #ffd700, #ff9800)' :
+                        index === 1 ? 'linear-gradient(135deg, #94a3b8, #64748b)' :
+                        index === 2 ? 'linear-gradient(135deg, #cd7f32, #b45309)' :
+                        'rgba(255,255,255,0.08)',
+                      color: index < 3 ? '#fff' : 'rgba(255,255,255,0.5)',
+                    }}>
                     {index + 1}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap font-medium">
-                    {participant.player.name}
-                  </td>
-                  {category.category.format !== 'SINGLES' && (
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {participant.partner?.name || <span className="text-yellow-600">Pending</span>}
-                    </td>
-                  )}
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                    {participant.player.email}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                    {participant.player.phone || '-'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                    {participant.player.city}, {participant.player.state}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                    {new Date(participant.registeredAt).toLocaleDateString()}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  </div>
+
+                  {/* Player info */}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-white text-sm leading-tight truncate">{participant.player.name}</p>
+                    {participant.partner && (
+                      <p className="text-xs font-medium mt-0.5 truncate" style={{ color: '#00ff88' }}>
+                        & {participant.partner.name}
+                      </p>
+                    )}
+                    <div className="flex items-center gap-3 mt-1">
+                      {participant.player.city && (
+                        <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                          {participant.player.city}
+                        </span>
+                      )}
+                      {participant.player.phone && (
+                        <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                          {participant.player.phone}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Date */}
+                  <div className="text-right flex-shrink-0">
+                    <p className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                      {new Date(participant.registeredAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                    </p>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </div>
       </div>
     </div>

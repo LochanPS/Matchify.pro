@@ -866,13 +866,13 @@ const DrawPage = () => {
           />
         </div>
         
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-white/70 hover:text-white mb-6 transition-colors group"
+            className="flex items-center gap-2 text-white/70 hover:text-white mb-4 transition-colors group"
           >
-            <ArrowLeftIcon className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
-            <span>Back to Tournament</span>
+            <ArrowLeftIcon className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
+            <span className="text-sm">Back to Tournament</span>
           </button>
 
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
@@ -2491,42 +2491,52 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                             {/* Player 1 */}
                             <div className={`flex items-center justify-between px-2.5 py-2 rounded-lg transition-all ${
                               isPlayer1Winner
-                                ? 'bg-gradient-to-r from-emerald-500/30 to-teal-500/30 border-2 border-emerald-500/60 shadow-lg' 
-                                : 'bg-slate-700/40 border border-white/10'
-                            }`}>
+                                ? 'border-2 border-emerald-500/60 shadow-lg'
+                                : 'border border-white/10'
+                            }`} style={{
+                              background: isPlayer1Winner ? 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,200,83,0.1))' : 'rgba(255,255,255,0.04)'
+                            }}>
                               <div className="flex items-center gap-1.5 flex-1 min-w-0">
                                 {isPlayer1Winner && (
                                   <Trophy className="w-3 h-3 text-emerald-400 flex-shrink-0" />
                                 )}
                                 <span className={`text-xs font-bold truncate ${
-                                  isPlayer1Winner ? 'text-emerald-200' : player1Name === 'TBD' ? 'text-gray-500 italic' : 'text-white'
+                                  isPlayer1Winner ? 'text-emerald-200' : player1Name === 'TBD' ? 'text-gray-600 italic' : 'text-white'
                                 }`}>
                                   {player1Name}
                                 </span>
                               </div>
+                              {isPlayer1Winner && (
+                                <span className="text-[9px] font-black text-emerald-400 ml-1 flex-shrink-0">WIN</span>
+                              )}
                             </div>
-                            
+
                             {/* VS Divider */}
                             <div className="flex items-center justify-center py-0.5">
-                              <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest">VS</span>
+                              <span className="text-[9px] font-black uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.2)' }}>VS</span>
                             </div>
-                            
+
                             {/* Player 2 */}
                             <div className={`flex items-center justify-between px-2.5 py-2 rounded-lg transition-all ${
                               isPlayer2Winner
-                                ? 'bg-gradient-to-r from-emerald-500/30 to-teal-500/30 border-2 border-emerald-500/60 shadow-lg' 
-                                : 'bg-slate-700/40 border border-white/10'
-                            }`}>
+                                ? 'border-2 border-emerald-500/60 shadow-lg'
+                                : 'border border-white/10'
+                            }`} style={{
+                              background: isPlayer2Winner ? 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,200,83,0.1))' : 'rgba(255,255,255,0.04)'
+                            }}>
                               <div className="flex items-center gap-1.5 flex-1 min-w-0">
                                 {isPlayer2Winner && (
                                   <Trophy className="w-3 h-3 text-emerald-400 flex-shrink-0" />
                                 )}
                                 <span className={`text-xs font-bold truncate ${
-                                  isPlayer2Winner ? 'text-emerald-200' : player2Name === 'TBD' ? 'text-gray-500 italic' : 'text-white'
+                                  isPlayer2Winner ? 'text-emerald-200' : player2Name === 'TBD' ? 'text-gray-600 italic' : 'text-white'
                                 }`}>
                                   {player2Name}
                                 </span>
                               </div>
+                              {isPlayer2Winner && (
+                                <span className="text-[9px] font-black text-emerald-400 ml-1 flex-shrink-0">WIN</span>
+                              )}
                             </div>
                           </div>
                           
@@ -2701,19 +2711,23 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                       )}
                     </div>
                     
-                    {/* Stats */}
-                    <div className="flex items-center gap-3 text-xs font-bold">
-                      <div className="text-center">
+                    {/* Stats: P / W / L / PTS */}
+                    <div className="flex items-center gap-1.5 text-xs font-bold">
+                      <div className="text-center w-8 py-1 rounded-lg" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                        <div className="text-white">{(p.wins || 0) + (p.losses || 0)}</div>
+                        <div className="text-[9px]" style={{ color: 'rgba(255,255,255,0.35)' }}>P</div>
+                      </div>
+                      <div className="text-center w-8 py-1 rounded-lg" style={{ background: 'rgba(0,255,136,0.08)' }}>
                         <div className="text-emerald-400">{p.wins || 0}</div>
-                        <div className="text-gray-500 text-[10px]">W</div>
+                        <div className="text-[9px]" style={{ color: 'rgba(0,255,136,0.5)' }}>W</div>
                       </div>
-                      <div className="text-center">
+                      <div className="text-center w-8 py-1 rounded-lg" style={{ background: 'rgba(239,68,68,0.08)' }}>
                         <div className="text-red-400">{p.losses || 0}</div>
-                        <div className="text-gray-500 text-[10px]">L</div>
+                        <div className="text-[9px]" style={{ color: 'rgba(239,68,68,0.5)' }}>L</div>
                       </div>
-                      <div className="text-center px-2 py-1 bg-emerald-500/20 rounded-lg">
-                        <div className="text-emerald-300">{p.points || 0}</div>
-                        <div className="text-emerald-400/60 text-[10px]">PTS</div>
+                      <div className="text-center w-10 py-1 rounded-lg" style={{ background: 'rgba(0,255,136,0.15)', border: '1px solid rgba(0,255,136,0.3)' }}>
+                        <div className="text-emerald-300 font-black">{p.points || 0}</div>
+                        <div className="text-[9px]" style={{ color: 'rgba(0,255,136,0.6)' }}>PTS</div>
                       </div>
                     </div>
                   </div>
@@ -2721,12 +2735,21 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
             </div>
             
             {/* Points System */}
-            <div className="mt-3 p-2.5 bg-slate-800/50 rounded-lg border border-white/10">
-              <div className="flex items-center justify-center gap-4 text-xs font-semibold">
-                <span className="text-emerald-400">Win: +2 pts</span>
-                <span className="text-gray-500">•</span>
-                <span className="text-red-400">Loss: +0 pts</span>
+            <div className="mt-3 p-3 rounded-xl" style={{ background: 'rgba(0,0,0,0.25)', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <p className="text-[10px] font-black uppercase tracking-wider mb-2 text-center" style={{ color: 'rgba(255,255,255,0.35)' }}>Points System</p>
+              <div className="flex items-center justify-center gap-3 text-xs font-bold">
+                <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg" style={{ background: 'rgba(0,255,136,0.1)', border: '1px solid rgba(0,255,136,0.2)' }}>
+                  <span className="w-4 h-4 bg-emerald-500 rounded flex items-center justify-center text-[9px] text-white font-black">W</span>
+                  <span style={{ color: '#00ff88' }}>+2 pts</span>
+                </div>
+                <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)' }}>
+                  <span className="w-4 h-4 bg-red-500 rounded flex items-center justify-center text-[9px] text-white font-black">L</span>
+                  <span style={{ color: '#f87171' }}>+0 pts</span>
+                </div>
               </div>
+              <p className="text-[9px] text-center mt-2" style={{ color: 'rgba(255,255,255,0.25)' }}>
+                P = Played · W = Won · L = Lost · PTS = Points
+              </p>
             </div>
           </div>
 
@@ -2769,31 +2792,36 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                         {hasUmpire && !isCompleted && !isInProgress && <span className="text-blue-400 text-xs font-bold">⚖️ READY</span>}
                       </div>
                       
-                      {/* Players */}
-                      <div className="space-y-2">
-                        <div className={`py-2 px-3 rounded-lg text-center font-semibold text-sm ${
-                          hasPlayers ? 'text-white bg-slate-700/50' : 'text-gray-500 bg-slate-800/30'
-                        }`}>
-                          {getPlayerDisplay(match.player1) || 'TBD'}
-                        </div>
-                        <div className="text-center">
-                          <span className="text-gray-400 text-xs font-black uppercase">VS</span>
-                        </div>
-                        <div className={`py-2 px-3 rounded-lg text-center font-semibold text-sm ${
-                          hasPlayers ? 'text-white bg-slate-700/50' : 'text-gray-500 bg-slate-800/30'
-                        }`}>
-                          {getPlayerDisplay(match.player2) || 'TBD'}
-                        </div>
-                      </div>
-                      
-                      {/* Winner Info */}
-                      {dbMatch?.winnerId && (
-                        <div className="mt-2.5 p-2 bg-emerald-500/20 rounded-lg border border-emerald-500/30">
-                          <div className="text-xs text-emerald-300 font-bold text-center">
-                            Winner: {dbMatch.winnerId === match.player1?.id ? getPlayerDisplay(match.player1) : getPlayerDisplay(match.player2)}
+                      {/* Players with winner highlight */}
+                      {(() => {
+                        const p1Won = dbMatch?.winnerId === match.player1?.id;
+                        const p2Won = dbMatch?.winnerId === match.player2?.id;
+                        return (
+                          <div className="space-y-1.5">
+                            <div className={`py-2 px-3 rounded-xl font-bold text-sm flex items-center justify-between ${hasPlayers ? '' : ''}`}
+                              style={{
+                                background: p1Won ? 'rgba(0,255,136,0.18)' : hasPlayers ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.03)',
+                                border: p1Won ? '1px solid rgba(0,255,136,0.4)' : '1px solid rgba(255,255,255,0.08)',
+                                color: p1Won ? '#00ff88' : hasPlayers ? 'white' : 'rgba(255,255,255,0.35)',
+                              }}>
+                              <span className="truncate flex-1 text-xs">{getPlayerDisplay(match.player1) || 'TBD'}</span>
+                              {p1Won && <span className="text-[10px] font-black ml-1 flex-shrink-0">🏆 WIN</span>}
+                            </div>
+                            <div className="text-center">
+                              <span className="text-xs font-black" style={{ color: 'rgba(255,255,255,0.3)' }}>VS</span>
+                            </div>
+                            <div className="py-2 px-3 rounded-xl font-bold text-sm flex items-center justify-between"
+                              style={{
+                                background: p2Won ? 'rgba(0,255,136,0.18)' : hasPlayers ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.03)',
+                                border: p2Won ? '1px solid rgba(0,255,136,0.4)' : '1px solid rgba(255,255,255,0.08)',
+                                color: p2Won ? '#00ff88' : hasPlayers ? 'white' : 'rgba(255,255,255,0.35)',
+                              }}>
+                              <span className="truncate flex-1 text-xs">{getPlayerDisplay(match.player2) || 'TBD'}</span>
+                              {p2Won && <span className="text-[10px] font-black ml-1 flex-shrink-0">🏆 WIN</span>}
+                            </div>
                           </div>
-                        </div>
-                      )}
+                        );
+                      })()}
                       
                       {/* Actions */}
                       {isOrganizer && hasPlayers && (

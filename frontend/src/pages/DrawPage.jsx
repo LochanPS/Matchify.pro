@@ -744,24 +744,100 @@ const DrawPage = () => {
   const hasPlayedMatches = matches.some(m => m.status === 'COMPLETED' || m.status === 'IN_PROGRESS');
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-teal-950 to-slate-900 relative overflow-hidden">
-      {/* Animated Background - Floating Particles */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-2 h-2 bg-emerald-400 rounded-full animate-float opacity-60"></div>
-        <div className="absolute top-40 right-20 w-3 h-3 bg-teal-400 rounded-full animate-float-delayed opacity-50" style={{animationDelay: '1s'}}></div>
-        <div className="absolute top-60 left-1/4 w-2 h-2 bg-emerald-300 rounded-full animate-float opacity-70" style={{animationDelay: '2s'}}></div>
-        <div className="absolute bottom-40 right-1/3 w-3 h-3 bg-teal-500 rounded-full animate-float-delayed opacity-60" style={{animationDelay: '0.5s'}}></div>
-        <div className="absolute bottom-20 left-1/3 w-2 h-2 bg-emerald-400 rounded-full animate-float opacity-50" style={{animationDelay: '1.5s'}}></div>
-        <div className="absolute top-1/3 right-10 w-2 h-2 bg-teal-300 rounded-full animate-float-delayed opacity-70" style={{animationDelay: '2.5s'}}></div>
-        <div className="absolute top-1/2 left-20 w-3 h-3 bg-emerald-500 rounded-full animate-float opacity-60" style={{animationDelay: '0.8s'}}></div>
-        <div className="absolute bottom-1/3 right-1/4 w-2 h-2 bg-teal-400 rounded-full animate-float-delayed opacity-50" style={{animationDelay: '1.8s'}}></div>
+    <div className="min-h-screen relative overflow-hidden" style={{ 
+      background: 'linear-gradient(180deg, #0a0a1f 0%, #07071a 30%, #0d1a2a 60%, #07071a 100%)' 
+    }}>
+      {/* Animated Background Elements */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        {/* Large Gradient Orbs */}
+        <div 
+          className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl opacity-30 animate-pulse"
+          style={{ 
+            background: 'radial-gradient(circle, rgba(0,200,83,0.4) 0%, rgba(0,255,136,0.2) 40%, transparent 70%)',
+            animation: 'float 8s ease-in-out infinite'
+          }}
+        />
+        <div 
+          className="absolute top-1/4 left-0 w-80 h-80 rounded-full blur-3xl opacity-25 animate-pulse"
+          style={{ 
+            background: 'radial-gradient(circle, rgba(20,184,166,0.4) 0%, rgba(13,148,136,0.2) 40%, transparent 70%)',
+            animation: 'float 10s ease-in-out infinite reverse',
+            animationDelay: '2s'
+          }}
+        />
+        <div 
+          className="absolute bottom-1/4 right-1/4 w-72 h-72 rounded-full blur-3xl opacity-20 animate-pulse"
+          style={{ 
+            background: 'radial-gradient(circle, rgba(6,182,212,0.4) 0%, rgba(14,165,233,0.2) 40%, transparent 70%)',
+            animation: 'float 12s ease-in-out infinite',
+            animationDelay: '4s'
+          }}
+        />
+        <div 
+          className="absolute top-1/2 right-1/3 w-64 h-64 rounded-full blur-3xl opacity-15 animate-pulse"
+          style={{ 
+            background: 'radial-gradient(circle, rgba(16,185,129,0.4) 0%, rgba(5,150,105,0.2) 40%, transparent 70%)',
+            animation: 'float 9s ease-in-out infinite reverse',
+            animationDelay: '1s'
+          }}
+        />
+        
+        {/* Floating Particles */}
+        {[...Array(15)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute rounded-full"
+            style={{
+              width: `${Math.random() * 6 + 2}px`,
+              height: `${Math.random() * 6 + 2}px`,
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              background: ['#00c853', '#14b8a6', '#06b6d4', '#10b981'][Math.floor(Math.random() * 4)],
+              opacity: Math.random() * 0.5 + 0.2,
+              animation: `float ${Math.random() * 10 + 5}s ease-in-out infinite`,
+              animationDelay: `${Math.random() * 5}s`,
+              boxShadow: `0 0 ${Math.random() * 20 + 10}px currentColor`
+            }}
+          />
+        ))}
       </div>
 
+      {/* Add keyframes for animations */}
+      <style>{`
+        @keyframes float {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          25% { transform: translate(20px, -20px) scale(1.05); }
+          50% { transform: translate(-15px, 15px) scale(0.95); }
+          75% { transform: translate(15px, 10px) scale(1.02); }
+        }
+        @keyframes glow {
+          0%, 100% { opacity: 0.5; filter: brightness(1); }
+          50% { opacity: 1; filter: brightness(1.3); }
+        }
+      `}</style>
+
       {/* Hero Header */}
-      <div className="relative bg-gradient-to-r from-slate-900 via-teal-950 to-slate-900 overflow-hidden">
+      <div className="relative overflow-hidden" style={{
+        background: 'linear-gradient(135deg, rgba(7,7,26,0.95), rgba(13,26,42,0.95))',
+        borderBottom: '1px solid rgba(0,200,83,0.2)',
+        boxShadow: '0 4px 20px rgba(0,200,83,0.1)'
+      }}>
         <div className="absolute inset-0">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-teal-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+          <div 
+            className="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl opacity-20"
+            style={{ 
+              background: 'radial-gradient(circle, rgba(0,200,83,0.4) 0%, transparent 70%)',
+              animation: 'glow 3s ease-in-out infinite'
+            }}
+          />
+          <div 
+            className="absolute bottom-0 right-1/4 w-96 h-96 rounded-full blur-3xl opacity-20"
+            style={{ 
+              background: 'radial-gradient(circle, rgba(20,184,166,0.4) 0%, transparent 70%)',
+              animation: 'glow 3s ease-in-out infinite',
+              animationDelay: '1.5s'
+            }}
+          />
         </div>
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -2791,13 +2867,13 @@ const GroupsKnockoutDisplay = ({
       <div className="flex gap-2 p-1.5 bg-slate-800/50 rounded-xl border-2 border-white/10">
         <button
           onClick={() => setActiveStage('roundrobin')}
-          className={`flex-1 px-3 py-3 rounded-lg font-black transition-all flex items-center justify-center gap-2 text-xs sm:text-sm ${
+          className={`flex-1 px-2 py-3 rounded-lg font-black transition-all flex items-center justify-center gap-1.5 text-[10px] ${
             activeStage === 'roundrobin'
               ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/50'
               : 'bg-slate-700/30 text-gray-400 hover:bg-slate-700/50 hover:text-white'
           }`}
         >
-          <span className={`px-2 py-0.5 rounded-md text-xs font-black whitespace-nowrap ${
+          <span className={`px-1.5 py-0.5 rounded text-[9px] font-black whitespace-nowrap ${
             activeStage === 'roundrobin' ? 'bg-white/20' : 'bg-slate-600/50'
           }`}>
             STAGE 1
@@ -2807,13 +2883,13 @@ const GroupsKnockoutDisplay = ({
         
         <button
           onClick={() => setActiveStage('knockout')}
-          className={`flex-1 px-3 py-3 rounded-lg font-black transition-all flex items-center justify-center gap-2 text-xs sm:text-sm ${
+          className={`flex-1 px-2 py-3 rounded-lg font-black transition-all flex items-center justify-center gap-1.5 text-[10px] ${
             activeStage === 'knockout'
               ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/50'
               : 'bg-slate-700/30 text-gray-400 hover:bg-slate-700/50 hover:text-white'
           }`}
         >
-          <span className={`px-2 py-0.5 rounded-md text-xs font-black whitespace-nowrap ${
+          <span className={`px-1.5 py-0.5 rounded text-[9px] font-black whitespace-nowrap ${
             activeStage === 'knockout' ? 'bg-white/20' : 'bg-slate-600/50'
           }`}>
             STAGE 2

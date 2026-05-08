@@ -11,6 +11,7 @@ import DatesStep from '../components/tournament/steps/DatesStep';
 import PostersStep from '../components/tournament/steps/PostersStep';
 import CategoriesStep from '../components/tournament/steps/CategoriesStep';
 import PaymentQRStep from '../components/tournament/steps/PaymentQRStep';
+import AgreementStep from '../components/tournament/steps/AgreementStep';
 import ReviewStep from '../components/tournament/steps/ReviewStep';
 import { Trophy, Save, X, AlertTriangle, CheckCircle, Sparkles, ArrowLeft } from 'lucide-react';
 
@@ -233,6 +234,13 @@ const CreateTournament = () => {
           />
         );
       case 6:
+        return (
+          <AgreementStep
+            onNext={() => handleStepComplete(6)}
+            onPrev={prevStep}
+          />
+        );
+      case 7:
         return (
           <ReviewStep
             formData={formData}

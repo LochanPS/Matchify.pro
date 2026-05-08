@@ -147,7 +147,7 @@ export const useTournamentForm = (existingDraftId = null) => {
     if (!completedSteps.includes(currentStep)) {
       setCompletedSteps(prev => [...prev, currentStep]);
     }
-    setCurrentStep(prev => Math.min(prev + 1, 6));
+    setCurrentStep(prev => Math.min(prev + 1, 7));
   };
 
   const prevStep = () => {

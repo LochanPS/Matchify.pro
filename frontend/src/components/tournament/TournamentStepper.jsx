@@ -5,7 +5,8 @@ const TournamentStepper = ({ currentStep, goToStep, completedSteps }) => {
     { number: 3, label: 'Posters', icon: '3' },
     { number: 4, label: 'Categories', icon: '4' },
     { number: 5, label: 'Payment', icon: '5' },
-    { number: 6, label: 'Review', icon: '6' },
+    { number: 6, label: 'Agreement', icon: '6' },
+    { number: 7, label: 'Review', icon: '7' },
   ];
 
   return (

@@ -250,38 +250,38 @@ const CategoryForm = ({ initialData, onSave, onCancel }) => {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-300 mb-2">Tournament Format *</label>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <label className="block text-sm font-medium text-emerald-400 mb-3">Tournament Format *</label>
+        <div className="grid grid-cols-1 gap-3">
           <button
             type="button"
             onClick={() => handleChange('tournamentFormat', 'KNOCKOUT')}
-            className={`p-4 border-2 rounded-xl text-left transition-all ${formData.tournamentFormat === 'KNOCKOUT' ? 'border-amber-500 bg-amber-500/20' : 'border-white/10 hover:border-white/20 bg-slate-700/30'}`}
+            className={`p-4 border-2 rounded-xl text-left transition-all ${formData.tournamentFormat === 'KNOCKOUT' ? 'border-amber-500 bg-gradient-to-br from-amber-500/20 to-orange-500/10' : 'border-slate-600 hover:border-slate-500 bg-slate-700/30'}`}
           >
-            <div className="flex items-center gap-3 mb-2">
+            <div className="flex items-center gap-3 mb-1.5">
               <span className="text-2xl">🏆</span>
-              <span className="font-semibold text-white">Knockout</span>
+              <span className="font-bold text-white">Knockout</span>
             </div>
             <p className="text-sm text-gray-400">Single elimination bracket. Lose once and you're out.</p>
           </button>
           <button
             type="button"
             onClick={() => handleChange('tournamentFormat', 'ROUND_ROBIN')}
-            className={`p-4 border-2 rounded-xl text-left transition-all ${formData.tournamentFormat === 'ROUND_ROBIN' ? 'border-purple-500 bg-purple-500/20' : 'border-white/10 hover:border-white/20 bg-slate-700/30'}`}
+            className={`p-4 border-2 rounded-xl text-left transition-all ${formData.tournamentFormat === 'ROUND_ROBIN' ? 'border-cyan-500 bg-gradient-to-br from-cyan-500/20 to-blue-500/10' : 'border-slate-600 hover:border-slate-500 bg-slate-700/30'}`}
           >
-            <div className="flex items-center gap-3 mb-2">
+            <div className="flex items-center gap-3 mb-1.5">
               <span className="text-2xl">🔄</span>
-              <span className="font-semibold text-white">Round Robin</span>
+              <span className="font-bold text-white">Round Robin</span>
             </div>
             <p className="text-sm text-gray-400">Everyone plays everyone. Winner by most wins.</p>
           </button>
           <button
             type="button"
             onClick={() => handleChange('tournamentFormat', 'ROUND_ROBIN_KNOCKOUT')}
-            className={`p-4 border-2 rounded-xl text-left transition-all ${formData.tournamentFormat === 'ROUND_ROBIN_KNOCKOUT' ? 'border-emerald-500 bg-emerald-500/20' : 'border-white/10 hover:border-white/20 bg-slate-700/30'}`}
+            className={`p-4 border-2 rounded-xl text-left transition-all ${formData.tournamentFormat === 'ROUND_ROBIN_KNOCKOUT' ? 'border-purple-500 bg-gradient-to-br from-purple-500/20 to-indigo-500/10' : 'border-slate-600 hover:border-slate-500 bg-slate-700/30'}`}
           >
-            <div className="flex items-center gap-3 mb-2">
+            <div className="flex items-center gap-3 mb-1.5">
               <span className="text-2xl">⚡</span>
-              <span className="font-semibold text-white">Round Robin + Knockout</span>
+              <span className="font-bold text-white">Round Robin + Knockout</span>
             </div>
             <p className="text-sm text-gray-400">Group stage first, then knockout finals.</p>
           </button>
@@ -289,80 +289,66 @@ const CategoryForm = ({ initialData, onSave, onCancel }) => {
       </div>
 
       <div className="border-t border-white/10 pt-6">
-        <h4 className="text-md font-semibold text-white mb-2">💰 Cash Prize (Optional)</h4>
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-xl">💰</span>
+          <h4 className="text-md font-bold text-amber-400">Cash Prize (Optional)</h4>
+        </div>
         <p className="text-sm text-gray-400 mb-4">Add prize money to attract more participants</p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-3">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">🥇 Winner Prize (₹)</label>
-            <input type="number" value={formData.prizeWinner} onChange={(e) => handleChange('prizeWinner', e.target.value)} min="0" step="1" placeholder="e.g., 5000" className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 transition-all" />
+            <label className="block text-sm font-medium text-amber-400 mb-2">🥇 Winner Prize (₹)</label>
+            <input type="number" value={formData.prizeWinner} onChange={(e) => handleChange('prizeWinner', e.target.value)} min="0" step="1" placeholder="e.g., 5000" className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-amber-500 transition-all" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">🥈 Runner-up Prize (₹)</label>
-            <input type="number" value={formData.prizeRunnerUp} onChange={(e) => handleChange('prizeRunnerUp', e.target.value)} min="0" step="1" placeholder="e.g., 3000" className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 transition-all" />
+            <label className="block text-sm font-medium text-blue-400 mb-2">🥈 Runner-up Prize (₹)</label>
+            <input type="number" value={formData.prizeRunnerUp} onChange={(e) => handleChange('prizeRunnerUp', e.target.value)} min="0" step="1" placeholder="e.g., 3000" className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 transition-all" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">🥉 Semi-finalist Prize (₹)</label>
-            <input type="number" value={formData.prizeSemiFinalist} onChange={(e) => handleChange('prizeSemiFinalist', e.target.value)} min="0" step="1" placeholder="e.g., 1000" className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 transition-all" />
+            <label className="block text-sm font-medium text-orange-400 mb-2">🥉 Semi-finalist Prize (₹)</label>
+            <input type="number" value={formData.prizeSemiFinalist} onChange={(e) => handleChange('prizeSemiFinalist', e.target.value)} min="0" step="1" placeholder="e.g., 1000" className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-orange-500 transition-all" />
           </div>
         </div>
         <div className="mt-4">
           <label className="block text-sm font-medium text-gray-300 mb-2">Additional Prize Info</label>
-          <input type="text" value={formData.prizeDescription} onChange={(e) => handleChange('prizeDescription', e.target.value)} placeholder="e.g., Trophies, medals, certificates, sponsored gifts..." className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 transition-all" />
+          <input type="text" value={formData.prizeDescription} onChange={(e) => handleChange('prizeDescription', e.target.value)} placeholder="e.g., Trophies, medals, certificates..." className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-emerald-500 transition-all" />
           <p className="text-xs text-gray-500 mt-1">Mention any non-cash prizes like trophies, medals, etc.</p>
         </div>
-        {(formData.prizeWinner || formData.prizeRunnerUp || formData.prizeSemiFinalist || formData.prizeDescription) && (
-          <div className="mt-4 bg-green-500/10 border border-green-500/30 rounded-xl p-4">
-            <p className="text-sm font-medium text-green-400 mb-2">Prize Preview:</p>
-            <div className="flex flex-wrap gap-3 text-sm text-green-300">
-              {formData.prizeWinner && <span>🥇 Winner: ₹{formData.prizeWinner}</span>}
-              {formData.prizeRunnerUp && <span>🥈 Runner-up: ₹{formData.prizeRunnerUp}</span>}
-              {formData.prizeSemiFinalist && <span>🥉 Semi-finalist: ₹{formData.prizeSemiFinalist}</span>}
-            </div>
-            {formData.prizeDescription && <p className="text-sm text-green-400/80 mt-2">+ {formData.prizeDescription}</p>}
-          </div>
-        )}
       </div>
 
       <div className="border-t border-white/10 pt-6">
-        <h4 className="text-md font-semibold text-white mb-4">🏸 Scoring Settings</h4>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="flex items-center gap-2 mb-4">
+          <span className="text-xl">🏸</span>
+          <h4 className="text-md font-bold text-emerald-400">Scoring Settings</h4>
+        </div>
+        <div className="grid grid-cols-1 gap-3">
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">Number of Games/Sets *</label>
-            <input type="number" value={formData.numberOfGames} onChange={(e) => handleChange('numberOfGames', e.target.value)} min="1" max="7" className={`w-full px-4 py-3 bg-slate-700/50 border rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 transition-all ${errors.numberOfGames ? 'border-red-500' : 'border-white/10'}`} />
+            <input type="number" value={formData.numberOfGames} onChange={(e) => handleChange('numberOfGames', e.target.value)} min="1" max="7" className={`w-full px-4 py-3 bg-slate-700/50 border rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-emerald-500 transition-all ${errors.numberOfGames ? 'border-red-500' : 'border-slate-600'}`} />
             {errors.numberOfGames && <p className="text-red-400 text-sm mt-1">{errors.numberOfGames}</p>}
             <p className="text-xs text-gray-500 mt-1">Best of X games (e.g., 3 for best of 3)</p>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">Points Per Game *</label>
-            <input type="number" value={formData.pointsPerGame} onChange={(e) => handleChange('pointsPerGame', e.target.value)} min="1" max="50" className={`w-full px-4 py-3 bg-slate-700/50 border rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 transition-all ${errors.pointsPerGame ? 'border-red-500' : 'border-white/10'}`} />
+            <input type="number" value={formData.pointsPerGame} onChange={(e) => handleChange('pointsPerGame', e.target.value)} min="1" max="50" className={`w-full px-4 py-3 bg-slate-700/50 border rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-emerald-500 transition-all ${errors.pointsPerGame ? 'border-red-500' : 'border-slate-600'}`} />
             {errors.pointsPerGame && <p className="text-red-400 text-sm mt-1">{errors.pointsPerGame}</p>}
             <p className="text-xs text-gray-500 mt-1">Points to win each game (e.g., 21)</p>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">Win By Points</label>
-            <input type="number" value={formData.winByPoints} onChange={(e) => handleChange('winByPoints', e.target.value)} min="0" max="5" className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 transition-all" />
+            <input type="number" value={formData.winByPoints} onChange={(e) => handleChange('winByPoints', e.target.value)} min="0" max="5" className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-emerald-500 transition-all" />
             <p className="text-xs text-gray-500 mt-1">Minimum lead to win (e.g., 2)</p>
           </div>
         </div>
-        <div className="mt-4 bg-purple-500/10 border border-purple-500/30 rounded-xl p-4">
-          <p className="text-sm text-purple-300">
+        <div className="mt-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3">
+          <p className="text-sm text-emerald-300">
             <span className="font-medium">Scoring Format Preview:</span> Best of {formData.numberOfGames} games, each game to {formData.pointsPerGame} points{formData.winByPoints > 0 && ` (win by ${formData.winByPoints})`}
           </p>
-        </div>
-        <div className="mt-4">
-          <p className="text-sm font-medium text-gray-300 mb-2">Quick Presets:</p>
-          <div className="flex flex-wrap gap-2">
-            <button type="button" onClick={() => { handleChange('numberOfGames', 3); handleChange('pointsPerGame', 21); handleChange('winByPoints', 2); }} className="px-3 py-1 text-sm bg-slate-700/50 hover:bg-slate-600/50 text-gray-300 rounded-full transition-colors border border-white/10">Standard (3×21)</button>
-            <button type="button" onClick={() => { handleChange('numberOfGames', 1); handleChange('pointsPerGame', 21); handleChange('winByPoints', 2); }} className="px-3 py-1 text-sm bg-slate-700/50 hover:bg-slate-600/50 text-gray-300 rounded-full transition-colors border border-white/10">Single Game (1×21)</button>
-            <button type="button" onClick={() => { handleChange('numberOfGames', 1); handleChange('pointsPerGame', 15); handleChange('winByPoints', 0); }} className="px-3 py-1 text-sm bg-slate-700/50 hover:bg-slate-600/50 text-gray-300 rounded-full transition-colors border border-white/10">Quick Match (1×15)</button>
-            <button type="button" onClick={() => { handleChange('numberOfGames', 5); handleChange('pointsPerGame', 11); handleChange('winByPoints', 2); }} className="px-3 py-1 text-sm bg-slate-700/50 hover:bg-slate-600/50 text-gray-300 rounded-full transition-colors border border-white/10">Table Tennis Style (5×11)</button>
-          </div>
         </div>
       </div>
 
       <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
         <button type="button" onClick={onCancel} className="px-6 py-2 border border-white/10 text-gray-300 rounded-xl hover:bg-slate-700/50 transition-colors font-medium">Cancel</button>
-        <button type="submit" className="px-6 py-2 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-xl hover:shadow-lg hover:shadow-purple-500/25 transition-all font-medium">{initialData ? 'Update Category' : 'Add Category'}</button>
+        <button type="submit" className="px-6 py-2 rounded-xl text-white font-medium transition-all" style={{ background: 'linear-gradient(135deg, #00c853, #00ff88)', boxShadow: '0 6px 20px rgba(0,200,83,0.4)' }}>{initialData ? 'Update Category' : 'Add Category'}</button>
       </div>
     </form>
   );

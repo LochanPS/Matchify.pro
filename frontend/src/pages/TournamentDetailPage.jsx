@@ -492,105 +492,192 @@ const TournamentDetailPage = () => {
         <div className="absolute bottom-1/3 right-1/4 w-2 h-2 bg-teal-400 rounded-full animate-float-delayed opacity-50" style={{animationDelay: '1.8s'}}></div>
       </div>
 
-      {/* Hero Header with Poster - Mobile Optimized - EMERALD THEME */}
-      <div className="relative overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(16,185,129,0.15) 0%, rgba(6,182,212,0.1) 100%)' }}>
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 left-1/4 w-64 h-64 rounded-full blur-3xl opacity-10" style={{ background: 'radial-gradient(circle, #10b981, transparent)' }}></div>
-          <div className="absolute bottom-0 right-1/4 w-64 h-64 rounded-full blur-3xl opacity-10" style={{ background: 'radial-gradient(circle, #06b6d4, transparent)' }}></div>
-        </div>
-        
-        <div className="relative max-w-7xl mx-auto px-4 py-5">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-white/70 hover:text-white mb-4 transition-colors"
-          >
-            <ArrowLeftIcon className="h-4 w-4" />
-            <span className="text-sm">Back</span>
-          </button>
+      {/* ── HERO SECTION ── Cinematic poster + info */}
+      <div className="relative">
 
-          <div className="flex flex-col md:flex-row gap-5 items-start">
-            {/* Poster - Compact for Mobile */}
-            {tournament?.posters && tournament.posters.length > 0 && (
-              <div className="w-full md:w-64 flex-shrink-0">
-                <div 
-                  className="rounded-xl overflow-hidden shadow-xl border-2 border-white/20 cursor-pointer hover:scale-105 transition-transform duration-300 group relative"
-                  onClick={() => {
-                    console.log('Poster clicked! Opening modal...');
-                    setShowPosterModal(true);
-                  }}
+        {/* === POSTER HERO (full-width cinematic) === */}
+        {tournament?.posters && tournament.posters.length > 0 ? (
+          <div className="relative w-full" style={{ minHeight: '320px' }}>
+            {/* Poster image — full bleed */}
+            <div
+              className="w-full cursor-pointer relative overflow-hidden"
+              style={{ height: '340px' }}
+              onClick={() => setShowPosterModal(true)}
+            >
+              <img
+                src={getImageUrl(tournament.posters?.[selectedPoster]?.imageUrl)}
+                alt={tournament.name}
+                className="w-full h-full object-cover"
+                style={{ objectPosition: 'center top' }}
+              />
+              {/* Dark gradient overlay — bottom-up so text is readable */}
+              <div
+                className="absolute inset-0"
+                style={{
+                  background: 'linear-gradient(to bottom, rgba(7,7,26,0.25) 0%, rgba(7,7,26,0.5) 50%, rgba(7,7,26,0.92) 100%)'
+                }}
+              />
+              {/* Tap to enlarge hint */}
+              <div className="absolute top-3 right-3">
+                <span
+                  className="px-2.5 py-1 rounded-full text-xs font-semibold backdrop-blur-md"
+                  style={{ background: 'rgba(0,0,0,0.55)', color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.2)' }}
                 >
-                  <img
-                    src={getImageUrl(tournament.posters?.[selectedPoster]?.imageUrl)}
-                    alt={tournament.name}
-                    className="w-full h-48 md:h-64 object-cover"
-                  />
-                  {/* Click hint overlay */}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/90 text-gray-800 px-2 py-1 rounded-full text-xs font-medium">
-                      Tap to enlarge
-                    </div>
-                  </div>
-                </div>
-                {tournament.posters?.length > 1 && (
-                  <div className="flex gap-2 mt-2 overflow-x-auto pb-2">
-                    {tournament.posters.map((poster, index) => (
-                      <button
-                        key={poster.id}
-                        onClick={() => setSelectedPoster(index)}
-                        className={`flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden border-2 transition-all ${
-                          selectedPoster === index ? 'border-white scale-105' : 'border-white/30 opacity-70 hover:opacity-100'
-                        }`}
-                      >
-                        <img 
-                          src={getImageUrl(poster.imageUrl)} 
-                          alt={`Poster ${index + 1}`} 
-                          className="w-full h-full object-cover" 
-                        />
-                      </button>
-                    ))}
-                  </div>
-                )}
+                  🔍 Tap to enlarge
+                </span>
+              </div>
+            </div>
+
+            {/* Back button — top left over poster */}
+            <button
+              onClick={() => navigate(-1)}
+              className="absolute top-4 left-4 flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-semibold text-sm backdrop-blur-md transition-all"
+              style={{ background: 'rgba(0,0,0,0.5)', color: 'rgba(255,255,255,0.85)', border: '1px solid rgba(255,255,255,0.15)' }}
+            >
+              <ArrowLeftIcon className="h-4 w-4" />
+              Back
+            </button>
+
+            {/* Thumbnail strip if multiple posters */}
+            {tournament.posters.length > 1 && (
+              <div className="absolute bottom-3 left-4 flex gap-2 overflow-x-auto">
+                {tournament.posters.map((poster, index) => (
+                  <button
+                    key={poster.id}
+                    onClick={() => setSelectedPoster(index)}
+                    className="flex-shrink-0 rounded-lg overflow-hidden transition-all"
+                    style={{
+                      width: '40px', height: '40px',
+                      border: selectedPoster === index ? '2px solid #00ff88' : '2px solid rgba(255,255,255,0.25)',
+                      opacity: selectedPoster === index ? 1 : 0.6,
+                    }}
+                  >
+                    <img src={getImageUrl(poster.imageUrl)} alt={`P${index + 1}`} className="w-full h-full object-cover" />
+                  </button>
+                ))}
               </div>
             )}
 
-            {/* Tournament Info - Compact */}
-            <div className="flex-1 w-full">
-              <div className="flex flex-wrap items-center gap-2 mb-3">
-                <span className={`px-3 py-1 rounded-full text-xs font-bold ${statusStyle.bg} ${statusStyle.text}`}>
+            {/* Info card overlaid at bottom of poster */}
+            <div
+              className="absolute bottom-0 left-0 right-0 px-4 pb-5"
+            >
+              {/* Status + format badges */}
+              <div className="flex flex-wrap items-center gap-2 mb-2">
+                <span
+                  className="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider"
+                  style={{
+                    background: statusStyle.bg.includes('green') || statusStyle.bg.includes('emerald')
+                      ? 'linear-gradient(135deg,#00c853,#00ff88)'
+                      : statusStyle.bg.includes('blue')
+                      ? 'linear-gradient(135deg,#1d4ed8,#3b82f6)'
+                      : 'linear-gradient(135deg,#b45309,#d97706)',
+                    color: '#fff',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.4)'
+                  }}
+                >
                   {statusStyle.label}
                 </span>
-                <span className="px-2 py-1 bg-white/10 backdrop-blur-sm rounded-full text-white/80 text-xs border border-white/20">
-                  {tournament.format === 'both' ? '🏸 Singles & Doubles' : 
+                <span
+                  className="px-2.5 py-1 rounded-full text-xs font-semibold"
+                  style={{ background: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.85)', border: '1px solid rgba(255,255,255,0.2)', backdropFilter: 'blur(8px)' }}
+                >
+                  {tournament.format === 'both' ? '🏸 Singles & Doubles' :
                    tournament.format === 'singles' ? '🏸 Singles' : '👥 Doubles'}
                 </span>
               </div>
 
-              <h1 className="text-xl md:text-2xl font-black text-white mb-3 leading-tight">
+              {/* Tournament name */}
+              <h1 className="text-2xl font-black text-white leading-tight mb-2" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.6)' }}>
                 {tournament.name}
               </h1>
 
-              <div className="grid grid-cols-1 gap-3 text-white/80">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <MapPinIcon className="h-4 w-4 text-white" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-white font-semibold text-sm truncate">{tournament.venue}</p>
-                    <p className="text-xs text-white/60 truncate">{tournament.city}, {tournament.state}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <CalendarIcon className="h-4 w-4 text-white" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-white font-semibold text-sm">{formatDate(tournament.startDate)}</p>
-                    <p className="text-xs text-white/60">to {formatDate(tournament.endDate)}</p>
-                  </div>
-                </div>
+              {/* Quick info row */}
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+                <span className="flex items-center gap-1.5 text-sm font-medium" style={{ color: 'rgba(255,255,255,0.8)' }}>
+                  <MapPinIcon className="h-4 w-4 flex-shrink-0" style={{ color: '#00ff88' }} />
+                  {tournament.city}, {tournament.state}
+                </span>
+                <span className="flex items-center gap-1.5 text-sm font-medium" style={{ color: 'rgba(255,255,255,0.8)' }}>
+                  <CalendarIcon className="h-4 w-4 flex-shrink-0" style={{ color: '#00d4ff' }} />
+                  {formatDate(tournament.startDate)}
+                </span>
               </div>
             </div>
           </div>
+
+        ) : (
+          /* ── No poster: compact header ── */
+          <div
+            className="relative px-4 pt-5 pb-6"
+            style={{ background: 'linear-gradient(135deg, rgba(0,255,136,0.08) 0%, rgba(0,212,255,0.05) 100%)', borderBottom: '1px solid rgba(0,255,136,0.15)' }}
+          >
+            <button
+              onClick={() => navigate(-1)}
+              className="flex items-center gap-1.5 mb-4 text-sm font-medium transition-colors"
+              style={{ color: 'rgba(255,255,255,0.6)' }}
+              onMouseEnter={e => e.currentTarget.style.color = '#00ff88'}
+              onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.6)'}
+            >
+              <ArrowLeftIcon className="h-4 w-4" />
+              Back
+            </button>
+            <div className="flex flex-wrap items-center gap-2 mb-2">
+              <span className={`px-3 py-1 rounded-full text-xs font-bold ${statusStyle.bg} ${statusStyle.text}`}>
+                {statusStyle.label}
+              </span>
+            </div>
+            <h1 className="text-2xl font-black text-white leading-tight mb-3">{tournament.name}</h1>
+            <div className="flex flex-wrap gap-4">
+              <span className="flex items-center gap-1.5 text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>
+                <MapPinIcon className="h-4 w-4" style={{ color: '#00ff88' }} />
+                {tournament.venue}, {tournament.city}
+              </span>
+              <span className="flex items-center gap-1.5 text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>
+                <CalendarIcon className="h-4 w-4" style={{ color: '#00d4ff' }} />
+                {formatDate(tournament.startDate)}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* ── QUICK-STAT PILLS — prize / entry / reg deadline ── */}
+        <div
+          className="px-4 py-3 flex items-center gap-2 overflow-x-auto"
+          style={{ background: 'rgba(7,7,26,0.95)', borderBottom: '1px solid rgba(0,255,136,0.12)' }}
+        >
+          {tournament.prizePool && (
+            <div
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold flex-shrink-0"
+              style={{ background: 'linear-gradient(135deg,rgba(245,158,11,0.2),rgba(251,146,60,0.15))', border: '1px solid rgba(245,158,11,0.4)', color: '#fbbf24' }}
+            >
+              🏆 ₹{Number(tournament.prizePool).toLocaleString('en-IN')} Prize
+            </div>
+          )}
+          {tournament.categories && tournament.categories.length > 0 && (
+            <div
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold flex-shrink-0"
+              style={{ background: 'linear-gradient(135deg,rgba(0,255,136,0.12),rgba(0,200,83,0.08))', border: '1px solid rgba(0,255,136,0.3)', color: '#00ff88' }}
+            >
+              🏸 {tournament.categories.length} {tournament.categories.length === 1 ? 'Category' : 'Categories'}
+            </div>
+          )}
+          {tournament.registrationCloseDate && (
+            <div
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold flex-shrink-0"
+              style={{ background: 'linear-gradient(135deg,rgba(0,212,255,0.12),rgba(6,182,212,0.08))', border: '1px solid rgba(0,212,255,0.3)', color: '#00d4ff' }}
+            >
+              ⏰ Reg ends {formatDate(tournament.registrationCloseDate)}
+            </div>
+          )}
+          {tournament.city && (
+            <div
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold flex-shrink-0"
+              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.65)' }}
+            >
+              📍 {tournament.city}
+            </div>
+          )}
         </div>
       </div>
 

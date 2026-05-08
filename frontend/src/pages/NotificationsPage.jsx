@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bell, CheckCheck, Trash2, ChevronRight, ArrowLeft } from 'lucide-react';
+import { CheckCheck, ChevronRight, ArrowLeft } from 'lucide-react';
 import { useNotifications } from '../contexts/NotificationContext';
 import { formatDistanceToNow, format } from 'date-fns';
 import MatchifyLogo from '../components/MatchifyLogo';
@@ -27,12 +27,7 @@ const NotificationsPage = () => {
     fetchNotifications,
     markAsRead,
     markAllAsRead,
-    deleteNotification,
-    deleteAllNotifications,
   } = useNotifications();
-
-  const [showDeleteAllConfirm, setShowDeleteAllConfirm] = useState(false);
-  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     fetchNotifications();
@@ -87,24 +82,6 @@ const NotificationsPage = () => {
     
     // Navigate to notification detail page
     navigate(`/notifications/${notification.id}`);
-  };
-
-  const handleDelete = (e, notificationId) => {
-    e.stopPropagation();
-    deleteNotification(notificationId);
-  };
-
-  const handleDeleteAll = async () => {
-    try {
-      setDeleting(true);
-      await deleteAllNotifications();
-      setShowDeleteAllConfirm(false);
-    } catch (error) {
-      console.error('Failed to delete all notifications:', error);
-      alert('Failed to delete notifications. Please try again.');
-    } finally {
-      setDeleting(false);
-    }
   };
 
   return (
@@ -256,47 +233,27 @@ const NotificationsPage = () => {
 
       <div className="relative max-w-md mx-auto px-4 py-6">
         {/* Action Buttons */}
-        {notifications.length > 0 && (
-          <div 
+        {notifications.length > 0 && notifications.some(n => !n.read) && (
+          <div
             className="flex items-center gap-2 mb-6"
             style={{ animation: 'fadeIn 0.8s ease-out 0.2s both' }}
           >
-            {notifications.some(n => !n.read) && (
-              <button
-                onClick={markAllAsRead}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold text-sm transition-all relative overflow-hidden group"
-                style={{ 
-                  background: 'linear-gradient(135deg, rgba(0,200,83,0.2), rgba(0,255,136,0.15))', 
-                  border: '2px solid rgba(0,200,83,0.4)',
-                  color: '#00ff88',
-                  boxShadow: '0 4px 15px rgba(0,200,83,0.2)'
-                }}
-              >
-                <div 
-                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                  style={{ background: 'rgba(0,200,83,0.1)' }}
-                />
-                <CheckCheck className="w-4 h-4 relative z-10" />
-                <span className="relative z-10">Mark All Read</span>
-              </button>
-            )}
-
             <button
-              onClick={() => setShowDeleteAllConfirm(true)}
+              onClick={markAllAsRead}
               className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold text-sm transition-all relative overflow-hidden group"
-              style={{ 
-                background: 'linear-gradient(135deg, rgba(239,68,68,0.2), rgba(220,38,38,0.15))', 
-                border: '2px solid rgba(239,68,68,0.4)',
-                color: '#f87171',
-                boxShadow: '0 4px 15px rgba(239,68,68,0.2)'
+              style={{
+                background: 'linear-gradient(135deg, rgba(0,200,83,0.2), rgba(0,255,136,0.15))',
+                border: '2px solid rgba(0,200,83,0.4)',
+                color: '#00ff88',
+                boxShadow: '0 4px 15px rgba(0,200,83,0.2)'
               }}
             >
-              <div 
+              <div
                 className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                style={{ background: 'rgba(239,68,68,0.1)' }}
+                style={{ background: 'rgba(0,200,83,0.1)' }}
               />
-              <Trash2 className="w-4 h-4 relative z-10" />
-              <span className="relative z-10">Delete All</span>
+              <CheckCheck className="w-4 h-4 relative z-10" />
+              <span className="relative z-10">Mark All Read</span>
             </button>
           </div>
         )}
@@ -452,20 +409,6 @@ const NotificationsPage = () => {
 
                         {/* Actions */}
                         <div className="flex items-center gap-2">
-                          <button
-                            onClick={(e) => handleDelete(e, notification.id)}
-                            className="p-2 rounded-lg transition-all relative overflow-hidden group"
-                            style={{ 
-                              background: 'rgba(239,68,68,0.2)',
-                              border: '1px solid rgba(239,68,68,0.3)'
-                            }}
-                          >
-                            <div 
-                              className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                              style={{ background: 'rgba(239,68,68,0.2)' }}
-                            />
-                            <Trash2 className="w-4 h-4 text-red-400 relative z-10" />
-                          </button>
                           <ChevronRight className="w-5 h-5 text-gray-400" />
                         </div>
                       </div>
@@ -478,96 +421,6 @@ const NotificationsPage = () => {
         )}
       </div>
 
-      {/* Delete All Confirmation Modal */}
-      {showDeleteAllConfirm && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div 
-            className="rounded-2xl p-6 max-w-md w-full relative overflow-hidden"
-            style={{
-              background: 'linear-gradient(135deg, rgba(7,7,26,0.98), rgba(13,26,42,0.98))',
-              border: '2px solid rgba(239,68,68,0.4)',
-              boxShadow: '0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(239,68,68,0.2)',
-              animation: 'scaleIn 0.3s ease-out'
-            }}
-          >
-            {/* Animated Glow */}
-            <div 
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 rounded-full blur-3xl opacity-20"
-              style={{ 
-                background: 'radial-gradient(circle, rgba(239,68,68,0.8), transparent)',
-                animation: 'glow 3s ease-in-out infinite'
-              }}
-            />
-            
-            <div className="relative z-10">
-              <div className="flex items-center gap-3 mb-4">
-                <div 
-                  className="w-12 h-12 rounded-xl flex items-center justify-center"
-                  style={{ 
-                    background: 'linear-gradient(135deg, rgba(239,68,68,0.3), rgba(220,38,38,0.2))',
-                    border: '2px solid rgba(239,68,68,0.5)',
-                    boxShadow: '0 4px 12px rgba(239,68,68,0.4)'
-                  }}
-                >
-                  <Trash2 className="w-6 h-6 text-red-400" />
-                </div>
-                <h3 className="text-xl font-black text-white">Delete All Notifications?</h3>
-              </div>
-              
-              <p className="text-gray-300 mb-6 leading-relaxed">
-                This will permanently delete all <span className="font-bold text-white">{notifications.length}</span> notification{notifications.length !== 1 ? 's' : ''}. This action cannot be undone.
-              </p>
-
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setShowDeleteAllConfirm(false)}
-                  disabled={deleting}
-                  className="flex-1 px-4 py-3 rounded-xl font-semibold transition-all relative overflow-hidden group disabled:opacity-50"
-                  style={{ 
-                    background: 'linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.05))', 
-                    border: '2px solid rgba(255,255,255,0.15)',
-                    color: '#ffffff'
-                  }}
-                >
-                  <div 
-                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                    style={{ background: 'rgba(255,255,255,0.05)' }}
-                  />
-                  <span className="relative z-10">Cancel</span>
-                </button>
-                <button
-                  onClick={handleDeleteAll}
-                  disabled={deleting}
-                  className="flex-1 px-4 py-3 rounded-xl font-bold transition-all relative overflow-hidden group disabled:opacity-50 flex items-center justify-center gap-2"
-                  style={{ 
-                    background: 'linear-gradient(135deg, #ef4444, #dc2626)',
-                    color: '#ffffff',
-                    boxShadow: '0 4px 15px rgba(239,68,68,0.4), inset 0 1px 0 rgba(255,255,255,0.2)'
-                  }}
-                >
-                  <div 
-                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                    style={{ background: 'rgba(255,255,255,0.1)' }}
-                  />
-                  {deleting ? (
-                    <>
-                      <div 
-                        className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin relative z-10"
-                      ></div>
-                      <span className="relative z-10">Deleting...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Trash2 className="w-4 h-4 relative z-10" />
-                      <span className="relative z-10">Delete All</span>
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

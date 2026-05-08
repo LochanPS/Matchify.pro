@@ -2230,8 +2230,8 @@ const getCompleteMatchScore = (scoreData) => {
   }
 };
 
-// Knockout Display - HORIZONTAL PYRAMID FOR WINNER ADVANCEMENT
-// This layout is REQUIRED for automatic winner progression to work correctly
+// Knockout Display - CONTAINED HORIZONTAL PYRAMID
+// Properly contained within app boundaries with horizontal scroll
 const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onViewMatchDetails, onChangeResult, categoryFormat }) => {
   if (!data?.rounds) return <p className="text-gray-400 text-center p-8">No bracket data</p>;
 
@@ -2282,183 +2282,212 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
   };
 
   return (
-    <div className="overflow-x-auto pb-4">
-      {/* HORIZONTAL PYRAMID - Required for winner advancement logic */}
-      <div className="flex gap-4 min-w-max p-3">
-        {data.rounds.map((round, ri) => (
-          <div key={ri} className="flex flex-col min-w-[240px]">
-            {/* Round Header - Emerald Theme - MOBILE OPTIMIZED */}
-            <div className="mb-4 text-center">
-              <div className="inline-flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border-2 border-emerald-500/30 rounded-xl shadow-lg">
-                <Trophy className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                <h4 className="text-sm font-black text-emerald-300 uppercase tracking-wider whitespace-nowrap">
-                  {getRoundName(ri, data.rounds.length)}
-                </h4>
-              </div>
+    <div className="p-3">
+      {/* CONTAINED BRACKET - Matches app theme */}
+      <div className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-sm rounded-2xl border-2 border-emerald-500/20 shadow-xl overflow-hidden">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-emerald-500/30 to-teal-500/30 p-4 border-b-2 border-emerald-500/30">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-emerald-500/50">
+              🏆
             </div>
-            
-            {/* Matches - MOBILE OPTIMIZED CARDS */}
-            <div 
-              className="flex flex-col justify-around flex-1 gap-3" 
-              style={{ paddingTop: ri > 0 ? `${Math.pow(2, ri) * 16}px` : 0 }}
-            >
-              {round.matches.map((match, mi) => {
-                const dbMatch = findMatch(ri, mi);
-                
-                const player1 = dbMatch?.player1 || match.player1 || { name: 'TBD' };
-                const player2 = dbMatch?.player2 || match.player2 || { name: 'TBD' };
-                
-                const player1Name = getPlayerDisplay(player1);
-                const player2Name = getPlayerDisplay(player2);
-                
-                const isCompleted = dbMatch?.status === 'COMPLETED';
-                const isLive = dbMatch?.status === 'IN_PROGRESS';
-                const isReady = dbMatch?.status === 'READY' && player1.name !== 'TBD' && player2.name !== 'TBD';
-                const hasUmpire = dbMatch?.umpireId;
-                
-                const isPlayer1Winner = dbMatch?.winnerId === player1?.id;
-                const isPlayer2Winner = dbMatch?.winnerId === player2?.id;
-                
-                return (
-                  <div 
-                    key={mi} 
-                    className="relative" 
-                    style={{ marginBottom: ri > 0 ? `${Math.pow(2, ri) * 32}px` : 0 }}
-                  >
-                    <div className={`bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-sm border-2 rounded-xl overflow-hidden shadow-lg transition-all ${
-                      isLive ? 'border-emerald-500 shadow-emerald-500/30 animate-pulse' :
-                      isReady ? 'border-blue-500/50 shadow-blue-500/20' :
-                      isCompleted ? 'border-emerald-500/30 shadow-emerald-500/10' :
-                      'border-white/10'
-                    }`}>
-                      {/* Match Header - MOBILE OPTIMIZED TEXT */}
-                      <div className="bg-slate-700/60 px-3 py-2 border-b-2 border-white/10 flex items-center justify-between">
-                        <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest">
-                          #{match.matchNumber || mi + 1}
-                        </span>
-                        
-                        {/* Status Badge - MOBILE OPTIMIZED */}
-                        {isLive && (
-                          <span className="px-2 py-0.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-full text-[10px] font-black flex items-center gap-1 shadow-lg">
-                            <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>
-                            LIVE
-                          </span>
-                        )}
-                        {isCompleted && !isLive && (
-                          <span className="px-2 py-0.5 bg-emerald-500/30 text-emerald-300 border border-emerald-500/50 rounded-full text-[10px] font-black">
-                            ✓
-                          </span>
-                        )}
-                      </div>
-                      
-                      {/* Players - MOBILE OPTIMIZED */}
-                      <div className="p-2 space-y-1.5">
-                        {/* Player 1 */}
-                        <div className={`flex items-center justify-between px-2.5 py-2 rounded-lg transition-all ${
-                          isPlayer1Winner
-                            ? 'bg-gradient-to-r from-emerald-500/30 to-teal-500/30 border-2 border-emerald-500/60 shadow-lg' 
-                            : 'bg-slate-700/40 border border-white/10'
-                        }`}>
-                          <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                            {isPlayer1Winner && (
-                              <Trophy className="w-3 h-3 text-emerald-400 flex-shrink-0" />
-                            )}
-                            <span className={`text-xs font-bold truncate ${
-                              isPlayer1Winner ? 'text-emerald-200' : player1Name === 'TBD' ? 'text-gray-500 italic' : 'text-white'
-                            }`}>
-                              {player1Name}
-                            </span>
-                          </div>
-                        </div>
-                        
-                        {/* VS Divider */}
-                        <div className="flex items-center justify-center py-0.5">
-                          <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest">VS</span>
-                        </div>
-                        
-                        {/* Player 2 */}
-                        <div className={`flex items-center justify-between px-2.5 py-2 rounded-lg transition-all ${
-                          isPlayer2Winner
-                            ? 'bg-gradient-to-r from-emerald-500/30 to-teal-500/30 border-2 border-emerald-500/60 shadow-lg' 
-                            : 'bg-slate-700/40 border border-white/10'
-                        }`}>
-                          <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                            {isPlayer2Winner && (
-                              <Trophy className="w-3 h-3 text-emerald-400 flex-shrink-0" />
-                            )}
-                            <span className={`text-xs font-bold truncate ${
-                              isPlayer2Winner ? 'text-emerald-200' : player2Name === 'TBD' ? 'text-gray-500 italic' : 'text-white'
-                            }`}>
-                              {player2Name}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      {/* Organizer Actions - MOBILE OPTIMIZED */}
-                      {isOrganizer && dbMatch && (
-                        <div className="px-2 pb-2 flex gap-1.5">
-                          {/* Assign Umpire Button */}
-                          {!isCompleted && player1.name !== 'TBD' && player2.name !== 'TBD' && (
-                            <button
-                              onClick={() => {
-                                const bracketMatchData = {
-                                  matchNumber: match.matchNumber,
-                                  round: ri + 1,
-                                  player1: player1,
-                                  player2: player2
-                                };
-                                onAssignUmpire(dbMatch, bracketMatchData);
-                              }}
-                              className={`flex-1 py-2 rounded-lg border-2 transition-all text-[10px] font-black flex items-center justify-center gap-1 ${
-                                hasUmpire
-                                  ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
-                                  : 'bg-blue-500/20 text-blue-300 border-blue-500/40'
-                              }`}
-                            >
-                              <Gavel className="w-3 h-3" />
-                              {hasUmpire ? 'READY' : 'UMPIRE'}
-                            </button>
-                          )}
-                          
-                          {/* Conduct Match Button */}
-                          {!isCompleted && (player1.name !== 'TBD' || player2.name !== 'TBD') && (
-                            <button
-                              onClick={() => handleConductMatch(dbMatch.id)}
-                              className="flex-1 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-600 text-white border-2 border-emerald-400/50 transition-all text-[10px] font-black flex items-center justify-center gap-1"
-                            >
-                              <Play className="w-3 h-3" />
-                              START
-                            </button>
-                          )}
-                          
-                          {/* View Details Button */}
-                          {isCompleted && (
-                            <button
-                              onClick={() => {
-                                const bracketMatchData = {
-                                  matchNumber: match.matchNumber,
-                                  round: ri + 1,
-                                  player1: player1,
-                                  player2: player2
-                                };
-                                onViewMatchDetails(dbMatch, bracketMatchData);
-                              }}
-                              className="flex-1 py-2 rounded-lg bg-blue-500/20 text-blue-300 border-2 border-blue-500/40 transition-all text-[10px] font-black flex items-center justify-center gap-1"
-                            >
-                              <Eye className="w-3 h-3" />
-                              VIEW
-                            </button>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
+            <div className="flex-1">
+              <h4 className="text-lg font-black text-white">Knockout Bracket</h4>
+              <p className="text-emerald-300 text-xs font-semibold">
+                {totalRounds} {totalRounds === 1 ? 'Round' : 'Rounds'} • Pyramid Format
+              </p>
             </div>
           </div>
-        ))}
+        </div>
+
+        {/* Scrollable Bracket Container */}
+        <div className="overflow-x-auto custom-scrollbar">
+          <div className="flex gap-4 min-w-max p-4">
+            {data.rounds.map((round, ri) => (
+              <div key={ri} className="flex flex-col min-w-[220px]">
+                {/* Round Header */}
+                <div className="mb-4 text-center">
+                  <div className="inline-flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border-2 border-emerald-500/30 rounded-xl shadow-lg">
+                    <Trophy className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                    <h4 className="text-xs font-black text-emerald-300 uppercase tracking-wider whitespace-nowrap">
+                      {getRoundName(ri, data.rounds.length)}
+                    </h4>
+                  </div>
+                </div>
+                
+                {/* Matches */}
+                <div 
+                  className="flex flex-col justify-around flex-1 gap-3" 
+                  style={{ paddingTop: ri > 0 ? `${Math.pow(2, ri) * 16}px` : 0 }}
+                >
+                  {round.matches.map((match, mi) => {
+                    const dbMatch = findMatch(ri, mi);
+                    
+                    const player1 = dbMatch?.player1 || match.player1 || { name: 'TBD' };
+                    const player2 = dbMatch?.player2 || match.player2 || { name: 'TBD' };
+                    
+                    const player1Name = getPlayerDisplay(player1);
+                    const player2Name = getPlayerDisplay(player2);
+                    
+                    const isCompleted = dbMatch?.status === 'COMPLETED';
+                    const isLive = dbMatch?.status === 'IN_PROGRESS';
+                    const isReady = dbMatch?.status === 'READY' && player1.name !== 'TBD' && player2.name !== 'TBD';
+                    const hasUmpire = dbMatch?.umpireId;
+                    
+                    const isPlayer1Winner = dbMatch?.winnerId === player1?.id;
+                    const isPlayer2Winner = dbMatch?.winnerId === player2?.id;
+                    
+                    return (
+                      <div 
+                        key={mi} 
+                        className="relative" 
+                        style={{ marginBottom: ri > 0 ? `${Math.pow(2, ri) * 32}px` : 0 }}
+                      >
+                        <div className={`bg-gradient-to-br from-slate-700/60 to-slate-800/60 backdrop-blur-sm border-2 rounded-xl overflow-hidden shadow-lg transition-all ${
+                          isLive ? 'border-emerald-500 shadow-emerald-500/30 animate-pulse' :
+                          isReady ? 'border-blue-500/50 shadow-blue-500/20' :
+                          isCompleted ? 'border-emerald-500/30 shadow-emerald-500/10' :
+                          'border-white/10'
+                        }`}>
+                          {/* Match Header */}
+                          <div className="bg-slate-800/60 px-3 py-2 border-b-2 border-white/10 flex items-center justify-between">
+                            <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest">
+                              #{match.matchNumber || mi + 1}
+                            </span>
+                            
+                            {/* Status Badge */}
+                            {isLive && (
+                              <span className="px-2 py-0.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-full text-[10px] font-black flex items-center gap-1 shadow-lg">
+                                <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>
+                                LIVE
+                              </span>
+                            )}
+                            {isCompleted && !isLive && (
+                              <span className="px-2 py-0.5 bg-emerald-500/30 text-emerald-300 border border-emerald-500/50 rounded-full text-[10px] font-black">
+                                ✓
+                              </span>
+                            )}
+                          </div>
+                          
+                          {/* Players */}
+                          <div className="p-2 space-y-1.5">
+                            {/* Player 1 */}
+                            <div className={`flex items-center justify-between px-2.5 py-2 rounded-lg transition-all ${
+                              isPlayer1Winner
+                                ? 'bg-gradient-to-r from-emerald-500/30 to-teal-500/30 border-2 border-emerald-500/60 shadow-lg' 
+                                : 'bg-slate-700/40 border border-white/10'
+                            }`}>
+                              <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                                {isPlayer1Winner && (
+                                  <Trophy className="w-3 h-3 text-emerald-400 flex-shrink-0" />
+                                )}
+                                <span className={`text-xs font-bold truncate ${
+                                  isPlayer1Winner ? 'text-emerald-200' : player1Name === 'TBD' ? 'text-gray-500 italic' : 'text-white'
+                                }`}>
+                                  {player1Name}
+                                </span>
+                              </div>
+                            </div>
+                            
+                            {/* VS Divider */}
+                            <div className="flex items-center justify-center py-0.5">
+                              <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest">VS</span>
+                            </div>
+                            
+                            {/* Player 2 */}
+                            <div className={`flex items-center justify-between px-2.5 py-2 rounded-lg transition-all ${
+                              isPlayer2Winner
+                                ? 'bg-gradient-to-r from-emerald-500/30 to-teal-500/30 border-2 border-emerald-500/60 shadow-lg' 
+                                : 'bg-slate-700/40 border border-white/10'
+                            }`}>
+                              <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                                {isPlayer2Winner && (
+                                  <Trophy className="w-3 h-3 text-emerald-400 flex-shrink-0" />
+                                )}
+                                <span className={`text-xs font-bold truncate ${
+                                  isPlayer2Winner ? 'text-emerald-200' : player2Name === 'TBD' ? 'text-gray-500 italic' : 'text-white'
+                                }`}>
+                                  {player2Name}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* Organizer Actions */}
+                          {isOrganizer && dbMatch && (
+                            <div className="px-2 pb-2 flex gap-1.5">
+                              {/* Assign Umpire Button */}
+                              {!isCompleted && player1.name !== 'TBD' && player2.name !== 'TBD' && (
+                                <button
+                                  onClick={() => {
+                                    const bracketMatchData = {
+                                      matchNumber: match.matchNumber,
+                                      round: ri + 1,
+                                      player1: player1,
+                                      player2: player2
+                                    };
+                                    onAssignUmpire(dbMatch, bracketMatchData);
+                                  }}
+                                  className={`flex-1 py-2 rounded-lg border-2 transition-all text-[10px] font-black flex items-center justify-center gap-1 ${
+                                    hasUmpire
+                                      ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                                      : 'bg-blue-500/20 text-blue-300 border-blue-500/40'
+                                  }`}
+                                >
+                                  <Gavel className="w-3 h-3" />
+                                  {hasUmpire ? 'READY' : 'UMPIRE'}
+                                </button>
+                              )}
+                              
+                              {/* Conduct Match Button */}
+                              {!isCompleted && (player1.name !== 'TBD' || player2.name !== 'TBD') && (
+                                <button
+                                  onClick={() => handleConductMatch(dbMatch.id)}
+                                  className="flex-1 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-600 text-white border-2 border-emerald-400/50 transition-all text-[10px] font-black flex items-center justify-center gap-1"
+                                >
+                                  <Play className="w-3 h-3" />
+                                  START
+                                </button>
+                              )}
+                              
+                              {/* View Details Button */}
+                              {isCompleted && (
+                                <button
+                                  onClick={() => {
+                                    const bracketMatchData = {
+                                      matchNumber: match.matchNumber,
+                                      round: ri + 1,
+                                      player1: player1,
+                                      player2: player2
+                                    };
+                                    onViewMatchDetails(dbMatch, bracketMatchData);
+                                  }}
+                                  className="flex-1 py-2 rounded-lg bg-blue-500/20 text-blue-300 border-2 border-blue-500/40 transition-all text-[10px] font-black flex items-center justify-center gap-1"
+                                >
+                                  <Eye className="w-3 h-3" />
+                                  VIEW
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Scroll Hint */}
+        <div className="bg-emerald-500/10 border-t-2 border-emerald-500/20 px-4 py-2 text-center">
+          <p className="text-xs text-emerald-300 font-semibold flex items-center justify-center gap-2">
+            <span>←</span>
+            Swipe to view all rounds
+            <span>→</span>
+          </p>
+        </div>
       </div>
     </div>
   );

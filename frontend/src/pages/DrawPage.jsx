@@ -2230,9 +2230,8 @@ const getCompleteMatchScore = (scoreData) => {
   }
 };
 
-// Knockout Display - HORIZONTAL PYRAMID (LEFT TO RIGHT)
-// STANDARD LAYOUT: Round 1 → Quarters → Semis → Final (left to right)
-// This layout is used for ALL knockout brackets regardless of size or format
+// Knockout Display - MOBILE OPTIMIZED VERTICAL LAYOUT
+// Each round stacks vertically for easy mobile viewing
 const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onViewMatchDetails, onChangeResult, categoryFormat }) => {
   if (!data?.rounds) return <p className="text-gray-400 text-center p-8">No bracket data</p>;
 
@@ -2283,219 +2282,217 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
   };
 
   return (
-    <div className="overflow-x-auto pb-4">
-      <div className="flex gap-6 min-w-max p-4">
-        {data.rounds.map((round, ri) => (
-          <div key={ri} id={`round-${ri}`} className="flex flex-col min-w-[260px]">
-            {/* Round Header */}
-            <div className="mb-6 text-center">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 rounded-xl">
-                <Trophy className="w-4 h-4 text-emerald-400" />
-                <h4 className="text-sm font-bold text-emerald-300 uppercase tracking-wider">
-                  {getRoundName(ri, data.rounds.length)}
-                </h4>
-              </div>
+    <div className="space-y-6 p-3">
+      {/* MOBILE: Stack rounds vertically */}
+      {data.rounds.map((round, ri) => (
+        <div key={ri} className="space-y-3">
+          {/* Round Header - Emerald Theme */}
+          <div className="sticky top-0 z-10 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 backdrop-blur-sm border-2 border-emerald-500/30 rounded-xl p-3 shadow-lg">
+            <div className="flex items-center justify-center gap-2">
+              <Trophy className="w-5 h-5 text-emerald-400" />
+              <h4 className="text-base font-black text-emerald-300 uppercase tracking-wider">
+                {getRoundName(ri, data.rounds.length)}
+              </h4>
+              <span className="px-2 py-0.5 bg-emerald-500/30 text-emerald-300 rounded-full text-xs font-bold">
+                {round.matches.length} {round.matches.length === 1 ? 'Match' : 'Matches'}
+              </span>
             </div>
-            
-            {/* Matches */}
-            <div 
-              className="flex flex-col justify-around flex-1 gap-3" 
-              style={{ paddingTop: ri > 0 ? `${Math.pow(2, ri) * 18}px` : 0 }}
-            >
-              {round.matches.map((match, mi) => {
-                const dbMatch = findMatch(ri, mi);
-                
-                const player1 = dbMatch?.player1 || match.player1 || { name: 'TBD' };
-                const player2 = dbMatch?.player2 || match.player2 || { name: 'TBD' };
-                
-                const player1Name = getPlayerDisplay(player1);
-                const player2Name = getPlayerDisplay(player2);
-                
-                const isCompleted = dbMatch?.status === 'COMPLETED';
-                const isLive = dbMatch?.status === 'IN_PROGRESS';
-                const isReady = dbMatch?.status === 'READY' && player1.name !== 'TBD' && player2.name !== 'TBD';
-                const hasUmpire = dbMatch?.umpireId;
-                
-                const isPlayer1Winner = dbMatch?.winnerId === player1?.id;
-                const isPlayer2Winner = dbMatch?.winnerId === player2?.id;
-                
-                return (
-                  <div 
-                    key={mi} 
-                    className="relative group" 
-                    style={{ marginBottom: ri > 0 ? `${Math.pow(2, ri) * 36}px` : 0 }}
-                  >
-                    <div className={`bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm border rounded-xl overflow-hidden shadow-lg transition-all ${
-                      isLive ? 'border-emerald-500 shadow-emerald-500/20' :
-                      isReady ? 'border-blue-500/50 shadow-blue-500/10' :
-                      isCompleted ? 'border-amber-500/30' :
-                      'border-white/10'
+          </div>
+          
+          {/* Matches - Full Width Cards */}
+          <div className="space-y-3">
+            {round.matches.map((match, mi) => {
+              const dbMatch = findMatch(ri, mi);
+              
+              const player1 = dbMatch?.player1 || match.player1 || { name: 'TBD' };
+              const player2 = dbMatch?.player2 || match.player2 || { name: 'TBD' };
+              
+              const player1Name = getPlayerDisplay(player1);
+              const player2Name = getPlayerDisplay(player2);
+              
+              const isCompleted = dbMatch?.status === 'COMPLETED';
+              const isLive = dbMatch?.status === 'IN_PROGRESS';
+              const isReady = dbMatch?.status === 'READY' && player1.name !== 'TBD' && player2.name !== 'TBD';
+              const hasUmpire = dbMatch?.umpireId;
+              
+              const isPlayer1Winner = dbMatch?.winnerId === player1?.id;
+              const isPlayer2Winner = dbMatch?.winnerId === player2?.id;
+              
+              return (
+                <div 
+                  key={mi} 
+                  className={`bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-sm border-2 rounded-2xl overflow-hidden shadow-xl transition-all ${
+                    isLive ? 'border-emerald-500 shadow-emerald-500/30 animate-pulse' :
+                    isReady ? 'border-blue-500/50 shadow-blue-500/20' :
+                    isCompleted ? 'border-emerald-500/30 shadow-emerald-500/10' :
+                    'border-white/10'
+                  }`}
+                >
+                  {/* Match Header */}
+                  <div className="bg-slate-700/60 px-4 py-2.5 border-b-2 border-white/10 flex items-center justify-between">
+                    <span className="text-xs font-black text-gray-300 uppercase tracking-widest">
+                      Match #{match.matchNumber || mi + 1}
+                    </span>
+                    
+                    {/* Status Badge */}
+                    {isLive && (
+                      <span className="px-3 py-1 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-full text-xs font-black flex items-center gap-1.5 shadow-lg shadow-emerald-500/50">
+                        <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+                        LIVE
+                      </span>
+                    )}
+                    {isCompleted && !isLive && (
+                      <span className="px-3 py-1 bg-gradient-to-r from-emerald-500/30 to-teal-500/30 text-emerald-300 border-2 border-emerald-500/50 rounded-full text-xs font-black">
+                        ✓ DONE
+                      </span>
+                    )}
+                    {isReady && !isLive && !isCompleted && (
+                      <span className="px-3 py-1 bg-blue-500/30 text-blue-300 border-2 border-blue-500/50 rounded-full text-xs font-black">
+                        READY
+                      </span>
+                    )}
+                  </div>
+                  
+                  {/* Players */}
+                  <div className="p-4 space-y-2.5">
+                    {/* Player 1 */}
+                    <div className={`flex items-center justify-between px-4 py-3.5 rounded-xl transition-all ${
+                      isPlayer1Winner
+                        ? 'bg-gradient-to-r from-emerald-500/30 to-teal-500/30 border-2 border-emerald-500/60 shadow-lg shadow-emerald-500/30' 
+                        : 'bg-slate-700/40 border-2 border-white/10'
                     }`}>
-                      {/* Match Number Badge */}
-                      <div className="bg-slate-700/50 px-3 py-1.5 border-b border-white/5 flex items-center justify-between">
-                        <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                          Match #{match.matchNumber || mi + 1}
+                      <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                        {isPlayer1Winner && (
+                          <Trophy className="w-5 h-5 text-emerald-400 flex-shrink-0 animate-bounce" />
+                        )}
+                        <span className={`text-sm font-bold truncate ${
+                          isPlayer1Winner ? 'text-emerald-200' : player1Name === 'TBD' ? 'text-gray-500 italic' : 'text-white'
+                        }`}>
+                          {player1Name}
                         </span>
-                        
-                        {/* Status Badge */}
-                        {isLive && (
-                          <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 rounded text-xs font-bold flex items-center gap-1">
-                            <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span>
-                            LIVE
-                          </span>
-                        )}
-                        {isCompleted && !isLive && (
-                          <span className="px-2 py-0.5 bg-amber-500/20 text-amber-400 border border-amber-500/50 rounded text-xs font-bold">
-                            COMPLETED
-                          </span>
-                        )}
-                        {isReady && !isLive && !isCompleted && (
-                          <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 border border-blue-500/50 rounded text-xs font-bold">
-                            READY
-                          </span>
-                        )}
                       </div>
-                      
-                      {/* Players */}
-                      <div className="p-2.5 space-y-1.5">
-                        {/* Player 1 */}
-                        <div className={`flex items-center justify-between px-3 py-2 rounded-lg transition-all ${
-                          isPlayer1Winner
-                            ? 'bg-gradient-to-r from-emerald-500/20 to-emerald-600/20 border-2 border-emerald-500/50 shadow-lg shadow-emerald-500/20' 
-                            : 'bg-slate-700/30 border border-white/5'
+                      {isPlayer1Winner && (
+                        <span className="ml-2 px-2.5 py-1 bg-emerald-500/50 text-white rounded-lg text-xs font-black shadow-lg">
+                          WINNER
+                        </span>
+                      )}
+                    </div>
+                    
+                    {/* VS Divider */}
+                    <div className="flex items-center justify-center py-1">
+                      <span className="px-4 py-1 bg-slate-700/50 text-gray-400 rounded-full text-xs font-black uppercase tracking-widest">
+                        VS
+                      </span>
+                    </div>
+                    
+                    {/* Player 2 */}
+                    <div className={`flex items-center justify-between px-4 py-3.5 rounded-xl transition-all ${
+                      isPlayer2Winner
+                        ? 'bg-gradient-to-r from-emerald-500/30 to-teal-500/30 border-2 border-emerald-500/60 shadow-lg shadow-emerald-500/30' 
+                        : 'bg-slate-700/40 border-2 border-white/10'
+                    }`}>
+                      <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                        {isPlayer2Winner && (
+                          <Trophy className="w-5 h-5 text-emerald-400 flex-shrink-0 animate-bounce" />
+                        )}
+                        <span className={`text-sm font-bold truncate ${
+                          isPlayer2Winner ? 'text-emerald-200' : player2Name === 'TBD' ? 'text-gray-500 italic' : 'text-white'
                         }`}>
-                          <div className="flex items-center gap-2 flex-1 min-w-0">
-                            {isPlayer1Winner && (
-                              <Trophy className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
-                            )}
-                            <span className={`text-sm font-medium truncate ${
-                              isPlayer1Winner ? 'text-emerald-300' : player1Name === 'TBD' ? 'text-gray-500 italic' : 'text-white'
-                            }`}>
-                              {player1Name}
-                            </span>
-                          </div>
-                          {isPlayer1Winner && (
-                            <span className="ml-2 px-1.5 py-0.5 bg-emerald-500/30 text-emerald-300 rounded text-xs font-bold">
-                              W
-                            </span>
-                          )}
-                        </div>
-                        
-                        {/* VS Divider */}
-                        <div className="flex items-center justify-center py-0.5">
-                          <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">vs</span>
-                        </div>
-                        
-                        {/* Player 2 */}
-                        <div className={`flex items-center justify-between px-3 py-2 rounded-lg transition-all ${
-                          isPlayer2Winner
-                            ? 'bg-gradient-to-r from-emerald-500/20 to-emerald-600/20 border-2 border-emerald-500/50 shadow-lg shadow-emerald-500/20' 
-                            : 'bg-slate-700/30 border border-white/5'
-                        }`}>
-                          <div className="flex items-center gap-2 flex-1 min-w-0">
-                            {isPlayer2Winner && (
-                              <Trophy className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
-                            )}
-                            <span className={`text-sm font-medium truncate ${
-                              isPlayer2Winner ? 'text-emerald-300' : player2Name === 'TBD' ? 'text-gray-500 italic' : 'text-white'
-                            }`}>
-                              {player2Name}
-                            </span>
-                          </div>
-                          {isPlayer2Winner && (
-                            <span className="ml-2 px-1.5 py-0.5 bg-emerald-500/30 text-emerald-300 rounded text-xs font-bold">
-                              W
-                            </span>
-                          )}
-                        </div>
+                          {player2Name}
+                        </span>
                       </div>
-                      
-                      {/* Organizer Actions */}
-                      {isOrganizer && dbMatch && (
-                        <div className="px-2.5 pb-2.5 flex gap-1.5">
-                          {/* Assign Umpire Button */}
-                          {!isCompleted && player1.name !== 'TBD' && player2.name !== 'TBD' && (
-                            <button
-                              onClick={() => {
-                                const bracketMatchData = {
-                                  matchNumber: match.matchNumber,
-                                  round: ri + 1,
-                                  player1: player1,
-                                  player2: player2
-                                };
-                                onAssignUmpire(dbMatch, bracketMatchData);
-                              }}
-                              className={`flex-1 py-1.5 rounded-lg border transition-all text-xs font-semibold flex items-center justify-center gap-1.5 ${
-                                hasUmpire
-                                  ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/30'
-                                  : 'bg-blue-500/20 text-blue-400 border-blue-500/30 hover:bg-blue-500/30'
-                              }`}
-                              title={hasUmpire ? 'Umpire assigned' : 'Assign umpire'}
-                            >
-                              <Gavel className="w-3 h-3" />
-                              {hasUmpire ? 'Umpire ✓' : 'Umpire'}
-                            </button>
-                          )}
-                          
-                          {/* Conduct Match Button */}
-                          {!isCompleted && (player1.name !== 'TBD' || player2.name !== 'TBD') && (
-                            <button
-                              onClick={() => handleConductMatch(dbMatch.id)}
-                              className="flex-1 py-1.5 rounded-lg bg-purple-500/20 text-purple-400 border border-purple-500/30 hover:bg-purple-500/30 transition-all text-xs font-semibold flex items-center justify-center gap-1.5"
-                              title="Conduct match"
-                            >
-                              <Play className="w-3 h-3" />
-                              Conduct
-                            </button>
-                          )}
-                          
-                          {/* View Details Button for Completed Matches */}
-                          {isCompleted && (
-                            <button
-                              onClick={() => {
-                                const bracketMatchData = {
-                                  matchNumber: match.matchNumber,
-                                  round: ri + 1,
-                                  player1: player1,
-                                  player2: player2
-                                };
-                                onViewMatchDetails(dbMatch, bracketMatchData);
-                              }}
-                              className="flex-1 py-1.5 rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30 transition-all text-xs font-semibold flex items-center justify-center gap-1.5"
-                            >
-                              <Eye className="w-3 h-3" />
-                              View Details
-                            </button>
-                          )}
-                          
-                          {/* Change Result Button for Completed Matches */}
-                          {isCompleted && onChangeResult && (
-                            <button
-                              onClick={() => {
-                                const bracketMatchData = {
-                                  matchNumber: match.matchNumber,
-                                  round: ri + 1,
-                                  player1: player1,
-                                  player2: player2
-                                };
-                                onChangeResult(dbMatch, bracketMatchData);
-                              }}
-                              className="py-1.5 px-2 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/30 hover:bg-amber-500/30 transition-all text-xs font-semibold flex items-center justify-center"
-                              title="Change result"
-                            >
-                              <Edit className="w-3 h-3" />
-                            </button>
-                          )}
-                        </div>
+                      {isPlayer2Winner && (
+                        <span className="ml-2 px-2.5 py-1 bg-emerald-500/50 text-white rounded-lg text-xs font-black shadow-lg">
+                          WINNER
+                        </span>
                       )}
                     </div>
                   </div>
-                );
-              })}
-            </div>
+                  
+                  {/* Organizer Actions */}
+                  {isOrganizer && dbMatch && (
+                    <div className="px-4 pb-4 flex gap-2">
+                      {/* Assign Umpire Button */}
+                      {!isCompleted && player1.name !== 'TBD' && player2.name !== 'TBD' && (
+                        <button
+                          onClick={() => {
+                            const bracketMatchData = {
+                              matchNumber: match.matchNumber,
+                              round: ri + 1,
+                              player1: player1,
+                              player2: player2
+                            };
+                            onAssignUmpire(dbMatch, bracketMatchData);
+                          }}
+                          className={`flex-1 py-3 rounded-xl border-2 transition-all text-xs font-black flex items-center justify-center gap-2 ${
+                            hasUmpire
+                              ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 hover:bg-emerald-500/30'
+                              : 'bg-blue-500/20 text-blue-300 border-blue-500/40 hover:bg-blue-500/30'
+                          }`}
+                          title={hasUmpire ? 'Umpire assigned' : 'Assign umpire'}
+                        >
+                          <Gavel className="w-4 h-4" />
+                          {hasUmpire ? 'UMPIRE ✓' : 'ASSIGN UMPIRE'}
+                        </button>
+                      )}
+                      
+                      {/* Conduct Match Button */}
+                      {!isCompleted && (player1.name !== 'TBD' || player2.name !== 'TBD') && (
+                        <button
+                          onClick={() => handleConductMatch(dbMatch.id)}
+                          className="flex-1 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white border-2 border-emerald-400/50 hover:shadow-lg hover:shadow-emerald-500/50 transition-all text-xs font-black flex items-center justify-center gap-2"
+                          title="Conduct match"
+                        >
+                          <Play className="w-4 h-4" />
+                          CONDUCT
+                        </button>
+                      )}
+                      
+                      {/* View Details Button for Completed Matches */}
+                      {isCompleted && (
+                        <button
+                          onClick={() => {
+                            const bracketMatchData = {
+                              matchNumber: match.matchNumber,
+                              round: ri + 1,
+                              player1: player1,
+                              player2: player2
+                            };
+                            onViewMatchDetails(dbMatch, bracketMatchData);
+                          }}
+                          className="flex-1 py-3 rounded-xl bg-blue-500/20 text-blue-300 border-2 border-blue-500/40 hover:bg-blue-500/30 transition-all text-xs font-black flex items-center justify-center gap-2"
+                        >
+                          <Eye className="w-4 h-4" />
+                          VIEW
+                        </button>
+                      )}
+                      
+                      {/* Change Result Button for Completed Matches */}
+                      {isCompleted && onChangeResult && (
+                        <button
+                          onClick={() => {
+                            const bracketMatchData = {
+                              matchNumber: match.matchNumber,
+                              round: ri + 1,
+                              player1: player1,
+                              player2: player2
+                            };
+                            onChangeResult(dbMatch, bracketMatchData);
+                          }}
+                          className="py-3 px-4 rounded-xl bg-amber-500/20 text-amber-300 border-2 border-amber-500/40 hover:bg-amber-500/30 transition-all text-xs font-black flex items-center justify-center"
+                          title="Change result"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
   );
 };
@@ -2525,170 +2522,159 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
   };
 
   return (
-    <div className="p-6 space-y-8">
+    <div className="p-3 space-y-4">
       {data.groups.map((group, gi) => (
-        <div key={gi} className="bg-slate-700/30 rounded-xl overflow-hidden">
-          {/* Group Header */}
-          <div className="bg-gradient-to-r from-purple-600/20 to-indigo-600/20 p-4 border-b border-white/10">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <span className="w-10 h-10 bg-purple-500/30 rounded-xl flex items-center justify-center text-purple-300 font-bold text-lg">
-                  {String.fromCharCode(65 + gi)}
-                </span>
-                <div>
-                  <h4 className="text-xl font-bold text-white">Group {String.fromCharCode(65 + gi)}</h4>
-                  <p className="text-purple-300 text-sm">
-                    {group.participants.filter(p => p.id).length} players • {group.matches?.length || 0} matches
-                  </p>
-                </div>
+        <div key={gi} className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-sm rounded-2xl overflow-hidden border-2 border-emerald-500/20 shadow-xl">
+          {/* Group Header - Emerald Theme */}
+          <div className="bg-gradient-to-r from-emerald-500/30 to-teal-500/30 p-4 border-b-2 border-emerald-500/30">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-emerald-500/50">
+                {String.fromCharCode(65 + gi)}
               </div>
-              <div className="text-right">
-                <p className="text-xs text-gray-400">Round Robin Format</p>
-                <p className="text-sm text-purple-300 font-semibold">Everyone plays everyone</p>
+              <div className="flex-1">
+                <h4 className="text-lg font-black text-white">Group {String.fromCharCode(65 + gi)}</h4>
+                <p className="text-emerald-300 text-xs font-semibold">
+                  {group.participants.filter(p => p.id).length} players • {group.matches?.length || 0} matches
+                </p>
               </div>
             </div>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-6 p-6">
-            {/* Left: Match Schedule */}
-            <div>
-              <h5 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                <span className="w-6 h-6 bg-blue-500/20 rounded-lg flex items-center justify-center text-blue-400 text-sm">📅</span>
-                Match Schedule
-              </h5>
-              
-              {group.matches && group.matches.length > 0 ? (
-                <div className="space-y-3">
-                  {group.matches.map((match, mi) => {
-                    const dbMatch = findDbMatch(match, gi);
-                    const hasPlayers = match.player1?.id && match.player2?.id;
-                    const isCompleted = dbMatch?.status === 'COMPLETED';
+          {/* Group Standings - Mobile Optimized */}
+          <div className="p-4">
+            <h5 className="text-sm font-black text-emerald-300 mb-3 flex items-center gap-2 uppercase tracking-wider">
+              <Trophy className="w-4 h-4" />
+              Standings
+            </h5>
+            
+            <div className="space-y-2">
+              {group.participants
+                .sort((a, b) => (b.points || 0) - (a.points || 0))
+                .map((p, pi) => (
+                  <div 
+                    key={pi} 
+                    className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-all ${
+                      pi === 0 ? 'bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border-emerald-500/50' :
+                      'bg-slate-700/30 border-white/10'
+                    }`}
+                  >
+                    {/* Rank */}
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black ${
+                      pi === 0 ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/50' :
+                      pi === 1 ? 'bg-gray-400 text-white' :
+                      pi === 2 ? 'bg-orange-500 text-white' :
+                      'bg-slate-600 text-gray-400'
+                    }`}>
+                      {pi + 1}
+                    </div>
                     
-                    const isInProgress = dbMatch?.status === 'IN_PROGRESS';
-                    const hasUmpire = dbMatch?.umpireId;
+                    {/* Player Name */}
+                    <div className="flex-1 min-w-0">
+                      <span className={`font-bold text-sm truncate block ${
+                        p.id ? 'text-white' : 'text-gray-500'
+                      }`}>
+                        {p.name || `Slot ${pi + 1}`}
+                      </span>
+                    </div>
                     
-                    return (
-                      <div 
-                        key={mi} 
-                        className={`p-4 rounded-xl border transition-all ${
-                          isCompleted 
-                            ? 'border-emerald-500/30 bg-emerald-500/10' 
-                            : isInProgress
-                              ? 'border-amber-500/30 bg-amber-500/10'
-                              : hasPlayers
-                                ? 'border-blue-500/30 bg-blue-500/10 hover:bg-blue-500/20'
-                                : 'border-white/10 bg-slate-800/30'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-3 mb-2">
-                              <span className="px-2 py-1 bg-purple-500/20 text-purple-300 rounded text-xs font-bold">
-                                Match {match.matchNumber}
-                              </span>
-                              {isCompleted && <span className="text-emerald-400 text-sm">✅ Complete</span>}
-                              {isInProgress && <span className="text-amber-400 text-sm">🔴 Live</span>}
-                              {hasUmpire && !isCompleted && !isInProgress && <span className="text-blue-400 text-sm">⚖️ Umpire Ready</span>}
-                            </div>
-                            
-                            {/* Match Display - Vertical for Doubles, Horizontal for Singles */}
-                            {categoryFormat === 'doubles' ? (
-                              <div className="space-y-2">
-                                <div className={`font-medium text-center py-2 px-3 rounded-lg ${hasPlayers ? 'text-white bg-slate-700/50' : 'text-gray-500 bg-slate-800/30'}`}>
-                                  {match.player1?.name || 'TBD'}
-                                </div>
-                                <div className="text-center">
-                                  <span className="text-gray-400 text-sm font-semibold uppercase tracking-wider">vs</span>
-                                </div>
-                                <div className={`font-medium text-center py-2 px-3 rounded-lg ${hasPlayers ? 'text-white bg-slate-700/50' : 'text-gray-500 bg-slate-800/30'}`}>
-                                  {match.player2?.name || 'TBD'}
-                                </div>
-                              </div>
-                            ) : (
-                              <div className="flex items-center gap-3">
-                                <span className={`font-medium ${hasPlayers ? 'text-white' : 'text-gray-500'}`}>
-                                  {match.player1?.name || 'TBD'}
-                                </span>
-                                <span className="text-gray-400 text-sm">vs</span>
-                                <span className={`font-medium ${hasPlayers ? 'text-white' : 'text-gray-500'}`}>
-                                  {match.player2?.name || 'TBD'}
-                                </span>
-                              </div>
-                            )}
-                            
-                            {dbMatch?.winnerId && (
-                              <div className="mt-2 text-sm">
-                                <span className="text-emerald-400">
-                                  Winner: {dbMatch.winnerId === match.player1?.id ? match.player1?.name : match.player2?.name}
-                                </span>
-                                {/* Display detailed set scores for both players */}
-                                {dbMatch.score && (
-                                  <div className="mt-2 space-y-1">
-                                    <div className="text-xs text-gray-300">
-                                      <span className="font-medium">{match.player1?.name}:</span> {getDetailedSetScores(dbMatch.score, 1)}
-                                    </div>
-                                    <div className="text-xs text-gray-300">
-                                      <span className="font-medium">{match.player2?.name}:</span> {getDetailedSetScores(dbMatch.score, 2)}
-                                    </div>
-                                  </div>
-                                )}
-                                {/* Debug: Show if score exists but is empty */}
-                                {!dbMatch.score && (
-                                  <div className="mt-2 text-xs text-red-400">
-                                    ⚠️ No score data available
-                                  </div>
-                                )}
-                              </div>
-                            )}
+                    {/* Stats */}
+                    <div className="flex items-center gap-3 text-xs font-bold">
+                      <div className="text-center">
+                        <div className="text-emerald-400">{p.wins || 0}</div>
+                        <div className="text-gray-500 text-[10px]">W</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-red-400">{p.losses || 0}</div>
+                        <div className="text-gray-500 text-[10px]">L</div>
+                      </div>
+                      <div className="text-center px-2 py-1 bg-emerald-500/20 rounded-lg">
+                        <div className="text-emerald-300">{p.points || 0}</div>
+                        <div className="text-emerald-400/60 text-[10px]">PTS</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+            </div>
+            
+            {/* Points System */}
+            <div className="mt-3 p-2.5 bg-slate-800/50 rounded-lg border border-white/10">
+              <div className="flex items-center justify-center gap-4 text-xs font-semibold">
+                <span className="text-emerald-400">Win: +2 pts</span>
+                <span className="text-gray-500">•</span>
+                <span className="text-red-400">Loss: +0 pts</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Match Schedule - Mobile Optimized */}
+          <div className="p-4 border-t-2 border-white/10">
+            <h5 className="text-sm font-black text-blue-300 mb-3 flex items-center gap-2 uppercase tracking-wider">
+              <Clock className="w-4 h-4" />
+              Matches
+            </h5>
+            
+            {group.matches && group.matches.length > 0 ? (
+              <div className="space-y-2.5">
+                {group.matches.map((match, mi) => {
+                  const dbMatch = findDbMatch(match, gi);
+                  const hasPlayers = match.player1?.id && match.player2?.id;
+                  const isCompleted = dbMatch?.status === 'COMPLETED';
+                  const isInProgress = dbMatch?.status === 'IN_PROGRESS';
+                  const hasUmpire = dbMatch?.umpireId;
+                  
+                  return (
+                    <div 
+                      key={mi} 
+                      className={`p-3 rounded-xl border-2 transition-all ${
+                        isCompleted 
+                          ? 'border-emerald-500/50 bg-emerald-500/10' 
+                          : isInProgress
+                            ? 'border-amber-500/50 bg-amber-500/10'
+                            : hasPlayers
+                              ? 'border-blue-500/30 bg-blue-500/10'
+                              : 'border-white/10 bg-slate-800/30'
+                      }`}
+                    >
+                      {/* Match Header */}
+                      <div className="flex items-center justify-between mb-2.5">
+                        <span className="px-2 py-1 bg-emerald-500/20 text-emerald-300 rounded-lg text-xs font-black">
+                          #{match.matchNumber}
+                        </span>
+                        {isCompleted && <span className="text-emerald-400 text-xs font-bold">✓ DONE</span>}
+                        {isInProgress && <span className="text-amber-400 text-xs font-bold">🔴 LIVE</span>}
+                        {hasUmpire && !isCompleted && !isInProgress && <span className="text-blue-400 text-xs font-bold">⚖️ READY</span>}
+                      </div>
+                      
+                      {/* Players */}
+                      <div className="space-y-2">
+                        <div className={`py-2 px-3 rounded-lg text-center font-semibold text-sm ${
+                          hasPlayers ? 'text-white bg-slate-700/50' : 'text-gray-500 bg-slate-800/30'
+                        }`}>
+                          {match.player1?.name || 'TBD'}
+                        </div>
+                        <div className="text-center">
+                          <span className="text-gray-400 text-xs font-black uppercase">VS</span>
+                        </div>
+                        <div className={`py-2 px-3 rounded-lg text-center font-semibold text-sm ${
+                          hasPlayers ? 'text-white bg-slate-700/50' : 'text-gray-500 bg-slate-800/30'
+                        }`}>
+                          {match.player2?.name || 'TBD'}
+                        </div>
+                      </div>
+                      
+                      {/* Winner Info */}
+                      {dbMatch?.winnerId && (
+                        <div className="mt-2.5 p-2 bg-emerald-500/20 rounded-lg border border-emerald-500/30">
+                          <div className="text-xs text-emerald-300 font-bold text-center">
+                            Winner: {dbMatch.winnerId === match.player1?.id ? match.player1?.name : match.player2?.name}
                           </div>
-                          
-                          {/* Umpire Assignment Button or Match Status */}
-                          {isCompleted ? (
-                            <div className="flex flex-col gap-2">
-                              <div className="px-3 py-2 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-sm font-medium text-center">
-                                ✅ Completed
-                              </div>
-                              <div className="flex gap-2">
-                                {/* View Details Button - Always visible for completed matches */}
-                                <button
-                                  onClick={() => {
-                                    const bracketMatchData = {
-                                      matchNumber: match.matchNumber,
-                                      round: 1,
-                                      player1: match.player1,
-                                      player2: match.player2,
-                                      groupName: group.groupName
-                                    };
-                                    onViewMatchDetails(dbMatch, bracketMatchData);
-                                  }}
-                                  className="flex-1 px-3 py-1.5 rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30 transition-all text-xs font-medium flex items-center justify-center gap-1"
-                                  title="View match details"
-                                >
-                                  <span className="text-base">ℹ️</span>
-                                  Info
-                                </button>
-                                {/* Change Result Button - Only for organizers */}
-                                {isOrganizer && (
-                                  <button
-                                    onClick={() => {
-                                      const bracketMatchData = {
-                                        matchNumber: match.matchNumber,
-                                        round: 1,
-                                        player1: match.player1,
-                                        player2: match.player2,
-                                        groupName: group.groupName,
-                                        currentWinnerId: dbMatch?.winnerId
-                                      };
-                                      onChangeResult(dbMatch, bracketMatchData);
-                                    }}
-                                    className="flex-1 px-3 py-1.5 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/30 hover:bg-amber-500/30 transition-all text-xs font-medium"
-                                  >
-                                    Change
-                                  </button>
-                                )}
-                              </div>
-                            </div>
-                          ) : isOrganizer && hasPlayers ? (
+                        </div>
+                      )}
+                      
+                      {/* Actions */}
+                      {isOrganizer && hasPlayers && (
+                        <div className="mt-2.5 flex gap-2">
+                          {!isCompleted ? (
                             <button
                               onClick={() => {
                                 const bracketMatchData = {
@@ -2700,87 +2686,63 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                                 };
                                 onAssignUmpire(dbMatch, bracketMatchData);
                               }}
-                              className={`px-3 py-2 rounded-lg transition-all flex items-center gap-2 text-sm font-medium ${
+                              className={`flex-1 py-2.5 rounded-lg transition-all flex items-center justify-center gap-2 text-xs font-black ${
                                 hasUmpire 
-                                  ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' 
-                                  : 'bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30'
+                                  ? 'bg-emerald-500/20 text-emerald-300 border-2 border-emerald-500/40' 
+                                  : 'bg-blue-500/20 text-blue-300 border-2 border-blue-500/40'
                               }`}
                             >
-                              <span className="text-base">⚖️</span>
-                              {hasUmpire ? 'Ready' : 'Assign'}
+                              <Gavel className="w-4 h-4" />
+                              {hasUmpire ? 'READY' : 'ASSIGN'}
                             </button>
-                          ) : null}
+                          ) : (
+                            <>
+                              <button
+                                onClick={() => {
+                                  const bracketMatchData = {
+                                    matchNumber: match.matchNumber,
+                                    round: 1,
+                                    player1: match.player1,
+                                    player2: match.player2,
+                                    groupName: group.groupName
+                                  };
+                                  onViewMatchDetails(dbMatch, bracketMatchData);
+                                }}
+                                className="flex-1 py-2.5 rounded-lg bg-blue-500/20 text-blue-300 border-2 border-blue-500/40 transition-all text-xs font-black flex items-center justify-center gap-2"
+                              >
+                                <Eye className="w-4 h-4" />
+                                VIEW
+                              </button>
+                              <button
+                                onClick={() => {
+                                  const bracketMatchData = {
+                                    matchNumber: match.matchNumber,
+                                    round: 1,
+                                    player1: match.player1,
+                                    player2: match.player2,
+                                    groupName: group.groupName,
+                                    currentWinnerId: dbMatch?.winnerId
+                                  };
+                                  onChangeResult(dbMatch, bracketMatchData);
+                                }}
+                                className="py-2.5 px-4 rounded-lg bg-amber-500/20 text-amber-300 border-2 border-amber-500/40 transition-all text-xs font-black"
+                              >
+                                CHANGE
+                              </button>
+                            </>
+                          )}
                         </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-gray-500">
-                  <p>No matches generated yet</p>
-                  <p className="text-sm">Assign players to generate matches</p>
-                </div>
-              )}
-            </div>
-
-            {/* Right: Standings Table */}
-            <div>
-              <h5 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                <span className="w-6 h-6 bg-amber-500/20 rounded-lg flex items-center justify-center text-amber-400 text-sm">🏆</span>
-                Group Standings
-              </h5>
-              
-              <div className="bg-slate-800/50 rounded-xl overflow-hidden">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="bg-slate-700/50 border-b border-white/10">
-                      <th className="text-left py-3 px-4 text-gray-400 font-semibold">#</th>
-                      <th className="text-left py-3 px-4 text-gray-400 font-semibold">{categoryFormat === 'doubles' ? 'Team' : 'Player'}</th>
-                      <th className="text-center py-3 px-4 text-gray-400 font-semibold">P</th>
-                      <th className="text-center py-3 px-4 text-gray-400 font-semibold">W</th>
-                      <th className="text-center py-3 px-4 text-gray-400 font-semibold">L</th>
-                      <th className="text-center py-3 px-4 text-gray-400 font-semibold">Pts</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {group.participants
-                      .sort((a, b) => (b.points || 0) - (a.points || 0)) // Sort by points
-                      .map((p, pi) => (
-                        <tr key={pi} className="border-b border-white/5 hover:bg-white/5">
-                          <td className="py-3 px-4">
-                            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                              pi === 0 ? 'bg-amber-500/20 text-amber-400' : 
-                              pi === 1 ? 'bg-gray-400/20 text-gray-400' :
-                              pi === 2 ? 'bg-orange-500/20 text-orange-400' :
-                              'bg-slate-600/20 text-gray-500'
-                            }`}>
-                              {pi + 1}
-                            </span>
-                          </td>
-                          <td className="py-3 px-4">
-                            <span className={`font-medium ${p.id ? 'text-white' : 'text-gray-500'}`}>
-                              {p.name || `Slot ${pi + 1}`}
-                            </span>
-                          </td>
-                          <td className="py-3 px-4 text-center text-gray-400">{p.played || 0}</td>
-                          <td className="py-3 px-4 text-center text-emerald-400 font-semibold">{p.wins || 0}</td>
-                          <td className="py-3 px-4 text-center text-red-400 font-semibold">{p.losses || 0}</td>
-                          <td className="py-3 px-4 text-center text-amber-400 font-bold">{p.points || 0}</td>
-                        </tr>
-                      ))}
-                  </tbody>
-                </table>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
-              
-              {/* Points System Explanation */}
-              <div className="mt-4 p-3 bg-slate-800/30 rounded-lg">
-                <p className="text-xs text-gray-400 mb-1">Points System:</p>
-                <div className="flex gap-4 text-xs">
-                  <span className="text-emerald-400">Win: +2 pts</span>
-                  <span className="text-red-400">Loss: +0 pts</span>
-                </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <p className="text-sm">No matches generated yet</p>
+                <p className="text-xs mt-1">Assign players to generate matches</p>
               </div>
-            </div>
+            )}
           </div>
         </div>
       ))}
@@ -2813,49 +2775,45 @@ const GroupsKnockoutDisplay = ({
   // activeStage is now passed as prop from parent ('roundrobin' or 'knockout')
 
   return (
-    <div className="space-y-6 p-6">
-      {/* Stage Navigation Tabs */}
-      <div className="flex gap-3 border-b border-white/10 pb-4">
+    <div className="space-y-4 p-3">
+      {/* Stage Navigation Tabs - Emerald Theme */}
+      <div className="flex gap-2 p-1.5 bg-slate-800/50 rounded-xl border-2 border-white/10">
         <button
           onClick={() => setActiveStage('roundrobin')}
-          className={`px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 ${
+          className={`flex-1 px-4 py-3 rounded-lg font-black transition-all flex items-center justify-center gap-2 text-sm ${
             activeStage === 'roundrobin'
-              ? 'bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-lg shadow-purple-500/30'
-              : 'bg-slate-700/50 text-gray-400 hover:bg-slate-700 hover:text-white'
+              ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/50'
+              : 'bg-slate-700/30 text-gray-400 hover:bg-slate-700/50 hover:text-white'
           }`}
         >
-          <span className={`px-2 py-1 rounded-lg text-xs font-bold ${
+          <span className={`px-2 py-0.5 rounded-md text-xs font-black ${
             activeStage === 'roundrobin' ? 'bg-white/20' : 'bg-slate-600/50'
           }`}>
-            Stage 1
+            STAGE 1
           </span>
-          Round Robin
+          GROUPS
         </button>
         
         <button
           onClick={() => setActiveStage('knockout')}
-          className={`px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 ${
+          className={`flex-1 px-4 py-3 rounded-lg font-black transition-all flex items-center justify-center gap-2 text-sm ${
             activeStage === 'knockout'
-              ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-lg shadow-amber-500/30'
-              : 'bg-slate-700/50 text-gray-400 hover:bg-slate-700 hover:text-white'
+              ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/50'
+              : 'bg-slate-700/30 text-gray-400 hover:bg-slate-700/50 hover:text-white'
           }`}
         >
-          <span className={`px-2 py-1 rounded-lg text-xs font-bold ${
+          <span className={`px-2 py-0.5 rounded-md text-xs font-black ${
             activeStage === 'knockout' ? 'bg-white/20' : 'bg-slate-600/50'
           }`}>
-            Stage 2
+            STAGE 2
           </span>
-          Knockout
+          KNOCKOUT
         </button>
       </div>
 
       {/* Round Robin Stage */}
       {activeStage === 'roundrobin' && (
         <div>
-          <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-3">
-            <span className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-lg text-sm font-semibold">Stage 1</span>
-            Group Stage (Round Robin)
-          </h3>
           <RoundRobinDisplay 
             data={data} 
             matches={matches} 
@@ -2872,28 +2830,23 @@ const GroupsKnockoutDisplay = ({
       {/* Knockout Stage */}
       {activeStage === 'knockout' && (
         <div>
-          <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-3">
-            <span className="px-3 py-1 bg-amber-500/20 text-amber-400 rounded-lg text-sm font-semibold">Stage 2</span>
-            Knockout Stage
-          </h3>
-          
           {!data.knockout ? (
             // No knockout data at all - show message to create it
-            <div className="bg-slate-800/50 border-2 border-dashed border-slate-600 rounded-xl p-12 text-center">
-              <div className="w-20 h-20 bg-amber-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <TrophyIcon className="w-10 h-10 text-amber-400" />
+            <div className="bg-slate-800/50 border-2 border-dashed border-emerald-500/30 rounded-2xl p-8 text-center">
+              <div className="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <TrophyIcon className="w-10 h-10 text-emerald-400" />
               </div>
               <h4 className="text-xl font-bold text-white mb-2">Knockout Stage Not Created</h4>
-              <p className="text-gray-400 mb-4">
+              <p className="text-gray-400 mb-4 text-sm">
                 {isRoundRobinComplete() 
                   ? 'All round robin matches are completed! Use the "Arrange Knockout Matchups" button above to create the knockout bracket.'
                   : 'The knockout bracket will be available after all round robin matches are completed.'}
               </p>
               
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500/20 border border-purple-500/30 rounded-lg">
-                <Settings className="w-4 h-4 text-purple-400" />
-                <span className="text-sm text-purple-400 font-medium">
-                  {isRoundRobinComplete() ? 'Click "Arrange Knockout Matchups" button in the header' : 'Complete all round robin matches first'}
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/20 border-2 border-emerald-500/30 rounded-xl">
+                <Settings className="w-4 h-4 text-emerald-400" />
+                <span className="text-sm text-emerald-300 font-semibold">
+                  {isRoundRobinComplete() ? 'Click "Arrange KO" button in the header' : 'Complete all round robin matches first'}
                 </span>
               </div>
             </div>

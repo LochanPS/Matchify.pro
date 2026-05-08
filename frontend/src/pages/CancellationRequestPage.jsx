@@ -4,23 +4,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import { approveRefund, rejectRefund } from '../api/organizer';
 import { formatDateIndian } from '../utils/dateFormat';
-import {
-  ArrowLeft,
-  User,
-  Mail,
-  Phone,
-  MapPin,
-  Calendar,
-  CreditCard,
-  QrCode,
-  AlertTriangle,
-  Check,
-  X,
-  Loader,
-  Trophy,
-} from 'lucide-react';
+import { ArrowLeft, User, Mail, Phone, MapPin, Calendar, CreditCard, QrCode, AlertTriangle, Check, X, Loader, Trophy } from 'lucide-react';
 
-// Helper to get proper image URL
 const getImageUrl = (url) => {
   if (!url) return null;
   if (url.startsWith('/uploads')) {
@@ -29,6 +14,10 @@ const getImageUrl = (url) => {
   }
   return url;
 };
+
+const BG = 'linear-gradient(180deg,#0a0a1f 0%,#07071a 50%,#0a0a1f 100%)';
+const CARD = { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px' };
+const ROW = { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', padding: '14px 16px' };
 
 export default function CancellationRequestPage() {
   const { registrationId } = useParams();
@@ -41,9 +30,7 @@ export default function CancellationRequestPage() {
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [resultModal, setResultModal] = useState(null);
 
-  useEffect(() => {
-    fetchRegistration();
-  }, [registrationId]);
+  useEffect(() => { fetchRegistration(); }, [registrationId]);
 
   const fetchRegistration = async () => {
     try {
@@ -51,7 +38,6 @@ export default function CancellationRequestPage() {
       const response = await api.get(`/organizer/registrations/${registrationId}`);
       setRegistration(response.data.registration);
     } catch (err) {
-      console.error('Error fetching registration:', err);
       setError(getErrorMessage(err, 'Failed to load cancellation request'));
     } finally {
       setLoading(false);
@@ -62,54 +48,30 @@ export default function CancellationRequestPage() {
     try {
       setActionLoading(true);
       await approveRefund(registrationId);
-      setResultModal({
-        type: 'success',
-        title: 'Refund Approved',
-        message: `Refund of ₹${registration.refundAmount || registration.amountTotal} has been approved. The player will be notified.`
-      });
+      setResultModal({ type: 'success', title: 'Refund Approved', message: `Refund of ₹${registration.refundAmount || registration.amountTotal} approved. Player will be notified.` });
     } catch (err) {
-      console.error('Error approving refund:', err);
-      setResultModal({
-        type: 'error',
-        title: 'Error',
-        message: err.response?.data?.error || 'Failed to approve refund'
-      });
-    } finally {
-      setActionLoading(false);
-    }
+      setResultModal({ type: 'error', title: 'Error', message: err.response?.data?.error || 'Failed to approve refund' });
+    } finally { setActionLoading(false); }
   };
 
   const handleReject = async () => {
-    if (!rejectReason.trim()) {
-      return;
-    }
+    if (!rejectReason.trim()) return;
     try {
       setActionLoading(true);
       setShowRejectModal(false);
       await rejectRefund(registrationId, rejectReason);
-      setResultModal({
-        type: 'success',
-        title: 'Refund Rejected',
-        message: 'The refund request has been rejected. The player will be notified and their registration will remain active.'
-      });
+      setResultModal({ type: 'success', title: 'Request Rejected', message: 'The refund request has been rejected. The player will be notified and their registration remains active.' });
     } catch (err) {
-      console.error('Error rejecting refund:', err);
-      setResultModal({
-        type: 'error',
-        title: 'Error',
-        message: err.response?.data?.error || 'Failed to reject refund'
-      });
-    } finally {
-      setActionLoading(false);
-    }
+      setResultModal({ type: 'error', title: 'Error', message: err.response?.data?.error || 'Failed to reject refund' });
+    } finally { setActionLoading(false); }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: BG }}>
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-orange-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="text-gray-500 mt-4 font-medium">Loading cancellation request...</p>
+          <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: 'rgba(251,146,60,0.3)', borderTopColor: '#fb923c' }} />
+          <p className="mt-4 text-sm font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>Loading cancellation request...</p>
         </div>
       </div>
     );
@@ -117,17 +79,12 @@ export default function CancellationRequestPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <X className="w-8 h-8 text-red-600" />
-          </div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Error</h2>
-          <p className="text-gray-600 mb-6">{error}</p>
-          <button
-            onClick={() => navigate(-1)}
-            className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-medium"
-          >
+      <div className="min-h-screen flex items-center justify-center p-4" style={{ background: BG }}>
+        <div className="rounded-2xl p-8 text-center w-full" style={{ maxWidth: '400px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)' }}>
+          <X className="w-10 h-10 text-red-400 mx-auto mb-3" />
+          <h2 className="text-lg font-black text-white mb-2">Error</h2>
+          <p className="text-sm mb-5" style={{ color: 'rgba(255,255,255,0.6)' }}>{error}</p>
+          <button onClick={() => navigate(-1)} className="px-6 py-2.5 rounded-xl font-bold text-sm" style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.8)', border: '1px solid rgba(255,255,255,0.12)' }}>
             Go Back
           </button>
         </div>
@@ -135,253 +92,190 @@ export default function CancellationRequestPage() {
     );
   }
 
-  if (!registration) {
-    return null;
-  }
+  if (!registration) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      {/* Header */}
-      <div className="relative bg-gradient-to-r from-orange-600 via-red-600 to-rose-700 overflow-hidden">
-        <div className="absolute inset-0">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-yellow-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-red-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
-        </div>
-        
-        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-white/70 hover:text-white mb-6 transition-colors group"
-          >
-            <ArrowLeft className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
-            <span>Back</span>
-          </button>
+    <div className="min-h-screen relative" style={{ background: BG }}>
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 rounded-full blur-3xl opacity-15" style={{ background: 'radial-gradient(circle,rgba(251,146,60,0.5) 0%,transparent 70%)' }} />
+        <div className="absolute bottom-1/3 left-0 w-56 h-56 rounded-full blur-3xl opacity-10" style={{ background: 'radial-gradient(circle,rgba(239,68,68,0.5) 0%,transparent 70%)' }} />
+      </div>
 
-          <div className="flex items-center gap-5">
-            <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
-              <AlertTriangle className="w-8 h-8 text-white" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-white">Cancellation Request</h1>
-              <p className="text-white/70 mt-1">Review and process the refund request</p>
-            </div>
-          </div>
+      {/* Sticky header */}
+      <div className="sticky top-0 z-20" style={{ background: 'rgba(7,7,26,0.95)', borderBottom: '1px solid rgba(251,146,60,0.2)', backdropFilter: 'blur(20px)' }}>
+        <div className="px-4 py-3 flex items-center gap-3">
+          <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-sm font-medium" style={{ color: 'rgba(255,255,255,0.6)' }}>
+            <ArrowLeft className="w-4 h-4" /> Back
+          </button>
+          <span className="text-sm font-black text-white">Cancellation Request</span>
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 -mt-6">
-        {/* Main Content */}
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
-          {/* Tournament Info */}
-          <div className="bg-gradient-to-r from-purple-50 to-indigo-50 p-6 border-b border-gray-100">
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center">
-                <Trophy className="w-7 h-7 text-white" />
-              </div>
-              <div>
-                <h2 className="text-xl font-bold text-gray-900">{registration.tournament?.name}</h2>
-                <p className="text-gray-600">
-                  {registration.category?.name} • {registration.category?.format} • {registration.category?.gender}
-                </p>
-              </div>
+      <div className="relative px-4 py-5 space-y-4">
+
+        {/* Tournament card */}
+        <div style={CARD} className="overflow-hidden">
+          <div className="px-4 py-3 flex items-center gap-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(168,85,247,0.08)' }}>
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'linear-gradient(135deg,#a855f7,#6366f1)' }}>
+              <Trophy className="w-5 h-5 text-white" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-black text-white truncate">{registration.tournament?.name}</p>
+              <p className="text-xs truncate" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                {registration.category?.name} · {registration.category?.format} · {registration.category?.gender}
+              </p>
             </div>
           </div>
 
-          {/* Player Info */}
-          <div className="p-6 border-b border-gray-100">
-            <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-              <User className="w-5 h-5 text-gray-400" />
-              Player Information
-            </h3>
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
-                <User className="w-5 h-5 text-gray-400" />
-                <div>
-                  <p className="text-sm text-gray-500">Name</p>
-                  <p className="font-semibold text-gray-900">{registration.user?.name}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
-                <Mail className="w-5 h-5 text-gray-400" />
-                <div>
-                  <p className="text-sm text-gray-500">Email</p>
-                  <p className="font-semibold text-gray-900">{registration.user?.email}</p>
-                </div>
-              </div>
-              {registration.user?.phone && (
-                <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
-                  <Phone className="w-5 h-5 text-gray-400" />
-                  <div>
-                    <p className="text-sm text-gray-500">Phone</p>
-                    <p className="font-semibold text-gray-900">{registration.user?.phone}</p>
+          {/* Player info */}
+          <div className="p-4">
+            <p className="text-xs font-black uppercase tracking-wider mb-3 flex items-center gap-1.5" style={{ color: 'rgba(255,255,255,0.4)' }}>
+              <User className="w-3.5 h-3.5" /> Player Information
+            </p>
+            <div className="space-y-2">
+              {[
+                { icon: User, label: 'Name', value: registration.user?.name },
+                { icon: Mail, label: 'Email', value: registration.user?.email, mono: true },
+                registration.user?.phone && { icon: Phone, label: 'Phone', value: registration.user?.phone },
+                registration.user?.city && { icon: MapPin, label: 'Location', value: `${registration.user?.city}, ${registration.user?.state}` },
+                { icon: Calendar, label: 'Registered', value: formatDateIndian(registration.createdAt) },
+              ].filter(Boolean).map(({ icon: Icon, label, value, mono }) => (
+                <div key={label} style={ROW} className="flex items-center gap-3">
+                  <Icon className="w-4 h-4 flex-shrink-0" style={{ color: 'rgba(255,255,255,0.35)' }} />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>{label}</p>
+                    <p className={`text-sm font-semibold text-white truncate ${mono ? 'font-mono' : ''}`}>{value}</p>
                   </div>
                 </div>
-              )}
-              {registration.user?.city && (
-                <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
-                  <MapPin className="w-5 h-5 text-gray-400" />
-                  <div>
-                    <p className="text-sm text-gray-500">Location</p>
-                    <p className="font-semibold text-gray-900">{registration.user?.city}, {registration.user?.state}</p>
-                  </div>
-                </div>
-              )}
+              ))}
             </div>
           </div>
+        </div>
 
-          {/* Cancellation Details */}
-          <div className="p-6 border-b border-gray-100">
-            <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5 text-orange-500" />
-              Cancellation Details
-            </h3>
-            
-            {/* Reason */}
-            <div className="mb-6">
-              <p className="text-sm font-medium text-gray-500 mb-2">Reason for Cancellation</p>
-              <div className="p-4 bg-orange-50 border border-orange-200 rounded-xl">
-                <p className="text-gray-800">{registration.cancellationReason || 'No reason provided'}</p>
-              </div>
-            </div>
-
-            {/* Registration Date */}
-            <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl mb-4">
-              <Calendar className="w-5 h-5 text-gray-400" />
-              <div>
-                <p className="text-sm text-gray-500">Registered On</p>
-                <p className="font-semibold text-gray-900">{formatDateIndian(registration.createdAt)}</p>
-              </div>
+        {/* Cancellation reason */}
+        <div style={CARD} className="overflow-hidden">
+          <div className="px-4 py-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+            <p className="text-xs font-black uppercase tracking-wider flex items-center gap-1.5" style={{ color: 'rgba(251,146,60,0.8)' }}>
+              <AlertTriangle className="w-3.5 h-3.5" /> Cancellation Details
+            </p>
+          </div>
+          <div className="p-4">
+            <p className="text-xs font-medium mb-2" style={{ color: 'rgba(255,255,255,0.45)' }}>Reason</p>
+            <div className="rounded-xl p-3" style={{ background: 'rgba(251,146,60,0.1)', border: '1px solid rgba(251,146,60,0.25)' }}>
+              <p className="text-sm text-white">{registration.cancellationReason || 'No reason provided'}</p>
             </div>
           </div>
+        </div>
 
-          {/* Refund Details */}
-          <div className="p-6 border-b border-gray-100">
-            <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-              <CreditCard className="w-5 h-5 text-green-500" />
-              Refund Details
-            </h3>
-            
-            <div className="grid md:grid-cols-2 gap-4 mb-6">
-              {/* Refund Amount */}
-              <div className="p-4 bg-green-50 border border-green-200 rounded-xl">
-                <p className="text-sm text-green-600 mb-1">Refund Amount</p>
-                <p className="text-3xl font-bold text-green-700">₹{registration.refundAmount || registration.amountTotal}</p>
+        {/* Refund details */}
+        <div style={CARD} className="overflow-hidden">
+          <div className="px-4 py-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+            <p className="text-xs font-black uppercase tracking-wider flex items-center gap-1.5" style={{ color: 'rgba(0,255,136,0.8)' }}>
+              <CreditCard className="w-3.5 h-3.5" /> Refund Details
+            </p>
+          </div>
+          <div className="p-4 space-y-3">
+            {/* Amount + UPI side by side */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-xl p-3" style={{ background: 'rgba(0,255,136,0.1)', border: '1px solid rgba(0,255,136,0.25)' }}>
+                <p className="text-xs mb-1" style={{ color: 'rgba(0,255,136,0.7)' }}>Refund Amount</p>
+                <p className="text-xl font-black" style={{ color: '#00ff88' }}>₹{registration.refundAmount || registration.amountTotal}</p>
               </div>
-              
-              {/* UPI ID */}
-              <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl">
-                <p className="text-sm text-blue-600 mb-1">Player's UPI ID</p>
-                <p className="text-xl font-mono font-bold text-blue-700">{registration.refundUpiId || 'Not provided'}</p>
+              <div className="rounded-xl p-3" style={{ background: 'rgba(0,212,255,0.1)', border: '1px solid rgba(0,212,255,0.25)' }}>
+                <p className="text-xs mb-1" style={{ color: 'rgba(0,212,255,0.7)' }}>UPI ID</p>
+                <p className="text-sm font-mono font-bold text-white truncate">{registration.refundUpiId || 'Not provided'}</p>
               </div>
             </div>
 
             {/* QR Code */}
             {registration.refundQrCode && (
               <div>
-                <p className="text-sm font-medium text-gray-500 mb-2 flex items-center gap-2">
-                  <QrCode className="w-4 h-4" />
-                  Player's Payment QR Code
+                <p className="text-xs font-medium mb-2 flex items-center gap-1.5" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                  <QrCode className="w-3.5 h-3.5" /> Player's QR Code
                 </p>
-                <div className="p-4 bg-gray-50 rounded-xl inline-block">
-                  <img
-                    src={getImageUrl(registration.refundQrCode)}
-                    alt="Refund QR Code"
-                    className="max-w-xs rounded-lg shadow-md"
-                  />
+                <div className="p-3 rounded-xl inline-block" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                  <img src={getImageUrl(registration.refundQrCode)} alt="Refund QR" className="max-w-[180px] rounded-lg" />
                 </div>
               </div>
             )}
           </div>
-
-          {/* Action Buttons */}
-          {registration.status === 'cancellation_requested' && (
-            <div className="p-6 bg-gray-50">
-              <div className="flex flex-col sm:flex-row gap-4">
-                <button
-                  onClick={handleApprove}
-                  disabled={actionLoading}
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-green-500/30 transition-all disabled:opacity-50"
-                >
-                  {actionLoading ? (
-                    <Loader className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <Check className="w-5 h-5" />
-                  )}
-                  Approve Refund
-                </button>
-                <button
-                  onClick={() => setShowRejectModal(true)}
-                  disabled={actionLoading}
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-red-500/30 transition-all disabled:opacity-50"
-                >
-                  <X className="w-5 h-5" />
-                  Reject Request
-                </button>
-              </div>
-              <p className="text-center text-sm text-gray-500 mt-4">
-                The player will be notified of your decision
-              </p>
-            </div>
-          )}
-
-          {/* Already Processed */}
-          {registration.status === 'cancelled' && (
-            <div className="p-6 bg-green-50 text-center">
-              <Check className="w-12 h-12 text-green-600 mx-auto mb-2" />
-              <p className="text-green-700 font-semibold">This refund has been approved</p>
-            </div>
-          )}
-
-          {registration.status === 'confirmed' && registration.refundStatus === 'rejected' && (
-            <div className="p-6 bg-red-50 text-center">
-              <X className="w-12 h-12 text-red-600 mx-auto mb-2" />
-              <p className="text-red-700 font-semibold">This refund request was rejected</p>
-            </div>
-          )}
         </div>
+
+        {/* Action buttons */}
+        {registration.status === 'cancellation_requested' && (
+          <div className="space-y-3">
+            <button
+              onClick={handleApprove}
+              disabled={actionLoading}
+              className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-black text-sm transition-all disabled:opacity-50"
+              style={{ background: 'linear-gradient(135deg,#00ff88,#00c853)', color: '#07071a', boxShadow: '0 4px 20px rgba(0,255,136,0.3)' }}
+            >
+              {actionLoading ? <Loader className="w-5 h-5 animate-spin" /> : <Check className="w-5 h-5" />}
+              Approve Refund
+            </button>
+            <button
+              onClick={() => setShowRejectModal(true)}
+              disabled={actionLoading}
+              className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-black text-sm transition-all disabled:opacity-50"
+              style={{ background: 'linear-gradient(135deg,rgba(239,68,68,0.2),rgba(220,38,38,0.15))', color: '#f87171', border: '2px solid rgba(239,68,68,0.4)' }}
+            >
+              <X className="w-5 h-5" /> Reject Request
+            </button>
+            <p className="text-center text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>Player will be notified of your decision</p>
+          </div>
+        )}
+
+        {/* Already processed states */}
+        {registration.status === 'cancelled' && (
+          <div className="rounded-2xl p-5 text-center" style={{ background: 'rgba(0,255,136,0.1)', border: '1px solid rgba(0,255,136,0.3)' }}>
+            <Check className="w-10 h-10 mx-auto mb-2" style={{ color: '#00ff88' }} />
+            <p className="font-black text-white">Refund Approved ✓</p>
+          </div>
+        )}
+        {registration.status === 'confirmed' && registration.refundStatus === 'rejected' && (
+          <div className="rounded-2xl p-5 text-center" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)' }}>
+            <X className="w-10 h-10 mx-auto mb-2 text-red-400" />
+            <p className="font-black text-white">Request Rejected</p>
+          </div>
+        )}
       </div>
 
       {/* Reject Modal */}
       {showRejectModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
-            <div className="bg-gradient-to-r from-red-500 to-rose-600 p-6 text-white">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                  <X className="h-6 w-6" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold">Reject Refund Request</h2>
-                  <p className="text-red-100 text-sm mt-1">Please provide a reason</p>
-                </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)' }}>
+          <div className="w-full rounded-2xl overflow-hidden" style={{ maxWidth: '420px', background: 'linear-gradient(180deg,#0f0f2e,#0d1117)', border: '2px solid rgba(239,68,68,0.4)' }}>
+            <div className="px-5 py-4 flex items-center gap-3" style={{ borderBottom: '1px solid rgba(239,68,68,0.2)', background: 'rgba(239,68,68,0.1)' }}>
+              <X className="w-5 h-5 text-red-400" />
+              <div>
+                <h2 className="text-base font-black text-white">Reject Refund Request</h2>
+                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>Provide a reason for rejection</p>
               </div>
             </div>
-
-            <div className="p-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Reason for Rejection <span className="text-red-500">*</span>
-              </label>
-              <textarea
-                value={rejectReason}
-                onChange={(e) => setRejectReason(e.target.value)}
-                placeholder="e.g., Tournament has already started, Cancellation policy not met..."
-                rows={4}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all"
-              />
-              
-              <div className="flex gap-3 mt-6">
-                <button
-                  onClick={() => setShowRejectModal(false)}
-                  className="flex-1 px-4 py-3 border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors font-medium"
-                >
+            <div className="p-5 space-y-4">
+              <div>
+                <label className="block text-xs font-bold mb-2" style={{ color: 'rgba(255,255,255,0.6)' }}>
+                  Reason <span className="text-red-400">*</span>
+                </label>
+                <textarea
+                  value={rejectReason}
+                  onChange={e => setRejectReason(e.target.value)}
+                  placeholder="e.g., Tournament already started, policy not met..."
+                  rows={4}
+                  className="w-full rounded-xl px-4 py-3 text-sm text-white resize-none outline-none focus:ring-2"
+                  style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', focusRingColor: '#ef4444' }}
+                />
+              </div>
+              <div className="flex gap-3">
+                <button onClick={() => setShowRejectModal(false)} className="flex-1 py-3 rounded-xl font-bold text-sm" style={{ background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.1)' }}>
                   Cancel
                 </button>
                 <button
                   onClick={handleReject}
                   disabled={!rejectReason.trim() || actionLoading}
-                  className="flex-1 px-4 py-3 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl hover:shadow-lg transition-all font-semibold disabled:opacity-50"
+                  className="flex-1 py-3 rounded-xl font-black text-sm disabled:opacity-50"
+                  style={{ background: 'linear-gradient(135deg,#ef4444,#dc2626)', color: '#fff' }}
                 >
-                  Reject
+                  Confirm Reject
                 </button>
               </div>
             </div>
@@ -391,33 +285,27 @@ export default function CancellationRequestPage() {
 
       {/* Result Modal */}
       {resultModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
-            <div className={`p-6 text-white ${resultModal.type === 'success' ? 'bg-gradient-to-r from-green-500 to-emerald-600' : 'bg-gradient-to-r from-red-500 to-rose-600'}`}>
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                  {resultModal.type === 'success' ? (
-                    <Check className="h-6 w-6" />
-                  ) : (
-                    <X className="h-6 w-6" />
-                  )}
-                </div>
-                <h2 className="text-xl font-bold">{resultModal.title}</h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)' }}>
+          <div className="w-full rounded-2xl overflow-hidden" style={{
+            maxWidth: '400px',
+            background: 'linear-gradient(180deg,#0f0f2e,#0d1117)',
+            border: `2px solid ${resultModal.type === 'success' ? 'rgba(0,255,136,0.4)' : 'rgba(239,68,68,0.4)'}`,
+          }}>
+            <div className="p-5 text-center">
+              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: resultModal.type === 'success' ? 'rgba(0,255,136,0.15)' : 'rgba(239,68,68,0.15)' }}>
+                {resultModal.type === 'success'
+                  ? <Check className="w-8 h-8" style={{ color: '#00ff88' }} />
+                  : <X className="w-8 h-8 text-red-400" />}
               </div>
-            </div>
-
-            <div className="p-6">
-              <p className="text-gray-700 mb-6">{resultModal.message}</p>
+              <h2 className="text-lg font-black text-white mb-2">{resultModal.title}</h2>
+              <p className="text-sm mb-5" style={{ color: 'rgba(255,255,255,0.6)' }}>{resultModal.message}</p>
               <button
-                onClick={() => {
-                  setResultModal(null);
-                  navigate(-1);
+                onClick={() => { setResultModal(null); navigate(-1); }}
+                className="w-full py-3 rounded-xl font-black text-sm"
+                style={{
+                  background: resultModal.type === 'success' ? 'linear-gradient(135deg,#00ff88,#00c853)' : 'linear-gradient(135deg,#ef4444,#dc2626)',
+                  color: resultModal.type === 'success' ? '#07071a' : '#fff',
                 }}
-                className={`w-full px-4 py-3 rounded-xl font-semibold transition-all ${
-                  resultModal.type === 'success' 
-                    ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:shadow-lg' 
-                    : 'bg-gradient-to-r from-red-500 to-rose-600 text-white hover:shadow-lg'
-                }`}
               >
                 Done
               </button>

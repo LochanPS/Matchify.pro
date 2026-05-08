@@ -734,20 +734,20 @@ export default function ProfilePage() {
               
             {/* Contact Information */}
             <div className="space-y-3 mb-4">
-              <div className="flex items-center gap-3 text-gray-300">
-                <Mail className="w-5 h-5 text-emerald-400" />
-                <span className="text-sm">{profile?.email}</span>
+              <div className="flex items-center gap-3 text-gray-300 min-w-0">
+                <Mail className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+                <span className="text-sm truncate min-w-0">{profile?.email}</span>
               </div>
               {profile?.phone && (
-                <div className="flex items-center gap-3 text-gray-300">
-                  <Phone className="w-5 h-5 text-blue-400" />
-                  <span className="text-sm">{profile?.phone}</span>
+                <div className="flex items-center gap-3 text-gray-300 min-w-0">
+                  <Phone className="w-5 h-5 text-blue-400 flex-shrink-0" />
+                  <span className="text-sm truncate min-w-0">{profile?.phone}</span>
                 </div>
               )}
               {(profile?.city || profile?.state) && (
-                <div className="flex items-center gap-3 text-gray-300">
-                  <MapPin className="w-5 h-5 text-emerald-400" />
-                  <span className="text-sm">{[profile?.city, profile?.state].filter(Boolean).join(', ')}</span>
+                <div className="flex items-center gap-3 text-gray-300 min-w-0">
+                  <MapPin className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+                  <span className="text-sm truncate min-w-0">{[profile?.city, profile?.state].filter(Boolean).join(', ')}</span>
                 </div>
               )}
             </div>

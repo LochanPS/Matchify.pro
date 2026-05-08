@@ -277,7 +277,7 @@ export default function MyRegistrationsPage() {
                           <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'rgba(168,85,247,0.15)', border: '1px solid rgba(168,85,247,0.3)' }}>
                             <MapPin className="h-4 w-4 text-purple-400" />
                           </div>
-                          <span className="text-xs">{registration.tournament.city}, {registration.tournament.state}</span>
+                          <span className="text-xs truncate">{registration.tournament.city}, {registration.tournament.state}</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'rgba(59,130,246,0.15)', border: '1px solid rgba(59,130,246,0.3)' }}>

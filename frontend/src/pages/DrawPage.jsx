@@ -744,24 +744,24 @@ const DrawPage = () => {
   const hasPlayedMatches = matches.some(m => m.status === 'COMPLETED' || m.status === 'IN_PROGRESS');
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-950 via-emerald-950 to-teal-950 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-teal-900 via-emerald-800 to-teal-900 relative overflow-hidden">
       {/* Animated Background - Floating Particles */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-2 h-2 bg-emerald-400 rounded-full animate-float opacity-60"></div>
-        <div className="absolute top-40 right-20 w-3 h-3 bg-teal-400 rounded-full animate-float-delayed opacity-50" style={{animationDelay: '1s'}}></div>
-        <div className="absolute top-60 left-1/4 w-2 h-2 bg-emerald-300 rounded-full animate-float opacity-70" style={{animationDelay: '2s'}}></div>
-        <div className="absolute bottom-40 right-1/3 w-3 h-3 bg-teal-500 rounded-full animate-float-delayed opacity-60" style={{animationDelay: '0.5s'}}></div>
-        <div className="absolute bottom-20 left-1/3 w-2 h-2 bg-emerald-400 rounded-full animate-float opacity-50" style={{animationDelay: '1.5s'}}></div>
-        <div className="absolute top-1/3 right-10 w-2 h-2 bg-teal-300 rounded-full animate-float-delayed opacity-70" style={{animationDelay: '2.5s'}}></div>
-        <div className="absolute top-1/2 left-20 w-3 h-3 bg-emerald-500 rounded-full animate-float opacity-60" style={{animationDelay: '0.8s'}}></div>
-        <div className="absolute bottom-1/3 right-1/4 w-2 h-2 bg-teal-400 rounded-full animate-float-delayed opacity-50" style={{animationDelay: '1.8s'}}></div>
+        <div className="absolute top-20 left-10 w-2 h-2 bg-emerald-400 rounded-full animate-float opacity-80"></div>
+        <div className="absolute top-40 right-20 w-3 h-3 bg-teal-400 rounded-full animate-float-delayed opacity-70" style={{animationDelay: '1s'}}></div>
+        <div className="absolute top-60 left-1/4 w-2 h-2 bg-emerald-300 rounded-full animate-float opacity-90" style={{animationDelay: '2s'}}></div>
+        <div className="absolute bottom-40 right-1/3 w-3 h-3 bg-teal-500 rounded-full animate-float-delayed opacity-80" style={{animationDelay: '0.5s'}}></div>
+        <div className="absolute bottom-20 left-1/3 w-2 h-2 bg-emerald-400 rounded-full animate-float opacity-70" style={{animationDelay: '1.5s'}}></div>
+        <div className="absolute top-1/3 right-10 w-2 h-2 bg-teal-300 rounded-full animate-float-delayed opacity-90" style={{animationDelay: '2.5s'}}></div>
+        <div className="absolute top-1/2 left-20 w-3 h-3 bg-emerald-500 rounded-full animate-float opacity-80" style={{animationDelay: '0.8s'}}></div>
+        <div className="absolute bottom-1/3 right-1/4 w-2 h-2 bg-teal-400 rounded-full animate-float-delayed opacity-70" style={{animationDelay: '1.8s'}}></div>
       </div>
 
       {/* Hero Header */}
-      <div className="relative bg-gradient-to-r from-teal-900 via-emerald-900 to-teal-900 overflow-hidden">
+      <div className="relative bg-gradient-to-r from-teal-800 via-emerald-700 to-teal-800 overflow-hidden">
         <div className="absolute inset-0">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-teal-500 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob"></div>
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-teal-500 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob animation-delay-2000"></div>
         </div>
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -931,14 +931,14 @@ const DrawPage = () => {
           <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
               {/* Total Players */}
-              <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-500/20 rounded-xl p-2.5 relative">
+              <div className="bg-gradient-to-br from-teal-500/10 to-emerald-500/10 border border-teal-500/20 rounded-xl p-2.5 relative">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Users className="w-4 h-4 text-blue-400" />
+                  <div className="w-8 h-8 bg-teal-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Users className="w-4 h-4 text-teal-400" />
                   </div>
                   <div className="text-left flex-1 min-w-0">
                     <p className="text-lg font-bold text-white leading-none">{tournamentStats.totalPlayers}</p>
-                    <p className="text-blue-300 text-xs font-medium leading-tight">Players</p>
+                    <p className="text-teal-300 text-xs font-medium leading-tight">Players</p>
                   </div>
                   {/* View Players Button - COMPACT */}
                   <button
@@ -963,13 +963,13 @@ const DrawPage = () => {
                         }
                       }
                     }}
-                    className="w-6 h-6 bg-blue-500/30 hover:bg-blue-500/50 rounded-lg flex items-center justify-center transition-all hover:scale-110 group flex-shrink-0"
+                    className="w-6 h-6 bg-teal-500/30 hover:bg-teal-500/50 rounded-lg flex items-center justify-center transition-all hover:scale-110 group flex-shrink-0"
                     title="View all players"
                   >
                     {showPlayersModal ? (
-                      <X className="w-3 h-3 text-blue-300 group-hover:text-white" />
+                      <X className="w-3 h-3 text-teal-300 group-hover:text-white" />
                     ) : (
-                      <svg className="w-3 h-3 text-blue-300 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-3 h-3 text-teal-300 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                       </svg>
                     )}
@@ -991,27 +991,27 @@ const DrawPage = () => {
               </div>
 
               {/* Total Matches - COMPACT */}
-              <div className="bg-gradient-to-br from-purple-500/10 to-violet-500/10 border border-purple-500/20 rounded-xl p-2.5">
+              <div className="bg-gradient-to-br from-teal-500/10 to-emerald-500/10 border border-teal-500/20 rounded-xl p-2.5">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Gavel className="w-4 h-4 text-purple-400" />
+                  <div className="w-8 h-8 bg-teal-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Gavel className="w-4 h-4 text-teal-400" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-lg font-bold text-white leading-none">{tournamentStats.totalMatches}</p>
-                    <p className="text-purple-300 text-xs font-medium leading-tight">Matches</p>
+                    <p className="text-teal-300 text-xs font-medium leading-tight">Matches</p>
                   </div>
                 </div>
               </div>
 
               {/* Completed Matches - COMPACT */}
-              <div className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-xl p-2.5">
+              <div className="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 rounded-xl p-2.5">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-amber-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <TrophyIcon className="w-4 h-4 text-amber-400" />
+                  <div className="w-8 h-8 bg-emerald-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <TrophyIcon className="w-4 h-4 text-emerald-400" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-lg font-bold text-white leading-none">{tournamentStats.completedMatches}</p>
-                    <p className="text-amber-300 text-xs font-medium leading-tight">Completed</p>
+                    <p className="text-emerald-300 text-xs font-medium leading-tight">Completed</p>
                   </div>
                 </div>
               </div>
@@ -1022,10 +1022,10 @@ const DrawPage = () => {
 
             {/* Players List - Shows when Total Players card is clicked */}
             {showPlayersModal && (
-              <div className="mt-6 bg-gradient-to-br from-slate-800/80 to-slate-700/80 backdrop-blur-sm border border-blue-500/30 rounded-2xl p-6 shadow-2xl">
+              <div className="mt-6 bg-gradient-to-br from-slate-800/80 to-slate-700/80 backdrop-blur-sm border border-teal-500/30 rounded-2xl p-6 shadow-2xl">
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
                       <Users className="w-6 h-6 text-white" />
                     </div>
                     <div>
@@ -1053,11 +1053,11 @@ const DrawPage = () => {
                     {registeredPlayers.map((registration, index) => (
                       <div
                         key={registration.id}
-                        className="bg-gradient-to-br from-slate-700/50 to-slate-600/50 border border-white/10 rounded-xl p-4 hover:border-blue-500/50 hover:shadow-lg hover:shadow-blue-500/20 transition-all"
+                        className="bg-gradient-to-br from-slate-700/50 to-slate-600/50 border border-white/10 rounded-xl p-4 hover:border-teal-500/50 hover:shadow-lg hover:shadow-teal-500/20 transition-all"
                       >
                         <div className="flex items-center gap-3">
                           {/* Player Number */}
-                          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center font-bold text-white shadow-lg flex-shrink-0">
+                          <div className="w-10 h-10 bg-gradient-to-br from-teal-500 to-emerald-500 rounded-lg flex items-center justify-center font-bold text-white shadow-lg flex-shrink-0">
                             {index + 1}
                           </div>
                           
@@ -1092,7 +1092,7 @@ const DrawPage = () => {
                               
                               {/* Guest Badge */}
                               {registration.isGuest && (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-purple-500/20 border border-purple-500/30 rounded-full text-xs text-purple-300">
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-teal-500/20 border border-teal-500/30 rounded-full text-xs text-teal-300">
                                   Quick Added
                                 </span>
                               )}

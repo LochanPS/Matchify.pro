@@ -4426,38 +4426,77 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
   const unassignedPlayers = advancingPlayers.filter(p => !assignedIds.has(p.id));
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="bg-slate-800 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6 border-b border-white/10">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      {/* Animated Background for Modal */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div 
+          className="absolute top-10 right-10 w-64 h-64 rounded-full blur-3xl opacity-20"
+          style={{ 
+            background: 'radial-gradient(circle, rgba(0,200,83,0.5) 0%, transparent 70%)',
+            animation: 'float 8s ease-in-out infinite'
+          }}
+        />
+        <div 
+          className="absolute bottom-10 left-10 w-56 h-56 rounded-full blur-3xl opacity-15"
+          style={{ 
+            background: 'radial-gradient(circle, rgba(20,184,166,0.5) 0%, transparent 70%)',
+            animation: 'float 10s ease-in-out infinite reverse',
+            animationDelay: '2s'
+          }}
+        />
+        {[...Array(8)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute rounded-full"
+            style={{
+              width: `${Math.random() * 4 + 2}px`,
+              height: `${Math.random() * 4 + 2}px`,
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              background: ['#00c853', '#14b8a6'][Math.floor(Math.random() * 2)],
+              opacity: Math.random() * 0.4 + 0.2,
+              animation: `float ${Math.random() * 8 + 4}s ease-in-out infinite`,
+              animationDelay: `${Math.random() * 3}s`,
+              boxShadow: `0 0 ${Math.random() * 15 + 5}px currentColor`
+            }}
+          />
+        ))}
+      </div>
+
+      <div className="relative bg-slate-800/95 backdrop-blur-xl border border-emerald-500/20 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl shadow-emerald-500/10">
+        <div className="p-4 border-b border-white/10">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-bold text-white">Arrange Knockout Matchups</h2>
-              <p className="text-gray-400 text-sm mt-1">Select players to arrange knockout stage matches</p>
+              <h2 className="text-base font-bold text-white">Arrange Knockout Matchups</h2>
+              <p className="text-gray-400 text-xs mt-0.5">Select players to arrange knockout stage matches</p>
             </div>
-            <button onClick={onClose} className="text-gray-400 hover:text-white">
-              <X className="w-5 h-5" />
+            <button onClick={onClose} className="text-gray-400 hover:text-white p-2 hover:bg-white/10 rounded-lg transition-colors">
+              <X className="w-4 h-4" />
             </button>
           </div>
         </div>
 
-        <div className="p-6">
+        <div className="p-4">
           {/* Unassigned Players */}
-          <div className="mb-6">
-            <h3 className="text-sm font-medium text-gray-300 mb-3">Advancing Players ({advancingPlayers.length})</h3>
+          <div className="mb-4">
+            <h3 className="text-[10px] font-semibold text-gray-400 mb-2 uppercase tracking-wider">Advancing Players ({advancingPlayers.length})</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
               {unassignedPlayers.map(player => (
                 <div
                   key={player.id}
-                  className="p-3 bg-slate-700 rounded-lg border border-slate-600"
+                  className="p-2 bg-slate-700/50 rounded-lg border border-emerald-500/20"
                 >
-                  <div className="text-sm font-medium text-white">{player.name}</div>
-                  <div className="text-xs text-gray-400 mt-1">
+                  <div className="text-xs font-medium text-white leading-tight">{player.name}</div>
+                  {player.partnerName && (
+                    <div className="text-[10px] text-emerald-300 leading-tight">& {player.partnerName}</div>
+                  )}
+                  <div className="text-[9px] text-gray-400 mt-1">
                     Pool {player.group} • Rank #{player.rank} • {player.points} pts
                   </div>
                 </div>
               ))}
               {unassignedPlayers.length === 0 && (
-                <div className="col-span-full text-center text-gray-400 text-sm py-4">
+                <div className="col-span-full text-center text-gray-400 text-xs py-4">
                   All players assigned
                 </div>
               )}
@@ -4466,26 +4505,29 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
 
           {/* Knockout Matches */}
           <div>
-            <h3 className="text-sm font-medium text-gray-300 mb-3">Knockout Matches</h3>
-            <div className="space-y-3">
+            <h3 className="text-[10px] font-semibold text-gray-400 mb-2 uppercase tracking-wider">Knockout Matches</h3>
+            <div className="space-y-2">
               {knockoutSlots.map((slot, index) => (
-                <div key={index} className="bg-slate-700/50 rounded-lg p-4 border border-slate-600">
-                  <div className="text-xs text-gray-400 mb-3">Match {slot.matchNumber}</div>
-                  <div className="grid grid-cols-2 gap-3">
+                <div key={index} className="bg-slate-700/30 rounded-lg p-2 border border-white/10">
+                  <div className="text-[9px] text-gray-400 mb-2">Match {slot.matchNumber}</div>
+                  <div className="grid grid-cols-2 gap-2">
                     {/* Player 1 Slot */}
-                    <div className="space-y-2">
-                      <label className="text-xs text-gray-400">Player 1</label>
+                    <div className="space-y-1">
+                      <label className="text-[9px] text-gray-400">Player 1</label>
                       {slot.player1 ? (
-                        <div className="p-3 bg-blue-600 rounded-lg flex items-center justify-between">
-                          <div>
-                            <div className="text-sm font-medium text-white">{slot.player1.name}</div>
-                            <div className="text-xs text-blue-200">Pool {slot.player1.group} • Rank #{slot.player1.rank}</div>
+                        <div className="p-2 bg-emerald-600 rounded-lg flex items-center justify-between">
+                          <div className="flex-1 min-w-0">
+                            <div className="text-xs font-medium text-white leading-tight">{slot.player1.name}</div>
+                            {slot.player1.partnerName && (
+                              <div className="text-[10px] text-emerald-200 leading-tight">& {slot.player1.partnerName}</div>
+                            )}
+                            <div className="text-[9px] text-emerald-200/70">Pool {slot.player1.group} • #{slot.player1.rank}</div>
                           </div>
                           <button
                             onClick={() => removePlayerFromSlot(index, 1)}
-                            className="text-white/70 hover:text-white"
+                            className="text-white/70 hover:text-white p-1 flex-shrink-0"
                           >
-                            <X className="w-4 h-4" />
+                            <X className="w-3 h-3" />
                           </button>
                         </div>
                       ) : (
@@ -4495,12 +4537,12 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
                             if (player) assignPlayerToSlot(player, index, 1);
                           }}
                           value=""
-                          className="w-full p-3 bg-slate-800 border border-slate-600 rounded-lg text-white text-sm"
+                          className="w-full p-2 bg-slate-800 border border-slate-600 rounded-lg text-white text-xs"
                         >
                           <option value="">Select player...</option>
                           {unassignedPlayers.map(player => (
                             <option key={player.id} value={player.id}>
-                              {player.name} (Pool {player.group} • Rank #{player.rank})
+                              {player.name} (Pool {player.group} • #{player.rank})
                             </option>
                           ))}
                         </select>
@@ -4508,19 +4550,22 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
                     </div>
 
                     {/* Player 2 Slot */}
-                    <div className="space-y-2">
-                      <label className="text-xs text-gray-400">Player 2</label>
+                    <div className="space-y-1">
+                      <label className="text-[9px] text-gray-400">Player 2</label>
                       {slot.player2 ? (
-                        <div className="p-3 bg-blue-600 rounded-lg flex items-center justify-between">
-                          <div>
-                            <div className="text-sm font-medium text-white">{slot.player2.name}</div>
-                            <div className="text-xs text-blue-200">Pool {slot.player2.group} • Rank #{slot.player2.rank}</div>
+                        <div className="p-2 bg-emerald-600 rounded-lg flex items-center justify-between">
+                          <div className="flex-1 min-w-0">
+                            <div className="text-xs font-medium text-white leading-tight">{slot.player2.name}</div>
+                            {slot.player2.partnerName && (
+                              <div className="text-[10px] text-emerald-200 leading-tight">& {slot.player2.partnerName}</div>
+                            )}
+                            <div className="text-[9px] text-emerald-200/70">Pool {slot.player2.group} • #{slot.player2.rank}</div>
                           </div>
                           <button
                             onClick={() => removePlayerFromSlot(index, 2)}
-                            className="text-white/70 hover:text-white"
+                            className="text-white/70 hover:text-white p-1 flex-shrink-0"
                           >
-                            <X className="w-4 h-4" />
+                            <X className="w-3 h-3" />
                           </button>
                         </div>
                       ) : (
@@ -4530,12 +4575,12 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
                             if (player) assignPlayerToSlot(player, index, 2);
                           }}
                           value=""
-                          className="w-full p-3 bg-slate-800 border border-slate-600 rounded-lg text-white text-sm"
+                          className="w-full p-2 bg-slate-800 border border-slate-600 rounded-lg text-white text-xs"
                         >
                           <option value="">Select player...</option>
                           {unassignedPlayers.map(player => (
                             <option key={player.id} value={player.id}>
-                              {player.name} (Pool {player.group} • Rank #{player.rank})
+                              {player.name} (Pool {player.group} • #{player.rank})
                             </option>
                           ))}
                         </select>
@@ -4548,14 +4593,14 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
           </div>
         </div>
 
-        <div className="p-6 border-t border-white/10 flex gap-3">
-          <button onClick={onClose} className="flex-1 px-4 py-3 bg-slate-700 text-white rounded-lg hover:bg-slate-600 transition-colors">
+        <div className="p-4 border-t border-white/10 flex gap-2">
+          <button onClick={onClose} className="flex-1 px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-600 transition-colors text-xs font-semibold">
             Cancel
           </button>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+            className="flex-1 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg hover:shadow-lg hover:shadow-emerald-500/25 transition-all disabled:opacity-50 text-xs font-semibold"
           >
             {saving ? 'Saving...' : 'Save Matchups'}
           </button>

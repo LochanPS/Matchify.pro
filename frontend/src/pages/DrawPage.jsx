@@ -4427,76 +4427,76 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      {/* Animated Background for Modal */}
+      {/* Animated Background for Modal - MORE VISIBLE */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div 
-          className="absolute top-10 right-10 w-64 h-64 rounded-full blur-3xl opacity-20"
+          className="absolute top-10 right-10 w-80 h-80 rounded-full blur-3xl opacity-30"
           style={{ 
-            background: 'radial-gradient(circle, rgba(0,200,83,0.5) 0%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(0,200,83,0.6) 0%, transparent 70%)',
             animation: 'float 8s ease-in-out infinite'
           }}
         />
         <div 
-          className="absolute bottom-10 left-10 w-56 h-56 rounded-full blur-3xl opacity-15"
+          className="absolute bottom-10 left-10 w-72 h-72 rounded-full blur-3xl opacity-25"
           style={{ 
-            background: 'radial-gradient(circle, rgba(20,184,166,0.5) 0%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(20,184,166,0.6) 0%, transparent 70%)',
             animation: 'float 10s ease-in-out infinite reverse',
             animationDelay: '2s'
           }}
         />
-        {[...Array(8)].map((_, i) => (
+        {[...Array(12)].map((_, i) => (
           <div
             key={i}
             className="absolute rounded-full"
             style={{
-              width: `${Math.random() * 4 + 2}px`,
-              height: `${Math.random() * 4 + 2}px`,
+              width: `${Math.random() * 5 + 3}px`,
+              height: `${Math.random() * 5 + 3}px`,
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
-              background: ['#00c853', '#14b8a6'][Math.floor(Math.random() * 2)],
-              opacity: Math.random() * 0.4 + 0.2,
+              background: ['#00c853', '#14b8a6', '#10b981'][Math.floor(Math.random() * 3)],
+              opacity: Math.random() * 0.4 + 0.4,
               animation: `float ${Math.random() * 8 + 4}s ease-in-out infinite`,
               animationDelay: `${Math.random() * 3}s`,
-              boxShadow: `0 0 ${Math.random() * 15 + 5}px currentColor`
+              boxShadow: `0 0 ${Math.random() * 20 + 10}px currentColor`
             }}
           />
         ))}
       </div>
 
-      <div className="relative bg-slate-800/95 backdrop-blur-xl border border-emerald-500/20 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl shadow-emerald-500/10">
-        <div className="p-4 border-b border-white/10">
+      <div className="relative bg-slate-800/95 backdrop-blur-xl border border-emerald-500/20 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl shadow-emerald-500/10">
+        <div className="p-3 border-b border-white/10">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-base font-bold text-white">Arrange Knockout Matchups</h2>
-              <p className="text-gray-400 text-xs mt-0.5">Select players to arrange knockout stage matches</p>
+              <h2 className="text-sm font-bold text-white leading-tight">Arrange Knockout Matchups</h2>
+              <p className="text-gray-400 text-[10px] leading-tight mt-0.5">Select players for knockout matches</p>
             </div>
-            <button onClick={onClose} className="text-gray-400 hover:text-white p-2 hover:bg-white/10 rounded-lg transition-colors">
-              <X className="w-4 h-4" />
+            <button onClick={onClose} className="text-gray-400 hover:text-white p-1.5 hover:bg-white/10 rounded-lg transition-colors">
+              <X className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
 
-        <div className="p-4">
+        <div className="p-3">
           {/* Unassigned Players */}
-          <div className="mb-4">
-            <h3 className="text-[10px] font-semibold text-gray-400 mb-2 uppercase tracking-wider">Advancing Players ({advancingPlayers.length})</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+          <div className="mb-3">
+            <h3 className="text-[9px] font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">Advancing Players ({advancingPlayers.length})</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5">
               {unassignedPlayers.map(player => (
                 <div
                   key={player.id}
-                  className="p-2 bg-slate-700/50 rounded-lg border border-emerald-500/20"
+                  className="p-1.5 bg-slate-700/50 rounded-lg border border-emerald-500/20"
                 >
-                  <div className="text-xs font-medium text-white leading-tight">{player.name}</div>
+                  <div className="text-[11px] font-medium text-white leading-tight">{player.name}</div>
                   {player.partnerName && (
-                    <div className="text-[10px] text-emerald-300 leading-tight">& {player.partnerName}</div>
+                    <div className="text-[9px] text-emerald-300 leading-tight">& {player.partnerName}</div>
                   )}
-                  <div className="text-[9px] text-gray-400 mt-1">
-                    Pool {player.group} • Rank #{player.rank} • {player.points} pts
+                  <div className="text-[8px] text-gray-400 mt-0.5">
+                    Pool {player.group} • #{player.rank} • {player.points}pts
                   </div>
                 </div>
               ))}
               {unassignedPlayers.length === 0 && (
-                <div className="col-span-full text-center text-gray-400 text-xs py-4">
+                <div className="col-span-full text-center text-gray-400 text-[10px] py-3">
                   All players assigned
                 </div>
               )}
@@ -4505,27 +4505,27 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
 
           {/* Knockout Matches */}
           <div>
-            <h3 className="text-[10px] font-semibold text-gray-400 mb-2 uppercase tracking-wider">Knockout Matches</h3>
-            <div className="space-y-2">
+            <h3 className="text-[9px] font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">Knockout Matches</h3>
+            <div className="space-y-1.5">
               {knockoutSlots.map((slot, index) => (
-                <div key={index} className="bg-slate-700/30 rounded-lg p-2 border border-white/10">
-                  <div className="text-[9px] text-gray-400 mb-2">Match {slot.matchNumber}</div>
-                  <div className="grid grid-cols-2 gap-2">
+                <div key={index} className="bg-slate-700/30 rounded-lg p-1.5 border border-white/10">
+                  <div className="text-[8px] text-gray-400 mb-1.5">Match {slot.matchNumber}</div>
+                  <div className="grid grid-cols-2 gap-1.5">
                     {/* Player 1 Slot */}
                     <div className="space-y-1">
-                      <label className="text-[9px] text-gray-400">Player 1</label>
+                      <label className="text-[8px] text-gray-400">Player 1</label>
                       {slot.player1 ? (
-                        <div className="p-2 bg-emerald-600 rounded-lg flex items-center justify-between">
+                        <div className="p-1.5 bg-emerald-600 rounded-lg flex items-center justify-between">
                           <div className="flex-1 min-w-0">
-                            <div className="text-xs font-medium text-white leading-tight">{slot.player1.name}</div>
+                            <div className="text-[11px] font-medium text-white leading-tight">{slot.player1.name}</div>
                             {slot.player1.partnerName && (
-                              <div className="text-[10px] text-emerald-200 leading-tight">& {slot.player1.partnerName}</div>
+                              <div className="text-[9px] text-emerald-200 leading-tight">& {slot.player1.partnerName}</div>
                             )}
-                            <div className="text-[9px] text-emerald-200/70">Pool {slot.player1.group} • #{slot.player1.rank}</div>
+                            <div className="text-[8px] text-emerald-200/70">Pool {slot.player1.group} • #{slot.player1.rank}</div>
                           </div>
                           <button
                             onClick={() => removePlayerFromSlot(index, 1)}
-                            className="text-white/70 hover:text-white p-1 flex-shrink-0"
+                            className="text-white/70 hover:text-white p-0.5 flex-shrink-0"
                           >
                             <X className="w-3 h-3" />
                           </button>
@@ -4537,7 +4537,7 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
                             if (player) assignPlayerToSlot(player, index, 1);
                           }}
                           value=""
-                          className="w-full p-2 bg-slate-800 border border-slate-600 rounded-lg text-white text-xs"
+                          className="w-full p-1.5 bg-slate-800 border border-slate-600 rounded-lg text-white text-[11px]"
                         >
                           <option value="">Select player...</option>
                           {unassignedPlayers.map(player => (
@@ -4551,19 +4551,19 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
 
                     {/* Player 2 Slot */}
                     <div className="space-y-1">
-                      <label className="text-[9px] text-gray-400">Player 2</label>
+                      <label className="text-[8px] text-gray-400">Player 2</label>
                       {slot.player2 ? (
-                        <div className="p-2 bg-emerald-600 rounded-lg flex items-center justify-between">
+                        <div className="p-1.5 bg-emerald-600 rounded-lg flex items-center justify-between">
                           <div className="flex-1 min-w-0">
-                            <div className="text-xs font-medium text-white leading-tight">{slot.player2.name}</div>
+                            <div className="text-[11px] font-medium text-white leading-tight">{slot.player2.name}</div>
                             {slot.player2.partnerName && (
-                              <div className="text-[10px] text-emerald-200 leading-tight">& {slot.player2.partnerName}</div>
+                              <div className="text-[9px] text-emerald-200 leading-tight">& {slot.player2.partnerName}</div>
                             )}
-                            <div className="text-[9px] text-emerald-200/70">Pool {slot.player2.group} • #{slot.player2.rank}</div>
+                            <div className="text-[8px] text-emerald-200/70">Pool {slot.player2.group} • #{slot.player2.rank}</div>
                           </div>
                           <button
                             onClick={() => removePlayerFromSlot(index, 2)}
-                            className="text-white/70 hover:text-white p-1 flex-shrink-0"
+                            className="text-white/70 hover:text-white p-0.5 flex-shrink-0"
                           >
                             <X className="w-3 h-3" />
                           </button>
@@ -4575,7 +4575,7 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
                             if (player) assignPlayerToSlot(player, index, 2);
                           }}
                           value=""
-                          className="w-full p-2 bg-slate-800 border border-slate-600 rounded-lg text-white text-xs"
+                          className="w-full p-1.5 bg-slate-800 border border-slate-600 rounded-lg text-white text-[11px]"
                         >
                           <option value="">Select player...</option>
                           {unassignedPlayers.map(player => (
@@ -4593,14 +4593,14 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
           </div>
         </div>
 
-        <div className="p-4 border-t border-white/10 flex gap-2">
-          <button onClick={onClose} className="flex-1 px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-600 transition-colors text-xs font-semibold">
+        <div className="p-3 border-t border-white/10 flex gap-2">
+          <button onClick={onClose} className="flex-1 px-4 py-1.5 bg-slate-700 text-white rounded-lg hover:bg-slate-600 transition-colors text-[11px] font-semibold">
             Cancel
           </button>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex-1 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg hover:shadow-lg hover:shadow-emerald-500/25 transition-all disabled:opacity-50 text-xs font-semibold"
+            className="flex-1 px-4 py-1.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg hover:shadow-lg hover:shadow-emerald-500/25 transition-all disabled:opacity-50 text-[11px] font-semibold"
           >
             {saving ? 'Saving...' : 'Save Matchups'}
           </button>

@@ -1,6 +1,17 @@
 // Matchify.pro - Premier Badminton Tournament Platform
 // Version: 1.0.3 - Matchify ID System Update
 // Last Updated: May 6, 2026
+
+// Global star particles — deterministic, rendered once, fixed behind all pages
+const GLOBAL_STARS = Array.from({ length: 60 }, (_, i) => ({
+  x: (i * 37 + 11) % 100,
+  y: (i * 53 + 7) % 100,
+  r: ((i * 7) % 3) + 1,          // 1–3 px
+  o: ((i * 13) % 50) / 100 + 0.08, // 0.08–0.57 opacity
+  dur: (i * 7) % 8 + 4,           // 4–11s animation duration
+  delay: (i * 3) % 6,             // 0–5s delay
+  c: ['#00ff88','#00d4ff','#a855f7','#ffffff'][i % 4],
+}));
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { NotificationProvider } from './contexts/NotificationContext'
@@ -105,6 +116,33 @@ function AppContent() {
 
   return (
     <div className="min-h-screen" style={{ background: '#07071a' }}>
+      {/* Global animated star field — fixed behind every page */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 0 }}>
+        {/* Large ambient glow orbs */}
+        <div className="absolute top-0 right-0 w-80 h-80 rounded-full blur-3xl opacity-10"
+          style={{ background: 'radial-gradient(circle,rgba(0,255,136,0.6) 0%,transparent 70%)' }} />
+        <div className="absolute bottom-1/3 left-0 w-72 h-72 rounded-full blur-3xl opacity-8"
+          style={{ background: 'radial-gradient(circle,rgba(168,85,247,0.6) 0%,transparent 70%)' }} />
+        <div className="absolute top-1/2 right-1/4 w-64 h-64 rounded-full blur-3xl opacity-6"
+          style={{ background: 'radial-gradient(circle,rgba(0,212,255,0.5) 0%,transparent 70%)' }} />
+        {/* Star particles */}
+        {GLOBAL_STARS.map((s, i) => (
+          <div key={i} className="absolute rounded-full"
+            style={{
+              left: `${s.x}%`, top: `${s.y}%`,
+              width: `${s.r}px`, height: `${s.r}px`,
+              background: s.c, opacity: s.o,
+              animation: `globalStar ${s.dur}s ease-in-out ${s.delay}s infinite`,
+              boxShadow: `0 0 ${s.r * 3}px ${s.c}`,
+            }} />
+        ))}
+      </div>
+      <style>{`
+        @keyframes globalStar {
+          0%,100%{transform:scale(1);opacity:var(--op,0.2)}
+          50%{transform:scale(1.8);opacity:min(var(--op,0.2)*2.5,0.7)}
+        }
+      `}</style>
       <ScrollToTop />
       <ImpersonationBanner />
       <div className={isImpersonating() ? 'pt-[60px]' : ''}> {/* Add padding only when impersonating */}

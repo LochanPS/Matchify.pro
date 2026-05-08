@@ -206,9 +206,11 @@ export default function TournamentRegistrationPage() {
   };
 
   const handlePartnerCodeChange = (categoryId, code) => {
+    let val = code.toUpperCase();
+    if (!val.startsWith('#')) val = '#' + val.replace(/#/g, '');
     setPartnerCodes(prev => ({
       ...prev,
-      [categoryId]: code.toUpperCase()
+      [categoryId]: val
     }));
     // Clear partner info when code changes
     setPartnerInfo(prev => ({
@@ -410,7 +412,7 @@ export default function TournamentRegistrationPage() {
                           <div className="flex flex-col sm:flex-row gap-2">
                             <input
                               type="text"
-                              value={partnerCodes[catId] || ''}
+                              value={partnerCodes[catId] || '#'}
                               onChange={(e) => handlePartnerCodeChange(catId, e.target.value)}
                               placeholder="#A10000"
                               maxLength={7}
@@ -425,10 +427,10 @@ export default function TournamentRegistrationPage() {
                             <button
                               type="button"
                               onClick={() => fetchPartnerByCode(catId, partnerCodes[catId])}
-                              disabled={!partnerCodes[catId] || partnerCodes[catId].length !== 7}
+                              disabled={!partnerCodes[catId] || partnerCodes[catId].length !== 7 || partnerCodes[catId] === '#'}
                               className="px-5 py-3 rounded-xl font-bold text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                               style={
-                                !partnerCodes[catId] || partnerCodes[catId].length !== 7
+                                !partnerCodes[catId] || partnerCodes[catId].length !== 7 || partnerCodes[catId] === '#'
                                   ? { background: 'rgba(100,100,100,0.3)', color: 'rgba(255,255,255,0.4)' }
                                   : { background: 'linear-gradient(135deg,#10b981,#059669)', color: '#ffffff', boxShadow: '0 4px 15px rgba(16,185,129,0.3)' }
                               }

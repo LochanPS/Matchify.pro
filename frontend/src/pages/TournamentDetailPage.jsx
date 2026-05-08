@@ -143,7 +143,7 @@ const TournamentDetailPage = () => {
   
   // Umpire management state
   const [showUmpireModal, setShowUmpireModal] = useState(false);
-  const [umpireCode, setUmpireCode] = useState('');
+  const [umpireCode, setUmpireCode] = useState('#');
   const [umpires, setUmpires] = useState([]);
   const [loadingUmpires, setLoadingUmpires] = useState(false);
   const [addingUmpire, setAddingUmpire] = useState(false);
@@ -236,7 +236,7 @@ const TournamentDetailPage = () => {
   };
 
   const handleAddUmpire = async () => {
-    if (!umpireCode.trim()) {
+    if (!umpireCode.trim() || umpireCode.trim() === '#') {
       setUmpireError('Please enter an umpire code');
       return;
     }
@@ -259,7 +259,7 @@ const TournamentDetailPage = () => {
       
       if (response.success) {
         setUmpireSuccess(`Umpire "${response.umpire.name}" added successfully!`);
-        setUmpireCode('');
+        setUmpireCode('#');
         fetchUmpires(); // Refresh the list
       } else {
         setUmpireError(response.error || 'Failed to add umpire');
@@ -288,7 +288,7 @@ const TournamentDetailPage = () => {
 
   const openUmpireModal = () => {
     setShowUmpireModal(true);
-    setUmpireCode('');
+    setUmpireCode('#');
     setUmpireError('');
     setUmpireSuccess('');
     fetchUmpires();
@@ -1310,7 +1310,9 @@ const TournamentDetailPage = () => {
                     type="text"
                     value={umpireCode}
                     onChange={(e) => {
-                      setUmpireCode(e.target.value.toUpperCase());
+                      let val = e.target.value.toUpperCase();
+                      if (!val.startsWith('#')) val = '#' + val.replace(/#/g, '');
+                      setUmpireCode(val);
                       setUmpireError('');
                     }}
                     placeholder="#123ABCD"
@@ -1323,7 +1325,7 @@ const TournamentDetailPage = () => {
               {/* Add button */}
               <button
                 onClick={handleAddUmpire}
-                disabled={addingUmpire || !umpireCode.trim()}
+                disabled={addingUmpire || !umpireCode.trim() || umpireCode.trim() === '#'}
                 className="w-full px-4 py-3 bg-gradient-to-r from-teal-500 to-emerald-600 text-white rounded-xl hover:shadow-lg hover:shadow-teal-500/30 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mb-6"
               >
                 {addingUmpire ? (

@@ -3616,35 +3616,36 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-slate-800 border border-white/10 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-        <div className="p-6 border-b border-white/10">
+      <div className="bg-gradient-to-br from-slate-900 to-slate-800 border-2 border-emerald-500/20 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+        {/* Header - Emerald Theme */}
+        <div className="p-6 border-b-2 border-white/10 bg-gradient-to-r from-emerald-500/20 to-teal-500/20">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-emerald-500/20 rounded-xl flex items-center justify-center">
-                <UserPlus className="w-6 h-6 text-emerald-400" />
+              <div className="w-14 h-14 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/50">
+                <UserPlus className="w-7 h-7 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-white">Assign Players to Draw</h2>
-                <p className="text-gray-400 text-sm">Click a player, then click a slot to assign</p>
+                <h2 className="text-2xl font-bold text-white">Assign Players</h2>
+                <p className="text-emerald-300 text-sm font-medium">Click player → Click slot</p>
               </div>
             </div>
-            <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-lg transition-colors">
-              <X className="w-5 h-5 text-gray-400" />
+            <button onClick={onClose} className="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-lg transition-colors flex items-center justify-center">
+              <X className="w-5 h-5 text-gray-300" />
             </button>
           </div>
           
-          {/* Bulk Action Buttons */}
+          {/* Bulk Action Buttons - Emerald Theme */}
           <div className="mt-4 flex gap-3">
             <button
               onClick={handleAddAllPlayers}
               disabled={!canAddAll}
-              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-xl hover:shadow-lg hover:shadow-blue-500/25 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-              title={canAddAll ? `Add ${Math.min(unassignedPlayersCount, availableSlotsCount)} unassigned players to available slots` : 'No unassigned players or available slots'}
+              className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl hover:shadow-lg hover:shadow-emerald-500/30 transition-all font-bold disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+              title={canAddAll ? `Add ${Math.min(unassignedPlayersCount, availableSlotsCount)} unassigned players` : 'No unassigned players or available slots'}
             >
               <Users className="w-4 h-4" />
-              Add All Players
+              Add All
               {canAddAll && (
-                <span className="px-2 py-0.5 bg-white/20 rounded-full text-xs">
+                <span className="px-2 py-0.5 bg-white/20 rounded-full text-xs font-black">
                   +{Math.min(unassignedPlayersCount, availableSlotsCount)}
                 </span>
               )}
@@ -3653,22 +3654,22 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
             <button
               onClick={handleShuffleAllPlayers}
               disabled={!canShuffle}
-              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-violet-600 text-white rounded-xl hover:shadow-lg hover:shadow-purple-500/25 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-              title={canShuffle ? 'Randomly redistribute all assigned players (locked matches unchanged)' : 'Need at least 2 assigned players to shuffle'}
+              className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl hover:shadow-lg hover:shadow-emerald-500/30 transition-all font-bold disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+              title={canShuffle ? 'Randomly redistribute all assigned players' : 'Need at least 2 assigned players'}
             >
               <Zap className="w-4 h-4" />
-              Shuffle All Players
+              Shuffle All
             </button>
           </div>
           
           {selectedPlayer && (
-            <div className="mt-3 px-4 py-2 bg-purple-500/20 border border-purple-500/30 rounded-xl flex items-center justify-between">
-              <span className="text-purple-300 text-sm">
-                Selected: <span className="font-semibold text-white">{selectedPlayer.name}</span> — Click a slot to assign
+            <div className="mt-3 px-4 py-2.5 bg-emerald-500/20 border-2 border-emerald-500/40 rounded-xl flex items-center justify-between">
+              <span className="text-emerald-300 text-sm font-semibold">
+                Selected: <span className="font-bold text-white">{selectedPlayer.name}</span> — Click a slot
               </span>
               <button 
                 onClick={() => setSelectedPlayer(null)}
-                className="text-purple-400 hover:text-purple-300 text-sm"
+                className="text-emerald-400 hover:text-emerald-300 text-sm font-bold"
               >
                 Cancel
               </button>
@@ -3676,15 +3677,16 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
           )}
         </div>
 
-        <div className="flex-1 overflow-hidden flex">
+        <div className="flex-1 overflow-hidden flex flex-col md:flex-row">
           {/* Players List */}
-          <div className="w-1/3 border-r border-white/10 p-4 overflow-y-auto scroll-smooth scrollbar-thin">
-            <h3 className="text-sm font-semibold text-gray-400 mb-3 uppercase tracking-wider">
-              Registered Players ({players.length})
+          <div className="w-full md:w-1/3 border-b md:border-b-0 md:border-r-2 border-white/10 p-4 overflow-y-auto">
+            <h3 className="text-sm font-black text-emerald-300 mb-3 uppercase tracking-wider flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              Players ({players.length})
             </h3>
             {loading ? (
               <div className="flex items-center justify-center py-8">
-                <div className="w-8 h-8 border-3 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-8 h-8 border-3 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
               </div>
             ) : players.length === 0 ? (
               <div className="text-center py-8">
@@ -3702,29 +3704,29 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                       onClick={() => handleSelectPlayer(player)}
                       className={`p-3 rounded-xl cursor-pointer transition-all ${
                         isSelected
-                          ? 'bg-purple-500/30 border-2 border-purple-500 shadow-lg shadow-purple-500/20'
+                          ? 'bg-gradient-to-r from-emerald-500/30 to-teal-500/30 border-2 border-emerald-500 shadow-lg shadow-emerald-500/30'
                           : assigned
-                            ? 'bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20'
-                            : 'bg-slate-700/50 border border-transparent hover:bg-slate-700 hover:shadow-lg hover:shadow-purple-500/10'
+                            ? 'bg-emerald-500/10 border-2 border-emerald-500/30 hover:bg-emerald-500/20'
+                            : 'bg-slate-700/50 border-2 border-transparent hover:bg-slate-700 hover:border-emerald-500/30'
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-sm ${
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-white font-black shadow-lg ${
                           isSelected
-                            ? 'bg-gradient-to-br from-purple-400 to-violet-600 ring-2 ring-purple-400'
+                            ? 'bg-gradient-to-br from-emerald-400 to-teal-600 ring-2 ring-emerald-400'
                             : assigned 
                               ? 'bg-gradient-to-br from-emerald-500 to-teal-600' 
-                              : 'bg-gradient-to-br from-purple-500 to-indigo-600'
+                              : 'bg-gradient-to-br from-slate-600 to-slate-700'
                         }`}>
                           {player.seed}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-white font-medium truncate">{player.name}</p>
-                          <p className="text-gray-500 text-xs truncate">{player.email}</p>
+                          <p className="text-white font-bold text-sm truncate">{player.name}</p>
+                          <p className="text-gray-400 text-xs truncate">{player.email}</p>
                         </div>
                         {isSelected ? (
-                          <div className="w-5 h-5 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
-                            <div className="w-2 h-2 bg-white rounded-full"></div>
+                          <div className="w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg shadow-emerald-500/50">
+                            <div className="w-2.5 h-2.5 bg-white rounded-full"></div>
                           </div>
                         ) : assigned ? (
                           <CheckCircle className="w-5 h-5 text-emerald-400 flex-shrink-0" />
@@ -3737,18 +3739,18 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
             )}
           </div>
 
-          {/* Slots Grid - For Round Robin: Show by Pools, For Knockout: Show by Matches */}
-          <div className="flex-1 p-4 overflow-y-auto scroll-smooth scrollbar-thin">
+          {/* Slots Grid */}
+          <div className="flex-1 p-4 overflow-y-auto">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">
+              <h3 className="text-sm font-black text-emerald-300 uppercase tracking-wider flex items-center gap-2">
+                <Layers className="w-4 h-4" />
                 {bracket?.format === 'ROUND_ROBIN' || bracket?.format === 'ROUND_ROBIN_KNOCKOUT' 
                   ? `Pools (${bracket.groups?.length || 0})` 
-                  : `Draw Slots (${slots.length})`}
+                  : `Slots (${slots.length})`}
               </h3>
               {assignedCount > 0 && (
                 <button
                   onClick={() => {
-                    // Only clear unlocked slots
                     const newAssignments = {};
                     Object.entries(assignments).forEach(([slotKey, data]) => {
                       const slot = slots.find(s => s.slot === parseInt(slotKey));
@@ -3758,7 +3760,7 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                     });
                     setAssignments(newAssignments);
                   }}
-                  className="text-xs text-red-400 hover:text-red-300 hover:bg-red-500/10 px-2 py-1 rounded-lg transition-colors"
+                  className="text-xs text-red-400 hover:text-red-300 hover:bg-red-500/10 px-3 py-1.5 rounded-lg transition-all font-bold"
                 >
                   Clear All
                 </button>
@@ -3781,27 +3783,26 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                   const totalInPool = groupSlots.length;
                   
                   return (
-                    <div key={groupIndex} className="bg-slate-700/30 rounded-xl border border-white/10 overflow-hidden">
-                      {/* Pool Header */}
-                      <div className="px-4 py-3 bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-b border-white/10">
+                    <div key={groupIndex} className="bg-gradient-to-br from-slate-800/60 to-slate-700/60 rounded-xl border-2 border-emerald-500/20 overflow-hidden shadow-lg">
+                      {/* Pool Header - Emerald Theme */}
+                      <div className="px-4 py-3 bg-gradient-to-r from-emerald-500/30 to-teal-500/30 border-b-2 border-emerald-500/30">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-purple-500/30 rounded-xl flex items-center justify-center">
-                              <span className="text-purple-300 font-bold text-lg">
+                            <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/50">
+                              <span className="text-white font-black text-xl">
                                 {String.fromCharCode(65 + groupIndex)}
                               </span>
                             </div>
                             <div>
-                              <h4 className="text-white font-bold">Pool {String.fromCharCode(65 + groupIndex)}</h4>
-                              <p className="text-purple-300 text-xs">
-                                {assignedInPool} of {totalInPool} players assigned
+                              <h4 className="text-white font-black text-lg">Pool {String.fromCharCode(65 + groupIndex)}</h4>
+                              <p className="text-emerald-300 text-xs font-bold">
+                                {assignedInPool} of {totalInPool} assigned
                               </p>
                             </div>
                           </div>
-                          <div className="text-right">
-                            <div className="px-3 py-1 bg-purple-500/20 rounded-lg">
-                              <span className="text-purple-300 font-bold text-sm">{totalInPool} slots</span>
-                            </div>
+                          <div className="px-3 py-1.5 bg-emerald-500/20 rounded-lg border border-emerald-500/40">
+                            <span className="text-emerald-300 font-black text-sm">{totalInPool}</span>
+                            <span className="text-emerald-400 text-xs ml-1">slots</span>
                           </div>
                         </div>
                       </div>
@@ -3816,9 +3817,9 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                             <div
                               key={slot.slot}
                               onClick={() => canAccept && handleSlotClick(slot)}
-                              className={`p-3 rounded-lg border transition-all ${
+                              className={`p-3 rounded-xl border-2 transition-all ${
                                 canAccept
-                                  ? 'border-purple-500/50 bg-purple-500/10 cursor-pointer hover:bg-purple-500/20 hover:border-purple-500'
+                                  ? 'border-emerald-500/50 bg-emerald-500/10 cursor-pointer hover:bg-emerald-500/20 hover:border-emerald-500 hover:shadow-lg hover:shadow-emerald-500/30'
                                   : assigned
                                     ? 'border-emerald-500/30 bg-emerald-500/10'
                                     : 'border-white/10 bg-slate-800/30'
@@ -3826,18 +3827,18 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                             >
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2 flex-1 min-w-0">
-                                  <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0 ${
+                                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black flex-shrink-0 shadow-lg ${
                                     assigned 
-                                      ? 'bg-emerald-500/30 text-emerald-300' 
-                                      : 'bg-slate-600/30 text-gray-500'
+                                      ? 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white' 
+                                      : 'bg-slate-700/50 text-gray-500'
                                   }`}>
                                     {slot.slot}
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     {assigned ? (
-                                      <p className="text-white font-medium text-sm truncate">{assigned.playerName}</p>
+                                      <p className="text-white font-bold text-sm truncate">{assigned.playerName}</p>
                                     ) : (
-                                      <p className="text-gray-500 text-sm">Empty Slot</p>
+                                      <p className="text-gray-500 text-sm font-medium">Empty</p>
                                     )}
                                   </div>
                                 </div>
@@ -3865,8 +3866,8 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                 })}
               </div>
             ) : (
-              /* KNOCKOUT: Match-based view (existing code) */
-              <div className="grid grid-cols-2 gap-3">
+              /* KNOCKOUT: Match-based view */
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {/* Group slots into pairs (matches) */}
                 {Array.from({ length: Math.ceil(slots.length / 2) }, (_, matchIndex) => {
                   const slot1 = slots[matchIndex * 2];
@@ -3875,30 +3876,30 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                   const isMatchLocked = slot1?.locked || slot2?.locked;
                 
                 return (
-                  <div key={matchIndex} className={`bg-slate-700/30 rounded-xl border overflow-hidden ${
-                    isMatchLocked ? 'border-amber-500/30 bg-amber-500/5' : 'border-white/10'
+                  <div key={matchIndex} className={`bg-gradient-to-br from-slate-800/60 to-slate-700/60 rounded-xl border-2 overflow-hidden shadow-lg ${
+                    isMatchLocked ? 'border-amber-500/30 bg-amber-500/5' : 'border-emerald-500/20'
                   }`}>
-                    {/* Match Header - Compact */}
-                    <div className={`px-3 py-1.5 border-b border-white/10 flex items-center gap-2 ${
+                    {/* Match Header - Emerald Theme */}
+                    <div className={`px-3 py-2 border-b-2 border-white/10 flex items-center gap-2 ${
                       isMatchLocked 
                         ? 'bg-gradient-to-r from-amber-500/20 to-orange-500/20' 
-                        : 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20'
+                        : 'bg-gradient-to-r from-emerald-500/30 to-teal-500/30'
                     }`}>
-                      <span className={`w-5 h-5 rounded flex items-center justify-center text-xs font-bold ${
-                        isMatchLocked ? 'bg-amber-500/30 text-amber-300' : 'bg-purple-500/30 text-purple-300'
+                      <span className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black shadow-lg ${
+                        isMatchLocked ? 'bg-amber-500/30 text-amber-300' : 'bg-emerald-500/30 text-emerald-300'
                       }`}>{matchNum}</span>
-                      <span className={`font-semibold text-xs ${isMatchLocked ? 'text-amber-300' : 'text-purple-300'}`}>
+                      <span className={`font-black text-sm ${isMatchLocked ? 'text-amber-300' : 'text-emerald-300'}`}>
                         Match {matchNum}
                       </span>
                       {isMatchLocked && (
-                        <span className="ml-auto px-1.5 py-0.5 bg-amber-500/20 text-amber-400 text-[10px] font-bold rounded">
+                        <span className="ml-auto px-2 py-0.5 bg-amber-500/20 text-amber-400 text-[10px] font-black rounded">
                           🔒 LOCKED
                         </span>
                       )}
                     </div>
                     
-                    {/* Players Container - Compact */}
-                    <div className="p-2 space-y-1">
+                    {/* Players Container */
+                    <div className="p-2.5 space-y-2">
                       {/* Player 1 Slot */}
                       {slot1 && (
                         <CompactSlotCard 
@@ -3948,31 +3949,34 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
           </div>
         </div>
 
-        <div className="p-6 border-t border-white/10 flex items-center justify-between">
-          <div className="text-sm text-gray-400">
-            {assignedCount} of {slots.length} slots assigned
+        <div className="p-6 border-t-2 border-white/10 bg-gradient-to-r from-slate-900/50 to-slate-800/50 flex items-center justify-between">
+          <div className="text-sm font-bold">
+            <span className="text-emerald-400">{assignedCount}</span>
+            <span className="text-gray-400"> of </span>
+            <span className="text-white">{slots.length}</span>
+            <span className="text-gray-400"> assigned</span>
           </div>
           <div className="flex gap-3">
             <button 
               onClick={onClose} 
-              className="px-6 py-3 bg-slate-700 text-gray-300 rounded-xl hover:bg-slate-600 transition-colors font-semibold"
+              className="px-6 py-3 bg-slate-700 text-white rounded-xl hover:bg-slate-600 transition-all font-bold"
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
               disabled={saving}
-              className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl hover:shadow-lg hover:shadow-emerald-500/25 transition-all font-semibold disabled:opacity-50 flex items-center gap-2"
+              className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl hover:shadow-lg hover:shadow-emerald-500/30 transition-all font-bold disabled:opacity-50 flex items-center gap-2"
             >
               {saving ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                   Saving...
                 </>
               ) : (
                 <>
                   <CheckCircle className="w-5 h-5" />
-                  Save Assignments
+                  Save
                 </>
               )}
             </button>

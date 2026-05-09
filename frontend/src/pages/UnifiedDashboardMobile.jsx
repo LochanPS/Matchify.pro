@@ -118,38 +118,10 @@ const UnifiedDashboardMobile = () => {
     : 0;
 
   const stats = [
-    { 
-      label: 'Total Points', 
-      value: user?.totalPoints || 0, 
-      icon: SparklesIcon,
-      color: 'from-amber-500 to-orange-600',
-      bg: 'rgba(245,158,11,0.1)',
-      border: 'rgba(245,158,11,0.2)'
-    },
-    { 
-      label: 'Tournaments', 
-      value: user?.tournamentsPlayed || 0, 
-      icon: TrophyIcon,
-      color: 'from-emerald-500 to-emerald-600',
-      bg: 'rgba(16,185,129,0.1)',
-      border: 'rgba(16,185,129,0.2)'
-    },
-    { 
-      label: 'Matches Won', 
-      value: user?.matchesWon || 0, 
-      icon: FireIcon,
-      color: 'from-green-500 to-emerald-600',
-      bg: 'rgba(16,185,129,0.1)',
-      border: 'rgba(16,185,129,0.2)'
-    },
-    { 
-      label: 'Win Rate', 
-      value: `${winRate}%`, 
-      icon: BoltIcon,
-      color: 'from-emerald-500 to-emerald-600',
-      bg: 'rgba(16,185,129,0.1)',
-      border: 'rgba(16,185,129,0.2)'
-    },
+    { label: 'Total Points', value: user?.totalPoints || 0, icon: SparklesIcon, gradient: 'linear-gradient(135deg,#f59e0b,#d97706)', bg: 'rgba(245,158,11,0.1)', border: 'rgba(245,158,11,0.2)', val: '#fbbf24' },
+    { label: 'Tournaments', value: user?.tournamentsPlayed || 0, icon: TrophyIcon, gradient: 'linear-gradient(135deg,#00c853,#00ff88)', bg: 'rgba(0,255,136,0.1)', border: 'rgba(0,255,136,0.2)', val: '#00ff88' },
+    { label: 'Matches Won', value: user?.matchesWon || 0, icon: FireIcon, gradient: 'linear-gradient(135deg,#00c853,#00ff88)', bg: 'rgba(0,255,136,0.1)', border: 'rgba(0,255,136,0.2)', val: '#00ff88' },
+    { label: 'Win Rate', value: `${winRate}%`, icon: BoltIcon, gradient: 'linear-gradient(135deg,#00bcd4,#00d4ff)', bg: 'rgba(0,212,255,0.1)', border: 'rgba(0,212,255,0.2)', val: '#00d4ff' },
   ];
 
   const roleConfig = {
@@ -177,9 +149,7 @@ const UnifiedDashboardMobile = () => {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden pt-16" style={{ 
-      background: 'linear-gradient(180deg, #0a0a1f 0%, #07071a 30%, #0d1a2a 60%, #07071a 100%)' 
-    }}>
+    <div className="min-h-screen relative overflow-hidden pt-16" style={{ background: '#07071a' }}>
       {/* Animated Background Elements */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         {/* Large Gradient Orbs */}
@@ -416,10 +386,10 @@ const UnifiedDashboardMobile = () => {
                       boxShadow: '0 2px 8px rgba(0,200,83,0.3)'
                     }}
                   >
-                    <UserIcon className="w-6 h-6 text-emerald-300" />
+                    <UserIcon className="w-6 h-6 text-green-300" />
                   </div>
                   <span className="font-bold text-base relative z-10 flex-1">Edit Profile</span>
-                  <ArrowRightIcon className="w-5 h-5 text-emerald-300 relative z-10 flex-shrink-0" />
+                  <ArrowRightIcon className="w-5 h-5 text-green-300 relative z-10 flex-shrink-0" />
                 </Link>
                 
                 <Link
@@ -495,15 +465,15 @@ const UnifiedDashboardMobile = () => {
                   <div 
                     className="w-12 h-12 rounded-xl flex items-center justify-center relative z-10 flex-shrink-0"
                     style={{ 
-                      background: 'linear-gradient(135deg, rgba(16,185,129,0.3), rgba(5,150,105,0.2))',
-                      border: '1px solid rgba(16,185,129,0.4)',
-                      boxShadow: '0 2px 8px rgba(16,185,129,0.3)'
+                      background: 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,200,83,0.12))',
+                      border: '1px solid rgba(0,255,136,0.3)',
+                      boxShadow: '0 2px 8px rgba(0,255,136,0.2)'
                     }}
                   >
-                    <CalendarIcon className="w-6 h-6 text-emerald-300" />
+                    <CalendarIcon className="w-6 h-6 text-green-300" />
                   </div>
                   <span className="font-bold text-base relative z-10 flex-1">My Registrations</span>
-                  <ArrowRightIcon className="w-5 h-5 text-emerald-300 relative z-10 flex-shrink-0" />
+                  <ArrowRightIcon className="w-5 h-5 text-green-300 relative z-10 flex-shrink-0" />
                 </Link>
 
                 <Link
@@ -511,27 +481,27 @@ const UnifiedDashboardMobile = () => {
                   onClick={() => setShowMenu(false)}
                   className="flex items-center gap-4 p-4 rounded-xl text-white transition-all relative overflow-hidden group"
                   style={{ 
-                    background: 'linear-gradient(135deg, rgba(16,185,129,0.15), rgba(5,150,105,0.1))',
-                    border: '2px solid rgba(16,185,129,0.3)',
-                    boxShadow: '0 2px 10px rgba(16,185,129,0.1)'
+                    background: 'linear-gradient(135deg, rgba(0,255,136,0.1), rgba(5,150,105,0.1))',
+                    border: '2px solid rgba(0,255,136,0.2)',
+                    boxShadow: '0 2px 10px rgba(0,255,136,0.08)'
                   }}
                 >
                   <div 
                     className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                    style={{ background: 'rgba(16,185,129,0.1)' }}
+                    style={{ background: 'rgba(0,255,136,0.08)' }}
                   />
                   <div 
                     className="w-12 h-12 rounded-xl flex items-center justify-center relative z-10 flex-shrink-0"
                     style={{ 
-                      background: 'linear-gradient(135deg, rgba(16,185,129,0.3), rgba(5,150,105,0.2))',
-                      border: '1px solid rgba(16,185,129,0.4)',
-                      boxShadow: '0 2px 8px rgba(16,185,129,0.3)'
+                      background: 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,200,83,0.12))',
+                      border: '1px solid rgba(0,255,136,0.3)',
+                      boxShadow: '0 2px 8px rgba(0,255,136,0.2)'
                     }}
                   >
-                    <UserIcon className="w-6 h-6 text-emerald-300" />
+                    <UserIcon className="w-6 h-6 text-green-300" />
                   </div>
                   <span className="font-bold text-base relative z-10 flex-1">Academies</span>
-                  <ArrowRightIcon className="w-5 h-5 text-emerald-300 relative z-10 flex-shrink-0" />
+                  <ArrowRightIcon className="w-5 h-5 text-green-300 relative z-10 flex-shrink-0" />
                 </Link>
               </div>
 
@@ -745,7 +715,7 @@ const UnifiedDashboardMobile = () => {
                   }}
                   title="Copy Matchify ID"
                 >
-                  <svg className="w-5 h-5 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                   </svg>
                 </button>
@@ -843,7 +813,7 @@ const UnifiedDashboardMobile = () => {
                       border: '1px solid rgba(0,200,83,0.5)'
                     }}
                   >
-                    <svg className="w-6 h-6 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-6 h-6 text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                     </svg>
                   </button>
@@ -877,7 +847,7 @@ const UnifiedDashboardMobile = () => {
           <div 
             className="rounded-2xl p-5 mb-6 relative overflow-hidden"
             style={{
-              background: 'linear-gradient(135deg, rgba(0,200,83,0.15) 0%, rgba(16,185,129,0.15) 100%)',
+              background: 'linear-gradient(135deg, rgba(0,200,83,0.15) 0%, rgba(0,255,136,0.1) 100%)',
               border: '2px solid rgba(0,200,83,0.3)',
               backdropFilter: 'blur(20px)',
               boxShadow: '0 8px 32px rgba(0,200,83,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
@@ -919,48 +889,26 @@ const UnifiedDashboardMobile = () => {
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                {stats.map((stat, index) => {
-                  const colorSchemes = [
-                    { gradient: 'from-green-500 to-emerald-600', bg: 'linear-gradient(135deg, rgba(16,185,129,0.2), rgba(5,150,105,0.15))', border: 'rgba(16,185,129,0.4)', shadow: 'rgba(16,185,129,0.3)' },
-                    { gradient: 'from-amber-500 to-orange-600', bg: 'linear-gradient(135deg, rgba(245,158,11,0.2), rgba(251,146,60,0.15))', border: 'rgba(245,158,11,0.4)', shadow: 'rgba(245,158,11,0.3)' },
-                    { gradient: 'from-emerald-500 to-emerald-600', bg: 'linear-gradient(135deg, rgba(16,185,129,0.2), rgba(5,150,105,0.15))', border: 'rgba(16,185,129,0.4)', shadow: 'rgba(16,185,129,0.3)' },
-                    { gradient: 'from-emerald-500 to-emerald-600', bg: 'linear-gradient(135deg, rgba(16,185,129,0.2), rgba(5,150,105,0.15))', border: 'rgba(16,185,129,0.4)', shadow: 'rgba(16,185,129,0.3)' }
-                  ];
-                  const scheme = colorSchemes[index];
-                  
-                  return (
+                {stats.map((stat, index) => (
+                  <div
+                    key={index}
+                    className="p-4 rounded-xl relative overflow-hidden"
+                    style={{
+                      background: stat.bg,
+                      border: `1px solid ${stat.border}`,
+                      animation: `scaleIn 0.5s ease-out ${0.5 + index * 0.1}s both`
+                    }}
+                  >
                     <div
-                      key={index}
-                      className="p-4 rounded-xl relative overflow-hidden"
-                      style={{
-                        background: scheme.bg,
-                        border: `2px solid ${scheme.border}`,
-                        boxShadow: `0 4px 15px ${scheme.shadow}, inset 0 1px 0 rgba(255,255,255,0.1)`,
-                        animation: `scaleIn 0.5s ease-out ${0.5 + index * 0.1}s both`
-                      }}
+                      className="inline-flex items-center justify-center w-11 h-11 rounded-xl mb-3 relative z-10"
+                      style={{ background: stat.gradient }}
                     >
-                      <div 
-                        className="absolute inset-0 opacity-20"
-                        style={{
-                          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
-                          backgroundSize: '200% 100%',
-                          animation: 'shimmer 4s infinite',
-                          animationDelay: `${index * 0.5}s`
-                        }}
-                      />
-                      <div 
-                        className={`inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br ${scheme.gradient} rounded-xl mb-3 relative z-10`}
-                        style={{ 
-                          boxShadow: `0 4px 12px ${scheme.shadow}, inset 0 1px 0 rgba(255,255,255,0.3)`
-                        }}
-                      >
-                        <stat.icon className="w-6 h-6 text-white" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
-                      </div>
-                      <p className="text-3xl font-black text-white mb-1 relative z-10">{stat.value}</p>
-                      <p className="text-xs text-gray-400 relative z-10">{stat.label}</p>
+                      <stat.icon className="w-5 h-5 text-white" />
                     </div>
-                  );
-                })}
+                    <p className="text-3xl font-black text-white mb-1 relative z-10">{stat.value}</p>
+                    <p className="text-xs relative z-10" style={{ color: 'rgba(255,255,255,0.55)' }}>{stat.label}</p>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -1030,23 +978,23 @@ const UnifiedDashboardMobile = () => {
                     }}
                   />
                   <div 
-                    className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl mb-3 relative z-10"
+                    className="inline-flex items-center justify-center w-11 h-11 rounded-xl mb-3 relative z-10" style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)' }}
                     style={{ 
-                      boxShadow: '0 4px 12px rgba(16,185,129,0.4), inset 0 1px 0 rgba(255,255,255,0.3)'
+                      boxShadow: '0 4px 12px rgba(0,255,136,0.25)'
                     }}
                   >
                     <TrophyIcon className="w-6 h-6 text-white" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
                   </div>
                   <p className="text-3xl font-black text-white mb-1 relative z-10">{user?.tournamentsOrganized || 0}</p>
-                  <p className="text-xs text-gray-400 relative z-10">Tournaments Organized</p>
+                  <p className="text-xs relative z-10" style={{ color: 'rgba(255,255,255,0.55)' }}>Tournaments Organized</p>
                 </div>
 
                 <div
                   className="p-4 rounded-xl relative overflow-hidden"
                   style={{
-                    background: 'linear-gradient(135deg, rgba(16,185,129,0.2), rgba(5,150,105,0.15))',
-                    border: '2px solid rgba(16,185,129,0.4)',
-                    boxShadow: '0 4px 15px rgba(16,185,129,0.3), inset 0 1px 0 rgba(255,255,255,0.1)',
+                    background: 'linear-gradient(135deg, rgba(0,255,136,0.1), rgba(0,200,83,0.1))',
+                    border: '2px solid rgba(0,255,136,0.3)',
+                    boxShadow: '0 4px 15px rgba(0,255,136,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
                     animation: 'scaleIn 0.5s ease-out 0.6s both'
                   }}
                 >
@@ -1060,15 +1008,15 @@ const UnifiedDashboardMobile = () => {
                     }}
                   />
                   <div 
-                    className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl mb-3 relative z-10"
+                    className="inline-flex items-center justify-center w-11 h-11 rounded-xl mb-3 relative z-10" style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)' }}
                     style={{ 
-                      boxShadow: '0 4px 12px rgba(16,185,129,0.4), inset 0 1px 0 rgba(255,255,255,0.3)'
+                      boxShadow: '0 4px 12px rgba(0,255,136,0.25)'
                     }}
                   >
                     <UserIcon className="w-6 h-6 text-white" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
                   </div>
                   <p className="text-3xl font-black text-white mb-1 relative z-10">{user?.totalParticipants || 0}</p>
-                  <p className="text-xs text-gray-400 relative z-10">Total Participants</p>
+                  <p className="text-xs relative z-10" style={{ color: 'rgba(255,255,255,0.55)' }}>Total Participants</p>
                 </div>
               </div>
 
@@ -1157,23 +1105,23 @@ const UnifiedDashboardMobile = () => {
                     }}
                   />
                   <div 
-                    className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl mb-3 relative z-10"
+                    className="inline-flex items-center justify-center w-11 h-11 rounded-xl mb-3 relative z-10" style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)' }}
                     style={{ 
-                      boxShadow: '0 4px 12px rgba(16,185,129,0.4), inset 0 1px 0 rgba(255,255,255,0.3)'
+                      boxShadow: '0 4px 12px rgba(0,255,136,0.25)'
                     }}
                   >
                     <FireIcon className="w-6 h-6 text-white" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
                   </div>
                   <p className="text-3xl font-black text-white mb-1 relative z-10">{user?.matchesUmpired || 0}</p>
-                  <p className="text-xs text-gray-400 relative z-10">Matches Umpired</p>
+                  <p className="text-xs relative z-10" style={{ color: 'rgba(255,255,255,0.55)' }}>Matches Umpired</p>
                 </div>
 
                 <div
                   className="p-4 rounded-xl relative overflow-hidden"
                   style={{
-                    background: 'linear-gradient(135deg, rgba(16,185,129,0.2), rgba(5,150,105,0.15))',
-                    border: '2px solid rgba(16,185,129,0.4)',
-                    boxShadow: '0 4px 15px rgba(16,185,129,0.3), inset 0 1px 0 rgba(255,255,255,0.1)',
+                    background: 'linear-gradient(135deg, rgba(0,255,136,0.1), rgba(0,200,83,0.1))',
+                    border: '2px solid rgba(0,255,136,0.3)',
+                    boxShadow: '0 4px 15px rgba(0,255,136,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
                     animation: 'scaleIn 0.5s ease-out 0.6s both'
                   }}
                 >
@@ -1187,15 +1135,15 @@ const UnifiedDashboardMobile = () => {
                     }}
                   />
                   <div 
-                    className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl mb-3 relative z-10"
+                    className="inline-flex items-center justify-center w-11 h-11 rounded-xl mb-3 relative z-10" style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)' }}
                     style={{ 
-                      boxShadow: '0 4px 12px rgba(16,185,129,0.4), inset 0 1px 0 rgba(255,255,255,0.3)'
+                      boxShadow: '0 4px 12px rgba(0,255,136,0.25)'
                     }}
                   >
                     <TrophyIcon className="w-6 h-6 text-white" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
                   </div>
                   <p className="text-3xl font-black text-white mb-1 relative z-10">{user?.tournamentsUmpired || 0}</p>
-                  <p className="text-xs text-gray-400 relative z-10">Tournaments</p>
+                  <p className="text-xs relative z-10" style={{ color: 'rgba(255,255,255,0.55)' }}>Tournaments</p>
                 </div>
               </div>
             </div>
@@ -1206,8 +1154,8 @@ const UnifiedDashboardMobile = () => {
         <div 
           className="rounded-2xl p-5 mb-6 relative overflow-hidden"
           style={{
-            background: 'linear-gradient(135deg, rgba(16,185,129,0.15) 0%, rgba(5,150,105,0.15) 100%)',
-            border: '2px solid rgba(16,185,129,0.3)',
+            background: 'linear-gradient(135deg, rgba(0,255,136,0.1) 0%, rgba(0,200,83,0.1) 100%)',
+            border: '2px solid rgba(0,255,136,0.2)',
             backdropFilter: 'blur(20px)',
             boxShadow: '0 8px 32px rgba(99,102,241,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
             animation: 'fadeIn 0.8s ease-out 0.7s both'
@@ -1227,12 +1175,12 @@ const UnifiedDashboardMobile = () => {
               <div 
                 className="w-10 h-10 rounded-xl flex items-center justify-center"
                 style={{ 
-                  background: 'linear-gradient(135deg, rgba(16,185,129,0.3), rgba(5,150,105,0.2))',
-                  border: '1px solid rgba(16,185,129,0.4)',
-                  boxShadow: '0 4px 12px rgba(16,185,129,0.3)'
+                  background: 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,200,83,0.12))',
+                  border: '1px solid rgba(0,255,136,0.3)',
+                  boxShadow: '0 4px 12px rgba(0,255,136,0.2)'
                 }}
               >
-                <UserIcon className="w-5 h-5 text-emerald-300" />
+                <UserIcon className="w-5 h-5 text-green-300" />
               </div>
               <h3 
                 className="text-lg font-black"
@@ -1320,12 +1268,12 @@ const UnifiedDashboardMobile = () => {
               <div 
                 className="w-10 h-10 rounded-xl flex items-center justify-center"
                 style={{ 
-                  background: 'linear-gradient(135deg, rgba(16,185,129,0.3), rgba(5,150,105,0.2))',
-                  border: '1px solid rgba(16,185,129,0.4)',
-                  boxShadow: '0 4px 12px rgba(16,185,129,0.3)'
+                  background: 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,200,83,0.12))',
+                  border: '1px solid rgba(0,255,136,0.3)',
+                  boxShadow: '0 4px 12px rgba(0,255,136,0.2)'
                 }}
               >
-                <CalendarIcon className="w-5 h-5 text-emerald-300" />
+                <CalendarIcon className="w-5 h-5 text-green-300" />
               </div>
               <h3 
                 className="text-lg font-black"
@@ -1341,7 +1289,7 @@ const UnifiedDashboardMobile = () => {
             </div>
             <Link
               to="/registrations"
-              className="text-emerald-300 text-sm font-bold flex items-center gap-1 hover:text-emerald-200 transition-colors"
+              className="text-green-300 text-sm font-bold flex items-center gap-1 hover:text-emerald-200 transition-colors"
             >
               View All
               <ArrowRightIcon className="w-4 h-4" />
@@ -1354,7 +1302,7 @@ const UnifiedDashboardMobile = () => {
                 <div 
                   className="w-10 h-10 border-4 rounded-full animate-spin"
                   style={{ 
-                    borderColor: 'rgba(16,185,129,0.3)',
+                    borderColor: 'rgba(0,255,136,0.2)',
                     borderTopColor: '#10b981'
                   }}
                 ></div>
@@ -1417,7 +1365,7 @@ const UnifiedDashboardMobile = () => {
                       <div className="flex-1 min-w-0">
                         <Link 
                           to={`/tournaments/${reg.tournament?.id}`}
-                          className="font-bold text-white hover:text-emerald-300 transition-colors block truncate"
+                          className="font-bold text-white hover:text-green-300 transition-colors block truncate"
                         >
                           {reg.tournament?.name || 'Tournament'}
                         </Link>
@@ -1426,7 +1374,7 @@ const UnifiedDashboardMobile = () => {
                         </p>
                         <span className={`inline-block mt-2 px-3 py-1 rounded-lg text-xs font-bold ${
                           reg.status === 'confirmed' 
-                            ? 'text-emerald-300'
+                            ? 'text-green-300'
                             : reg.status === 'pending'
                             ? 'text-amber-300'
                             : reg.status === 'rejected'
@@ -1435,7 +1383,7 @@ const UnifiedDashboardMobile = () => {
                         }`}
                         style={{
                           background: reg.status === 'confirmed' 
-                            ? 'linear-gradient(135deg, rgba(16,185,129,0.3), rgba(5,150,105,0.2))'
+                            ? 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,200,83,0.12))'
                             : reg.status === 'pending'
                             ? 'linear-gradient(135deg, rgba(245,158,11,0.3), rgba(251,146,60,0.2))'
                             : reg.status === 'rejected'
@@ -1443,7 +1391,7 @@ const UnifiedDashboardMobile = () => {
                             : 'linear-gradient(135deg, rgba(107,114,128,0.3), rgba(75,85,99,0.2))',
                           border: `1px solid ${
                             reg.status === 'confirmed' 
-                              ? 'rgba(16,185,129,0.4)'
+                              ? 'rgba(0,255,136,0.3)'
                               : reg.status === 'pending'
                               ? 'rgba(245,158,11,0.4)'
                               : reg.status === 'rejected'

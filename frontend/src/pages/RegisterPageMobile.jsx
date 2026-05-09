@@ -129,8 +129,8 @@ const RegisterPageMobile = () => {
         className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md border-b"
         style={{ 
           background: 'linear-gradient(135deg, rgba(7,7,26,0.95), rgba(13,26,42,0.95))', 
-          borderColor: 'rgba(0,200,83,0.2)',
-          boxShadow: '0 4px 20px rgba(0,200,83,0.1)',
+          borderColor: 'rgba(0,255,136,0.2)',
+          boxShadow: '0 4px 20px rgba(0,255,136,0.1)',
           animation: 'slideDown 0.5s ease-out'
         }}
       >
@@ -141,7 +141,7 @@ const RegisterPageMobile = () => {
               <div 
                 className="absolute inset-0 blur-lg opacity-60"
                 style={{ 
-                  background: 'radial-gradient(circle, rgba(0,200,83,0.6) 0%, transparent 70%)',
+                  background: 'radial-gradient(circle, rgba(0,255,136,0.6) 0%, transparent 70%)',
                   animation: 'glow 3s ease-in-out infinite'
                 }}
               />
@@ -150,7 +150,7 @@ const RegisterPageMobile = () => {
             <span 
               className="font-bold text-base"
               style={{ 
-                background: 'linear-gradient(135deg, #00c853, #00ff88)',
+                background: 'linear-gradient(135deg, #00ff88, #00ff88)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text'
@@ -186,7 +186,7 @@ const RegisterPageMobile = () => {
         <div 
           className="absolute top-0 left-0 w-80 h-80 rounded-full blur-3xl opacity-30 animate-pulse"
           style={{ 
-            background: 'radial-gradient(circle, rgba(0,200,83,0.4) 0%, rgba(0,255,136,0.2) 40%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(0,255,136,0.4) 0%, rgba(0,255,136,0.2) 40%, transparent 70%)',
             animation: 'float 8s ease-in-out infinite'
           }}
         />
@@ -274,7 +274,7 @@ const RegisterPageMobile = () => {
             <div 
               className="absolute inset-0 blur-2xl opacity-60"
               style={{ 
-                background: 'radial-gradient(circle, rgba(0,200,83,0.6) 0%, transparent 70%)',
+                background: 'radial-gradient(circle, rgba(0,255,136,0.6) 0%, transparent 70%)',
                 animation: 'glow 3s ease-in-out infinite'
               }}
             />
@@ -290,9 +290,9 @@ const RegisterPageMobile = () => {
           className="rounded-2xl p-5 mb-4 relative overflow-hidden"
           style={{
             background: 'linear-gradient(135deg, rgba(0,200,83,0.12) 0%, rgba(168,85,247,0.12) 100%)',
-            border: '2px solid rgba(0,200,83,0.3)',
+            border: '2px solid rgba(0,255,136,0.3)',
             backdropFilter: 'blur(20px)',
-            boxShadow: '0 8px 32px rgba(0,200,83,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
+            boxShadow: '0 8px 32px rgba(0,255,136,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
             animation: 'slideUp 0.8s ease-out 0.5s both'
           }}
         >
@@ -318,10 +318,10 @@ const RegisterPageMobile = () => {
               <div 
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold mb-3 relative overflow-hidden"
                 style={{ 
-                  background: 'linear-gradient(135deg, rgba(0,200,83,0.2), rgba(0,255,136,0.15))', 
-                  border: '2px solid rgba(0,200,83,0.5)', 
+                  background: 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,255,136,0.15))', 
+                  border: '2px solid rgba(0,255,136,0.5)', 
                   color: '#00ff88',
-                  boxShadow: '0 0 20px rgba(0,200,83,0.3), inset 0 0 20px rgba(0,200,83,0.1)'
+                  boxShadow: '0 0 20px rgba(0,255,136,0.3), inset 0 0 20px rgba(0,255,136,0.1)'
                 }}
               >
                 <div 
@@ -344,7 +344,7 @@ const RegisterPageMobile = () => {
                   backgroundClip: 'text',
                   animation: 'shimmer 4s linear infinite',
                   textShadow: 'none',
-                  filter: 'drop-shadow(0 2px 10px rgba(0,200,83,0.3))'
+                  filter: 'drop-shadow(0 2px 10px rgba(0,255,136,0.3))'
                 }}
               >
                 Create Account
@@ -377,7 +377,7 @@ const RegisterPageMobile = () => {
               <div className="grid grid-cols-3 gap-2">
                 {roles.map((role, idx) => {
                   const colors = [
-                    { bg: 'linear-gradient(135deg, rgba(0,200,83,0.2), rgba(0,255,136,0.15))', border: 'rgba(0,200,83,0.5)', shadow: 'rgba(0,200,83,0.3)' },
+                    { bg: 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,255,136,0.15))', border: 'rgba(0,255,136,0.5)', shadow: 'rgba(0,255,136,0.3)' },
                     { bg: 'linear-gradient(135deg, rgba(168,85,247,0.2), rgba(139,92,246,0.15))', border: 'rgba(168,85,247,0.5)', shadow: 'rgba(168,85,247,0.3)' },
                     { bg: 'linear-gradient(135deg, rgba(6,182,212,0.2), rgba(14,165,233,0.15))', border: 'rgba(6,182,212,0.5)', shadow: 'rgba(6,182,212,0.3)' }
                   ];
@@ -393,7 +393,7 @@ const RegisterPageMobile = () => {
                         boxShadow: `0 4px 15px ${color.shadow}, inset 0 1px 0 rgba(255,255,255,0.1)`
                       }}
                     >
-                      <CheckCircleIcon className="w-4 h-4 text-emerald-400 mx-auto mb-1" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,200,83,0.5))' }} />
+                      <CheckCircleIcon className="w-4 h-4 mx-auto mb-1" style={{ color: '#00ff88', filter: 'drop-shadow(0 2px 4px rgba(0,255,136,0.5))' }} />
                       <div className="text-xl mb-1" style={{ filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.3))' }}>{role.icon}</div>
                       <p className="text-xs font-semibold text-white">{role.title}</p>
                       <p className="text-xs text-gray-300">{role.desc}</p>
@@ -402,7 +402,7 @@ const RegisterPageMobile = () => {
                 })}
               </div>
               <p className="mt-2 text-xs font-semibold text-center" style={{ 
-                background: 'linear-gradient(135deg, #00c853, #00ff88)',
+                background: 'linear-gradient(135deg, #00ff88, #00ff88)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text'
@@ -534,13 +534,13 @@ const RegisterPageMobile = () => {
               </div>
               {/* Password requirements */}
               <div className="mt-2 space-y-1">
-                <p className={`text-xs ${/[A-Z]/.test(formData.password) ? 'text-emerald-400' : 'text-gray-500'}`}>
+                <p className="text-xs" style={{ color: /[A-Z]/.test(formData.password) ? '#00ff88' : 'rgba(255,255,255,0.35)' }}>
                   {/[A-Z]/.test(formData.password) ? '✓' : '○'} One uppercase letter
                 </p>
-                <p className={`text-xs ${(formData.password.match(/[0-9]/g) || []).length >= 2 ? 'text-emerald-400' : 'text-gray-500'}`}>
+                <p className="text-xs" style={{ color: (formData.password.match(/[0-9]/g) || []).length >= 2 ? '#00ff88' : 'rgba(255,255,255,0.35)' }}>
                   {(formData.password.match(/[0-9]/g) || []).length >= 2 ? '✓' : '○'} Two numbers
                 </p>
-                <p className={`text-xs ${/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(formData.password) ? 'text-emerald-400' : 'text-gray-500'}`}>
+                <p className="text-xs" style={{ color: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(formData.password) ? '#00ff88' : 'rgba(255,255,255,0.35)' }}>
                   {/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(formData.password) ? '✓' : '○'} One symbol
                 </p>
               </div>
@@ -584,13 +584,13 @@ const RegisterPageMobile = () => {
                 checked={termsAccepted}
                 onChange={(e) => setTermsAccepted(e.target.checked)}
                 className="w-5 h-5 rounded mt-0.5" 
-                style={{ accentColor: '#00c853' }}
+                style={{ accentColor: '#00ff88' }}
               />
               <span className="text-xs text-gray-400">
                 I agree to the{' '}
-                <Link to="/terms" className="text-emerald-400 underline">Terms</Link>
+                <Link to="/terms" className="underline" style={{ color: '#00ff88' }}>Terms</Link>
                 {' '}and{' '}
-                <Link to="/privacy" className="text-emerald-400 underline">Privacy Policy</Link>
+                <Link to="/privacy" className="underline" style={{ color: '#00ff88' }}>Privacy Policy</Link>
               </span>
             </label>
 
@@ -600,10 +600,10 @@ const RegisterPageMobile = () => {
               disabled={loading}
               className="w-full py-4 rounded-xl font-bold text-base transition-all disabled:opacity-50 relative overflow-hidden group"
               style={{ 
-                background: 'linear-gradient(135deg, #00c853 0%, #00ff88 50%, #00c853 100%)',
+                background: 'linear-gradient(135deg, #00ff88 0%, #00ff88 50%, #00ff88 100%)',
                 backgroundSize: '200% auto',
                 color: '#003320',
-                boxShadow: '0 8px 25px rgba(0,200,83,0.4), 0 0 40px rgba(0,200,83,0.2), inset 0 1px 0 rgba(255,255,255,0.3)',
+                boxShadow: '0 8px 25px rgba(0,255,136,0.4), 0 0 40px rgba(0,255,136,0.2), inset 0 1px 0 rgba(255,255,255,0.3)',
                 animation: 'shimmer 3s linear infinite, pulse 3s ease-in-out infinite'
               }}
             >
@@ -635,7 +635,7 @@ const RegisterPageMobile = () => {
                 to={redirectUrl ? `/login?redirect=${encodeURIComponent(redirectUrl)}` : '/login'}
                 className="font-bold"
                 style={{ 
-                  background: 'linear-gradient(135deg, #00c853, #00ff88)',
+                  background: 'linear-gradient(135deg, #00ff88, #00ff88)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   backgroundClip: 'text'
@@ -653,9 +653,9 @@ const RegisterPageMobile = () => {
           <div 
             className="p-4 rounded-xl text-center relative overflow-hidden"
             style={{ 
-              background: 'linear-gradient(135deg, rgba(0,200,83,0.2), rgba(0,255,136,0.15))',
-              border: '2px solid rgba(0,200,83,0.4)',
-              boxShadow: '0 4px 15px rgba(0,200,83,0.3), inset 0 1px 0 rgba(255,255,255,0.1)',
+              background: 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,255,136,0.15))',
+              border: '2px solid rgba(0,255,136,0.4)',
+              boxShadow: '0 4px 15px rgba(0,255,136,0.3), inset 0 1px 0 rgba(255,255,255,0.1)',
               animation: 'scaleIn 0.5s ease-out 0.9s both'
             }}
           >

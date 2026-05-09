@@ -154,10 +154,10 @@ function HomePage() {
   };
 
   const features = [
-    { icon: TrophyIcon,    title: 'Tournament Engine',   desc: 'Automated draws, brackets & live scoring for any format.',       color: 'from-amber-500 to-orange-500',  glow: 'rgba(251,146,60,0.2)'  },
-    { icon: UserGroupIcon, title: 'Partner Network',     desc: 'Find doubles partners across your city instantly.',              color: 'from-cyan-500 to-blue-500',     glow: 'rgba(6,182,212,0.2)'   },
-    { icon: ChartBarIcon,  title: 'Live Rankings',       desc: 'Matchify Points system — climb city & national leaderboards.',   color: 'from-violet-500 to-purple-600', glow: 'rgba(139,92,246,0.2)'  },
-    { icon: SparklesIcon,  title: 'Real-Time Scoring',   desc: 'Point-by-point live updates with instant notifications.',        color: 'from-green-500 to-emerald-500', glow: 'rgba(16,185,129,0.2)'  },
+    { icon: TrophyIcon,    title: 'Tournament Engine',   desc: 'Automated draws, brackets & live scoring for any format.',       gradient: 'linear-gradient(135deg,#f59e0b,#f97316)', glow: 'rgba(251,146,60,0.2)'   },
+    { icon: UserGroupIcon, title: 'Partner Network',     desc: 'Find doubles partners across your city instantly.',              gradient: 'linear-gradient(135deg,#06b6d4,#3b82f6)', glow: 'rgba(6,182,212,0.2)'    },
+    { icon: ChartBarIcon,  title: 'Live Rankings',       desc: 'Matchify Points system — climb city & national leaderboards.',   gradient: 'linear-gradient(135deg,#8b5cf6,#9333ea)', glow: 'rgba(139,92,246,0.2)'   },
+    { icon: SparklesIcon,  title: 'Real-Time Scoring',   desc: 'Point-by-point live updates with instant notifications.',        gradient: 'linear-gradient(135deg,#00c853,#00ff88)', glow: 'rgba(0,255,136,0.2)'    },
   ];
 
   const stats = [
@@ -168,10 +168,10 @@ function HomePage() {
   ];
 
   const steps = [
-    { step: '01', title: 'Create Account', desc: 'Sign up in seconds',               icon: '👤', color: 'from-blue-500 to-cyan-400'    },
-    { step: '02', title: 'Find Tournament', desc: 'Browse by city & level',           icon: '🔍', color: 'from-violet-500 to-purple-400' },
-    { step: '03', title: 'Register & Pay',  desc: 'Secure UPI payment',               icon: '💳', color: 'from-green-500 to-emerald-400' },
-    { step: '04', title: 'Play & Win',      desc: 'Compete & climb rankings',         icon: '🏆', color: 'from-amber-500 to-orange-400'  },
+    { step: '01', title: 'Create Account',  desc: 'Sign up in seconds',       icon: '👤', gradient: 'linear-gradient(135deg,#3b82f6,#22d3ee)' },
+    { step: '02', title: 'Find Tournament', desc: 'Browse by city & level',   icon: '🔍', gradient: 'linear-gradient(135deg,#8b5cf6,#c084fc)' },
+    { step: '03', title: 'Register & Pay',  desc: 'Secure UPI payment',       icon: '💳', gradient: 'linear-gradient(135deg,#00c853,#00ff88)' },
+    { step: '04', title: 'Play & Win',      desc: 'Compete & climb rankings', icon: '🏆', gradient: 'linear-gradient(135deg,#f59e0b,#fb923c)' },
   ];
 
   const testimonials = [
@@ -181,14 +181,14 @@ function HomePage() {
   ];
 
   const benefits = [
-    { icon: BoltIcon,         text: 'Instant Registration', color: 'text-amber-400',  bg: 'bg-amber-400/10'  },
-    { icon: ShieldCheckIcon,  text: 'Secure Payments',      color: 'text-green-400',  bg: 'bg-green-400/10'  },
-    { icon: TrophyIcon,       text: 'Fair Play System',     color: 'text-cyan-400',   bg: 'bg-cyan-400/10'   },
-    { icon: ChartBarIcon,     text: 'Performance Tracking', color: 'text-violet-400', bg: 'bg-violet-400/10' },
+    { icon: BoltIcon,         text: 'Instant Registration', color: '#fbbf24', bg: 'rgba(251,191,36,0.1)'  },
+    { icon: ShieldCheckIcon,  text: 'Secure Payments',      color: '#00ff88', bg: 'rgba(0,255,136,0.1)'   },
+    { icon: TrophyIcon,       text: 'Fair Play System',     color: '#00d4ff', bg: 'rgba(0,212,255,0.1)'   },
+    { icon: ChartBarIcon,     text: 'Performance Tracking', color: '#a855f7', bg: 'rgba(168,85,247,0.1)'  },
   ];
 
   return (
-    <div className="min-h-screen relative overflow-x-hidden" style={{ background: 'linear-gradient(180deg, #0a0a1f 0%, #07071a 50%, #0a0a1f 100%)' }}>
+    <div className="min-h-screen relative overflow-x-hidden" style={{ background: '#07071a' }}>
 
       {/* ── ENHANCED GLOBAL BACKGROUND ── */}
       <div className="fixed inset-0 z-0 pointer-events-none">
@@ -273,7 +273,7 @@ function HomePage() {
           
           <p className="anim-fade-up delay-300 text-sm mb-8 leading-relaxed px-2" 
             style={{ color: 'rgba(255,255,255,0.6)' }}>
-            Join <span className="font-bold text-green-400">10,000+</span> players across India. 
+            Join <span className="font-bold" style={{ color: '#00ff88' }}>10,000+</span> players across India. 
             Register for tournaments, track progress, and compete with the best.
           </p>
 
@@ -378,7 +378,8 @@ function HomePage() {
               <div key={i} className="card-glow group relative rounded-2xl p-5 border transition-all duration-300 active:scale-95"
                 style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.08)' }}>
                 {/* icon */}
-                <div className={`inline-flex items-center justify-center w-11 h-11 bg-gradient-to-br ${f.color} rounded-xl mb-3 group-hover:scale-110 transition-transform duration-300`}>
+                <div className="inline-flex items-center justify-center w-11 h-11 rounded-xl mb-3 group-hover:scale-110 transition-transform duration-300"
+                  style={{ background: f.gradient }}>
                   <f.icon className="w-6 h-6 text-white" />
                 </div>
                 <h3 className="text-base font-bold text-white mb-2">{f.title}</h3>
@@ -409,7 +410,8 @@ function HomePage() {
               <div key={i} className="card-glow relative rounded-2xl p-4 border transition-all duration-300 active:scale-95"
                 style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.08)' }}>
                 {/* step number badge */}
-                <div className={`inline-flex items-center justify-center w-7 h-7 bg-gradient-to-br ${s.color} rounded-lg text-white text-xs font-black mb-2`}>
+                <div className="inline-flex items-center justify-center w-7 h-7 rounded-lg text-white text-xs font-black mb-2"
+                  style={{ background: s.gradient }}>
                   {s.step}
                 </div>
                 <div className="text-2xl mb-2">{s.icon}</div>
@@ -435,7 +437,8 @@ function HomePage() {
             {benefits.map((b, i) => (
               <div key={i} className="flex items-center gap-2.5 rounded-xl p-3 border transition-all duration-300 active:scale-95"
                 style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.07)' }}>
-                <div className={`flex-shrink-0 w-9 h-9 ${b.bg} ${b.color} rounded-lg flex items-center justify-center`}>
+                <div className="flex-shrink-0 w-9 h-9 rounded-lg flex items-center justify-center"
+                  style={{ background: b.bg, color: b.color }}>
                   <b.icon className="w-5 h-5" />
                 </div>
                 <span className="text-xs font-semibold text-white leading-tight">{b.text}</span>

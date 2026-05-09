@@ -2,7 +2,6 @@ import { QrCodeIcon } from '@heroicons/react/24/outline';
 import { useState, useEffect } from 'react';
 import { getPublicPaymentSettings } from '../../api/payment';
 
-// Helper to get proper image URL
 const getImageUrl = (url) => {
   if (!url) return null;
   if (url.startsWith('/uploads')) {
@@ -12,15 +11,10 @@ const getImageUrl = (url) => {
   return url;
 };
 
-export default function PaymentSummary({ 
-  selectedCategories, 
-  categories,
-  tournament
-}) {
+export default function PaymentSummary({ selectedCategories, categories, tournament }) {
   const [adminPaymentSettings, setAdminPaymentSettings] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Fetch admin payment settings (PUBLIC endpoint)
   useEffect(() => {
     const fetchAdminPaymentSettings = async () => {
       try {
@@ -32,122 +26,97 @@ export default function PaymentSummary({
         setLoading(false);
       }
     };
-
     fetchAdminPaymentSettings();
   }, []);
 
-  // Calculate total amount
   const totalAmount = selectedCategories.reduce((sum, catId) => {
     const category = categories.find(c => c.id === catId);
     return sum + (category?.entryFee || 0);
   }, 0);
 
-  const selectedCategoryDetails = selectedCategories.map(catId => 
-    categories.find(c => c.id === catId)
-  ).filter(Boolean);
+  const selectedCategoryDetails = selectedCategories
+    .map(catId => categories.find(c => c.id === catId))
+    .filter(Boolean);
 
-  // Use ADMIN's QR code instead of organizer's
   const qrImageUrl = adminPaymentSettings?.qrCodeUrl ? getImageUrl(adminPaymentSettings.qrCodeUrl) : null;
 
-  if (selectedCategories.length === 0) {
-    return null;
-  }
+  if (selectedCategories.length === 0) return null;
 
   return (
-    <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
-      <h3 className="text-lg font-semibold text-white mb-4">
-        Payment Summary
-      </h3>
-
-      {/* Selected Categories */}
-      <div className="space-y-2 mb-4">
-        {selectedCategoryDetails.map((category) => (
-          <div key={category.id} className="flex justify-between text-sm">
-            <span className="text-gray-400">{category.name}</span>
-            <span className="font-medium text-white">₹{category.entryFee}</span>
-          </div>
-        ))}
+    <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+      {/* Header */}
+      <div className="px-4 py-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)', background: 'rgba(168,85,247,0.05)' }}>
+        <p className="text-xs font-black uppercase tracking-widest" style={{ color: 'rgba(168,85,247,0.8)' }}>
+          Payment Summary
+        </p>
       </div>
 
-      <div className="border-t border-white/10 pt-4 mb-4">
-        <div className="flex justify-between text-lg font-bold">
-          <span className="text-white">Total Amount</span>
-          <span className="text-purple-400">₹{totalAmount}</span>
+      <div className="p-4 space-y-3">
+        {/* Category breakdown */}
+        <div className="space-y-2">
+          {selectedCategoryDetails.map(category => (
+            <div key={category.id} className="flex justify-between text-sm">
+              <span style={{ color: 'rgba(255,255,255,0.55)' }}>{category.name}</span>
+              <span className="font-bold text-white">₹{category.entryFee}</span>
+            </div>
+          ))}
         </div>
-      </div>
 
-      {/* Payment QR Code - ADMIN's QR */}
-      {!loading && qrImageUrl && (
-        <div className="bg-slate-700/50 border border-white/10 rounded-xl p-4 text-center">
-          <div className="flex items-center justify-center gap-2 mb-3">
-            <QrCodeIcon className="h-5 w-5 text-purple-400" />
-            <h4 className="text-sm font-medium text-gray-300">
-              Scan & Pay to Matchify.pro
-            </h4>
-          </div>
-          
-          <div className="p-2 bg-slate-600/50 border border-white/10 rounded-xl inline-block">
-            <img
-              src={qrImageUrl}
-              alt="Payment QR Code"
-              className="w-48 h-48 mx-auto object-contain rounded-lg"
-            />
-          </div>
-          
-          {adminPaymentSettings?.accountHolderName && (
-            <p className="mt-3 text-sm font-medium text-white">
-              {adminPaymentSettings.accountHolderName}
-            </p>
-          )}
-          
-          {adminPaymentSettings?.upiId && (
-            <p className="text-sm text-gray-400">
-              UPI: {adminPaymentSettings.upiId}
-            </p>
-          )}
-          
-          <div className="mt-3 p-2 bg-amber-500/10 border border-amber-500/30 rounded-xl">
-            <p className="text-xs text-amber-300">
-              💡 Pay <strong className="text-amber-200">₹{totalAmount}</strong> using any UPI app
-            </p>
-          </div>
-
-          {/* Anti-Scam Notice */}
-          <div className="mt-3 p-2 bg-teal-500/10 border border-teal-500/30 rounded-xl">
-            <p className="text-xs text-teal-300">
-              🔒 <strong>Secure Payment:</strong> All payments go to Matchify.pro. Admin will pay organizer after verification.
-            </p>
-          </div>
+        {/* Total */}
+        <div className="flex justify-between items-center pt-3 mt-1"
+          style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+          <span className="text-sm font-black text-white">Total</span>
+          <span className="text-2xl font-black" style={{ color: '#a855f7' }}>₹{totalAmount}</span>
         </div>
-      )}
 
-      {/* Loading State */}
-      {loading && (
-        <div className="bg-slate-700/50 border border-white/10 rounded-xl p-8 text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500 mx-auto"></div>
-          <p className="text-sm text-gray-400 mt-2">Loading payment details...</p>
+        {/* QR Code */}
+        {loading ? (
+          <div className="flex items-center justify-center py-6">
+            <div className="w-6 h-6 rounded-full border-2 border-t-transparent animate-spin"
+              style={{ borderColor: '#a855f7 transparent transparent transparent' }} />
+          </div>
+        ) : qrImageUrl ? (
+          <div className="rounded-xl p-4 text-center"
+            style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
+            <div className="flex items-center justify-center gap-1.5 mb-3">
+              <QrCodeIcon className="h-4 w-4" style={{ color: '#a855f7' }} />
+              <p className="text-xs font-black" style={{ color: 'rgba(255,255,255,0.6)' }}>Scan & Pay · Matchify.pro</p>
+            </div>
+            <div className="inline-block p-2 bg-white rounded-xl">
+              <img src={qrImageUrl} alt="Payment QR" className="w-44 h-44 object-contain rounded-lg mx-auto" />
+            </div>
+            {adminPaymentSettings?.accountHolderName && (
+              <p className="mt-2.5 text-xs font-bold text-white">{adminPaymentSettings.accountHolderName}</p>
+            )}
+            {adminPaymentSettings?.upiId && (
+              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>UPI: {adminPaymentSettings.upiId}</p>
+            )}
+            <div className="mt-3 px-3 py-2 rounded-xl text-xs font-semibold"
+              style={{ background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.2)', color: '#fbbf24' }}>
+              Pay <strong>₹{totalAmount}</strong> using any UPI app
+            </div>
+            <div className="mt-2 px-3 py-2 rounded-xl text-xs"
+              style={{ background: 'rgba(0,212,255,0.06)', border: '1px solid rgba(0,212,255,0.18)', color: 'rgba(0,212,255,0.8)' }}>
+              🔒 All payments go to Matchify.pro. Organizer paid after verification.
+            </div>
+          </div>
+        ) : (
+          <div className="px-3 py-3 rounded-xl text-xs font-semibold"
+            style={{ background: 'rgba(251,191,36,0.07)', border: '1px solid rgba(251,191,36,0.2)', color: '#fbbf24' }}>
+            ⚠️ Payment QR not available. Contact support.
+          </div>
+        )}
+
+        {/* How to pay */}
+        <div className="px-3 py-3 rounded-xl" style={{ background: 'rgba(0,212,255,0.05)', border: '1px solid rgba(0,212,255,0.15)' }}>
+          <p className="text-xs font-black mb-2" style={{ color: 'rgba(0,212,255,0.8)' }}>How to pay:</p>
+          {['Scan QR with any UPI app', `Pay ₹${totalAmount} to Matchify.pro`, 'Screenshot the payment', 'Upload below → we verify & confirm'].map((t, i) => (
+            <div key={i} className="flex items-start gap-1.5 mt-1">
+              <span className="text-xs font-black" style={{ color: '#00d4ff' }}>{i + 1}.</span>
+              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>{t}</p>
+            </div>
+          ))}
         </div>
-      )}
-
-      {/* No QR Code Message */}
-      {!loading && !qrImageUrl && (
-        <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4">
-          <p className="text-sm text-amber-300">
-            ⚠️ Payment QR not available. Please contact support.
-          </p>
-        </div>
-      )}
-
-      {/* Payment Instructions */}
-      <div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/30 rounded-xl">
-        <h4 className="text-sm font-medium text-blue-300 mb-2">How to Pay:</h4>
-        <ol className="text-xs text-blue-400/80 space-y-1 list-decimal list-inside">
-          <li>Scan the QR code with any UPI app</li>
-          <li>Pay ₹{totalAmount} to Matchify.pro</li>
-          <li>Take a screenshot of the payment</li>
-          <li>Click "Complete Registration" below</li>
-          <li>Admin will verify your payment</li>
-        </ol>
       </div>
     </div>
   );

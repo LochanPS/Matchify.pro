@@ -1262,119 +1262,131 @@ const TournamentDetailPage = () => {
 
       {/* Add Umpire Modal */}
       {showUmpireModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-white/10">
-            {/* Header with halo effect */}
-            <div className="relative bg-gradient-to-r from-teal-600 to-emerald-600 p-6 text-white overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-teal-400/20 to-emerald-400/20 blur-xl"></div>
-              <div className="relative flex items-center gap-3">
-                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                  <Users className="h-6 w-6" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold">Add Umpire</h2>
-                  <p className="text-teal-100 text-sm mt-1">Enter umpire's unique code</p>
-                </div>
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4"
+          style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)' }}>
+          <div className="w-full max-w-sm rounded-2xl overflow-hidden"
+            style={{ background: '#0d0d2b', border: '1px solid rgba(255,255,255,0.1)' }}>
+
+            {/* Header */}
+            <div className="px-5 py-4 flex items-center gap-3"
+              style={{ background: 'linear-gradient(135deg,rgba(0,255,136,0.12),rgba(0,200,83,0.06))', borderBottom: '1px solid rgba(0,255,136,0.15)' }}>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{ background: 'rgba(0,255,136,0.2)', border: '1px solid rgba(0,255,136,0.35)' }}>
+                <Users className="h-5 w-5" style={{ color: '#00ff88' }} />
+              </div>
+              <div>
+                <h2 className="text-base font-black text-white">Add Umpire</h2>
+                <p className="text-xs" style={{ color: 'rgba(0,255,136,0.7)' }}>Enter umpire's Matchify.pro ID</p>
               </div>
             </div>
 
-            <div className="p-6">
-              {/* Info box */}
-              <div className="bg-slate-700/50 border border-white/10 rounded-xl p-4 mb-4">
-                <p className="text-gray-300 text-sm">
-                  Enter the umpire's Matchify.pro ID with # prefix (e.g., <span className="text-teal-400 font-mono">#123ABCD</span>)
-                </p>
+            <div className="p-5 space-y-3">
+              {/* Info */}
+              <div className="px-3 py-2.5 rounded-xl text-xs"
+                style={{ background: 'rgba(0,212,255,0.06)', border: '1px solid rgba(0,212,255,0.15)', color: 'rgba(0,212,255,0.8)' }}>
+                Format: <span className="font-mono font-bold" style={{ color: '#00d4ff' }}>#123ABCD</span> or <span className="font-mono font-bold" style={{ color: '#00d4ff' }}>#A10000</span>
               </div>
 
-              {/* Error message */}
+              {/* Error */}
               {umpireError && (
-                <div className="mb-4 p-3 bg-red-500/20 border border-red-500/30 rounded-xl text-red-400 text-sm">
+                <div className="px-3 py-2.5 rounded-xl text-xs font-semibold"
+                  style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)', color: '#f87171' }}>
                   {umpireError}
                 </div>
               )}
 
-              {/* Success message */}
+              {/* Success */}
               {umpireSuccess && (
-                <div className="mb-4 p-3 bg-green-500/20 border border-green-500/30 rounded-xl text-green-400 text-sm">
+                <div className="px-3 py-2.5 rounded-xl text-xs font-semibold"
+                  style={{ background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.25)', color: '#00ff88' }}>
                   {umpireSuccess}
                 </div>
               )}
 
-              {/* Input field */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+              {/* Input */}
+              <div>
+                <label className="block text-xs font-black mb-1.5" style={{ color: 'rgba(255,255,255,0.6)' }}>
                   Umpire Matchify.pro ID
                 </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={umpireCode}
-                    onChange={(e) => {
-                      let val = e.target.value.toUpperCase();
-                      if (!val.startsWith('#')) val = '#' + val.replace(/#/g, '');
-                      setUmpireCode(val);
-                      setUmpireError('');
-                    }}
-                    placeholder="#123ABCD"
-                    maxLength={8}
-                    className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all font-mono text-lg tracking-wider"
-                  />
-                </div>
+                <input
+                  type="text"
+                  value={umpireCode}
+                  onChange={(e) => {
+                    let val = e.target.value.toUpperCase();
+                    if (!val.startsWith('#')) val = '#' + val.replace(/#/g, '');
+                    setUmpireCode(val);
+                    setUmpireError('');
+                  }}
+                  placeholder="#123ABCD"
+                  maxLength={8}
+                  className="w-full px-4 py-3 rounded-xl text-white font-mono text-base tracking-widest"
+                  style={{
+                    background: 'rgba(0,0,0,0.3)',
+                    border: '1.5px solid rgba(0,255,136,0.25)',
+                    outline: 'none',
+                  }}
+                />
               </div>
 
               {/* Add button */}
               <button
                 onClick={handleAddUmpire}
                 disabled={addingUmpire || !umpireCode.trim() || umpireCode.trim() === '#'}
-                className="w-full px-4 py-3 bg-gradient-to-r from-teal-500 to-emerald-600 text-white rounded-xl hover:shadow-lg hover:shadow-teal-500/30 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mb-6"
+                className="w-full py-3 rounded-xl font-black text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                style={{
+                  background: (!addingUmpire && umpireCode.trim() && umpireCode.trim() !== '#')
+                    ? 'linear-gradient(135deg,#00c853,#00ff88)'
+                    : 'rgba(255,255,255,0.08)',
+                  color: (!addingUmpire && umpireCode.trim() && umpireCode.trim() !== '#') ? '#07071a' : 'rgba(255,255,255,0.4)',
+                }}
               >
                 {addingUmpire ? (
                   <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                    Adding...
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-t-transparent" style={{ borderColor: '#07071a transparent transparent transparent' }} />
+                    Adding…
                   </>
                 ) : (
                   <>
-                    <UserGroupIcon className="h-5 w-5" />
+                    <UserGroupIcon className="h-4 w-4" />
                     Add Umpire
                   </>
                 )}
               </button>
 
-              {/* Current umpires list */}
-              <div className="border-t border-white/10 pt-4">
-                <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
-                  <Users className="w-4 h-4 text-teal-400" />
+              {/* Umpires list */}
+              <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: '12px' }}>
+                <h3 className="text-xs font-black mb-3 flex items-center gap-2" style={{ color: 'rgba(255,255,255,0.6)' }}>
+                  <Users className="w-3.5 h-3.5" style={{ color: '#00ff88' }} />
                   Tournament Umpires ({umpires.length})
                 </h3>
-                
+
                 {loadingUmpires ? (
                   <div className="flex items-center justify-center py-4">
-                    <div className="animate-spin rounded-full h-6 w-6 border-2 border-teal-500 border-t-transparent"></div>
+                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-t-transparent" style={{ borderColor: '#00ff88 transparent transparent transparent' }} />
                   </div>
                 ) : umpires.length === 0 ? (
                   <div className="text-center py-4">
-                    <p className="text-gray-500 text-sm">No umpires added yet</p>
+                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>No umpires added yet</p>
                   </div>
                 ) : (
-                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                  <div className="space-y-2 max-h-44 overflow-y-auto">
                     {umpires.map((umpire) => (
-                      <div
-                        key={umpire.id}
-                        className="flex items-center justify-between p-3 bg-slate-700/50 border border-white/10 rounded-xl"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-gradient-to-br from-teal-400 to-emerald-500 rounded-xl flex items-center justify-center text-white font-bold">
+                      <div key={umpire.id} className="flex items-center justify-between p-3 rounded-xl"
+                        style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm flex-shrink-0"
+                            style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#07071a' }}>
                             {umpire.name?.charAt(0)?.toUpperCase()}
                           </div>
                           <div>
-                            <p className="text-white font-medium">{umpire.name}</p>
-                            <p className="text-gray-400 text-xs font-mono">{umpire.umpireCode}</p>
+                            <p className="text-white font-bold text-sm">{umpire.name}</p>
+                            <p className="text-xs font-mono" style={{ color: 'rgba(0,255,136,0.7)' }}>{umpire.umpireCode}</p>
                           </div>
                         </div>
                         <button
                           onClick={() => handleRemoveUmpire(umpire.id)}
-                          className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg transition-colors"
+                          className="p-1.5 rounded-lg transition-colors"
+                          style={{ color: '#f87171' }}
                           title="Remove umpire"
                         >
                           <TrashIcon className="h-4 w-4" />
@@ -1385,10 +1397,11 @@ const TournamentDetailPage = () => {
                 )}
               </div>
 
-              {/* Close button */}
+              {/* Close */}
               <button
                 onClick={() => setShowUmpireModal(false)}
-                className="w-full mt-4 px-4 py-3 border border-white/10 rounded-xl text-gray-300 hover:bg-slate-700/50 transition-colors font-medium"
+                className="w-full py-3 rounded-xl font-bold text-sm transition-all"
+                style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.1)' }}
               >
                 Close
               </button>

@@ -5,11 +5,19 @@ import { useAuth } from '../contexts/AuthContext';
 import { tournamentAPI } from '../api/tournament';
 import { registrationAPI } from '../api/registration';
 import { getPublicPaymentSettings } from '../api/payment';
-import { getImageUrl } from '../utils/imageUrl';
 import CategorySelector from '../components/registration/CategorySelector';
 import PaymentSummary from '../components/registration/PaymentSummary';
 import { ArrowLeftIcon, UserGroupIcon, CameraIcon, CheckCircleIcon, XMarkIcon, ClockIcon } from '@heroicons/react/24/outline';
-import { Loader, Upload, QrCode, PartyPopper } from 'lucide-react';
+import { Loader, Upload, QrCode, AlertCircle, Search } from 'lucide-react';
+
+const BRAND = {
+  bg: '#07071a',
+  green: '#00ff88',
+  cyan: '#00d4ff',
+  purple: '#a855f7',
+  card: 'rgba(255,255,255,0.04)',
+  cardBorder: 'rgba(255,255,255,0.08)',
+};
 
 export default function TournamentRegistrationPage() {
   const { id } = useParams();
@@ -21,24 +29,24 @@ export default function TournamentRegistrationPage() {
   const [categories, setCategories] = useState([]);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [partnerCodes, setPartnerCodes] = useState({});
-  const [partnerInfo, setPartnerInfo] = useState({}); // Store fetched partner information
+  const [partnerInfo, setPartnerInfo] = useState({});
   const [paymentScreenshot, setPaymentScreenshot] = useState(null);
   const [paymentPreview, setPaymentPreview] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
-  const [step, setStep] = useState(1); // 1: Select categories, 2: Payment
+  const [step, setStep] = useState(1);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [alreadyRegisteredCategories, setAlreadyRegisteredCategories] = useState([]);
   const [adminPaymentSettings, setAdminPaymentSettings] = useState(null);
   const [isRegistrationClosed, setIsRegistrationClosed] = useState(false);
+  const [searchingPartner, setSearchingPartner] = useState({});
 
   useEffect(() => {
     fetchTournamentData();
     fetchAdminPaymentSettings();
   }, [id]);
 
-  // Check if registration is closed
   useEffect(() => {
     if (tournament) {
       const now = new Date();
@@ -47,15 +55,10 @@ export default function TournamentRegistrationPage() {
     }
   }, [tournament]);
 
-  // Display already registered categories as info (not error)
   const getAlreadyRegisteredCategoryNames = () => {
     if (alreadyRegisteredCategories.length === 0) return null;
-    
     return alreadyRegisteredCategories
-      .map(catId => {
-        const cat = categories.find(c => c.id === catId);
-        return cat?.name;
-      })
+      .map(catId => categories.find(c => c.id === catId)?.name)
       .filter(Boolean)
       .join(', ');
   };
@@ -77,17 +80,12 @@ export default function TournamentRegistrationPage() {
         tournamentAPI.getCategories(id),
         registrationAPI.getMyRegistrations(),
       ]);
-      
       setTournament(tournamentData.data);
       setCategories(categoriesData.categories || []);
-      
-      // Find categories user is already registered for in this tournament
-      // Only block re-registration if status is PENDING or APPROVED/CONFIRMED
-      // Allow re-registration if status is REJECTED or CANCELLED
       const registeredCategoryIds = (myRegistrations.registrations || [])
-        .filter(reg => 
-          reg.tournament.id === id && 
-          reg.status !== 'cancelled' && 
+        .filter(reg =>
+          reg.tournament.id === id &&
+          reg.status !== 'cancelled' &&
           reg.status !== 'rejected'
         )
         .map(reg => reg.category.id);
@@ -103,99 +101,74 @@ export default function TournamentRegistrationPage() {
   const handleScreenshotSelect = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     if (!file.type.startsWith('image/')) {
       setError('Please upload an image file (JPG, PNG, etc.)');
       return;
     }
-
     if (file.size > 5 * 1024 * 1024) {
       setError('Image size should be less than 5MB');
       return;
     }
-
     setPaymentScreenshot(file);
     setPaymentPreview(URL.createObjectURL(file));
     setError('');
   };
 
   const removeScreenshot = () => {
-    if (paymentPreview) {
-      URL.revokeObjectURL(paymentPreview);
-    }
+    if (paymentPreview) URL.revokeObjectURL(paymentPreview);
     setPaymentScreenshot(null);
     setPaymentPreview(null);
   };
 
   const handleProceedToPayment = () => {
     setError('');
-
     if (selectedCategories.length === 0) {
       setError('Please select at least one category');
       return;
     }
-
-    // Check if doubles categories have partner codes
     const doublesCategories = selectedCategories.filter(catId => {
       const cat = categories.find(c => c.id === catId);
       return cat?.format === 'doubles';
     });
-
     for (const catId of doublesCategories) {
       const code = partnerCodes[catId];
       if (!code) {
         const cat = categories.find(c => c.id === catId);
-        setError(`Partner Matchify.pro ID is required for ${cat?.name}`);
+        setError(`Partner Matchify.pro ID required for ${cat?.name}`);
         return;
       }
-      
-      // Validate Matchify.pro ID format: #A10000 (# + 1 letter + 5 digits)
       if (!/^#[A-Za-z]\d{5}$/i.test(code)) {
         const cat = categories.find(c => c.id === catId);
-        setError(`Please enter a valid Matchify.pro ID for ${cat?.name} (Format: #A10000)`);
+        setError(`Invalid Matchify.pro ID for ${cat?.name} — format: #A10000`);
         return;
       }
-
-      // Check if partner info was fetched
       if (!partnerInfo[catId]) {
         const cat = categories.find(c => c.id === catId);
-        setError(`Please verify the Matchify.pro ID for ${cat?.name} by clicking the search button`);
+        setError(`Search and verify partner ID for ${cat?.name}`);
         return;
       }
     }
-
     setStep(2);
   };
 
   const handleRegister = async () => {
     try {
       setError('');
-
-      // Validate payment screenshot
       if (!paymentScreenshot) {
-        setError('Please upload your payment screenshot. This is required for registration.');
+        setError('Upload your payment screenshot to continue');
         return;
       }
-
       setSubmitting(true);
-
-      // Create FormData for file upload
       const formData = new FormData();
       formData.append('tournamentId', id);
       formData.append('categoryIds', JSON.stringify(selectedCategories));
-      // Send partner emails extracted from partnerInfo
       const partnerEmails = {};
       Object.keys(partnerInfo).forEach(catId => {
-        if (partnerInfo[catId]) {
-          partnerEmails[catId] = partnerInfo[catId].email;
-        }
+        if (partnerInfo[catId]) partnerEmails[catId] = partnerInfo[catId].email;
       });
       formData.append('partnerEmails', JSON.stringify(partnerEmails));
       formData.append('paymentScreenshot', paymentScreenshot);
-
-      const response = await registrationAPI.createRegistrationWithScreenshot(formData);
-
-      // Show success modal instead of alert
+      await registrationAPI.createRegistrationWithScreenshot(formData);
       setShowSuccessModal(true);
     } catch (err) {
       console.error('Registration error:', err);
@@ -208,65 +181,53 @@ export default function TournamentRegistrationPage() {
   const handlePartnerCodeChange = (categoryId, code) => {
     let val = code.toUpperCase();
     if (!val.startsWith('#')) val = '#' + val.replace(/#/g, '');
-    setPartnerCodes(prev => ({
-      ...prev,
-      [categoryId]: val
-    }));
-    // Clear partner info when code changes
-    setPartnerInfo(prev => ({
-      ...prev,
-      [categoryId]: null
-    }));
+    setPartnerCodes(prev => ({ ...prev, [categoryId]: val }));
+    setPartnerInfo(prev => ({ ...prev, [categoryId]: null }));
   };
 
   const fetchPartnerByCode = async (categoryId, code) => {
     try {
       setError('');
-      
-      // Validate format first: #A10000 (# + 1 letter + 5 digits)
       if (!/^#[A-Za-z]\d{5}$/i.test(code)) {
-        setError('Invalid Matchify.pro ID format. Use #A10000 (# + 1 letter + 5 digits)');
+        setError('Format: #A10000 (# + 1 letter + 5 digits)');
         return;
       }
-
-      // Fetch partner info from API
+      setSearchingPartner(prev => ({ ...prev, [categoryId]: true }));
       const response = await registrationAPI.getPartnerByCode(code.toUpperCase());
-      
       if (response.success && response.user) {
-        setPartnerInfo(prev => ({
-          ...prev,
-          [categoryId]: response.user
-        }));
+        setPartnerInfo(prev => ({ ...prev, [categoryId]: response.user }));
       } else {
-        setError('Player not found with this Matchify.pro ID');
-        setPartnerInfo(prev => ({
-          ...prev,
-          [categoryId]: null
-        }));
+        setError('No player found with this Matchify.pro ID');
+        setPartnerInfo(prev => ({ ...prev, [categoryId]: null }));
       }
     } catch (err) {
       console.error('Error fetching partner:', err);
-      setError(getErrorMessage(err, 'Failed to find player with this Matchify.pro ID'));
-      setPartnerInfo(prev => ({
-        ...prev,
-        [categoryId]: null
-      }));
+      setError(getErrorMessage(err, 'Player not found'));
+      setPartnerInfo(prev => ({ ...prev, [categoryId]: null }));
+    } finally {
+      setSearchingPartner(prev => ({ ...prev, [categoryId]: false }));
     }
   };
 
-  const calculateTotal = () => {
-    return selectedCategories.reduce((total, catId) => {
+  const calculateTotal = () =>
+    selectedCategories.reduce((total, catId) => {
       const cat = categories.find(c => c.id === catId);
       return total + (cat?.entryFee || 0);
     }, 0);
-  };
 
+  const selectedDoublesCategories = selectedCategories.filter(catId => {
+    const cat = categories.find(c => c.id === catId);
+    return cat?.format === 'doubles';
+  });
+
+  // ── Loading ──────────────────────────────────────────────────────────────
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: BRAND.bg }}>
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="text-gray-500 mt-4 font-medium">Loading tournament...</p>
+          <div className="w-12 h-12 rounded-full border-4 border-t-transparent mx-auto animate-spin"
+            style={{ borderColor: `${BRAND.green} transparent transparent transparent` }} />
+          <p className="mt-4 text-sm font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>Loading…</p>
         </div>
       </div>
     );
@@ -274,473 +235,448 @@ export default function TournamentRegistrationPage() {
 
   if (!tournament) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-white mb-2">Tournament Not Found</h2>
-          <button
-            onClick={() => navigate('/tournaments')}
-            className="text-purple-600 hover:text-purple-700 font-medium"
-          >
-            Back to Tournaments
+      <div className="min-h-screen flex items-center justify-center" style={{ background: BRAND.bg }}>
+        <div className="text-center px-6">
+          <p className="text-white font-bold text-lg mb-4">Tournament not found</p>
+          <button onClick={() => navigate('/tournaments')} className="text-sm font-bold" style={{ color: BRAND.green }}>
+            Browse Tournaments
           </button>
         </div>
       </div>
     );
   }
 
-  const selectedDoublesCategories = selectedCategories.filter(catId => {
-    const cat = categories.find(c => c.id === catId);
-    return cat?.format === 'doubles';
-  });
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-6">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-gray-400 hover:text-white mb-4"
-          >
-            <ArrowLeftIcon className="h-5 w-5" />
-            Back to Tournament
-          </button>
-          
-          <h1 className="text-3xl font-bold text-white mb-2">
-            Register for Tournament
-          </h1>
-          <p className="text-lg text-gray-400">{tournament.name}</p>
-          <div className="mt-2 flex items-center gap-4 text-sm text-gray-500">
-            <span>📍 {tournament.city}, {tournament.state}</span>
-            <span>📅 {new Date(tournament.startDate).toLocaleDateString('en-IN')}</span>
+  // ── Registration Closed ──────────────────────────────────────────────────
+  if (isRegistrationClosed) {
+    return (
+      <div className="min-h-screen px-4 py-8 flex flex-col" style={{ background: BRAND.bg }}>
+        <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 mb-6 text-sm font-bold"
+          style={{ color: 'rgba(255,255,255,0.5)' }}>
+          <ArrowLeftIcon className="h-4 w-4" /> Back
+        </button>
+        <div className="flex-1 flex items-center justify-center">
+          <div className="rounded-2xl p-8 text-center w-full max-w-sm"
+            style={{ background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.25)' }}>
+            <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+              style={{ background: 'rgba(239,68,68,0.15)' }}>
+              <XMarkIcon className="w-8 h-8" style={{ color: '#f87171' }} />
+            </div>
+            <h2 className="text-xl font-black text-white mb-2">Registration Closed</h2>
+            <p className="text-sm mb-1" style={{ color: 'rgba(255,255,255,0.5)' }}>
+              Deadline was{' '}
+              {new Date(tournament.registrationCloseDate).toLocaleDateString('en-IN', {
+                day: 'numeric', month: 'short', year: 'numeric'
+              })}
+            </p>
+            <button onClick={() => navigate(`/tournaments/${id}`)}
+              className="mt-6 px-6 py-3 rounded-xl font-bold text-sm text-white"
+              style={{ background: 'rgba(255,255,255,0.1)' }}>
+              View Tournament
+            </button>
           </div>
         </div>
+      </div>
+    );
+  }
 
-        {/* Registration Closed Warning */}
-        {isRegistrationClosed ? (
-          <div className="max-w-2xl mx-auto">
-            <div className="bg-red-500/10 border-2 border-red-500/30 rounded-2xl p-8 text-center">
-              <div className="w-20 h-20 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <XMarkIcon className="w-10 h-10 text-red-400" />
-              </div>
-              <h2 className="text-2xl font-bold text-red-400 mb-3">Registration Closed</h2>
-              <p className="text-gray-300 mb-2">
-                Registration for this tournament has ended.
-              </p>
-              <p className="text-gray-400 text-sm mb-6">
-                Deadline was: {new Date(tournament.registrationCloseDate).toLocaleDateString('en-IN', {
-                  day: 'numeric',
-                  month: 'long',
-                  year: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })}
-              </p>
-              <button
-                onClick={() => navigate(`/tournaments/${id}`)}
-                className="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl transition-colors"
-              >
-                Back to Tournament Details
-              </button>
+  // ── Main ─────────────────────────────────────────────────────────────────
+  return (
+    <div className="min-h-screen pb-10" style={{ background: BRAND.bg }}>
+      {/* Header */}
+      <div className="px-4 pt-6 pb-4">
+        <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 mb-5 text-sm font-bold"
+          style={{ color: 'rgba(255,255,255,0.5)' }}>
+          <ArrowLeftIcon className="h-4 w-4" /> Back
+        </button>
+        <h1 className="text-xl font-black text-white leading-tight">{tournament.name}</h1>
+        <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.45)' }}>
+          📍 {tournament.city}, {tournament.state} &nbsp;·&nbsp; 📅 {new Date(tournament.startDate).toLocaleDateString('en-IN')}
+        </p>
+      </div>
+
+      {/* Step Indicator */}
+      <div className="px-4 mb-5">
+        <div className="flex items-center gap-2">
+          {/* Step 1 */}
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-black"
+              style={{
+                background: step >= 1 ? (step > 1 ? BRAND.green : BRAND.purple) : 'rgba(255,255,255,0.1)',
+                color: step >= 1 ? '#07071a' : 'rgba(255,255,255,0.4)',
+              }}>
+              {step > 1 ? '✓' : '1'}
             </div>
+            <span className="text-xs font-bold" style={{ color: step >= 1 ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.35)' }}>
+              Categories
+            </span>
           </div>
-        ) : (
+          {/* Connector */}
+          <div className="flex-1 h-0.5 rounded-full mx-1" style={{ background: step >= 2 ? BRAND.green : 'rgba(255,255,255,0.1)' }} />
+          {/* Step 2 */}
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-black"
+              style={{
+                background: step >= 2 ? BRAND.purple : 'rgba(255,255,255,0.1)',
+                color: step >= 2 ? '#07071a' : 'rgba(255,255,255,0.4)',
+              }}>
+              2
+            </div>
+            <span className="text-xs font-bold" style={{ color: step >= 2 ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.35)' }}>
+              Payment
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div className="px-4 space-y-4">
+        {/* Already Registered Notice */}
+        {alreadyRegisteredCategories.length > 0 && getAlreadyRegisteredCategoryNames() && (
+          <div className="flex items-start gap-2.5 px-4 py-3 rounded-xl"
+            style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)' }}>
+            <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: '#f87171' }} />
+            <p className="text-xs font-semibold" style={{ color: '#f87171' }}>
+              Already registered for: {getAlreadyRegisteredCategoryNames()}
+            </p>
+          </div>
+        )}
+
+        {/* Error */}
+        {error && (
+          <div className="flex items-start gap-2.5 px-4 py-3 rounded-xl"
+            style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)' }}>
+            <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: '#f87171' }} />
+            <p className="text-xs font-semibold" style={{ color: '#f87171' }}>{error}</p>
+          </div>
+        )}
+
+        {/* ── STEP 1 ─────────────────────────────────────────────────────── */}
+        {step === 1 && (
           <>
-            {/* Step Indicator */}
-            <div className="mb-8">
-              <div className="flex items-center gap-4">
-                <div className={`flex items-center gap-2 ${step >= 1 ? 'text-purple-400' : 'text-gray-500'}`}>
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${step >= 1 ? 'bg-purple-600 text-white' : 'bg-slate-700 text-gray-400'}`}>1</div>
-                  <span className="font-medium">Select Categories</span>
-                </div>
-                <div className="flex-1 h-1 bg-slate-700 rounded">
-                  <div className={`h-full bg-purple-600 rounded transition-all ${step >= 2 ? 'w-full' : 'w-0'}`}></div>
-                </div>
-                <div className={`flex items-center gap-2 ${step >= 2 ? 'text-purple-400' : 'text-gray-500'}`}>
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${step >= 2 ? 'bg-purple-600 text-white' : 'bg-slate-700 text-gray-400'}`}>2</div>
-                  <span className="font-medium">Payment</span>
-                </div>
-              </div>
+            {/* Category Selector */}
+            <div className="rounded-2xl p-4" style={{ background: BRAND.card, border: `1px solid ${BRAND.cardBorder}` }}>
+              <CategorySelector
+                categories={categories}
+                selectedCategories={selectedCategories}
+                onSelectionChange={setSelectedCategories}
+                alreadyRegisteredCategories={alreadyRegisteredCategories}
+              />
             </div>
 
-            {/* Already Registered Categories Info */}
-            {alreadyRegisteredCategories.length > 0 && getAlreadyRegisteredCategoryNames() && (
-              <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
-                <p className="text-sm text-red-400">
-                  Already registered for {getAlreadyRegisteredCategoryNames()}
-                </p>
-              </div>
-            )}
-
-            {/* Error Message */}
-            {error && (
-              <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
-                <p className="text-sm text-red-400">{error}</p>
-              </div>
-            )}
-
-            {step === 1 ? (
-          /* Step 1: Category Selection */
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 space-y-6">
-              <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
-                <CategorySelector
-                  categories={categories}
-                  selectedCategories={selectedCategories}
-                  onSelectionChange={setSelectedCategories}
-                  alreadyRegisteredCategories={alreadyRegisteredCategories}
-                />
-              </div>
-
-              {/* Partner Matchify.pro ID Inputs - MOBILE OPTIMIZED */}
-              {selectedDoublesCategories.length > 0 && (
-                <div className="rounded-2xl p-4 border" style={{ background: 'rgba(16,185,129,0.05)', borderColor: 'rgba(16,185,129,0.2)' }}>
-                  <div className="flex items-center gap-2 mb-4">
-                    <UserGroupIcon className="h-5 w-5 text-emerald-400" />
-                    <h3 className="text-base font-bold text-white">Partner Details</h3>
-                  </div>
-                  <div className="space-y-4">
-                    {selectedDoublesCategories.map(catId => {
-                      const category = categories.find(c => c.id === catId);
-                      const partner = partnerInfo[catId];
-                      return (
-                        <div key={catId} className="space-y-2">
-                          <label className="block text-sm font-semibold" style={{ color: '#10b981' }}>
-                            Partner Matchify.pro ID for <span className="text-white">{category?.name}</span>
-                            <span className="text-red-400"> *</span>
-                          </label>
-                          <div className="flex flex-col sm:flex-row gap-2">
-                            <input
-                              type="text"
-                              value={partnerCodes[catId] || '#'}
-                              onChange={(e) => handlePartnerCodeChange(catId, e.target.value)}
-                              placeholder="#A10000"
-                              maxLength={7}
-                              className="flex-1 px-3 py-3 rounded-xl text-white placeholder-gray-500 focus:ring-2 uppercase font-mono text-sm"
-                              style={{ 
-                                background: 'rgba(0,0,0,0.3)', 
-                                border: '1.5px solid rgba(16,185,129,0.3)',
-                                outline: 'none'
-                              }}
-                              required
-                            />
-                            <button
-                              type="button"
-                              onClick={() => fetchPartnerByCode(catId, partnerCodes[catId])}
-                              disabled={!partnerCodes[catId] || partnerCodes[catId].length !== 7 || partnerCodes[catId] === '#'}
-                              className="px-5 py-3 rounded-xl font-bold text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
-                              style={
-                                !partnerCodes[catId] || partnerCodes[catId].length !== 7 || partnerCodes[catId] === '#'
-                                  ? { background: 'rgba(100,100,100,0.3)', color: 'rgba(255,255,255,0.4)' }
-                                  : { background: 'linear-gradient(135deg,#10b981,#059669)', color: '#ffffff', boxShadow: '0 4px 15px rgba(16,185,129,0.3)' }
-                              }
-                            >
-                              Search
-                            </button>
-                          </div>
-                          
-                          {/* Show partner info if found */}
-                          {partner && (
-                            <div className="p-3 rounded-xl border" style={{ background: 'rgba(16,185,129,0.1)', borderColor: 'rgba(16,185,129,0.3)' }}>
-                              <div className="flex items-center gap-3">
-                                {partner.profilePhoto ? (
-                                  <img 
-                                    src={partner.profilePhoto} 
-                                    alt={partner.name}
-                                    className="w-10 h-10 rounded-full object-cover"
-                                  />
-                                ) : (
-                                  <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm" style={{ background: 'linear-gradient(135deg,#10b981,#059669)' }}>
-                                    {partner.name?.charAt(0)?.toUpperCase()}
-                                  </div>
-                                )}
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-white font-semibold text-sm truncate">{partner.name}</p>
-                                  <p className="text-emerald-400 text-xs font-mono">{partner.matchifyCode || partner.email}</p>
-                                  {partner.city && partner.state && (
-                                    <p className="text-gray-500 text-xs truncate">{partner.city}, {partner.state}</p>
-                                  )}
-                                </div>
-                                <CheckCircleIcon className="w-5 h-5 text-emerald-400 flex-shrink-0" />
-                              </div>
-                            </div>
-                          )}
-                          
-                          <p className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                            Enter your partner's Matchify.pro ID. They will receive a confirmation.
-                          </p>
-                        </div>
-                      );
-                    })}
-                  </div>
+            {/* Partner Details */}
+            {selectedDoublesCategories.length > 0 && (
+              <div className="rounded-2xl p-4" style={{ background: 'rgba(0,255,136,0.05)', border: '1px solid rgba(0,255,136,0.18)' }}>
+                <div className="flex items-center gap-2 mb-4">
+                  <UserGroupIcon className="h-5 w-5" style={{ color: BRAND.green }} />
+                  <h3 className="text-sm font-black text-white">Partner Details</h3>
                 </div>
-              )}
-            </div>
-
-            {/* Right Column - Summary */}
-            <div className="lg:col-span-1">
-              <div className="sticky top-6 space-y-6">
-                <PaymentSummary
-                  selectedCategories={selectedCategories}
-                  categories={categories}
-                  tournament={tournament}
-                />
-
-                <button
-                  onClick={handleProceedToPayment}
-                  disabled={selectedCategories.length === 0}
-                  className="w-full py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:shadow-lg hover:shadow-purple-500/30 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Proceed to Payment →
-                </button>
-              </div>
-            </div>
-          </div>
-        ) : (
-          /* Step 2: Payment */
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Left: QR Code & Payment Info */}
-            <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center">
-                  <QrCode className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-white">Pay via UPI</h3>
-                  <p className="text-gray-500 text-sm">Scan QR code or use UPI ID</p>
-                </div>
-              </div>
-
-              {/* Check if admin payment details exist */}
-              {!adminPaymentSettings?.qrCodeUrl && !adminPaymentSettings?.upiId ? (
-                <div className="p-6 bg-red-500/10 border border-red-500/30 rounded-xl text-center">
-                  <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <XMarkIcon className="w-8 h-8 text-red-400" />
-                  </div>
-                  <h4 className="text-lg font-semibold text-red-300 mb-2">Payment Details Not Available</h4>
-                  <p className="text-sm text-red-400/80">
-                    Admin payment details are not set up yet. Please contact support.
-                  </p>
-                </div>
-              ) : (
-                <>
-                  {/* Admin's QR Code */}
-                  {adminPaymentSettings?.qrCodeUrl && (
-                    <div className="flex justify-center mb-6">
-                      <div className="relative p-6 bg-white rounded-2xl shadow-2xl">
-                        <div className="absolute -inset-1 bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 rounded-2xl blur opacity-30"></div>
-                        <div className="relative bg-white p-4 rounded-xl">
-                          <img 
-                            src={adminPaymentSettings.qrCodeUrl}
-                            alt="Payment QR Code" 
-                            className="w-64 h-64 object-contain"
-                            onError={(e) => {
-                              e.target.onerror = null;
-                              e.target.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256"><rect width="256" height="256" fill="%23ddd"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="%23999">QR Code</text></svg>';
+                <div className="space-y-5">
+                  {selectedDoublesCategories.map(catId => {
+                    const category = categories.find(c => c.id === catId);
+                    const partner = partnerInfo[catId];
+                    const isSearching = searchingPartner[catId];
+                    const code = partnerCodes[catId] || '#';
+                    const canSearch = code.length === 7 && code !== '#';
+                    return (
+                      <div key={catId} className="space-y-2">
+                        <label className="block text-xs font-bold" style={{ color: BRAND.green }}>
+                          Partner ID for <span className="text-white">{category?.name}</span>
+                          <span style={{ color: '#f87171' }}> *</span>
+                        </label>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            value={code}
+                            onChange={e => handlePartnerCodeChange(catId, e.target.value)}
+                            placeholder="#A10000"
+                            maxLength={7}
+                            className="flex-1 px-3 py-3 rounded-xl text-white font-mono text-sm uppercase"
+                            style={{
+                              background: 'rgba(0,0,0,0.3)',
+                              border: '1.5px solid rgba(0,255,136,0.25)',
+                              outline: 'none',
                             }}
                           />
+                          <button
+                            type="button"
+                            onClick={() => fetchPartnerByCode(catId, code)}
+                            disabled={!canSearch || isSearching}
+                            className="px-4 py-3 rounded-xl font-black text-xs transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5"
+                            style={canSearch && !isSearching
+                              ? { background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#07071a' }
+                              : { background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.4)' }}
+                          >
+                            {isSearching
+                              ? <div className="w-4 h-4 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: '#07071a transparent transparent transparent' }} />
+                              : <Search className="w-4 h-4" />}
+                            {isSearching ? '' : 'Search'}
+                          </button>
                         </div>
-                        <p className="text-center text-gray-700 text-sm mt-3 font-medium">Scan to Pay</p>
+
+                        {/* Partner found */}
+                        {partner && (
+                          <div className="flex items-center gap-3 p-3 rounded-xl"
+                            style={{ background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.25)' }}>
+                            {partner.profilePhoto ? (
+                              <img src={partner.profilePhoto} alt={partner.name}
+                                className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
+                            ) : (
+                              <div className="w-10 h-10 rounded-full flex items-center justify-center font-black text-sm flex-shrink-0"
+                                style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#07071a' }}>
+                                {partner.name?.charAt(0)?.toUpperCase()}
+                              </div>
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <p className="text-white font-bold text-sm truncate">{partner.name}</p>
+                              <p className="text-xs font-mono truncate" style={{ color: BRAND.green }}>
+                                {partner.matchifyCode || partner.email}
+                              </p>
+                              {partner.city && partner.state && (
+                                <p className="text-xs truncate" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                                  {partner.city}, {partner.state}
+                                </p>
+                              )}
+                            </div>
+                            <CheckCircleIcon className="w-5 h-5 flex-shrink-0" style={{ color: BRAND.green }} />
+                          </div>
+                        )}
+
+                        <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                          Partner receives a confirmation once you register.
+                        </p>
                       </div>
-                    </div>
-                  )}
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
-                  {/* Payment Details */}
-                  <div className="space-y-4 p-4 bg-slate-700/50 border border-white/10 rounded-xl">
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">UPI ID:</span>
-                      <span className="font-semibold text-white">{adminPaymentSettings?.upiId || 'Not provided'}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">Account Holder:</span>
-                      <span className="font-semibold text-white">{adminPaymentSettings?.accountHolder || 'Not provided'}</span>
-                    </div>
-                    <div className="flex justify-between border-t border-white/10 pt-4">
-                      <span className="text-gray-400 font-medium">Amount to Pay:</span>
-                      <span className="font-bold text-2xl text-purple-400">₹{calculateTotal()}</span>
-                    </div>
-                  </div>
+            {/* Payment Summary */}
+            {selectedCategories.length > 0 && (
+              <PaymentSummary
+                selectedCategories={selectedCategories}
+                categories={categories}
+                tournament={tournament}
+              />
+            )}
 
-                  <div className="mt-4 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl">
-                    <p className="text-sm text-amber-300">
-                      <strong>Important:</strong> Please pay exactly ₹{calculateTotal()} and take a screenshot of the successful payment.
-                    </p>
-                  </div>
+            {/* Proceed Button */}
+            <button
+              onClick={handleProceedToPayment}
+              disabled={selectedCategories.length === 0}
+              className="w-full py-4 rounded-2xl font-black text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              style={{
+                background: selectedCategories.length > 0
+                  ? 'linear-gradient(135deg,#7c3aed,#a855f7)'
+                  : 'rgba(255,255,255,0.08)',
+                color: selectedCategories.length > 0 ? '#fff' : 'rgba(255,255,255,0.4)',
+                boxShadow: selectedCategories.length > 0 ? '0 4px 20px rgba(168,85,247,0.4)' : 'none',
+              }}
+            >
+              Continue to Payment →
+            </button>
+          </>
+        )}
 
-                  {/* Security Notice */}
-                  <div className="mt-4 p-4 bg-teal-500/10 border border-teal-500/30 rounded-xl">
-                    <p className="text-sm text-teal-300">
-                      🔒 <strong>Secure Payment:</strong> All payments go to Matchify.pro. Admin will verify and pay organizer after verification.
-                    </p>
-                  </div>
-                </>
-              )}
-            </div>
-
-            {/* Right: Screenshot Upload */}
-            <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center">
-                  <Upload className="w-6 h-6 text-white" />
+        {/* ── STEP 2 ─────────────────────────────────────────────────────── */}
+        {step === 2 && (
+          <>
+            {/* QR & Payment Info */}
+            <div className="rounded-2xl overflow-hidden" style={{ background: BRAND.card, border: `1px solid ${BRAND.cardBorder}` }}>
+              <div className="px-4 py-3 flex items-center gap-3"
+                style={{ borderBottom: `1px solid ${BRAND.cardBorder}`, background: 'rgba(0,212,255,0.05)' }}>
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center"
+                  style={{ background: 'rgba(0,212,255,0.15)', border: '1px solid rgba(0,212,255,0.3)' }}>
+                  <QrCode className="w-4 h-4" style={{ color: BRAND.cyan }} />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-white">Upload Payment Screenshot</h3>
-                  <p className="text-gray-500 text-sm">Required for verification</p>
+                  <p className="text-sm font-black text-white">Pay via UPI</p>
+                  <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Scan QR or use UPI ID</p>
                 </div>
               </div>
 
-              {!paymentPreview ? (
-                <div 
-                  onClick={() => fileInputRef.current?.click()}
-                  className="border-2 border-dashed border-white/20 rounded-2xl p-8 text-center cursor-pointer hover:border-purple-500/50 hover:bg-purple-500/5 transition-all"
-                >
-                  <CameraIcon className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-                  <p className="text-gray-300 font-medium mb-2">Click to upload payment screenshot</p>
-                  <p className="text-sm text-gray-500">PNG, JPG up to 5MB</p>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleScreenshotSelect}
-                    className="hidden"
-                  />
-                </div>
-              ) : (
-                <div className="relative">
-                  <img 
-                    src={paymentPreview} 
-                    alt="Payment Screenshot" 
-                    className="w-full rounded-xl border border-white/10"
-                  />
-                  <button
-                    onClick={removeScreenshot}
-                    className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 shadow-lg"
-                  >
-                    <XMarkIcon className="w-5 h-5" />
-                  </button>
-                  <div className="mt-4 flex items-center gap-2 text-green-400">
-                    <CheckCircleIcon className="w-5 h-5" />
-                    <span className="font-medium">Screenshot uploaded</span>
+              <div className="p-4">
+                {!adminPaymentSettings?.qrCodeUrl && !adminPaymentSettings?.upiId ? (
+                  <div className="rounded-xl p-6 text-center"
+                    style={{ background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.2)' }}>
+                    <p className="text-sm font-semibold" style={{ color: '#f87171' }}>Payment details not set up. Contact support.</p>
                   </div>
-                </div>
-              )}
+                ) : (
+                  <>
+                    {adminPaymentSettings?.qrCodeUrl && (
+                      <div className="flex justify-center mb-4">
+                        <div className="p-3 bg-white rounded-2xl shadow-lg">
+                          <img
+                            src={adminPaymentSettings.qrCodeUrl}
+                            alt="Payment QR"
+                            className="w-52 h-52 object-contain rounded-xl"
+                            onError={e => { e.target.style.display = 'none'; }}
+                          />
+                        </div>
+                      </div>
+                    )}
 
-              {/* Submit Button */}
+                    <div className="space-y-2 rounded-xl p-3"
+                      style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                      <div className="flex justify-between text-sm">
+                        <span style={{ color: 'rgba(255,255,255,0.5)' }}>UPI ID</span>
+                        <span className="font-bold text-white">{adminPaymentSettings?.upiId || '—'}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span style={{ color: 'rgba(255,255,255,0.5)' }}>Account</span>
+                        <span className="font-bold text-white">{adminPaymentSettings?.accountHolder || '—'}</span>
+                      </div>
+                      <div className="flex justify-between items-center pt-2 mt-1" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                        <span className="text-sm font-bold text-white">Amount</span>
+                        <span className="text-2xl font-black" style={{ color: BRAND.cyan }}>₹{calculateTotal()}</span>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 px-3 py-2 rounded-xl text-xs font-semibold"
+                      style={{ background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.2)', color: '#fbbf24' }}>
+                      ⚠️ Pay exactly ₹{calculateTotal()} and screenshot the confirmation.
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Screenshot Upload */}
+            <div className="rounded-2xl overflow-hidden" style={{ background: BRAND.card, border: `1px solid ${BRAND.cardBorder}` }}>
+              <div className="px-4 py-3 flex items-center gap-3"
+                style={{ borderBottom: `1px solid ${BRAND.cardBorder}`, background: 'rgba(0,255,136,0.04)' }}>
+                <div className="w-9 h-9 rounded-xl flex items-center justify-center"
+                  style={{ background: 'rgba(0,255,136,0.15)', border: '1px solid rgba(0,255,136,0.3)' }}>
+                  <Upload className="w-4 h-4" style={{ color: BRAND.green }} />
+                </div>
+                <div>
+                  <p className="text-sm font-black text-white">Upload Screenshot</p>
+                  <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Required for verification</p>
+                </div>
+              </div>
+
+              <div className="p-4">
+                {!paymentPreview ? (
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className="border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all"
+                    style={{ borderColor: 'rgba(0,255,136,0.2)', background: 'rgba(0,255,136,0.02)' }}
+                  >
+                    <CameraIcon className="w-12 h-12 mx-auto mb-3" style={{ color: 'rgba(255,255,255,0.3)' }} />
+                    <p className="text-sm font-bold text-white mb-1">Tap to upload payment screenshot</p>
+                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>PNG, JPG up to 5MB</p>
+                    <input ref={fileInputRef} type="file" accept="image/*" onChange={handleScreenshotSelect} className="hidden" />
+                  </div>
+                ) : (
+                  <div className="relative">
+                    <img src={paymentPreview} alt="Payment Screenshot" className="w-full rounded-xl" />
+                    <button onClick={removeScreenshot}
+                      className="absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center"
+                      style={{ background: 'rgba(239,68,68,0.9)' }}>
+                      <XMarkIcon className="w-4 h-4 text-white" />
+                    </button>
+                    <div className="mt-3 flex items-center gap-2">
+                      <CheckCircleIcon className="w-4 h-4" style={{ color: BRAND.green }} />
+                      <span className="text-sm font-bold" style={{ color: BRAND.green }}>Screenshot uploaded</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* What's Next */}
+            <div className="rounded-xl px-4 py-3"
+              style={{ background: 'rgba(168,85,247,0.06)', border: '1px solid rgba(168,85,247,0.18)' }}>
+              <p className="text-xs font-black mb-2" style={{ color: BRAND.purple }}>What happens next?</p>
+              {['Organizer reviews your payment screenshot', 'Registration confirmed once verified', 'Notification sent when approved'].map((t, i) => (
+                <div key={i} className="flex items-start gap-2 mt-1.5">
+                  <span className="text-xs font-black mt-0.5" style={{ color: BRAND.purple }}>{i + 1}.</span>
+                  <p className="text-xs" style={{ color: 'rgba(255,255,255,0.55)' }}>{t}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Buttons */}
+            <div className="flex gap-3">
+              <button
+                onClick={() => { setStep(1); setError(''); }}
+                className="px-5 py-4 rounded-2xl font-bold text-sm"
+                style={{ background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.12)' }}
+              >
+                Back
+              </button>
               <button
                 onClick={handleRegister}
                 disabled={submitting || !paymentScreenshot || (!adminPaymentSettings?.qrCodeUrl && !adminPaymentSettings?.upiId)}
-                className="w-full mt-6 py-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:shadow-lg hover:shadow-green-500/30 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="flex-1 py-4 rounded-2xl font-black text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                style={{
+                  background: paymentScreenshot ? 'linear-gradient(135deg,#00c853,#00ff88)' : 'rgba(255,255,255,0.08)',
+                  color: paymentScreenshot ? '#07071a' : 'rgba(255,255,255,0.4)',
+                  boxShadow: paymentScreenshot ? '0 4px 20px rgba(0,200,83,0.4)' : 'none',
+                }}
               >
                 {submitting ? (
                   <>
-                    <Loader className="animate-spin h-5 w-5" />
-                    Submitting Registration...
+                    <Loader className="animate-spin h-4 w-4" />
+                    Submitting…
                   </>
                 ) : (
                   <>
-                    <CheckCircleIcon className="w-5 h-5" />
+                    <CheckCircleIcon className="w-4 h-4" />
                     Complete Registration
                   </>
                 )}
               </button>
-
-              {/* Info */}
-              <div className="mt-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl">
-                <h4 className="text-sm font-semibold text-blue-300 mb-2">What happens next?</h4>
-                <ul className="text-xs text-blue-400/80 space-y-1">
-                  <li>• Your registration will be marked as "Pending Verification"</li>
-                  <li>• The organizer will review your payment screenshot</li>
-                  <li>• Once verified, your registration will be confirmed</li>
-                  <li>• You'll receive a notification when approved</li>
-                </ul>
-              </div>
             </div>
-          </div>
-        )}
           </>
         )}
       </div>
 
-      {/* Success Modal */}
+      {/* ── Success Modal ──────────────────────────────────────────────────── */}
       {showSuccessModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-800 border border-white/10 rounded-3xl shadow-2xl max-w-md w-full p-8 animate-in fade-in zoom-in duration-300">
-            {/* Success Icon */}
-            <div className="text-center mb-6">
-              <div className="relative inline-block">
-                <div className="w-24 h-24 bg-gradient-to-br from-green-400 to-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-lg shadow-green-500/30">
-                  <CheckCircleIcon className="w-14 h-14 text-white" />
-                </div>
-                <div className="absolute -top-2 -right-2 w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg">
-                  <PartyPopper className="w-5 h-5 text-white" />
-                </div>
+        <div className="fixed inset-0 flex items-end justify-center z-50 p-4"
+          style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)' }}>
+          <div className="w-full max-w-sm rounded-3xl overflow-hidden"
+            style={{ background: '#0d0d2b', border: '1px solid rgba(255,255,255,0.1)' }}>
+            {/* Green success header */}
+            <div className="pt-8 pb-5 px-6 text-center"
+              style={{ background: 'linear-gradient(180deg,rgba(0,255,136,0.12) 0%,transparent 100%)' }}>
+              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+                style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', boxShadow: '0 0 30px rgba(0,200,83,0.5)' }}>
+                <CheckCircleIcon className="w-9 h-9 text-white" />
               </div>
+              <h2 className="text-xl font-black text-white mb-1">Registration Submitted!</h2>
+              <p className="text-sm" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                {tournament?.name}
+              </p>
             </div>
 
-            {/* Title */}
-            <h2 className="text-2xl font-bold text-white text-center mb-2">
-              Registration Submitted! 🎉
-            </h2>
-            
-            {/* Message */}
-            <p className="text-gray-400 text-center mb-6">
-              Your registration for <span className="font-semibold text-purple-400">{tournament?.name}</span> has been submitted successfully.
-            </p>
-
-            {/* Status Card with Halo Effect */}
-            <div className="relative mb-6">
-              <div className="absolute inset-0 bg-gradient-to-r from-amber-500/30 via-orange-500/30 to-amber-500/30 blur-xl rounded-2xl"></div>
-              <div className="relative bg-amber-500/10 border border-amber-500/30 rounded-2xl p-5">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 bg-amber-500/20 rounded-xl flex items-center justify-center">
-                    <ClockIcon className="w-5 h-5 text-amber-400" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-amber-300">Pending Verification</h3>
-                    <p className="text-sm text-amber-400/80">Awaiting organizer approval</p>
-                  </div>
+            <div className="px-5 pb-6 space-y-3">
+              {/* Status */}
+              <div className="rounded-xl p-4"
+                style={{ background: 'rgba(251,191,36,0.07)', border: '1px solid rgba(251,191,36,0.2)' }}>
+                <div className="flex items-center gap-3 mb-2">
+                  <ClockIcon className="w-5 h-5 flex-shrink-0" style={{ color: '#fbbf24' }} />
+                  <p className="font-black text-sm" style={{ color: '#fbbf24' }}>Pending Verification</p>
                 </div>
-                <div className="space-y-2 text-sm text-amber-300/90">
+                <div className="space-y-1 text-xs" style={{ color: 'rgba(251,191,36,0.8)' }}>
                   <p>✓ Payment screenshot uploaded</p>
                   <p>✓ Registration details saved</p>
-                  <p>⏳ Waiting for admin to verify payment</p>
+                  <p>⏳ Awaiting organizer approval</p>
                 </div>
               </div>
-            </div>
 
-            {/* What's Next with Halo Effect */}
-            <div className="relative mb-6">
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-indigo-500/20 to-purple-500/20 blur-xl rounded-xl"></div>
-              <div className="relative bg-slate-700/50 border border-white/10 rounded-xl p-4">
-                <h4 className="font-semibold text-white mb-2">What happens next?</h4>
-                <ul className="text-sm text-gray-300 space-y-2">
-                  <li className="flex items-start gap-2">
-                    <span className="text-purple-400 mt-0.5">1.</span>
-                    <span>The organizer will review your payment screenshot</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-purple-400 mt-0.5">2.</span>
-                    <span>Once verified, your registration will be confirmed</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-purple-400 mt-0.5">3.</span>
-                    <span>You'll receive a notification when approved</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-
-            {/* Buttons */}
-            <div className="space-y-3">
+              {/* Buttons */}
               <button
                 onClick={() => navigate('/registrations')}
-                className="w-full py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:shadow-lg hover:shadow-purple-500/30 transition-all font-semibold"
+                className="w-full py-4 rounded-2xl font-black text-sm"
+                style={{ background: 'linear-gradient(135deg,#7c3aed,#a855f7)', color: '#fff', boxShadow: '0 4px 20px rgba(168,85,247,0.4)' }}
               >
                 View My Registrations
               </button>
               <button
                 onClick={() => navigate('/tournaments')}
-                className="w-full py-3 border border-white/10 text-gray-300 rounded-xl hover:bg-slate-700/50 transition-all font-medium"
+                className="w-full py-3 rounded-2xl font-bold text-sm"
+                style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.1)' }}
               >
                 Browse More Tournaments
               </button>

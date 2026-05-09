@@ -124,9 +124,9 @@ const ViewDrawsPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#07071a' }}>
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-12 h-12 border-4 rounded-full animate-spin mx-auto mb-4" style={{ borderColor: 'rgba(0,255,136,0.3)', borderTopColor: '#00ff88' }}></div>
           <p className="text-gray-400">Loading draws...</p>
         </div>
       </div>
@@ -134,7 +134,7 @@ const ViewDrawsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    <div className="min-h-screen" style={{ background: '#07071a' }}>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -143,7 +143,7 @@ const ViewDrawsPage = () => {
             <span className="font-medium">Back to Tournament</span>
           </button>
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl shadow-lg shadow-emerald-500/20">
+            <div className="p-3 rounded-xl shadow-lg" style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', boxShadow: '0 4px 24px rgba(0,255,136,0.2)' }}>
               <GitBranch className="w-6 h-6 text-white" />
             </div>
             <div>
@@ -162,10 +162,10 @@ const ViewDrawsPage = () => {
           </div>
         )}
         {success && (
-          <div className="mb-6 bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 flex items-center gap-3">
-            <CheckCircle className="w-5 h-5 text-emerald-400 flex-shrink-0" />
-            <span className="text-emerald-300 font-medium">{success}</span>
-            <button onClick={() => setSuccess(null)} className="ml-auto text-emerald-400 hover:text-emerald-300"><X className="w-5 h-5" /></button>
+          <div className="mb-6 rounded-xl p-4 flex items-center gap-3" style={{ background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.3)' }}>
+            <CheckCircle className="w-5 h-5 flex-shrink-0" style={{ color: '#00ff88' }} />
+            <span className="font-medium" style={{ color: '#00ff88' }}>{success}</span>
+            <button onClick={() => setSuccess(null)} className="ml-auto" style={{ color: '#00ff88' }}><X className="w-5 h-5" /></button>
           </div>
         )}
 
@@ -175,7 +175,7 @@ const ViewDrawsPage = () => {
             <h3 className="text-xl font-semibold text-white mb-2">No Categories</h3>
             <p className="text-gray-400 mb-6">Add categories to this tournament to create draws.</p>
             {isOrganizer && (
-              <button onClick={() => navigate(`/tournaments/${id}/categories`)} className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl hover:shadow-lg transition-all font-semibold">
+              <button onClick={() => navigate(`/tournaments/${id}/categories`)} className="px-6 py-3 text-white rounded-xl hover:shadow-lg transition-all font-semibold" style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)' }}>
                 Manage Categories
               </button>
             )}
@@ -191,11 +191,10 @@ const ViewDrawsPage = () => {
                     <button
                       key={category.id}
                       onClick={() => setSelectedCategory(category)}
-                      className={`w-full text-left px-4 py-3 rounded-xl transition-all ${
-                        selectedCategory?.id === category.id
-                          ? 'bg-emerald-500/20 border border-emerald-500/50 text-white'
-                          : 'bg-slate-700/30 border border-white/5 text-gray-300 hover:bg-slate-700/50'
-                      }`}
+                      className="w-full text-left px-4 py-3 rounded-xl transition-all"
+                      style={selectedCategory?.id === category.id
+                        ? { background: 'rgba(0,255,136,0.1)', border: '1px solid rgba(0,255,136,0.4)', color: '#fff' }
+                        : { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.05)', color: '#d1d5db' }}
                     >
                       <div className="font-medium">{category.name}</div>
                       <div className="text-xs text-gray-400 mt-1">
@@ -222,7 +221,7 @@ const ViewDrawsPage = () => {
                     {isOrganizer && (
                       <button
                         onClick={() => setShowConfigModal(true)}
-                        className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl hover:shadow-lg hover:shadow-emerald-500/25 transition-all font-semibold"
+                        className="flex items-center gap-2 px-4 py-2 text-white rounded-xl hover:shadow-lg transition-all font-semibold" style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)' }}
                       >
                         {draw ? <Settings className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
                         {draw ? 'Edit Draw' : 'Create Draw'}
@@ -235,15 +234,15 @@ const ViewDrawsPage = () => {
                       <DrawBracket draw={draw} categoryFormat={selectedCategory?.format} />
                     ) : (
                       <div className="text-center py-12">
-                        <div className="w-20 h-20 bg-emerald-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                          <GitBranch className="w-10 h-10 text-emerald-400" />
+                        <div className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: 'rgba(0,255,136,0.08)' }}>
+                          <GitBranch className="w-10 h-10" style={{ color: '#00ff88' }} />
                         </div>
                         <h3 className="text-xl font-semibold text-white mb-2">Draw Not Generated Yet</h3>
                         <p className="text-gray-400 mb-6">Click "Create Draw" to set up the tournament bracket.</p>
                         {isOrganizer && (
                           <button
                             onClick={() => setShowConfigModal(true)}
-                            className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl hover:shadow-lg hover:shadow-emerald-500/25 transition-all font-semibold"
+                            className="px-6 py-3 text-white rounded-xl hover:shadow-lg transition-all font-semibold" style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)' }}
                           >
                             <Plus className="w-5 h-5 inline mr-2" />
                             Create Draw
@@ -303,7 +302,7 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-slate-800 border border-white/10 rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+      <div className="border border-white/10 rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto" style={{ background: '#0d1025' }}>
         <div className="p-6 border-b border-white/10">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold text-white">Configure Draw</h2>
@@ -321,11 +320,10 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
                 <button
                   key={option.value}
                   onClick={() => setConfig({ ...config, format: option.value })}
-                  className={`w-full p-4 rounded-xl text-left transition-all ${
-                    config.format === option.value
-                      ? 'bg-emerald-500/20 border-2 border-emerald-500'
-                      : 'bg-slate-700/50 border-2 border-transparent hover:border-white/20'
-                  }`}
+                  className="w-full p-4 rounded-xl text-left transition-all"
+                  style={config.format === option.value
+                    ? { background: 'rgba(0,255,136,0.1)', border: '2px solid #00ff88' }
+                    : { background: 'rgba(255,255,255,0.04)', border: '2px solid transparent' }}
                 >
                   <div className="flex items-center gap-3">
                     <span className="text-2xl">{option.icon}</span>
@@ -345,7 +343,7 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
             <select
               value={config.bracketSize}
               onChange={(e) => setConfig({ ...config, bracketSize: parseInt(e.target.value) })}
-              className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white focus:outline-none focus:border-emerald-500"
+              className="w-full px-4 py-3 border rounded-xl text-white focus:outline-none" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}
             >
               {[4, 8, 16, 32, 64, 128].filter(n => n >= 4).map(size => (
                 <option key={size} value={size}>{size} Players</option>
@@ -363,11 +361,10 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
                     <button
                       key={num}
                       onClick={() => setConfig({ ...config, numberOfGroups: num, playersPerGroup: Math.floor(config.bracketSize / num) })}
-                      className={`py-3 rounded-xl font-semibold transition-all ${
-                        config.numberOfGroups === num
-                          ? 'bg-emerald-500 text-white'
-                          : 'bg-slate-700/50 text-gray-300 hover:bg-slate-700'
-                      }`}
+                      className="py-3 rounded-xl font-semibold transition-all"
+                      style={config.numberOfGroups === num
+                        ? { background: '#00ff88', color: '#07071a' }
+                        : { background: 'rgba(255,255,255,0.06)', color: '#d1d5db' }}
                     >
                       {num}
                     </button>
@@ -386,11 +383,10 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
                       <button
                         key={num}
                         onClick={() => setConfig({ ...config, advanceFromGroup: num })}
-                        className={`py-3 rounded-xl font-semibold transition-all ${
-                          config.advanceFromGroup === num
-                            ? 'bg-emerald-500 text-white'
-                            : 'bg-slate-700/50 text-gray-300 hover:bg-slate-700'
-                        }`}
+                        className="py-3 rounded-xl font-semibold transition-all"
+                        style={config.advanceFromGroup === num
+                          ? { background: '#00ff88', color: '#07071a' }
+                          : { background: 'rgba(255,255,255,0.06)', color: '#d1d5db' }}
                       >
                         Top {num}
                       </button>
@@ -431,7 +427,7 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex-1 px-4 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl hover:shadow-lg hover:shadow-emerald-500/25 transition-all font-semibold disabled:opacity-50"
+            className="flex-1 px-4 py-3 text-white rounded-xl hover:shadow-lg transition-all font-semibold disabled:opacity-50" style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', color: '#07071a' }}
           >
             {saving ? 'Creating...' : 'Create Draw'}
           </button>
@@ -513,7 +509,7 @@ const KnockoutBracket = ({ data, categoryFormat }) => {
                         Match {match.matchNumber}
                       </span>
                       {hasWinner && (
-                        <span className="text-[10px] font-semibold text-emerald-400 tracking-wider uppercase">
+                        <span className="text-[10px] font-semibold tracking-wider uppercase" style={{ color: '#00ff88' }}>
                           Completed
                         </span>
                       )}
@@ -522,11 +518,10 @@ const KnockoutBracket = ({ data, categoryFormat }) => {
                     {/* Players Container - Optimized spacing */}
                     <div className="px-4 py-4 space-y-2">
                       {/* Player 1 */}
-                      <div className={`flex items-center justify-between py-2.5 px-3 rounded-md transition-colors ${
-                        isPlayer1Winner 
-                          ? 'bg-emerald-500/10 border border-emerald-500/20' 
-                          : 'bg-slate-700/30'
-                      }`}>
+                      <div className="flex items-center justify-between py-2.5 px-3 rounded-md transition-colors"
+                        style={isPlayer1Winner
+                          ? { background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.2)' }
+                          : { background: 'rgba(255,255,255,0.04)' }}>
                         <div className="flex items-center gap-2 flex-1 min-w-0">
                           {isPlayer1Winner && (
                             <span className="text-base flex-shrink-0">👑</span>
@@ -545,11 +540,10 @@ const KnockoutBracket = ({ data, categoryFormat }) => {
                       </div>
 
                       {/* Player 2 */}
-                      <div className={`flex items-center justify-between py-2.5 px-3 rounded-md transition-colors ${
-                        isPlayer2Winner 
-                          ? 'bg-emerald-500/10 border border-emerald-500/20' 
-                          : 'bg-slate-700/30'
-                      }`}>
+                      <div className="flex items-center justify-between py-2.5 px-3 rounded-md transition-colors"
+                        style={isPlayer2Winner
+                          ? { background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.2)' }
+                          : { background: 'rgba(255,255,255,0.04)' }}>
                         <div className="flex items-center gap-2 flex-1 min-w-0">
                           {isPlayer2Winner && (
                             <span className="text-base flex-shrink-0">👑</span>
@@ -601,7 +595,7 @@ const RoundRobinDraw = ({ data, categoryFormat }) => {
                     <td className="py-2 px-3 text-gray-500">{pi + 1}</td>
                     <td className="py-2 px-3 text-white">{p.name || `Slot ${pi + 1}`}</td>
                     <td className="py-2 px-3 text-center text-gray-400">{p.played || 0}</td>
-                    <td className="py-2 px-3 text-center text-emerald-400">{p.wins || 0}</td>
+                    <td className="py-2 px-3 text-center" style={{ color: '#00ff88' }}>{p.wins || 0}</td>
                     <td className="py-2 px-3 text-center text-red-400">{p.losses || 0}</td>
                     <td className="py-2 px-3 text-center text-amber-400 font-semibold">{p.points || 0}</td>
                   </tr>
@@ -622,7 +616,7 @@ const GroupsKnockoutDraw = ({ data, categoryFormat }) => {
       {/* Group Stage */}
       <div>
         <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-          <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-lg text-sm">Stage 1</span>
+          <span className="px-3 py-1 rounded-lg text-sm" style={{ background: 'rgba(0,255,136,0.1)', color: '#00ff88' }}>Stage 1</span>
           Group Stage (Round Robin)
         </h3>
         <RoundRobinDraw data={data} categoryFormat={categoryFormat} />
@@ -632,7 +626,7 @@ const GroupsKnockoutDraw = ({ data, categoryFormat }) => {
       {data.knockout && (
         <div>
           <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-            <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-lg text-sm">Stage 2</span>
+            <span className="px-3 py-1 rounded-lg text-sm" style={{ background: 'rgba(0,255,136,0.1)', color: '#00ff88' }}>Stage 2</span>
             Knockout Stage
           </h3>
           <KnockoutBracket data={data.knockout} categoryFormat={categoryFormat} />

@@ -433,21 +433,21 @@ const TournamentDetailPage = () => {
 
   const getStatusStyle = (status) => {
     const styles = {
-      published: { bg: 'bg-green-100', text: 'text-green-700', label: 'Open for Registration' },
-      ongoing: { bg: 'bg-blue-100', text: 'text-blue-700', label: 'Ongoing' },
-      completed: { bg: 'bg-gray-100', text: 'text-gray-700', label: 'Completed' },
-      draft: { bg: 'bg-amber-100', text: 'text-amber-700', label: 'Draft' },
-      cancelled: { bg: 'bg-red-100', text: 'text-red-700', label: 'Cancelled' },
+      published: { bg: 'bg-green-100', text: 'text-green-700', label: 'Open for Registration', inlineBg: 'rgba(0,255,136,0.15)', inlineColor: '#00ff88', inlineBorder: 'rgba(0,255,136,0.3)' },
+      ongoing:   { bg: 'bg-blue-100',  text: 'text-blue-700',  label: 'Ongoing',               inlineBg: 'rgba(59,130,246,0.15)', inlineColor: '#60a5fa', inlineBorder: 'rgba(59,130,246,0.3)' },
+      completed: { bg: 'bg-gray-100',  text: 'text-gray-700',  label: 'Completed',             inlineBg: 'rgba(255,255,255,0.08)', inlineColor: 'rgba(255,255,255,0.6)', inlineBorder: 'rgba(255,255,255,0.15)' },
+      draft:     { bg: 'bg-amber-100', text: 'text-amber-700', label: 'Draft',                 inlineBg: 'rgba(251,191,36,0.15)', inlineColor: '#fbbf24', inlineBorder: 'rgba(251,191,36,0.3)' },
+      cancelled: { bg: 'bg-red-100',   text: 'text-red-700',   label: 'Cancelled',             inlineBg: 'rgba(239,68,68,0.15)',  inlineColor: '#f87171', inlineBorder: 'rgba(239,68,68,0.3)' },
     };
     return styles[status] || styles.draft;
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #0a0a1f 0%, #07071a 50%, #0a0a1f 100%)' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#07071a' }}>
         <div className="text-center">
-          <div className="w-16 h-16 border-4 rounded-full animate-spin mx-auto" style={{ borderColor: 'rgba(16,185,129,0.3)', borderTopColor: '#10b981' }}></div>
-          <p className="text-gray-400 mt-4 font-medium">Loading tournament...</p>
+          <div className="w-16 h-16 border-4 rounded-full animate-spin mx-auto" style={{ borderColor: 'rgba(0,255,136,0.3)', borderTopColor: '#00ff88' }}></div>
+          <p className="mt-4 font-medium" style={{ color: 'rgba(255,255,255,0.6)' }}>Loading tournament...</p>
         </div>
       </div>
     );
@@ -455,16 +455,16 @@ const TournamentDetailPage = () => {
 
   if (error || !tournament) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
-        <div className="text-center bg-white rounded-2xl shadow-xl p-10 max-w-md">
-          <div className="w-16 h-16 bg-red-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <ExclamationTriangleIcon className="w-8 h-8 text-red-600" />
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#07071a' }}>
+        <div className="text-center rounded-2xl shadow-xl p-10 max-w-md border" style={{ background: '#0d1025', borderColor: 'rgba(255,255,255,0.1)' }}>
+          <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: 'rgba(239,68,68,0.15)' }}>
+            <ExclamationTriangleIcon className="w-8 h-8 text-red-400" />
           </div>
-          <p className="text-red-600 text-lg font-semibold mb-4">{error || 'Tournament not found'}</p>
+          <p className="text-red-400 text-lg font-semibold mb-4">{error || 'Tournament not found'}</p>
           <button
             onClick={() => navigate('/tournaments')}
             className="px-6 py-3 rounded-xl font-bold transition-all text-sm"
-            style={{ background: 'linear-gradient(135deg,#10b981,#059669)', color: '#ffffff', boxShadow: '0 4px 15px rgba(16,185,129,0.3)' }}
+            style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#003320', boxShadow: '0 4px 15px rgba(0,255,136,0.3)' }}
           >
             Back to Tournaments
           </button>
@@ -476,17 +476,12 @@ const TournamentDetailPage = () => {
   const statusStyle = getStatusStyle(tournament.status);
 
   return (
-    <div className="min-h-screen relative overflow-hidden" style={{ background: 'linear-gradient(180deg, #0a0a1f 0%, #07071a 50%, #0a0a1f 100%)' }}>
-      {/* Animated Background - Floating Particles */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-2 h-2 bg-emerald-400 rounded-full animate-float opacity-60"></div>
-        <div className="absolute top-40 right-20 w-3 h-3 bg-teal-400 rounded-full animate-float-delayed opacity-50" style={{animationDelay: '1s'}}></div>
-        <div className="absolute top-60 left-1/4 w-2 h-2 bg-emerald-300 rounded-full animate-float opacity-70" style={{animationDelay: '2s'}}></div>
-        <div className="absolute bottom-40 right-1/3 w-3 h-3 bg-teal-500 rounded-full animate-float-delayed opacity-60" style={{animationDelay: '0.5s'}}></div>
-        <div className="absolute bottom-20 left-1/3 w-2 h-2 bg-emerald-400 rounded-full animate-float opacity-50" style={{animationDelay: '1.5s'}}></div>
-        <div className="absolute top-1/3 right-10 w-2 h-2 bg-teal-300 rounded-full animate-float-delayed opacity-70" style={{animationDelay: '2.5s'}}></div>
-        <div className="absolute top-1/2 left-20 w-3 h-3 bg-emerald-500 rounded-full animate-float opacity-60" style={{animationDelay: '0.8s'}}></div>
-        <div className="absolute bottom-1/3 right-1/4 w-2 h-2 bg-teal-400 rounded-full animate-float-delayed opacity-50" style={{animationDelay: '1.8s'}}></div>
+    <div className="min-h-screen relative overflow-hidden" style={{ background: '#07071a' }}>
+      {/* Background orbs */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-80 h-80 rounded-full blur-3xl opacity-[0.06]" style={{ background: '#a855f7' }} />
+        <div className="absolute bottom-1/4 right-1/4 w-72 h-72 rounded-full blur-3xl opacity-[0.05]" style={{ background: '#00ff88' }} />
+        <div className="absolute top-3/4 left-3/4 w-64 h-64 rounded-full blur-3xl opacity-[0.04]" style={{ background: '#00d4ff' }} />
       </div>
 
       {/* ── HERO SECTION ── Cinematic poster + info */}
@@ -620,7 +615,8 @@ const TournamentDetailPage = () => {
               Back
             </button>
             <div className="flex flex-wrap items-center gap-2 mb-2">
-              <span className={`px-3 py-1 rounded-full text-xs font-bold ${statusStyle.bg} ${statusStyle.text}`}>
+              <span className="px-3 py-1 rounded-full text-xs font-bold border"
+                style={{ background: statusStyle.inlineBg, color: statusStyle.inlineColor, borderColor: statusStyle.inlineBorder }}>
                 {statusStyle.label}
               </span>
             </div>
@@ -721,25 +717,25 @@ const TournamentDetailPage = () => {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-4">
             {/* Description - Compact */}
-            <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-xl p-4">
+            <div className="rounded-xl p-4 border" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}>
               <h2 className="text-base font-bold text-white mb-3">About Tournament</h2>
-              <p className="text-gray-400 text-sm whitespace-pre-wrap leading-relaxed break-words max-w-full overflow-hidden">
+              <p className="text-sm whitespace-pre-wrap leading-relaxed break-words max-w-full overflow-hidden" style={{ color: 'rgba(255,255,255,0.55)' }}>
                 {tournament.description || 'No description provided.'}
               </p>
             </div>
 
             {/* Key Details - Compact */}
-            <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-xl p-4">
+            <div className="rounded-xl p-4 border" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}>
               <h2 className="text-base font-bold text-white mb-3">Tournament Details</h2>
               <div className="grid grid-cols-1 gap-4">
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 bg-emerald-500/20 border border-emerald-500/30 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <MapPinIcon className="h-5 w-5 text-emerald-400" />
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(0,255,136,0.12)', border: '1px solid rgba(0,255,136,0.25)' }}>
+                    <MapPinIcon className="h-5 w-5" style={{ color: '#00ff88' }} />
                   </div>
                   <div className="min-w-0">
                     <p className="font-bold text-white text-sm">Venue</p>
-                    <p className="text-gray-400 text-sm">{tournament.venue}</p>
-                    <p className="text-xs text-gray-400 truncate">
+                    <p className="text-sm" style={{ color: 'rgba(255,255,255,0.55)' }}>{tournament.venue}</p>
+                    <p className="text-xs truncate" style={{ color: 'rgba(255,255,255,0.4)' }}>
                       {tournament.address}, {tournament.city}, {tournament.state} - {tournament.pincode}
                     </p>
                   </div>
@@ -751,8 +747,8 @@ const TournamentDetailPage = () => {
                   </div>
                   <div className="min-w-0">
                     <p className="font-bold text-white text-sm">Tournament Schedule</p>
-                    <p className="text-gray-400 text-sm">Start: {formatDate(tournament.startDate)}</p>
-                    <p className="text-gray-400 text-sm">End: {formatDate(tournament.endDate)}</p>
+                    <p className="text-sm" style={{ color: 'rgba(255,255,255,0.55)' }}>Start: {formatDate(tournament.startDate)}</p>
+                    <p className="text-sm" style={{ color: 'rgba(255,255,255,0.55)' }}>End: {formatDate(tournament.endDate)}</p>
                   </div>
                 </div>
 
@@ -762,26 +758,26 @@ const TournamentDetailPage = () => {
                   </div>
                   <div className="min-w-0">
                     <p className="font-bold text-white text-sm">Registration Period</p>
-                    <p className="text-xs text-gray-400">Opens: {formatDateTime(tournament.registrationOpenDate)}</p>
-                    <p className="text-xs text-gray-400">Closes: {formatDateTime(tournament.registrationCloseDate)}</p>
+                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>Opens: {formatDateTime(tournament.registrationOpenDate)}</p>
+                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>Closes: {formatDateTime(tournament.registrationCloseDate)}</p>
                   </div>
                 </div>
 
                 {/* Shuttle Information */}
                 {(tournament.shuttleType || tournament.shuttleBrand) && (
                   <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 bg-emerald-500/20 border border-emerald-500/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(0,255,136,0.12)', border: '1px solid rgba(0,255,136,0.25)' }}>
                       <span className="text-xl">🏸</span>
                     </div>
                     <div className="min-w-0">
                       <p className="font-bold text-white text-sm">Shuttle Information</p>
                       {tournament.shuttleType && (
-                        <p className="text-gray-400 text-sm">
+                        <p className="text-sm" style={{ color: 'rgba(255,255,255,0.55)' }}>
                           Type: <span className="text-white font-medium">{tournament.shuttleType}</span>
                         </p>
                       )}
                       {tournament.shuttleBrand && (
-                        <p className="text-gray-400 text-sm">
+                        <p className="text-sm" style={{ color: 'rgba(255,255,255,0.55)' }}>
                           Brand: <span className="text-white font-medium">{tournament.shuttleBrand}</span>
                         </p>
                       )}
@@ -792,7 +788,7 @@ const TournamentDetailPage = () => {
             </div>
 
             {/* Categories - Compact */}
-            <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-xl p-4">
+            <div className="rounded-xl p-4 border" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}>
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-8 h-8 bg-gradient-to-br from-amber-400 to-orange-500 rounded-lg flex items-center justify-center">
                   <TrophyIcon className="w-4 h-4 text-white" />
@@ -837,7 +833,7 @@ const TournamentDetailPage = () => {
                     return (
                     <div
                       key={category.id}
-                      className="border border-white/10 rounded-xl p-4 hover:border-emerald-500/50 hover:shadow-[0_0_15px_rgba(16,185,129,0.15)] transition-all bg-slate-700/50"
+                      className="rounded-xl p-4 border transition-all" style={{ background: 'rgba(0,0,0,0.2)', borderColor: 'rgba(255,255,255,0.08)' }}
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex-1 min-w-0">
@@ -845,19 +841,19 @@ const TournamentDetailPage = () => {
                             {category.name}
                           </h3>
                           <div className="flex flex-wrap gap-1.5 mb-2">
-                            <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full text-xs font-medium">
+                            <span className="px-2 py-0.5 rounded-full text-xs font-medium border" style={{ background: 'rgba(0,255,136,0.12)', color: '#00ff88', borderColor: 'rgba(0,255,136,0.3)' }}>
                               {category.format}
                             </span>
-                            <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-full text-xs font-medium">
+                            <span className="px-2 py-0.5 rounded-full text-xs font-medium border" style={{ background: 'rgba(59,130,246,0.12)', color: '#60a5fa', borderColor: 'rgba(59,130,246,0.3)' }}>
                               {category.gender}
                             </span>
                             {category.ageGroup && (
-                              <span className="px-2 py-0.5 bg-green-500/20 text-green-400 border border-green-500/30 rounded-full text-xs font-medium">
+                              <span className="px-2 py-0.5 rounded-full text-xs font-medium border" style={{ background: 'rgba(0,212,255,0.12)', color: '#00d4ff', borderColor: 'rgba(0,212,255,0.3)' }}>
                                 {category.ageGroup}
                               </span>
                             )}
                             {category.maxParticipants && (
-                              <span className="px-2 py-0.5 bg-slate-600/50 text-gray-300 border border-white/10 rounded-full text-xs font-medium">
+                              <span className="px-2 py-0.5 rounded-full text-xs font-medium border" style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.6)', borderColor: 'rgba(255,255,255,0.12)' }}>
                                 Max {category.maxParticipants}
                               </span>
                             )}
@@ -868,16 +864,17 @@ const TournamentDetailPage = () => {
                             <div className="flex flex-wrap gap-2 text-xs">
                               {/* Tournament Format */}
                               <div className="flex items-center gap-1">
-                                <span className={`px-2 py-0.5 rounded-lg text-xs font-bold ${
-                                  formatInfo.color === 'amber' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
-                                  formatInfo.color === 'emerald' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
-                                  'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                                }`}>
+                                <span className="px-2 py-0.5 rounded-lg text-xs font-bold border"
+                                  style={{
+                                    background: formatInfo.color === 'amber' ? 'rgba(251,191,36,0.12)' : formatInfo.color === 'purple' ? 'rgba(168,85,247,0.12)' : 'rgba(0,255,136,0.12)',
+                                    color: formatInfo.color === 'amber' ? '#fbbf24' : formatInfo.color === 'purple' ? '#a855f7' : '#00ff88',
+                                    borderColor: formatInfo.color === 'amber' ? 'rgba(251,191,36,0.3)' : formatInfo.color === 'purple' ? 'rgba(168,85,247,0.3)' : 'rgba(0,255,136,0.3)',
+                                  }}>
                                   {formatInfo.icon} {formatInfo.label}
                                 </span>
                               </div>
                               {/* Scoring Format */}
-                              <div className="flex items-center gap-1 text-gray-400">
+                              <div className="flex items-center gap-1" style={{ color: 'rgba(255,255,255,0.45)' }}>
                                 <span className="text-xs">🎯</span>
                                 <span className="text-xs font-medium">{scoring.points} pts × {scoring.sets} {parseInt(scoring.sets) === 1 ? 'set' : 'sets'}</span>
                               </div>
@@ -892,17 +889,17 @@ const TournamentDetailPage = () => {
                               </div>
                               <div className="flex flex-wrap gap-2 text-xs">
                                 {category.prizeWinner && (
-                                  <span className="text-green-400 font-medium">🥇 ₹{category.prizeWinner}</span>
+                                  <span className="font-medium" style={{ color: '#00ff88' }}>🥇 ₹{category.prizeWinner}</span>
                                 )}
                                 {category.prizeRunnerUp && (
-                                  <span className="text-blue-400 font-medium">🥈 ₹{category.prizeRunnerUp}</span>
+                                  <span className="font-medium" style={{ color: '#60a5fa' }}>🥈 ₹{category.prizeRunnerUp}</span>
                                 )}
                                 {category.prizeSemiFinalist && (
                                   <span className="text-orange-400 font-medium">🥉 ₹{category.prizeSemiFinalist}</span>
                                 )}
                               </div>
                               {category.prizeDescription && (
-                                <p className="text-xs text-gray-500 mt-1">+ {category.prizeDescription}</p>
+                                <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.35)' }}>+ {category.prizeDescription}</p>
                               )}
                             </div>
                           )}
@@ -912,7 +909,7 @@ const TournamentDetailPage = () => {
                             <CurrencyRupeeIcon className="h-5 w-5" />
                             {category.entryFee}
                           </div>
-                          <p className="text-xs text-gray-400 mt-0.5">
+                          <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.45)' }}>
                             {category.registrationCount || 0} registered
                           </p>
                         </div>
@@ -945,10 +942,10 @@ const TournamentDetailPage = () => {
                 </div>
               ) : (
                 <div className="text-center py-10">
-                  <div className="w-16 h-16 bg-slate-700/50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <Layers className="w-8 h-8 text-gray-500" />
+                  <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                    <Layers className="w-8 h-8" style={{ color: 'rgba(255,255,255,0.3)' }} />
                   </div>
-                  <p className="text-gray-400">No categories available yet</p>
+                  <p style={{ color: 'rgba(255,255,255,0.5)' }}>No categories available yet</p>
                 </div>
               )}
             </div>
@@ -958,22 +955,24 @@ const TournamentDetailPage = () => {
           <div className="space-y-4">
             {/* Register Button - Show for published tournaments */}
             {tournament.status === 'published' && (
-              <div className="bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-xl p-4 text-white shadow-xl shadow-emerald-500/30">
+              <div className="rounded-xl p-4 text-white border" style={{ background: 'linear-gradient(135deg,rgba(0,255,136,0.15),rgba(0,200,83,0.1))', borderColor: 'rgba(0,255,136,0.3)', boxShadow: '0 4px 20px rgba(0,255,136,0.1)' }}>
                 <h3 className="font-bold text-base mb-1">Ready to Compete?</h3>
-                <p className="text-emerald-100 text-xs mb-3">
+                <p className="text-xs mb-3" style={{ color: 'rgba(255,255,255,0.65)' }}>
                   Registration closes on {formatDate(tournament.registrationCloseDate)}
                 </p>
                 {user && canRegister() ? (
                   <button
                     onClick={() => navigate(`/tournaments/${id}/register`)}
-                    className="w-full bg-white text-emerald-700 px-5 py-3 rounded-xl hover:bg-emerald-50 font-bold text-base transition-all hover:scale-105"
+                    className="w-full px-5 py-3 rounded-xl font-bold text-base transition-all hover:scale-105"
+                    style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#003320' }}
                   >
                     Register Now
                   </button>
                 ) : (
                   <button
                     onClick={() => setShowLoginModal(true)}
-                    className="w-full bg-white text-emerald-700 px-5 py-3 rounded-xl hover:bg-emerald-50 font-bold text-base transition-all hover:scale-105"
+                    className="w-full px-5 py-3 rounded-xl font-bold text-base transition-all hover:scale-105"
+                    style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#003320' }}
                   >
                     Register Now
                   </button>
@@ -982,31 +981,26 @@ const TournamentDetailPage = () => {
             )}
 
             {/* Organizer Info - Compact */}
-            <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-xl p-4">
+            <div className="rounded-xl p-4 border" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}>
               <h3 className="font-bold text-white text-sm mb-3">Organized By</h3>
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-lg flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
+                <div className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold text-lg flex-shrink-0" style={{ background: 'linear-gradient(135deg,#a855f7,#7c3aed)' }}>
                   {tournament.organizer.name?.charAt(0)?.toUpperCase()}
                 </div>
                 <div className="min-w-0">
                   <p className="font-bold text-white text-sm truncate">{tournament.organizer.name}</p>
-                  <p className="text-xs text-gray-400 truncate">{tournament.organizer.email}</p>
+                  <p className="text-xs truncate" style={{ color: 'rgba(255,255,255,0.5)' }}>{tournament.organizer.email}</p>
                   {tournament.organizer.phone && (
-                    <p className="text-xs text-gray-400">{tournament.organizer.phone}</p>
+                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>{tournament.organizer.phone}</p>
                   )}
                 </div>
               </div>
             </div>
 
-            {/* Quick Stats - Colorful Mobile Design */}
-            <div 
+            {/* Quick Stats */}
+            <div
               className="rounded-2xl p-5 relative overflow-hidden"
-              style={{
-                background: 'linear-gradient(135deg, rgba(15,23,42,0.95) 0%, rgba(30,41,59,0.95) 100%)',
-                border: '2px solid rgba(100,116,139,0.3)',
-                backdropFilter: 'blur(20px)',
-                boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
-              }}
+              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
             >
               <h3 className="font-black text-white text-lg mb-4">Quick Stats</h3>
               <div className="space-y-3">
@@ -1046,20 +1040,17 @@ const TournamentDetailPage = () => {
                   </span>
                 </div>
 
-                {/* Zone - Green */}
-                <div 
+                {/* Zone - Brand Green */}
+                <div
                   className="flex items-center justify-between p-4 rounded-xl transition-all hover:scale-[1.02]"
                   style={{
-                    background: 'linear-gradient(135deg, rgba(16,185,129,0.3) 0%, rgba(5,150,105,0.2) 100%)',
-                    border: '2px solid rgba(16,185,129,0.4)',
-                    boxShadow: '0 4px 15px rgba(16,185,129,0.2)'
+                    background: 'linear-gradient(135deg, rgba(0,255,136,0.2) 0%, rgba(0,200,83,0.12) 100%)',
+                    border: '2px solid rgba(0,255,136,0.3)',
+                    boxShadow: '0 4px 15px rgba(0,255,136,0.15)'
                   }}
                 >
                   <span className="text-white/90 font-bold text-base">Zone</span>
-                  <span 
-                    className="font-black text-xl"
-                    style={{ color: '#6ee7b7' }}
-                  >
+                  <span className="font-black text-xl" style={{ color: '#00ff88' }}>
                     {tournament.zone}
                   </span>
                 </div>
@@ -1102,14 +1093,9 @@ const TournamentDetailPage = () => {
               userEmail: user?.email
             })}
             {user && user.id === tournament.organizerId && (
-              <div 
+              <div
                 className="rounded-2xl p-5 relative overflow-hidden"
-                style={{
-                  background: 'linear-gradient(135deg, rgba(15,23,42,0.95) 0%, rgba(30,41,59,0.95) 100%)',
-                  border: '2px solid rgba(100,116,139,0.3)',
-                  backdropFilter: 'blur(20px)',
-                  boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
-                }}
+                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
               >
                 <h3 className="font-black text-white text-lg mb-4">Manage Tournament</h3>
                 <div className="space-y-3">
@@ -1118,7 +1104,8 @@ const TournamentDetailPage = () => {
                       <button
                         onClick={() => setShowPublishConfirmModal(true)}
                         disabled={publishing || tournament.categories?.length === 0}
-                        className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white px-5 py-3.5 rounded-xl hover:shadow-lg hover:shadow-green-500/30 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed font-black text-base transition-all"
+                        className="w-full px-5 py-3.5 rounded-xl font-black text-base transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#003320' }}
                       >
                         {publishing ? 'Publishing...' : '🚀 Publish Tournament'}
                       </button>
@@ -1229,15 +1216,16 @@ const TournamentDetailPage = () => {
 
             {/* Admin Actions - Compact */}
             {isAdmin() && (
-              <div className="bg-gradient-to-br from-emerald-900/50 to-emerald-800/50 backdrop-blur-sm border border-emerald-500/30 rounded-xl p-4">
+              <div className="rounded-xl p-4 border" style={{ background: 'rgba(0,255,136,0.06)', borderColor: 'rgba(0,255,136,0.2)' }}>
                 <div className="flex items-center gap-2 mb-3">
-                  <SparklesIcon className="h-4 w-4 text-emerald-400" />
+                  <SparklesIcon className="h-4 w-4" style={{ color: '#00ff88' }} />
                   <h3 className="font-bold text-white text-sm">Admin Actions</h3>
                 </div>
                 <div className="space-y-2">
                   <button
                     onClick={() => setShowQuickAddModal(true)}
-                    className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-4 py-2.5 rounded-lg hover:shadow-lg hover:shadow-emerald-500/30 font-bold text-sm transition-all"
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-bold text-sm transition-all"
+                    style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#003320' }}
                   >
                     <UserPlusIcon className="h-4 w-4" />
                     Quick Add Player
@@ -1611,9 +1599,8 @@ const TournamentDetailPage = () => {
       {/* Quick Add Player Modal (Admin Only) */}
       {showQuickAddModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-emerald-500/30">
-            <div className="relative bg-gradient-to-r from-emerald-600 to-emerald-700 p-6 text-white overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-emerald-400/20 to-emerald-500/20 blur-xl"></div>
+          <div className="rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border" style={{ background: '#0d1025', borderColor: 'rgba(255,255,255,0.1)' }}>
+            <div className="relative p-6 text-white overflow-hidden border-b" style={{ background: 'linear-gradient(135deg,rgba(0,255,136,0.12),rgba(0,200,83,0.06))', borderColor: 'rgba(0,255,136,0.15)' }}>
               <div className="relative flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
@@ -1621,16 +1608,12 @@ const TournamentDetailPage = () => {
                   </div>
                   <div>
                     <h2 className="text-xl font-bold">Quick Add Player</h2>
-                    <p className="text-emerald-100 text-sm mt-1">Add player without payment</p>
+                    <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.65)' }}>Add player without payment</p>
                   </div>
                 </div>
                 <button
-                  onClick={() => {
-                    setShowQuickAddModal(false);
-                    setQuickAddError('');
-                    setQuickAddSuccess('');
-                  }}
-                  className="w-10 h-10 bg-white/20 hover:bg-white/30 rounded-xl flex items-center justify-center transition-colors"
+                  onClick={() => { setShowQuickAddModal(false); setQuickAddError(''); setQuickAddSuccess(''); }}
+                  className="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-xl flex items-center justify-center transition-colors"
                 >
                   <span className="text-2xl">×</span>
                 </button>
@@ -1638,17 +1621,17 @@ const TournamentDetailPage = () => {
             </div>
             <form onSubmit={handleQuickAddPlayer} className="p-6 space-y-4">
               {quickAddSuccess && (
-                <div className="bg-emerald-500/20 border border-emerald-500/30 rounded-xl p-4 text-emerald-300 text-sm">
+                <div className="rounded-xl p-4 text-sm border" style={{ background: 'rgba(0,255,136,0.08)', borderColor: 'rgba(0,255,136,0.25)', color: '#00ff88' }}>
                   {quickAddSuccess}
                 </div>
               )}
               {quickAddError && (
-                <div className="bg-red-500/20 border border-red-500/30 rounded-xl p-4 text-red-300 text-sm">
+                <div className="rounded-xl p-4 text-sm border" style={{ background: 'rgba(239,68,68,0.08)', borderColor: 'rgba(239,68,68,0.25)', color: '#f87171' }}>
                   {quickAddError}
                 </div>
               )}
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium mb-2" style={{ color: 'rgba(255,255,255,0.7)' }}>
                   {tournament?.categories?.find(c => c.id === quickAddData.categoryId)?.format === 'doubles' ? 'Player 1 Name' : 'Player Name'} <span className="text-red-400">*</span>
                 </label>
                 <input
@@ -1656,13 +1639,14 @@ const TournamentDetailPage = () => {
                   value={quickAddData.name}
                   onChange={(e) => setQuickAddData({ ...quickAddData, name: e.target.value })}
                   placeholder={tournament?.categories?.find(c => c.id === quickAddData.categoryId)?.format === 'doubles' ? 'Enter player 1 name' : 'Enter player name'}
-                  className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 rounded-xl text-white transition-all"
+                  style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)' }}
                   required
                 />
               </div>
               {tournament?.categories?.find(c => c.id === quickAddData.categoryId)?.format === 'doubles' && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium mb-2" style={{ color: 'rgba(255,255,255,0.7)' }}>
                     Player 2 Name <span className="text-red-400">*</span>
                   </label>
                   <input
@@ -1670,24 +1654,26 @@ const TournamentDetailPage = () => {
                     value={quickAddData.player2Name}
                     onChange={(e) => setQuickAddData({ ...quickAddData, player2Name: e.target.value })}
                     placeholder="Enter player 2 name"
-                    className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-3 rounded-xl text-white transition-all"
+                    style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)' }}
                     required
                   />
                 </div>
               )}
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium mb-2" style={{ color: 'rgba(255,255,255,0.7)' }}>
                   Category <span className="text-red-400">*</span>
                 </label>
                 <select
                   value={quickAddData.categoryId}
                   onChange={(e) => setQuickAddData({ ...quickAddData, categoryId: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 rounded-xl text-white transition-all"
+                  style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)' }}
                   required
                 >
-                  <option value="">Select a category</option>
+                  <option value="" style={{ background: '#0d1025' }}>Select a category</option>
                   {tournament?.categories?.map((category) => (
-                    <option key={category.id} value={category.id}>
+                    <option key={category.id} value={category.id} style={{ background: '#0d1025' }}>
                       {category.name} - {category.format} ({category.gender})
                     </option>
                   ))}
@@ -1696,20 +1682,18 @@ const TournamentDetailPage = () => {
               <div className="flex gap-3 pt-2">
                 <button
                   type="button"
-                  onClick={() => {
-                    setShowQuickAddModal(false);
-                    setQuickAddError('');
-                    setQuickAddSuccess('');
-                  }}
+                  onClick={() => { setShowQuickAddModal(false); setQuickAddError(''); setQuickAddSuccess(''); }}
                   disabled={quickAddLoading}
-                  className="flex-1 px-4 py-3 border border-white/10 rounded-xl text-gray-300 hover:bg-slate-700/50 transition-colors font-medium disabled:opacity-50"
+                  className="flex-1 px-4 py-3 rounded-xl font-medium disabled:opacity-50 border transition-colors"
+                  style={{ borderColor: 'rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.7)' }}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={quickAddLoading}
-                  className="flex-1 px-4 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-xl hover:shadow-lg hover:shadow-purple-500/30 transition-all font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="flex-1 px-4 py-3 rounded-xl font-semibold disabled:opacity-50 flex items-center justify-center gap-2 text-white transition-all"
+                  style={{ background: 'linear-gradient(135deg,#a855f7,#7c3aed)' }}
                 >
                   {quickAddLoading ? (
                     <>

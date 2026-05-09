@@ -31,7 +31,7 @@ import { Loader, Zap, Layers, X, Plus, Settings, Users, CheckCircle, AlertTriang
 const DRAW_BG_PARTICLES = Array.from({ length: 15 }, (_, i) => ({
   w: (i * 7 + 3) % 6 + 2,  h: (i * 11 + 1) % 6 + 2,
   x: (i * 37 + 11) % 97,   y: (i * 53 + 7) % 91,
-  c: ['#00c853', '#14b8a6', '#06b6d4', '#10b981'][i % 4],
+  c: ['#00ff88', '#00d4ff', '#a855f7', '#00ff88'][i % 4],
   o: ((i * 13) % 50) / 100 + 0.2,
   dur: (i * 7) % 10 + 5,   delay: (i * 3) % 5,
   glow: (i * 11) % 20 + 10,
@@ -39,7 +39,7 @@ const DRAW_BG_PARTICLES = Array.from({ length: 15 }, (_, i) => ({
 const ASSIGN_PARTICLES = Array.from({ length: 8 }, (_, i) => ({
   w: (i * 5 + 2) % 4 + 2,  h: (i * 5 + 2) % 4 + 2,
   x: (i * 41 + 17) % 97,   y: (i * 59 + 13) % 91,
-  c: ['#00c853', '#14b8a6'][i % 2],
+  c: ['#00ff88', '#00d4ff'][i % 2],
   o: ((i * 17) % 40) / 100 + 0.2,
   dur: (i * 9) % 8 + 4,    delay: (i * 4) % 3,
   glow: (i * 13) % 15 + 5,
@@ -47,7 +47,7 @@ const ASSIGN_PARTICLES = Array.from({ length: 8 }, (_, i) => ({
 const ARRANGE_PARTICLES = Array.from({ length: 18 }, (_, i) => ({
   w: (i * 7 + 3) % 6 + 3,  h: (i * 7 + 3) % 6 + 3,
   x: (i * 43 + 19) % 97,   y: (i * 61 + 11) % 91,
-  c: ['#00c853', '#14b8a6', '#10b981', '#00ff88'][i % 4],
+  c: ['#00ff88', '#00d4ff', '#a855f7', '#00ff88'][i % 4],
   o: ((i * 19) % 50) / 100 + 0.5,
   dur: (i * 11) % 8 + 4,   delay: (i * 5) % 3,
   glow: (i * 17) % 25 + 15,
@@ -775,7 +775,7 @@ const DrawPage = () => {
         <div 
           className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl opacity-30 animate-pulse"
           style={{ 
-            background: 'radial-gradient(circle, rgba(0,200,83,0.4) 0%, rgba(0,255,136,0.2) 40%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(0,255,136,0.4) 0%, rgba(0,255,136,0.2) 40%, transparent 70%)',
             animation: 'float 8s ease-in-out infinite'
           }}
         />
@@ -836,19 +836,26 @@ const DrawPage = () => {
           0%, 100% { opacity: 0.5; filter: brightness(1); }
           50% { opacity: 1; filter: brightness(1.3); }
         }
+        .btn-brand { background: linear-gradient(135deg, #00ff88, #00d4ff); color: #07071a !important; }
+        .btn-brand:hover { box-shadow: 0 8px 25px rgba(0,255,136,0.4); transform: scale(1.05); }
+        .btn-brand-sm { background: linear-gradient(135deg, #00ff88, #00d4ff); color: #07071a !important; }
+        .card-brand { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); }
+        .card-dark { background: #0d1025; border: 1px solid rgba(255,255,255,0.1); }
+        .tab-active { background: linear-gradient(135deg, #00ff88, #00d4ff); color: #07071a !important; box-shadow: 0 4px 15px rgba(0,255,136,0.3); }
+        .icon-green { color: #00ff88; }
       `}</style>
 
       {/* Hero Header */}
       <div className="relative overflow-hidden" style={{
         background: 'linear-gradient(135deg, rgba(7,7,26,0.95), rgba(13,26,42,0.95))',
-        borderBottom: '1px solid rgba(0,200,83,0.2)',
-        boxShadow: '0 4px 20px rgba(0,200,83,0.1)'
+        borderBottom: '1px solid rgba(0,255,136,0.2)',
+        boxShadow: '0 4px 20px rgba(0,255,136,0.1)'
       }}>
         <div className="absolute inset-0">
           <div 
             className="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl opacity-20"
             style={{ 
-              background: 'radial-gradient(circle, rgba(0,200,83,0.4) 0%, transparent 70%)',
+              background: 'radial-gradient(circle, rgba(0,255,136,0.4) 0%, transparent 70%)',
               animation: 'glow 3s ease-in-out infinite'
             }}
           />
@@ -895,7 +902,7 @@ const DrawPage = () => {
                         className={`px-4 py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm ${
                           isCategoryCompleted
                             ? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50'
-                            : 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:scale-105'
+                            : 'btn-brand'
                         }`}
                       >
                         <UserPlus className="w-5 h-5" />
@@ -911,7 +918,7 @@ const DrawPage = () => {
                         className={`px-4 py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm ${
                           isCategoryCompleted
                             ? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50'
-                            : 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:scale-105'
+                            : 'btn-brand'
                         }`}
                       >
                         <Layers className="w-5 h-5" />
@@ -928,7 +935,7 @@ const DrawPage = () => {
                         className={`px-4 py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm ${
                           isCategoryCompleted
                             ? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50'
-                            : 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:scale-105'
+                            : 'btn-brand'
                         }`}
                       >
                         <Settings className="w-5 h-5" />
@@ -939,7 +946,7 @@ const DrawPage = () => {
                     {!isCategoryCompleted && (
                       <button
                         onClick={() => setShowEndTournamentModal(true)}
-                        className="px-4 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:scale-105 transition-all flex items-center justify-center gap-2 font-bold text-sm"
+                        className="px-4 py-3 btn-brand rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm"
                         title="Mark this category as complete"
                       >
                         <Trophy className="w-5 h-5" />
@@ -992,7 +999,7 @@ const DrawPage = () => {
                 {!bracket && !isCategoryCompleted && (
                   <button
                     onClick={() => setShowConfigModal(true)}
-                    className="col-span-2 px-4 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:scale-105 transition-all flex items-center justify-center gap-2 font-bold text-sm"
+                    className="col-span-2 px-4 py-3 btn-brand rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm"
                   >
                     <Plus className="w-5 h-5" />
                     Create Draw
@@ -1025,11 +1032,11 @@ const DrawPage = () => {
 
       {/* Tournament Statistics Header - ULTRA COMPACT FOR MOBILE */}
       {activeCategory && (
-        <div className="bg-slate-800/50 backdrop-blur-sm border-b border-white/10">
+        <div className="backdrop-blur-sm border-b border-white/10" style={{ background: 'rgba(13,16,37,0.8)' }}>
           <div className="max-w-2xl mx-auto px-3 py-2">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
               {/* Total Players */}
-              <div className="bg-gradient-to-br from-teal-500/10 to-emerald-500/10 border border-teal-500/20 rounded-xl p-2.5 relative">
+              <div className="rounded-xl p-2.5 relative" style={{ background: 'rgba(0,212,255,0.06)', border: '1px solid rgba(0,212,255,0.2)' }}>
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 bg-teal-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
                     <Users className="w-4 h-4 text-teal-400" />
@@ -1076,20 +1083,20 @@ const DrawPage = () => {
               </div>
 
               {/* Confirmed Players - COMPACT */}
-              <div className="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 rounded-xl p-2.5">
+              <div className="rounded-xl p-2.5" style={{ background: 'rgba(0,255,136,0.06)', border: '1px solid rgba(0,255,136,0.2)' }}>
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-emerald-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <CheckCircle className="w-4 h-4 text-emerald-400" />
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(0,255,136,0.12)' }}>
+                    <CheckCircle className="w-4 h-4 icon-green" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-lg font-bold text-white leading-none">{tournamentStats.confirmedPlayers}</p>
-                    <p className="text-emerald-300 text-xs font-medium leading-tight">Confirmed</p>
+                    <p className="text-[#00ff88] text-xs font-medium leading-tight">Confirmed</p>
                   </div>
                 </div>
               </div>
 
               {/* Total Matches - COMPACT */}
-              <div className="bg-gradient-to-br from-teal-500/10 to-emerald-500/10 border border-teal-500/20 rounded-xl p-2.5">
+              <div className="rounded-xl p-2.5" style={{ background: 'rgba(0,255,136,0.06)', border: '1px solid rgba(0,255,136,0.2)' }}>
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 bg-teal-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
                     <Gavel className="w-4 h-4 text-teal-400" />
@@ -1102,14 +1109,14 @@ const DrawPage = () => {
               </div>
 
               {/* Completed Matches - COMPACT */}
-              <div className="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 rounded-xl p-2.5">
+              <div className="rounded-xl p-2.5" style={{ background: 'rgba(0,255,136,0.06)', border: '1px solid rgba(0,255,136,0.2)' }}>
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-emerald-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <TrophyIcon className="w-4 h-4 text-emerald-400" />
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(0,255,136,0.12)' }}>
+                    <TrophyIcon className="w-4 h-4 icon-green" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-lg font-bold text-white leading-none">{tournamentStats.completedMatches}</p>
-                    <p className="text-emerald-300 text-xs font-medium leading-tight">Completed</p>
+                    <p className="text-[#00ff88] text-xs font-medium leading-tight">Completed</p>
                   </div>
                 </div>
               </div>
@@ -1120,11 +1127,11 @@ const DrawPage = () => {
 
             {/* Players List - Shows when Total Players card is clicked */}
             {showPlayersModal && (
-              <div className="mt-6 bg-gradient-to-br from-slate-800/80 to-slate-700/80 backdrop-blur-sm border border-teal-500/30 rounded-2xl p-6 shadow-2xl">
+              <div className="mt-6 backdrop-blur-sm rounded-2xl p-6 shadow-2xl" style={{ background: 'rgba(13,16,37,0.9)', border: '1px solid rgba(0,212,255,0.2)' }}>
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
-                      <Users className="w-6 h-6 text-white" />
+                    <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg" style={{ background: 'linear-gradient(135deg,#00d4ff,#a855f7)' }}>
+                      <Users className="w-6 h-6" style={{ color: '#07071a' }} />
                     </div>
                     <div>
                       <h3 className="text-xl font-bold text-white">Registered Players</h3>
@@ -1224,15 +1231,15 @@ const DrawPage = () => {
           </div>
         )}
         {success && (
-          <div className="mb-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 flex items-center gap-3">
-            <CheckCircle className="w-5 h-5 text-emerald-400 flex-shrink-0" />
-            <span className="text-emerald-300 font-medium">{success}</span>
+          <div className="mb-4 rounded-xl p-4 flex items-center gap-3" style={{ background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.25)' }}>
+            <CheckCircle className="w-5 h-5 icon-green flex-shrink-0" />
+            <span className="text-[#00ff88] font-medium">{success}</span>
             {refreshing && (
               <div className="ml-auto">
                 <div className="w-5 h-5 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></div>
               </div>
             )}
-            <button onClick={() => setSuccess(null)} className="ml-auto text-emerald-400 hover:text-emerald-300"><X className="w-5 h-5" /></button>
+            <button onClick={() => setSuccess(null)} className="ml-auto icon-green hover:text-[#00ff88]"><X className="w-5 h-5" /></button>
           </div>
         )}
       </div>
@@ -1240,7 +1247,7 @@ const DrawPage = () => {
       {/* Category Tabs - ULTRA COMPACT FOR MOBILE */}
       {categories.length > 0 && (
         <div className="max-w-2xl mx-auto px-3 mt-2">
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-1.5">
+          <div className="backdrop-blur-sm rounded-2xl p-1.5" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
             <div className="flex gap-2 overflow-x-auto">
               {categories.map((category) => (
                 <button
@@ -1248,7 +1255,7 @@ const DrawPage = () => {
                   onClick={() => handleCategoryChange(category)}
                   className={`flex-shrink-0 px-4 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap ${
                     activeCategory?.id === category.id
-                      ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/30'
+                      ? 'tab-active'
                       : 'text-gray-400 hover:text-white hover:bg-slate-700/50'
                   }`}
                 >
@@ -1269,8 +1276,8 @@ const DrawPage = () => {
             <p className="mt-4 text-sm font-medium" style={{ color: 'rgba(255,255,255,0.55)' }}>Loading bracket...</p>
           </div>
         ) : drawNotGenerated ? (
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-16 text-center">
-            <div className="w-24 h-24 bg-gradient-to-br from-emerald-500/20 to-teal-500/20 rounded-3xl flex items-center justify-center mx-auto mb-6">
+          <div className="backdrop-blur-sm rounded-2xl p-16 text-center" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+            <div className="w-24 h-24 rounded-3xl flex items-center justify-center mx-auto mb-6" style={{ background: 'rgba(0,255,136,0.1)', border: '1px solid rgba(0,255,136,0.2)' }}>
               <span className="text-5xl">📋</span>
             </div>
             <h3 className="text-2xl font-bold text-white mb-3">Draw Not Generated Yet</h3>
@@ -1282,7 +1289,7 @@ const DrawPage = () => {
             {isOrganizer && (
               <button
                 onClick={() => setShowConfigModal(true)}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-emerald-500/25 hover:scale-105 transition-all"
+                className="inline-flex items-center gap-2 px-6 py-3 btn-brand rounded-xl font-semibold transition-all"
               >
                 <Plus className="w-5 h-5" />
                 Create Draw Now
@@ -1290,15 +1297,15 @@ const DrawPage = () => {
             )}
           </div>
         ) : !bracket ? (
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-16 text-center">
-            <div className="w-24 h-24 bg-slate-700/50 rounded-3xl flex items-center justify-center mx-auto mb-6">
+          <div className="backdrop-blur-sm rounded-2xl p-16 text-center" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+            <div className="w-24 h-24 rounded-3xl flex items-center justify-center mx-auto mb-6" style={{ background: 'rgba(255,255,255,0.06)' }}>
               <TrophyIcon className="w-12 h-12 text-gray-500" />
             </div>
             <h3 className="text-xl font-bold text-white mb-2">No bracket data available</h3>
             <p className="text-gray-400">Please try again later</p>
           </div>
         ) : (
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden">
+          <div className="backdrop-blur-sm rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
             <DrawDisplay 
               bracket={bracket} 
               matches={matches} 
@@ -1347,13 +1354,13 @@ const DrawPage = () => {
       {/* Continue to Knockout Stage Confirmation Modal */}
       {showContinueKnockoutModal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-800 rounded-2xl max-w-md w-full border-2 border-green-500/30 shadow-2xl shadow-green-500/20">
+          <div className="rounded-2xl max-w-md w-full shadow-2xl" style={{ background: '#0d1025', border: '2px solid rgba(0,255,136,0.25)' }}>
             {/* Header */}
-            <div className="p-6 border-b border-white/10 bg-gradient-to-r from-green-600/20 via-emerald-600/20 to-teal-600/20">
+            <div className="p-6 border-b border-white/10" style={{ background: 'rgba(0,255,136,0.06)' }}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
-                    <Play className="w-6 h-6 text-white" />
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg" style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)' }}>
+                    <Play className="w-6 h-6" style={{ color: '#07071a' }} />
                   </div>
                   <div>
                     <h3 className="text-xl font-bold text-white">Matchify.pro says</h3>
@@ -1378,7 +1385,7 @@ const DrawPage = () => {
               <button
                 onClick={() => setShowContinueKnockoutModal(false)}
                 disabled={assigning}
-                className="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl transition-all font-semibold disabled:opacity-50"
+                className="px-6 py-3 rounded-xl transition-all font-semibold disabled:opacity-50" style={{ background: 'rgba(255,255,255,0.06)', color: 'white' }}
               >
                 Cancel
               </button>
@@ -1425,13 +1432,13 @@ const DrawPage = () => {
       {/* Select Players for Knockout Modal */}
       {showSelectPlayersModal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden border-2 border-green-500/30 shadow-2xl shadow-green-500/20">
+          <div className="rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl" style={{ background: '#0d1025', border: '2px solid rgba(0,255,136,0.25)' }}>
             {/* Header */}
-            <div className="p-6 border-b border-white/10 bg-gradient-to-r from-green-600/20 via-emerald-600/20 to-teal-600/20">
+            <div className="p-6 border-b border-white/10" style={{ background: 'rgba(0,255,136,0.06)' }}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
-                    <Users className="w-6 h-6 text-white" />
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg" style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)' }}>
+                    <Users className="w-6 h-6" style={{ color: '#07071a' }} />
                   </div>
                   <div>
                     <h3 className="text-xl font-bold text-white">Select Players for Knockout Stage</h3>
@@ -1467,7 +1474,7 @@ const DrawPage = () => {
                       setSelectedPlayersForKnockout(selectedPlayersForKnockout.slice(0, value));
                     }
                   }}
-                  className="w-full px-4 py-4 bg-slate-700 border-2 border-green-500/30 rounded-xl text-white text-2xl font-bold focus:outline-none focus:border-green-400 focus:shadow-lg focus:shadow-green-500/20 transition-all"
+                  className="w-full px-4 py-4 rounded-xl text-white text-2xl font-bold focus:outline-none transition-all" style={{ background: 'rgba(255,255,255,0.06)', border: '2px solid rgba(0,255,136,0.25)' }}
                   placeholder="Enter number (e.g., 4, 6, 8)"
                 />
                 <p className="text-xs text-gray-400 mt-2">
@@ -1524,7 +1531,7 @@ const DrawPage = () => {
             <div className="p-6 border-t border-white/10 flex gap-3 justify-end bg-slate-900/50">
               <button
                 onClick={() => setShowSelectPlayersModal(false)}
-                className="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl transition-all font-semibold"
+                className="px-6 py-3 rounded-xl transition-all font-semibold" style={{ background: 'rgba(255,255,255,0.06)', color: 'white' }}
               >
                 Cancel
               </button>
@@ -1614,9 +1621,9 @@ const DrawPage = () => {
       {/* Change Match Result Modal */}
       {showChangeResultModal && selectedMatchForChange && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-gradient-to-br from-slate-900 to-slate-800 border-2 border-amber-500/50 rounded-3xl p-8 max-w-md w-full shadow-2xl shadow-amber-500/20">
+          <div className="rounded-3xl p-8 max-w-md w-full shadow-2xl" style={{ background: '#0d1025', border: '2px solid rgba(251,191,36,0.4)' }}>
             {/* Icon */}
-            <div className="w-20 h-20 bg-gradient-to-br from-amber-500 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-amber-500/50">
+            <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg" style={{ background: 'linear-gradient(135deg,#fbbf24,#f59e0b)' }}>
               <span className="text-4xl">🔄</span>
             </div>
 
@@ -1629,7 +1636,7 @@ const DrawPage = () => {
             </p>
 
             {/* Current Winner */}
-            <div className="bg-slate-800/50 border border-white/10 rounded-xl p-4 mb-6">
+            <div className="rounded-xl p-4 mb-6" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
               <p className="text-gray-400 text-xs mb-2">Current Winner</p>
               <p className="text-white font-semibold">
                 {selectedMatchForChange.winnerId === selectedMatchForChange.bracketMatch.player1?.id 
@@ -1645,14 +1652,14 @@ const DrawPage = () => {
                 disabled={changingResult}
                 className={`w-full p-4 rounded-xl border-2 transition-all text-left ${
                   selectedMatchForChange.winnerId === selectedMatchForChange.bracketMatch.player1?.id
-                    ? 'border-emerald-500/50 bg-emerald-500/10'
-                    : 'border-white/10 bg-slate-800/50 hover:border-amber-500/50 hover:bg-amber-500/10'
+                    ? 'border-[rgba(0,255,136,0.5)] bg-[rgba(0,255,136,0.08)]'
+                    : 'border-white/10 bg-white/[0.03] hover:border-[rgba(251,191,36,0.4)] hover:bg-[rgba(251,191,36,0.06)]'
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <span className="text-white font-semibold">{getPlayerDisplay(selectedMatchForChange.bracketMatch.player1)}</span>
                   {selectedMatchForChange.winnerId === selectedMatchForChange.bracketMatch.player1?.id && (
-                    <span className="text-emerald-400 text-sm">✓ Current</span>
+                    <span className="text-sm icon-green">✓ Current</span>
                   )}
                 </div>
               </button>
@@ -1662,14 +1669,14 @@ const DrawPage = () => {
                 disabled={changingResult}
                 className={`w-full p-4 rounded-xl border-2 transition-all text-left ${
                   selectedMatchForChange.winnerId === selectedMatchForChange.bracketMatch.player2?.id
-                    ? 'border-emerald-500/50 bg-emerald-500/10'
-                    : 'border-white/10 bg-slate-800/50 hover:border-amber-500/50 hover:bg-amber-500/10'
+                    ? 'border-[rgba(0,255,136,0.5)] bg-[rgba(0,255,136,0.08)]'
+                    : 'border-white/10 bg-white/[0.03] hover:border-[rgba(251,191,36,0.4)] hover:bg-[rgba(251,191,36,0.06)]'
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <span className="text-white font-semibold">{getPlayerDisplay(selectedMatchForChange.bracketMatch.player2)}</span>
                   {selectedMatchForChange.winnerId === selectedMatchForChange.bracketMatch.player2?.id && (
-                    <span className="text-emerald-400 text-sm">✓ Current</span>
+                    <span className="text-sm icon-green">✓ Current</span>
                   )}
                 </div>
               </button>
@@ -1683,7 +1690,7 @@ const DrawPage = () => {
                   setSelectedMatchForChange(null);
                 }}
                 disabled={changingResult}
-                className="flex-1 py-3 bg-slate-700 text-white rounded-xl font-semibold hover:bg-slate-600 transition-all"
+                className="flex-1 py-3 rounded-xl font-semibold transition-all" style={{ background: 'rgba(255,255,255,0.06)', color: 'white' }}
               >
                 Cancel
               </button>
@@ -1702,7 +1709,7 @@ const DrawPage = () => {
       {/* Match Details Modal */}
       {showMatchDetailsModal && selectedMatchDetails && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-gradient-to-br from-slate-900 to-slate-800 border-2 border-blue-500/50 rounded-3xl p-8 max-w-3xl w-full shadow-2xl shadow-blue-500/20 max-h-[90vh] overflow-y-auto">
+          <div className="rounded-3xl p-8 max-w-3xl w-full shadow-2xl max-h-[90vh] overflow-y-auto" style={{ background: '#0d1025', border: '2px solid rgba(0,212,255,0.35)' }}>
             {/* Header */}
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-4">
@@ -1780,8 +1787,8 @@ const DrawPage = () => {
                 {/* Player 1 */}
                 <div className={`p-6 rounded-xl border-2 transition-all ${
                   selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player1?.id
-                    ? 'border-emerald-500/50 bg-emerald-500/10 shadow-lg shadow-emerald-500/20'
-                    : 'border-white/10 bg-slate-800/50'
+                    ? 'border-[rgba(0,255,136,0.5)] bg-[rgba(0,255,136,0.08)] shadow-lg'
+                    : 'border-white/10 bg-white/[0.03]'
                 }`}>
                   <div className="text-center">
                     <div className="flex items-center justify-center gap-2 mb-4">
@@ -1790,7 +1797,7 @@ const DrawPage = () => {
                       )}
                       <span className={`text-xl font-bold ${
                         selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player1?.id
-                          ? 'text-emerald-300'
+                          ? 'text-[#00ff88]'
                           : 'text-white'
                       }`}>
                         {getPlayerDisplay(selectedMatchDetails.bracketMatch.player1)}
@@ -1798,7 +1805,7 @@ const DrawPage = () => {
                     </div>
                     {selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player1?.id && (
                       <div className="mb-3">
-                        <span className="px-3 py-1 bg-emerald-500/20 text-emerald-300 rounded-full text-xs font-bold uppercase tracking-wider">
+                        <span className="px-3 py-1 bg-[rgba(0,255,136,0.1)] text-[#00ff88] rounded-full text-xs font-bold uppercase tracking-wider border border-[rgba(0,255,136,0.25)]">
                           Winner
                         </span>
                       </div>
@@ -1813,7 +1820,7 @@ const DrawPage = () => {
                             return (
                               <span key={idx} className={`px-3 py-1.5 rounded-lg font-semibold text-sm ${
                                 won 
-                                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' 
+                                  ? 'bg-[rgba(0,255,136,0.12)] text-[#00ff88] border border-[rgba(0,255,136,0.25)]' 
                                   : 'bg-slate-700/50 text-gray-300 border border-slate-600/30'
                               }`}>
                                 {score}
@@ -1829,8 +1836,8 @@ const DrawPage = () => {
                 {/* Player 2 */}
                 <div className={`p-6 rounded-xl border-2 transition-all ${
                   selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player2?.id
-                    ? 'border-emerald-500/50 bg-emerald-500/10 shadow-lg shadow-emerald-500/20'
-                    : 'border-white/10 bg-slate-800/50'
+                    ? 'border-[rgba(0,255,136,0.5)] bg-[rgba(0,255,136,0.08)] shadow-lg'
+                    : 'border-white/10 bg-white/[0.03]'
                 }`}>
                   <div className="text-center">
                     <div className="flex items-center justify-center gap-2 mb-4">
@@ -1839,7 +1846,7 @@ const DrawPage = () => {
                       )}
                       <span className={`text-xl font-bold ${
                         selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player2?.id
-                          ? 'text-emerald-300'
+                          ? 'text-[#00ff88]'
                           : 'text-white'
                       }`}>
                         {getPlayerDisplay(selectedMatchDetails.bracketMatch.player2)}
@@ -1847,7 +1854,7 @@ const DrawPage = () => {
                     </div>
                     {selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player2?.id && (
                       <div className="mb-3">
-                        <span className="px-3 py-1 bg-emerald-500/20 text-emerald-300 rounded-full text-xs font-bold uppercase tracking-wider">
+                        <span className="px-3 py-1 bg-[rgba(0,255,136,0.1)] text-[#00ff88] rounded-full text-xs font-bold uppercase tracking-wider border border-[rgba(0,255,136,0.25)]">
                           Winner
                         </span>
                       </div>
@@ -1862,7 +1869,7 @@ const DrawPage = () => {
                             return (
                               <span key={idx} className={`px-3 py-1.5 rounded-lg font-semibold text-sm ${
                                 won 
-                                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' 
+                                  ? 'bg-[rgba(0,255,136,0.12)] text-[#00ff88] border border-[rgba(0,255,136,0.25)]' 
                                   : 'bg-slate-700/50 text-gray-300 border border-slate-600/30'
                               }`}>
                                 {score}
@@ -1878,7 +1885,7 @@ const DrawPage = () => {
             </div>
 
             {/* Match Information Grid */}
-            <div className="bg-slate-800/50 border border-white/10 rounded-2xl p-6 mb-6">
+            <div className="rounded-2xl p-6 mb-6" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
               <h3 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
                 <span className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center text-blue-400">ℹ️</span>
                 Match Information
@@ -1996,7 +2003,7 @@ const DrawPage = () => {
       {/* Match Complete Success Modal */}
       {showSuccessModal && matchCompleteData && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-gradient-to-br from-slate-900 to-slate-800 border-2 border-amber-500/50 rounded-3xl p-8 max-w-md w-full shadow-2xl shadow-amber-500/20 animate-scale-in">
+          <div className="rounded-3xl p-8 max-w-md w-full shadow-2xl animate-scale-in">
             {/* Trophy Icon */}
             <div className="w-24 h-24 bg-gradient-to-br from-amber-500 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-amber-500/50">
               <Trophy className="w-12 h-12 text-white" />
@@ -2008,7 +2015,7 @@ const DrawPage = () => {
             </h2>
 
             {/* Winner Info */}
-            <div className="bg-slate-800/50 border border-amber-500/30 rounded-xl p-6 mb-6">
+            <div className="rounded-xl p-6 mb-6" style={{ background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.2)' }}>
               <div className="text-center mb-4">
                 <p className="text-gray-400 text-sm mb-2">Winner</p>
                 <p className="text-2xl font-bold text-white">{matchCompleteData.winner}</p>
@@ -2022,7 +2029,7 @@ const DrawPage = () => {
 
             {/* Success Message */}
             <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 mb-6">
-              <p className="text-emerald-400 text-center text-sm">
+              <p className="icon-green text-center text-sm">
                 ✓ Winner advanced to next round<br />
                 ✓ Notifications sent to players<br />
                 ✓ Bracket updated successfully
@@ -2046,7 +2053,7 @@ const DrawPage = () => {
       {/* Restart Draws Confirmation Modal */}
       {showRestartModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-gradient-to-br from-slate-900 to-slate-800 border-2 border-orange-500/50 rounded-3xl p-8 max-w-lg w-full shadow-2xl shadow-orange-500/20">
+          <div className="rounded-3xl p-8 max-w-lg w-full shadow-2xl" style={{ background: '#0d1025', border: '2px solid rgba(249,115,22,0.4)' }}>
             {/* Warning Icon */}
             <div className="w-20 h-20 bg-gradient-to-br from-orange-500 to-amber-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-orange-500/50">
               <Zap className="w-10 h-10 text-white" />
@@ -2077,7 +2084,7 @@ const DrawPage = () => {
             </div>
 
             {/* Category Info */}
-            <div className="bg-slate-800/50 border border-white/10 rounded-xl p-4 mb-6">
+            <div className="rounded-xl p-4 mb-6">
               <p className="text-gray-400 text-sm mb-1">Category</p>
               <p className="text-white font-semibold">{activeCategory?.name}</p>
             </div>
@@ -2087,7 +2094,7 @@ const DrawPage = () => {
               <button
                 onClick={() => setShowRestartModal(false)}
                 disabled={restarting}
-                className="flex-1 py-3 bg-slate-700 text-white rounded-xl font-semibold hover:bg-slate-600 transition-all"
+                className="flex-1 py-3 rounded-xl font-semibold transition-all" style={{ background: 'rgba(255,255,255,0.06)', color: 'white' }}
               >
                 Cancel
               </button>
@@ -2116,9 +2123,9 @@ const DrawPage = () => {
       {/* End Category Confirmation Modal */}
       {showEndTournamentModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-gradient-to-br from-slate-900 to-slate-800 border-2 border-green-500/50 rounded-3xl p-8 max-w-lg w-full shadow-2xl shadow-green-500/20">
-            <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-green-500/50">
-              <Trophy className="w-10 h-10 text-white" />
+          <div className="rounded-3xl p-8 max-w-lg w-full shadow-2xl" style={{ background: '#0d1025', border: '2px solid rgba(0,255,136,0.3)' }}>
+            <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg" style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)' }}>
+              <Trophy className="w-10 h-10" style={{ color: '#07071a' }} />
             </div>
             <h2 className="text-2xl font-bold text-center mb-2 text-white">End Category?</h2>
             <p className="text-center text-purple-300 font-semibold mb-4">{activeCategory?.name}</p>
@@ -2137,7 +2144,7 @@ const DrawPage = () => {
               </p>
             </div>
             <div className="flex gap-3">
-              <button onClick={() => setShowEndTournamentModal(false)} disabled={endingTournament} className="flex-1 py-3 bg-slate-700 text-white rounded-xl font-semibold hover:bg-slate-600 transition-all">Cancel</button>
+              <button onClick={() => setShowEndTournamentModal(false)} disabled={endingTournament} className="flex-1 py-3 rounded-xl font-semibold transition-all">Cancel</button>
               <button onClick={handleEndCategory} disabled={endingTournament} className="flex-1 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-green-500/30 transition-all flex items-center justify-center gap-2">
                 {endingTournament ? <><div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>Ending...</> : <>End Category</>}
               </button>
@@ -2398,16 +2405,16 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
   return (
     <div className="p-3">
       {/* CONTAINED BRACKET - Matches app theme */}
-      <div className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-sm rounded-2xl border-2 border-emerald-500/20 shadow-xl overflow-hidden">
+      <div className="backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden" style={{ background: 'rgba(13,16,37,0.9)', border: '2px solid rgba(0,255,136,0.15)' }}>
         {/* Header */}
-        <div className="bg-gradient-to-r from-emerald-500/30 to-teal-500/30 p-4 border-b-2 border-emerald-500/30">
+        <div className="p-4 border-b-2 border-white/10" style={{ background: 'rgba(0,255,136,0.08)' }}>
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-emerald-500/50">
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center font-black text-xl shadow-lg" style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', color: '#07071a' }}>
               🏆
             </div>
             <div className="flex-1">
               <h4 className="text-lg font-black text-white">Knockout Bracket</h4>
-              <p className="text-emerald-300 text-xs font-semibold">
+              <p className="text-[#00ff88] text-xs font-semibold">
                 {totalRounds} {totalRounds === 1 ? 'Round' : 'Rounds'} • Pyramid Format
               </p>
             </div>
@@ -2421,9 +2428,9 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
               <div key={ri} className="flex flex-col min-w-[220px]">
                 {/* Round Header */}
                 <div className="mb-4 text-center">
-                  <div className="inline-flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border-2 border-emerald-500/30 rounded-xl shadow-lg">
-                    <Trophy className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                    <h4 className="text-xs font-black text-emerald-300 uppercase tracking-wider whitespace-nowrap">
+                  <div className="inline-flex items-center gap-2 px-3 py-2 rounded-xl shadow-lg" style={{ background: 'rgba(0,255,136,0.1)', border: '2px solid rgba(0,255,136,0.25)' }}>
+                    <Trophy className="w-4 h-4 icon-green flex-shrink-0" />
+                    <h4 className="text-xs font-black text-[#00ff88] uppercase tracking-wider whitespace-nowrap">
                       {getRoundName(ri, data.rounds.length)}
                     </h4>
                   </div>
@@ -2464,20 +2471,20 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                           'border-white/10'
                         }`}>
                           {/* Match Header */}
-                          <div className="bg-slate-800/60 px-3 py-2 border-b-2 border-white/10 flex items-center justify-between">
+                          <div className="px-3 py-2 border-b-2 border-white/10 flex items-center justify-between">
                             <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest">
                               #{match.matchNumber || mi + 1}
                             </span>
                             
                             {/* Status Badge */}
                             {isLive && (
-                              <span className="px-2 py-0.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-full text-[10px] font-black flex items-center gap-1 shadow-lg">
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-black flex items-center gap-1 shadow-lg" style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', color: '#07071a' }}>
                                 <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>
                                 LIVE
                               </span>
                             )}
                             {isCompleted && !isLive && (
-                              <span className="px-2 py-0.5 bg-emerald-500/30 text-emerald-300 border border-emerald-500/50 rounded-full text-[10px] font-black">
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-black" style={{ background: 'rgba(0,255,136,0.15)', color: '#00ff88', border: '1px solid rgba(0,255,136,0.3)' }}>
                                 ✓
                               </span>
                             )}
@@ -2491,11 +2498,11 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                                 ? 'border-2 border-emerald-500/60 shadow-lg'
                                 : 'border border-white/10'
                             }`} style={{
-                              background: isPlayer1Winner ? 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,200,83,0.1))' : 'rgba(255,255,255,0.04)'
+                              background: isPlayer1Winner ? 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,255,136,0.1))' : 'rgba(255,255,255,0.04)'
                             }}>
                               <div className="flex items-center gap-1.5 flex-1 min-w-0">
                                 {isPlayer1Winner && (
-                                  <Trophy className="w-3 h-3 text-emerald-400 flex-shrink-0" />
+                                  <Trophy className="w-3 h-3 icon-green flex-shrink-0" />
                                 )}
                                 <span className={`text-xs font-bold truncate ${
                                   isPlayer1Winner ? 'text-emerald-200' : player1Name === 'TBD' ? 'text-gray-600 italic' : 'text-white'
@@ -2504,7 +2511,7 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                                 </span>
                               </div>
                               {isPlayer1Winner && (
-                                <span className="text-[9px] font-black text-emerald-400 ml-1 flex-shrink-0">WIN</span>
+                                <span className="text-[9px] font-black icon-green ml-1 flex-shrink-0">WIN</span>
                               )}
                             </div>
 
@@ -2519,11 +2526,11 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                                 ? 'border-2 border-emerald-500/60 shadow-lg'
                                 : 'border border-white/10'
                             }`} style={{
-                              background: isPlayer2Winner ? 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,200,83,0.1))' : 'rgba(255,255,255,0.04)'
+                              background: isPlayer2Winner ? 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,255,136,0.1))' : 'rgba(255,255,255,0.04)'
                             }}>
                               <div className="flex items-center gap-1.5 flex-1 min-w-0">
                                 {isPlayer2Winner && (
-                                  <Trophy className="w-3 h-3 text-emerald-400 flex-shrink-0" />
+                                  <Trophy className="w-3 h-3 icon-green flex-shrink-0" />
                                 )}
                                 <span className={`text-xs font-bold truncate ${
                                   isPlayer2Winner ? 'text-emerald-200' : player2Name === 'TBD' ? 'text-gray-600 italic' : 'text-white'
@@ -2532,7 +2539,7 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                                 </span>
                               </div>
                               {isPlayer2Winner && (
-                                <span className="text-[9px] font-black text-emerald-400 ml-1 flex-shrink-0">WIN</span>
+                                <span className="text-[9px] font-black icon-green ml-1 flex-shrink-0">WIN</span>
                               )}
                             </div>
                           </div>
@@ -2554,7 +2561,7 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                                   }}
                                   className={`flex-1 py-2 rounded-lg border-2 transition-all text-[10px] font-black flex items-center justify-center gap-1 ${
                                     hasUmpire
-                                      ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                                      ? 'bg-[rgba(0,255,136,0.12)] text-[#00ff88] border-[rgba(0,255,136,0.3)]'
                                       : 'bg-blue-500/20 text-blue-300 border-blue-500/40'
                                   }`}
                                 >
@@ -2567,7 +2574,7 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                               {!isCompleted && (player1.name !== 'TBD' || player2.name !== 'TBD') && (
                                 <button
                                   onClick={() => handleConductMatch(dbMatch.id)}
-                                  className="flex-1 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-600 text-white border-2 border-emerald-400/50 transition-all text-[10px] font-black flex items-center justify-center gap-1"
+                                  className="flex-1 py-2 rounded-lg border-2 border-transparent transition-all text-[10px] font-black flex items-center justify-center gap-1 btn-brand"
                                 >
                                   <Play className="w-3 h-3" />
                                   START
@@ -2605,8 +2612,8 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
         </div>
 
         {/* Scroll Hint */}
-        <div className="bg-emerald-500/10 border-t-2 border-emerald-500/20 px-4 py-2 text-center">
-          <p className="text-xs text-emerald-300 font-semibold flex items-center justify-center gap-2">
+        <div className="px-4 py-2 text-center border-t-2" style={{ background: 'rgba(0,255,136,0.06)', borderColor: 'rgba(0,255,136,0.15)' }}>
+          <p className="text-xs text-[#00ff88] font-semibold flex items-center justify-center gap-2">
             <span>←</span>
             Swipe to view all rounds
             <span>→</span>
@@ -2644,16 +2651,16 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
   return (
     <div className="p-3 space-y-4">
       {data.groups.map((group, gi) => (
-        <div key={gi} className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-sm rounded-2xl overflow-hidden border-2 border-emerald-500/20 shadow-xl">
-          {/* Group Header - Emerald Theme */}
-          <div className="bg-gradient-to-r from-emerald-500/30 to-teal-500/30 p-4 border-b-2 border-emerald-500/30">
+        <div key={gi} className="backdrop-blur-sm rounded-2xl overflow-hidden shadow-xl" style={{ background: 'rgba(13,16,37,0.9)', border: '2px solid rgba(0,255,136,0.15)' }}>
+          {/* Group Header */}
+          <div className="p-4 border-b-2 border-white/10" style={{ background: 'rgba(0,255,136,0.08)' }}>
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-emerald-500/50">
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center font-black text-xl shadow-lg" style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', color: '#07071a' }}>
                 {String.fromCharCode(65 + gi)}
               </div>
               <div className="flex-1">
                 <h4 className="text-lg font-black text-white">Group {String.fromCharCode(65 + gi)}</h4>
-                <p className="text-emerald-300 text-xs font-semibold">
+                <p className="text-[#00ff88] text-xs font-semibold">
                   {group.participants.filter(p => p.id).length} players • {group.matches?.length || 0} matches
                 </p>
               </div>
@@ -2662,7 +2669,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
 
           {/* Group Standings - Mobile Optimized */}
           <div className="p-4">
-            <h5 className="text-sm font-black text-emerald-300 mb-3 flex items-center gap-2 uppercase tracking-wider">
+            <h5 className="text-sm font-black text-[#00ff88] mb-3 flex items-center gap-2 uppercase tracking-wider">
               <Trophy className="w-4 h-4" />
               Standings
             </h5>
@@ -2678,7 +2685,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                       padding: '10px 10px',
                       gap: '8px',
                       background: pi === 0
-                        ? 'linear-gradient(135deg, rgba(0,255,136,0.12), rgba(0,200,83,0.08))'
+                        ? 'linear-gradient(135deg, rgba(0,255,136,0.12), rgba(0,255,136,0.08))'
                         : 'rgba(255,255,255,0.04)',
                       borderColor: pi === 0 ? 'rgba(0,255,136,0.4)' : 'rgba(255,255,255,0.08)',
                     }}
@@ -2689,7 +2696,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                       style={{
                         width: '28px', height: '28px',
                         background:
-                          pi === 0 ? 'linear-gradient(135deg,#00c853,#00ff88)' :
+                          pi === 0 ? 'linear-gradient(135deg,#00ff88,#00ff88)' :
                           pi === 1 ? 'linear-gradient(135deg,#94a3b8,#64748b)' :
                           pi === 2 ? 'linear-gradient(135deg,#cd7f32,#b45309)' :
                           'rgba(255,255,255,0.08)',
@@ -2752,7 +2759,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
               <p className="text-[10px] font-black uppercase tracking-wider mb-2 text-center" style={{ color: 'rgba(255,255,255,0.35)' }}>Points System</p>
               <div className="flex items-center justify-center gap-3 text-xs font-bold">
                 <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg" style={{ background: 'rgba(0,255,136,0.1)', border: '1px solid rgba(0,255,136,0.2)' }}>
-                  <span className="w-4 h-4 bg-emerald-500 rounded flex items-center justify-center text-[9px] text-white font-black">W</span>
+                  <span className="w-4 h-4 rounded flex items-center justify-center text-[9px] font-black" style={{ background: '#00ff88', color: '#07071a' }}>W</span>
                   <span style={{ color: '#00ff88' }}>+2 pts</span>
                 </div>
                 <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)' }}>
@@ -2785,22 +2792,18 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                   return (
                     <div 
                       key={mi} 
-                      className={`p-3 rounded-xl border-2 transition-all ${
-                        isCompleted 
-                          ? 'border-emerald-500/50 bg-emerald-500/10' 
-                          : isInProgress
-                            ? 'border-amber-500/50 bg-amber-500/10'
-                            : hasPlayers
-                              ? 'border-blue-500/30 bg-blue-500/10'
-                              : 'border-white/10 bg-slate-800/30'
-                      }`}
+                      className="p-3 rounded-xl border-2 transition-all"
+                      style={{
+                        background: isCompleted ? 'rgba(0,255,136,0.06)' : isInProgress ? 'rgba(251,191,36,0.06)' : hasPlayers ? 'rgba(0,212,255,0.06)' : 'rgba(255,255,255,0.02)',
+                        borderColor: isCompleted ? 'rgba(0,255,136,0.4)' : isInProgress ? 'rgba(251,191,36,0.4)' : hasPlayers ? 'rgba(0,212,255,0.25)' : 'rgba(255,255,255,0.08)'
+                      }}
                     >
                       {/* Match Header */}
                       <div className="flex items-center justify-between mb-2.5">
-                        <span className="px-2 py-1 bg-emerald-500/20 text-emerald-300 rounded-lg text-xs font-black">
+                        <span className="px-2 py-1 rounded-lg text-xs font-black" style={{ background: 'rgba(0,255,136,0.12)', color: '#00ff88' }}>
                           #{match.matchNumber}
                         </span>
-                        {isCompleted && <span className="text-emerald-400 text-xs font-bold">✓ DONE</span>}
+                        {isCompleted && <span className="text-xs font-bold icon-green">✓ DONE</span>}
                         {isInProgress && <span className="text-amber-400 text-xs font-bold">🔴 LIVE</span>}
                         {hasUmpire && !isCompleted && !isInProgress && <span className="text-blue-400 text-xs font-bold">⚖️ READY</span>}
                       </div>
@@ -2853,7 +2856,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                               }}
                               className={`flex-1 py-2.5 rounded-lg transition-all flex items-center justify-center gap-2 text-xs font-black ${
                                 hasUmpire 
-                                  ? 'bg-emerald-500/20 text-emerald-300 border-2 border-emerald-500/40' 
+                                  ? 'bg-[rgba(0,255,136,0.12)] text-[#00ff88] border-2 border-[rgba(0,255,136,0.3)]' 
                                   : 'bg-blue-500/20 text-blue-300 border-2 border-blue-500/40'
                               }`}
                             >
@@ -2942,12 +2945,12 @@ const GroupsKnockoutDisplay = ({
   return (
     <div className="space-y-4 p-3">
       {/* Stage Navigation Tabs - Emerald Theme */}
-      <div className="flex gap-2 p-1.5 bg-slate-800/50 rounded-xl border-2 border-white/10">
+      <div className="flex gap-2 p-1.5 rounded-xl border-2" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.1)' }}>
         <button
           onClick={() => setActiveStage('roundrobin')}
           className={`flex-1 px-2 py-3 rounded-lg font-black transition-all flex items-center justify-center gap-1.5 text-[10px] ${
             activeStage === 'roundrobin'
-              ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/50'
+              ? 'tab-active'
               : 'bg-slate-700/30 text-gray-400 hover:bg-slate-700/50 hover:text-white'
           }`}
         >
@@ -2963,7 +2966,7 @@ const GroupsKnockoutDisplay = ({
           onClick={() => setActiveStage('knockout')}
           className={`flex-1 px-2 py-3 rounded-lg font-black transition-all flex items-center justify-center gap-1.5 text-[10px] ${
             activeStage === 'knockout'
-              ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/50'
+              ? 'tab-active'
               : 'bg-slate-700/30 text-gray-400 hover:bg-slate-700/50 hover:text-white'
           }`}
         >
@@ -2997,9 +3000,9 @@ const GroupsKnockoutDisplay = ({
         <div>
           {!data.knockout ? (
             // No knockout data at all - show message to create it
-            <div className="bg-slate-800/50 border-2 border-dashed border-emerald-500/30 rounded-2xl p-8 text-center">
-              <div className="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <TrophyIcon className="w-10 h-10 text-emerald-400" />
+            <div className="rounded-2xl p-8 text-center border-2 border-dashed" style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(0,255,136,0.25)' }}>
+              <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: 'rgba(0,255,136,0.08)' }}>
+                <TrophyIcon className="w-10 h-10 icon-green" />
               </div>
               <h4 className="text-xl font-bold text-white mb-2">Knockout Stage Not Created</h4>
               <p className="text-gray-400 mb-4 text-sm">
@@ -3008,9 +3011,9 @@ const GroupsKnockoutDisplay = ({
                   : 'The knockout bracket will be available after all round robin matches are completed.'}
               </p>
               
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/20 border-2 border-emerald-500/30 rounded-xl">
-                <Settings className="w-4 h-4 text-emerald-400" />
-                <span className="text-sm text-emerald-300 font-semibold">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl" style={{ background: 'rgba(0,255,136,0.1)', border: '2px solid rgba(0,255,136,0.25)' }}>
+                <Settings className="w-4 h-4 icon-green" />
+                <span className="text-sm text-[#00ff88] font-semibold">
                   {isRoundRobinComplete() ? 'Click "Arrange KO" button in the header' : 'Complete all round robin matches first'}
                 </span>
               </div>
@@ -3085,13 +3088,13 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
 
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto border-2 border-emerald-500/20 shadow-2xl">
+      <div className="rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl" style={{ background: '#0d1025', border: '2px solid rgba(0,255,136,0.2)' }}>
         {/* Header */}
-        <div className="p-6 border-b-2 border-white/10 bg-gradient-to-r from-emerald-500/20 to-teal-500/20">
+        <div className="p-6 border-b-2 border-white/10" style={{ background: 'rgba(0,255,136,0.05)' }}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/50">
-                <Settings className="w-6 h-6 text-white" />
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg" style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)' }}>
+                <Settings className="w-6 h-6" style={{ color: '#07071a' }} />
               </div>
               <h2 className="text-xl font-bold text-white">Configure Draw</h2>
             </div>
@@ -3105,7 +3108,7 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
           {/* Format Selection */}
           <div>
             <label className="block text-sm font-semibold text-gray-200 mb-3 flex items-center gap-2">
-              <Layers className="w-4 h-4 text-emerald-400" />
+              <Layers className="w-4 h-4 icon-green" />
               Tournament Format
             </label>
             <div className="space-y-2">
@@ -3116,7 +3119,7 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
                     onClick={() => setConfig({ ...config, format: option.value })}
                     className={`w-full p-4 rounded-xl text-left transition-all border-2 font-semibold ${
                       config.format === option.value
-                        ? 'bg-gradient-to-r from-emerald-500 to-teal-600 border-emerald-400 text-white shadow-lg shadow-emerald-500/30'
+                        ? 'tab-active border-transparent'
                         : 'bg-slate-700/50 text-gray-300 border-white/10 hover:border-emerald-500/30 hover:bg-slate-700'
                     }`}
                   >
@@ -3130,7 +3133,7 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
           {/* Bracket Size */}
           <div>
             <label className="block text-sm font-semibold text-gray-200 mb-3 flex items-center gap-2">
-              <Users className="w-4 h-4 text-emerald-400" />
+              <Users className="w-4 h-4 icon-green" />
               Total Players
             </label>
             <div className="relative">
@@ -3143,10 +3146,10 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
                   const value = e.target.value === '' ? 0 : parseInt(e.target.value);
                   setConfig({ ...config, bracketSize: isNaN(value) ? 0 : Math.max(0, Math.min(128, value)) });
                 }}
-                className="w-full px-4 py-4 bg-slate-700/80 border-2 border-emerald-500/30 rounded-xl text-white text-2xl font-bold focus:outline-none focus:border-emerald-400 focus:shadow-lg focus:shadow-emerald-500/20 transition-all"
+                className="w-full px-4 py-4 rounded-xl text-white text-2xl font-bold focus:outline-none transition-all" style={{ background: 'rgba(255,255,255,0.06)', border: '2px solid rgba(0,255,136,0.25)' }}
                 placeholder="0"
               />
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 text-emerald-400 text-sm font-medium">
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 icon-green text-sm font-medium">
                 players
               </div>
             </div>
@@ -3157,7 +3160,7 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
             <>
               <div>
                 <label className="block text-sm font-semibold text-gray-200 mb-3 flex items-center gap-2">
-                  <Layers className="w-4 h-4 text-emerald-400" />
+                  <Layers className="w-4 h-4 icon-green" />
                   Number of Groups
                 </label>
                 <div className="relative">
@@ -3172,10 +3175,10 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
                       setConfig({ ...config, numberOfGroups: groups, customGroupSizes: null });
                       setUseCustomGroupSizes(false);
                     }}
-                    className="w-full px-4 py-4 bg-slate-700/80 border-2 border-emerald-500/30 rounded-xl text-white text-2xl font-bold focus:outline-none focus:border-emerald-400 focus:shadow-lg focus:shadow-emerald-500/20 transition-all"
+                    className="w-full px-4 py-4 rounded-xl text-white text-2xl font-bold focus:outline-none transition-all" style={{ background: 'rgba(255,255,255,0.06)', border: '2px solid rgba(0,255,136,0.25)' }}
                     placeholder="0"
                   />
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2 text-emerald-400 text-sm font-medium">
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 icon-green text-sm font-medium">
                     groups
                   </div>
                 </div>
@@ -3194,7 +3197,7 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
                     }}
                     className={`mt-3 w-full px-4 py-3 rounded-xl transition-all font-semibold ${
                       useCustomGroupSizes
-                        ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/30'
+                        ? 'tab-active'
                         : 'bg-slate-700/50 text-gray-300 hover:bg-slate-700 border-2 border-white/10'
                     }`}
                   >
@@ -3208,7 +3211,7 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
                     {config.customGroupSizes?.map((size, idx) => {
                       return (
                         <div key={idx} className="flex items-center gap-3">
-                          <div className="w-20 h-12 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-lg flex items-center justify-center text-white font-bold shadow-lg">
+                          <div className="w-20 h-12 rounded-lg flex items-center justify-center font-bold shadow-lg" style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', color: '#07071a' }}>
                             Pool {String.fromCharCode(65 + idx)}
                           </div>
                           <input
@@ -3222,7 +3225,7 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
                               newSizes[idx] = isNaN(value) ? 0 : Math.max(0, Math.min(config.bracketSize, value));
                               setConfig({ ...config, customGroupSizes: newSizes });
                             }}
-                            className="flex-1 px-4 py-3 bg-slate-700 border-2 border-emerald-500/30 rounded-xl text-white text-xl font-bold focus:outline-none focus:border-emerald-400 focus:shadow-lg focus:shadow-emerald-500/20 transition-all"
+                            className="flex-1 px-4 py-3 rounded-xl text-white text-xl font-bold focus:outline-none transition-all" style={{ background: 'rgba(255,255,255,0.06)', border: '2px solid rgba(0,255,136,0.25)' }}
                             placeholder="0"
                           />
                         </div>
@@ -3234,11 +3237,7 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
                         : 'bg-red-500/20 border-2 border-red-500/50'
                     }`}>
                       <span className="text-sm font-medium text-white">Total:</span>
-                      <span className={`text-lg font-bold ${
-                        config.customGroupSizes?.reduce((a, b) => a + b, 0) === config.bracketSize
-                          ? 'text-emerald-400'
-                          : 'text-red-400'
-                      }`}>
+                      <span className="text-lg font-bold" style={{ color: config.customGroupSizes?.reduce((a, b) => a + b, 0) === config.bracketSize ? '#00ff88' : '#f87171' }}>
                         {config.customGroupSizes?.reduce((a, b) => a + b, 0)} / {config.bracketSize}
                       </span>
                     </div>
@@ -3249,7 +3248,7 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
               {config.format === 'ROUND_ROBIN_KNOCKOUT' && (
                 <div>
                   <label className="block text-sm font-semibold text-gray-200 mb-3 flex items-center gap-2">
-                    <TrophyIcon className="w-4 h-4 text-emerald-400" />
+                    <TrophyIcon className="w-4 h-4 icon-green" />
                     Players Advancing from Each Group
                   </label>
                   <div className="grid grid-cols-4 gap-3">
@@ -3260,7 +3259,7 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
                           onClick={() => setConfig({ ...config, advanceFromGroup: num })}
                           className={`py-4 rounded-xl font-bold transition-all border-2 ${
                             config.advanceFromGroup === num
-                              ? 'bg-gradient-to-br from-emerald-500 to-teal-600 border-emerald-400 text-white shadow-lg shadow-emerald-500/30'
+                              ? 'tab-active border-transparent'
                               : 'bg-slate-700 text-gray-400 border-white/10 hover:border-emerald-500/30'
                           }`}
                         >
@@ -3278,14 +3277,14 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
         <div className="p-6 border-t-2 border-white/10 flex gap-3">
           <button 
             onClick={onClose} 
-            className="flex-1 px-6 py-4 bg-slate-700 text-white rounded-xl hover:bg-slate-600 transition-all font-semibold"
+            className="flex-1 px-6 py-4 rounded-xl transition-all font-semibold text-white" style={{ background: 'rgba(255,255,255,0.06)' }}
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex-1 px-6 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl hover:shadow-lg hover:shadow-emerald-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
+            className="flex-1 px-6 py-4 btn-brand rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
           >
             {saving ? (
               <span className="flex items-center justify-center gap-2">
@@ -3316,7 +3315,7 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
               <div className="p-4 border-t-2 border-white/10">
                 <button
                   onClick={() => setAlertMessage(null)}
-                  className="w-full px-4 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:shadow-lg hover:shadow-emerald-500/30 text-white font-semibold transition-all"
+                  className="w-full px-4 py-3 rounded-xl btn-brand font-semibold transition-all"
                 >
                   OK
                 </button>
@@ -3335,7 +3334,7 @@ export default DrawPage;
 const DeleteDrawModal = ({ categoryName, onClose, onConfirm, deleting }) => {
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-gradient-to-br from-slate-900 to-slate-800 border-2 border-red-500/30 rounded-2xl max-w-md w-full shadow-2xl">
+      <div className="rounded-2xl max-w-md w-full shadow-2xl" style={{ background: '#0d1025', border: '2px solid rgba(239,68,68,0.35)' }}>
         <div className="p-6 border-b-2 border-white/10">
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 bg-gradient-to-br from-red-500 to-rose-600 rounded-xl flex items-center justify-center shadow-lg shadow-red-500/50">
@@ -3366,7 +3365,7 @@ const DeleteDrawModal = ({ categoryName, onClose, onConfirm, deleting }) => {
           <button 
             onClick={onClose} 
             disabled={deleting}
-            className="flex-1 px-4 py-3 bg-slate-700 text-white rounded-xl hover:bg-slate-600 transition-all font-semibold"
+            className="flex-1 px-4 py-3 rounded-xl transition-all font-semibold text-white" style={{ background: 'rgba(255,255,255,0.06)' }}
           >
             Cancel
           </button>
@@ -3416,7 +3415,7 @@ const SlotCard = ({ slot, assigned, canAccept, onSlotClick, onRemove, playerLabe
                 : 'bg-slate-700/50'
           }`}>
             {assigned ? (
-              <CheckCircle className="w-5 h-5 text-emerald-400" />
+              <CheckCircle className="w-5 h-5 icon-green" />
             ) : (
               <Users className={`w-5 h-5 ${canAccept ? 'text-purple-400' : 'text-gray-500'}`} />
             )}
@@ -3499,13 +3498,10 @@ const CompactSlotCard = ({ slot, assigned, canAccept, onSlotClick, onRemove, pla
     >
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0 flex-1">
-          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
-            locked
-              ? 'bg-amber-500/20 text-amber-400'
-              : assigned 
-                ? 'bg-emerald-500/20 text-emerald-400' 
-                : 'bg-slate-700/50 text-gray-500'
-          }`}>
+          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded" style={{
+            background: locked ? 'rgba(251,191,36,0.15)' : assigned ? 'rgba(0,255,136,0.15)' : 'rgba(255,255,255,0.06)',
+            color: locked ? '#fbbf24' : assigned ? '#00ff88' : 'rgba(255,255,255,0.4)'
+          }}>
             {playerLabel}
           </span>
           {assigned ? (
@@ -3790,7 +3786,7 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
         <div 
           className="absolute top-10 right-10 w-64 h-64 rounded-full blur-3xl opacity-20"
           style={{ 
-            background: 'radial-gradient(circle, rgba(0,200,83,0.5) 0%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(0,255,136,0.5) 0%, transparent 70%)',
             animation: 'float 8s ease-in-out infinite'
           }}
         />
@@ -3821,12 +3817,12 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
         ))}
       </div>
 
-      <div className="relative bg-slate-800/95 backdrop-blur-xl border border-emerald-500/20 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl shadow-emerald-500/10">
+      <div className="relative backdrop-blur-xl rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl" style={{ background: '#0d1025', border: '1px solid rgba(0,255,136,0.2)' }}>
         <div className="p-4 border-b border-white/10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-emerald-500/20 rounded-xl flex items-center justify-center">
-                <UserPlus className="w-5 h-5 text-emerald-400" />
+                <UserPlus className="w-5 h-5 icon-green" />
               </div>
               <div>
                 <h2 className="text-base font-bold text-white">Assign Players to Draw</h2>
@@ -3843,7 +3839,7 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
             <button
               onClick={handleAddAllPlayers}
               disabled={!canAddAll}
-              className="flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg hover:shadow-lg hover:shadow-emerald-500/25 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed text-xs"
+              className="flex items-center gap-1.5 px-3 py-2 btn-brand rounded-lg transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed text-xs"
               title={canAddAll ? `Add ${Math.min(unassignedPlayersCount, availableSlotsCount)} unassigned players to available slots` : 'No unassigned players or available slots'}
             >
               <Users className="w-3.5 h-3.5" />
@@ -3868,12 +3864,12 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
           
           {selectedPlayer && (
             <div className="mt-2 px-3 py-2 bg-emerald-500/20 border border-emerald-500/30 rounded-lg flex items-center justify-between">
-              <span className="text-emerald-300 text-xs">
+              <span className="text-[#00ff88] text-xs">
                 Selected: <span className="font-semibold text-white">{selectedPlayer.name}</span> — Click a slot to assign
               </span>
               <button 
                 onClick={() => setSelectedPlayer(null)}
-                className="text-emerald-400 hover:text-emerald-300 text-xs"
+                className="text-xs icon-green hover:opacity-80"
               >
                 Cancel
               </button>
@@ -3914,19 +3910,18 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                       }`}
                     >
                       <div className="flex items-center gap-1.5">
-                        <div className={`w-5 h-5 rounded flex items-center justify-center text-white font-bold text-[10px] flex-shrink-0 ${
-                          isSelected
-                            ? 'bg-gradient-to-br from-emerald-400 to-teal-600 ring-1 ring-emerald-400'
-                            : assigned 
-                              ? 'bg-gradient-to-br from-emerald-500 to-teal-600' 
-                              : 'bg-gradient-to-br from-teal-500 to-emerald-600'
-                        }`}>
+                        <div className="w-5 h-5 rounded flex items-center justify-center font-bold text-[10px] flex-shrink-0"
+                          style={{
+                            background: isSelected ? 'linear-gradient(135deg,#00ff88,#00d4ff)' : assigned ? 'linear-gradient(135deg,#00ff88,#a855f7)' : 'linear-gradient(135deg,#a855f7,#00d4ff)',
+                            color: '#07071a',
+                            boxShadow: isSelected ? '0 0 0 2px #00ff88' : undefined
+                          }}>
                           {player.seed}
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-white font-medium text-[11px] leading-tight">{player.name}</p>
                           {player.partnerName && (
-                            <p className="text-emerald-300 text-[9px] leading-tight">& {player.partnerName}</p>
+                            <p className="text-[#00ff88] text-[9px] leading-tight">& {player.partnerName}</p>
                           )}
                         </div>
                         {isSelected ? (
@@ -3934,7 +3929,7 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                             <div className="w-1 h-1 bg-white rounded-full"></div>
                           </div>
                         ) : assigned ? (
-                          <CheckCircle className="w-3 h-3 text-emerald-400 flex-shrink-0" />
+                          <CheckCircle className="w-3 h-3 icon-green flex-shrink-0" />
                         ) : null}
                       </div>
                     </div>
@@ -3993,19 +3988,19 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                       <div className="px-2 py-1.5 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border-b border-white/10 flex items-center justify-between">
                         <div className="flex items-center gap-1.5">
                           <div className="w-6 h-6 bg-emerald-500/30 rounded flex items-center justify-center">
-                            <span className="text-emerald-300 font-bold text-xs">
+                            <span className="text-[#00ff88] font-bold text-xs">
                               {String.fromCharCode(65 + groupIndex)}
                             </span>
                           </div>
                           <div>
                             <h4 className="text-white font-bold text-[11px] leading-tight">Pool {String.fromCharCode(65 + groupIndex)}</h4>
-                            <p className="text-emerald-300 text-[9px] leading-tight">
+                            <p className="text-[#00ff88] text-[9px] leading-tight">
                               {assignedInPool}/{totalInPool} assigned
                             </p>
                           </div>
                         </div>
                         <div className="px-1.5 py-0.5 bg-emerald-500/20 rounded">
-                          <span className="text-emerald-300 font-bold text-[9px]">{totalInPool} slots</span>
+                          <span className="text-[#00ff88] font-bold text-[9px]">{totalInPool} slots</span>
                         </div>
                       </div>
                       
@@ -4030,7 +4025,7 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                               <div className="flex items-center gap-1">
                                 <div className={`w-4 h-4 rounded flex items-center justify-center text-[9px] font-bold flex-shrink-0 ${
                                   assigned 
-                                    ? 'bg-emerald-500/30 text-emerald-300' 
+                                    ? 'bg-emerald-500/30 text-[#00ff88]' 
                                     : 'bg-slate-600/30 text-gray-500'
                                 }`}>
                                   {slot.slot}
@@ -4040,7 +4035,7 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                                     <>
                                       <p className="text-white font-medium text-[9px] leading-tight">{assigned.playerName}</p>
                                       {assigned.partnerName && (
-                                        <p className="text-emerald-300 text-[8px] leading-tight">& {assigned.partnerName}</p>
+                                        <p className="text-[#00ff88] text-[8px] leading-tight">& {assigned.partnerName}</p>
                                       )}
                                     </>
                                   ) : (
@@ -4168,7 +4163,7 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
             <button
               onClick={handleSave}
               disabled={saving}
-              className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg hover:shadow-lg hover:shadow-emerald-500/25 transition-all font-semibold disabled:opacity-50 flex items-center gap-1.5 text-xs"
+              className="px-4 py-2 btn-brand rounded-lg transition-all font-semibold disabled:opacity-50 flex items-center gap-1.5 text-xs"
             >
               {saving ? (
                 <>
@@ -4269,7 +4264,7 @@ const AssignUmpireModal = ({ match, umpires, onClose, onAssign }) => {
                   >
                     <div className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm flex-shrink-0"
                       style={isSelected
-                        ? { background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#07071a' }
+                        ? { background: 'linear-gradient(135deg,#00ff88,#00ff88)', color: '#07071a' }
                         : { background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)' }}>
                       {umpire.name?.charAt(0)?.toUpperCase() || 'U'}
                     </div>
@@ -4303,7 +4298,7 @@ const AssignUmpireModal = ({ match, umpires, onClose, onAssign }) => {
             onClick={handleStartMatch}
             disabled={!selectedUmpire || assigning || umpires.length === 0}
             className="w-full py-3.5 rounded-xl font-black text-sm transition-all disabled:opacity-40 flex items-center justify-center gap-2"
-            style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#07071a', boxShadow: '0 4px 16px rgba(0,200,83,0.35)' }}
+            style={{ background: 'linear-gradient(135deg,#00ff88,#00ff88)', color: '#07071a', boxShadow: '0 4px 16px rgba(0,255,136,0.35)' }}
           >
             {assigning
               ? <><div className="w-4 h-4 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#07071a transparent transparent transparent' }} />Starting…</>
@@ -4494,7 +4489,7 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
         <div 
           className="absolute top-10 right-10 w-96 h-96 rounded-full blur-3xl"
           style={{ 
-            background: 'radial-gradient(circle, rgba(0,200,83,0.5) 0%, rgba(0,255,136,0.3) 50%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(0,255,136,0.5) 0%, rgba(0,255,136,0.3) 50%, transparent 70%)',
             animation: 'float 8s ease-in-out infinite, pulse 4s ease-in-out infinite'
           }}
         />
@@ -4534,7 +4529,7 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
         ))}
       </div>
 
-      <div className="relative bg-gradient-to-br from-slate-800/95 via-slate-800/95 to-slate-900/95 backdrop-blur-xl border-2 border-emerald-500/30 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl shadow-emerald-500/20">
+      <div className="relative backdrop-blur-xl rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl" style={{ background: '#0d1025', border: '2px solid rgba(0,255,136,0.2)' }}>
         {/* Header with gradient */}
         <div className="p-3 border-b border-emerald-500/20 bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-emerald-500/10">
           <div className="flex items-center justify-between">
@@ -4553,7 +4548,7 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
         <div className="p-3">
           {/* Advancing Players with icon */}
           <div className="mb-3">
-            <h3 className="text-[10px] font-black text-emerald-400 mb-2 uppercase tracking-wider flex items-center gap-1.5">
+            <h3 className="text-[10px] font-black icon-green mb-2 uppercase tracking-wider flex items-center gap-1.5">
               <Trophy className="w-3 h-3" />
               Advancing Players ({advancingPlayers.length})
             </h3>
@@ -4565,18 +4560,18 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
                 >
                   <div className="text-[11px] font-bold text-white leading-tight">{player.name}</div>
                   {player.partnerName && (
-                    <div className="text-[9px] text-emerald-300 leading-tight">& {player.partnerName}</div>
+                    <div className="text-[9px] text-[#00ff88] leading-tight">& {player.partnerName}</div>
                   )}
                   <div className="text-[8px] text-gray-400 mt-0.5 flex items-center gap-1">
-                    <span className="px-1 py-0.5 bg-emerald-500/20 rounded text-emerald-300 font-bold">Pool {player.group}</span>
+                    <span className="px-1 py-0.5 bg-emerald-500/20 rounded text-[#00ff88] font-bold">Pool {player.group}</span>
                     <span>#{player.rank}</span>
                     <span>•</span>
-                    <span className="text-emerald-400 font-bold">{player.points}pts</span>
+                    <span className="font-bold icon-green">{player.points}pts</span>
                   </div>
                 </div>
               ))}
               {unassignedPlayers.length === 0 && (
-                <div className="col-span-full text-center text-emerald-400 text-[10px] py-3 font-semibold">
+                <div className="col-span-full text-center icon-green text-[10px] py-3 font-semibold">
                   ✓ All players assigned
                 </div>
               )}
@@ -4585,21 +4580,21 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
 
           {/* Knockout Matches with icon */}
           <div>
-            <h3 className="text-[10px] font-black text-emerald-400 mb-2 uppercase tracking-wider flex items-center gap-1.5">
+            <h3 className="text-[10px] font-black icon-green mb-2 uppercase tracking-wider flex items-center gap-1.5">
               <Zap className="w-3 h-3" />
               Knockout Matches
             </h3>
             <div className="space-y-2">
               {knockoutSlots.map((slot, index) => (
                 <div key={index} className="bg-gradient-to-br from-slate-700/30 to-slate-800/30 rounded-lg p-2 border-2 border-emerald-500/20 hover:border-emerald-500/40 transition-all">
-                  <div className="text-[9px] text-emerald-400 mb-2 font-bold flex items-center gap-1">
+                  <div className="text-[9px] icon-green mb-2 font-bold flex items-center gap-1">
                     <span className="w-5 h-5 bg-emerald-500/20 rounded flex items-center justify-center text-[10px]">{slot.matchNumber}</span>
                     Match {slot.matchNumber}
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     {/* Player 1 Slot */}
                     <div className="space-y-1">
-                      <label className="text-[8px] text-emerald-400 font-bold uppercase tracking-wide">Player 1</label>
+                      <label className="text-[8px] icon-green font-bold uppercase tracking-wide">Player 1</label>
                       {slot.player1 ? (
                         <div className="p-2 bg-gradient-to-br from-emerald-600 to-teal-600 rounded-lg flex items-center justify-between shadow-lg shadow-emerald-500/30 border border-emerald-400/30">
                           <div className="flex-1 min-w-0">
@@ -4637,7 +4632,7 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
 
                     {/* Player 2 Slot */}
                     <div className="space-y-1">
-                      <label className="text-[8px] text-emerald-400 font-bold uppercase tracking-wide">Player 2</label>
+                      <label className="text-[8px] icon-green font-bold uppercase tracking-wide">Player 2</label>
                       {slot.player2 ? (
                         <div className="p-2 bg-gradient-to-br from-emerald-600 to-teal-600 rounded-lg flex items-center justify-between shadow-lg shadow-emerald-500/30 border border-emerald-400/30">
                           <div className="flex-1 min-w-0">
@@ -4686,7 +4681,7 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex-1 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg hover:shadow-xl hover:shadow-emerald-500/40 hover:scale-105 transition-all disabled:opacity-50 text-[11px] font-bold"
+            className="flex-1 px-4 py-2 btn-brand rounded-lg transition-all disabled:opacity-50 text-[11px] font-bold"
           >
             {saving ? 'Saving...' : 'Save Matchups'}
           </button>

@@ -2,24 +2,23 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import TournamentHistoryCard from '../components/TournamentHistoryCard';
-import { ArrowLeftIcon, TrophyIcon, FunnelIcon, CalendarIcon } from '@heroicons/react/24/outline';
+import { ArrowLeftIcon, TrophyIcon } from '@heroicons/react/24/outline';
 import { Filter, X, RefreshCw } from 'lucide-react';
+
+const B = {
+  bg: '#07071a', card: 'rgba(255,255,255,0.04)', border: 'rgba(255,255,255,0.08)',
+  cardDark: '#0d1025', green: '#00ff88', cyan: '#00d4ff', purple: '#a855f7',
+  sub: 'rgba(255,255,255,0.6)', dim: 'rgba(255,255,255,0.4)',
+};
 
 export default function OrganizerTournamentHistory() {
   const navigate = useNavigate();
   const [tournaments, setTournaments] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useState({
-    status: '',
-    startDate: '',
-    endDate: '',
-    page: 1
-  });
+  const [filters, setFilters] = useState({ status: '', startDate: '', endDate: '', page: 1 });
   const [pagination, setPagination] = useState(null);
 
-  useEffect(() => {
-    fetchHistory();
-  }, [filters]);
+  useEffect(() => { fetchHistory(); }, [filters]);
 
   const fetchHistory = async () => {
     try {
@@ -31,14 +30,10 @@ export default function OrganizerTournamentHistory() {
       if (filters.endDate) params.append('endDate', filters.endDate);
       params.append('page', filters.page);
       params.append('limit', 10);
-
       const response = await axios.get(
         `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/organizer/history?${params}`,
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-
       if (response.data.success) {
         setTournaments(response.data.data.tournaments);
         setPagination(response.data.data.pagination);
@@ -50,113 +45,104 @@ export default function OrganizerTournamentHistory() {
     }
   };
 
-  const handleFilterChange = (key, value) => {
-    setFilters(prev => ({ ...prev, [key]: value, page: 1 }));
-  };
-
-  const handlePageChange = (newPage) => {
-    setFilters(prev => ({ ...prev, page: newPage }));
-  };
-
-  const clearFilters = () => {
-    setFilters({ status: '', startDate: '', endDate: '', page: 1 });
-  };
-
+  const handleFilterChange = (key, value) => setFilters(prev => ({ ...prev, [key]: value, page: 1 }));
+  const handlePageChange = (newPage) => setFilters(prev => ({ ...prev, page: newPage }));
+  const clearFilters = () => setFilters({ status: '', startDate: '', endDate: '', page: 1 });
   const hasActiveFilters = filters.status || filters.startDate || filters.endDate;
 
+  const inputStyle = {
+    width: '100%', padding: '12px 16px', borderRadius: '12px', color: '#fff',
+    background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(168,85,247,0.35)',
+    outline: 'none', fontSize: '14px',
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    <div className="min-h-screen" style={{ background: B.bg }}>
+      {/* Background orbs */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-1/4 left-1/4 w-80 h-80 rounded-full blur-3xl opacity-[0.06]" style={{ background: B.purple }} />
+        <div className="absolute bottom-1/4 right-1/4 w-72 h-72 rounded-full blur-3xl opacity-[0.05]" style={{ background: B.cyan }} />
+      </div>
+
       {/* Hero Header */}
-      <div className="relative bg-gradient-to-r from-slate-900 via-purple-900 to-slate-900 overflow-hidden">
-        <div className="absolute inset-0">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
-        </div>
-        
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="relative border-b" style={{ background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.06)' }}>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-white/70 hover:text-white mb-6 transition-colors group"
+            className="flex items-center gap-2 mb-6 transition-colors group"
+            style={{ color: B.sub }}
           >
             <ArrowLeftIcon className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
             <span>Back</span>
           </button>
-
           <div className="flex items-center gap-5">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-400 via-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-indigo-500/30">
+            <div className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-2xl"
+              style={{ background: 'linear-gradient(135deg,#a855f7,#7c3aed)', boxShadow: '0 8px 25px rgba(168,85,247,0.3)' }}>
               <TrophyIcon className="w-8 h-8 text-white" />
             </div>
             <div>
               <h1 className="text-3xl font-bold text-white">Tournament History</h1>
-              <p className="text-white/60 mt-1">View and manage all your tournaments</p>
+              <p className="mt-1" style={{ color: B.sub }}>View and manage all your tournaments</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 -mt-6">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Filters */}
-        <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-6 mb-8">
+        <div className="rounded-2xl p-6 mb-8 border" style={{ background: B.card, borderColor: B.border }}>
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+              style={{ background: 'linear-gradient(135deg,#a855f7,#7c3aed)' }}>
               <Filter className="w-5 h-5 text-white" />
             </div>
             <h2 className="text-lg font-bold text-white">Filters</h2>
             {hasActiveFilters && (
               <button
                 onClick={clearFilters}
-                className="ml-auto flex items-center gap-2 px-4 py-2 text-sm text-red-400 hover:bg-red-500/20 rounded-xl transition-colors"
+                className="ml-auto flex items-center gap-2 px-4 py-2 text-sm rounded-xl transition-colors"
+                style={{ color: '#f87171' }}
               >
-                <X className="w-4 h-4" />
-                Clear All
+                <X className="w-4 h-4" />Clear All
               </button>
             )}
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Status</label>
+              <label className="block text-sm font-medium mb-2" style={{ color: B.sub }}>Status</label>
               <select
                 value={filters.status}
                 onChange={(e) => handleFilterChange('status', e.target.value)}
-                className="w-full px-4 py-3 bg-slate-800 border border-purple-500/50 rounded-xl text-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all shadow-[0_0_15px_rgba(168,85,247,0.3)] hover:shadow-[0_0_20px_rgba(168,85,247,0.4)]"
+                style={inputStyle}
               >
-                <option value="">All Statuses</option>
-                <option value="completed">Completed</option>
-                <option value="cancelled">Cancelled</option>
-                <option value="ongoing">Ongoing</option>
-                <option value="published">Published</option>
-                <option value="draft">Draft</option>
+                <option value="" style={{ background: '#0d1025' }}>All Statuses</option>
+                <option value="completed" style={{ background: '#0d1025' }}>Completed</option>
+                <option value="cancelled" style={{ background: '#0d1025' }}>Cancelled</option>
+                <option value="ongoing" style={{ background: '#0d1025' }}>Ongoing</option>
+                <option value="published" style={{ background: '#0d1025' }}>Published</option>
+                <option value="draft" style={{ background: '#0d1025' }}>Draft</option>
               </select>
             </div>
-
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Start Date</label>
-              <input
-                type="date"
-                value={filters.startDate}
+              <label className="block text-sm font-medium mb-2" style={{ color: B.sub }}>Start Date</label>
+              <input type="date" value={filters.startDate}
                 onChange={(e) => handleFilterChange('startDate', e.target.value)}
-                className="w-full px-4 py-3 bg-slate-800 border border-purple-500/50 rounded-xl text-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all shadow-[0_0_15px_rgba(168,85,247,0.3)] hover:shadow-[0_0_20px_rgba(168,85,247,0.4)]"
-              />
+                style={{ ...inputStyle, colorScheme: 'dark' }} />
             </div>
-
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">End Date</label>
-              <input
-                type="date"
-                value={filters.endDate}
+              <label className="block text-sm font-medium mb-2" style={{ color: B.sub }}>End Date</label>
+              <input type="date" value={filters.endDate}
                 onChange={(e) => handleFilterChange('endDate', e.target.value)}
-                className="w-full px-4 py-3 bg-slate-800 border border-purple-500/50 rounded-xl text-white focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all shadow-[0_0_15px_rgba(168,85,247,0.3)] hover:shadow-[0_0_20px_rgba(168,85,247,0.4)]"
-              />
+                style={{ ...inputStyle, colorScheme: 'dark' }} />
             </div>
-
             <div className="flex items-end">
               <button
                 onClick={fetchHistory}
-                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:shadow-lg hover:shadow-purple-500/30 transition-all font-semibold"
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold text-white transition-all"
+                style={{ background: 'linear-gradient(135deg,#a855f7,#7c3aed)' }}
               >
-                <RefreshCw className="w-4 h-4" />
-                Refresh
+                <RefreshCw className="w-4 h-4" />Refresh
               </button>
             </div>
           </div>
@@ -164,20 +150,23 @@ export default function OrganizerTournamentHistory() {
 
         {/* Tournament List */}
         {loading ? (
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-16 text-center">
-            <div className="w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-            <p className="text-gray-400 mt-6 font-medium">Loading tournaments...</p>
+          <div className="rounded-2xl p-16 text-center border" style={{ background: B.card, borderColor: B.border }}>
+            <div className="w-16 h-16 border-4 border-t-transparent rounded-full animate-spin mx-auto"
+              style={{ borderColor: 'rgba(0,255,136,0.3)', borderTopColor: B.green }} />
+            <p className="mt-6 font-medium" style={{ color: B.sub }}>Loading tournaments...</p>
           </div>
         ) : tournaments.length === 0 ? (
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-16 text-center">
-            <div className="w-24 h-24 bg-slate-700/50 rounded-3xl flex items-center justify-center mx-auto mb-6">
-              <TrophyIcon className="w-12 h-12 text-gray-500" />
+          <div className="rounded-2xl p-16 text-center border" style={{ background: B.card, borderColor: B.border }}>
+            <div className="w-24 h-24 rounded-3xl flex items-center justify-center mx-auto mb-6"
+              style={{ background: 'rgba(255,255,255,0.06)' }}>
+              <TrophyIcon className="w-12 h-12" style={{ color: B.dim }} />
             </div>
             <h3 className="text-xl font-bold text-white mb-2">No tournaments found</h3>
-            <p className="text-gray-400 mb-6">Try adjusting your filters or create a new tournament</p>
+            <p className="mb-6" style={{ color: B.sub }}>Try adjusting your filters or create a new tournament</p>
             <Link
               to="/tournaments/create"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-semibold hover:shadow-lg hover:scale-105 transition-all"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-white transition-all"
+              style={{ background: 'linear-gradient(135deg,#a855f7,#7c3aed)' }}
             >
               Create Tournament
             </Link>
@@ -196,17 +185,19 @@ export default function OrganizerTournamentHistory() {
                 <button
                   onClick={() => handlePageChange(filters.page - 1)}
                   disabled={filters.page === 1}
-                  className="px-5 py-2.5 bg-slate-800/50 border border-white/10 rounded-xl hover:bg-slate-700/50 disabled:opacity-50 disabled:cursor-not-allowed font-medium text-gray-300 transition-all"
+                  className="px-5 py-2.5 rounded-xl font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed border"
+                  style={{ background: B.card, borderColor: B.border, color: B.sub }}
                 >
                   Previous
                 </button>
-                <span className="px-4 py-2 text-sm text-gray-400 font-medium">
+                <span className="px-4 py-2 text-sm font-medium" style={{ color: B.dim }}>
                   Page {pagination.page} of {pagination.pages}
                 </span>
                 <button
                   onClick={() => handlePageChange(filters.page + 1)}
                   disabled={filters.page === pagination.pages}
-                  className="px-5 py-2.5 bg-slate-800/50 border border-white/10 rounded-xl hover:bg-slate-700/50 disabled:opacity-50 disabled:cursor-not-allowed font-medium text-gray-300 transition-all"
+                  className="px-5 py-2.5 rounded-xl font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed border"
+                  style={{ background: B.card, borderColor: B.border, color: B.sub }}
                 >
                   Next
                 </button>

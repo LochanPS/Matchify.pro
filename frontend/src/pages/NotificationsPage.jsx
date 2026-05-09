@@ -60,12 +60,12 @@ const NotificationsPage = () => {
 
   const getNotificationColor = (type) => {
     const colors = {
-      REGISTRATION_CONFIRMED: { bg: 'linear-gradient(135deg, rgba(16,185,129,0.2), rgba(5,150,105,0.15))', border: 'rgba(16,185,129,0.4)', shadow: 'rgba(16,185,129,0.3)' },
+      REGISTRATION_CONFIRMED: { bg: 'linear-gradient(135deg, rgba(0,255,136,0.15), rgba(0,200,83,0.1))', border: 'rgba(0,255,136,0.35)', shadow: 'rgba(0,255,136,0.2)' },
       REGISTRATION_REJECTED: { bg: 'linear-gradient(135deg, rgba(239,68,68,0.2), rgba(220,38,38,0.15))', border: 'rgba(239,68,68,0.4)', shadow: 'rgba(239,68,68,0.3)' },
       REGISTRATION_PENDING: { bg: 'linear-gradient(135deg, rgba(245,158,11,0.2), rgba(251,146,60,0.15))', border: 'rgba(245,158,11,0.4)', shadow: 'rgba(245,158,11,0.3)' },
       PAYMENT_VERIFICATION_REQUIRED: { bg: 'linear-gradient(135deg, rgba(59,130,246,0.2), rgba(37,99,235,0.15))', border: 'rgba(59,130,246,0.4)', shadow: 'rgba(59,130,246,0.3)' },
       PARTNER_INVITATION: { bg: 'linear-gradient(135deg, rgba(168,85,247,0.2), rgba(139,92,246,0.15))', border: 'rgba(168,85,247,0.4)', shadow: 'rgba(168,85,247,0.3)' },
-      PARTNER_ACCEPTED: { bg: 'linear-gradient(135deg, rgba(16,185,129,0.2), rgba(5,150,105,0.15))', border: 'rgba(16,185,129,0.4)', shadow: 'rgba(16,185,129,0.3)' },
+      PARTNER_ACCEPTED: { bg: 'linear-gradient(135deg, rgba(0,255,136,0.15), rgba(0,200,83,0.1))', border: 'rgba(0,255,136,0.35)', shadow: 'rgba(0,255,136,0.2)' },
       DRAW_PUBLISHED: { bg: 'linear-gradient(135deg, rgba(6,182,212,0.2), rgba(14,165,233,0.15))', border: 'rgba(6,182,212,0.4)', shadow: 'rgba(6,182,212,0.3)' },
       MATCH_ASSIGNED: { bg: 'linear-gradient(135deg, rgba(59,130,246,0.2), rgba(37,99,235,0.15))', border: 'rgba(59,130,246,0.4)', shadow: 'rgba(59,130,246,0.3)' },
       POINTS_AWARDED: { bg: 'linear-gradient(135deg, rgba(245,158,11,0.2), rgba(251,146,60,0.15))', border: 'rgba(245,158,11,0.4)', shadow: 'rgba(245,158,11,0.3)' },
@@ -85,9 +85,7 @@ const NotificationsPage = () => {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden" style={{ 
-      background: 'linear-gradient(180deg, #0a0a1f 0%, #07071a 30%, #0d1a2a 60%, #07071a 100%)' 
-    }}>
+    <div className="min-h-screen relative overflow-hidden" style={{ background: '#07071a' }}>
       {/* Animated Background Elements */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         {/* Large Gradient Orbs */}
@@ -172,10 +170,10 @@ const NotificationsPage = () => {
       {/* Sticky Header */}
       <div 
         className="sticky top-0 z-50 backdrop-blur-md border-b relative"
-        style={{ 
-          background: 'linear-gradient(135deg, rgba(7,7,26,0.95), rgba(13,26,42,0.95))', 
-          borderColor: 'rgba(0,200,83,0.3)',
-          boxShadow: '0 4px 20px rgba(0,200,83,0.1)',
+        style={{
+          background: 'rgba(7,7,26,0.95)',
+          borderColor: 'rgba(255,255,255,0.08)',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
           animation: 'slideDown 0.5s ease-out'
         }}
       >
@@ -189,7 +187,7 @@ const NotificationsPage = () => {
               className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
               style={{ background: 'rgba(255,255,255,0.05)' }}
             />
-            <ArrowLeft className="w-5 h-5 text-emerald-400 relative z-10" />
+            <ArrowLeft className="w-5 h-5 relative z-10" style={{ color: '#00ff88' }} />
             <div className="relative">
               <div 
                 className="absolute inset-0 blur-lg opacity-60"
@@ -277,7 +275,7 @@ const NotificationsPage = () => {
                 borderTopColor: '#00ff88'
               }}
             ></div>
-            <p className="text-gray-300 mt-4 font-semibold">Loading notifications...</p>
+            <p className="mt-4 font-semibold" style={{ color: 'rgba(255,255,255,0.6)' }}>Loading notifications...</p>
           </div>
         ) : notifications.length === 0 ? (
           <div 
@@ -310,7 +308,7 @@ const NotificationsPage = () => {
                 🔔
               </div>
               <h3 className="text-xl font-black text-white mb-2">No notifications yet</h3>
-              <p className="text-sm text-gray-300">You'll see notifications here when you have updates</p>
+              <p className="text-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>You'll see notifications here when you have updates</p>
             </div>
           </div>
         ) : (
@@ -387,7 +385,7 @@ const NotificationsPage = () => {
                         )}
                       </div>
                       
-                      <p className="text-sm text-gray-300 mb-3 leading-relaxed">
+                      <p className="text-sm mb-3 leading-relaxed" style={{ color: 'rgba(255,255,255,0.65)' }}>
                         {notification.message}
                       </p>
                       
@@ -401,15 +399,15 @@ const NotificationsPage = () => {
                               addSuffix: true,
                             })}
                           </span>
-                          <span className="text-gray-500">•</span>
-                          <span className="text-gray-400">
+                          <span style={{ color: 'rgba(255,255,255,0.25)' }}>•</span>
+                          <span style={{ color: 'rgba(255,255,255,0.4)' }}>
                             {format(new Date(notification.createdAt), 'MMM dd, h:mm a')}
                           </span>
                         </div>
 
                         {/* Actions */}
                         <div className="flex items-center gap-2">
-                          <ChevronRight className="w-5 h-5 text-gray-400" />
+                          <ChevronRight className="w-5 h-5" style={{ color: 'rgba(255,255,255,0.4)' }} />
                         </div>
                       </div>
                     </div>

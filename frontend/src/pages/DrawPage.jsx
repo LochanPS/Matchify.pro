@@ -1,4 +1,3 @@
-import { getErrorMessage } from '../utils/errorMessage';
 /**
  * DrawPage - Tournament Bracket Display
  * 
@@ -26,41 +25,6 @@ import SingleEliminationBracket from '../components/brackets/SingleEliminationBr
 import { useAuth } from '../contexts/AuthContext';
 import { ArrowLeftIcon, TrophyIcon } from '@heroicons/react/24/outline';
 import { Loader, Zap, Layers, X, Plus, Settings, Users, CheckCircle, AlertTriangle, Trash2, UserPlus, Gavel, AlertCircle, Play, Trophy, Clock, Eye, Edit } from 'lucide-react';
-
-// Pre-generated particle data — deterministic, never re-randomized on render
-const DRAW_BG_PARTICLES = Array.from({ length: 15 }, (_, i) => ({
-  w: (i * 7 + 3) % 6 + 2,  h: (i * 11 + 1) % 6 + 2,
-  x: (i * 37 + 11) % 97,   y: (i * 53 + 7) % 91,
-  c: ['#00ff88', '#00d4ff', '#a855f7', '#00ff88'][i % 4],
-  o: ((i * 13) % 50) / 100 + 0.2,
-  dur: (i * 7) % 10 + 5,   delay: (i * 3) % 5,
-  glow: (i * 11) % 20 + 10,
-}));
-const ASSIGN_PARTICLES = Array.from({ length: 8 }, (_, i) => ({
-  w: (i * 5 + 2) % 4 + 2,  h: (i * 5 + 2) % 4 + 2,
-  x: (i * 41 + 17) % 97,   y: (i * 59 + 13) % 91,
-  c: ['#00ff88', '#00d4ff'][i % 2],
-  o: ((i * 17) % 40) / 100 + 0.2,
-  dur: (i * 9) % 8 + 4,    delay: (i * 4) % 3,
-  glow: (i * 13) % 15 + 5,
-}));
-const ARRANGE_PARTICLES = Array.from({ length: 18 }, (_, i) => ({
-  w: (i * 7 + 3) % 6 + 3,  h: (i * 7 + 3) % 6 + 3,
-  x: (i * 43 + 19) % 97,   y: (i * 61 + 11) % 91,
-  c: ['#00ff88', '#00d4ff', '#a855f7', '#00ff88'][i % 4],
-  o: ((i * 19) % 50) / 100 + 0.5,
-  dur: (i * 11) % 8 + 4,   delay: (i * 5) % 3,
-  glow: (i * 17) % 25 + 15,
-}));
-
-// Utility function to display player names with partner names for doubles
-const getPlayerDisplay = (player) => {
-  if (!player || !player.name || player.name === 'TBD') return 'TBD';
-  if (player.partnerName) {
-    return `${player.name} & ${player.partnerName}`;
-  }
-  return player.name;
-};
 
 const DrawPage = () => {
   const { tournamentId, categoryId } = useParams();
@@ -93,7 +57,6 @@ const DrawPage = () => {
     completedMatches: 0
   });
   const [refreshing, setRefreshing] = useState(false);
-  const [bracketLoading, setBracketLoading] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [matchCompleteData, setMatchCompleteData] = useState(null);
   const [showRestartModal, setShowRestartModal] = useState(false);
@@ -216,15 +179,12 @@ const DrawPage = () => {
     try {
       setLoading(true);
       console.log('🔄 Fetching tournament data for ID:', tournamentId);
-
-      // Parallel fetch — tournament + categories in one round trip
-      const [tournamentData, categoriesData] = await Promise.all([
-        tournamentAPI.getTournament(tournamentId),
-        tournamentAPI.getCategories(tournamentId),
-      ]);
+      
+      const tournamentData = await tournamentAPI.getTournament(tournamentId);
       setTournament(tournamentData.data);
       console.log('✅ Tournament data fetched:', tournamentData.data.name);
 
+      const categoriesData = await tournamentAPI.getCategories(tournamentId);
       const cats = categoriesData.categories || [];
       setCategories(cats);
       console.log('✅ Categories fetched:', cats.length, 'categories');
@@ -268,50 +228,58 @@ const DrawPage = () => {
       categoryName: activeCategory.name
     });
 
-    setBracketLoading(true);
+    setLoading(true);
     setError(null);
 
     try {
-      // Parallel fetch — draw + matches in one round trip
+      // Add timestamp to force fresh data (cache busting)
       const timestamp = new Date().getTime();
-      const [response, matchesResponse] = await Promise.all([
-        api.get(`/tournaments/${tournamentId}/categories/${activeCategory.id}/draw?t=${timestamp}`, {
-          headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
-        }),
-        api.get(`/tournaments/${tournamentId}/categories/${activeCategory.id}/matches`).catch(() => ({ data: { matches: [] } })),
-      ]);
-
+      const response = await api.get(`/tournaments/${tournamentId}/categories/${activeCategory.id}/draw?t=${timestamp}`, {
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      });
+      
       console.log('✅ Draw API response:', response.data);
-      setMatches(matchesResponse.data.matches || []);
-      console.log('✅ Matches fetched:', matchesResponse.data.matches?.length || 0);
-
+      
       const draw = response.data.draw;
-
+      
       if (!draw) {
         console.log('⚠️ No draw data in response');
         setError(null);
         setBracket(null);
         return;
       }
-
+      
       // Parse bracketJson if it's a string
       const bracketData = draw.bracketJson || draw.bracket;
-
+      
       if (!bracketData) {
         console.log('⚠️ No bracketJson in draw data');
         setError(null);
         setBracket(null);
         return;
       }
-
+      
       const parsedBracket = typeof bracketData === 'string' ? JSON.parse(bracketData) : bracketData;
       console.log('✅ Bracket parsed successfully:', {
         format: parsedBracket.format,
         hasRounds: !!parsedBracket.rounds,
         hasGroups: !!parsedBracket.groups
       });
-
+      
       setBracket(parsedBracket);
+      
+      // Also fetch matches for scoring
+      try {
+        const matchesResponse = await api.get(`/tournaments/${tournamentId}/categories/${activeCategory.id}/matches`);
+        setMatches(matchesResponse.data.matches || []);
+        console.log('✅ Matches fetched:', matchesResponse.data.matches?.length || 0);
+      } catch (matchErr) {
+        console.log('⚠️ No matches found:', matchErr.message);
+        setMatches([]);
+      }
     } catch (err) {
       console.error('❌ Error fetching bracket:', err);
       
@@ -357,14 +325,14 @@ const DrawPage = () => {
         setError('Network error: Cannot connect to server. Please check your connection and try again.');
         // Don't clear bracket on network errors - keep existing data
       } else {
-        // For other errors, show specific error message
+        // For other API errors, silently show empty draw state (no red banner)
         const errorMessage = err.response?.data?.error || err.response?.data?.message || 'Failed to load bracket';
         console.error('⚠️ API error occurred:', errorMessage);
-        setError(`${errorMessage}. Please try refreshing the page.`);
-        // Don't clear bracket here - keep existing data if available
+        setError(null);
+        setBracket(null);
       }
     } finally {
-      setBracketLoading(false);
+      setLoading(false);
     }
   };
 
@@ -372,12 +340,12 @@ const DrawPage = () => {
     if (!activeCategory) return;
 
     try {
-      // Parallel fetch — registrations + matches in one round trip
-      const [registrationsResponse, matchesResponse] = await Promise.all([
-        api.get(`/tournaments/${tournamentId}/categories/${activeCategory.id}/registrations`),
-        api.get(`/tournaments/${tournamentId}/categories/${activeCategory.id}/matches`),
-      ]);
+      // Fetch registrations for this category
+      const registrationsResponse = await api.get(`/tournaments/${tournamentId}/categories/${activeCategory.id}/registrations`);
       const registrations = registrationsResponse.data.registrations || [];
+      
+      // Fetch matches for this category
+      const matchesResponse = await api.get(`/tournaments/${tournamentId}/categories/${activeCategory.id}/matches`);
       const matches = matchesResponse.data.matches || [];
 
       // Simply use the actual matches count from the database
@@ -439,7 +407,7 @@ const DrawPage = () => {
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       console.error('Error creating draw:', err);
-      setError(getErrorMessage(err, 'Failed to create draw'));
+      setError(err.response?.data?.error || 'Failed to create draw');
     } finally {
       setGenerating(false);
     }
@@ -465,7 +433,7 @@ const DrawPage = () => {
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       console.error('Error deleting draw:', err);
-      setError(getErrorMessage(err, 'Failed to delete draw'));
+      setError(err.response?.data?.error || 'Failed to delete draw');
     } finally {
       setDeleting(false);
     }
@@ -490,7 +458,7 @@ const DrawPage = () => {
       setTimeout(() => setSuccess(null), 5000);
     } catch (err) {
       console.error('Error restarting draw:', err);
-      setError(getErrorMessage(err, 'Failed to restart draw'));
+      setError(err.response?.data?.error || 'Failed to restart draw');
     } finally {
       setRestarting(false);
     }
@@ -528,7 +496,7 @@ const DrawPage = () => {
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       console.error('Error arranging knockout matchups:', err);
-      setError(getErrorMessage(err, 'Failed to arrange knockout matchups'));
+      setError(err.response?.data?.error || 'Failed to arrange knockout matchups');
     } finally {
       setAssigning(false);
     }
@@ -563,7 +531,7 @@ const DrawPage = () => {
       console.error('❌ Error data:', err.response?.data);
       console.error('❌ Error status:', err.response?.status);
       console.error('❌ Full error:', err);
-      setError(getErrorMessage(err, 'Failed to end category'));
+      setError(err.response?.data?.error || 'Failed to end category');
     } finally {
       setEndingTournament(false);
     }
@@ -636,7 +604,7 @@ const DrawPage = () => {
         fetchBracket();
       } catch (err) {
         console.error('Error creating match:', err);
-        setError(getErrorMessage(err, 'Failed to create match. Please try again.'));
+        setError(err.response?.data?.error || 'Failed to create match. Please try again.');
       }
     }
   };
@@ -659,7 +627,7 @@ const DrawPage = () => {
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       console.error('Error assigning umpire:', err);
-      setError(getErrorMessage(err, 'Failed to assign umpire'));
+      setError(err.response?.data?.error || 'Failed to assign umpire');
     }
   };
 
@@ -701,7 +669,7 @@ const DrawPage = () => {
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       console.error('Error changing match result:', err);
-      setError(getErrorMessage(err, 'Failed to change match result'));
+      setError(err.response?.data?.error || 'Failed to change match result');
     } finally {
       setChangingResult(false);
     }
@@ -739,7 +707,7 @@ const DrawPage = () => {
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       console.error('Error assigning players:', err);
-      setError(getErrorMessage(err, 'Failed to assign players'));
+      setError(err.response?.data?.error || 'Failed to assign players');
     } finally {
       setAssigning(false);
     }
@@ -747,10 +715,10 @@ const DrawPage = () => {
 
   if (loading && !tournament) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #0a0a1f 0%, #07071a 50%, #0d1a2a 100%)' }}>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: 'rgba(0,255,136,0.3)', borderTopColor: 'transparent' }}></div>
-          <p className="mt-4 font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>Loading draw...</p>
+          <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="text-gray-400 mt-4 font-medium">Loading draw...</p>
         </div>
       </div>
     );
@@ -766,121 +734,26 @@ const DrawPage = () => {
   const hasPlayedMatches = matches.some(m => m.status === 'COMPLETED' || m.status === 'IN_PROGRESS');
 
   return (
-    <div className="min-h-screen relative overflow-hidden" style={{ 
-      background: 'linear-gradient(180deg, #0a0a1f 0%, #07071a 30%, #0d1a2a 60%, #07071a 100%)' 
-    }}>
-      {/* Animated Background Elements */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        {/* Large Gradient Orbs */}
-        <div 
-          className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl opacity-30 animate-pulse"
-          style={{ 
-            background: 'radial-gradient(circle, rgba(0,255,136,0.4) 0%, rgba(0,255,136,0.2) 40%, transparent 70%)',
-            animation: 'float 8s ease-in-out infinite'
-          }}
-        />
-        <div 
-          className="absolute top-1/4 left-0 w-80 h-80 rounded-full blur-3xl opacity-25 animate-pulse"
-          style={{ 
-            background: 'radial-gradient(circle, rgba(20,184,166,0.4) 0%, rgba(13,148,136,0.2) 40%, transparent 70%)',
-            animation: 'float 10s ease-in-out infinite reverse',
-            animationDelay: '2s'
-          }}
-        />
-        <div 
-          className="absolute bottom-1/4 right-1/4 w-72 h-72 rounded-full blur-3xl opacity-20 animate-pulse"
-          style={{ 
-            background: 'radial-gradient(circle, rgba(6,182,212,0.4) 0%, rgba(14,165,233,0.2) 40%, transparent 70%)',
-            animation: 'float 12s ease-in-out infinite',
-            animationDelay: '4s'
-          }}
-        />
-        <div 
-          className="absolute top-1/2 right-1/3 w-64 h-64 rounded-full blur-3xl opacity-15 animate-pulse"
-          style={{ 
-            background: 'radial-gradient(circle, rgba(16,185,129,0.4) 0%, rgba(5,150,105,0.2) 40%, transparent 70%)',
-            animation: 'float 9s ease-in-out infinite reverse',
-            animationDelay: '1s'
-          }}
-        />
-        
-        {/* Floating Particles */}
-        {DRAW_BG_PARTICLES.map((p, i) => (
-          <div
-            key={i}
-            className="absolute rounded-full"
-            style={{
-              width: `${p.w}px`,
-              height: `${p.h}px`,
-              left: `${p.x}%`,
-              top: `${p.y}%`,
-              background: p.c,
-              opacity: p.o,
-              animation: `float ${p.dur}s ease-in-out infinite`,
-              animationDelay: `${p.delay}s`,
-              boxShadow: `0 0 ${p.glow}px ${p.c}`,
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Add keyframes for animations */}
-      <style>{`
-        @keyframes float {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          25% { transform: translate(20px, -20px) scale(1.05); }
-          50% { transform: translate(-15px, 15px) scale(0.95); }
-          75% { transform: translate(15px, 10px) scale(1.02); }
-        }
-        @keyframes glow {
-          0%, 100% { opacity: 0.5; filter: brightness(1); }
-          50% { opacity: 1; filter: brightness(1.3); }
-        }
-        .btn-brand { background: linear-gradient(135deg, #00ff88, #00d4ff); color: #07071a !important; }
-        .btn-brand:hover { box-shadow: 0 8px 25px rgba(0,255,136,0.4); transform: scale(1.05); }
-        .btn-brand-sm { background: linear-gradient(135deg, #00ff88, #00d4ff); color: #07071a !important; }
-        .card-brand { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); }
-        .card-dark { background: #0d1025; border: 1px solid rgba(255,255,255,0.1); }
-        .tab-active { background: linear-gradient(135deg, #00ff88, #00d4ff); color: #07071a !important; box-shadow: 0 4px 15px rgba(0,255,136,0.3); }
-        .icon-green { color: #00ff88; }
-      `}</style>
-
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       {/* Hero Header */}
-      <div className="relative overflow-hidden" style={{
-        background: 'linear-gradient(135deg, rgba(7,7,26,0.95), rgba(13,26,42,0.95))',
-        borderBottom: '1px solid rgba(0,255,136,0.2)',
-        boxShadow: '0 4px 20px rgba(0,255,136,0.1)'
-      }}>
+      <div className="relative bg-gradient-to-r from-slate-900 via-purple-900 to-slate-900 overflow-hidden">
         <div className="absolute inset-0">
-          <div 
-            className="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl opacity-20"
-            style={{ 
-              background: 'radial-gradient(circle, rgba(0,255,136,0.4) 0%, transparent 70%)',
-              animation: 'glow 3s ease-in-out infinite'
-            }}
-          />
-          <div 
-            className="absolute bottom-0 right-1/4 w-96 h-96 rounded-full blur-3xl opacity-20"
-            style={{ 
-              background: 'radial-gradient(circle, rgba(20,184,166,0.4) 0%, transparent 70%)',
-              animation: 'glow 3s ease-in-out infinite',
-              animationDelay: '1.5s'
-            }}
-          />
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
         </div>
         
-        <div className="relative max-w-2xl mx-auto px-4 py-4">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-white/70 hover:text-white mb-4 transition-colors group"
+            className="flex items-center gap-2 text-white/70 hover:text-white mb-6 transition-colors group"
           >
-            <ArrowLeftIcon className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
-            <span className="text-sm">Back to Tournament</span>
+            <ArrowLeftIcon className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
+            <span>Back to Tournament</span>
           </button>
 
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
             <div className="flex items-center gap-5">
-              <div className="w-16 h-16 bg-gradient-to-br from-emerald-400 via-teal-500 to-emerald-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-emerald-500/30">
+              <div className="w-16 h-16 bg-gradient-to-br from-purple-400 via-violet-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-purple-500/30">
                 <Layers className="w-8 h-8 text-white" />
               </div>
               <div>
@@ -890,71 +763,69 @@ const DrawPage = () => {
             </div>
 
             {isOrganizer && (
-              <div className="grid grid-cols-2 gap-3 w-full max-w-2xl">
+              <div className="flex gap-3">
                 {bracket && (
                   <>
-                    {/* Row 1: Assign Players & Edit Groups */}
+                    {/* Assign Players button - Disabled when tournament is completed */}
                     {(bracket?.format === 'KNOCKOUT' || bracket?.format === 'ROUND_ROBIN' || bracket?.format === 'ROUND_ROBIN_KNOCKOUT') && (
                       <button
                         onClick={openAssignModal}
                         disabled={isCategoryCompleted}
                         title={isCategoryCompleted ? 'Category has ended - draw is locked' : 'Assign players to draw'}
-                        className={`px-4 py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm ${
+                        className={`px-5 py-3 rounded-xl shadow-lg transition-all flex items-center gap-2 font-semibold ${
                           isCategoryCompleted
                             ? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50'
-                            : 'btn-brand'
+                            : 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:scale-105'
                         }`}
                       >
                         <UserPlus className="w-5 h-5" />
                         Assign Players
                       </button>
                     )}
-                    
+                    {/* Edit Group Sizes button - Disabled when tournament is completed */}
                     {(bracket?.format === 'ROUND_ROBIN' || bracket?.format === 'ROUND_ROBIN_KNOCKOUT') && !hasPlayedMatches && (
                       <button
                         onClick={() => setShowConfigModal(true)}
                         disabled={isCategoryCompleted}
                         title={isCategoryCompleted ? 'Category has ended - draw is locked' : 'Edit group sizes and configuration'}
-                        className={`px-4 py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm ${
+                        className={`px-5 py-3 rounded-xl shadow-lg transition-all flex items-center gap-2 font-semibold ${
                           isCategoryCompleted
                             ? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50'
-                            : 'btn-brand'
+                            : 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-blue-500/30 hover:shadow-blue-500/50 hover:scale-105'
                         }`}
                       >
                         <Layers className="w-5 h-5" />
-                        Edit Groups
+                        Edit Group Sizes
                       </button>
                     )}
-                    
-                    {/* Row 2: Arrange KO & End Category */}
+                    {/* Arrange Knockout Matchups button - Disabled when tournament is completed */}
                     {bracket?.format === 'ROUND_ROBIN_KNOCKOUT' && (
                       <button
                         onClick={() => setShowArrangeMatchupsModal(true)}
                         disabled={isCategoryCompleted}
                         title={isCategoryCompleted ? 'Category has ended - draw is locked' : 'Arrange knockout stage matchups'}
-                        className={`px-4 py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm ${
+                        className={`px-5 py-3 rounded-xl shadow-lg transition-all flex items-center gap-2 font-semibold ${
                           isCategoryCompleted
                             ? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50'
-                            : 'btn-brand'
+                            : 'bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-purple-500/30 hover:shadow-purple-500/50 hover:scale-105'
                         }`}
                       >
                         <Settings className="w-5 h-5" />
-                        Arrange KO
+                        Arrange Knockout
                       </button>
                     )}
-                    
+                    {/* End Category Button - Hide when already completed */}
                     {!isCategoryCompleted && (
                       <button
                         onClick={() => setShowEndTournamentModal(true)}
-                        className="px-4 py-3 btn-brand rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm"
+                        className="px-5 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl shadow-lg shadow-green-500/30 hover:shadow-green-500/50 hover:scale-105 transition-all flex items-center gap-2 font-semibold"
                         title="Mark this category as complete"
                       >
                         <Trophy className="w-5 h-5" />
                         End Category
                       </button>
                     )}
-                    
-                    {/* Row 3: Restart & Delete */}
+                    {/* Restart Draws button - Disabled when tournament is completed */}
                     <button
                       onClick={() => hasPlayedMatches && !isCategoryCompleted && setShowRestartModal(true)}
                       disabled={!hasPlayedMatches || isCategoryCompleted}
@@ -965,16 +836,16 @@ const DrawPage = () => {
                             ? 'No matches have been played yet' 
                             : 'Restart all matches'
                       }
-                      className={`px-4 py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm ${
+                      className={`px-5 py-3 rounded-xl shadow-lg transition-all flex items-center gap-2 font-semibold ${
                         !hasPlayedMatches || isCategoryCompleted
                           ? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50' 
-                          : 'bg-gradient-to-r from-gray-600 to-gray-700 text-white shadow-gray-500/30 hover:shadow-gray-500/50 hover:scale-105'
+                          : 'bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-orange-500/30 hover:shadow-orange-500/50 hover:scale-105'
                       }`}
                     >
                       <Zap className="w-5 h-5" />
-                      Restart
+                      Restart Draws
                     </button>
-                    
+                    {/* Delete Draw button - Disabled when tournament is completed */}
                     <button
                       onClick={() => !hasPlayedMatches && !isCategoryCompleted && setShowDeleteModal(true)}
                       disabled={hasPlayedMatches || isCategoryCompleted}
@@ -985,21 +856,21 @@ const DrawPage = () => {
                             ? 'Cannot delete draw - matches have been played' 
                             : 'Delete Draw'
                       }
-                      className={`px-4 py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm ${
+                      className={`px-5 py-3 rounded-xl shadow-lg transition-all flex items-center gap-2 font-semibold ${
                         hasPlayedMatches || isCategoryCompleted
                           ? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50' 
                           : 'bg-gradient-to-r from-red-500 to-rose-600 text-white shadow-red-500/30 hover:shadow-red-500/50 hover:scale-105'
                       }`}
                     >
                       <Trash2 className="w-5 h-5" />
-                      Delete
+                      Delete Draw
                     </button>
                   </>
                 )}
                 {!bracket && !isCategoryCompleted && (
                   <button
                     onClick={() => setShowConfigModal(true)}
-                    className="col-span-2 px-4 py-3 btn-brand rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm"
+                    className="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl shadow-lg shadow-amber-500/30 hover:shadow-amber-500/50 hover:scale-105 transition-all flex items-center gap-2 font-semibold"
                   >
                     <Plus className="w-5 h-5" />
                     Create Draw
@@ -1030,22 +901,22 @@ const DrawPage = () => {
         </div>
       </div>
 
-      {/* Tournament Statistics Header - ULTRA COMPACT FOR MOBILE */}
+      {/* Tournament Statistics Header */}
       {activeCategory && (
-        <div className="backdrop-blur-sm border-b border-white/10" style={{ background: 'rgba(13,16,37,0.8)' }}>
-          <div className="max-w-2xl mx-auto px-3 py-2">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+        <div className="bg-slate-800/50 backdrop-blur-sm border-b border-white/10">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {/* Total Players */}
-              <div className="rounded-xl p-2.5 relative" style={{ background: 'rgba(0,212,255,0.06)', border: '1px solid rgba(0,212,255,0.2)' }}>
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-teal-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Users className="w-4 h-4 text-teal-400" />
+              <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-500/20 rounded-xl p-4 relative">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                    <Users className="w-5 h-5 text-blue-400" />
                   </div>
-                  <div className="text-left flex-1 min-w-0">
-                    <p className="text-lg font-bold text-white leading-none">{tournamentStats.totalPlayers}</p>
-                    <p className="text-teal-300 text-xs font-medium leading-tight">Players</p>
+                  <div className="text-left flex-1">
+                    <p className="text-2xl font-bold text-white">{tournamentStats.totalPlayers}</p>
+                    <p className="text-blue-300 text-sm font-medium">Total Players</p>
                   </div>
-                  {/* View Players Button - COMPACT */}
+                  {/* View Players Button */}
                   <button
                     onClick={async () => {
                       if (showPlayersModal) {
@@ -1068,13 +939,13 @@ const DrawPage = () => {
                         }
                       }
                     }}
-                    className="w-6 h-6 bg-teal-500/30 hover:bg-teal-500/50 rounded-lg flex items-center justify-center transition-all hover:scale-110 group flex-shrink-0"
+                    className="w-8 h-8 bg-blue-500/30 hover:bg-blue-500/50 rounded-lg flex items-center justify-center transition-all hover:scale-110 group"
                     title="View all players"
                   >
                     {showPlayersModal ? (
-                      <X className="w-3 h-3 text-teal-300 group-hover:text-white" />
+                      <X className="w-4 h-4 text-blue-300 group-hover:text-white" />
                     ) : (
-                      <svg className="w-3 h-3 text-teal-300 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 text-blue-300 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                       </svg>
                     )}
@@ -1082,41 +953,41 @@ const DrawPage = () => {
                 </div>
               </div>
 
-              {/* Confirmed Players - COMPACT */}
-              <div className="rounded-xl p-2.5" style={{ background: 'rgba(0,255,136,0.06)', border: '1px solid rgba(0,255,136,0.2)' }}>
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(0,255,136,0.12)' }}>
-                    <CheckCircle className="w-4 h-4 icon-green" />
+              {/* Confirmed Players */}
+              <div className="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 rounded-xl p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-emerald-500/20 rounded-lg flex items-center justify-center">
+                    <CheckCircle className="w-5 h-5 text-emerald-400" />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-lg font-bold text-white leading-none">{tournamentStats.confirmedPlayers}</p>
-                    <p className="text-[#00ff88] text-xs font-medium leading-tight">Confirmed</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Total Matches - COMPACT */}
-              <div className="rounded-xl p-2.5" style={{ background: 'rgba(0,255,136,0.06)', border: '1px solid rgba(0,255,136,0.2)' }}>
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-teal-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Gavel className="w-4 h-4 text-teal-400" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-lg font-bold text-white leading-none">{tournamentStats.totalMatches}</p>
-                    <p className="text-teal-300 text-xs font-medium leading-tight">Matches</p>
+                  <div>
+                    <p className="text-2xl font-bold text-white">{tournamentStats.confirmedPlayers}</p>
+                    <p className="text-emerald-300 text-sm font-medium">Confirmed</p>
                   </div>
                 </div>
               </div>
 
-              {/* Completed Matches - COMPACT */}
-              <div className="rounded-xl p-2.5" style={{ background: 'rgba(0,255,136,0.06)', border: '1px solid rgba(0,255,136,0.2)' }}>
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(0,255,136,0.12)' }}>
-                    <TrophyIcon className="w-4 h-4 icon-green" />
+              {/* Total Matches */}
+              <div className="bg-gradient-to-br from-purple-500/10 to-violet-500/10 border border-purple-500/20 rounded-xl p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center">
+                    <Gavel className="w-5 h-5 text-purple-400" />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-lg font-bold text-white leading-none">{tournamentStats.completedMatches}</p>
-                    <p className="text-[#00ff88] text-xs font-medium leading-tight">Completed</p>
+                  <div>
+                    <p className="text-2xl font-bold text-white">{tournamentStats.totalMatches}</p>
+                    <p className="text-purple-300 text-sm font-medium">Total Matches</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Completed Matches */}
+              <div className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-xl p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-amber-500/20 rounded-lg flex items-center justify-center">
+                    <TrophyIcon className="w-5 h-5 text-amber-400" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-white">{tournamentStats.completedMatches}</p>
+                    <p className="text-amber-300 text-sm font-medium">Completed</p>
                   </div>
                 </div>
               </div>
@@ -1127,11 +998,11 @@ const DrawPage = () => {
 
             {/* Players List - Shows when Total Players card is clicked */}
             {showPlayersModal && (
-              <div className="mt-6 backdrop-blur-sm rounded-2xl p-6 shadow-2xl" style={{ background: 'rgba(13,16,37,0.9)', border: '1px solid rgba(0,212,255,0.2)' }}>
+              <div className="mt-6 bg-gradient-to-br from-slate-800/80 to-slate-700/80 backdrop-blur-sm border border-blue-500/30 rounded-2xl p-6 shadow-2xl">
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg" style={{ background: 'linear-gradient(135deg,#00d4ff,#a855f7)' }}>
-                      <Users className="w-6 h-6" style={{ color: '#07071a' }} />
+                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl flex items-center justify-center shadow-lg">
+                      <Users className="w-6 h-6 text-white" />
                     </div>
                     <div>
                       <h3 className="text-xl font-bold text-white">Registered Players</h3>
@@ -1158,11 +1029,11 @@ const DrawPage = () => {
                     {registeredPlayers.map((registration, index) => (
                       <div
                         key={registration.id}
-                        className="bg-gradient-to-br from-slate-700/50 to-slate-600/50 border border-white/10 rounded-xl p-4 hover:border-teal-500/50 hover:shadow-lg hover:shadow-teal-500/20 transition-all"
+                        className="bg-gradient-to-br from-slate-700/50 to-slate-600/50 border border-white/10 rounded-xl p-4 hover:border-blue-500/50 hover:shadow-lg hover:shadow-blue-500/20 transition-all"
                       >
                         <div className="flex items-center gap-3">
                           {/* Player Number */}
-                          <div className="w-10 h-10 bg-gradient-to-br from-teal-500 to-emerald-500 rounded-lg flex items-center justify-center font-bold text-white shadow-lg flex-shrink-0">
+                          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center font-bold text-white shadow-lg flex-shrink-0">
                             {index + 1}
                           </div>
                           
@@ -1197,7 +1068,7 @@ const DrawPage = () => {
                               
                               {/* Guest Badge */}
                               {registration.isGuest && (
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-teal-500/20 border border-teal-500/30 rounded-full text-xs text-teal-300">
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-purple-500/20 border border-purple-500/30 rounded-full text-xs text-purple-300">
                                   Quick Added
                                 </span>
                               )}
@@ -1222,7 +1093,7 @@ const DrawPage = () => {
       )}
 
       {/* Messages */}
-      <div className="max-w-2xl mx-auto px-4 mt-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
         {error && (
           <div className="mb-4 bg-red-500/10 border border-red-500/30 rounded-xl p-4 flex items-center gap-3">
             <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0" />
@@ -1231,35 +1102,42 @@ const DrawPage = () => {
           </div>
         )}
         {success && (
-          <div className="mb-4 rounded-xl p-4 flex items-center gap-3" style={{ background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.25)' }}>
-            <CheckCircle className="w-5 h-5 icon-green flex-shrink-0" />
-            <span className="text-[#00ff88] font-medium">{success}</span>
+          <div className="mb-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 flex items-center gap-3">
+            <CheckCircle className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+            <span className="text-emerald-300 font-medium">{success}</span>
             {refreshing && (
               <div className="ml-auto">
                 <div className="w-5 h-5 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></div>
               </div>
             )}
-            <button onClick={() => setSuccess(null)} className="ml-auto icon-green hover:text-[#00ff88]"><X className="w-5 h-5" /></button>
+            <button onClick={() => setSuccess(null)} className="ml-auto text-emerald-400 hover:text-emerald-300"><X className="w-5 h-5" /></button>
           </div>
         )}
       </div>
 
-      {/* Category Tabs - ULTRA COMPACT FOR MOBILE */}
+      {/* Category Tabs */}
       {categories.length > 0 && (
-        <div className="max-w-2xl mx-auto px-3 mt-2">
-          <div className="backdrop-blur-sm rounded-2xl p-1.5" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+          <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-2">
             <div className="flex gap-2 overflow-x-auto">
               {categories.map((category) => (
                 <button
                   key={category.id}
                   onClick={() => handleCategoryChange(category)}
-                  className={`flex-shrink-0 px-4 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap ${
+                  className={`flex-shrink-0 px-6 py-3 rounded-xl text-sm font-semibold transition-all ${
                     activeCategory?.id === category.id
-                      ? 'tab-active'
+                      ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/30'
                       : 'text-gray-400 hover:text-white hover:bg-slate-700/50'
                   }`}
                 >
                   {category.name}
+                  <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${
+                    activeCategory?.id === category.id
+                      ? 'bg-white/20 text-white'
+                      : 'bg-slate-700 text-gray-400'
+                  }`}>
+                    {category.format}
+                  </span>
                 </button>
               ))}
             </div>
@@ -1268,16 +1146,15 @@ const DrawPage = () => {
       )}
 
       {/* Content */}
-      <div className="max-w-2xl mx-auto px-3 py-4">
-        {bracketLoading ? (
-          <div className="rounded-2xl p-16 text-center border" style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.08)' }}>
-            <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin mx-auto"
-              style={{ borderColor: 'rgba(0,255,136,0.4)', borderTopColor: 'transparent' }} />
-            <p className="mt-4 text-sm font-medium" style={{ color: 'rgba(255,255,255,0.55)' }}>Loading bracket...</p>
+      <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {loading ? (
+          <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-16 text-center">
+            <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <p className="text-gray-400 mt-6 font-medium">Loading bracket...</p>
           </div>
         ) : drawNotGenerated ? (
-          <div className="backdrop-blur-sm rounded-2xl p-16 text-center" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
-            <div className="w-24 h-24 rounded-3xl flex items-center justify-center mx-auto mb-6" style={{ background: 'rgba(0,255,136,0.1)', border: '1px solid rgba(0,255,136,0.2)' }}>
+          <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-16 text-center">
+            <div className="w-24 h-24 bg-gradient-to-br from-amber-500/20 to-orange-500/20 rounded-3xl flex items-center justify-center mx-auto mb-6">
               <span className="text-5xl">📋</span>
             </div>
             <h3 className="text-2xl font-bold text-white mb-3">Draw Not Generated Yet</h3>
@@ -1289,7 +1166,7 @@ const DrawPage = () => {
             {isOrganizer && (
               <button
                 onClick={() => setShowConfigModal(true)}
-                className="inline-flex items-center gap-2 px-6 py-3 btn-brand rounded-xl font-semibold transition-all"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-amber-500/25 hover:scale-105 transition-all"
               >
                 <Plus className="w-5 h-5" />
                 Create Draw Now
@@ -1297,15 +1174,15 @@ const DrawPage = () => {
             )}
           </div>
         ) : !bracket ? (
-          <div className="backdrop-blur-sm rounded-2xl p-16 text-center" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
-            <div className="w-24 h-24 rounded-3xl flex items-center justify-center mx-auto mb-6" style={{ background: 'rgba(255,255,255,0.06)' }}>
+          <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-16 text-center">
+            <div className="w-24 h-24 bg-slate-700/50 rounded-3xl flex items-center justify-center mx-auto mb-6">
               <TrophyIcon className="w-12 h-12 text-gray-500" />
             </div>
             <h3 className="text-xl font-bold text-white mb-2">No bracket data available</h3>
             <p className="text-gray-400">Please try again later</p>
           </div>
         ) : (
-          <div className="backdrop-blur-sm rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+          <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden">
             <DrawDisplay 
               bracket={bracket} 
               matches={matches} 
@@ -1354,13 +1231,13 @@ const DrawPage = () => {
       {/* Continue to Knockout Stage Confirmation Modal */}
       {showContinueKnockoutModal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="rounded-2xl max-w-md w-full shadow-2xl" style={{ background: '#0d1025', border: '2px solid rgba(0,255,136,0.25)' }}>
+          <div className="bg-slate-800 rounded-2xl max-w-md w-full border-2 border-green-500/30 shadow-2xl shadow-green-500/20">
             {/* Header */}
-            <div className="p-6 border-b border-white/10" style={{ background: 'rgba(0,255,136,0.06)' }}>
+            <div className="p-6 border-b border-white/10 bg-gradient-to-r from-green-600/20 via-emerald-600/20 to-teal-600/20">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg" style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)' }}>
-                    <Play className="w-6 h-6" style={{ color: '#07071a' }} />
+                  <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <Play className="w-6 h-6 text-white" />
                   </div>
                   <div>
                     <h3 className="text-xl font-bold text-white">Matchify.pro says</h3>
@@ -1385,7 +1262,7 @@ const DrawPage = () => {
               <button
                 onClick={() => setShowContinueKnockoutModal(false)}
                 disabled={assigning}
-                className="px-6 py-3 rounded-xl transition-all font-semibold disabled:opacity-50" style={{ background: 'rgba(255,255,255,0.06)', color: 'white' }}
+                className="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl transition-all font-semibold disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -1404,7 +1281,7 @@ const DrawPage = () => {
                     setTimeout(() => setSuccess(null), 5000);
                   } catch (err) {
                     console.error('Error continuing to knockout:', err);
-                    setError(getErrorMessage(err, 'Failed to continue to knockout stage'));
+                    setError(err.response?.data?.error || 'Failed to continue to knockout stage');
                   } finally {
                     setAssigning(false);
                   }
@@ -1432,13 +1309,13 @@ const DrawPage = () => {
       {/* Select Players for Knockout Modal */}
       {showSelectPlayersModal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl" style={{ background: '#0d1025', border: '2px solid rgba(0,255,136,0.25)' }}>
+          <div className="bg-slate-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden border-2 border-green-500/30 shadow-2xl shadow-green-500/20">
             {/* Header */}
-            <div className="p-6 border-b border-white/10" style={{ background: 'rgba(0,255,136,0.06)' }}>
+            <div className="p-6 border-b border-white/10 bg-gradient-to-r from-green-600/20 via-emerald-600/20 to-teal-600/20">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg" style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)' }}>
-                    <Users className="w-6 h-6" style={{ color: '#07071a' }} />
+                  <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <Users className="w-6 h-6 text-white" />
                   </div>
                   <div>
                     <h3 className="text-xl font-bold text-white">Select Players for Knockout Stage</h3>
@@ -1474,7 +1351,7 @@ const DrawPage = () => {
                       setSelectedPlayersForKnockout(selectedPlayersForKnockout.slice(0, value));
                     }
                   }}
-                  className="w-full px-4 py-4 rounded-xl text-white text-2xl font-bold focus:outline-none transition-all" style={{ background: 'rgba(255,255,255,0.06)', border: '2px solid rgba(0,255,136,0.25)' }}
+                  className="w-full px-4 py-4 bg-slate-700 border-2 border-green-500/30 rounded-xl text-white text-2xl font-bold focus:outline-none focus:border-green-400 focus:shadow-lg focus:shadow-green-500/20 transition-all"
                   placeholder="Enter number (e.g., 4, 6, 8)"
                 />
                 <p className="text-xs text-gray-400 mt-2">
@@ -1531,7 +1408,7 @@ const DrawPage = () => {
             <div className="p-6 border-t border-white/10 flex gap-3 justify-end bg-slate-900/50">
               <button
                 onClick={() => setShowSelectPlayersModal(false)}
-                className="px-6 py-3 rounded-xl transition-all font-semibold" style={{ background: 'rgba(255,255,255,0.06)', color: 'white' }}
+                className="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl transition-all font-semibold"
               >
                 Cancel
               </button>
@@ -1561,7 +1438,7 @@ const DrawPage = () => {
                     setTimeout(() => setSuccess(null), 5000);
                   } catch (err) {
                     console.error('Error creating knockout:', err);
-                    setError(getErrorMessage(err, 'Failed to create knockout stage'));
+                    setError(err.response?.data?.error || 'Failed to create knockout stage');
                   } finally {
                     setAssigning(false);
                   }
@@ -1621,9 +1498,9 @@ const DrawPage = () => {
       {/* Change Match Result Modal */}
       {showChangeResultModal && selectedMatchForChange && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="rounded-3xl p-8 max-w-md w-full shadow-2xl" style={{ background: '#0d1025', border: '2px solid rgba(251,191,36,0.4)' }}>
+          <div className="bg-gradient-to-br from-slate-900 to-slate-800 border-2 border-amber-500/50 rounded-3xl p-8 max-w-md w-full shadow-2xl shadow-amber-500/20">
             {/* Icon */}
-            <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg" style={{ background: 'linear-gradient(135deg,#fbbf24,#f59e0b)' }}>
+            <div className="w-20 h-20 bg-gradient-to-br from-amber-500 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-amber-500/50">
               <span className="text-4xl">🔄</span>
             </div>
 
@@ -1636,12 +1513,12 @@ const DrawPage = () => {
             </p>
 
             {/* Current Winner */}
-            <div className="rounded-xl p-4 mb-6" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+            <div className="bg-slate-800/50 border border-white/10 rounded-xl p-4 mb-6">
               <p className="text-gray-400 text-xs mb-2">Current Winner</p>
               <p className="text-white font-semibold">
                 {selectedMatchForChange.winnerId === selectedMatchForChange.bracketMatch.player1?.id 
-                  ? getPlayerDisplay(selectedMatchForChange.bracketMatch.player1)
-                  : getPlayerDisplay(selectedMatchForChange.bracketMatch.player2)}
+                  ? selectedMatchForChange.bracketMatch.player1?.name 
+                  : selectedMatchForChange.bracketMatch.player2?.name}
               </p>
             </div>
 
@@ -1652,14 +1529,14 @@ const DrawPage = () => {
                 disabled={changingResult}
                 className={`w-full p-4 rounded-xl border-2 transition-all text-left ${
                   selectedMatchForChange.winnerId === selectedMatchForChange.bracketMatch.player1?.id
-                    ? 'border-[rgba(0,255,136,0.5)] bg-[rgba(0,255,136,0.08)]'
-                    : 'border-white/10 bg-white/[0.03] hover:border-[rgba(251,191,36,0.4)] hover:bg-[rgba(251,191,36,0.06)]'
+                    ? 'border-emerald-500/50 bg-emerald-500/10'
+                    : 'border-white/10 bg-slate-800/50 hover:border-amber-500/50 hover:bg-amber-500/10'
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-white font-semibold">{getPlayerDisplay(selectedMatchForChange.bracketMatch.player1)}</span>
+                  <span className="text-white font-semibold">{selectedMatchForChange.bracketMatch.player1?.name}</span>
                   {selectedMatchForChange.winnerId === selectedMatchForChange.bracketMatch.player1?.id && (
-                    <span className="text-sm icon-green">✓ Current</span>
+                    <span className="text-emerald-400 text-sm">✓ Current</span>
                   )}
                 </div>
               </button>
@@ -1669,14 +1546,14 @@ const DrawPage = () => {
                 disabled={changingResult}
                 className={`w-full p-4 rounded-xl border-2 transition-all text-left ${
                   selectedMatchForChange.winnerId === selectedMatchForChange.bracketMatch.player2?.id
-                    ? 'border-[rgba(0,255,136,0.5)] bg-[rgba(0,255,136,0.08)]'
-                    : 'border-white/10 bg-white/[0.03] hover:border-[rgba(251,191,36,0.4)] hover:bg-[rgba(251,191,36,0.06)]'
+                    ? 'border-emerald-500/50 bg-emerald-500/10'
+                    : 'border-white/10 bg-slate-800/50 hover:border-amber-500/50 hover:bg-amber-500/10'
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-white font-semibold">{getPlayerDisplay(selectedMatchForChange.bracketMatch.player2)}</span>
+                  <span className="text-white font-semibold">{selectedMatchForChange.bracketMatch.player2?.name}</span>
                   {selectedMatchForChange.winnerId === selectedMatchForChange.bracketMatch.player2?.id && (
-                    <span className="text-sm icon-green">✓ Current</span>
+                    <span className="text-emerald-400 text-sm">✓ Current</span>
                   )}
                 </div>
               </button>
@@ -1690,7 +1567,7 @@ const DrawPage = () => {
                   setSelectedMatchForChange(null);
                 }}
                 disabled={changingResult}
-                className="flex-1 py-3 rounded-xl font-semibold transition-all" style={{ background: 'rgba(255,255,255,0.06)', color: 'white' }}
+                className="flex-1 py-3 bg-slate-700 text-white rounded-xl font-semibold hover:bg-slate-600 transition-all"
               >
                 Cancel
               </button>
@@ -1709,11 +1586,11 @@ const DrawPage = () => {
       {/* Match Details Modal */}
       {showMatchDetailsModal && selectedMatchDetails && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="rounded-3xl p-8 max-w-3xl w-full shadow-2xl max-h-[90vh] overflow-y-auto" style={{ background: '#0d1025', border: '2px solid rgba(0,212,255,0.35)' }}>
+          <div className="rounded-3xl p-8 max-w-3xl w-full shadow-2xl max-h-[90vh] overflow-y-auto" style={{ background: '#0d1025', border: '2px solid rgba(0,212,255,0.35)', boxShadow: '0 0 40px rgba(0,212,255,0.12)' }}>
             {/* Header */}
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/50">
+                <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#00d4ff,#a855f7)', boxShadow: '0 0 20px rgba(0,212,255,0.4)' }}>
                   <span className="text-3xl">🏸</span>
                 </div>
                 <div>
@@ -1726,22 +1603,22 @@ const DrawPage = () => {
                   setShowMatchDetailsModal(false);
                   setSelectedMatchDetails(null);
                 }}
-                className="w-12 h-12 rounded-full bg-slate-700 hover:bg-slate-600 flex items-center justify-center transition-all"
+                className="w-12 h-12 rounded-full flex items-center justify-center transition-all" style={{ background: 'rgba(255,255,255,0.08)' }}
               >
                 <X className="w-6 h-6 text-gray-400" />
               </button>
             </div>
 
             {/* Match Score Card - Prominent Display */}
-            <div className="bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border-2 border-purple-500/30 rounded-2xl p-8 mb-8">
+            <div className="rounded-2xl p-8 mb-8" style={{ background: 'rgba(0,212,255,0.06)', border: '2px solid rgba(0,212,255,0.2)' }}>
               {/* Final Score Header */}
               <div className="text-center mb-8">
-                <p className="text-purple-300 text-sm uppercase tracking-widest mb-3 font-semibold">Final Score</p>
-                <div className="inline-flex items-center gap-4 px-8 py-4 bg-slate-900/60 rounded-2xl border border-purple-500/20">
+                <p className="text-sm uppercase tracking-widest mb-3 font-semibold" style={{ color: '#00d4ff' }}>Final Score</p>
+                <div className="inline-flex items-center gap-4 px-4 sm:px-8 py-4 rounded-2xl" style={{ background: 'rgba(7,7,26,0.7)', border: '1px solid rgba(0,212,255,0.15)' }}>
                   <span className="text-4xl sm:text-7xl font-black text-white tracking-tight">
                     {selectedMatchDetails.score && (() => {
-                      const scoreData = typeof selectedMatchDetails.score === 'string'
-                        ? JSON.parse(selectedMatchDetails.score)
+                      const scoreData = typeof selectedMatchDetails.score === 'string' 
+                        ? JSON.parse(selectedMatchDetails.score) 
                         : selectedMatchDetails.score;
                       let p1SetsWon = 0;
                       let p2SetsWon = 0;
@@ -1769,11 +1646,10 @@ const DrawPage = () => {
                       const p2Score = set.player2Score !== undefined ? set.player2Score : set.player2;
                       const isP1Winner = set.winner === 1;
                       return (
-                        <div key={idx} className={`px-4 py-2 rounded-xl border-2 ${
-                          isP1Winner 
-                            ? 'border-blue-400/50 bg-blue-500/10' 
-                            : 'border-emerald-400/50 bg-emerald-500/10'
-                        }`}>
+                        <div key={idx} className="px-4 py-2 rounded-xl" style={{
+                          border: isP1Winner ? '2px solid rgba(0,212,255,0.4)' : '2px solid rgba(0,255,136,0.4)',
+                          background: isP1Winner ? 'rgba(0,212,255,0.08)' : 'rgba(0,255,136,0.08)',
+                        }}>
                           <span className="text-white font-bold text-lg">{p1Score}-{p2Score}</span>
                         </div>
                       );
@@ -1785,109 +1661,117 @@ const DrawPage = () => {
               {/* Players Score Breakdown */}
               <div className="grid grid-cols-2 gap-4">
                 {/* Player 1 */}
-                <div className={`p-6 rounded-xl border-2 transition-all ${
-                  selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player1?.id
-                    ? 'border-[rgba(0,255,136,0.5)] bg-[rgba(0,255,136,0.08)] shadow-lg'
-                    : 'border-white/10 bg-white/[0.03]'
-                }`}>
-                  <div className="text-center">
-                    <div className="flex items-center justify-center gap-2 mb-4">
-                      {selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player1?.id && (
-                        <span className="text-3xl">👑</span>
-                      )}
-                      <span className={`text-xl font-bold ${
-                        selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player1?.id
-                          ? 'text-[#00ff88]'
-                          : 'text-white'
-                      }`}>
-                        {getPlayerDisplay(selectedMatchDetails.bracketMatch.player1)}
-                      </span>
-                    </div>
-                    {selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player1?.id && (
-                      <div className="mb-3">
-                        <span className="px-3 py-1 bg-[rgba(0,255,136,0.1)] text-[#00ff88] rounded-full text-xs font-bold uppercase tracking-wider border border-[rgba(0,255,136,0.25)]">
-                          Winner
+                {(() => {
+                  const p1IsWinner = selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player1?.id;
+                  return (
+                  <div className="p-4 rounded-xl transition-all" style={{
+                    border: p1IsWinner ? '2px solid rgba(0,255,136,0.5)' : '2px solid rgba(255,255,255,0.08)',
+                    background: p1IsWinner ? 'rgba(0,255,136,0.07)' : 'rgba(255,255,255,0.04)',
+                    boxShadow: p1IsWinner ? '0 0 20px rgba(0,255,136,0.15)' : 'none',
+                  }}>
+                    <div className="text-center">
+                      <div className="flex items-center justify-center gap-2 mb-3 flex-wrap">
+                        {p1IsWinner && <span className="text-2xl">👑</span>}
+                        <span className="text-base font-bold leading-tight" style={{
+                          color: p1IsWinner ? '#00ff88' : '#ffffff',
+                          wordBreak: 'break-word',
+                          overflowWrap: 'break-word',
+                          maxWidth: '100%',
+                        }}>
+                          {selectedMatchDetails.bracketMatch.player1?.name}
                         </span>
                       </div>
-                    )}
-                    {selectedMatchDetails.score && (
-                      <div className="space-y-2">
-                        <p className="text-xs text-gray-400 uppercase tracking-wider">Individual Scores</p>
-                        <div className="flex flex-wrap gap-2 justify-center">
-                          {getDetailedSetScores(selectedMatchDetails.score, 1).split(', ').map((score, idx) => {
-                            const [p1, p2] = score.split('-').map(Number);
-                            const won = p1 > p2;
-                            return (
-                              <span key={idx} className={`px-3 py-1.5 rounded-lg font-semibold text-sm ${
-                                won 
-                                  ? 'bg-[rgba(0,255,136,0.12)] text-[#00ff88] border border-[rgba(0,255,136,0.25)]' 
-                                  : 'bg-slate-700/50 text-gray-300 border border-slate-600/30'
-                              }`}>
-                                {score}
-                              </span>
-                            );
-                          })}
+                      {p1IsWinner && (
+                        <div className="mb-3">
+                          <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider" style={{ background: 'rgba(0,255,136,0.15)', color: '#00ff88' }}>
+                            Winner
+                          </span>
                         </div>
-                      </div>
-                    )}
+                      )}
+                      {selectedMatchDetails.score && (
+                        <div className="space-y-2">
+                          <p className="text-xs uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.4)' }}>Individual Scores</p>
+                          <div className="flex flex-wrap gap-2 justify-center">
+                            {getDetailedSetScores(selectedMatchDetails.score, 1).split(', ').map((score, idx) => {
+                              const [p1, p2] = score.split('-').map(Number);
+                              const won = p1 > p2;
+                              return (
+                                <span key={idx} className="px-3 py-1.5 rounded-lg font-semibold text-sm" style={{
+                                  background: won ? 'rgba(0,255,136,0.12)' : 'rgba(255,255,255,0.06)',
+                                  color: won ? '#00ff88' : 'rgba(255,255,255,0.7)',
+                                  border: won ? '1px solid rgba(0,255,136,0.3)' : '1px solid rgba(255,255,255,0.1)',
+                                }}>
+                                  {score}
+                                </span>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
+                  );
+                })()}
 
                 {/* Player 2 */}
-                <div className={`p-6 rounded-xl border-2 transition-all ${
-                  selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player2?.id
-                    ? 'border-[rgba(0,255,136,0.5)] bg-[rgba(0,255,136,0.08)] shadow-lg'
-                    : 'border-white/10 bg-white/[0.03]'
-                }`}>
-                  <div className="text-center">
-                    <div className="flex items-center justify-center gap-2 mb-4">
-                      {selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player2?.id && (
-                        <span className="text-3xl">👑</span>
-                      )}
-                      <span className={`text-xl font-bold ${
-                        selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player2?.id
-                          ? 'text-[#00ff88]'
-                          : 'text-white'
-                      }`}>
-                        {getPlayerDisplay(selectedMatchDetails.bracketMatch.player2)}
-                      </span>
-                    </div>
-                    {selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player2?.id && (
-                      <div className="mb-3">
-                        <span className="px-3 py-1 bg-[rgba(0,255,136,0.1)] text-[#00ff88] rounded-full text-xs font-bold uppercase tracking-wider border border-[rgba(0,255,136,0.25)]">
-                          Winner
+                {(() => {
+                  const p2IsWinner = selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player2?.id;
+                  return (
+                  <div className="p-4 rounded-xl transition-all" style={{
+                    border: p2IsWinner ? '2px solid rgba(0,255,136,0.5)' : '2px solid rgba(255,255,255,0.08)',
+                    background: p2IsWinner ? 'rgba(0,255,136,0.07)' : 'rgba(255,255,255,0.04)',
+                    boxShadow: p2IsWinner ? '0 0 20px rgba(0,255,136,0.15)' : 'none',
+                  }}>
+                    <div className="text-center">
+                      <div className="flex items-center justify-center gap-2 mb-3 flex-wrap">
+                        {p2IsWinner && <span className="text-2xl">👑</span>}
+                        <span className="text-base font-bold leading-tight" style={{
+                          color: p2IsWinner ? '#00ff88' : '#ffffff',
+                          wordBreak: 'break-word',
+                          overflowWrap: 'break-word',
+                          maxWidth: '100%',
+                        }}>
+                          {selectedMatchDetails.bracketMatch.player2?.name}
                         </span>
                       </div>
-                    )}
-                    {selectedMatchDetails.score && (
-                      <div className="space-y-2">
-                        <p className="text-xs text-gray-400 uppercase tracking-wider">Individual Scores</p>
-                        <div className="flex flex-wrap gap-2 justify-center">
-                          {getDetailedSetScores(selectedMatchDetails.score, 2).split(', ').map((score, idx) => {
-                            const [p2, p1] = score.split('-').map(Number);
-                            const won = p2 > p1;
-                            return (
-                              <span key={idx} className={`px-3 py-1.5 rounded-lg font-semibold text-sm ${
-                                won 
-                                  ? 'bg-[rgba(0,255,136,0.12)] text-[#00ff88] border border-[rgba(0,255,136,0.25)]' 
-                                  : 'bg-slate-700/50 text-gray-300 border border-slate-600/30'
-                              }`}>
-                                {score}
-                              </span>
-                            );
-                          })}
+                      {p2IsWinner && (
+                        <div className="mb-3">
+                          <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider" style={{ background: 'rgba(0,255,136,0.15)', color: '#00ff88' }}>
+                            Winner
+                          </span>
                         </div>
-                      </div>
-                    )}
+                      )}
+                      {selectedMatchDetails.score && (
+                        <div className="space-y-2">
+                          <p className="text-xs uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.4)' }}>Individual Scores</p>
+                          <div className="flex flex-wrap gap-2 justify-center">
+                            {getDetailedSetScores(selectedMatchDetails.score, 2).split(', ').map((score, idx) => {
+                              const [p2, p1] = score.split('-').map(Number);
+                              const won = p2 > p1;
+                              return (
+                                <span key={idx} className="px-3 py-1.5 rounded-lg font-semibold text-sm" style={{
+                                  background: won ? 'rgba(0,255,136,0.12)' : 'rgba(255,255,255,0.06)',
+                                  color: won ? '#00ff88' : 'rgba(255,255,255,0.7)',
+                                  border: won ? '1px solid rgba(0,255,136,0.3)' : '1px solid rgba(255,255,255,0.1)',
+                                }}>
+                                  {score}
+                                </span>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
+                  );
+                })()}
               </div>
             </div>
 
             {/* Match Information Grid */}
             <div className="rounded-2xl p-6 mb-6" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
               <h3 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
-                <span className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center text-blue-400">ℹ️</span>
+                <span className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(0,212,255,0.15)' }}>ℹ️</span>
                 Match Information
               </h3>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
@@ -2003,7 +1887,7 @@ const DrawPage = () => {
       {/* Match Complete Success Modal */}
       {showSuccessModal && matchCompleteData && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="rounded-3xl p-8 max-w-md w-full shadow-2xl animate-scale-in">
+          <div className="rounded-3xl p-8 max-w-md w-full shadow-2xl animate-scale-in" style={{ background: '#0d1025', border: '2px solid rgba(251,191,36,0.5)', boxShadow: '0 0 40px rgba(251,191,36,0.15)' }}>
             {/* Trophy Icon */}
             <div className="w-24 h-24 bg-gradient-to-br from-amber-500 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-amber-500/50">
               <Trophy className="w-12 h-12 text-white" />
@@ -2015,7 +1899,7 @@ const DrawPage = () => {
             </h2>
 
             {/* Winner Info */}
-            <div className="rounded-xl p-6 mb-6" style={{ background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.2)' }}>
+            <div className="rounded-xl p-6 mb-6" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(251,191,36,0.3)' }}>
               <div className="text-center mb-4">
                 <p className="text-gray-400 text-sm mb-2">Winner</p>
                 <p className="text-2xl font-bold text-white">{matchCompleteData.winner}</p>
@@ -2028,8 +1912,8 @@ const DrawPage = () => {
             </div>
 
             {/* Success Message */}
-            <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 mb-6">
-              <p className="icon-green text-center text-sm">
+            <div className="rounded-xl p-4 mb-6" style={{ background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.25)' }}>
+              <p className="text-center text-sm" style={{ color: '#00ff88' }}>
                 ✓ Winner advanced to next round<br />
                 ✓ Notifications sent to players<br />
                 ✓ Bracket updated successfully
@@ -2053,7 +1937,7 @@ const DrawPage = () => {
       {/* Restart Draws Confirmation Modal */}
       {showRestartModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="rounded-3xl p-8 max-w-lg w-full shadow-2xl" style={{ background: '#0d1025', border: '2px solid rgba(249,115,22,0.4)' }}>
+          <div className="bg-gradient-to-br from-slate-900 to-slate-800 border-2 border-orange-500/50 rounded-3xl p-8 max-w-lg w-full shadow-2xl shadow-orange-500/20">
             {/* Warning Icon */}
             <div className="w-20 h-20 bg-gradient-to-br from-orange-500 to-amber-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-orange-500/50">
               <Zap className="w-10 h-10 text-white" />
@@ -2084,7 +1968,7 @@ const DrawPage = () => {
             </div>
 
             {/* Category Info */}
-            <div className="rounded-xl p-4 mb-6">
+            <div className="bg-slate-800/50 border border-white/10 rounded-xl p-4 mb-6">
               <p className="text-gray-400 text-sm mb-1">Category</p>
               <p className="text-white font-semibold">{activeCategory?.name}</p>
             </div>
@@ -2094,7 +1978,7 @@ const DrawPage = () => {
               <button
                 onClick={() => setShowRestartModal(false)}
                 disabled={restarting}
-                className="flex-1 py-3 rounded-xl font-semibold transition-all" style={{ background: 'rgba(255,255,255,0.06)', color: 'white' }}
+                className="flex-1 py-3 bg-slate-700 text-white rounded-xl font-semibold hover:bg-slate-600 transition-all"
               >
                 Cancel
               </button>
@@ -2123,9 +2007,9 @@ const DrawPage = () => {
       {/* End Category Confirmation Modal */}
       {showEndTournamentModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="rounded-3xl p-8 max-w-lg w-full shadow-2xl" style={{ background: '#0d1025', border: '2px solid rgba(0,255,136,0.3)' }}>
-            <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg" style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)' }}>
-              <Trophy className="w-10 h-10" style={{ color: '#07071a' }} />
+          <div className="bg-gradient-to-br from-slate-900 to-slate-800 border-2 border-green-500/50 rounded-3xl p-8 max-w-lg w-full shadow-2xl shadow-green-500/20">
+            <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-green-500/50">
+              <Trophy className="w-10 h-10 text-white" />
             </div>
             <h2 className="text-2xl font-bold text-center mb-2 text-white">End Category?</h2>
             <p className="text-center text-purple-300 font-semibold mb-4">{activeCategory?.name}</p>
@@ -2144,7 +2028,7 @@ const DrawPage = () => {
               </p>
             </div>
             <div className="flex gap-3">
-              <button onClick={() => setShowEndTournamentModal(false)} disabled={endingTournament} className="flex-1 py-3 rounded-xl font-semibold transition-all">Cancel</button>
+              <button onClick={() => setShowEndTournamentModal(false)} disabled={endingTournament} className="flex-1 py-3 bg-slate-700 text-white rounded-xl font-semibold hover:bg-slate-600 transition-all">Cancel</button>
               <button onClick={handleEndCategory} disabled={endingTournament} className="flex-1 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-green-500/30 transition-all flex items-center justify-center gap-2">
                 {endingTournament ? <><div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>Ending...</> : <>End Category</>}
               </button>
@@ -2359,8 +2243,9 @@ const getCompleteMatchScore = (scoreData) => {
   }
 };
 
-// Knockout Display - CONTAINED HORIZONTAL PYRAMID
-// Properly contained within app boundaries with horizontal scroll
+// Knockout Display - HORIZONTAL PYRAMID (LEFT TO RIGHT)
+// STANDARD LAYOUT: Round 1 → Quarters → Semis → Final (left to right)
+// This layout is used for ALL knockout brackets regardless of size or format
 const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onViewMatchDetails, onChangeResult, categoryFormat }) => {
   if (!data?.rounds) return <p className="text-gray-400 text-center p-8">No bracket data</p>;
 
@@ -2390,235 +2275,232 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
     return roundMatches[matchIdx];
   };
 
+  const getPlayerDisplay = (player) => {
+    if (!player || !player.name || player.name === 'TBD') return 'TBD';
+    if (player.partnerName) {
+      return `${player.name} & ${player.partnerName}`;
+    }
+    return player.name;
+  };
+
   // Open conduct page for match
   const handleConductMatch = (matchId) => {
-    console.log('🎯 Conduct button clicked for matchId:', matchId);
-    console.log('🎯 Navigating to:', `/match/${matchId}/conduct`);
-    try {
-      navigate(`/match/${matchId}/conduct`);
-      console.log('✅ Navigation successful');
-    } catch (error) {
-      console.error('❌ Navigation error:', error);
-    }
+    window.open(`/match/${matchId}/conduct`, '_blank');
   };
 
   return (
-    <div className="p-3">
-      {/* CONTAINED BRACKET - Matches app theme */}
-      <div className="backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden" style={{ background: 'rgba(13,16,37,0.9)', border: '2px solid rgba(0,255,136,0.15)' }}>
-        {/* Header */}
-        <div className="p-4 border-b-2 border-white/10" style={{ background: 'rgba(0,255,136,0.08)' }}>
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center font-black text-xl shadow-lg" style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', color: '#07071a' }}>
-              🏆
+    <div className="overflow-x-auto pb-4">
+      <div className="flex gap-6 min-w-max p-4">
+        {data.rounds.map((round, ri) => (
+          <div key={ri} id={`round-${ri}`} className="flex flex-col min-w-[260px]">
+            {/* Round Header */}
+            <div className="mb-6 text-center">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-500/30 rounded-xl">
+                <Trophy className="w-4 h-4 text-emerald-400" />
+                <h4 className="text-sm font-bold text-emerald-300 uppercase tracking-wider">
+                  {getRoundName(ri, data.rounds.length)}
+                </h4>
+              </div>
             </div>
-            <div className="flex-1">
-              <h4 className="text-lg font-black text-white">Knockout Bracket</h4>
-              <p className="text-[#00ff88] text-xs font-semibold">
-                {totalRounds} {totalRounds === 1 ? 'Round' : 'Rounds'} • Pyramid Format
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Scrollable Bracket Container */}
-        <div className="overflow-x-auto custom-scrollbar">
-          <div className="flex gap-4 min-w-max p-4">
-            {data.rounds.map((round, ri) => (
-              <div key={ri} className="flex flex-col min-w-[220px]">
-                {/* Round Header */}
-                <div className="mb-4 text-center">
-                  <div className="inline-flex items-center gap-2 px-3 py-2 rounded-xl shadow-lg" style={{ background: 'rgba(0,255,136,0.1)', border: '2px solid rgba(0,255,136,0.25)' }}>
-                    <Trophy className="w-4 h-4 icon-green flex-shrink-0" />
-                    <h4 className="text-xs font-black text-[#00ff88] uppercase tracking-wider whitespace-nowrap">
-                      {getRoundName(ri, data.rounds.length)}
-                    </h4>
-                  </div>
-                </div>
+            
+            {/* Matches */}
+            <div 
+              className="flex flex-col justify-around flex-1 gap-3" 
+              style={{ paddingTop: ri > 0 ? `${Math.pow(2, ri) * 18}px` : 0 }}
+            >
+              {round.matches.map((match, mi) => {
+                const dbMatch = findMatch(ri, mi);
                 
-                {/* Matches */}
-                <div 
-                  className="flex flex-col justify-around flex-1 gap-3" 
-                  style={{ paddingTop: ri > 0 ? `${Math.pow(2, ri) * 16}px` : 0 }}
-                >
-                  {round.matches.map((match, mi) => {
-                    const dbMatch = findMatch(ri, mi);
-                    
-                    const player1 = dbMatch?.player1 || match.player1 || { name: 'TBD' };
-                    const player2 = dbMatch?.player2 || match.player2 || { name: 'TBD' };
-                    
-                    const player1Name = getPlayerDisplay(player1);
-                    const player2Name = getPlayerDisplay(player2);
-                    
-                    const isCompleted = dbMatch?.status === 'COMPLETED';
-                    const isLive = dbMatch?.status === 'IN_PROGRESS';
-                    const isReady = dbMatch?.status === 'READY' && player1.name !== 'TBD' && player2.name !== 'TBD';
-                    const hasUmpire = dbMatch?.umpireId;
-                    
-                    const isPlayer1Winner = dbMatch?.winnerId === player1?.id;
-                    const isPlayer2Winner = dbMatch?.winnerId === player2?.id;
-                    
-                    return (
-                      <div 
-                        key={mi} 
-                        className="relative" 
-                        style={{ marginBottom: ri > 0 ? `${Math.pow(2, ri) * 32}px` : 0 }}
-                      >
-                        <div className={`bg-gradient-to-br from-slate-700/60 to-slate-800/60 backdrop-blur-sm border-2 rounded-xl overflow-hidden shadow-lg transition-all ${
-                          isLive ? 'border-emerald-500 shadow-emerald-500/30 animate-pulse' :
-                          isReady ? 'border-blue-500/50 shadow-blue-500/20' :
-                          isCompleted ? 'border-emerald-500/30 shadow-emerald-500/10' :
-                          'border-white/10'
+                const player1 = dbMatch?.player1 || match.player1 || { name: 'TBD' };
+                const player2 = dbMatch?.player2 || match.player2 || { name: 'TBD' };
+                
+                const player1Name = getPlayerDisplay(player1);
+                const player2Name = getPlayerDisplay(player2);
+                
+                const isCompleted = dbMatch?.status === 'COMPLETED';
+                const isLive = dbMatch?.status === 'IN_PROGRESS';
+                const isReady = dbMatch?.status === 'READY' && player1.name !== 'TBD' && player2.name !== 'TBD';
+                const hasUmpire = dbMatch?.umpireId;
+                
+                const isPlayer1Winner = dbMatch?.winnerId === player1?.id;
+                const isPlayer2Winner = dbMatch?.winnerId === player2?.id;
+                
+                return (
+                  <div 
+                    key={mi} 
+                    className="relative group" 
+                    style={{ marginBottom: ri > 0 ? `${Math.pow(2, ri) * 36}px` : 0 }}
+                  >
+                    <div className={`bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm border rounded-xl overflow-hidden shadow-lg transition-all ${
+                      isLive ? 'border-emerald-500 shadow-emerald-500/20' :
+                      isReady ? 'border-blue-500/50 shadow-blue-500/10' :
+                      isCompleted ? 'border-amber-500/30' :
+                      'border-white/10'
+                    }`}>
+                      {/* Match Number Badge */}
+                      <div className="bg-slate-700/50 px-3 py-1.5 border-b border-white/5 flex items-center justify-between">
+                        <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                          Match #{match.matchNumber || mi + 1}
+                        </span>
+                        
+                        {/* Status Badge */}
+                        {isLive && (
+                          <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 rounded text-xs font-bold flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span>
+                            LIVE
+                          </span>
+                        )}
+                        {isCompleted && !isLive && (
+                          <span className="px-2 py-0.5 bg-amber-500/20 text-amber-400 border border-amber-500/50 rounded text-xs font-bold">
+                            COMPLETED
+                          </span>
+                        )}
+                        {isReady && !isLive && !isCompleted && (
+                          <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 border border-blue-500/50 rounded text-xs font-bold">
+                            READY
+                          </span>
+                        )}
+                      </div>
+                      
+                      {/* Players */}
+                      <div className="p-2.5 space-y-1.5">
+                        {/* Player 1 */}
+                        <div className={`flex items-center justify-between px-3 py-2 rounded-lg transition-all ${
+                          isPlayer1Winner
+                            ? 'bg-gradient-to-r from-emerald-500/20 to-emerald-600/20 border-2 border-emerald-500/50 shadow-lg shadow-emerald-500/20' 
+                            : 'bg-slate-700/30 border border-white/5'
                         }`}>
-                          {/* Match Header */}
-                          <div className="px-3 py-2 border-b-2 border-white/10 flex items-center justify-between">
-                            <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest">
-                              #{match.matchNumber || mi + 1}
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            {isPlayer1Winner && (
+                              <Trophy className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                            )}
+                            <span className={`text-sm font-medium truncate ${
+                              isPlayer1Winner ? 'text-emerald-300' : player1Name === 'TBD' ? 'text-gray-500 italic' : 'text-white'
+                            }`}>
+                              {player1Name}
                             </span>
-                            
-                            {/* Status Badge */}
-                            {isLive && (
-                              <span className="px-2 py-0.5 rounded-full text-[10px] font-black flex items-center gap-1 shadow-lg" style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', color: '#07071a' }}>
-                                <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>
-                                LIVE
-                              </span>
-                            )}
-                            {isCompleted && !isLive && (
-                              <span className="px-2 py-0.5 rounded-full text-[10px] font-black" style={{ background: 'rgba(0,255,136,0.15)', color: '#00ff88', border: '1px solid rgba(0,255,136,0.3)' }}>
-                                ✓
-                              </span>
-                            )}
                           </div>
-                          
-                          {/* Players */}
-                          <div className="p-2 space-y-1.5">
-                            {/* Player 1 */}
-                            <div className={`flex items-center justify-between px-2.5 py-2 rounded-lg transition-all ${
-                              isPlayer1Winner
-                                ? 'border-2 border-emerald-500/60 shadow-lg'
-                                : 'border border-white/10'
-                            }`} style={{
-                              background: isPlayer1Winner ? 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,255,136,0.1))' : 'rgba(255,255,255,0.04)'
-                            }}>
-                              <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                                {isPlayer1Winner && (
-                                  <Trophy className="w-3 h-3 icon-green flex-shrink-0" />
-                                )}
-                                <span className={`text-xs font-bold truncate ${
-                                  isPlayer1Winner ? 'text-emerald-200' : player1Name === 'TBD' ? 'text-gray-600 italic' : 'text-white'
-                                }`}>
-                                  {player1Name}
-                                </span>
-                              </div>
-                              {isPlayer1Winner && (
-                                <span className="text-[9px] font-black icon-green ml-1 flex-shrink-0">WIN</span>
-                              )}
-                            </div>
-
-                            {/* VS Divider */}
-                            <div className="flex items-center justify-center py-0.5">
-                              <span className="text-[9px] font-black uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.2)' }}>VS</span>
-                            </div>
-
-                            {/* Player 2 */}
-                            <div className={`flex items-center justify-between px-2.5 py-2 rounded-lg transition-all ${
-                              isPlayer2Winner
-                                ? 'border-2 border-emerald-500/60 shadow-lg'
-                                : 'border border-white/10'
-                            }`} style={{
-                              background: isPlayer2Winner ? 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,255,136,0.1))' : 'rgba(255,255,255,0.04)'
-                            }}>
-                              <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                                {isPlayer2Winner && (
-                                  <Trophy className="w-3 h-3 icon-green flex-shrink-0" />
-                                )}
-                                <span className={`text-xs font-bold truncate ${
-                                  isPlayer2Winner ? 'text-emerald-200' : player2Name === 'TBD' ? 'text-gray-600 italic' : 'text-white'
-                                }`}>
-                                  {player2Name}
-                                </span>
-                              </div>
-                              {isPlayer2Winner && (
-                                <span className="text-[9px] font-black icon-green ml-1 flex-shrink-0">WIN</span>
-                              )}
-                            </div>
+                          {isPlayer1Winner && (
+                            <span className="ml-2 px-1.5 py-0.5 bg-emerald-500/30 text-emerald-300 rounded text-xs font-bold">
+                              W
+                            </span>
+                          )}
+                        </div>
+                        
+                        {/* VS Divider */}
+                        <div className="flex items-center justify-center py-0.5">
+                          <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">vs</span>
+                        </div>
+                        
+                        {/* Player 2 */}
+                        <div className={`flex items-center justify-between px-3 py-2 rounded-lg transition-all ${
+                          isPlayer2Winner
+                            ? 'bg-gradient-to-r from-emerald-500/20 to-emerald-600/20 border-2 border-emerald-500/50 shadow-lg shadow-emerald-500/20' 
+                            : 'bg-slate-700/30 border border-white/5'
+                        }`}>
+                          <div className="flex items-center gap-2 flex-1 min-w-0">
+                            {isPlayer2Winner && (
+                              <Trophy className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                            )}
+                            <span className={`text-sm font-medium truncate ${
+                              isPlayer2Winner ? 'text-emerald-300' : player2Name === 'TBD' ? 'text-gray-500 italic' : 'text-white'
+                            }`}>
+                              {player2Name}
+                            </span>
                           </div>
-                          
-                          {/* Organizer Actions */}
-                          {isOrganizer && dbMatch && (
-                            <div className="px-2 pb-2 flex gap-1.5">
-                              {/* Assign Umpire Button */}
-                              {!isCompleted && player1.name !== 'TBD' && player2.name !== 'TBD' && (
-                                <button
-                                  onClick={() => {
-                                    const bracketMatchData = {
-                                      matchNumber: match.matchNumber,
-                                      round: ri + 1,
-                                      player1: player1,
-                                      player2: player2
-                                    };
-                                    onAssignUmpire(dbMatch, bracketMatchData);
-                                  }}
-                                  className={`flex-1 py-2 rounded-lg border-2 transition-all text-[10px] font-black flex items-center justify-center gap-1 ${
-                                    hasUmpire
-                                      ? 'bg-[rgba(0,255,136,0.12)] text-[#00ff88] border-[rgba(0,255,136,0.3)]'
-                                      : 'bg-blue-500/20 text-blue-300 border-blue-500/40'
-                                  }`}
-                                >
-                                  <Gavel className="w-3 h-3" />
-                                  {hasUmpire ? 'READY' : 'UMPIRE'}
-                                </button>
-                              )}
-                              
-                              {/* Conduct Match Button */}
-                              {!isCompleted && (player1.name !== 'TBD' || player2.name !== 'TBD') && (
-                                <button
-                                  onClick={() => handleConductMatch(dbMatch.id)}
-                                  className="flex-1 py-2 rounded-lg border-2 border-transparent transition-all text-[10px] font-black flex items-center justify-center gap-1 btn-brand"
-                                >
-                                  <Play className="w-3 h-3" />
-                                  START
-                                </button>
-                              )}
-                              
-                              {/* View Details Button */}
-                              {isCompleted && (
-                                <button
-                                  onClick={() => {
-                                    const bracketMatchData = {
-                                      matchNumber: match.matchNumber,
-                                      round: ri + 1,
-                                      player1: player1,
-                                      player2: player2
-                                    };
-                                    onViewMatchDetails(dbMatch, bracketMatchData);
-                                  }}
-                                  className="flex-1 py-2 rounded-lg bg-blue-500/20 text-blue-300 border-2 border-blue-500/40 transition-all text-[10px] font-black flex items-center justify-center gap-1"
-                                >
-                                  <Eye className="w-3 h-3" />
-                                  VIEW
-                                </button>
-                              )}
-                            </div>
+                          {isPlayer2Winner && (
+                            <span className="ml-2 px-1.5 py-0.5 bg-emerald-500/30 text-emerald-300 rounded text-xs font-bold">
+                              W
+                            </span>
                           )}
                         </div>
                       </div>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
+                      
+                      {/* Organizer Actions */}
+                      {isOrganizer && dbMatch && (
+                        <div className="px-2.5 pb-2.5 flex gap-1.5">
+                          {/* Assign Umpire Button */}
+                          {!isCompleted && player1.name !== 'TBD' && player2.name !== 'TBD' && (
+                            <button
+                              onClick={() => {
+                                const bracketMatchData = {
+                                  matchNumber: match.matchNumber,
+                                  round: ri + 1,
+                                  player1: player1,
+                                  player2: player2
+                                };
+                                onAssignUmpire(dbMatch, bracketMatchData);
+                              }}
+                              className={`flex-1 py-1.5 rounded-lg border transition-all text-xs font-semibold flex items-center justify-center gap-1.5 ${
+                                hasUmpire
+                                  ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/30'
+                                  : 'bg-blue-500/20 text-blue-400 border-blue-500/30 hover:bg-blue-500/30'
+                              }`}
+                              title={hasUmpire ? 'Umpire assigned' : 'Assign umpire'}
+                            >
+                              <Gavel className="w-3 h-3" />
+                              {hasUmpire ? 'Umpire ✓' : 'Umpire'}
+                            </button>
+                          )}
+                          
+                          {/* Conduct Match Button */}
+                          {!isCompleted && (player1.name !== 'TBD' || player2.name !== 'TBD') && (
+                            <button
+                              onClick={() => handleConductMatch(dbMatch.id)}
+                              className="flex-1 py-1.5 rounded-lg bg-purple-500/20 text-purple-400 border border-purple-500/30 hover:bg-purple-500/30 transition-all text-xs font-semibold flex items-center justify-center gap-1.5"
+                              title="Conduct match"
+                            >
+                              <Play className="w-3 h-3" />
+                              Conduct
+                            </button>
+                          )}
+                          
+                          {/* View Details Button for Completed Matches */}
+                          {isCompleted && (
+                            <button
+                              onClick={() => {
+                                const bracketMatchData = {
+                                  matchNumber: match.matchNumber,
+                                  round: ri + 1,
+                                  player1: player1,
+                                  player2: player2
+                                };
+                                onViewMatchDetails(dbMatch, bracketMatchData);
+                              }}
+                              className="flex-1 py-1.5 rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30 transition-all text-xs font-semibold flex items-center justify-center gap-1.5"
+                            >
+                              <Eye className="w-3 h-3" />
+                              View Details
+                            </button>
+                          )}
+                          
+                          {/* Change Result Button for Completed Matches */}
+                          {isCompleted && onChangeResult && (
+                            <button
+                              onClick={() => {
+                                const bracketMatchData = {
+                                  matchNumber: match.matchNumber,
+                                  round: ri + 1,
+                                  player1: player1,
+                                  player2: player2
+                                };
+                                onChangeResult(dbMatch, bracketMatchData);
+                              }}
+                              className="py-1.5 px-2 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/30 hover:bg-amber-500/30 transition-all text-xs font-semibold flex items-center justify-center"
+                              title="Change result"
+                            >
+                              <Edit className="w-3 h-3" />
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
-
-        {/* Scroll Hint */}
-        <div className="px-4 py-2 text-center border-t-2" style={{ background: 'rgba(0,255,136,0.06)', borderColor: 'rgba(0,255,136,0.15)' }}>
-          <p className="text-xs text-[#00ff88] font-semibold flex items-center justify-center gap-2">
-            <span>←</span>
-            Swipe to view all rounds
-            <span>→</span>
-          </p>
-        </div>
+        ))}
       </div>
     </div>
   );
@@ -2649,200 +2531,170 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
   };
 
   return (
-    <div className="p-3 space-y-4">
+    <div className="p-6 space-y-8">
       {data.groups.map((group, gi) => (
-        <div key={gi} className="backdrop-blur-sm rounded-2xl overflow-hidden shadow-xl" style={{ background: 'rgba(13,16,37,0.9)', border: '2px solid rgba(0,255,136,0.15)' }}>
+        <div key={gi} className="bg-slate-700/30 rounded-xl overflow-hidden">
           {/* Group Header */}
-          <div className="p-4 border-b-2 border-white/10" style={{ background: 'rgba(0,255,136,0.08)' }}>
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center font-black text-xl shadow-lg" style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', color: '#07071a' }}>
-                {String.fromCharCode(65 + gi)}
+          <div className="bg-gradient-to-r from-purple-600/20 to-indigo-600/20 p-4 border-b border-white/10">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <span className="w-10 h-10 bg-purple-500/30 rounded-xl flex items-center justify-center text-purple-300 font-bold text-lg">
+                  {String.fromCharCode(65 + gi)}
+                </span>
+                <div>
+                  <h4 className="text-xl font-bold text-white">Group {String.fromCharCode(65 + gi)}</h4>
+                  <p className="text-purple-300 text-sm">
+                    {group.participants.filter(p => p.id).length} players • {group.matches?.length || 0} matches
+                  </p>
+                </div>
               </div>
-              <div className="flex-1">
-                <h4 className="text-lg font-black text-white">Group {String.fromCharCode(65 + gi)}</h4>
-                <p className="text-[#00ff88] text-xs font-semibold">
-                  {group.participants.filter(p => p.id).length} players • {group.matches?.length || 0} matches
-                </p>
+              <div className="text-right">
+                <p className="text-xs text-gray-400">Round Robin Format</p>
+                <p className="text-sm text-purple-300 font-semibold">Everyone plays everyone</p>
               </div>
             </div>
           </div>
 
-          {/* Group Standings - Mobile Optimized */}
-          <div className="p-4">
-            <h5 className="text-sm font-black text-[#00ff88] mb-3 flex items-center gap-2 uppercase tracking-wider">
-              <Trophy className="w-4 h-4" />
-              Standings
-            </h5>
-            
-            <div className="space-y-2">
-              {group.participants
-                .sort((a, b) => (b.points || 0) - (a.points || 0))
-                .map((p, pi) => (
-                  <div
-                    key={pi}
-                    className="flex items-center rounded-xl border-2 transition-all"
-                    style={{
-                      padding: '10px 10px',
-                      gap: '8px',
-                      background: pi === 0
-                        ? 'linear-gradient(135deg, rgba(0,255,136,0.12), rgba(0,255,136,0.08))'
-                        : 'rgba(255,255,255,0.04)',
-                      borderColor: pi === 0 ? 'rgba(0,255,136,0.4)' : 'rgba(255,255,255,0.08)',
-                    }}
-                  >
-                    {/* Rank badge — fixed 28×28 */}
-                    <div
-                      className="flex-shrink-0 flex items-center justify-center rounded-lg font-black text-xs"
-                      style={{
-                        width: '28px', height: '28px',
-                        background:
-                          pi === 0 ? 'linear-gradient(135deg,#00ff88,#00ff88)' :
-                          pi === 1 ? 'linear-gradient(135deg,#94a3b8,#64748b)' :
-                          pi === 2 ? 'linear-gradient(135deg,#cd7f32,#b45309)' :
-                          'rgba(255,255,255,0.08)',
-                        color: pi < 3 ? '#fff' : 'rgba(255,255,255,0.5)',
-                      }}
-                    >
-                      {pi + 1}
-                    </div>
-
-                    {/* Player Name — flex-1, strictly clipped */}
-                    <div className="flex-1 min-w-0 overflow-hidden">
-                      {p.id ? (
-                        <>
-                          <p className="font-bold text-white leading-tight text-sm truncate">
-                            {p.name || `Slot ${pi + 1}`}
-                          </p>
-                          {p.partnerName && (
-                            <p className="text-xs leading-tight truncate" style={{ color: '#00ff88' }}>
-                              & {p.partnerName}
-                            </p>
-                          )}
-                        </>
-                      ) : (
-                        <p className="font-bold text-sm leading-tight" style={{ color: 'rgba(255,255,255,0.35)' }}>
-                          Slot {pi + 1}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Stats: P · W · L · PTS — fixed total width, no gap overflow */}
-                    <div className="flex-shrink-0 flex items-center" style={{ gap: '4px' }}>
-                      {[
-                        { val: (p.wins || 0) + (p.losses || 0), label: 'P', bg: 'rgba(255,255,255,0.07)', color: '#fff', labelColor: 'rgba(255,255,255,0.35)' },
-                        { val: p.wins || 0, label: 'W', bg: 'rgba(0,255,136,0.1)', color: '#34d399', labelColor: 'rgba(0,255,136,0.55)' },
-                        { val: p.losses || 0, label: 'L', bg: 'rgba(239,68,68,0.1)', color: '#f87171', labelColor: 'rgba(239,68,68,0.55)' },
-                        { val: p.points || 0, label: 'PTS', bg: 'rgba(0,255,136,0.18)', color: '#6ee7b7', labelColor: 'rgba(0,255,136,0.65)', border: '1px solid rgba(0,255,136,0.3)', bold: true },
-                      ].map(({ val, label, bg, color, labelColor, border, bold }) => (
-                        <div
-                          key={label}
-                          className="flex flex-col items-center justify-center"
-                          style={{
-                            width: label === 'PTS' ? '36px' : '28px',
-                            height: '36px',
-                            background: bg,
-                            border: border || 'none',
-                            borderRadius: '8px',
-                          }}
-                        >
-                          <span style={{ fontSize: '12px', fontWeight: bold ? '900' : '700', color, lineHeight: 1 }}>{val}</span>
-                          <span style={{ fontSize: '9px', color: labelColor, lineHeight: 1, marginTop: '2px' }}>{label}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-            </div>
-            
-            {/* Points System */}
-            <div className="mt-3 p-3 rounded-xl" style={{ background: 'rgba(0,0,0,0.25)', border: '1px solid rgba(255,255,255,0.08)' }}>
-              <p className="text-[10px] font-black uppercase tracking-wider mb-2 text-center" style={{ color: 'rgba(255,255,255,0.35)' }}>Points System</p>
-              <div className="flex items-center justify-center gap-3 text-xs font-bold">
-                <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg" style={{ background: 'rgba(0,255,136,0.1)', border: '1px solid rgba(0,255,136,0.2)' }}>
-                  <span className="w-4 h-4 rounded flex items-center justify-center text-[9px] font-black" style={{ background: '#00ff88', color: '#07071a' }}>W</span>
-                  <span style={{ color: '#00ff88' }}>+2 pts</span>
-                </div>
-                <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)' }}>
-                  <span className="w-4 h-4 bg-red-500 rounded flex items-center justify-center text-[9px] text-white font-black">L</span>
-                  <span style={{ color: '#f87171' }}>+0 pts</span>
-                </div>
-              </div>
-              <p className="text-[9px] text-center mt-2" style={{ color: 'rgba(255,255,255,0.25)' }}>
-                P = Played · W = Won · L = Lost · PTS = Points
-              </p>
-            </div>
-          </div>
-
-          {/* Match Schedule - Mobile Optimized */}
-          <div className="p-4 border-t-2 border-white/10">
-            <h5 className="text-sm font-black text-blue-300 mb-3 flex items-center gap-2 uppercase tracking-wider">
-              <Clock className="w-4 h-4" />
-              Matches
-            </h5>
-            
-            {group.matches && group.matches.length > 0 ? (
-              <div className="space-y-2.5">
-                {group.matches.map((match, mi) => {
-                  const dbMatch = findDbMatch(match, gi);
-                  const hasPlayers = match.player1?.id && match.player2?.id;
-                  const isCompleted = dbMatch?.status === 'COMPLETED';
-                  const isInProgress = dbMatch?.status === 'IN_PROGRESS';
-                  const hasUmpire = dbMatch?.umpireId;
-                  
-                  return (
-                    <div 
-                      key={mi} 
-                      className="p-3 rounded-xl border-2 transition-all"
-                      style={{
-                        background: isCompleted ? 'rgba(0,255,136,0.06)' : isInProgress ? 'rgba(251,191,36,0.06)' : hasPlayers ? 'rgba(0,212,255,0.06)' : 'rgba(255,255,255,0.02)',
-                        borderColor: isCompleted ? 'rgba(0,255,136,0.4)' : isInProgress ? 'rgba(251,191,36,0.4)' : hasPlayers ? 'rgba(0,212,255,0.25)' : 'rgba(255,255,255,0.08)'
-                      }}
-                    >
-                      {/* Match Header */}
-                      <div className="flex items-center justify-between mb-2.5">
-                        <span className="px-2 py-1 rounded-lg text-xs font-black" style={{ background: 'rgba(0,255,136,0.12)', color: '#00ff88' }}>
-                          #{match.matchNumber}
-                        </span>
-                        {isCompleted && <span className="text-xs font-bold icon-green">✓ DONE</span>}
-                        {isInProgress && <span className="text-amber-400 text-xs font-bold">🔴 LIVE</span>}
-                        {hasUmpire && !isCompleted && !isInProgress && <span className="text-blue-400 text-xs font-bold">⚖️ READY</span>}
-                      </div>
-                      
-                      {/* Players with winner highlight */}
-                      {(() => {
-                        const p1Won = dbMatch?.winnerId === match.player1?.id;
-                        const p2Won = dbMatch?.winnerId === match.player2?.id;
-                        return (
-                          <div className="space-y-1.5">
-                            <div className={`py-2 px-3 rounded-xl font-bold text-sm flex items-center justify-between ${hasPlayers ? '' : ''}`}
-                              style={{
-                                background: p1Won ? 'rgba(0,255,136,0.18)' : hasPlayers ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.03)',
-                                border: p1Won ? '1px solid rgba(0,255,136,0.4)' : '1px solid rgba(255,255,255,0.08)',
-                                color: p1Won ? '#00ff88' : hasPlayers ? 'white' : 'rgba(255,255,255,0.35)',
-                              }}>
-                              <span className="truncate flex-1 text-xs">{getPlayerDisplay(match.player1) || 'TBD'}</span>
-                              {p1Won && <span className="text-[10px] font-black ml-1 flex-shrink-0">🏆 WIN</span>}
+          <div className="grid lg:grid-cols-2 gap-6 p-6">
+            {/* Left: Match Schedule */}
+            <div>
+              <h5 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                <span className="w-6 h-6 bg-blue-500/20 rounded-lg flex items-center justify-center text-blue-400 text-sm">📅</span>
+                Match Schedule
+              </h5>
+              
+              {group.matches && group.matches.length > 0 ? (
+                <div className="space-y-3">
+                  {group.matches.map((match, mi) => {
+                    const dbMatch = findDbMatch(match, gi);
+                    const hasPlayers = match.player1?.id && match.player2?.id;
+                    const isCompleted = dbMatch?.status === 'COMPLETED';
+                    
+                    const isInProgress = dbMatch?.status === 'IN_PROGRESS';
+                    const hasUmpire = dbMatch?.umpireId;
+                    
+                    return (
+                      <div 
+                        key={mi} 
+                        className={`p-4 rounded-xl border transition-all ${
+                          isCompleted 
+                            ? 'border-emerald-500/30 bg-emerald-500/10' 
+                            : isInProgress
+                              ? 'border-amber-500/30 bg-amber-500/10'
+                              : hasPlayers
+                                ? 'border-blue-500/30 bg-blue-500/10 hover:bg-blue-500/20'
+                                : 'border-white/10 bg-slate-800/30'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <span className="px-2 py-1 bg-purple-500/20 text-purple-300 rounded text-xs font-bold">
+                                Match {match.matchNumber}
+                              </span>
+                              {isCompleted && <span className="text-emerald-400 text-sm">✅ Complete</span>}
+                              {isInProgress && <span className="text-amber-400 text-sm">🔴 Live</span>}
+                              {hasUmpire && !isCompleted && !isInProgress && <span className="text-blue-400 text-sm">⚖️ Umpire Ready</span>}
                             </div>
-                            <div className="text-center">
-                              <span className="text-xs font-black" style={{ color: 'rgba(255,255,255,0.3)' }}>VS</span>
-                            </div>
-                            <div className="py-2 px-3 rounded-xl font-bold text-sm flex items-center justify-between"
-                              style={{
-                                background: p2Won ? 'rgba(0,255,136,0.18)' : hasPlayers ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.03)',
-                                border: p2Won ? '1px solid rgba(0,255,136,0.4)' : '1px solid rgba(255,255,255,0.08)',
-                                color: p2Won ? '#00ff88' : hasPlayers ? 'white' : 'rgba(255,255,255,0.35)',
-                              }}>
-                              <span className="truncate flex-1 text-xs">{getPlayerDisplay(match.player2) || 'TBD'}</span>
-                              {p2Won && <span className="text-[10px] font-black ml-1 flex-shrink-0">🏆 WIN</span>}
-                            </div>
+                            
+                            {/* Match Display - Vertical for Doubles, Horizontal for Singles */}
+                            {categoryFormat === 'doubles' ? (
+                              <div className="space-y-2">
+                                <div className={`font-medium text-center py-2 px-3 rounded-lg ${hasPlayers ? 'text-white bg-slate-700/50' : 'text-gray-500 bg-slate-800/30'}`}>
+                                  {match.player1?.name || 'TBD'}
+                                </div>
+                                <div className="text-center">
+                                  <span className="text-gray-400 text-sm font-semibold uppercase tracking-wider">vs</span>
+                                </div>
+                                <div className={`font-medium text-center py-2 px-3 rounded-lg ${hasPlayers ? 'text-white bg-slate-700/50' : 'text-gray-500 bg-slate-800/30'}`}>
+                                  {match.player2?.name || 'TBD'}
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-3">
+                                <span className={`font-medium ${hasPlayers ? 'text-white' : 'text-gray-500'}`}>
+                                  {match.player1?.name || 'TBD'}
+                                </span>
+                                <span className="text-gray-400 text-sm">vs</span>
+                                <span className={`font-medium ${hasPlayers ? 'text-white' : 'text-gray-500'}`}>
+                                  {match.player2?.name || 'TBD'}
+                                </span>
+                              </div>
+                            )}
+                            
+                            {dbMatch?.winnerId && (
+                              <div className="mt-2 text-sm">
+                                <span className="text-emerald-400">
+                                  Winner: {dbMatch.winnerId === match.player1?.id ? match.player1?.name : match.player2?.name}
+                                </span>
+                                {/* Display detailed set scores for both players */}
+                                {dbMatch.score && (
+                                  <div className="mt-2 space-y-1">
+                                    <div className="text-xs text-gray-300">
+                                      <span className="font-medium">{match.player1?.name}:</span> {getDetailedSetScores(dbMatch.score, 1)}
+                                    </div>
+                                    <div className="text-xs text-gray-300">
+                                      <span className="font-medium">{match.player2?.name}:</span> {getDetailedSetScores(dbMatch.score, 2)}
+                                    </div>
+                                  </div>
+                                )}
+                                {/* Debug: Show if score exists but is empty */}
+                                {!dbMatch.score && (
+                                  <div className="mt-2 text-xs text-red-400">
+                                    ⚠️ No score data available
+                                  </div>
+                                )}
+                              </div>
+                            )}
                           </div>
-                        );
-                      })()}
-                      
-                      {/* Actions */}
-                      {isOrganizer && hasPlayers && (
-                        <div className="mt-2.5 flex gap-2">
-                          {!isCompleted ? (
+                          
+                          {/* Umpire Assignment Button or Match Status */}
+                          {isCompleted ? (
+                            <div className="flex flex-col gap-2">
+                              <div className="px-3 py-2 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-sm font-medium text-center">
+                                ✅ Completed
+                              </div>
+                              <div className="flex gap-2">
+                                {/* View Details Button - Always visible for completed matches */}
+                                <button
+                                  onClick={() => {
+                                    const bracketMatchData = {
+                                      matchNumber: match.matchNumber,
+                                      round: 1,
+                                      player1: match.player1,
+                                      player2: match.player2,
+                                      groupName: group.groupName
+                                    };
+                                    onViewMatchDetails(dbMatch, bracketMatchData);
+                                  }}
+                                  className="flex-1 px-3 py-1.5 rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30 transition-all text-xs font-medium flex items-center justify-center gap-1"
+                                  title="View match details"
+                                >
+                                  <span className="text-base">ℹ️</span>
+                                  Info
+                                </button>
+                                {/* Change Result Button - Only for organizers */}
+                                {isOrganizer && (
+                                  <button
+                                    onClick={() => {
+                                      const bracketMatchData = {
+                                        matchNumber: match.matchNumber,
+                                        round: 1,
+                                        player1: match.player1,
+                                        player2: match.player2,
+                                        groupName: group.groupName,
+                                        currentWinnerId: dbMatch?.winnerId
+                                      };
+                                      onChangeResult(dbMatch, bracketMatchData);
+                                    }}
+                                    className="flex-1 px-3 py-1.5 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/30 hover:bg-amber-500/30 transition-all text-xs font-medium"
+                                  >
+                                    Change
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          ) : isOrganizer && hasPlayers ? (
                             <button
                               onClick={() => {
                                 const bracketMatchData = {
@@ -2854,63 +2706,87 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                                 };
                                 onAssignUmpire(dbMatch, bracketMatchData);
                               }}
-                              className={`flex-1 py-2.5 rounded-lg transition-all flex items-center justify-center gap-2 text-xs font-black ${
+                              className={`px-3 py-2 rounded-lg transition-all flex items-center gap-2 text-sm font-medium ${
                                 hasUmpire 
-                                  ? 'bg-[rgba(0,255,136,0.12)] text-[#00ff88] border-2 border-[rgba(0,255,136,0.3)]' 
-                                  : 'bg-blue-500/20 text-blue-300 border-2 border-blue-500/40'
+                                  ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' 
+                                  : 'bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30'
                               }`}
                             >
-                              <Gavel className="w-4 h-4" />
-                              {hasUmpire ? 'READY' : 'ASSIGN'}
+                              <span className="text-base">⚖️</span>
+                              {hasUmpire ? 'Ready' : 'Assign'}
                             </button>
-                          ) : (
-                            <>
-                              <button
-                                onClick={() => {
-                                  const bracketMatchData = {
-                                    matchNumber: match.matchNumber,
-                                    round: 1,
-                                    player1: match.player1,
-                                    player2: match.player2,
-                                    groupName: group.groupName
-                                  };
-                                  onViewMatchDetails(dbMatch, bracketMatchData);
-                                }}
-                                className="flex-1 py-2.5 rounded-lg bg-blue-500/20 text-blue-300 border-2 border-blue-500/40 transition-all text-xs font-black flex items-center justify-center gap-2"
-                              >
-                                <Eye className="w-4 h-4" />
-                                VIEW
-                              </button>
-                              <button
-                                onClick={() => {
-                                  const bracketMatchData = {
-                                    matchNumber: match.matchNumber,
-                                    round: 1,
-                                    player1: match.player1,
-                                    player2: match.player2,
-                                    groupName: group.groupName,
-                                    currentWinnerId: dbMatch?.winnerId
-                                  };
-                                  onChangeResult(dbMatch, bracketMatchData);
-                                }}
-                                className="py-2.5 px-4 rounded-lg bg-amber-500/20 text-amber-300 border-2 border-amber-500/40 transition-all text-xs font-black"
-                              >
-                                CHANGE
-                              </button>
-                            </>
-                          )}
+                          ) : null}
                         </div>
-                      )}
-                    </div>
-                  );
-                })}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <p>No matches generated yet</p>
+                  <p className="text-sm">Assign players to generate matches</p>
+                </div>
+              )}
+            </div>
+
+            {/* Right: Standings Table */}
+            <div>
+              <h5 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                <span className="w-6 h-6 bg-amber-500/20 rounded-lg flex items-center justify-center text-amber-400 text-sm">🏆</span>
+                Group Standings
+              </h5>
+              
+              <div className="bg-slate-800/50 rounded-xl overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-slate-700/50 border-b border-white/10">
+                      <th className="text-left py-3 px-4 text-gray-400 font-semibold">#</th>
+                      <th className="text-left py-3 px-4 text-gray-400 font-semibold">{categoryFormat === 'doubles' ? 'Team' : 'Player'}</th>
+                      <th className="text-center py-3 px-4 text-gray-400 font-semibold">P</th>
+                      <th className="text-center py-3 px-4 text-gray-400 font-semibold">W</th>
+                      <th className="text-center py-3 px-4 text-gray-400 font-semibold">L</th>
+                      <th className="text-center py-3 px-4 text-gray-400 font-semibold">Pts</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {group.participants
+                      .sort((a, b) => (b.points || 0) - (a.points || 0)) // Sort by points
+                      .map((p, pi) => (
+                        <tr key={pi} className="border-b border-white/5 hover:bg-white/5">
+                          <td className="py-3 px-4">
+                            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                              pi === 0 ? 'bg-amber-500/20 text-amber-400' : 
+                              pi === 1 ? 'bg-gray-400/20 text-gray-400' :
+                              pi === 2 ? 'bg-orange-500/20 text-orange-400' :
+                              'bg-slate-600/20 text-gray-500'
+                            }`}>
+                              {pi + 1}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className={`font-medium ${p.id ? 'text-white' : 'text-gray-500'}`}>
+                              {p.name || `Slot ${pi + 1}`}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4 text-center text-gray-400">{p.played || 0}</td>
+                          <td className="py-3 px-4 text-center text-emerald-400 font-semibold">{p.wins || 0}</td>
+                          <td className="py-3 px-4 text-center text-red-400 font-semibold">{p.losses || 0}</td>
+                          <td className="py-3 px-4 text-center text-amber-400 font-bold">{p.points || 0}</td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
               </div>
-            ) : (
-              <div className="text-center py-8 text-gray-500">
-                <p className="text-sm">No matches generated yet</p>
-                <p className="text-xs mt-1">Assign players to generate matches</p>
+              
+              {/* Points System Explanation */}
+              <div className="mt-4 p-3 bg-slate-800/30 rounded-lg">
+                <p className="text-xs text-gray-400 mb-1">Points System:</p>
+                <div className="flex gap-4 text-xs">
+                  <span className="text-emerald-400">Win: +2 pts</span>
+                  <span className="text-red-400">Loss: +0 pts</span>
+                </div>
               </div>
-            )}
+            </div>
           </div>
         </div>
       ))}
@@ -2943,45 +2819,49 @@ const GroupsKnockoutDisplay = ({
   // activeStage is now passed as prop from parent ('roundrobin' or 'knockout')
 
   return (
-    <div className="space-y-4 p-3">
-      {/* Stage Navigation Tabs - Emerald Theme */}
-      <div className="flex gap-2 p-1.5 rounded-xl border-2" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.1)' }}>
+    <div className="space-y-6 p-6">
+      {/* Stage Navigation Tabs */}
+      <div className="flex gap-3 border-b border-white/10 pb-4">
         <button
           onClick={() => setActiveStage('roundrobin')}
-          className={`flex-1 px-2 py-3 rounded-lg font-black transition-all flex items-center justify-center gap-1.5 text-[10px] ${
+          className={`px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 ${
             activeStage === 'roundrobin'
-              ? 'tab-active'
-              : 'bg-slate-700/30 text-gray-400 hover:bg-slate-700/50 hover:text-white'
+              ? 'bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-lg shadow-purple-500/30'
+              : 'bg-slate-700/50 text-gray-400 hover:bg-slate-700 hover:text-white'
           }`}
         >
-          <span className={`px-1.5 py-0.5 rounded text-[9px] font-black whitespace-nowrap ${
+          <span className={`px-2 py-1 rounded-lg text-xs font-bold ${
             activeStage === 'roundrobin' ? 'bg-white/20' : 'bg-slate-600/50'
           }`}>
-            STAGE 1
+            Stage 1
           </span>
-          <span className="whitespace-nowrap">GROUPS</span>
+          Round Robin
         </button>
         
         <button
           onClick={() => setActiveStage('knockout')}
-          className={`flex-1 px-2 py-3 rounded-lg font-black transition-all flex items-center justify-center gap-1.5 text-[10px] ${
+          className={`px-6 py-3 rounded-xl font-semibold transition-all flex items-center gap-2 ${
             activeStage === 'knockout'
-              ? 'tab-active'
-              : 'bg-slate-700/30 text-gray-400 hover:bg-slate-700/50 hover:text-white'
+              ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-lg shadow-amber-500/30'
+              : 'bg-slate-700/50 text-gray-400 hover:bg-slate-700 hover:text-white'
           }`}
         >
-          <span className={`px-1.5 py-0.5 rounded text-[9px] font-black whitespace-nowrap ${
+          <span className={`px-2 py-1 rounded-lg text-xs font-bold ${
             activeStage === 'knockout' ? 'bg-white/20' : 'bg-slate-600/50'
           }`}>
-            STAGE 2
+            Stage 2
           </span>
-          <span className="whitespace-nowrap">KNOCKOUT</span>
+          Knockout
         </button>
       </div>
 
       {/* Round Robin Stage */}
       {activeStage === 'roundrobin' && (
         <div>
+          <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-3">
+            <span className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-lg text-sm font-semibold">Stage 1</span>
+            Group Stage (Round Robin)
+          </h3>
           <RoundRobinDisplay 
             data={data} 
             matches={matches} 
@@ -2998,23 +2878,28 @@ const GroupsKnockoutDisplay = ({
       {/* Knockout Stage */}
       {activeStage === 'knockout' && (
         <div>
+          <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-3">
+            <span className="px-3 py-1 bg-amber-500/20 text-amber-400 rounded-lg text-sm font-semibold">Stage 2</span>
+            Knockout Stage
+          </h3>
+          
           {!data.knockout ? (
             // No knockout data at all - show message to create it
-            <div className="rounded-2xl p-8 text-center border-2 border-dashed" style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(0,255,136,0.25)' }}>
-              <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: 'rgba(0,255,136,0.08)' }}>
-                <TrophyIcon className="w-10 h-10 icon-green" />
+            <div className="bg-slate-800/50 border-2 border-dashed border-slate-600 rounded-xl p-12 text-center">
+              <div className="w-20 h-20 bg-amber-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <TrophyIcon className="w-10 h-10 text-amber-400" />
               </div>
               <h4 className="text-xl font-bold text-white mb-2">Knockout Stage Not Created</h4>
-              <p className="text-gray-400 mb-4 text-sm">
+              <p className="text-gray-400 mb-4">
                 {isRoundRobinComplete() 
                   ? 'All round robin matches are completed! Use the "Arrange Knockout Matchups" button above to create the knockout bracket.'
                   : 'The knockout bracket will be available after all round robin matches are completed.'}
               </p>
               
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl" style={{ background: 'rgba(0,255,136,0.1)', border: '2px solid rgba(0,255,136,0.25)' }}>
-                <Settings className="w-4 h-4 icon-green" />
-                <span className="text-sm text-[#00ff88] font-semibold">
-                  {isRoundRobinComplete() ? 'Click "Arrange KO" button in the header' : 'Complete all round robin matches first'}
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500/20 border border-purple-500/30 rounded-lg">
+                <Settings className="w-4 h-4 text-purple-400" />
+                <span className="text-sm text-purple-400 font-medium">
+                  {isRoundRobinComplete() ? 'Click "Arrange Knockout Matchups" button in the header' : 'Complete all round robin matches first'}
                 </span>
               </div>
             </div>
@@ -3088,17 +2973,17 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
 
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl" style={{ background: '#0d1025', border: '2px solid rgba(0,255,136,0.2)' }}>
+      <div className="bg-slate-800 rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="p-6 border-b-2 border-white/10" style={{ background: 'rgba(0,255,136,0.05)' }}>
+        <div className="p-6 border-b border-white/10 bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-pink-600/20">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg" style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)' }}>
-                <Settings className="w-6 h-6" style={{ color: '#07071a' }} />
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                <Settings className="w-5 h-5 text-white" />
               </div>
               <h2 className="text-xl font-bold text-white">Configure Draw</h2>
             </div>
-            <button onClick={onClose} className="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-lg flex items-center justify-center text-gray-300 hover:text-white transition-colors">
+            <button onClick={onClose} className="w-8 h-8 bg-white/10 hover:bg-white/20 rounded-lg flex items-center justify-center text-gray-300 hover:text-white transition-colors">
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -3108,22 +2993,32 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
           {/* Format Selection */}
           <div>
             <label className="block text-sm font-semibold text-gray-200 mb-3 flex items-center gap-2">
-              <Layers className="w-4 h-4 icon-green" />
+              <Layers className="w-4 h-4 text-purple-400" />
               Tournament Format
             </label>
             <div className="space-y-2">
-              {formatOptions.map((option) => {
+              {formatOptions.map((option, idx) => {
+                const gradients = [
+                  'from-blue-500/20 to-cyan-500/20 border-blue-500/30 hover:border-blue-400',
+                  'from-purple-500/20 to-pink-500/20 border-purple-500/30 hover:border-purple-400',
+                  'from-orange-500/20 to-red-500/20 border-orange-500/30 hover:border-orange-400'
+                ];
+                const selectedGradients = [
+                  'from-blue-500 to-cyan-500 border-blue-400 shadow-lg shadow-blue-500/30',
+                  'from-purple-500 to-pink-500 border-purple-400 shadow-lg shadow-purple-500/30',
+                  'from-orange-500 to-red-500 border-orange-400 shadow-lg shadow-orange-500/30'
+                ];
                 return (
                   <button
                     key={option.value}
                     onClick={() => setConfig({ ...config, format: option.value })}
-                    className={`w-full p-4 rounded-xl text-left transition-all border-2 font-semibold ${
+                    className={`w-full p-4 rounded-xl text-left transition-all border-2 ${
                       config.format === option.value
-                        ? 'tab-active border-transparent'
-                        : 'bg-slate-700/50 text-gray-300 border-white/10 hover:border-emerald-500/30 hover:bg-slate-700'
+                        ? `bg-gradient-to-r ${selectedGradients[idx]} text-white`
+                        : `bg-gradient-to-r ${gradients[idx]} text-gray-300 border-white/10`
                     }`}
                   >
-                    {option.label}
+                    <div className="font-semibold">{option.label}</div>
                   </button>
                 );
               })}
@@ -3133,7 +3028,7 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
           {/* Bracket Size */}
           <div>
             <label className="block text-sm font-semibold text-gray-200 mb-3 flex items-center gap-2">
-              <Users className="w-4 h-4 icon-green" />
+              <Users className="w-4 h-4 text-cyan-400" />
               Total Players
             </label>
             <div className="relative">
@@ -3146,10 +3041,10 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
                   const value = e.target.value === '' ? 0 : parseInt(e.target.value);
                   setConfig({ ...config, bracketSize: isNaN(value) ? 0 : Math.max(0, Math.min(128, value)) });
                 }}
-                className="w-full px-4 py-4 rounded-xl text-white text-2xl font-bold focus:outline-none transition-all" style={{ background: 'rgba(255,255,255,0.06)', border: '2px solid rgba(0,255,136,0.25)' }}
-                placeholder="0"
+                className="w-full px-4 py-4 bg-gradient-to-r from-slate-700 to-slate-600 border-2 border-cyan-500/30 rounded-xl text-white text-2xl font-bold focus:outline-none focus:border-cyan-400 focus:shadow-lg focus:shadow-cyan-500/20 transition-all"
+                placeholder="028"
               />
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 icon-green text-sm font-medium">
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 text-cyan-400 text-sm font-medium">
                 players
               </div>
             </div>
@@ -3160,7 +3055,7 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
             <>
               <div>
                 <label className="block text-sm font-semibold text-gray-200 mb-3 flex items-center gap-2">
-                  <Layers className="w-4 h-4 icon-green" />
+                  <Layers className="w-4 h-4 text-green-400" />
                   Number of Groups
                 </label>
                 <div className="relative">
@@ -3175,10 +3070,10 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
                       setConfig({ ...config, numberOfGroups: groups, customGroupSizes: null });
                       setUseCustomGroupSizes(false);
                     }}
-                    className="w-full px-4 py-4 rounded-xl text-white text-2xl font-bold focus:outline-none transition-all" style={{ background: 'rgba(255,255,255,0.06)', border: '2px solid rgba(0,255,136,0.25)' }}
-                    placeholder="0"
+                    className="w-full px-4 py-4 bg-gradient-to-r from-slate-700 to-slate-600 border-2 border-green-500/30 rounded-xl text-white text-2xl font-bold focus:outline-none focus:border-green-400 focus:shadow-lg focus:shadow-green-500/20 transition-all"
+                    placeholder="04"
                   />
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2 icon-green text-sm font-medium">
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 text-green-400 text-sm font-medium">
                     groups
                   </div>
                 </div>
@@ -3195,23 +3090,29 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
                         setConfig({ ...config, customGroupSizes: null });
                       }
                     }}
-                    className={`mt-3 w-full px-4 py-3 rounded-xl transition-all font-semibold ${
+                    className={`mt-3 w-full px-4 py-3 rounded-xl transition-all font-medium ${
                       useCustomGroupSizes
-                        ? 'tab-active'
-                        : 'bg-slate-700/50 text-gray-300 hover:bg-slate-700 border-2 border-white/10'
+                        ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg shadow-purple-500/30'
+                        : 'bg-gradient-to-r from-slate-700 to-slate-600 text-gray-300 hover:from-slate-600 hover:to-slate-500 border-2 border-white/10'
                     }`}
                   >
-                    {useCustomGroupSizes ? '✓ Custom Sizes' : 'Customize Group Sizes'}
+                    {useCustomGroupSizes ? '✓ Use Equal Groups' : 'Customize Group Sizes'}
                   </button>
                 )}
 
                 {/* Custom Group Size Inputs */}
                 {useCustomGroupSizes && (
-                  <div className="mt-4 space-y-3 p-4 bg-emerald-500/10 border-2 border-emerald-500/30 rounded-xl">
+                  <div className="mt-4 space-y-3 p-4 bg-gradient-to-br from-purple-500/10 to-pink-500/10 border-2 border-purple-500/30 rounded-xl">
                     {config.customGroupSizes?.map((size, idx) => {
+                      const poolColors = [
+                        'from-blue-500 to-cyan-500',
+                        'from-green-500 to-emerald-500',
+                        'from-orange-500 to-amber-500',
+                        'from-red-500 to-pink-500'
+                      ];
                       return (
                         <div key={idx} className="flex items-center gap-3">
-                          <div className="w-20 h-12 rounded-lg flex items-center justify-center font-bold shadow-lg" style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', color: '#07071a' }}>
+                          <div className={`w-20 h-12 bg-gradient-to-r ${poolColors[idx % 4]} rounded-lg flex items-center justify-center text-white font-bold shadow-lg`}>
                             Pool {String.fromCharCode(65 + idx)}
                           </div>
                           <input
@@ -3225,7 +3126,7 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
                               newSizes[idx] = isNaN(value) ? 0 : Math.max(0, Math.min(config.bracketSize, value));
                               setConfig({ ...config, customGroupSizes: newSizes });
                             }}
-                            className="flex-1 px-4 py-3 rounded-xl text-white text-xl font-bold focus:outline-none transition-all" style={{ background: 'rgba(255,255,255,0.06)', border: '2px solid rgba(0,255,136,0.25)' }}
+                            className="flex-1 px-4 py-3 bg-slate-700 border-2 border-purple-500/30 rounded-xl text-white text-xl font-bold focus:outline-none focus:border-purple-400 focus:shadow-lg focus:shadow-purple-500/20 transition-all"
                             placeholder="0"
                           />
                         </div>
@@ -3233,11 +3134,15 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
                     })}
                     <div className={`flex items-center justify-between p-3 rounded-lg ${
                       config.customGroupSizes?.reduce((a, b) => a + b, 0) === config.bracketSize
-                        ? 'bg-emerald-500/20 border-2 border-emerald-500/50'
+                        ? 'bg-green-500/20 border-2 border-green-500/50'
                         : 'bg-red-500/20 border-2 border-red-500/50'
                     }`}>
                       <span className="text-sm font-medium text-white">Total:</span>
-                      <span className="text-lg font-bold" style={{ color: config.customGroupSizes?.reduce((a, b) => a + b, 0) === config.bracketSize ? '#00ff88' : '#f87171' }}>
+                      <span className={`text-lg font-bold ${
+                        config.customGroupSizes?.reduce((a, b) => a + b, 0) === config.bracketSize
+                          ? 'text-green-400'
+                          : 'text-red-400'
+                      }`}>
                         {config.customGroupSizes?.reduce((a, b) => a + b, 0)} / {config.bracketSize}
                       </span>
                     </div>
@@ -3248,19 +3153,25 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
               {config.format === 'ROUND_ROBIN_KNOCKOUT' && (
                 <div>
                   <label className="block text-sm font-semibold text-gray-200 mb-3 flex items-center gap-2">
-                    <TrophyIcon className="w-4 h-4 icon-green" />
+                    <TrophyIcon className="w-4 h-4 text-yellow-400" />
                     Players Advancing from Each Group
                   </label>
                   <div className="grid grid-cols-4 gap-3">
-                    {[1, 2, 3, 4].map((num) => {
+                    {[1, 2, 3, 4].map((num, idx) => {
+                      const colors = [
+                        'from-yellow-500 to-amber-500 border-yellow-400 shadow-yellow-500/30',
+                        'from-blue-500 to-cyan-500 border-blue-400 shadow-blue-500/30',
+                        'from-purple-500 to-pink-500 border-purple-400 shadow-purple-500/30',
+                        'from-green-500 to-emerald-500 border-green-400 shadow-green-500/30'
+                      ];
                       return (
                         <button
                           key={num}
                           onClick={() => setConfig({ ...config, advanceFromGroup: num })}
                           className={`py-4 rounded-xl font-bold transition-all border-2 ${
                             config.advanceFromGroup === num
-                              ? 'tab-active border-transparent'
-                              : 'bg-slate-700 text-gray-400 border-white/10 hover:border-emerald-500/30'
+                              ? `bg-gradient-to-br ${colors[idx]} text-white shadow-lg`
+                              : 'bg-slate-700 text-gray-400 border-white/10 hover:border-white/30'
                           }`}
                         >
                           Top {num}
@@ -3274,17 +3185,17 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
           )}
         </div>
 
-        <div className="p-6 border-t-2 border-white/10 flex gap-3">
+        <div className="p-6 border-t border-white/10 bg-gradient-to-r from-slate-800/50 to-slate-700/50 flex gap-3">
           <button 
             onClick={onClose} 
-            className="flex-1 px-6 py-4 rounded-xl transition-all font-semibold text-white" style={{ background: 'rgba(255,255,255,0.06)' }}
+            className="flex-1 px-6 py-4 bg-slate-700 text-white rounded-xl hover:bg-slate-600 transition-all font-semibold border-2 border-white/10 hover:border-white/20"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex-1 px-6 py-4 btn-brand rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
+            className="flex-1 px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-500 hover:to-purple-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed font-semibold shadow-lg shadow-blue-500/30 border-2 border-blue-400/50"
           >
             {saving ? (
               <span className="flex items-center justify-center gap-2">
@@ -3305,17 +3216,15 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
       {alertMessage && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70">
           <div className="relative w-full max-w-md">
-            <div className="bg-gradient-to-br from-slate-900 to-slate-800 border-2 border-emerald-500/30 rounded-2xl overflow-hidden shadow-2xl">
-              <div className="p-6 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border-b-2 border-white/10">
-                <h3 className="text-lg font-bold text-white">Matchify.pro</h3>
-              </div>
+            <div className="bg-slate-800 rounded-xl overflow-hidden">
               <div className="p-6">
+                <h3 className="text-lg font-semibold text-white mb-3">Matchify.pro</h3>
                 <p className="text-gray-300">{alertMessage}</p>
               </div>
-              <div className="p-4 border-t-2 border-white/10">
+              <div className="p-4 border-t border-white/10">
                 <button
                   onClick={() => setAlertMessage(null)}
-                  className="w-full px-4 py-3 rounded-xl btn-brand font-semibold transition-all"
+                  className="w-full px-4 py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors"
                 >
                   OK
                 </button>
@@ -3334,11 +3243,11 @@ export default DrawPage;
 const DeleteDrawModal = ({ categoryName, onClose, onConfirm, deleting }) => {
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="rounded-2xl max-w-md w-full shadow-2xl" style={{ background: '#0d1025', border: '2px solid rgba(239,68,68,0.35)' }}>
-        <div className="p-6 border-b-2 border-white/10">
+      <div className="bg-slate-800 border border-white/10 rounded-2xl max-w-md w-full">
+        <div className="p-6 border-b border-white/10">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-gradient-to-br from-red-500 to-rose-600 rounded-xl flex items-center justify-center shadow-lg shadow-red-500/50">
-              <Trash2 className="w-7 h-7 text-white" />
+            <div className="w-12 h-12 bg-red-500/20 rounded-xl flex items-center justify-center">
+              <Trash2 className="w-6 h-6 text-red-400" />
             </div>
             <div>
               <h2 className="text-xl font-bold text-white">Delete Draw</h2>
@@ -3348,10 +3257,10 @@ const DeleteDrawModal = ({ categoryName, onClose, onConfirm, deleting }) => {
         </div>
 
         <div className="p-6">
-          <p className="text-gray-300 mb-4">
+          <p className="text-gray-300">
             Are you sure you want to delete this draw? This action cannot be undone and all bracket data will be lost.
           </p>
-          <div className="p-4 bg-red-500/10 border-2 border-red-500/30 rounded-xl">
+          <div className="mt-4 p-4 bg-red-500/10 border border-red-500/30 rounded-xl">
             <div className="flex items-start gap-3">
               <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
               <p className="text-sm text-red-300">
@@ -3361,18 +3270,17 @@ const DeleteDrawModal = ({ categoryName, onClose, onConfirm, deleting }) => {
           </div>
         </div>
 
-        <div className="p-6 border-t-2 border-white/10 flex gap-3">
+        <div className="p-6 border-t border-white/10 flex gap-3">
           <button 
             onClick={onClose} 
-            disabled={deleting}
-            className="flex-1 px-4 py-3 rounded-xl transition-all font-semibold text-white" style={{ background: 'rgba(255,255,255,0.06)' }}
+            className="flex-1 px-4 py-3 bg-slate-700 text-gray-300 rounded-xl hover:bg-slate-600 transition-colors font-semibold"
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
             disabled={deleting}
-            className="flex-1 px-4 py-3 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl hover:shadow-lg hover:shadow-red-500/30 transition-all font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+            className="flex-1 px-4 py-3 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl hover:shadow-lg hover:shadow-red-500/25 transition-all font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {deleting ? (
               <>
@@ -3382,7 +3290,7 @@ const DeleteDrawModal = ({ categoryName, onClose, onConfirm, deleting }) => {
             ) : (
               <>
                 <Trash2 className="w-4 h-4" />
-                Delete
+                Delete Draw
               </>
             )}
           </button>
@@ -3415,7 +3323,7 @@ const SlotCard = ({ slot, assigned, canAccept, onSlotClick, onRemove, playerLabe
                 : 'bg-slate-700/50'
           }`}>
             {assigned ? (
-              <CheckCircle className="w-5 h-5 icon-green" />
+              <CheckCircle className="w-5 h-5 text-emerald-400" />
             ) : (
               <Users className={`w-5 h-5 ${canAccept ? 'text-purple-400' : 'text-gray-500'}`} />
             )}
@@ -3498,10 +3406,13 @@ const CompactSlotCard = ({ slot, assigned, canAccept, onSlotClick, onRemove, pla
     >
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0 flex-1">
-          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded" style={{
-            background: locked ? 'rgba(251,191,36,0.15)' : assigned ? 'rgba(0,255,136,0.15)' : 'rgba(255,255,255,0.06)',
-            color: locked ? '#fbbf24' : assigned ? '#00ff88' : 'rgba(255,255,255,0.4)'
-          }}>
+          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+            locked
+              ? 'bg-amber-500/20 text-amber-400'
+              : assigned 
+                ? 'bg-emerald-500/20 text-emerald-400' 
+                : 'bg-slate-700/50 text-gray-500'
+          }`}>
             {playerLabel}
           </span>
           {assigned ? (
@@ -3642,8 +3553,7 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
     // Assign player to the new slot
     newAssignments[targetSlot.slot] = {
       playerId: selectedPlayer.id,
-      playerName: selectedPlayer.name,
-      partnerName: selectedPlayer.partnerName || null
+      playerName: selectedPlayer.name
     };
     
     setAssignments(newAssignments);
@@ -3732,7 +3642,7 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       console.error('Error bulk assigning players:', err);
-      setError(getErrorMessage(err, 'Failed to assign all players'));
+      setError(err.response?.data?.error || 'Failed to assign all players');
     }
   };
 
@@ -3759,7 +3669,7 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       console.error('Error shuffling players:', err);
-      setError(getErrorMessage(err, 'Failed to shuffle players'));
+      setError(err.response?.data?.error || 'Failed to shuffle players');
     }
   };
 
@@ -3781,71 +3691,35 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      {/* Animated Background for Modal */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div 
-          className="absolute top-10 right-10 w-64 h-64 rounded-full blur-3xl opacity-20"
-          style={{ 
-            background: 'radial-gradient(circle, rgba(0,255,136,0.5) 0%, transparent 70%)',
-            animation: 'float 8s ease-in-out infinite'
-          }}
-        />
-        <div 
-          className="absolute bottom-10 left-10 w-56 h-56 rounded-full blur-3xl opacity-15"
-          style={{ 
-            background: 'radial-gradient(circle, rgba(20,184,166,0.5) 0%, transparent 70%)',
-            animation: 'float 10s ease-in-out infinite reverse',
-            animationDelay: '2s'
-          }}
-        />
-        {ASSIGN_PARTICLES.map((p, i) => (
-          <div
-            key={i}
-            className="absolute rounded-full"
-            style={{
-              width: `${p.w}px`,
-              height: `${p.h}px`,
-              left: `${p.x}%`,
-              top: `${p.y}%`,
-              background: p.c,
-              opacity: p.o,
-              animation: `float ${p.dur}s ease-in-out infinite`,
-              animationDelay: `${p.delay}s`,
-              boxShadow: `0 0 ${p.glow}px ${p.c}`,
-            }}
-          />
-        ))}
-      </div>
-
-      <div className="relative backdrop-blur-xl rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl" style={{ background: '#0d1025', border: '1px solid rgba(0,255,136,0.2)' }}>
-        <div className="p-4 border-b border-white/10">
+      <div className="bg-slate-800 border border-white/10 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+        <div className="p-6 border-b border-white/10">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-emerald-500/20 rounded-xl flex items-center justify-center">
-                <UserPlus className="w-5 h-5 icon-green" />
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-emerald-500/20 rounded-xl flex items-center justify-center">
+                <UserPlus className="w-6 h-6 text-emerald-400" />
               </div>
               <div>
-                <h2 className="text-base font-bold text-white">Assign Players to Draw</h2>
-                <p className="text-gray-400 text-xs">Click a player, then click a slot to assign</p>
+                <h2 className="text-xl font-bold text-white">Assign Players to Draw</h2>
+                <p className="text-gray-400 text-sm">Click a player, then click a slot to assign</p>
               </div>
             </div>
             <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-lg transition-colors">
-              <X className="w-4 h-4 text-gray-400" />
+              <X className="w-5 h-5 text-gray-400" />
             </button>
           </div>
           
           {/* Bulk Action Buttons */}
-          <div className="mt-3 flex gap-2">
+          <div className="mt-4 flex gap-3">
             <button
               onClick={handleAddAllPlayers}
               disabled={!canAddAll}
-              className="flex items-center gap-1.5 px-3 py-2 btn-brand rounded-lg transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed text-xs"
+              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-xl hover:shadow-lg hover:shadow-blue-500/25 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed text-sm"
               title={canAddAll ? `Add ${Math.min(unassignedPlayersCount, availableSlotsCount)} unassigned players to available slots` : 'No unassigned players or available slots'}
             >
-              <Users className="w-3.5 h-3.5" />
+              <Users className="w-4 h-4" />
               Add All Players
               {canAddAll && (
-                <span className="px-1.5 py-0.5 bg-white/20 rounded-full text-[10px]">
+                <span className="px-2 py-0.5 bg-white/20 rounded-full text-xs">
                   +{Math.min(unassignedPlayersCount, availableSlotsCount)}
                 </span>
               )}
@@ -3854,22 +3728,22 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
             <button
               onClick={handleShuffleAllPlayers}
               disabled={!canShuffle}
-              className="flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-teal-500 to-emerald-600 text-white rounded-lg hover:shadow-lg hover:shadow-teal-500/25 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed text-xs"
+              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-violet-600 text-white rounded-xl hover:shadow-lg hover:shadow-purple-500/25 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed text-sm"
               title={canShuffle ? 'Randomly redistribute all assigned players (locked matches unchanged)' : 'Need at least 2 assigned players to shuffle'}
             >
-              <Zap className="w-3.5 h-3.5" />
+              <Zap className="w-4 h-4" />
               Shuffle All Players
             </button>
           </div>
           
           {selectedPlayer && (
-            <div className="mt-2 px-3 py-2 bg-emerald-500/20 border border-emerald-500/30 rounded-lg flex items-center justify-between">
-              <span className="text-[#00ff88] text-xs">
+            <div className="mt-3 px-4 py-2 bg-purple-500/20 border border-purple-500/30 rounded-xl flex items-center justify-between">
+              <span className="text-purple-300 text-sm">
                 Selected: <span className="font-semibold text-white">{selectedPlayer.name}</span> — Click a slot to assign
               </span>
               <button 
                 onClick={() => setSelectedPlayer(null)}
-                className="text-xs icon-green hover:opacity-80"
+                className="text-purple-400 hover:text-purple-300 text-sm"
               >
                 Cancel
               </button>
@@ -3878,22 +3752,22 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
         </div>
 
         <div className="flex-1 overflow-hidden flex">
-          {/* Players List - 35% width */}
-          <div className="w-[35%] border-r border-white/10 p-2 overflow-y-auto scroll-smooth scrollbar-thin">
-            <h3 className="text-[10px] font-semibold text-gray-400 mb-2 uppercase tracking-wider">
+          {/* Players List */}
+          <div className="w-1/3 border-r border-white/10 p-4 overflow-y-auto scroll-smooth scrollbar-thin">
+            <h3 className="text-sm font-semibold text-gray-400 mb-3 uppercase tracking-wider">
               Registered Players ({players.length})
             </h3>
             {loading ? (
               <div className="flex items-center justify-center py-8">
-                <div className="w-6 h-6 border-3 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-8 h-8 border-3 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
               </div>
             ) : players.length === 0 ? (
               <div className="text-center py-8">
-                <Users className="w-8 h-8 text-gray-600 mx-auto mb-2" />
-                <p className="text-gray-500 text-[10px]">No registered players</p>
+                <Users className="w-12 h-12 text-gray-600 mx-auto mb-3" />
+                <p className="text-gray-500 text-sm">No registered players</p>
               </div>
             ) : (
-              <div className="space-y-1">
+              <div className="space-y-2">
                 {players.map((player) => {
                   const assigned = isPlayerAssigned(player.id);
                   const isSelected = selectedPlayer?.id === player.id;
@@ -3901,35 +3775,34 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                     <div
                       key={player.id}
                       onClick={() => handleSelectPlayer(player)}
-                      className={`p-1.5 rounded-lg cursor-pointer transition-all ${
+                      className={`p-3 rounded-xl cursor-pointer transition-all ${
                         isSelected
-                          ? 'bg-emerald-500/30 border border-emerald-500 shadow-lg shadow-emerald-500/20'
+                          ? 'bg-purple-500/30 border-2 border-purple-500 shadow-lg shadow-purple-500/20'
                           : assigned
                             ? 'bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20'
-                            : 'bg-slate-700/50 border border-transparent hover:bg-slate-700 hover:shadow-lg hover:shadow-emerald-500/10'
+                            : 'bg-slate-700/50 border border-transparent hover:bg-slate-700 hover:shadow-lg hover:shadow-purple-500/10'
                       }`}
                     >
-                      <div className="flex items-center gap-1.5">
-                        <div className="w-5 h-5 rounded flex items-center justify-center font-bold text-[10px] flex-shrink-0"
-                          style={{
-                            background: isSelected ? 'linear-gradient(135deg,#00ff88,#00d4ff)' : assigned ? 'linear-gradient(135deg,#00ff88,#a855f7)' : 'linear-gradient(135deg,#a855f7,#00d4ff)',
-                            color: '#07071a',
-                            boxShadow: isSelected ? '0 0 0 2px #00ff88' : undefined
-                          }}>
+                      <div className="flex items-center gap-3">
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-sm ${
+                          isSelected
+                            ? 'bg-gradient-to-br from-purple-400 to-violet-600 ring-2 ring-purple-400'
+                            : assigned 
+                              ? 'bg-gradient-to-br from-emerald-500 to-teal-600' 
+                              : 'bg-gradient-to-br from-purple-500 to-indigo-600'
+                        }`}>
                           {player.seed}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-white font-medium text-[11px] leading-tight">{player.name}</p>
-                          {player.partnerName && (
-                            <p className="text-[#00ff88] text-[9px] leading-tight">& {player.partnerName}</p>
-                          )}
+                          <p className="text-white font-medium truncate">{player.name}</p>
+                          <p className="text-gray-500 text-xs truncate">{player.email}</p>
                         </div>
                         {isSelected ? (
-                          <div className="w-3 h-3 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0">
-                            <div className="w-1 h-1 bg-white rounded-full"></div>
+                          <div className="w-5 h-5 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
+                            <div className="w-2 h-2 bg-white rounded-full"></div>
                           </div>
                         ) : assigned ? (
-                          <CheckCircle className="w-3 h-3 icon-green flex-shrink-0" />
+                          <CheckCircle className="w-5 h-5 text-emerald-400 flex-shrink-0" />
                         ) : null}
                       </div>
                     </div>
@@ -3939,10 +3812,10 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
             )}
           </div>
 
-          {/* Slots Grid - 65% width */}
-          <div className="flex-1 p-2 overflow-y-auto scroll-smooth scrollbar-thin">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
+          {/* Slots Grid - For Round Robin: Show by Pools, For Knockout: Show by Matches */}
+          <div className="flex-1 p-4 overflow-y-auto scroll-smooth scrollbar-thin">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">
                 {bracket?.format === 'ROUND_ROBIN' || bracket?.format === 'ROUND_ROBIN_KNOCKOUT' 
                   ? `Pools (${bracket.groups?.length || 0})` 
                   : `Draw Slots (${slots.length})`}
@@ -3960,7 +3833,7 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                     });
                     setAssignments(newAssignments);
                   }}
-                  className="text-[10px] text-red-400 hover:text-red-300 hover:bg-red-500/10 px-2 py-1 rounded-lg transition-colors"
+                  className="text-xs text-red-400 hover:text-red-300 hover:bg-red-500/10 px-2 py-1 rounded-lg transition-colors"
                 >
                   Clear All
                 </button>
@@ -3969,7 +3842,7 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
             
             {/* ROUND ROBIN: Pool-based view */}
             {(bracket?.format === 'ROUND_ROBIN' || bracket?.format === 'ROUND_ROBIN_KNOCKOUT') && bracket.groups ? (
-              <div className="space-y-2">
+              <div className="space-y-4">
                 {bracket.groups.map((group, groupIndex) => {
                   const groupSlots = slots.filter(s => {
                     const slotIndex = s.slot - 1;
@@ -3983,29 +3856,33 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                   const totalInPool = groupSlots.length;
                   
                   return (
-                    <div key={groupIndex} className="bg-slate-700/30 rounded-lg border border-white/10 overflow-hidden">
-                      {/* Pool Header - Compact */}
-                      <div className="px-2 py-1.5 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border-b border-white/10 flex items-center justify-between">
-                        <div className="flex items-center gap-1.5">
-                          <div className="w-6 h-6 bg-emerald-500/30 rounded flex items-center justify-center">
-                            <span className="text-[#00ff88] font-bold text-xs">
-                              {String.fromCharCode(65 + groupIndex)}
-                            </span>
+                    <div key={groupIndex} className="bg-slate-700/30 rounded-xl border border-white/10 overflow-hidden">
+                      {/* Pool Header */}
+                      <div className="px-4 py-3 bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-b border-white/10">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-purple-500/30 rounded-xl flex items-center justify-center">
+                              <span className="text-purple-300 font-bold text-lg">
+                                {String.fromCharCode(65 + groupIndex)}
+                              </span>
+                            </div>
+                            <div>
+                              <h4 className="text-white font-bold">Pool {String.fromCharCode(65 + groupIndex)}</h4>
+                              <p className="text-purple-300 text-xs">
+                                {assignedInPool} of {totalInPool} players assigned
+                              </p>
+                            </div>
                           </div>
-                          <div>
-                            <h4 className="text-white font-bold text-[11px] leading-tight">Pool {String.fromCharCode(65 + groupIndex)}</h4>
-                            <p className="text-[#00ff88] text-[9px] leading-tight">
-                              {assignedInPool}/{totalInPool} assigned
-                            </p>
+                          <div className="text-right">
+                            <div className="px-3 py-1 bg-purple-500/20 rounded-lg">
+                              <span className="text-purple-300 font-bold text-sm">{totalInPool} slots</span>
+                            </div>
                           </div>
-                        </div>
-                        <div className="px-1.5 py-0.5 bg-emerald-500/20 rounded">
-                          <span className="text-[#00ff88] font-bold text-[9px]">{totalInPool} slots</span>
                         </div>
                       </div>
                       
-                      {/* Pool Slots - Ultra Compact */}
-                      <div className="p-1.5 grid grid-cols-2 gap-1">
+                      {/* Pool Slots */}
+                      <div className="p-3 grid grid-cols-2 gap-2">
                         {groupSlots.map((slot) => {
                           const assigned = getAssignedPlayer(slot.slot);
                           const canAccept = selectedPlayer && !assigned && !slot.locked;
@@ -4014,33 +3891,30 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                             <div
                               key={slot.slot}
                               onClick={() => canAccept && handleSlotClick(slot)}
-                              className={`p-1.5 rounded border transition-all ${
+                              className={`p-3 rounded-lg border transition-all ${
                                 canAccept
-                                  ? 'border-emerald-500/50 bg-emerald-500/10 cursor-pointer hover:bg-emerald-500/20 hover:border-emerald-500'
+                                  ? 'border-purple-500/50 bg-purple-500/10 cursor-pointer hover:bg-purple-500/20 hover:border-purple-500'
                                   : assigned
                                     ? 'border-emerald-500/30 bg-emerald-500/10'
                                     : 'border-white/10 bg-slate-800/30'
                               } ${slot.locked ? 'opacity-50' : ''}`}
                             >
-                              <div className="flex items-center gap-1">
-                                <div className={`w-4 h-4 rounded flex items-center justify-center text-[9px] font-bold flex-shrink-0 ${
-                                  assigned 
-                                    ? 'bg-emerald-500/30 text-[#00ff88]' 
-                                    : 'bg-slate-600/30 text-gray-500'
-                                }`}>
-                                  {slot.slot}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  {assigned ? (
-                                    <>
-                                      <p className="text-white font-medium text-[9px] leading-tight">{assigned.playerName}</p>
-                                      {assigned.partnerName && (
-                                        <p className="text-[#00ff88] text-[8px] leading-tight">& {assigned.partnerName}</p>
-                                      )}
-                                    </>
-                                  ) : (
-                                    <p className="text-gray-500 text-[9px] leading-tight">Empty</p>
-                                  )}
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2 flex-1 min-w-0">
+                                  <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0 ${
+                                    assigned 
+                                      ? 'bg-emerald-500/30 text-emerald-300' 
+                                      : 'bg-slate-600/30 text-gray-500'
+                                  }`}>
+                                    {slot.slot}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    {assigned ? (
+                                      <p className="text-white font-medium text-sm truncate">{assigned.playerName}</p>
+                                    ) : (
+                                      <p className="text-gray-500 text-sm">Empty Slot</p>
+                                    )}
+                                  </div>
                                 </div>
                                 {assigned && !slot.locked && (
                                   <button
@@ -4048,13 +3922,13 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                                       e.stopPropagation();
                                       handleRemoveAssignment(slot.slot);
                                     }}
-                                    className="p-0.5 hover:bg-red-500/20 rounded transition-colors flex-shrink-0"
+                                    className="p-1 hover:bg-red-500/20 rounded transition-colors flex-shrink-0"
                                   >
-                                    <X className="w-2.5 h-2.5 text-red-400" />
+                                    <X className="w-4 h-4 text-red-400" />
                                   </button>
                                 )}
                                 {slot.locked && (
-                                  <span className="text-[9px] flex-shrink-0">🔒</span>
+                                  <span className="text-amber-400 text-xs flex-shrink-0">🔒</span>
                                 )}
                               </div>
                             </div>
@@ -4149,30 +4023,30 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
           </div>
         </div>
 
-        <div className="p-4 border-t border-white/10 flex items-center justify-between">
-          <div className="text-xs text-gray-400">
+        <div className="p-6 border-t border-white/10 flex items-center justify-between">
+          <div className="text-sm text-gray-400">
             {assignedCount} of {slots.length} slots assigned
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-3">
             <button 
               onClick={onClose} 
-              className="px-4 py-2 bg-slate-700 text-gray-300 rounded-lg hover:bg-slate-600 transition-colors font-semibold text-xs"
+              className="px-6 py-3 bg-slate-700 text-gray-300 rounded-xl hover:bg-slate-600 transition-colors font-semibold"
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
               disabled={saving}
-              className="px-4 py-2 btn-brand rounded-lg transition-all font-semibold disabled:opacity-50 flex items-center gap-1.5 text-xs"
+              className="px-6 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl hover:shadow-lg hover:shadow-emerald-500/25 transition-all font-semibold disabled:opacity-50 flex items-center gap-2"
             >
               {saving ? (
                 <>
-                  <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                   Saving...
                 </>
               ) : (
                 <>
-                  <CheckCircle className="w-4 h-4" />
+                  <CheckCircle className="w-5 h-5" />
                   Save Assignments
                 </>
               )}
@@ -4190,6 +4064,7 @@ const AssignUmpireModal = ({ match, umpires, onClose, onAssign }) => {
   const [selectedUmpire, setSelectedUmpire] = useState(match?.umpireId || null);
   const [assigning, setAssigning] = useState(false);
 
+  // Assign Only - just assign umpire and close modal
   const handleAssignOnly = async () => {
     if (!selectedUmpire) return;
     setAssigning(true);
@@ -4198,139 +4073,144 @@ const AssignUmpireModal = ({ match, umpires, onClose, onAssign }) => {
     onClose();
   };
 
+  // Start Match - assign umpire and redirect to conduct page
   const handleStartMatch = async () => {
     if (!selectedUmpire) return;
     setAssigning(true);
     await onAssign(selectedUmpire);
     setAssigning(false);
+    // Redirect to conduct page for configuration
     navigate(`/match/${match.id}/conduct`);
   };
 
   const selectedUmpireData = umpires.find(u => u.id === selectedUmpire);
 
   return (
-    <div
-      className="fixed inset-0 flex items-end sm:items-center justify-center z-50 p-4"
-      style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)' }}
-      onClick={onClose}
-    >
-      <div
-        className="w-full max-w-sm rounded-2xl overflow-hidden"
-        style={{ background: '#0d1025', border: '1px solid rgba(0,255,136,0.18)' }}
-        onClick={e => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="px-5 pt-5 pb-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
-                style={{ background: 'linear-gradient(135deg,rgba(0,255,136,0.25),rgba(0,212,255,0.2))', border: '1px solid rgba(0,255,136,0.3)' }}>
-                <Gavel className="w-5 h-5" style={{ color: '#00ff88' }} />
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-slate-800 border border-white/10 rounded-2xl max-w-md w-full">
+        <div className="p-6 border-b border-white/10">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center">
+                <Gavel className="w-6 h-6 text-blue-400" />
               </div>
               <div>
-                <h2 className="text-base font-black text-white">Assign Umpire & Start Match</h2>
-                <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                  Match {match?.matchNumber} • {getPlayerDisplay(match?.player1)} vs {getPlayerDisplay(match?.player2)}
+                <h2 className="text-xl font-bold text-white">Assign Umpire & Start Match</h2>
+                <p className="text-gray-400 text-sm">
+                  Match {match?.matchNumber} • {match?.player1?.name || 'TBD'} vs {match?.player2?.name || 'TBD'}
                 </p>
               </div>
             </div>
-            <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-xl flex-shrink-0 transition-all"
-              style={{ background: 'rgba(255,255,255,0.06)' }}>
-              <X className="w-4 h-4" style={{ color: 'rgba(255,255,255,0.5)' }} />
+            <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-lg transition-colors">
+              <X className="w-5 h-5 text-gray-400" />
             </button>
           </div>
         </div>
 
-        {/* Umpire list */}
-        <div className="px-5 py-4">
+        <div className="p-6">
           {umpires.length === 0 ? (
             <div className="text-center py-8">
-              <Gavel className="w-10 h-10 mx-auto mb-3" style={{ color: 'rgba(255,255,255,0.2)' }} />
-              <p className="text-sm font-bold text-white mb-1">No umpires added</p>
-              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Add umpires from tournament settings first</p>
+              <Gavel className="w-12 h-12 text-gray-600 mx-auto mb-3" />
+              <p className="text-gray-400">No umpires added to this tournament</p>
+              <p className="text-gray-500 text-sm mt-1">Add umpires from the tournament settings first</p>
             </div>
           ) : (
-            <div className="space-y-2 max-h-56 overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
-              {umpires.map((umpire) => {
-                const isSelected = selectedUmpire === umpire.id;
-                return (
-                  <div
-                    key={umpire.id}
-                    onClick={() => setSelectedUmpire(umpire.id)}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all"
-                    style={isSelected
-                      ? { background: 'rgba(0,255,136,0.1)', border: '1.5px solid rgba(0,255,136,0.4)' }
-                      : { background: 'rgba(255,255,255,0.04)', border: '1.5px solid rgba(255,255,255,0.07)' }}
-                  >
-                    <div className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm flex-shrink-0"
-                      style={isSelected
-                        ? { background: 'linear-gradient(135deg,#00ff88,#00ff88)', color: '#07071a' }
-                        : { background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)' }}>
+            <div className="space-y-2 max-h-64 overflow-y-auto scroll-smooth scrollbar-thin">
+              {umpires.map((umpire) => (
+                <div
+                  key={umpire.id}
+                  onClick={() => setSelectedUmpire(umpire.id)}
+                  className={`p-3 rounded-xl cursor-pointer transition-all ${
+                    selectedUmpire === umpire.id
+                      ? 'bg-blue-500/20 border-2 border-blue-500'
+                      : 'bg-slate-700/50 border-2 border-transparent hover:bg-slate-700'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold ${
+                      selectedUmpire === umpire.id
+                        ? 'bg-gradient-to-br from-blue-400 to-cyan-600'
+                        : 'bg-gradient-to-br from-slate-500 to-slate-600'
+                    }`}>
                       {umpire.name?.charAt(0)?.toUpperCase() || 'U'}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-white truncate">{umpire.name}</p>
-                      <p className="text-xs truncate" style={{ color: 'rgba(255,255,255,0.4)' }}>{umpire.email}</p>
+                      <p className="text-white font-medium truncate">{umpire.name}</p>
+                      <p className="text-gray-500 text-xs truncate">{umpire.email}</p>
                     </div>
-                    {isSelected && <CheckCircle className="w-4 h-4 flex-shrink-0" style={{ color: '#00ff88' }} />}
+                    {selectedUmpire === umpire.id && (
+                      <CheckCircle className="w-5 h-5 text-blue-400 flex-shrink-0" />
+                    )}
                   </div>
-                );
-              })}
+                </div>
+              ))}
             </div>
           )}
 
-          {/* Selected umpire confirmation */}
+          {/* Selected Umpire Info */}
           {selectedUmpireData && (
-            <div className="mt-3 px-3 py-2.5 rounded-xl flex items-center gap-2"
-              style={{ background: 'rgba(0,255,136,0.07)', border: '1px solid rgba(0,255,136,0.2)' }}>
-              <CheckCircle className="w-4 h-4 flex-shrink-0" style={{ color: '#00ff88' }} />
-              <p className="text-xs font-bold" style={{ color: '#00ff88' }}>
-                {selectedUmpireData.name} will conduct this match
+            <div className="mt-4 p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl">
+              <p className="text-emerald-300 text-sm">
+                <span className="font-semibold">{selectedUmpireData.name}</span> will conduct this match
               </p>
             </div>
           )}
         </div>
 
-        {/* Actions */}
-        <div className="px-5 pb-5 space-y-2.5" style={{ borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: '1rem' }}>
-          {/* Start Match — primary */}
+        <div className="p-6 border-t border-white/10 space-y-3">
+          {/* Primary action - Start Match (assign + configure) */}
           <button
             onClick={handleStartMatch}
             disabled={!selectedUmpire || assigning || umpires.length === 0}
-            className="w-full py-3.5 rounded-xl font-black text-sm transition-all disabled:opacity-40 flex items-center justify-center gap-2"
-            style={{ background: 'linear-gradient(135deg,#00ff88,#00ff88)', color: '#07071a', boxShadow: '0 4px 16px rgba(0,255,136,0.35)' }}
+            className="w-full px-4 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl hover:shadow-lg hover:shadow-emerald-500/25 transition-all font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
           >
-            {assigning
-              ? <><div className="w-4 h-4 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#07071a transparent transparent transparent' }} />Starting…</>
-              : <><Gavel className="w-4 h-4" />Start Match</>}
+            {assigning ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                Starting...
+              </>
+            ) : (
+              <>
+                <Gavel className="w-5 h-5" />
+                Start Match
+              </>
+            )}
           </button>
-
-          {/* Cancel + Assign Only */}
-          <div className="flex gap-2">
-            <button
-              onClick={onClose}
-              className="flex-1 py-2.5 rounded-xl text-sm font-bold transition-all"
-              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.7)' }}
+          
+          {/* Secondary action - Assign Only */}
+          <div className="flex gap-3">
+            <button 
+              onClick={onClose} 
+              className="flex-1 px-4 py-2.5 bg-slate-700 text-gray-300 rounded-xl hover:bg-slate-600 transition-colors font-medium"
             >
               Cancel
             </button>
+            
             <button
               onClick={handleAssignOnly}
               disabled={!selectedUmpire || assigning || umpires.length === 0}
-              className="flex-1 py-2.5 rounded-xl text-sm font-bold transition-all disabled:opacity-40 flex items-center justify-center gap-1.5"
-              style={{ background: 'rgba(0,212,255,0.1)', border: '1px solid rgba(0,212,255,0.3)', color: '#00d4ff' }}
+              className="flex-1 px-4 py-2.5 bg-blue-500/20 border border-blue-500/50 text-blue-300 rounded-xl hover:bg-blue-500/30 transition-all font-medium disabled:opacity-50 flex items-center justify-center gap-2"
             >
-              {assigning
-                ? <div className="w-3.5 h-3.5 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#00d4ff transparent transparent transparent' }} />
-                : <CheckCircle className="w-3.5 h-3.5" />}
-              Assign Only
+              {assigning ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-blue-300/30 border-t-blue-300 rounded-full animate-spin"></div>
+                  Assigning...
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="w-4 h-4" />
+                  Assign Only
+                </>
+              )}
             </button>
           </div>
-
-          {/* Hint */}
-          <p className="text-center text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>
-            Press "Start Match" to assign <span style={{ color: '#00ff88' }}>{selectedUmpireData?.name || 'umpire'}</span> and begin scoring
-          </p>
+          
+          {/* Info message */}
+          <div className="text-center pt-2">
+            <p className="text-xs text-gray-500">
+              Press "Start Match" to assign <span className="text-emerald-400 font-medium">{selectedUmpireData?.name || 'umpire'}</span> and begin scoring
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -4482,133 +4362,66 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
   const unassignedPlayers = advancingPlayers.filter(p => !assignedIds.has(p.id));
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      {/* Animated Background - MUCH BRIGHTER & MORE VISIBLE */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {/* Large pulsing orbs */}
-        <div 
-          className="absolute top-10 right-10 w-96 h-96 rounded-full blur-3xl"
-          style={{ 
-            background: 'radial-gradient(circle, rgba(0,255,136,0.5) 0%, rgba(0,255,136,0.3) 50%, transparent 70%)',
-            animation: 'float 8s ease-in-out infinite, pulse 4s ease-in-out infinite'
-          }}
-        />
-        <div 
-          className="absolute bottom-10 left-10 w-80 h-80 rounded-full blur-3xl"
-          style={{ 
-            background: 'radial-gradient(circle, rgba(20,184,166,0.5) 0%, rgba(13,148,136,0.3) 50%, transparent 70%)',
-            animation: 'float 10s ease-in-out infinite reverse, pulse 5s ease-in-out infinite',
-            animationDelay: '2s'
-          }}
-        />
-        <div 
-          className="absolute top-1/2 left-1/2 w-72 h-72 rounded-full blur-3xl"
-          style={{ 
-            background: 'radial-gradient(circle, rgba(16,185,129,0.4) 0%, transparent 70%)',
-            animation: 'float 12s ease-in-out infinite, pulse 6s ease-in-out infinite',
-            animationDelay: '4s'
-          }}
-        />
-        {/* Floating particles */}
-        {ARRANGE_PARTICLES.map((p, i) => (
-          <div
-            key={i}
-            className="absolute rounded-full"
-            style={{
-              width: `${p.w}px`,
-              height: `${p.h}px`,
-              left: `${p.x}%`,
-              top: `${p.y}%`,
-              background: p.c,
-              opacity: p.o,
-              animation: `float ${p.dur}s ease-in-out infinite`,
-              animationDelay: `${p.delay}s`,
-              boxShadow: `0 0 ${p.glow}px ${p.c}`,
-            }}
-          />
-        ))}
-      </div>
-
-      <div className="relative backdrop-blur-xl rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl" style={{ background: '#0d1025', border: '2px solid rgba(0,255,136,0.2)' }}>
-        {/* Header with gradient */}
-        <div className="p-3 border-b border-emerald-500/20 bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-emerald-500/10">
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+      <div className="bg-slate-800 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="p-6 border-b border-white/10">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-[15px] font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 leading-tight">
-                Arrange Knockout Matchups
-              </h2>
-              <p className="text-gray-400 text-[10px] leading-tight mt-0.5">Select players for knockout matches</p>
+              <h2 className="text-xl font-bold text-white">Arrange Knockout Matchups</h2>
+              <p className="text-gray-400 text-sm mt-1">Select players to arrange knockout stage matches</p>
             </div>
-            <button onClick={onClose} className="text-gray-400 hover:text-white p-1.5 hover:bg-emerald-500/20 rounded-lg transition-all hover:scale-110">
-              <X className="w-3.5 h-3.5" />
+            <button onClick={onClose} className="text-gray-400 hover:text-white">
+              <X className="w-5 h-5" />
             </button>
           </div>
         </div>
 
-        <div className="p-3">
-          {/* Advancing Players with icon */}
-          <div className="mb-3">
-            <h3 className="text-[10px] font-black icon-green mb-2 uppercase tracking-wider flex items-center gap-1.5">
-              <Trophy className="w-3 h-3" />
-              Advancing Players ({advancingPlayers.length})
-            </h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5">
+        <div className="p-6">
+          {/* Unassigned Players */}
+          <div className="mb-6">
+            <h3 className="text-sm font-medium text-gray-300 mb-3">Advancing Players ({advancingPlayers.length})</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
               {unassignedPlayers.map(player => (
                 <div
                   key={player.id}
-                  className="p-2 bg-gradient-to-br from-slate-700/50 to-slate-800/50 rounded-lg border border-emerald-500/30 hover:border-emerald-500/60 hover:shadow-lg hover:shadow-emerald-500/20 hover:scale-105 transition-all cursor-pointer"
+                  className="p-3 bg-slate-700 rounded-lg border border-slate-600"
                 >
-                  <div className="text-[11px] font-bold text-white leading-tight">{player.name}</div>
-                  {player.partnerName && (
-                    <div className="text-[9px] text-[#00ff88] leading-tight">& {player.partnerName}</div>
-                  )}
-                  <div className="text-[8px] text-gray-400 mt-0.5 flex items-center gap-1">
-                    <span className="px-1 py-0.5 bg-emerald-500/20 rounded text-[#00ff88] font-bold">Pool {player.group}</span>
-                    <span>#{player.rank}</span>
-                    <span>•</span>
-                    <span className="font-bold icon-green">{player.points}pts</span>
+                  <div className="text-sm font-medium text-white">{player.name}</div>
+                  <div className="text-xs text-gray-400 mt-1">
+                    Pool {player.group} • Rank #{player.rank} • {player.points} pts
                   </div>
                 </div>
               ))}
               {unassignedPlayers.length === 0 && (
-                <div className="col-span-full text-center icon-green text-[10px] py-3 font-semibold">
-                  ✓ All players assigned
+                <div className="col-span-full text-center text-gray-400 text-sm py-4">
+                  All players assigned
                 </div>
               )}
             </div>
           </div>
 
-          {/* Knockout Matches with icon */}
+          {/* Knockout Matches */}
           <div>
-            <h3 className="text-[10px] font-black icon-green mb-2 uppercase tracking-wider flex items-center gap-1.5">
-              <Zap className="w-3 h-3" />
-              Knockout Matches
-            </h3>
-            <div className="space-y-2">
+            <h3 className="text-sm font-medium text-gray-300 mb-3">Knockout Matches</h3>
+            <div className="space-y-3">
               {knockoutSlots.map((slot, index) => (
-                <div key={index} className="bg-gradient-to-br from-slate-700/30 to-slate-800/30 rounded-lg p-2 border-2 border-emerald-500/20 hover:border-emerald-500/40 transition-all">
-                  <div className="text-[9px] icon-green mb-2 font-bold flex items-center gap-1">
-                    <span className="w-5 h-5 bg-emerald-500/20 rounded flex items-center justify-center text-[10px]">{slot.matchNumber}</span>
-                    Match {slot.matchNumber}
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
+                <div key={index} className="bg-slate-700/50 rounded-lg p-4 border border-slate-600">
+                  <div className="text-xs text-gray-400 mb-3">Match {slot.matchNumber}</div>
+                  <div className="grid grid-cols-2 gap-3">
                     {/* Player 1 Slot */}
-                    <div className="space-y-1">
-                      <label className="text-[8px] icon-green font-bold uppercase tracking-wide">Player 1</label>
+                    <div className="space-y-2">
+                      <label className="text-xs text-gray-400">Player 1</label>
                       {slot.player1 ? (
-                        <div className="p-2 bg-gradient-to-br from-emerald-600 to-teal-600 rounded-lg flex items-center justify-between shadow-lg shadow-emerald-500/30 border border-emerald-400/30">
-                          <div className="flex-1 min-w-0">
-                            <div className="text-[11px] font-bold text-white leading-tight">{slot.player1.name}</div>
-                            {slot.player1.partnerName && (
-                              <div className="text-[9px] text-emerald-100 leading-tight">& {slot.player1.partnerName}</div>
-                            )}
-                            <div className="text-[8px] text-emerald-200/80">Pool {slot.player1.group} • #{slot.player1.rank}</div>
+                        <div className="p-3 bg-blue-600 rounded-lg flex items-center justify-between">
+                          <div>
+                            <div className="text-sm font-medium text-white">{slot.player1.name}</div>
+                            <div className="text-xs text-blue-200">Pool {slot.player1.group} • Rank #{slot.player1.rank}</div>
                           </div>
                           <button
                             onClick={() => removePlayerFromSlot(index, 1)}
-                            className="text-white/70 hover:text-white p-1 hover:bg-white/20 rounded transition-all flex-shrink-0"
+                            className="text-white/70 hover:text-white"
                           >
-                            <X className="w-3 h-3" />
+                            <X className="w-4 h-4" />
                           </button>
                         </div>
                       ) : (
@@ -4618,12 +4431,12 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
                             if (player) assignPlayerToSlot(player, index, 1);
                           }}
                           value=""
-                          className="w-full p-2 bg-slate-800/80 border-2 border-slate-600 hover:border-emerald-500/50 focus:border-emerald-500 rounded-lg text-white text-[11px] transition-all cursor-pointer"
+                          className="w-full p-3 bg-slate-800 border border-slate-600 rounded-lg text-white text-sm"
                         >
                           <option value="">Select player...</option>
                           {unassignedPlayers.map(player => (
                             <option key={player.id} value={player.id}>
-                              {player.name} (Pool {player.group} • #{player.rank})
+                              {player.name} (Pool {player.group} • Rank #{player.rank})
                             </option>
                           ))}
                         </select>
@@ -4631,22 +4444,19 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
                     </div>
 
                     {/* Player 2 Slot */}
-                    <div className="space-y-1">
-                      <label className="text-[8px] icon-green font-bold uppercase tracking-wide">Player 2</label>
+                    <div className="space-y-2">
+                      <label className="text-xs text-gray-400">Player 2</label>
                       {slot.player2 ? (
-                        <div className="p-2 bg-gradient-to-br from-emerald-600 to-teal-600 rounded-lg flex items-center justify-between shadow-lg shadow-emerald-500/30 border border-emerald-400/30">
-                          <div className="flex-1 min-w-0">
-                            <div className="text-[11px] font-bold text-white leading-tight">{slot.player2.name}</div>
-                            {slot.player2.partnerName && (
-                              <div className="text-[9px] text-emerald-100 leading-tight">& {slot.player2.partnerName}</div>
-                            )}
-                            <div className="text-[8px] text-emerald-200/80">Pool {slot.player2.group} • #{slot.player2.rank}</div>
+                        <div className="p-3 bg-blue-600 rounded-lg flex items-center justify-between">
+                          <div>
+                            <div className="text-sm font-medium text-white">{slot.player2.name}</div>
+                            <div className="text-xs text-blue-200">Pool {slot.player2.group} • Rank #{slot.player2.rank}</div>
                           </div>
                           <button
                             onClick={() => removePlayerFromSlot(index, 2)}
-                            className="text-white/70 hover:text-white p-1 hover:bg-white/20 rounded transition-all flex-shrink-0"
+                            className="text-white/70 hover:text-white"
                           >
-                            <X className="w-3 h-3" />
+                            <X className="w-4 h-4" />
                           </button>
                         </div>
                       ) : (
@@ -4656,12 +4466,12 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
                             if (player) assignPlayerToSlot(player, index, 2);
                           }}
                           value=""
-                          className="w-full p-2 bg-slate-800/80 border-2 border-slate-600 hover:border-emerald-500/50 focus:border-emerald-500 rounded-lg text-white text-[11px] transition-all cursor-pointer"
+                          className="w-full p-3 bg-slate-800 border border-slate-600 rounded-lg text-white text-sm"
                         >
                           <option value="">Select player...</option>
                           {unassignedPlayers.map(player => (
                             <option key={player.id} value={player.id}>
-                              {player.name} (Pool {player.group} • #{player.rank})
+                              {player.name} (Pool {player.group} • Rank #{player.rank})
                             </option>
                           ))}
                         </select>
@@ -4674,14 +4484,14 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
           </div>
         </div>
 
-        <div className="p-3 border-t border-emerald-500/20 flex gap-2 bg-gradient-to-r from-emerald-500/5 via-teal-500/5 to-emerald-500/5">
-          <button onClick={onClose} className="flex-1 px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-600 hover:scale-105 transition-all text-[11px] font-bold shadow-lg">
+        <div className="p-6 border-t border-white/10 flex gap-3">
+          <button onClick={onClose} className="flex-1 px-4 py-3 bg-slate-700 text-white rounded-lg hover:bg-slate-600 transition-colors">
             Cancel
           </button>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex-1 px-4 py-2 btn-brand rounded-lg transition-all disabled:opacity-50 text-[11px] font-bold"
+            className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
           >
             {saving ? 'Saving...' : 'Save Matchups'}
           </button>

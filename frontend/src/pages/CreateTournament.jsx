@@ -19,7 +19,7 @@ import { Trophy, Save, X, AlertTriangle, CheckCircle, Sparkles, ArrowLeft } from
 const CREATE_PARTICLES = Array.from({ length: 12 }, (_, i) => ({
   w: (i * 7 + 3) % 4 + 2,  h: (i * 7 + 3) % 4 + 2,
   x: (i * 37 + 11) % 97,   y: (i * 53 + 7) % 91,
-  c: ['#00c853', '#a855f7', '#06b6d4', '#f59e0b'][i % 4],
+  c: ['#00ff88', '#a855f7', '#00d4ff', '#fbbf24'][i % 4],
   o: ((i * 13) % 50) / 100 + 0.2,
   dur: (i * 7) % 10 + 5,   delay: (i * 3) % 5,
   glow: (i * 11) % 15 + 5,
@@ -262,7 +262,7 @@ const CreateTournament = () => {
         <div 
           className="absolute top-0 right-0 w-72 h-72 rounded-full blur-3xl opacity-30"
           style={{ 
-            background: 'radial-gradient(circle, rgba(0,200,83,0.6), transparent)',
+            background: 'radial-gradient(circle, rgba(0,255,136,0.6), transparent)',
             animation: 'glow 4s ease-in-out infinite'
           }}
         />
@@ -323,8 +323,8 @@ const CreateTournament = () => {
             <div 
               className="w-12 h-12 rounded-2xl flex items-center justify-center"
               style={{
-                background: 'linear-gradient(135deg, #00c853, #00ff88)',
-                boxShadow: '0 8px 25px rgba(0,200,83,0.4)'
+                background: 'linear-gradient(135deg, #00ff88, #00d4ff)',
+                boxShadow: '0 8px 25px rgba(0,255,136,0.4)'
               }}
             >
               <Trophy className="w-6 h-6 text-white" />
@@ -333,7 +333,7 @@ const CreateTournament = () => {
               <h1 
                 className="text-xl font-black"
                 style={{
-                  background: 'linear-gradient(135deg, #00c853, #00ff88)',
+                  background: 'linear-gradient(135deg, #00ff88, #00d4ff)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   backgroundClip: 'text'
@@ -350,10 +350,10 @@ const CreateTournament = () => {
             <div 
               className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold mb-3"
               style={{
-                background: 'linear-gradient(135deg, rgba(0,200,83,0.2), rgba(0,255,136,0.15))',
-                border: '2px solid rgba(0,200,83,0.4)',
+                background: 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,212,255,0.15))',
+                border: '2px solid rgba(0,255,136,0.4)',
                 color: '#00ff88',
-                boxShadow: '0 4px 15px rgba(0,200,83,0.3)'
+                boxShadow: '0 4px 15px rgba(0,255,136,0.3)'
               }}
             >
               <CheckCircle className="w-3.5 h-3.5" />
@@ -405,10 +405,10 @@ const CreateTournament = () => {
         <div 
           className="rounded-2xl p-4 mb-4"
           style={{
-            background: 'linear-gradient(135deg, rgba(0,200,83,0.1) 0%, rgba(99,102,241,0.1) 100%)',
-            border: '2px solid rgba(0,200,83,0.2)',
+            background: 'linear-gradient(135deg, rgba(0,255,136,0.1) 0%, rgba(99,102,241,0.1) 100%)',
+            border: '2px solid rgba(0,255,136,0.2)',
             backdropFilter: 'blur(20px)',
-            boxShadow: '0 8px 32px rgba(0,200,83,0.15)'
+            boxShadow: '0 8px 32px rgba(0,255,136,0.15)'
           }}
         >
           <TournamentStepper
@@ -422,10 +422,10 @@ const CreateTournament = () => {
         <div 
           className="rounded-2xl p-4"
           style={{
-            background: 'linear-gradient(135deg, rgba(0,200,83,0.1) 0%, rgba(99,102,241,0.1) 100%)',
-            border: '2px solid rgba(0,200,83,0.2)',
+            background: 'linear-gradient(135deg, rgba(0,255,136,0.1) 0%, rgba(99,102,241,0.1) 100%)',
+            border: '2px solid rgba(0,255,136,0.2)',
             backdropFilter: 'blur(20px)',
-            boxShadow: '0 8px 32px rgba(0,200,83,0.15)'
+            boxShadow: '0 8px 32px rgba(0,255,136,0.15)'
           }}
         >
           {renderStep()}
@@ -436,8 +436,8 @@ const CreateTournament = () => {
           <div 
             className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium"
             style={{
-              background: 'linear-gradient(135deg, rgba(0,200,83,0.15), rgba(0,255,136,0.1))',
-              border: '1px solid rgba(0,200,83,0.3)',
+              background: 'linear-gradient(135deg, rgba(0,255,136,0.15), rgba(0,212,255,0.1))',
+              border: '1px solid rgba(0,255,136,0.3)',
               color: '#00ff88'
             }}
           >
@@ -450,7 +450,7 @@ const CreateTournament = () => {
       {/* Exit Confirmation Modal */}
       {showExitModal && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="relative bg-slate-800/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl max-w-md w-full p-8 animate-in fade-in zoom-in duration-200">
+          <div className="relative backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl max-w-md w-full p-8 animate-in fade-in zoom-in duration-200" style={{ background: '#0d1025' }}>
             {/* Halo effect */}
             <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 rounded-2xl blur-xl opacity-30 animate-pulse"></div>
             
@@ -469,7 +469,7 @@ const CreateTournament = () => {
               </div>
 
               {formData.name && (
-                <div className="bg-slate-700/50 backdrop-blur-sm rounded-xl p-4 mb-6 border border-white/10">
+                <div className="backdrop-blur-sm rounded-xl p-4 mb-6 border border-white/10" style={{ background: 'rgba(255,255,255,0.06)' }}>
                   <p className="text-sm text-gray-300">
                     <span className="font-semibold text-white">Tournament:</span> {formData.name || 'Untitled'}
                   </p>
@@ -482,7 +482,8 @@ const CreateTournament = () => {
               <div className="space-y-3">
                 <button
                   onClick={handleSaveAndExit}
-                  className="w-full py-3.5 px-4 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl hover:shadow-lg hover:shadow-emerald-500/50 transition-all font-semibold flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98]"
+                  className="w-full py-3.5 px-4 rounded-xl hover:shadow-lg transition-all font-semibold flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98]"
+                  style={{ background: 'linear-gradient(135deg, #00ff88, #00d4ff)', color: '#07071a' }}
                 >
                   <Save className="w-5 h-5" />
                   Save as Draft & Exit

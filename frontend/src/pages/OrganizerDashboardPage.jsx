@@ -231,7 +231,8 @@ export default function OrganizerDashboardPage() {
                 {/* Create Tournament Button */}
                 <button
                   onClick={() => navigate('/tournaments/create')}
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl font-medium hover:shadow-lg hover:shadow-green-500/25 hover:scale-105 transition-all"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-medium hover:shadow-lg hover:scale-105 transition-all"
+                  style={{ background: 'linear-gradient(135deg, #00ff88, #00d4ff)', color: '#07071a' }}
                 >
                   <Plus className="w-5 h-5" />
                   Create Tournament
@@ -338,7 +339,7 @@ export default function OrganizerDashboardPage() {
                 <p className="text-sm text-gray-400">Active Tournaments</p>
                 <p className="text-3xl font-bold text-green-400 mt-1">{stats.activeTournaments}</p>
               </div>
-              <div className="p-3 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl">
+              <div className="p-3 rounded-xl" style={{ background: 'linear-gradient(135deg, #00ff88, #00d4ff)' }}>
                 <TrendingUp className="h-6 w-6 text-white" />
               </div>
             </div>
@@ -426,7 +427,7 @@ export default function OrganizerDashboardPage() {
           {/* Performance Stats */}
           <div className="rounded-2xl border p-6" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}>
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #00ff88, #00d4ff)' }}>
                 <BarChart3 className="w-5 h-5 text-white" />
               </div>
               <h3 className="text-lg font-bold text-white">Performance Stats</h3>
@@ -467,7 +468,7 @@ export default function OrganizerDashboardPage() {
                   <p className="text-gray-400 text-sm">Experience Level</p>
                   <button
                     onClick={() => setShowLevelInfo(true)}
-                    className="p-1 hover:bg-slate-700 rounded-lg transition-colors"
+                    className="p-1 rounded-lg transition-colors hover:bg-white/10"
                     title="View level details"
                   >
                     <Info className="h-4 w-4 text-blue-400" />
@@ -577,7 +578,7 @@ export default function OrganizerDashboardPage() {
               <button
                 onClick={() => navigate('/tournaments/create')}
                 className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white rounded-lg transition-all"
-                style={{ background: 'linear-gradient(135deg, #00c853, #00ff88)', boxShadow: '0 4px 15px rgba(0, 200, 83, 0.3)' }}
+                style={{ background: 'linear-gradient(135deg, #00ff88, #00d4ff)', boxShadow: '0 4px 15px rgba(0,255,136,0.3)' }}
               >
                 <Plus className="w-4 h-4" />
                 Create New
@@ -655,7 +656,7 @@ export default function OrganizerDashboardPage() {
                               navigate(`/tournaments/${tournament.id}`);
                             }}
                             className="w-full px-3 py-2 text-xs font-bold text-white rounded-lg transition-all"
-                            style={{ background: 'linear-gradient(135deg, #00c853, #00ff88)', boxShadow: '0 2px 8px rgba(0, 200, 83, 0.3)' }}
+                            style={{ background: 'linear-gradient(135deg, #00ff88, #00d4ff)', boxShadow: '0 2px 8px rgba(0,255,136,0.3)' }}
                           >
                             Publish Tournament
                           </button>
@@ -673,7 +674,7 @@ export default function OrganizerDashboardPage() {
                   <button
                     onClick={() => navigate('/tournaments/create')}
                     className="inline-flex items-center gap-2 px-6 py-3 text-white rounded-xl font-medium transition-all"
-                    style={{ background: 'linear-gradient(135deg, #00c853, #00ff88)', boxShadow: '0 4px 15px rgba(0, 200, 83, 0.3)' }}
+                    style={{ background: 'linear-gradient(135deg, #00ff88, #00d4ff)', boxShadow: '0 4px 15px rgba(0,255,136,0.3)' }}
                   >
                     <Plus className="w-5 h-5" />
                     Create Your First Tournament
@@ -696,7 +697,7 @@ export default function OrganizerDashboardPage() {
                   {dashboardData.upcoming_tournaments.map((tournament) => (
                     <div
                       key={tournament.id}
-                      className="border border-white/10 rounded-xl p-4 hover:border-purple-500/50 cursor-pointer transition bg-slate-700/30"
+                      className="border border-white/10 rounded-xl p-4 hover:border-purple-500/50 cursor-pointer transition" style={{ background: 'rgba(255,255,255,0.04)' }}
                       onClick={() => navigate(`/organizer/tournaments/${tournament.id}`)}
                     >
                       <div className="flex justify-between items-start mb-2">
@@ -776,7 +777,7 @@ export default function OrganizerDashboardPage() {
           <h2 className="text-xl font-semibold text-white mb-4">Tournament Status Breakdown</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {Object.entries(dashboardData.tournaments_by_status || {}).map(([status, count]) => (
-              <div key={status} className="text-center p-4 bg-slate-700/50 rounded-xl border border-white/10">
+              <div key={status} className="text-center p-4 rounded-xl border border-white/10" style={{ background: 'rgba(255,255,255,0.04)' }}>
                 <p className="text-2xl font-bold text-white">{count}</p>
                 <p className="text-sm text-gray-400 capitalize">{status.replace('_', ' ')}</p>
               </div>
@@ -795,9 +796,9 @@ export default function OrganizerDashboardPage() {
       {/* Experience Level Info Modal */}
       {showLevelInfo && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-800 border border-white/10 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="border border-white/10 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" style={{ background: '#0d1025' }}>
             {/* Header */}
-            <div className="sticky top-0 bg-slate-800 border-b border-white/10 p-6 flex items-center justify-between">
+            <div className="sticky top-0 border-b border-white/10 p-6 flex items-center justify-between" style={{ background: '#0d1025' }}>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center">
                   <Star className="w-5 h-5 text-white" />
@@ -806,7 +807,7 @@ export default function OrganizerDashboardPage() {
               </div>
               <button
                 onClick={() => setShowLevelInfo(false)}
-                className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
+                className="p-2 rounded-lg transition-colors hover:bg-white/10"
               >
                 <X className="w-5 h-5 text-gray-400" />
               </button>
@@ -822,7 +823,7 @@ export default function OrganizerDashboardPage() {
               {/* Level Cards */}
               <div className="space-y-3">
                 {/* New Organizer */}
-                <div className="bg-slate-700/50 border border-white/10 rounded-xl p-4">
+                <div className="border border-white/10 rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.04)' }}>
                   <div className="flex items-center justify-between mb-2">
                     <div>
                       <h4 className="text-lg font-bold text-gray-300">New Organizer</h4>
@@ -840,7 +841,7 @@ export default function OrganizerDashboardPage() {
                 </div>
 
                 {/* Beginner */}
-                <div className="bg-slate-700/50 border border-amber-500/30 rounded-xl p-4">
+                <div className="border border-amber-500/30 rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.04)' }}>
                   <div className="flex items-center justify-between mb-2">
                     <div>
                       <h4 className="text-lg font-bold text-amber-400">Beginner</h4>
@@ -859,7 +860,7 @@ export default function OrganizerDashboardPage() {
                 </div>
 
                 {/* Intermediate */}
-                <div className="bg-slate-700/50 border border-blue-500/30 rounded-xl p-4">
+                <div className="border border-blue-500/30 rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.04)' }}>
                   <div className="flex items-center justify-between mb-2">
                     <div>
                       <h4 className="text-lg font-bold text-blue-400">Intermediate</h4>
@@ -879,7 +880,7 @@ export default function OrganizerDashboardPage() {
                 </div>
 
                 {/* Advanced */}
-                <div className="bg-slate-700/50 border border-purple-500/30 rounded-xl p-4">
+                <div className="border border-purple-500/30 rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.04)' }}>
                   <div className="flex items-center justify-between mb-2">
                     <div>
                       <h4 className="text-lg font-bold text-purple-400">Advanced</h4>
@@ -900,7 +901,7 @@ export default function OrganizerDashboardPage() {
                 </div>
 
                 {/* Expert */}
-                <div className="bg-slate-700/50 border border-green-500/30 rounded-xl p-4">
+                <div className="border border-green-500/30 rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.04)' }}>
                   <div className="flex items-center justify-between mb-2">
                     <div>
                       <h4 className="text-lg font-bold text-green-400">Expert</h4>
@@ -959,7 +960,7 @@ export default function OrganizerDashboardPage() {
             </div>
 
             {/* Footer */}
-            <div className="sticky bottom-0 bg-slate-800 border-t border-white/10 p-4">
+            <div className="sticky bottom-0 border-t border-white/10 p-4" style={{ background: '#0d1025' }}>
               <button
                 onClick={() => setShowLevelInfo(false)}
                 className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-4 rounded-xl font-medium hover:shadow-lg transition-all"

@@ -870,7 +870,7 @@ const KnockoutBracket = ({ data, onViewMatchDetails, dbMatches = [] }) => {
                       </div>
 
                       {/* View Details Button for Completed Matches */}
-                      {isCompleted && resolvedDbMatch && onViewMatchDetails && (
+                      {isCompleted && onViewMatchDetails && (
                         <div className="px-2.5 pb-2.5">
                           <button
                             onClick={() => {
@@ -880,7 +880,17 @@ const KnockoutBracket = ({ data, onViewMatchDetails, dbMatches = [] }) => {
                                 player1: match.player1,
                                 player2: match.player2
                               };
-                              onViewMatchDetails(resolvedDbMatch, bracketMatchData);
+                              const matchDataToUse = resolvedDbMatch || {
+                                matchNumber: match.matchNumber,
+                                status: 'COMPLETED',
+                                winner: match.winner,
+                                winnerId: match.winner === 1 ? match.player1?.id : match.player2?.id,
+                                score: match.scoreJson || match.score || null,
+                                scoreJson: match.scoreJson || null,
+                                player1: match.player1,
+                                player2: match.player2,
+                              };
+                              onViewMatchDetails(matchDataToUse, bracketMatchData);
                             }}
                             className="w-full py-2 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all"
                             style={{ background: 'rgba(0,212,255,0.1)', border: '1px solid rgba(0,212,255,0.3)', color: '#00d4ff' }}
@@ -1153,7 +1163,7 @@ const RoundRobinDraw = ({ data, onViewMatchDetails, categoryFormat, dbMatches = 
                           )}
                           
                           {/* View Details Button */}
-                          {isCompleted && resolvedDbMatch && onViewMatchDetails && (
+                          {isCompleted && onViewMatchDetails && (
                             <div className="px-3 pb-3">
                               <button
                                 onClick={() => {
@@ -1163,7 +1173,17 @@ const RoundRobinDraw = ({ data, onViewMatchDetails, categoryFormat, dbMatches = 
                                     player1: match.player1,
                                     player2: match.player2
                                   };
-                                  onViewMatchDetails(resolvedDbMatch, bracketMatchData);
+                                  const matchDataToUse = resolvedDbMatch || {
+                                    matchNumber: match.matchNumber,
+                                    status: 'COMPLETED',
+                                    winner: match.winner,
+                                    winnerId: match.winner === 1 ? match.player1?.id : match.player2?.id,
+                                    score: match.scoreJson || match.score || null,
+                                    scoreJson: match.scoreJson || null,
+                                    player1: match.player1,
+                                    player2: match.player2,
+                                  };
+                                  onViewMatchDetails(matchDataToUse, bracketMatchData);
                                 }}
                                 className="w-full py-2 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all"
                                 style={{ background: 'rgba(0,212,255,0.1)', border: '1px solid rgba(0,212,255,0.3)', color: '#00d4ff' }}
@@ -1329,7 +1349,7 @@ const GroupsKnockoutDraw = ({ data, onViewMatchDetails, categoryFormat, dbMatche
                             </div>
                             
                             {/* View Details Button for Completed Matches */}
-                            {isCompleted && resolvedDbMatch && onViewMatchDetails && (
+                            {isCompleted && onViewMatchDetails && (
                               <div className="px-2.5 pb-2.5">
                                 <button
                                   onClick={() => {
@@ -1339,7 +1359,17 @@ const GroupsKnockoutDraw = ({ data, onViewMatchDetails, categoryFormat, dbMatche
                                       player1: match.player1,
                                       player2: match.player2
                                     };
-                                    onViewMatchDetails(resolvedDbMatch, bracketMatchData);
+                                    const matchDataToUse = resolvedDbMatch || {
+                                      matchNumber: match.matchNumber,
+                                      status: 'COMPLETED',
+                                      winner: match.winner,
+                                      winnerId: match.winner === 1 ? match.player1?.id : match.player2?.id,
+                                      score: match.scoreJson || match.score || null,
+                                      scoreJson: match.scoreJson || null,
+                                      player1: match.player1,
+                                      player2: match.player2,
+                                    };
+                                    onViewMatchDetails(matchDataToUse, bracketMatchData);
                                   }}
                                   className="w-full py-2 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all"
                                   style={{ background: 'rgba(0,212,255,0.1)', border: '1px solid rgba(0,212,255,0.3)', color: '#00d4ff' }}

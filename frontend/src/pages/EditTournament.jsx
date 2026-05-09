@@ -88,10 +88,11 @@ const EditTournament = () => {
 
   const formatDateForInput = (dateString) => {
     if (!dateString) return '';
-    if (typeof dateString === 'string' && dateString.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/)) {
-      return dateString.slice(0, 16);
-    }
-    return dateString;
+    const d = new Date(dateString);
+    if (isNaN(d.getTime())) return '';
+    // Convert UTC → local time for datetime-local input
+    const pad = n => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
   };
 
   const handleChange = (field, value) => {

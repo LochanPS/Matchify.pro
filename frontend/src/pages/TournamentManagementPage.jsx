@@ -332,8 +332,8 @@ export default function TournamentManagementPage() {
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
 
         {/* Filters */}
-        <div className="mb-5 flex flex-wrap gap-2 items-center">
-          <div className="flex items-center gap-2 mr-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
+        <div className="mb-5 flex gap-2 items-center overflow-x-auto pb-1" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+          <div className="flex items-center gap-2 mr-1 flex-shrink-0" style={{ color: 'rgba(255,255,255,0.4)' }}>
             <Filter className="w-4 h-4" />
             <span className="text-sm font-semibold">Filter:</span>
           </div>
@@ -341,7 +341,7 @@ export default function TournamentManagementPage() {
             <button
               key={status}
               onClick={() => setFilter(status)}
-              className="px-3 py-2 rounded-xl text-sm font-bold transition-all"
+              className="px-3 py-2 rounded-xl text-sm font-bold transition-all flex-shrink-0"
               style={{
                 background: filter === status
                   ? status === 'cancellation_requested'

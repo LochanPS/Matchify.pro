@@ -1,20 +1,31 @@
 import { getErrorMessage } from '../utils/errorMessage';
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { 
-  Plus, 
-  Trash2, 
-  Pencil, 
-  ArrowLeft, 
-  Trophy, 
-  Users, 
+import {
+  Plus,
+  Trash2,
+  Pencil,
+  ArrowLeft,
+  Trophy,
+  Users,
   AlertTriangle,
   X,
-  CheckCircle
+  CheckCircle,
+  Layers,
 } from 'lucide-react';
 import { tournamentAPI } from '../api/tournament';
 import api from '../utils/api';
 import CategoryForm from '../components/tournament/CategoryForm';
+
+const B = {
+  bg: '#07071a',
+  card: 'rgba(255,255,255,0.04)',
+  border: 'rgba(255,255,255,0.08)',
+  green: '#00ff88',
+  cyan: '#00d4ff',
+  purple: '#a855f7',
+  red: '#f87171',
+};
 
 const ManageCategoriesPage = () => {
   const { id } = useParams();
@@ -50,9 +61,7 @@ const ManageCategoriesPage = () => {
   const handleAddCategory = async (categoryData) => {
     try {
       setSaving(true);
-      
       const response = await api.post(`/tournaments/${id}/categories`, categoryData);
-      
       if (response.data.success) {
         setCategories([...categories, response.data.category]);
         setShowForm(false);
@@ -73,9 +82,7 @@ const ManageCategoriesPage = () => {
   const handleUpdateCategory = async (categoryData) => {
     try {
       setSaving(true);
-      
       const response = await api.put(`/tournaments/${id}/categories/${editingCategory.id}`, categoryData);
-      
       if (response.data.success) {
         setCategories(categories.map(c => c.id === editingCategory.id ? response.data.category : c));
         setShowForm(false);
@@ -83,7 +90,6 @@ const ManageCategoriesPage = () => {
         setSuccessMessage('Category updated successfully!');
         setTimeout(() => setSuccessMessage(''), 3000);
       } else {
-        // Handle fee locking error specifically
         if (response.data.feeLocked) {
           setError(`Entry fee cannot be changed: ${response.data.details}`);
         } else {
@@ -92,8 +98,6 @@ const ManageCategoriesPage = () => {
       }
     } catch (err) {
       console.error('Error updating category:', err);
-      
-      // Handle fee locking error from server response
       if (err.response?.data?.feeLocked) {
         setError(`Entry fee is locked: ${err.response.data.details}`);
       } else {
@@ -107,14 +111,13 @@ const ManageCategoriesPage = () => {
   const handleDeleteCategory = async (categoryId) => {
     try {
       const response = await api.delete(`/tournaments/${id}/categories/${categoryId}`);
-      
       if (response.data.success) {
         setCategories(categories.filter(c => c.id !== categoryId));
         setConfirmModal(null);
         setSuccessMessage('Category deleted successfully!');
         setTimeout(() => setSuccessMessage(''), 3000);
       } else {
-        setError(data.error || 'Failed to delete category');
+        setError(response.data.error || 'Failed to delete category');
         setConfirmModal(null);
       }
     } catch (err) {
@@ -132,16 +135,14 @@ const ManageCategoriesPage = () => {
     }
   };
 
+  // ── Loading ──────────────────────────────────────────────────────────────
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl animate-blob"></div>
-          <div className="absolute top-40 -left-40 w-80 h-80 bg-blue-500/20 rounded-full blur-3xl animate-blob animation-delay-2000"></div>
-        </div>
-        <div className="relative text-center">
-          <div className="spinner-premium mx-auto mb-4"></div>
-          <p className="text-gray-400">Loading categories...</p>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: B.bg }}>
+        <div className="text-center">
+          <div className="w-10 h-10 rounded-full border-4 border-t-transparent animate-spin mx-auto"
+            style={{ borderColor: `${B.purple} transparent transparent transparent` }} />
+          <p className="mt-3 text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>Loading categories…</p>
         </div>
       </div>
     );
@@ -149,13 +150,14 @@ const ManageCategoriesPage = () => {
 
   if (error && !tournament) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
-        <div className="glass-card-dark p-8 text-center max-w-md">
-          <AlertTriangle className="w-12 h-12 text-red-400 mx-auto mb-4" />
-          <p className="text-red-400 text-lg mb-4">{error || 'Tournament not found'}</p>
+      <div className="min-h-screen flex items-center justify-center px-6" style={{ background: B.bg }}>
+        <div className="text-center">
+          <AlertTriangle className="w-10 h-10 mx-auto mb-3" style={{ color: B.red }} />
+          <p className="text-white font-bold mb-4">{error || 'Tournament not found'}</p>
           <button
             onClick={() => navigate('/dashboard?role=ORGANIZER')}
-            className="btn-premium"
+            className="px-5 py-2.5 rounded-xl text-sm font-bold"
+            style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.8)' }}
           >
             Back to Dashboard
           </button>
@@ -165,231 +167,252 @@ const ManageCategoriesPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      {/* Animated Background */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl animate-blob"></div>
-        <div className="absolute top-40 -left-40 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl animate-blob animation-delay-2000"></div>
-        <div className="absolute bottom-40 right-40 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl animate-blob animation-delay-4000"></div>
-      </div>
+    <div className="min-h-screen pb-10" style={{ background: B.bg }}>
+      <div className="max-w-lg mx-auto px-4 pt-6">
 
-      <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
+        {/* Back */}
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-6 group"
+          className="flex items-center gap-1.5 mb-5 text-sm font-bold"
+          style={{ color: 'rgba(255,255,255,0.5)' }}
         >
-          <ArrowLeft className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
-          Back to Tournament
+          <ArrowLeft className="h-4 w-4" /> Back to Tournament
         </button>
 
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-            <div className="p-2 bg-gradient-to-br from-purple-500 to-violet-600 rounded-xl">
-              <Trophy className="w-6 h-6 text-white" />
-            </div>
-            Manage Categories
-          </h1>
-          <p className="text-gray-400 mt-1">{tournament?.name}</p>
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0"
+            style={{ background: 'linear-gradient(135deg,rgba(168,85,247,0.3),rgba(124,58,237,0.2))', border: '1px solid rgba(168,85,247,0.4)' }}>
+            <Trophy className="w-5 h-5" style={{ color: B.purple }} />
+          </div>
+          <div>
+            <h1 className="text-xl font-black text-white">Manage Categories</h1>
+            <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>{tournament?.name}</p>
+          </div>
         </div>
 
-        {/* Messages */}
+        {/* Error message */}
         {error && (
-          <div className="mb-6 alert-error flex items-center gap-3 animate-fade-in-up">
-            <AlertTriangle className="w-5 h-5 flex-shrink-0" />
-            <span>{error}</span>
-            <button onClick={() => setError(null)} className="ml-auto">
-              <X className="w-4 h-4" />
-            </button>
+          <div className="mb-4 flex items-start gap-2.5 px-4 py-3 rounded-xl"
+            style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)' }}>
+            <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: B.red }} />
+            <p className="text-xs font-semibold flex-1" style={{ color: B.red }}>{error}</p>
+            <button onClick={() => setError(null)}><X className="w-4 h-4" style={{ color: B.red }} /></button>
           </div>
         )}
-        
+
+        {/* Success message */}
         {successMessage && (
-          <div className="mb-6 alert-success flex items-center gap-3 animate-fade-in-up">
-            <CheckCircle className="w-5 h-5 flex-shrink-0" />
-            <span>{successMessage}</span>
+          <div className="mb-4 flex items-start gap-2.5 px-4 py-3 rounded-xl"
+            style={{ background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.25)' }}>
+            <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: B.green }} />
+            <p className="text-xs font-semibold flex-1" style={{ color: B.green }}>{successMessage}</p>
           </div>
         )}
 
         {!showForm ? (
-          <div className="space-y-6">
+          <div className="space-y-4">
             {/* Add Category Button */}
             <button
               onClick={() => { setShowForm(true); setEditingCategory(null); }}
-              className="w-full border-2 border-dashed border-white/20 rounded-2xl p-6 hover:border-blue-500/50 hover:bg-blue-500/5 transition-all flex items-center justify-center gap-2 text-gray-400 hover:text-blue-400 group"
+              className="w-full py-4 rounded-2xl flex items-center justify-center gap-2 font-bold text-sm transition-all"
+              style={{
+                background: 'rgba(168,85,247,0.06)',
+                border: '2px dashed rgba(168,85,247,0.35)',
+                color: B.purple,
+              }}
             >
-              <Plus className="h-6 w-6 group-hover:scale-110 transition-transform" />
-              <span className="font-medium">Add Category</span>
+              <Plus className="h-5 w-5" />
+              Add Category
             </button>
 
-            {/* Categories List */}
+            {/* Section label */}
+            {categories.length > 0 && (
+              <div className="flex items-center gap-2 px-1">
+                <Users className="w-4 h-4" style={{ color: B.purple }} />
+                <span className="text-sm font-bold text-white">Categories ({categories.length})</span>
+              </div>
+            )}
+
+            {/* Category cards */}
             {categories.length > 0 ? (
-              <div className="space-y-4">
-                <h3 className="font-medium text-white flex items-center gap-2">
-                  <Users className="w-5 h-5 text-purple-400" />
-                  Categories ({categories.length})
-                </h3>
-                
+              <div className="space-y-3">
                 {categories.map((category) => (
                   <div
                     key={category.id}
-                    className="glass-card-dark p-5 hover:border-purple-500/30 transition-all"
+                    className="rounded-2xl overflow-hidden"
+                    style={{ background: B.card, border: `1px solid ${B.border}` }}
                   >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-white text-lg mb-3">
-                          {category.name}
-                        </h4>
-                        
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-                          <div className="bg-white/5 rounded-lg p-2">
-                            <span className="text-gray-500 text-xs">Format</span>
-                            <p className="text-white font-medium">{category.format}</p>
+                    {/* Card header */}
+                    <div className="px-4 py-3 flex items-center justify-between"
+                      style={{ borderBottom: `1px solid ${B.border}`, background: 'rgba(168,85,247,0.04)' }}>
+                      <h4 className="font-black text-white">{category.name}</h4>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => { setEditingCategory(category); setShowForm(true); }}
+                          className="w-8 h-8 rounded-xl flex items-center justify-center transition-all"
+                          style={{ background: 'rgba(0,212,255,0.12)', border: '1px solid rgba(0,212,255,0.2)' }}
+                          title="Edit"
+                        >
+                          <Pencil className="h-3.5 w-3.5" style={{ color: B.cyan }} />
+                        </button>
+                        <button
+                          onClick={() => !category.registrationCount && setConfirmModal(category)}
+                          disabled={category.registrationCount > 0}
+                          className="w-8 h-8 rounded-xl flex items-center justify-center transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                          style={{ background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.2)' }}
+                          title={category.registrationCount > 0 ? 'Cannot delete — has registrations' : 'Delete'}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" style={{ color: B.red }} />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Card body */}
+                    <div className="p-4">
+                      <div className="grid grid-cols-2 gap-2">
+                        {[
+                          { label: 'Format', value: category.format },
+                          { label: 'Gender', value: category.gender },
+                          category.ageGroup && { label: 'Age Group', value: category.ageGroup },
+                          { label: 'Registered', value: category.registrationCount || 0, color: B.cyan },
+                        ].filter(Boolean).map(({ label, value, color }) => (
+                          <div key={label} className="rounded-xl px-3 py-2.5"
+                            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                            <p className="text-xs mb-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>{label}</p>
+                            <p className="text-sm font-bold" style={{ color: color || 'white' }}>{value}</p>
                           </div>
-                          <div className="bg-white/5 rounded-lg p-2">
-                            <span className="text-gray-500 text-xs">Gender</span>
-                            <p className="text-white font-medium">{category.gender}</p>
+                        ))}
+
+                        {/* Entry fee — full width */}
+                        <div className="col-span-2 rounded-xl px-3 py-2.5 flex items-center justify-between"
+                          style={{ background: 'rgba(0,255,136,0.06)', border: '1px solid rgba(0,255,136,0.15)' }}>
+                          <div>
+                            <p className="text-xs mb-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>Entry Fee</p>
+                            <p className="text-sm font-black" style={{ color: B.green }}>₹{category.entryFee}</p>
                           </div>
-                          {category.ageGroup && (
-                            <div className="bg-white/5 rounded-lg p-2">
-                              <span className="text-gray-500 text-xs">Age Group</span>
-                              <p className="text-white font-medium">{category.ageGroup}</p>
+                          {category.registrationCount > 0 && (
+                            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg"
+                              style={{ background: 'rgba(251,191,36,0.1)', border: '1px solid rgba(251,191,36,0.25)' }}>
+                              <div className="w-1.5 h-1.5 rounded-full" style={{ background: '#fbbf24' }} />
+                              <span className="text-xs font-bold" style={{ color: '#fbbf24' }}>Locked</span>
                             </div>
                           )}
-                          <div className="bg-white/5 rounded-lg p-2">
-                            <span className="text-gray-500 text-xs">Entry Fee</span>
-                            <div className="flex items-center gap-2">
-                              <p className="text-emerald-400 font-bold">₹{category.entryFee}</p>
-                              {category.registrationCount > 0 && (
-                                <div className="flex items-center gap-1" title="Entry fee is locked due to existing registrations">
-                                  <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
-                                  <span className="text-xs text-amber-400">Locked</span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                          {category.maxParticipants && (
-                            <div className="bg-white/5 rounded-lg p-2">
-                              <span className="text-gray-500 text-xs">Max Players</span>
-                              <p className="text-white font-medium">{category.maxParticipants}</p>
-                            </div>
-                          )}
-                          <div className="bg-white/5 rounded-lg p-2">
-                            <span className="text-gray-500 text-xs">Registered</span>
-                            <p className="text-blue-400 font-medium">{category.registrationCount || 0}</p>
-                          </div>
                         </div>
-                        
-                        {/* Prize Info */}
-                        {(category.prizeWinner || category.prizeRunnerUp || category.prizeSemiFinalist) && (
-                          <div className="mt-4 pt-4 border-t border-white/10">
-                            <div className="flex items-center gap-2 mb-2">
-                              <span className="text-amber-400">✨</span>
-                              <span className="text-xs font-semibold text-amber-400">Cash Prize</span>
-                            </div>
-                            <div className="flex flex-wrap gap-3 mt-2 text-sm">
-                              {category.prizeWinner && (
-                                <span className="text-amber-400">🥇 Winner: ₹{category.prizeWinner}</span>
-                              )}
-                              {category.prizeRunnerUp && (
-                                <span className="text-gray-300">🥈 Runner-up: ₹{category.prizeRunnerUp}</span>
-                              )}
-                              {category.prizeSemiFinalist && (
-                                <span className="text-orange-400">🥉 Semi-finalist: ₹{category.prizeSemiFinalist}</span>
-                              )}
-                            </div>
-                            {category.prizeDescription && (
-                              <p className="text-xs text-gray-500 mt-2">{category.prizeDescription}</p>
-                            )}
+
+                        {category.maxParticipants && (
+                          <div className="rounded-xl px-3 py-2.5"
+                            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                            <p className="text-xs mb-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>Max Players</p>
+                            <p className="text-sm font-bold text-white">{category.maxParticipants}</p>
                           </div>
                         )}
                       </div>
 
-                      <div className="flex items-center gap-2 ml-4">
-                        <button
-                          onClick={() => { setEditingCategory(category); setShowForm(true); }}
-                          className="p-2 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 transition-colors"
-                          title="Edit category"
-                        >
-                          <Pencil className="h-5 w-5" />
-                        </button>
-                        <button
-                          onClick={() => setConfirmModal(category)}
-                          className="p-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                          title="Delete category"
-                          disabled={category.registrationCount > 0}
-                        >
-                          <Trash2 className="h-5 w-5" />
-                        </button>
-                      </div>
+                      {/* Prize info */}
+                      {(category.prizeWinner || category.prizeRunnerUp || category.prizeSemiFinalist) && (
+                        <div className="mt-3 pt-3 rounded-xl px-3 py-2.5"
+                          style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.15)' }}>
+                          <p className="text-xs font-bold mb-2" style={{ color: '#fbbf24' }}>✨ Cash Prizes</p>
+                          <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs">
+                            {category.prizeWinner && (
+                              <span style={{ color: '#fbbf24' }}>🥇 ₹{category.prizeWinner}</span>
+                            )}
+                            {category.prizeRunnerUp && (
+                              <span style={{ color: 'rgba(255,255,255,0.7)' }}>🥈 ₹{category.prizeRunnerUp}</span>
+                            )}
+                            {category.prizeSemiFinalist && (
+                              <span style={{ color: '#fb923c' }}>🥉 ₹{category.prizeSemiFinalist}</span>
+                            )}
+                          </div>
+                          {category.prizeDescription && (
+                            <p className="text-xs mt-1.5" style={{ color: 'rgba(255,255,255,0.4)' }}>{category.prizeDescription}</p>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="glass-card-dark p-12 text-center">
-                <div className="w-16 h-16 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Trophy className="w-8 h-8 text-purple-400" />
+              <div className="rounded-2xl p-12 text-center"
+                style={{ background: B.card, border: `1px solid ${B.border}` }}>
+                <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4"
+                  style={{ background: 'rgba(168,85,247,0.12)', border: '1px solid rgba(168,85,247,0.2)' }}>
+                  <Trophy className="w-7 h-7" style={{ color: B.purple }} />
                 </div>
-                <p className="text-gray-400">No categories added yet</p>
+                <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>No categories added yet</p>
               </div>
             )}
           </div>
         ) : (
-          <div className="glass-card-dark p-6">
-            <h3 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-              {editingCategory ? (
-                <>
-                  <Pencil className="w-5 h-5 text-blue-400" />
-                  Edit Category
-                </>
-              ) : (
-                <>
-                  <Plus className="w-5 h-5 text-emerald-400" />
-                  Add New Category
-                </>
-              )}
-            </h3>
-            <CategoryForm
-              initialData={editingCategory}
-              onSave={handleSaveCategory}
-              onCancel={() => { setShowForm(false); setEditingCategory(null); }}
-            />
+          /* ── Category Form ── */
+          <div className="rounded-2xl overflow-hidden"
+            style={{ background: B.card, border: `1px solid ${B.border}` }}>
+            <div className="px-4 py-3 flex items-center gap-3"
+              style={{ borderBottom: `1px solid ${B.border}`, background: editingCategory ? 'rgba(0,212,255,0.04)' : 'rgba(0,255,136,0.04)' }}>
+              <div className="w-8 h-8 rounded-xl flex items-center justify-center"
+                style={{
+                  background: editingCategory ? 'rgba(0,212,255,0.15)' : 'rgba(0,255,136,0.15)',
+                  border: `1px solid ${editingCategory ? 'rgba(0,212,255,0.3)' : 'rgba(0,255,136,0.3)'}`,
+                }}>
+                {editingCategory
+                  ? <Pencil className="w-4 h-4" style={{ color: B.cyan }} />
+                  : <Plus className="w-4 h-4" style={{ color: B.green }} />}
+              </div>
+              <h3 className="text-sm font-black text-white">
+                {editingCategory ? 'Edit Category' : 'Add New Category'}
+              </h3>
+            </div>
+            <div className="p-4">
+              <CategoryForm
+                initialData={editingCategory}
+                onSave={handleSaveCategory}
+                onCancel={() => { setShowForm(false); setEditingCategory(null); }}
+              />
+            </div>
           </div>
         )}
       </div>
 
-      {/* Delete Confirmation Modal */}
+      {/* ── Delete Confirmation Modal ── */}
       {confirmModal && (
-        <div className="modal-overlay" onClick={() => setConfirmModal(null)}>
-          <div 
-            className="modal-content max-w-md animate-scale-in"
-            onClick={(e) => e.stopPropagation()}
+        <div
+          className="fixed inset-0 flex items-end justify-center z-50 p-4"
+          style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}
+          onClick={() => setConfirmModal(null)}
+        >
+          <div
+            className="w-full max-w-sm rounded-2xl overflow-hidden"
+            style={{ background: '#0d1025', border: '1px solid rgba(239,68,68,0.3)' }}
+            onClick={e => e.stopPropagation()}
           >
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-rose-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-red-500/30">
-                <Trash2 className="w-8 h-8 text-white" />
+            {/* Modal header */}
+            <div className="px-5 pt-5 pb-4 text-center"
+              style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+              <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3"
+                style={{ background: 'linear-gradient(135deg,rgba(239,68,68,0.3),rgba(220,38,38,0.2))', border: '1px solid rgba(239,68,68,0.4)' }}>
+                <Trash2 className="w-6 h-6" style={{ color: B.red }} />
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">Delete Category?</h3>
-              <p className="text-gray-400">
-                Are you sure you want to delete <span className="text-red-400 font-medium">{confirmModal.name}</span>?
+              <h3 className="text-base font-black text-white mb-1">Delete Category?</h3>
+              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                Delete <span style={{ color: B.red }}>{confirmModal.name}</span>? This cannot be undone.
               </p>
             </div>
-            <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 mb-6">
-              <p className="text-sm text-red-300">
-                This action cannot be undone. The category will be permanently removed.
-              </p>
-            </div>
-            <div className="flex gap-3">
+
+            {/* Modal actions */}
+            <div className="p-4 flex gap-3">
               <button
                 onClick={() => setConfirmModal(null)}
-                className="flex-1 py-3 px-4 bg-white/10 text-white rounded-xl hover:bg-white/20 transition-colors font-medium"
+                className="flex-1 py-3 rounded-xl text-sm font-bold transition-all"
+                style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.7)' }}
               >
                 Cancel
               </button>
               <button
                 onClick={() => handleDeleteCategory(confirmModal.id)}
-                className="flex-1 py-3 px-4 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl hover:shadow-lg hover:shadow-red-500/30 transition-all font-semibold"
+                className="flex-1 py-3 rounded-xl text-sm font-bold transition-all"
+                style={{ background: 'linear-gradient(135deg,#ef4444,#dc2626)', color: '#fff', boxShadow: '0 4px 15px rgba(239,68,68,0.35)' }}
               >
                 Delete
               </button>

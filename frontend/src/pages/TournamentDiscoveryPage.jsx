@@ -662,15 +662,6 @@ function TournamentCard({ tournament, navigate, index }) {
         <div className="absolute inset-0"
           style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.3) 50%, rgba(7,7,26,0.92) 100%)' }} />
 
-        {/* "Matchify.pro Presents" top bar */}
-        <div className="absolute top-0 left-0 right-0 px-3 pt-2.5 pb-1.5"
-          style={{ background: 'linear-gradient(to bottom,rgba(0,0,0,0.6),transparent)' }}>
-          <p className="text-xs font-black tracking-widest uppercase"
-            style={{ color: accentColor, textShadow: `0 0 12px ${accentColor}`, letterSpacing: '0.15em' }}>
-            ✦ Matchify.pro Presents
-          </p>
-        </div>
-
         {/* Status badge top-right */}
         <div className="absolute top-2 right-2">
           <span className="px-2.5 py-1 text-xs font-black rounded-full"
@@ -697,7 +688,12 @@ function TournamentCard({ tournament, navigate, index }) {
       </div>
 
       {/* ── CONTENT (no money info) ── */}
-      <div className="p-4 space-y-3" style={{ position: 'relative', zIndex: 2 }}>
+      <div className="p-4 space-y-2" style={{ position: 'relative', zIndex: 2 }}>
+        {/* Matchify.pro Presents — just above tournament name */}
+        <p className="text-xs font-black uppercase tracking-widest"
+          style={{ color: accentColor, opacity: 0.8, letterSpacing: '0.13em' }}>
+          ✦ Matchify.pro Presents
+        </p>
         {/* Tournament name with accent glow */}
         <h3 className="font-black text-base text-white leading-snug line-clamp-2"
           style={{ textShadow: `0 0 20px ${accentColor}40` }}>

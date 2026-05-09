@@ -90,7 +90,7 @@ export default function TournamentCategoryDetails() {
           <button
             onClick={() => navigate('/dashboard?role=ORGANIZER')}
             className="px-6 py-3 rounded-xl font-bold text-white transition-all"
-            style={{ background: 'linear-gradient(135deg, #00ff88, #00c853)', color: '#07071a' }}
+            style={{ background: 'linear-gradient(135deg, #00ff88, #00d4ff)', color: '#07071a' }}
           >
             Back to Dashboard
           </button>
@@ -146,7 +146,7 @@ export default function TournamentCategoryDetails() {
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
-                style={{ background: 'linear-gradient(135deg, #00ff88, #00c853)' }}>
+                style={{ background: 'linear-gradient(135deg, #00ff88, #00d4ff)' }}>
                 <Trophy className="w-6 h-6" style={{ color: '#07071a' }} />
               </div>
               <div>
@@ -162,7 +162,7 @@ export default function TournamentCategoryDetails() {
             <button
               onClick={downloadParticipants}
               className="flex items-center gap-2 px-3 py-2.5 rounded-xl font-bold text-xs transition-all hover:scale-105 flex-shrink-0"
-              style={{ background: 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,200,83,0.15))', border: '1px solid rgba(0,255,136,0.4)', color: '#00ff88' }}
+              style={{ background: 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,255,136,0.15))', border: '1px solid rgba(0,255,136,0.4)', color: '#00ff88' }}
             >
               <Download className="w-4 h-4" />
               CSV

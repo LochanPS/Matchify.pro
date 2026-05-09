@@ -275,9 +275,9 @@ const EditTournament = () => {
                 disabled={saving}
                 className="w-full py-3.5 rounded-xl font-black text-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                 style={{
-                  background: 'linear-gradient(135deg,#00c853,#00ff88)',
+                  background: 'linear-gradient(135deg,#00ff88,#00d4ff)',
                   color: '#07071a',
-                  boxShadow: '0 4px 15px rgba(0,200,83,0.35)',
+                  boxShadow: '0 4px 15px rgba(0,255,136,0.35)',
                 }}
               >
                 {saving

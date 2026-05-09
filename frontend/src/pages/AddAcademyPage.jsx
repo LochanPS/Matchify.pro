@@ -21,7 +21,7 @@ const Toast = ({ message, show, onClose }) => {
 
   return (
     <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 animate-fade-in">
-      <div className="flex items-center gap-3 px-5 py-3 bg-emerald-500/90 backdrop-blur-lg text-white rounded-xl shadow-lg shadow-emerald-500/30">
+      <div className="flex items-center gap-3 px-5 py-3 backdrop-blur-lg text-white rounded-xl shadow-lg" style={{ background: 'rgba(0,255,136,0.9)', boxShadow: '0 8px 20px rgba(0,255,136,0.3)' }}>
         <CheckCircle className="w-5 h-5" />
         <span className="font-medium">{message}</span>
       </div>
@@ -465,10 +465,10 @@ const AddAcademyPage = () => {
   // Step 3: Success
   if (step === 3) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
-        <div className="bg-slate-800/50 backdrop-blur-lg rounded-2xl border border-white/10 p-8 max-w-md w-full text-center">
-          <div className="w-20 h-20 mx-auto mb-6 bg-emerald-500/20 rounded-full flex items-center justify-center">
-            <CheckCircle className="w-10 h-10 text-emerald-400" />
+      <div className="min-h-screen flex items-center justify-center p-4" style={{ background: '#07071a' }}>
+        <div className="backdrop-blur-lg rounded-2xl border border-white/10 p-8 max-w-md w-full text-center" style={{ background: 'rgba(13,16,37,0.9)' }}>
+          <div className="w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center" style={{ background: 'rgba(0,255,136,0.15)' }}>
+            <CheckCircle className="w-10 h-10" style={{ color: '#00ff88' }} />
           </div>
           <h2 className="text-2xl font-bold text-white mb-3">Academy Submitted!</h2>
           <p className="text-gray-400 mb-6">
@@ -476,7 +476,8 @@ const AddAcademyPage = () => {
           </p>
           <button
             onClick={() => navigate('/academies')}
-            className="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-xl transition-all"
+            className="w-full py-3 font-semibold rounded-xl transition-all"
+            style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', color: '#07071a' }}
           >
             Back to Academies
           </button>
@@ -488,7 +489,7 @@ const AddAcademyPage = () => {
   // Step 2: Payment
   if (step === 2) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-8 px-4">
+      <div className="min-h-screen py-8 px-4" style={{ background: '#07071a' }}>
         <div className="max-w-lg mx-auto">
           <button
             onClick={() => setStep(1)}
@@ -498,16 +499,16 @@ const AddAcademyPage = () => {
             Back to Form
           </button>
 
-          <div className="bg-slate-800/50 backdrop-blur-lg rounded-2xl border border-white/10 p-6">
+          <div className="backdrop-blur-lg rounded-2xl border border-white/10 p-6" style={{ background: 'rgba(13,16,37,0.9)' }}>
             <div className="text-center mb-6">
-              <CreditCard className="w-12 h-12 text-purple-400 mx-auto mb-3" />
+              <CreditCard className="w-12 h-12 mx-auto mb-3" style={{ color: '#a855f7' }} />
               <h2 className="text-2xl font-bold text-white mb-2">Complete Payment</h2>
               <p className="text-gray-400">Pay ₹200 to list your academy on Matchify.pro</p>
             </div>
 
             {/* QR Code */}
             <div className="bg-white rounded-2xl p-4 mb-6">
-              <div className="bg-slate-900 rounded-xl p-5">
+              <div className="rounded-xl p-5" style={{ background: '#07071a' }}>
                 <div className="flex items-center justify-center gap-2 mb-4">
                   <span className="text-2xl">🏸</span>
                   <span className="text-xl font-semibold text-amber-400">P S LOCHAN</span>
@@ -548,8 +549,8 @@ const AddAcademyPage = () => {
               </div>
             </div>
 
-            <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl p-4 mb-6">
-              <p className="text-purple-300 text-center font-semibold text-lg">Amount: ₹200</p>
+            <div className="rounded-xl p-4 mb-6" style={{ background: 'rgba(168,85,247,0.1)', border: '1px solid rgba(168,85,247,0.3)' }}>
+              <p className="text-center font-semibold text-lg" style={{ color: '#a855f7' }}>Amount: ₹200</p>
             </div>
 
 
@@ -571,7 +572,7 @@ const AddAcademyPage = () => {
                   </button>
                 </div>
               ) : (
-                <label className="flex flex-col items-center justify-center h-32 border-2 border-dashed border-gray-600 rounded-xl cursor-pointer hover:border-purple-500 transition-colors">
+                <label className="flex flex-col items-center justify-center h-32 border-2 border-dashed border-gray-600 rounded-xl cursor-pointer transition-colors" style={{ borderColor: 'rgba(255,255,255,0.15)' }}>
                   <Upload className="w-8 h-8 text-gray-500 mb-2" />
                   <span className="text-gray-400 text-sm">Click to upload screenshot</span>
                   <input
@@ -587,7 +588,8 @@ const AddAcademyPage = () => {
             <button
               onClick={handleSubmit}
               disabled={loading || !paymentScreenshot}
-              className="w-full py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-purple-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full py-3 font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              style={{ background: 'linear-gradient(135deg,#a855f7,#6366f1)', color: '#fff' }}
             >
               {loading ? (
                 <>
@@ -607,7 +609,7 @@ const AddAcademyPage = () => {
 
   // Step 1: Form
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-8 px-4">
+    <div className="min-h-screen py-8 px-4" style={{ background: '#07071a' }}>
       <div className="max-w-2xl mx-auto">
         {/* Draft Restored Banner */}
         {showDraftBanner && (
@@ -643,9 +645,9 @@ const AddAcademyPage = () => {
           )}
         </div>
 
-        <div className="bg-slate-800/50 backdrop-blur-lg rounded-2xl border border-white/10 p-6 md:p-8">
+        <div className="backdrop-blur-lg rounded-2xl border border-white/10 p-6 md:p-8" style={{ background: 'rgba(13,16,37,0.9)' }}>
           <div className="text-center mb-8">
-            <Building2 className="w-12 h-12 text-purple-400 mx-auto mb-3" />
+            <Building2 className="w-12 h-12 mx-auto mb-3" style={{ color: '#a855f7' }} />
             <h1 className="text-2xl font-bold text-white mb-2">Add Your Academy</h1>
             <p className="text-gray-400">List your academy on Matchify.pro for ₹200</p>
           </div>
@@ -703,7 +705,7 @@ const AddAcademyPage = () => {
               
               {/* City Suggestions Dropdown */}
               {showCitySuggestions && citySuggestions.length > 0 && (
-                <div className="absolute z-50 w-full mt-1 bg-slate-800 border border-purple-500/30 rounded-xl shadow-2xl shadow-purple-500/20 overflow-hidden">
+                <div className="absolute z-50 w-full mt-1 rounded-xl overflow-hidden" style={{ background: '#0d1025', border: '1px solid rgba(168,85,247,0.3)', boxShadow: '0 8px 24px rgba(168,85,247,0.2)' }}>
                   {citySuggestions.map((item, index) => (
                     <div
                       key={index}
@@ -711,7 +713,10 @@ const AddAcademyPage = () => {
                         e.preventDefault();
                         handleCitySelect(item.city, item.state);
                       }}
-                      className="px-4 py-3 hover:bg-purple-500/20 cursor-pointer transition-colors border-b border-slate-700/50 last:border-b-0"
+                      className="px-4 py-3 cursor-pointer transition-colors"
+                      style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
+                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(168,85,247,0.15)'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                     >
                       <div className="text-white font-medium">{item.city}</div>
                       <div className="text-gray-400 text-sm">{item.state}</div>
@@ -756,11 +761,10 @@ const AddAcademyPage = () => {
                   key={sport}
                   type="button"
                   onClick={() => toggleSport(sport)}
-                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                    formData.sports.includes(sport)
-                      ? 'bg-purple-500 text-white'
-                      : 'bg-slate-700/50 text-gray-300 hover:bg-slate-600/50'
-                  }`}
+                  className="px-4 py-2 rounded-xl text-sm font-medium transition-all"
+                  style={formData.sports.includes(sport)
+                    ? { background: '#a855f7', color: '#fff' }
+                    : { background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.7)' }}
                 >
                   {sport}
                 </button>
@@ -771,8 +775,8 @@ const AddAcademyPage = () => {
 
           {/* Dynamic Sport-Specific Questions */}
           {formData.sports.length > 0 && (
-            <div className="mb-5 p-4 bg-slate-700/30 rounded-xl border border-purple-500/20">
-              <h3 className="text-sm font-semibold text-purple-400 mb-4 flex items-center gap-2">
+            <div className="mb-5 p-4 rounded-xl" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(168,85,247,0.2)' }}>
+              <h3 className="text-sm font-semibold mb-4 flex items-center gap-2" style={{ color: '#a855f7' }}>
                 <Dumbbell className="w-4 h-4" />
                 Facility Details for Selected Sports
               </h3>
@@ -956,10 +960,10 @@ const AddAcademyPage = () => {
           </div>
 
           {/* Price Info */}
-          <div className="bg-purple-500/10 border border-purple-500/30 rounded-xl p-4 mb-6">
+          <div className="rounded-xl p-4 mb-6" style={{ background: 'rgba(168,85,247,0.1)', border: '1px solid rgba(168,85,247,0.3)' }}>
             <div className="flex items-center justify-between">
               <span className="text-gray-300">Listing Fee</span>
-              <span className="text-purple-300 font-bold text-xl">₹200</span>
+              <span className="font-bold text-xl" style={{ color: '#a855f7' }}>₹200</span>
             </div>
             <p className="text-gray-500 text-sm mt-2">One-time payment to list your academy</p>
           </div>
@@ -978,7 +982,8 @@ const AddAcademyPage = () => {
             </button>
             <button
               onClick={handleProceedToPayment}
-              className="flex-[2] py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-purple-500/30 transition-all"
+              className="flex-[2] py-3 font-semibold rounded-xl transition-all"
+              style={{ background: 'linear-gradient(135deg,#a855f7,#6366f1)', color: '#fff' }}
             >
               Proceed to Payment
             </button>

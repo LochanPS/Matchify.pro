@@ -121,7 +121,7 @@ const SearchAcademiesPage = () => {
               <a
                 href="mailto:matchify.pro@gmail.com?subject=Academy Listing Request&body=Hi MATCHIFY.PRO Team,%0D%0A%0D%0AI would like to list my badminton academy on your platform.%0D%0A%0D%0AAcademy Name: %0D%0ALocation: %0D%0AContact Person: %0D%0APhone: %0D%0AEmail: %0D%0A%0D%0APlease let me know the next steps.%0D%0A%0D%0AThank you!"
                 className="flex items-center gap-2 w-full px-4 py-3 rounded-xl font-bold text-sm transition-all"
-                style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#003320' }}
+                style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', color: '#07071a' }}
               >
                 <Mail className="w-4 h-4 flex-shrink-0" />
                 <span style={{ wordBreak: 'break-all' }}>matchify.pro@gmail.com</span>

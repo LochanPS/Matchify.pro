@@ -85,7 +85,7 @@ const LiveMatchDetail = () => {
       <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg,#0a0a1f 0%,#07071a 100%)' }}>
         <div className="text-center p-8 rounded-2xl" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)' }}>
           <p className="text-red-400 font-semibold mb-4">{error || 'Match not found'}</p>
-          <button onClick={() => navigate('/matches/live')} className="px-5 py-2.5 rounded-xl font-bold text-sm" style={{ background: 'linear-gradient(135deg,#00ff88,#00c853)', color: '#07071a' }}>
+          <button onClick={() => navigate('/matches/live')} className="px-5 py-2.5 rounded-xl font-bold text-sm" style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', color: '#07071a' }}>
             Back to Live Matches
           </button>
         </div>
@@ -133,7 +133,7 @@ const LiveMatchDetail = () => {
               <p className="text-sm mt-2" style={{ color: 'rgba(255,255,255,0.6)' }}>Match link copied to clipboard!</p>
             </div>
             <div className="p-4" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-              <button onClick={() => setShareModal(false)} className="w-full py-3 rounded-xl font-bold text-sm" style={{ background: 'linear-gradient(135deg,#00ff88,#00c853)', color: '#07071a' }}>
+              <button onClick={() => setShareModal(false)} className="w-full py-3 rounded-xl font-bold text-sm" style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', color: '#07071a' }}>
                 OK
               </button>
             </div>

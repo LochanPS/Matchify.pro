@@ -208,7 +208,7 @@ export default function CancellationRequestPage() {
               onClick={handleApprove}
               disabled={actionLoading}
               className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-black text-sm transition-all disabled:opacity-50"
-              style={{ background: 'linear-gradient(135deg,#00ff88,#00c853)', color: '#07071a', boxShadow: '0 4px 20px rgba(0,255,136,0.3)' }}
+              style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', color: '#07071a', boxShadow: '0 4px 20px rgba(0,255,136,0.3)' }}
             >
               {actionLoading ? <Loader className="w-5 h-5 animate-spin" /> : <Check className="w-5 h-5" />}
               Approve Refund
@@ -303,7 +303,7 @@ export default function CancellationRequestPage() {
                 onClick={() => { setResultModal(null); navigate(-1); }}
                 className="w-full py-3 rounded-xl font-black text-sm"
                 style={{
-                  background: resultModal.type === 'success' ? 'linear-gradient(135deg,#00ff88,#00c853)' : 'linear-gradient(135deg,#ef4444,#dc2626)',
+                  background: resultModal.type === 'success' ? 'linear-gradient(135deg,#00ff88,#00d4ff)' : 'linear-gradient(135deg,#ef4444,#dc2626)',
                   color: resultModal.type === 'success' ? '#07071a' : '#fff',
                 }}
               >

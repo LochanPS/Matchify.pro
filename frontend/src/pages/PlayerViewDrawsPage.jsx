@@ -25,6 +25,7 @@ const PlayerViewDrawsPage = () => {
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [draw, setDraw] = useState(null);
+  const [categoryMatches, setCategoryMatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingDraw, setLoadingDraw] = useState(false);
   const [error, setError] = useState(null);
@@ -74,12 +75,16 @@ const PlayerViewDrawsPage = () => {
   const fetchDraw = async (categoryId, silent = false) => {
     if (!silent) setLoadingDraw(true);
     try {
-      const response = await api.get(`/tournaments/${id}/categories/${categoryId}/draw`);
-      if (response.data?.success && response.data.draw) {
-        setDraw(response.data.draw);
+      const [drawResponse, matchesResponse] = await Promise.all([
+        api.get(`/tournaments/${id}/categories/${categoryId}/draw`),
+        api.get(`/tournaments/${id}/categories/${categoryId}/matches`).catch(() => ({ data: { matches: [] } }))
+      ]);
+      if (drawResponse.data?.success && drawResponse.data.draw) {
+        setDraw(drawResponse.data.draw);
       } else {
         setDraw(null);
       }
+      setCategoryMatches(matchesResponse.data?.matches || []);
     } catch (err) {
       if (err.response?.status === 404) {
         setDraw(null);
@@ -371,7 +376,7 @@ const PlayerViewDrawsPage = () => {
                         <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>Loading draw…</p>
                       </div>
                     ) : draw ? (
-                      <DrawBracket draw={draw} onViewMatchDetails={onViewMatchDetails} categoryFormat={selectedCategory?.format} />
+                      <DrawBracket draw={draw} onViewMatchDetails={onViewMatchDetails} categoryFormat={selectedCategory?.format} dbMatches={categoryMatches} />
                     ) : error ? (
                       <div className="text-center py-12">
                         <div className="w-20 h-20 bg-red-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -509,16 +514,14 @@ const PlayerViewDrawsPage = () => {
                     : { borderColor: 'rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)' }}
                 >
                   <div className="text-center">
-                    <div className="flex items-center justify-center gap-2 mb-4 flex-wrap">
+                    <div className="mb-4">
                       {selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player1?.id && (
-                        <span className="text-2xl">👑</span>
+                        <div className="text-xl mb-1">👑</div>
                       )}
-                      <span
-                        className="text-base font-bold leading-tight"
-                        style={{ color: selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player1?.id ? '#00ff88' : '#fff', wordBreak: 'break-word', overflowWrap: 'break-word', maxWidth: '100%' }}
-                      >
+                      <p className="font-bold text-sm leading-snug"
+                        style={{ color: selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player1?.id ? '#00ff88' : '#fff', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
                         {selectedMatchDetails.bracketMatch.player1?.name}
-                      </span>
+                      </p>
                     </div>
                     {selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player1?.id && (
                       <div className="mb-3">
@@ -567,16 +570,14 @@ const PlayerViewDrawsPage = () => {
                     : { borderColor: 'rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)' }}
                 >
                   <div className="text-center">
-                    <div className="flex items-center justify-center gap-2 mb-4 flex-wrap">
+                    <div className="mb-4">
                       {selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player2?.id && (
-                        <span className="text-2xl">👑</span>
+                        <div className="text-xl mb-1">👑</div>
                       )}
-                      <span
-                        className="text-base font-bold leading-tight"
-                        style={{ color: selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player2?.id ? '#00ff88' : '#fff', wordBreak: 'break-word', overflowWrap: 'break-word', maxWidth: '100%' }}
-                      >
+                      <p className="font-bold text-sm leading-snug"
+                        style={{ color: selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player2?.id ? '#00ff88' : '#fff', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
                         {selectedMatchDetails.bracketMatch.player2?.name}
-                      </span>
+                      </p>
                     </div>
                     {selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player2?.id && (
                       <div className="mb-3">
@@ -733,23 +734,24 @@ const PlayerViewDrawsPage = () => {
 };
 
 // Draw Bracket Component (Read-only version)
-const DrawBracket = ({ draw, onViewMatchDetails, categoryFormat }) => {
+const DrawBracket = ({ draw, onViewMatchDetails, categoryFormat, dbMatches = [] }) => {
   const rawData = draw.bracketJson || draw.bracket;
   const data = typeof rawData === 'string' ? JSON.parse(rawData) : rawData;
   const format = draw.format || data?.format;
 
   if (format === 'ROUND_ROBIN') {
-    return <RoundRobinDraw data={data} onViewMatchDetails={onViewMatchDetails} categoryFormat={categoryFormat} />;
+    return <RoundRobinDraw data={data} onViewMatchDetails={onViewMatchDetails} categoryFormat={categoryFormat} dbMatches={dbMatches} />;
   }
   if (format === 'ROUND_ROBIN_KNOCKOUT') {
-    return <GroupsKnockoutDraw data={data} onViewMatchDetails={onViewMatchDetails} categoryFormat={categoryFormat} />;
+    return <GroupsKnockoutDraw data={data} onViewMatchDetails={onViewMatchDetails} categoryFormat={categoryFormat} dbMatches={dbMatches} />;
   }
-  return <KnockoutBracket data={data} onViewMatchDetails={onViewMatchDetails} />;
+  return <KnockoutBracket data={data} onViewMatchDetails={onViewMatchDetails} dbMatches={dbMatches} />;
 };
 
 // Knockout Bracket Component
-const KnockoutBracket = ({ data, onViewMatchDetails }) => {
+const KnockoutBracket = ({ data, onViewMatchDetails, dbMatches = [] }) => {
   if (!data?.rounds) return <p className="text-gray-400 text-center">No bracket data</p>;
+  const findDbMatch = (matchNum) => dbMatches.find(m => m.matchNumber === matchNum) || null;
 
   const getRoundName = (idx, total) => {
     const r = total - idx;
@@ -788,6 +790,7 @@ const KnockoutBracket = ({ data, onViewMatchDetails }) => {
               style={{ paddingTop: ri > 0 ? `${Math.pow(2, ri) * 18}px` : 0 }}
             >
               {round.matches.map((match, mi) => {
+                const resolvedDbMatch = match.dbMatch || findDbMatch(match.matchNumber);
                 const isCompleted = match.winner && (match.player1?.name !== 'TBD' && match.player2?.name !== 'TBD');
                 const player1Name = getPlayerDisplay(match.player1);
                 const player2Name = getPlayerDisplay(match.player2);
@@ -867,7 +870,7 @@ const KnockoutBracket = ({ data, onViewMatchDetails }) => {
                       </div>
 
                       {/* View Details Button for Completed Matches */}
-                      {isCompleted && match.dbMatch && onViewMatchDetails && (
+                      {isCompleted && resolvedDbMatch && onViewMatchDetails && (
                         <div className="px-2.5 pb-2.5">
                           <button
                             onClick={() => {
@@ -877,12 +880,13 @@ const KnockoutBracket = ({ data, onViewMatchDetails }) => {
                                 player1: match.player1,
                                 player2: match.player2
                               };
-                              onViewMatchDetails(match.dbMatch, bracketMatchData);
+                              onViewMatchDetails(resolvedDbMatch, bracketMatchData);
                             }}
-                            className="w-full py-1.5 rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30 transition-all text-xs font-semibold flex items-center justify-center gap-1.5 group-hover:border-blue-500/50"
+                            className="w-full py-2 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all"
+                            style={{ background: 'rgba(0,212,255,0.1)', border: '1px solid rgba(0,212,255,0.3)', color: '#00d4ff' }}
                           >
-                            <Eye className="w-3 h-3" />
-                            View Details
+                            <Eye className="w-3.5 h-3.5" />
+                            View Score
                           </button>
                         </div>
                       )}
@@ -899,8 +903,9 @@ const KnockoutBracket = ({ data, onViewMatchDetails }) => {
 };
 
 // Round Robin Draw Component
-const RoundRobinDraw = ({ data, onViewMatchDetails, categoryFormat }) => {
+const RoundRobinDraw = ({ data, onViewMatchDetails, categoryFormat, dbMatches = [] }) => {
   if (!data?.groups) return <p className="text-gray-400 text-center">No group data</p>;
+  const findDbMatch = (matchNum) => dbMatches.find(m => m.matchNumber === matchNum) || null;
 
   // Helper function to calculate total points scored by a player across all matches
   const calculateTotalPointsScored = (playerId, groupMatches) => {
@@ -1042,6 +1047,7 @@ const RoundRobinDraw = ({ data, onViewMatchDetails, categoryFormat }) => {
                 {group.matches && group.matches.length > 0 ? (
                   <div className="space-y-3">
                     {group.matches.map((match, mi) => {
+                      const resolvedDbMatch = match.dbMatch || findDbMatch(match.matchNumber);
                       const isCompleted = match.winner && (match.player1?.name !== 'TBD' && match.player2?.name !== 'TBD');
                       const isPlayer1Winner = match.winner === 1;
                       const isPlayer2Winner = match.winner === 2;
@@ -1147,7 +1153,7 @@ const RoundRobinDraw = ({ data, onViewMatchDetails, categoryFormat }) => {
                           )}
                           
                           {/* View Details Button */}
-                          {isCompleted && match.dbMatch && onViewMatchDetails && (
+                          {isCompleted && resolvedDbMatch && onViewMatchDetails && (
                             <div className="px-3 pb-3">
                               <button
                                 onClick={() => {
@@ -1157,12 +1163,13 @@ const RoundRobinDraw = ({ data, onViewMatchDetails, categoryFormat }) => {
                                     player1: match.player1,
                                     player2: match.player2
                                   };
-                                  onViewMatchDetails(match.dbMatch, bracketMatchData);
+                                  onViewMatchDetails(resolvedDbMatch, bracketMatchData);
                                 }}
-                                className="w-full py-1.5 rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30 transition-all text-xs font-semibold flex items-center justify-center gap-1.5 group-hover:border-blue-500/50"
+                                className="w-full py-2 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all"
+                                style={{ background: 'rgba(0,212,255,0.1)', border: '1px solid rgba(0,212,255,0.3)', color: '#00d4ff' }}
                               >
-                                <Eye className="w-3 h-3" />
-                                View Details
+                                <Eye className="w-3.5 h-3.5" />
+                                View Score
                               </button>
                             </div>
                           )}
@@ -1186,7 +1193,8 @@ const RoundRobinDraw = ({ data, onViewMatchDetails, categoryFormat }) => {
 };
 
 // Groups + Knockout Draw Component
-const GroupsKnockoutDraw = ({ data, onViewMatchDetails, categoryFormat }) => {
+const GroupsKnockoutDraw = ({ data, onViewMatchDetails, categoryFormat, dbMatches = [] }) => {
+  const findDbMatch = (matchNum) => dbMatches.find(m => m.matchNumber === matchNum) || null;
   const getRoundName = (idx, total) => {
     const r = total - idx;
     if (r === 1) return 'Final';
@@ -1211,7 +1219,7 @@ const GroupsKnockoutDraw = ({ data, onViewMatchDetails, categoryFormat }) => {
           <span className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-lg text-sm">Stage 1</span>
           Group Stage (Round Robin)
         </h3>
-        <RoundRobinDraw data={data} onViewMatchDetails={onViewMatchDetails} categoryFormat={categoryFormat} />
+        <RoundRobinDraw data={data} onViewMatchDetails={onViewMatchDetails} categoryFormat={categoryFormat} dbMatches={dbMatches} />
       </div>
 
       {/* Knockout Stage */}
@@ -1241,6 +1249,7 @@ const GroupsKnockoutDraw = ({ data, onViewMatchDetails, categoryFormat }) => {
                     style={{ paddingTop: ri > 0 ? `${Math.pow(2, ri) * 18}px` : 0 }}
                   >
                     {round.matches.map((match, mi) => {
+                      const resolvedDbMatch = match.dbMatch || findDbMatch(match.matchNumber);
                       const isCompleted = match.winner && (match.player1?.name !== 'TBD' && match.player2?.name !== 'TBD');
                       const player1Name = getPlayerDisplay(match.player1);
                       const player2Name = getPlayerDisplay(match.player2);
@@ -1320,7 +1329,7 @@ const GroupsKnockoutDraw = ({ data, onViewMatchDetails, categoryFormat }) => {
                             </div>
                             
                             {/* View Details Button for Completed Matches */}
-                            {isCompleted && match.dbMatch && onViewMatchDetails && (
+                            {isCompleted && resolvedDbMatch && onViewMatchDetails && (
                               <div className="px-2.5 pb-2.5">
                                 <button
                                   onClick={() => {
@@ -1330,12 +1339,13 @@ const GroupsKnockoutDraw = ({ data, onViewMatchDetails, categoryFormat }) => {
                                       player1: match.player1,
                                       player2: match.player2
                                     };
-                                    onViewMatchDetails(match.dbMatch, bracketMatchData);
+                                    onViewMatchDetails(resolvedDbMatch, bracketMatchData);
                                   }}
-                                  className="w-full py-1.5 rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30 transition-all text-xs font-semibold flex items-center justify-center gap-1.5 group-hover:border-blue-500/50"
+                                  className="w-full py-2 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all"
+                                  style={{ background: 'rgba(0,212,255,0.1)', border: '1px solid rgba(0,212,255,0.3)', color: '#00d4ff' }}
                                 >
-                                  <Eye className="w-3 h-3" />
-                                  View Details
+                                  <Eye className="w-3.5 h-3.5" />
+                                  View Score
                                 </button>
                               </div>
                             )}

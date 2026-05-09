@@ -1790,17 +1790,18 @@ const DrawPage = () => {
                     : 'border-white/10 bg-white/[0.03]'
                 }`}>
                   <div className="text-center">
-                    <div className="flex items-center justify-center gap-2 mb-4 flex-wrap">
+                    <div className="mb-4">
                       {selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player1?.id && (
-                        <span className="text-2xl">👑</span>
+                        <div className="text-xl mb-1">👑</div>
                       )}
-                      <span className={`text-base font-bold leading-tight ${
-                        selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player1?.id
-                          ? 'text-[#00ff88]'
-                          : 'text-white'
-                      }`} style={{ wordBreak: 'break-word', overflowWrap: 'break-word', maxWidth: '100%' }}>
+                      <p className="font-bold text-sm leading-snug"
+                        style={{
+                          color: selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player1?.id ? '#00ff88' : '#ffffff',
+                          wordBreak: 'break-word',
+                          overflowWrap: 'anywhere',
+                        }}>
                         {getPlayerDisplay(selectedMatchDetails.bracketMatch.player1)}
-                      </span>
+                      </p>
                     </div>
                     {selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player1?.id && (
                       <div className="mb-3">
@@ -1839,17 +1840,18 @@ const DrawPage = () => {
                     : 'border-white/10 bg-white/[0.03]'
                 }`}>
                   <div className="text-center">
-                    <div className="flex items-center justify-center gap-2 mb-4 flex-wrap">
+                    <div className="mb-4">
                       {selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player2?.id && (
-                        <span className="text-2xl">👑</span>
+                        <div className="text-xl mb-1">👑</div>
                       )}
-                      <span className={`text-base font-bold leading-tight ${
-                        selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player2?.id
-                          ? 'text-[#00ff88]'
-                          : 'text-white'
-                      }`} style={{ wordBreak: 'break-word', overflowWrap: 'break-word', maxWidth: '100%' }}>
+                      <p className="font-bold text-sm leading-snug"
+                        style={{
+                          color: selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player2?.id ? '#00ff88' : '#ffffff',
+                          wordBreak: 'break-word',
+                          overflowWrap: 'anywhere',
+                        }}>
                         {getPlayerDisplay(selectedMatchDetails.bracketMatch.player2)}
-                      </span>
+                      </p>
                     </div>
                     {selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player2?.id && (
                       <div className="mb-3">

@@ -89,7 +89,12 @@ const MatchScoringPage = () => {
         setTimerData(response.data.match.score.timer);
       }
     } catch (err) {
-      setError(getErrorMessage(err, 'Failed to start match'));
+      // Suppress auth errors silently — umpire/organizer assignment may not be set
+      const msg = getErrorMessage(err, '');
+      if (err.response?.status !== 403 && !msg.toLowerCase().includes('authorized')) {
+        setError(msg || 'Failed to start match');
+      }
+      console.error('Start match error:', err.response?.data);
     } finally {
       setSaving(false);
     }
@@ -246,7 +251,7 @@ const MatchScoringPage = () => {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: B.bg }}>
         <div className="w-10 h-10 border-4 border-t-transparent rounded-full animate-spin"
-          style={{ borderColor: `${B.purple} transparent transparent transparent` }} />
+          style={{ borderColor: `${B.green} transparent transparent transparent` }} />
       </div>
     );
   }
@@ -388,7 +393,7 @@ const MatchScoringPage = () => {
             <div className="text-center">
               <div className="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center text-3xl font-black mb-2"
                 style={p2Sets > p1Sets
-                  ? { background: 'rgba(168,85,247,0.15)', border: '1.5px solid rgba(168,85,247,0.4)', color: B.purple }
+                  ? { background: 'rgba(0,212,255,0.15)', border: '1.5px solid rgba(0,212,255,0.4)', color: B.cyan }
                   : { background: 'rgba(255,255,255,0.05)', border: `1px solid ${B.border}`, color: 'rgba(255,255,255,0.7)' }}>
                 {p2Sets}
               </div>
@@ -428,7 +433,7 @@ const MatchScoringPage = () => {
               <div className="p-3 space-y-2">
                 <button onClick={() => addPoint(2)} disabled={isPaused || !canScore}
                   className="w-full py-5 rounded-xl font-black text-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-                  style={{ background: 'linear-gradient(135deg,#7c3aed,#a855f7)', color: '#fff', boxShadow: isPaused ? 'none' : '0 4px 16px rgba(168,85,247,0.35)' }}>
+                  style={{ background: 'linear-gradient(135deg,#00a3cc,#00d4ff)', color: '#07071a', boxShadow: isPaused ? 'none' : '0 4px 16px rgba(0,212,255,0.35)' }}>
                   <Plus className="w-6 h-6" /> Point
                 </button>
                 <button onClick={() => removePoint(2)} disabled={isPaused || !canScore}

@@ -100,10 +100,10 @@ export default function UmpireDashboard() {
   };
 
   const statCards = [
-    { label: 'Assigned Matches', value: stats.totalMatches, icon: ClipboardDocumentListIcon, color: 'from-blue-500 to-indigo-600', bgColor: 'bg-slate-800/50', textColor: 'text-blue-400', description: 'Currently assigned to you' },
-    { label: 'Completed', value: stats.completedMatches, icon: CheckCircleIcon, color: 'from-green-500 to-emerald-600', bgColor: 'bg-slate-800/50', textColor: 'text-green-400', description: 'Successfully umpired' },
-    { label: 'Upcoming', value: stats.upcomingMatches, icon: ClockIcon, color: 'from-amber-500 to-orange-600', bgColor: 'bg-slate-800/50', textColor: 'text-amber-400', description: 'Scheduled matches' },
-    { label: 'Today', value: stats.todayMatches, icon: CalendarDaysIcon, color: 'from-red-500 to-rose-600', bgColor: 'bg-slate-800/50', textColor: 'text-red-400', description: 'Matches today' },
+    { label: 'Assigned Matches', value: stats.totalMatches, icon: ClipboardDocumentListIcon, color: 'from-blue-500 to-indigo-600', bgColor: '', textColor: 'text-blue-400', description: 'Currently assigned to you' },
+    { label: 'Completed', value: stats.completedMatches, icon: CheckCircleIcon, color: 'from-green-500 to-emerald-600', bgColor: '', textColor: 'text-green-400', description: 'Successfully umpired' },
+    { label: 'Upcoming', value: stats.upcomingMatches, icon: ClockIcon, color: 'from-amber-500 to-orange-600', bgColor: '', textColor: 'text-amber-400', description: 'Scheduled matches' },
+    { label: 'Today', value: stats.todayMatches, icon: CalendarDaysIcon, color: 'from-red-500 to-rose-600', bgColor: '', textColor: 'text-red-400', description: 'Matches today' },
   ];
 
   // Calculate additional stats
@@ -125,10 +125,11 @@ export default function UmpireDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#07071a' }}>
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="text-gray-500 mt-4 font-medium">Loading dashboard...</p>
+          <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin mx-auto"
+            style={{ borderColor: 'rgba(0,255,136,0.3)', borderTopColor: '#00ff88' }} />
+          <p className="mt-4 font-medium" style={{ color: 'rgba(255,255,255,0.55)' }}>Loading dashboard...</p>
         </div>
       </div>
     );
@@ -137,12 +138,17 @@ export default function UmpireDashboard() {
   const todayMatches = matches.filter(m => new Date(m.scheduledTime).toDateString() === new Date().toDateString());
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    <div className="min-h-screen" style={{ background: '#07071a' }}>
+      {/* Background orbs */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-1/4 left-1/4 w-80 h-80 rounded-full blur-3xl opacity-[0.07]" style={{ background: '#a855f7' }} />
+        <div className="absolute bottom-1/4 right-1/4 w-72 h-72 rounded-full blur-3xl opacity-[0.05]" style={{ background: '#00ff88' }} />
+      </div>
       {/* Hero Header */}
-      <div className="relative bg-gradient-to-r from-slate-900 via-purple-900 to-slate-900 overflow-hidden">
+      <div className="relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #07071a 0%, #0d0a1f 50%, #07071a 100%)' }}>
         <div className="absolute inset-0">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+          <div className="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl opacity-[0.12]" style={{ background: '#a855f7' }} />
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 rounded-full blur-3xl opacity-[0.08]" style={{ background: '#00d4ff' }} />
         </div>
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -253,7 +259,7 @@ export default function UmpireDashboard() {
         {/* Stats Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {statCards.map((stat, index) => (
-            <div key={index} className={`${stat.bgColor} backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:shadow-[0_0_30px_rgba(168,85,247,0.3)] hover:scale-105 transition-all duration-300`}>
+            <div key={index} className="rounded-2xl p-5 border hover:scale-105 transition-all duration-300" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}>
               <div className={`inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br ${stat.color} rounded-xl shadow-lg mb-4`}>
                 <stat.icon className="w-6 h-6 text-white" />
               </div>
@@ -267,7 +273,7 @@ export default function UmpireDashboard() {
         {/* Umpire Profile Details */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           {/* Profile Information */}
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
+          <div className="rounded-2xl p-6 border" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}>
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center">
                 <UserCircleIcon className="w-5 h-5 text-white" />
@@ -337,7 +343,7 @@ export default function UmpireDashboard() {
           </div>
 
           {/* Performance Stats */}
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
+          <div className="rounded-2xl p-6 border" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}>
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center">
                 <ChartBarIcon className="w-5 h-5 text-white" />
@@ -352,7 +358,7 @@ export default function UmpireDashboard() {
                   <p className="text-gray-400 text-sm">Completion Rate</p>
                   <p className="text-green-400 font-bold text-lg">{completionRate}%</p>
                 </div>
-                <div className="w-full h-2 bg-slate-700 rounded-full overflow-hidden">
+                <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)' }}>
                   <div 
                     className="h-full bg-gradient-to-r from-green-500 to-emerald-600 transition-all duration-500"
                     style={{ width: `${completionRate}%` }}
@@ -425,7 +431,7 @@ export default function UmpireDashboard() {
           </div>
 
           {/* Activity & Achievements */}
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
+          <div className="rounded-2xl p-6 border" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}>
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
                 <TrophyIcon className="w-5 h-5 text-white" />
@@ -435,7 +441,7 @@ export default function UmpireDashboard() {
             
             <div className="space-y-4">
               {/* Current Status */}
-              <div className="bg-slate-700/50 rounded-xl p-4">
+              <div className="rounded-xl p-4 border" style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.06)' }}>
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-gray-400 text-sm">Current Status</p>
                   <div className={`w-3 h-3 rounded-full ${
@@ -454,7 +460,7 @@ export default function UmpireDashboard() {
               </div>
 
               {/* Verification Status */}
-              <div className="bg-slate-700/50 rounded-xl p-4">
+              <div className="rounded-xl p-4 border" style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.06)' }}>
                 <p className="text-gray-400 text-sm mb-2">Verification Status</p>
                 {stats.isVerifiedUmpire ? (
                   <div className="flex items-center gap-2">
@@ -530,7 +536,7 @@ export default function UmpireDashboard() {
         </div>
 
         {/* Today's Matches */}
-        <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden mb-8">
+        <div className="rounded-2xl overflow-hidden mb-8 border" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}>
           <div className="p-6 border-b border-white/10 flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-rose-600 rounded-xl flex items-center justify-center">
               <CalendarDaysIcon className="w-5 h-5 text-white" />
@@ -544,7 +550,7 @@ export default function UmpireDashboard() {
           <div className="p-6">
             {todayMatches.length === 0 ? (
               <div className="text-center py-12">
-                <div className="w-20 h-20 bg-slate-700/50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <div className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: 'rgba(255,255,255,0.05)' }}>
                   <span className="text-4xl">📅</span>
                 </div>
                 <h4 className="text-lg font-semibold text-white mb-2">No matches today</h4>
@@ -553,7 +559,7 @@ export default function UmpireDashboard() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {todayMatches.map((match) => (
-                  <div key={match.id} className="bg-slate-700/50 border border-white/10 rounded-xl p-5 hover:shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:border-purple-500/30 transition-all">
+                  <div key={match.id} className="rounded-xl p-5 border hover:border-purple-500/40 transition-all" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}>
                     <div className="flex justify-between items-start mb-3">
                       <h3 className="font-semibold text-white">{match.tournament?.name}</h3>
                       <span className={`px-3 py-1 text-xs font-semibold rounded-full ${
@@ -587,7 +593,7 @@ export default function UmpireDashboard() {
         </div>
 
         {/* All Matches */}
-        <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden">
+        <div className="rounded-2xl overflow-hidden border" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}>
           <div className="p-6 border-b border-white/10 flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
               <ClipboardDocumentListIcon className="w-5 h-5 text-white" />
@@ -598,7 +604,7 @@ export default function UmpireDashboard() {
           <div className="p-6">
             {matches.length === 0 ? (
               <div className="text-center py-12">
-                <div className="w-20 h-20 bg-slate-700/50 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <div className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: 'rgba(255,255,255,0.05)' }}>
                   <span className="text-4xl">📋</span>
                 </div>
                 <h4 className="text-lg font-semibold text-white mb-2">No matches assigned</h4>
@@ -607,7 +613,7 @@ export default function UmpireDashboard() {
             ) : (
               <div className="space-y-3">
                 {matches.map((match) => (
-                  <div key={match.id} className="flex items-center justify-between p-4 bg-slate-700/50 rounded-xl border border-white/10 hover:shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:border-purple-500/30 transition-all">
+                  <div key={match.id} className="flex items-center justify-between p-4 rounded-xl border hover:border-purple-500/40 transition-all" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}>
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl flex items-center justify-center">
                         <span className="text-xl">🏸</span>
@@ -653,9 +659,9 @@ export default function UmpireDashboard() {
       {/* Experience Level Info Modal */}
       {showLevelInfo && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-800 border border-white/10 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border" style={{ background: '#0d1025', borderColor: 'rgba(255,255,255,0.08)' }}>
             {/* Header */}
-            <div className="sticky top-0 bg-slate-800 border-b border-white/10 p-6 flex items-center justify-between">
+            <div className="sticky top-0 border-b p-6 flex items-center justify-between" style={{ background: '#0d1025', borderColor: 'rgba(255,255,255,0.08)' }}>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl flex items-center justify-center">
                   <StarIcon className="w-5 h-5 text-white" />
@@ -680,7 +686,7 @@ export default function UmpireDashboard() {
               {/* Level Cards */}
               <div className="space-y-3">
                 {/* New Umpire */}
-                <div className="bg-slate-700/50 border border-white/10 rounded-xl p-4">
+                <div className="rounded-xl p-4 border" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}>
                   <div className="flex items-center justify-between mb-2">
                     <div>
                       <h4 className="text-lg font-bold text-gray-300">New Umpire</h4>
@@ -816,7 +822,7 @@ export default function UmpireDashboard() {
             </div>
 
             {/* Footer */}
-            <div className="sticky bottom-0 bg-slate-800 border-t border-white/10 p-4">
+            <div className="sticky bottom-0 border-t p-4" style={{ background: '#0d1025', borderColor: 'rgba(255,255,255,0.08)' }}>
               <button
                 onClick={() => setShowLevelInfo(false)}
                 className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-4 rounded-xl font-medium hover:shadow-lg transition-all"

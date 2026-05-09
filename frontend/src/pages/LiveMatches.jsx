@@ -4,8 +4,16 @@ import { matchService } from '../services/matchService';
 import LiveMatchCard from '../components/matches/LiveMatchCard';
 import LiveMatchFilters from '../components/matches/LiveMatchFilters';
 import { useWebSocket } from '../contexts/WebSocketContext';
-import { ArrowLeftIcon } from '@heroicons/react/24/outline';
-import { Radio, Wifi, WifiOff, RefreshCw, Trophy, Filter } from 'lucide-react';
+import { ArrowLeft, Radio, Wifi, WifiOff, RefreshCw, Trophy, SlidersHorizontal } from 'lucide-react';
+
+const B = {
+  bg: '#07071a',
+  card: 'rgba(255,255,255,0.04)',
+  border: 'rgba(255,255,255,0.08)',
+  green: '#00ff88',
+  cyan: '#00d4ff',
+  sub: 'rgba(255,255,255,0.6)',
+};
 
 const LiveMatches = () => {
   const navigate = useNavigate();
@@ -30,179 +38,128 @@ const LiveMatches = () => {
     }
   };
 
-  useEffect(() => {
-    fetchLiveMatches();
-  }, [filters]);
+  useEffect(() => { fetchLiveMatches(); }, [filters]);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      fetchLiveMatches();
-    }, 30000);
-
+    const interval = setInterval(fetchLiveMatches, 30000);
     return () => clearInterval(interval);
   }, [filters]);
 
   useEffect(() => {
     if (!socket) return;
-
-    socket.on('match:started', () => {
-      fetchLiveMatches();
-    });
-
-    socket.on('match:ended', () => {
-      fetchLiveMatches();
-    });
-
-    socket.on('tournament-match-update', () => {
-      fetchLiveMatches();
-    });
-
+    const refresh = () => fetchLiveMatches();
+    socket.on('match:started', refresh);
+    socket.on('match:ended', refresh);
+    socket.on('tournament-match-update', refresh);
     return () => {
-      socket.off('match:started');
-      socket.off('match:ended');
-      socket.off('tournament-match-update');
+      socket.off('match:started', refresh);
+      socket.off('match:ended', refresh);
+      socket.off('tournament-match-update', refresh);
     };
   }, [socket]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      {/* Hero Header */}
-      <div className="relative bg-gradient-to-r from-slate-900 via-red-900 to-slate-900 overflow-hidden">
-        <div className="absolute inset-0">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-red-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-orange-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
-        </div>
-        
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-white/70 hover:text-white mb-6 transition-colors group"
-          >
-            <ArrowLeftIcon className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
-            <span>Back</span>
+    <div className="min-h-screen" style={{ background: B.bg }}>
+      {/* Background orbs */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-1/4 left-1/4 w-80 h-80 rounded-full blur-3xl opacity-[0.07]" style={{ background: '#f87171' }} />
+        <div className="absolute bottom-1/4 right-1/4 w-72 h-72 rounded-full blur-3xl opacity-[0.05]" style={{ background: B.green }} />
+      </div>
+
+      {/* Sticky header */}
+      <div className="sticky top-0 z-20 px-4 py-3 border-b backdrop-blur-xl"
+        style={{ background: 'rgba(7,7,26,0.95)', borderColor: 'rgba(0,255,136,0.12)' }}>
+        <div className="max-w-2xl mx-auto flex items-center justify-between gap-3">
+          <button onClick={() => navigate(-1)} className="flex items-center gap-2">
+            <ArrowLeft className="w-5 h-5" style={{ color: B.green }} />
+            <span className="text-sm font-semibold" style={{ color: B.sub }}>Back</span>
           </button>
 
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-            <div className="flex items-center gap-5">
-              <div className="relative">
-                <div className="w-16 h-16 bg-gradient-to-br from-red-400 via-rose-500 to-pink-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-red-500/30">
-                  <Radio className="w-8 h-8 text-white" />
-                </div>
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white animate-pulse"></span>
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold text-white">Live Matches</h1>
-                <p className="text-white/60 mt-1">Watch badminton matches happening right now</p>
-              </div>
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <Radio className="w-5 h-5" style={{ color: '#f87171' }} />
+              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+            </div>
+            <h1 className="text-base font-black text-white">Live Matches</h1>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {/* Connection status */}
+            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold border"
+              style={isConnected
+                ? { background: 'rgba(0,255,136,0.08)', borderColor: 'rgba(0,255,136,0.25)', color: B.green }
+                : { background: 'rgba(248,113,113,0.08)', borderColor: 'rgba(248,113,113,0.25)', color: '#f87171' }}>
+              {isConnected ? <><Wifi className="w-3 h-3" /> Live</> : <><WifiOff className="w-3 h-3" /> Off</>}
             </div>
 
-            <div className="flex items-center gap-4">
-              {/* Connection Status */}
-              <div className={`flex items-center gap-2 px-4 py-2 rounded-xl backdrop-blur-sm border ${
-                isConnected 
-                  ? 'bg-green-500/20 border-green-500/30 text-green-300' 
-                  : 'bg-red-500/20 border-red-500/30 text-red-300'
-              }`}>
-                {isConnected ? (
-                  <>
-                    <Wifi className="w-4 h-4" />
-                    <span className="text-sm font-medium">Live</span>
-                  </>
-                ) : (
-                  <>
-                    <WifiOff className="w-4 h-4" />
-                    <span className="text-sm font-medium">Connecting...</span>
-                  </>
-                )}
-              </div>
+            <button onClick={fetchLiveMatches}
+              className="p-2 rounded-xl border transition-all"
+              style={{ background: B.card, borderColor: B.border, color: B.sub }}>
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            </button>
 
-              <button
-                onClick={fetchLiveMatches}
-                className="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm text-white rounded-xl border border-white/20 hover:bg-white/20 transition-all"
-              >
-                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-                Refresh
-              </button>
-            </div>
+            <button onClick={() => setShowFilters(!showFilters)}
+              className="p-2 rounded-xl border transition-all"
+              style={showFilters
+                ? { background: 'rgba(0,255,136,0.12)', borderColor: 'rgba(0,255,136,0.3)', color: B.green }
+                : { background: B.card, borderColor: B.border, color: B.sub }}>
+              <SlidersHorizontal className="w-4 h-4" />
+            </button>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 -mt-6">
-        {/* Stats Bar */}
-        <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl shadow-xl shadow-gray-200/50 border border-white/10 p-4 mb-8">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-gray-700 font-medium">{matches.length} Live Matches</span>
-              </div>
-            </div>
-            
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all ${
-                showFilters 
-                  ? 'bg-gradient-to-r from-red-500 to-rose-600 text-white' 
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              <Filter className="w-4 h-4" />
-              Filters
-            </button>
-          </div>
+      <div className="relative max-w-2xl mx-auto px-4 py-5">
+        {/* Stats bar */}
+        <div className="flex items-center gap-3 mb-5 px-4 py-3 rounded-xl border"
+          style={{ background: B.card, borderColor: B.border }}>
+          <div className="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse" />
+          <span className="text-sm font-semibold" style={{ color: B.sub }}>
+            {matches.length} {matches.length === 1 ? 'match' : 'matches'} live right now
+          </span>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Filters Sidebar */}
-          {showFilters && (
-            <div className="lg:col-span-1">
-              <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl shadow-xl shadow-gray-200/50 border border-white/10 p-6 sticky top-24">
-                <h3 className="font-bold text-white mb-4">Filter Matches</h3>
-                <LiveMatchFilters filters={filters} onFilterChange={setFilters} />
-              </div>
-            </div>
-          )}
-
-          {/* Matches Grid */}
-          <div className={showFilters ? 'lg:col-span-3' : 'lg:col-span-4'}>
-            {loading ? (
-              <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl shadow-xl shadow-gray-200/50 border border-white/10 p-16 text-center">
-                <div className="w-16 h-16 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-                <p className="text-gray-500 mt-6 font-medium">Loading live matches...</p>
-              </div>
-            ) : error ? (
-              <div className="bg-red-50 border border-red-200 rounded-2xl p-6 text-red-700 flex items-center gap-3">
-                <span className="text-2xl">⚠️</span>
-                {error}
-              </div>
-            ) : matches.length === 0 ? (
-              <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl shadow-xl shadow-gray-200/50 border border-white/10 p-16 text-center">
-                <div className="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-3xl flex items-center justify-center mx-auto mb-6">
-                  <Trophy className="w-12 h-12 text-gray-400" />
-                </div>
-                <h3 className="text-xl font-bold text-white mb-2">No live matches</h3>
-                <p className="text-gray-500 max-w-md mx-auto">
-                  There are no matches happening right now. Check back later or adjust your filters.
-                </p>
-              </div>
-            ) : (
-              <>
-                <div className={`grid grid-cols-1 ${showFilters ? 'md:grid-cols-2' : 'md:grid-cols-2 lg:grid-cols-3'} gap-4`}>
-                  {matches.map((match) => (
-                    <LiveMatchCard key={match.id} match={match} />
-                  ))}
-                </div>
-
-                <div className="mt-6 text-center">
-                  <p className="text-sm text-gray-500 bg-white/50 backdrop-blur-sm inline-block px-6 py-2 rounded-full">
-                    Showing {matches.length} live {matches.length === 1 ? 'match' : 'matches'}
-                  </p>
-                </div>
-              </>
-            )}
+        {/* Filters */}
+        {showFilters && (
+          <div className="mb-5 rounded-xl border p-4" style={{ background: B.card, borderColor: B.border }}>
+            <h3 className="font-bold text-white text-sm mb-3">Filter Matches</h3>
+            <LiveMatchFilters filters={filters} onFilterChange={setFilters} />
           </div>
-        </div>
+        )}
+
+        {/* Content */}
+        {loading ? (
+          <div className="rounded-2xl border p-12 text-center" style={{ background: B.card, borderColor: B.border }}>
+            <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin mx-auto"
+              style={{ borderColor: 'rgba(248,113,113,0.3)', borderTopColor: '#f87171' }} />
+            <p className="mt-4 text-sm font-medium" style={{ color: B.sub }}>Loading live matches...</p>
+          </div>
+        ) : error ? (
+          <div className="rounded-2xl border p-6 text-center" style={{ background: 'rgba(239,68,68,0.06)', borderColor: 'rgba(239,68,68,0.2)' }}>
+            <p className="text-red-300 font-medium">⚠️ {error}</p>
+          </div>
+        ) : matches.length === 0 ? (
+          <div className="rounded-2xl border p-12 text-center" style={{ background: B.card, borderColor: B.border }}>
+            <Trophy className="w-12 h-12 mx-auto mb-4" style={{ color: 'rgba(255,255,255,0.2)' }} />
+            <h3 className="text-lg font-bold text-white mb-2">No live matches</h3>
+            <p className="text-sm" style={{ color: B.sub }}>
+              No matches happening right now. Check back later or adjust your filters.
+            </p>
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {matches.map((match) => (
+                <LiveMatchCard key={match.id} match={match} />
+              ))}
+            </div>
+            <div className="mt-5 text-center">
+              <p className="text-xs" style={{ color: B.sub }}>
+                Showing {matches.length} live {matches.length === 1 ? 'match' : 'matches'}
+              </p>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

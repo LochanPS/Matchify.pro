@@ -85,7 +85,7 @@ export default function OrganizerDashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#07071a' }}>
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
           <p className="text-gray-500 mt-4 font-medium">Loading dashboard...</p>
@@ -96,7 +96,7 @@ export default function OrganizerDashboardPage() {
 
   if (error || !dashboardData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
+      <div className="min-h-screen flex items-center justify-center p-4" style={{ background: '#07071a' }}>
         <div className="text-center max-w-md">
           <div className="text-6xl mb-4">⚠️</div>
           <p className="text-red-400 text-lg mb-4">{error || 'Failed to load dashboard'}</p>
@@ -164,9 +164,14 @@ export default function OrganizerDashboardPage() {
   const hasNoTournaments = stats.totalTournaments === 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    <div className="min-h-screen" style={{ background: '#07071a' }}>
+      {/* Background orbs */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-1/4 left-1/4 w-80 h-80 rounded-full blur-3xl opacity-[0.07]" style={{ background: '#a855f7' }} />
+        <div className="absolute bottom-1/4 right-1/4 w-72 h-72 rounded-full blur-3xl opacity-[0.05]" style={{ background: '#00ff88' }} />
+      </div>
       {/* Hero Header with Profile */}
-      <div className="relative bg-gradient-to-r from-slate-900 via-purple-900 to-slate-900 overflow-hidden">
+      <div className="relative overflow-hidden" style={{ background: 'linear-gradient(135deg,#07071a 0%,#0d0a1f 50%,#07071a 100%)' }}>
         <div className="absolute inset-0">
           <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
           <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
@@ -236,7 +241,7 @@ export default function OrganizerDashboardPage() {
 
             {/* Right: Quick Stats */}
             <div className="grid grid-cols-2 gap-4 lg:w-80">
-              <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
+              <div className="rounded-2xl p-4 border" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}>
                 <div className="flex items-center gap-2 mb-2">
                   <Trophy className="w-5 h-5 text-yellow-400" />
                   <span className="text-white/60 text-xs">Career Tournaments</span>
@@ -244,7 +249,7 @@ export default function OrganizerDashboardPage() {
                 <p className="text-3xl font-bold text-yellow-400">{stats.totalTournaments}</p>
               </div>
               
-              <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
+              <div className="rounded-2xl p-4 border" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}>
                 <div className="flex items-center gap-2 mb-2">
                   <Zap className="w-5 h-5 text-orange-400" />
                   <span className="text-white/60 text-xs">Avg/Month</span>
@@ -252,7 +257,7 @@ export default function OrganizerDashboardPage() {
                 <p className="text-3xl font-bold text-orange-400">{averageTournamentsPerMonth}</p>
               </div>
               
-              <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
+              <div className="rounded-2xl p-4 border" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}>
                 <div className="flex items-center gap-2 mb-2">
                   <Star className="w-5 h-5 text-purple-400" />
                   <span className="text-white/60 text-xs">Member Since</span>
@@ -260,7 +265,7 @@ export default function OrganizerDashboardPage() {
                 <p className="text-sm font-bold text-purple-400">{memberSince}</p>
               </div>
               
-              <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-4 border border-white/10">
+              <div className="rounded-2xl p-4 border" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}>
                 <div className="flex items-center gap-2 mb-2">
                   <Target className="w-5 h-5 text-green-400" />
                   <span className="text-white/60 text-xs">Active Days</span>
@@ -276,7 +281,7 @@ export default function OrganizerDashboardPage() {
 
         {/* Empty State - First Tournament */}
         {hasNoTournaments ? (
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-12 text-center">
+          <div className="rounded-2xl border p-12 text-center" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}>
             <div className="max-w-2xl mx-auto">
               <div className="text-6xl mb-6">🎾</div>
               <h2 className="text-2xl font-bold text-white mb-4">
@@ -293,17 +298,17 @@ export default function OrganizerDashboardPage() {
                 Create Your First Tournament
               </button>
               <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
-                <div className="bg-slate-700/50 p-4 rounded-xl border border-white/10">
+                <div className="p-4 rounded-xl border" style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.06)' }}>
                   <div className="text-2xl mb-2">📝</div>
                   <h4 className="font-semibold text-white mb-1">Easy Setup</h4>
                   <p className="text-sm text-gray-400">Create tournaments in minutes with our simple form</p>
                 </div>
-                <div className="bg-slate-700/50 p-4 rounded-xl border border-white/10">
+                <div className="p-4 rounded-xl border" style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.06)' }}>
                   <div className="text-2xl mb-2">👥</div>
                   <h4 className="font-semibold text-white mb-1">Manage Registrations</h4>
                   <p className="text-sm text-gray-400">Track participants and payments easily</p>
                 </div>
-                <div className="bg-slate-700/50 p-4 rounded-xl border border-white/10">
+                <div className="p-4 rounded-xl border" style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.06)' }}>
                   <div className="text-2xl mb-2">📊</div>
                   <h4 className="font-semibold text-white mb-1">Live Scoring</h4>
                   <p className="text-sm text-gray-400">Real-time match scoring and updates</p>
@@ -315,7 +320,7 @@ export default function OrganizerDashboardPage() {
           <>
             {/* Stats Cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:shadow-[0_0_30px_rgba(168,85,247,0.3)] hover:scale-105 transition-all duration-300">
+          <div className="rounded-2xl p-6 border hover:scale-105 transition-all duration-300" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}>
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-400">Total Tournaments</p>
@@ -327,7 +332,7 @@ export default function OrganizerDashboardPage() {
             </div>
           </div>
 
-          <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:shadow-[0_0_30px_rgba(168,85,247,0.3)] hover:scale-105 transition-all duration-300">
+          <div className="rounded-2xl p-6 border hover:scale-105 transition-all duration-300" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}>
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-400">Active Tournaments</p>
@@ -339,7 +344,7 @@ export default function OrganizerDashboardPage() {
             </div>
           </div>
 
-          <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:shadow-[0_0_30px_rgba(168,85,247,0.3)] hover:scale-105 transition-all duration-300">
+          <div className="rounded-2xl p-6 border hover:scale-105 transition-all duration-300" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}>
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-400">Total Participants</p>
@@ -351,7 +356,7 @@ export default function OrganizerDashboardPage() {
             </div>
           </div>
 
-          <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:shadow-[0_0_30px_rgba(168,85,247,0.3)] hover:scale-105 transition-all duration-300">
+          <div className="rounded-2xl p-6 border hover:scale-105 transition-all duration-300" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}>
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-400">Total Revenue</p>
@@ -369,7 +374,7 @@ export default function OrganizerDashboardPage() {
         {/* Comprehensive Profile Section */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           {/* Profile Information */}
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
+          <div className="rounded-2xl border p-6" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}>
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center">
                 <Users className="w-5 h-5 text-white" />
@@ -419,7 +424,7 @@ export default function OrganizerDashboardPage() {
           </div>
 
           {/* Performance Stats */}
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
+          <div className="rounded-2xl border p-6" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}>
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center">
                 <BarChart3 className="w-5 h-5 text-white" />
@@ -484,7 +489,7 @@ export default function OrganizerDashboardPage() {
           </div>
 
           {/* Activity & Achievements */}
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
+          <div className="rounded-2xl border p-6" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}>
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center">
                 <Trophy className="w-5 h-5 text-white" />
@@ -494,7 +499,7 @@ export default function OrganizerDashboardPage() {
             
             <div className="space-y-4">
               {/* Current Status */}
-              <div className="bg-slate-700/50 rounded-xl p-4">
+              <div className="rounded-xl p-4 border" style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.06)' }}>
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-gray-400 text-sm">Current Status</p>
                   <div className={`w-3 h-3 rounded-full ${
@@ -513,7 +518,7 @@ export default function OrganizerDashboardPage() {
               </div>
 
               {/* Total Revenue */}
-              <div className="bg-slate-700/50 rounded-xl p-4">
+              <div className="rounded-xl p-4 border" style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.06)' }}>
                 <p className="text-gray-400 text-sm mb-2">Total Revenue</p>
                 <p className="text-3xl font-bold text-green-400">₹{stats.totalRevenue.toLocaleString()}</p>
                 <p className="text-gray-500 text-xs mt-1">
@@ -566,7 +571,7 @@ export default function OrganizerDashboardPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
           {/* My Tournaments - Published & Draft */}
-          <div className="lg:col-span-2 bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden">
+          <div className="lg:col-span-2 rounded-2xl border" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }} className=" overflow-hidden">
             <div className="p-6 border-b border-white/10 flex items-center justify-between">
               <h2 className="text-xl font-semibold text-white">My Tournaments</h2>
               <button
@@ -592,7 +597,7 @@ export default function OrganizerDashboardPage() {
                       .map((tournament) => (
                         <div
                           key={tournament.id}
-                          className="border border-white/10 rounded-xl p-4 hover:border-emerald-500/50 cursor-pointer transition bg-slate-700/30"
+                          className="rounded-xl p-4 hover:border-emerald-500/50 cursor-pointer transition border" style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.08)' }}
                           onClick={() => navigate(`/tournaments/${tournament.id}`)}
                         >
                           <div className="flex justify-between items-start mb-2">
@@ -679,7 +684,7 @@ export default function OrganizerDashboardPage() {
           </div>
 
           {/* Upcoming Tournaments */}
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden">
+          <div className="rounded-2xl border overflow-hidden" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}>
             <div className="p-6 border-b border-white/10">
               <h2 className="text-xl font-semibold text-white">Upcoming Tournaments</h2>
             </div>
@@ -725,7 +730,7 @@ export default function OrganizerDashboardPage() {
           </div>
 
           {/* Recent Registrations */}
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden">
+          <div className="rounded-2xl border overflow-hidden" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}>
             <div className="p-6 border-b border-white/10">
               <h2 className="text-xl font-semibold text-white">Recent Registrations</h2>
             </div>
@@ -767,7 +772,7 @@ export default function OrganizerDashboardPage() {
         </div>
 
         {/* Tournament Status Breakdown */}
-        <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
+        <div className="rounded-2xl border p-6" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}>
           <h2 className="text-xl font-semibold text-white mb-4">Tournament Status Breakdown</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {Object.entries(dashboardData.tournaments_by_status || {}).map(([status, count]) => (

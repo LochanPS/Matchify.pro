@@ -2,8 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getMyPoints } from '../api/points';
 import PointsHistoryCard from '../components/PointsHistoryCard';
-import { TrendingUp, Award, Trophy, Target, Sparkles, AlertTriangle } from 'lucide-react';
-import { ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { TrendingUp, Award, Trophy, Target, Crown, ArrowLeft, AlertTriangle } from 'lucide-react';
+
+const B = {
+  bg: '#07071a',
+  card: 'rgba(255,255,255,0.04)',
+  border: 'rgba(255,255,255,0.08)',
+  cardDark: '#0d1025',
+  green: '#00ff88',
+  cyan: '#00d4ff',
+  purple: '#a855f7',
+  amber: '#fbbf24',
+  sub: 'rgba(255,255,255,0.6)',
+  dim: 'rgba(255,255,255,0.4)',
+};
 
 const MyPoints = () => {
   const navigate = useNavigate();
@@ -21,8 +33,8 @@ const MyPoints = () => {
     try {
       const result = await getMyPoints();
       setData(result);
-    } catch (error) {
-      console.error('Failed to fetch points:', error);
+    } catch (err) {
+      console.error('Failed to fetch points:', err);
       setError('Failed to load points data');
     } finally {
       setLoading(false);
@@ -31,168 +43,122 @@ const MyPoints = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: B.bg }}>
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="mt-4 text-gray-400 font-medium">Loading your points...</p>
+          <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin mx-auto"
+            style={{ borderColor: 'rgba(0,255,136,0.3)', borderTopColor: B.green }} />
+          <p className="mt-4 font-medium" style={{ color: B.sub }}>Loading your points...</p>
         </div>
       </div>
     );
   }
 
-  // Handle null/undefined data gracefully
   const total_points = data?.total_points || 0;
   const rank = data?.rank || '-';
   const tournaments_played = data?.tournaments_played || 0;
   const logs = data?.logs || [];
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      {/* Hero Header */}
-      <div className="relative bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 overflow-hidden">
-        <div className="absolute inset-0">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
-        </div>
-        
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          {/* Back Button */}
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-white/70 hover:text-white mb-6 transition-colors group"
-          >
-            <ArrowLeftIcon className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
-            <span>Back</span>
-          </button>
+  const stats = [
+    { icon: <TrendingUp className="w-5 h-5" style={{ color: B.green }} />, label: 'Total Points', value: total_points.toFixed ? total_points.toFixed(1) : total_points, color: B.green, accent: 'rgba(0,255,136,0.1)' },
+    { icon: <Trophy className="w-5 h-5" style={{ color: B.amber }} />, label: 'Global Rank', value: `#${rank}`, color: B.amber, accent: 'rgba(251,191,36,0.1)' },
+    { icon: <Target className="w-5 h-5" style={{ color: B.cyan }} />, label: 'Tournaments', value: tournaments_played, color: B.cyan, accent: 'rgba(0,212,255,0.1)' },
+    { icon: <Award className="w-5 h-5" style={{ color: B.purple }} />, label: 'Avg Points', value: tournaments_played > 0 ? (total_points / tournaments_played).toFixed(1) : '0.0', color: B.purple, accent: 'rgba(168,85,247,0.1)' },
+  ];
 
-          <div className="flex items-center gap-5">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-400 via-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-blue-500/30">
-              <Award className="w-8 h-8 text-white" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-white">My Matchify Points</h1>
-              <p className="text-white/60">Track your tournament performance and rankings</p>
-            </div>
-          </div>
-        </div>
+  const pointsTable = [
+    { label: 'Winner', pts: '+10', color: B.green, accentBg: 'rgba(0,255,136,0.08)' },
+    { label: 'Runner-up', pts: '+8', color: B.cyan, accentBg: 'rgba(0,212,255,0.08)' },
+    { label: 'Semi-finalist', pts: '+6', color: B.purple, accentBg: 'rgba(168,85,247,0.08)' },
+    { label: 'Quarter-finalist', pts: '+4', color: B.amber, accentBg: 'rgba(251,191,36,0.08)' },
+    { label: 'Participation', pts: '+2', color: 'rgba(255,255,255,0.55)', accentBg: 'rgba(255,255,255,0.04)' },
+  ];
+
+  return (
+    <div className="min-h-screen" style={{ background: B.bg }}>
+      {/* Background orbs */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-1/4 left-1/4 w-80 h-80 rounded-full blur-3xl opacity-[0.07]" style={{ background: B.green }} />
+        <div className="absolute bottom-1/4 right-1/4 w-72 h-72 rounded-full blur-3xl opacity-[0.05]" style={{ background: B.purple }} />
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 -mt-6">
-        {/* Error Message */}
+      <div className="relative max-w-lg mx-auto px-4 py-6">
+        {/* Back */}
+        <button onClick={() => navigate(-1)} className="flex items-center gap-2 mb-6">
+          <ArrowLeft className="w-5 h-5" style={{ color: B.green }} />
+          <span className="text-sm font-semibold" style={{ color: B.sub }}>Back</span>
+        </button>
+
+        {/* Header */}
+        <div className="flex items-center gap-4 mb-8">
+          <div className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg"
+            style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', boxShadow: '0 0 20px rgba(0,255,136,0.25)' }}>
+            <Award className="w-7 h-7" style={{ color: '#003320' }} />
+          </div>
+          <div>
+            <h1 className="text-2xl font-black text-white">My Points</h1>
+            <p className="text-sm" style={{ color: B.sub }}>Track your tournament performance</p>
+          </div>
+        </div>
+
+        {/* Error */}
         {error && (
-          <div className="mb-6 bg-red-500/10 border border-red-500/30 rounded-2xl p-4 flex items-center gap-3">
-            <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0" />
-            <span className="text-red-300">{error}</span>
+          <div className="mb-5 flex items-center gap-2.5 px-4 py-3 rounded-xl border"
+            style={{ background: 'rgba(239,68,68,0.08)', borderColor: 'rgba(239,68,68,0.25)' }}>
+            <AlertTriangle className="w-4 h-4 text-red-400 flex-shrink-0" />
+            <span className="text-sm text-red-300">{error}</span>
           </div>
         )}
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-6 shadow-xl hover:shadow-blue-500/10 transition-all">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center">
-                <TrendingUp className="w-5 h-5 text-blue-400" />
+        {/* Stats grid */}
+        <div className="grid grid-cols-2 gap-3 mb-6">
+          {stats.map(({ icon, label, value, color, accent }) => (
+            <div key={label} className="rounded-2xl p-4 border" style={{ background: B.card, borderColor: B.border }}>
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-3" style={{ background: accent }}>
+                {icon}
               </div>
-              <p className="text-sm font-semibold text-gray-400">Total Points</p>
+              <p className="text-2xl font-black" style={{ color }}>{value}</p>
+              <p className="text-xs mt-0.5" style={{ color: B.sub }}>{label}</p>
             </div>
-            <p className="text-4xl font-bold text-white">{total_points.toFixed ? total_points.toFixed(1) : total_points}</p>
-          </div>
-
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-6 shadow-xl hover:shadow-purple-500/10 transition-all">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-10 h-10 bg-purple-500/20 rounded-xl flex items-center justify-center">
-                <Trophy className="w-5 h-5 text-purple-400" />
-              </div>
-              <p className="text-sm font-semibold text-gray-400">Global Rank</p>
-            </div>
-            <p className="text-4xl font-bold text-white">#{rank}</p>
-          </div>
-
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-6 shadow-xl hover:shadow-emerald-500/10 transition-all">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-10 h-10 bg-emerald-500/20 rounded-xl flex items-center justify-center">
-                <Target className="w-5 h-5 text-emerald-400" />
-              </div>
-              <p className="text-sm font-semibold text-gray-400">Tournaments</p>
-            </div>
-            <p className="text-4xl font-bold text-white">{tournaments_played}</p>
-          </div>
-
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-6 shadow-xl hover:shadow-amber-500/10 transition-all">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-10 h-10 bg-amber-500/20 rounded-xl flex items-center justify-center">
-                <Award className="w-5 h-5 text-amber-400" />
-              </div>
-              <p className="text-sm font-semibold text-gray-400">Avg Points</p>
-            </div>
-            <p className="text-4xl font-bold text-white">
-              {tournaments_played > 0 ? (total_points / tournaments_played).toFixed(1) : '0.0'}
-            </p>
-          </div>
+          ))}
         </div>
 
-        {/* Points Breakdown */}
-        <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-6 mb-8">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-white" />
+        {/* Points breakdown */}
+        <div className="rounded-2xl border p-5 mb-5" style={{ background: B.card, borderColor: B.border }}>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'rgba(251,191,36,0.15)' }}>
+              <Crown className="w-5 h-5 text-yellow-400" />
             </div>
-            <h2 className="text-xl font-bold text-white">Points Breakdown</h2>
+            <h2 className="text-base font-bold text-white">Points Breakdown</h2>
           </div>
-          
+
           {logs && logs.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-3">
               {logs.map((log) => (
                 <PointsHistoryCard key={log.id} log={log} />
               ))}
             </div>
           ) : (
-            <div className="text-center py-12">
-              <div className="w-20 h-20 bg-slate-700/50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Trophy className="w-10 h-10 text-gray-500" />
-              </div>
-              <p className="text-gray-300 text-lg font-semibold">No points earned yet</p>
-              <p className="text-gray-500 text-sm mt-2">
-                Participate in tournaments to start earning Matchify Points!
-              </p>
+            <div className="text-center py-8">
+              <Trophy className="w-10 h-10 mx-auto mb-3" style={{ color: 'rgba(255,255,255,0.2)' }} />
+              <p className="font-semibold text-white mb-1">No points earned yet</p>
+              <p className="text-sm" style={{ color: B.sub }}>Participate in tournaments to start earning points!</p>
             </div>
           )}
         </div>
 
-        {/* How Points Work */}
-        <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
-          <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center">
-              <span className="text-xl">📊</span>
-            </div>
-            How Matchify Points Work
+        {/* How points work */}
+        <div className="rounded-2xl border p-5" style={{ background: B.card, borderColor: B.border }}>
+          <h3 className="font-bold text-white mb-4 flex items-center gap-2">
+            <span>📊</span> How Matchify Points Work
           </h3>
-          <div className="bg-slate-700/30 rounded-xl p-6 border border-white/5">
-            <p className="font-semibold text-white mb-4 flex items-center gap-2 text-lg">
-              <span className="text-2xl">🏆</span> Tournament Results
-            </p>
-            <ul className="space-y-3 text-base">
-              <li className="flex items-center justify-between py-3 border-b border-white/10">
-                <span className="text-gray-300">Winner</span>
-                <span className="font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-lg">+10 points</span>
-              </li>
-              <li className="flex items-center justify-between py-3 border-b border-white/10">
-                <span className="text-gray-300">Runner-up</span>
-                <span className="font-bold text-blue-400 bg-blue-500/10 px-3 py-1 rounded-lg">+8 points</span>
-              </li>
-              <li className="flex items-center justify-between py-3 border-b border-white/10">
-                <span className="text-gray-300">Semi-finalist</span>
-                <span className="font-bold text-purple-400 bg-purple-500/10 px-3 py-1 rounded-lg">+6 points</span>
-              </li>
-              <li className="flex items-center justify-between py-3 border-b border-white/10">
-                <span className="text-gray-300">Quarter-finalist</span>
-                <span className="font-bold text-amber-400 bg-amber-500/10 px-3 py-1 rounded-lg">+4 points</span>
-              </li>
-              <li className="flex items-center justify-between py-3">
-                <span className="text-gray-300">Participation</span>
-                <span className="font-bold text-gray-400 bg-gray-500/10 px-3 py-1 rounded-lg">+2 points</span>
-              </li>
-            </ul>
+          <div className="rounded-xl overflow-hidden border" style={{ borderColor: B.border }}>
+            {pointsTable.map(({ label, pts, color, accentBg }, i) => (
+              <div key={label} className={`flex items-center justify-between px-4 py-3 ${i < pointsTable.length - 1 ? 'border-b' : ''}`}
+                style={{ borderColor: B.border }}>
+                <span className="text-sm" style={{ color: 'rgba(255,255,255,0.75)' }}>{label}</span>
+                <span className="text-sm font-black px-3 py-1 rounded-lg" style={{ color, background: accentBg }}>{pts} pts</span>
+              </div>
+            ))}
           </div>
         </div>
       </div>

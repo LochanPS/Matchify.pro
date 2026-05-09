@@ -3,24 +3,24 @@ import { useParams, useNavigate } from 'react-router-dom';
 
 /**
  * UmpireScoring - Redirect component
- * This page redirects umpires to the proper MatchScoringPage
- * which has the full scoring functionality
+ * Redirects umpires to the proper MatchScoringPage
  */
 export default function UmpireScoring() {
   const { matchId } = useParams();
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Redirect to the proper match scoring page
     navigate(`/match/${matchId}/score`, { replace: true });
   }, [matchId, navigate]);
 
-  // Show loading while redirecting
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center" style={{ background: '#07071a' }}>
       <div className="text-center">
-        <div className="w-16 h-16 border-4 border-teal-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-        <p className="text-gray-400 mt-4 font-medium">Loading scoring console...</p>
+        <div
+          className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin mx-auto"
+          style={{ borderColor: 'rgba(0,255,136,0.3)', borderTopColor: '#00ff88' }}
+        />
+        <p className="mt-4 font-medium" style={{ color: 'rgba(255,255,255,0.55)' }}>Loading scoring console...</p>
       </div>
     </div>
   );

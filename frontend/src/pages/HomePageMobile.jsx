@@ -59,24 +59,22 @@ const HomePageMobile = () => {
   ];
 
   const benefits = [
-    { icon: BoltIcon, text: 'Instant Registration', color: 'text-amber-400', bg: 'bg-amber-400/10' },
-    { icon: ShieldCheckIcon, text: 'Secure Payments', color: 'text-green-400', bg: 'bg-green-400/10' },
-    { icon: TrophyIcon, text: 'Fair Play System', color: 'text-cyan-400', bg: 'bg-cyan-400/10' },
-    { icon: ChartBarIcon, text: 'Track Performance', color: 'text-violet-400', bg: 'bg-violet-400/10' },
+    { icon: BoltIcon, text: 'Instant Registration', color: '#fbbf24', bg: 'rgba(251,191,36,0.1)' },
+    { icon: ShieldCheckIcon, text: 'Secure Payments', color: '#00ff88', bg: 'rgba(0,255,136,0.1)' },
+    { icon: TrophyIcon, text: 'Fair Play System', color: '#00d4ff', bg: 'rgba(0,212,255,0.1)' },
+    { icon: ChartBarIcon, text: 'Track Performance', color: '#a855f7', bg: 'rgba(168,85,247,0.1)' },
   ];
 
   return (
-    <div className="min-h-screen relative overflow-hidden" style={{ 
-      background: 'linear-gradient(180deg, #0a0a1f 0%, #07071a 30%, #0d1a2a 60%, #07071a 100%)' 
-    }}>
+    <div className="min-h-screen relative overflow-hidden" style={{ background: '#07071a' }}>
       {/* Sticky Header with Sign In & Sign Up */}
       {!user && (
         <div 
           className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md border-b"
           style={{ 
             background: 'linear-gradient(135deg, rgba(7,7,26,0.95), rgba(13,26,42,0.95))', 
-            borderColor: 'rgba(0,200,83,0.2)',
-            boxShadow: '0 4px 20px rgba(0,200,83,0.1)',
+            borderColor: 'rgba(0,255,136,0.2)',
+            boxShadow: '0 4px 20px rgba(0,255,136,0.1)',
             animation: 'slideDown 0.5s ease-out'
           }}
         >
@@ -87,7 +85,7 @@ const HomePageMobile = () => {
                 <div 
                   className="absolute inset-0 blur-lg opacity-60"
                   style={{ 
-                    background: 'radial-gradient(circle, rgba(0,200,83,0.6) 0%, transparent 70%)',
+                    background: 'radial-gradient(circle, rgba(0,255,136,0.6) 0%, transparent 70%)',
                     animation: 'glow 3s ease-in-out infinite'
                   }}
                 />
@@ -96,7 +94,7 @@ const HomePageMobile = () => {
               <span 
                 className="font-bold text-base"
                 style={{ 
-                  background: 'linear-gradient(135deg, #00c853, #00ff88)',
+                  background: 'linear-gradient(135deg, #00ff88, #00ff88)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   backgroundClip: 'text'
@@ -129,9 +127,9 @@ const HomePageMobile = () => {
                 to="/register"
                 className="px-4 py-2 rounded-lg font-bold text-sm transition-all relative overflow-hidden group"
                 style={{ 
-                  background: 'linear-gradient(135deg, #00c853, #00ff88)',
+                  background: 'linear-gradient(135deg, #00ff88, #00ff88)',
                   color: '#003320',
-                  boxShadow: '0 4px 12px rgba(0,200,83,0.4), inset 0 1px 0 rgba(255,255,255,0.3)'
+                  boxShadow: '0 4px 12px rgba(0,255,136,0.4), inset 0 1px 0 rgba(255,255,255,0.3)'
                 }}
               >
                 <div 
@@ -151,7 +149,7 @@ const HomePageMobile = () => {
         <div 
           className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl opacity-30 animate-pulse"
           style={{ 
-            background: 'radial-gradient(circle, rgba(0,200,83,0.4) 0%, rgba(0,255,136,0.2) 40%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(0,255,136,0.4) 0%, rgba(0,255,136,0.2) 40%, transparent 70%)',
             animation: 'float 8s ease-in-out infinite'
           }}
         />
@@ -248,7 +246,7 @@ const HomePageMobile = () => {
             <div 
               className="absolute inset-0 blur-2xl opacity-60"
               style={{ 
-                background: 'radial-gradient(circle, rgba(0,200,83,0.6) 0%, transparent 70%)',
+                background: 'radial-gradient(circle, rgba(0,255,136,0.6) 0%, transparent 70%)',
                 animation: 'glow 3s ease-in-out infinite'
               }}
             />
@@ -261,10 +259,10 @@ const HomePageMobile = () => {
           <div 
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold mb-4 relative overflow-hidden"
             style={{ 
-              background: 'linear-gradient(135deg, rgba(0,200,83,0.2), rgba(0,255,136,0.15))', 
-              border: '2px solid rgba(0,200,83,0.5)', 
+              background: 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,255,136,0.15))', 
+              border: '2px solid rgba(0,255,136,0.5)', 
               color: '#00ff88',
-              boxShadow: '0 0 20px rgba(0,200,83,0.3), inset 0 0 20px rgba(0,200,83,0.1)',
+              boxShadow: '0 0 20px rgba(0,255,136,0.3), inset 0 0 20px rgba(0,255,136,0.1)',
               animation: 'slideDown 0.8s ease-out 0.2s both'
             }}
           >
@@ -285,7 +283,7 @@ const HomePageMobile = () => {
             <span 
               className="block text-white"
               style={{ 
-                textShadow: '0 0 30px rgba(255,255,255,0.3), 0 0 60px rgba(0,200,83,0.2)'
+                textShadow: '0 0 30px rgba(255,255,255,0.3), 0 0 60px rgba(0,255,136,0.2)'
               }}
             >
               Where Champions
@@ -293,14 +291,14 @@ const HomePageMobile = () => {
             <span 
               className="block mt-1"
               style={{ 
-                background: 'linear-gradient(135deg, #00c853 0%, #00ff88 50%, #00c853 100%)',
+                background: 'linear-gradient(135deg, #00ff88 0%, #00ff88 50%, #00ff88 100%)',
                 backgroundSize: '200% auto',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
                 animation: 'shimmer 4s linear infinite',
                 textShadow: 'none',
-                filter: 'drop-shadow(0 0 20px rgba(0,200,83,0.5))'
+                filter: 'drop-shadow(0 0 20px rgba(0,255,136,0.5))'
               }}
             >
               Are Made
@@ -309,7 +307,7 @@ const HomePageMobile = () => {
 
           {/* Tagline */}
           <p className="text-sm text-gray-400 mb-2 px-4" style={{ animation: 'fadeIn 1s ease-out 0.4s both' }}>
-            Join <span className="font-bold text-emerald-400">10,000+</span> players across India
+            Join <span className="font-bold" style={{ color: '#00ff88' }}>10,000+</span> players across India
           </p>
           <p className="text-sm text-gray-400 mb-6 px-4" style={{ animation: 'fadeIn 1s ease-out 0.5s both' }}>
             Register for tournaments, track progress, compete with the best
@@ -323,7 +321,7 @@ const HomePageMobile = () => {
                   key={i}
                   className="w-8 h-8 rounded-full border-2 flex items-center justify-center text-xs font-bold"
                   style={{ 
-                    background: 'linear-gradient(135deg,#00c853,#00ff88)', 
+                    background: 'linear-gradient(135deg,#00ff88,#00ff88)', 
                     borderColor: '#07071a', 
                     color: '#003320',
                     animation: `scaleIn 0.5s ease-out ${0.7 + i * 0.1}s both`
@@ -352,10 +350,10 @@ const HomePageMobile = () => {
                 to={getDashboardLink()}
                 className="flex items-center justify-center gap-2 w-full py-4 rounded-xl font-bold text-base transition-all relative overflow-hidden group"
                 style={{ 
-                  background: 'linear-gradient(135deg, #00c853 0%, #00ff88 50%, #00c853 100%)',
+                  background: 'linear-gradient(135deg, #00ff88 0%, #00ff88 50%, #00ff88 100%)',
                   backgroundSize: '200% auto',
                   color: '#003320',
-                  boxShadow: '0 8px 25px rgba(0,200,83,0.4), 0 0 40px rgba(0,200,83,0.2), inset 0 1px 0 rgba(255,255,255,0.3)',
+                  boxShadow: '0 8px 25px rgba(0,255,136,0.4), 0 0 40px rgba(0,255,136,0.2), inset 0 1px 0 rgba(255,255,255,0.3)',
                   animation: 'shimmer 3s linear infinite'
                 }}
               >
@@ -371,17 +369,17 @@ const HomePageMobile = () => {
               <div 
                 className="flex items-center gap-3 px-4 py-4 rounded-xl border relative overflow-hidden"
                 style={{ 
-                  background: 'linear-gradient(135deg, rgba(0,200,83,0.1), rgba(99,102,241,0.1))', 
-                  borderColor: 'rgba(0,200,83,0.3)',
-                  boxShadow: '0 4px 15px rgba(0,200,83,0.1), inset 0 1px 0 rgba(255,255,255,0.1)'
+                  background: 'linear-gradient(135deg, rgba(0,255,136,0.1), rgba(99,102,241,0.1))', 
+                  borderColor: 'rgba(0,255,136,0.3)',
+                  boxShadow: '0 4px 15px rgba(0,255,136,0.1), inset 0 1px 0 rgba(255,255,255,0.1)'
                 }}
               >
                 <div 
                   className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-base flex-shrink-0 relative"
                   style={{ 
-                    background: 'linear-gradient(135deg,#00c853,#00ff88)', 
+                    background: 'linear-gradient(135deg,#00ff88,#00ff88)', 
                     color: '#003320',
-                    boxShadow: '0 4px 12px rgba(0,200,83,0.4), inset 0 1px 0 rgba(255,255,255,0.3)'
+                    boxShadow: '0 4px 12px rgba(0,255,136,0.4), inset 0 1px 0 rgba(255,255,255,0.3)'
                   }}
                 >
                   {user.name?.charAt(0).toUpperCase()}
@@ -398,10 +396,10 @@ const HomePageMobile = () => {
                 to="/register"
                 className="flex items-center justify-center gap-2 w-full py-4 rounded-xl font-bold text-base transition-all relative overflow-hidden group"
                 style={{ 
-                  background: 'linear-gradient(135deg, #00c853 0%, #00ff88 50%, #00c853 100%)',
+                  background: 'linear-gradient(135deg, #00ff88 0%, #00ff88 50%, #00ff88 100%)',
                   backgroundSize: '200% auto',
                   color: '#003320',
-                  boxShadow: '0 8px 25px rgba(0,200,83,0.4), 0 0 40px rgba(0,200,83,0.2), inset 0 1px 0 rgba(255,255,255,0.3)',
+                  boxShadow: '0 8px 25px rgba(0,255,136,0.4), 0 0 40px rgba(0,255,136,0.2), inset 0 1px 0 rgba(255,255,255,0.3)',
                   animation: 'shimmer 3s linear infinite, pulse 3s ease-in-out infinite'
                 }}
               >
@@ -438,10 +436,10 @@ const HomePageMobile = () => {
         <div 
           className="rounded-2xl p-6 mb-6 relative overflow-hidden"
           style={{
-            background: 'linear-gradient(135deg, rgba(0,200,83,0.15) 0%, rgba(99,102,241,0.15) 100%)',
-            border: '2px solid rgba(0,200,83,0.3)',
+            background: 'linear-gradient(135deg, rgba(0,255,136,0.15) 0%, rgba(99,102,241,0.15) 100%)',
+            border: '2px solid rgba(0,255,136,0.3)',
             backdropFilter: 'blur(20px)',
-            boxShadow: '0 8px 32px rgba(0,200,83,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
+            boxShadow: '0 8px 32px rgba(0,255,136,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
             animation: 'fadeIn 0.8s ease-out 0.8s both'
           }}
         >
@@ -472,7 +470,7 @@ const HomePageMobile = () => {
             <div className="grid grid-cols-2 gap-4">
               {stats.map((s, i) => {
                 const colors = [
-                  { bg: 'linear-gradient(135deg, rgba(0,200,83,0.2), rgba(0,255,136,0.15))', border: 'rgba(0,200,83,0.4)', shadow: 'rgba(0,200,83,0.3)', text: '#00ff88' },
+                  { bg: 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,255,136,0.15))', border: 'rgba(0,255,136,0.4)', shadow: 'rgba(0,255,136,0.3)', text: '#00ff88' },
                   { bg: 'linear-gradient(135deg, rgba(245,158,11,0.2), rgba(251,146,60,0.15))', border: 'rgba(245,158,11,0.4)', shadow: 'rgba(245,158,11,0.3)', text: '#fbbf24' },
                   { bg: 'linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.15))', border: 'rgba(99,102,241,0.4)', shadow: 'rgba(99,102,241,0.3)', text: '#a78bfa' },
                   { bg: 'linear-gradient(135deg, rgba(6,182,212,0.2), rgba(14,165,233,0.15))', border: 'rgba(6,182,212,0.4)', shadow: 'rgba(6,182,212,0.3)', text: '#22d3ee' }
@@ -552,10 +550,10 @@ const HomePageMobile = () => {
             <div className="grid grid-cols-2 gap-4">
               {features.map((f, i) => {
                 const colorSchemes = [
-                  { gradient: 'from-amber-500 to-orange-600', bg: 'linear-gradient(135deg, rgba(245,158,11,0.2), rgba(251,146,60,0.15))', border: 'rgba(245,158,11,0.4)', shadow: 'rgba(245,158,11,0.3)' },
-                  { gradient: 'from-cyan-500 to-blue-600', bg: 'linear-gradient(135deg, rgba(6,182,212,0.2), rgba(37,99,235,0.15))', border: 'rgba(6,182,212,0.4)', shadow: 'rgba(6,182,212,0.3)' },
-                  { gradient: 'from-violet-500 to-purple-600', bg: 'linear-gradient(135deg, rgba(139,92,246,0.2), rgba(168,85,247,0.15))', border: 'rgba(139,92,246,0.4)', shadow: 'rgba(139,92,246,0.3)' },
-                  { gradient: 'from-green-500 to-emerald-600', bg: 'linear-gradient(135deg, rgba(16,185,129,0.2), rgba(5,150,105,0.15))', border: 'rgba(16,185,129,0.4)', shadow: 'rgba(16,185,129,0.3)' }
+                  { gradient: 'linear-gradient(135deg,#f59e0b,#ea580c)', bg: 'linear-gradient(135deg, rgba(245,158,11,0.2), rgba(251,146,60,0.15))', border: 'rgba(245,158,11,0.4)', shadow: 'rgba(245,158,11,0.3)' },
+                  { gradient: 'linear-gradient(135deg,#06b6d4,#00d4ff)', bg: 'linear-gradient(135deg, rgba(6,182,212,0.2), rgba(37,99,235,0.15))', border: 'rgba(6,182,212,0.4)', shadow: 'rgba(6,182,212,0.3)' },
+                  { gradient: 'linear-gradient(135deg,#a855f7,#7c3aed)', bg: 'linear-gradient(135deg, rgba(168,85,247,0.2), rgba(139,92,246,0.15))', border: 'rgba(168,85,247,0.4)', shadow: 'rgba(168,85,247,0.3)' },
+                  { gradient: 'linear-gradient(135deg,#00ff88,#00c853)', bg: 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,200,83,0.15))', border: 'rgba(0,255,136,0.4)', shadow: 'rgba(0,255,136,0.3)' }
                 ];
                 const scheme = colorSchemes[i];
                 
@@ -570,9 +568,10 @@ const HomePageMobile = () => {
                       animation: `slideUp 0.5s ease-out ${1.1 + i * 0.1}s both`
                     }}
                   >
-                    <div 
-                      className={`inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br ${scheme.gradient} rounded-xl mb-3 relative`}
-                      style={{ 
+                    <div
+                      className="inline-flex items-center justify-center w-12 h-12 rounded-xl mb-3 relative"
+                      style={{
+                        background: scheme.gradient,
                         boxShadow: `0 4px 12px ${scheme.shadow}, inset 0 1px 0 rgba(255,255,255,0.3)`,
                         animation: 'pulse 3s ease-in-out infinite'
                       }}
@@ -593,14 +592,14 @@ const HomePageMobile = () => {
           className="rounded-2xl p-5 mb-6"
           style={{
             background: 'rgba(13,26,42,0.8)',
-            border: '1px solid rgba(0,200,83,0.2)',
+            border: '1px solid rgba(0,255,136,0.2)',
             backdropFilter: 'blur(10px)',
             animation: 'fadeIn 0.8s ease-out 1.2s both'
           }}
         >
           <div className="text-center mb-5">
             <h2 className="text-xl font-bold text-white mb-1">
-              Why <span style={{ color: '#00c853' }}>Matchify.pro</span>?
+              Why <span style={{ color: '#00ff88' }}>Matchify.pro</span>?
             </h2>
           </div>
 
@@ -614,7 +613,8 @@ const HomePageMobile = () => {
                   border: '1px solid rgba(255,255,255,0.07)' 
                 }}
               >
-                <div className={`flex-shrink-0 w-8 h-8 ${b.bg} ${b.color} rounded-lg flex items-center justify-center`}>
+                <div className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center"
+                  style={{ background: b.bg, color: b.color }}>
                   <b.icon className="w-4 h-4" />
                 </div>
                 <span className="text-xs font-semibold text-white leading-tight">{b.text}</span>
@@ -628,7 +628,7 @@ const HomePageMobile = () => {
           className="rounded-2xl p-5 mb-6"
           style={{
             background: 'rgba(13,26,42,0.8)',
-            border: '1px solid rgba(0,200,83,0.2)',
+            border: '1px solid rgba(0,255,136,0.2)',
             backdropFilter: 'blur(10px)',
             animation: 'fadeIn 0.8s ease-out 1.3s both'
           }}
@@ -662,8 +662,9 @@ const HomePageMobile = () => {
                   border: '1px solid rgba(255,255,255,0.08)' 
                 }}
               >
-                <div 
-                  className="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg flex items-center justify-center text-white text-xs font-black"
+                <div
+                  className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center text-xs font-black"
+                  style={{ background: 'linear-gradient(135deg,#00ff88,#00c853)', color: '#003320' }}
                 >
                   {s.step}
                 </div>
@@ -684,7 +685,7 @@ const HomePageMobile = () => {
           className="rounded-2xl p-5 mb-6"
           style={{
             background: 'rgba(13,26,42,0.8)',
-            border: '1px solid rgba(0,200,83,0.2)',
+            border: '1px solid rgba(0,255,136,0.2)',
             backdropFilter: 'blur(10px)',
             animation: 'fadeIn 0.8s ease-out 1.4s both'
           }}
@@ -744,10 +745,10 @@ const HomePageMobile = () => {
         <div 
           className="rounded-2xl p-6 mb-6 text-center relative overflow-hidden"
           style={{
-            background: 'linear-gradient(135deg, rgba(0,200,83,0.2) 0%, rgba(99,102,241,0.2) 50%, rgba(245,158,11,0.2) 100%)',
-            border: '2px solid rgba(0,200,83,0.4)',
+            background: 'linear-gradient(135deg, rgba(0,255,136,0.2) 0%, rgba(99,102,241,0.2) 50%, rgba(245,158,11,0.2) 100%)',
+            border: '2px solid rgba(0,255,136,0.4)',
             backdropFilter: 'blur(20px)',
-            boxShadow: '0 8px 32px rgba(0,200,83,0.3), inset 0 1px 0 rgba(255,255,255,0.1)',
+            boxShadow: '0 8px 32px rgba(0,255,136,0.3), inset 0 1px 0 rgba(255,255,255,0.1)',
             animation: 'scaleIn 0.8s ease-out 1.5s both'
           }}
         >
@@ -755,7 +756,7 @@ const HomePageMobile = () => {
           <div 
             className="absolute inset-0 opacity-30"
             style={{
-              background: 'linear-gradient(45deg, rgba(0,200,83,0.3), rgba(99,102,241,0.3), rgba(245,158,11,0.3), rgba(6,182,212,0.3))',
+              background: 'linear-gradient(45deg, rgba(0,255,136,0.3), rgba(99,102,241,0.3), rgba(245,158,11,0.3), rgba(6,182,212,0.3))',
               backgroundSize: '400% 400%',
               animation: 'shimmer 8s ease infinite'
             }}
@@ -765,7 +766,7 @@ const HomePageMobile = () => {
             <div 
               className="text-5xl mb-4 inline-block"
               style={{ 
-                filter: 'drop-shadow(0 0 20px rgba(0,200,83,0.6))',
+                filter: 'drop-shadow(0 0 20px rgba(0,255,136,0.6))',
                 animation: 'float 3s ease-in-out infinite'
               }}
             >
@@ -781,7 +782,7 @@ const HomePageMobile = () => {
                 backgroundClip: 'text',
                 animation: 'shimmer 4s linear infinite',
                 textShadow: 'none',
-                filter: 'drop-shadow(0 2px 10px rgba(0,200,83,0.3))'
+                filter: 'drop-shadow(0 2px 10px rgba(0,255,136,0.3))'
               }}
             >
               Ready to Start?
@@ -795,10 +796,10 @@ const HomePageMobile = () => {
                 to={user ? getDashboardLink() : '/register'}
                 className="flex items-center justify-center gap-2 w-full py-4 rounded-xl font-bold text-base transition-all relative overflow-hidden group"
                 style={{ 
-                  background: 'linear-gradient(135deg, #00c853 0%, #00ff88 50%, #00c853 100%)',
+                  background: 'linear-gradient(135deg, #00ff88 0%, #00ff88 50%, #00ff88 100%)',
                   backgroundSize: '200% auto',
                   color: '#003320',
-                  boxShadow: '0 8px 25px rgba(0,200,83,0.5), 0 0 40px rgba(0,200,83,0.3), inset 0 1px 0 rgba(255,255,255,0.3)',
+                  boxShadow: '0 8px 25px rgba(0,255,136,0.5), 0 0 40px rgba(0,255,136,0.3), inset 0 1px 0 rgba(255,255,255,0.3)',
                   animation: 'shimmer 3s linear infinite'
                 }}
               >
@@ -832,12 +833,12 @@ const HomePageMobile = () => {
           <div 
             className="rounded-2xl px-5 py-4 border"
             style={{ 
-              background: 'rgba(0,200,83,0.04)', 
-              borderColor: 'rgba(0,200,83,0.12)' 
+              background: 'rgba(0,255,136,0.04)', 
+              borderColor: 'rgba(0,255,136,0.12)' 
             }}
           >
             <p className="text-xs tracking-wider uppercase mb-2 text-gray-500">Co-Founded By</p>
-            <p className="text-lg font-black mb-2 text-emerald-400">PS Brothers</p>
+            <p className="text-lg font-black mb-2" style={{ color: '#00ff88' }}>PS Brothers</p>
             <div className="flex justify-center items-center gap-3 text-sm font-semibold text-white">
               <span>PS Lochan</span>
               <span className="text-gray-600">|</span>

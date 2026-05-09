@@ -79,15 +79,8 @@ const ViewDrawsPage = () => {
 
   const fetchDraw = async (categoryId) => {
     try {
-      // Add timestamp to force fresh data (cache busting)
-      const timestamp = new Date().getTime();
-      const response = await api.get(`/tournaments/${id}/categories/${categoryId}/draw?t=${timestamp}`, {
-        headers: {
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache'
-        }
-      });
-      setDraw(response.data.draw);
+      const response = await api.get(`/tournaments/${id}/categories/${categoryId}/draw`);
+      setDraw(response.data.draw || null);
     } catch (err) {
       if (err.response?.status !== 404) {
         console.error('Error fetching draw:', err);

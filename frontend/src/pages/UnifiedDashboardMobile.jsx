@@ -564,6 +564,56 @@ const UnifiedDashboardMobile = () => {
       {/* Main Content */}
       <div className="px-4 py-6 max-w-md mx-auto relative z-10">
         
+        {/* Quick Navigation — moved to top so visible immediately */}
+        <div
+          className="rounded-2xl p-5 mb-6 relative overflow-hidden"
+          style={{
+            background: 'linear-gradient(135deg, rgba(0,200,83,0.15) 0%, rgba(99,102,241,0.15) 100%)',
+            border: '2px solid rgba(0,200,83,0.3)',
+            backdropFilter: 'blur(20px)',
+            boxShadow: '0 8px 32px rgba(0,200,83,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
+            animation: 'fadeIn 0.5s ease-out both'
+          }}
+        >
+          <div className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl opacity-30"
+            style={{ background: 'radial-gradient(circle, rgba(0,255,136,0.6), transparent)', animation: 'glow 4s ease-in-out infinite' }} />
+          <div className="relative z-10">
+            <h3 className="text-lg font-black mb-4"
+              style={{ background: 'linear-gradient(135deg, #ffffff, #00ff88)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+              Quick Navigation
+            </h3>
+            <div className="grid grid-cols-3 gap-3">
+              <Link to="/tournaments" className="flex flex-col items-center gap-2 p-4 rounded-xl transition-all relative overflow-hidden group"
+                style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.2), rgba(37,99,235,0.15))', border: '2px solid rgba(59,130,246,0.3)', boxShadow: '0 4px 15px rgba(59,130,246,0.2)' }}>
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200" style={{ background: 'rgba(59,130,246,0.1)' }} />
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center relative z-10"
+                  style={{ background: 'linear-gradient(135deg, #3b82f6, #2563eb)', boxShadow: '0 4px 12px rgba(59,130,246,0.4)' }}>
+                  <TrophyIcon className="w-6 h-6 text-white" />
+                </div>
+                <span className="text-xs font-bold text-white text-center relative z-10">Tournaments</span>
+              </Link>
+              <Link to="/leaderboard" className="flex flex-col items-center gap-2 p-4 rounded-xl transition-all relative overflow-hidden group"
+                style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.2), rgba(251,146,60,0.15))', border: '2px solid rgba(245,158,11,0.3)', boxShadow: '0 4px 15px rgba(245,158,11,0.2)' }}>
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200" style={{ background: 'rgba(245,158,11,0.1)' }} />
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center relative z-10"
+                  style={{ background: 'linear-gradient(135deg, #f59e0b, #ea580c)', boxShadow: '0 4px 12px rgba(245,158,11,0.4)' }}>
+                  <ChartBarIcon className="w-6 h-6 text-white" />
+                </div>
+                <span className="text-xs font-bold text-white text-center relative z-10">Leaderboard</span>
+              </Link>
+              <Link to="/academies" className="flex flex-col items-center gap-2 p-4 rounded-xl transition-all relative overflow-hidden group"
+                style={{ background: 'linear-gradient(135deg, rgba(168,85,247,0.2), rgba(139,92,246,0.15))', border: '2px solid rgba(168,85,247,0.3)', boxShadow: '0 4px 15px rgba(168,85,247,0.2)' }}>
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200" style={{ background: 'rgba(168,85,247,0.1)' }} />
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center relative z-10"
+                  style={{ background: 'linear-gradient(135deg, #a855f7, #8b5cf6)', boxShadow: '0 4px 12px rgba(168,85,247,0.4)' }}>
+                  <UserIcon className="w-6 h-6 text-white" />
+                </div>
+                <span className="text-xs font-bold text-white text-center relative z-10">Academies</span>
+              </Link>
+            </div>
+          </div>
+        </div>
+
         {/* Profile Card */}
         <div 
           className="rounded-2xl p-5 mb-6 relative overflow-hidden"
@@ -820,125 +870,6 @@ const UnifiedDashboardMobile = () => {
             <UserIcon className="w-5 h-5 relative z-10" />
             <span className="relative z-10">Edit Profile</span>
           </Link>
-        </div>
-
-        {/* Navigation Section */}
-        <div 
-          className="rounded-2xl p-5 mb-6 relative overflow-hidden"
-          style={{
-            background: 'linear-gradient(135deg, rgba(0,200,83,0.15) 0%, rgba(99,102,241,0.15) 100%)',
-            border: '2px solid rgba(0,200,83,0.3)',
-            backdropFilter: 'blur(20px)',
-            boxShadow: '0 8px 32px rgba(0,200,83,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
-            animation: 'fadeIn 0.8s ease-out 0.3s both'
-          }}
-        >
-          {/* Animated Glow */}
-          <div 
-            className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl opacity-30"
-            style={{ 
-              background: 'radial-gradient(circle, rgba(0,255,136,0.6), transparent)',
-              animation: 'glow 4s ease-in-out infinite'
-            }}
-          />
-          
-          <div className="relative z-10">
-            <h3 
-              className="text-lg font-black mb-4"
-              style={{ 
-                background: 'linear-gradient(135deg, #ffffff, #00ff88)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text'
-              }}
-            >
-              Quick Navigation
-            </h3>
-            <div className="grid grid-cols-3 gap-3">
-              <Link
-                to="/tournaments"
-                className="flex flex-col items-center gap-2 p-4 rounded-xl transition-all relative overflow-hidden group"
-                style={{ 
-                  background: 'linear-gradient(135deg, rgba(59,130,246,0.2), rgba(37,99,235,0.15))',
-                  border: '2px solid rgba(59,130,246,0.3)',
-                  boxShadow: '0 4px 15px rgba(59,130,246,0.2)',
-                  animation: 'scaleIn 0.5s ease-out 0.4s both'
-                }}
-              >
-                <div 
-                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                  style={{ background: 'rgba(59,130,246,0.1)' }}
-                />
-                <div 
-                  className="w-12 h-12 rounded-xl flex items-center justify-center relative z-10"
-                  style={{ 
-                    background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
-                    boxShadow: '0 4px 12px rgba(59,130,246,0.4), inset 0 1px 0 rgba(255,255,255,0.3)',
-                    animation: 'pulse 3s ease-in-out infinite'
-                  }}
-                >
-                  <TrophyIcon className="w-6 h-6 text-white" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
-                </div>
-                <span className="text-xs font-bold text-white text-center relative z-10">Tournaments</span>
-              </Link>
-
-              <Link
-                to="/leaderboard"
-                className="flex flex-col items-center gap-2 p-4 rounded-xl transition-all relative overflow-hidden group"
-                style={{ 
-                  background: 'linear-gradient(135deg, rgba(245,158,11,0.2), rgba(251,146,60,0.15))',
-                  border: '2px solid rgba(245,158,11,0.3)',
-                  boxShadow: '0 4px 15px rgba(245,158,11,0.2)',
-                  animation: 'scaleIn 0.5s ease-out 0.5s both'
-                }}
-              >
-                <div 
-                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                  style={{ background: 'rgba(245,158,11,0.1)' }}
-                />
-                <div 
-                  className="w-12 h-12 rounded-xl flex items-center justify-center relative z-10"
-                  style={{ 
-                    background: 'linear-gradient(135deg, #f59e0b, #ea580c)',
-                    boxShadow: '0 4px 12px rgba(245,158,11,0.4), inset 0 1px 0 rgba(255,255,255,0.3)',
-                    animation: 'pulse 3s ease-in-out infinite',
-                    animationDelay: '0.5s'
-                  }}
-                >
-                  <ChartBarIcon className="w-6 h-6 text-white" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
-                </div>
-                <span className="text-xs font-bold text-white text-center relative z-10">Leaderboard</span>
-              </Link>
-
-              <Link
-                to="/academies"
-                className="flex flex-col items-center gap-2 p-4 rounded-xl transition-all relative overflow-hidden group"
-                style={{ 
-                  background: 'linear-gradient(135deg, rgba(168,85,247,0.2), rgba(139,92,246,0.15))',
-                  border: '2px solid rgba(168,85,247,0.3)',
-                  boxShadow: '0 4px 15px rgba(168,85,247,0.2)',
-                  animation: 'scaleIn 0.5s ease-out 0.6s both'
-                }}
-              >
-                <div 
-                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                  style={{ background: 'rgba(168,85,247,0.1)' }}
-                />
-                <div 
-                  className="w-12 h-12 rounded-xl flex items-center justify-center relative z-10"
-                  style={{ 
-                    background: 'linear-gradient(135deg, #a855f7, #8b5cf6)',
-                    boxShadow: '0 4px 12px rgba(168,85,247,0.4), inset 0 1px 0 rgba(255,255,255,0.3)',
-                    animation: 'pulse 3s ease-in-out infinite',
-                    animationDelay: '1s'
-                  }}
-                >
-                  <UserIcon className="w-6 h-6 text-white" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
-                </div>
-                <span className="text-xs font-bold text-white text-center relative z-10">Academies</span>
-              </Link>
-            </div>
-          </div>
         </div>
 
         {/* Role-Specific Stats */}

@@ -32,7 +32,7 @@ const RegisterPageMobile = () => {
     name: '',
     email: '',
     phone: '',
-    dateOfBirth: '',
+    yearOfBirth: '',
     password: '',
     confirmPassword: '',
   });
@@ -94,7 +94,11 @@ const RegisterPageMobile = () => {
     setError('');
     
     try {
-      const { confirmPassword, ...dataToSend } = formData;
+      const { confirmPassword, yearOfBirth, ...rest } = formData;
+      const dataToSend = {
+        ...rest,
+        ...(yearOfBirth ? { birthYear: parseInt(yearOfBirth, 10) } : {}),
+      };
       await register(dataToSend);
       
       if (redirectUrl) {
@@ -477,22 +481,27 @@ const RegisterPageMobile = () => {
               </div>
             </div>
 
-            {/* Date of Birth */}
+            {/* Year of Birth */}
             <div>
               <label className="block text-sm font-semibold text-white mb-2">
-                Date of Birth (Optional)
+                Year of Birth <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 400 }}>(Optional)</span>
               </label>
-              <input
-                name="dateOfBirth"
-                type="date"
-                className="w-full px-4 py-3 rounded-xl text-white text-sm placeholder-gray-500 outline-none [color-scheme:dark]"
-                style={{ 
-                  background: 'rgba(255,255,255,0.05)', 
-                  border: '1px solid rgba(255,255,255,0.1)' 
+              <select
+                name="yearOfBirth"
+                className="w-full px-4 py-3 rounded-xl text-white text-sm outline-none"
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  colorScheme: 'dark',
                 }}
-                value={formData.dateOfBirth}
+                value={formData.yearOfBirth}
                 onChange={handleChange}
-              />
+              >
+                <option value="" style={{ background: '#1e293b' }}>Select year</option>
+                {Array.from({ length: 2026 - 1950 + 1 }, (_, i) => 2026 - i).map(yr => (
+                  <option key={yr} value={yr} style={{ background: '#1e293b' }}>{yr}</option>
+                ))}
+              </select>
             </div>
 
             {/* Password */}

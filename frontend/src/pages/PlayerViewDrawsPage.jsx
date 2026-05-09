@@ -26,6 +26,7 @@ const PlayerViewDrawsPage = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [draw, setDraw] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadingDraw, setLoadingDraw] = useState(false);
   const [error, setError] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
   
@@ -40,13 +41,11 @@ const PlayerViewDrawsPage = () => {
   useEffect(() => {
     if (selectedCategory) {
       fetchDraw(selectedCategory.id);
-      
-      // Set up polling to refresh draw data every 10 seconds
-      const pollInterval = setInterval(() => {
-        fetchDraw(selectedCategory.id);
-      }, 10000); // 10 seconds
 
-      // Cleanup interval on unmount or when category changes
+      // Poll every 60 seconds (draw doesn't change that often)
+      const pollInterval = setInterval(() => {
+        fetchDraw(selectedCategory.id, true); // silent refresh
+      }, 60000);
       return () => clearInterval(pollInterval);
     }
   }, [selectedCategory]);
@@ -57,9 +56,12 @@ const PlayerViewDrawsPage = () => {
       setError(null);
       const response = await tournamentAPI.getTournament(id);
       setTournament(response.data);
-      setCategories(response.data.categories || []);
-      if (response.data.categories?.length > 0) {
-        setSelectedCategory(response.data.categories[0]);
+      const cats = response.data.categories || [];
+      setCategories(cats);
+      if (cats.length > 0) {
+        setSelectedCategory(cats[0]);
+        // Fetch draw in parallel — don't wait for it to clear loading
+        fetchDraw(cats[0].id);
       }
     } catch (err) {
       console.error('Error fetching tournament:', err);
@@ -69,35 +71,23 @@ const PlayerViewDrawsPage = () => {
     }
   };
 
-  const fetchDraw = async (categoryId) => {
+  const fetchDraw = async (categoryId, silent = false) => {
+    if (!silent) setLoadingDraw(true);
     try {
-      console.log(`🔍 Fetching draw for tournament ${id}, category ${categoryId}`);
       const response = await api.get(`/tournaments/${id}/categories/${categoryId}/draw`);
-      console.log('✅ Draw response:', response.data);
-      
-      // Check if response has draw data
-      if (response.data && response.data.success && response.data.draw) {
+      if (response.data?.success && response.data.draw) {
         setDraw(response.data.draw);
-        console.log('✅ Draw set successfully:', response.data.draw);
       } else {
-        console.warn('⚠️ Response missing draw data:', response.data);
         setDraw(null);
       }
     } catch (err) {
-      console.error('❌ Error fetching draw:', err);
-      console.error('Error response:', err.response);
-      console.error('Error status:', err.response?.status);
-      console.error('Error data:', err.response?.data);
-      
-      // Only set draw to null if it's truly not found
       if (err.response?.status === 404) {
-        console.log('Draw not found (404)');
         setDraw(null);
-      } else {
-        // For other errors, show error message but don't hide existing draw
-        console.error('Unexpected error fetching draw:', err);
+      } else if (!silent) {
         setError(`Failed to load draw: ${err.response?.data?.error || err.message}`);
       }
+    } finally {
+      if (!silent) setLoadingDraw(false);
     }
   };
 
@@ -374,7 +364,13 @@ const PlayerViewDrawsPage = () => {
                   </div>
 
                   <div className="p-6">
-                    {draw ? (
+                    {loadingDraw ? (
+                      <div className="flex flex-col items-center justify-center py-12 gap-4">
+                        <div className="w-10 h-10 border-4 border-t-transparent rounded-full animate-spin"
+                          style={{ borderColor: '#00ff88 transparent transparent transparent' }} />
+                        <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>Loading draw…</p>
+                      </div>
+                    ) : draw ? (
                       <DrawBracket draw={draw} onViewMatchDetails={onViewMatchDetails} categoryFormat={selectedCategory?.format} />
                     ) : error ? (
                       <div className="text-center py-12">

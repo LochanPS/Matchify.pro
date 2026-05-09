@@ -342,27 +342,18 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen relative overflow-hidden flex items-center justify-center" style={{ 
-        background: 'linear-gradient(180deg, #0a0a1f 0%, #07071a 30%, #0d1a2a 60%, #07071a 100%)' 
-      }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#07071a' }}>
         <div className="text-center">
-          <div 
-            className="w-16 h-16 border-4 rounded-full animate-spin mx-auto"
-            style={{ 
-              borderColor: 'rgba(0,200,83,0.3)',
-              borderTopColor: '#00ff88'
-            }}
-          ></div>
-          <p className="text-gray-300 mt-4 font-semibold">Loading profile...</p>
+          <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin mx-auto"
+            style={{ borderColor: 'rgba(0,255,136,0.3)', borderTopColor: '#00ff88' }} />
+          <p className="mt-4 font-semibold" style={{ color: 'rgba(255,255,255,0.6)' }}>Loading profile...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden" style={{ 
-      background: 'linear-gradient(180deg, #0a0a1f 0%, #07071a 30%, #0d1a2a 60%, #07071a 100%)' 
-    }}>
+    <div className="min-h-screen relative overflow-hidden" style={{ background: '#07071a' }}>
       {/* Animated Background Elements */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         {/* Large Gradient Orbs */}
@@ -468,8 +459,8 @@ export default function ProfilePage() {
               className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
               style={{ background: 'rgba(255,255,255,0.05)' }}
             />
-            <ArrowLeftIcon className="w-5 h-5 text-emerald-400 relative z-10" />
-            <span className="text-sm font-semibold text-gray-300 relative z-10">Back</span>
+            <ArrowLeftIcon className="w-5 h-5 relative z-10" style={{ color: '#00ff88' }} />
+            <span className="text-sm font-semibold relative z-10" style={{ color: 'rgba(255,255,255,0.6)' }}>Back</span>
           </button>
 
           {/* Title */}
@@ -833,49 +824,21 @@ export default function ProfilePage() {
 
         {/* Edit Form */}
         {isEditing && (
-          <div 
-            className="rounded-2xl p-6 mb-6 relative overflow-hidden"
-            style={{
-              background: 'linear-gradient(135deg, rgba(59,130,246,0.15) 0%, rgba(37,99,235,0.15) 100%)',
-              border: '2px solid rgba(59,130,246,0.3)',
-              backdropFilter: 'blur(20px)',
-              boxShadow: '0 8px 32px rgba(59,130,246,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
-              animation: 'fadeIn 0.8s ease-out 0.4s both'
-            }}
+          <div
+            className="rounded-2xl p-5 mb-6 relative overflow-hidden"
+            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
           >
-            <div className="flex items-center gap-3 mb-6 relative z-10">
-              <div 
-                className="w-10 h-10 rounded-xl flex items-center justify-center"
-                style={{ 
-                  background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
-                  boxShadow: '0 4px 12px rgba(59,130,246,0.4)'
-                }}
-              >
-                <User className="w-5 h-5 text-white" />
+            <div className="flex items-center gap-3 mb-5 relative z-10">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'rgba(0,212,255,0.15)' }}>
+                <User className="w-5 h-5" style={{ color: '#00d4ff' }} />
               </div>
-              <h2 
-                className="text-lg font-black"
-                style={{ 
-                  background: 'linear-gradient(135deg, #ffffff, #93c5fd)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text'
-                }}
-              >
-                Edit Profile Information
-              </h2>
+              <h2 className="text-base font-black text-white">Edit Profile Information</h2>
             </div>
-            
+
             {/* Notice about permanent fields */}
-            <div 
-              className="mb-6 p-4 rounded-xl flex items-start gap-3 relative z-10"
-              style={{
-                background: 'linear-gradient(135deg, rgba(245,158,11,0.2), rgba(251,146,60,0.15))',
-                border: '2px solid rgba(245,158,11,0.4)'
-              }}
-            >
-              <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-amber-300">
+            <div className="mb-5 p-3.5 rounded-xl flex items-start gap-3 relative z-10" style={{ background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.25)' }}>
+              <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: '#fbbf24' }} />
+              <p className="text-sm" style={{ color: '#fbbf24' }}>
                 <strong>Important:</strong> Birth Year can only be set once and cannot be changed later.
               </p>
             </div>
@@ -883,7 +846,7 @@ export default function ProfilePage() {
             <div className="grid grid-cols-1 gap-6 relative z-10">
               {/* Name Field - Always Editable */}
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium mb-2" style={{ color: 'rgba(255,255,255,0.7)' }}>
                   Full Name
                 </label>
                 <input
@@ -891,15 +854,16 @@ export default function ProfilePage() {
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 rounded-xl text-white outline-none"
+                  style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }}
                   placeholder="Enter your full name"
                 />
               </div>
 
               {/* Birth Year Field */}
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Birth Year {!canEditBirthYear && <span className="text-gray-500">(locked)</span>}
+                <label className="block text-sm font-medium mb-2" style={{ color: 'rgba(255,255,255,0.7)' }}>
+                  Birth Year {!canEditBirthYear && <span style={{ color: 'rgba(255,255,255,0.35)' }}>(locked)</span>}
                 </label>
                 {canEditBirthYear ? (
                   <>
@@ -907,62 +871,58 @@ export default function ProfilePage() {
                       name="birthYear"
                       value={formData.birthYear}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 bg-blue-500/10 border border-blue-500/30 rounded-xl text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all appearance-none cursor-pointer"
-                      style={{
-                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%233b82f6'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
-                        backgroundRepeat: 'no-repeat',
-                        backgroundPosition: 'right 0.75rem center',
-                        backgroundSize: '1.5rem'
-                      }}
+                      className="w-full px-4 py-3 rounded-xl text-white outline-none appearance-none cursor-pointer"
+                      style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(0,212,255,0.3)', color: '#fff' }}
                     >
-                      <option value="" className="bg-slate-800">Select your birth year</option>
+                      <option value="" style={{ background: '#0d1025' }}>Select your birth year</option>
                       {Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i).map(year => (
-                        <option key={year} value={year} className="bg-slate-800">
-                          {year}
-                        </option>
+                        <option key={year} value={year} style={{ background: '#0d1025' }}>{year}</option>
                       ))}
                     </select>
-                    <p className="text-xs text-blue-400 mt-1">⚠️ This can only be set once</p>
+                    <p className="text-xs mt-1" style={{ color: '#00d4ff' }}>⚠️ This can only be set once</p>
                   </>
                 ) : (
                   <input
                     type="text"
                     value={profile?.birthYear || 'Not provided'}
                     disabled
-                    className="w-full px-4 py-3 border border-white/5 rounded-xl bg-slate-700/30 text-gray-500 cursor-not-allowed"
+                    className="w-full px-4 py-3 rounded-xl cursor-not-allowed"
+                    style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.4)' }}
                   />
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Phone Number</label>
+                <label className="block text-sm font-medium mb-2" style={{ color: 'rgba(255,255,255,0.7)' }}>Phone Number</label>
                 <input
                   type="tel"
                   name="phone"
                   value={formData.phone}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 rounded-xl text-white outline-none"
+                  style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }}
                   placeholder="Enter your phone number"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Gender</label>
+                <label className="block text-sm font-medium mb-2" style={{ color: 'rgba(255,255,255,0.7)' }}>Gender</label>
                 <select
                   name="gender"
                   value={formData.gender}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 rounded-xl text-white outline-none appearance-none"
+                  style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }}
                 >
-                  <option value="" className="bg-slate-800">Select Gender</option>
-                  <option value="MALE" className="bg-slate-800">Male</option>
-                  <option value="FEMALE" className="bg-slate-800">Female</option>
-                  <option value="OTHER" className="bg-slate-800">Other</option>
+                  <option value="" style={{ background: '#0d1025' }}>Select Gender</option>
+                  <option value="MALE" style={{ background: '#0d1025' }}>Male</option>
+                  <option value="FEMALE" style={{ background: '#0d1025' }}>Female</option>
+                  <option value="OTHER" style={{ background: '#0d1025' }}>Other</option>
                 </select>
               </div>
 
               <div className="relative">
-                <label className="block text-sm font-medium text-gray-300 mb-2">City</label>
+                <label className="block text-sm font-medium mb-2" style={{ color: 'rgba(255,255,255,0.7)' }}>City</label>
                 <input
                   type="text"
                   name="city"
@@ -977,13 +937,14 @@ export default function ProfilePage() {
                     setTimeout(() => setShowCitySuggestions(false), 300);
                   }}
                   autoComplete="off"
-                  className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 rounded-xl text-white outline-none"
+                  style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }}
                   placeholder="Enter your city"
                 />
-                
+
                 {/* City Suggestions Dropdown */}
                 {showCitySuggestions && citySuggestions.length > 0 && (
-                  <div className="absolute z-50 w-full mt-1 bg-slate-800 border border-emerald-500/30 rounded-xl shadow-2xl shadow-emerald-500/20 overflow-hidden">
+                  <div className="absolute z-50 w-full mt-1 rounded-xl shadow-2xl overflow-hidden" style={{ background: '#0d1025', border: '1px solid rgba(0,255,136,0.25)' }}>
                     {citySuggestions.map((item, index) => (
                       <div
                         key={index}
@@ -991,10 +952,13 @@ export default function ProfilePage() {
                           e.preventDefault();
                           handleCitySelect(item.city, item.state);
                         }}
-                        className="px-4 py-3 hover:bg-emerald-500/20 cursor-pointer transition-colors border-b border-slate-700/50 last:border-b-0"
+                        className="px-4 py-3 cursor-pointer transition-colors"
+                        style={{ borderBottom: index < citySuggestions.length - 1 ? '1px solid rgba(255,255,255,0.06)' : 'none' }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(0,255,136,0.08)'}
+                        onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                       >
-                        <div className="text-white font-medium">{item.city}</div>
-                        <div className="text-gray-400 text-sm">{item.state}</div>
+                        <div className="text-white font-medium text-sm">{item.city}</div>
+                        <div className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>{item.state}</div>
                       </div>
                     ))}
                   </div>
@@ -1002,26 +966,28 @@ export default function ProfilePage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">State</label>
+                <label className="block text-sm font-medium mb-2" style={{ color: 'rgba(255,255,255,0.7)' }}>State</label>
                 <input
                   type="text"
                   name="state"
                   value={formData.state}
                   onChange={handleInputChange}
                   readOnly
-                  className="w-full px-4 py-3 bg-slate-700/30 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all cursor-not-allowed"
+                  className="w-full px-4 py-3 rounded-xl cursor-not-allowed"
+                  style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.5)' }}
                   placeholder="State (auto-filled)"
                 />
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-300 mb-2">Country</label>
+                <label className="block text-sm font-medium mb-2" style={{ color: 'rgba(255,255,255,0.7)' }}>Country</label>
                 <input
                   type="text"
                   name="country"
                   value={formData.country}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 rounded-xl text-white outline-none"
+                  style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }}
                   placeholder="Enter your country"
                 />
               </div>
@@ -1049,58 +1015,47 @@ export default function ProfilePage() {
 
       {/* Confirmation Modal for Name/DOB */}
       {showConfirmModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          {/* Halo Effect */}
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="w-96 h-96 bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-amber-500/20 rounded-full blur-3xl"></div>
-          </div>
-          
-          <div className="relative bg-slate-800 border border-white/10 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
-            {/* Header with gradient */}
-            <div className="relative bg-gradient-to-r from-amber-500 to-orange-600 px-6 py-5">
-              <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0wIDBoNDB2NDBIMHoiLz48cGF0aCBkPSJNMjAgMjBtLTEgMGExIDEgMCAxIDAgMiAwYTEgMSAwIDEgMCAtMiAwIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMSkiLz48L2c+PC9zdmc+')] opacity-30"></div>
-              <div className="relative flex items-center gap-4">
-                <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
-                  <AlertTriangle className="text-white" size={24} />
-                </div>
-                <h3 className="text-xl font-bold text-white">Confirm Your Details</h3>
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="rounded-2xl shadow-2xl max-w-md w-full overflow-hidden" style={{ background: '#0d1025', border: '1px solid rgba(255,255,255,0.1)' }}>
+            {/* Header */}
+            <div className="px-5 py-4 flex items-center gap-3" style={{ background: 'rgba(251,191,36,0.08)', borderBottom: '1px solid rgba(251,191,36,0.2)' }}>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'rgba(251,191,36,0.15)' }}>
+                <AlertTriangle className="w-5 h-5" style={{ color: '#fbbf24' }} />
               </div>
+              <h3 className="text-base font-bold text-white">Confirm Your Details</h3>
             </div>
-            
-            <div className="p-6">
-              <p className="text-gray-300 mb-4">
-                Please verify the following information. <strong className="text-amber-400">Once saved, these fields cannot be changed.</strong>
+
+            <div className="p-5">
+              <p className="text-sm mb-4" style={{ color: 'rgba(255,255,255,0.7)' }}>
+                Please verify the following information. <strong style={{ color: '#fbbf24' }}>Once saved, these fields cannot be changed.</strong>
               </p>
 
-              <div className="bg-slate-700/50 border border-white/10 rounded-xl p-4 mb-6 space-y-3">
+              <div className="rounded-xl p-4 mb-4 space-y-3" style={{ background: 'rgba(0,0,0,0.25)', border: '1px solid rgba(255,255,255,0.08)' }}>
                 {!profile?.birthYear && pendingData?.birthYear && (
                   <div>
-                    <p className="text-sm text-gray-400">Birth Year</p>
-                    <p className="font-semibold text-white text-xl">
-                      {pendingData.birthYear}
-                    </p>
+                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>Birth Year</p>
+                    <p className="font-bold text-white text-xl">{pendingData.birthYear}</p>
                   </div>
                 )}
               </div>
 
-              <p className="text-sm text-amber-400 mb-6 flex items-center gap-2 bg-amber-500/10 border border-amber-500/30 rounded-xl p-3">
-                <AlertTriangle size={16} />
-                Are you sure this information is correct?
-              </p>
+              <div className="flex items-center gap-2 p-3 rounded-xl mb-5" style={{ background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.2)' }}>
+                <AlertTriangle className="w-4 h-4 flex-shrink-0" style={{ color: '#fbbf24' }} />
+                <p className="text-sm" style={{ color: '#fbbf24' }}>Are you sure this information is correct?</p>
+              </div>
 
               <div className="flex gap-3">
                 <button
-                  onClick={() => {
-                    setShowConfirmModal(false);
-                    setPendingData(null);
-                  }}
-                  className="flex-1 px-4 py-3 bg-slate-700/50 border border-white/10 text-gray-300 rounded-xl hover:bg-slate-700 hover:text-white transition-all font-medium"
+                  onClick={() => { setShowConfirmModal(false); setPendingData(null); }}
+                  className="flex-1 px-4 py-3 rounded-xl font-medium text-sm"
+                  style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.75)' }}
                 >
                   Go Back & Edit
                 </button>
                 <button
                   onClick={handleConfirmSave}
-                  className="flex-1 px-4 py-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl hover:shadow-lg hover:shadow-amber-500/25 transition-all font-medium"
+                  className="flex-1 px-4 py-3 rounded-xl font-medium text-sm"
+                  style={{ background: 'linear-gradient(135deg,#f59e0b,#d97706)', color: '#fff' }}
                 >
                   Yes, Confirm & Save
                 </button>

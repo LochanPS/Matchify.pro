@@ -142,10 +142,11 @@ export default function MyRegistrationsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #0a0a1f 0%, #07071a 50%, #0a0a1f 100%)' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#07071a' }}>
         <div className="text-center">
-          <div className="w-16 h-16 border-4 rounded-full animate-spin mx-auto" style={{ borderColor: 'rgba(16,185,129,0.3)', borderTopColor: '#10b981' }}></div>
-          <p className="text-gray-400 mt-4 font-medium">Loading registrations...</p>
+          <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin mx-auto"
+            style={{ borderColor: 'rgba(0,255,136,0.3)', borderTopColor: '#00ff88' }} />
+          <p className="mt-4 font-medium" style={{ color: 'rgba(255,255,255,0.6)' }}>Loading registrations...</p>
         </div>
       </div>
     );
@@ -159,64 +160,46 @@ export default function MyRegistrationsPage() {
   ];
 
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #0a0a1f 0%, #07071a 50%, #0a0a1f 100%)' }}>
-      {/* Hero Header - EMERALD THEME */}
-      <div className="relative overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(16,185,129,0.15) 0%, rgba(6,182,212,0.1) 100%)' }}>
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl opacity-10" style={{ background: 'radial-gradient(circle, #10b981, transparent)' }}></div>
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 rounded-full blur-3xl opacity-10" style={{ background: 'radial-gradient(circle, #06b6d4, transparent)' }}></div>
-        </div>
-        
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Back Button */}
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-2 mb-4 transition-colors group" style={{ color: 'rgba(255,255,255,0.6)' }}
-            onMouseEnter={(e) => e.currentTarget.style.color = '#ffffff'}
-            onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255,255,255,0.6)'}
-          >
-            <ArrowLeftIcon className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
-            <span>Back</span>
-          </button>
+    <div className="min-h-screen" style={{ background: '#07071a' }}>
+      {/* Background orbs */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-1/4 left-1/4 w-80 h-80 rounded-full blur-3xl opacity-[0.06]" style={{ background: '#00ff88' }} />
+        <div className="absolute bottom-1/4 right-1/4 w-72 h-72 rounded-full blur-3xl opacity-[0.05]" style={{ background: '#a855f7' }} />
+      </div>
 
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-2xl" style={{ background: 'linear-gradient(135deg,#10b981,#059669)', boxShadow: '0 8px 25px rgba(16,185,129,0.3)' }}>
-              <Trophy className="w-7 h-7 text-white" />
+      {/* Header */}
+      <div className="sticky top-0 z-20 border-b backdrop-blur-xl px-4 py-4" style={{ background: 'rgba(7,7,26,0.95)', borderColor: 'rgba(0,255,136,0.12)' }}>
+        <div className="max-w-2xl mx-auto flex items-center gap-4">
+          <button onClick={() => navigate(-1)} className="flex items-center gap-1.5">
+            <ArrowLeft className="w-5 h-5" style={{ color: '#00ff88' }} />
+            <span className="text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.6)' }}>Back</span>
+          </button>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', boxShadow: '0 0 16px rgba(0,255,136,0.25)' }}>
+              <Trophy className="w-5 h-5" style={{ color: '#003320' }} />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-white">My Registrations</h1>
-              <p className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>View and manage your tournament registrations</p>
+              <h1 className="text-base font-black text-white">My Registrations</h1>
+              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>View and manage your tournament registrations</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Filter Tabs - EMERALD THEME */}
-        <div className="rounded-2xl shadow-xl p-2 mb-6" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+      <div className="relative max-w-2xl mx-auto px-4 py-6">
+        {/* Filter Tabs */}
+        <div className="rounded-2xl p-2 mb-6" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
           <div className="flex gap-2">
             {filterTabs.map(tab => (
               <button
                 key={tab.key}
                 onClick={() => setFilter(tab.key)}
-                className="flex-1 px-4 py-3 text-sm font-bold rounded-xl transition-all"
+                className="flex-1 px-4 py-2.5 text-sm font-bold rounded-xl transition-all"
                 style={
                   filter === tab.key
-                    ? { background: 'linear-gradient(135deg,#10b981,#059669)', color: '#ffffff', boxShadow: '0 4px 15px rgba(16,185,129,0.3)' }
+                    ? { background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#003320', boxShadow: '0 4px 15px rgba(0,255,136,0.25)' }
                     : { color: 'rgba(255,255,255,0.5)', background: 'transparent' }
                 }
-                onMouseEnter={(e) => {
-                  if (filter !== tab.key) {
-                    e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
-                    e.currentTarget.style.color = '#ffffff';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (filter !== tab.key) {
-                    e.currentTarget.style.background = 'transparent';
-                    e.currentTarget.style.color = 'rgba(255,255,255,0.5)';
-                  }
-                }}
               >
                 {tab.label}
               </button>
@@ -226,16 +209,16 @@ export default function MyRegistrationsPage() {
 
         {/* Registrations List */}
         {registrations.length === 0 ? (
-          <div className="rounded-2xl shadow-xl p-12 text-center" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)' }}>
-            <div className="w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-5" style={{ background: 'rgba(16,185,129,0.1)', border: '2px solid rgba(16,185,129,0.2)' }}>
-              <TrophyIcon className="w-10 h-10 text-emerald-400" />
+          <div className="rounded-2xl p-12 text-center border" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}>
+            <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: 'rgba(0,255,136,0.1)', border: '1px solid rgba(0,255,136,0.2)' }}>
+              <Trophy className="w-8 h-8" style={{ color: '#00ff88' }} />
             </div>
-            <h3 className="text-xl font-bold text-white mb-2">No registrations found</h3>
-            <p className="text-gray-400 mb-6 text-sm">You haven't registered for any tournaments yet</p>
+            <h3 className="text-lg font-bold text-white mb-2">No registrations found</h3>
+            <p className="text-sm mb-6" style={{ color: 'rgba(255,255,255,0.6)' }}>You haven't registered for any tournaments yet</p>
             <button
               onClick={() => navigate('/tournaments')}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all text-sm"
-              style={{ background: 'linear-gradient(135deg,#10b981,#059669)', color: '#ffffff', boxShadow: '0 4px 15px rgba(16,185,129,0.3)' }}
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm"
+              style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#003320' }}
             >
               Browse Tournaments
               <ArrowRight className="w-4 h-4" />
@@ -251,10 +234,10 @@ export default function MyRegistrationsPage() {
                 <div
                   key={registration.id}
                   className="rounded-2xl p-5 transition-all"
-                  style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)' }}
+                  style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = 'rgba(16,185,129,0.3)';
-                    e.currentTarget.style.boxShadow = '0 8px 25px rgba(16,185,129,0.1)';
+                    e.currentTarget.style.borderColor = 'rgba(0,255,136,0.25)';
+                    e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,255,136,0.08)';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
@@ -264,15 +247,17 @@ export default function MyRegistrationsPage() {
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       {/* Tournament Name */}
-                      <Link 
+                      <Link
                         to={`/tournaments/${registration.tournament.id}`}
-                        className="text-lg font-bold text-white mb-3 hover:text-emerald-400 transition-colors block truncate"
+                        className="text-base font-bold text-white mb-3 block truncate transition-colors"
+                        onMouseEnter={(e) => e.currentTarget.style.color = '#00ff88'}
+                        onMouseLeave={(e) => e.currentTarget.style.color = '#ffffff'}
                       >
                         {registration.tournament.name}
                       </Link>
 
                       {/* Tournament Details */}
-                      <div className="flex flex-wrap gap-3 text-sm text-gray-400 mb-3">
+                      <div className="flex flex-wrap gap-3 text-sm mb-3" style={{ color: 'rgba(255,255,255,0.6)' }}>
                         <div className="flex items-center gap-2">
                           <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'rgba(168,85,247,0.15)', border: '1px solid rgba(168,85,247,0.3)' }}>
                             <MapPin className="h-4 w-4 text-purple-400" />
@@ -289,9 +274,9 @@ export default function MyRegistrationsPage() {
 
                       {/* Category */}
                       <div className="mb-3">
-                        <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl" style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)' }}>
+                        <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl" style={{ background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.2)' }}>
                           <span className="font-bold text-white text-sm">{registration.category.name}</span>
-                          <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: 'rgba(6,182,212,0.2)', color: '#22d3ee', border: '1px solid rgba(6,182,212,0.3)' }}>
+                          <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: 'rgba(0,212,255,0.12)', color: '#00d4ff', border: '1px solid rgba(0,212,255,0.25)' }}>
                             {registration.category.format} • {registration.category.gender}
                           </span>
                         </span>
@@ -299,19 +284,19 @@ export default function MyRegistrationsPage() {
 
                       {/* Partner Info */}
                       {registration.category.format === 'doubles' && (
-                        <div className="mb-3 p-3 rounded-xl" style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.05)' }}>
-                          <p className="text-xs font-bold text-gray-300 mb-1.5">Doubles Partner</p>
+                        <div className="mb-3 p-3 rounded-xl" style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                          <p className="text-xs font-bold mb-1.5" style={{ color: 'rgba(255,255,255,0.75)' }}>Doubles Partner</p>
                           {!registration.partnerConfirmed && registration.partnerEmail && (
-                            <div className="flex items-center text-amber-400">
-                              <span className="mr-2">⏳</span>
+                            <div className="flex items-center gap-1.5" style={{ color: '#fbbf24' }}>
+                              <span>⏳</span>
                               <span className="text-xs">Waiting for {registration.partnerEmail} to accept</span>
                             </div>
                           )}
                           {registration.partnerConfirmed && registration.partner && (
-                            <div className="flex items-center text-emerald-400">
-                              <Users className="h-4 w-4 mr-2" />
+                            <div className="flex items-center gap-1.5" style={{ color: '#00ff88' }}>
+                              <Users className="h-4 w-4" />
                               <span className="text-xs font-semibold">{registration.partner.name}</span>
-                              <span className="ml-2 text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(16,185,129,0.2)', color: '#10b981', border: '1px solid rgba(16,185,129,0.3)' }}>Confirmed</span>
+                              <span className="ml-1 text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(0,255,136,0.12)', color: '#00ff88', border: '1px solid rgba(0,255,136,0.25)' }}>Confirmed</span>
                             </div>
                           )}
                         </div>
@@ -320,8 +305,8 @@ export default function MyRegistrationsPage() {
                       {/* Payment Details */}
                       <div className="flex items-center gap-3">
                         <div className="flex items-center gap-2">
-                          <CreditCard className="h-4 w-4 text-gray-400" />
-                          <span className="text-gray-400 text-xs">Amount:</span>
+                          <CreditCard className="h-4 w-4" style={{ color: 'rgba(255,255,255,0.4)' }} />
+                          <span className="text-xs" style={{ color: 'rgba(255,255,255,0.55)' }}>Amount:</span>
                           <span className="font-bold text-white text-sm">₹{registration.amountTotal}</span>
                         </div>
                         <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${paymentStyle.bg} ${paymentStyle.text}`}>
@@ -356,8 +341,8 @@ export default function MyRegistrationsPage() {
                       {registration.status === 'rejected' && !registration.refundUpiId && (
                         <button
                           onClick={() => setShowRefundDetailsModal(registration)}
-                          className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-xl transition-colors font-bold"
-                          style={{ color: '#10b981', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)' }}
+                          className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-xl font-bold"
+                          style={{ color: '#00ff88', background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.25)' }}
                         >
                           <Upload className="h-3.5 w-3.5" />
                           Submit Refund Details
@@ -366,7 +351,7 @@ export default function MyRegistrationsPage() {
 
                       {/* Show status for rejected registrations with refund details submitted */}
                       {registration.status === 'rejected' && registration.refundUpiId && (
-                        <div className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-xl" style={{ color: '#10b981', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)' }}>
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-xl" style={{ color: '#00ff88', background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.25)' }}>
                           <CheckCircle className="h-3.5 w-3.5" />
                           Refund Details Submitted
                         </div>
@@ -374,8 +359,8 @@ export default function MyRegistrationsPage() {
 
                       <button
                         onClick={() => navigate(`/tournaments/${registration.tournament.id}`)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-xl transition-colors font-bold"
-                        style={{ color: '#10b981', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)' }}
+                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-xl font-bold"
+                        style={{ color: '#00ff88', background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.25)' }}
                       >
                         View Tournament
                         <ArrowRight className="w-3.5 h-3.5" />
@@ -385,11 +370,11 @@ export default function MyRegistrationsPage() {
 
                   {/* Refund Info */}
                   {registration.status === 'cancelled' && registration.refundAmount > 0 && (
-                    <div className="mt-3 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-                      <div className="text-xs text-gray-400">
-                        Refund: <span className="font-bold text-emerald-400">₹{registration.refundAmount}</span>
+                    <div className="mt-3 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                      <div className="text-xs" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                        Refund: <span className="font-bold" style={{ color: '#00ff88' }}>₹{registration.refundAmount}</span>
                         {' • '}
-                        Status: <span className="font-bold text-gray-300">{registration.refundStatus}</span>
+                        Status: <span className="font-bold text-white">{registration.refundStatus}</span>
                       </div>
                     </div>
                   )}
@@ -402,63 +387,63 @@ export default function MyRegistrationsPage() {
 
       {/* Cancel Registration Modal */}
       {cancelModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-slate-800/90 backdrop-blur-sm border border-white/10 rounded-2xl shadow-2xl max-w-lg w-full my-8">
-            <div className="bg-gradient-to-r from-red-500 to-rose-600 p-6 text-white">
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                    <AlertTriangle className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-bold">Request Cancellation & Refund</h2>
-                    <p className="text-red-100 text-sm mt-1">Refund Amount: ₹{cancelModal.amount}</p>
-                  </div>
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="rounded-2xl shadow-2xl max-w-lg w-full my-8 overflow-hidden" style={{ background: '#0d1025', border: '1px solid rgba(255,255,255,0.1)' }}>
+            {/* Header */}
+            <div className="p-5 flex items-center justify-between gap-3" style={{ background: 'rgba(239,68,68,0.12)', borderBottom: '1px solid rgba(239,68,68,0.2)' }}>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'rgba(239,68,68,0.2)' }}>
+                  <AlertTriangle className="h-5 w-5 text-red-400" />
                 </div>
-                <button
-                  onClick={() => setCancelModal(null)}
-                  disabled={cancelling}
-                  className="w-10 h-10 bg-white/20 hover:bg-white/30 rounded-xl flex items-center justify-center transition-colors disabled:opacity-50"
-                  aria-label="Close"
-                >
-                  <X className="h-5 w-5" />
-                </button>
+                <div>
+                  <h2 className="text-base font-bold text-white">Request Cancellation & Refund</h2>
+                  <p className="text-sm" style={{ color: 'rgba(255,255,255,0.55)' }}>Refund Amount: ₹{cancelModal.amount}</p>
+                </div>
               </div>
+              <button
+                onClick={() => setCancelModal(null)}
+                disabled={cancelling}
+                className="w-9 h-9 rounded-xl flex items-center justify-center disabled:opacity-50"
+                style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.6)' }}
+              >
+                <X className="h-5 w-5" />
+              </button>
             </div>
 
-            <div className="p-6">
-              <p className="text-gray-300 mb-4">
+            <div className="p-5">
+              <p className="text-sm mb-4" style={{ color: 'rgba(255,255,255,0.7)' }}>
                 You are requesting to cancel your registration for <span className="font-semibold text-white">"{cancelModal.tournamentName}"</span>.
               </p>
-              
-              <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mb-6">
-                <p className="text-amber-300 text-sm">
+
+              <div className="rounded-xl p-3.5 mb-5" style={{ background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.25)' }}>
+                <p className="text-sm" style={{ color: '#fbbf24' }}>
                   <strong>Note:</strong> The organizer will review your request and verify your payment before processing the refund.
                 </p>
               </div>
 
-              {/* Reason for Cancellation */}
+              {/* Reason */}
               <div className="mb-4">
-                <label className="block text-sm font-semibold text-gray-300 mb-2">
+                <label className="block text-sm font-semibold mb-2" style={{ color: 'rgba(255,255,255,0.75)' }}>
                   Reason for Cancellation <span className="text-red-400">*</span>
                 </label>
                 <textarea
                   value={cancelForm.reason}
                   onChange={(e) => setCancelForm(prev => ({ ...prev, reason: e.target.value }))}
-                  placeholder="Please explain why you want to cancel (e.g., health issues, schedule conflict, etc.)"
+                  placeholder="Please explain why you want to cancel..."
                   rows={3}
-                  className={`w-full px-4 py-3 bg-slate-700/50 border rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all ${
-                    cancelFormErrors.reason ? 'border-red-500' : 'border-white/10'
-                  }`}
+                  className="w-full px-4 py-3 rounded-xl text-white text-sm outline-none transition-all"
+                  style={{
+                    background: 'rgba(0,0,0,0.3)',
+                    border: `1px solid ${cancelFormErrors.reason ? '#ef4444' : 'rgba(255,255,255,0.1)'}`,
+                    color: '#fff',
+                  }}
                 />
-                {cancelFormErrors.reason && (
-                  <p className="text-red-400 text-sm mt-1">{cancelFormErrors.reason}</p>
-                )}
+                {cancelFormErrors.reason && <p className="text-red-400 text-xs mt-1">{cancelFormErrors.reason}</p>}
               </div>
 
               {/* UPI ID */}
               <div className="mb-4">
-                <label className="block text-sm font-semibold text-gray-300 mb-2">
+                <label className="block text-sm font-semibold mb-2" style={{ color: 'rgba(255,255,255,0.75)' }}>
                   Your UPI ID for Refund <span className="text-red-400">*</span>
                 </label>
                 <input
@@ -466,79 +451,65 @@ export default function MyRegistrationsPage() {
                   value={cancelForm.upiId}
                   onChange={(e) => setCancelForm(prev => ({ ...prev, upiId: e.target.value }))}
                   placeholder="e.g., yourname@upi, 9876543210@paytm"
-                  className={`w-full px-4 py-3 bg-slate-700/50 border rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all ${
-                    cancelFormErrors.upiId ? 'border-red-500' : 'border-white/10'
-                  }`}
+                  className="w-full px-4 py-3 rounded-xl text-white text-sm outline-none"
+                  style={{
+                    background: 'rgba(0,0,0,0.3)',
+                    border: `1px solid ${cancelFormErrors.upiId ? '#ef4444' : 'rgba(255,255,255,0.1)'}`,
+                  }}
                 />
-                {cancelFormErrors.upiId && (
-                  <p className="text-red-400 text-sm mt-1">{cancelFormErrors.upiId}</p>
-                )}
+                {cancelFormErrors.upiId && <p className="text-red-400 text-xs mt-1">{cancelFormErrors.upiId}</p>}
               </div>
 
               {/* QR Code Upload */}
-              <div className="mb-6">
-                <label className="block text-sm font-semibold text-gray-300 mb-2">
-                  Your Payment QR Code (Optional)
+              <div className="mb-5">
+                <label className="block text-sm font-semibold mb-1" style={{ color: 'rgba(255,255,255,0.75)' }}>
+                  Payment QR Code (Optional)
                 </label>
-                <p className="text-gray-500 text-sm mb-2">
+                <p className="text-xs mb-2" style={{ color: 'rgba(255,255,255,0.4)' }}>
                   Upload your UPI QR code to help the organizer send the refund faster
                 </p>
-                <input
-                  type="file"
-                  ref={qrCodeInputRef}
-                  onChange={handleQrCodeChange}
-                  accept="image/*"
-                  className="hidden"
-                />
+                <input type="file" ref={qrCodeInputRef} onChange={handleQrCodeChange} accept="image/*" className="hidden" />
                 <button
                   type="button"
                   onClick={() => qrCodeInputRef.current?.click()}
-                  className={`w-full px-4 py-4 border-2 border-dashed rounded-xl flex flex-col items-center justify-center gap-2 transition-all ${
-                    cancelForm.qrCode 
-                      ? 'border-green-500/50 bg-green-500/10' 
-                      : 'border-white/20 hover:border-white/30 hover:bg-slate-700/30'
-                  }`}
+                  className="w-full px-4 py-4 border-2 border-dashed rounded-xl flex flex-col items-center justify-center gap-2 transition-all"
+                  style={cancelForm.qrCode
+                    ? { borderColor: 'rgba(0,255,136,0.4)', background: 'rgba(0,255,136,0.06)' }
+                    : { borderColor: 'rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.15)' }}
                 >
                   {cancelForm.qrCode ? (
                     <>
-                      <CheckCircle className="h-8 w-8 text-green-400" />
-                      <span className="text-green-300 font-medium">{cancelForm.qrCode.name}</span>
-                      <span className="text-green-400/80 text-sm">Click to change</span>
+                      <CheckCircle className="h-7 w-7" style={{ color: '#00ff88' }} />
+                      <span className="text-sm font-medium" style={{ color: '#00ff88' }}>{cancelForm.qrCode.name}</span>
+                      <span className="text-xs" style={{ color: 'rgba(0,255,136,0.7)' }}>Click to change</span>
                     </>
                   ) : (
                     <>
-                      <QrCode className="h-8 w-8 text-gray-500" />
-                      <span className="text-gray-400 font-medium">Upload QR Code</span>
-                      <span className="text-gray-500 text-sm">PNG, JPG up to 5MB</span>
+                      <QrCode className="h-7 w-7" style={{ color: 'rgba(255,255,255,0.3)' }} />
+                      <span className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.55)' }}>Upload QR Code</span>
+                      <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>PNG, JPG up to 5MB</span>
                     </>
                   )}
                 </button>
-                {cancelFormErrors.qrCode && (
-                  <p className="text-red-400 text-sm mt-1">{cancelFormErrors.qrCode}</p>
-                )}
+                {cancelFormErrors.qrCode && <p className="text-red-400 text-xs mt-1">{cancelFormErrors.qrCode}</p>}
               </div>
 
               <div className="flex gap-3">
                 <button
                   onClick={() => setCancelModal(null)}
                   disabled={cancelling}
-                  className="flex-1 px-4 py-3 border border-white/10 rounded-xl text-gray-300 hover:bg-slate-700/50 transition-colors font-medium disabled:opacity-50"
+                  className="flex-1 px-4 py-3 rounded-xl font-semibold text-sm disabled:opacity-50"
+                  style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.75)' }}
                 >
                   Keep Registration
                 </button>
                 <button
                   onClick={handleCancelRegistration}
                   disabled={cancelling}
-                  className="flex-1 px-4 py-3 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl hover:shadow-lg hover:shadow-red-500/30 transition-all font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="flex-1 px-4 py-3 rounded-xl font-semibold text-sm disabled:opacity-50 flex items-center justify-center gap-2"
+                  style={{ background: 'linear-gradient(135deg,#ef4444,#dc2626)', color: '#fff' }}
                 >
-                  {cancelling ? (
-                    <>
-                      <Loader className="h-4 w-4 animate-spin" />
-                      Submitting...
-                    </>
-                  ) : (
-                    'Submit Request'
-                  )}
+                  {cancelling ? <><Loader className="h-4 w-4 animate-spin" />Submitting...</> : 'Submit Request'}
                 </button>
               </div>
             </div>
@@ -548,34 +519,31 @@ export default function MyRegistrationsPage() {
 
       {/* Result Modal */}
       {resultModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
-            <div className={`p-6 text-white ${resultModal.type === 'success' ? 'bg-gradient-to-r from-amber-500 to-orange-600' : 'bg-gradient-to-r from-red-500 to-rose-600'}`}>
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                  {resultModal.type === 'success' ? (
-                    <Clock className="h-6 w-6" />
-                  ) : (
-                    <X className="h-6 w-6" />
-                  )}
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold">
-                    {resultModal.type === 'success' ? 'Request Submitted' : 'Error'}
-                  </h2>
-                </div>
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="rounded-2xl shadow-2xl max-w-md w-full overflow-hidden" style={{ background: '#0d1025', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <div className="p-5 flex items-center gap-3" style={{
+              background: resultModal.type === 'success' ? 'rgba(0,255,136,0.08)' : 'rgba(239,68,68,0.1)',
+              borderBottom: `1px solid ${resultModal.type === 'success' ? 'rgba(0,255,136,0.2)' : 'rgba(239,68,68,0.2)'}`,
+            }}>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: resultModal.type === 'success' ? 'rgba(0,255,136,0.15)' : 'rgba(239,68,68,0.15)' }}>
+                {resultModal.type === 'success'
+                  ? <Clock className="h-5 w-5" style={{ color: '#00ff88' }} />
+                  : <X className="h-5 w-5 text-red-400" />}
               </div>
+              <h2 className="text-base font-bold text-white">
+                {resultModal.type === 'success' ? 'Request Submitted' : 'Error'}
+              </h2>
             </div>
 
-            <div className="p-6">
-              <p className="text-gray-300 mb-4">{resultModal.message}</p>
-              
+            <div className="p-5">
+              <p className="text-sm mb-4" style={{ color: 'rgba(255,255,255,0.7)' }}>{resultModal.message}</p>
+
               {resultModal.type === 'success' && resultModal.refundAmount > 0 && (
-                <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mb-4">
-                  <p className="text-amber-300 font-medium">
+                <div className="rounded-xl p-4 mb-4" style={{ background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.25)' }}>
+                  <p className="font-medium" style={{ color: '#fbbf24' }}>
                     Refund Amount: <span className="text-lg font-bold">₹{resultModal.refundAmount}</span>
                   </p>
-                  <p className="text-amber-400/80 text-sm mt-1">
+                  <p className="text-xs mt-1" style={{ color: 'rgba(251,191,36,0.7)' }}>
                     The organizer will review your request and process the refund to your UPI ID.
                   </p>
                 </div>
@@ -583,11 +551,10 @@ export default function MyRegistrationsPage() {
 
               <button
                 onClick={() => setResultModal(null)}
-                className={`w-full px-4 py-3 rounded-xl font-semibold transition-all ${
-                  resultModal.type === 'success' 
-                    ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white hover:shadow-lg hover:shadow-amber-500/30' 
-                    : 'bg-gradient-to-r from-red-500 to-rose-600 text-white hover:shadow-lg hover:shadow-red-500/30'
-                }`}
+                className="w-full px-4 py-3 rounded-xl font-semibold text-sm"
+                style={resultModal.type === 'success'
+                  ? { background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#003320' }
+                  : { background: 'linear-gradient(135deg,#ef4444,#dc2626)', color: '#fff' }}
               >
                 Close
               </button>

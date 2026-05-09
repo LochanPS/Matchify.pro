@@ -2,215 +2,130 @@ import { getErrorMessage } from '../utils/errorMessage';
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../utils/api';
-import { ArrowLeftIcon } from '@heroicons/react/24/outline';
-import { Gavel, Trophy, AlertTriangle, Play, Loader, Swords, Settings, Check } from 'lucide-react';
+import { ArrowLeft, Gavel, Trophy, AlertTriangle, Play, Loader, Swords, Settings, Check, X } from 'lucide-react';
+
+const B = {
+  bg: '#07071a',
+  card: 'rgba(255,255,255,0.04)',
+  border: 'rgba(255,255,255,0.08)',
+  input: 'rgba(0,0,0,0.3)',
+  inputBorder: 'rgba(255,255,255,0.1)',
+  green: '#00ff88',
+  cyan: '#00d4ff',
+  purple: '#a855f7',
+  red: '#f87171',
+};
 
 const ConductMatchPage = () => {
   const { matchId } = useParams();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const umpireId = searchParams.get('umpireId');
-  
+
   const [match, setMatch] = useState(null);
   const [umpire, setUmpire] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [assigning, setAssigning] = useState(false);
   const [givingBye, setGivingBye] = useState(false);
-  
-  // Editable scoring config
+
   const [pointsPerSet, setPointsPerSet] = useState(21);
   const [maxSets, setMaxSets] = useState(3);
   const [extension, setExtension] = useState(true);
 
   useEffect(() => {
-    // Guard clause: Only fetch match details when matchId exists
-    if (!matchId) {
-      console.warn('⚠️ Skipping match fetch - matchId not available');
-      return;
-    }
-    
-    console.log('🎯 ConductMatchPage loaded for matchId:', matchId);
-    console.log('🎯 umpireId from URL:', umpireId);
+    if (!matchId) return;
     fetchMatchDetails();
   }, [matchId]);
 
   const fetchMatchDetails = async () => {
-    // Guard clause: Ensure matchId exists before fetching
-    if (!matchId) {
-      console.warn('⚠️ Cannot fetch match details - matchId is missing');
-      setError('Match ID is missing');
-      setLoading(false);
-      return;
-    }
-    
+    if (!matchId) { setError('Match ID is missing'); setLoading(false); return; }
     try {
       setLoading(true);
-      console.log('📡 Fetching match details for matchId:', matchId);
-      const response = await api.get(`/matches/${matchId}`);
-      console.log('✅ Match data received:', response.data.match);
-      setMatch(response.data.match);
-      
-      // Parse and set initial scoring config from category
-      const category = response.data.match?.category;
-      if (category?.scoringFormat) {
-        const config = parseScoringFormat(category.scoringFormat);
-        console.log('⚙️ Parsed scoring config:', config);
-        setPointsPerSet(config.points);
-        setMaxSets(config.sets);
-        setExtension(!category.scoringFormat.toLowerCase().includes('noext'));
+      const [matchRes, umpireRes] = await Promise.all([
+        api.get(`/matches/${matchId}`),
+        umpireId ? api.get(`/users/${umpireId}`).catch(() => null) : Promise.resolve(null),
+      ]);
+      const m = matchRes.data.match;
+      setMatch(m);
+      if (m?.category?.scoringFormat) {
+        const cfg = parseScoringFormat(m.category.scoringFormat);
+        setPointsPerSet(cfg.points);
+        setMaxSets(cfg.sets);
+        setExtension(!m.category.scoringFormat.toLowerCase().includes('noext'));
       }
-      
-      // If umpireId is provided, fetch umpire details
-      if (umpireId) {
-        try {
-          const umpireResponse = await api.get(`/users/${umpireId}`);
-          console.log('👨‍⚖️ Umpire data received:', umpireResponse.data.user);
-          setUmpire(umpireResponse.data.user);
-        } catch (err) {
-          console.log('Could not fetch umpire details');
-        }
-      }
+      if (umpireRes) setUmpire(umpireRes.data.user);
     } catch (err) {
-      console.error('❌ Error fetching match:', err);
-      
-      // Enhanced error logging
-      const errorDetails = {
-        message: err.message,
-        status: err.response?.status,
-        statusText: err.response?.statusText,
-        url: err.config?.url,
-        responseData: err.response?.data
-      };
-      console.error('📋 Full Error Details:', errorDetails);
-      
-      // Handle specific error cases
-      if (err.response?.status === 404) {
-        setError('Match not found. It may have been deleted or the ID is incorrect.');
-      } else if (err.code === 'ERR_NETWORK' || !err.response) {
-        setError('Network error: Cannot connect to server. Please check your connection.');
-      } else {
-        const errorMessage = err.response?.data?.error || err.response?.data?.message || 'Failed to load match details';
-        setError(errorMessage);
-      }
+      if (err.response?.status === 404) setError('Match not found.');
+      else if (err.code === 'ERR_NETWORK' || !err.response) setError('Network error. Check your connection.');
+      else setError(err.response?.data?.error || 'Failed to load match details');
     } finally {
       setLoading(false);
-      console.log('✅ ConductMatchPage ready - Configuration section should be visible');
     }
   };
 
-  // Parse scoring format from category
   const parseScoringFormat = (scoringFormat) => {
-    if (!scoringFormat) return { points: 21, sets: 3, setsToWin: 2 };
-    
-    // Try "NxM" format
-    const nxmMatch = scoringFormat.match(/(\d+)x(\d+)/);
-    if (nxmMatch) {
-      const points = parseInt(nxmMatch[1]);
-      const sets = parseInt(nxmMatch[2]);
-      return { points, sets, setsToWin: Math.ceil(sets / 2) };
-    }
-    
-    // Try "N games to M pts" format
-    const gamesMatch = scoringFormat.match(/(\d+)\s*games?\s*to\s*(\d+)\s*pts?/i);
-    if (gamesMatch) {
-      const sets = parseInt(gamesMatch[1]);
-      const points = parseInt(gamesMatch[2]);
-      return { points, sets, setsToWin: Math.ceil(sets / 2) };
-    }
-    
-    return { points: 21, sets: 3, setsToWin: 2 };
+    if (!scoringFormat) return { points: 21, sets: 3 };
+    const nxm = scoringFormat.match(/(\d+)x(\d+)/);
+    if (nxm) return { points: parseInt(nxm[1]), sets: parseInt(nxm[2]) };
+    const gm = scoringFormat.match(/(\d+)\s*games?\s*to\s*(\d+)\s*pts?/i);
+    if (gm) return { points: parseInt(gm[2]), sets: parseInt(gm[1]) };
+    return { points: 21, sets: 3 };
   };
 
-  // Assign umpire, set court, and start conducting
   const handleStartMatch = async () => {
     setAssigning(true);
     setError(null);
-    
     try {
-      // Assign umpire to match if umpireId is provided
-      if (umpireId) {
-        await api.put(`/matches/${matchId}/umpire`, { umpireId });
-      }
-      
-      // Only save config if match hasn't started yet
-      if (match.status === 'PENDING' || match.status === 'READY' || match.status === 'SCHEDULED') {
+      if (umpireId) await api.put(`/matches/${matchId}/umpire`, { umpireId });
+      if (['PENDING', 'READY', 'SCHEDULED'].includes(match.status)) {
         try {
-          await api.put(`/matches/${matchId}/config`, {
-            pointsPerSet,
-            maxSets,
-            setsToWin: Math.ceil(maxSets / 2),
-            extension
-          });
-          console.log('✅ Match config saved successfully');
-        } catch (configErr) {
-          // If config fails (match already started), just continue to scoring
-          console.log('⚠️ Config not saved (match may have started):', configErr.response?.data?.error);
-        }
-      } else {
-        console.log('⚠️ Match already started, skipping config save. Status:', match.status);
+          await api.put(`/matches/${matchId}/config`, { pointsPerSet, maxSets, setsToWin: Math.ceil(maxSets / 2), extension });
+        } catch (_) { /* match may have already started */ }
       }
-      
-      // Navigate to scoring page
       navigate(`/match/${matchId}/score`);
     } catch (err) {
-      console.error('❌ Error starting match:', err);
       setError(getErrorMessage(err, 'Failed to start match'));
       setAssigning(false);
     }
   };
 
-  // Give bye to the player with no opponent
   const handleGiveBye = async () => {
     setGivingBye(true);
     setError(null);
-    
     try {
-      // Determine which player gets the bye
       const byeWinnerId = player1 ? match.player1Id : match.player2Id;
-      
-      if (!byeWinnerId) {
-        setError('No player found to give bye');
-        setGivingBye(false);
-        return;
-      }
-
-      // Call backend to give bye
+      if (!byeWinnerId) { setError('No player found to give bye'); setGivingBye(false); return; }
       await api.post(`/matches/${matchId}/give-bye`, { winnerId: byeWinnerId });
-      
-      // Navigate back to draws page
       navigate(`/tournaments/${match.tournamentId}/draws`);
     } catch (err) {
-      console.error('❌ Error giving bye:', err);
       setError(getErrorMessage(err, 'Failed to give bye'));
       setGivingBye(false);
     }
   };
 
-
-
+  // ── Loading ────────────────────────────────────────────────────────────────
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: B.bg }}>
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="text-gray-400 mt-4 font-medium">Loading match details...</p>
+          <div className="w-10 h-10 rounded-full border-4 border-t-transparent animate-spin mx-auto"
+            style={{ borderColor: `${B.green} transparent transparent transparent` }} />
+          <p className="mt-3 text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>Loading match…</p>
         </div>
       </div>
     );
   }
 
-  if (error) {
+  if (error && !match) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
-        <div className="bg-slate-800/50 border border-red-500/30 rounded-2xl p-8 max-w-md w-full text-center">
-          <AlertTriangle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-white mb-2">Error</h2>
-          <p className="text-gray-400 mb-6">{error}</p>
-          <button
-            onClick={() => navigate(-1)}
-            className="px-6 py-3 bg-slate-700 text-white rounded-xl hover:bg-slate-600 transition-colors"
-          >
+      <div className="min-h-screen flex items-center justify-center px-6" style={{ background: B.bg }}>
+        <div className="text-center">
+          <AlertTriangle className="w-10 h-10 mx-auto mb-3" style={{ color: B.red }} />
+          <p className="text-white font-bold mb-4">{error}</p>
+          <button onClick={() => navigate(-1)}
+            className="px-5 py-2.5 rounded-xl text-sm font-bold"
+            style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.8)' }}>
             Go Back
           </button>
         </div>
@@ -223,7 +138,6 @@ const ConductMatchPage = () => {
   const tournament = match?.tournament;
   const category = match?.category;
 
-  // Get round name
   const getRoundName = () => {
     if (!match?.round) return '';
     if (match.round === 1) return 'FINAL';
@@ -232,300 +146,274 @@ const ConductMatchPage = () => {
     return `ROUND ${match.round}`;
   };
 
+  const inputStyle = { background: B.input, border: `1.5px solid ${B.inputBorder}`, outline: 'none', colorScheme: 'dark' };
+
+  const StepBtn = ({ onClick, children }) => (
+    <button type="button" onClick={onClick}
+      className="w-11 h-11 flex items-center justify-center rounded-xl font-black text-lg text-white flex-shrink-0 transition-all"
+      style={{ background: 'rgba(255,255,255,0.07)', border: `1px solid ${B.inputBorder}` }}>
+      {children}
+    </button>
+  );
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      {/* Animated Background */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-emerald-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-2000"></div>
-        <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-4000"></div>
-      </div>
+    <div className="min-h-screen pb-10" style={{ background: B.bg }}>
+      <div className="max-w-lg mx-auto px-4 pt-6">
 
-      {/* Header */}
-      <div className="relative">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-white/70 hover:text-white transition-colors group"
-          >
-            <ArrowLeftIcon className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
-            <span>Back to Draw</span>
-          </button>
-        </div>
-      </div>
+        {/* Back */}
+        <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 mb-5 text-sm font-bold"
+          style={{ color: 'rgba(255,255,255,0.5)' }}>
+          <ArrowLeft className="h-4 w-4" /> Back to Draw
+        </button>
 
-      <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
-        {/* Tournament Badge */}
-        <div className="text-center mb-8">
-          <span className="inline-flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/30 text-amber-400 rounded-full text-sm font-semibold">
-            <Trophy className="w-4 h-4" />
+        {/* Tournament badge */}
+        <div className="text-center mb-5">
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold"
+            style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.3)', color: '#fbbf24' }}>
+            <Trophy className="w-3.5 h-3.5" />
             {tournament?.name || 'Tournament'}
           </span>
-          {category && (
-            <p className="text-gray-500 text-sm mt-2">{category.name}</p>
-          )}
+          {category && <p className="text-xs mt-1.5" style={{ color: 'rgba(255,255,255,0.4)' }}>{category.name}</p>}
         </div>
 
-        {/* Match Title */}
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-3 mb-3">
-            <Swords className="w-8 h-8 text-emerald-400" />
-            <h1 className="text-3xl font-bold text-white">Match {match?.matchNumber}</h1>
+        {/* Match title */}
+        <div className="text-center mb-6">
+          <div className="inline-flex items-center gap-2 mb-1">
+            <Swords className="w-6 h-6" style={{ color: B.green }} />
+            <h1 className="text-2xl font-black text-white">Match {match?.matchNumber}</h1>
           </div>
-          <p className="text-gray-400">Round {match?.round} • {match?.status === 'PENDING' ? 'Ready to Start' : match?.status}</p>
+          <p className="text-xs font-bold" style={{ color: 'rgba(255,255,255,0.4)' }}>
+            Round {match?.round} • <span style={{ color: B.green }}>{match?.status === 'PENDING' ? 'READY' : match?.status}</span>
+          </p>
         </div>
 
-        {/* Players Card */}
-        <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-3xl p-8 mb-6 relative overflow-hidden">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-gradient-to-r from-transparent via-emerald-500 to-transparent"></div>
-          
-          <div className="flex items-center justify-between gap-4">
-            {/* Player 1 */}
-            <div className="flex-1 text-center">
-              <div className="relative inline-block mb-4">
-                {player1?.profilePhoto ? (
-                  <img src={player1.profilePhoto} alt={player1.name} className="w-20 h-20 sm:w-28 sm:h-28 rounded-2xl object-cover border-4 border-blue-500/30 shadow-2xl shadow-blue-500/20" />
-                ) : (
-                  <div className="w-20 h-20 sm:w-28 sm:h-28 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-blue-500/30 border-4 border-blue-500/30">
-                    <span className="text-2xl sm:text-4xl font-bold text-white">{player1?.name?.charAt(0)?.toUpperCase() || 'P1'}</span>
-                  </div>
-                )}
-                <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-lg">1</div>
-              </div>
-              <h3 className="text-xl font-bold text-white mb-1">{player1?.name || 'Player 1'}</h3>
-              <p className="text-gray-500 text-sm">{player1?.email || 'Awaiting player'}</p>
-            </div>
-
-            {/* VS Divider */}
-            <div className="flex flex-col items-center px-4">
-              <div className="w-20 h-20 bg-gradient-to-br from-slate-700 to-slate-800 rounded-full flex items-center justify-center border-2 border-white/10 shadow-xl">
-                <span className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">VS</span>
-              </div>
-              <div className="mt-3 flex items-center gap-2 text-gray-500 text-xs">
-                <Swords className="w-3 h-3" />
-                <span>{getRoundName()}</span>
-              </div>
-            </div>
-
-            {/* Player 2 */}
-            <div className="flex-1 text-center">
-              <div className="relative inline-block mb-4">
-                {player2?.profilePhoto ? (
-                  <img src={player2.profilePhoto} alt={player2.name} className="w-20 h-20 sm:w-28 sm:h-28 rounded-2xl object-cover border-4 border-purple-500/30 shadow-2xl shadow-purple-500/20" />
-                ) : (
-                  <div className="w-20 h-20 sm:w-28 sm:h-28 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-purple-500/30 border-4 border-purple-500/30">
-                    <span className="text-2xl sm:text-4xl font-bold text-white">{player2?.name?.charAt(0)?.toUpperCase() || 'P2'}</span>
-                  </div>
-                )}
-                <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-lg">2</div>
-              </div>
-              <h3 className="text-xl font-bold text-white mb-1">{player2?.name || 'Player 2'}</h3>
-              <p className="text-gray-500 text-sm">{player2?.email || 'Awaiting player'}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Umpire Card */}
-        {umpire && (
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-emerald-500/20 rounded-2xl p-5 mb-6">
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
-                <Gavel className="w-7 h-7 text-white" />
-              </div>
-              <div className="flex-1">
-                <p className="text-emerald-400 text-xs font-semibold uppercase tracking-wider mb-1">Match Official</p>
-                <h3 className="text-lg font-bold text-white">{umpire.name}</h3>
-              </div>
-              <div className="px-4 py-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-xl text-sm font-semibold flex items-center gap-2">
-                <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
-                Ready
-              </div>
-            </div>
+        {/* Error banner */}
+        {error && (
+          <div className="mb-4 flex items-start gap-2.5 px-4 py-3 rounded-xl"
+            style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)' }}>
+            <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: B.red }} />
+            <p className="text-xs font-semibold flex-1" style={{ color: B.red }}>{error}</p>
+            <button onClick={() => setError(null)}><X className="w-4 h-4" style={{ color: B.red }} /></button>
           </div>
         )}
 
-        {/* Scoring Configuration - Always Editable */}
-        <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 border-2 border-blue-500 rounded-2xl p-6 mb-6">
-          <div className="text-center mb-4">
-            <h2 className="text-2xl font-bold text-white mb-2">⚙️ CONFIGURE MATCH SETTINGS</h2>
-            <p className="text-blue-300 text-sm">Edit the scoring format before starting the match</p>
-          </div>
+        <div className="space-y-4">
 
-          {/* Edit scoring config - Always shown */}
-          <div className="space-y-5">
-            {/* Points per Set */}
-            <div>
-              <label className="block text-gray-300 text-sm mb-2">Points per Set</label>
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => setPointsPerSet(Math.max(0, pointsPerSet - 1))}
-                  className="w-12 h-12 bg-slate-700/50 border border-white/10 rounded-xl text-white text-xl font-bold hover:bg-slate-600/50 transition-colors flex items-center justify-center"
-                >
-                  −
-                </button>
-                <input
-                  type="number"
-                  value={pointsPerSet}
-                  onChange={(e) => setPointsPerSet(parseInt(e.target.value) || 0)}
-                  className="flex-1 px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white text-center text-xl font-bold focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
-                  min="0"
-                  max="100"
-                  placeholder="Enter points"
-                />
-                <button
-                  type="button"
-                  onClick={() => setPointsPerSet(Math.min(100, pointsPerSet + 1))}
-                  className="w-12 h-12 bg-slate-700/50 border border-white/10 rounded-xl text-white text-xl font-bold hover:bg-slate-600/50 transition-colors flex items-center justify-center"
-                >
-                  +
-                </button>
+          {/* ── Players Card ─────────────────────────────────────────────── */}
+          <div className="rounded-2xl overflow-hidden relative"
+            style={{ background: B.card, border: `1px solid ${B.border}` }}>
+            {/* Top accent line */}
+            <div className="h-0.5 w-full" style={{ background: `linear-gradient(90deg, ${B.green}, ${B.purple})` }} />
+
+            <div className="p-5 flex items-center gap-3">
+              {/* Player 1 */}
+              <div className="flex-1 text-center">
+                <div className="relative inline-block mb-3">
+                  {player1?.profilePhoto ? (
+                    <img src={player1.profilePhoto} alt={player1.name}
+                      className="w-16 h-16 rounded-2xl object-cover"
+                      style={{ border: `2px solid rgba(0,255,136,0.4)`, boxShadow: '0 0 20px rgba(0,255,136,0.2)' }} />
+                  ) : (
+                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center font-black text-xl text-white"
+                      style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', boxShadow: '0 0 20px rgba(0,255,136,0.25)' }}>
+                      {player1?.name?.charAt(0)?.toUpperCase() || 'P'}
+                    </div>
+                  )}
+                  <div className="absolute -bottom-1.5 -right-1.5 w-6 h-6 rounded-lg flex items-center justify-center text-xs font-black"
+                    style={{ background: B.green, color: '#07071a' }}>1</div>
+                </div>
+                <p className="text-sm font-black text-white leading-tight line-clamp-2">
+                  {player1?.name || 'Player 1'}
+                </p>
+                {!player1 && (
+                  <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.35)' }}>Awaiting player</p>
+                )}
               </div>
-              <p className="text-gray-500 text-xs mt-2">Enter any number of points (e.g., 11, 15, 21, 30)</p>
-            </div>
 
-            {/* Number of Sets */}
-            <div>
-              <label className="block text-gray-300 text-sm mb-2">Number of Sets</label>
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => setMaxSets(Math.max(1, maxSets - 1))}
-                  className="w-12 h-12 bg-slate-700/50 border border-white/10 rounded-xl text-white text-xl font-bold hover:bg-slate-600/50 transition-colors flex items-center justify-center"
-                >
-                  −
-                </button>
-                <input
-                  type="number"
-                  value={maxSets}
-                  onChange={(e) => setMaxSets(parseInt(e.target.value) || 1)}
-                  className="flex-1 px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white text-center text-xl font-bold focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
-                  min="1"
-                  max="9"
-                  placeholder="Enter sets"
-                />
-                <button
-                  type="button"
-                  onClick={() => setMaxSets(Math.min(9, maxSets + 1))}
-                  className="w-12 h-12 bg-slate-700/50 border border-white/10 rounded-xl text-white text-xl font-bold hover:bg-slate-600/50 transition-colors flex items-center justify-center"
-                >
-                  +
-                </button>
+              {/* VS */}
+              <div className="flex flex-col items-center gap-1.5 px-2">
+                <div className="w-14 h-14 rounded-full flex items-center justify-center"
+                  style={{ background: 'rgba(255,255,255,0.05)', border: `1px solid ${B.border}` }}>
+                  <span className="text-lg font-black" style={{ color: B.cyan }}>VS</span>
+                </div>
+                <div className="flex items-center gap-1" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                  <Swords className="w-3 h-3" />
+                  <span className="text-xs font-bold">{getRoundName()}</span>
+                </div>
               </div>
-              <p className="text-gray-500 text-xs mt-2">
-                {maxSets === 1 ? 'Single set match' : `Best of ${maxSets} (first to win ${Math.ceil(maxSets / 2)} sets)`}
-              </p>
-            </div>
 
-            {/* Extension (Deuce) */}
-            <div>
-              <label className="block text-gray-300 text-sm mb-2">Extension (Deuce)</label>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setExtension(true)}
-                  className={`flex-1 px-4 py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 ${
-                    extension
-                      ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/30'
-                      : 'bg-slate-700/50 text-gray-300 hover:bg-slate-600/50'
-                  }`}
-                >
-                  {extension && <Check className="w-4 h-4" />}
-                  Yes (Deuce at {pointsPerSet - 1}-{pointsPerSet - 1})
-                </button>
-                <button
-                  onClick={() => setExtension(false)}
-                  className={`flex-1 px-4 py-3 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 ${
-                    !extension
-                      ? 'bg-red-500 text-white shadow-lg shadow-red-500/30'
-                      : 'bg-slate-700/50 text-gray-300 hover:bg-slate-600/50'
-                  }`}
-                >
-                  {!extension && <Check className="w-4 h-4" />}
-                  No (First to {pointsPerSet} wins)
-                </button>
+              {/* Player 2 */}
+              <div className="flex-1 text-center">
+                <div className="relative inline-block mb-3">
+                  {player2?.profilePhoto ? (
+                    <img src={player2.profilePhoto} alt={player2.name}
+                      className="w-16 h-16 rounded-2xl object-cover"
+                      style={{ border: `2px solid rgba(168,85,247,0.4)`, boxShadow: '0 0 20px rgba(168,85,247,0.2)' }} />
+                  ) : (
+                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center font-black text-xl text-white"
+                      style={{ background: 'linear-gradient(135deg,#a855f7,#7c3aed)', boxShadow: '0 0 20px rgba(168,85,247,0.25)' }}>
+                      {player2?.name?.charAt(0)?.toUpperCase() || 'P'}
+                    </div>
+                  )}
+                  <div className="absolute -bottom-1.5 -right-1.5 w-6 h-6 rounded-lg flex items-center justify-center text-xs font-black"
+                    style={{ background: B.purple, color: '#fff' }}>2</div>
+                </div>
+                <p className="text-sm font-black text-white leading-tight line-clamp-2">
+                  {player2?.name || 'Player 2'}
+                </p>
+                {!player2 && (
+                  <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.35)' }}>Awaiting player</p>
+                )}
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Scoring Format Summary */}
-        <div className="bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 border border-emerald-500/20 rounded-xl p-4 mb-6">
-          <div className="flex items-center gap-3">
-            <Settings className="w-5 h-5 text-emerald-400 flex-shrink-0" />
-            <div>
-              <p className="text-emerald-300 text-sm font-semibold mb-1">
-                Configure match settings before starting
-              </p>
-              <p className="text-emerald-300/70 text-xs">
-                {maxSets === 1 
-                  ? `Single set to ${pointsPerSet} points` 
-                  : `Best of ${maxSets} sets, ${pointsPerSet} points each`}
-                {!extension && ' (no extension)'}
-              </p>
+          {/* ── Umpire Card ───────────────────────────────────────────────── */}
+          {umpire && (
+            <div className="rounded-2xl flex items-center gap-4 px-4 py-3.5"
+              style={{ background: 'rgba(0,255,136,0.06)', border: '1px solid rgba(0,255,136,0.2)' }}>
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{ background: 'linear-gradient(135deg,rgba(0,255,136,0.3),rgba(0,200,83,0.2))', border: '1px solid rgba(0,255,136,0.3)' }}>
+                <Gavel className="w-5 h-5" style={{ color: B.green }} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-bold uppercase tracking-widest mb-0.5" style={{ color: 'rgba(0,255,136,0.6)' }}>Match Official</p>
+                <p className="text-sm font-black text-white truncate">{umpire.name}</p>
+              </div>
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg flex-shrink-0"
+                style={{ background: 'rgba(0,255,136,0.1)', border: '1px solid rgba(0,255,136,0.25)' }}>
+                <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: B.green }} />
+                <span className="text-xs font-bold" style={{ color: B.green }}>Ready</span>
+              </div>
             </div>
-          </div>
-        </div>
+          )}
 
-        {/* Action Buttons */}
-        {(!player1 || !player2) ? (
-          // Show Give Bye button when one player is missing
-          <div className="space-y-4">
-            <button
-              onClick={handleGiveBye}
-              disabled={givingBye || (!player1 && !player2)}
-              className="w-full py-5 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white rounded-2xl font-bold text-lg shadow-2xl shadow-amber-500/30 hover:shadow-amber-500/50 hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-3 relative overflow-hidden group"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
-              
-              {givingBye ? (
-                <>
-                  <Loader className="w-6 h-6 animate-spin" />
-                  Giving Bye...
-                </>
-              ) : (
-                <>
-                  <Trophy className="w-6 h-6" />
-                  Give Bye to {player1?.name || player2?.name || 'Player'}
-                </>
-              )}
-            </button>
-
-            <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl flex items-center gap-3">
-              <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0" />
+          {/* ── Configure Match Settings ──────────────────────────────────── */}
+          <div className="rounded-2xl overflow-hidden"
+            style={{ background: B.card, border: `1px solid ${B.border}` }}>
+            {/* Section header */}
+            <div className="px-4 py-3 flex items-center gap-3"
+              style={{ borderBottom: `1px solid ${B.border}`, background: 'rgba(168,85,247,0.04)' }}>
+              <div className="w-8 h-8 rounded-xl flex items-center justify-center"
+                style={{ background: 'rgba(168,85,247,0.15)', border: '1px solid rgba(168,85,247,0.3)' }}>
+                <Settings className="w-4 h-4" style={{ color: B.purple }} />
+              </div>
               <div>
-                <p className="text-amber-300 text-sm font-semibold mb-1">
-                  One player is missing
+                <h2 className="text-sm font-black text-white">Configure Match Settings</h2>
+                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Set scoring format before starting</p>
+              </div>
+            </div>
+
+            <div className="p-4 space-y-5">
+              {/* Points per Set */}
+              <div>
+                <label className="block text-xs font-black mb-2" style={{ color: 'rgba(255,255,255,0.6)' }}>Points per Set</label>
+                <div className="flex items-center gap-3">
+                  <StepBtn onClick={() => setPointsPerSet(Math.max(0, pointsPerSet - 1))}>−</StepBtn>
+                  <input
+                    type="number"
+                    value={pointsPerSet}
+                    onChange={e => setPointsPerSet(parseInt(e.target.value) || 0)}
+                    className="flex-1 px-3 py-2.5 rounded-xl text-white text-center text-lg font-black"
+                    style={inputStyle}
+                    min="0" max="100"
+                  />
+                  <StepBtn onClick={() => setPointsPerSet(Math.min(100, pointsPerSet + 1))}>+</StepBtn>
+                </div>
+                <p className="text-xs mt-1.5" style={{ color: 'rgba(255,255,255,0.35)' }}>e.g. 11, 15, 21, 30</p>
+              </div>
+
+              {/* Number of Sets */}
+              <div>
+                <label className="block text-xs font-black mb-2" style={{ color: 'rgba(255,255,255,0.6)' }}>Number of Sets</label>
+                <div className="flex items-center gap-3">
+                  <StepBtn onClick={() => setMaxSets(Math.max(1, maxSets - 1))}>−</StepBtn>
+                  <input
+                    type="number"
+                    value={maxSets}
+                    onChange={e => setMaxSets(parseInt(e.target.value) || 1)}
+                    className="flex-1 px-3 py-2.5 rounded-xl text-white text-center text-lg font-black"
+                    style={inputStyle}
+                    min="1" max="9"
+                  />
+                  <StepBtn onClick={() => setMaxSets(Math.min(9, maxSets + 1))}>+</StepBtn>
+                </div>
+                <p className="text-xs mt-1.5" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                  {maxSets === 1 ? 'Single set match' : `Best of ${maxSets} — first to ${Math.ceil(maxSets / 2)} sets`}
                 </p>
-                <p className="text-amber-300/70 text-xs">
-                  Click "Give Bye" to automatically advance {player1?.name || player2?.name || 'the player'} to the next round without playing this match.
+              </div>
+
+              {/* Extension toggle */}
+              <div>
+                <label className="block text-xs font-black mb-2" style={{ color: 'rgba(255,255,255,0.6)' }}>Extension (Deuce)</label>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setExtension(true)}
+                    className="flex-1 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all"
+                    style={extension
+                      ? { background: 'linear-gradient(135deg,rgba(0,255,136,0.25),rgba(0,200,83,0.2))', border: '1.5px solid rgba(0,255,136,0.5)', color: B.green }
+                      : { background: 'rgba(255,255,255,0.04)', border: `1.5px solid ${B.inputBorder}`, color: 'rgba(255,255,255,0.4)' }}
+                  >
+                    {extension && <Check className="w-4 h-4" />}
+                    Yes — Deuce
+                  </button>
+                  <button
+                    onClick={() => setExtension(false)}
+                    className="flex-1 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all"
+                    style={!extension
+                      ? { background: 'rgba(239,68,68,0.15)', border: '1.5px solid rgba(239,68,68,0.4)', color: B.red }
+                      : { background: 'rgba(255,255,255,0.04)', border: `1.5px solid ${B.inputBorder}`, color: 'rgba(255,255,255,0.4)' }}
+                  >
+                    {!extension && <Check className="w-4 h-4" />}
+                    No — Fixed
+                  </button>
+                </div>
+              </div>
+
+              {/* Summary line */}
+              <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl"
+                style={{ background: 'rgba(0,212,255,0.06)', border: '1px solid rgba(0,212,255,0.15)' }}>
+                <Settings className="w-4 h-4 flex-shrink-0" style={{ color: B.cyan }} />
+                <p className="text-xs font-bold" style={{ color: B.cyan }}>
+                  {maxSets === 1 ? `Single set to ${pointsPerSet} pts` : `Best of ${maxSets}, ${pointsPerSet} pts each`}
+                  {!extension ? ' · No deuce' : ''}
                 </p>
               </div>
             </div>
           </div>
-        ) : (
-          // Show Start Match button when both players are present
-          <>
+
+          {/* ── Action Buttons ────────────────────────────────────────────── */}
+          {(!player1 || !player2) ? (
+            <div className="space-y-3">
+              <button
+                onClick={handleGiveBye}
+                disabled={givingBye || (!player1 && !player2)}
+                className="w-full py-4 rounded-2xl font-black text-base transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                style={{ background: 'linear-gradient(135deg,#f59e0b,#fbbf24)', color: '#07071a', boxShadow: '0 6px 20px rgba(245,158,11,0.35)' }}>
+                {givingBye ? <Loader className="w-5 h-5 animate-spin" /> : <Trophy className="w-5 h-5" />}
+                {givingBye ? 'Giving Bye…' : `Give Bye to ${player1?.name || player2?.name || 'Player'}`}
+              </button>
+              <div className="flex items-start gap-2.5 px-4 py-3 rounded-xl"
+                style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.25)' }}>
+                <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: '#fbbf24' }} />
+                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                  One player is missing. Give Bye to advance {player1?.name || player2?.name || 'the player'} automatically.
+                </p>
+              </div>
+            </div>
+          ) : (
             <button
               onClick={handleStartMatch}
               disabled={assigning}
-              className="w-full py-5 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-white rounded-2xl font-bold text-lg shadow-2xl shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-3 relative overflow-hidden group"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
-              
-              {assigning ? (
-                <>
-                  <Loader className="w-6 h-6 animate-spin" />
-                  Starting Match...
-                </>
-              ) : (
-                <>
-                  <Play className="w-6 h-6" />
-                  Start Match
-                </>
-              )}
+              className="w-full py-4 rounded-2xl font-black text-base transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+              style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#07071a', boxShadow: '0 6px 20px rgba(0,200,83,0.35)' }}>
+              {assigning
+                ? <><div className="w-5 h-5 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: '#07071a transparent transparent transparent' }} />Starting…</>
+                : <><Play className="w-5 h-5" />Start Match</>}
             </button>
-          </>
-        )}
+          )}
+
+        </div>
       </div>
     </div>
   );

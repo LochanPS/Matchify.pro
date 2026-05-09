@@ -4198,7 +4198,6 @@ const AssignUmpireModal = ({ match, umpires, onClose, onAssign }) => {
   const [selectedUmpire, setSelectedUmpire] = useState(match?.umpireId || null);
   const [assigning, setAssigning] = useState(false);
 
-  // Assign Only - just assign umpire and close modal
   const handleAssignOnly = async () => {
     if (!selectedUmpire) return;
     setAssigning(true);
@@ -4207,144 +4206,139 @@ const AssignUmpireModal = ({ match, umpires, onClose, onAssign }) => {
     onClose();
   };
 
-  // Start Match - assign umpire and redirect to conduct page
   const handleStartMatch = async () => {
     if (!selectedUmpire) return;
     setAssigning(true);
     await onAssign(selectedUmpire);
     setAssigning(false);
-    // Redirect to conduct page for configuration
     navigate(`/match/${match.id}/conduct`);
   };
 
   const selectedUmpireData = umpires.find(u => u.id === selectedUmpire);
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-slate-800 border border-white/10 rounded-2xl max-w-md w-full">
-        <div className="p-6 border-b border-white/10">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center">
-                <Gavel className="w-6 h-6 text-blue-400" />
+    <div
+      className="fixed inset-0 flex items-end sm:items-center justify-center z-50 p-4"
+      style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)' }}
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-sm rounded-2xl overflow-hidden"
+        style={{ background: '#0d1025', border: '1px solid rgba(0,255,136,0.18)' }}
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="px-5 pt-5 pb-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{ background: 'linear-gradient(135deg,rgba(0,255,136,0.25),rgba(0,212,255,0.2))', border: '1px solid rgba(0,255,136,0.3)' }}>
+                <Gavel className="w-5 h-5" style={{ color: '#00ff88' }} />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-white">Assign Umpire & Start Match</h2>
-                <p className="text-gray-400 text-sm">
+                <h2 className="text-base font-black text-white">Assign Umpire & Start Match</h2>
+                <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>
                   Match {match?.matchNumber} • {getPlayerDisplay(match?.player1)} vs {getPlayerDisplay(match?.player2)}
                 </p>
               </div>
             </div>
-            <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-lg transition-colors">
-              <X className="w-5 h-5 text-gray-400" />
+            <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-xl flex-shrink-0 transition-all"
+              style={{ background: 'rgba(255,255,255,0.06)' }}>
+              <X className="w-4 h-4" style={{ color: 'rgba(255,255,255,0.5)' }} />
             </button>
           </div>
         </div>
 
-        <div className="p-6">
+        {/* Umpire list */}
+        <div className="px-5 py-4">
           {umpires.length === 0 ? (
             <div className="text-center py-8">
-              <Gavel className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-              <p className="text-gray-400">No umpires added to this tournament</p>
-              <p className="text-gray-500 text-sm mt-1">Add umpires from the tournament settings first</p>
+              <Gavel className="w-10 h-10 mx-auto mb-3" style={{ color: 'rgba(255,255,255,0.2)' }} />
+              <p className="text-sm font-bold text-white mb-1">No umpires added</p>
+              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Add umpires from tournament settings first</p>
             </div>
           ) : (
-            <div className="space-y-2 max-h-64 overflow-y-auto scroll-smooth scrollbar-thin">
-              {umpires.map((umpire) => (
-                <div
-                  key={umpire.id}
-                  onClick={() => setSelectedUmpire(umpire.id)}
-                  className={`p-3 rounded-xl cursor-pointer transition-all ${
-                    selectedUmpire === umpire.id
-                      ? 'bg-blue-500/20 border-2 border-blue-500'
-                      : 'bg-slate-700/50 border-2 border-transparent hover:bg-slate-700'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold ${
-                      selectedUmpire === umpire.id
-                        ? 'bg-gradient-to-br from-blue-400 to-cyan-600'
-                        : 'bg-gradient-to-br from-slate-500 to-slate-600'
-                    }`}>
+            <div className="space-y-2 max-h-56 overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
+              {umpires.map((umpire) => {
+                const isSelected = selectedUmpire === umpire.id;
+                return (
+                  <div
+                    key={umpire.id}
+                    onClick={() => setSelectedUmpire(umpire.id)}
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all"
+                    style={isSelected
+                      ? { background: 'rgba(0,255,136,0.1)', border: '1.5px solid rgba(0,255,136,0.4)' }
+                      : { background: 'rgba(255,255,255,0.04)', border: '1.5px solid rgba(255,255,255,0.07)' }}
+                  >
+                    <div className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm flex-shrink-0"
+                      style={isSelected
+                        ? { background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#07071a' }
+                        : { background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)' }}>
                       {umpire.name?.charAt(0)?.toUpperCase() || 'U'}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-white font-medium truncate">{umpire.name}</p>
-                      <p className="text-gray-500 text-xs truncate">{umpire.email}</p>
+                      <p className="text-sm font-bold text-white truncate">{umpire.name}</p>
+                      <p className="text-xs truncate" style={{ color: 'rgba(255,255,255,0.4)' }}>{umpire.email}</p>
                     </div>
-                    {selectedUmpire === umpire.id && (
-                      <CheckCircle className="w-5 h-5 text-blue-400 flex-shrink-0" />
-                    )}
+                    {isSelected && <CheckCircle className="w-4 h-4 flex-shrink-0" style={{ color: '#00ff88' }} />}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
 
-          {/* Selected Umpire Info */}
+          {/* Selected umpire confirmation */}
           {selectedUmpireData && (
-            <div className="mt-4 p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl">
-              <p className="text-emerald-300 text-sm">
-                <span className="font-semibold">{selectedUmpireData.name}</span> will conduct this match
+            <div className="mt-3 px-3 py-2.5 rounded-xl flex items-center gap-2"
+              style={{ background: 'rgba(0,255,136,0.07)', border: '1px solid rgba(0,255,136,0.2)' }}>
+              <CheckCircle className="w-4 h-4 flex-shrink-0" style={{ color: '#00ff88' }} />
+              <p className="text-xs font-bold" style={{ color: '#00ff88' }}>
+                {selectedUmpireData.name} will conduct this match
               </p>
             </div>
           )}
         </div>
 
-        <div className="p-6 border-t border-white/10 space-y-3">
-          {/* Primary action - Start Match (assign + configure) */}
+        {/* Actions */}
+        <div className="px-5 pb-5 space-y-2.5" style={{ borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: '1rem' }}>
+          {/* Start Match — primary */}
           <button
             onClick={handleStartMatch}
             disabled={!selectedUmpire || assigning || umpires.length === 0}
-            className="w-full px-4 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl hover:shadow-lg hover:shadow-emerald-500/25 transition-all font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full py-3.5 rounded-xl font-black text-sm transition-all disabled:opacity-40 flex items-center justify-center gap-2"
+            style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#07071a', boxShadow: '0 4px 16px rgba(0,200,83,0.35)' }}
           >
-            {assigning ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                Starting...
-              </>
-            ) : (
-              <>
-                <Gavel className="w-5 h-5" />
-                Start Match
-              </>
-            )}
+            {assigning
+              ? <><div className="w-4 h-4 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#07071a transparent transparent transparent' }} />Starting…</>
+              : <><Gavel className="w-4 h-4" />Start Match</>}
           </button>
-          
-          {/* Secondary action - Assign Only */}
-          <div className="flex gap-3">
-            <button 
-              onClick={onClose} 
-              className="flex-1 px-4 py-2.5 bg-slate-700 text-gray-300 rounded-xl hover:bg-slate-600 transition-colors font-medium"
+
+          {/* Cancel + Assign Only */}
+          <div className="flex gap-2">
+            <button
+              onClick={onClose}
+              className="flex-1 py-2.5 rounded-xl text-sm font-bold transition-all"
+              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.7)' }}
             >
               Cancel
             </button>
-            
             <button
               onClick={handleAssignOnly}
               disabled={!selectedUmpire || assigning || umpires.length === 0}
-              className="flex-1 px-4 py-2.5 bg-blue-500/20 border border-blue-500/50 text-blue-300 rounded-xl hover:bg-blue-500/30 transition-all font-medium disabled:opacity-50 flex items-center justify-center gap-2"
+              className="flex-1 py-2.5 rounded-xl text-sm font-bold transition-all disabled:opacity-40 flex items-center justify-center gap-1.5"
+              style={{ background: 'rgba(0,212,255,0.1)', border: '1px solid rgba(0,212,255,0.3)', color: '#00d4ff' }}
             >
-              {assigning ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-blue-300/30 border-t-blue-300 rounded-full animate-spin"></div>
-                  Assigning...
-                </>
-              ) : (
-                <>
-                  <CheckCircle className="w-4 h-4" />
-                  Assign Only
-                </>
-              )}
+              {assigning
+                ? <div className="w-3.5 h-3.5 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#00d4ff transparent transparent transparent' }} />
+                : <CheckCircle className="w-3.5 h-3.5" />}
+              Assign Only
             </button>
           </div>
-          
-          {/* Info message */}
-          <div className="text-center pt-2">
-            <p className="text-xs text-gray-500">
-              Press "Start Match" to assign <span className="text-emerald-400 font-medium">{selectedUmpireData?.name || 'umpire'}</span> and begin scoring
-            </p>
-          </div>
+
+          {/* Hint */}
+          <p className="text-center text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>
+            Press "Start Match" to assign <span style={{ color: '#00ff88' }}>{selectedUmpireData?.name || 'umpire'}</span> and begin scoring
+          </p>
         </div>
       </div>
     </div>

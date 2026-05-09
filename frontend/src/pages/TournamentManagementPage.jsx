@@ -4,7 +4,7 @@ const MGMT_PARTICLES = Array.from({ length: 18 }, (_, i) => ({
   x: (i * 37 + 11) % 97, y: (i * 53 + 7) % 93,
   o: ((i * 13) % 35) / 100 + 0.15,
   dur: (i * 7) % 8 + 4, delay: (i * 3) % 5,
-  c: ['#00ff88', '#00d4ff', '#a855f7', '#10b981'][i % 4],
+  c: ['#00ff88', '#00d4ff', '#a855f7', '#00ff88'][i % 4],
 }));
 
 import { useState, useEffect } from 'react';
@@ -236,7 +236,7 @@ export default function TournamentManagementPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #0a0a1f 0%, #07071a 50%, #0a0a1f 100%)' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#07071a' }}>
         <div className="text-center">
           <div className="w-14 h-14 border-4 border-t-transparent rounded-full animate-spin mx-auto mb-4"
             style={{ borderColor: 'rgba(0,255,136,0.3)', borderTopColor: '#00ff88' }}></div>
@@ -247,7 +247,7 @@ export default function TournamentManagementPage() {
   }
 
   return (
-    <div className="min-h-screen relative overflow-x-hidden" style={{ background: 'linear-gradient(180deg, #0a0a1f 0%, #07071a 40%, #0d1a2a 70%, #07071a 100%)' }}>
+    <div className="min-h-screen relative overflow-x-hidden" style={{ background: '#07071a' }}>
       {/* Animated background */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-0 right-0 w-80 h-80 rounded-full blur-3xl opacity-15"
@@ -572,7 +572,7 @@ export default function TournamentManagementPage() {
                             <div className="text-white text-sm">{registration.partner.name}</div>
                             <div className="text-xs">
                               {registration.partnerConfirmed
-                                ? <span className="text-emerald-400 flex items-center gap-1"><CheckCircle className="w-3 h-3" /> Confirmed</span>
+                                ? <span className="flex items-center gap-1" style={{ color: '#00ff88' }}><CheckCircle className="w-3 h-3" /> Confirmed</span>
                                 : <span className="text-amber-400 flex items-center gap-1"><Clock className="w-3 h-3" /> Pending</span>}
                             </div>
                           </div>
@@ -622,7 +622,7 @@ export default function TournamentManagementPage() {
                       <td className="px-5 py-4">
                         <div className="flex flex-col items-center gap-1.5">
                           {registration.status === 'pending' && <span className="text-amber-400 text-xs flex items-center gap-1"><Clock className="h-3.5 w-3.5" />Pending Admin</span>}
-                          {registration.status === 'confirmed' && <span className="text-emerald-400 text-xs flex items-center gap-1"><CheckCircle className="h-3.5 w-3.5" />Registered</span>}
+                          {registration.status === 'confirmed' && <span className="text-xs flex items-center gap-1" style={{ color: '#00ff88' }}><CheckCircle className="h-3.5 w-3.5" />Registered</span>}
                           {registration.status === 'rejected' && <span className="text-red-400 text-xs flex items-center gap-1"><XCircle className="h-3.5 w-3.5" />Rejected</span>}
                           {registration.status === 'cancelled' && !registration.refundStatus && <span className="text-xs italic" style={{ color: 'rgba(255,255,255,0.3)' }}>No actions</span>}
                           {registration.status === 'cancellation_requested' && (
@@ -643,7 +643,7 @@ export default function TournamentManagementPage() {
                             </button>
                           )}
                           {registration.status === 'cancelled' && registration.refundStatus === 'completed' && (
-                            <span className="text-emerald-400 text-xs flex items-center gap-1"><CheckCircle className="h-3.5 w-3.5" />Done</span>
+                            <span className="text-xs flex items-center gap-1" style={{ color: '#00ff88' }}><CheckCircle className="h-3.5 w-3.5" />Done</span>
                           )}
                           {actionLoading === registration.id && <div className="w-4 h-4 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: 'rgba(0,255,136,0.3)', borderTopColor: '#00ff88' }}></div>}
                         </div>
@@ -701,17 +701,18 @@ export default function TournamentManagementPage() {
             {confirmModal.type === 'remove' && (
               <>
                 <div className="text-center mb-6">
-                  <div className="w-16 h-16 bg-gradient-to-br from-red-400 to-rose-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-red-500/30">
+                  <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+                    style={{ background: 'linear-gradient(135deg,#ef4444,#dc2626)', boxShadow: '0 8px 20px rgba(239,68,68,0.3)' }}>
                     <Trash2 className="w-8 h-8 text-white" />
                   </div>
                   <h3 className="text-xl font-bold text-white mb-2">Remove Registration?</h3>
-                  <p className="text-gray-400">
-                    Remove <span className="text-red-400 font-medium">{confirmModal.registration.displayName || confirmModal.registration.user?.name || 'Unknown'}</span>'s registration permanently.
+                  <p style={{ color: 'rgba(255,255,255,0.5)' }}>
+                    Remove <span className="font-medium" style={{ color: '#f87171' }}>{confirmModal.registration.displayName || confirmModal.registration.user?.name || 'Unknown'}</span>'s registration permanently.
                   </p>
                 </div>
-                <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 mb-6">
-                  <p className="text-sm text-red-300 font-medium mb-2">This will:</p>
-                  <ul className="text-sm text-red-200/80 space-y-1">
+                <div className="rounded-xl p-4 mb-6" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)' }}>
+                  <p className="text-sm font-medium mb-2" style={{ color: '#fca5a5' }}>This will:</p>
+                  <ul className="text-sm space-y-1" style={{ color: 'rgba(252,165,165,0.8)' }}>
                     <li>• Permanently delete the registration</li>
                     <li>• Cannot be undone</li>
                   </ul>
@@ -719,17 +720,19 @@ export default function TournamentManagementPage() {
                 <div className="flex gap-3">
                   <button
                     onClick={() => setConfirmModal(null)}
-                    className="flex-1 py-3 px-4 bg-white/10 text-white rounded-xl hover:bg-white/20 transition-colors font-medium"
+                    className="flex-1 py-3 px-4 rounded-xl font-medium transition-colors"
+                    style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.7)' }}
                   >
                     Cancel
                   </button>
                   <button
                     onClick={() => handleRemove(confirmModal.registration.id)}
                     disabled={actionLoading}
-                    className="flex-1 py-3 px-4 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl hover:shadow-lg hover:shadow-red-500/30 transition-all font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+                    className="flex-1 py-3 px-4 rounded-xl font-semibold transition-all disabled:opacity-50 flex items-center justify-center gap-2 text-white"
+                    style={{ background: 'linear-gradient(135deg,#ef4444,#dc2626)' }}
                   >
                     {actionLoading ? (
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: 'rgba(255,255,255,0.3)', borderTopColor: '#fff' }} />
                     ) : (
                       <>
                         <Trash2 className="w-5 h-5" />
@@ -796,27 +799,28 @@ export default function TournamentManagementPage() {
 
       {/* Complete Refund Modal - Upload Payment Screenshot */}
       {completeRefundModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-slate-800/90 backdrop-blur-sm border border-white/10 rounded-2xl shadow-2xl max-w-lg w-full my-8">
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4 overflow-y-auto" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}>
+          <div className="rounded-2xl shadow-2xl max-w-lg w-full my-8" style={{ background: '#0d1025', border: '1px solid rgba(255,255,255,0.1)' }}>
             {/* Header */}
-            <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-6 text-white">
+            <div className="p-6 text-white rounded-t-2xl" style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)' }}>
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                    <CreditCard className="h-6 w-6" />
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.2)' }}>
+                    <CreditCard className="h-6 w-6" style={{ color: '#07071a' }} />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold">Complete Refund</h2>
-                    <p className="text-green-100 text-sm mt-1">Upload payment proof</p>
+                    <h2 className="text-xl font-bold" style={{ color: '#07071a' }}>Complete Refund</h2>
+                    <p className="text-sm mt-1" style={{ color: 'rgba(0,51,32,0.8)' }}>Upload payment proof</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setCompleteRefundModal(null)}
                   disabled={actionLoading}
-                  className="w-10 h-10 bg-white/20 hover:bg-white/30 rounded-xl flex items-center justify-center transition-colors disabled:opacity-50"
+                  className="w-10 h-10 rounded-xl flex items-center justify-center transition-colors disabled:opacity-50"
+                  style={{ background: 'rgba(0,0,0,0.2)' }}
                   aria-label="Close"
                 >
-                  <X className="h-5 w-5" />
+                  <X className="h-5 w-5" style={{ color: '#07071a' }} />
                 </button>
               </div>
             </div>
@@ -824,35 +828,35 @@ export default function TournamentManagementPage() {
             {/* Content */}
             <div className="p-6">
               <div className="mb-6">
-                <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 mb-4">
-                  <p className="text-gray-300 mb-2">
-                    You are completing the refund for <span className="font-semibold text-white">{completeRefundModal.playerName}</span>
+                <div className="rounded-xl p-4 mb-4" style={{ background: 'rgba(0,212,255,0.08)', border: '1px solid rgba(0,212,255,0.2)' }}>
+                  <p className="mb-2" style={{ color: 'rgba(255,255,255,0.7)' }}>
+                    Completing refund for <span className="font-semibold text-white">{completeRefundModal.playerName}</span>
                   </p>
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-400">Refund Amount:</span>
+                    <span style={{ color: 'rgba(255,255,255,0.5)' }}>Refund Amount:</span>
                     <span className="text-2xl font-bold text-white">₹{completeRefundModal.amount}</span>
                   </div>
                   <div className="flex items-center justify-between mt-2">
-                    <span className="text-gray-400">UPI ID:</span>
+                    <span style={{ color: 'rgba(255,255,255,0.5)' }}>UPI ID:</span>
                     <span className="text-white font-mono">{completeRefundModal.upiId}</span>
                   </div>
                 </div>
 
-                <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mb-6">
-                  <p className="text-amber-300 text-sm">
-                    <strong>Important:</strong> Please send ₹{completeRefundModal.amount} to the player's UPI ID via your UPI app (Google Pay, PhonePe, Paytm, etc.), then upload the payment screenshot as proof.
+                <div className="rounded-xl p-4 mb-6" style={{ background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.25)' }}>
+                  <p className="text-sm" style={{ color: '#fbbf24' }}>
+                    <strong>Important:</strong> Send ₹{completeRefundModal.amount} to the player's UPI ID via your UPI app (Google Pay, PhonePe, Paytm, etc.), then upload the payment screenshot as proof.
                   </p>
                 </div>
 
                 {/* Payment Screenshot Upload */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-300 mb-2">
-                    Payment Screenshot <span className="text-red-400">*</span>
+                  <label className="block text-sm font-semibold mb-2" style={{ color: 'rgba(255,255,255,0.7)' }}>
+                    Payment Screenshot <span style={{ color: '#f87171' }}>*</span>
                   </label>
-                  <p className="text-gray-500 text-sm mb-3">
+                  <p className="text-sm mb-3" style={{ color: 'rgba(255,255,255,0.4)' }}>
                     Upload a screenshot of the successful payment from your UPI app
                   </p>
-                  
+
                   <input
                     type="file"
                     id="payment-screenshot-input"
@@ -860,32 +864,31 @@ export default function TournamentManagementPage() {
                     accept="image/*"
                     className="hidden"
                   />
-                  
+
                   <label
                     htmlFor="payment-screenshot-input"
-                    className={`w-full px-4 py-6 border-2 border-dashed rounded-xl flex flex-col items-center justify-center gap-2 transition-all cursor-pointer ${
-                      paymentScreenshot 
-                        ? 'border-green-500/50 bg-green-500/10' 
-                        : 'border-white/20 hover:border-white/30 hover:bg-slate-700/30'
-                    }`}
+                    className="w-full px-4 py-6 rounded-xl flex flex-col items-center justify-center gap-2 transition-all cursor-pointer"
+                    style={paymentScreenshot
+                      ? { background: 'rgba(0,255,136,0.08)', border: '2px dashed rgba(0,255,136,0.4)' }
+                      : { background: 'rgba(255,255,255,0.03)', border: '2px dashed rgba(255,255,255,0.15)' }}
                   >
                     {paymentScreenshot ? (
                       <>
-                        <CheckCircle className="h-10 w-10 text-green-400" />
-                        <span className="text-green-300 font-medium text-center">{paymentScreenshot.name}</span>
-                        <span className="text-green-400/80 text-sm">Click to change</span>
+                        <CheckCircle className="h-10 w-10" style={{ color: '#00ff88' }} />
+                        <span className="font-medium text-center" style={{ color: '#00ff88' }}>{paymentScreenshot.name}</span>
+                        <span className="text-sm" style={{ color: 'rgba(0,255,136,0.7)' }}>Click to change</span>
                       </>
                     ) : (
                       <>
-                        <Image className="h-10 w-10 text-gray-500" />
-                        <span className="text-gray-400 font-medium">Upload Payment Screenshot</span>
-                        <span className="text-gray-500 text-sm">PNG, JPG up to 5MB</span>
+                        <Image className="h-10 w-10" style={{ color: 'rgba(255,255,255,0.3)' }} />
+                        <span className="font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>Upload Payment Screenshot</span>
+                        <span className="text-sm" style={{ color: 'rgba(255,255,255,0.3)' }}>PNG, JPG up to 5MB</span>
                       </>
                     )}
                   </label>
-                  
+
                   {paymentScreenshotError && (
-                    <p className="text-red-400 text-sm mt-2">{paymentScreenshotError}</p>
+                    <p className="text-sm mt-2" style={{ color: '#f87171' }}>{paymentScreenshotError}</p>
                   )}
                 </div>
               </div>
@@ -895,14 +898,16 @@ export default function TournamentManagementPage() {
                 <button
                   onClick={() => setCompleteRefundModal(null)}
                   disabled={actionLoading}
-                  className="flex-1 px-4 py-3 border border-white/10 rounded-xl text-gray-300 hover:bg-slate-700/50 transition-colors font-medium disabled:opacity-50"
+                  className="flex-1 px-4 py-3 rounded-xl font-medium transition-colors disabled:opacity-50"
+                  style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.7)' }}
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleCompleteRefund}
                   disabled={actionLoading || !paymentScreenshot}
-                  className="flex-1 px-4 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:shadow-lg hover:shadow-green-500/30 transition-all font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="flex-1 px-4 py-3 rounded-xl font-semibold transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                  style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#07071a' }}
                 >
                   {actionLoading ? (
                     <>

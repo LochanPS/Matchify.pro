@@ -23,7 +23,7 @@ const DISC_PARTICLES = Array.from({ length: 15 }, (_, i) => ({
   h: (i * 11 + 2) % 4 + 2,
   x: (i * 37 + 11) % 97,
   y: (i * 53 + 7) % 91,
-  c: ["#00c853", "#14b8a6", "#06b6d4", "#10b981"][i % 4],
+  c: ["#00ff88", "#00d4ff", "#a855f7", "#00ff88"][i % 4],
   o: ((i * 13) % 50) / 100 + 0.2,
   dur: (i * 7) % 8 + 5,
   delay: (i * 3) % 5,
@@ -138,13 +138,13 @@ export default function TournamentDiscoveryPage() {
   const hasActiveFilters = Object.values(filters).some(v => v) || searchQuery;
 
   return (
-    <div className="min-h-screen relative overflow-hidden pb-6" style={{ background:'linear-gradient(180deg, #0a0a1f 0%, #07071a 30%, #0d1a2a 60%, #07071a 100%)' }}>
+    <div className="min-h-screen relative overflow-hidden pb-6" style={{ background: '#07071a' }}>
       {/* Animated Background Elements */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div 
           className="absolute top-0 right-0 w-72 h-72 rounded-full blur-3xl opacity-30"
           style={{ 
-            background: 'radial-gradient(circle, rgba(0,200,83,0.6), transparent)',
+            background: 'radial-gradient(circle, rgba(0,255,136,0.6), transparent)',
             animation: 'glow 4s ease-in-out infinite'
           }}
         />
@@ -228,11 +228,11 @@ export default function TournamentDiscoveryPage() {
             <h1 
               className="text-2xl sm:text-3xl font-black mb-2"
               style={{
-                background: 'linear-gradient(135deg, #00c853, #00ff88, #00c853)',
+                background: 'linear-gradient(135deg, #00ff88, #00ff88, #00ff88)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
-                textShadow: '0 0 40px rgba(0,200,83,0.3)'
+                textShadow: '0 0 40px rgba(0,255,136,0.3)'
               }}
             >
               Discover Tournaments
@@ -247,9 +247,9 @@ export default function TournamentDiscoveryPage() {
                 onClick={() => navigate('/tournaments/create')}
                 className="flex-1 flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl font-bold text-sm transition-all relative overflow-hidden group"
                 style={{ 
-                  background: 'linear-gradient(135deg, #00c853, #00ff88)',
+                  background: 'linear-gradient(135deg, #00ff88, #00ff88)',
                   color: '#003320',
-                  boxShadow: '0 8px 25px rgba(0,200,83,0.4)'
+                  boxShadow: '0 8px 25px rgba(0,255,136,0.4)'
                 }}
               >
                 <div 
@@ -287,15 +287,15 @@ export default function TournamentDiscoveryPage() {
         <div 
           className="rounded-2xl p-4 mb-4 relative overflow-hidden"
           style={{
-            background: 'linear-gradient(135deg, rgba(0,200,83,0.1) 0%, rgba(99,102,241,0.1) 100%)',
-            border: '2px solid rgba(0,200,83,0.2)',
+            background: 'linear-gradient(135deg, rgba(0,255,136,0.1) 0%, rgba(99,102,241,0.1) 100%)',
+            border: '2px solid rgba(0,255,136,0.2)',
             backdropFilter: 'blur(20px)',
-            boxShadow: '0 8px 32px rgba(0,200,83,0.15)'
+            boxShadow: '0 8px 32px rgba(0,255,136,0.15)'
           }}
         >
           <form onSubmit={handleSearch} className="flex flex-col gap-3">
             <div className="relative">
-              <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-400" />
+              <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: '#00ff88' }} />
               <input
                 type="text"
                 placeholder="Search tournaments by name..."
@@ -304,7 +304,7 @@ export default function TournamentDiscoveryPage() {
                 className="w-full pl-10 pr-3 py-3 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all text-white text-sm placeholder-gray-400 font-medium"
                 style={{
                   background: 'rgba(0,0,0,0.3)',
-                  border: '1.5px solid rgba(0,200,83,0.3)',
+                  border: '1.5px solid rgba(0,255,136,0.3)',
                   boxShadow: '0 4px 15px rgba(0,0,0,0.2)'
                 }}
               />
@@ -361,7 +361,7 @@ export default function TournamentDiscoveryPage() {
                 {hasActiveFilters && (
                   <button
                     onClick={clearFilters}
-                    className="text-xs text-emerald-400 hover:text-emerald-300 flex items-center gap-1 font-bold transition-colors"
+                    className="text-xs flex items-center gap-1 font-bold transition-colors" style={{ color: '#00ff88' }}
                   >
                     <XMarkIcon className="h-3.5 w-3.5" />
                     Clear All
@@ -371,7 +371,7 @@ export default function TournamentDiscoveryPage() {
 
               <div className="grid grid-cols-1 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-emerald-400 mb-1.5">City</label>
+                  <label className="block text-xs font-bold mb-1.5" style={{ color: '#00ff88' }}>City</label>
                   <input
                     type="text"
                     value={filters.city}
@@ -380,7 +380,7 @@ export default function TournamentDiscoveryPage() {
                     className="w-full px-3 py-2.5 text-sm rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all text-white placeholder-gray-500 font-medium"
                     style={{
                       background: 'rgba(0,0,0,0.3)',
-                      border: '1.5px solid rgba(0,200,83,0.3)'
+                      border: '1.5px solid rgba(0,255,136,0.3)'
                     }}
                   />
                 </div>
@@ -463,7 +463,7 @@ export default function TournamentDiscoveryPage() {
             <p 
               className="text-sm font-bold"
               style={{
-                background: 'linear-gradient(135deg, #00c853, #00ff88)',
+                background: 'linear-gradient(135deg, #00ff88, #00ff88)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text'
@@ -488,16 +488,16 @@ export default function TournamentDiscoveryPage() {
           <div 
             className="rounded-2xl p-8 sm:p-16 text-center relative overflow-hidden"
             style={{
-              background: 'linear-gradient(135deg, rgba(0,200,83,0.1) 0%, rgba(99,102,241,0.1) 100%)',
-              border: '2px solid rgba(0,200,83,0.2)',
+              background: 'linear-gradient(135deg, rgba(0,255,136,0.1) 0%, rgba(99,102,241,0.1) 100%)',
+              border: '2px solid rgba(0,255,136,0.2)',
               backdropFilter: 'blur(20px)'
             }}
           >
             <div 
               className="w-16 h-16 border-4 rounded-full animate-spin mx-auto"
               style={{ 
-                borderColor: 'rgba(0,200,83,0.3)',
-                borderTopColor: '#00c853'
+                borderColor: 'rgba(0,255,136,0.3)',
+                borderTopColor: '#00ff88'
               }}
             ></div>
             <p className="text-white/70 mt-6 font-bold">Loading tournaments...</p>
@@ -506,19 +506,19 @@ export default function TournamentDiscoveryPage() {
           <div 
             className="rounded-2xl p-8 sm:p-16 text-center relative overflow-hidden"
             style={{
-              background: 'linear-gradient(135deg, rgba(0,200,83,0.1) 0%, rgba(99,102,241,0.1) 100%)',
-              border: '2px solid rgba(0,200,83,0.2)',
+              background: 'linear-gradient(135deg, rgba(0,255,136,0.1) 0%, rgba(99,102,241,0.1) 100%)',
+              border: '2px solid rgba(0,255,136,0.2)',
               backdropFilter: 'blur(20px)'
             }}
           >
             <div 
               className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl flex items-center justify-center mx-auto mb-6"
               style={{
-                background: 'linear-gradient(135deg, rgba(0,200,83,0.2), rgba(168,85,247,0.2))',
-                border: '2px solid rgba(0,200,83,0.3)'
+                background: 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(168,85,247,0.2))',
+                border: '2px solid rgba(0,255,136,0.3)'
               }}
             >
-              <TrophyIcon className="w-10 h-10 sm:w-12 sm:h-12 text-emerald-400" />
+              <TrophyIcon className="w-10 h-10 sm:w-12 sm:h-12" style={{ color: '#00ff88' }} />
             </div>
             <h3 className="text-lg sm:text-xl font-black text-white mb-2">No tournaments found</h3>
             <p className="text-sm sm:text-base text-white/60 mb-6 font-medium">Try adjusting your filters or check back later</p>
@@ -527,9 +527,9 @@ export default function TournamentDiscoveryPage() {
                 onClick={clearFilters}
                 className="px-6 py-3 rounded-xl font-bold transition-all"
                 style={{ 
-                  background: 'linear-gradient(135deg, #00c853, #00ff88)',
+                  background: 'linear-gradient(135deg, #00ff88, #00ff88)',
                   color: '#003320',
-                  boxShadow: '0 6px 20px rgba(0,200,83,0.4)'
+                  boxShadow: '0 6px 20px rgba(0,255,136,0.4)'
                 }}
               >
                 Clear all filters
@@ -551,8 +551,8 @@ export default function TournamentDiscoveryPage() {
                   <div 
                     className="w-12 h-12 border-4 rounded-full animate-spin"
                     style={{ 
-                      borderColor: 'rgba(0,200,83,0.3)',
-                      borderTopColor: '#00c853'
+                      borderColor: 'rgba(0,255,136,0.3)',
+                      borderTopColor: '#00ff88'
                     }}
                   ></div>
                   <p className="text-white/70 font-bold text-sm">Loading more tournaments...</p>
@@ -563,11 +563,11 @@ export default function TournamentDiscoveryPage() {
                   <div 
                     className="w-10 h-10 rounded-full flex items-center justify-center"
                     style={{
-                      background: 'linear-gradient(135deg, rgba(0,200,83,0.2), rgba(168,85,247,0.2))',
-                      border: '2px solid rgba(0,200,83,0.3)'
+                      background: 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(168,85,247,0.2))',
+                      border: '2px solid rgba(0,255,136,0.3)'
                     }}
                   >
-                    <SparklesIcon className="w-5 h-5 text-emerald-400" />
+                    <SparklesIcon className="w-5 h-5" style={{ color: '#00ff88' }} />
                   </div>
                   <p className="text-white/60 font-bold text-sm">You've reached the end!</p>
                   <p className="text-white/40 text-xs">That's all the tournaments for now</p>
@@ -586,7 +586,7 @@ export default function TournamentDiscoveryPage() {
 function TournamentCard({ tournament, navigate, index }) {
   const getStatusStyle = (status) => {
     const styles = {
-      published: { bg: 'linear-gradient(135deg, #00c853, #00ff88)', text: 'Open', color: '#003320' },
+      published: { bg: 'linear-gradient(135deg, #00ff88, #00ff88)', text: 'Open', color: '#003320' },
       ongoing: { bg: 'linear-gradient(135deg, #3b82f6, #60a5fa)', text: 'Live', color: '#ffffff' },
       completed: { bg: 'linear-gradient(135deg, #6b7280, #9ca3af)', text: 'Done', color: '#ffffff' },
       cancelled: { bg: 'linear-gradient(135deg, #ef4444, #dc2626)', text: 'Cancelled', color: '#ffffff' },

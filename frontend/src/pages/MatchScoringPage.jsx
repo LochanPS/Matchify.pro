@@ -3,12 +3,22 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import { useAuth } from '../contexts/AuthContext';
-import { ArrowLeftIcon } from '@heroicons/react/24/outline';
-import { 
-  Play, Pause, Trophy, Plus, Minus, 
-  AlertTriangle, X, Clock, Calendar
+import {
+  Play, Pause, Trophy, Plus, Minus,
+  AlertTriangle, X, Clock, Calendar, ArrowLeft
 } from 'lucide-react';
 import { pauseTimer, resumeTimer } from '../api/matches';
+
+const B = {
+  bg: '#07071a',
+  card: 'rgba(255,255,255,0.04)',
+  border: 'rgba(255,255,255,0.08)',
+  green: '#00ff88',
+  cyan: '#00d4ff',
+  purple: '#a855f7',
+  amber: '#fbbf24',
+  red: '#f87171',
+};
 
 const MatchScoringPage = () => {
   const { matchId } = useParams();
@@ -25,16 +35,10 @@ const MatchScoringPage = () => {
   const [showSetCompleteModal, setShowSetCompleteModal] = useState(false);
   const [completedSetData, setCompletedSetData] = useState(null);
 
-  // Score state
   const [score, setScore] = useState({
     sets: [{ player1: 0, player2: 0 }],
     currentSet: 0,
-    matchConfig: {
-      pointsPerSet: 21,
-      setsToWin: 2,
-      maxSets: 3,
-      extension: true
-    }
+    matchConfig: { pointsPerSet: 21, setsToWin: 2, maxSets: 3, extension: true }
   });
 
   const fetchMatch = useCallback(async () => {
@@ -42,26 +46,22 @@ const MatchScoringPage = () => {
       setLoading(true);
       const response = await api.get(`/matches/${matchId}`);
       const matchData = response.data.match;
-      console.log('🎯 MatchScoringPage - Match status:', matchData.status);
-      console.log('🎯 MatchScoringPage - Match score:', matchData.score);
-      
-      // If match is PENDING/READY/SCHEDULED and hasn't been configured, redirect to conduct page
-      if ((matchData.status === 'PENDING' || matchData.status === 'READY' || matchData.status === 'SCHEDULED') && 
+
+      if ((matchData.status === 'PENDING' || matchData.status === 'READY' || matchData.status === 'SCHEDULED') &&
           !matchData.score && !matchData.scoreJson) {
-        console.log('⚠️ Match not configured yet - redirecting to conduct page');
         navigate(`/match/${matchId}/conduct`, { replace: true });
         return;
       }
-      
+
       setMatch(matchData);
-      
+
       if (matchData.score && matchData.score.sets) {
         setScore(matchData.score);
         setTimerData(matchData.score.timer);
         setIsPaused(matchData.score.timer?.isPaused || false);
       } else if (matchData.scoreJson) {
-        const parsed = typeof matchData.scoreJson === 'string' 
-          ? JSON.parse(matchData.scoreJson) 
+        const parsed = typeof matchData.scoreJson === 'string'
+          ? JSON.parse(matchData.scoreJson)
           : matchData.scoreJson;
         if (parsed && parsed.sets) {
           setScore(parsed);
@@ -70,22 +70,18 @@ const MatchScoringPage = () => {
         }
       }
     } catch (err) {
-      console.error('Error fetching match:', err);
       setError('Failed to load match');
     } finally {
       setLoading(false);
     }
   }, [matchId, navigate]);
 
-  useEffect(() => {
-    fetchMatch();
-  }, [fetchMatch]);
+  useEffect(() => { fetchMatch(); }, [fetchMatch]);
 
-  // Start match
   const handleStartMatch = async () => {
     try {
       setSaving(true);
-      setError(null); // Clear any previous errors
+      setError(null);
       const response = await api.post(`/matches/${matchId}/start`);
       setMatch(response.data.match);
       if (response.data.match.score) {
@@ -99,237 +95,108 @@ const MatchScoringPage = () => {
     }
   };
 
-  // Update score
   const updateScore = async (newScore) => {
     setScore(newScore);
-    try {
-      await api.put(`/matches/${matchId}/score`, { score: newScore });
-    } catch (err) {
-      console.error('Error updating score:', err);
-    }
+    try { await api.put(`/matches/${matchId}/score`, { score: newScore }); }
+    catch (err) { console.error('Error updating score:', err); }
   };
 
-  // Add point to player
   const addPoint = (player) => {
-    if (isPaused) return; // Don't allow scoring when paused
-    
+    if (isPaused) return;
     const newScore = { ...score };
-    const currentSetIndex = newScore.currentSet;
-    const currentSet = { ...newScore.sets[currentSetIndex] };
-    
-    if (player === 1) {
-      currentSet.player1 += 1;
-    } else {
-      currentSet.player2 += 1;
-    }
-    
-    newScore.sets[currentSetIndex] = currentSet;
+    const idx = newScore.currentSet;
+    const currentSet = { ...newScore.sets[idx] };
 
-    // Check if set is won based on match configuration
-    const matchConfig = newScore.matchConfig || { pointsPerSet: 21, extension: true, setsToWin: 2, maxSets: 3 };
-    const { pointsPerSet, extension } = matchConfig;
-    const p1 = currentSet.player1;
-    const p2 = currentSet.player2;
-    
-    let setWon = false;
-    let winner = null;
-    
+    if (player === 1) currentSet.player1 += 1;
+    else currentSet.player2 += 1;
+    newScore.sets[idx] = currentSet;
+
+    const cfg = newScore.matchConfig || { pointsPerSet: 21, extension: true, setsToWin: 2, maxSets: 3 };
+    const { pointsPerSet, extension } = cfg;
+    const p1 = currentSet.player1, p2 = currentSet.player2;
+
+    let setWon = false, winner = null;
     if (extension) {
-      // With extension (deuce): need to reach pointsPerSet AND have 2-point lead, OR reach 30 points
-      if ((p1 >= pointsPerSet && p1 - p2 >= 2) || p1 >= 30) {
-        setWon = true;
-        winner = 1;
-      } else if ((p2 >= pointsPerSet && p2 - p1 >= 2) || p2 >= 30) {
-        setWon = true;
-        winner = 2;
-      }
+      if ((p1 >= pointsPerSet && p1 - p2 >= 2) || p1 >= 30) { setWon = true; winner = 1; }
+      else if ((p2 >= pointsPerSet && p2 - p1 >= 2) || p2 >= 30) { setWon = true; winner = 2; }
     } else {
-      // Without extension: first to reach pointsPerSet wins
-      if (p1 >= pointsPerSet) {
-        setWon = true;
-        winner = 1;
-      } else if (p2 >= pointsPerSet) {
-        setWon = true;
-        winner = 2;
-      }
+      if (p1 >= pointsPerSet) { setWon = true; winner = 1; }
+      else if (p2 >= pointsPerSet) { setWon = true; winner = 2; }
     }
 
     if (setWon) {
-      // Mark the set as completed
       currentSet.winner = winner;
-      newScore.sets[currentSetIndex] = currentSet;
-      
-      // Check if this is the final set or if we should ask for continuation
+      newScore.sets[idx] = currentSet;
       const setsWon = getSetsWonFromScore(newScore);
-      const setsToWin = matchConfig.setsToWin || 2;
-      const maxSets = matchConfig.maxSets || 3;
+      const setsToWin = cfg.setsToWin || 2;
+      const maxSets = cfg.maxSets || 3;
       const matchWon = setsWon.p1Sets >= setsToWin || setsWon.p2Sets >= setsToWin;
-      
-      if (matchWon || currentSetIndex >= maxSets - 1) {
-        // Match is complete - automatically detect winner and show confirmation
+
+      updateScore(newScore);
+
+      if (matchWon || idx >= maxSets - 1) {
         const matchWinnerId = winner === 1 ? match.player1?.id : match.player2?.id;
         const matchWinnerName = winner === 1 ? match.player1?.name : match.player2?.name;
-        
-        updateScore(newScore);
-        
-        // Show automatic winner confirmation modal
-        setCompletedSetData({
-          setNumber: currentSetIndex + 1,
-          winner: matchWinnerName,
-          score: `${p1}-${p2}`,
-          newScore: newScore,
-          isMatchComplete: true,
-          matchWinnerId: matchWinnerId,
-          matchWinnerName: matchWinnerName
-        });
-        setShowSetCompleteModal(true);
+        setCompletedSetData({ setNumber: idx + 1, winner: matchWinnerName, score: `${p1}-${p2}`, newScore, isMatchComplete: true, matchWinnerId, matchWinnerName });
       } else {
-        // Set completed but match can continue - show continuation modal
-        setCompletedSetData({
-          setNumber: currentSetIndex + 1,
-          winner: winner === 1 ? match.player1?.name : match.player2?.name,
-          score: `${p1}-${p2}`,
-          newScore: newScore,
-          isMatchComplete: false
-        });
-        setShowSetCompleteModal(true);
+        setCompletedSetData({ setNumber: idx + 1, winner: winner === 1 ? match.player1?.name : match.player2?.name, score: `${p1}-${p2}`, newScore, isMatchComplete: false });
       }
+      setShowSetCompleteModal(true);
     } else {
-      // Set not won yet, just update score
       updateScore(newScore);
     }
   };
 
-  // Remove point (undo)
   const removePoint = (player) => {
     if (isPaused) return;
-    
     const newScore = { ...score };
-    const currentSetIndex = newScore.currentSet;
-    const currentSet = { ...newScore.sets[currentSetIndex] };
-    
-    if (player === 1 && currentSet.player1 > 0) {
-      currentSet.player1 -= 1;
-    } else if (player === 2 && currentSet.player2 > 0) {
-      currentSet.player2 -= 1;
-    }
-    
-    newScore.sets[currentSetIndex] = currentSet;
+    const idx = newScore.currentSet;
+    const currentSet = { ...newScore.sets[idx] };
+    if (player === 1 && currentSet.player1 > 0) currentSet.player1 -= 1;
+    else if (player === 2 && currentSet.player2 > 0) currentSet.player2 -= 1;
+    newScore.sets[idx] = currentSet;
     updateScore(newScore);
   };
 
-  // Pause timer
   const handlePauseTimer = async () => {
-    try {
-      setSaving(true);
-      const data = await pauseTimer(matchId);
-      setTimerData(data.timer);
-      setIsPaused(true);
-    } catch (err) {
-      setError(getErrorMessage(err, 'Failed to pause timer'));
-    } finally {
-      setSaving(false);
-    }
+    try { setSaving(true); const d = await pauseTimer(matchId); setTimerData(d.timer); setIsPaused(true); }
+    catch (err) { setError(getErrorMessage(err, 'Failed to pause')); }
+    finally { setSaving(false); }
   };
 
-  // Resume timer
   const handleResumeTimer = async () => {
-    try {
-      setSaving(true);
-      const data = await resumeTimer(matchId);
-      setTimerData(data.timer);
-      setIsPaused(false);
-    } catch (err) {
-      setError(getErrorMessage(err, 'Failed to resume timer'));
-    } finally {
-      setSaving(false);
-    }
+    try { setSaving(true); const d = await resumeTimer(matchId); setTimerData(d.timer); setIsPaused(false); }
+    catch (err) { setError(getErrorMessage(err, 'Failed to resume')); }
+    finally { setSaving(false); }
   };
 
-  // Handle back navigation
   const handleBack = () => {
-    if (match?.tournament?.id && match?.category?.id) {
-      navigate(`/tournaments/${match.tournament.id}/draw?category=${match.category.id}`);
-    } else if (match?.tournamentId && match?.categoryId) {
-      navigate(`/tournaments/${match.tournamentId}/draw?category=${match.categoryId}`);
-    } else {
-      navigate('/dashboard');
-    }
+    if (match?.tournament?.id && match?.category?.id) navigate(`/tournaments/${match.tournament.id}/draw?category=${match.category.id}`);
+    else if (match?.tournamentId && match?.categoryId) navigate(`/tournaments/${match.tournamentId}/draw?category=${match.categoryId}`);
+    else navigate('/dashboard');
   };
 
-  // End match
   const handleEndMatch = async (winnerId) => {
     try {
       setSaving(true);
-      
-      // 🔍 DEBUG: Log what we're sending to the API
-      console.log('🏁 Ending match - Sending to API:');
-      console.log('   Winner ID:', winnerId);
-      console.log('   Final Score:', JSON.stringify(score, null, 2));
-      console.log('   Score has sets:', !!score.sets);
-      console.log('   Number of sets:', score.sets?.length);
-      
       const response = await api.put(`/matches/${matchId}/end`, { winnerId, finalScore: score });
-      
-      // Store match summary for display
-      const summary = response.data.summary;
-      
-      // Navigate to draws page (plural) - the tournament management page with all categories
-      const drawsUrl = match?.tournament?.id
-        ? `/tournaments/${match.tournament.id}/draws`
-        : match?.tournamentId
-        ? `/tournaments/${match.tournamentId}/draws`
-        : '/dashboard';
-      
-      console.log('✅ Match completed! Navigating to:', drawsUrl);
-      
-      // Navigate to draws page where organizer can start next match
-      navigate(drawsUrl, { 
-        state: { 
-          matchComplete: true,
-          winner: summary.winner,
-          duration: summary.duration,
-          categoryId: match?.category?.id || match?.categoryId
-        }
-      });
+      const drawsUrl = match?.tournament?.id ? `/tournaments/${match.tournament.id}/draws`
+        : match?.tournamentId ? `/tournaments/${match.tournamentId}/draws` : '/dashboard';
+      navigate(drawsUrl, { state: { matchComplete: true, winner: response.data.summary?.winner, categoryId: match?.category?.id || match?.categoryId } });
     } catch (err) {
       setError(getErrorMessage(err, 'Failed to end match'));
-    } finally {
-      setSaving(false);
-    }
+    } finally { setSaving(false); }
   };
 
-  // Calculate sets won
-  const getSetsWon = () => {
-    try {
-      return getSetsWonFromScore(score);
-    } catch (error) {
-      console.error('Error calculating sets won:', error);
-      return { p1Sets: 0, p2Sets: 0 };
-    }
-  };
-
-  // Helper function to calculate sets won from any score object
   const getSetsWonFromScore = (scoreObj) => {
-    // Provide defaults if matchConfig is missing
-    const matchConfig = scoreObj.matchConfig || {
-      pointsPerSet: 21,
-      extension: true
-    };
-    const { pointsPerSet, extension } = matchConfig;
+    const cfg = scoreObj.matchConfig || { pointsPerSet: 21, extension: true };
+    const { pointsPerSet, extension } = cfg;
     let p1Sets = 0, p2Sets = 0;
-    
-    if (!scoreObj.sets || scoreObj.sets.length === 0) {
-      return { p1Sets: 0, p2Sets: 0 };
-    }
-    
+    if (!scoreObj.sets?.length) return { p1Sets: 0, p2Sets: 0 };
     scoreObj.sets.forEach(set => {
-      if (set.winner === 1) {
-        p1Sets++;
-      } else if (set.winner === 2) {
-        p2Sets++;
-      } else {
-        // Legacy calculation for sets without winner field
+      if (set.winner === 1) p1Sets++;
+      else if (set.winner === 2) p2Sets++;
+      else {
         if (extension) {
           if ((set.player1 >= pointsPerSet && set.player1 - set.player2 >= 2) || set.player1 >= 30) p1Sets++;
           if ((set.player2 >= pointsPerSet && set.player2 - set.player1 >= 2) || set.player2 >= 30) p2Sets++;
@@ -339,392 +206,327 @@ const MatchScoringPage = () => {
         }
       }
     });
-    
     return { p1Sets, p2Sets };
   };
 
-  // Continue to next set
+  const getSetsWon = () => { try { return getSetsWonFromScore(score); } catch { return { p1Sets: 0, p2Sets: 0 }; } };
+
   const handleContinueToNextSet = () => {
     if (!completedSetData) return;
-    
     const newScore = { ...completedSetData.newScore };
     const maxSets = newScore.matchConfig?.maxSets || 3;
-    
-    // Add new set if we haven't reached max sets
     if (newScore.currentSet < maxSets - 1) {
       newScore.sets.push({ player1: 0, player2: 0 });
       newScore.currentSet = newScore.currentSet + 1;
     }
-    
     updateScore(newScore);
     setShowSetCompleteModal(false);
     setCompletedSetData(null);
   };
 
-  // Confirm match winner (automatic detection)
   const handleConfirmMatchWinner = async () => {
-    if (!completedSetData || !completedSetData.isMatchComplete) return;
-    
+    if (!completedSetData?.isMatchComplete) return;
     try {
       await handleEndMatch(completedSetData.matchWinnerId);
-      // Close the set completion modal
       setShowSetCompleteModal(false);
       setCompletedSetData(null);
-      // Navigation is handled in handleEndMatch - goes back to draw page
-    } catch (err) {
-      console.error('Error confirming match winner:', err);
-      setError('Failed to confirm match winner');
-    }
+    } catch { setError('Failed to confirm match winner'); }
   };
 
-  // End match early (umpire decision) - for non-complete matches
   const handleEndMatchEarly = () => {
     if (!completedSetData) return;
-    
     updateScore(completedSetData.newScore);
     setShowSetCompleteModal(false);
     setCompletedSetData(null);
     setShowEndModal(true);
   };
 
+  // ── Loading ────────────────────────────────────────────────────────────────
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
-        <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: B.bg }}>
+        <div className="w-10 h-10 border-4 border-t-transparent rounded-full animate-spin"
+          style={{ borderColor: `${B.purple} transparent transparent transparent` }} />
       </div>
     );
   }
 
   if (!match) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: B.bg }}>
         <div className="text-center">
-          <AlertTriangle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-white">Match not found</h2>
+          <AlertTriangle className="w-10 h-10 mx-auto mb-3" style={{ color: B.red }} />
+          <h2 className="text-lg font-bold text-white">Match not found</h2>
         </div>
       </div>
     );
   }
 
   const { p1Sets, p2Sets } = getSetsWon();
-  const currentSet = score.sets && score.sets[score.currentSet] ? score.sets[score.currentSet] : { player1: 0, player2: 0 };
+  const currentSet = score.sets?.[score.currentSet] || { player1: 0, player2: 0 };
   const isInProgress = match.status === 'IN_PROGRESS';
   const isCompleted = match.status === 'COMPLETED';
   const canStart = match.status === 'PENDING' || match.status === 'SCHEDULED' || match.status === 'READY';
-  
-  // Allow scoring even before match is officially started (for umpire convenience)
   const canScore = !isCompleted && !isPaused;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      {/* Header */}
-      <div className="bg-slate-800/50 border-b border-white/10 px-4 py-4">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <button
-            onClick={handleBack}
-            className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
-          >
-            <ArrowLeftIcon className="w-5 h-5" />
-            Back
-          </button>
-          <div className="flex items-center gap-3">
-            {/* Timer Controls */}
-            {isInProgress && (
-              <>
-                {!isPaused ? (
-                  <button
-                    onClick={handlePauseTimer}
-                    disabled={saving}
-                    className="flex items-center gap-2 px-4 py-2 bg-amber-500/20 border border-amber-500/30 text-amber-400 rounded-xl hover:bg-amber-500/30 transition-all disabled:opacity-50"
-                  >
-                    <Pause className="w-5 h-5" />
-                    Pause
-                  </button>
-                ) : (
-                  <button
-                    onClick={handleResumeTimer}
-                    disabled={saving}
-                    className="flex items-center gap-2 px-4 py-2 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 rounded-xl hover:bg-emerald-500/30 transition-all disabled:opacity-50"
-                  >
-                    <Play className="w-5 h-5" />
-                    Resume
-                  </button>
-                )}
-                <button
-                  onClick={() => setShowEndModal(true)}
-                  className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all"
-                >
-                  End Match
-                </button>
-              </>
+    <div className="min-h-screen" style={{ background: B.bg }}>
+
+      {/* ── Sticky Header ─────────────────────────────────────────────────── */}
+      <div className="sticky top-0 z-20 px-4 py-3 flex items-center justify-between"
+        style={{ background: 'rgba(7,7,26,0.95)', borderBottom: `1px solid rgba(0,255,136,0.15)`, backdropFilter: 'blur(20px)' }}>
+        <button onClick={handleBack} className="flex items-center gap-1.5 text-sm font-bold"
+          style={{ color: 'rgba(255,255,255,0.55)' }}>
+          <ArrowLeft className="w-4 h-4" /> Back
+        </button>
+
+        {isInProgress && (
+          <div className="flex items-center gap-2">
+            {!isPaused ? (
+              <button onClick={handlePauseTimer} disabled={saving}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all disabled:opacity-50"
+                style={{ background: 'rgba(251,191,36,0.12)', border: '1px solid rgba(251,191,36,0.3)', color: B.amber }}>
+                <Pause className="w-3.5 h-3.5" /> Pause
+              </button>
+            ) : (
+              <button onClick={handleResumeTimer} disabled={saving}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all disabled:opacity-50"
+                style={{ background: 'rgba(0,255,136,0.12)', border: '1px solid rgba(0,255,136,0.3)', color: B.green }}>
+                <Play className="w-3.5 h-3.5" /> Resume
+              </button>
             )}
+            <button onClick={() => setShowEndModal(true)}
+              className="px-3 py-1.5 rounded-xl text-xs font-bold"
+              style={{ background: 'rgba(248,113,113,0.12)', border: '1px solid rgba(248,113,113,0.3)', color: B.red }}>
+              End Match
+            </button>
           </div>
-        </div>
+        )}
       </div>
 
-      {/* Error Message */}
-      {error && (
-        <div className="max-w-4xl mx-auto px-4 mt-4">
-          <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 flex items-center gap-3">
-            <AlertTriangle className="w-5 h-5 text-red-400" />
-            <span className="text-red-300">{error}</span>
-            <button onClick={() => setError(null)} className="ml-auto"><X className="w-5 h-5 text-red-400" /></button>
+      {/* ── Body ──────────────────────────────────────────────────────────── */}
+      <div className="max-w-lg mx-auto px-4 pt-5 pb-28">
+
+        {/* Match info */}
+        <div className="text-center mb-4">
+          <p className="text-sm font-bold" style={{ color: 'rgba(255,255,255,0.55)' }}>
+            {match.tournament?.name} • {match.category?.name}
+          </p>
+          <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.3)' }}>Match #{match.matchNumber}</p>
+        </div>
+
+        {/* Error */}
+        {error && (
+          <div className="mb-4 flex items-start gap-2.5 px-4 py-3 rounded-xl"
+            style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)' }}>
+            <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: B.red }} />
+            <p className="text-xs font-semibold flex-1" style={{ color: B.red }}>{error}</p>
+            <button onClick={() => setError(null)}><X className="w-4 h-4" style={{ color: B.red }} /></button>
           </div>
-        </div>
-      )}
-
-      {/* Match Info */}
-      <div className="max-w-4xl mx-auto px-4 py-6">
-        <div className="text-center mb-6">
-          <p className="text-gray-400 text-sm">{match.tournament?.name} • {match.category?.name}</p>
-          <p className="text-gray-500 text-xs mt-1">Match #{match.matchNumber}</p>
-        </div>
-
-        {/* Timer Display */}
-        {isInProgress && (
-          <MatchTimerDisplay 
-            timer={timerData} 
-            isPaused={isPaused}
-          />
         )}
 
-        {/* Paused Indicator */}
+        {/* Timer */}
+        {isInProgress && <MatchTimerDisplay timer={timerData} isPaused={isPaused} />}
+
+        {/* Paused banner */}
         {isPaused && (
-          <div className="mb-6 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl text-center">
-            <p className="text-amber-300 font-semibold flex items-center justify-center gap-2">
-              <Pause className="w-5 h-5" />
-              Match Paused - Scoring Disabled
-            </p>
+          <div className="mb-4 py-3 flex items-center justify-center gap-2 rounded-xl"
+            style={{ background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.25)' }}>
+            <Pause className="w-4 h-4" style={{ color: B.amber }} />
+            <p className="text-sm font-bold" style={{ color: B.amber }}>Match Paused — Scoring Disabled</p>
           </div>
         )}
 
-        {/* Scoreboard */}
-        <div className="bg-slate-800/70 backdrop-blur-sm border border-white/10 rounded-3xl p-6 mb-6">
-          {/* Sets Score */}
-          <div className="flex justify-center gap-4 mb-6">
-            {score.sets && score.sets.length > 0 && score.sets.map((set, idx) => (
-              <div 
-                key={idx} 
-                className={`px-4 py-2 rounded-xl text-center min-w-[80px] ${
-                  idx === score.currentSet 
-                    ? 'bg-purple-500/20 border-2 border-purple-500' 
-                    : 'bg-slate-700/50'
-                }`}
-              >
-                <div className="text-xs text-gray-400 mb-1">Set {idx + 1}</div>
-                <div className="text-lg font-bold text-white">{set.player1} - {set.player2}</div>
-              </div>
-            ))}
-          </div>
+        {/* ── Scoreboard ──────────────────────────────────────────────────── */}
+        <div className="rounded-2xl overflow-hidden mb-4" style={{ background: B.card, border: `1px solid ${B.border}` }}>
+          {/* Set tabs */}
+          {score.sets?.length > 0 && (
+            <div className="flex justify-center gap-2 px-4 pt-4">
+              {score.sets.map((set, idx) => {
+                const isCurrent = idx === score.currentSet;
+                const isDone = set.winner != null;
+                return (
+                  <div key={idx} className="px-3 py-1.5 rounded-xl text-center min-w-[72px] transition-all"
+                    style={isCurrent
+                      ? { background: 'rgba(0,255,136,0.1)', border: `1.5px solid rgba(0,255,136,0.5)` }
+                      : { background: 'rgba(255,255,255,0.04)', border: `1px solid ${B.border}` }}>
+                    <div className="text-xs font-bold mb-0.5"
+                      style={{ color: isCurrent ? B.green : 'rgba(255,255,255,0.4)' }}>Set {idx + 1}</div>
+                    <div className="text-sm font-black"
+                      style={{ color: isCurrent ? '#fff' : 'rgba(255,255,255,0.55)' }}>
+                      {set.player1} - {set.player2}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
 
-          {/* Players */}
-          <div className="grid grid-cols-3 gap-4 items-center">
-            {/* Player 1 */}
+          {/* Main score */}
+          <div className="grid grid-cols-3 gap-2 items-center px-4 py-5">
+            {/* P1 sets won */}
             <div className="text-center">
-              <div className={`w-20 h-20 mx-auto rounded-2xl flex items-center justify-center text-4xl font-bold mb-3 ${
-                p1Sets > p2Sets ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-700/50 text-white'
-              }`}>
+              <div className="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center text-3xl font-black mb-2"
+                style={p1Sets > p2Sets
+                  ? { background: 'rgba(0,255,136,0.15)', border: '1.5px solid rgba(0,255,136,0.4)', color: B.green }
+                  : { background: 'rgba(255,255,255,0.05)', border: `1px solid ${B.border}`, color: 'rgba(255,255,255,0.7)' }}>
                 {p1Sets}
               </div>
-              <h3 className="text-lg font-bold text-white truncate">{match.player1?.name || 'Player 1'}</h3>
-              <p className="text-sm text-gray-400">Sets Won</p>
+              <p className="text-xs font-black text-white truncate">{match.player1?.name || 'Player 1'}</p>
+              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>Sets Won</p>
             </div>
 
-            {/* Current Score */}
+            {/* Live score */}
             <div className="text-center">
-              <div className="text-4xl sm:text-6xl font-black text-white mb-2">
-                {currentSet.player1} <span className="text-gray-500">-</span> {currentSet.player2}
+              <div className="text-5xl font-black text-white">
+                {currentSet.player1}<span className="text-2xl font-bold mx-1" style={{ color: 'rgba(255,255,255,0.3)' }}>-</span>{currentSet.player2}
               </div>
-              <p className="text-amber-400 font-semibold">Set {score.currentSet + 1}</p>
+              <p className="text-xs font-black mt-1" style={{ color: B.cyan }}>Set {score.currentSet + 1}</p>
+            </div>
+
+            {/* P2 sets won */}
+            <div className="text-center">
+              <div className="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center text-3xl font-black mb-2"
+                style={p2Sets > p1Sets
+                  ? { background: 'rgba(168,85,247,0.15)', border: '1.5px solid rgba(168,85,247,0.4)', color: B.purple }
+                  : { background: 'rgba(255,255,255,0.05)', border: `1px solid ${B.border}`, color: 'rgba(255,255,255,0.7)' }}>
+                {p2Sets}
+              </div>
+              <p className="text-xs font-black text-white truncate">{match.player2?.name || 'Player 2'}</p>
+              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>Sets Won</p>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Scoring Controls ─────────────────────────────────────────────── */}
+        {!isCompleted && (
+          <div className="grid grid-cols-2 gap-3">
+            {/* Player 1 */}
+            <div className="rounded-2xl overflow-hidden" style={{ background: B.card, border: `1px solid ${B.border}`, opacity: isPaused ? 0.45 : 1 }}>
+              <div className="px-3 pt-3 pb-2 text-center border-b" style={{ borderColor: B.border }}>
+                <p className="text-xs font-black text-white truncate">{match.player1?.name || 'Player 1'}</p>
+              </div>
+              <div className="p-3 space-y-2">
+                <button onClick={() => addPoint(1)} disabled={isPaused || !canScore}
+                  className="w-full py-5 rounded-xl font-black text-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                  style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#07071a', boxShadow: isPaused ? 'none' : '0 4px 16px rgba(0,200,83,0.35)' }}>
+                  <Plus className="w-6 h-6" /> Point
+                </button>
+                <button onClick={() => removePoint(1)} disabled={isPaused || !canScore}
+                  className="w-full py-2.5 rounded-xl text-sm font-bold transition-all disabled:opacity-50 flex items-center justify-center gap-1.5"
+                  style={{ background: 'rgba(255,255,255,0.05)', border: `1px solid ${B.border}`, color: 'rgba(255,255,255,0.55)' }}>
+                  <Minus className="w-4 h-4" /> Undo
+                </button>
+              </div>
             </div>
 
             {/* Player 2 */}
-            <div className="text-center">
-              <div className={`w-20 h-20 mx-auto rounded-2xl flex items-center justify-center text-4xl font-bold mb-3 ${
-                p2Sets > p1Sets ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-700/50 text-white'
-              }`}>
-                {p2Sets}
+            <div className="rounded-2xl overflow-hidden" style={{ background: B.card, border: `1px solid ${B.border}`, opacity: isPaused ? 0.45 : 1 }}>
+              <div className="px-3 pt-3 pb-2 text-center border-b" style={{ borderColor: B.border }}>
+                <p className="text-xs font-black text-white truncate">{match.player2?.name || 'Player 2'}</p>
               </div>
-              <h3 className="text-lg font-bold text-white truncate">{match.player2?.name || 'Player 2'}</h3>
-              <p className="text-sm text-gray-400">Sets Won</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Scoring Controls */}
-        {!isCompleted && (
-          <div className="grid grid-cols-2 gap-3 sm:gap-6">
-            {/* Player 1 Controls */}
-            <div className={`bg-slate-800/50 border rounded-2xl p-3 sm:p-6 ${isPaused ? 'border-amber-500/30 opacity-50' : 'border-white/10'}`}>
-              <h4 className="text-center text-white font-semibold mb-4">{match.player1?.name || 'Player 1'}</h4>
-              {canScore ? (
-                <div className="space-y-3">
-                  <button
-                    onClick={() => addPoint(1)}
-                    disabled={isPaused}
-                    className="w-full py-6 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl text-2xl font-bold hover:shadow-lg hover:shadow-emerald-500/30 hover:scale-[1.02] transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-                  >
-                    <Plus className="w-8 h-8" />
-                    Point
-                  </button>
-                  <button
-                    onClick={() => removePoint(1)}
-                    disabled={isPaused}
-                    className="w-full py-3 bg-slate-700 text-gray-300 rounded-xl font-semibold hover:bg-slate-600 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <Minus className="w-5 h-5" />
-                    Undo
-                  </button>
-                </div>
-              ) : (
-                <div className="text-center py-8 text-gray-500">
-                  Match completed
-                </div>
-              )}
-            </div>
-
-            {/* Player 2 Controls */}
-            <div className={`bg-slate-800/50 border rounded-2xl p-3 sm:p-6 ${isPaused ? 'border-amber-500/30 opacity-50' : 'border-white/10'}`}>
-              <h4 className="text-center text-white font-semibold mb-4">{match.player2?.name || 'Player 2'}</h4>
-              {canScore ? (
-                <div className="space-y-3">
-                  <button
-                    onClick={() => addPoint(2)}
-                    disabled={isPaused}
-                    className="w-full py-6 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl text-2xl font-bold hover:shadow-lg hover:shadow-blue-500/30 hover:scale-[1.02] transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-                  >
-                    <Plus className="w-8 h-8" />
-                    Point
-                  </button>
-                  <button
-                    onClick={() => removePoint(2)}
-                    disabled={isPaused}
-                    className="w-full py-3 bg-slate-700 text-gray-300 rounded-xl font-semibold hover:bg-slate-600 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <Minus className="w-5 h-5" />
-                    Undo
-                  </button>
-                </div>
-              ) : (
-                <div className="text-center py-8 text-gray-500">
-                  Match completed
-                </div>
-              )}
+              <div className="p-3 space-y-2">
+                <button onClick={() => addPoint(2)} disabled={isPaused || !canScore}
+                  className="w-full py-5 rounded-xl font-black text-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                  style={{ background: 'linear-gradient(135deg,#7c3aed,#a855f7)', color: '#fff', boxShadow: isPaused ? 'none' : '0 4px 16px rgba(168,85,247,0.35)' }}>
+                  <Plus className="w-6 h-6" /> Point
+                </button>
+                <button onClick={() => removePoint(2)} disabled={isPaused || !canScore}
+                  className="w-full py-2.5 rounded-xl text-sm font-bold transition-all disabled:opacity-50 flex items-center justify-center gap-1.5"
+                  style={{ background: 'rgba(255,255,255,0.05)', border: `1px solid ${B.border}`, color: 'rgba(255,255,255,0.55)' }}>
+                  <Minus className="w-4 h-4" /> Undo
+                </button>
+              </div>
             </div>
           </div>
         )}
 
-        {/* Start Match Button */}
-        {canStart && (
-          <div className="mt-6">
-            <button
-              onClick={handleStartMatch}
-              disabled={saving}
-              className="w-full py-6 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-white rounded-2xl text-2xl font-black hover:shadow-2xl hover:shadow-emerald-500/50 hover:scale-[1.02] transition-all flex items-center justify-center gap-3 disabled:opacity-50 animate-pulse"
-            >
-              {saving ? (
-                <div className="w-8 h-8 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
-              ) : (
-                <>
-                  <Play className="w-8 h-8" />
-                  START MATCH
-                </>
-              )}
-            </button>
-            <p className="text-center text-gray-400 text-sm mt-3">
-              You can score now • Click "Start Match" to begin timer
-            </p>
-          </div>
-        )}
-
-        {/* Match Completed */}
+        {/* Match completed */}
         {isCompleted && (
-          <div className="mt-6 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-6 text-center">
-            <Trophy className="w-12 h-12 text-amber-400 mx-auto mb-3" />
-            <h3 className="text-xl font-bold text-white mb-2">Match Completed</h3>
-            <p className="text-gray-400">Winner: {match.winnerId === match.player1?.id ? match.player1?.name : match.player2?.name}</p>
+          <div className="rounded-2xl p-6 text-center"
+            style={{ background: 'rgba(0,255,136,0.06)', border: '1px solid rgba(0,255,136,0.2)' }}>
+            <Trophy className="w-10 h-10 mx-auto mb-3" style={{ color: B.amber }} />
+            <h3 className="text-lg font-black text-white mb-1">Match Completed</h3>
+            <p className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>
+              Winner: <span className="font-bold text-white">{match.winnerId === match.player1?.id ? match.player1?.name : match.player2?.name}</span>
+            </p>
             {score.timer?.totalDurationFormatted && (
-              <p className="text-gray-500 text-sm mt-2">Duration: {score.timer.totalDurationFormatted}</p>
+              <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.35)' }}>Duration: {score.timer.totalDurationFormatted}</p>
             )}
           </div>
         )}
       </div>
 
-      {/* Set Completion Modal */}
+      {/* ── START MATCH sticky bottom ─────────────────────────────────────── */}
+      {canStart && (
+        <div className="fixed bottom-0 left-0 right-0 p-4" style={{ background: 'rgba(7,7,26,0.97)', borderTop: `1px solid rgba(0,255,136,0.15)` }}>
+          <div className="max-w-lg mx-auto">
+            <button onClick={handleStartMatch} disabled={saving}
+              className="w-full py-4 rounded-2xl font-black text-base transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+              style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#07071a', boxShadow: '0 4px 20px rgba(0,200,83,0.4)' }}>
+              {saving
+                ? <><div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#07071a transparent transparent transparent' }} />Starting…</>
+                : <><Play className="w-5 h-5" />START MATCH</>}
+            </button>
+            <p className="text-center text-xs mt-2" style={{ color: 'rgba(255,255,255,0.35)' }}>
+              You can score now • Start Match to begin timer
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* ── Set Complete Modal ───────────────────────────────────────────── */}
       {showSetCompleteModal && completedSetData && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-800 border border-white/10 rounded-2xl max-w-md w-full p-6">
+        <div className="fixed inset-0 flex items-end sm:items-center justify-center z-50 p-4"
+          style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)' }}>
+          <div className="w-full max-w-sm rounded-2xl overflow-hidden" style={{ background: '#0d1025', border: `1px solid ${B.border}` }}>
             {completedSetData.isMatchComplete ? (
-              // Match Complete - Automatic Winner Detection
               <>
-                <div className="text-center mb-6">
-                  <div className="w-20 h-20 bg-gradient-to-br from-amber-500 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
-                    <Trophy className="w-10 h-10 text-white" />
+                <div className="px-5 pt-6 pb-4 text-center">
+                  <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3"
+                    style={{ background: 'linear-gradient(135deg,rgba(251,191,36,0.3),rgba(245,158,11,0.2))', border: '1px solid rgba(251,191,36,0.4)' }}>
+                    <Trophy className="w-8 h-8" style={{ color: B.amber }} />
                   </div>
-                  <h2 className="text-2xl font-bold text-white mb-2">🎉 Match Complete!</h2>
-                  <p className="text-gray-400 mb-2">Final set won by</p>
-                  <p className="text-3xl font-bold text-amber-400 mb-2">{completedSetData.matchWinnerName}</p>
-                  <p className="text-xl text-white">Set {completedSetData.setNumber}: {completedSetData.score}</p>
+                  <h2 className="text-xl font-black text-white mb-1">🎉 Match Complete!</h2>
+                  <p className="text-sm mb-2" style={{ color: 'rgba(255,255,255,0.5)' }}>Winner</p>
+                  <p className="text-2xl font-black mb-1" style={{ color: B.amber }}>{completedSetData.matchWinnerName}</p>
+                  <p className="text-base font-bold text-white">Set {completedSetData.setNumber}: {completedSetData.score}</p>
                 </div>
-                
-                <div className="space-y-3">
-                  <button
-                    onClick={handleConfirmMatchWinner}
-                    className="w-full py-4 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl font-bold text-lg hover:shadow-lg hover:shadow-amber-500/30 transition-all flex items-center justify-center gap-3"
-                  >
-                    <Trophy className="w-6 h-6" />
-                    Confirm {completedSetData.matchWinnerName} as Winner
+                <div className="px-5 pb-5">
+                  <button onClick={handleConfirmMatchWinner}
+                    className="w-full py-3.5 rounded-xl font-black text-sm transition-all flex items-center justify-center gap-2"
+                    style={{ background: 'linear-gradient(135deg,#f59e0b,#fbbf24)', color: '#07071a', boxShadow: '0 4px 16px rgba(245,158,11,0.35)' }}>
+                    <Trophy className="w-4 h-4" /> Confirm {completedSetData.matchWinnerName} as Winner
                   </button>
-                  
-                  <div className="pt-2 border-t border-white/10">
-                    <p className="text-center text-gray-500 text-sm">
-                      🏆 {completedSetData.matchWinnerName} scored the final point and wins the match!
-                    </p>
-                    <p className="text-center text-gray-400 text-xs mt-1">
-                      Click confirm to officially end the match
-                    </p>
-                  </div>
                 </div>
               </>
             ) : (
-              // Set Complete - Continue or End Early
               <>
-                <div className="text-center mb-6">
-                  <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Trophy className="w-8 h-8 text-white" />
+                <div className="px-5 pt-6 pb-4 text-center">
+                  <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3"
+                    style={{ background: 'rgba(0,255,136,0.15)', border: '1px solid rgba(0,255,136,0.35)' }}>
+                    <Trophy className="w-7 h-7" style={{ color: B.green }} />
                   </div>
-                  <h2 className="text-xl font-bold text-white mb-2">Set {completedSetData.setNumber} Complete!</h2>
-                  <p className="text-gray-400 mb-1">
-                    <span className="text-emerald-400 font-semibold">{completedSetData.winner}</span> wins the set
+                  <h2 className="text-lg font-black text-white mb-1">Set {completedSetData.setNumber} Complete!</h2>
+                  <p className="text-sm mb-1" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                    <span className="font-bold" style={{ color: B.green }}>{completedSetData.winner}</span> wins the set
                   </p>
-                  <p className="text-2xl font-bold text-white">{completedSetData.score}</p>
+                  <p className="text-xl font-black text-white">{completedSetData.score}</p>
                 </div>
-                
-                <div className="space-y-3">
-                  <button
-                    onClick={handleContinueToNextSet}
-                    className="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-emerald-500/30 transition-all flex items-center justify-center gap-3"
-                  >
-                    <Play className="w-5 h-5" />
-                    Continue to Set {completedSetData.setNumber + 1}
+                <div className="px-5 pb-5 space-y-2">
+                  <button onClick={handleContinueToNextSet}
+                    className="w-full py-3.5 rounded-xl font-black text-sm transition-all flex items-center justify-center gap-2"
+                    style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#07071a', boxShadow: '0 4px 16px rgba(0,200,83,0.35)' }}>
+                    <Play className="w-4 h-4" /> Continue to Set {completedSetData.setNumber + 1}
                   </button>
-                  
-                  <button
-                    onClick={handleEndMatchEarly}
-                    className="w-full py-4 bg-gradient-to-r from-amber-500 to-orange-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-amber-500/30 transition-all flex items-center justify-center gap-3"
-                  >
-                    <Trophy className="w-5 h-5" />
+                  <button onClick={handleEndMatchEarly}
+                    className="w-full py-3 rounded-xl text-sm font-bold transition-all"
+                    style={{ background: 'rgba(251,191,36,0.1)', border: '1px solid rgba(251,191,36,0.3)', color: B.amber }}>
                     End Match Here
                   </button>
-                  
-                  <div className="pt-2 border-t border-white/10">
-                    <p className="text-center text-gray-500 text-sm">
-                      Match configured for {score.matchConfig?.maxSets === 1 ? '1 set' : `best of ${score.matchConfig?.maxSets || 3} sets`}
-                    </p>
-                    <p className="text-center text-gray-400 text-xs mt-1">
-                      You can end the match early or continue as planned
-                    </p>
-                  </div>
+                  <p className="text-center text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                    {score.matchConfig?.maxSets === 1 ? '1 set' : `Best of ${score.matchConfig?.maxSets || 3} sets`}
+                  </p>
                 </div>
               </>
             )}
@@ -732,34 +534,29 @@ const MatchScoringPage = () => {
         </div>
       )}
 
-      {/* End Match Modal */}
+      {/* ── End Match Modal ──────────────────────────────────────────────── */}
       {showEndModal && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-800 border border-white/10 rounded-2xl max-w-md w-full p-6">
-            <h2 className="text-xl font-bold text-white mb-4 text-center">End Match</h2>
-            <p className="text-gray-400 text-center mb-6">Select the winner to end this match</p>
-            
-            <div className="space-y-3">
-              <button
-                onClick={() => handleEndMatch(match.player1?.id)}
-                disabled={saving}
-                className="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-3"
-              >
-                <Trophy className="w-5 h-5" />
-                {match.player1?.name} Wins
+        <div className="fixed inset-0 flex items-end sm:items-center justify-center z-50 p-4"
+          style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)' }}>
+          <div className="w-full max-w-sm rounded-2xl overflow-hidden" style={{ background: '#0d1025', border: `1px solid ${B.border}` }}>
+            <div className="px-5 pt-5 pb-4 text-center" style={{ borderBottom: `1px solid ${B.border}` }}>
+              <h2 className="text-base font-black text-white">End Match</h2>
+              <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.45)' }}>Select the winner</p>
+            </div>
+            <div className="p-5 space-y-2.5">
+              <button onClick={() => handleEndMatch(match.player1?.id)} disabled={saving}
+                className="w-full py-3.5 rounded-xl font-black text-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#07071a' }}>
+                <Trophy className="w-4 h-4" /> {match.player1?.name} Wins
               </button>
-              <button
-                onClick={() => handleEndMatch(match.player2?.id)}
-                disabled={saving}
-                className="w-full py-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-3"
-              >
-                <Trophy className="w-5 h-5" />
-                {match.player2?.name} Wins
+              <button onClick={() => handleEndMatch(match.player2?.id)} disabled={saving}
+                className="w-full py-3.5 rounded-xl font-black text-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                style={{ background: 'linear-gradient(135deg,#7c3aed,#a855f7)', color: '#fff' }}>
+                <Trophy className="w-4 h-4" /> {match.player2?.name} Wins
               </button>
-              <button
-                onClick={() => setShowEndModal(false)}
-                className="w-full py-3 bg-slate-700 text-gray-300 rounded-xl font-semibold hover:bg-slate-600 transition-colors"
-              >
+              <button onClick={() => setShowEndModal(false)}
+                className="w-full py-3 rounded-xl text-sm font-bold transition-all"
+                style={{ background: 'rgba(255,255,255,0.06)', border: `1px solid ${B.border}`, color: 'rgba(255,255,255,0.6)' }}>
                 Cancel
               </button>
             </div>
@@ -770,84 +567,44 @@ const MatchScoringPage = () => {
   );
 };
 
-// Timer Display Component
+// ── Timer Display ─────────────────────────────────────────────────────────────
 const MatchTimerDisplay = ({ timer, isPaused }) => {
   const [displayTime, setDisplayTime] = useState(0);
 
   useEffect(() => {
-    if (!timer?.startedAt) {
-      setDisplayTime(0);
-      return;
-    }
-
-    // Calculate initial elapsed time
-    const calculateElapsed = () => {
-      const startTime = new Date(timer.startedAt).getTime();
-      const now = Date.now();
-      const totalPausedTime = timer.totalPausedTime || 0;
-      
-      let elapsed = now - startTime - totalPausedTime;
-      
-      // If currently paused, subtract time since pause started
-      if (isPaused && timer.pausedAt) {
-        const pauseStart = new Date(timer.pausedAt).getTime();
-        elapsed -= (now - pauseStart);
-      }
-      
+    if (!timer?.startedAt) { setDisplayTime(0); return; }
+    const calculate = () => {
+      const start = new Date(timer.startedAt).getTime();
+      const total = timer.totalPausedTime || 0;
+      let elapsed = Date.now() - start - total;
+      if (isPaused && timer.pausedAt) elapsed -= (Date.now() - new Date(timer.pausedAt).getTime());
       return Math.max(0, Math.floor(elapsed / 1000));
     };
-
-    // Set initial value
-    setDisplayTime(calculateElapsed());
-
-    // Only update if not paused
+    setDisplayTime(calculate());
     if (isPaused) return;
-
-    const interval = setInterval(() => {
-      setDisplayTime(calculateElapsed());
-    }, 1000);
-
-    return () => clearInterval(interval);
+    const iv = setInterval(() => setDisplayTime(calculate()), 1000);
+    return () => clearInterval(iv);
   }, [timer, isPaused]);
 
-  const formatTime = (seconds) => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-
-    if (hours > 0) {
-      return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-    }
-    return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  const fmt = (s) => {
+    const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+    return h > 0 ? `${h}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}` : `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
   };
-
-  const formatStartTime = (dateString) => {
-    if (!dateString) return '--:--';
-    const date = new Date(dateString);
-    return date.toLocaleTimeString('en-US', { 
-      hour: '2-digit', 
-      minute: '2-digit',
-      hour12: true 
-    });
-  };
+  const fmtTime = (d) => d ? new Date(d).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }) : '--:--';
 
   return (
-    <div className="bg-slate-800/50 border border-white/10 rounded-xl p-4 mb-6">
-      <div className="flex items-center justify-center gap-2 mb-2 text-gray-400 text-sm">
-        <Calendar className="w-4 h-4" />
-        <span>Started at {formatStartTime(timer?.startedAt)}</span>
+    <div className="mb-4 rounded-xl px-4 py-3 flex items-center justify-between"
+      style={{ background: 'rgba(255,255,255,0.04)', border: `1px solid rgba(255,255,255,0.08)` }}>
+      <div className="flex items-center gap-1.5 text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
+        <Calendar className="w-3.5 h-3.5" />
+        <span>Started {fmtTime(timer?.startedAt)}</span>
       </div>
-      <div className="flex items-center justify-center gap-3">
-        <Clock className={`w-6 h-6 ${isPaused ? 'text-amber-400' : 'text-emerald-400'}`} />
-        <span className={`text-3xl font-bold font-mono ${isPaused ? 'text-amber-400' : 'text-white'}`}>
-          {formatTime(displayTime)}
+      <div className="flex items-center gap-2">
+        <Clock className="w-4 h-4" style={{ color: isPaused ? '#fbbf24' : '#00ff88' }} />
+        <span className="text-xl font-black font-mono" style={{ color: isPaused ? '#fbbf24' : '#fff' }}>
+          {fmt(displayTime)}
         </span>
       </div>
-      {timer?.pauseHistory?.length > 0 && (
-        <p className="text-center text-gray-500 text-xs mt-2">
-          {timer.pauseHistory.length} pause{timer.pauseHistory.length > 1 ? 's' : ''}
-        </p>
-      )}
     </div>
   );
 };

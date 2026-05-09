@@ -40,6 +40,7 @@ import {
   Filter,
   FileJson,
   FileSpreadsheet,
+  ChevronDown,
 } from 'lucide-react';
 
 // Helper to get proper image URL
@@ -70,6 +71,7 @@ export default function TournamentManagementPage() {
   const [paymentScreenshot, setPaymentScreenshot] = useState(null);
   const [paymentScreenshotError, setPaymentScreenshotError] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [expandedId, setExpandedId] = useState(null);
 
   useEffect(() => {
     fetchRegistrations();
@@ -381,94 +383,145 @@ export default function TournamentManagementPage() {
             </div>
           ) : (
             <div>
-            {/* Mobile: Cards */}
-            <div className="block md:hidden divide-y" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
-              {filteredRegistrations.map((registration) => (
-                <div key={registration.id} className="p-4 space-y-3">
-                  {/* Player row */}
-                  <div className="flex items-center gap-3">
-                    <div className="w-11 h-11 rounded-xl flex items-center justify-center font-black text-base flex-shrink-0"
-                      style={{ background: 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,200,83,0.1))', border: '1px solid rgba(0,255,136,0.3)', color: '#00ff88' }}>
-                      {(registration.displayName || registration.user?.name || '?').charAt(0).toUpperCase()}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1.5 min-w-0">
-                        <p className="font-bold text-white text-sm truncate">{registration.displayName || registration.user?.name || 'Unknown'}</p>
-                        {registration.isGuest && <span className="text-xs px-1.5 py-0.5 rounded flex-shrink-0" style={{ background: 'rgba(168,85,247,0.2)', color: '#a855f7', border: '1px solid rgba(168,85,247,0.3)' }}>Guest</span>}
+            {/* Mobile: Compact collapsible cards */}
+            <div className="block md:hidden divide-y" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
+              {filteredRegistrations.map((registration) => {
+                const name = registration.displayName || registration.user?.name || 'Unknown';
+                const isOpen = expandedId === registration.id;
+                const statusColor = registration.status === 'confirmed' ? '#00ff88'
+                  : registration.status === 'pending' ? '#fbbf24'
+                  : registration.status === 'cancellation_requested' ? '#fb923c'
+                  : 'rgba(255,255,255,0.4)';
+                return (
+                  <div key={registration.id}>
+                    {/* ── Compact row (always visible, tap to expand) ── */}
+                    <button
+                      className="w-full flex items-center gap-3 px-4 py-3.5 text-left transition-all"
+                      style={{ background: isOpen ? 'rgba(0,255,136,0.03)' : 'transparent' }}
+                      onClick={() => setExpandedId(isOpen ? null : registration.id)}
+                    >
+                      {/* Avatar */}
+                      <div className="w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm flex-shrink-0"
+                        style={{ background: 'linear-gradient(135deg,rgba(0,255,136,0.2),rgba(0,200,83,0.1))', border: '1px solid rgba(0,255,136,0.25)', color: '#00ff88' }}>
+                        {name.charAt(0).toUpperCase()}
                       </div>
-                      <p className="text-xs truncate" style={{ color: 'rgba(255,255,255,0.4)' }}>{registration.displayEmail || registration.user?.email || '—'}</p>
-                      {(registration.displayPhone || registration.user?.phone) && (
-                        <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>{registration.displayPhone || registration.user?.phone}</p>
-                      )}
-                    </div>
-                    <div className="text-right flex-shrink-0">
-                      <p className="font-black text-white">₹{registration.amountTotal}</p>
-                      <div className="flex items-center gap-1 justify-end mt-0.5">
-                        {getStatusIcon(registration.status)}
-                        <span className={`text-xs font-bold ${getStatusBadge(registration.status).includes('emerald') ? 'text-emerald-400' : getStatusBadge(registration.status).includes('amber') ? 'text-amber-400' : getStatusBadge(registration.status).includes('orange') ? 'text-orange-400' : 'text-gray-400'}`}>
-                          {registration.status === 'cancellation_requested' ? 'Refund Req.' : registration.status}
-                        </span>
+
+                      {/* Name + badges */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <span className="font-bold text-white text-sm truncate">{name}</span>
+                          {registration.isGuest && (
+                            <span className="text-xs px-1.5 py-0.5 rounded flex-shrink-0"
+                              style={{ background: 'rgba(168,85,247,0.2)', color: '#a855f7', border: '1px solid rgba(168,85,247,0.3)' }}>Guest</span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-xs font-semibold" style={{ color: '#00ff88' }}>{registration.category?.name}</span>
+                          <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>·</span>
+                          <span className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>{registration.category?.format}</span>
+                        </div>
                       </div>
-                    </div>
+
+                      {/* Amount + status + chevron */}
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <div className="text-right">
+                          <p className="font-black text-sm text-white">₹{registration.amountTotal}</p>
+                          <p className="text-xs font-bold" style={{ color: statusColor }}>
+                            {registration.status === 'cancellation_requested' ? 'Refund' : registration.status}
+                          </p>
+                        </div>
+                        <ChevronDown className="w-4 h-4 transition-transform flex-shrink-0"
+                          style={{ color: 'rgba(255,255,255,0.35)', transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }} />
+                      </div>
+                    </button>
+
+                    {/* ── Expanded details ── */}
+                    {isOpen && (
+                      <div className="px-4 pb-4 space-y-3" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                        {/* Contact info */}
+                        {(registration.displayEmail || registration.user?.email) && (
+                          <div className="flex items-center gap-2 pt-3">
+                            <Mail className="w-3.5 h-3.5 flex-shrink-0" style={{ color: 'rgba(255,255,255,0.3)' }} />
+                            <span className="text-xs truncate" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                              {registration.displayEmail || registration.user?.email}
+                            </span>
+                          </div>
+                        )}
+                        {(registration.displayPhone || registration.user?.phone) && (
+                          <div className="flex items-center gap-2">
+                            <Phone className="w-3.5 h-3.5 flex-shrink-0" style={{ color: 'rgba(255,255,255,0.3)' }} />
+                            <span className="text-xs" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                              {registration.displayPhone || registration.user?.phone}
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Partner */}
+                        {registration.partner && (
+                          <div className="flex items-center gap-2">
+                            <Users className="w-3.5 h-3.5 flex-shrink-0" style={{ color: 'rgba(255,255,255,0.3)' }} />
+                            <span className="text-xs font-semibold" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                              Partner: {registration.partner.name}
+                              <span style={{ color: registration.partnerConfirmed ? '#00ff88' : '#fbbf24' }}>
+                                {registration.partnerConfirmed ? ' ✓ confirmed' : ' (pending)'}
+                              </span>
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Quick Added tag */}
+                        {registration.isQuickAdded && (
+                          <span className="inline-block text-xs px-2 py-1 rounded-lg font-semibold"
+                            style={{ background: 'rgba(168,85,247,0.15)', border: '1px solid rgba(168,85,247,0.3)', color: '#a855f7' }}>
+                            Quick Added
+                          </span>
+                        )}
+
+                        {/* Action buttons */}
+                        <div className="flex flex-wrap gap-2 pt-1">
+                          {registration.paymentScreenshot && (
+                            <button
+                              onClick={() => setScreenshotModal({ url: getImageUrl(registration.paymentScreenshot), playerName: name, amount: registration.amountTotal })}
+                              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold"
+                              style={{ background: 'rgba(0,212,255,0.1)', border: '1px solid rgba(0,212,255,0.25)', color: '#00d4ff' }}>
+                              <ZoomIn className="h-3.5 w-3.5" /> Screenshot
+                            </button>
+                          )}
+                          {registration.status === 'cancellation_requested' && (
+                            <button
+                              onClick={() => setRefundQrModal({ url: getImageUrl(registration.refundQrCode), playerName: name, upiId: registration.refundUpiId, reason: registration.cancellationReason, amount: registration.refundAmount || registration.amountTotal })}
+                              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold"
+                              style={{ background: 'rgba(249,115,22,0.1)', border: '1px solid rgba(249,115,22,0.25)', color: '#fb923c' }}>
+                              <Eye className="h-3.5 w-3.5" /> Refund Details
+                            </button>
+                          )}
+                          {registration.status === 'cancelled' && registration.refundStatus === 'approved' && (
+                            <button
+                              onClick={() => openCompleteRefundModal(registration)}
+                              disabled={actionLoading === registration.id}
+                              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold disabled:opacity-50"
+                              style={{ background: 'rgba(0,255,136,0.1)', border: '1px solid rgba(0,255,136,0.25)', color: '#00ff88' }}>
+                              <CreditCard className="h-3.5 w-3.5" /> Complete Refund
+                            </button>
+                          )}
+                          {registration.status === 'cancelled' && registration.refundStatus === 'completed' && (
+                            <span className="flex items-center gap-1 text-xs font-bold" style={{ color: '#00ff88' }}>
+                              <CheckCircle className="h-3.5 w-3.5" /> Refund Done
+                            </span>
+                          )}
+                          {actionLoading === registration.id && (
+                            <div className="w-4 h-4 border-2 border-t-transparent rounded-full animate-spin"
+                              style={{ borderColor: 'rgba(0,255,136,0.3)', borderTopColor: '#00ff88' }} />
+                          )}
+                        </div>
+
+                        {/* Date */}
+                        <p className="text-xs" style={{ color: 'rgba(255,255,255,0.25)' }}>{formatDateIndian(registration.createdAt)}</p>
+                      </div>
+                    )}
                   </div>
-                  {/* Category + Partner */}
-                  <div className="flex flex-wrap gap-2 text-xs">
-                    <span className="px-2 py-1 rounded-lg font-semibold" style={{ background: 'rgba(0,255,136,0.1)', border: '1px solid rgba(0,255,136,0.2)', color: '#00ff88' }}>
-                      {registration.category.name}
-                    </span>
-                    <span className="px-2 py-1 rounded-lg font-semibold" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)' }}>
-                      {registration.category.format}
-                    </span>
-                    {registration.isQuickAdded && (
-                      <span className="px-2 py-1 rounded-lg font-semibold" style={{ background: 'rgba(168,85,247,0.15)', border: '1px solid rgba(168,85,247,0.3)', color: '#a855f7' }}>
-                        Quick Added
-                      </span>
-                    )}
-                    {registration.partner && (
-                      <span className="px-2 py-1 rounded-lg font-semibold" style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                        + {registration.partner.name}{registration.partnerConfirmed ? ' ✓' : ' (pending)'}
-                      </span>
-                    )}
-                  </div>
-                  {/* Actions */}
-                  <div className="flex flex-wrap gap-2">
-                    {registration.paymentScreenshot && (
-                      <button
-                        onClick={() => setScreenshotModal({ url: getImageUrl(registration.paymentScreenshot), playerName: registration.displayName || registration.user?.name || 'Unknown', amount: registration.amountTotal })}
-                        className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all"
-                        style={{ background: 'rgba(0,212,255,0.12)', border: '1px solid rgba(0,212,255,0.3)', color: '#00d4ff' }}>
-                        <ZoomIn className="h-3.5 w-3.5" /> Screenshot
-                      </button>
-                    )}
-                    {registration.status === 'cancellation_requested' && (
-                      <button
-                        onClick={() => setRefundQrModal({ url: getImageUrl(registration.refundQrCode), playerName: registration.displayName || registration.user?.name || 'Unknown', upiId: registration.refundUpiId, reason: registration.cancellationReason, amount: registration.refundAmount || registration.amountTotal })}
-                        className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all"
-                        style={{ background: 'rgba(249,115,22,0.12)', border: '1px solid rgba(249,115,22,0.3)', color: '#fb923c' }}>
-                        <Eye className="h-3.5 w-3.5" /> Refund Details
-                      </button>
-                    )}
-                    {registration.status === 'cancelled' && registration.refundStatus === 'approved' && (
-                      <button
-                        onClick={() => openCompleteRefundModal(registration)}
-                        disabled={actionLoading === registration.id}
-                        className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all disabled:opacity-50"
-                        style={{ background: 'rgba(0,255,136,0.12)', border: '1px solid rgba(0,255,136,0.3)', color: '#00ff88' }}>
-                        <CreditCard className="h-3.5 w-3.5" /> Complete Refund
-                      </button>
-                    )}
-                    {registration.status === 'cancelled' && registration.refundStatus === 'completed' && (
-                      <span className="flex items-center gap-1 text-xs font-medium" style={{ color: '#00ff88' }}>
-                        <CheckCircle className="h-3.5 w-3.5" /> Refund Done
-                      </span>
-                    )}
-                    {actionLoading === registration.id && (
-                      <div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: 'rgba(0,255,136,0.3)', borderTopColor: '#00ff88' }}></div>
-                    )}
-                  </div>
-                  <p className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>{formatDateIndian(registration.createdAt)}</p>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* Desktop: Table */}

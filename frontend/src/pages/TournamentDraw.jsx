@@ -133,9 +133,9 @@ const TournamentDraw = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen" style={{ background: 'linear-gradient(180deg, #1a1a2e 0%, #16213e 100%)' }}>
+      <div className="flex items-center justify-center min-h-screen" style={{ background: '#07071a' }}>
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto" style={{ borderColor: 'rgba(0,255,136,0.3)', borderBottomColor: '#00ff88' }}></div>
           <p className="mt-4 text-gray-400">Loading tournament draw...</p>
         </div>
       </div>
@@ -143,7 +143,7 @@ const TournamentDraw = () => {
   }
 
   return (
-    <div className="min-h-screen pb-4" style={{ background: 'linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)' }}>
+    <div className="min-h-screen pb-4" style={{ background: '#07071a' }}>
       <div className="max-w-7xl mx-auto px-3 py-2">
         {/* Header - Ultra Compact */}
         <button
@@ -178,9 +178,9 @@ const TournamentDraw = () => {
           <button
             className="flex-shrink-0 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg font-bold text-xs transition-all"
             style={{
-              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-              color: '#ffffff',
-              boxShadow: '0 2px 8px rgba(16,185,129,0.3)'
+              background: 'linear-gradient(135deg, #00ff88, #00d4ff)',
+              color: '#07071a',
+              boxShadow: '0 2px 8px rgba(0,255,136,0.3)'
             }}
           >
             <UserGroupIcon className="w-4 h-4" />
@@ -190,9 +190,9 @@ const TournamentDraw = () => {
           <button
             className="flex-shrink-0 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg font-bold text-xs transition-all"
             style={{
-              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-              color: '#ffffff',
-              boxShadow: '0 2px 8px rgba(16,185,129,0.3)'
+              background: 'linear-gradient(135deg, #00ff88, #00d4ff)',
+              color: '#07071a',
+              boxShadow: '0 2px 8px rgba(0,255,136,0.3)'
             }}
           >
             <TrophyIcon className="w-4 h-4" />
@@ -229,17 +229,17 @@ const TournamentDraw = () => {
           <div
             className="rounded-xl p-2.5 relative overflow-hidden"
             style={{
-              background: 'linear-gradient(135deg, rgba(16,185,129,0.2) 0%, rgba(5,150,105,0.1) 100%)',
-              border: '1.5px solid rgba(16,185,129,0.3)',
+              background: 'linear-gradient(135deg, rgba(0,255,136,0.15) 0%, rgba(0,212,255,0.1) 100%)',
+              border: '1.5px solid rgba(0,255,136,0.3)',
               backdropFilter: 'blur(10px)'
             }}
           >
             <div className="flex items-center gap-2">
               <div
                 className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                style={{ background: 'rgba(16,185,129,0.3)' }}
+                style={{ background: 'rgba(0,255,136,0.2)' }}
               >
-                <CheckCircleIcon className="w-4 h-4 text-emerald-400" />
+                <CheckCircleIcon className="w-4 h-4" style={{ color: '#00ff88' }} />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-lg font-black text-white leading-none">0</p>
@@ -328,13 +328,13 @@ const TournamentDraw = () => {
           <div
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl"
             style={{
-              background: 'linear-gradient(135deg, rgba(16,185,129,0.3) 0%, rgba(5,150,105,0.2) 100%)',
-              border: '1.5px solid rgba(16,185,129,0.5)',
-              boxShadow: '0 2px 10px rgba(16,185,129,0.3)'
+              background: 'linear-gradient(135deg, rgba(0,255,136,0.2) 0%, rgba(0,212,255,0.15) 100%)',
+              border: '1.5px solid rgba(0,255,136,0.4)',
+              boxShadow: '0 2px 10px rgba(0,255,136,0.2)'
             }}
           >
-            <TrophyIcon className="w-4 h-4 text-emerald-400" />
-            <span className="font-black text-emerald-400 text-xs">SEMI FINALS</span>
+            <TrophyIcon className="w-4 h-4" style={{ color: '#00ff88' }} />
+            <span className="font-black text-xs" style={{ color: '#00ff88' }}>SEMI FINALS</span>
           </div>
         </div>
 
@@ -415,8 +415,8 @@ const TournamentDraw = () => {
                   style={
                     umpire.isAvailable
                       ? {
-                          background: 'rgba(16,185,129,0.2)',
-                          border: '2px solid rgba(16,185,129,0.4)'
+                          background: 'rgba(0,255,136,0.15)',
+                          border: '2px solid rgba(0,255,136,0.35)'
                         }
                       : {
                           background: 'rgba(100,116,139,0.1)',
@@ -433,7 +433,7 @@ const TournamentDraw = () => {
                       </div>
                     </div>
                     {umpire.isAvailable && (
-                      <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full"></div>
+                      <div className="w-2.5 h-2.5 rounded-full" style={{ background: '#00ff88' }}></div>
                     )}
                   </div>
                 </button>

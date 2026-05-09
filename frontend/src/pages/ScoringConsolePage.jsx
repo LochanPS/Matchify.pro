@@ -152,9 +152,9 @@ const ScoringConsolePage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#07071a' }}>
         <div className="text-center">
-          <RefreshCw className="w-12 h-12 text-emerald-500 animate-spin mx-auto mb-4" />
+          <RefreshCw className="w-12 h-12 animate-spin mx-auto mb-4" style={{ color: '#00ff88' }} />
           <p className="text-gray-400">Loading match...</p>
         </div>
       </div>
@@ -163,21 +163,21 @@ const ScoringConsolePage = () => {
 
   if (!match) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#07071a' }}>
         <div className="text-center">
           <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
           <p className="text-gray-400">Match not found</p>
-          <button onClick={() => navigate(-1)} className="mt-4 text-emerald-400 hover:text-emerald-300">Go Back</button>
+          <button onClick={() => navigate(-1)} className="mt-4" style={{ color: '#00ff88' }}>Go Back</button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-6 px-4">
+    <div className="min-h-screen py-6 px-4" style={{ background: '#07071a' }}>
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-emerald-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-2000"></div>
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full filter blur-3xl opacity-[0.07]" style={{ background: '#00ff88' }}></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full filter blur-3xl opacity-[0.07]" style={{ background: '#00d4ff' }}></div>
       </div>
       <div className="relative max-w-4xl mx-auto">
         <div className="flex items-center justify-between mb-6">
@@ -191,7 +191,7 @@ const ScoringConsolePage = () => {
                 <span className="text-sm font-semibold">LIVE</span>
               </div>
             )}
-            <button onClick={fetchMatch} disabled={processing} className="flex items-center gap-2 text-emerald-400 hover:text-emerald-300 disabled:text-gray-500">
+            <button onClick={fetchMatch} disabled={processing} className="flex items-center gap-2 disabled:text-gray-500" style={{ color: '#00ff88' }}>
               <RefreshCw className={`w-5 h-5 ${processing ? 'animate-spin' : ''}`} /><span>Refresh</span>
             </button>
           </div>
@@ -205,17 +205,17 @@ const ScoringConsolePage = () => {
         </div>
 
         <div className="grid grid-cols-3 gap-3 mb-6">
-          <div className="bg-slate-800/50 border border-white/10 rounded-xl p-3 text-center">
+          <div className="border border-white/10 rounded-xl p-3 text-center" style={{ background: '#0d1025' }}>
             <Target className="w-4 h-4 text-amber-400 mx-auto mb-1" />
             <p className="text-gray-500 text-xs">Points</p>
             <p className="text-white font-bold">{matchConfig.pointsPerSet}</p>
           </div>
-          <div className="bg-slate-800/50 border border-white/10 rounded-xl p-3 text-center">
+          <div className="border border-white/10 rounded-xl p-3 text-center" style={{ background: '#0d1025' }}>
             <Clock className="w-4 h-4 text-blue-400 mx-auto mb-1" />
             <p className="text-gray-500 text-xs">Sets</p>
             <p className="text-white font-bold">{matchConfig.maxSets === 1 ? '1 Set' : `Best of ${matchConfig.maxSets}`}</p>
           </div>
-          <div className="bg-slate-800/50 border border-white/10 rounded-xl p-3 text-center">
+          <div className="border border-white/10 rounded-xl p-3 text-center" style={{ background: '#0d1025' }}>
             <MapPin className="w-4 h-4 text-purple-400 mx-auto mb-1" />
             <p className="text-gray-500 text-xs">Court</p>
             <p className="text-white font-bold">{match.courtNumber || '-'}</p>
@@ -236,11 +236,11 @@ const ScoringConsolePage = () => {
         )}
 
         {matchComplete && winner && (
-          <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-6 mb-6 text-center">
-            <h2 className="text-3xl font-bold text-emerald-300 mb-2">🏆 Match Complete! 🏆</h2>
-            <p className="text-xl text-emerald-400 mb-3">{winner === 'player1' ? player1Name : player2Name} wins!</p>
+          <div className="rounded-xl p-6 mb-6 text-center" style={{ background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.3)' }}>
+            <h2 className="text-3xl font-bold mb-2" style={{ color: '#00ff88' }}>🏆 Match Complete! 🏆</h2>
+            <p className="text-xl mb-3" style={{ color: '#00ff88' }}>{winner === 'player1' ? player1Name : player2Name} wins!</p>
             {score?.timer && (
-              <div className="mt-4 pt-4 border-t border-emerald-500/20">
+              <div className="mt-4 pt-4" style={{ borderTop: '1px solid rgba(0,255,136,0.2)' }}>
                 <p className="text-gray-400 text-sm">Match Duration</p>
                 <p className="text-white font-bold text-lg">
                   {score.timer.totalDurationFormatted || formatMatchDuration(score.timer)}
@@ -292,14 +292,14 @@ const ScoringConsolePage = () => {
         )}
 
         {score && score.history && score.history.length > 0 && (
-          <div className="mt-6 bg-slate-800/50 border border-white/10 rounded-xl p-6">
+          <div className="mt-6 border border-white/10 rounded-xl p-6" style={{ background: '#0d1025' }}>
             <h3 className="text-lg font-bold text-white mb-4">Point History</h3>
             <div className="max-h-64 overflow-y-auto space-y-2">
               {score.history.slice().reverse().map((point, index) => (
-                <div key={score.history.length - index} className="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg">
+                <div key={score.history.length - index} className="flex items-center justify-between p-3 rounded-lg" style={{ background: 'rgba(255,255,255,0.05)' }}>
                   <div className="flex items-center gap-3">
                     <span className="text-sm font-semibold text-gray-500">#{score.history.length - index}</span>
-                    <span className={`font-semibold ${point.player === 'player1' ? 'text-blue-400' : 'text-purple-400'}`}>{point.player === 'player1' ? player1Name : player2Name}</span>
+                    <span className="font-semibold" style={{ color: point.player === 'player1' ? '#00d4ff' : '#a855f7' }}>{point.player === 'player1' ? player1Name : player2Name}</span>
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-mono text-white">{point.score.player1} - {point.score.player2}</p>

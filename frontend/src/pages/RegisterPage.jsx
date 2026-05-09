@@ -256,7 +256,7 @@ const RegisterPage = () => {
             {/* All Roles Included - Informational */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-3">
-                You'll Get All 3 Roles <span className="text-emerald-400">✓</span>
+                You'll Get All 3 Roles <span style={{ color: '#00ff88' }}>✓</span>
               </label>
               <div className="grid grid-cols-3 gap-3">
                 {roles.map((role) => (
@@ -264,14 +264,14 @@ const RegisterPage = () => {
                     key={role.id}
                     className="relative p-4 rounded-xl border" style={{ background:'rgba(0,255,136,0.06)', borderColor:'rgba(0,255,136,0.25)' }}
                   >
-                    <CheckCircleIcon className="absolute top-2 right-2 w-5 h-5 text-emerald-400" />
+                    <CheckCircleIcon className="absolute top-2 right-2 w-5 h-5" style={{ color: '#00ff88' }} />
                     <div className="text-2xl mb-2">{role.icon}</div>
                     <p className="font-semibold text-white text-sm">{role.title}</p>
                     <p className="text-xs text-gray-500">{role.desc}</p>
                   </div>
                 ))}
               </div>
-              <p className="mt-2 text-xs text-emerald-400 flex items-center gap-1">
+              <p className="mt-2 text-xs flex items-center gap-1" style={{ color: '#00ff88' }}>
                 <CheckCircleIcon className="w-4 h-4" />
                 Switch between roles anytime from your dashboard
               </p>
@@ -389,13 +389,13 @@ const RegisterPage = () => {
                 </div>
                 {/* Password requirements */}
                 <div className="mt-2 space-y-1">
-                  <p className={`text-xs flex items-center gap-1 ${/[A-Z]/.test(formData.password) ? 'text-emerald-400' : 'text-gray-500'}`}>
+                  <p className="text-xs flex items-center gap-1" style={{ color: /[A-Z]/.test(formData.password) ? '#00ff88' : 'rgba(255,255,255,0.35)' }}>
                     <span>{/[A-Z]/.test(formData.password) ? '✓' : '○'}</span> One uppercase letter
                   </p>
-                  <p className={`text-xs flex items-center gap-1 ${(formData.password.match(/[0-9]/g) || []).length >= 2 ? 'text-emerald-400' : 'text-gray-500'}`}>
+                  <p className="text-xs flex items-center gap-1" style={{ color: (formData.password.match(/[0-9]/g) || []).length >= 2 ? '#00ff88' : 'rgba(255,255,255,0.35)' }}>
                     <span>{(formData.password.match(/[0-9]/g) || []).length >= 2 ? '✓' : '○'}</span> Two numbers
                   </p>
-                  <p className={`text-xs flex items-center gap-1 ${/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(formData.password) ? 'text-emerald-400' : 'text-gray-500'}`}>
+                  <p className="text-xs flex items-center gap-1" style={{ color: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(formData.password) ? '#00ff88' : 'rgba(255,255,255,0.35)' }}>
                     <span>{/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(formData.password) ? '✓' : '○'}</span> One symbol (!@#$...)
                   </p>
                 </div>
@@ -503,15 +503,16 @@ const RegisterPage = () => {
       {/* Terms of Service Modal */}
       {showTermsModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-slate-800 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col border border-purple-500/30">
+          <div className="rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col" style={{ background: '#0d1025', border: '1px solid rgba(168,85,247,0.3)' }}>
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-slate-700">
+            <div className="flex items-center justify-between p-6" style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
               <h2 className="text-2xl font-bold text-white">Terms and Conditions</h2>
               <button
                 onClick={() => setShowTermsModal(false)}
-                className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
+                className="p-2 rounded-lg transition-colors"
+                style={{ color: 'rgba(255,255,255,0.5)' }}
               >
-                <XMarkIcon className="w-6 h-6 text-gray-400" />
+                <XMarkIcon className="w-6 h-6" />
               </button>
             </div>
             
@@ -521,10 +522,10 @@ const RegisterPage = () => {
             </div>
             
             {/* Footer */}
-            <div className="p-6 border-t border-slate-700 flex justify-end gap-4">
+            <div className="p-6 flex justify-end gap-4" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
               <button
                 onClick={() => setShowTermsModal(false)}
-                className="px-6 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
+                className="px-6 py-2 rounded-lg transition-colors text-white" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)' }}
               >
                 Close
               </button>
@@ -533,7 +534,7 @@ const RegisterPage = () => {
                   setTermsAccepted(true);
                   setShowTermsModal(false);
                 }}
-                className="px-6 py-2 bg-gradient-to-r from-emerald-500 to-cyan-500 text-white rounded-lg hover:shadow-lg transition-all"
+                className="px-6 py-2 rounded-lg hover:shadow-lg transition-all font-bold" style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#003320' }}
               >
                 I Accept
               </button>
@@ -545,15 +546,16 @@ const RegisterPage = () => {
       {/* Privacy Policy Modal */}
       {showPrivacyModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-slate-800 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col border border-purple-500/30">
+          <div className="rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col" style={{ background: '#0d1025', border: '1px solid rgba(168,85,247,0.3)' }}>
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-slate-700">
+            <div className="flex items-center justify-between p-6" style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
               <h2 className="text-2xl font-bold text-white">Privacy Policy</h2>
               <button
                 onClick={() => setShowPrivacyModal(false)}
-                className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
+                className="p-2 rounded-lg transition-colors"
+                style={{ color: 'rgba(255,255,255,0.5)' }}
               >
-                <XMarkIcon className="w-6 h-6 text-gray-400" />
+                <XMarkIcon className="w-6 h-6" />
               </button>
             </div>
             
@@ -563,10 +565,10 @@ const RegisterPage = () => {
             </div>
             
             {/* Footer */}
-            <div className="p-6 border-t border-slate-700 flex justify-end gap-4">
+            <div className="p-6 flex justify-end gap-4" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
               <button
                 onClick={() => setShowPrivacyModal(false)}
-                className="px-6 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
+                className="px-6 py-2 rounded-lg transition-colors text-white" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)' }}
               >
                 Close
               </button>
@@ -575,7 +577,7 @@ const RegisterPage = () => {
                   setTermsAccepted(true);
                   setShowPrivacyModal(false);
                 }}
-                className="px-6 py-2 bg-gradient-to-r from-emerald-500 to-cyan-500 text-white rounded-lg hover:shadow-lg transition-all"
+                className="px-6 py-2 rounded-lg hover:shadow-lg transition-all font-bold" style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#003320' }}
               >
                 I Accept
               </button>
@@ -638,14 +640,14 @@ const TermsContent = () => (
 
     <section>
       <h3 className="text-xl font-bold text-white mb-3">3. PAYMENT TERMS</h3>
-      <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-4 mb-4">
-        <p className="text-emerald-300 font-semibold mb-2">💰 PAYMENT BREAKDOWN</p>
+      <div className="rounded-lg p-4 mb-4" style={{ background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.25)' }}>
+        <p className="font-semibold mb-2" style={{ color: '#00ff88' }}>💰 PAYMENT BREAKDOWN</p>
         <div className="space-y-2 text-sm">
           <div className="flex justify-between">
             <span>Players pay to:</span>
             <span className="font-semibold text-white">Matchify.pro Admin (100%)</span>
           </div>
-          <div className="border-t border-emerald-500/20 my-2"></div>
+          <div className="my-2" style={{ borderTop: '1px solid rgba(0,255,136,0.2)' }}></div>
           <div className="flex justify-between">
             <span>Platform keeps:</span>
             <span className="font-semibold text-purple-300">3% (Platform Fee)</span>
@@ -654,7 +656,7 @@ const TermsContent = () => (
             <span>Organizer gets (Total):</span>
             <span className="font-semibold text-cyan-300">97%</span>
           </div>
-          <div className="border-t border-emerald-500/20 my-2"></div>
+          <div className="my-2" style={{ borderTop: '1px solid rgba(0,255,136,0.2)' }}></div>
           <div className="pl-4 space-y-1">
             <div className="flex justify-between text-xs">
               <span>→ First Payment (BEFORE tournament):</span>
@@ -669,7 +671,7 @@ const TermsContent = () => (
       </div>
       
       <p className="text-sm mb-3"><strong>Example:</strong> If entry fee is ₹1,000</p>
-      <ul className="list-none pl-6 space-y-1 text-sm bg-slate-700/50 rounded-lg p-3">
+      <ul className="list-none pl-6 space-y-1 text-sm rounded-lg p-3" style={{ background: 'rgba(255,255,255,0.05)' }}>
         <li>• Player pays: <strong className="text-white">₹1,000</strong> to Matchify.pro admin</li>
         <li>• Platform keeps: <strong className="text-purple-300">₹30</strong> (3%)</li>
         <li>• Organizer gets: <strong className="text-cyan-300">₹970</strong> (97%)</li>
@@ -724,8 +726,8 @@ const TermsContent = () => (
 
     <section>
       <h3 className="text-xl font-bold text-white mb-3">6. GAMBLING DISCLAIMER</h3>
-      <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4">
-        <p className="text-green-300 font-semibold mb-2">✓ GAME OF SKILL</p>
+      <div className="rounded-lg p-4" style={{ background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.2)' }}>
+        <p className="font-semibold mb-2" style={{ color: '#00ff88' }}>✓ GAME OF SKILL</p>
         <ul className="list-disc pl-6 space-y-2 text-sm">
           <li>Badminton is a <strong>game of SKILL</strong>, not chance</li>
           <li>This platform does NOT involve gambling</li>
@@ -774,7 +776,7 @@ const TermsContent = () => (
 
     <section>
       <h3 className="text-xl font-bold text-white mb-3">10. GRIEVANCE OFFICER</h3>
-      <div className="bg-slate-700 rounded-lg p-4">
+      <div className="rounded-lg p-4" style={{ background: 'rgba(255,255,255,0.06)' }}>
         <p className="text-sm">For complaints or concerns:</p>
         <ul className="list-none space-y-1 mt-2 text-sm">
           <li><strong>Email:</strong> grievance@matchify.pro</li>
@@ -912,8 +914,8 @@ const PrivacyContent = () => (
         <li>Required by tax authorities</li>
       </ul>
 
-      <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4 mt-4">
-        <p className="text-green-300 font-semibold text-sm">✓ WE DO NOT:</p>
+      <div className="rounded-lg p-4 mt-4" style={{ background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.2)' }}>
+        <p className="font-semibold text-sm" style={{ color: '#00ff88' }}>✓ WE DO NOT:</p>
         <ul className="list-disc pl-6 space-y-1 text-sm mt-2">
           <li>Sell your data to third parties</li>
           <li>Use your data for unrelated purposes</li>
@@ -950,27 +952,27 @@ const PrivacyContent = () => (
       <h3 className="text-xl font-bold text-white mb-3">5. YOUR RIGHTS (DPDP ACT 2023)</h3>
       
       <div className="space-y-3">
-        <div className="bg-slate-700 rounded-lg p-3">
+        <div className="rounded-lg p-3" style={{ background: 'rgba(255,255,255,0.06)' }}>
           <p className="font-semibold text-white">✓ Right to Access</p>
           <p className="text-sm mt-1">Request a copy of your personal data</p>
         </div>
         
-        <div className="bg-slate-700 rounded-lg p-3">
+        <div className="rounded-lg p-3" style={{ background: 'rgba(255,255,255,0.06)' }}>
           <p className="font-semibold text-white">✓ Right to Correction</p>
           <p className="text-sm mt-1">Correct inaccurate or incomplete data</p>
         </div>
         
-        <div className="bg-slate-700 rounded-lg p-3">
+        <div className="rounded-lg p-3" style={{ background: 'rgba(255,255,255,0.06)' }}>
           <p className="font-semibold text-white">✓ Right to Erasure</p>
           <p className="text-sm mt-1">Request deletion of your personal data</p>
         </div>
         
-        <div className="bg-slate-700 rounded-lg p-3">
+        <div className="rounded-lg p-3" style={{ background: 'rgba(255,255,255,0.06)' }}>
           <p className="font-semibold text-white">✓ Right to Data Portability</p>
           <p className="text-sm mt-1">Receive your data in machine-readable format</p>
         </div>
         
-        <div className="bg-slate-700 rounded-lg p-3">
+        <div className="rounded-lg p-3" style={{ background: 'rgba(255,255,255,0.06)' }}>
           <p className="font-semibold text-white">✓ Right to Withdraw Consent</p>
           <p className="text-sm mt-1">Withdraw consent for data processing anytime</p>
         </div>
@@ -1027,7 +1029,7 @@ const PrivacyContent = () => (
 
     <section>
       <h3 className="text-xl font-bold text-white mb-3">10. CONTACT INFORMATION</h3>
-      <div className="bg-slate-700 rounded-lg p-4 space-y-2">
+      <div className="rounded-lg p-4 space-y-2" style={{ background: 'rgba(255,255,255,0.06)' }}>
         <div>
           <p className="font-semibold text-white">General Inquiries:</p>
           <p className="text-sm">privacy@matchify.pro</p>

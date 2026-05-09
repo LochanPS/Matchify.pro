@@ -175,7 +175,7 @@ export default function MyRegistrationsPage() {
             <span className="text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.6)' }}>Back</span>
           </button>
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', boxShadow: '0 0 16px rgba(0,255,136,0.25)' }}>
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', boxShadow: '0 0 16px rgba(0,255,136,0.25)' }}>
               <Trophy className="w-5 h-5" style={{ color: '#003320' }} />
             </div>
             <div>
@@ -197,7 +197,7 @@ export default function MyRegistrationsPage() {
                 className="flex-1 px-4 py-2.5 text-sm font-bold rounded-xl transition-all"
                 style={
                   filter === tab.key
-                    ? { background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#003320', boxShadow: '0 4px 15px rgba(0,255,136,0.25)' }
+                    ? { background: 'linear-gradient(135deg,#00ff88,#00d4ff)', color: '#003320', boxShadow: '0 4px 15px rgba(0,255,136,0.25)' }
                     : { color: 'rgba(255,255,255,0.5)', background: 'transparent' }
                 }
               >
@@ -218,7 +218,7 @@ export default function MyRegistrationsPage() {
             <button
               onClick={() => navigate('/tournaments')}
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm"
-              style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#003320' }}
+              style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', color: '#003320' }}
             >
               Browse Tournaments
               <ArrowRight className="w-4 h-4" />
@@ -553,7 +553,7 @@ export default function MyRegistrationsPage() {
                 onClick={() => setResultModal(null)}
                 className="w-full px-4 py-3 rounded-xl font-semibold text-sm"
                 style={resultModal.type === 'success'
-                  ? { background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#003320' }
+                  ? { background: 'linear-gradient(135deg,#00ff88,#00d4ff)', color: '#003320' }
                   : { background: 'linear-gradient(135deg,#ef4444,#dc2626)', color: '#fff' }}
               >
                 Close

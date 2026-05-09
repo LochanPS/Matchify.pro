@@ -90,7 +90,7 @@ const Wallet = () => {
           </button>
 
           <div className="flex items-center gap-4 mb-8">
-            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center shadow-lg" style={{ background: 'linear-gradient(135deg,#00ff88,#00c853)', boxShadow: '0 0 24px rgba(0,255,136,0.3)' }}>
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center shadow-lg" style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', boxShadow: '0 0 24px rgba(0,255,136,0.3)' }}>
               <WalletIcon className="w-7 h-7 sm:w-8 sm:h-8" style={{ color: '#003320' }} />
             </div>
             <div>

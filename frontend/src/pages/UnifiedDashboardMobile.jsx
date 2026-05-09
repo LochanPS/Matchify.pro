@@ -119,8 +119,8 @@ const UnifiedDashboardMobile = () => {
 
   const stats = [
     { label: 'Total Points', value: user?.totalPoints || 0, icon: SparklesIcon, gradient: 'linear-gradient(135deg,#f59e0b,#d97706)', bg: 'rgba(245,158,11,0.1)', border: 'rgba(245,158,11,0.2)', val: '#fbbf24' },
-    { label: 'Tournaments', value: user?.tournamentsPlayed || 0, icon: TrophyIcon, gradient: 'linear-gradient(135deg,#00c853,#00ff88)', bg: 'rgba(0,255,136,0.1)', border: 'rgba(0,255,136,0.2)', val: '#00ff88' },
-    { label: 'Matches Won', value: user?.matchesWon || 0, icon: FireIcon, gradient: 'linear-gradient(135deg,#00c853,#00ff88)', bg: 'rgba(0,255,136,0.1)', border: 'rgba(0,255,136,0.2)', val: '#00ff88' },
+    { label: 'Tournaments', value: user?.tournamentsPlayed || 0, icon: TrophyIcon, gradient: 'linear-gradient(135deg,#00ff88,#00d4ff)', bg: 'rgba(0,255,136,0.1)', border: 'rgba(0,255,136,0.2)', val: '#00ff88' },
+    { label: 'Matches Won', value: user?.matchesWon || 0, icon: FireIcon, gradient: 'linear-gradient(135deg,#00ff88,#00d4ff)', bg: 'rgba(0,255,136,0.1)', border: 'rgba(0,255,136,0.2)', val: '#00ff88' },
     { label: 'Win Rate', value: `${winRate}%`, icon: BoltIcon, gradient: 'linear-gradient(135deg,#00bcd4,#00d4ff)', bg: 'rgba(0,212,255,0.1)', border: 'rgba(0,212,255,0.2)', val: '#00d4ff' },
   ];
 
@@ -128,9 +128,9 @@ const UnifiedDashboardMobile = () => {
     PLAYER: {
       name: 'Player',
       icon: '🏸',
-      color: '#00c853',
-      bg: 'rgba(0,200,83,0.1)',
-      border: 'rgba(0,200,83,0.3)'
+      color: '#00ff88',
+      bg: 'rgba(0,255,136,0.1)',
+      border: 'rgba(0,255,136,0.3)'
     },
     ORGANIZER: {
       name: 'Organizer',
@@ -156,7 +156,7 @@ const UnifiedDashboardMobile = () => {
         <div 
           className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl opacity-30 animate-pulse"
           style={{ 
-            background: 'radial-gradient(circle, rgba(0,200,83,0.4) 0%, rgba(0,255,136,0.2) 40%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(0,255,136,0.4) 0%, rgba(0,255,136,0.2) 40%, transparent 70%)',
             animation: 'float 8s ease-in-out infinite'
           }}
         />
@@ -250,8 +250,8 @@ const UnifiedDashboardMobile = () => {
             className="w-[90vw] max-w-md h-[85vh] relative overflow-hidden rounded-2xl"
             style={{ 
               background: 'linear-gradient(180deg, #07071a 0%, #0d1a2a 50%, #07071a 100%)',
-              border: '2px solid rgba(0,200,83,0.3)',
-              boxShadow: '0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(0,200,83,0.2)',
+              border: '2px solid rgba(0,255,136,0.3)',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(0,255,136,0.2)',
               animation: 'scaleIn 0.3s ease-out'
             }}
             onClick={(e) => e.stopPropagation()}
@@ -261,7 +261,7 @@ const UnifiedDashboardMobile = () => {
               <div 
                 className="absolute top-0 right-0 w-64 h-64 rounded-full blur-3xl opacity-20"
                 style={{ 
-                  background: 'radial-gradient(circle, rgba(0,200,83,0.6), transparent)',
+                  background: 'radial-gradient(circle, rgba(0,255,136,0.6), transparent)',
                   animation: 'glow 4s ease-in-out infinite'
                 }}
               />
@@ -289,7 +289,7 @@ const UnifiedDashboardMobile = () => {
                     <div 
                       className="absolute inset-0 blur-lg opacity-60"
                       style={{ 
-                        background: 'radial-gradient(circle, rgba(0,200,83,0.6) 0%, transparent 70%)',
+                        background: 'radial-gradient(circle, rgba(0,255,136,0.6) 0%, transparent 70%)',
                         animation: 'glow 3s ease-in-out infinite'
                       }}
                     />
@@ -327,9 +327,9 @@ const UnifiedDashboardMobile = () => {
               <div 
                 className="rounded-xl p-5 mb-6 relative overflow-hidden"
                 style={{
-                  background: 'linear-gradient(135deg, rgba(0,200,83,0.15) 0%, rgba(99,102,241,0.15) 100%)',
-                  border: '2px solid rgba(0,200,83,0.3)',
-                  boxShadow: '0 4px 15px rgba(0,200,83,0.2), inset 0 1px 0 rgba(255,255,255,0.1)'
+                  background: 'linear-gradient(135deg, rgba(0,255,136,0.15) 0%, rgba(99,102,241,0.15) 100%)',
+                  border: '2px solid rgba(0,255,136,0.3)',
+                  boxShadow: '0 4px 15px rgba(0,255,136,0.2), inset 0 1px 0 rgba(255,255,255,0.1)'
                 }}
               >
                 <div 
@@ -344,9 +344,9 @@ const UnifiedDashboardMobile = () => {
                   <div 
                     className="w-16 h-16 rounded-full flex items-center justify-center font-bold text-xl flex-shrink-0"
                     style={{ 
-                      background: 'linear-gradient(135deg,#00c853,#00ff88)', 
+                      background: 'linear-gradient(135deg,#00ff88,#00d4ff)', 
                       color: '#003320',
-                      boxShadow: '0 4px 12px rgba(0,200,83,0.4), inset 0 1px 0 rgba(255,255,255,0.3)'
+                      boxShadow: '0 4px 12px rgba(0,255,136,0.4), inset 0 1px 0 rgba(255,255,255,0.3)'
                     }}
                   >
                     {user?.profilePhoto ? (
@@ -369,21 +369,21 @@ const UnifiedDashboardMobile = () => {
                   onClick={() => setShowMenu(false)}
                   className="flex items-center gap-4 p-4 rounded-xl text-white transition-all relative overflow-hidden group"
                   style={{ 
-                    background: 'linear-gradient(135deg, rgba(0,200,83,0.15), rgba(0,255,136,0.1))',
-                    border: '2px solid rgba(0,200,83,0.3)',
-                    boxShadow: '0 2px 10px rgba(0,200,83,0.1)'
+                    background: 'linear-gradient(135deg, rgba(0,255,136,0.15), rgba(0,255,136,0.1))',
+                    border: '2px solid rgba(0,255,136,0.3)',
+                    boxShadow: '0 2px 10px rgba(0,255,136,0.1)'
                   }}
                 >
                   <div 
                     className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                    style={{ background: 'rgba(0,200,83,0.1)' }}
+                    style={{ background: 'rgba(0,255,136,0.1)' }}
                   />
                   <div 
                     className="w-12 h-12 rounded-xl flex items-center justify-center relative z-10 flex-shrink-0"
                     style={{ 
-                      background: 'linear-gradient(135deg, rgba(0,200,83,0.3), rgba(0,255,136,0.2))',
-                      border: '1px solid rgba(0,200,83,0.4)',
-                      boxShadow: '0 2px 8px rgba(0,200,83,0.3)'
+                      background: 'linear-gradient(135deg, rgba(0,255,136,0.3), rgba(0,255,136,0.2))',
+                      border: '1px solid rgba(0,255,136,0.4)',
+                      boxShadow: '0 2px 8px rgba(0,255,136,0.3)'
                     }}
                   >
                     <UserIcon className="w-6 h-6 text-green-300" />
@@ -465,7 +465,7 @@ const UnifiedDashboardMobile = () => {
                   <div 
                     className="w-12 h-12 rounded-xl flex items-center justify-center relative z-10 flex-shrink-0"
                     style={{ 
-                      background: 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,200,83,0.12))',
+                      background: 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,255,136,0.12))',
                       border: '1px solid rgba(0,255,136,0.3)',
                       boxShadow: '0 2px 8px rgba(0,255,136,0.2)'
                     }}
@@ -493,7 +493,7 @@ const UnifiedDashboardMobile = () => {
                   <div 
                     className="w-12 h-12 rounded-xl flex items-center justify-center relative z-10 flex-shrink-0"
                     style={{ 
-                      background: 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,200,83,0.12))',
+                      background: 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,255,136,0.12))',
                       border: '1px solid rgba(0,255,136,0.3)',
                       boxShadow: '0 2px 8px rgba(0,255,136,0.2)'
                     }}
@@ -538,10 +538,10 @@ const UnifiedDashboardMobile = () => {
         <div
           className="rounded-2xl p-5 mb-6 relative overflow-hidden"
           style={{
-            background: 'linear-gradient(135deg, rgba(0,200,83,0.15) 0%, rgba(99,102,241,0.15) 100%)',
-            border: '2px solid rgba(0,200,83,0.3)',
+            background: 'linear-gradient(135deg, rgba(0,255,136,0.15) 0%, rgba(99,102,241,0.15) 100%)',
+            border: '2px solid rgba(0,255,136,0.3)',
             backdropFilter: 'blur(20px)',
-            boxShadow: '0 8px 32px rgba(0,200,83,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
+            boxShadow: '0 8px 32px rgba(0,255,136,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
             animation: 'fadeIn 0.5s ease-out both'
           }}
         >
@@ -588,10 +588,10 @@ const UnifiedDashboardMobile = () => {
         <div 
           className="rounded-2xl p-5 mb-6 relative overflow-hidden"
           style={{
-            background: 'linear-gradient(135deg, rgba(0,200,83,0.15) 0%, rgba(99,102,241,0.15) 100%)',
-            border: '2px solid rgba(0,200,83,0.3)',
+            background: 'linear-gradient(135deg, rgba(0,255,136,0.15) 0%, rgba(99,102,241,0.15) 100%)',
+            border: '2px solid rgba(0,255,136,0.3)',
             backdropFilter: 'blur(20px)',
-            boxShadow: '0 8px 32px rgba(0,200,83,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
+            boxShadow: '0 8px 32px rgba(0,255,136,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
             animation: 'fadeIn 0.8s ease-out 0.2s both'
           }}
         >
@@ -617,15 +617,15 @@ const UnifiedDashboardMobile = () => {
               onClick={() => user?.profilePhoto && setShowPhotoViewer(true)}
               className="w-24 h-24 rounded-full flex items-center justify-center font-bold text-3xl mb-3 relative transition-all hover:scale-105 cursor-pointer group"
               style={{ 
-                background: 'linear-gradient(135deg,#00c853,#00ff88)', 
+                background: 'linear-gradient(135deg,#00ff88,#00d4ff)', 
                 color: '#003320',
-                boxShadow: '0 8px 25px rgba(0,200,83,0.5), 0 0 40px rgba(0,200,83,0.3), inset 0 2px 0 rgba(255,255,255,0.3)'
+                boxShadow: '0 8px 25px rgba(0,255,136,0.5), 0 0 40px rgba(0,255,136,0.3), inset 0 2px 0 rgba(255,255,255,0.3)'
               }}
             >
               <div 
                 className="absolute inset-0 rounded-full blur-xl opacity-60 pointer-events-none"
                 style={{ 
-                  background: 'radial-gradient(circle, rgba(0,200,83,0.8) 0%, transparent 70%)',
+                  background: 'radial-gradient(circle, rgba(0,255,136,0.8) 0%, transparent 70%)',
                   animation: 'glow 3s ease-in-out infinite'
                 }}
               />
@@ -657,7 +657,7 @@ const UnifiedDashboardMobile = () => {
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
                 textShadow: 'none',
-                filter: 'drop-shadow(0 2px 10px rgba(0,200,83,0.3))'
+                filter: 'drop-shadow(0 2px 10px rgba(0,255,136,0.3))'
               }}
             >
               {user?.name}
@@ -676,9 +676,9 @@ const UnifiedDashboardMobile = () => {
             <div 
               className="inline-flex items-center gap-2 px-4 py-2 rounded-lg mb-3 relative overflow-hidden"
               style={{ 
-                background: 'linear-gradient(135deg, rgba(0,200,83,0.25), rgba(0,255,136,0.2))',
-                border: '2px solid rgba(0,200,83,0.5)',
-                boxShadow: '0 4px 12px rgba(0,200,83,0.4), inset 0 1px 0 rgba(255,255,255,0.2)'
+                background: 'linear-gradient(135deg, rgba(0,255,136,0.25), rgba(0,255,136,0.2))',
+                border: '2px solid rgba(0,255,136,0.5)',
+                boxShadow: '0 4px 12px rgba(0,255,136,0.4), inset 0 1px 0 rgba(255,255,255,0.2)'
               }}
             >
               <div 
@@ -695,7 +695,7 @@ const UnifiedDashboardMobile = () => {
                   className="text-lg font-mono font-black tracking-wider"
                   style={{ 
                     color: '#00ff88',
-                    textShadow: '0 0 15px rgba(0,200,83,0.6)'
+                    textShadow: '0 0 15px rgba(0,255,136,0.6)'
                   }}
                 >
                   {matchifyCode || userProfile?.matchifyCode || user?.matchifyCode || 'Loading...'}
@@ -710,8 +710,8 @@ const UnifiedDashboardMobile = () => {
                   }}
                   className="p-2 rounded-lg transition-all relative z-10"
                   style={{ 
-                    background: 'rgba(0,200,83,0.3)',
-                    border: '1px solid rgba(0,200,83,0.6)'
+                    background: 'rgba(0,255,136,0.3)',
+                    border: '1px solid rgba(0,255,136,0.6)'
                   }}
                   title="Copy Matchify ID"
                 >
@@ -773,9 +773,9 @@ const UnifiedDashboardMobile = () => {
               <div 
                 className="p-4 rounded-xl relative overflow-hidden"
                 style={{ 
-                  background: 'linear-gradient(135deg, rgba(0,200,83,0.2), rgba(0,255,136,0.15))',
-                  border: '2px solid rgba(0,200,83,0.4)',
-                  boxShadow: '0 4px 15px rgba(0,200,83,0.3), inset 0 1px 0 rgba(255,255,255,0.1)'
+                  background: 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,255,136,0.15))',
+                  border: '2px solid rgba(0,255,136,0.4)',
+                  boxShadow: '0 4px 15px rgba(0,255,136,0.3), inset 0 1px 0 rgba(255,255,255,0.1)'
                 }}
               >
                 <div 
@@ -793,7 +793,7 @@ const UnifiedDashboardMobile = () => {
                       className="text-2xl font-mono font-black tracking-wider"
                       style={{ 
                         color: '#00ff88',
-                        textShadow: '0 0 20px rgba(0,200,83,0.5)'
+                        textShadow: '0 0 20px rgba(0,255,136,0.5)'
                       }}
                     >
                       {matchifyCode}
@@ -809,8 +809,8 @@ const UnifiedDashboardMobile = () => {
                     }}
                     className="p-3 rounded-lg transition-all"
                     style={{ 
-                      background: 'rgba(0,200,83,0.3)',
-                      border: '1px solid rgba(0,200,83,0.5)'
+                      background: 'rgba(0,255,136,0.3)',
+                      border: '1px solid rgba(0,255,136,0.5)'
                     }}
                   >
                     <svg className="w-6 h-6 text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -827,15 +827,15 @@ const UnifiedDashboardMobile = () => {
             to="/profile"
             className="flex items-center justify-center gap-2 w-full py-3 rounded-xl font-semibold text-sm transition-all relative overflow-hidden group z-10"
             style={{ 
-              background: 'linear-gradient(135deg, rgba(0,200,83,0.2), rgba(0,255,136,0.15))', 
-              border: '2px solid rgba(0,200,83,0.4)',
+              background: 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,255,136,0.15))', 
+              border: '2px solid rgba(0,255,136,0.4)',
               color: '#00ff88',
-              boxShadow: '0 4px 15px rgba(0,200,83,0.2)'
+              boxShadow: '0 4px 15px rgba(0,255,136,0.2)'
             }}
           >
             <div 
               className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
-              style={{ background: 'rgba(0,200,83,0.1)' }}
+              style={{ background: 'rgba(0,255,136,0.1)' }}
             />
             <UserIcon className="w-5 h-5 relative z-10" />
             <span className="relative z-10">Edit Profile</span>
@@ -847,10 +847,10 @@ const UnifiedDashboardMobile = () => {
           <div 
             className="rounded-2xl p-5 mb-6 relative overflow-hidden"
             style={{
-              background: 'linear-gradient(135deg, rgba(0,200,83,0.15) 0%, rgba(0,255,136,0.1) 100%)',
-              border: '2px solid rgba(0,200,83,0.3)',
+              background: 'linear-gradient(135deg, rgba(0,255,136,0.15) 0%, rgba(0,255,136,0.1) 100%)',
+              border: '2px solid rgba(0,255,136,0.3)',
               backdropFilter: 'blur(20px)',
-              boxShadow: '0 8px 32px rgba(0,200,83,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
+              boxShadow: '0 8px 32px rgba(0,255,136,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
               animation: 'slideUp 0.8s ease-out 0.4s both'
             }}
           >
@@ -858,7 +858,7 @@ const UnifiedDashboardMobile = () => {
             <div 
               className="absolute bottom-0 left-0 w-48 h-48 rounded-full blur-3xl opacity-20"
               style={{ 
-                background: 'radial-gradient(circle, rgba(0,200,83,0.8), transparent)',
+                background: 'radial-gradient(circle, rgba(0,255,136,0.8), transparent)',
                 animation: 'glow 4s ease-in-out infinite'
               }}
             />
@@ -868,9 +868,9 @@ const UnifiedDashboardMobile = () => {
                 <div 
                   className="w-10 h-10 rounded-xl flex items-center justify-center"
                   style={{ 
-                    background: 'linear-gradient(135deg, rgba(0,200,83,0.3), rgba(0,255,136,0.2))',
-                    border: '1px solid rgba(0,200,83,0.4)',
-                    boxShadow: '0 4px 12px rgba(0,200,83,0.3)'
+                    background: 'linear-gradient(135deg, rgba(0,255,136,0.3), rgba(0,255,136,0.2))',
+                    border: '1px solid rgba(0,255,136,0.4)',
+                    boxShadow: '0 4px 12px rgba(0,255,136,0.3)'
                   }}
                 >
                   <span className="text-xl">🏸</span>
@@ -979,7 +979,7 @@ const UnifiedDashboardMobile = () => {
                   />
                   <div
                     className="inline-flex items-center justify-center w-11 h-11 rounded-xl mb-3 relative z-10"
-                    style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', boxShadow: '0 4px 12px rgba(0,255,136,0.25)' }}
+                    style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', boxShadow: '0 4px 12px rgba(0,255,136,0.25)' }}
                   >
                     <TrophyIcon className="w-6 h-6 text-white" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
                   </div>
@@ -990,7 +990,7 @@ const UnifiedDashboardMobile = () => {
                 <div
                   className="p-4 rounded-xl relative overflow-hidden"
                   style={{
-                    background: 'linear-gradient(135deg, rgba(0,255,136,0.1), rgba(0,200,83,0.1))',
+                    background: 'linear-gradient(135deg, rgba(0,255,136,0.1), rgba(0,255,136,0.1))',
                     border: '2px solid rgba(0,255,136,0.3)',
                     boxShadow: '0 4px 15px rgba(0,255,136,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
                     animation: 'scaleIn 0.5s ease-out 0.6s both'
@@ -1007,7 +1007,7 @@ const UnifiedDashboardMobile = () => {
                   />
                   <div
                     className="inline-flex items-center justify-center w-11 h-11 rounded-xl mb-3 relative z-10"
-                    style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', boxShadow: '0 4px 12px rgba(0,255,136,0.25)' }}
+                    style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', boxShadow: '0 4px 12px rgba(0,255,136,0.25)' }}
                   >
                     <UserIcon className="w-6 h-6 text-white" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
                   </div>
@@ -1102,7 +1102,7 @@ const UnifiedDashboardMobile = () => {
                   />
                   <div
                     className="inline-flex items-center justify-center w-11 h-11 rounded-xl mb-3 relative z-10"
-                    style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', boxShadow: '0 4px 12px rgba(0,255,136,0.25)' }}
+                    style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', boxShadow: '0 4px 12px rgba(0,255,136,0.25)' }}
                   >
                     <FireIcon className="w-6 h-6 text-white" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
                   </div>
@@ -1113,7 +1113,7 @@ const UnifiedDashboardMobile = () => {
                 <div
                   className="p-4 rounded-xl relative overflow-hidden"
                   style={{
-                    background: 'linear-gradient(135deg, rgba(0,255,136,0.1), rgba(0,200,83,0.1))',
+                    background: 'linear-gradient(135deg, rgba(0,255,136,0.1), rgba(0,255,136,0.1))',
                     border: '2px solid rgba(0,255,136,0.3)',
                     boxShadow: '0 4px 15px rgba(0,255,136,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
                     animation: 'scaleIn 0.5s ease-out 0.6s both'
@@ -1130,7 +1130,7 @@ const UnifiedDashboardMobile = () => {
                   />
                   <div
                     className="inline-flex items-center justify-center w-11 h-11 rounded-xl mb-3 relative z-10"
-                    style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', boxShadow: '0 4px 12px rgba(0,255,136,0.25)' }}
+                    style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', boxShadow: '0 4px 12px rgba(0,255,136,0.25)' }}
                   >
                     <TrophyIcon className="w-6 h-6 text-white" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
                   </div>
@@ -1146,7 +1146,7 @@ const UnifiedDashboardMobile = () => {
         <div 
           className="rounded-2xl p-5 mb-6 relative overflow-hidden"
           style={{
-            background: 'linear-gradient(135deg, rgba(0,255,136,0.1) 0%, rgba(0,200,83,0.1) 100%)',
+            background: 'linear-gradient(135deg, rgba(0,255,136,0.1) 0%, rgba(0,255,136,0.1) 100%)',
             border: '2px solid rgba(0,255,136,0.2)',
             backdropFilter: 'blur(20px)',
             boxShadow: '0 8px 32px rgba(99,102,241,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
@@ -1167,7 +1167,7 @@ const UnifiedDashboardMobile = () => {
               <div 
                 className="w-10 h-10 rounded-xl flex items-center justify-center"
                 style={{ 
-                  background: 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,200,83,0.12))',
+                  background: 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,255,136,0.12))',
                   border: '1px solid rgba(0,255,136,0.3)',
                   boxShadow: '0 4px 12px rgba(0,255,136,0.2)'
                 }}
@@ -1260,7 +1260,7 @@ const UnifiedDashboardMobile = () => {
               <div 
                 className="w-10 h-10 rounded-xl flex items-center justify-center"
                 style={{ 
-                  background: 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,200,83,0.12))',
+                  background: 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,255,136,0.12))',
                   border: '1px solid rgba(0,255,136,0.3)',
                   boxShadow: '0 4px 12px rgba(0,255,136,0.2)'
                 }}
@@ -1304,7 +1304,7 @@ const UnifiedDashboardMobile = () => {
                 <div 
                   className="text-5xl mb-3 inline-block"
                   style={{ 
-                    filter: 'drop-shadow(0 0 20px rgba(0,200,83,0.6))',
+                    filter: 'drop-shadow(0 0 20px rgba(0,255,136,0.6))',
                     animation: 'float 3s ease-in-out infinite'
                   }}
                 >
@@ -1316,10 +1316,10 @@ const UnifiedDashboardMobile = () => {
                   to="/tournaments"
                   className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm relative overflow-hidden group"
                   style={{ 
-                    background: 'linear-gradient(135deg, #00c853 0%, #00ff88 50%, #00c853 100%)',
+                    background: 'linear-gradient(135deg, #00ff88 0%, #00d4ff 50%, #00ff88 100%)',
                     backgroundSize: '200% auto',
                     color: '#003320',
-                    boxShadow: '0 8px 25px rgba(0,200,83,0.4), 0 0 40px rgba(0,200,83,0.2), inset 0 1px 0 rgba(255,255,255,0.3)',
+                    boxShadow: '0 8px 25px rgba(0,255,136,0.4), 0 0 40px rgba(0,255,136,0.2), inset 0 1px 0 rgba(255,255,255,0.3)',
                     animation: 'shimmer 3s linear infinite'
                   }}
                 >
@@ -1375,7 +1375,7 @@ const UnifiedDashboardMobile = () => {
                         }`}
                         style={{
                           background: reg.status === 'confirmed' 
-                            ? 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,200,83,0.12))'
+                            ? 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,255,136,0.12))'
                             : reg.status === 'pending'
                             ? 'linear-gradient(135deg, rgba(245,158,11,0.3), rgba(251,146,60,0.2))'
                             : reg.status === 'rejected'

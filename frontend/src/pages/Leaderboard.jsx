@@ -106,7 +106,7 @@ export default function Leaderboard() {
     if (rank === 2) return 'bg-gradient-to-r from-gray-400 to-gray-500 text-white shadow-lg shadow-gray-400/50';
     if (rank === 3) return 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/50';
     if (rank <= 10) return 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-md';
-    return 'bg-slate-700 text-gray-200 border border-slate-600';
+    return 'text-gray-200 border border-gray-600 bg-slate-800';
   };
 
   const needsLogin = (scope === 'city' && !userCity) || (scope === 'state' && !userState);
@@ -196,7 +196,7 @@ export default function Leaderboard() {
                 className="px-3 py-2 rounded-xl font-bold text-xs transition-all flex-shrink-0"
                 style={
                   scope === key
-                    ? { background: 'linear-gradient(135deg,#00c853,#059669)', color: '#fff', boxShadow: '0 0 14px rgba(0,255,136,0.25)' }
+                    ? { background: 'linear-gradient(135deg,#00ff88,#00d4ff)', color: '#fff', boxShadow: '0 0 14px rgba(0,255,136,0.25)' }
                     : { background: 'rgba(255,255,255,0.06)', color: B.sub, border: '1px solid rgba(255,255,255,0.1)' }
                 }
               >
@@ -224,7 +224,7 @@ export default function Leaderboard() {
               <div className="flex items-center gap-3">
                 <div
                   className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
-                  style={{ background: 'linear-gradient(135deg,#10b981,#059669)' }}
+                  style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)' }}
                 >
                   {myRanks.profilePhoto ? (
                     <img src={myRanks.profilePhoto} alt={myRanks.name} className="w-full h-full rounded-full object-cover" />
@@ -368,8 +368,8 @@ export default function Leaderboard() {
                       <td className="px-3 py-3">
                         <div className="flex items-center gap-2.5">
                           <div
-                            className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ring-2 ring-emerald-400/25"
-                            style={{ background: 'linear-gradient(135deg,#10b981,#059669)' }}
+                            className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                            style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', boxShadow: '0 0 0 2px rgba(0,255,136,0.25)' }}
                           >
                             {player.profilePhoto ? (
                               <img src={player.profilePhoto} alt={player.name} className="w-full h-full rounded-full object-cover" />
@@ -407,7 +407,7 @@ export default function Leaderboard() {
             <button
               onClick={() => setLimit(limit + 50)}
               className="px-8 py-3 rounded-xl font-bold transition-all"
-              style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#003320', boxShadow: '0 0 20px rgba(0,255,136,0.3)' }}
+              style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', color: '#003320', boxShadow: '0 0 20px rgba(0,255,136,0.3)' }}
             >
               Load More Players
             </button>

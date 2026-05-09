@@ -91,7 +91,7 @@ const MyPoints = () => {
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
           <div className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg"
-            style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', boxShadow: '0 0 20px rgba(0,255,136,0.25)' }}>
+            style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', boxShadow: '0 0 20px rgba(0,255,136,0.25)' }}>
             <Award className="w-7 h-7" style={{ color: '#003320' }} />
           </div>
           <div>

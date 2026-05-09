@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
-import { Trophy, Medal, Award, TrendingUp, Users, Target, Zap, Crown, Star, ArrowLeft } from 'lucide-react';
+import { Trophy, Medal, Award, Target, Crown, Star, ArrowLeft, MapPin, Globe, Building } from 'lucide-react';
 
 // Pre-generated particle data — deterministic, no Math.random in render
 const LB_PARTICLES = Array.from({ length: 15 }, (_, i) => ({
@@ -9,13 +9,23 @@ const LB_PARTICLES = Array.from({ length: 15 }, (_, i) => ({
   h: (i * 11 + 1) % 3 + 1,
   x: (i * 37 + 11) % 97,
   y: (i * 53 + 7) % 91,
-  c: ["#00ff88", "#f59e0b", "#00d4ff"][i % 3],
+  c: ['#00ff88', '#f59e0b', '#00d4ff'][i % 3],
   o: ((i * 13) % 50) / 100 + 0.2,
   dur: (i * 7) % 8 + 4,
   delay: (i * 3) % 4,
   glow: (i * 11) % 15 + 5,
 }));
 
+const B = {
+  bg: '#07071a',
+  card: 'rgba(255,255,255,0.04)',
+  border: 'rgba(255,255,255,0.08)',
+  green: '#00ff88',
+  cyan: '#00d4ff',
+  purple: '#a855f7',
+  sub: 'rgba(255,255,255,0.6)',
+  dim: 'rgba(255,255,255,0.45)',
+};
 
 export default function Leaderboard() {
   const navigate = useNavigate();
@@ -24,7 +34,7 @@ export default function Leaderboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [limit, setLimit] = useState(100);
-  const [scope, setScope] = useState('country'); // 'city', 'state', or 'country'
+  const [scope, setScope] = useState('country');
   const [userCity, setUserCity] = useState(null);
   const [userState, setUserState] = useState(null);
 
@@ -36,20 +46,19 @@ export default function Leaderboard() {
     fetchLeaderboard();
   }, [limit, scope]);
 
+  // Re-fetch when city/state loads (if tab already selected)
+  useEffect(() => {
+    if ((scope === 'city' && userCity) || (scope === 'state' && userState)) {
+      fetchLeaderboard();
+    }
+  }, [userCity, userState]);
+
   const fetchLeaderboard = async () => {
     try {
       setLoading(true);
-      const params = new URLSearchParams({
-        limit: limit.toString(),
-        scope
-      });
-      
-      if (scope === 'city' && userCity) {
-        params.append('city', userCity);
-      } else if (scope === 'state' && userState) {
-        params.append('state', userState);
-      }
-      
+      const params = new URLSearchParams({ limit: limit.toString(), scope });
+      if (scope === 'city' && userCity) params.append('city', userCity);
+      else if (scope === 'state' && userState) params.append('state', userState);
       const response = await api.get(`/leaderboard?${params.toString()}`);
       setLeaderboard(response.data.leaderboard);
     } catch (err) {
@@ -74,6 +83,7 @@ export default function Leaderboard() {
   const getScopeLabel = () => {
     if (scope === 'city' && userCity) return userCity;
     if (scope === 'state' && userState) return userState;
+    if (scope === 'city' || scope === 'state') return 'Login to see local rankings';
     return 'India';
   };
 
@@ -96,42 +106,41 @@ export default function Leaderboard() {
     if (rank === 2) return 'bg-gradient-to-r from-gray-400 to-gray-500 text-white shadow-lg shadow-gray-400/50';
     if (rank === 3) return 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/50';
     if (rank <= 10) return 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-md';
-    return 'bg-slate-700 text-gray-300 border border-slate-600';
+    return 'bg-slate-700 text-gray-200 border border-slate-600';
   };
+
+  const needsLogin = (scope === 'city' && !userCity) || (scope === 'state' && !userState);
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#07071a' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: B.bg }}>
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: 'rgba(0,255,136,0.3)', borderTopColor: 'transparent' }}></div>
-          <p className="mt-4 font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>Loading leaderboard...</p>
+          <div
+            className="w-16 h-16 border-4 rounded-full animate-spin mx-auto"
+            style={{ borderColor: 'rgba(0,255,136,0.3)', borderTopColor: 'transparent' }}
+          />
+          <p className="mt-4 font-medium" style={{ color: B.sub }}>Loading leaderboard...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen" style={{ background: '#07071a' }}>
-      {/* Animated Background - Enhanced with More Elements */}
+    <div className="min-h-screen" style={{ background: B.bg }}>
+      {/* Background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        {/* Large Glowing Orbs */}
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full blur-3xl opacity-[0.08]" style={{ background: '#00ff88', animation: 'glow 4s ease-in-out infinite' }}></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full blur-3xl opacity-[0.06]" style={{ background: '#00d4ff', animation: 'glow 5s ease-in-out infinite reverse' }}></div>
-        <div className="absolute top-1/2 right-1/3 w-80 h-80 rounded-full blur-3xl opacity-[0.05]" style={{ background: '#a855f7', animation: 'glow 6s ease-in-out infinite' }}></div>
-        
-        {/* Floating Particles */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full blur-3xl opacity-[0.08]" style={{ background: B.green }} />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full blur-3xl opacity-[0.06]" style={{ background: B.cyan }} />
+        <div className="absolute top-1/2 right-1/3 w-80 h-80 rounded-full blur-3xl opacity-[0.05]" style={{ background: B.purple }} />
         {LB_PARTICLES.map((p, i) => (
           <div
             key={i}
             className="absolute rounded-full"
             style={{
-              width: `${p.w}px`,
-              height: `${p.h}px`,
-              left: `${p.x}%`,
-              top: `${p.y}%`,
-              background: p.c,
-              opacity: p.o,
-              animation: `float ${p.dur}s ease-in-out infinite`,
+              width: `${p.w}px`, height: `${p.h}px`,
+              left: `${p.x}%`, top: `${p.y}%`,
+              background: p.c, opacity: p.o,
+              animation: `lbfloat ${p.dur}s ease-in-out infinite`,
               animationDelay: `${p.delay}s`,
               boxShadow: `0 0 ${p.glow}px ${p.c}`,
             }}
@@ -140,84 +149,83 @@ export default function Leaderboard() {
       </div>
 
       <style>{`
-        @keyframes float {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          25% { transform: translate(20px, -20px) scale(1.1); }
-          50% { transform: translate(-15px, 15px) scale(0.9); }
-          75% { transform: translate(15px, 10px) scale(1.05); }
-        }
-        @keyframes glow {
-          0%, 100% { opacity: 0.08; filter: brightness(1); }
-          50% { opacity: 0.15; filter: brightness(1.5); }
+        @keyframes lbfloat {
+          0%, 100% { transform: translate(0,0) scale(1); }
+          25% { transform: translate(20px,-20px) scale(1.1); }
+          50% { transform: translate(-15px,15px) scale(0.9); }
+          75% { transform: translate(15px,10px) scale(1.05); }
         }
       `}</style>
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Back Button */}
-        <button
-          onClick={() => navigate(-1)}
-          className="flex items-center gap-2 mb-6 transition-all relative overflow-hidden group"
-        >
-          <div 
-            className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-            style={{ background: 'rgba(255,255,255,0.05)' }}
-          />
-          <ArrowLeft className="w-5 h-5 text-emerald-400 relative z-10" />
-          <span className="text-sm font-semibold text-gray-300 relative z-10">Back</span>
+      <div className="relative max-w-2xl mx-auto px-4 py-6">
+        {/* Back */}
+        <button onClick={() => navigate(-1)} className="flex items-center gap-2 mb-6">
+          <ArrowLeft className="w-5 h-5" style={{ color: B.green }} />
+          <span className="text-sm font-semibold" style={{ color: B.sub }}>Back</span>
         </button>
 
-        {/* Header - MOBILE PERFECT */}
-        <div className="text-center mb-4">
+        {/* Header */}
+        <div className="text-center mb-5">
           <div className="inline-flex items-center gap-2 mb-2">
-            <Trophy className="w-6 h-6 text-yellow-400 drop-shadow-lg" style={{ filter: 'drop-shadow(0 0 8px rgba(251, 191, 36, 0.6))' }} />
-            <h1 
+            <Trophy className="w-6 h-6 text-yellow-400" style={{ filter: 'drop-shadow(0 0 8px rgba(251,191,36,0.6))' }} />
+            <h1
               className="text-2xl font-black"
               style={{
-                background: 'linear-gradient(135deg, #00ff88, #00d4ff, #a855f7)',
+                background: 'linear-gradient(135deg,#00ff88,#00d4ff,#a855f7)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
-                filter: 'drop-shadow(0 0 20px rgba(0, 255, 136, 0.3))'
               }}
             >
               Leaderboard
             </h1>
-            <Trophy className="w-6 h-6 text-yellow-400 drop-shadow-lg" style={{ filter: 'drop-shadow(0 0 8px rgba(251, 191, 36, 0.6))' }} />
+            <Trophy className="w-6 h-6 text-yellow-400" style={{ filter: 'drop-shadow(0 0 8px rgba(251,191,36,0.6))' }} />
           </div>
-          <p className="text-xs text-gray-400">Top players ranked by tournament points</p>
+          <p className="text-xs mb-4" style={{ color: B.sub }}>Top players ranked by tournament points</p>
 
-          {/* Geographical Filter Tabs - COMPACT */}
-          <div className="mt-3 flex flex-wrap justify-center gap-2">
+          {/* Scope Tabs */}
+          <div className="flex justify-center gap-2 mb-2">
             {[
-              { key: 'city', label: `🏙️ City${userCity ? ` (${userCity})` : ''}` },
-              { key: 'state', label: `🗺️ State${userState ? ` (${userState})` : ''}` },
-              { key: 'country', label: '🇮🇳 Country' },
-            ].map(({ key, label }) => (
+              { key: 'city', label: '🏙️ City', sub: userCity, icon: <Building className="w-3 h-3" /> },
+              { key: 'state', label: '🗺️ State', sub: userState, icon: <MapPin className="w-3 h-3" /> },
+              { key: 'country', label: '🇮🇳 Country', sub: 'India', icon: <Globe className="w-3 h-3" /> },
+            ].map(({ key, label, sub }) => (
               <button
                 key={key}
                 onClick={() => setScope(key)}
-                className="px-3 py-2 rounded-xl font-bold transition-all text-xs"
-                style={scope === key
-                  ? { background: 'linear-gradient(135deg,#10b981,#059669)', color: '#ffffff', boxShadow: '0 0 12px rgba(16,185,129,0.3)' }
-                  : { background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.08)' }
+                className="px-3 py-2 rounded-xl font-bold text-xs transition-all flex-shrink-0"
+                style={
+                  scope === key
+                    ? { background: 'linear-gradient(135deg,#00c853,#059669)', color: '#fff', boxShadow: '0 0 14px rgba(0,255,136,0.25)' }
+                    : { background: 'rgba(255,255,255,0.06)', color: B.sub, border: '1px solid rgba(255,255,255,0.1)' }
                 }
-              >{label}</button>
+              >
+                {label}
+                {sub && scope === key && (
+                  <span className="block text-[10px] font-normal opacity-80 truncate max-w-[80px]">{sub}</span>
+                )}
+              </button>
             ))}
           </div>
 
-          <div className="mt-2">
-            <p className="text-xs text-gray-400">
-              Showing: <span className="font-bold text-emerald-400">{getScopeLabel()}</span>
-            </p>
-          </div>
+          <p className="text-xs" style={{ color: B.dim }}>
+            Showing:{' '}
+            <span className="font-bold" style={{ color: B.green }}>{getScopeLabel()}</span>
+          </p>
         </div>
 
-        {/* My Rank Card - COMPACT */}
+        {/* My Rank */}
         {myRanks && (
-          <div className="mb-4 rounded-xl p-3 border" style={{ background: 'rgba(13,26,42,0.6)', borderColor: 'rgba(0,255,136,0.15)', backdropFilter: 'blur(10px)' }}>
+          <div
+            className="mb-4 rounded-xl p-3 border"
+            style={{ background: 'rgba(0,255,136,0.05)', borderColor: 'rgba(0,255,136,0.15)' }}
+          >
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#10b981,#059669)' }}>
+                <div
+                  className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
+                  style={{ background: 'linear-gradient(135deg,#10b981,#059669)' }}
+                >
                   {myRanks.profilePhoto ? (
                     <img src={myRanks.profilePhoto} alt={myRanks.name} className="w-full h-full rounded-full object-cover" />
                   ) : (
@@ -225,29 +233,46 @@ export default function Leaderboard() {
                   )}
                 </div>
                 <div>
-                  <p className="text-xs font-semibold text-emerald-400">Your Ranks</p>
+                  <p className="text-xs font-semibold" style={{ color: B.green }}>Your Rank</p>
                   <h3 className="text-base font-bold text-white">{myRanks.name}</h3>
-                  <p className="text-xs text-gray-400">
-                    {myRanks.tournamentsPlayed} tournaments • {myRanks.matchesWon}W-{myRanks.matchesLost}L
+                  <p className="text-xs" style={{ color: B.sub }}>
+                    {myRanks.tournamentsPlayed} tournaments · {myRanks.matchesWon}W-{myRanks.matchesLost}L
                   </p>
                 </div>
               </div>
               <div className="text-right">
-                <div className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg ${getRankBadge(getCurrentRank())}`}>
-                  {getRankIcon(getCurrentRank())}
-                  <span className="text-lg font-bold">#{getCurrentRank()}</span>
-                </div>
+                {getCurrentRank() && (
+                  <div className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg ${getRankBadge(getCurrentRank())}`}>
+                    {getRankIcon(getCurrentRank())}
+                    <span className="text-lg font-bold">#{getCurrentRank()}</span>
+                  </div>
+                )}
                 <p className="text-xl font-black text-yellow-400 mt-1">{myRanks.totalPoints} pts</p>
               </div>
             </div>
           </div>
         )}
 
-        {/* Top 3 Podium - MOBILE PERFECT */}
-        {leaderboard.length >= 3 && (
-          <div className="mb-4">
-            <div className="flex items-end justify-center gap-2" style={{ height: '140px' }}>
-              {/* 2nd Place */}
+        {/* Login nudge for city/state when not logged in */}
+        {needsLogin && !loading && (
+          <div
+            className="mb-4 rounded-xl p-4 border text-center"
+            style={{ background: 'rgba(255,255,255,0.03)', borderColor: B.border }}
+          >
+            <p className="text-sm font-semibold text-white mb-1">
+              {scope === 'city' ? '🏙️ City Rankings' : '🗺️ State Rankings'}
+            </p>
+            <p className="text-xs" style={{ color: B.sub }}>
+              Login with your profile to see rankings in your {scope}.
+            </p>
+          </div>
+        )}
+
+        {/* Podium — top 3 */}
+        {!needsLogin && leaderboard.length >= 3 && (
+          <div className="mb-5">
+            <div className="flex items-end justify-center gap-3" style={{ height: '148px' }}>
+              {/* 2nd */}
               <div className="flex flex-col items-center" style={{ width: '30%' }}>
                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gray-300 to-gray-500 flex items-center justify-center ring-2 ring-gray-300/50 shadow-lg mb-1 relative">
                   {leaderboard[1].profilePhoto ? (
@@ -260,11 +285,11 @@ export default function Leaderboard() {
                   </div>
                 </div>
                 <h3 className="text-xs font-bold text-white mb-0.5 truncate w-full text-center">{leaderboard[1].name.split(' ')[0]}</h3>
-                <p className="text-lg font-black text-emerald-400">{leaderboard[1].totalPoints}</p>
-                <p className="text-xs text-gray-400">points</p>
+                <p className="text-lg font-black" style={{ color: B.green }}>{leaderboard[1].totalPoints}</p>
+                <p className="text-xs" style={{ color: B.sub }}>pts</p>
               </div>
 
-              {/* 1st Place */}
+              {/* 1st */}
               <div className="flex flex-col items-center" style={{ width: '34%' }}>
                 <Crown className="w-6 h-6 text-yellow-400 mb-1" />
                 <div className="w-16 h-16 rounded-full bg-gradient-to-br from-yellow-400 to-amber-500 flex items-center justify-center ring-2 ring-yellow-400/60 shadow-xl mb-1 relative">
@@ -279,10 +304,10 @@ export default function Leaderboard() {
                 </div>
                 <h3 className="text-sm font-bold text-white mb-0.5 truncate w-full text-center">{leaderboard[0].name.split(' ')[0]}</h3>
                 <p className="text-2xl font-black text-yellow-400">{leaderboard[0].totalPoints}</p>
-                <p className="text-xs text-gray-400">points</p>
+                <p className="text-xs" style={{ color: B.sub }}>pts</p>
               </div>
 
-              {/* 3rd Place */}
+              {/* 3rd */}
               <div className="flex flex-col items-center" style={{ width: '30%' }}>
                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-orange-700 flex items-center justify-center ring-2 ring-orange-500/50 shadow-lg mb-1 relative">
                   {leaderboard[2].profilePhoto ? (
@@ -295,75 +320,90 @@ export default function Leaderboard() {
                   </div>
                 </div>
                 <h3 className="text-xs font-bold text-white mb-0.5 truncate w-full text-center">{leaderboard[2].name.split(' ')[0]}</h3>
-                <p className="text-lg font-black text-emerald-400">{leaderboard[2].totalPoints}</p>
-                <p className="text-xs text-gray-400">points</p>
+                <p className="text-lg font-black" style={{ color: B.green }}>{leaderboard[2].totalPoints}</p>
+                <p className="text-xs" style={{ color: B.sub }}>pts</p>
               </div>
             </div>
           </div>
         )}
 
-        {/* Full Leaderboard Table - Duolingo Style (Clean & Readable) */}
-        <div className="rounded-2xl overflow-hidden border" style={{ background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.08)' }}>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b" style={{ background: 'rgba(0,255,136,0.08)', borderColor: 'rgba(255,255,255,0.08)' }}>
-                  <th className="px-3 sm:px-4 py-4 text-left text-sm font-bold uppercase tracking-wider text-emerald-400">Rank</th>
-                  <th className="px-3 sm:px-4 py-4 text-left text-sm font-bold uppercase tracking-wider text-emerald-400">Player</th>
-                  <th className="px-3 sm:px-4 py-4 text-center text-sm font-bold uppercase tracking-wider text-emerald-400">Points</th>
-                  <th className="px-3 sm:px-4 py-4 text-center text-sm font-bold uppercase tracking-wider text-emerald-400 hidden sm:table-cell">Win%</th>
-                </tr>
-              </thead>
-              <tbody>
-                {leaderboard.map((player) => (
-                  <tr
-                    key={player.id}
-                    className="border-b transition-all cursor-pointer hover:bg-white/5"
-                    style={{
-                      borderColor: 'rgba(255,255,255,0.04)',
-                      background: myRanks?.id === player.id ? 'rgba(0,255,136,0.08)' : 'transparent',
-                    }}
-                    onClick={() => navigate(`/profile/${player.id}`)}
-                  >
-                    <td className="px-3 sm:px-4 py-4">
-                      <div className={`inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl font-bold text-sm ${getRankBadge(player.rank)}`}>
-                        {getRankIcon(player.rank)}
-                      </div>
-                    </td>
-
-                    <td className="px-3 sm:px-4 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center flex-shrink-0 ring-2 ring-emerald-400/30" style={{ background: 'linear-gradient(135deg,#10b981,#059669)' }}>
-                          {player.profilePhoto ? (
-                            <img src={player.profilePhoto} alt={player.name} className="w-full h-full rounded-full object-cover" />
-                          ) : (
-                            <span className="text-base font-bold text-white">{player.name?.charAt(0)}</span>
-                          )}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="font-bold text-white text-base truncate">{player.name}</p>
-                          {player.city && <p className="text-xs text-gray-400 truncate">{player.city}</p>}
-                        </div>
-                      </div>
-                    </td>
-
-                    <td className="px-3 sm:px-4 py-4 text-center">
-                      <span className="text-xl sm:text-2xl font-black text-emerald-400">{player.totalPoints}</span>
-                    </td>
-
-                    <td className="px-3 sm:px-4 py-4 text-center hidden sm:table-cell">
-                      <span className="text-base font-bold text-cyan-400">{player.winRate}%</span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        {/* Full table */}
+        {needsLogin ? null : leaderboard.length === 0 ? (
+          <div
+            className="rounded-2xl p-8 border text-center"
+            style={{ background: B.card, borderColor: B.border }}
+          >
+            <p className="font-semibold text-white mb-1">No players yet</p>
+            <p className="text-sm" style={{ color: B.sub }}>No data for this region yet.</p>
           </div>
-        </div>
+        ) : (
+          <div className="rounded-2xl overflow-hidden border" style={{ background: 'rgba(255,255,255,0.02)', borderColor: B.border }}>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b" style={{ background: 'rgba(0,255,136,0.07)', borderColor: 'rgba(255,255,255,0.08)' }}>
+                    <th className="px-3 py-3 text-left text-xs font-bold uppercase tracking-wider" style={{ color: B.green }}>Rank</th>
+                    <th className="px-3 py-3 text-left text-xs font-bold uppercase tracking-wider" style={{ color: B.green }}>Player</th>
+                    <th className="px-3 py-3 text-center text-xs font-bold uppercase tracking-wider" style={{ color: B.green }}>Points</th>
+                    <th className="px-3 py-3 text-center text-xs font-bold uppercase tracking-wider hidden sm:table-cell" style={{ color: B.green }}>Win%</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {leaderboard.map((player) => (
+                    <tr
+                      key={player.id}
+                      className="border-b transition-all cursor-pointer hover:bg-white/5"
+                      style={{
+                        borderColor: 'rgba(255,255,255,0.04)',
+                        background: myRanks?.id === player.id ? 'rgba(0,255,136,0.07)' : 'transparent',
+                      }}
+                      onClick={() => navigate(`/profile/${player.id}`)}
+                    >
+                      <td className="px-3 py-3">
+                        <div className={`inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-xl font-bold text-sm ${getRankBadge(player.rank)}`}>
+                          {getRankIcon(player.rank)}
+                        </div>
+                      </td>
+
+                      <td className="px-3 py-3">
+                        <div className="flex items-center gap-2.5">
+                          <div
+                            className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ring-2 ring-emerald-400/25"
+                            style={{ background: 'linear-gradient(135deg,#10b981,#059669)' }}
+                          >
+                            {player.profilePhoto ? (
+                              <img src={player.profilePhoto} alt={player.name} className="w-full h-full rounded-full object-cover" />
+                            ) : (
+                              <span className="text-sm font-bold text-white">{player.name?.charAt(0)}</span>
+                            )}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="font-bold text-white text-sm truncate">{player.name}</p>
+                            {player.city && (
+                              <p className="text-xs truncate" style={{ color: B.sub }}>{player.city}</p>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+
+                      <td className="px-3 py-3 text-center">
+                        <span className="text-lg font-black" style={{ color: B.green }}>{player.totalPoints}</span>
+                      </td>
+
+                      <td className="px-3 py-3 text-center hidden sm:table-cell">
+                        <span className="text-sm font-bold" style={{ color: B.cyan }}>{player.winRate}%</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
 
         {/* Load More */}
-        {leaderboard.length >= limit && (
-          <div className="text-center mt-8">
+        {!needsLogin && leaderboard.length >= limit && (
+          <div className="text-center mt-6">
             <button
               onClick={() => setLimit(limit + 50)}
               className="px-8 py-3 rounded-xl font-bold transition-all"
@@ -374,24 +414,31 @@ export default function Leaderboard() {
           </div>
         )}
 
-        {/* Points Info */}
-        <div className="mt-10 rounded-2xl p-5 sm:p-6 border" style={{ background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.08)' }}>
-          <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+        {/* Points info */}
+        <div
+          className="mt-8 rounded-2xl p-5 border"
+          style={{ background: B.card, borderColor: B.border }}
+        >
+          <h3 className="text-base font-bold text-white mb-4 flex items-center gap-2">
             <Award className="w-5 h-5 text-yellow-400" />
             How Points Are Earned
           </h3>
           <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
             {[
-              { icon: <Crown className="w-7 h-7 text-yellow-400 mx-auto mb-1" />, pts: 10, label: 'Winner', color: '#fbbf24' },
-              { icon: <Medal className="w-7 h-7 text-gray-300 mx-auto mb-1" />, pts: 8, label: 'Runner-up', color: '#d1d5db' },
-              { icon: <Medal className="w-7 h-7 text-amber-600 mx-auto mb-1" />, pts: 6, label: 'Semi', color: '#d97706' },
-              { icon: <Award className="w-7 h-7 mx-auto mb-1" style={{ color: '#00d4ff' }} />, pts: 4, label: 'Quarter', color: '#00d4ff' },
-              { icon: <Target className="w-7 h-7 mx-auto mb-1" style={{ color: '#00ff88' }} />, pts: 2, label: 'Participant', color: '#00ff88' },
+              { icon: <Crown className="w-6 h-6 text-yellow-400 mx-auto mb-1" />, pts: 10, label: 'Winner', color: '#fbbf24' },
+              { icon: <Medal className="w-6 h-6 text-gray-300 mx-auto mb-1" />, pts: 8, label: 'Runner-up', color: '#d1d5db' },
+              { icon: <Medal className="w-6 h-6 text-amber-500 mx-auto mb-1" />, pts: 6, label: 'Semi', color: '#f59e0b' },
+              { icon: <Award className="w-6 h-6 mx-auto mb-1" style={{ color: B.cyan }} />, pts: 4, label: 'Quarter', color: B.cyan },
+              { icon: <Target className="w-6 h-6 mx-auto mb-1" style={{ color: B.green }} />, pts: 2, label: 'Played', color: B.green },
             ].map(({ icon, pts, label, color }) => (
-              <div key={label} className="text-center p-3 rounded-xl" style={{ background: 'rgba(255,255,255,0.04)' }}>
+              <div
+                key={label}
+                className="text-center p-3 rounded-xl"
+                style={{ background: 'rgba(255,255,255,0.04)' }}
+              >
                 {icon}
-                <p className="text-xl font-bold" style={{ color }}>{pts}</p>
-                <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.5)' }}>{label}</p>
+                <p className="text-lg font-bold" style={{ color }}>{pts}</p>
+                <p className="text-xs mt-0.5" style={{ color: B.sub }}>{label}</p>
               </div>
             ))}
           </div>

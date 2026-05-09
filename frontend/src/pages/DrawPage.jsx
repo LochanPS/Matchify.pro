@@ -93,6 +93,7 @@ const DrawPage = () => {
     completedMatches: 0
   });
   const [refreshing, setRefreshing] = useState(false);
+  const [bracketLoading, setBracketLoading] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [matchCompleteData, setMatchCompleteData] = useState(null);
   const [showRestartModal, setShowRestartModal] = useState(false);
@@ -215,12 +216,15 @@ const DrawPage = () => {
     try {
       setLoading(true);
       console.log('🔄 Fetching tournament data for ID:', tournamentId);
-      
-      const tournamentData = await tournamentAPI.getTournament(tournamentId);
+
+      // Parallel fetch — tournament + categories in one round trip
+      const [tournamentData, categoriesData] = await Promise.all([
+        tournamentAPI.getTournament(tournamentId),
+        tournamentAPI.getCategories(tournamentId),
+      ]);
       setTournament(tournamentData.data);
       console.log('✅ Tournament data fetched:', tournamentData.data.name);
 
-      const categoriesData = await tournamentAPI.getCategories(tournamentId);
       const cats = categoriesData.categories || [];
       setCategories(cats);
       console.log('✅ Categories fetched:', cats.length, 'categories');
@@ -264,58 +268,50 @@ const DrawPage = () => {
       categoryName: activeCategory.name
     });
 
-    setLoading(true);
+    setBracketLoading(true);
     setError(null);
 
     try {
-      // Add timestamp to force fresh data (cache busting)
+      // Parallel fetch — draw + matches in one round trip
       const timestamp = new Date().getTime();
-      const response = await api.get(`/tournaments/${tournamentId}/categories/${activeCategory.id}/draw?t=${timestamp}`, {
-        headers: {
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache'
-        }
-      });
-      
+      const [response, matchesResponse] = await Promise.all([
+        api.get(`/tournaments/${tournamentId}/categories/${activeCategory.id}/draw?t=${timestamp}`, {
+          headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }
+        }),
+        api.get(`/tournaments/${tournamentId}/categories/${activeCategory.id}/matches`).catch(() => ({ data: { matches: [] } })),
+      ]);
+
       console.log('✅ Draw API response:', response.data);
-      
+      setMatches(matchesResponse.data.matches || []);
+      console.log('✅ Matches fetched:', matchesResponse.data.matches?.length || 0);
+
       const draw = response.data.draw;
-      
+
       if (!draw) {
         console.log('⚠️ No draw data in response');
         setError(null);
         setBracket(null);
         return;
       }
-      
+
       // Parse bracketJson if it's a string
       const bracketData = draw.bracketJson || draw.bracket;
-      
+
       if (!bracketData) {
         console.log('⚠️ No bracketJson in draw data');
         setError(null);
         setBracket(null);
         return;
       }
-      
+
       const parsedBracket = typeof bracketData === 'string' ? JSON.parse(bracketData) : bracketData;
       console.log('✅ Bracket parsed successfully:', {
         format: parsedBracket.format,
         hasRounds: !!parsedBracket.rounds,
         hasGroups: !!parsedBracket.groups
       });
-      
+
       setBracket(parsedBracket);
-      
-      // Also fetch matches for scoring
-      try {
-        const matchesResponse = await api.get(`/tournaments/${tournamentId}/categories/${activeCategory.id}/matches`);
-        setMatches(matchesResponse.data.matches || []);
-        console.log('✅ Matches fetched:', matchesResponse.data.matches?.length || 0);
-      } catch (matchErr) {
-        console.log('⚠️ No matches found:', matchErr.message);
-        setMatches([]);
-      }
     } catch (err) {
       console.error('❌ Error fetching bracket:', err);
       
@@ -368,7 +364,7 @@ const DrawPage = () => {
         // Don't clear bracket here - keep existing data if available
       }
     } finally {
-      setLoading(false);
+      setBracketLoading(false);
     }
   };
 
@@ -376,12 +372,12 @@ const DrawPage = () => {
     if (!activeCategory) return;
 
     try {
-      // Fetch registrations for this category
-      const registrationsResponse = await api.get(`/tournaments/${tournamentId}/categories/${activeCategory.id}/registrations`);
+      // Parallel fetch — registrations + matches in one round trip
+      const [registrationsResponse, matchesResponse] = await Promise.all([
+        api.get(`/tournaments/${tournamentId}/categories/${activeCategory.id}/registrations`),
+        api.get(`/tournaments/${tournamentId}/categories/${activeCategory.id}/matches`),
+      ]);
       const registrations = registrationsResponse.data.registrations || [];
-      
-      // Fetch matches for this category
-      const matchesResponse = await api.get(`/tournaments/${tournamentId}/categories/${activeCategory.id}/matches`);
       const matches = matchesResponse.data.matches || [];
 
       // Simply use the actual matches count from the database
@@ -1266,10 +1262,11 @@ const DrawPage = () => {
 
       {/* Content */}
       <div className="max-w-2xl mx-auto px-3 py-4">
-        {loading ? (
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-16 text-center">
-            <div className="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-            <p className="text-gray-400 mt-6 font-medium">Loading bracket...</p>
+        {bracketLoading ? (
+          <div className="rounded-2xl p-16 text-center border" style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.08)' }}>
+            <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin mx-auto"
+              style={{ borderColor: 'rgba(0,255,136,0.4)', borderTopColor: 'transparent' }} />
+            <p className="mt-4 text-sm font-medium" style={{ color: 'rgba(255,255,255,0.55)' }}>Loading bracket...</p>
           </div>
         ) : drawNotGenerated ? (
           <div className="bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-16 text-center">

@@ -312,7 +312,7 @@ const MatchScoringPage = () => {
           <p className="text-sm font-bold" style={{ color: 'rgba(255,255,255,0.55)' }}>
             {match.tournament?.name} • {match.category?.name}
           </p>
-          <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.3)' }}>Match #{match.matchNumber}</p>
+          <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.5)' }}>Match #{match.matchNumber}</p>
         </div>
 
         {/* Error */}
@@ -372,8 +372,8 @@ const MatchScoringPage = () => {
                   : { background: 'rgba(255,255,255,0.05)', border: `1px solid ${B.border}`, color: 'rgba(255,255,255,0.7)' }}>
                 {p1Sets}
               </div>
-              <p className="text-xs font-black text-white truncate">{match.player1?.name || 'Player 1'}</p>
-              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>Sets Won</p>
+              <p className="text-xs font-black text-white leading-tight" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{match.player1?.name || 'Player 1'}</p>
+              <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.6)' }}>Sets Won</p>
             </div>
 
             {/* Live score */}
@@ -392,8 +392,8 @@ const MatchScoringPage = () => {
                   : { background: 'rgba(255,255,255,0.05)', border: `1px solid ${B.border}`, color: 'rgba(255,255,255,0.7)' }}>
                 {p2Sets}
               </div>
-              <p className="text-xs font-black text-white truncate">{match.player2?.name || 'Player 2'}</p>
-              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>Sets Won</p>
+              <p className="text-xs font-black text-white leading-tight" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{match.player2?.name || 'Player 2'}</p>
+              <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.6)' }}>Sets Won</p>
             </div>
           </div>
         </div>
@@ -447,11 +447,11 @@ const MatchScoringPage = () => {
             style={{ background: 'rgba(0,255,136,0.06)', border: '1px solid rgba(0,255,136,0.2)' }}>
             <Trophy className="w-10 h-10 mx-auto mb-3" style={{ color: B.amber }} />
             <h3 className="text-lg font-black text-white mb-1">Match Completed</h3>
-            <p className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>
+            <p className="text-sm" style={{ color: 'rgba(255,255,255,0.65)' }}>
               Winner: <span className="font-bold text-white">{match.winnerId === match.player1?.id ? match.player1?.name : match.player2?.name}</span>
             </p>
             {score.timer?.totalDurationFormatted && (
-              <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.35)' }}>Duration: {score.timer.totalDurationFormatted}</p>
+              <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.55)' }}>Duration: {score.timer.totalDurationFormatted}</p>
             )}
           </div>
         )}
@@ -468,7 +468,7 @@ const MatchScoringPage = () => {
                 ? <><div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#07071a transparent transparent transparent' }} />Starting…</>
                 : <><Play className="w-5 h-5" />START MATCH</>}
             </button>
-            <p className="text-center text-xs mt-2" style={{ color: 'rgba(255,255,255,0.35)' }}>
+            <p className="text-center text-xs mt-2" style={{ color: 'rgba(255,255,255,0.55)' }}>
               You can score now • Start Match to begin timer
             </p>
           </div>
@@ -524,7 +524,7 @@ const MatchScoringPage = () => {
                     style={{ background: 'rgba(251,191,36,0.1)', border: '1px solid rgba(251,191,36,0.3)', color: B.amber }}>
                     End Match Here
                   </button>
-                  <p className="text-center text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                  <p className="text-center text-xs" style={{ color: 'rgba(255,255,255,0.55)' }}>
                     {score.matchConfig?.maxSets === 1 ? '1 set' : `Best of ${score.matchConfig?.maxSets || 3} sets`}
                   </p>
                 </div>
@@ -595,7 +595,7 @@ const MatchTimerDisplay = ({ timer, isPaused }) => {
   return (
     <div className="mb-4 rounded-xl px-4 py-3 flex items-center justify-between"
       style={{ background: 'rgba(255,255,255,0.04)', border: `1px solid rgba(255,255,255,0.08)` }}>
-      <div className="flex items-center gap-1.5 text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
+      <div className="flex items-center gap-1.5 text-xs" style={{ color: 'rgba(255,255,255,0.6)' }}>
         <Calendar className="w-3.5 h-3.5" />
         <span>Started {fmtTime(timer?.startedAt)}</span>
       </div>

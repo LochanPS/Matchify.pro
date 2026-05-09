@@ -977,11 +977,9 @@ const UnifiedDashboardMobile = () => {
                       animation: 'shimmer 4s infinite'
                     }}
                   />
-                  <div 
-                    className="inline-flex items-center justify-center w-11 h-11 rounded-xl mb-3 relative z-10" style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)' }}
-                    style={{ 
-                      boxShadow: '0 4px 12px rgba(0,255,136,0.25)'
-                    }}
+                  <div
+                    className="inline-flex items-center justify-center w-11 h-11 rounded-xl mb-3 relative z-10"
+                    style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', boxShadow: '0 4px 12px rgba(0,255,136,0.25)' }}
                   >
                     <TrophyIcon className="w-6 h-6 text-white" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
                   </div>
@@ -1007,11 +1005,9 @@ const UnifiedDashboardMobile = () => {
                       animationDelay: '0.5s'
                     }}
                   />
-                  <div 
-                    className="inline-flex items-center justify-center w-11 h-11 rounded-xl mb-3 relative z-10" style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)' }}
-                    style={{ 
-                      boxShadow: '0 4px 12px rgba(0,255,136,0.25)'
-                    }}
+                  <div
+                    className="inline-flex items-center justify-center w-11 h-11 rounded-xl mb-3 relative z-10"
+                    style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', boxShadow: '0 4px 12px rgba(0,255,136,0.25)' }}
                   >
                     <UserIcon className="w-6 h-6 text-white" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
                   </div>
@@ -1104,11 +1100,9 @@ const UnifiedDashboardMobile = () => {
                       animation: 'shimmer 4s infinite'
                     }}
                   />
-                  <div 
-                    className="inline-flex items-center justify-center w-11 h-11 rounded-xl mb-3 relative z-10" style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)' }}
-                    style={{ 
-                      boxShadow: '0 4px 12px rgba(0,255,136,0.25)'
-                    }}
+                  <div
+                    className="inline-flex items-center justify-center w-11 h-11 rounded-xl mb-3 relative z-10"
+                    style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', boxShadow: '0 4px 12px rgba(0,255,136,0.25)' }}
                   >
                     <FireIcon className="w-6 h-6 text-white" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
                   </div>
@@ -1134,11 +1128,9 @@ const UnifiedDashboardMobile = () => {
                       animationDelay: '0.5s'
                     }}
                   />
-                  <div 
-                    className="inline-flex items-center justify-center w-11 h-11 rounded-xl mb-3 relative z-10" style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)' }}
-                    style={{ 
-                      boxShadow: '0 4px 12px rgba(0,255,136,0.25)'
-                    }}
+                  <div
+                    className="inline-flex items-center justify-center w-11 h-11 rounded-xl mb-3 relative z-10"
+                    style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', boxShadow: '0 4px 12px rgba(0,255,136,0.25)' }}
                   >
                     <TrophyIcon className="w-6 h-6 text-white" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
                   </div>

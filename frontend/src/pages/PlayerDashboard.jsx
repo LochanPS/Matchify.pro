@@ -103,7 +103,7 @@ const PlayerDashboard = () => {
   const stats = [
     { label: 'Total Points', value: user?.totalPoints || 0, icon: SparklesIcon, bg: 'linear-gradient(135deg,#f59e0b,#d97706)', glow: 'rgba(245,158,11,0.15)', val: '#fbbf24' },
     { label: 'Tournaments', value: user?.tournamentsPlayed || 0, icon: TrophyIcon, bg: 'linear-gradient(135deg,#a855f7,#7c3aed)', glow: 'rgba(168,85,247,0.15)', val: '#a855f7' },
-    { label: 'Matches Won', value: user?.matchesWon || 0, icon: FireIcon, bg: 'linear-gradient(135deg,#00c853,#00ff88)', glow: 'rgba(0,255,136,0.15)', val: '#00ff88' },
+    { label: 'Matches Won', value: user?.matchesWon || 0, icon: FireIcon, bg: 'linear-gradient(135deg,#00ff88,#00ff88)', glow: 'rgba(0,255,136,0.15)', val: '#00ff88' },
     { label: 'Win Rate', value: `${winRate}%`, icon: BoltIcon, bg: 'linear-gradient(135deg,#00bcd4,#00d4ff)', glow: 'rgba(0,212,255,0.15)', val: '#00d4ff' },
   ];
 
@@ -122,7 +122,7 @@ const PlayerDashboard = () => {
             {/* Profile Info */}
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 w-full sm:w-auto">
               <div className="relative flex-shrink-0">
-                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl flex items-center justify-center text-4xl font-bold text-white shadow-2xl" style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#003320', boxShadow: '0 8px 25px rgba(0,255,136,0.25)' }}>
+                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl flex items-center justify-center text-4xl font-bold text-white shadow-2xl" style={{ background: 'linear-gradient(135deg,#00ff88,#00ff88)', color: '#003320', boxShadow: '0 8px 25px rgba(0,255,136,0.25)' }}>
                   {user?.profilePhoto ? (
                     <img src={user.profilePhoto} alt={user.name} className="w-full h-full object-cover rounded-2xl" />
                   ) : (
@@ -298,7 +298,7 @@ const PlayerDashboard = () => {
                   <p className="font-bold text-base" style={{ color: '#00ff88' }}>{winRate}%</p>
                 </div>
                 <div className="w-full h-2 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)' }}>
-                  <div className="h-full rounded-full transition-all duration-500" style={{ width: `${winRate}%`, background: 'linear-gradient(90deg,#00c853,#00ff88)' }} />
+                  <div className="h-full rounded-full transition-all duration-500" style={{ width: `${winRate}%`, background: 'linear-gradient(90deg,#00ff88,#00ff88)' }} />
                 </div>
                 <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
                   {user?.matchesWon || 0} wins of {(user?.matchesWon || 0) + (user?.matchesLost || 0)} matches
@@ -621,7 +621,7 @@ const PlayerDashboard = () => {
             <div className="sticky bottom-0 px-5 py-4" style={{ background: '#0d1025', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
               <button onClick={() => setShowLevelInfo(false)}
                 className="w-full py-3 rounded-xl font-semibold text-sm"
-                style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#003320' }}>
+                style={{ background: 'linear-gradient(135deg,#00ff88,#00ff88)', color: '#003320' }}>
                 Got it!
               </button>
             </div>

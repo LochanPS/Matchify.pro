@@ -402,7 +402,7 @@ export default function TournamentRegistrationPage() {
                             disabled={!canSearch || isSearching}
                             className="px-4 py-3 rounded-xl font-black text-xs transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5"
                             style={canSearch && !isSearching
-                              ? { background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#07071a' }
+                              ? { background: 'linear-gradient(135deg,#00ff88,#00ff88)', color: '#07071a' }
                               : { background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.4)' }}
                           >
                             {isSearching
@@ -421,7 +421,7 @@ export default function TournamentRegistrationPage() {
                                 className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
                             ) : (
                               <div className="w-10 h-10 rounded-full flex items-center justify-center font-black text-sm flex-shrink-0"
-                                style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#07071a' }}>
+                                style={{ background: 'linear-gradient(135deg,#00ff88,#00ff88)', color: '#07071a' }}>
                                 {partner.name?.charAt(0)?.toUpperCase()}
                               </div>
                             )}
@@ -609,9 +609,9 @@ export default function TournamentRegistrationPage() {
                 disabled={submitting || !paymentScreenshot || (!adminPaymentSettings?.qrCodeUrl && !adminPaymentSettings?.upiId)}
                 className="flex-1 py-4 rounded-2xl font-black text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 style={{
-                  background: paymentScreenshot ? 'linear-gradient(135deg,#00c853,#00ff88)' : 'rgba(255,255,255,0.08)',
+                  background: paymentScreenshot ? 'linear-gradient(135deg,#00ff88,#00ff88)' : 'rgba(255,255,255,0.08)',
                   color: paymentScreenshot ? '#07071a' : 'rgba(255,255,255,0.4)',
-                  boxShadow: paymentScreenshot ? '0 4px 20px rgba(0,200,83,0.4)' : 'none',
+                  boxShadow: paymentScreenshot ? '0 4px 20px rgba(0,255,136,0.4)' : 'none',
                 }}
               >
                 {submitting ? (
@@ -641,7 +641,7 @@ export default function TournamentRegistrationPage() {
             <div className="pt-8 pb-5 px-6 text-center"
               style={{ background: 'linear-gradient(180deg,rgba(0,255,136,0.12) 0%,transparent 100%)' }}>
               <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
-                style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', boxShadow: '0 0 30px rgba(0,200,83,0.5)' }}>
+                style={{ background: 'linear-gradient(135deg,#00ff88,#00ff88)', boxShadow: '0 0 30px rgba(0,255,136,0.5)' }}>
                 <CheckCircleIcon className="w-9 h-9 text-white" />
               </div>
               <h2 className="text-xl font-black text-white mb-1">Registration Submitted!</h2>

@@ -73,15 +73,15 @@ const LoginPageMobile = () => {
 
   return (
     <div className="min-h-screen flex flex-col relative overflow-hidden" style={{ 
-      background: 'linear-gradient(180deg, #0a0a1f 0%, #07071a 30%, #0d1a2a 60%, #07071a 100%)' 
+      background: '#07071a'
     }}>
       {/* Sticky Header with Sign In & Sign Up */}
       <div 
         className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md border-b"
         style={{ 
           background: 'linear-gradient(135deg, rgba(7,7,26,0.95), rgba(13,26,42,0.95))', 
-          borderColor: 'rgba(0,200,83,0.2)',
-          boxShadow: '0 4px 20px rgba(0,200,83,0.1)',
+          borderColor: 'rgba(0,255,136,0.2)',
+          boxShadow: '0 4px 20px rgba(0,255,136,0.1)',
           animation: 'slideDown 0.5s ease-out'
         }}
       >
@@ -92,7 +92,7 @@ const LoginPageMobile = () => {
               <div 
                 className="absolute inset-0 blur-lg opacity-60"
                 style={{ 
-                  background: 'radial-gradient(circle, rgba(0,200,83,0.6) 0%, transparent 70%)',
+                  background: 'radial-gradient(circle, rgba(0,255,136,0.6) 0%, transparent 70%)',
                   animation: 'glow 3s ease-in-out infinite'
                 }}
               />
@@ -101,7 +101,7 @@ const LoginPageMobile = () => {
             <span 
               className="font-bold text-base"
               style={{ 
-                background: 'linear-gradient(135deg, #00c853, #00ff88)',
+                background: 'linear-gradient(135deg, #00ff88, #00ff88)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text'
@@ -116,9 +116,9 @@ const LoginPageMobile = () => {
             to={redirectUrl ? `/register?redirect=${encodeURIComponent(redirectUrl)}` : '/register'}
             className="px-4 py-2 rounded-lg font-bold text-sm transition-all relative overflow-hidden group"
             style={{ 
-              background: 'linear-gradient(135deg, #00c853, #00ff88)',
+              background: 'linear-gradient(135deg, #00ff88, #00ff88)',
               color: '#003320',
-              boxShadow: '0 4px 12px rgba(0,200,83,0.4), inset 0 1px 0 rgba(255,255,255,0.3)'
+              boxShadow: '0 4px 12px rgba(0,255,136,0.4), inset 0 1px 0 rgba(255,255,255,0.3)'
             }}
           >
             <div 
@@ -136,7 +136,7 @@ const LoginPageMobile = () => {
         <div 
           className="absolute top-0 right-0 w-80 h-80 rounded-full blur-3xl opacity-30 animate-pulse"
           style={{ 
-            background: 'radial-gradient(circle, rgba(0,200,83,0.4) 0%, rgba(0,255,136,0.2) 40%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(0,255,136,0.4) 0%, rgba(0,255,136,0.2) 40%, transparent 70%)',
             animation: 'float 8s ease-in-out infinite'
           }}
         />
@@ -224,7 +224,7 @@ const LoginPageMobile = () => {
             <div 
               className="absolute inset-0 blur-2xl opacity-60"
               style={{ 
-                background: 'radial-gradient(circle, rgba(0,200,83,0.6) 0%, transparent 70%)',
+                background: 'radial-gradient(circle, rgba(0,255,136,0.6) 0%, transparent 70%)',
                 animation: 'glow 3s ease-in-out infinite'
               }}
             />
@@ -240,9 +240,9 @@ const LoginPageMobile = () => {
           className="rounded-2xl p-6 mb-6 relative overflow-hidden"
           style={{
             background: 'linear-gradient(135deg, rgba(0,200,83,0.12) 0%, rgba(99,102,241,0.12) 100%)',
-            border: '2px solid rgba(0,200,83,0.3)',
+            border: '2px solid rgba(0,255,136,0.3)',
             backdropFilter: 'blur(20px)',
-            boxShadow: '0 8px 32px rgba(0,200,83,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
+            boxShadow: '0 8px 32px rgba(0,255,136,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
             animation: 'slideUp 0.8s ease-out 0.5s both'
           }}
         >
@@ -268,10 +268,10 @@ const LoginPageMobile = () => {
               <div 
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold mb-3 relative overflow-hidden"
                 style={{ 
-                  background: 'linear-gradient(135deg, rgba(0,200,83,0.2), rgba(0,255,136,0.15))', 
-                  border: '2px solid rgba(0,200,83,0.5)', 
+                  background: 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,255,136,0.15))', 
+                  border: '2px solid rgba(0,255,136,0.5)', 
                   color: '#00ff88',
-                  boxShadow: '0 0 20px rgba(0,200,83,0.3), inset 0 0 20px rgba(0,200,83,0.1)'
+                  boxShadow: '0 0 20px rgba(0,255,136,0.3), inset 0 0 20px rgba(0,255,136,0.1)'
                 }}
               >
                 <div 
@@ -294,7 +294,7 @@ const LoginPageMobile = () => {
                   backgroundClip: 'text',
                   animation: 'shimmer 4s linear infinite',
                   textShadow: 'none',
-                  filter: 'drop-shadow(0 2px 10px rgba(0,200,83,0.3))'
+                  filter: 'drop-shadow(0 2px 10px rgba(0,255,136,0.3))'
                 }}
               >
                 Welcome Back
@@ -380,11 +380,11 @@ const LoginPageMobile = () => {
                 <input 
                   type="checkbox" 
                   className="w-4 h-4 rounded" 
-                  style={{ accentColor: '#00c853' }}
+                  style={{ accentColor: '#00ff88' }}
                 />
                 <span className="text-xs text-gray-400">Remember me</span>
               </label>
-              <a href="#" className="text-xs font-semibold text-emerald-400">
+              <a href="#" className="text-xs font-semibold" style={{ color: '#00ff88' }}>
                 Forgot password?
               </a>
             </div>
@@ -395,10 +395,10 @@ const LoginPageMobile = () => {
               disabled={loading}
               className="w-full py-4 rounded-xl font-bold text-base transition-all disabled:opacity-50 relative overflow-hidden group"
               style={{ 
-                background: 'linear-gradient(135deg, #00c853 0%, #00ff88 50%, #00c853 100%)',
+                background: 'linear-gradient(135deg, #00ff88 0%, #00ff88 50%, #00ff88 100%)',
                 backgroundSize: '200% auto',
                 color: '#003320',
-                boxShadow: '0 8px 25px rgba(0,200,83,0.4), 0 0 40px rgba(0,200,83,0.2), inset 0 1px 0 rgba(255,255,255,0.3)',
+                boxShadow: '0 8px 25px rgba(0,255,136,0.4), 0 0 40px rgba(0,255,136,0.2), inset 0 1px 0 rgba(255,255,255,0.3)',
                 animation: 'shimmer 3s linear infinite, pulse 3s ease-in-out infinite'
               }}
             >
@@ -432,7 +432,7 @@ const LoginPageMobile = () => {
                 to={redirectUrl ? `/register?redirect=${encodeURIComponent(redirectUrl)}` : '/register'}
                 className="font-bold"
                 style={{ 
-                  background: 'linear-gradient(135deg, #00c853, #00ff88)',
+                  background: 'linear-gradient(135deg, #00ff88, #00ff88)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   backgroundClip: 'text'
@@ -450,13 +450,13 @@ const LoginPageMobile = () => {
           <div 
             className="p-4 rounded-xl text-center relative overflow-hidden"
             style={{ 
-              background: 'linear-gradient(135deg, rgba(0,200,83,0.2), rgba(0,255,136,0.15))',
-              border: '2px solid rgba(0,200,83,0.4)',
-              boxShadow: '0 4px 15px rgba(0,200,83,0.3), inset 0 1px 0 rgba(255,255,255,0.1)',
+              background: 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,255,136,0.15))',
+              border: '2px solid rgba(0,255,136,0.4)',
+              boxShadow: '0 4px 15px rgba(0,255,136,0.3), inset 0 1px 0 rgba(255,255,255,0.1)',
               animation: 'scaleIn 0.5s ease-out 0.9s both'
             }}
           >
-            <p className="text-2xl font-black mb-1" style={{ color: '#00ff88', textShadow: '0 0 20px rgba(0,200,83,0.5)' }}>1000+</p>
+            <p className="text-2xl font-black mb-1" style={{ color: '#00ff88', textShadow: '0 0 20px rgba(0,255,136,0.5)' }}>1000+</p>
             <p className="text-xs font-semibold text-white/80">Players</p>
           </div>
           <div 

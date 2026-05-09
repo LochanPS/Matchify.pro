@@ -241,12 +241,9 @@ const TournamentDetailPage = () => {
       return;
     }
 
-    // Validate format: Support both #123ABCD (3 digits + 4 letters) and #A10000 (1 letter + 5 digits)
-    const newFormat = /^#\d{3}[A-Z]{4}$/i;  // #123ABCD
-    const oldFormat = /^#[A-Z]\d{5}$/i;      // #A10000
-    
-    if (!newFormat.test(umpireCode.trim()) && !oldFormat.test(umpireCode.trim())) {
-      setUmpireError('Invalid umpire code format. Use #123ABCD (3 digits + 4 letters) or #A10000 (1 letter + 5 digits)');
+    // Validate Matchify.pro ID format: #A10000 (# + 1 letter + 5 digits)
+    if (!/^#[A-Z]\d{5}$/i.test(umpireCode.trim())) {
+      setUmpireError('Invalid Matchify.pro ID. Format: #A10000');
       return;
     }
 
@@ -1284,7 +1281,7 @@ const TournamentDetailPage = () => {
               {/* Info */}
               <div className="px-3 py-2.5 rounded-xl text-xs"
                 style={{ background: 'rgba(0,212,255,0.06)', border: '1px solid rgba(0,212,255,0.15)', color: 'rgba(0,212,255,0.8)' }}>
-                Format: <span className="font-mono font-bold" style={{ color: '#00d4ff' }}>#123ABCD</span> or <span className="font-mono font-bold" style={{ color: '#00d4ff' }}>#A10000</span>
+                Enter Matchify.pro ID: <span className="font-mono font-bold" style={{ color: '#00d4ff' }}>#A10000</span>
               </div>
 
               {/* Error */}
@@ -1317,8 +1314,8 @@ const TournamentDetailPage = () => {
                     setUmpireCode(val);
                     setUmpireError('');
                   }}
-                  placeholder="#123ABCD"
-                  maxLength={8}
+                  placeholder="#A10000"
+                  maxLength={7}
                   className="w-full px-4 py-3 rounded-xl text-white font-mono text-base tracking-widest"
                   style={{
                     background: 'rgba(0,0,0,0.3)',

@@ -1363,16 +1363,12 @@ const addUmpireByCode = async (req, res) => {
     const { umpireCode } = req.body;
     const userId = req.user.id;
 
-    // Validate umpire code format - Support both formats:
-    // #123ABCD (3 digits + 4 letters) - NEW format
-    // #A10000 (1 letter + 5 digits) - OLD format for backward compatibility
-    const newFormat = /^#\d{3}[A-Z]{4}$/i;
-    const oldFormat = /^#[A-Z]\d{5}$/i;
-    
-    if (!umpireCode || (!newFormat.test(umpireCode) && !oldFormat.test(umpireCode))) {
+    // Validate Matchify.pro ID format: #A10000 (# + 1 letter + 5 digits)
+    const matchifyIdFormat = /^#[A-Z]\d{5}$/i;
+    if (!umpireCode || !matchifyIdFormat.test(umpireCode)) {
       return res.status(400).json({
         success: false,
-        error: 'Invalid umpire code format. Must be #123ABCD (3 digits + 4 letters) or #A10000 (1 letter + 5 digits)'
+        error: 'Invalid Matchify.pro ID format. Use #A10000 (# + 1 letter + 5 digits)'
       });
     }
 
@@ -1393,21 +1389,18 @@ const addUmpireByCode = async (req, res) => {
       });
     }
 
-    // Find umpire by code (case-insensitive)
+    // Find user by matchifyCode (universal Matchify.pro ID)
     const umpire = await prisma.user.findFirst({
       where: {
-        umpireCode: {
+        matchifyCode: {
           equals: umpireCode.toUpperCase()
-        },
-        roles: {
-          contains: 'UMPIRE'
         }
       },
       select: {
         id: true,
         name: true,
         email: true,
-        umpireCode: true,
+        matchifyCode: true,
         profilePhoto: true
       }
     });
@@ -1415,7 +1408,7 @@ const addUmpireByCode = async (req, res) => {
     if (!umpire) {
       return res.status(404).json({
         success: false,
-        error: 'No umpire found with this code. Please check the code and try again.'
+        error: 'No player found with this Matchify.pro ID. Please check and try again.'
       });
     }
 
@@ -1472,7 +1465,7 @@ const addUmpireByCode = async (req, res) => {
         id: umpire.id,
         name: umpire.name,
         email: umpire.email,
-        umpireCode: umpire.umpireCode,
+        umpireCode: umpire.matchifyCode,
         profilePhoto: umpire.profilePhoto
       }
     });
@@ -1497,7 +1490,7 @@ const getTournamentUmpires = async (req, res) => {
                 id: true,
                 name: true,
                 email: true,
-                umpireCode: true,
+                matchifyCode: true,
                 profilePhoto: true,
                 umpireProfile: {
                   select: {
@@ -1521,7 +1514,7 @@ const getTournamentUmpires = async (req, res) => {
       id: tu.umpire.id,
       name: tu.umpire.name,
       email: tu.umpire.email,
-      umpireCode: tu.umpire.umpireCode,
+      umpireCode: tu.umpire.matchifyCode,
       profilePhoto: tu.umpire.profilePhoto,
       addedAt: tu.addedAt,
       matchesUmpired: tu.umpire.umpireProfile?.matchesUmpired || 0,

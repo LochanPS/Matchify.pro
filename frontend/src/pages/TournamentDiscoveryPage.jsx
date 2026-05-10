@@ -1,17 +1,18 @@
 ﻿import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  MagnifyingGlassIcon, 
-  FunnelIcon, 
-  MapPinIcon, 
-  CalendarIcon, 
-  UserGroupIcon, 
+import {
+  MagnifyingGlassIcon,
+  FunnelIcon,
+  MapPinIcon,
+  CalendarIcon,
+  UserGroupIcon,
   XMarkIcon,
   TrophyIcon,
   ArrowRightIcon,
   SparklesIcon,
   ClockIcon,
-  CurrencyRupeeIcon
+  CurrencyRupeeIcon,
+  ShareIcon
 } from '@heroicons/react/24/outline';
 import { Loader } from 'lucide-react';
 import { tournamentAPI } from '../api/tournament';
@@ -582,6 +583,26 @@ export default function TournamentDiscoveryPage() {
 }
 
 
+// ── Shareable link helper ────────────────────────────────────────────────────
+function getTournamentShareUrl(id) {
+  return `${window.location.origin}/tournaments/${id}`;
+}
+
+async function shareTournament(tournament, e) {
+  e?.stopPropagation();
+  const url = getTournamentShareUrl(tournament.id);
+  const text = `🏸 ${tournament.name}\n📍 ${tournament.city}${tournament.state ? `, ${tournament.state}` : ''}\n📅 Starts ${new Date(tournament.startDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}\n\nRegister on Matchify.pro 👇`;
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: tournament.name, text, url });
+    } catch (_) { /* user cancelled */ }
+  } else {
+    await navigator.clipboard.writeText(`${text}\n${url}`);
+    return 'copied';
+  }
+  return 'shared';
+}
+
 // Tournament Card Component - Event Poster Style
 function TournamentCard({ tournament, navigate, index }) {
   const getStatusStyle = (status) => {
@@ -604,6 +625,17 @@ function TournamentCard({ tournament, navigate, index }) {
     ['#06b6d4','rgba(6,182,212,0.25)'],
   ];
   const [accentColor, accentGlow] = accentPairs[index % accentPairs.length];
+
+  const [shareState, setShareState] = useState('idle'); // idle | copied | shared
+
+  const handleShare = async (e) => {
+    e.stopPropagation();
+    const result = await shareTournament(tournament, e);
+    if (result === 'copied') {
+      setShareState('copied');
+      setTimeout(() => setShareState('idle'), 2000);
+    }
+  };
 
   const statusStyle = getStatusStyle(tournament.status);
   const hasPoster = tournament.posters && tournament.posters.length > 0 && tournament.posters[0]?.imageUrl;
@@ -669,6 +701,23 @@ function TournamentCard({ tournament, navigate, index }) {
             {statusStyle.text}
           </span>
         </div>
+
+        {/* Share button top-left */}
+        <button
+          onClick={handleShare}
+          title="Share tournament"
+          className="absolute top-2 left-2 flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-bold transition-all"
+          style={{
+            background: shareState === 'copied' ? 'rgba(0,255,136,0.9)' : 'rgba(0,0,0,0.65)',
+            color: shareState === 'copied' ? '#003320' : 'rgba(255,255,255,0.9)',
+            backdropFilter: 'blur(8px)',
+            border: `1px solid ${shareState === 'copied' ? 'rgba(0,255,136,0.5)' : 'rgba(255,255,255,0.2)'}`,
+            boxShadow: '0 2px 8px rgba(0,0,0,0.5)',
+          }}
+        >
+          <ShareIcon className="w-3.5 h-3.5" />
+          <span>{shareState === 'copied' ? 'Copied!' : 'Share'}</span>
+        </button>
 
         {/* Bottom: city + countdown */}
         <div className="absolute bottom-0 left-0 right-0 px-3 pb-2.5 flex items-end justify-between gap-2">

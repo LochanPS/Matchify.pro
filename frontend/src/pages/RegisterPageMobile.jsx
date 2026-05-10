@@ -56,7 +56,7 @@ const RegisterPageMobile = () => {
     e.preventDefault();
     
     if (!formData.name || !formData.phone || !formData.birthYear || !formData.password) {
-      setError('Name, Phone, Birth Year and Password are required');
+      setError('Name, Phone, Date of Birth and Password are required');
       return;
     }
     if (!/^[0-9]{10}$/.test(formData.phone)) {
@@ -68,10 +68,16 @@ const RegisterPageMobile = () => {
       setError('Enter valid email address');
       return;
     }
-    const currentYear = new Date().getFullYear();
-    const year = parseInt(formData.birthYear);
-    if (isNaN(year) || year < 1900 || year > currentYear) {
-      setError(`Enter valid birth year (1900-${currentYear})`);
+    
+    // Validate date of birth
+    if (!formData.birthYear) {
+      setError('Please enter your date of birth');
+      return;
+    }
+    const birthDate = new Date(formData.birthYear);
+    const today = new Date();
+    if (birthDate > today) {
+      setError('Date of birth cannot be in the future');
       return;
     }
     
@@ -490,11 +496,13 @@ const RegisterPageMobile = () => {
             {/* Birth Year - Required */}
             <div>
               <label className="block text-sm font-semibold text-white mb-2">
-                Birth Year
+                Date of Birth
               </label>
-              <select
+              <input
                 name="birthYear"
+                type="date"
                 required
+                max={new Date().toISOString().split('T')[0]}
                 className="w-full px-4 py-3 rounded-xl text-white text-sm outline-none"
                 style={{
                   background: 'rgba(255,255,255,0.05)',
@@ -503,12 +511,10 @@ const RegisterPageMobile = () => {
                 }}
                 value={formData.birthYear}
                 onChange={handleChange}
-              >
-                <option value="" style={{ background: '#1e293b' }}>Select your birth year</option>
-                {Array.from({ length: 2026 - 1950 + 1 }, (_, i) => 2026 - i).map(yr => (
-                  <option key={yr} value={yr} style={{ background: '#1e293b' }}>{yr}</option>
-                ))}
-              </select>
+              />
+              <p className="text-xs mt-2" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                Please enter your correct date of birth. This information is kept confidential and will not be misused.
+              </p>
             </div>
 
             {/* Password */}

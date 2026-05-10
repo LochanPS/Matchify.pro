@@ -119,3 +119,9 @@ export const deleteAllData = async (password) => {
   const response = await api.post('/admin/delete-all-info', { password });
   return response.data;
 };
+
+// Complete System Reset - Delete ALL users except admin
+export const completeSystemReset = async (password) => {
+  const response = await api.post('/admin/complete-system-reset', { password });
+  return response.data;
+};

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getRevenueOverview, getRevenueTimeline, deleteAllData } from '../../api/payment';
+import { getRevenueOverview, getRevenueTimeline, deleteAllData, completeSystemReset } from '../../api/payment';
 import { toast } from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -31,6 +31,9 @@ const RevenueDashboardPage = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deletePassword, setDeletePassword] = useState('');
   const [deleting, setDeleting] = useState(false);
+  const [showNuclearModal, setShowNuclearModal] = useState(false);
+  const [nuclearPassword, setNuclearPassword] = useState('');
+  const [nuclearDeleting, setNuclearDeleting] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -82,6 +85,32 @@ const RevenueDashboardPage = () => {
       toast.error(error.message || 'Failed to delete data');
     } finally {
       setDeleting(false);
+    }
+  };
+
+  const handleCompleteSystemReset = async () => {
+    if (!nuclearPassword) {
+      toast.error('Please enter the password');
+      return;
+    }
+
+    try {
+      setNuclearDeleting(true);
+      const response = await completeSystemReset(nuclearPassword);
+
+      toast.success('Complete system reset successful! All users deleted except admin.');
+      setShowNuclearModal(false);
+      setNuclearPassword('');
+      
+      // Refresh the page after 2 seconds
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+    } catch (error) {
+      console.error('Error in complete system reset:', error);
+      toast.error(error.message || 'Failed to perform complete system reset');
+    } finally {
+      setNuclearDeleting(false);
     }
   };
 
@@ -347,7 +376,7 @@ const RevenueDashboardPage = () => {
       </div>
 
       {/* Danger Zone - Delete All Data */}
-      <div className="bg-red-900/20 rounded-xl p-6 border-2 border-red-700 shadow-lg">
+      <div className="bg-red-900/20 rounded-xl p-6 border-2 border-red-700 shadow-lg mb-6">
         <div className="flex items-start gap-4">
           <div className="text-4xl">⚠️</div>
           <div className="flex-1">
@@ -364,6 +393,55 @@ const RevenueDashboardPage = () => {
               className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition shadow-lg shadow-red-500/50"
             >
               🗑️ Delete All Info
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Nuclear Zone - Complete System Reset */}
+      <div className="bg-gradient-to-br from-red-950 to-black rounded-xl p-6 border-4 border-red-600 shadow-2xl shadow-red-600/50 animate-pulse">
+        <div className="flex items-start gap-4">
+          <div className="text-5xl animate-bounce">☢️</div>
+          <div className="flex-1">
+            <h3 className="text-2xl font-black text-red-500 mb-2 uppercase tracking-wider">
+              ☢️ Nuclear Zone ☢️
+            </h3>
+            <p className="text-red-300 font-bold mb-3 text-lg">
+              COMPLETE SYSTEM RESET - DELETE EVERYTHING!
+            </p>
+            <p className="text-gray-300 mb-4">
+              This will permanently delete <span className="text-red-400 font-bold">ALL DATA</span> from the database:
+            </p>
+            <ul className="text-gray-300 text-sm space-y-2 mb-4 ml-4">
+              <li>✗ <span className="text-red-400 font-bold">ALL USER ACCOUNTS</span> (except admin)</li>
+              <li>✗ All user profiles, notifications, and data</li>
+              <li>✗ All tournaments, registrations, and payments</li>
+              <li>✗ All matches, draws, and categories</li>
+              <li>✗ All wallet transactions and revenue</li>
+              <li>✗ All academies and applications</li>
+              <li>✗ Everything in the database</li>
+            </ul>
+            <div className="bg-emerald-900/40 border-2 border-emerald-600 rounded-lg p-3 mb-4">
+              <p className="text-emerald-400 text-sm font-bold">
+                ✓ ONLY ADMIN ACCOUNT WILL BE PRESERVED
+              </p>
+              <p className="text-emerald-300 text-xs mt-1">
+                All features will continue to work - this is like a factory reset
+              </p>
+            </div>
+            <div className="bg-red-950/60 border-2 border-red-500 rounded-lg p-4 mb-4">
+              <p className="text-red-400 font-black text-xl text-center animate-pulse">
+                ⚠️ THIS ACTION CANNOT BE UNDONE! ⚠️
+              </p>
+              <p className="text-red-300 text-center text-sm mt-2">
+                The website will become completely empty (like a fresh installation)
+              </p>
+            </div>
+            <button
+              onClick={() => setShowNuclearModal(true)}
+              className="bg-gradient-to-r from-red-700 via-red-600 to-red-700 hover:from-red-800 hover:via-red-700 hover:to-red-800 text-white font-black py-4 px-8 rounded-lg transition shadow-2xl shadow-red-600/70 text-lg uppercase tracking-wider border-2 border-red-400"
+            >
+              ☢️ Complete System Reset
             </button>
           </div>
         </div>
@@ -439,6 +517,96 @@ const RevenueDashboardPage = () => {
                   </span>
                 ) : (
                   '🗑️ Delete Everything'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Nuclear Reset Confirmation Modal */}
+      {showNuclearModal && (
+        <div className="fixed inset-0 bg-black/95 backdrop-blur-md flex items-center justify-center z-50 p-4">
+          <div className="bg-gradient-to-br from-red-950 to-black rounded-2xl border-4 border-red-600 shadow-2xl shadow-red-600/70 max-w-lg w-full p-8 animate-pulse">
+            <div className="text-center mb-6">
+              <div className="text-8xl mb-4 animate-bounce">☢️</div>
+              <h2 className="text-3xl font-black text-red-500 mb-3 uppercase tracking-wider">
+                Complete System Reset
+              </h2>
+              <p className="text-red-300 font-bold text-lg mb-4">
+                ⚠️ NUCLEAR OPTION - DELETE EVERYTHING! ⚠️
+              </p>
+              <p className="text-gray-300 mb-4">
+                This will <span className="text-red-400 font-black text-xl">PERMANENTLY DELETE</span>:
+              </p>
+              <ul className="text-left text-gray-300 text-sm space-y-2 mb-4 bg-black/50 p-4 rounded-lg border border-red-700">
+                <li className="text-red-400 font-bold">☢️ ALL USER ACCOUNTS (except admin)</li>
+                <li>☢️ All user profiles and data</li>
+                <li>☢️ All tournaments and registrations</li>
+                <li>☢️ All payments and transactions</li>
+                <li>☢️ All notifications and logs</li>
+                <li>☢️ All matches and draws</li>
+                <li>☢️ All academies and applications</li>
+                <li className="text-red-400 font-bold">☢️ EVERYTHING IN THE DATABASE</li>
+              </ul>
+              <div className="bg-emerald-900/40 border-2 border-emerald-600 rounded-lg p-4 mb-4">
+                <p className="text-emerald-400 text-sm font-bold">
+                  ✓ ONLY ADMIN ACCOUNT PRESERVED
+                </p>
+                <p className="text-emerald-300 text-xs mt-1">
+                  All features will work - like a fresh installation
+                </p>
+              </div>
+              <div className="bg-red-950/80 border-4 border-red-500 rounded-lg p-4 mb-4 animate-pulse">
+                <p className="text-red-400 font-black text-2xl">
+                  ⚠️ CANNOT BE UNDONE! ⚠️
+                </p>
+                <p className="text-red-300 text-sm mt-2">
+                  The website will become completely empty
+                </p>
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-red-300 font-bold mb-2 text-lg">
+                Enter Admin Password to Confirm:
+              </label>
+              <input
+                type="password"
+                value={nuclearPassword}
+                onChange={(e) => setNuclearPassword(e.target.value)}
+                placeholder="Pradyu@123(123)"
+                className="w-full bg-black border-2 border-red-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-red-400 text-lg font-bold"
+                disabled={nuclearDeleting}
+              />
+              <p className="text-xs text-gray-500 mt-2">
+                Password: Pradyu@123(123)
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowNuclearModal(false);
+                  setNuclearPassword('');
+                }}
+                className="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-bold py-4 px-4 rounded-lg transition text-lg"
+                disabled={nuclearDeleting}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCompleteSystemReset}
+                disabled={nuclearDeleting || !nuclearPassword}
+                className="flex-1 bg-gradient-to-r from-red-700 via-red-600 to-red-700 hover:from-red-800 hover:via-red-700 hover:to-red-800 text-white font-black py-4 px-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed text-lg uppercase border-2 border-red-400"
+              >
+                {nuclearDeleting ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    Resetting...
+                  </span>
+                ) : (
+                  '☢️ Reset System'
                 )}
               </button>
             </div>

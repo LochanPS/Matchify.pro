@@ -147,4 +147,163 @@ router.post('/delete-all-info', authenticate, async (req, res) => {
   }
 });
 
+/**
+ * POST /api/admin/complete-system-reset
+ * NUCLEAR OPTION: Delete ALL data including ALL users (except admin)
+ * Requires admin authentication + special password
+ */
+router.post('/complete-system-reset', authenticate, async (req, res) => {
+  try {
+    const { password } = req.body;
+
+    // Check if user is admin
+    if (!req.user.roles || !req.user.roles.includes('ADMIN')) {
+      return res.status(403).json({
+        success: false,
+        error: 'Only admins can perform complete system reset'
+      });
+    }
+
+    // Verify special password
+    if (password !== DELETE_PASSWORD) {
+      return res.status(401).json({
+        success: false,
+        error: 'Invalid password'
+      });
+    }
+
+    console.log('☢️  COMPLETE SYSTEM RESET initiated by:', req.user.email);
+    console.log('⚠️  This will delete ALL users except admin!');
+
+    const deletionResults = {};
+
+    // STEP 1: Delete all match-related data
+    deletionResults.matchScores = await prisma.match.deleteMany({});
+    
+    // STEP 2: Delete draws
+    deletionResults.draws = await prisma.draw.deleteMany({});
+    
+    // STEP 3: Delete registrations
+    deletionResults.registrations = await prisma.registration.deleteMany({});
+    
+    // STEP 4: Delete payment verifications
+    deletionResults.paymentVerifications = await prisma.paymentVerification.deleteMany({});
+    
+    // STEP 5: Delete categories
+    deletionResults.categories = await prisma.category.deleteMany({});
+    
+    // STEP 6: Delete tournament payments
+    deletionResults.tournamentPayments = await prisma.tournamentPayment.deleteMany({});
+    
+    // STEP 7: Delete tournament posters
+    deletionResults.tournamentPosters = await prisma.tournamentPoster.deleteMany({});
+    
+    // STEP 8: Delete tournament umpires
+    deletionResults.tournamentUmpires = await prisma.tournamentUmpire.deleteMany({});
+    
+    // STEP 9: Delete tournaments
+    deletionResults.tournaments = await prisma.tournament.deleteMany({});
+    
+    // STEP 10: Delete wallet transactions
+    deletionResults.walletTransactions = await prisma.walletTransaction.deleteMany({});
+    
+    // STEP 11: Delete notifications
+    deletionResults.notifications = await prisma.notification.deleteMany({});
+    
+    // STEP 12: Delete score correction requests
+    deletionResults.scoreCorrectionRequests = await prisma.scoreCorrectionRequest.deleteMany({});
+    
+    // STEP 13: Delete SMS logs
+    deletionResults.smsLogs = await prisma.smsLog.deleteMany({});
+    
+    // STEP 14: Delete audit logs
+    deletionResults.auditLogs = await prisma.auditLog.deleteMany({});
+    
+    // STEP 15: Delete academies
+    deletionResults.academies = await prisma.academy.deleteMany({});
+    
+    // STEP 16: Delete organizer KYC submissions
+    deletionResults.organizerKYC = await prisma.organizerKYC.deleteMany({});
+    
+    // STEP 17: Delete organizer requests
+    deletionResults.organizerRequests = await prisma.organizerRequest.deleteMany({});
+    
+    // STEP 18: Delete payment settings
+    deletionResults.paymentSettings = await prisma.paymentSettings.deleteMany({});
+    
+    // STEP 19: Delete user profiles (must be before users)
+    deletionResults.playerProfiles = await prisma.playerProfile.deleteMany({
+      where: {
+        user: {
+          email: { not: 'ADMIN@gmail.com' }
+        }
+      }
+    });
+    
+    deletionResults.organizerProfiles = await prisma.organizerProfile.deleteMany({
+      where: {
+        user: {
+          email: { not: 'ADMIN@gmail.com' }
+        }
+      }
+    });
+    
+    deletionResults.umpireProfiles = await prisma.umpireProfile.deleteMany({
+      where: {
+        user: {
+          email: { not: 'ADMIN@gmail.com' }
+        }
+      }
+    });
+    
+    // STEP 20: DELETE ALL USERS EXCEPT ADMIN
+    deletionResults.usersDeleted = await prisma.user.deleteMany({
+      where: {
+        email: { not: 'ADMIN@gmail.com' }
+      }
+    });
+
+    console.log('☢️  COMPLETE SYSTEM RESET SUCCESSFUL');
+    console.log('📊 Deletion results:', deletionResults);
+
+    res.json({
+      success: true,
+      message: 'Complete system reset successful. All data deleted except admin account.',
+      deletionResults: {
+        matches: deletionResults.matchScores.count,
+        draws: deletionResults.draws.count,
+        registrations: deletionResults.registrations.count,
+        paymentVerifications: deletionResults.paymentVerifications.count,
+        categories: deletionResults.categories.count,
+        tournamentPayments: deletionResults.tournamentPayments.count,
+        tournamentPosters: deletionResults.tournamentPosters.count,
+        tournamentUmpires: deletionResults.tournamentUmpires.count,
+        tournaments: deletionResults.tournaments.count,
+        walletTransactions: deletionResults.walletTransactions.count,
+        notifications: deletionResults.notifications.count,
+        scoreCorrectionRequests: deletionResults.scoreCorrectionRequests.count,
+        smsLogs: deletionResults.smsLogs.count,
+        auditLogs: deletionResults.auditLogs.count,
+        academies: deletionResults.academies.count,
+        organizerKYC: deletionResults.organizerKYC.count,
+        organizerRequests: deletionResults.organizerRequests.count,
+        paymentSettings: deletionResults.paymentSettings.count,
+        playerProfiles: deletionResults.playerProfiles.count,
+        organizerProfiles: deletionResults.organizerProfiles.count,
+        umpireProfiles: deletionResults.umpireProfiles.count,
+        usersDeleted: deletionResults.usersDeleted.count,
+        adminPreserved: true
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Error in complete system reset:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to perform complete system reset',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
 export default router;

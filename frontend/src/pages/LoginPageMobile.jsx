@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { EyeIcon, EyeSlashIcon, EnvelopeIcon, LockClosedIcon } from '@heroicons/react/24/outline';
+import { EyeIcon, EyeSlashIcon, PhoneIcon, LockClosedIcon } from '@heroicons/react/24/outline';
 import { getErrorMessage } from '../utils/errorMessage';
 import MatchifyLogo from '../components/MatchifyLogo';
 
@@ -20,7 +20,7 @@ const LOGIN_M_PARTICLES = Array.from({ length: 20 }, (_, i) => ({
 
 
 const LoginPageMobile = () => {
-  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [formData, setFormData] = useState({ phone: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -37,8 +37,12 @@ const LoginPageMobile = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.email || !formData.password) {
-      setError('All fields are required');
+    if (!formData.phone || !formData.password) {
+      setError('Phone number and password are required');
+      return;
+    }
+    if (!/^[0-9]{10}$/.test(formData.phone)) {
+      setError('Enter valid 10-digit phone number');
       return;
     }
     
@@ -46,7 +50,7 @@ const LoginPageMobile = () => {
     setError('');
     
     try {
-      const user = await login(formData.email, formData.password);
+      const user = await login(formData.phone, formData.password);
       
       if (redirectUrl) {
         navigate(redirectUrl);
@@ -319,25 +323,26 @@ const LoginPageMobile = () => {
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
             
-            {/* Email */}
+            {/* Phone Number */}
             <div>
               <label className="block text-sm font-semibold text-white mb-2">
-                Email Address
+                Phone Number
               </label>
               <div className="relative">
-                <EnvelopeIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                <PhoneIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
                 <input
-                  name="email"
-                  type="email"
+                  name="phone"
+                  type="tel"
                   required
-                  autoComplete="email"
+                  autoComplete="tel"
+                  maxLength={10}
                   className="w-full pl-10 pr-4 py-3.5 rounded-xl text-white text-sm placeholder-gray-500 outline-none"
                   style={{ 
                     background: 'rgba(255,255,255,0.05)', 
                     border: '1px solid rgba(255,255,255,0.1)' 
                   }}
-                  placeholder="you@example.com"
-                  value={formData.email}
+                  placeholder="9876543210"
+                  value={formData.phone}
                   onChange={handleChange}
                 />
               </div>
@@ -372,21 +377,6 @@ const LoginPageMobile = () => {
                   {showPassword ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
                 </button>
               </div>
-            </div>
-
-            {/* Remember & Forgot */}
-            <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input 
-                  type="checkbox" 
-                  className="w-4 h-4 rounded" 
-                  style={{ accentColor: '#00ff88' }}
-                />
-                <span className="text-xs text-gray-400">Remember me</span>
-              </label>
-              <a href="#" className="text-xs font-semibold" style={{ color: '#00ff88' }}>
-                Forgot password?
-              </a>
             </div>
 
             {/* Submit Button with Enhanced Glow */}

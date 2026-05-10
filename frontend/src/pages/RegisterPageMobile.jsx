@@ -30,9 +30,8 @@ const REG_M_PARTICLES = Array.from({ length: 20 }, (_, i) => ({
 const RegisterPageMobile = () => {
   const [formData, setFormData] = useState({
     name: '',
-    email: '',
     phone: '',
-    yearOfBirth: '',
+    birthYear: '',
     password: '',
     confirmPassword: '',
   });
@@ -55,12 +54,18 @@ const RegisterPageMobile = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.email || !formData.password || !formData.phone) {
-      setError('Name, Email, Phone and Password are required');
+    if (!formData.name || !formData.phone || !formData.birthYear || !formData.password) {
+      setError('All fields are required');
       return;
     }
     if (!/^[0-9]{10}$/.test(formData.phone)) {
       setError('Enter valid 10-digit phone number');
+      return;
+    }
+    const currentYear = new Date().getFullYear();
+    const year = parseInt(formData.birthYear);
+    if (isNaN(year) || year < 1900 || year > currentYear) {
+      setError(`Enter valid birth year (1900-${currentYear})`);
       return;
     }
     
@@ -70,7 +75,7 @@ const RegisterPageMobile = () => {
       return;
     }
     if (!/[A-Z]/.test(password)) {
-      setError('Password needs one uppercase letter');
+      setError('Password needs one capital letter');
       return;
     }
     if ((password.match(/[0-9]/g) || []).length < 2) {
@@ -78,7 +83,7 @@ const RegisterPageMobile = () => {
       return;
     }
     if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
-      setError('Password needs one symbol (!@#$...)');
+      setError('Password needs one special symbol');
       return;
     }
     if (formData.password !== formData.confirmPassword) {
@@ -94,11 +99,7 @@ const RegisterPageMobile = () => {
     setError('');
     
     try {
-      const { confirmPassword, yearOfBirth, ...rest } = formData;
-      const dataToSend = {
-        ...rest,
-        ...(yearOfBirth ? { birthYear: parseInt(yearOfBirth, 10) } : {}),
-      };
+      const { confirmPassword, ...dataToSend } = formData;
       await register(dataToSend);
       
       if (redirectUrl) {
@@ -434,30 +435,7 @@ const RegisterPageMobile = () => {
               </div>
             </div>
 
-            {/* Email */}
-            <div>
-              <label className="block text-sm font-semibold text-white mb-2">
-                Email Address
-              </label>
-              <div className="relative">
-                <EnvelopeIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
-                <input
-                  name="email"
-                  type="email"
-                  required
-                  className="w-full pl-10 pr-4 py-3 rounded-xl text-white text-sm placeholder-gray-500 outline-none"
-                  style={{ 
-                    background: 'rgba(255,255,255,0.05)', 
-                    border: '1px solid rgba(255,255,255,0.1)' 
-                  }}
-                  placeholder="you@example.com"
-                  value={formData.email}
-                  onChange={handleChange}
-                />
-              </div>
-            </div>
-
-            {/* Phone */}
+            {/* Phone Number */}
             <div>
               <label className="block text-sm font-semibold text-white mb-2">
                 Phone Number
@@ -481,23 +459,24 @@ const RegisterPageMobile = () => {
               </div>
             </div>
 
-            {/* Year of Birth */}
+            {/* Birth Year - Required */}
             <div>
               <label className="block text-sm font-semibold text-white mb-2">
-                Year of Birth <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 400 }}>(Optional)</span>
+                Birth Year
               </label>
               <select
-                name="yearOfBirth"
+                name="birthYear"
+                required
                 className="w-full px-4 py-3 rounded-xl text-white text-sm outline-none"
                 style={{
                   background: 'rgba(255,255,255,0.05)',
                   border: '1px solid rgba(255,255,255,0.1)',
                   colorScheme: 'dark',
                 }}
-                value={formData.yearOfBirth}
+                value={formData.birthYear}
                 onChange={handleChange}
               >
-                <option value="" style={{ background: '#1e293b' }}>Select year</option>
+                <option value="" style={{ background: '#1e293b' }}>Select your birth year</option>
                 {Array.from({ length: 2026 - 1950 + 1 }, (_, i) => 2026 - i).map(yr => (
                   <option key={yr} value={yr} style={{ background: '#1e293b' }}>{yr}</option>
                 ))}

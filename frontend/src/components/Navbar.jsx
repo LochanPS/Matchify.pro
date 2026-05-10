@@ -3,17 +3,22 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import NotificationBell from './NotificationBell';
 import MatchifyLogo from './MatchifyLogo';
-import { 
-  ChevronDown, 
-  Plus, 
-  User, 
-  LogOut, 
-  Menu, 
+import {
+  ChevronDown,
+  Plus,
+  User,
+  LogOut,
+  Menu,
   X,
   Trophy,
   LayoutDashboard,
   Search,
-  Award
+  Award,
+  HeadphonesIcon,
+  Mail,
+  ChevronUp,
+  Copy,
+  Check
 } from 'lucide-react';
 import {
   ArrowLeftIcon,
@@ -41,6 +46,8 @@ const Navbar = () => {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showRoleMenu, setShowRoleMenu] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [showCustomerCare, setShowCustomerCare] = useState(false);
+  const [emailCopied, setEmailCopied] = useState(false);
   const userMenuRef = useRef(null);
   const roleMenuRef = useRef(null);
   const mobileMenuRef = useRef(null);
@@ -54,9 +61,7 @@ const Navbar = () => {
       if (roleMenuRef.current && !roleMenuRef.current.contains(event.target)) {
         setShowRoleMenu(false);
       }
-      // Close mobile menu when clicking outside
       if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target) && showMobileMenu) {
-        // Check if click is not on the menu button itself
         const menuButton = document.querySelector('[data-mobile-menu-button]');
         if (menuButton && !menuButton.contains(event.target)) {
           setShowMobileMenu(false);
@@ -90,27 +95,25 @@ const Navbar = () => {
     setShowUserMenu(false);
   };
 
+  const handleCopyEmail = () => {
+    navigator.clipboard.writeText('matchify.pro@gmail.com').then(() => {
+      setEmailCopied(true);
+      setTimeout(() => setEmailCopied(false), 2000);
+    });
+  };
+
   const getCurrentRole = () => {
     if (!user) return null;
-    
-    // Check if user is admin first - multiple detection methods
-    const isAdmin = user.isAdmin || 
+    const isAdmin = user.isAdmin ||
                    (user.roles && (Array.isArray(user.roles) ? user.roles.includes('ADMIN') : user.roles === 'ADMIN' || user.roles.includes('ADMIN'))) ||
                    user.currentRole === 'ADMIN';
-    
-    if (isAdmin) {
-      return 'ADMIN';
-    }
-    
+    if (isAdmin) return 'ADMIN';
     return user.currentRole || user.role || (user.roles && user.roles[0]);
   };
 
   const getAvailableRoles = () => {
     if (!user) return [];
-    
     let roles = [];
-    
-    // Handle different role formats
     if (Array.isArray(user.roles)) {
       roles = user.roles;
     } else if (typeof user.roles === 'string') {
@@ -118,22 +121,14 @@ const Navbar = () => {
     } else if (user.role) {
       roles = [user.role];
     }
-    
-    // Normalize role names to uppercase
     roles = roles.map(r => r.toUpperCase());
-    
-    // Ensure PLAYER is always there as base role
-    if (!roles.includes('PLAYER')) {
-      roles.unshift('PLAYER');
-    }
-    
+    if (!roles.includes('PLAYER')) roles.unshift('PLAYER');
     return roles;
   };
 
   const handleRoleSwitch = (role) => {
     if (switchRole) switchRole(role);
     setShowRoleMenu(false);
-    // Navigate to unified dashboard with role parameter
     if (role === 'ADMIN') {
       navigate('/admin-dashboard');
     } else {
@@ -153,10 +148,7 @@ const Navbar = () => {
 
   const getDashboardLink = () => {
     const role = getCurrentRole();
-    if (role === 'ADMIN') {
-      return '/admin-dashboard';
-    }
-    // Return unified dashboard with role parameter
+    if (role === 'ADMIN') return '/admin-dashboard';
     return `/dashboard?role=${role || 'PLAYER'}`;
   };
 
@@ -177,19 +169,16 @@ const Navbar = () => {
   const roleColors = getRoleColor(currentRole);
   const availableRoles = getAvailableRoles();
 
-  // If user is admin, use the same navbar style as regular users
+  // Admin navbar
   if (user?.isAdmin) {
     return (
       <header className="sticky top-0 z-50 backdrop-blur-lg border-b shadow-lg shadow-black/40" style={{ background:'rgba(7,7,26,0.96)', borderColor:'rgba(0,255,136,0.1)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-8">
-              {/* Logo */}
               <Link to="/admin-dashboard" className="group hover:opacity-90 transition-opacity">
                 <MatchifyLogo size={42} variant="full" />
               </Link>
-
-              {/* Admin Navigation */}
               <nav className="hidden md:flex items-center gap-1">
                 <NavLink to="/admin-dashboard" active={location.pathname === '/admin-dashboard' || location.pathname === '/admin/dashboard'}>
                   <LayoutDashboard className="w-4 h-4" />
@@ -209,18 +198,12 @@ const Navbar = () => {
                 </NavLink>
               </nav>
             </div>
-
             <div className="flex items-center gap-3">
-              {/* Admin Badge */}
               <div className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl bg-red-500/20 text-red-400 text-sm font-semibold border border-red-500/30">
                 <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></span>
                 ADMIN
               </div>
-
-              {/* Notifications */}
               <NotificationBell />
-
-              {/* Logout */}
               <button
                 onClick={handleLogout}
                 className="flex items-center gap-2 px-4 py-2 bg-slate-800 text-gray-300 rounded-xl border border-white/10 hover:bg-slate-700 transition-all text-sm font-medium"
@@ -236,13 +219,12 @@ const Navbar = () => {
   }
 
   return (
-    <header className="sticky top-0 z-50 backdrop-blur-lg border-b shadow-lg shadow-purple-900/40" style={{ background:'linear-gradient(135deg, rgba(88,28,135,0.95) 0%, rgba(67,20,100,0.95) 50%, rgba(49,15,75,0.95) 100%)', borderColor:'rgba(168,85,247,0.3)' }}>
+    <header className="sticky top-0 z-50 backdrop-blur-lg border-b shadow-lg shadow-black/40" style={{ background:'rgba(7,7,26,0.96)', borderColor:'rgba(0,255,136,0.1)' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16">
 
           {/* Left: Logo + Nav */}
           <div className="flex items-center gap-6 sm:gap-8">
-            {/* Logo */}
             <Link to="/" className="group hover:opacity-90 transition-opacity flex-shrink-0">
               <MatchifyLogo size={42} variant="full" />
             </Link>
@@ -262,12 +244,10 @@ const Navbar = () => {
                 Academies
               </NavLink>
               {user && (
-                <>
-                  <NavLink to={getDashboardLink()} active={isActiveLink('/dashboard')}>
-                    <LayoutDashboard className="w-4 h-4" />
-                    Dashboard
-                  </NavLink>
-                </>
+                <NavLink to={getDashboardLink()} active={isActiveLink('/dashboard')}>
+                  <LayoutDashboard className="w-4 h-4" />
+                  Dashboard
+                </NavLink>
               )}
             </nav>
           </div>
@@ -276,7 +256,7 @@ const Navbar = () => {
           <div className="flex items-center gap-3 sm:gap-4">
             {user ? (
               <>
-                {/* Role Switcher - Always show, allow adding roles */}
+                {/* Role Switcher */}
                 <div className="relative hidden sm:block" ref={roleMenuRef}>
                   <button
                     onClick={() => setShowRoleMenu(!showRoleMenu)}
@@ -296,14 +276,12 @@ const Navbar = () => {
                           <button
                             key={role}
                             onClick={() => handleRoleSwitch(role)}
-                            className={`w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-white/5 transition-colors ${
-                              role === currentRole ? 'bg-white/5' : ''
-                            }`}
+                            className={`w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-white/5 transition-colors ${role === currentRole ? 'bg-white/5' : ''}`}
                           >
                             <span className={`w-3 h-3 rounded-full ${colors.dot}`}></span>
                             <span className={`font-medium ${colors.text}`}>{role}</span>
                             {role === currentRole && (
-                              <span className="ml-auto text-xs bg-gradient-to-r from-green-500 to-emerald-500 text-white px-2.5 py-1 rounded-full font-semibold">Active</span>
+                              <span className="ml-auto text-xs px-2.5 py-1 rounded-full font-semibold text-white" style={{ background:'linear-gradient(135deg,#00ff88,#00d4ff)' }}>Active</span>
                             )}
                           </button>
                         );
@@ -312,11 +290,12 @@ const Navbar = () => {
                   )}
                 </div>
 
-                {/* Create Tournament Button - Only for Organizers, hide on academies page */}
+                {/* Create Tournament Button */}
                 {isOrganizer() && !location.pathname.startsWith('/academies') && (
                   <Link
                     to="/tournaments/create"
-                    className="hidden sm:flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-500 to-violet-600 text-white rounded-xl hover:shadow-lg hover:shadow-purple-500/30 hover:scale-105 transition-all text-sm font-semibold"
+                    className="hidden sm:flex items-center gap-2 px-5 py-2.5 rounded-xl hover:shadow-lg hover:scale-105 transition-all text-sm font-semibold text-black"
+                    style={{ background:'linear-gradient(135deg,#00ff88,#00d4ff)', boxShadow:'0 0 16px rgba(0,255,136,0.3)' }}
                   >
                     <Plus className="w-4 h-4" />
                     Create
@@ -333,13 +312,9 @@ const Navbar = () => {
                     className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-white/10 transition-all"
                   >
                     {user.profilePhoto ? (
-                      <img 
-                        src={user.profilePhoto} 
-                        alt={user.name} 
-                        className="w-10 h-10 rounded-xl object-cover border-2 border-white/20 shadow-sm"
-                      />
+                      <img src={user.profilePhoto} alt={user.name} className="w-10 h-10 rounded-xl object-cover border-2 border-white/20 shadow-sm" />
                     ) : (
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-purple-500/30">
+                      <div className="w-10 h-10 rounded-xl flex items-center justify-center text-black font-bold text-sm shadow-lg" style={{ background:'linear-gradient(135deg,#00ff88,#00d4ff)' }}>
                         {user.name?.charAt(0)?.toUpperCase() || 'U'}
                       </div>
                     )}
@@ -348,13 +323,12 @@ const Navbar = () => {
 
                   {showUserMenu && (
                     <div className="absolute right-0 mt-2 w-72 bg-slate-800 border border-white/10 rounded-2xl shadow-2xl shadow-black/50 py-2 z-50 overflow-hidden">
-                      {/* User Info */}
                       <div className="px-4 py-4 bg-white/5 border-b border-white/10">
                         <div className="flex items-center gap-3">
                           {user.profilePhoto ? (
                             <img src={user.profilePhoto} alt={user.name} className="w-12 h-12 rounded-xl object-cover" />
                           ) : (
-                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white font-bold">
+                            <div className="w-12 h-12 rounded-xl flex items-center justify-center text-black font-bold" style={{ background:'linear-gradient(135deg,#00ff88,#00d4ff)' }}>
                               {user.name?.charAt(0)?.toUpperCase()}
                             </div>
                           )}
@@ -364,8 +338,6 @@ const Navbar = () => {
                           </div>
                         </div>
                       </div>
-
-                      {/* Menu Items */}
                       <div className="py-2">
                         <MenuLink to="/profile" icon={<User className="w-4 h-4" />} onClick={() => setShowUserMenu(false)}>
                           My Profile
@@ -376,8 +348,6 @@ const Navbar = () => {
                           </MenuLink>
                         )}
                       </div>
-
-                      {/* Logout */}
                       <div className="border-t border-white/10 pt-2 pb-1 px-2">
                         <button
                           onClick={handleLogout}
@@ -395,7 +365,7 @@ const Navbar = () => {
                 <button
                   data-mobile-menu-button
                   onClick={() => setShowMobileMenu(!showMobileMenu)}
-                  className="md:hidden p-2 rounded-lg hover:bg-purple-500/20 transition-colors text-purple-200"
+                  className="md:hidden p-2 rounded-lg hover:bg-white/10 transition-colors text-gray-300"
                 >
                   {showMobileMenu ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
                 </button>
@@ -411,8 +381,8 @@ const Navbar = () => {
                 </Link>
                 <Link
                   to="/register"
-                  className="px-5 py-2.5 rounded-xl hover:scale-105 transition-all text-sm font-bold"
-                  style={{ background:'linear-gradient(135deg,#a855f7,#c084fc)', color:'#ffffff', boxShadow:'0 0 16px rgba(168,85,247,0.4)' }}
+                  className="px-5 py-2.5 rounded-xl hover:scale-105 transition-all text-sm font-bold text-black"
+                  style={{ background:'linear-gradient(135deg,#00ff88,#00d4ff)', boxShadow:'0 0 16px rgba(0,255,136,0.4)' }}
                 >
                   Sign up
                 </Link>
@@ -422,239 +392,273 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile Menu - Professional Design */}
+      {/* Mobile Menu */}
       {user && showMobileMenu && (
         <>
-          {/* Full-screen overlay */}
-          <div 
+          {/* Overlay */}
+          <div
             className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
             onClick={() => setShowMobileMenu(false)}
           />
-          
-          {/* Menu content - slides down from navbar */}
-          <div 
+
+          {/* Menu panel */}
+          <div
             ref={mobileMenuRef}
-            className="md:hidden fixed left-0 right-0 top-0 z-50 overflow-y-auto max-h-screen"
-            style={{ 
-              paddingTop: '64px', // Space for navbar
-              background: 'linear-gradient(180deg, #1e1b4b 0%, #312e81 30%, #4c1d95 60%, #581c87 100%)'
+            className="md:hidden fixed z-50 overflow-y-auto"
+            style={{
+              top: 0,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: '100%',
+              maxWidth: '480px',
+              maxHeight: '100vh',
+              paddingTop: '64px',
+              background: 'linear-gradient(180deg, #07071a 0%, #0d1025 40%, #07071a 100%)',
             }}
           >
-          {/* Animated Background Elements */}
-          <div className="fixed inset-0 pointer-events-none overflow-hidden">
-            <div 
-              className="absolute top-0 right-0 w-64 h-64 rounded-full blur-3xl opacity-30"
-              style={{ 
-                background: 'radial-gradient(circle, rgba(168,85,247,0.8), transparent)',
-                animation: 'glow 4s ease-in-out infinite'
-              }}
-            />
-            <div 
-              className="absolute bottom-1/3 left-0 w-56 h-56 rounded-full blur-3xl opacity-25"
-              style={{ 
-                background: 'radial-gradient(circle, rgba(192,132,252,0.8), transparent)',
-                animation: 'glow 5s ease-in-out infinite reverse'
-              }}
-            />
-            {NAV_PARTICLES.map((p, i) => (
-          <div
-            key={i}
-            className="absolute rounded-full"
-            style={{
-              width: `${p.w}px`,
-              height: `${p.h}px`,
-              left: `${p.x}%`,
-              top: `${p.y}%`,
-              background: p.c,
-              opacity: p.o,
-              animation: `float ${p.dur}s ease-in-out infinite`,
-              animationDelay: `${p.delay}s`,
-              boxShadow: `0 0 ${p.glow}px ${p.c}`,
-            }}
-          />
-        ))}
-          </div>
-
-          <style>{`
-            @keyframes float {
-              0%, 100% { transform: translate(0, 0) scale(1); }
-              25% { transform: translate(15px, -15px) scale(1.05); }
-              50% { transform: translate(-10px, 10px) scale(0.95); }
-              75% { transform: translate(10px, 5px) scale(1.02); }
-            }
-            @keyframes glow {
-              0%, 100% { opacity: 0.3; filter: brightness(1); }
-              50% { opacity: 0.6; filter: brightness(1.3); }
-            }
-            @keyframes shimmer {
-              0% { background-position: -200% center; }
-              100% { background-position: 200% center; }
-            }
-          `}</style>
-
-          <div className="relative px-4 py-3 space-y-3">
-            {/* Role Switcher Card */}
-            <div 
-              className="rounded-2xl p-4 relative overflow-hidden"
-              style={{
-                background: 'linear-gradient(135deg, rgba(168,85,247,0.2) 0%, rgba(192,132,252,0.2) 100%)',
-                border: '2px solid rgba(168,85,247,0.4)',
-                backdropFilter: 'blur(20px)',
-                boxShadow: '0 8px 32px rgba(168,85,247,0.3), inset 0 1px 0 rgba(255,255,255,0.1)'
-              }}
+            {/* Background particles */}
+            <div
+              className="fixed pointer-events-none overflow-hidden"
+              style={{ top: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: '480px', height: '100%' }}
             >
-              <div 
-                className="absolute inset-0 opacity-20"
-                style={{
-                  background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
-                  backgroundSize: '200% 100%',
-                  animation: 'shimmer 3s infinite'
-                }}
+              <div
+                className="absolute top-0 right-0 w-48 h-48 rounded-full blur-3xl opacity-20"
+                style={{ background: 'radial-gradient(circle, rgba(0,255,136,0.8), transparent)', animation: 'glow 4s ease-in-out infinite' }}
               />
-              <p 
-                className="text-xs font-bold mb-2 relative z-10"
-                style={{ 
-                  background: 'linear-gradient(135deg, #a855f7, #c084fc)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text'
-                }}
-              >
-                YOUR ROLES
-              </p>
-              <div className="flex flex-wrap gap-2 relative z-10">
-                {availableRoles.map((role) => {
-                  const colors = getRoleColor(role);
-                  const isActive = role === currentRole;
-                  return (
-                    <button
-                      key={role}
-                      onClick={() => { handleRoleSwitch(role); setShowMobileMenu(false); }}
-                      className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all relative overflow-hidden"
-                      style={{
-                        background: isActive 
-                          ? 'linear-gradient(135deg, #a855f7, #c084fc)' 
-                          : 'rgba(255,255,255,0.05)',
-                        border: `1.5px solid ${isActive ? 'rgba(168,85,247,0.6)' : 'rgba(255,255,255,0.1)'}`,
-                        color: isActive ? '#ffffff' : '#e9d5ff',
-                        boxShadow: isActive ? '0 4px 15px rgba(168,85,247,0.5)' : 'none'
-                      }}
-                    >
-                      {isActive && (
-                        <div 
-                          className="absolute inset-0 opacity-30"
-                          style={{
-                            background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)',
-                            backgroundSize: '200% 100%',
-                            animation: 'shimmer 2s infinite'
-                          }}
-                        />
-                      )}
-                      <span className={`w-2 h-2 rounded-full ${colors.dot} relative z-10`}></span>
-                      <span className="relative z-10">{role}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Navigation Links */}
-            <div className="space-y-2">
-              <MobileNavLinkStyled to="/tournaments" onClick={() => setShowMobileMenu(false)} icon={<Trophy className="w-5 h-5" />} color="blue">
-                Tournaments
-              </MobileNavLinkStyled>
-              <MobileNavLinkStyled to="/leaderboard" onClick={() => setShowMobileMenu(false)} icon={<Award className="w-5 h-5" />} color="orange">
-                Leaderboard
-              </MobileNavLinkStyled>
-              <MobileNavLinkStyled to="/academies" onClick={() => setShowMobileMenu(false)} icon={<Search className="w-5 h-5" />} color="purple">
-                Academies
-              </MobileNavLinkStyled>
-              <MobileNavLinkStyled to={getDashboardLink()} onClick={() => setShowMobileMenu(false)} icon={<LayoutDashboard className="w-5 h-5" />} color="green">
-                Dashboard
-              </MobileNavLinkStyled>
-              <MobileNavLinkStyled to="/profile" onClick={() => setShowMobileMenu(false)} icon={<User className="w-5 h-5" />} color="cyan">
-                Profile
-              </MobileNavLinkStyled>
-              {currentRole === 'PLAYER' && (
-                <MobileNavLinkStyled to="/registrations" onClick={() => setShowMobileMenu(false)} icon={<Trophy className="w-5 h-5" />} color="indigo">
-                  My Registrations
-                </MobileNavLinkStyled>
-              )}
-            </div>
-
-            {/* Create Tournament Button */}
-            {isOrganizer() && (
-              <Link
-                to="/tournaments/create"
-                onClick={() => setShowMobileMenu(false)}
-                className="flex items-center justify-center gap-3 px-6 py-4 rounded-xl font-bold text-base transition-all relative overflow-hidden group"
-                style={{ 
-                  background: 'linear-gradient(135deg, #a855f7, #c084fc)',
-                  color: '#ffffff',
-                  boxShadow: '0 8px 25px rgba(168,85,247,0.5), inset 0 1px 0 rgba(255,255,255,0.3)'
-                }}
-              >
-                <div 
-                  className="absolute inset-0 opacity-0 group-active:opacity-100 transition-opacity"
-                  style={{ background: 'radial-gradient(circle at center, rgba(255,255,255,0.3), transparent)' }}
+              <div
+                className="absolute bottom-1/3 left-0 w-40 h-40 rounded-full blur-3xl opacity-15"
+                style={{ background: 'radial-gradient(circle, rgba(0,212,255,0.8), transparent)', animation: 'glow 5s ease-in-out infinite reverse' }}
+              />
+              {NAV_PARTICLES.map((p, i) => (
+                <div
+                  key={i}
+                  className="absolute rounded-full"
+                  style={{
+                    width: `${p.w}px`,
+                    height: `${p.h}px`,
+                    left: `${p.x}%`,
+                    top: `${p.y}%`,
+                    background: p.c,
+                    opacity: p.o,
+                    animation: `float ${p.dur}s ease-in-out infinite`,
+                    animationDelay: `${p.delay}s`,
+                    boxShadow: `0 0 ${p.glow}px ${p.c}`,
+                  }}
                 />
-                <Plus className="w-5 h-5 relative z-10" />
-                <span className="relative z-10">Create Tournament</span>
-              </Link>
-            )}
+              ))}
+            </div>
 
-            {/* Find Competition Button */}
-            <button
-              onClick={() => { navigate('/tournaments'); setShowMobileMenu(false); }}
-              className="w-full flex items-center justify-center gap-3 px-6 py-4 rounded-xl font-bold text-base transition-all relative overflow-hidden"
-              style={{ 
-                background: 'linear-gradient(135deg, rgba(245,158,11,0.2), rgba(251,146,60,0.15))',
-                border: '2px solid rgba(245,158,11,0.4)',
-                color: '#fbbf24',
-                boxShadow: '0 4px 15px rgba(245,158,11,0.3)'
-              }}
-            >
-              <SparklesIcon className="w-5 h-5" />
-              Find Your Next Competition
-            </button>
+            <style>{`
+              @keyframes float {
+                0%, 100% { transform: translate(0, 0) scale(1); }
+                25% { transform: translate(15px, -15px) scale(1.05); }
+                50% { transform: translate(-10px, 10px) scale(0.95); }
+                75% { transform: translate(10px, 5px) scale(1.02); }
+              }
+              @keyframes glow {
+                0%, 100% { opacity: 0.3; filter: brightness(1); }
+                50% { opacity: 0.6; filter: brightness(1.3); }
+              }
+              @keyframes shimmer {
+                0% { background-position: -200% center; }
+                100% { background-position: 200% center; }
+              }
+            `}</style>
 
-            {/* Logout Button */}
-            <button
-              onClick={() => { handleLogout(); setShowMobileMenu(false); }}
-              className="w-full flex items-center justify-center gap-3 px-6 py-4 rounded-xl font-bold text-base transition-all relative overflow-hidden group"
-              style={{ 
-                background: 'linear-gradient(135deg, rgba(239,68,68,0.2), rgba(220,38,38,0.15))',
-                border: '2px solid rgba(239,68,68,0.4)',
-                color: '#f87171',
-                boxShadow: '0 4px 15px rgba(239,68,68,0.3)'
-              }}
-            >
-              <div 
-                className="absolute inset-0 opacity-0 group-active:opacity-100 transition-opacity"
-                style={{ background: 'rgba(239,68,68,0.1)' }}
-              />
-              <LogOut className="w-5 h-5 relative z-10" />
-              <span className="relative z-10">Logout</span>
-            </button>
+            <div className="relative px-4 py-3 space-y-2">
 
-            {/* Back Button */}
-            <button
-              onClick={() => { navigate(-1); setShowMobileMenu(false); }}
-              className="w-full flex items-center justify-center gap-3 px-6 py-3 rounded-xl font-semibold text-sm transition-all"
-              style={{ 
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                color: '#9ca3af'
-              }}
-            >
-              <ArrowLeftIcon className="w-5 h-5" />
-              Back
-            </button>
+              {/* Role Switcher Card */}
+              <div
+                className="rounded-2xl p-3 relative overflow-hidden"
+                style={{
+                  background: 'rgba(0,255,136,0.06)',
+                  border: '1.5px solid rgba(0,255,136,0.2)',
+                  backdropFilter: 'blur(20px)',
+                }}
+              >
+                <div
+                  className="absolute inset-0 opacity-10"
+                  style={{
+                    background: 'linear-gradient(90deg, transparent, rgba(0,255,136,0.3), transparent)',
+                    backgroundSize: '200% 100%',
+                    animation: 'shimmer 3s infinite'
+                  }}
+                />
+                <p
+                  className="text-xs font-bold mb-2 relative z-10"
+                  style={{
+                    background: 'linear-gradient(135deg, #00ff88, #00d4ff)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text'
+                  }}
+                >
+                  YOUR ROLES
+                </p>
+                <div className="flex flex-wrap gap-1.5 relative z-10">
+                  {availableRoles.map((role) => {
+                    const colors = getRoleColor(role);
+                    const isActive = role === currentRole;
+                    return (
+                      <button
+                        key={role}
+                        onClick={() => { handleRoleSwitch(role); setShowMobileMenu(false); }}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-bold transition-all"
+                        style={{
+                          background: isActive ? 'linear-gradient(135deg, #00ff88, #00d4ff)' : 'rgba(255,255,255,0.06)',
+                          border: `1.5px solid ${isActive ? 'rgba(0,255,136,0.5)' : 'rgba(255,255,255,0.1)'}`,
+                          color: isActive ? '#07071a' : '#e2e8f0',
+                          boxShadow: isActive ? '0 4px 15px rgba(0,255,136,0.4)' : 'none'
+                        }}
+                      >
+                        <span className={`w-2 h-2 rounded-full ${colors.dot}`}></span>
+                        {role}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Navigation Links */}
+              <div className="space-y-1.5">
+                <MobileNavLinkStyled to="/tournaments" onClick={() => setShowMobileMenu(false)} icon={<Trophy className="w-4 h-4" />} color="blue">
+                  Tournaments
+                </MobileNavLinkStyled>
+                <MobileNavLinkStyled to="/leaderboard" onClick={() => setShowMobileMenu(false)} icon={<Award className="w-4 h-4" />} color="orange">
+                  Leaderboard
+                </MobileNavLinkStyled>
+                <MobileNavLinkStyled to="/academies" onClick={() => setShowMobileMenu(false)} icon={<Search className="w-4 h-4" />} color="cyan">
+                  Academies
+                </MobileNavLinkStyled>
+                <MobileNavLinkStyled to={getDashboardLink()} onClick={() => setShowMobileMenu(false)} icon={<LayoutDashboard className="w-4 h-4" />} color="green">
+                  Dashboard
+                </MobileNavLinkStyled>
+                <MobileNavLinkStyled to="/profile" onClick={() => setShowMobileMenu(false)} icon={<User className="w-4 h-4" />} color="teal">
+                  Profile
+                </MobileNavLinkStyled>
+                {currentRole === 'PLAYER' && (
+                  <MobileNavLinkStyled to="/registrations" onClick={() => setShowMobileMenu(false)} icon={<Trophy className="w-4 h-4" />} color="blue">
+                    My Registrations
+                  </MobileNavLinkStyled>
+                )}
+              </div>
+
+              {/* Create Tournament Button */}
+              {isOrganizer() && (
+                <Link
+                  to="/tournaments/create"
+                  onClick={() => setShowMobileMenu(false)}
+                  className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold text-sm transition-all relative overflow-hidden group text-black"
+                  style={{
+                    background: 'linear-gradient(135deg, #00ff88, #00d4ff)',
+                    boxShadow: '0 4px 20px rgba(0,255,136,0.4)'
+                  }}
+                >
+                  <Plus className="w-4 h-4" />
+                  Create Tournament
+                </Link>
+              )}
+
+              {/* Find Competition Button */}
+              <button
+                onClick={() => { navigate('/tournaments'); setShowMobileMenu(false); }}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold text-sm transition-all"
+                style={{
+                  background: 'rgba(251,191,36,0.1)',
+                  border: '1.5px solid rgba(251,191,36,0.3)',
+                  color: '#fbbf24',
+                }}
+              >
+                <SparklesIcon className="w-4 h-4" />
+                Find Your Next Competition
+              </button>
+
+              {/* Customer Care */}
+              <div className="rounded-xl overflow-hidden" style={{ border: '1.5px solid rgba(0,212,255,0.2)' }}>
+                <button
+                  onClick={() => setShowCustomerCare(!showCustomerCare)}
+                  className="w-full flex items-center gap-2 px-4 py-3 font-bold text-sm transition-all"
+                  style={{
+                    background: showCustomerCare ? 'rgba(0,212,255,0.12)' : 'rgba(0,212,255,0.06)',
+                    color: '#00d4ff',
+                  }}
+                >
+                  <HeadphonesIcon className="w-4 h-4" />
+                  <span className="flex-1 text-left">Customer Care</span>
+                  {showCustomerCare ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                </button>
+
+                {showCustomerCare && (
+                  <div
+                    className="px-4 py-3"
+                    style={{ background: 'rgba(0,212,255,0.05)' }}
+                  >
+                    <p className="text-xs text-gray-400 mb-2.5">
+                      Please enter your query at our support email and we'll get back to you shortly.
+                    </p>
+                    <div
+                      className="flex items-center gap-2 px-3 py-2.5 rounded-lg"
+                      style={{ background: 'rgba(0,212,255,0.08)', border: '1px solid rgba(0,212,255,0.2)' }}
+                    >
+                      <Mail className="w-4 h-4 flex-shrink-0" style={{ color: '#00d4ff' }} />
+                      <span className="flex-1 text-sm font-medium" style={{ color: '#00d4ff' }}>
+                        matchify.pro@gmail.com
+                      </span>
+                      <button
+                        onClick={handleCopyEmail}
+                        className="p-1 rounded transition-colors"
+                        style={{ color: emailCopied ? '#00ff88' : '#00d4ff' }}
+                        title="Copy email"
+                      >
+                        {emailCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                      </button>
+                    </div>
+                    <a
+                      href="mailto:matchify.pro@gmail.com"
+                      className="mt-2 w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-bold transition-all text-black"
+                      style={{ background: 'linear-gradient(135deg,#00d4ff,#0099cc)', marginTop: '8px', display: 'flex' }}
+                    >
+                      <Mail className="w-3.5 h-3.5" />
+                      Send Email
+                    </a>
+                  </div>
+                )}
+              </div>
+
+              {/* Logout Button */}
+              <button
+                onClick={() => { handleLogout(); setShowMobileMenu(false); }}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold text-sm transition-all"
+                style={{
+                  background: 'rgba(239,68,68,0.1)',
+                  border: '1.5px solid rgba(239,68,68,0.3)',
+                  color: '#f87171',
+                }}
+              >
+                <LogOut className="w-4 h-4" />
+                Logout
+              </button>
+
+              {/* Back Button */}
+              <button
+                onClick={() => { navigate(-1); setShowMobileMenu(false); }}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-semibold text-sm transition-all"
+                style={{
+                  background: 'rgba(255,255,255,0.04)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  color: '#9ca3af'
+                }}
+              >
+                <ArrowLeftIcon className="w-4 h-4" />
+                Back
+              </button>
+
+              {/* Bottom spacer */}
+              <div className="h-4" />
+            </div>
           </div>
-        </div>
         </>
       )}
-
     </header>
   );
 };
@@ -664,9 +668,9 @@ const NavLink = ({ to, children, active }) => (
   <Link
     to={to}
     className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
-      active 
-        ? 'text-purple-300 bg-purple-500/30 shadow-sm shadow-purple-500/20' 
-        : 'text-purple-100 hover:text-white hover:bg-purple-500/20'
+      active
+        ? 'text-green-300 bg-green-500/20 shadow-sm'
+        : 'text-gray-300 hover:text-white hover:bg-white/10'
     }`}
   >
     {children}
@@ -685,53 +689,51 @@ const MenuLink = ({ to, icon, children, onClick }) => (
   </Link>
 );
 
-// Mobile Nav Link Component
+// Mobile Nav Link Component (unused but kept for compat)
 const MobileNavLink = ({ to, children, onClick }) => (
   <Link
     to={to}
     onClick={onClick}
-    className="flex items-center gap-3 px-4 py-3.5 text-gray-300 hover:bg-white/10 rounded-xl transition-colors font-medium"
+    className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:bg-white/10 rounded-xl transition-colors font-medium"
   >
     {children}
   </Link>
 );
 
-// Styled Mobile Nav Link Component with Colors
+// Styled Mobile Nav Link Component
 const MobileNavLinkStyled = ({ to, children, onClick, icon, color }) => {
   const colorStyles = {
-    blue: { bg: 'rgba(59,130,246,0.15)', border: 'rgba(59,130,246,0.3)', text: '#60a5fa', iconBg: 'rgba(59,130,246,0.3)' },
-    orange: { bg: 'rgba(245,158,11,0.15)', border: 'rgba(245,158,11,0.3)', text: '#fbbf24', iconBg: 'rgba(245,158,11,0.3)' },
-    purple: { bg: 'rgba(168,85,247,0.15)', border: 'rgba(168,85,247,0.3)', text: '#c4b5fd', iconBg: 'rgba(168,85,247,0.3)' },
-    green: { bg: 'rgba(0,200,83,0.15)', border: 'rgba(0,200,83,0.3)', text: '#00ff88', iconBg: 'rgba(0,200,83,0.3)' },
-    cyan: { bg: 'rgba(6,182,212,0.15)', border: 'rgba(6,182,212,0.3)', text: '#22d3ee', iconBg: 'rgba(6,182,212,0.3)' },
-    indigo: { bg: 'rgba(99,102,241,0.15)', border: 'rgba(99,102,241,0.3)', text: '#a5b4fc', iconBg: 'rgba(99,102,241,0.3)' },
+    blue:   { bg: 'rgba(59,130,246,0.10)',  border: 'rgba(59,130,246,0.25)',  text: '#60a5fa', iconBg: 'rgba(59,130,246,0.2)' },
+    orange: { bg: 'rgba(245,158,11,0.10)',  border: 'rgba(245,158,11,0.25)',  text: '#fbbf24', iconBg: 'rgba(245,158,11,0.2)' },
+    cyan:   { bg: 'rgba(0,212,255,0.10)',   border: 'rgba(0,212,255,0.25)',   text: '#00d4ff', iconBg: 'rgba(0,212,255,0.2)' },
+    green:  { bg: 'rgba(0,255,136,0.10)',   border: 'rgba(0,255,136,0.25)',   text: '#00ff88', iconBg: 'rgba(0,255,136,0.2)' },
+    teal:   { bg: 'rgba(20,184,166,0.10)',  border: 'rgba(20,184,166,0.25)',  text: '#2dd4bf', iconBg: 'rgba(20,184,166,0.2)' },
   };
-  
+
   const style = colorStyles[color] || colorStyles.blue;
-  
+
   return (
     <Link
       to={to}
       onClick={onClick}
-      className="flex items-center gap-4 px-4 py-4 rounded-xl transition-all relative overflow-hidden group"
+      className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all relative overflow-hidden group"
       style={{
         background: style.bg,
-        border: `2px solid ${style.border}`,
-        boxShadow: `0 4px 15px ${style.border}`
+        border: `1.5px solid ${style.border}`,
       }}
     >
-      <div 
+      <div
         className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
-        style={{ background: 'rgba(255,255,255,0.05)' }}
+        style={{ background: 'rgba(255,255,255,0.04)' }}
       />
-      <div 
-        className="w-10 h-10 rounded-lg flex items-center justify-center relative z-10"
+      <div
+        className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 relative z-10"
         style={{ background: style.iconBg }}
       >
         <span style={{ color: style.text }}>{icon}</span>
       </div>
-      <span className="font-bold text-white relative z-10">{children}</span>
-      <ArrowRightIcon className="w-5 h-5 ml-auto relative z-10" style={{ color: style.text }} />
+      <span className="font-semibold text-white text-sm relative z-10">{children}</span>
+      <ArrowRightIcon className="w-4 h-4 ml-auto relative z-10" style={{ color: style.text }} />
     </Link>
   );
 };

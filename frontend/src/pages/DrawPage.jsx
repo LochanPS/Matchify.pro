@@ -2444,13 +2444,13 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                     const player1Name = getPlayerDisplay(player1);
                     const player2Name = getPlayerDisplay(player2);
                     
-                    const isCompleted = dbMatch?.status === 'COMPLETED';
+                    const isCompleted = dbMatch?.status === 'COMPLETED' || (!dbMatch && match.winner && player1.name !== 'TBD' && player2.name !== 'TBD');
                     const isLive = dbMatch?.status === 'IN_PROGRESS';
                     const isReady = dbMatch?.status === 'READY' && player1.name !== 'TBD' && player2.name !== 'TBD';
                     const hasUmpire = dbMatch?.umpireId;
-                    
-                    const isPlayer1Winner = dbMatch?.winnerId === player1?.id;
-                    const isPlayer2Winner = dbMatch?.winnerId === player2?.id;
+
+                    const isPlayer1Winner = dbMatch ? dbMatch.winnerId === player1?.id : match.winner === 1;
+                    const isPlayer2Winner = dbMatch ? dbMatch.winnerId === player2?.id : match.winner === 2;
                     
                     return (
                       <div 
@@ -2538,19 +2538,36 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                             </div>
                           </div>
                           
-                          {/* Organizer Actions */}
-                          {isOrganizer && dbMatch && (
+                          {/* VIEW — all users when completed */}
+                          {isCompleted && (
+                            <div className="px-2 pb-2">
+                              <button
+                                onClick={() => {
+                                  const bracketMatchData = { matchNumber: match.matchNumber, round: ri + 1, player1, player2 };
+                                  const matchDataToUse = dbMatch || {
+                                    matchNumber: match.matchNumber, status: 'COMPLETED', winner: match.winner,
+                                    winnerId: match.winner === 1 ? player1?.id : player2?.id,
+                                    score: match.scoreJson || match.score || null,
+                                    scoreJson: match.scoreJson || null,
+                                    player1, player2,
+                                  };
+                                  onViewMatchDetails(matchDataToUse, bracketMatchData);
+                                }}
+                                className="w-full py-2 rounded-lg bg-blue-500/20 text-blue-300 border-2 border-blue-500/40 transition-all text-[10px] font-black flex items-center justify-center gap-1"
+                              >
+                                <Eye className="w-3 h-3" />
+                                VIEW
+                              </button>
+                            </div>
+                          )}
+
+                          {/* Organizer-only actions */}
+                          {isOrganizer && dbMatch && !isCompleted && (
                             <div className="px-2 pb-2 flex gap-1.5">
-                              {/* Assign Umpire Button */}
-                              {!isCompleted && player1.name !== 'TBD' && player2.name !== 'TBD' && (
+                              {player1.name !== 'TBD' && player2.name !== 'TBD' && (
                                 <button
                                   onClick={() => {
-                                    const bracketMatchData = {
-                                      matchNumber: match.matchNumber,
-                                      round: ri + 1,
-                                      player1: player1,
-                                      player2: player2
-                                    };
+                                    const bracketMatchData = { matchNumber: match.matchNumber, round: ri + 1, player1, player2 };
                                     onAssignUmpire(dbMatch, bracketMatchData);
                                   }}
                                   className={`flex-1 py-2 rounded-lg border-2 transition-all text-[10px] font-black flex items-center justify-center gap-1 ${
@@ -2563,9 +2580,7 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                                   {hasUmpire ? 'READY' : 'UMPIRE'}
                                 </button>
                               )}
-                              
-                              {/* Conduct Match Button */}
-                              {!isCompleted && (player1.name !== 'TBD' || player2.name !== 'TBD') && (
+                              {(player1.name !== 'TBD' || player2.name !== 'TBD') && (
                                 <button
                                   onClick={() => handleConductMatch(dbMatch.id)}
                                   className="flex-1 py-2 rounded-lg border-2 border-transparent transition-all text-[10px] font-black flex items-center justify-center gap-1 btn-brand"
@@ -2574,25 +2589,21 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                                   START
                                 </button>
                               )}
-                              
-                              {/* View Details Button */}
-                              {isCompleted && (
-                                <button
-                                  onClick={() => {
-                                    const bracketMatchData = {
-                                      matchNumber: match.matchNumber,
-                                      round: ri + 1,
-                                      player1: player1,
-                                      player2: player2
-                                    };
-                                    onViewMatchDetails(dbMatch, bracketMatchData);
-                                  }}
-                                  className="flex-1 py-2 rounded-lg bg-blue-500/20 text-blue-300 border-2 border-blue-500/40 transition-all text-[10px] font-black flex items-center justify-center gap-1"
-                                >
-                                  <Eye className="w-3 h-3" />
-                                  VIEW
-                                </button>
-                              )}
+                            </div>
+                          )}
+
+                          {/* Organizer CHANGE button when completed */}
+                          {isOrganizer && dbMatch && isCompleted && (
+                            <div className="px-2 pb-2">
+                              <button
+                                onClick={() => {
+                                  const bracketMatchData = { matchNumber: match.matchNumber, round: ri + 1, player1, player2, currentWinnerId: dbMatch?.winnerId };
+                                  onChangeResult(dbMatch, bracketMatchData);
+                                }}
+                                className="w-full py-2 rounded-lg bg-amber-500/20 text-amber-300 border-2 border-amber-500/40 transition-all text-[10px] font-black"
+                              >
+                                CHANGE
+                              </button>
                             </div>
                           )}
                         </div>
@@ -2779,7 +2790,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                 {group.matches.map((match, mi) => {
                   const dbMatch = findDbMatch(match, gi);
                   const hasPlayers = match.player1?.id && match.player2?.id;
-                  const isCompleted = dbMatch?.status === 'COMPLETED';
+                  const isCompleted = dbMatch?.status === 'COMPLETED' || (!dbMatch && match.winner && match.player1?.id && match.player2?.id);
                   const isInProgress = dbMatch?.status === 'IN_PROGRESS';
                   const hasUmpire = dbMatch?.umpireId;
                   
@@ -2804,8 +2815,8 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                       
                       {/* Players with winner highlight */}
                       {(() => {
-                        const p1Won = dbMatch?.winnerId === match.player1?.id;
-                        const p2Won = dbMatch?.winnerId === match.player2?.id;
+                        const p1Won = dbMatch ? dbMatch.winnerId === match.player1?.id : match.winner === 1;
+                        const p2Won = dbMatch ? dbMatch.winnerId === match.player2?.id : match.winner === 2;
                         return (
                           <div className="space-y-1.5">
                             <div className={`py-2 px-3 rounded-xl font-bold text-sm flex items-center justify-between ${hasPlayers ? '' : ''}`}
@@ -2833,66 +2844,57 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                         );
                       })()}
                       
-                      {/* Actions */}
-                      {isOrganizer && hasPlayers && (
+                      {/* VIEW — all users when completed */}
+                      {isCompleted && hasPlayers && (
                         <div className="mt-2.5 flex gap-2">
-                          {!isCompleted ? (
+                          <button
+                            onClick={() => {
+                              const bracketMatchData = { matchNumber: match.matchNumber, round: 1, player1: match.player1, player2: match.player2, groupName: group.groupName };
+                              const matchDataToUse = dbMatch || {
+                                matchNumber: match.matchNumber, status: 'COMPLETED', winner: match.winner,
+                                winnerId: match.winner === 1 ? match.player1?.id : match.player2?.id,
+                                score: match.scoreJson || match.score || null,
+                                scoreJson: match.scoreJson || null,
+                                player1: match.player1, player2: match.player2,
+                              };
+                              onViewMatchDetails(matchDataToUse, bracketMatchData);
+                            }}
+                            className="flex-1 py-2.5 rounded-lg bg-blue-500/20 text-blue-300 border-2 border-blue-500/40 transition-all text-xs font-black flex items-center justify-center gap-2"
+                          >
+                            <Eye className="w-4 h-4" />
+                            VIEW
+                          </button>
+                          {isOrganizer && (
                             <button
                               onClick={() => {
-                                const bracketMatchData = {
-                                  matchNumber: match.matchNumber,
-                                  round: 1,
-                                  player1: match.player1,
-                                  player2: match.player2,
-                                  groupName: group.groupName
-                                };
-                                onAssignUmpire(dbMatch, bracketMatchData);
+                                const bracketMatchData = { matchNumber: match.matchNumber, round: 1, player1: match.player1, player2: match.player2, groupName: group.groupName, currentWinnerId: dbMatch?.winnerId };
+                                onChangeResult(dbMatch, bracketMatchData);
                               }}
-                              className={`flex-1 py-2.5 rounded-lg transition-all flex items-center justify-center gap-2 text-xs font-black ${
-                                hasUmpire 
-                                  ? 'bg-[rgba(0,255,136,0.12)] text-[#00ff88] border-2 border-[rgba(0,255,136,0.3)]' 
-                                  : 'bg-blue-500/20 text-blue-300 border-2 border-blue-500/40'
-                              }`}
+                              className="py-2.5 px-4 rounded-lg bg-amber-500/20 text-amber-300 border-2 border-amber-500/40 transition-all text-xs font-black"
                             >
-                              <Gavel className="w-4 h-4" />
-                              {hasUmpire ? 'READY' : 'ASSIGN'}
+                              CHANGE
                             </button>
-                          ) : (
-                            <>
-                              <button
-                                onClick={() => {
-                                  const bracketMatchData = {
-                                    matchNumber: match.matchNumber,
-                                    round: 1,
-                                    player1: match.player1,
-                                    player2: match.player2,
-                                    groupName: group.groupName
-                                  };
-                                  onViewMatchDetails(dbMatch, bracketMatchData);
-                                }}
-                                className="flex-1 py-2.5 rounded-lg bg-blue-500/20 text-blue-300 border-2 border-blue-500/40 transition-all text-xs font-black flex items-center justify-center gap-2"
-                              >
-                                <Eye className="w-4 h-4" />
-                                VIEW
-                              </button>
-                              <button
-                                onClick={() => {
-                                  const bracketMatchData = {
-                                    matchNumber: match.matchNumber,
-                                    round: 1,
-                                    player1: match.player1,
-                                    player2: match.player2,
-                                    groupName: group.groupName,
-                                    currentWinnerId: dbMatch?.winnerId
-                                  };
-                                  onChangeResult(dbMatch, bracketMatchData);
-                                }}
-                                className="py-2.5 px-4 rounded-lg bg-amber-500/20 text-amber-300 border-2 border-amber-500/40 transition-all text-xs font-black"
-                              >
-                                CHANGE
-                              </button>
-                            </>
                           )}
+                        </div>
+                      )}
+
+                      {/* Organizer-only pre-completion actions */}
+                      {isOrganizer && hasPlayers && !isCompleted && (
+                        <div className="mt-2.5">
+                          <button
+                            onClick={() => {
+                              const bracketMatchData = { matchNumber: match.matchNumber, round: 1, player1: match.player1, player2: match.player2, groupName: group.groupName };
+                              onAssignUmpire(dbMatch, bracketMatchData);
+                            }}
+                            className={`w-full py-2.5 rounded-lg transition-all flex items-center justify-center gap-2 text-xs font-black ${
+                              hasUmpire
+                                ? 'bg-[rgba(0,255,136,0.12)] text-[#00ff88] border-2 border-[rgba(0,255,136,0.3)]'
+                                : 'bg-blue-500/20 text-blue-300 border-2 border-blue-500/40'
+                            }`}
+                          >
+                            <Gavel className="w-4 h-4" />
+                            {hasUmpire ? 'READY' : 'ASSIGN'}
+                          </button>
                         </div>
                       )}
                     </div>

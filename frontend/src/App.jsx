@@ -100,9 +100,12 @@ function AppContent() {
   // Hide Navbar for admin dashboard only (unified dashboard shows navbar)
   const shouldShowNavbar = !location.pathname.startsWith('/admin-dashboard');
 
-  // Admin dashboard needs full-width layout — all other pages constrained to
-  // mobile-app width so they look identical on any phone or tablet.
-  const isAdminRoute = location.pathname.startsWith('/admin-dashboard');
+  // Admin routes need full-width desktop layout — all other pages constrained
+  // to 480px mobile-app width so they look identical on any phone or tablet.
+  const isAdminRoute = location.pathname.startsWith('/admin-dashboard') ||
+                       location.pathname.startsWith('/admin/')  ||
+                       location.pathname === '/admin' ||
+                       user?.isAdmin;
 
   return (
     <div className="min-h-screen" style={{ background: '#07071a' }}>

@@ -544,11 +544,16 @@ const TournamentDetailPage = () => {
                   background: 'linear-gradient(to bottom, rgba(7,7,26,0.25) 0%, rgba(7,7,26,0.5) 50%, rgba(7,7,26,0.92) 100%)'
                 }}
               />
-              {/* Tap to enlarge hint */}
-              <div className="absolute top-3 right-3">
+              {/* Tap to enlarge — centered on poster */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <span
-                  className="px-2.5 py-1 rounded-full text-xs font-semibold backdrop-blur-md"
-                  style={{ background: 'rgba(0,0,0,0.55)', color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.2)' }}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold backdrop-blur-md"
+                  style={{
+                    background: 'rgba(0,0,0,0.35)',
+                    color: 'rgba(255,255,255,0.9)',
+                    border: '1px solid rgba(255,255,255,0.25)',
+                    letterSpacing: '0.02em',
+                  }}
                 >
                   🔍 Tap to enlarge
                 </span>

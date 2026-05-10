@@ -526,20 +526,20 @@ const RevenueDashboardPage = () => {
 
       {/* Nuclear Reset Confirmation Modal */}
       {showNuclearModal && (
-        <div className="fixed inset-0 bg-black/95 backdrop-blur-md flex items-center justify-center z-50 p-4">
-          <div className="bg-gradient-to-br from-red-950 to-black rounded-2xl border-4 border-red-600 shadow-2xl shadow-red-600/70 max-w-lg w-full p-8 animate-pulse">
-            <div className="text-center mb-6">
-              <div className="text-8xl mb-4 animate-bounce">☢️</div>
-              <h2 className="text-3xl font-black text-red-500 mb-3 uppercase tracking-wider">
+        <div className="fixed inset-0 bg-black/95 backdrop-blur-md flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-gradient-to-br from-red-950 to-black rounded-2xl border-4 border-red-600 shadow-2xl shadow-red-600/70 max-w-lg w-full p-6 my-8 animate-pulse">
+            <div className="text-center mb-4">
+              <div className="text-6xl mb-3 animate-bounce">☢️</div>
+              <h2 className="text-2xl font-black text-red-500 mb-2 uppercase tracking-wider">
                 Complete System Reset
               </h2>
-              <p className="text-red-300 font-bold text-lg mb-4">
+              <p className="text-red-300 font-bold text-base mb-3">
                 ⚠️ NUCLEAR OPTION - DELETE EVERYTHING! ⚠️
               </p>
-              <p className="text-gray-300 mb-4">
-                This will <span className="text-red-400 font-black text-xl">PERMANENTLY DELETE</span>:
+              <p className="text-gray-300 text-sm mb-3">
+                This will <span className="text-red-400 font-black">PERMANENTLY DELETE</span>:
               </p>
-              <ul className="text-left text-gray-300 text-sm space-y-2 mb-4 bg-black/50 p-4 rounded-lg border border-red-700">
+              <ul className="text-left text-gray-300 text-xs space-y-1 mb-3 bg-black/50 p-3 rounded-lg border border-red-700 max-h-40 overflow-y-auto">
                 <li className="text-red-400 font-bold">☢️ ALL USER ACCOUNTS (except admin)</li>
                 <li>☢️ All user profiles and data</li>
                 <li>☢️ All tournaments and registrations</li>
@@ -549,26 +549,26 @@ const RevenueDashboardPage = () => {
                 <li>☢️ All academies and applications</li>
                 <li className="text-red-400 font-bold">☢️ EVERYTHING IN THE DATABASE</li>
               </ul>
-              <div className="bg-emerald-900/40 border-2 border-emerald-600 rounded-lg p-4 mb-4">
-                <p className="text-emerald-400 text-sm font-bold">
+              <div className="bg-emerald-900/40 border-2 border-emerald-600 rounded-lg p-3 mb-3">
+                <p className="text-emerald-400 text-xs font-bold">
                   ✓ ONLY ADMIN ACCOUNT PRESERVED
                 </p>
                 <p className="text-emerald-300 text-xs mt-1">
                   All features will work - like a fresh installation
                 </p>
               </div>
-              <div className="bg-red-950/80 border-4 border-red-500 rounded-lg p-4 mb-4 animate-pulse">
-                <p className="text-red-400 font-black text-2xl">
+              <div className="bg-red-950/80 border-4 border-red-500 rounded-lg p-3 mb-3 animate-pulse">
+                <p className="text-red-400 font-black text-lg">
                   ⚠️ CANNOT BE UNDONE! ⚠️
                 </p>
-                <p className="text-red-300 text-sm mt-2">
+                <p className="text-red-300 text-xs mt-1">
                   The website will become completely empty
                 </p>
               </div>
             </div>
 
-            <div className="mb-6">
-              <label className="block text-red-300 font-bold mb-3 text-lg">
+            <div className="mb-4">
+              <label className="block text-red-300 font-bold mb-2 text-sm">
                 Enter Admin Password to Confirm:
               </label>
               <input
@@ -576,11 +576,11 @@ const RevenueDashboardPage = () => {
                 value={nuclearPassword}
                 onChange={(e) => setNuclearPassword(e.target.value)}
                 placeholder="Enter password"
-                className="w-full bg-black border-2 border-red-600 rounded-lg px-4 py-4 text-white focus:outline-none focus:border-red-400 text-lg font-mono placeholder-gray-600"
+                className="w-full bg-black border-2 border-red-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-red-400 text-base font-mono placeholder-gray-600"
                 disabled={nuclearDeleting}
                 autoFocus
               />
-              <p className="text-sm text-red-400 mt-3 font-bold bg-black/50 p-2 rounded border border-red-700">
+              <p className="text-xs text-red-400 mt-2 font-bold bg-black/50 p-2 rounded border border-red-700">
                 Password: Pradyu@123(123)(123)
               </p>
             </div>
@@ -591,7 +591,7 @@ const RevenueDashboardPage = () => {
                   setShowNuclearModal(false);
                   setNuclearPassword('');
                 }}
-                className="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-bold py-4 px-4 rounded-lg transition text-lg"
+                className="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 px-4 rounded-lg transition text-sm"
                 disabled={nuclearDeleting}
               >
                 Cancel
@@ -599,11 +599,11 @@ const RevenueDashboardPage = () => {
               <button
                 onClick={handleCompleteSystemReset}
                 disabled={nuclearDeleting || !nuclearPassword}
-                className="flex-1 bg-gradient-to-r from-red-700 via-red-600 to-red-700 hover:from-red-800 hover:via-red-700 hover:to-red-800 text-white font-black py-4 px-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed text-lg uppercase border-2 border-red-400"
+                className="flex-1 bg-gradient-to-r from-red-700 via-red-600 to-red-700 hover:from-red-800 hover:via-red-700 hover:to-red-800 text-white font-black py-3 px-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed text-sm uppercase border-2 border-red-400"
               >
                 {nuclearDeleting ? (
                   <span className="flex items-center justify-center gap-2">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                     Resetting...
                   </span>
                 ) : (

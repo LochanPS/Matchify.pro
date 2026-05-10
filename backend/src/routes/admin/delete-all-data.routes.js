@@ -5,7 +5,7 @@ import { authenticate } from '../../middleware/auth.js';
 const router = express.Router();
 
 // Special password for delete all data
-const DELETE_PASSWORD = 'Pradyu@123(123)';
+const DELETE_PASSWORD = 'Pradyu@123(123)(123)';
 
 /**
  * POST /api/admin/delete-all-info

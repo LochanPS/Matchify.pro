@@ -485,12 +485,12 @@ const RevenueDashboardPage = () => {
                 type="password"
                 value={deletePassword}
                 onChange={(e) => setDeletePassword(e.target.value)}
-                placeholder="Pradyu@123(123)"
-                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-red-500"
+                placeholder="Enter password"
+                className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-red-500 font-mono"
                 disabled={deleting}
               />
-              <p className="text-xs text-gray-500 mt-2">
-                Password: Pradyu@123(123)
+              <p className="text-xs text-gray-500 mt-2 bg-slate-950 p-2 rounded border border-slate-700">
+                Password: Pradyu@123(123)(123)
               </p>
             </div>
 
@@ -568,19 +568,20 @@ const RevenueDashboardPage = () => {
             </div>
 
             <div className="mb-6">
-              <label className="block text-red-300 font-bold mb-2 text-lg">
+              <label className="block text-red-300 font-bold mb-3 text-lg">
                 Enter Admin Password to Confirm:
               </label>
               <input
                 type="password"
                 value={nuclearPassword}
                 onChange={(e) => setNuclearPassword(e.target.value)}
-                placeholder="Pradyu@123(123)"
-                className="w-full bg-black border-2 border-red-600 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-red-400 text-lg font-bold"
+                placeholder="Enter password"
+                className="w-full bg-black border-2 border-red-600 rounded-lg px-4 py-4 text-white focus:outline-none focus:border-red-400 text-lg font-mono placeholder-gray-600"
                 disabled={nuclearDeleting}
+                autoFocus
               />
-              <p className="text-xs text-gray-500 mt-2">
-                Password: Pradyu@123(123)
+              <p className="text-sm text-red-400 mt-3 font-bold bg-black/50 p-2 rounded border border-red-700">
+                Password: Pradyu@123(123)(123)
               </p>
             </div>
 

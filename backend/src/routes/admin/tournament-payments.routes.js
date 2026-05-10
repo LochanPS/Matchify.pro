@@ -337,12 +337,29 @@ router.get('/pending/payouts', authenticate, requireAdmin, async (req, res) => {
             id: true,
             name: true,
             email: true,
-            phone: true
+            phone: true,
+            organizerProfile: {
+              select: {
+                savedUpiId: true,
+                savedAccountHolder: true,
+                savedPaymentQRUrl: true
+              }
+            }
           }
         });
 
+        const profile = organizer?.organizerProfile;
+        const getQRUrl = (url) => {
+          if (!url) return null;
+          if (url.startsWith('http')) return url;
+          return `${process.env.BACKEND_URL || 'https://matchify-probackend.vercel.app'}${url}`;
+        };
+
         return {
           ...payment,
+          organizerUpiId: profile?.savedUpiId || null,
+          organizerAccountHolder: profile?.savedAccountHolder || null,
+          organizerQRUrl: getQRUrl(profile?.savedPaymentQRUrl),
           tournament: {
             ...tournament,
             organizer

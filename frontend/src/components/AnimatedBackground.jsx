@@ -16,7 +16,7 @@ const BRAND = {
   amber:  '#fbbf24',
 };
 
-export default function AnimatedBackground({ variant = 'default', className = '' }) {
+export default function AnimatedBackground({ variant = 'default', className = '', fullWidth = false }) {
   const { stars, orbs, balloons } = useMemo(() => {
     const rand = seededRand(42);
 
@@ -69,7 +69,10 @@ export default function AnimatedBackground({ variant = 'default', className = ''
   return (
     <div
       className={`fixed pointer-events-none overflow-hidden ${className}`}
-      style={{ zIndex: 0, top: 0, bottom: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: '480px' }}
+      style={fullWidth
+        ? { zIndex: 0, top: 0, bottom: 0, left: 0, right: 0, width: '100%' }
+        : { zIndex: 0, top: 0, bottom: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: '480px' }
+      }
       aria-hidden="true"
     >
       {/* CSS keyframes */}

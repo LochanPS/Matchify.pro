@@ -110,7 +110,7 @@ function AppContent() {
   return (
     <div className="min-h-screen" style={{ background: '#07071a' }}>
       {/* Global animated background — stars + glowing orbs + floating balloons, fixed behind every page */}
-      <AnimatedBackground />
+      <AnimatedBackground fullWidth={isAdminRoute} />
       <ScrollToTop />
       <ImpersonationBanner />
       <div className={isImpersonating() ? 'pt-[60px]' : ''}> {/* Add padding only when impersonating */}

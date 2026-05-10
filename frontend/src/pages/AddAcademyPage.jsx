@@ -501,7 +501,7 @@ const AddAcademyPage = () => {
 
           <div className="backdrop-blur-lg rounded-2xl border border-white/10 p-6" style={{ background: 'rgba(13,16,37,0.9)' }}>
             <div className="text-center mb-6">
-              <CreditCard className="w-12 h-12 mx-auto mb-3" style={{ color: '#a855f7' }} />
+              <CreditCard className="w-12 h-12 mx-auto mb-3" style={{ color: '#00ff88' }} />
               <h2 className="text-2xl font-bold text-white mb-2">Complete Payment</h2>
               <p className="text-gray-400">Pay ₹200 to list your academy on Matchify.pro</p>
             </div>
@@ -550,7 +550,7 @@ const AddAcademyPage = () => {
             </div>
 
             <div className="rounded-xl p-4 mb-6" style={{ background: 'rgba(168,85,247,0.1)', border: '1px solid rgba(168,85,247,0.3)' }}>
-              <p className="text-center font-semibold text-lg" style={{ color: '#a855f7' }}>Amount: ₹200</p>
+              <p className="text-center font-semibold text-lg" style={{ color: '#00ff88' }}>Amount: ₹200</p>
             </div>
 
 
@@ -589,7 +589,7 @@ const AddAcademyPage = () => {
               onClick={handleSubmit}
               disabled={loading || !paymentScreenshot}
               className="w-full py-3 font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              style={{ background: 'linear-gradient(135deg,#a855f7,#6366f1)', color: '#fff' }}
+              style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', color: '#fff' }}
             >
               {loading ? (
                 <>
@@ -647,7 +647,7 @@ const AddAcademyPage = () => {
 
         <div className="backdrop-blur-lg rounded-2xl border border-white/10 p-6 md:p-8" style={{ background: 'rgba(13,16,37,0.9)' }}>
           <div className="text-center mb-8">
-            <Building2 className="w-12 h-12 mx-auto mb-3" style={{ color: '#a855f7' }} />
+            <Building2 className="w-12 h-12 mx-auto mb-3" style={{ color: '#00ff88' }} />
             <h1 className="text-2xl font-bold text-white mb-2">Add Your Academy</h1>
             <p className="text-gray-400">List your academy on Matchify.pro for ₹200</p>
           </div>
@@ -661,7 +661,7 @@ const AddAcademyPage = () => {
               value={formData.name}
               onChange={handleInputChange}
               placeholder="Enter academy name"
-              className={`w-full px-4 py-3 bg-slate-700/50 text-white rounded-xl border ${errors.name ? 'border-red-500' : 'border-gray-600'} focus:outline-none focus:border-purple-500`}
+              className={`w-full px-4 py-3 bg-slate-700/50 text-white rounded-xl border ${errors.name ? 'border-red-500' : 'border-gray-600'} focus:outline-none focus:border-green-500`}
             />
             {errors.name && <p className="text-red-400 text-sm mt-1">{errors.name}</p>}
           </div>
@@ -675,7 +675,7 @@ const AddAcademyPage = () => {
               onChange={handleInputChange}
               placeholder="Enter complete address"
               rows={2}
-              className={`w-full px-4 py-3 bg-slate-700/50 text-white rounded-xl border ${errors.address ? 'border-red-500' : 'border-gray-600'} focus:outline-none focus:border-purple-500 resize-none`}
+              className={`w-full px-4 py-3 bg-slate-700/50 text-white rounded-xl border ${errors.address ? 'border-red-500' : 'border-gray-600'} focus:outline-none focus:border-green-500 resize-none`}
             />
             {errors.address && <p className="text-red-400 text-sm mt-1">{errors.address}</p>}
           </div>
@@ -699,7 +699,7 @@ const AddAcademyPage = () => {
                 }}
                 placeholder="City"
                 autoComplete="off"
-                className={`w-full px-4 py-3 bg-slate-700/50 text-white rounded-xl border ${errors.city ? 'border-red-500' : 'border-gray-600'} focus:outline-none focus:border-purple-500`}
+                className={`w-full px-4 py-3 bg-slate-700/50 text-white rounded-xl border ${errors.city ? 'border-red-500' : 'border-gray-600'} focus:outline-none focus:border-green-500`}
               />
               {errors.city && <p className="text-red-400 text-sm mt-1">{errors.city}</p>}
               
@@ -734,7 +734,7 @@ const AddAcademyPage = () => {
                 onChange={handleInputChange}
                 placeholder="State (auto-filled)"
                 readOnly
-                className={`w-full px-4 py-3 bg-slate-700/30 text-white rounded-xl border ${errors.state ? 'border-red-500' : 'border-gray-600'} focus:outline-none focus:border-purple-500 cursor-not-allowed`}
+                className={`w-full px-4 py-3 bg-slate-700/30 text-white rounded-xl border ${errors.state ? 'border-red-500' : 'border-gray-600'} focus:outline-none focus:border-green-500 cursor-not-allowed`}
               />
               {errors.state && <p className="text-red-400 text-sm mt-1">{errors.state}</p>}
             </div>
@@ -746,7 +746,7 @@ const AddAcademyPage = () => {
                 value={formData.pincode}
                 onChange={handleInputChange}
                 placeholder="Pincode"
-                className="w-full px-4 py-3 bg-slate-700/50 text-white rounded-xl border border-gray-600 focus:outline-none focus:border-purple-500"
+                className="w-full px-4 py-3 bg-slate-700/50 text-white rounded-xl border border-gray-600 focus:outline-none focus:border-green-500"
               />
             </div>
           </div>
@@ -763,7 +763,7 @@ const AddAcademyPage = () => {
                   onClick={() => toggleSport(sport)}
                   className="px-4 py-2 rounded-xl text-sm font-medium transition-all"
                   style={formData.sports.includes(sport)
-                    ? { background: '#a855f7', color: '#fff' }
+                    ? { background: '#00ff88', color: '#fff' }
                     : { background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.7)' }}
                 >
                   {sport}
@@ -776,7 +776,7 @@ const AddAcademyPage = () => {
           {/* Dynamic Sport-Specific Questions */}
           {formData.sports.length > 0 && (
             <div className="mb-5 p-4 rounded-xl" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(168,85,247,0.2)' }}>
-              <h3 className="text-sm font-semibold mb-4 flex items-center gap-2" style={{ color: '#a855f7' }}>
+              <h3 className="text-sm font-semibold mb-4 flex items-center gap-2" style={{ color: '#00ff88' }}>
                 <Dumbbell className="w-4 h-4" />
                 Facility Details for Selected Sports
               </h3>
@@ -797,7 +797,7 @@ const AddAcademyPage = () => {
                           min={config.type === 'number' ? '1' : undefined}
                           className={`w-full px-4 py-3 bg-slate-700/50 text-white rounded-xl border ${
                             errors[`sport_${sport}`] ? 'border-red-500' : 'border-gray-600'
-                          } focus:outline-none focus:border-purple-500 ${config.suffix ? 'pr-20' : ''}`}
+                          } focus:outline-none focus:border-green-500 ${config.suffix ? 'pr-20' : ''}`}
                         />
                         {config.suffix && (
                           <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium pointer-events-none">
@@ -824,7 +824,7 @@ const AddAcademyPage = () => {
                   onChange={handleInputChange}
                   placeholder="Any other sports facilities or additional details you'd like to mention..."
                   rows={3}
-                  className="w-full px-4 py-3 bg-slate-700/50 text-white rounded-xl border border-gray-600 focus:outline-none focus:border-purple-500 resize-none"
+                  className="w-full px-4 py-3 bg-slate-700/50 text-white rounded-xl border border-gray-600 focus:outline-none focus:border-green-500 resize-none"
                 />
                 <p className="text-xs text-gray-500 mt-1">
                   e.g., Indoor/outdoor facilities, equipment provided, coaching available, etc.
@@ -842,7 +842,7 @@ const AddAcademyPage = () => {
               onChange={handleInputChange}
               placeholder="Tell us about your academy..."
               rows={3}
-              className="w-full px-4 py-3 bg-slate-700/50 text-white rounded-xl border border-gray-600 focus:outline-none focus:border-purple-500 resize-none"
+              className="w-full px-4 py-3 bg-slate-700/50 text-white rounded-xl border border-gray-600 focus:outline-none focus:border-green-500 resize-none"
             />
           </div>
 
@@ -857,7 +857,7 @@ const AddAcademyPage = () => {
                 value={formData.phone}
                 onChange={handleInputChange}
                 placeholder="+91 98765 43210"
-                className={`w-full px-4 py-3 bg-slate-700/50 text-white rounded-xl border ${errors.phone ? 'border-red-500' : 'border-gray-600'} focus:outline-none focus:border-purple-500`}
+                className={`w-full px-4 py-3 bg-slate-700/50 text-white rounded-xl border ${errors.phone ? 'border-red-500' : 'border-gray-600'} focus:outline-none focus:border-green-500`}
               />
               {errors.phone && <p className="text-red-400 text-sm mt-1">{errors.phone}</p>}
             </div>
@@ -869,7 +869,7 @@ const AddAcademyPage = () => {
                 value={formData.email}
                 onChange={handleInputChange}
                 placeholder="academy@email.com"
-                className="w-full px-4 py-3 bg-slate-700/50 text-white rounded-xl border border-gray-600 focus:outline-none focus:border-purple-500"
+                className="w-full px-4 py-3 bg-slate-700/50 text-white rounded-xl border border-gray-600 focus:outline-none focus:border-green-500"
               />
             </div>
           </div>
@@ -883,7 +883,7 @@ const AddAcademyPage = () => {
               value={formData.website}
               onChange={handleInputChange}
               placeholder="www.youracademy.com"
-              className="w-full px-4 py-3 bg-slate-700/50 text-white rounded-xl border border-gray-600 focus:outline-none focus:border-purple-500"
+              className="w-full px-4 py-3 bg-slate-700/50 text-white rounded-xl border border-gray-600 focus:outline-none focus:border-green-500"
             />
           </div>
 
@@ -910,7 +910,7 @@ const AddAcademyPage = () => {
                   </button>
                 </div>
               ))}
-              <label className="aspect-square flex flex-col items-center justify-center border-2 border-dashed border-gray-600 rounded-xl cursor-pointer hover:border-purple-500 transition-colors">
+              <label className="aspect-square flex flex-col items-center justify-center border-2 border-dashed border-gray-600 rounded-xl cursor-pointer hover:border-green-500 transition-colors">
                 <Plus className="w-6 h-6 text-gray-500 mb-1" />
                 <span className="text-gray-500 text-xs">Add Photo</span>
                 <input
@@ -946,7 +946,7 @@ const AddAcademyPage = () => {
                 </button>
               </div>
             ) : (
-              <label className="flex flex-col items-center justify-center w-48 h-48 border-2 border-dashed border-gray-600 rounded-xl cursor-pointer hover:border-purple-500 transition-colors">
+              <label className="flex flex-col items-center justify-center w-48 h-48 border-2 border-dashed border-gray-600 rounded-xl cursor-pointer hover:border-green-500 transition-colors">
                 <CreditCard className="w-8 h-8 text-gray-500 mb-2" />
                 <span className="text-gray-400 text-sm text-center px-2">Upload QR Code</span>
                 <input
@@ -963,7 +963,7 @@ const AddAcademyPage = () => {
           <div className="rounded-xl p-4 mb-6" style={{ background: 'rgba(168,85,247,0.1)', border: '1px solid rgba(168,85,247,0.3)' }}>
             <div className="flex items-center justify-between">
               <span className="text-gray-300">Listing Fee</span>
-              <span className="font-bold text-xl" style={{ color: '#a855f7' }}>₹200</span>
+              <span className="font-bold text-xl" style={{ color: '#00ff88' }}>₹200</span>
             </div>
             <p className="text-gray-500 text-sm mt-2">One-time payment to list your academy</p>
           </div>
@@ -983,7 +983,7 @@ const AddAcademyPage = () => {
             <button
               onClick={handleProceedToPayment}
               className="flex-[2] py-3 font-semibold rounded-xl transition-all"
-              style={{ background: 'linear-gradient(135deg,#a855f7,#6366f1)', color: '#fff' }}
+              style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', color: '#fff' }}
             >
               Proceed to Payment
             </button>

@@ -31,6 +31,7 @@ const RegisterPageMobile = () => {
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
+    email: '',
     birthYear: '',
     password: '',
     confirmPassword: '',
@@ -55,11 +56,16 @@ const RegisterPageMobile = () => {
     e.preventDefault();
     
     if (!formData.name || !formData.phone || !formData.birthYear || !formData.password) {
-      setError('All fields are required');
+      setError('Name, Phone, Birth Year and Password are required');
       return;
     }
     if (!/^[0-9]{10}$/.test(formData.phone)) {
       setError('Enter valid 10-digit phone number');
+      return;
+    }
+    // Email is optional, but if provided, validate it
+    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      setError('Enter valid email address');
       return;
     }
     const currentYear = new Date().getFullYear();
@@ -454,6 +460,28 @@ const RegisterPageMobile = () => {
                   }}
                   placeholder="9876543210"
                   value={formData.phone}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+
+            {/* Email - Optional */}
+            <div>
+              <label className="block text-sm font-semibold text-white mb-2">
+                Email <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 400, fontSize: '11px' }}>(Optional)</span>
+              </label>
+              <div className="relative">
+                <EnvelopeIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                <input
+                  name="email"
+                  type="email"
+                  className="w-full pl-10 pr-4 py-3 rounded-xl text-white text-sm placeholder-gray-500 outline-none"
+                  style={{ 
+                    background: 'rgba(255,255,255,0.05)', 
+                    border: '1px solid rgba(255,255,255,0.1)' 
+                  }}
+                  placeholder="you@example.com"
+                  value={formData.email}
                   onChange={handleChange}
                 />
               </div>

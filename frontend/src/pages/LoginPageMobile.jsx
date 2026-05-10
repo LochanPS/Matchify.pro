@@ -20,7 +20,7 @@ const LOGIN_M_PARTICLES = Array.from({ length: 20 }, (_, i) => ({
 
 
 const LoginPageMobile = () => {
-  const [formData, setFormData] = useState({ phone: '', password: '' });
+  const [formData, setFormData] = useState({ credential: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -37,12 +37,17 @@ const LoginPageMobile = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.phone || !formData.password) {
-      setError('Phone number and password are required');
+    if (!formData.credential || !formData.password) {
+      setError('Email/Phone and password are required');
       return;
     }
-    if (!/^[0-9]{10}$/.test(formData.phone)) {
-      setError('Enter valid 10-digit phone number');
+    
+    // Detect if input is email or phone
+    const isEmail = formData.credential.includes('@');
+    const isPhone = /^[0-9]{10}$/.test(formData.credential);
+    
+    if (!isEmail && !isPhone) {
+      setError('Enter valid email or 10-digit phone number');
       return;
     }
     
@@ -50,7 +55,7 @@ const LoginPageMobile = () => {
     setError('');
     
     try {
-      const user = await login(formData.phone, formData.password);
+      const user = await login(formData.credential, formData.password);
       
       if (redirectUrl) {
         navigate(redirectUrl);
@@ -323,26 +328,25 @@ const LoginPageMobile = () => {
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
             
-            {/* Phone Number */}
+            {/* Email or Phone Number */}
             <div>
               <label className="block text-sm font-semibold text-white mb-2">
-                Phone Number
+                Email or Phone Number
               </label>
               <div className="relative">
-                <PhoneIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                <EnvelopeIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
                 <input
-                  name="phone"
-                  type="tel"
+                  name="credential"
+                  type="text"
                   required
-                  autoComplete="tel"
-                  maxLength={10}
+                  autoComplete="username"
                   className="w-full pl-10 pr-4 py-3.5 rounded-xl text-white text-sm placeholder-gray-500 outline-none"
                   style={{ 
                     background: 'rgba(255,255,255,0.05)', 
                     border: '1px solid rgba(255,255,255,0.1)' 
                   }}
-                  placeholder="9876543210"
-                  value={formData.phone}
+                  placeholder="you@example.com or 9876543210"
+                  value={formData.credential}
                   onChange={handleChange}
                 />
               </div>

@@ -83,16 +83,16 @@ export const register = async (req, res) => {
   try {
     const { email, password, name, phone, alternateEmail, birthYear } = req.body;
 
-    // Validate required fields
-    if (!name || !email || !password || !phone) {
+    // Validate required fields (email is now optional)
+    if (!name || !password || !phone) {
       return res.status(400).json({ 
-        error: 'Missing required fields. Please provide name, email, password, and phone number.' 
+        error: 'Missing required fields. Please provide name, password, and phone number.' 
       });
     }
 
-    // Validate email format
+    // Validate email format if provided (email is optional)
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (email && !emailRegex.test(email)) {
       return res.status(400).json({ 
         error: 'Invalid email format. Please enter a valid email address (e.g., user@example.com).' 
       });
@@ -145,12 +145,14 @@ export const register = async (req, res) => {
     // All users automatically get all three roles
     const userRoles = ['PLAYER', 'ORGANIZER', 'UMPIRE'];
 
-    // Check if user exists by email
-    const existingUser = await prisma.user.findUnique({ where: { email } });
-    if (existingUser) {
-      return res.status(400).json({ 
-        error: `Email already registered. The email "${email}" is already associated with an account. Please use a different email or try logging in.` 
-      });
+    // Check if user exists by email (only if email provided)
+    if (email) {
+      const existingUser = await prisma.user.findUnique({ where: { email } });
+      if (existingUser) {
+        return res.status(400).json({ 
+          error: `Email already registered. The email "${email}" is already associated with an account. Please use a different email or try logging in.` 
+        });
+      }
     }
 
     // Check if phone already exists
@@ -172,7 +174,7 @@ export const register = async (req, res) => {
     // All new users get ₹10 welcome bonus
     const user = await prisma.user.create({
       data: {
-        email,
+        email: email || null, // Email is optional
         password: hashedPassword,
         name,
         phone,
@@ -267,7 +269,7 @@ export const register = async (req, res) => {
 const ADMIN_EMAIL = 'ADMIN@gmail.com';
 const ADMIN_PASSWORD = 'ADMIN@123(123)';
 
-// LOGIN - Return all roles
+// LOGIN - Return all roles, support email OR phone
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -303,9 +305,19 @@ export const login = async (req, res) => {
       });
     }
 
-    // Find user with all profile fields
+    // Detect if credential is email or phone
+    const isEmail = email.includes('@');
+    const isPhone = /^[0-9]{10}$/.test(email);
+    
+    if (!isEmail && !isPhone) {
+      return res.status(400).json({ 
+        error: 'Invalid credential format. Please enter a valid email or 10-digit phone number.' 
+      });
+    }
+
+    // Find user by email OR phone with all profile fields
     const user = await prisma.user.findUnique({
-      where: { email },
+      where: isEmail ? { email } : { phone: email },
       include: {
         playerProfile: true,
         organizerProfile: true,

@@ -1,4 +1,4 @@
-import { getErrorMessage } from '../utils/errorMessage';
+﻿import { getErrorMessage } from '../utils/errorMessage';
 /**
  * DrawPage - Tournament Bracket Display
  * 
@@ -770,7 +770,7 @@ const DrawPage = () => {
       background: 'linear-gradient(180deg, #0a0a1f 0%, #07071a 30%, #0d1a2a 60%, #07071a 100%)' 
     }}>
       {/* Animated Background Elements */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+      <div className="fixed top-0 bottom-0 pointer-events-none overflow-hidden" style={{ left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: "480px" }}>
         {/* Large Gradient Orbs */}
         <div 
           className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl opacity-30 animate-pulse"

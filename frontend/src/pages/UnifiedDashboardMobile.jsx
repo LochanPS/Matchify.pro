@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import api from '../utils/api';
@@ -151,7 +151,7 @@ const UnifiedDashboardMobile = () => {
   return (
     <div className="min-h-screen relative overflow-hidden pt-16" style={{ background: '#07071a' }}>
       {/* Animated Background Elements */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+      <div className="fixed top-0 bottom-0 pointer-events-none overflow-hidden" style={{ left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: "480px" }}>
         {/* Large Gradient Orbs */}
         <div 
           className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl opacity-30 animate-pulse"

@@ -1,4 +1,4 @@
-// Deterministic star particles — no Math.random()
+﻿// Deterministic star particles — no Math.random()
 const MGMT_PARTICLES = Array.from({ length: 18 }, (_, i) => ({
   w: (i * 5 + 2) % 3 + 1,
   x: (i * 37 + 11) % 97, y: (i * 53 + 7) % 93,
@@ -249,7 +249,7 @@ export default function TournamentManagementPage() {
   return (
     <div className="min-h-screen relative overflow-x-hidden" style={{ background: '#07071a' }}>
       {/* Animated background */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+      <div className="fixed top-0 bottom-0 pointer-events-none overflow-hidden" style={{ left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: "480px" }}>
         <div className="absolute top-0 right-0 w-80 h-80 rounded-full blur-3xl opacity-15"
           style={{ background: 'radial-gradient(circle, rgba(0,255,136,0.4) 0%, transparent 70%)' }} />
         <div className="absolute bottom-1/4 left-0 w-64 h-64 rounded-full blur-3xl opacity-10"

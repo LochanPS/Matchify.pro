@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { matchService } from '../services/matchService';
 import LiveMatchCard from '../components/matches/LiveMatchCard';
@@ -61,7 +61,7 @@ const LiveMatches = () => {
   return (
     <div className="min-h-screen" style={{ background: B.bg }}>
       {/* Background orbs */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+      <div className="fixed top-0 bottom-0 pointer-events-none overflow-hidden" style={{ left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: "480px" }}>
         <div className="absolute top-1/4 left-1/4 w-80 h-80 rounded-full blur-3xl opacity-[0.07]" style={{ background: '#f87171' }} />
         <div className="absolute bottom-1/4 right-1/4 w-72 h-72 rounded-full blur-3xl opacity-[0.05]" style={{ background: B.green }} />
       </div>

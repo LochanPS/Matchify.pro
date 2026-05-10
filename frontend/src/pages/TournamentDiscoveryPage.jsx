@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+﻿import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   MagnifyingGlassIcon, 
@@ -140,7 +140,7 @@ export default function TournamentDiscoveryPage() {
   return (
     <div className="min-h-screen relative overflow-hidden pb-6" style={{ background: '#07071a' }}>
       {/* Animated Background Elements */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+      <div className="fixed top-0 bottom-0 pointer-events-none overflow-hidden" style={{ left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: "480px" }}>
         <div 
           className="absolute top-0 right-0 w-72 h-72 rounded-full blur-3xl opacity-30"
           style={{ 

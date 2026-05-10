@@ -669,7 +669,7 @@ function TournamentCard({ tournament, navigate, index }) {
     if (!hasPoster) return null;
     const url = tournament.posters[0].imageUrl;
     if (url.startsWith('/uploads')) {
-      const base = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+      const base = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://matchify-probackend.vercel.app';
       return `${base}${url}`;
     }
     return url;

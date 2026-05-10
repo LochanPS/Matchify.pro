@@ -31,7 +31,7 @@ export default function OrganizerTournamentHistory() {
       params.append('page', filters.page);
       params.append('limit', 10);
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/organizer/history?${params}`,
+        `${import.meta.env.VITE_API_URL || 'https://matchify-probackend.vercel.app/api'}/organizer/history?${params}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       if (response.data.success) {

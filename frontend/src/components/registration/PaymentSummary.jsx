@@ -5,7 +5,7 @@ import { getPublicPaymentSettings } from '../../api/payment';
 const getImageUrl = (url) => {
   if (!url) return null;
   if (url.startsWith('/uploads')) {
-    const baseUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+    const baseUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://matchify-probackend.vercel.app';
     return `${baseUrl}${url}`;
   }
   return url;

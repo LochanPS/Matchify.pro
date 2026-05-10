@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { X, AlertTriangle, CheckCircle } from 'lucide-react';
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://matchify-probackend.vercel.app/api';
 
 const ScoreCorrectionModal = ({ matchId, currentScore, onClose, onSuccess }) => {
   const [correctionType, setCorrectionType] = useState('set_score');

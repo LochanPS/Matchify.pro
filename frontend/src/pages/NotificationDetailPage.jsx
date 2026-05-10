@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+﻿import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, ExternalLink, Calendar, Clock, Upload, CheckCircle, Loader } from 'lucide-react';
 import { useNotifications } from '../contexts/NotificationContext';
@@ -229,7 +229,7 @@ const NotificationDetailPage = () => {
   return (
     <div className="min-h-screen relative" style={{ background: BG }}>
       {/* Fixed bg glow + particles */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+      <div className="fixed top-0 bottom-0 pointer-events-none overflow-hidden" style={{ left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: "480px" }}>
         <div className="absolute top-0 right-0 w-64 h-64 rounded-full blur-3xl opacity-15"
           style={{ background: `radial-gradient(circle,${typeColor.accent}50 0%,transparent 70%)` }} />
         <div className="absolute bottom-1/3 left-0 w-56 h-56 rounded-full blur-3xl opacity-10"

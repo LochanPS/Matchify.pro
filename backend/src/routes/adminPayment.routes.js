@@ -344,14 +344,21 @@ router.get('/pending-payouts', authenticate, requireAdmin, async (req, res) => {
         ]
       },
       include: {
-        tournament: { 
-          include: { 
+        tournament: {
+          include: {
             organizer: {
               select: {
                 id: true,
                 name: true,
                 email: true,
-                phone: true
+                phone: true,
+                organizerProfile: {
+                  select: {
+                    savedUpiId: true,
+                    savedAccountHolder: true,
+                    savedPaymentQRUrl: true
+                  }
+                }
               }
             }
           }
@@ -364,9 +371,24 @@ router.get('/pending-payouts', authenticate, requireAdmin, async (req, res) => {
     const formattedPayouts = pendingPayouts.map(payout => {
       const tournament = payout.tournament;
       const organizer = tournament.organizer;
-      
+      const profile = organizer.organizerProfile;
+
+      // Build image URL for QR if stored as relative path
+      const getQRUrl = (url) => {
+        if (!url) return null;
+        if (url.startsWith('http')) return url;
+        const base = process.env.BACKEND_URL || 'https://matchify-probackend.vercel.app';
+        return `${base}${url}`;
+      };
+
+      const paymentInfo = {
+        organizerUpiId: profile?.savedUpiId || null,
+        organizerAccountHolder: profile?.savedAccountHolder || null,
+        organizerQRUrl: getQRUrl(profile?.savedPaymentQRUrl),
+      };
+
       const payouts = [];
-      
+
       // Check if first payment (30%) is pending
       if (payout.payout50Status1 === 'pending') {
         payouts.push({
@@ -377,8 +399,9 @@ router.get('/pending-payouts', authenticate, requireAdmin, async (req, res) => {
           organizerName: organizer.name,
           organizerEmail: organizer.email,
           organizerPhone: organizer.phone,
+          ...paymentInfo,
           amount: payout.payout50Percent1,
-          type: 'first', // 30% before tournament
+          type: 'first',
           percentage: '30%',
           timing: 'Before Tournament',
           status: 'pending',
@@ -387,7 +410,7 @@ router.get('/pending-payouts', authenticate, requireAdmin, async (req, res) => {
           totalRegistrations: payout.totalRegistrations
         });
       }
-      
+
       // Check if second payment (65%) is pending
       if (payout.payout50Status2 === 'pending') {
         payouts.push({
@@ -398,8 +421,9 @@ router.get('/pending-payouts', authenticate, requireAdmin, async (req, res) => {
           organizerName: organizer.name,
           organizerEmail: organizer.email,
           organizerPhone: organizer.phone,
+          ...paymentInfo,
           amount: payout.payout50Percent2,
-          type: 'second', // 65% after tournament
+          type: 'second',
           percentage: '65%',
           timing: 'After Tournament',
           status: 'pending',
@@ -408,7 +432,7 @@ router.get('/pending-payouts', authenticate, requireAdmin, async (req, res) => {
           totalRegistrations: payout.totalRegistrations
         });
       }
-      
+
       return payouts;
     }).flat();
 

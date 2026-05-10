@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import {
@@ -32,7 +32,7 @@ export default function TournamentCategoryDetails() {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/organizer/categories/${categoryId}/details`,
+        `${import.meta.env.VITE_API_URL || 'https://matchify-probackend.vercel.app/api'}/organizer/categories/${categoryId}/details`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       if (response.data.success) {
@@ -108,7 +108,7 @@ export default function TournamentCategoryDetails() {
   return (
     <div className="min-h-screen relative overflow-x-hidden" style={{ background: 'linear-gradient(180deg, #0a0a1f 0%, #07071a 40%, #0d1a2a 70%, #07071a 100%)' }}>
       {/* Animated star particles */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+      <div className="fixed top-0 bottom-0 pointer-events-none overflow-hidden" style={{ left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: "480px" }}>
         <div className="absolute top-0 right-0 w-72 h-72 rounded-full blur-3xl opacity-20"
           style={{ background: 'radial-gradient(circle, rgba(0,255,136,0.4) 0%, transparent 70%)' }} />
         <div className="absolute bottom-1/4 left-0 w-64 h-64 rounded-full blur-3xl opacity-15"

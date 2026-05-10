@@ -1,4 +1,4 @@
-import { getErrorMessage } from '../utils/errorMessage';
+﻿import { getErrorMessage } from '../utils/errorMessage';
 /**
  * DrawPage - Tournament Bracket Display
  * 
@@ -357,11 +357,11 @@ const DrawPage = () => {
         setError('Network error: Cannot connect to server. Please check your connection and try again.');
         // Don't clear bracket on network errors - keep existing data
       } else {
-        // For other errors, show specific error message
+        // For other API errors, silently show empty draw state (no red banner)
         const errorMessage = err.response?.data?.error || err.response?.data?.message || 'Failed to load bracket';
         console.error('⚠️ API error occurred:', errorMessage);
-        setError(`${errorMessage}. Please try refreshing the page.`);
-        // Don't clear bracket here - keep existing data if available
+        setError(null);
+        setBracket(null);
       }
     } finally {
       setBracketLoading(false);
@@ -770,7 +770,7 @@ const DrawPage = () => {
       background: 'linear-gradient(180deg, #0a0a1f 0%, #07071a 30%, #0d1a2a 60%, #07071a 100%)' 
     }}>
       {/* Animated Background Elements */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+      <div className="fixed top-0 bottom-0 pointer-events-none overflow-hidden" style={{ left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: "480px" }}>
         {/* Large Gradient Orbs */}
         <div 
           className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl opacity-30 animate-pulse"
@@ -1708,17 +1708,17 @@ const DrawPage = () => {
 
       {/* Match Details Modal */}
       {showMatchDetailsModal && selectedMatchDetails && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="rounded-3xl p-8 max-w-3xl w-full shadow-2xl max-h-[90vh] overflow-y-auto" style={{ background: '#0d1025', border: '2px solid rgba(0,212,255,0.35)' }}>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-3">
+          <div className="rounded-2xl p-4 max-w-lg w-full shadow-2xl max-h-[90vh] overflow-y-auto" style={{ background: '#0d1025', border: '2px solid rgba(0,212,255,0.35)' }}>
             {/* Header */}
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/50">
-                  <span className="text-3xl">🏸</span>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'rgba(0,212,255,0.15)', border: '1px solid rgba(0,212,255,0.3)' }}>
+                  <span className="text-lg">🏸</span>
                 </div>
                 <div>
-                  <h2 className="text-3xl font-bold text-white">Match Details</h2>
-                  <p className="text-gray-400 text-sm mt-1">Match #{selectedMatchDetails.matchNumber}</p>
+                  <h2 className="text-lg font-bold text-white">Match Details</h2>
+                  <p className="text-gray-400 text-xs">Match #{selectedMatchDetails.matchNumber}</p>
                 </div>
               </div>
               <button
@@ -1726,19 +1726,20 @@ const DrawPage = () => {
                   setShowMatchDetailsModal(false);
                   setSelectedMatchDetails(null);
                 }}
-                className="w-12 h-12 rounded-full bg-slate-700 hover:bg-slate-600 flex items-center justify-center transition-all"
+                className="w-9 h-9 rounded-full flex items-center justify-center transition-all"
+                style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}
               >
-                <X className="w-6 h-6 text-gray-400" />
+                <X className="w-5 h-5 text-gray-400" />
               </button>
             </div>
 
-            {/* Match Score Card - Prominent Display */}
-            <div className="bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border-2 border-purple-500/30 rounded-2xl p-8 mb-8">
+            {/* Match Score Card */}
+            <div className="rounded-xl p-4 mb-4" style={{ background: 'rgba(0,212,255,0.06)', border: '2px solid rgba(0,212,255,0.2)' }}>
               {/* Final Score Header */}
-              <div className="text-center mb-8">
-                <p className="text-purple-300 text-sm uppercase tracking-widest mb-3 font-semibold">Final Score</p>
-                <div className="inline-flex items-center gap-4 px-8 py-4 bg-slate-900/60 rounded-2xl border border-purple-500/20">
-                  <span className="text-4xl sm:text-7xl font-black text-white tracking-tight">
+              <div className="text-center mb-4">
+                <p className="text-xs uppercase tracking-widest mb-2 font-semibold" style={{ color: '#00d4ff' }}>Final Score</p>
+                <div className="inline-flex items-center gap-3 px-6 py-3 rounded-xl" style={{ background: 'rgba(7,7,26,0.7)', border: '1px solid rgba(0,212,255,0.15)' }}>
+                  <span className="text-5xl font-black text-white tracking-tight">
                     {selectedMatchDetails.score && (() => {
                       const scoreData = typeof selectedMatchDetails.score === 'string'
                         ? JSON.parse(selectedMatchDetails.score)
@@ -1753,28 +1754,27 @@ const DrawPage = () => {
                     })()}
                   </span>
                 </div>
-                <p className="text-gray-400 text-xs uppercase tracking-wider mt-3">Sets Won</p>
+                <p className="text-gray-400 text-xs uppercase tracking-wider mt-2">Sets Won</p>
               </div>
 
               {/* Set-by-Set Breakdown */}
-              <div className="text-center mb-6">
-                <p className="text-gray-400 text-xs uppercase tracking-wider mb-3">Set Breakdown</p>
-                <div className="flex items-center justify-center gap-3">
+              <div className="text-center mb-4">
+                <p className="text-gray-400 text-xs uppercase tracking-wider mb-2">Set Breakdown</p>
+                <div className="flex items-center justify-center gap-2 flex-wrap">
                   {selectedMatchDetails.score && (() => {
-                    const scoreData = typeof selectedMatchDetails.score === 'string' 
-                      ? JSON.parse(selectedMatchDetails.score) 
+                    const scoreData = typeof selectedMatchDetails.score === 'string'
+                      ? JSON.parse(selectedMatchDetails.score)
                       : selectedMatchDetails.score;
                     return scoreData?.sets?.map((set, idx) => {
                       const p1Score = set.player1Score !== undefined ? set.player1Score : set.player1;
                       const p2Score = set.player2Score !== undefined ? set.player2Score : set.player2;
                       const isP1Winner = set.winner === 1;
                       return (
-                        <div key={idx} className={`px-4 py-2 rounded-xl border-2 ${
-                          isP1Winner 
-                            ? 'border-blue-400/50 bg-blue-500/10' 
-                            : 'border-emerald-400/50 bg-emerald-500/10'
-                        }`}>
-                          <span className="text-white font-bold text-lg">{p1Score}-{p2Score}</span>
+                        <div key={idx} className="px-3 py-1.5 rounded-lg" style={{
+                          border: isP1Winner ? '2px solid rgba(0,212,255,0.4)' : '2px solid rgba(0,255,136,0.4)',
+                          background: isP1Winner ? 'rgba(0,212,255,0.08)' : 'rgba(0,255,136,0.08)',
+                        }}>
+                          <span className="text-white font-bold text-sm">{p1Score}-{p2Score}</span>
                         </div>
                       );
                     });
@@ -1782,133 +1782,126 @@ const DrawPage = () => {
                 </div>
               </div>
 
-              {/* Players Score Breakdown */}
-              <div className="grid grid-cols-2 gap-4">
+              {/* Players — stacked vertically for clean mobile layout */}
+              <div className="space-y-3">
                 {/* Player 1 */}
-                <div className={`p-6 rounded-xl border-2 transition-all ${
-                  selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player1?.id
-                    ? 'border-[rgba(0,255,136,0.5)] bg-[rgba(0,255,136,0.08)] shadow-lg'
-                    : 'border-white/10 bg-white/[0.03]'
-                }`}>
-                  <div className="text-center">
-                    <div className="flex items-center justify-center gap-2 mb-4">
-                      {selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player1?.id && (
-                        <span className="text-3xl">👑</span>
-                      )}
-                      <span className={`text-xl font-bold ${
-                        selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player1?.id
-                          ? 'text-[#00ff88]'
-                          : 'text-white'
-                      }`}>
-                        {getPlayerDisplay(selectedMatchDetails.bracketMatch.player1)}
-                      </span>
-                    </div>
-                    {selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player1?.id && (
-                      <div className="mb-3">
-                        <span className="px-3 py-1 bg-[rgba(0,255,136,0.1)] text-[#00ff88] rounded-full text-xs font-bold uppercase tracking-wider border border-[rgba(0,255,136,0.25)]">
-                          Winner
-                        </span>
+                {(() => {
+                  const isWinner = selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player1?.id;
+                  const setScores = selectedMatchDetails.score ? getDetailedSetScores(selectedMatchDetails.score, 1) : '';
+                  return (
+                    <div className="rounded-xl p-3 border-2 transition-all"
+                      style={isWinner
+                        ? { borderColor: 'rgba(0,255,136,0.4)', background: 'rgba(0,255,136,0.07)' }
+                        : { borderColor: 'rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)' }}>
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 min-w-0 flex-1">
+                          {isWinner && <span className="text-base flex-shrink-0">👑</span>}
+                          <p className="font-bold text-sm leading-snug min-w-0"
+                            style={{ color: isWinner ? '#00ff88' : '#fff', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
+                            {getPlayerDisplay(selectedMatchDetails.bracketMatch.player1)}
+                          </p>
+                        </div>
+                        {isWinner && (
+                          <span className="flex-shrink-0 px-2 py-0.5 rounded-full text-xs font-bold" style={{ background: 'rgba(0,255,136,0.15)', color: '#00ff88', border: '1px solid rgba(0,255,136,0.3)' }}>
+                            Winner
+                          </span>
+                        )}
                       </div>
-                    )}
-                    {selectedMatchDetails.score && (
-                      <div className="space-y-2">
-                        <p className="text-xs text-gray-400 uppercase tracking-wider">Individual Scores</p>
-                        <div className="flex flex-wrap gap-2 justify-center">
-                          {getDetailedSetScores(selectedMatchDetails.score, 1).split(', ').map((score, idx) => {
+                      {setScores && (
+                        <div className="flex flex-wrap gap-1.5 mt-2">
+                          {setScores.split(', ').map((score, idx) => {
                             const [p1, p2] = score.split('-').map(Number);
                             const won = p1 > p2;
                             return (
-                              <span key={idx} className={`px-3 py-1.5 rounded-lg font-semibold text-sm ${
-                                won 
-                                  ? 'bg-[rgba(0,255,136,0.12)] text-[#00ff88] border border-[rgba(0,255,136,0.25)]' 
-                                  : 'bg-slate-700/50 text-gray-300 border border-slate-600/30'
-                              }`}>
+                              <span key={idx} className="px-2 py-0.5 rounded text-xs font-semibold"
+                                style={won
+                                  ? { background: 'rgba(0,255,136,0.12)', color: '#00ff88', border: '1px solid rgba(0,255,136,0.25)' }
+                                  : { background: 'rgba(255,255,255,0.06)', color: '#9ca3af', border: '1px solid rgba(255,255,255,0.1)' }}>
                                 {score}
                               </span>
                             );
                           })}
                         </div>
-                      </div>
-                    )}
-                  </div>
+                      )}
+                    </div>
+                  );
+                })()}
+
+                {/* VS divider */}
+                <div className="text-center">
+                  <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">vs</span>
                 </div>
 
                 {/* Player 2 */}
-                <div className={`p-6 rounded-xl border-2 transition-all ${
-                  selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player2?.id
-                    ? 'border-[rgba(0,255,136,0.5)] bg-[rgba(0,255,136,0.08)] shadow-lg'
-                    : 'border-white/10 bg-white/[0.03]'
-                }`}>
-                  <div className="text-center">
-                    <div className="flex items-center justify-center gap-2 mb-4">
-                      {selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player2?.id && (
-                        <span className="text-3xl">👑</span>
-                      )}
-                      <span className={`text-xl font-bold ${
-                        selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player2?.id
-                          ? 'text-[#00ff88]'
-                          : 'text-white'
-                      }`}>
-                        {getPlayerDisplay(selectedMatchDetails.bracketMatch.player2)}
-                      </span>
-                    </div>
-                    {selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player2?.id && (
-                      <div className="mb-3">
-                        <span className="px-3 py-1 bg-[rgba(0,255,136,0.1)] text-[#00ff88] rounded-full text-xs font-bold uppercase tracking-wider border border-[rgba(0,255,136,0.25)]">
-                          Winner
-                        </span>
+                {(() => {
+                  const isWinner = selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player2?.id;
+                  const setScores = selectedMatchDetails.score ? getDetailedSetScores(selectedMatchDetails.score, 2) : '';
+                  return (
+                    <div className="rounded-xl p-3 border-2 transition-all"
+                      style={isWinner
+                        ? { borderColor: 'rgba(0,255,136,0.4)', background: 'rgba(0,255,136,0.07)' }
+                        : { borderColor: 'rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)' }}>
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 min-w-0 flex-1">
+                          {isWinner && <span className="text-base flex-shrink-0">👑</span>}
+                          <p className="font-bold text-sm leading-snug min-w-0"
+                            style={{ color: isWinner ? '#00ff88' : '#fff', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
+                            {getPlayerDisplay(selectedMatchDetails.bracketMatch.player2)}
+                          </p>
+                        </div>
+                        {isWinner && (
+                          <span className="flex-shrink-0 px-2 py-0.5 rounded-full text-xs font-bold" style={{ background: 'rgba(0,255,136,0.15)', color: '#00ff88', border: '1px solid rgba(0,255,136,0.3)' }}>
+                            Winner
+                          </span>
+                        )}
                       </div>
-                    )}
-                    {selectedMatchDetails.score && (
-                      <div className="space-y-2">
-                        <p className="text-xs text-gray-400 uppercase tracking-wider">Individual Scores</p>
-                        <div className="flex flex-wrap gap-2 justify-center">
-                          {getDetailedSetScores(selectedMatchDetails.score, 2).split(', ').map((score, idx) => {
+                      {setScores && (
+                        <div className="flex flex-wrap gap-1.5 mt-2">
+                          {setScores.split(', ').map((score, idx) => {
                             const [p2, p1] = score.split('-').map(Number);
                             const won = p2 > p1;
                             return (
-                              <span key={idx} className={`px-3 py-1.5 rounded-lg font-semibold text-sm ${
-                                won 
-                                  ? 'bg-[rgba(0,255,136,0.12)] text-[#00ff88] border border-[rgba(0,255,136,0.25)]' 
-                                  : 'bg-slate-700/50 text-gray-300 border border-slate-600/30'
-                              }`}>
+                              <span key={idx} className="px-2 py-0.5 rounded text-xs font-semibold"
+                                style={won
+                                  ? { background: 'rgba(0,255,136,0.12)', color: '#00ff88', border: '1px solid rgba(0,255,136,0.25)' }
+                                  : { background: 'rgba(255,255,255,0.06)', color: '#9ca3af', border: '1px solid rgba(255,255,255,0.1)' }}>
                                 {score}
                               </span>
                             );
                           })}
                         </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                      )}
+                    </div>
+                  );
+                })()}
               </div>
             </div>
 
             {/* Match Information Grid */}
-            <div className="rounded-2xl p-6 mb-6" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
-              <h3 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
-                <span className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center text-blue-400">ℹ️</span>
+            <div className="rounded-xl p-4 mb-4" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+                <span>ℹ️</span>
                 Match Information
               </h3>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-                <div className="space-y-2">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
                   <p className="text-gray-400 text-xs uppercase tracking-wider">Status</p>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5">
                     <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
-                    <p className="text-white font-semibold text-lg">Completed</p>
+                    <p className="text-white font-semibold text-sm">Completed</p>
                   </div>
                 </div>
                 {selectedMatchDetails.courtNumber && (
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <p className="text-gray-400 text-xs uppercase tracking-wider">Court</p>
-                    <p className="text-white font-semibold text-lg">Court {selectedMatchDetails.courtNumber}</p>
+                    <p className="text-white font-semibold text-sm">Court {selectedMatchDetails.courtNumber}</p>
                   </div>
                 )}
                 {/* Started At - check both startTime and startedAt */}
                 {(selectedMatchDetails.startTime || selectedMatchDetails.startedAt) && (
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <p className="text-gray-400 text-xs uppercase tracking-wider">Started At</p>
-                    <p className="text-white font-semibold text-sm">
+                    <p className="text-white font-semibold text-xs">
                       {new Date(selectedMatchDetails.startTime || selectedMatchDetails.startedAt).toLocaleString('en-US', {
                         month: 'short',
                         day: 'numeric',
@@ -1920,9 +1913,9 @@ const DrawPage = () => {
                 )}
                 {/* Ended At - check both endTime and completedAt */}
                 {(selectedMatchDetails.endTime || selectedMatchDetails.completedAt) && (
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <p className="text-gray-400 text-xs uppercase tracking-wider">Ended At</p>
-                    <p className="text-white font-semibold text-sm">
+                    <p className="text-white font-semibold text-xs">
                       {new Date(selectedMatchDetails.endTime || selectedMatchDetails.completedAt).toLocaleString('en-US', {
                         month: 'short',
                         day: 'numeric',
@@ -1973,9 +1966,9 @@ const DrawPage = () => {
                     }
                     
                     return (
-                      <div className="space-y-2">
+                      <div className="space-y-1">
                         <p className="text-gray-400 text-xs uppercase tracking-wider">Duration</p>
-                        <p className="text-white font-semibold text-base">
+                        <p className="text-white font-semibold text-xs">
                           {durationText}
                         </p>
                       </div>
@@ -1992,7 +1985,8 @@ const DrawPage = () => {
                 setShowMatchDetailsModal(false);
                 setSelectedMatchDetails(null);
               }}
-              className="w-full py-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl font-semibold text-lg hover:shadow-lg hover:shadow-blue-500/30 transition-all"
+              className="w-full py-3 rounded-xl font-semibold text-sm transition-all"
+              style={{ background: 'rgba(0,212,255,0.12)', border: '1px solid rgba(0,212,255,0.3)', color: '#00d4ff' }}
             >
               Close
             </button>
@@ -2003,7 +1997,7 @@ const DrawPage = () => {
       {/* Match Complete Success Modal */}
       {showSuccessModal && matchCompleteData && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="rounded-3xl p-8 max-w-md w-full shadow-2xl animate-scale-in">
+          <div className="rounded-3xl p-8 max-w-md w-full shadow-2xl animate-scale-in" style={{ background: '#0d1025', border: '2px solid rgba(251,191,36,0.5)', boxShadow: '0 0 40px rgba(251,191,36,0.15)' }}>
             {/* Trophy Icon */}
             <div className="w-24 h-24 bg-gradient-to-br from-amber-500 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-amber-500/50">
               <Trophy className="w-12 h-12 text-white" />
@@ -2028,8 +2022,8 @@ const DrawPage = () => {
             </div>
 
             {/* Success Message */}
-            <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 mb-6">
-              <p className="icon-green text-center text-sm">
+            <div className="rounded-xl p-4 mb-6" style={{ background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.25)' }}>
+              <p className="text-center text-sm" style={{ color: '#00ff88' }}>
                 ✓ Winner advanced to next round<br />
                 ✓ Notifications sent to players<br />
                 ✓ Bracket updated successfully
@@ -2128,7 +2122,7 @@ const DrawPage = () => {
               <Trophy className="w-10 h-10" style={{ color: '#07071a' }} />
             </div>
             <h2 className="text-2xl font-bold text-center mb-2 text-white">End Category?</h2>
-            <p className="text-center text-purple-300 font-semibold mb-4">{activeCategory?.name}</p>
+            <p className="text-center font-semibold mb-4" style={{ color: '#00d4ff' }}>{activeCategory?.name}</p>
             <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 mb-6 space-y-2">
               <p className="text-sm text-green-300">
                 <strong>This will:</strong>
@@ -2450,13 +2444,13 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                     const player1Name = getPlayerDisplay(player1);
                     const player2Name = getPlayerDisplay(player2);
                     
-                    const isCompleted = dbMatch?.status === 'COMPLETED';
+                    const isCompleted = dbMatch?.status === 'COMPLETED' || (!dbMatch && match.winner && player1.name !== 'TBD' && player2.name !== 'TBD');
                     const isLive = dbMatch?.status === 'IN_PROGRESS';
                     const isReady = dbMatch?.status === 'READY' && player1.name !== 'TBD' && player2.name !== 'TBD';
                     const hasUmpire = dbMatch?.umpireId;
-                    
-                    const isPlayer1Winner = dbMatch?.winnerId === player1?.id;
-                    const isPlayer2Winner = dbMatch?.winnerId === player2?.id;
+
+                    const isPlayer1Winner = dbMatch ? dbMatch.winnerId === player1?.id : match.winner === 1;
+                    const isPlayer2Winner = dbMatch ? dbMatch.winnerId === player2?.id : match.winner === 2;
                     
                     return (
                       <div 
@@ -2544,19 +2538,36 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                             </div>
                           </div>
                           
-                          {/* Organizer Actions */}
-                          {isOrganizer && dbMatch && (
+                          {/* VIEW — all users when completed */}
+                          {isCompleted && (
+                            <div className="px-2 pb-2">
+                              <button
+                                onClick={() => {
+                                  const bracketMatchData = { matchNumber: match.matchNumber, round: ri + 1, player1, player2 };
+                                  const matchDataToUse = dbMatch || {
+                                    matchNumber: match.matchNumber, status: 'COMPLETED', winner: match.winner,
+                                    winnerId: match.winner === 1 ? player1?.id : player2?.id,
+                                    score: match.scoreJson || match.score || null,
+                                    scoreJson: match.scoreJson || null,
+                                    player1, player2,
+                                  };
+                                  onViewMatchDetails(matchDataToUse, bracketMatchData);
+                                }}
+                                className="w-full py-2 rounded-lg bg-blue-500/20 text-blue-300 border-2 border-blue-500/40 transition-all text-[10px] font-black flex items-center justify-center gap-1"
+                              >
+                                <Eye className="w-3 h-3" />
+                                VIEW
+                              </button>
+                            </div>
+                          )}
+
+                          {/* Organizer-only actions */}
+                          {isOrganizer && dbMatch && !isCompleted && (
                             <div className="px-2 pb-2 flex gap-1.5">
-                              {/* Assign Umpire Button */}
-                              {!isCompleted && player1.name !== 'TBD' && player2.name !== 'TBD' && (
+                              {player1.name !== 'TBD' && player2.name !== 'TBD' && (
                                 <button
                                   onClick={() => {
-                                    const bracketMatchData = {
-                                      matchNumber: match.matchNumber,
-                                      round: ri + 1,
-                                      player1: player1,
-                                      player2: player2
-                                    };
+                                    const bracketMatchData = { matchNumber: match.matchNumber, round: ri + 1, player1, player2 };
                                     onAssignUmpire(dbMatch, bracketMatchData);
                                   }}
                                   className={`flex-1 py-2 rounded-lg border-2 transition-all text-[10px] font-black flex items-center justify-center gap-1 ${
@@ -2569,9 +2580,7 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                                   {hasUmpire ? 'READY' : 'UMPIRE'}
                                 </button>
                               )}
-                              
-                              {/* Conduct Match Button */}
-                              {!isCompleted && (player1.name !== 'TBD' || player2.name !== 'TBD') && (
+                              {(player1.name !== 'TBD' || player2.name !== 'TBD') && (
                                 <button
                                   onClick={() => handleConductMatch(dbMatch.id)}
                                   className="flex-1 py-2 rounded-lg border-2 border-transparent transition-all text-[10px] font-black flex items-center justify-center gap-1 btn-brand"
@@ -2580,25 +2589,21 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                                   START
                                 </button>
                               )}
-                              
-                              {/* View Details Button */}
-                              {isCompleted && (
-                                <button
-                                  onClick={() => {
-                                    const bracketMatchData = {
-                                      matchNumber: match.matchNumber,
-                                      round: ri + 1,
-                                      player1: player1,
-                                      player2: player2
-                                    };
-                                    onViewMatchDetails(dbMatch, bracketMatchData);
-                                  }}
-                                  className="flex-1 py-2 rounded-lg bg-blue-500/20 text-blue-300 border-2 border-blue-500/40 transition-all text-[10px] font-black flex items-center justify-center gap-1"
-                                >
-                                  <Eye className="w-3 h-3" />
-                                  VIEW
-                                </button>
-                              )}
+                            </div>
+                          )}
+
+                          {/* Organizer CHANGE button when completed */}
+                          {isOrganizer && dbMatch && isCompleted && (
+                            <div className="px-2 pb-2">
+                              <button
+                                onClick={() => {
+                                  const bracketMatchData = { matchNumber: match.matchNumber, round: ri + 1, player1, player2, currentWinnerId: dbMatch?.winnerId };
+                                  onChangeResult(dbMatch, bracketMatchData);
+                                }}
+                                className="w-full py-2 rounded-lg bg-amber-500/20 text-amber-300 border-2 border-amber-500/40 transition-all text-[10px] font-black"
+                              >
+                                CHANGE
+                              </button>
                             </div>
                           )}
                         </div>
@@ -2785,7 +2790,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                 {group.matches.map((match, mi) => {
                   const dbMatch = findDbMatch(match, gi);
                   const hasPlayers = match.player1?.id && match.player2?.id;
-                  const isCompleted = dbMatch?.status === 'COMPLETED';
+                  const isCompleted = dbMatch?.status === 'COMPLETED' || (!dbMatch && match.winner && match.player1?.id && match.player2?.id);
                   const isInProgress = dbMatch?.status === 'IN_PROGRESS';
                   const hasUmpire = dbMatch?.umpireId;
                   
@@ -2810,8 +2815,8 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                       
                       {/* Players with winner highlight */}
                       {(() => {
-                        const p1Won = dbMatch?.winnerId === match.player1?.id;
-                        const p2Won = dbMatch?.winnerId === match.player2?.id;
+                        const p1Won = dbMatch ? dbMatch.winnerId === match.player1?.id : match.winner === 1;
+                        const p2Won = dbMatch ? dbMatch.winnerId === match.player2?.id : match.winner === 2;
                         return (
                           <div className="space-y-1.5">
                             <div className={`py-2 px-3 rounded-xl font-bold text-sm flex items-center justify-between ${hasPlayers ? '' : ''}`}
@@ -2839,66 +2844,57 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                         );
                       })()}
                       
-                      {/* Actions */}
-                      {isOrganizer && hasPlayers && (
+                      {/* VIEW — all users when completed */}
+                      {isCompleted && hasPlayers && (
                         <div className="mt-2.5 flex gap-2">
-                          {!isCompleted ? (
+                          <button
+                            onClick={() => {
+                              const bracketMatchData = { matchNumber: match.matchNumber, round: 1, player1: match.player1, player2: match.player2, groupName: group.groupName };
+                              const matchDataToUse = dbMatch || {
+                                matchNumber: match.matchNumber, status: 'COMPLETED', winner: match.winner,
+                                winnerId: match.winner === 1 ? match.player1?.id : match.player2?.id,
+                                score: match.scoreJson || match.score || null,
+                                scoreJson: match.scoreJson || null,
+                                player1: match.player1, player2: match.player2,
+                              };
+                              onViewMatchDetails(matchDataToUse, bracketMatchData);
+                            }}
+                            className="flex-1 py-2.5 rounded-lg bg-blue-500/20 text-blue-300 border-2 border-blue-500/40 transition-all text-xs font-black flex items-center justify-center gap-2"
+                          >
+                            <Eye className="w-4 h-4" />
+                            VIEW
+                          </button>
+                          {isOrganizer && (
                             <button
                               onClick={() => {
-                                const bracketMatchData = {
-                                  matchNumber: match.matchNumber,
-                                  round: 1,
-                                  player1: match.player1,
-                                  player2: match.player2,
-                                  groupName: group.groupName
-                                };
-                                onAssignUmpire(dbMatch, bracketMatchData);
+                                const bracketMatchData = { matchNumber: match.matchNumber, round: 1, player1: match.player1, player2: match.player2, groupName: group.groupName, currentWinnerId: dbMatch?.winnerId };
+                                onChangeResult(dbMatch, bracketMatchData);
                               }}
-                              className={`flex-1 py-2.5 rounded-lg transition-all flex items-center justify-center gap-2 text-xs font-black ${
-                                hasUmpire 
-                                  ? 'bg-[rgba(0,255,136,0.12)] text-[#00ff88] border-2 border-[rgba(0,255,136,0.3)]' 
-                                  : 'bg-blue-500/20 text-blue-300 border-2 border-blue-500/40'
-                              }`}
+                              className="py-2.5 px-4 rounded-lg bg-amber-500/20 text-amber-300 border-2 border-amber-500/40 transition-all text-xs font-black"
                             >
-                              <Gavel className="w-4 h-4" />
-                              {hasUmpire ? 'READY' : 'ASSIGN'}
+                              CHANGE
                             </button>
-                          ) : (
-                            <>
-                              <button
-                                onClick={() => {
-                                  const bracketMatchData = {
-                                    matchNumber: match.matchNumber,
-                                    round: 1,
-                                    player1: match.player1,
-                                    player2: match.player2,
-                                    groupName: group.groupName
-                                  };
-                                  onViewMatchDetails(dbMatch, bracketMatchData);
-                                }}
-                                className="flex-1 py-2.5 rounded-lg bg-blue-500/20 text-blue-300 border-2 border-blue-500/40 transition-all text-xs font-black flex items-center justify-center gap-2"
-                              >
-                                <Eye className="w-4 h-4" />
-                                VIEW
-                              </button>
-                              <button
-                                onClick={() => {
-                                  const bracketMatchData = {
-                                    matchNumber: match.matchNumber,
-                                    round: 1,
-                                    player1: match.player1,
-                                    player2: match.player2,
-                                    groupName: group.groupName,
-                                    currentWinnerId: dbMatch?.winnerId
-                                  };
-                                  onChangeResult(dbMatch, bracketMatchData);
-                                }}
-                                className="py-2.5 px-4 rounded-lg bg-amber-500/20 text-amber-300 border-2 border-amber-500/40 transition-all text-xs font-black"
-                              >
-                                CHANGE
-                              </button>
-                            </>
                           )}
+                        </div>
+                      )}
+
+                      {/* Organizer-only pre-completion actions */}
+                      {isOrganizer && hasPlayers && !isCompleted && (
+                        <div className="mt-2.5">
+                          <button
+                            onClick={() => {
+                              const bracketMatchData = { matchNumber: match.matchNumber, round: 1, player1: match.player1, player2: match.player2, groupName: group.groupName };
+                              onAssignUmpire(dbMatch, bracketMatchData);
+                            }}
+                            className={`w-full py-2.5 rounded-lg transition-all flex items-center justify-center gap-2 text-xs font-black ${
+                              hasUmpire
+                                ? 'bg-[rgba(0,255,136,0.12)] text-[#00ff88] border-2 border-[rgba(0,255,136,0.3)]'
+                                : 'bg-blue-500/20 text-blue-300 border-2 border-blue-500/40'
+                            }`}
+                          >
+                            <Gavel className="w-4 h-4" />
+                            {hasUmpire ? 'READY' : 'ASSIGN'}
+                          </button>
                         </div>
                       )}
                     </div>
@@ -3397,27 +3393,25 @@ const SlotCard = ({ slot, assigned, canAccept, onSlotClick, onRemove, playerLabe
   return (
     <div
       onClick={onSlotClick}
-      className={`p-3 rounded-xl border-2 transition-all ${
-        assigned
-          ? 'border-emerald-500/50 bg-emerald-500/10 border-solid'
-          : canAccept
-            ? 'border-purple-500 bg-purple-500/10 border-dashed cursor-pointer hover:bg-purple-500/20 hover:shadow-lg hover:shadow-purple-500/20'
-            : 'border-white/20 bg-slate-800/50 border-dashed'
-      }`}
+      className="p-3 rounded-xl border-2 transition-all"
+      style={assigned
+        ? { borderColor: 'rgba(0,255,136,0.5)', background: 'rgba(0,255,136,0.1)' }
+        : canAccept
+          ? { borderColor: 'rgba(0,212,255,0.6)', background: 'rgba(0,212,255,0.08)', borderStyle: 'dashed', cursor: 'pointer' }
+          : { borderColor: 'rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.03)', borderStyle: 'dashed' }}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-            assigned 
-              ? 'bg-emerald-500/20' 
-              : canAccept 
-                ? 'bg-purple-500/20' 
-                : 'bg-slate-700/50'
-          }`}>
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center"
+            style={assigned
+              ? { background: 'rgba(0,255,136,0.15)' }
+              : canAccept
+                ? { background: 'rgba(0,212,255,0.12)' }
+                : { background: 'rgba(255,255,255,0.06)' }}>
             {assigned ? (
               <CheckCircle className="w-5 h-5 icon-green" />
             ) : (
-              <Users className={`w-5 h-5 ${canAccept ? 'text-purple-400' : 'text-gray-500'}`} />
+              <Users className="w-5 h-5" style={{ color: canAccept ? '#00d4ff' : '#6b7280' }} />
             )}
           </div>
           <div>
@@ -3425,7 +3419,7 @@ const SlotCard = ({ slot, assigned, canAccept, onSlotClick, onRemove, playerLabe
             {assigned ? (
               <span className="text-white font-medium">{assigned.playerName}</span>
             ) : (
-              <span className={`text-sm ${canAccept ? 'text-purple-400' : 'text-gray-500'}`}>
+              <span className="text-sm" style={{ color: canAccept ? '#00d4ff' : '#6b7280' }}>
                 {canAccept ? 'Click to assign' : 'Empty slot'}
               </span>
             )}
@@ -3483,17 +3477,16 @@ const CompactSlotCard = ({ slot, assigned, canAccept, onSlotClick, onRemove, pla
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
-      className={`px-2 py-1.5 rounded-lg border transition-all ${
-        locked
-          ? 'border-amber-500/30 bg-amber-500/5 cursor-not-allowed'
-          : isDragOver
-            ? 'border-emerald-500 bg-emerald-500/20 border-dashed'
-            : assigned
-              ? 'border-emerald-500/50 bg-emerald-500/10 border-solid cursor-move'
-              : canAccept
-                ? 'border-purple-500 bg-purple-500/10 border-dashed cursor-pointer hover:bg-purple-500/20'
-                : 'border-white/10 bg-slate-800/30 border-dashed'
-      }`}
+      className="px-2 py-1.5 rounded-lg border transition-all"
+      style={locked
+        ? { borderColor: 'rgba(251,191,36,0.3)', background: 'rgba(251,191,36,0.05)', cursor: 'not-allowed' }
+        : isDragOver
+          ? { borderColor: 'rgba(0,255,136,1)', background: 'rgba(0,255,136,0.2)', borderStyle: 'dashed' }
+          : assigned
+            ? { borderColor: 'rgba(0,255,136,0.5)', background: 'rgba(0,255,136,0.1)', cursor: 'move' }
+            : canAccept
+              ? { borderColor: 'rgba(0,212,255,0.6)', background: 'rgba(0,212,255,0.08)', borderStyle: 'dashed', cursor: 'pointer' }
+              : { borderColor: 'rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.02)', borderStyle: 'dashed' }}
       title={assigned && !locked ? 'Drag to move player to another slot' : undefined}
     >
       <div className="flex items-center justify-between gap-2">
@@ -3509,7 +3502,7 @@ const CompactSlotCard = ({ slot, assigned, canAccept, onSlotClick, onRemove, pla
               {assigned.playerName}
             </span>
           ) : (
-            <span className={`text-xs truncate ${canAccept ? 'text-purple-400' : 'text-gray-500'}`}>
+            <span className="text-xs truncate" style={{ color: canAccept ? '#00d4ff' : '#6b7280' }}>
               {canAccept ? 'Click to assign' : 'Empty'}
             </span>
           )}
@@ -4080,15 +4073,18 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                     isMatchLocked ? 'border-amber-500/30 bg-amber-500/5' : 'border-white/10'
                   }`}>
                     {/* Match Header - Compact */}
-                    <div className={`px-3 py-1.5 border-b border-white/10 flex items-center gap-2 ${
-                      isMatchLocked 
-                        ? 'bg-gradient-to-r from-amber-500/20 to-orange-500/20' 
-                        : 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20'
-                    }`}>
-                      <span className={`w-5 h-5 rounded flex items-center justify-center text-xs font-bold ${
-                        isMatchLocked ? 'bg-amber-500/30 text-amber-300' : 'bg-purple-500/30 text-purple-300'
-                      }`}>{matchNum}</span>
-                      <span className={`font-semibold text-xs ${isMatchLocked ? 'text-amber-300' : 'text-purple-300'}`}>
+                    <div className="px-3 py-1.5 border-b border-white/10 flex items-center gap-2"
+                      style={isMatchLocked
+                        ? { background: 'linear-gradient(to right,rgba(251,191,36,0.15),rgba(249,115,22,0.15))' }
+                        : { background: 'rgba(0,212,255,0.08)' }}>
+                      <span className="w-5 h-5 rounded flex items-center justify-center text-xs font-bold"
+                        style={isMatchLocked
+                          ? { background: 'rgba(251,191,36,0.2)', color: '#fbbf24' }
+                          : { background: 'rgba(0,212,255,0.15)', color: '#00d4ff' }}>
+                        {matchNum}
+                      </span>
+                      <span className="font-semibold text-xs"
+                        style={{ color: isMatchLocked ? '#fbbf24' : '#00d4ff' }}>
                         Match {matchNum}
                       </span>
                       {isMatchLocked && (

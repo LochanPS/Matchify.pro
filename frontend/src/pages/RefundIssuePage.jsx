@@ -1,4 +1,4 @@
-import { getErrorMessage } from '../utils/errorMessage';
+﻿import { getErrorMessage } from '../utils/errorMessage';
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
@@ -58,7 +58,7 @@ export default function RefundIssuePage() {
   return (
     <div className="min-h-screen relative" style={{ background: BG }}>
       {/* Fixed bg glow */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+      <div className="fixed top-0 bottom-0 pointer-events-none overflow-hidden" style={{ left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: "480px" }}>
         <div className="absolute top-0 right-0 w-64 h-64 rounded-full blur-3xl opacity-15" style={{ background: 'radial-gradient(circle,rgba(239,68,68,0.5) 0%,transparent 70%)' }} />
         <div className="absolute bottom-1/3 left-0 w-56 h-56 rounded-full blur-3xl opacity-10" style={{ background: 'radial-gradient(circle,rgba(251,191,36,0.5) 0%,transparent 70%)' }} />
       </div>

@@ -108,6 +108,8 @@ app.use(helmet({
 // CORS configuration
 const allowedOrigins = [
   FRONTEND_URL,
+  'https://matchify.pro',
+  'https://www.matchify.pro',
   'https://matchify-pro.vercel.app',
   'https://matchify.vercel.app',
   'http://localhost:5173',

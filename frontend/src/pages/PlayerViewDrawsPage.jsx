@@ -25,6 +25,7 @@ const PlayerViewDrawsPage = () => {
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [draw, setDraw] = useState(null);
+  const [categoryMatches, setCategoryMatches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingDraw, setLoadingDraw] = useState(false);
   const [error, setError] = useState(null);
@@ -74,12 +75,16 @@ const PlayerViewDrawsPage = () => {
   const fetchDraw = async (categoryId, silent = false) => {
     if (!silent) setLoadingDraw(true);
     try {
-      const response = await api.get(`/tournaments/${id}/categories/${categoryId}/draw`);
-      if (response.data?.success && response.data.draw) {
-        setDraw(response.data.draw);
+      const [drawResponse, matchesResponse] = await Promise.all([
+        api.get(`/tournaments/${id}/categories/${categoryId}/draw`),
+        api.get(`/tournaments/${id}/categories/${categoryId}/matches`).catch(() => ({ data: { matches: [] } }))
+      ]);
+      if (drawResponse.data?.success && drawResponse.data.draw) {
+        setDraw(drawResponse.data.draw);
       } else {
         setDraw(null);
       }
+      setCategoryMatches(matchesResponse.data?.matches || []);
     } catch (err) {
       if (err.response?.status === 404) {
         setDraw(null);
@@ -116,7 +121,7 @@ const PlayerViewDrawsPage = () => {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: '#07071a' }}>
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-12 h-12 border-4 rounded-full animate-spin mx-auto mb-4" style={{ borderColor: 'rgba(0,255,136,0.3)', borderTopColor: '#00ff88' }}></div>
           <p className="text-gray-400">Loading draws...</p>
         </div>
       </div>
@@ -371,7 +376,7 @@ const PlayerViewDrawsPage = () => {
                         <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>Loading draw…</p>
                       </div>
                     ) : draw ? (
-                      <DrawBracket draw={draw} onViewMatchDetails={onViewMatchDetails} categoryFormat={selectedCategory?.format} />
+                      <DrawBracket draw={draw} onViewMatchDetails={onViewMatchDetails} categoryFormat={selectedCategory?.format} dbMatches={categoryMatches} />
                     ) : error ? (
                       <div className="text-center py-12">
                         <div className="w-20 h-20 bg-red-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -410,17 +415,17 @@ const PlayerViewDrawsPage = () => {
 
       {/* Match Details Modal */}
       {showMatchDetailsModal && selectedMatchDetails && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="border-2 border-blue-500/50 rounded-3xl p-8 max-w-3xl w-full shadow-2xl shadow-blue-500/20 max-h-[90vh] overflow-y-auto" style={{ background: '#0d1025' }}>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-3">
+          <div className="rounded-2xl p-4 max-w-lg w-full shadow-2xl max-h-[90vh] overflow-y-auto" style={{ background: '#0d1025', border: '2px solid rgba(0,212,255,0.35)' }}>
             {/* Header */}
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/50">
-                  <span className="text-3xl">🏸</span>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'rgba(0,212,255,0.15)', border: '1px solid rgba(0,212,255,0.3)' }}>
+                  <span className="text-lg">🏸</span>
                 </div>
                 <div>
-                  <h2 className="text-3xl font-bold text-white">Match Details</h2>
-                  <p className="text-gray-400 text-sm mt-1">Match #{selectedMatchDetails.matchNumber}</p>
+                  <h2 className="text-lg font-bold text-white">Match Details</h2>
+                  <p className="text-gray-400 text-xs">Match #{selectedMatchDetails.matchNumber}</p>
                 </div>
               </div>
               <button
@@ -428,289 +433,231 @@ const PlayerViewDrawsPage = () => {
                   setShowMatchDetailsModal(false);
                   setSelectedMatchDetails(null);
                 }}
-                className="w-12 h-12 rounded-full bg-slate-700 hover:bg-slate-600 flex items-center justify-center transition-all"
+                className="w-9 h-9 rounded-full flex items-center justify-center transition-all"
+                style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}
               >
-                <X className="w-6 h-6 text-gray-400" />
+                <X className="w-5 h-5 text-gray-400" />
               </button>
             </div>
 
-            {/* Match Score Card - Prominent Display */}
-            <div className="bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border-2 border-purple-500/30 rounded-2xl p-8 mb-8">
-              {/* Final Score Header */}
-              <div className="text-center mb-8">
-                <p className="text-purple-300 text-sm uppercase tracking-widest mb-3 font-semibold">Final Score</p>
-                <div className="inline-flex items-center gap-4 px-8 py-4 bg-slate-900/60 rounded-2xl border border-purple-500/20">
-                  <span className="text-4xl sm:text-7xl font-black text-white tracking-tight">
+            {/* Match Score Card */}
+            <div className="rounded-xl p-4 mb-4" style={{ background: 'rgba(0,212,255,0.06)', border: '2px solid rgba(0,212,255,0.2)' }}>
+              {/* Final Score */}
+              <div className="text-center mb-4">
+                <p className="text-xs uppercase tracking-widest mb-2 font-semibold" style={{ color: '#00d4ff' }}>Final Score</p>
+                <div className="inline-flex items-center gap-3 px-6 py-3 rounded-xl" style={{ background: 'rgba(7,7,26,0.7)', border: '1px solid rgba(0,212,255,0.15)' }}>
+                  <span className="text-5xl font-black text-white tracking-tight">
                     {selectedMatchDetails.score ? (() => {
                       try {
-                        const scoreData = typeof selectedMatchDetails.score === 'string' 
-                          ? JSON.parse(selectedMatchDetails.score) 
+                        const scoreData = typeof selectedMatchDetails.score === 'string'
+                          ? JSON.parse(selectedMatchDetails.score)
                           : selectedMatchDetails.score;
-                        let p1SetsWon = 0;
-                        let p2SetsWon = 0;
+                        let p1SetsWon = 0, p2SetsWon = 0;
                         scoreData?.sets?.forEach((set) => {
                           if (set.winner === 1) p1SetsWon++;
                           if (set.winner === 2) p2SetsWon++;
                         });
                         return `${p1SetsWon}-${p2SetsWon}`;
-                      } catch (e) {
-                        console.error('Error parsing score:', e);
-                        return 'N/A';
-                      }
+                      } catch (e) { return 'N/A'; }
                     })() : 'N/A'}
                   </span>
                 </div>
-                <p className="text-gray-400 text-xs uppercase tracking-wider mt-3">Sets Won</p>
+                <p className="text-gray-400 text-xs uppercase tracking-wider mt-2">Sets Won</p>
               </div>
 
-              {/* Set-by-Set Breakdown */}
-              <div className="text-center mb-6">
-                <p className="text-gray-400 text-xs uppercase tracking-wider mb-3">Set Breakdown</p>
-                <div className="flex items-center justify-center gap-3">
+              {/* Set Breakdown */}
+              <div className="text-center mb-4">
+                <p className="text-gray-400 text-xs uppercase tracking-wider mb-2">Set Breakdown</p>
+                <div className="flex items-center justify-center gap-2 flex-wrap">
                   {selectedMatchDetails.score ? (() => {
                     try {
-                      const scoreData = typeof selectedMatchDetails.score === 'string' 
-                        ? JSON.parse(selectedMatchDetails.score) 
+                      const scoreData = typeof selectedMatchDetails.score === 'string'
+                        ? JSON.parse(selectedMatchDetails.score)
                         : selectedMatchDetails.score;
-                      
-                      if (!scoreData?.sets || scoreData.sets.length === 0) {
-                        return <span className="text-gray-400">No set data available</span>;
-                      }
-                      
+                      if (!scoreData?.sets?.length) return <span className="text-gray-400 text-xs">No set data</span>;
                       return scoreData.sets.map((set, idx) => {
                         const p1Score = set.player1Score !== undefined ? set.player1Score : set.player1;
                         const p2Score = set.player2Score !== undefined ? set.player2Score : set.player2;
                         const isP1Winner = set.winner === 1;
                         return (
-                          <div key={idx} className="px-4 py-2 rounded-xl border-2"
+                          <div key={idx} className="px-3 py-1.5 rounded-lg"
                             style={isP1Winner
-                              ? { borderColor: 'rgba(96,165,250,0.5)', background: 'rgba(59,130,246,0.1)' }
-                              : { borderColor: 'rgba(0,255,136,0.4)', background: 'rgba(0,255,136,0.08)' }}
-                          >
-                            <span className="text-white font-bold text-lg">{p1Score}-{p2Score}</span>
+                              ? { border: '2px solid rgba(0,212,255,0.4)', background: 'rgba(0,212,255,0.08)' }
+                              : { border: '2px solid rgba(0,255,136,0.4)', background: 'rgba(0,255,136,0.08)' }}>
+                            <span className="text-white font-bold text-sm">{p1Score}-{p2Score}</span>
                           </div>
                         );
                       });
-                    } catch (e) {
-                      console.error('Error parsing set breakdown:', e);
-                      return <span className="text-gray-400">Error loading set data</span>;
-                    }
-                  })() : <span className="text-gray-400">No score data available</span>}
+                    } catch (e) { return <span className="text-gray-400 text-xs">Error loading sets</span>; }
+                  })() : <span className="text-gray-400 text-xs">No score data available</span>}
                 </div>
               </div>
 
-              {/* Players Score Breakdown */}
-              <div className="grid grid-cols-2 gap-4">
+              {/* Players — stacked vertically */}
+              <div className="space-y-3">
                 {/* Player 1 */}
-                <div
-                  className="p-6 rounded-xl border-2 transition-all"
-                  style={selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player1?.id
-                    ? { borderColor: 'rgba(0,255,136,0.4)', background: 'rgba(0,255,136,0.08)' }
-                    : { borderColor: 'rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)' }}
-                >
-                  <div className="text-center">
-                    <div className="flex items-center justify-center gap-2 mb-4">
-                      {selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player1?.id && (
-                        <span className="text-3xl">👑</span>
-                      )}
-                      <span
-                        className="text-xl font-bold"
-                        style={{ color: selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player1?.id ? '#00ff88' : '#fff' }}
-                      >
-                        {selectedMatchDetails.bracketMatch.player1?.name}
-                      </span>
-                    </div>
-                    {selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player1?.id && (
-                      <div className="mb-3">
-                        <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider" style={{ background: 'rgba(0,255,136,0.15)', color: '#00ff88' }}>
-                          Winner
-                        </span>
+                {(() => {
+                  const isWinner = selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch?.player1?.id;
+                  return (
+                    <div className="rounded-xl p-3 border-2"
+                      style={isWinner
+                        ? { borderColor: 'rgba(0,255,136,0.4)', background: 'rgba(0,255,136,0.07)' }
+                        : { borderColor: 'rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)' }}>
+                      <div className="flex items-center justify-between gap-2 mb-2">
+                        <div className="flex items-center gap-2 min-w-0 flex-1">
+                          {isWinner && <span className="flex-shrink-0">👑</span>}
+                          <p className="font-bold text-sm leading-snug min-w-0"
+                            style={{ color: isWinner ? '#00ff88' : '#fff', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
+                            {selectedMatchDetails.bracketMatch?.player1?.name || selectedMatchDetails.player1?.name || 'Player 1'}
+                          </p>
+                        </div>
+                        {isWinner && (
+                          <span className="flex-shrink-0 px-2 py-0.5 rounded-full text-xs font-bold"
+                            style={{ background: 'rgba(0,255,136,0.15)', color: '#00ff88', border: '1px solid rgba(0,255,136,0.3)' }}>
+                            Winner
+                          </span>
+                        )}
                       </div>
-                    )}
-                    {selectedMatchDetails.score ? (
-                      <div className="space-y-2">
-                        <p className="text-xs text-gray-400 uppercase tracking-wider">Individual Scores</p>
-                        <div className="flex flex-wrap gap-2 justify-center">
-                          {(() => {
-                            try {
-                              const scores = getDetailedSetScores(selectedMatchDetails.score, 1);
-                              if (!scores) return <span className="text-gray-500 text-xs">No scores</span>;
-                              return scores.split(', ').map((score, idx) => {
+                      {selectedMatchDetails.score && (() => {
+                        try {
+                          const scores = getDetailedSetScores(selectedMatchDetails.score, 1);
+                          if (!scores) return null;
+                          return (
+                            <div className="flex flex-wrap gap-1.5">
+                              {scores.split(', ').map((score, idx) => {
                                 const [p1, p2] = score.split('-').map(Number);
                                 const won = p1 > p2;
                                 return (
-                                  <span key={idx} className="px-3 py-1.5 rounded-lg font-semibold text-sm"
+                                  <span key={idx} className="px-2 py-0.5 rounded text-xs font-semibold"
                                     style={won
-                                      ? { background: 'rgba(0,255,136,0.15)', color: '#00ff88', border: '1px solid rgba(0,255,136,0.3)' }
-                                      : { background: 'rgba(255,255,255,0.06)', color: '#d1d5db', border: '1px solid rgba(255,255,255,0.1)' }}
-                                  >
+                                      ? { background: 'rgba(0,255,136,0.12)', color: '#00ff88', border: '1px solid rgba(0,255,136,0.25)' }
+                                      : { background: 'rgba(255,255,255,0.06)', color: '#9ca3af', border: '1px solid rgba(255,255,255,0.1)' }}>
                                     {score}
                                   </span>
                                 );
-                              });
-                            } catch (e) {
-                              console.error('Error displaying player 1 scores:', e);
-                              return <span className="text-gray-500 text-xs">Error loading scores</span>;
-                            }
-                          })()}
-                        </div>
-                      </div>
-                    ) : null}
-                  </div>
+                              })}
+                            </div>
+                          );
+                        } catch (e) { return null; }
+                      })()}
+                    </div>
+                  );
+                })()}
+
+                <div className="text-center">
+                  <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">vs</span>
                 </div>
 
                 {/* Player 2 */}
-                <div
-                  className="p-6 rounded-xl border-2 transition-all"
-                  style={selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player2?.id
-                    ? { borderColor: 'rgba(0,255,136,0.4)', background: 'rgba(0,255,136,0.08)' }
-                    : { borderColor: 'rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)' }}
-                >
-                  <div className="text-center">
-                    <div className="flex items-center justify-center gap-2 mb-4">
-                      {selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player2?.id && (
-                        <span className="text-3xl">👑</span>
-                      )}
-                      <span
-                        className="text-xl font-bold"
-                        style={{ color: selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player2?.id ? '#00ff88' : '#fff' }}
-                      >
-                        {selectedMatchDetails.bracketMatch.player2?.name}
-                      </span>
-                    </div>
-                    {selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch.player2?.id && (
-                      <div className="mb-3">
-                        <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider" style={{ background: 'rgba(0,255,136,0.15)', color: '#00ff88' }}>
-                          Winner
-                        </span>
+                {(() => {
+                  const isWinner = selectedMatchDetails.winnerId === selectedMatchDetails.bracketMatch?.player2?.id;
+                  return (
+                    <div className="rounded-xl p-3 border-2"
+                      style={isWinner
+                        ? { borderColor: 'rgba(0,255,136,0.4)', background: 'rgba(0,255,136,0.07)' }
+                        : { borderColor: 'rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)' }}>
+                      <div className="flex items-center justify-between gap-2 mb-2">
+                        <div className="flex items-center gap-2 min-w-0 flex-1">
+                          {isWinner && <span className="flex-shrink-0">👑</span>}
+                          <p className="font-bold text-sm leading-snug min-w-0"
+                            style={{ color: isWinner ? '#00ff88' : '#fff', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
+                            {selectedMatchDetails.bracketMatch?.player2?.name || selectedMatchDetails.player2?.name || 'Player 2'}
+                          </p>
+                        </div>
+                        {isWinner && (
+                          <span className="flex-shrink-0 px-2 py-0.5 rounded-full text-xs font-bold"
+                            style={{ background: 'rgba(0,255,136,0.15)', color: '#00ff88', border: '1px solid rgba(0,255,136,0.3)' }}>
+                            Winner
+                          </span>
+                        )}
                       </div>
-                    )}
-                    {selectedMatchDetails.score ? (
-                      <div className="space-y-2">
-                        <p className="text-xs text-gray-400 uppercase tracking-wider">Individual Scores</p>
-                        <div className="flex flex-wrap gap-2 justify-center">
-                          {(() => {
-                            try {
-                              const scores = getDetailedSetScores(selectedMatchDetails.score, 2);
-                              if (!scores) return <span className="text-gray-500 text-xs">No scores</span>;
-                              return scores.split(', ').map((score, idx) => {
+                      {selectedMatchDetails.score && (() => {
+                        try {
+                          const scores = getDetailedSetScores(selectedMatchDetails.score, 2);
+                          if (!scores) return null;
+                          return (
+                            <div className="flex flex-wrap gap-1.5">
+                              {scores.split(', ').map((score, idx) => {
                                 const [p2, p1] = score.split('-').map(Number);
                                 const won = p2 > p1;
                                 return (
-                                  <span key={idx} className="px-3 py-1.5 rounded-lg font-semibold text-sm"
+                                  <span key={idx} className="px-2 py-0.5 rounded text-xs font-semibold"
                                     style={won
-                                      ? { background: 'rgba(0,255,136,0.15)', color: '#00ff88', border: '1px solid rgba(0,255,136,0.3)' }
-                                      : { background: 'rgba(255,255,255,0.06)', color: '#d1d5db', border: '1px solid rgba(255,255,255,0.1)' }}
-                                  >
+                                      ? { background: 'rgba(0,255,136,0.12)', color: '#00ff88', border: '1px solid rgba(0,255,136,0.25)' }
+                                      : { background: 'rgba(255,255,255,0.06)', color: '#9ca3af', border: '1px solid rgba(255,255,255,0.1)' }}>
                                     {score}
                                   </span>
                                 );
-                              });
-                            } catch (e) {
-                              console.error('Error displaying player 2 scores:', e);
-                              return <span className="text-gray-500 text-xs">Error loading scores</span>;
-                            }
-                          })()}
-                        </div>
-                      </div>
-                    ) : null}
-                  </div>
-                </div>
+                              })}
+                            </div>
+                          );
+                        } catch (e) { return null; }
+                      })()}
+                    </div>
+                  );
+                })()}
               </div>
             </div>
 
-            {/* Match Information Grid */}
-            <div className="bg-slate-800/50 border border-white/10 rounded-2xl p-6 mb-6">
-              <h3 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
-                <span className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center text-blue-400">ℹ️</span>
-                Match Information
+            {/* Match Information */}
+            <div className="rounded-xl p-4 mb-4" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+                <span>ℹ️</span> Match Information
               </h3>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-                <div className="space-y-2">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
                   <p className="text-gray-400 text-xs uppercase tracking-wider">Status</p>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: '#00ff88' }}></span>
-                    <p className="text-white font-semibold text-lg">Completed</p>
+                    <p className="text-white font-semibold text-sm">Completed</p>
                   </div>
                 </div>
                 {selectedMatchDetails.courtNumber && (
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     <p className="text-gray-400 text-xs uppercase tracking-wider">Court</p>
-                    <p className="text-white font-semibold text-lg">Court {selectedMatchDetails.courtNumber}</p>
+                    <p className="text-white font-semibold text-sm">Court {selectedMatchDetails.courtNumber}</p>
                   </div>
                 )}
                 {(selectedMatchDetails.startTime || selectedMatchDetails.startedAt) && (
-                  <div className="space-y-2">
-                    <p className="text-gray-400 text-xs uppercase tracking-wider">Started At</p>
-                    <p className="text-white font-semibold text-sm">
-                      {new Date(selectedMatchDetails.startTime || selectedMatchDetails.startedAt).toLocaleString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
+                  <div className="space-y-1">
+                    <p className="text-gray-400 text-xs uppercase tracking-wider">Started</p>
+                    <p className="text-white font-semibold text-xs">
+                      {new Date(selectedMatchDetails.startTime || selectedMatchDetails.startedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                     </p>
                   </div>
                 )}
                 {(selectedMatchDetails.endTime || selectedMatchDetails.completedAt) && (
-                  <div className="space-y-2">
-                    <p className="text-gray-400 text-xs uppercase tracking-wider">Ended At</p>
-                    <p className="text-white font-semibold text-sm">
-                      {new Date(selectedMatchDetails.endTime || selectedMatchDetails.completedAt).toLocaleString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
+                  <div className="space-y-1">
+                    <p className="text-gray-400 text-xs uppercase tracking-wider">Ended</p>
+                    <p className="text-white font-semibold text-xs">
+                      {new Date(selectedMatchDetails.endTime || selectedMatchDetails.completedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                     </p>
                   </div>
                 )}
                 {(() => {
                   let durationSeconds = selectedMatchDetails.duration;
-                  
                   if (!durationSeconds && selectedMatchDetails.score) {
                     try {
-                      const scoreData = typeof selectedMatchDetails.score === 'string' 
-                        ? JSON.parse(selectedMatchDetails.score) 
-                        : selectedMatchDetails.score;
-                      durationSeconds = scoreData?.timer?.totalDuration;
-                    } catch (e) {
-                      console.error('Error parsing score for duration:', e);
-                    }
+                      const sd = typeof selectedMatchDetails.score === 'string' ? JSON.parse(selectedMatchDetails.score) : selectedMatchDetails.score;
+                      durationSeconds = sd?.timer?.totalDuration;
+                    } catch (e) {}
                   }
-                  
                   if (!durationSeconds) {
-                    const startTime = selectedMatchDetails.startTime || selectedMatchDetails.startedAt;
-                    const endTime = selectedMatchDetails.endTime || selectedMatchDetails.completedAt;
-                    if (startTime && endTime) {
-                      durationSeconds = Math.floor((new Date(endTime) - new Date(startTime)) / 1000);
-                    }
+                    const s = selectedMatchDetails.startTime || selectedMatchDetails.startedAt;
+                    const e = selectedMatchDetails.endTime || selectedMatchDetails.completedAt;
+                    if (s && e) durationSeconds = Math.floor((new Date(e) - new Date(s)) / 1000);
                   }
-                  
-                  if (durationSeconds) {
-                    const hours = Math.floor(durationSeconds / 3600);
-                    const minutes = Math.floor((durationSeconds % 3600) / 60);
-                    const seconds = durationSeconds % 60;
-                    
-                    let durationText = '';
-                    if (hours > 0) {
-                      durationText = `${hours} hour${hours > 1 ? 's' : ''} ${minutes} minute${minutes !== 1 ? 's' : ''} ${seconds} second${seconds !== 1 ? 's' : ''}`;
-                    } else if (minutes > 0) {
-                      durationText = `${minutes} minute${minutes !== 1 ? 's' : ''} ${seconds} second${seconds !== 1 ? 's' : ''}`;
-                    } else {
-                      durationText = `${seconds} second${seconds !== 1 ? 's' : ''}`;
-                    }
-                    
-                    return (
-                      <div className="space-y-2">
-                        <p className="text-gray-400 text-xs uppercase tracking-wider">Duration</p>
-                        <p className="text-white font-semibold text-base">
-                          {durationText}
-                        </p>
-                      </div>
-                    );
-                  }
-                  return null;
+                  if (!durationSeconds) return null;
+                  const h = Math.floor(durationSeconds / 3600);
+                  const m = Math.floor((durationSeconds % 3600) / 60);
+                  const s = durationSeconds % 60;
+                  const txt = h > 0 ? `${h}h ${m}m ${s}s` : m > 0 ? `${m}m ${s}s` : `${s}s`;
+                  return (
+                    <div className="space-y-1">
+                      <p className="text-gray-400 text-xs uppercase tracking-wider">Duration</p>
+                      <p className="text-white font-semibold text-xs">{txt}</p>
+                    </div>
+                  );
                 })()}
               </div>
             </div>
@@ -721,7 +668,8 @@ const PlayerViewDrawsPage = () => {
                 setShowMatchDetailsModal(false);
                 setSelectedMatchDetails(null);
               }}
-              className="w-full py-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl font-semibold text-lg hover:shadow-lg hover:shadow-blue-500/30 transition-all"
+              className="w-full py-3 rounded-xl font-semibold text-sm transition-all"
+              style={{ background: 'rgba(0,212,255,0.12)', border: '1px solid rgba(0,212,255,0.3)', color: '#00d4ff' }}
             >
               Close
             </button>
@@ -733,23 +681,24 @@ const PlayerViewDrawsPage = () => {
 };
 
 // Draw Bracket Component (Read-only version)
-const DrawBracket = ({ draw, onViewMatchDetails, categoryFormat }) => {
+const DrawBracket = ({ draw, onViewMatchDetails, categoryFormat, dbMatches = [] }) => {
   const rawData = draw.bracketJson || draw.bracket;
   const data = typeof rawData === 'string' ? JSON.parse(rawData) : rawData;
   const format = draw.format || data?.format;
 
   if (format === 'ROUND_ROBIN') {
-    return <RoundRobinDraw data={data} onViewMatchDetails={onViewMatchDetails} categoryFormat={categoryFormat} />;
+    return <RoundRobinDraw data={data} onViewMatchDetails={onViewMatchDetails} categoryFormat={categoryFormat} dbMatches={dbMatches} />;
   }
   if (format === 'ROUND_ROBIN_KNOCKOUT') {
-    return <GroupsKnockoutDraw data={data} onViewMatchDetails={onViewMatchDetails} categoryFormat={categoryFormat} />;
+    return <GroupsKnockoutDraw data={data} onViewMatchDetails={onViewMatchDetails} categoryFormat={categoryFormat} dbMatches={dbMatches} />;
   }
-  return <KnockoutBracket data={data} onViewMatchDetails={onViewMatchDetails} />;
+  return <KnockoutBracket data={data} onViewMatchDetails={onViewMatchDetails} dbMatches={dbMatches} />;
 };
 
 // Knockout Bracket Component
-const KnockoutBracket = ({ data, onViewMatchDetails }) => {
+const KnockoutBracket = ({ data, onViewMatchDetails, dbMatches = [] }) => {
   if (!data?.rounds) return <p className="text-gray-400 text-center">No bracket data</p>;
+  const findDbMatch = (matchNum) => dbMatches.find(m => m.matchNumber === matchNum) || null;
 
   const getRoundName = (idx, total) => {
     const r = total - idx;
@@ -788,6 +737,7 @@ const KnockoutBracket = ({ data, onViewMatchDetails }) => {
               style={{ paddingTop: ri > 0 ? `${Math.pow(2, ri) * 18}px` : 0 }}
             >
               {round.matches.map((match, mi) => {
+                const resolvedDbMatch = match.dbMatch || findDbMatch(match.matchNumber);
                 const isCompleted = match.winner && (match.player1?.name !== 'TBD' && match.player2?.name !== 'TBD');
                 const player1Name = getPlayerDisplay(match.player1);
                 const player2Name = getPlayerDisplay(match.player2);
@@ -867,7 +817,7 @@ const KnockoutBracket = ({ data, onViewMatchDetails }) => {
                       </div>
 
                       {/* View Details Button for Completed Matches */}
-                      {isCompleted && match.dbMatch && onViewMatchDetails && (
+                      {isCompleted && onViewMatchDetails && (
                         <div className="px-2.5 pb-2.5">
                           <button
                             onClick={() => {
@@ -877,12 +827,23 @@ const KnockoutBracket = ({ data, onViewMatchDetails }) => {
                                 player1: match.player1,
                                 player2: match.player2
                               };
-                              onViewMatchDetails(match.dbMatch, bracketMatchData);
+                              const matchDataToUse = resolvedDbMatch || {
+                                matchNumber: match.matchNumber,
+                                status: 'COMPLETED',
+                                winner: match.winner,
+                                winnerId: match.winner === 1 ? match.player1?.id : match.player2?.id,
+                                score: match.scoreJson || match.score || null,
+                                scoreJson: match.scoreJson || null,
+                                player1: match.player1,
+                                player2: match.player2,
+                              };
+                              onViewMatchDetails(matchDataToUse, bracketMatchData);
                             }}
-                            className="w-full py-1.5 rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30 transition-all text-xs font-semibold flex items-center justify-center gap-1.5 group-hover:border-blue-500/50"
+                            className="w-full py-2 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all"
+                            style={{ background: 'rgba(0,212,255,0.1)', border: '1px solid rgba(0,212,255,0.3)', color: '#00d4ff' }}
                           >
-                            <Eye className="w-3 h-3" />
-                            View Details
+                            <Eye className="w-3.5 h-3.5" />
+                            View Score
                           </button>
                         </div>
                       )}
@@ -899,8 +860,9 @@ const KnockoutBracket = ({ data, onViewMatchDetails }) => {
 };
 
 // Round Robin Draw Component
-const RoundRobinDraw = ({ data, onViewMatchDetails, categoryFormat }) => {
+const RoundRobinDraw = ({ data, onViewMatchDetails, categoryFormat, dbMatches = [] }) => {
   if (!data?.groups) return <p className="text-gray-400 text-center">No group data</p>;
+  const findDbMatch = (matchNum) => dbMatches.find(m => m.matchNumber === matchNum) || null;
 
   // Helper function to calculate total points scored by a player across all matches
   const calculateTotalPointsScored = (playerId, groupMatches) => {
@@ -944,16 +906,16 @@ const RoundRobinDraw = ({ data, onViewMatchDetails, categoryFormat }) => {
   return (
     <div className="space-y-6">
       {data.groups.map((group, gi) => (
-        <div key={gi} id={`group-${gi}`} className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden shadow-lg">
+        <div key={gi} id={`group-${gi}`} className="backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden shadow-lg" style={{ background: 'rgba(13,16,37,0.9)' }}>
           {/* Group Header */}
-          <div className="bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-b border-purple-500/30 px-6 py-4">
+          <div className="border-b px-6 py-4" style={{ background: 'rgba(0,212,255,0.08)', borderColor: 'rgba(0,212,255,0.2)' }}>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/30">
-                <span className="text-xl font-bold text-white">{String.fromCharCode(65 + gi)}</span>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#00a3cc,#00d4ff)', boxShadow: '0 4px 12px rgba(0,212,255,0.3)' }}>
+                <span className="text-xl font-bold" style={{ color: '#07071a' }}>{String.fromCharCode(65 + gi)}</span>
               </div>
               <div>
                 <h4 className="text-lg font-bold text-white">Group {String.fromCharCode(65 + gi)}</h4>
-                <p className="text-xs text-purple-300">{group.participants?.length || 0} Players</p>
+                <p className="text-xs" style={{ color: '#00d4ff' }}>{group.participants?.length || 0} Players</p>
               </div>
             </div>
           </div>
@@ -1042,6 +1004,7 @@ const RoundRobinDraw = ({ data, onViewMatchDetails, categoryFormat }) => {
                 {group.matches && group.matches.length > 0 ? (
                   <div className="space-y-3">
                     {group.matches.map((match, mi) => {
+                      const resolvedDbMatch = match.dbMatch || findDbMatch(match.matchNumber);
                       const isCompleted = match.winner && (match.player1?.name !== 'TBD' && match.player2?.name !== 'TBD');
                       const isPlayer1Winner = match.winner === 1;
                       const isPlayer2Winner = match.winner === 2;
@@ -1147,7 +1110,7 @@ const RoundRobinDraw = ({ data, onViewMatchDetails, categoryFormat }) => {
                           )}
                           
                           {/* View Details Button */}
-                          {isCompleted && match.dbMatch && onViewMatchDetails && (
+                          {isCompleted && onViewMatchDetails && (
                             <div className="px-3 pb-3">
                               <button
                                 onClick={() => {
@@ -1157,12 +1120,23 @@ const RoundRobinDraw = ({ data, onViewMatchDetails, categoryFormat }) => {
                                     player1: match.player1,
                                     player2: match.player2
                                   };
-                                  onViewMatchDetails(match.dbMatch, bracketMatchData);
+                                  const matchDataToUse = resolvedDbMatch || {
+                                    matchNumber: match.matchNumber,
+                                    status: 'COMPLETED',
+                                    winner: match.winner,
+                                    winnerId: match.winner === 1 ? match.player1?.id : match.player2?.id,
+                                    score: match.scoreJson || match.score || null,
+                                    scoreJson: match.scoreJson || null,
+                                    player1: match.player1,
+                                    player2: match.player2,
+                                  };
+                                  onViewMatchDetails(matchDataToUse, bracketMatchData);
                                 }}
-                                className="w-full py-1.5 rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30 transition-all text-xs font-semibold flex items-center justify-center gap-1.5 group-hover:border-blue-500/50"
+                                className="w-full py-2 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all"
+                                style={{ background: 'rgba(0,212,255,0.1)', border: '1px solid rgba(0,212,255,0.3)', color: '#00d4ff' }}
                               >
-                                <Eye className="w-3 h-3" />
-                                View Details
+                                <Eye className="w-3.5 h-3.5" />
+                                View Score
                               </button>
                             </div>
                           )}
@@ -1186,7 +1160,8 @@ const RoundRobinDraw = ({ data, onViewMatchDetails, categoryFormat }) => {
 };
 
 // Groups + Knockout Draw Component
-const GroupsKnockoutDraw = ({ data, onViewMatchDetails, categoryFormat }) => {
+const GroupsKnockoutDraw = ({ data, onViewMatchDetails, categoryFormat, dbMatches = [] }) => {
+  const findDbMatch = (matchNum) => dbMatches.find(m => m.matchNumber === matchNum) || null;
   const getRoundName = (idx, total) => {
     const r = total - idx;
     if (r === 1) return 'Final';
@@ -1208,10 +1183,10 @@ const GroupsKnockoutDraw = ({ data, onViewMatchDetails, categoryFormat }) => {
       {/* Group Stage */}
       <div id="group-stage">
         <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-          <span className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-lg text-sm">Stage 1</span>
+          <span className="px-3 py-1 rounded-lg text-sm" style={{ background: 'rgba(0,212,255,0.12)', color: '#00d4ff' }}>Stage 1</span>
           Group Stage (Round Robin)
         </h3>
-        <RoundRobinDraw data={data} onViewMatchDetails={onViewMatchDetails} categoryFormat={categoryFormat} />
+        <RoundRobinDraw data={data} onViewMatchDetails={onViewMatchDetails} categoryFormat={categoryFormat} dbMatches={dbMatches} />
       </div>
 
       {/* Knockout Stage */}
@@ -1241,6 +1216,7 @@ const GroupsKnockoutDraw = ({ data, onViewMatchDetails, categoryFormat }) => {
                     style={{ paddingTop: ri > 0 ? `${Math.pow(2, ri) * 18}px` : 0 }}
                   >
                     {round.matches.map((match, mi) => {
+                      const resolvedDbMatch = match.dbMatch || findDbMatch(match.matchNumber);
                       const isCompleted = match.winner && (match.player1?.name !== 'TBD' && match.player2?.name !== 'TBD');
                       const player1Name = getPlayerDisplay(match.player1);
                       const player2Name = getPlayerDisplay(match.player2);
@@ -1320,7 +1296,7 @@ const GroupsKnockoutDraw = ({ data, onViewMatchDetails, categoryFormat }) => {
                             </div>
                             
                             {/* View Details Button for Completed Matches */}
-                            {isCompleted && match.dbMatch && onViewMatchDetails && (
+                            {isCompleted && onViewMatchDetails && (
                               <div className="px-2.5 pb-2.5">
                                 <button
                                   onClick={() => {
@@ -1330,12 +1306,23 @@ const GroupsKnockoutDraw = ({ data, onViewMatchDetails, categoryFormat }) => {
                                       player1: match.player1,
                                       player2: match.player2
                                     };
-                                    onViewMatchDetails(match.dbMatch, bracketMatchData);
+                                    const matchDataToUse = resolvedDbMatch || {
+                                      matchNumber: match.matchNumber,
+                                      status: 'COMPLETED',
+                                      winner: match.winner,
+                                      winnerId: match.winner === 1 ? match.player1?.id : match.player2?.id,
+                                      score: match.scoreJson || match.score || null,
+                                      scoreJson: match.scoreJson || null,
+                                      player1: match.player1,
+                                      player2: match.player2,
+                                    };
+                                    onViewMatchDetails(matchDataToUse, bracketMatchData);
                                   }}
-                                  className="w-full py-1.5 rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30 transition-all text-xs font-semibold flex items-center justify-center gap-1.5 group-hover:border-blue-500/50"
+                                  className="w-full py-2 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all"
+                                  style={{ background: 'rgba(0,212,255,0.1)', border: '1px solid rgba(0,212,255,0.3)', color: '#00d4ff' }}
                                 >
-                                  <Eye className="w-3 h-3" />
-                                  View Details
+                                  <Eye className="w-3.5 h-3.5" />
+                                  View Score
                                 </button>
                               </div>
                             )}

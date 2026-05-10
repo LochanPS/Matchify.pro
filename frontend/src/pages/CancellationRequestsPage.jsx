@@ -1,4 +1,4 @@
-import { getErrorMessage } from '../utils/errorMessage';
+﻿import { getErrorMessage } from '../utils/errorMessage';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
@@ -94,7 +94,7 @@ export default function CancellationRequestsPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: BRAND.bg }}>
-        <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="fixed top-0 bottom-0 pointer-events-none overflow-hidden" style={{ left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: "480px" }}>
           <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full blur-3xl opacity-[0.08]" style={{ background: BRAND.amber }} />
           <div className="absolute top-40 -left-40 w-80 h-80 rounded-full blur-3xl opacity-[0.06]" style={{ background: '#f87171' }} />
         </div>

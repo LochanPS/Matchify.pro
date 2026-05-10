@@ -174,12 +174,36 @@ const OrganizerPayoutsPage = () => {
                     <p className="text-white font-medium">{payout.tournament.organizer.name}</p>
                     <p className="text-gray-400">{payout.tournament.organizer.email}</p>
                     <p className="text-gray-400">{payout.tournament.organizer.phone}</p>
-                    {payout.organizerUpiId && (
-                      <div className="mt-3 p-2 bg-slate-900 rounded">
-                        <p className="text-gray-400 text-xs mb-1">UPI ID</p>
-                        <p className="text-teal-400 font-mono">{payout.organizerUpiId}</p>
-                      </div>
-                    )}
+
+                    {/* Payment Details Box */}
+                    <div className="mt-3 p-3 bg-slate-900 rounded-lg border border-slate-700 space-y-2">
+                      {payout.organizerAccountHolder && (
+                        <div>
+                          <p className="text-gray-500 text-xs">Account Holder</p>
+                          <p className="text-white font-semibold">{payout.organizerAccountHolder}</p>
+                        </div>
+                      )}
+                      {payout.organizerUpiId && (
+                        <div>
+                          <p className="text-gray-500 text-xs">UPI ID</p>
+                          <p className="text-teal-400 font-mono text-sm break-all">{payout.organizerUpiId}</p>
+                        </div>
+                      )}
+                      {payout.organizerQRUrl && (
+                        <div>
+                          <p className="text-gray-500 text-xs mb-1">Payment QR Code</p>
+                          <img
+                            src={payout.organizerQRUrl}
+                            alt="Payment QR"
+                            className="w-32 h-32 object-contain rounded-lg border border-slate-600 bg-white p-1"
+                            onError={(e) => { e.target.style.display = 'none'; }}
+                          />
+                        </div>
+                      )}
+                      {!payout.organizerUpiId && !payout.organizerQRUrl && (
+                        <p className="text-yellow-500 text-xs">⚠️ No payment details provided by organizer</p>
+                      )}
+                    </div>
                   </div>
                 </div>
 

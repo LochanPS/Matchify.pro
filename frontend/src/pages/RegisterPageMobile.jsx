@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import {
@@ -182,7 +182,7 @@ const RegisterPageMobile = () => {
       </div>
 
       {/* Animated Background Elements */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+      <div className="fixed top-0 bottom-0 pointer-events-none overflow-hidden" style={{ left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: "480px" }}>
         {/* Large Gradient Orbs */}
         <div 
           className="absolute top-0 left-0 w-80 h-80 rounded-full blur-3xl opacity-30 animate-pulse"

@@ -17,31 +17,23 @@ const ImpersonationBanner = () => {
     const token = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
     
-    console.log('🔍 ImpersonationBanner useEffect - checking token...');
-    console.log('Token exists:', !!token);
-    console.log('Stored user exists:', !!storedUser);
     
     if (token && storedUser) {
       try {
         // Decode JWT (simple base64 decode of payload)
         const payload = JSON.parse(atob(token.split('.')[1]));
-        console.log('🔍 Token payload:', payload);
-        console.log('🔍 isImpersonating:', payload.isImpersonating);
         
         setIsImpersonating(!!payload.isImpersonating);
         
         if (payload.isImpersonating) {
           const user = JSON.parse(storedUser);
-          console.log('🔍 Impersonated user:', user);
           setImpersonatedUser(user);
         } else {
-          console.log('🔍 Not impersonating - banner will not show');
         }
       } catch (error) {
         console.error('Error decoding token:', error);
       }
     } else {
-      console.log('🔍 No token or user - banner will not show');
     }
   }, []);
 
@@ -50,28 +42,18 @@ const ImpersonationBanner = () => {
     
     try {
       setIsReturning(true);
-      console.log('🔄 Attempting to return to admin...');
       const response = await api.post('/admin/return-to-admin');
-      console.log('✅ Response received:', response.data);
       
       if (response.data.success) {
-        console.log('✅ Success! Updating localStorage and context...');
-        console.log('📦 User data from response:', response.data.user);
-        console.log('📦 User roles:', response.data.user.roles);
-        console.log('📦 User isAdmin:', response.data.user.isAdmin);
         
         // Update token and user in localStorage
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('user', JSON.stringify(response.data.user));
         
-        console.log('✅ LocalStorage updated');
-        console.log('📦 Stored user:', localStorage.getItem('user'));
         
         // Update AuthContext
         updateUser(response.data.user);
-        console.log('✅ AuthContext updated');
         
-        console.log('✅ Redirecting to admin dashboard...');
         // Force full page reload to ensure all state is reset
         window.location.href = '/admin-dashboard';
       } else {

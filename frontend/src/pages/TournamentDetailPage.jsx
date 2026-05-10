@@ -18,6 +18,7 @@ import {
   SparklesIcon,
   UserIcon,
   UserPlusIcon,
+  ShareIcon,
 } from '@heroicons/react/24/outline';
 import { Edit, Users, Eye, Layers, GitBranch } from 'lucide-react';
 
@@ -160,6 +161,40 @@ const TournamentDetailPage = () => {
   const [quickAddLoading, setQuickAddLoading] = useState(false);
   const [quickAddError, setQuickAddError] = useState('');
   const [quickAddSuccess, setQuickAddSuccess] = useState('');
+
+  const [shareState, setShareState] = useState('idle'); // idle | copied
+
+  const handleShare = async () => {
+    if (!tournament) return;
+    const url = `${window.location.origin}/tournaments/${tournament.id}`;
+    const dateStr = formatDate(tournament.startDate);
+    const cats = (tournament.categories || []).map(c => `   • ${c.name}`).join('\n');
+    const catBlock = cats ? `\n🏸 Categories:\n${cats}\n` : '';
+    const text = [
+      `🎾 MATCHIFY.PRO PRESENTS`,
+      ``,
+      `━━━━━━━━━━━━━━━━━━━`,
+      `🏆 ${tournament.name.toUpperCase()}`,
+      `━━━━━━━━━━━━━━━━━━━`,
+      ``,
+      `📍 ${tournament.city}${tournament.state ? `, ${tournament.state}` : ''}`,
+      `📅 ${dateStr}`,
+      catBlock,
+      `🔗 View & Register:`,
+      url,
+      ``,
+      `━━━━━━━━━━━━━━━━━━━`,
+      `Powered by Matchify.pro ✨`,
+    ].join('\n');
+    if (navigator.share) {
+      // Pass text only — URL already embedded. Prevents WhatsApp double-URL.
+      try { await navigator.share({ title: `${tournament.name} — Matchify.pro`, text }); } catch (_) {}
+    } else {
+      await navigator.clipboard.writeText(text);
+      setShareState('copied');
+      setTimeout(() => setShareState('idle'), 2000);
+    }
+  };
 
   useEffect(() => {
     fetchTournament();
@@ -509,11 +544,16 @@ const TournamentDetailPage = () => {
                   background: 'linear-gradient(to bottom, rgba(7,7,26,0.25) 0%, rgba(7,7,26,0.5) 50%, rgba(7,7,26,0.92) 100%)'
                 }}
               />
-              {/* Tap to enlarge hint */}
-              <div className="absolute top-3 right-3">
+              {/* Tap to enlarge — centered on poster */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <span
-                  className="px-2.5 py-1 rounded-full text-xs font-semibold backdrop-blur-md"
-                  style={{ background: 'rgba(0,0,0,0.55)', color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.2)' }}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold backdrop-blur-md"
+                  style={{
+                    background: 'rgba(0,0,0,0.35)',
+                    color: 'rgba(255,255,255,0.9)',
+                    border: '1px solid rgba(255,255,255,0.25)',
+                    letterSpacing: '0.02em',
+                  }}
                 >
                   🔍 Tap to enlarge
                 </span>
@@ -528,6 +568,20 @@ const TournamentDetailPage = () => {
             >
               <ArrowLeftIcon className="h-4 w-4" />
               Back
+            </button>
+
+            {/* Share button — top right over poster */}
+            <button
+              onClick={handleShare}
+              className="absolute top-4 right-4 flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-semibold text-sm backdrop-blur-md transition-all"
+              style={{
+                background: shareState === 'copied' ? 'rgba(0,255,136,0.85)' : 'rgba(0,0,0,0.5)',
+                color: shareState === 'copied' ? '#003320' : 'rgba(255,255,255,0.85)',
+                border: `1px solid ${shareState === 'copied' ? 'rgba(0,255,136,0.4)' : 'rgba(255,255,255,0.15)'}`,
+              }}
+            >
+              <ShareIcon className="h-4 w-4" />
+              {shareState === 'copied' ? 'Copied!' : 'Share'}
             </button>
 
             {/* Thumbnail strip if multiple posters */}
@@ -604,16 +658,30 @@ const TournamentDetailPage = () => {
             className="relative px-4 pt-5 pb-6"
             style={{ background: 'linear-gradient(135deg, rgba(0,255,136,0.08) 0%, rgba(0,212,255,0.05) 100%)', borderBottom: '1px solid rgba(0,255,136,0.15)' }}
           >
-            <button
-              onClick={() => navigate(-1)}
-              className="flex items-center gap-1.5 mb-4 text-sm font-medium transition-colors"
-              style={{ color: 'rgba(255,255,255,0.6)' }}
-              onMouseEnter={e => e.currentTarget.style.color = '#00ff88'}
-              onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.6)'}
-            >
-              <ArrowLeftIcon className="h-4 w-4" />
-              Back
-            </button>
+            <div className="flex items-center justify-between mb-4">
+              <button
+                onClick={() => navigate(-1)}
+                className="flex items-center gap-1.5 text-sm font-medium transition-colors"
+                style={{ color: 'rgba(255,255,255,0.6)' }}
+                onMouseEnter={e => e.currentTarget.style.color = '#00ff88'}
+                onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.6)'}
+              >
+                <ArrowLeftIcon className="h-4 w-4" />
+                Back
+              </button>
+              <button
+                onClick={handleShare}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-semibold transition-all"
+                style={{
+                  background: shareState === 'copied' ? 'rgba(0,255,136,0.2)' : 'rgba(255,255,255,0.06)',
+                  color: shareState === 'copied' ? '#00ff88' : 'rgba(255,255,255,0.7)',
+                  border: `1px solid ${shareState === 'copied' ? 'rgba(0,255,136,0.4)' : 'rgba(255,255,255,0.15)'}`,
+                }}
+              >
+                <ShareIcon className="h-4 w-4" />
+                {shareState === 'copied' ? 'Copied!' : 'Share'}
+              </button>
+            </div>
             <div className="flex flex-wrap items-center gap-2 mb-2">
               <span className="px-3 py-1 rounded-full text-xs font-bold border"
                 style={{ background: statusStyle.inlineBg, color: statusStyle.inlineColor, borderColor: statusStyle.inlineBorder }}>

@@ -617,9 +617,10 @@ function buildShareMessage(tournament) {
 
 async function shareTournament(tournament, e) {
   e?.stopPropagation();
-  const { title, text, url } = buildShareMessage(tournament);
+  const { title, text } = buildShareMessage(tournament);
   if (navigator.share) {
-    try { await navigator.share({ title, text, url }); } catch (_) {}
+    // Pass text only — URL already embedded. Prevents WhatsApp double-URL.
+    try { await navigator.share({ title, text }); } catch (_) {}
   } else {
     await navigator.clipboard.writeText(text);
     return 'copied';

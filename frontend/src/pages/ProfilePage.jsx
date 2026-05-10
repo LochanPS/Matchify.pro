@@ -175,7 +175,6 @@ export default function ProfilePage() {
   const [showPhotoViewer, setShowPhotoViewer] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
-    birthYear: '',
     phone: '',
     city: '',
     state: '',
@@ -194,7 +193,6 @@ export default function ProfilePage() {
       setProfile(data);
       setFormData({
         name: data.name || '',
-        birthYear: data.birthYear || '',
         phone: data.phone || '',
         city: data.city || '',
         state: data.state || '',
@@ -253,8 +251,7 @@ export default function ProfilePage() {
   };
 
   const needsConfirmation = () => {
-    const settingBirthYear = !profile?.birthYear && formData.birthYear;
-    return settingBirthYear;
+    return false;
   };
 
   const handleSave = async () => {
@@ -280,7 +277,6 @@ export default function ProfilePage() {
     try {
       const cleanedData = {};
       if (dataToSave.name) cleanedData.name = dataToSave.name;
-      if (!profile?.birthYear && dataToSave.birthYear) cleanedData.birthYear = dataToSave.birthYear;
       if (dataToSave.phone) cleanedData.phone = dataToSave.phone.replace(/^\+91/, '').replace(/\s/g, '');
       if (dataToSave.gender) cleanedData.gender = dataToSave.gender;
       if (dataToSave.city !== undefined) cleanedData.city = dataToSave.city;
@@ -304,7 +300,6 @@ export default function ProfilePage() {
   const handleCancel = () => {
     setFormData({
       name: profile?.name || '',
-      birthYear: profile?.birthYear || '',
       phone: profile?.phone || '',
       city: profile?.city || '',
       state: profile?.state || '',
@@ -338,7 +333,6 @@ export default function ProfilePage() {
   };
 
   const canEditName = true; // Name is always editable
-  const canEditBirthYear = !profile?.birthYear;
 
   if (loading) {
     return (
@@ -836,14 +830,6 @@ export default function ProfilePage() {
               <h2 className="text-base font-black text-white">Edit Profile Information</h2>
             </div>
 
-            {/* Notice about permanent fields */}
-            <div className="mb-5 p-3.5 rounded-xl flex items-start gap-3 relative z-10" style={{ background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.25)' }}>
-              <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: '#fbbf24' }} />
-              <p className="text-sm" style={{ color: '#fbbf24' }}>
-                <strong>Important:</strong> Birth Year can only be set once and cannot be changed later.
-              </p>
-            </div>
-
             <div className="grid grid-cols-1 gap-6 relative z-10">
               {/* Name Field - Always Editable */}
               <div>
@@ -859,38 +845,6 @@ export default function ProfilePage() {
                   style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }}
                   placeholder="Enter your full name"
                 />
-              </div>
-
-              {/* Birth Year Field */}
-              <div>
-                <label className="block text-sm font-medium mb-2" style={{ color: 'rgba(255,255,255,0.7)' }}>
-                  Birth Year {!canEditBirthYear && <span style={{ color: 'rgba(255,255,255,0.35)' }}>(locked)</span>}
-                </label>
-                {canEditBirthYear ? (
-                  <>
-                    <select
-                      name="birthYear"
-                      value={formData.birthYear}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 rounded-xl text-white outline-none appearance-none cursor-pointer"
-                      style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(0,212,255,0.3)', color: '#fff' }}
-                    >
-                      <option value="" style={{ background: '#0d1025' }}>Select your birth year</option>
-                      {Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i).map(year => (
-                        <option key={year} value={year} style={{ background: '#0d1025' }}>{year}</option>
-                      ))}
-                    </select>
-                    <p className="text-xs mt-1" style={{ color: '#00d4ff' }}>⚠️ This can only be set once</p>
-                  </>
-                ) : (
-                  <input
-                    type="text"
-                    value={profile?.birthYear || 'Not provided'}
-                    disabled
-                    className="w-full px-4 py-3 rounded-xl cursor-not-allowed"
-                    style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.4)' }}
-                  />
-                )}
               </div>
 
               <div>
@@ -1030,15 +984,6 @@ export default function ProfilePage() {
               <p className="text-sm mb-4" style={{ color: 'rgba(255,255,255,0.7)' }}>
                 Please verify the following information. <strong style={{ color: '#fbbf24' }}>Once saved, these fields cannot be changed.</strong>
               </p>
-
-              <div className="rounded-xl p-4 mb-4 space-y-3" style={{ background: 'rgba(0,0,0,0.25)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                {!profile?.birthYear && pendingData?.birthYear && (
-                  <div>
-                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>Birth Year</p>
-                    <p className="font-bold text-white text-xl">{pendingData.birthYear}</p>
-                  </div>
-                )}
-              </div>
 
               <div className="flex items-center gap-2 p-3 rounded-xl mb-5" style={{ background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.2)' }}>
                 <AlertTriangle className="w-4 h-4 flex-shrink-0" style={{ color: '#fbbf24' }} />

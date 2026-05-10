@@ -81,7 +81,7 @@ export async function generateUmpireCode() {
 // REGISTER - All users get all three roles automatically
 export const register = async (req, res) => {
   try {
-    const { email, password, name, phone, alternateEmail, birthYear } = req.body;
+    const { email, password, name, phone, alternateEmail } = req.body;
 
     // Validate required fields (email is now optional)
     if (!name || !password || !phone) {
@@ -183,7 +183,6 @@ export const register = async (req, res) => {
         playerCode, // All users get player code
         umpireCode, // All users get umpire code
         walletBalance: 10, // Welcome bonus
-        ...(birthYear ? { birthYear: parseInt(birthYear, 10) } : {}),
       },
     });
 

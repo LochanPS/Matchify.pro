@@ -32,7 +32,6 @@ const RegisterPageMobile = () => {
     name: '',
     phone: '',
     email: '',
-    birthYear: '',
     password: '',
     confirmPassword: '',
   });
@@ -55,8 +54,8 @@ const RegisterPageMobile = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.phone || !formData.birthYear || !formData.password) {
-      setError('Name, Phone, Date of Birth and Password are required');
+    if (!formData.name || !formData.phone || !formData.password) {
+      setError('Name, Phone and Password are required');
       return;
     }
     if (!/^[0-9]{10}$/.test(formData.phone)) {
@@ -66,18 +65,6 @@ const RegisterPageMobile = () => {
     // Email is optional, but if provided, validate it
     if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       setError('Enter valid email address');
-      return;
-    }
-    
-    // Validate date of birth
-    if (!formData.birthYear) {
-      setError('Please enter your date of birth');
-      return;
-    }
-    const birthDate = new Date(formData.birthYear);
-    const today = new Date();
-    if (birthDate > today) {
-      setError('Date of birth cannot be in the future');
       return;
     }
     
@@ -491,30 +478,6 @@ const RegisterPageMobile = () => {
                   onChange={handleChange}
                 />
               </div>
-            </div>
-
-            {/* Birth Year - Required */}
-            <div>
-              <label className="block text-sm font-semibold text-white mb-2">
-                Date of Birth
-              </label>
-              <input
-                name="birthYear"
-                type="date"
-                required
-                max={new Date().toISOString().split('T')[0]}
-                className="w-full px-4 py-3 rounded-xl text-white text-sm outline-none"
-                style={{
-                  background: 'rgba(255,255,255,0.05)',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  colorScheme: 'dark',
-                }}
-                value={formData.birthYear}
-                onChange={handleChange}
-              />
-              <p className="text-xs mt-2" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                Please enter your correct date of birth. This information is kept confidential and will not be misused.
-              </p>
             </div>
 
             {/* Password */}

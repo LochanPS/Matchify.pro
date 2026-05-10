@@ -71,32 +71,34 @@ export default function MandatoryProfilePhotoModal({ isOpen }) {
     <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-[9999] p-4">
       {/* Animated Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-emerald-500/20 to-green-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-r from-cyan-500/20 to-emerald-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
       </div>
 
       <div className="relative bg-slate-800 border border-white/10 rounded-2xl max-w-md w-full overflow-hidden shadow-2xl">
         {/* Header */}
-        <div className="relative bg-gradient-to-r from-purple-600 to-indigo-600 px-6 py-5">
+        <div className="relative bg-gradient-to-r from-emerald-600 via-green-600 to-emerald-600 px-6 py-5">
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0wIDBoNDB2NDBIMHoiLz48cGF0aCBkPSJNMjAgMjBtLTEgMGExIDEgMCAxIDAgMiAwYTEgMSAwIDEgMCAtMiAwIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMSkiLz48L2c+PC9zdmc+')] opacity-30"></div>
           <div className="relative flex items-center gap-3">
             <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
               <Camera className="text-white" size={24} />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-white">Profile Photo Required</h2>
-              <p className="text-white/70 text-sm">Complete your profile to continue</p>
+              <h2 className="text-xl font-bold text-white">Complete Your Profile</h2>
+              <p className="text-emerald-100 text-sm">Add a photo to stand out</p>
             </div>
           </div>
         </div>
 
         <div className="p-6">
           {/* Info Message */}
-          <div className="bg-amber-500/10 border border-amber-500/30 text-amber-300 px-4 py-3 rounded-xl mb-6 flex items-start gap-3">
+          <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 px-4 py-3.5 rounded-xl mb-6 flex items-start gap-3">
             <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
-            <div className="text-sm">
-              <p className="font-semibold mb-1">Action Required</p>
-              <p>Please upload a profile photo to continue using Matchify.pro. This helps other players recognize you in tournaments.</p>
+            <div className="text-sm leading-relaxed">
+              <p className="font-semibold mb-1.5">Make Your Profile Shine ✨</p>
+              <p className="text-emerald-200/90">
+                A profile photo helps fellow players recognize you at tournaments, builds trust within the community, and makes your profile look professional and complete.
+              </p>
             </div>
           </div>
 
@@ -128,11 +130,12 @@ export default function MandatoryProfilePhotoModal({ isOpen }) {
               </div>
             ) : (
               <label className="block cursor-pointer">
-                <div className="border-2 border-dashed border-white/20 rounded-xl p-8 hover:border-purple-500/50 hover:bg-purple-500/5 transition-all">
+                <div className="border-2 border-dashed border-emerald-500/30 rounded-xl p-8 hover:border-emerald-500/60 hover:bg-emerald-500/5 transition-all">
                   <div className="text-center">
-                    <Upload className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                    <p className="text-white font-medium mb-1">Click to upload photo</p>
+                    <Upload className="w-12 h-12 text-emerald-400 mx-auto mb-3" />
+                    <p className="text-white font-semibold mb-1">Click to upload your photo</p>
                     <p className="text-gray-400 text-sm">JPG, PNG or GIF (max 5MB)</p>
+                    <p className="text-emerald-400 text-xs mt-2">📸 Show your best smile!</p>
                   </div>
                 </div>
                 <input
@@ -148,7 +151,7 @@ export default function MandatoryProfilePhotoModal({ isOpen }) {
             <button
               onClick={handleUpload}
               disabled={!selectedFile || uploading}
-              className="w-full py-4 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-xl font-bold hover:shadow-lg hover:shadow-purple-500/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className="w-full py-4 bg-gradient-to-r from-emerald-500 via-green-600 to-emerald-500 text-white rounded-xl font-bold hover:shadow-lg hover:shadow-emerald-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
               {uploading ? (
                 <span className="flex items-center justify-center gap-2">
@@ -156,14 +159,14 @@ export default function MandatoryProfilePhotoModal({ isOpen }) {
                   Uploading...
                 </span>
               ) : (
-                'Upload Photo & Continue'
+                '✨ Upload Photo & Continue'
               )}
             </button>
           </div>
 
           {/* Note */}
-          <p className="text-center text-gray-400 text-xs mt-4">
-            You cannot skip this step. A profile photo is required to use the platform.
+          <p className="text-center text-gray-400 text-xs mt-4 leading-relaxed">
+            Your profile photo is required to ensure a safe and trustworthy community. It helps organizers and players identify participants at tournaments.
           </p>
         </div>
       </div>

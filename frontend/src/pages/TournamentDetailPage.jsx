@@ -167,11 +167,29 @@ const TournamentDetailPage = () => {
   const handleShare = async () => {
     if (!tournament) return;
     const url = `${window.location.origin}/tournaments/${tournament.id}`;
-    const text = `🏸 ${tournament.name}\n📍 ${tournament.city}${tournament.state ? `, ${tournament.state}` : ''}\n📅 Starts ${formatDate(tournament.startDate)}\n\nRegister on Matchify.pro 👇`;
+    const dateStr = formatDate(tournament.startDate);
+    const cats = (tournament.categories || []).map(c => `   • ${c.name}`).join('\n');
+    const catBlock = cats ? `\n🏸 Categories:\n${cats}\n` : '';
+    const text = [
+      `🎾 MATCHIFY.PRO PRESENTS`,
+      ``,
+      `━━━━━━━━━━━━━━━━━━━`,
+      `🏆 ${tournament.name.toUpperCase()}`,
+      `━━━━━━━━━━━━━━━━━━━`,
+      ``,
+      `📍 ${tournament.city}${tournament.state ? `, ${tournament.state}` : ''}`,
+      `📅 ${dateStr}`,
+      catBlock,
+      `🔗 View & Register:`,
+      url,
+      ``,
+      `━━━━━━━━━━━━━━━━━━━`,
+      `Powered by Matchify.pro ✨`,
+    ].join('\n');
     if (navigator.share) {
-      try { await navigator.share({ title: tournament.name, text, url }); } catch (_) {}
+      try { await navigator.share({ title: `${tournament.name} — Matchify.pro`, text, url }); } catch (_) {}
     } else {
-      await navigator.clipboard.writeText(`${text}\n${url}`);
+      await navigator.clipboard.writeText(text);
       setShareState('copied');
       setTimeout(() => setShareState('idle'), 2000);
     }

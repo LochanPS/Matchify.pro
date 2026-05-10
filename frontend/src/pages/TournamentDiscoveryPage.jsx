@@ -588,16 +588,40 @@ function getTournamentShareUrl(id) {
   return `${window.location.origin}/tournaments/${id}`;
 }
 
+function buildShareMessage(tournament) {
+  const url = getTournamentShareUrl(tournament.id);
+  const dateStr = new Date(tournament.startDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+  const cats = (tournament.categories || []).map(c => `   • ${c.name}`).join('\n');
+  const catBlock = cats ? `\n🏸 Categories:\n${cats}\n` : '';
+  return {
+    title: `${tournament.name} — Matchify.pro`,
+    text: [
+      `🎾 MATCHIFY.PRO PRESENTS`,
+      ``,
+      `━━━━━━━━━━━━━━━━━━━`,
+      `🏆 ${tournament.name.toUpperCase()}`,
+      `━━━━━━━━━━━━━━━━━━━`,
+      ``,
+      `📍 ${tournament.city}${tournament.state ? `, ${tournament.state}` : ''}`,
+      `📅 ${dateStr}`,
+      catBlock,
+      `🔗 View & Register:`,
+      url,
+      ``,
+      `━━━━━━━━━━━━━━━━━━━`,
+      `Powered by Matchify.pro ✨`,
+    ].join('\n'),
+    url,
+  };
+}
+
 async function shareTournament(tournament, e) {
   e?.stopPropagation();
-  const url = getTournamentShareUrl(tournament.id);
-  const text = `🏸 ${tournament.name}\n📍 ${tournament.city}${tournament.state ? `, ${tournament.state}` : ''}\n📅 Starts ${new Date(tournament.startDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}\n\nRegister on Matchify.pro 👇`;
+  const { title, text, url } = buildShareMessage(tournament);
   if (navigator.share) {
-    try {
-      await navigator.share({ title: tournament.name, text, url });
-    } catch (_) { /* user cancelled */ }
+    try { await navigator.share({ title, text, url }); } catch (_) {}
   } else {
-    await navigator.clipboard.writeText(`${text}\n${url}`);
+    await navigator.clipboard.writeText(text);
     return 'copied';
   }
   return 'shared';

@@ -1,7 +1,7 @@
 ﻿import { useState } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { EyeIcon, EyeSlashIcon, PhoneIcon, LockClosedIcon } from '@heroicons/react/24/outline';
+import { EyeIcon, EyeSlashIcon, PhoneIcon, LockClosedIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
 import { getErrorMessage } from '../utils/errorMessage';
 import MatchifyLogo from '../components/MatchifyLogo';
 

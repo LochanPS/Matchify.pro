@@ -12,16 +12,21 @@ export function initializeSocket(server) {
         // Allow requests with no origin
         if (!origin) return callback(null, true);
         
+        // Allow matchify.pro domain
+        if (origin.includes('matchify.pro')) {
+          return callback(null, true);
+        }
+
         // Allow all Vercel deployments
         if (origin.includes('.vercel.app')) {
           return callback(null, true);
         }
-        
+
         // Allow localhost
         if (origin.includes('localhost')) {
           return callback(null, true);
         }
-        
+
         // Allow configured frontend URL
         if (process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL) {
           return callback(null, true);

@@ -121,7 +121,7 @@ const PlayerViewDrawsPage = () => {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: '#07071a' }}>
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-12 h-12 border-4 rounded-full animate-spin mx-auto mb-4" style={{ borderColor: 'rgba(0,255,136,0.3)', borderTopColor: '#00ff88' }}></div>
           <p className="text-gray-400">Loading draws...</p>
         </div>
       </div>
@@ -906,16 +906,16 @@ const RoundRobinDraw = ({ data, onViewMatchDetails, categoryFormat, dbMatches = 
   return (
     <div className="space-y-6">
       {data.groups.map((group, gi) => (
-        <div key={gi} id={`group-${gi}`} className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden shadow-lg">
+        <div key={gi} id={`group-${gi}`} className="backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden shadow-lg" style={{ background: 'rgba(13,16,37,0.9)' }}>
           {/* Group Header */}
-          <div className="bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border-b border-purple-500/30 px-6 py-4">
+          <div className="border-b px-6 py-4" style={{ background: 'rgba(0,212,255,0.08)', borderColor: 'rgba(0,212,255,0.2)' }}>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/30">
-                <span className="text-xl font-bold text-white">{String.fromCharCode(65 + gi)}</span>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#00a3cc,#00d4ff)', boxShadow: '0 4px 12px rgba(0,212,255,0.3)' }}>
+                <span className="text-xl font-bold" style={{ color: '#07071a' }}>{String.fromCharCode(65 + gi)}</span>
               </div>
               <div>
                 <h4 className="text-lg font-bold text-white">Group {String.fromCharCode(65 + gi)}</h4>
-                <p className="text-xs text-purple-300">{group.participants?.length || 0} Players</p>
+                <p className="text-xs" style={{ color: '#00d4ff' }}>{group.participants?.length || 0} Players</p>
               </div>
             </div>
           </div>
@@ -1183,7 +1183,7 @@ const GroupsKnockoutDraw = ({ data, onViewMatchDetails, categoryFormat, dbMatche
       {/* Group Stage */}
       <div id="group-stage">
         <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-          <span className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-lg text-sm">Stage 1</span>
+          <span className="px-3 py-1 rounded-lg text-sm" style={{ background: 'rgba(0,212,255,0.12)', color: '#00d4ff' }}>Stage 1</span>
           Group Stage (Round Robin)
         </h3>
         <RoundRobinDraw data={data} onViewMatchDetails={onViewMatchDetails} categoryFormat={categoryFormat} dbMatches={dbMatches} />

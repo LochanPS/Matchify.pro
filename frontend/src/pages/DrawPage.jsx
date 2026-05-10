@@ -2122,7 +2122,7 @@ const DrawPage = () => {
               <Trophy className="w-10 h-10" style={{ color: '#07071a' }} />
             </div>
             <h2 className="text-2xl font-bold text-center mb-2 text-white">End Category?</h2>
-            <p className="text-center text-purple-300 font-semibold mb-4">{activeCategory?.name}</p>
+            <p className="text-center font-semibold mb-4" style={{ color: '#00d4ff' }}>{activeCategory?.name}</p>
             <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 mb-6 space-y-2">
               <p className="text-sm text-green-300">
                 <strong>This will:</strong>
@@ -3393,27 +3393,25 @@ const SlotCard = ({ slot, assigned, canAccept, onSlotClick, onRemove, playerLabe
   return (
     <div
       onClick={onSlotClick}
-      className={`p-3 rounded-xl border-2 transition-all ${
-        assigned
-          ? 'border-emerald-500/50 bg-emerald-500/10 border-solid'
-          : canAccept
-            ? 'border-purple-500 bg-purple-500/10 border-dashed cursor-pointer hover:bg-purple-500/20 hover:shadow-lg hover:shadow-purple-500/20'
-            : 'border-white/20 bg-slate-800/50 border-dashed'
-      }`}
+      className="p-3 rounded-xl border-2 transition-all"
+      style={assigned
+        ? { borderColor: 'rgba(0,255,136,0.5)', background: 'rgba(0,255,136,0.1)' }
+        : canAccept
+          ? { borderColor: 'rgba(0,212,255,0.6)', background: 'rgba(0,212,255,0.08)', borderStyle: 'dashed', cursor: 'pointer' }
+          : { borderColor: 'rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.03)', borderStyle: 'dashed' }}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-            assigned 
-              ? 'bg-emerald-500/20' 
-              : canAccept 
-                ? 'bg-purple-500/20' 
-                : 'bg-slate-700/50'
-          }`}>
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center"
+            style={assigned
+              ? { background: 'rgba(0,255,136,0.15)' }
+              : canAccept
+                ? { background: 'rgba(0,212,255,0.12)' }
+                : { background: 'rgba(255,255,255,0.06)' }}>
             {assigned ? (
               <CheckCircle className="w-5 h-5 icon-green" />
             ) : (
-              <Users className={`w-5 h-5 ${canAccept ? 'text-purple-400' : 'text-gray-500'}`} />
+              <Users className="w-5 h-5" style={{ color: canAccept ? '#00d4ff' : '#6b7280' }} />
             )}
           </div>
           <div>
@@ -3421,7 +3419,7 @@ const SlotCard = ({ slot, assigned, canAccept, onSlotClick, onRemove, playerLabe
             {assigned ? (
               <span className="text-white font-medium">{assigned.playerName}</span>
             ) : (
-              <span className={`text-sm ${canAccept ? 'text-purple-400' : 'text-gray-500'}`}>
+              <span className="text-sm" style={{ color: canAccept ? '#00d4ff' : '#6b7280' }}>
                 {canAccept ? 'Click to assign' : 'Empty slot'}
               </span>
             )}
@@ -3479,17 +3477,16 @@ const CompactSlotCard = ({ slot, assigned, canAccept, onSlotClick, onRemove, pla
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
-      className={`px-2 py-1.5 rounded-lg border transition-all ${
-        locked
-          ? 'border-amber-500/30 bg-amber-500/5 cursor-not-allowed'
-          : isDragOver
-            ? 'border-emerald-500 bg-emerald-500/20 border-dashed'
-            : assigned
-              ? 'border-emerald-500/50 bg-emerald-500/10 border-solid cursor-move'
-              : canAccept
-                ? 'border-purple-500 bg-purple-500/10 border-dashed cursor-pointer hover:bg-purple-500/20'
-                : 'border-white/10 bg-slate-800/30 border-dashed'
-      }`}
+      className="px-2 py-1.5 rounded-lg border transition-all"
+      style={locked
+        ? { borderColor: 'rgba(251,191,36,0.3)', background: 'rgba(251,191,36,0.05)', cursor: 'not-allowed' }
+        : isDragOver
+          ? { borderColor: 'rgba(0,255,136,1)', background: 'rgba(0,255,136,0.2)', borderStyle: 'dashed' }
+          : assigned
+            ? { borderColor: 'rgba(0,255,136,0.5)', background: 'rgba(0,255,136,0.1)', cursor: 'move' }
+            : canAccept
+              ? { borderColor: 'rgba(0,212,255,0.6)', background: 'rgba(0,212,255,0.08)', borderStyle: 'dashed', cursor: 'pointer' }
+              : { borderColor: 'rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.02)', borderStyle: 'dashed' }}
       title={assigned && !locked ? 'Drag to move player to another slot' : undefined}
     >
       <div className="flex items-center justify-between gap-2">
@@ -3505,7 +3502,7 @@ const CompactSlotCard = ({ slot, assigned, canAccept, onSlotClick, onRemove, pla
               {assigned.playerName}
             </span>
           ) : (
-            <span className={`text-xs truncate ${canAccept ? 'text-purple-400' : 'text-gray-500'}`}>
+            <span className="text-xs truncate" style={{ color: canAccept ? '#00d4ff' : '#6b7280' }}>
               {canAccept ? 'Click to assign' : 'Empty'}
             </span>
           )}
@@ -4076,15 +4073,18 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                     isMatchLocked ? 'border-amber-500/30 bg-amber-500/5' : 'border-white/10'
                   }`}>
                     {/* Match Header - Compact */}
-                    <div className={`px-3 py-1.5 border-b border-white/10 flex items-center gap-2 ${
-                      isMatchLocked 
-                        ? 'bg-gradient-to-r from-amber-500/20 to-orange-500/20' 
-                        : 'bg-gradient-to-r from-purple-500/20 to-indigo-500/20'
-                    }`}>
-                      <span className={`w-5 h-5 rounded flex items-center justify-center text-xs font-bold ${
-                        isMatchLocked ? 'bg-amber-500/30 text-amber-300' : 'bg-purple-500/30 text-purple-300'
-                      }`}>{matchNum}</span>
-                      <span className={`font-semibold text-xs ${isMatchLocked ? 'text-amber-300' : 'text-purple-300'}`}>
+                    <div className="px-3 py-1.5 border-b border-white/10 flex items-center gap-2"
+                      style={isMatchLocked
+                        ? { background: 'linear-gradient(to right,rgba(251,191,36,0.15),rgba(249,115,22,0.15))' }
+                        : { background: 'rgba(0,212,255,0.08)' }}>
+                      <span className="w-5 h-5 rounded flex items-center justify-center text-xs font-bold"
+                        style={isMatchLocked
+                          ? { background: 'rgba(251,191,36,0.2)', color: '#fbbf24' }
+                          : { background: 'rgba(0,212,255,0.15)', color: '#00d4ff' }}>
+                        {matchNum}
+                      </span>
+                      <span className="font-semibold text-xs"
+                        style={{ color: isMatchLocked ? '#fbbf24' : '#00d4ff' }}>
                         Match {matchNum}
                       </span>
                       {isMatchLocked && (

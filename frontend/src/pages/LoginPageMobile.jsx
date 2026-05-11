@@ -20,6 +20,7 @@ const LOGIN_M_PARTICLES = Array.from({ length: 20 }, (_, i) => ({
 
 
 const LoginPageMobile = () => {
+  const [loginType, setLoginType] = useState('phone'); // 'phone' or 'email'
   const [formData, setFormData] = useState({ credential: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -35,20 +36,32 @@ const LoginPageMobile = () => {
     setError('');
   };
 
+  const handleLoginTypeChange = (type) => {
+    setLoginType(type);
+    setFormData({ credential: '', password: formData.password }); // Clear credential when switching
+    setError('');
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.credential || !formData.password) {
-      setError('Email/Phone and password are required');
+      setError(`${loginType === 'phone' ? 'Phone number' : 'Email'} and password are required`);
       return;
     }
     
-    // Detect if input is email or phone
-    const isEmail = formData.credential.includes('@');
-    const isPhone = /^[0-9]{10}$/.test(formData.credential);
-    
-    if (!isEmail && !isPhone) {
-      setError('Enter valid email or 10-digit phone number');
-      return;
+    // Validate based on login type
+    if (loginType === 'phone') {
+      const isValidPhone = /^[0-9]{10}$/.test(formData.credential);
+      if (!isValidPhone) {
+        setError('Please enter a valid 10-digit phone number');
+        return;
+      }
+    } else {
+      const isValidEmail = formData.credential.includes('@');
+      if (!isValidEmail) {
+        setError('Please enter a valid email address');
+        return;
+      }
     }
     
     setLoading(true);
@@ -328,28 +341,68 @@ const LoginPageMobile = () => {
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
             
-            {/* Email or Phone Number */}
+            {/* Login Type Toggle */}
+            <div>
+              <label className="block text-sm font-semibold text-white mb-3">
+                Login with
+              </label>
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                <button
+                  type="button"
+                  onClick={() => handleLoginTypeChange('phone')}
+                  className={`py-3 px-4 rounded-xl font-bold text-sm transition-all ${
+                    loginType === 'phone'
+                      ? 'bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-lg shadow-emerald-500/50'
+                      : 'bg-white/5 text-gray-400 hover:bg-white/10'
+                  }`}
+                >
+                  📱 Phone Number
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleLoginTypeChange('email')}
+                  className={`py-3 px-4 rounded-xl font-bold text-sm transition-all ${
+                    loginType === 'email'
+                      ? 'bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-lg shadow-emerald-500/50'
+                      : 'bg-white/5 text-gray-400 hover:bg-white/10'
+                  }`}
+                >
+                  ✉️ Email
+                </button>
+              </div>
+            </div>
+
+            {/* Phone Number or Email Input */}
             <div>
               <label className="block text-sm font-semibold text-white mb-2">
-                Email or Phone Number
+                {loginType === 'phone' ? 'Phone Number' : 'Email Address'}
               </label>
               <div className="relative">
-                <EnvelopeIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                {loginType === 'phone' ? (
+                  <PhoneIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                ) : (
+                  <EnvelopeIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                )}
                 <input
                   name="credential"
-                  type="text"
+                  type={loginType === 'phone' ? 'tel' : 'email'}
                   required
-                  autoComplete="username"
+                  autoComplete={loginType === 'phone' ? 'tel' : 'email'}
                   className="w-full pl-10 pr-4 py-3.5 rounded-xl text-white text-sm placeholder-gray-500 outline-none"
                   style={{ 
                     background: 'rgba(255,255,255,0.05)', 
                     border: '1px solid rgba(255,255,255,0.1)' 
                   }}
-                  placeholder="you@example.com or 9876543210"
+                  placeholder={loginType === 'phone' ? '9876543210' : 'you@example.com'}
                   value={formData.credential}
                   onChange={handleChange}
+                  maxLength={loginType === 'phone' ? 10 : undefined}
+                  pattern={loginType === 'phone' ? '[0-9]{10}' : undefined}
                 />
               </div>
+              {loginType === 'phone' && (
+                <p className="text-xs text-gray-400 mt-1">Enter 10-digit phone number without country code</p>
+              )}
             </div>
 
             {/* Password */}

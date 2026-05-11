@@ -103,6 +103,8 @@ export const register = async (req, res) => {
       });
     }
 
+    console.log('📧 Email validation - provided:', !!email, 'value:', email || 'none');
+
     // Validate phone number format (10 digits)
     const phoneRegex = /^[0-9]{10}$/;
     if (!phoneRegex.test(cleanedPhone)) {
@@ -360,8 +362,10 @@ export const login = async (req, res) => {
 
     // Verify password
     const isValid = await bcrypt.compare(password, user.password);
+    console.log('🔑 Password verification:', isValid ? 'SUCCESS' : 'FAILED');
+    
     if (!isValid) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      return res.status(401).json({ error: 'Invalid credentials. Please check your password and try again.' });
     }
 
     // Auto-generate codes for users without them (for existing users)

@@ -195,7 +195,12 @@ export const register = async (req, res) => {
       },
     });
 
-    console.log('✅ User created successfully with ID:', user.id, 'phone:', user.phone);
+    console.log('✅ User created successfully:');
+    console.log('   - User ID:', user.id);
+    console.log('   - Name:', user.name);
+    console.log('   - Email:', user.email || 'null');
+    console.log('   - Phone:', user.phone || 'null');
+    console.log('   - Phone saved correctly?:', user.phone === cleanedPhone);
 
     // Create welcome bonus transaction
     await prisma.walletTransaction.create({

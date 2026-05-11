@@ -170,6 +170,8 @@ export const register = async (req, res) => {
     const playerCode = await generatePlayerCode();
     const umpireCode = await generateUmpireCode();
 
+    console.log('📝 Creating user with phone:', phone, 'email:', email || 'null');
+
     // Create user with all three roles
     // All new users get ₹10 welcome bonus
     const user = await prisma.user.create({
@@ -185,6 +187,8 @@ export const register = async (req, res) => {
         walletBalance: 10, // Welcome bonus
       },
     });
+
+    console.log('✅ User created successfully with ID:', user.id, 'phone:', user.phone);
 
     // Create welcome bonus transaction
     await prisma.walletTransaction.create({
@@ -308,6 +312,8 @@ export const login = async (req, res) => {
     const isEmail = email.includes('@');
     const isPhone = /^[0-9]{10}$/.test(email);
     
+    console.log('🔐 Login attempt - credential:', email, 'isEmail:', isEmail, 'isPhone:', isPhone);
+    
     if (!isEmail && !isPhone) {
       return res.status(400).json({ 
         error: 'Invalid credential format. Please enter a valid email or 10-digit phone number.' 
@@ -323,6 +329,8 @@ export const login = async (req, res) => {
         umpireProfile: true,
       },
     });
+
+    console.log('🔍 User found:', user ? `Yes (ID: ${user.id}, phone: ${user.phone}, email: ${user.email})` : 'No');
 
     if (!user) {
       return res.status(401).json({ error: 'Invalid credentials' });

@@ -83,33 +83,43 @@ export const register = async (req, res) => {
   try {
     const { email, password, name, phone, alternateEmail } = req.body;
 
-    // Validate required fields (email is now optional)
-    if (!name || !password || !phone) {
+    // Validate required fields - at least phone OR email must be provided
+    if (!name || !password) {
       return res.status(400).json({ 
-        error: 'Missing required fields. Please provide name, password, and phone number.' 
+        error: 'Missing required fields. Please provide name and password.' 
       });
     }
 
-    // Clean phone number - remove spaces, dashes, and country code
-    const cleanedPhone = phone.replace(/[\s\-\+]/g, '').replace(/^91/, '');
-    
-    console.log('📝 Register - Original phone:', phone, 'Cleaned phone:', cleanedPhone);
+    // At least one of email or phone must be provided
+    if (!email && !phone) {
+      return res.status(400).json({ 
+        error: 'Please provide either email or phone number.' 
+      });
+    }
+
+    // Clean phone number if provided
+    let cleanedPhone = null;
+    if (phone) {
+      cleanedPhone = phone.replace(/[\s\-\+]/g, '').replace(/^91/, '');
+      
+      console.log('📝 Register - Original phone:', phone, 'Cleaned phone:', cleanedPhone);
+
+      // Validate phone number format (10 digits)
+      const phoneRegex = /^[0-9]{10}$/;
+      if (!phoneRegex.test(cleanedPhone)) {
+        return res.status(400).json({ 
+          error: 'Invalid phone number. Please enter a valid 10-digit phone number (e.g., 9876543210).' 
+        });
+      }
+    }
+
+    console.log('📧 Email validation - provided:', !!email, 'value:', email || 'none');
 
     // Validate email format if provided (email is optional)
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (email && !emailRegex.test(email)) {
       return res.status(400).json({ 
         error: 'Invalid email format. Please enter a valid email address (e.g., user@example.com).' 
-      });
-    }
-
-    console.log('📧 Email validation - provided:', !!email, 'value:', email || 'none');
-
-    // Validate phone number format (10 digits)
-    const phoneRegex = /^[0-9]{10}$/;
-    if (!phoneRegex.test(cleanedPhone)) {
-      return res.status(400).json({ 
-        error: 'Invalid phone number. Please enter a valid 10-digit phone number (e.g., 9876543210).' 
       });
     }
 
@@ -162,12 +172,14 @@ export const register = async (req, res) => {
       }
     }
 
-    // Check if phone already exists
-    const existingPhone = await prisma.user.findUnique({ where: { phone: cleanedPhone } });
-    if (existingPhone) {
-      return res.status(400).json({ 
-        error: `Phone number already registered. The phone number "${cleanedPhone}" is already associated with an account. Please use a different phone number.` 
-      });
+    // Check if phone already exists (only if phone provided)
+    if (cleanedPhone) {
+      const existingPhone = await prisma.user.findUnique({ where: { phone: cleanedPhone } });
+      if (existingPhone) {
+        return res.status(400).json({ 
+          error: `Phone number already registered. The phone number "${cleanedPhone}" is already associated with an account. Please use a different phone number.` 
+        });
+      }
     }
 
     // Hash password

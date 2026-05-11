@@ -14,7 +14,7 @@ model User {
   alternateEmail       String?
   password             String
   name                 String
-  phone                String              @unique
+  phone                String?             @unique
   roles                String              @default("PLAYER,UMPIRE,ORGANIZER") // Will store comma-separated roles
   matchifyCode         String?             @unique // Universal Matchify code: #A10000, #A10001, etc.
   playerCode           String?             @unique // DEPRECATED - Kept for migration

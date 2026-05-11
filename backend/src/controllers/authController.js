@@ -90,6 +90,11 @@ export const register = async (req, res) => {
       });
     }
 
+    // Clean phone number - remove spaces, dashes, and country code
+    const cleanedPhone = phone.replace(/[\s\-\+]/g, '').replace(/^91/, '');
+    
+    console.log('📝 Register - Original phone:', phone, 'Cleaned phone:', cleanedPhone);
+
     // Validate email format if provided (email is optional)
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (email && !emailRegex.test(email)) {
@@ -100,7 +105,7 @@ export const register = async (req, res) => {
 
     // Validate phone number format (10 digits)
     const phoneRegex = /^[0-9]{10}$/;
-    if (!phoneRegex.test(phone)) {
+    if (!phoneRegex.test(cleanedPhone)) {
       return res.status(400).json({ 
         error: 'Invalid phone number. Please enter a valid 10-digit phone number (e.g., 9876543210).' 
       });
@@ -156,10 +161,10 @@ export const register = async (req, res) => {
     }
 
     // Check if phone already exists
-    const existingPhone = await prisma.user.findUnique({ where: { phone } });
+    const existingPhone = await prisma.user.findUnique({ where: { phone: cleanedPhone } });
     if (existingPhone) {
       return res.status(400).json({ 
-        error: `Phone number already registered. The phone number "${phone}" is already associated with an account. Please use a different phone number.` 
+        error: `Phone number already registered. The phone number "${cleanedPhone}" is already associated with an account. Please use a different phone number.` 
       });
     }
 
@@ -170,7 +175,7 @@ export const register = async (req, res) => {
     const playerCode = await generatePlayerCode();
     const umpireCode = await generateUmpireCode();
 
-    console.log('📝 Creating user with phone:', phone, 'email:', email || 'null');
+    console.log('📝 Creating user with phone:', cleanedPhone, 'email:', email || 'null');
 
     // Create user with all three roles
     // All new users get ₹10 welcome bonus
@@ -179,7 +184,7 @@ export const register = async (req, res) => {
         email: email || null, // Email is optional
         password: hashedPassword,
         name,
-        phone,
+        phone: cleanedPhone, // Use cleaned phone
         alternateEmail: alternateEmail || null,
         roles: userRoles.join(','),
         playerCode, // All users get player code
@@ -310,9 +315,16 @@ export const login = async (req, res) => {
 
     // Detect if credential is email or phone
     const isEmail = email.includes('@');
-    const isPhone = /^[0-9]{10}$/.test(email);
     
-    console.log('🔐 Login attempt - credential:', email, 'isEmail:', isEmail, 'isPhone:', isPhone);
+    // Clean phone number if it's a phone
+    let cleanedCredential = email;
+    if (!isEmail) {
+      cleanedCredential = email.replace(/[\s\-\+]/g, '').replace(/^91/, '');
+    }
+    
+    const isPhone = /^[0-9]{10}$/.test(cleanedCredential);
+    
+    console.log('🔐 Login attempt - original:', email, 'cleaned:', cleanedCredential, 'isEmail:', isEmail, 'isPhone:', isPhone);
     
     if (!isEmail && !isPhone) {
       return res.status(400).json({ 
@@ -322,7 +334,7 @@ export const login = async (req, res) => {
 
     // Find user by email OR phone with all profile fields
     const user = await prisma.user.findUnique({
-      where: isEmail ? { email } : { phone: email },
+      where: isEmail ? { email: cleanedCredential } : { phone: cleanedCredential },
       include: {
         playerProfile: true,
         organizerProfile: true,
@@ -333,7 +345,7 @@ export const login = async (req, res) => {
     console.log('🔍 User found:', user ? `Yes (ID: ${user.id}, phone: ${user.phone}, email: ${user.email})` : 'No');
 
     if (!user) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      return res.status(401).json({ error: 'Invalid credentials. Please check your phone number/email and try again.' });
     }
 
     // Check if suspended - return detailed message

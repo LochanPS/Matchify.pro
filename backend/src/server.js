@@ -97,6 +97,9 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
+// Trust proxy - Required for Vercel deployment
+app.set('trust proxy', 1);
+
 // ============================================
 // MIDDLEWARE CONFIGURATION
 // ============================================
@@ -165,6 +168,12 @@ const limiter = rateLimit({
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
+  // Trust proxy for Vercel deployment
+  trustProxy: true,
+  // Use X-Forwarded-For header for IP tracking
+  keyGenerator: (req) => {
+    return req.headers['x-forwarded-for']?.split(',')[0] || req.ip || 'unknown';
+  },
 });
 
 // Apply rate limiting to all routes
@@ -183,6 +192,12 @@ const authLimiter = rateLimit({
   max: 20, // Allow 20 attempts per 15 minutes (more reasonable)
   message: 'Too many login attempts, please try again after 15 minutes.',
   skipSuccessfulRequests: true,
+  // Trust proxy for Vercel deployment
+  trustProxy: true,
+  // Use X-Forwarded-For header for IP tracking
+  keyGenerator: (req) => {
+    return req.headers['x-forwarded-for']?.split(',')[0] || req.ip || 'unknown';
+  },
 });
 
 // Static file serving for uploads

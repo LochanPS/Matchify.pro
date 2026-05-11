@@ -125,3 +125,9 @@ export const completeSystemReset = async (password) => {
   const response = await api.post('/admin/complete-system-reset', { password });
   return response.data;
 };
+
+// Clean Phone Numbers - Migrate old phone formats
+export const cleanPhoneNumbers = async (password) => {
+  const response = await api.post('/admin/clean-phone-numbers', { password });
+  return response.data;
+};

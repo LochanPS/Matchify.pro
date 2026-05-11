@@ -65,6 +65,7 @@ import tournamentPaymentsRoutes from './routes/admin/tournament-payments.routes.
 import revenueAnalyticsRoutes from './routes/admin/revenue-analytics.routes.js';
 import tournamentManagementRoutes from './routes/admin/tournament-management.routes.js';
 import deleteAllDataRoutes from './routes/admin/delete-all-data.routes.js';
+import cleanPhoneNumbersRoutes from './routes/admin/clean-phone-numbers.routes.js';
 import smsRoutes from './routes/sms.routes.js';
 import academyRoutes from './routes/academy.routes.js';
 import userRoutes from './routes/user.routes.js';
@@ -459,6 +460,7 @@ app.use('/api/admin/tournament-payments', tournamentPaymentsRoutes);
 app.use('/api/admin/revenue', revenueAnalyticsRoutes);
 app.use('/api/admin/tournament-management', tournamentManagementRoutes);
 app.use('/api/admin', deleteAllDataRoutes);
+app.use('/api/admin', cleanPhoneNumbersRoutes);
 
 // Admin routes (general - must be AFTER specific routes)
 app.use('/api/admin', adminRoutes);

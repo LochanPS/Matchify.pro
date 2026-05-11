@@ -335,7 +335,7 @@ export const login = async (req, res) => {
     }
 
     // Find user by email OR phone with all profile fields
-    const user = await prisma.user.findUnique({
+    let user = await prisma.user.findUnique({
       where: isEmail ? { email: cleanedCredential } : { phone: cleanedCredential },
       include: {
         playerProfile: true,
@@ -344,9 +344,39 @@ export const login = async (req, res) => {
       },
     });
 
-    console.log('🔍 User found:', user ? `Yes (ID: ${user.id}, phone: ${user.phone}, email: ${user.email})` : 'No');
+    console.log('🔍 User found (primary search):', user ? `Yes (ID: ${user.id}, phone: ${user.phone}, email: ${user.email})` : 'No');
+
+    // If phone login failed, try searching with original format (for backward compatibility)
+    if (!user && isPhone && cleanedCredential !== email) {
+      console.log('🔄 Trying fallback search with original phone format:', email);
+      user = await prisma.user.findUnique({
+        where: { phone: email },
+        include: {
+          playerProfile: true,
+          organizerProfile: true,
+          umpireProfile: true,
+        },
+      });
+      console.log('🔍 User found (fallback search):', user ? `Yes (ID: ${user.id}, phone: ${user.phone})` : 'No');
+      
+      // If found with old format, update to cleaned format
+      if (user) {
+        console.log('📝 Updating phone number from old format to cleaned format');
+        user = await prisma.user.update({
+          where: { id: user.id },
+          data: { phone: cleanedCredential },
+          include: {
+            playerProfile: true,
+            organizerProfile: true,
+            umpireProfile: true,
+          },
+        });
+        console.log('✅ Phone number updated to:', user.phone);
+      }
+    }
 
     if (!user) {
+      console.log('❌ Login failed - user not found');
       return res.status(401).json({ error: 'Invalid credentials. Please check your phone number/email and try again.' });
     }
 
@@ -363,8 +393,10 @@ export const login = async (req, res) => {
     // Verify password
     const isValid = await bcrypt.compare(password, user.password);
     console.log('🔑 Password verification:', isValid ? 'SUCCESS' : 'FAILED');
+    console.log('🔑 Stored hash:', user.password.substring(0, 20) + '...');
     
     if (!isValid) {
+      console.log('❌ Login failed - invalid password');
       return res.status(401).json({ error: 'Invalid credentials. Please check your password and try again.' });
     }
 

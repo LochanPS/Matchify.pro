@@ -4,8 +4,11 @@ import { authenticate } from '../../middleware/auth.js';
 
 const router = express.Router();
 
-// Special password for delete all data
-const DELETE_PASSWORD = 'Pradyu@123(123)(123)';
+// Danger Zone — deletes tournament data, preserves all user accounts
+const DANGER_ZONE_PASSWORD = 'Pradyu@123(123)';
+
+// Nuclear Zone — deletes EVERYTHING including all users except admin
+const NUCLEAR_ZONE_PASSWORD = 'Pradyu@123(123)(123)';
 
 /**
  * POST /api/admin/delete-all-info
@@ -24,8 +27,8 @@ router.post('/delete-all-info', authenticate, async (req, res) => {
       });
     }
 
-    // Verify special password
-    if (password !== DELETE_PASSWORD) {
+    // Verify Danger Zone password
+    if (password !== DANGER_ZONE_PASSWORD) {
       return res.status(401).json({
         success: false,
         error: 'Invalid password'
@@ -164,8 +167,8 @@ router.post('/complete-system-reset', authenticate, async (req, res) => {
       });
     }
 
-    // Verify special password
-    if (password !== DELETE_PASSWORD) {
+    // Verify Nuclear Zone password
+    if (password !== NUCLEAR_ZONE_PASSWORD) {
       return res.status(401).json({
         success: false,
         error: 'Invalid password'

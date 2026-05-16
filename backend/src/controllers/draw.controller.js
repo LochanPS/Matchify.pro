@@ -371,6 +371,21 @@ const getDraw = async (req, res) => {
       };
     });
 
+    // Build partner name map: userId -> partnerName (for doubles categories)
+    const partnerMap = {};
+    const regWithPartners = await prisma.registration.findMany({
+      where: { tournamentId: tournamentId, categoryId: categoryId },
+      select: {
+        userId: true,
+        partner: { select: { id: true, name: true } }
+      }
+    });
+    regWithPartners.forEach(reg => {
+      if (reg.userId && reg.partner) {
+        partnerMap[reg.userId] = reg.partner.name;
+      }
+    });
+
     // Parse the stored bracket JSON
     let bracketData;
     try {
@@ -435,13 +450,15 @@ const getDraw = async (req, res) => {
             if (dbMatch.player1Id && playerMap[dbMatch.player1Id]) {
               match.player1 = {
                 id: dbMatch.player1Id,
-                name: playerMap[dbMatch.player1Id].name
+                name: playerMap[dbMatch.player1Id].name,
+                partnerName: partnerMap[dbMatch.player1Id] || null
               };
             }
             if (dbMatch.player2Id && playerMap[dbMatch.player2Id]) {
               match.player2 = {
                 id: dbMatch.player2Id,
-                name: playerMap[dbMatch.player2Id].name
+                name: playerMap[dbMatch.player2Id].name,
+                partnerName: partnerMap[dbMatch.player2Id] || null
               };
             }
 
@@ -483,15 +500,16 @@ const getDraw = async (req, res) => {
           group.participants.forEach((participant, pIndex) => {
             if (participant.id && playerMap[participant.id]) {
               participant.name = playerMap[participant.id].name;
+              participant.partnerName = partnerMap[participant.id] || null;
             }
           });
         }
-        
+
         if (group.matches && Array.isArray(group.matches)) {
           group.matches.forEach((match, matchIndex) => {
             // Find the corresponding match in database by match number
             // Round robin matches are stored with unique match numbers
-            const dbMatch = matches.find(m => 
+            const dbMatch = matches.find(m =>
               m.stage === 'GROUP' &&
               m.matchNumber === match.matchNumber
             );
@@ -501,13 +519,15 @@ const getDraw = async (req, res) => {
               if (dbMatch.player1Id && playerMap[dbMatch.player1Id]) {
                 match.player1 = {
                   id: dbMatch.player1Id,
-                  name: playerMap[dbMatch.player1Id].name
+                  name: playerMap[dbMatch.player1Id].name,
+                  partnerName: partnerMap[dbMatch.player1Id] || null
                 };
               }
               if (dbMatch.player2Id && playerMap[dbMatch.player2Id]) {
                 match.player2 = {
                   id: dbMatch.player2Id,
-                  name: playerMap[dbMatch.player2Id].name
+                  name: playerMap[dbMatch.player2Id].name,
+                  partnerName: partnerMap[dbMatch.player2Id] || null
                 };
               }
 
@@ -671,13 +691,14 @@ const getDraw = async (req, res) => {
             group.participants.forEach((participant, pIndex) => {
               if (participant.id && playerMap[participant.id]) {
                 participant.name = playerMap[participant.id].name;
+                participant.partnerName = partnerMap[participant.id] || null;
               }
             });
           }
-          
+
           if (group.matches && Array.isArray(group.matches)) {
             group.matches.forEach((match, matchIndex) => {
-              const dbMatch = matches.find(m => 
+              const dbMatch = matches.find(m =>
                 m.stage === 'GROUP' &&
                 m.matchNumber === match.matchNumber
               );
@@ -686,13 +707,15 @@ const getDraw = async (req, res) => {
                 if (dbMatch.player1Id && playerMap[dbMatch.player1Id]) {
                   match.player1 = {
                     id: dbMatch.player1Id,
-                    name: playerMap[dbMatch.player1Id].name
+                    name: playerMap[dbMatch.player1Id].name,
+                    partnerName: partnerMap[dbMatch.player1Id] || null
                   };
                 }
                 if (dbMatch.player2Id && playerMap[dbMatch.player2Id]) {
                   match.player2 = {
                     id: dbMatch.player2Id,
-                    name: playerMap[dbMatch.player2Id].name
+                    name: playerMap[dbMatch.player2Id].name,
+                    partnerName: partnerMap[dbMatch.player2Id] || null
                   };
                 }
 
@@ -861,13 +884,15 @@ const getDraw = async (req, res) => {
               if (dbMatch.player1Id && playerMap[dbMatch.player1Id]) {
                 match.player1 = {
                   id: dbMatch.player1Id,
-                  name: playerMap[dbMatch.player1Id].name
+                  name: playerMap[dbMatch.player1Id].name,
+                  partnerName: partnerMap[dbMatch.player1Id] || null
                 };
               }
               if (dbMatch.player2Id && playerMap[dbMatch.player2Id]) {
                 match.player2 = {
                   id: dbMatch.player2Id,
-                  name: playerMap[dbMatch.player2Id].name
+                  name: playerMap[dbMatch.player2Id].name,
+                  partnerName: partnerMap[dbMatch.player2Id] || null
                 };
               }
 
@@ -1336,8 +1361,8 @@ const assignPlayersToDraw = async (req, res) => {
 
     // Build a map of playerId -> slot from assignments (each player can only be in ONE slot)
     const playerSlotMap = {};
-    assignments.forEach(({ slot, playerId, playerName }) => {
-      playerSlotMap[playerId] = { slot, playerName };
+    assignments.forEach(({ slot, playerId, playerName, partnerName }) => {
+      playerSlotMap[playerId] = { slot, playerName, partnerName: partnerName || null };
     });
 
     // Apply assignments to bracket - CLEAR ALL FIRST, then assign
@@ -1351,14 +1376,15 @@ const assignPlayersToDraw = async (req, res) => {
       });
       
       // Then assign players to their slots (each player only once)
-      Object.entries(playerSlotMap).forEach(([playerId, { slot, playerName }]) => {
+      Object.entries(playerSlotMap).forEach(([playerId, { slot, playerName, partnerName }]) => {
         const matchIndex = Math.floor((slot - 1) / 2);
         const playerPosition = (slot - 1) % 2 === 0 ? 'player1' : 'player2';
         if (firstRound.matches[matchIndex]) {
           firstRound.matches[matchIndex][playerPosition] = {
             id: playerId,
             name: playerName,
-            seed: slot
+            seed: slot,
+            partnerName: partnerName || null
           };
         }
       });
@@ -1393,7 +1419,8 @@ const assignPlayersToDraw = async (req, res) => {
             group.participants[idx] = {
               ...participant,
               id: assignment.playerId,
-              name: assignment.playerName
+              name: assignment.playerName,
+              partnerName: assignment.partnerName || null
             };
           }
           slotCounter++;

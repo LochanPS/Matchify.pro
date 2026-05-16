@@ -3596,7 +3596,8 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
       if (s.currentPlayer?.id && !usedPlayerIds.has(s.currentPlayer.id)) {
         initial[s.slot] = {
           playerId: s.currentPlayer.id,
-          playerName: s.currentPlayer.name
+          playerName: s.currentPlayer.name,
+          partnerName: s.currentPlayer.partnerName || null
         };
         usedPlayerIds.add(s.currentPlayer.id);
       }
@@ -3761,7 +3762,8 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
     const assignmentsArray = Object.entries(assignments).map(([slot, data]) => ({
       slot: parseInt(slot),
       playerId: data.playerId,
-      playerName: data.playerName
+      playerName: data.playerName,
+      partnerName: data.partnerName || null
     }));
     onSave(assignmentsArray);
   };

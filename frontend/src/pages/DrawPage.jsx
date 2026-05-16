@@ -18,7 +18,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { drawAPI } from '../api/draw';
 import { tournamentAPI } from '../api/tournament';
 import api from '../utils/api';
@@ -65,6 +65,7 @@ const getPlayerDisplay = (player) => {
 const DrawPage = () => {
   const { tournamentId, categoryId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
 
   const [tournament, setTournament] = useState(null);
@@ -188,29 +189,32 @@ const DrawPage = () => {
 
   // Handle refresh parameter from URL (when returning from match completion)
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
+    const urlParams = new URLSearchParams(location.search);
     const shouldRefresh = urlParams.get('refresh');
-    
+
     if (shouldRefresh === 'true' && activeCategory) {
       setRefreshing(true);
       setSuccess('Match completed! Updating bracket...');
-      
-      // Force refresh bracket and stats after match completion
-      setTimeout(async () => {
-        await fetchBracket();
-        await fetchTournamentStats();
+
+      const run = async () => {
+        try {
+          await fetchBracket();
+          await fetchTournamentStats();
+        } catch (_) {}
         setRefreshing(false);
         setSuccess('Bracket updated successfully! Winner advanced to next round.');
-        
-        // Clear the refresh parameter from URL
-        const newUrl = window.location.pathname + (window.location.search.replace(/[?&]refresh=true/, '').replace(/^&/, '?') || '');
-        window.history.replaceState({}, '', newUrl);
-        
-        // Clear success message after 5 seconds
+
+        // Clear the refresh parameter from URL without a hard reload
+        const newSearch = location.search.replace(/[?&]refresh=true/, '').replace(/^&/, '?');
+        window.history.replaceState({}, '', location.pathname + (newSearch || ''));
+
         setTimeout(() => setSuccess(null), 5000);
-      }, 500); // Small delay to ensure backend has processed the match completion
+      };
+
+      const t = setTimeout(run, 500);
+      return () => clearTimeout(t);
     }
-  }, [activeCategory, window.location.search]);
+  }, [activeCategory, location.search]);
 
   const fetchTournamentData = async () => {
     try {
@@ -2356,6 +2360,8 @@ const getCompleteMatchScore = (scoreData) => {
 // Knockout Display - CONTAINED HORIZONTAL PYRAMID
 // Properly contained within app boundaries with horizontal scroll
 const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onViewMatchDetails, onChangeResult, categoryFormat }) => {
+  const navigate = useNavigate(); // Fix: each top-level component needs its own hook
+
   if (!data?.rounds) return <p className="text-gray-400 text-center p-8">No bracket data</p>;
 
   const totalRounds = data.rounds.length;
@@ -2369,31 +2375,19 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
   };
 
   // Find match record by round and position within that round
+  // Handles both staged (stage='KNOCKOUT') and legacy (stage=null) matches
   const findMatch = (displayIdx, matchIdx) => {
-    if (!matches || !Array.isArray(matches)) {
-      return null;
-    }
-    
-    const totalRounds = data.rounds.length;
+    if (!matches || !Array.isArray(matches)) return null;
     const dbRound = totalRounds - displayIdx;
-    
     const roundMatches = matches
-      .filter(m => m.round === dbRound && m.stage === 'KNOCKOUT')
+      .filter(m => m.round === dbRound && (m.stage === 'KNOCKOUT' || m.stage == null))
       .sort((a, b) => a.matchNumber - b.matchNumber);
-    
     return roundMatches[matchIdx];
   };
 
-  // Open conduct page for match
-  const handleConductMatch = (matchId) => {
-    console.log('🎯 Conduct button clicked for matchId:', matchId);
-    console.log('🎯 Navigating to:', `/match/${matchId}/conduct`);
-    try {
-      navigate(`/match/${matchId}/conduct`);
-      console.log('✅ Navigation successful');
-    } catch (error) {
-      console.error('❌ Navigation error:', error);
-    }
+  // Navigate to conduct page for BYE matches (no umpire needed)
+  const handleGiveByeForMatch = (matchId) => {
+    navigate(`/match/${matchId}/conduct`);
   };
 
   return (
@@ -2482,6 +2476,11 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                                 ✓
                               </span>
                             )}
+                            {!isCompleted && !isLive && (player1.name === 'TBD') !== (player2.name === 'TBD') && (
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-black" style={{ background: 'rgba(245,158,11,0.18)', color: '#fbbf24', border: '1px solid rgba(245,158,11,0.4)' }}>
+                                BYE
+                              </span>
+                            )}
                           </div>
                           
                           {/* Players */}
@@ -2563,32 +2562,34 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
 
                           {/* Organizer-only actions */}
                           {isOrganizer && dbMatch && !isCompleted && (
-                            <div className="px-2 pb-2 flex gap-1.5">
-                              {player1.name !== 'TBD' && player2.name !== 'TBD' && (
+                            <div className="px-2 pb-2">
+                              {player1.name !== 'TBD' && player2.name !== 'TBD' ? (
+                                /* Both players — UMPIRE is the ONLY way to conduct */
                                 <button
                                   onClick={() => {
                                     const bracketMatchData = { matchNumber: match.matchNumber, round: ri + 1, player1, player2 };
                                     onAssignUmpire(dbMatch, bracketMatchData);
                                   }}
-                                  className={`flex-1 py-2 rounded-lg border-2 transition-all text-[10px] font-black flex items-center justify-center gap-1 ${
+                                  className={`w-full py-2 rounded-lg border-2 transition-all text-[10px] font-black flex items-center justify-center gap-1 ${
                                     hasUmpire
-                                      ? 'bg-[rgba(0,255,136,0.12)] text-[#00ff88] border-[rgba(0,255,136,0.3)]'
+                                      ? 'bg-[rgba(0,255,136,0.15)] text-[#00ff88] border-[rgba(0,255,136,0.4)]'
                                       : 'bg-blue-500/20 text-blue-300 border-blue-500/40'
                                   }`}
                                 >
                                   <Gavel className="w-3 h-3" />
-                                  {hasUmpire ? 'READY' : 'UMPIRE'}
+                                  {hasUmpire ? '✓ UMPIRE ASSIGNED — CONDUCT' : 'ASSIGN UMPIRE TO CONDUCT'}
                                 </button>
-                              )}
-                              {(player1.name !== 'TBD' || player2.name !== 'TBD') && (
+                              ) : (player1.name !== 'TBD' || player2.name !== 'TBD') ? (
+                                /* One player only — BYE match */
                                 <button
-                                  onClick={() => handleConductMatch(dbMatch.id)}
-                                  className="flex-1 py-2 rounded-lg border-2 border-transparent transition-all text-[10px] font-black flex items-center justify-center gap-1 btn-brand"
+                                  onClick={() => handleGiveByeForMatch(dbMatch.id)}
+                                  className="w-full py-2 rounded-lg border-2 border-amber-500/50 transition-all text-[10px] font-black flex items-center justify-center gap-1"
+                                  style={{ background: 'rgba(245,158,11,0.15)', color: '#fbbf24' }}
                                 >
-                                  <Play className="w-3 h-3" />
-                                  START
+                                  <Trophy className="w-3 h-3" />
+                                  GIVE BYE — {player1.name !== 'TBD' ? player1Name : player2Name}
                                 </button>
-                              )}
+                              ) : null}
                             </div>
                           )}
 

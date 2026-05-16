@@ -205,7 +205,7 @@ router.put('/:matchId/score', authenticate, async (req, res) => {
 router.post('/:matchId/start', authenticate, async (req, res) => {
   try {
     const { matchId } = req.params;
-    const userId = req.user.userId;
+    const userId = req.user.userId || req.user.id;
 
     const match = await prisma.match.findUnique({
       where: { id: matchId },
@@ -547,8 +547,10 @@ router.put('/:matchId/end', authenticate, async (req, res) => {
     }
 
     // Get player details for notifications and stats
-    const player1 = await prisma.user.findUnique({ where: { id: match.player1Id } });
-    const player2 = await prisma.user.findUnique({ where: { id: match.player2Id } });
+    // Guard: guest IDs (prefixed with "guest-") are not real User records
+    const isGuestId = (id) => !id || id.startsWith('guest-');
+    const player1 = isGuestId(match.player1Id) ? null : await prisma.user.findUnique({ where: { id: match.player1Id } });
+    const player2 = isGuestId(match.player2Id) ? null : await prisma.user.findUnique({ where: { id: match.player2Id } });
     const loserId = winnerId === match.player1Id ? match.player2Id : match.player1Id;
     const winner = winnerId === match.player1Id ? player1 : player2;
     const loser = winnerId === match.player1Id ? player2 : player1;
@@ -1191,7 +1193,7 @@ router.post('/:matchId/complete', authenticate, async (req, res) => {
   try {
     const { matchId } = req.params;
     const { winnerId, scoreData } = req.body;
-    const userId = req.user.userId;
+    const userId = req.user.userId || req.user.id;
     
     // 🔍 DEBUG: Log match completion request
     console.log(`\n🏁 Match Complete Request (POST) - Match ${matchId}`);

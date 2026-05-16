@@ -384,6 +384,7 @@ const ConductMatchPage = () => {
 
           {/* ── Action Buttons ────────────────────────────────────────────── */}
           {(!player1 || !player2) ? (
+            /* BYE match — one player missing, no umpire needed */
             <div className="space-y-3">
               <button
                 onClick={handleGiveBye}
@@ -401,7 +402,27 @@ const ConductMatchPage = () => {
                 </p>
               </div>
             </div>
+          ) : !umpireId ? (
+            /* Both players present but NO umpire assigned — block */
+            <div className="space-y-3">
+              <div className="w-full py-4 rounded-2xl font-black text-base flex items-center justify-center gap-2 select-none"
+                style={{ background: 'rgba(255,255,255,0.04)', border: '1.5px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.25)', cursor: 'not-allowed' }}>
+                <Play className="w-5 h-5" />
+                Start Match
+              </div>
+              <div className="flex items-start gap-3 px-4 py-3.5 rounded-2xl"
+                style={{ background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.3)' }}>
+                <Gavel className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: '#f87171' }} />
+                <div>
+                  <p className="text-sm font-black mb-1" style={{ color: '#f87171' }}>Umpire Required</p>
+                  <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                    Go back to the draw and tap <strong className="text-white">ASSIGN UMPIRE TO CONDUCT</strong> on this match to assign a match official first.
+                  </p>
+                </div>
+              </div>
+            </div>
           ) : (
+            /* Both players + umpire assigned — allow start */
             <button
               onClick={handleStartMatch}
               disabled={assigning}

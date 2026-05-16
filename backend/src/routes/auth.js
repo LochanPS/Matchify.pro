@@ -11,8 +11,24 @@ import { generateMatchifyCode } from '../utils/matchifyCode.js';
 
 const router = express.Router();
 
+// Run once on cold start — make email and phone nullable in DB
+// (prisma db push can't run at Vercel build time because DATABASE_URL is runtime-only)
+let _dbFixApplied = false;
+const ensureNullableColumns = async () => {
+  if (_dbFixApplied) return;
+  try {
+    await prisma.$executeRaw`ALTER TABLE "User" ALTER COLUMN "email" DROP NOT NULL`;
+    await prisma.$executeRaw`ALTER TABLE "User" ALTER COLUMN "phone" DROP NOT NULL`;
+    console.log('✅ email/phone columns confirmed nullable');
+  } catch (e) {
+    console.warn('DB nullable fix skipped (may already be nullable):', e.message);
+  }
+  _dbFixApplied = true;
+};
+
 // POST /auth/register
 router.post('/register', async (req, res) => {
+  await ensureNullableColumns();
   try {
     const {
       email,

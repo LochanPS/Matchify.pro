@@ -258,6 +258,12 @@ router.post('/:tournamentId/payout-50-2/mark-paid', authenticate, requireAdmin, 
       }
     });
 
+    // Mark tournament as completed since final payout is done
+    await prisma.tournament.update({
+      where: { id: tournamentId },
+      data: { status: 'completed' }
+    });
+
     // Send notification to organizer
     const tournament = await prisma.tournament.findUnique({
       where: { id: tournamentId },

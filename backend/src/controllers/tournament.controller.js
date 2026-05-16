@@ -291,6 +291,9 @@ const getTournaments = async (req, res) => {
       
       // Organizer filter - if true, show all tournaments for the organizer (including drafts)
       myTournaments,
+
+      // Tab filter - 'upcoming' or 'completed'
+      tab,
     } = req.query;
 
     const skip = (parseInt(page) - 1) * parseInt(limit);
@@ -311,6 +314,14 @@ const getTournaments = async (req, res) => {
       baseFilters.organizerId = userId;
       // Remove the published-only filter for organizer's own tournaments
       delete baseFilters.status;
+    }
+
+    // Tab filter - overrides default status filter
+    if (tab === 'completed') {
+      baseFilters.status = 'completed';
+    } else if (tab === 'upcoming' || (!tab && myTournaments !== 'true')) {
+      // upcoming = published (not completed, not draft)
+      baseFilters.status = 'published';
     }
 
     // Location filters (case-insensitive for SQLite)

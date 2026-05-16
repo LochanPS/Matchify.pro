@@ -41,6 +41,7 @@ export default function TournamentDiscoveryPage() {
   const [total, setTotal] = useState(0);
   const observerTarget = useRef(null);
   
+  const [activeTab, setActiveTab] = useState('upcoming');
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState({
     city: '',
@@ -80,11 +81,11 @@ export default function TournamentDiscoveryPage() {
   }, [page]);
 
   useEffect(() => {
-    // Reset when filters change
+    // Reset when filters or tab change
     setTournaments([]);
     setPage(1);
     setHasMore(true);
-  }, [filters, searchQuery]);
+  }, [filters, searchQuery, activeTab]);
 
   const fetchTournaments = async () => {
     if (!hasMore && page > 1) return;
@@ -96,6 +97,7 @@ export default function TournamentDiscoveryPage() {
         if (filters[key]) params[key] = filters[key];
       });
       if (searchQuery) params.search = searchQuery;
+      params.tab = activeTab;
 
       const response = await tournamentAPI.getTournaments(params);
       const newTournaments = response.data?.tournaments || [];
@@ -456,6 +458,30 @@ export default function TournamentDiscoveryPage() {
               </div>
             </div>
           )}
+        </div>
+
+        {/* Tab Toggle - Upcoming / Completed */}
+        <div className="flex gap-0 mb-5 rounded-xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.1)' }}>
+          <button
+            onClick={() => setActiveTab('upcoming')}
+            className="flex-1 py-3 text-sm font-black transition-all"
+            style={{
+              background: activeTab === 'upcoming' ? 'linear-gradient(135deg,#00ff88,#00d4ff)' : 'rgba(255,255,255,0.04)',
+              color: activeTab === 'upcoming' ? '#07071a' : 'rgba(255,255,255,0.5)',
+            }}
+          >
+            🏸 Upcoming
+          </button>
+          <button
+            onClick={() => setActiveTab('completed')}
+            className="flex-1 py-3 text-sm font-black transition-all"
+            style={{
+              background: activeTab === 'completed' ? 'linear-gradient(135deg,#a855f7,#6366f1)' : 'rgba(255,255,255,0.04)',
+              color: activeTab === 'completed' ? '#ffffff' : 'rgba(255,255,255,0.5)',
+            }}
+          >
+            🏆 Completed
+          </button>
         </div>
 
         {/* Results Count - Compact */}

@@ -1,18 +1,9 @@
 /**
- * MatchifyLogo — Official matchify.pro logo with shuttlecock
- * 
- * Features:
- * - Shuttlecock graphic with green swoosh
- * - "matchify.pro" text in one straight line
- * - Softer, less bright green colors
- * - Fully coded in SVG
+ * MatchifyLogo — Diamond gem with shuttlecock cutout + bold wordmark
  *
  * Props:
  *   size       {number}  — logo height in px (default 40)
  *   variant    {'full'|'icon'|'text'}
- *               full  — shuttlecock + text (default)
- *               icon  — shuttlecock only
- *               text  — text only
  *   className  {string}
  */
 export default function MatchifyLogo({
@@ -20,127 +11,140 @@ export default function MatchifyLogo({
   variant = 'full',
   className = '',
 }) {
-  // Softer green colors (less neon, more professional)
-  const softGreen = '#00c853';      // Softer green for "matchify"
-  const softGreenGlow = 'rgba(0,200,83,0.3)';  // Subtle glow
-  
-  // Calculate proportions
-  const shuttlecockSize = size;
-  const textHeight = size * 0.5;
-  const totalWidth = variant === 'full' ? size * 4.5 : size;
+  const green      = '#00ff88';
+  const greenMid   = '#00e676';
+  const greenDark  = '#00c853';
+  const greenGlow  = 'rgba(0,255,136,0.5)';
+  const iconSize   = size;
+  const textHeight = size * 0.52;
 
-  // Shuttlecock SVG
-  const ShuttlecockIcon = (
+  // Unique IDs so multiple instances don't clash
+  const uid = `mlg${size}${variant}`;
+
+  const DiamondIcon = (
     <svg
-      width={shuttlecockSize}
-      height={shuttlecockSize}
+      width={iconSize}
+      height={iconSize}
       viewBox="0 0 100 100"
       xmlns="http://www.w3.org/2000/svg"
-      style={{ display: 'block' }}
+      style={{ display: 'block', flexShrink: 0 }}
     >
       <defs>
-        <linearGradient id="shuttleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor={softGreen} />
+        {/* Green gem gradient */}
+        <linearGradient id={`${uid}grad`} x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%"   stopColor="#00ff88" />
+          <stop offset="45%"  stopColor="#00e676" />
           <stop offset="100%" stopColor="#00a844" />
         </linearGradient>
-        <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur stdDeviation="2" result="blur" />
-          <feFlood floodColor={softGreen} floodOpacity="0.3" />
-          <feComposite in2="blur" operator="in" />
+
+        {/* Inner highlight gradient */}
+        <linearGradient id={`${uid}hi`} x1="20%" y1="0%" x2="80%" y2="100%">
+          <stop offset="0%"   stopColor="rgba(255,255,255,0.35)" />
+          <stop offset="100%" stopColor="rgba(255,255,255,0)" />
+        </linearGradient>
+
+        {/* Glow filter */}
+        <filter id={`${uid}glow`} x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="3" result="blur" />
+          <feFlood floodColor="#00ff88" floodOpacity="0.6" result="color" />
+          <feComposite in="color" in2="blur" operator="in" result="glow" />
           <feMerge>
-            <feMergeNode />
+            <feMergeNode in="glow" />
             <feMergeNode in="SourceGraphic" />
           </feMerge>
         </filter>
+
+        {/* Shuttlecock CUTOUT mask
+            white = keep green  |  black = cut out (transparent) */}
+        <mask id={`${uid}mask`}>
+          <rect width="100" height="100" fill="white" />
+
+          {/* ── Feather stem lines fanning upward from cork ── */}
+          <line x1="50" y1="63" x2="33" y2="28" stroke="black" strokeWidth="5"  strokeLinecap="round" />
+          <line x1="50" y1="63" x2="40" y2="22" stroke="black" strokeWidth="4.5" strokeLinecap="round" />
+          <line x1="50" y1="63" x2="50" y2="19" stroke="black" strokeWidth="5"  strokeLinecap="round" />
+          <line x1="50" y1="63" x2="60" y2="22" stroke="black" strokeWidth="4.5" strokeLinecap="round" />
+          <line x1="50" y1="63" x2="67" y2="28" stroke="black" strokeWidth="5"  strokeLinecap="round" />
+
+          {/* ── Feather tip arc ── */}
+          <path
+            d="M 33 28 Q 50 13, 67 28"
+            fill="none"
+            stroke="black"
+            strokeWidth="5"
+            strokeLinecap="round"
+          />
+
+          {/* ── Cork (oval at base) ── */}
+          <ellipse cx="50" cy="67" rx="11" ry="7.5" fill="black" />
+        </mask>
       </defs>
 
-      {/* Swoosh/arc behind shuttlecock */}
-      <path
-        d="M 20 50 Q 35 25, 50 20 Q 65 25, 80 50"
+      {/* ── Shadow/glow ring behind diamond ── */}
+      <polygon
+        points="50,2 98,50 50,98 2,50"
         fill="none"
-        stroke="url(#shuttleGrad)"
+        stroke="rgba(0,255,136,0.25)"
         strokeWidth="3"
-        strokeLinecap="round"
-        opacity="0.6"
       />
 
-      {/* Shuttlecock feathers (cone shape) */}
-      <g filter="url(#softGlow)">
-        {/* Feather lines */}
-        <line x1="50" y1="65" x2="35" y2="30" stroke={softGreen} strokeWidth="2" strokeLinecap="round" />
-        <line x1="50" y1="65" x2="42" y2="25" stroke={softGreen} strokeWidth="2" strokeLinecap="round" />
-        <line x1="50" y1="65" x2="50" y2="22" stroke={softGreen} strokeWidth="2.5" strokeLinecap="round" />
-        <line x1="50" y1="65" x2="58" y2="25" stroke={softGreen} strokeWidth="2" strokeLinecap="round" />
-        <line x1="50" y1="65" x2="65" y2="30" stroke={softGreen} strokeWidth="2" strokeLinecap="round" />
-        
-        {/* Feather tips arc */}
-        <path
-          d="M 35 30 Q 50 18, 65 30"
-          fill="none"
-          stroke={softGreen}
-          strokeWidth="2.5"
-          strokeLinecap="round"
-        />
-        
-        {/* Feather tip dots */}
-        <circle cx="35" cy="30" r="2" fill={softGreen} />
-        <circle cx="42" cy="25" r="2" fill={softGreen} />
-        <circle cx="50" cy="22" r="2.5" fill={softGreen} />
-        <circle cx="58" cy="25" r="2" fill={softGreen} />
-        <circle cx="65" cy="30" r="2" fill={softGreen} />
-      </g>
-
-      {/* Cork (base of shuttlecock) */}
-      <ellipse
-        cx="50"
-        cy="68"
-        rx="12"
-        ry="9"
-        fill="url(#shuttleGrad)"
-        filter="url(#softGlow)"
+      {/* ── Main diamond with shuttlecock cutout ── */}
+      <polygon
+        points="50,5 95,50 50,95 5,50"
+        fill={`url(#${uid}grad)`}
+        mask={`url(#${uid}mask)`}
+        filter={`url(#${uid}glow)`}
       />
-      <ellipse cx="50" cy="68" rx="7" ry="5" fill="#007c35" />
-      <ellipse cx="47" cy="66" rx="3" ry="2" fill="rgba(255,255,255,0.4)" />
+
+      {/* ── Top-left facet highlight (gem depth) ── */}
+      <polygon
+        points="50,5 5,50 50,50"
+        fill={`url(#${uid}hi)`}
+        mask={`url(#${uid}mask)`}
+        style={{ mixBlendMode: 'overlay' }}
+      />
+
+      {/* ── Outer diamond border ── */}
+      <polygon
+        points="50,5 95,50 50,95 5,50"
+        fill="none"
+        stroke="rgba(255,255,255,0.2)"
+        strokeWidth="1"
+      />
     </svg>
   );
 
-  // Text in one straight line
   const LogoText = (
     <span
       style={{
-        fontFamily: "'Inter', 'Segoe UI', 'Arial', sans-serif",
-        fontWeight: 700,
+        fontFamily: "'Inter','Segoe UI','Arial',sans-serif",
+        fontWeight: 900,
         fontSize: `${textHeight}px`,
         lineHeight: 1,
-        letterSpacing: '-0.02em',
+        letterSpacing: '-0.03em',
         display: 'inline-block',
         whiteSpace: 'nowrap',
       }}
     >
-      <span
-        style={{
-          color: softGreen,
-          textShadow: `0 0 10px ${softGreenGlow}`,
-        }}
-      >
+      <span style={{
+        color: '#ffffff',
+        textShadow: '0 0 24px rgba(255,255,255,0.25)',
+      }}>
         matchify
       </span>
-      <span
-        style={{
-          color: softGreen,
-          textShadow: `0 0 10px ${softGreenGlow}`,
-        }}
-      >
+      <span style={{
+        color: green,
+        textShadow: `0 0 16px ${greenGlow}`,
+      }}>
         .pro
       </span>
     </span>
   );
 
-  // Render based on variant
   if (variant === 'icon') {
     return (
       <span className={className} style={{ display: 'inline-flex', alignItems: 'center' }}>
-        {ShuttlecockIcon}
+        {DiamondIcon}
       </span>
     );
   }
@@ -153,17 +157,16 @@ export default function MatchifyLogo({
     );
   }
 
-  // Full logo (icon + text in one line)
   return (
     <span
       className={className}
       style={{
         display: 'inline-flex',
         alignItems: 'center',
-        gap: `${size * 0.3}px`,
+        gap: `${size * 0.22}px`,
       }}
     >
-      {ShuttlecockIcon}
+      {DiamondIcon}
       {LogoText}
     </span>
   );

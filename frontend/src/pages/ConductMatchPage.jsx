@@ -77,7 +77,8 @@ const ConductMatchPage = () => {
     setAssigning(true);
     setError(null);
     try {
-      if (umpireId) await api.put(`/matches/${matchId}/umpire`, { umpireId });
+      // Umpire is always assigned BEFORE reaching this page (via modal or umpire dashboard).
+      // Do NOT re-call PUT /umpire here — it is organizer-only and would 403 for umpires.
       if (['PENDING', 'READY', 'SCHEDULED'].includes(match.status)) {
         try {
           await api.put(`/matches/${matchId}/config`, { pointsPerSet, maxSets, setsToWin: Math.ceil(maxSets / 2), extension });

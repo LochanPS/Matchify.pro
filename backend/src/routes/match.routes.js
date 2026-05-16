@@ -1,9 +1,13 @@
 import express from 'express';
 import prisma from '../lib/prisma.js';
 import { authenticate, authorize } from '../middleware/auth.js';
-import { assignUmpire } from '../controllers/match.controller.js';
+import { assignUmpire, getUmpireMatches } from '../controllers/match.controller.js';
 
 const router = express.Router();
+
+// Get matches assigned to the currently authenticated umpire
+// MUST be before /:matchId so 'umpire-matches' is not treated as a matchId
+router.get('/umpire-matches', authenticate, getUmpireMatches);
 
 // Get match details
 router.get('/:matchId', authenticate, async (req, res) => {

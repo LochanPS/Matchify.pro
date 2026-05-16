@@ -4202,7 +4202,8 @@ const AssignUmpireModal = ({ match, umpires, onClose, onAssign }) => {
     setAssigning(true);
     await onAssign(selectedUmpire);
     setAssigning(false);
-    navigate(`/match/${match.id}/conduct`);
+    // Pass umpireId in URL so ConductMatchPage can unlock the Start Match button
+    navigate(`/match/${match.id}/conduct?umpireId=${selectedUmpire}`);
   };
 
   const selectedUmpireData = umpires.find(u => u.id === selectedUmpire);

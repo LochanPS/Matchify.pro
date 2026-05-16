@@ -70,7 +70,7 @@ export default function UmpireDashboard() {
 
   const fetchUmpireData = async () => {
     try {
-      const response = await api.get('/multi-matches/umpire');
+      const response = await api.get('/matches/umpire-matches');
       const umpireMatches = response.data.matches;
       
       setMatches(umpireMatches);
@@ -578,7 +578,7 @@ export default function UmpireDashboard() {
                     
                     {match.status !== 'COMPLETED' && (
                       <Link
-                        to={`/match/${match.id}/conduct`}
+                        to={`/match/${match.id}/conduct?umpireId=${match.umpireId || user?.id}`}
                         className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-2.5 px-4 rounded-xl text-sm font-medium hover:shadow-lg hover:scale-105 transition-all"
                       >
                         <PlayIcon className="w-4 h-4" />
@@ -638,7 +638,7 @@ export default function UmpireDashboard() {
                       </span>
                       {match.status !== 'COMPLETED' ? (
                         <Link
-                          to={`/match/${match.id}/conduct`}
+                          to={`/match/${match.id}/conduct?umpireId=${match.umpireId || user?.id}`}
                           className="flex items-center gap-1 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl text-sm font-medium hover:shadow-lg transition-all"
                         >
                           Score

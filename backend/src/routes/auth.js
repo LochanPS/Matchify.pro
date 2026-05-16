@@ -26,19 +26,36 @@ router.post('/register', async (req, res) => {
       gender
     } = req.body;
 
-    // Validation
-    if (!email || !password || !name) {
+    // Validation — require name + password + at least one of email/phone
+    if (!password || !name) {
       return res.status(400).json({
-        error: 'Missing required fields: email, password, name'
+        error: 'Missing required fields: name, password'
+      });
+    }
+    if (!email && !phone) {
+      return res.status(400).json({
+        error: 'Please provide either email or phone number'
       });
     }
 
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return res.status(400).json({
-        error: 'Invalid email format'
-      });
+    // Validate email format if provided
+    if (email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({
+          error: 'Invalid email format'
+        });
+      }
+    }
+
+    // Validate phone format if provided
+    if (phone) {
+      const cleanedPhoneCheck = phone.replace(/[\s\-\+]/g, '').replace(/^91/, '');
+      if (!/^[0-9]{10}$/.test(cleanedPhoneCheck)) {
+        return res.status(400).json({
+          error: 'Invalid phone number. Enter 10-digit number without country code.'
+        });
+      }
     }
 
     // Validate password strength
@@ -71,27 +88,22 @@ router.post('/register', async (req, res) => {
       });
     }
 
-    // Check if user exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email }
-    });
+    // Clean phone number for storage
+    const cleanedPhone = phone ? phone.replace(/[\s\-\+]/g, '').replace(/^91/, '') : null;
 
-    if (existingUser) {
-      return res.status(409).json({
-        error: 'User with this email already exists'
-      });
+    // Check email uniqueness if provided
+    if (email) {
+      const existingUser = await prisma.user.findUnique({ where: { email } });
+      if (existingUser) {
+        return res.status(409).json({ error: 'User with this email already exists' });
+      }
     }
 
     // Check phone uniqueness if provided
-    if (phone) {
-      const existingPhone = await prisma.user.findUnique({
-        where: { phone }
-      });
-      
+    if (cleanedPhone) {
+      const existingPhone = await prisma.user.findUnique({ where: { phone: cleanedPhone } });
       if (existingPhone) {
-        return res.status(409).json({
-          error: 'User with this phone number already exists'
-        });
+        return res.status(409).json({ error: 'User with this phone number already exists' });
       }
     }
 
@@ -107,11 +119,11 @@ router.post('/register', async (req, res) => {
     // Create user with all roles as comma-separated string
     const user = await prisma.user.create({
       data: {
-        email,
+        email: email || null,
         password: hashedPassword,
         roles: userRoles.join(','), // Store as comma-separated string
         name,
-        phone,
+        phone: cleanedPhone,
         dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
         city,
         state,
@@ -180,10 +192,37 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    // Find user
-    const user = await prisma.user.findUnique({
-      where: { email }
+    // Detect if credential is email or phone
+    const isEmail = email.includes('@');
+    let cleanedCredential = email;
+    if (!isEmail) {
+      // Clean phone: remove spaces, dashes, +, strip leading country code 91
+      cleanedCredential = email.replace(/[\s\-\+]/g, '').replace(/^91/, '');
+    }
+    const isPhone = /^[0-9]{10}$/.test(cleanedCredential);
+
+    if (!isEmail && !isPhone) {
+      return res.status(400).json({
+        error: 'Invalid credential format. Please enter a valid email or 10-digit phone number.'
+      });
+    }
+
+    // Find user by email OR phone
+    let user = await prisma.user.findUnique({
+      where: isEmail ? { email: cleanedCredential } : { phone: cleanedCredential }
     });
+
+    // Fallback: try original (uncleaned) phone format for backward compatibility
+    if (!user && isPhone && cleanedCredential !== email) {
+      user = await prisma.user.findUnique({ where: { phone: email } });
+      // Migrate to cleaned format
+      if (user) {
+        user = await prisma.user.update({
+          where: { id: user.id },
+          data: { phone: cleanedCredential }
+        });
+      }
+    }
 
     if (!user) {
       return res.status(401).json({

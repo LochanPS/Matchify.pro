@@ -276,9 +276,10 @@ const TournamentDetailPage = () => {
       return;
     }
 
-    // Validate Matchify.pro ID format: #A10000 (# + 1 letter + 5 digits)
-    if (!/^#[A-Z]\d{5}$/i.test(umpireCode.trim())) {
-      setUmpireError('Invalid Matchify.pro ID. Format: #A10000');
+    // Validate Matchify.pro ID format: #1, #2, #100 (new) or #A10000 (legacy)
+    const trimmed = umpireCode.trim();
+    if (!/^#\d+$/.test(trimmed) && !/^#[A-Z]\d{5}$/i.test(trimmed)) {
+      setUmpireError('Invalid Matchify.pro ID. Enter like #1, #12, #100');
       return;
     }
 
@@ -1337,7 +1338,7 @@ const TournamentDetailPage = () => {
               {/* Info */}
               <div className="px-3 py-2.5 rounded-xl text-xs"
                 style={{ background: 'rgba(0,212,255,0.06)', border: '1px solid rgba(0,212,255,0.15)', color: 'rgba(0,212,255,0.8)' }}>
-                Enter Matchify.pro ID: <span className="font-mono font-bold" style={{ color: '#00d4ff' }}>#A10000</span>
+                Enter Matchify.pro ID: <span className="font-mono font-bold" style={{ color: '#00d4ff' }}>#1</span> or <span className="font-mono font-bold" style={{ color: '#00d4ff' }}>#100</span>
               </div>
 
               {/* Error */}
@@ -1365,13 +1366,14 @@ const TournamentDetailPage = () => {
                   type="text"
                   value={umpireCode}
                   onChange={(e) => {
-                    let val = e.target.value.toUpperCase();
+                    let val = e.target.value;
+                    // Strip everything except digits and leading #
+                    val = val.replace(/[^#\d]/g, '');
                     if (!val.startsWith('#')) val = '#' + val.replace(/#/g, '');
                     setUmpireCode(val);
                     setUmpireError('');
                   }}
-                  placeholder="#A10000"
-                  maxLength={7}
+                  placeholder="#1"
                   className="w-full px-4 py-3 rounded-xl text-white font-mono text-base tracking-widest"
                   style={{
                     background: 'rgba(0,0,0,0.3)',

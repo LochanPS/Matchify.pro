@@ -137,9 +137,9 @@ export default function TournamentRegistrationPage() {
         setError(`Partner Matchify.pro ID required for ${cat?.name}`);
         return;
       }
-      if (!/^#[A-Za-z]\d{5}$/i.test(code)) {
+      if (!/^#\d+$/.test(code) && !/^#[A-Z]\d{5}$/i.test(code)) {
         const cat = categories.find(c => c.id === catId);
-        setError(`Invalid Matchify.pro ID for ${cat?.name} — format: #A10000`);
+        setError(`Invalid Matchify.pro ID for ${cat?.name} — format: #1, #12, #100`);
         return;
       }
       if (!partnerInfo[catId]) {
@@ -179,7 +179,8 @@ export default function TournamentRegistrationPage() {
   };
 
   const handlePartnerCodeChange = (categoryId, code) => {
-    let val = code.toUpperCase();
+    // Allow only digits after #
+    let val = code.replace(/[^#\d]/g, '');
     if (!val.startsWith('#')) val = '#' + val.replace(/#/g, '');
     setPartnerCodes(prev => ({ ...prev, [categoryId]: val }));
     setPartnerInfo(prev => ({ ...prev, [categoryId]: null }));
@@ -188,12 +189,14 @@ export default function TournamentRegistrationPage() {
   const fetchPartnerByCode = async (categoryId, code) => {
     try {
       setError('');
-      if (!/^#[A-Za-z]\d{5}$/i.test(code)) {
-        setError('Format: #A10000 (# + 1 letter + 5 digits)');
+      const isNewFmt = /^#\d+$/.test(code);
+      const isOldFmt = /^#[A-Z]\d{5}$/i.test(code);
+      if (!isNewFmt && !isOldFmt) {
+        setError('Enter a valid Matchify.pro ID like #1, #12, #100');
         return;
       }
       setSearchingPartner(prev => ({ ...prev, [categoryId]: true }));
-      const response = await registrationAPI.getPartnerByCode(code.toUpperCase());
+      const response = await registrationAPI.getPartnerByCode(code);
       if (response.success && response.user) {
         setPartnerInfo(prev => ({ ...prev, [categoryId]: response.user }));
       } else {
@@ -375,7 +378,8 @@ export default function TournamentRegistrationPage() {
                     const partner = partnerInfo[catId];
                     const isSearching = searchingPartner[catId];
                     const code = partnerCodes[catId] || '#';
-                    const canSearch = code.length === 7 && code !== '#';
+                    // Valid to search when # + at least 1 digit
+                    const canSearch = /^#\d+$/.test(code) || /^#[A-Z]\d{5}$/i.test(code);
                     return (
                       <div key={catId} className="space-y-2">
                         <label className="block text-xs font-bold" style={{ color: BRAND.green }}>
@@ -387,9 +391,8 @@ export default function TournamentRegistrationPage() {
                             type="text"
                             value={code}
                             onChange={e => handlePartnerCodeChange(catId, e.target.value)}
-                            placeholder="#A10000"
-                            maxLength={7}
-                            className="flex-1 px-3 py-3 rounded-xl text-white font-mono text-sm uppercase"
+                            placeholder="#1"
+                            className="flex-1 px-3 py-3 rounded-xl text-white font-mono text-sm"
                             style={{
                               background: 'rgba(0,0,0,0.3)',
                               border: '1.5px solid rgba(0,255,136,0.25)',

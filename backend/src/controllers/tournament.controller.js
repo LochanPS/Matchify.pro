@@ -1390,12 +1390,13 @@ const addUmpireByCode = async (req, res) => {
     const { umpireCode } = req.body;
     const userId = req.user.id;
 
-    // Validate Matchify.pro ID format: #A10000 (# + 1 letter + 5 digits)
-    const matchifyIdFormat = /^#[A-Z]\d{5}$/i;
-    if (!umpireCode || !matchifyIdFormat.test(umpireCode)) {
+    // Validate Matchify.pro ID format: #1, #2, #100, ... (or legacy #A10000)
+    const isNewFormat = /^#\d+$/.test(umpireCode);
+    const isOldFormat = /^#[A-Z]\d{5}$/i.test(umpireCode);
+    if (!umpireCode || (!isNewFormat && !isOldFormat)) {
       return res.status(400).json({
         success: false,
-        error: 'Invalid Matchify.pro ID format. Use #A10000 (# + 1 letter + 5 digits)'
+        error: 'Invalid Matchify.pro ID. Format: #1, #2, #100 etc.'
       });
     }
 
@@ -1419,9 +1420,7 @@ const addUmpireByCode = async (req, res) => {
     // Find user by matchifyCode (universal Matchify.pro ID)
     const umpire = await prisma.user.findFirst({
       where: {
-        matchifyCode: {
-          equals: umpireCode.toUpperCase()
-        }
+        matchifyCode: umpireCode
       },
       select: {
         id: true,

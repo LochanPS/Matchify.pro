@@ -1046,17 +1046,19 @@ const getPartnerByCode = async (req, res) => {
   try {
     const { playerCode } = req.params;
 
-    // Validate Matchify.pro ID format: #A10000, #A10001, etc. (# + A + 5 digits)
-    if (!/^#A\d{5}$/i.test(playerCode)) {
+    // Validate Matchify.pro ID format: #1, #2, #100 (new) or #A10000 (legacy)
+    const isNewFmt = /^#\d+$/.test(playerCode);
+    const isOldFmt = /^#[A-Z]\d{5}$/i.test(playerCode);
+    if (!isNewFmt && !isOldFmt) {
       return res.status(400).json({
         success: false,
-        error: 'Invalid Matchify.pro ID format. Use #A10000 format (# + A + 5 digits)'
+        error: 'Invalid Matchify.pro ID. Format: #1, #2, #100 etc.'
       });
     }
 
     // Find user by matchifyCode (Matchify.pro ID)
     const user = await prisma.user.findUnique({
-      where: { matchifyCode: playerCode.toUpperCase() },
+      where: { matchifyCode: playerCode },
       select: {
         id: true,
         name: true,

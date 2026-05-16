@@ -44,6 +44,8 @@ const UnifiedDashboardMobile = () => {
   const [userProfile, setUserProfile] = useState(null);
   const [showMenu, setShowMenu] = useState(false);
   const [showPhotoViewer, setShowPhotoViewer] = useState(false);
+  const [myTournaments, setMyTournaments] = useState([]);
+  const [publishingId, setPublishingId] = useState(null);
 
   // Get user roles
   let userRoles = [];
@@ -94,17 +96,46 @@ const UnifiedDashboardMobile = () => {
         api.get('/auth/me'),
         api.get('/registrations/my')
       ]);
-      
+
       if (profileRes.data.user) {
         setUserProfile(profileRes.data.user);
         setMatchifyCode(profileRes.data.user.matchifyCode);
       }
-      
+
       setRegistrations(regRes.data.registrations || []);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchMyTournaments = async () => {
+    try {
+      const res = await api.get('/tournaments?myTournaments=true&limit=20');
+      setMyTournaments(res.data.tournaments || []);
+    } catch (err) {
+      console.error('Error fetching my tournaments:', err);
+    }
+  };
+
+  useEffect(() => {
+    if (activeRole === 'ORGANIZER') {
+      fetchMyTournaments();
+    }
+  }, [activeRole]);
+
+  const handlePublishTournament = async (tournamentId) => {
+    setPublishingId(tournamentId);
+    try {
+      await api.put(`/tournaments/${tournamentId}`, { status: 'published' });
+      setMyTournaments(prev =>
+        prev.map(t => t.id === tournamentId ? { ...t, status: 'published' } : t)
+      );
+    } catch (err) {
+      console.error('Failed to publish:', err);
+    } finally {
+      setPublishingId(null);
     }
   };
 
@@ -915,7 +946,8 @@ const UnifiedDashboardMobile = () => {
         )}
 
         {activeRole === 'ORGANIZER' && (
-          <div 
+          <>
+          <div
             className="rounded-2xl p-5 mb-6 relative overflow-hidden"
             style={{
               background: 'linear-gradient(135deg, rgba(168,85,247,0.15) 0%, rgba(139,92,246,0.15) 100%)',
@@ -1017,16 +1049,16 @@ const UnifiedDashboardMobile = () => {
               </div>
 
               <Link
-                to="/organize-tournament"
+                to="/tournaments/create"
                 className="flex items-center justify-center gap-2 w-full py-3 rounded-xl font-semibold text-sm transition-all relative overflow-hidden group mt-4"
-                style={{ 
-                  background: 'linear-gradient(135deg, rgba(168,85,247,0.2), rgba(139,92,246,0.15))', 
+                style={{
+                  background: 'linear-gradient(135deg, rgba(168,85,247,0.2), rgba(139,92,246,0.15))',
                   border: '2px solid rgba(168,85,247,0.4)',
                   color: '#c4b5fd',
                   boxShadow: '0 4px 15px rgba(168,85,247,0.2)'
                 }}
               >
-                <div 
+                <div
                   className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                   style={{ background: 'rgba(168,85,247,0.1)' }}
                 />
@@ -1035,6 +1067,101 @@ const UnifiedDashboardMobile = () => {
               </Link>
             </div>
           </div>
+
+          {/* My Tournaments Section */}
+          {myTournaments.length > 0 && (
+            <div
+              className="rounded-2xl p-5 mb-6"
+              style={{
+                background: 'linear-gradient(135deg, rgba(168,85,247,0.08) 0%, rgba(88,28,135,0.08) 100%)',
+                border: '1px solid rgba(168,85,247,0.25)',
+              }}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-base font-black text-white">My Tournaments</h3>
+                <Link
+                  to="/organizer/history"
+                  className="text-xs font-bold"
+                  style={{ color: '#a855f7' }}
+                >
+                  View All →
+                </Link>
+              </div>
+
+              <div className="space-y-3">
+                {myTournaments.slice(0, 5).map(t => {
+                  const isDraft = t.status === 'draft';
+                  const hasCategories = (t.categories?.length || 0) > 0;
+                  return (
+                    <div
+                      key={t.id}
+                      className="rounded-xl p-3"
+                      style={{
+                        background: isDraft ? 'rgba(251,191,36,0.06)' : 'rgba(0,255,136,0.06)',
+                        border: `1px solid ${isDraft ? 'rgba(251,191,36,0.2)' : 'rgba(0,255,136,0.2)'}`,
+                      }}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-black text-white truncate">{t.name}</p>
+                          <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                            {t.city}{t.state ? `, ${t.state}` : ''} · {t.categories?.length || 0} categories
+                          </p>
+                        </div>
+                        <span
+                          className="flex-shrink-0 text-xs font-bold px-2 py-0.5 rounded-full"
+                          style={{
+                            background: isDraft ? 'rgba(251,191,36,0.15)' : 'rgba(0,255,136,0.15)',
+                            color: isDraft ? '#fbbf24' : '#00ff88',
+                            border: `1px solid ${isDraft ? 'rgba(251,191,36,0.3)' : 'rgba(0,255,136,0.3)'}`,
+                          }}
+                        >
+                          {isDraft ? 'Draft' : t.status.charAt(0).toUpperCase() + t.status.slice(1)}
+                        </span>
+                      </div>
+
+                      <div className="flex gap-2 mt-2.5">
+                        <Link
+                          to={`/tournaments/${t.id}`}
+                          className="flex-1 text-center py-1.5 rounded-lg text-xs font-bold transition-all"
+                          style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)' }}
+                        >
+                          View
+                        </Link>
+                        <Link
+                          to={`/tournaments/${t.id}/edit`}
+                          className="flex-1 text-center py-1.5 rounded-lg text-xs font-bold transition-all"
+                          style={{ background: 'rgba(168,85,247,0.15)', color: '#c4b5fd', border: '1px solid rgba(168,85,247,0.25)' }}
+                        >
+                          Edit
+                        </Link>
+                        {isDraft && (
+                          <button
+                            onClick={() => handlePublishTournament(t.id)}
+                            disabled={publishingId === t.id || !hasCategories}
+                            className="flex-1 py-1.5 rounded-lg text-xs font-black transition-all disabled:opacity-50"
+                            style={{
+                              background: hasCategories ? 'linear-gradient(135deg,#00ff88,#00d4ff)' : 'rgba(255,255,255,0.06)',
+                              color: hasCategories ? '#07071a' : 'rgba(255,255,255,0.3)',
+                            }}
+                            title={!hasCategories ? 'Add categories first' : 'Publish tournament'}
+                          >
+                            {publishingId === t.id ? '...' : '🚀 Publish'}
+                          </button>
+                        )}
+                      </div>
+                      {isDraft && !hasCategories && (
+                        <p className="text-xs mt-1.5" style={{ color: 'rgba(251,191,36,0.7)' }}>
+                          ⚠️ Add categories before publishing
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+          </>
         )}
 
         {activeRole === 'UMPIRE' && (

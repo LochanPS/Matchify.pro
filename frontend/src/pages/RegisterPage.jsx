@@ -70,7 +70,6 @@ const RegisterPage = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    alternateEmail: '',
     phone: '',
     password: '',
     confirmPassword: '',
@@ -112,10 +111,6 @@ const RegisterPage = () => {
       setError('Please enter a valid 10-digit phone number');
       return;
     }
-    if (formData.alternateEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.alternateEmail)) {
-      setError('Please enter a valid alternate email address');
-      return;
-    }
     // Password validation
     const password = formData.password;
     const hasUppercase = /[A-Z]/.test(password);
@@ -148,6 +143,9 @@ const RegisterPage = () => {
     
     try {
       const { confirmPassword, ...dataToSend } = formData;
+      // Only send filled fields
+      if (!dataToSend.email) delete dataToSend.email;
+      if (!dataToSend.phone) delete dataToSend.phone;
       await register(dataToSend);
       
       if (redirectUrl) {
@@ -305,71 +303,61 @@ const RegisterPage = () => {
               </div>
             </div>
 
-            {/* Email & Phone */}
+            {/* Contact — Email OR Phone, at least one */}
             <div>
-              <div className="flex items-center justify-between mb-3">
-                <label className="block text-sm font-medium text-gray-300">Contact Details</label>
-                <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: 'rgba(0,255,136,0.1)', color: '#00ff88', border: '1px solid rgba(0,255,136,0.25)' }}>
-                  At least one required
-                </span>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-sm font-medium text-gray-300">Sign-in Contact</label>
+                {!formData.email && !formData.phone ? (
+                  <span className="text-xs font-semibold" style={{ color: 'rgba(251,191,36,0.85)' }}>
+                    ⚠ Enter email or phone
+                  </span>
+                ) : (
+                  <span className="text-xs font-semibold" style={{ color: '#00ff88' }}>
+                    ✓ Looks good
+                  </span>
+                )}
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-medium text-gray-400 mb-2">Email Address</label>
-                  <div className="relative group">
-                    <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-cyan-500/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
-                    <div className="relative">
-                      <EnvelopeIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 group-focus-within:text-purple-400 transition-colors" />
-                      <input
-                        name="email"
-                        type="email"
-                        className="w-full pl-12 pr-4 py-4 rounded-xl text-white text-sm placeholder-white/25 outline-none transition-all focus:ring-1 focus:ring-green-500/50" style={{ background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)' }}
-                        placeholder="you@example.com"
-                        value={formData.email}
-                        onChange={handleChange}
-                      />
-                    </div>
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-400 mb-2">Phone Number</label>
-                  <div className="relative group">
-                    <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-cyan-500/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
-                    <div className="relative">
-                      <PhoneIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 group-focus-within:text-purple-400 transition-colors" />
-                      <input
-                        name="phone"
-                        type="tel"
-                        maxLength={10}
-                        className="w-full pl-12 pr-4 py-4 rounded-xl text-white text-sm placeholder-white/25 outline-none transition-all focus:ring-1 focus:ring-green-500/50" style={{ background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)' }}
-                        placeholder="9876543210"
-                        value={formData.phone}
-                        onChange={handleChange}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <p className="text-xs mt-2" style={{ color: 'rgba(255,255,255,0.35)' }}>
-                Enter your email, phone, or both — you can use either to sign in
+              <p className="text-xs mb-3" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                Enter email, phone, or both — you can use either to sign in later
               </p>
-            </div>
 
-            {/* Alternate Email */}
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Alternate Email <span className="text-gray-500 text-xs font-normal">(Optional)</span>
-              </label>
-              <div className="relative group">
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-cyan-500/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity"></div>
+              {/* Email */}
+              <div className="relative group mb-3">
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-cyan-500/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity" />
                 <div className="relative">
                   <EnvelopeIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 group-focus-within:text-purple-400 transition-colors" />
                   <input
-                    name="alternateEmail"
+                    name="email"
                     type="email"
-                    className="w-full pl-12 pr-4 py-4 rounded-xl text-white text-sm placeholder-white/25 outline-none transition-all focus:ring-1 focus:ring-green-500/50" style={{ background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)' }}
-                    placeholder="Optional alternate email"
-                    value={formData.alternateEmail}
+                    className="w-full pl-12 pr-4 py-4 rounded-xl text-white text-sm placeholder-white/25 outline-none transition-all focus:ring-1 focus:ring-green-500/50"
+                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
+                    placeholder="Email address (optional)"
+                    value={formData.email}
+                    onChange={handleChange}
+                  />
+                </div>
+              </div>
+
+              {/* Divider */}
+              <div className="flex items-center gap-3 mb-3">
+                <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.08)' }} />
+                <span className="text-xs font-bold" style={{ color: 'rgba(255,255,255,0.25)' }}>OR</span>
+                <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.08)' }} />
+              </div>
+
+              {/* Phone */}
+              <div className="relative group">
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-cyan-500/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition-opacity" />
+                <div className="relative">
+                  <PhoneIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 group-focus-within:text-purple-400 transition-colors" />
+                  <input
+                    name="phone"
+                    type="tel"
+                    maxLength={10}
+                    className="w-full pl-12 pr-4 py-4 rounded-xl text-white text-sm placeholder-white/25 outline-none transition-all focus:ring-1 focus:ring-green-500/50"
+                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
+                    placeholder="10-digit phone number (optional)"
+                    value={formData.phone}
                     onChange={handleChange}
                   />
                 </div>

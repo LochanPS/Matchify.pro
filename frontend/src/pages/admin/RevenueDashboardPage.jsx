@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getRevenueOverview, getRevenueTimeline, deleteAllData, completeSystemReset, cleanPhoneNumbers } from '../../api/payment';
+import { getRevenueOverview, getRevenueTimeline, deleteAllData, completeSystemReset } from '../../api/payment';
 import { toast } from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -34,8 +34,6 @@ const RevenueDashboardPage = () => {
   const [showNuclearModal, setShowNuclearModal] = useState(false);
   const [nuclearPassword, setNuclearPassword] = useState('');
   const [nuclearDeleting, setNuclearDeleting] = useState(false);
-  const [cleaningPhones, setCleaningPhones] = useState(false);
-  const [phoneCleanupResult, setPhoneCleanupResult] = useState(null);
 
   useEffect(() => {
     fetchData();
@@ -116,23 +114,6 @@ const RevenueDashboardPage = () => {
     }
   };
 
-  const handleCleanPhoneNumbers = async () => {
-    const password = 'Pradyu@123(123)(123)'; // Admin password
-    
-    try {
-      setCleaningPhones(true);
-      setPhoneCleanupResult(null);
-      const response = await cleanPhoneNumbers(password);
-      
-      setPhoneCleanupResult(response.summary);
-      toast.success(`Phone cleanup complete! Updated ${response.summary.updated} phone numbers.`);
-    } catch (error) {
-      console.error('Error cleaning phone numbers:', error);
-      toast.error(error.message || 'Failed to clean phone numbers');
-    } finally {
-      setCleaningPhones(false);
-    }
-  };
 
   if (loading) {
     return (
@@ -396,7 +377,7 @@ const RevenueDashboardPage = () => {
       </div>
 
       {/* Danger Zone - Delete All Data */}
-      <div className="bg-red-900/20 rounded-xl p-6 border-2 border-red-700 shadow-lg mb-6">
+      <div className="bg-red-900/20 rounded-xl p-6 border-2 border-red-700 shadow-lg mb-8">
         <div className="flex items-start gap-4">
           <div className="text-4xl">⚠️</div>
           <div className="flex-1">
@@ -413,63 +394,6 @@ const RevenueDashboardPage = () => {
               className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition shadow-lg shadow-red-500/50"
             >
               🗑️ Delete All Info
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Phone Number Cleanup Section */}
-      <div className="bg-gradient-to-br from-blue-950 to-slate-900 rounded-xl p-6 border-2 border-blue-500 shadow-xl">
-        <div className="flex items-start gap-4">
-          <div className="text-4xl">📱</div>
-          <div className="flex-1">
-            <h3 className="text-xl font-bold text-blue-400 mb-2">
-              Phone Number Database Cleanup
-            </h3>
-            <p className="text-gray-300 mb-4 text-sm">
-              Clean and standardize all phone numbers in the database. This will:
-            </p>
-            <ul className="text-gray-300 text-sm space-y-1 mb-4 ml-4">
-              <li>✓ Remove spaces, dashes, and plus signs from phone numbers</li>
-              <li>✓ Remove country code (91) if present</li>
-              <li>✓ Standardize all phone numbers to 10-digit format</li>
-              <li>✓ Fix login issues for users with old phone formats</li>
-            </ul>
-            
-            {phoneCleanupResult && (
-              <div className="bg-emerald-900/40 border-2 border-emerald-600 rounded-lg p-4 mb-4">
-                <p className="text-emerald-400 font-bold mb-2">✅ Cleanup Complete!</p>
-                <div className="text-sm text-gray-300 space-y-1">
-                  <p>Total users: {phoneCleanupResult.totalUsers}</p>
-                  <p>Updated: {phoneCleanupResult.updated}</p>
-                  <p>Already clean: {phoneCleanupResult.alreadyClean}</p>
-                </div>
-                {phoneCleanupResult.updates && phoneCleanupResult.updates.length > 0 && (
-                  <div className="mt-3 max-h-40 overflow-y-auto">
-                    <p className="text-emerald-400 font-bold mb-2">Updated Numbers:</p>
-                    {phoneCleanupResult.updates.map((update, idx) => (
-                      <div key={idx} className="text-xs text-gray-400 mb-1">
-                        {update.name}: {update.originalPhone} → {update.cleanedPhone}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-            
-            <button
-              onClick={handleCleanPhoneNumbers}
-              disabled={cleaningPhones}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition shadow-lg shadow-blue-500/50 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {cleaningPhones ? (
-                <span className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Cleaning...
-                </span>
-              ) : (
-                '🔧 Clean Phone Numbers'
-              )}
             </button>
           </div>
         </div>

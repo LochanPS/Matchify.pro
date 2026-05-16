@@ -720,9 +720,12 @@ export default function ProfilePage() {
               
             {/* Contact Information */}
             <div className="space-y-3 mb-4">
-              <div className="flex items-center gap-3 text-gray-300 min-w-0">
+              <div className="flex items-center gap-3 min-w-0">
                 <Mail className="w-5 h-5 text-green-300 flex-shrink-0" />
-                <span className="text-sm truncate min-w-0">{profile?.email}</span>
+                {profile?.email
+                  ? <span className="text-sm truncate min-w-0 text-gray-300">{profile.email}</span>
+                  : <span className="text-sm text-gray-500 italic">No email added</span>
+                }
               </div>
               {profile?.phone && (
                 <div className="flex items-center gap-3 text-gray-300 min-w-0">

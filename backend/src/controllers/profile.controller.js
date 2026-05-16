@@ -11,6 +11,13 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+/**
+ * Strip placeholder email generated for phone-only users.
+ * Returns null so the client never sees the internal sentinel value.
+ */
+const cleanEmail = (email) =>
+  email?.endsWith('@noemail.matchify.internal') ? null : email ?? null;
+
 // Check if Cloudinary is properly configured
 const isCloudinaryConfigured = () => {
   return process.env.CLOUDINARY_CLOUD_NAME && 
@@ -117,6 +124,7 @@ export const getProfile = async (req, res) => {
 
     const profile = {
       ...user,
+      email: cleanEmail(user.email),
       stats
     };
 
@@ -246,7 +254,7 @@ export const updateProfile = async (req, res) => {
 
     res.json({
       message: 'Profile updated successfully',
-      user: updatedUser
+      user: { ...updatedUser, email: cleanEmail(updatedUser.email) }
     });
   } catch (error) {
     console.error('Update profile error:', error);

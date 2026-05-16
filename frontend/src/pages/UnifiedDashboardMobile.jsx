@@ -1,5 +1,9 @@
 ﻿import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+
+// Strip internal placeholder email generated for phone-only users
+const displayEmail = (email) =>
+  email && !email.endsWith('@noemail.matchify.internal') ? email : null;
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import api from '../utils/api';
 import MatchifyLogo from '../components/MatchifyLogo';
@@ -388,7 +392,12 @@ const UnifiedDashboardMobile = () => {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-base font-black text-white truncate">{user?.name}</p>
-                    <p className="text-sm text-gray-300 truncate">{user?.email}</p>
+                    {displayEmail(user?.email)
+                      ? <p className="text-sm text-gray-300 truncate">{displayEmail(user.email)}</p>
+                      : user?.phone
+                        ? <p className="text-sm text-gray-400 truncate">{user.phone}</p>
+                        : null
+                    }
                   </div>
                 </div>
               </div>
@@ -694,7 +703,9 @@ const UnifiedDashboardMobile = () => {
               {user?.name}
             </h2>
             
-            <p className="text-sm text-gray-300 mb-1">{user?.email}</p>
+            {displayEmail(user?.email) && (
+              <p className="text-sm text-gray-300 mb-1">{displayEmail(user.email)}</p>
+            )}
             
             {user?.city && (
               <div className="flex items-center gap-1 text-sm text-gray-400 mb-3">
@@ -1320,12 +1331,15 @@ const UnifiedDashboardMobile = () => {
                 <p className="text-base font-bold text-white">{userProfile?.name || user?.name || 'N/A'}</p>
               </div>
 
-              {(userProfile?.email || user?.email) && (
-                <div>
-                  <p className="text-xs text-gray-400 mb-1 font-semibold">Email Address</p>
-                  <p className="text-sm font-semibold text-white break-all">{userProfile?.email || user?.email}</p>
-                </div>
-              )}
+              {(() => {
+                const email = displayEmail(userProfile?.email) || displayEmail(user?.email);
+                return email ? (
+                  <div>
+                    <p className="text-xs text-gray-400 mb-1 font-semibold">Email Address</p>
+                    <p className="text-sm font-semibold text-white break-all">{email}</p>
+                  </div>
+                ) : null;
+              })()}
 
               {(userProfile?.phone || user?.phone) && (
                 <div>

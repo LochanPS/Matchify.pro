@@ -42,6 +42,11 @@ router.get('/:userId', authenticate, async (req, res) => {
       });
     }
 
+    // Strip internal placeholder email for phone-only users
+    if (user.email?.endsWith('@noemail.matchify.internal')) {
+      user = { ...user, email: null };
+    }
+
     res.json({
       success: true,
       user

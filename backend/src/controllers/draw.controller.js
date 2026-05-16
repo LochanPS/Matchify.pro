@@ -141,6 +141,12 @@ const generateDraw = async (req, res) => {
             name: true,
             email: true
           }
+        },
+        partner: {
+          select: {
+            id: true,
+            name: true
+          }
         }
       }
     });
@@ -171,7 +177,10 @@ const generateDraw = async (req, res) => {
         name: playerName,
         email: playerEmail,
         seedScore: seedScore,
-        seed: 0 // Will be assigned after sorting
+        seed: 0, // Will be assigned after sorting
+        // Doubles partner — null for singles registrations
+        partnerName: registration.partner?.name || null,
+        partnerId: registration.partnerId || null
       });
     }
 
@@ -1248,6 +1257,12 @@ const getCategoryPlayers = async (req, res) => {
             email: true,
             phone: true
           }
+        },
+        partner: {
+          select: {
+            id: true,
+            name: true
+          }
         }
       },
       orderBy: { createdAt: 'asc' }
@@ -1255,7 +1270,7 @@ const getCategoryPlayers = async (req, res) => {
 
     console.log('🔍 Found registrations:', registrations.length);
     registrations.forEach((reg, i) => {
-      console.log(`  [${i}] ID: ${reg.id}, userId: ${reg.userId}, guestName: ${reg.guestName}, userName: ${reg.user?.name}`);
+      console.log(`  [${i}] ID: ${reg.id}, userId: ${reg.userId}, guestName: ${reg.guestName}, userName: ${reg.user?.name}, partnerName: ${reg.partner?.name}`);
     });
 
     const players = registrations.map((reg, index) => ({
@@ -1264,7 +1279,10 @@ const getCategoryPlayers = async (req, res) => {
       name: getPlayerName(reg),
       email: getPlayerEmail(reg),
       phone: reg.userId && reg.user ? reg.user.phone : reg.guestPhone,
-      seed: index + 1
+      seed: index + 1,
+      // Doubles partner
+      partnerName: reg.partner?.name || null,
+      partnerId: reg.partnerId || null
     }));
 
     console.log('🔍 Mapped players:', players);

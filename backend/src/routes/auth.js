@@ -107,7 +107,7 @@ router.post('/register', async (req, res) => {
     // Clean phone number for storage
     const cleanedPhone = phone ? phone.replace(/[\s\-\+]/g, '').replace(/^91/, '') : null;
 
-    // Check email uniqueness if provided
+    // Check email uniqueness if a REAL email is provided
     if (email) {
       const existingUser = await prisma.user.findUnique({ where: { email } });
       if (existingUser) {
@@ -123,6 +123,11 @@ router.post('/register', async (req, res) => {
       }
     }
 
+    // If no email provided (phone-only registration), generate a unique internal placeholder.
+    // This satisfies the NOT NULL constraint on the email column without requiring a DB migration.
+    // The placeholder is never exposed to users and is never used for login.
+    const finalEmail = email || `phone.${cleanedPhone}.${Date.now()}@noemail.matchify.internal`;
+
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 12);
 
@@ -132,10 +137,10 @@ router.post('/register', async (req, res) => {
     // Determine initial wallet balance based on roles
     const initialBalance = userRoles.includes('ORGANIZER') ? 25 : 0;
 
-    // Create user with all roles as comma-separated string
+    // Create user
     const user = await prisma.user.create({
       data: {
-        ...(email ? { email } : {}),
+        email: finalEmail,
         ...(cleanedPhone ? { phone: cleanedPhone } : {}),
         password: hashedPassword,
         roles: userRoles.join(','),
@@ -159,8 +164,11 @@ router.post('/register', async (req, res) => {
       data: { refreshToken }
     });
 
-    // Remove password from response
+    // Remove password, refresh token, and internal placeholder email from response
     const { password: _, refreshToken: __, ...userWithoutPassword } = user;
+    if (userWithoutPassword.email?.endsWith('@noemail.matchify.internal')) {
+      userWithoutPassword.email = null;
+    }
 
     res.status(201).json({
       message: 'User registered successfully',
@@ -330,14 +338,19 @@ router.post('/login', async (req, res) => {
     // Remove sensitive data from response and fix roles field
     const { password: _, refreshToken: __, roles: ___, ...userWithoutPassword } = user;
 
+    // Strip internal placeholder email (phone-only users)
+    if (userWithoutPassword.email?.endsWith('@noemail.matchify.internal')) {
+      userWithoutPassword.email = null;
+    }
+
     // CRITICAL FIX: Ensure roles is always an array in response
     res.json({
       message: 'Login successful',
       user: {
         ...userWithoutPassword,
-        roles: userRoles, // Array of roles (not the string from DB)
-        currentRole: primaryRole, // Primary role string
-        isAdmin: isAdmin // Boolean flag
+        roles: userRoles,
+        currentRole: primaryRole,
+        isAdmin: isAdmin
       },
       accessToken,
       refreshToken

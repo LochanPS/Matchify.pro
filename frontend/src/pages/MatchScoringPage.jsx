@@ -176,8 +176,10 @@ const MatchScoringPage = () => {
   };
 
   const handleBack = () => {
-    if (match?.tournament?.id && match?.category?.id) navigate(`/tournaments/${match.tournament.id}/draw?category=${match.category.id}`);
-    else if (match?.tournamentId && match?.categoryId) navigate(`/tournaments/${match.tournamentId}/draw?category=${match.categoryId}`);
+    const tId = match?.tournament?.id || match?.tournamentId;
+    const cId = match?.category?.id || match?.categoryId;
+    if (tId && cId) navigate(`/tournaments/${tId}/draws/${cId}`);
+    else if (tId) navigate(`/tournaments/${tId}/draws`);
     else navigate('/dashboard');
   };
 
@@ -185,9 +187,14 @@ const MatchScoringPage = () => {
     try {
       setSaving(true);
       const response = await api.put(`/matches/${matchId}/end`, { winnerId, finalScore: score });
-      const drawsUrl = match?.tournament?.id ? `/tournaments/${match.tournament.id}/draws`
-        : match?.tournamentId ? `/tournaments/${match.tournamentId}/draws` : '/dashboard';
-      navigate(drawsUrl, { state: { matchComplete: true, winner: response.data.summary?.winner, categoryId: match?.category?.id || match?.categoryId } });
+      const tId = match?.tournament?.id || match?.tournamentId;
+      const cId = match?.category?.id || match?.categoryId;
+      // Navigate back to draws page with the correct category pre-selected and
+      // ?refresh=true so DrawPage re-fetches the bracket and shows the update.
+      const drawsUrl = tId
+        ? `/tournaments/${tId}/draws/${cId || ''}?refresh=true`
+        : '/dashboard';
+      navigate(drawsUrl, { state: { matchComplete: true, winner: response.data.summary?.winner, categoryId: cId } });
     } catch (err) {
       setError(getErrorMessage(err, 'Failed to end match'));
     } finally { setSaving(false); }

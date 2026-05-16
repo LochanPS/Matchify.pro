@@ -68,7 +68,7 @@ export default function OrganizerTournamentHistory() {
       <div className="relative border-b" style={{ background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.06)' }}>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => navigate('/organizer/dashboard')}
             className="flex items-center gap-2 mb-6 transition-colors group"
             style={{ color: B.sub }}
           >

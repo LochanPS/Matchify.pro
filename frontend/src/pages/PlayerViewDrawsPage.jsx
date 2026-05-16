@@ -134,7 +134,7 @@ const PlayerViewDrawsPage = () => {
         {/* Header */}
         <div className="mb-8">
           <button 
-            onClick={() => navigate(-1)} 
+            onClick={() => navigate(`/tournaments/${id}`)}
             className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-4 group"
           >
             <ArrowLeft className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />

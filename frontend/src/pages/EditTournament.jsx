@@ -330,7 +330,7 @@ const EditTournament = () => {
       <div className="max-w-lg mx-auto px-4 pt-6">
 
         {/* Header */}
-        <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 mb-5 text-sm font-bold"
+        <button onClick={() => navigate(`/organizer/tournaments/${id}`)} className="flex items-center gap-1.5 mb-5 text-sm font-bold"
           style={{ color: 'rgba(255,255,255,0.5)' }}>
           <ArrowLeft className="h-4 w-4" /> Back to Tournament
         </button>

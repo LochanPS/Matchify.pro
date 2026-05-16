@@ -875,7 +875,7 @@ const DrawPage = () => {
         
         <div className="relative max-w-2xl mx-auto px-4 py-4">
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => navigate(`/tournaments/${tournamentId}`)}
             className="flex items-center gap-2 text-white/70 hover:text-white mb-4 transition-colors group"
           >
             <ArrowLeftIcon className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />

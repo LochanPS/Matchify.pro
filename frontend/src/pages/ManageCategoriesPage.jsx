@@ -173,7 +173,7 @@ const ManageCategoriesPage = () => {
 
         {/* Back */}
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => navigate(`/organizer/tournaments/${id}`)}
           className="flex items-center gap-1.5 mb-5 text-sm font-bold"
           style={{ color: 'rgba(255,255,255,0.5)' }}
         >

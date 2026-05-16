@@ -253,7 +253,7 @@ export default function TournamentRegistrationPage() {
   if (isRegistrationClosed) {
     return (
       <div className="min-h-screen px-4 py-8 flex flex-col" style={{ background: BRAND.bg }}>
-        <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 mb-6 text-sm font-bold"
+        <button onClick={() => navigate(`/tournaments/${id}`)} className="flex items-center gap-1.5 mb-6 text-sm font-bold"
           style={{ color: 'rgba(255,255,255,0.5)' }}>
           <ArrowLeftIcon className="h-4 w-4" /> Back
         </button>
@@ -287,7 +287,7 @@ export default function TournamentRegistrationPage() {
     <div className="min-h-screen pb-10" style={{ background: BRAND.bg }}>
       {/* Header */}
       <div className="px-4 pt-6 pb-4">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 mb-5 text-sm font-bold"
+        <button onClick={() => navigate(`/tournaments/${id}`)} className="flex items-center gap-1.5 mb-5 text-sm font-bold"
           style={{ color: 'rgba(255,255,255,0.5)' }}>
           <ArrowLeftIcon className="h-4 w-4" /> Back
         </button>

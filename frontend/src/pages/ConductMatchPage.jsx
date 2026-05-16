@@ -147,7 +147,7 @@ const ConductMatchPage = () => {
             {match.status === 'COMPLETED' ? 'View Match Result' : 'Go to Scoring →'}
           </button>
           <div className="mt-3">
-            <button onClick={() => navigate(-1)} className="text-sm font-bold" style={{ color: 'rgba(255,255,255,0.4)' }}>
+            <button onClick={() => match ? navigate(`/tournaments/${match.tournamentId}/draws/${match.categoryId || ''}`) : navigate('/dashboard')} className="text-sm font-bold" style={{ color: 'rgba(255,255,255,0.4)' }}>
               ← Back
             </button>
           </div>
@@ -162,7 +162,7 @@ const ConductMatchPage = () => {
         <div className="text-center">
           <AlertTriangle className="w-10 h-10 mx-auto mb-3" style={{ color: B.red }} />
           <p className="text-white font-bold mb-4">{error}</p>
-          <button onClick={() => navigate(-1)}
+          <button onClick={() => navigate('/dashboard')}
             className="px-5 py-2.5 rounded-xl text-sm font-bold"
             style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.8)' }}>
             Go Back
@@ -200,7 +200,7 @@ const ConductMatchPage = () => {
       <div className="max-w-lg mx-auto px-4 pt-6">
 
         {/* Back */}
-        <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 mb-5 text-sm font-bold"
+        <button onClick={() => match ? navigate(`/tournaments/${match.tournamentId}/draws/${match.categoryId || ''}`) : navigate('/dashboard')} className="flex items-center gap-1.5 mb-5 text-sm font-bold"
           style={{ color: 'rgba(255,255,255,0.5)' }}>
           <ArrowLeft className="h-4 w-4" /> Back to Draw
         </button>

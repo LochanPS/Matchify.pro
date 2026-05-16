@@ -70,7 +70,7 @@ const LiveMatches = () => {
       <div className="sticky top-0 z-20 px-4 py-3 border-b backdrop-blur-xl"
         style={{ background: 'rgba(7,7,26,0.95)', borderColor: 'rgba(0,255,136,0.12)' }}>
         <div className="max-w-2xl mx-auto flex items-center justify-between gap-3">
-          <button onClick={() => navigate(-1)} className="flex items-center gap-2">
+          <button onClick={() => navigate('/dashboard')} className="flex items-center gap-2">
             <ArrowLeft className="w-5 h-5" style={{ color: B.green }} />
             <span className="text-sm font-semibold" style={{ color: B.sub }}>Back</span>
           </button>

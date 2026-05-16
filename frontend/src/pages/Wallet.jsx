@@ -81,7 +81,7 @@ const Wallet = () => {
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           {/* Back Button */}
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => navigate('/dashboard')}
             className="flex items-center gap-2 mb-6 transition-colors group"
             style={{ color: 'rgba(255,255,255,0.6)' }}
           >

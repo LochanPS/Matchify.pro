@@ -123,7 +123,7 @@ const TournamentResults = () => {
       <div className="relative max-w-2xl mx-auto px-4 py-6">
         {/* Back + Title */}
         <div className="flex items-center gap-3 mb-6">
-          <button onClick={() => navigate(-1)} className="flex items-center gap-1.5">
+          <button onClick={() => navigate(`/tournaments/${tournamentId}`)} className="flex items-center gap-1.5">
             <ArrowLeft className="w-5 h-5" style={{ color: B.green }} />
             <span className="text-sm font-semibold" style={{ color: B.sub }}>Back</span>
           </button>

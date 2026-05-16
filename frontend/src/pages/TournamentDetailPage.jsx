@@ -564,7 +564,7 @@ const TournamentDetailPage = () => {
 
             {/* Back button — top left over poster */}
             <button
-              onClick={() => navigate(-1)}
+              onClick={() => navigate('/dashboard')}
               className="absolute top-4 left-4 flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-semibold text-sm backdrop-blur-md transition-all"
               style={{ background: 'rgba(0,0,0,0.5)', color: 'rgba(255,255,255,0.85)', border: '1px solid rgba(255,255,255,0.15)' }}
             >
@@ -662,7 +662,7 @@ const TournamentDetailPage = () => {
           >
             <div className="flex items-center justify-between mb-4">
               <button
-                onClick={() => navigate(-1)}
+                onClick={() => navigate('/dashboard')}
                 className="flex items-center gap-1.5 text-sm font-medium transition-colors"
                 style={{ color: 'rgba(255,255,255,0.6)' }}
                 onMouseEnter={e => e.currentTarget.style.color = '#00ff88'}

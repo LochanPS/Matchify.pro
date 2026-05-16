@@ -180,7 +180,7 @@ const NotificationsPage = () => {
         <div className="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
           {/* Back Button & Logo */}
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => navigate('/dashboard')}
             className="flex items-center gap-2 transition-all relative overflow-hidden group"
           >
             <div 

@@ -47,7 +47,7 @@ export default function RefundIssuePage() {
           </div>
           <h2 className="text-lg font-black text-white mb-2">Error</h2>
           <p className="text-sm mb-5" style={{ color: 'rgba(255,255,255,0.6)' }}>{error}</p>
-          <button onClick={() => navigate(-1)} className="px-6 py-2.5 rounded-xl font-bold text-sm" style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.8)', border: '1px solid rgba(255,255,255,0.12)' }}>
+          <button onClick={() => navigate('/registrations')} className="px-6 py-2.5 rounded-xl font-bold text-sm" style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.8)', border: '1px solid rgba(255,255,255,0.12)' }}>
             Go Back
           </button>
         </div>
@@ -66,7 +66,7 @@ export default function RefundIssuePage() {
       {/* Sticky header */}
       <div className="sticky top-0 z-20" style={{ background: 'rgba(7,7,26,0.95)', borderBottom: '1px solid rgba(239,68,68,0.2)', backdropFilter: 'blur(20px)' }}>
         <div className="px-4 py-3 flex items-center gap-3">
-          <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-sm font-medium" style={{ color: 'rgba(255,255,255,0.6)' }}>
+          <button onClick={() => navigate('/registrations')} className="flex items-center gap-1.5 text-sm font-medium" style={{ color: 'rgba(255,255,255,0.6)' }}>
             <ArrowLeft className="w-4 h-4" /> Back
           </button>
           <div className="flex items-center gap-2 ml-1">
@@ -126,7 +126,7 @@ export default function RefundIssuePage() {
         </div>
 
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => navigate('/registrations')}
           className="w-full py-3 rounded-2xl font-bold text-sm transition-all"
           style={{ background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.8)', border: '1px solid rgba(255,255,255,0.1)' }}
         >

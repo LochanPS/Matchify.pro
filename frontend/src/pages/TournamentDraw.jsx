@@ -147,7 +147,7 @@ const TournamentDraw = () => {
       <div className="max-w-7xl mx-auto px-3 py-2">
         {/* Header - Ultra Compact */}
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => navigate(`/tournaments/${tournamentId}`)}
           className="flex items-center gap-1.5 text-white/70 hover:text-white mb-2 transition-colors"
         >
           <ArrowLeftIcon className="h-4 w-4" />

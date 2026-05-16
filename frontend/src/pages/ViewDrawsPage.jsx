@@ -138,7 +138,7 @@ const ViewDrawsPage = () => {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-4 group">
+          <button onClick={() => navigate(id ? `/tournaments/${id}` : '/dashboard')} className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-4 group">
             <ArrowLeft className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
             <span className="font-medium">Back to Tournament</span>
           </button>

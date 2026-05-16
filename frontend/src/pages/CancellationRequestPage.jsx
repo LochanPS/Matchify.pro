@@ -85,7 +85,7 @@ export default function CancellationRequestPage() {
           <X className="w-10 h-10 text-red-400 mx-auto mb-3" />
           <h2 className="text-lg font-black text-white mb-2">Error</h2>
           <p className="text-sm mb-5" style={{ color: 'rgba(255,255,255,0.6)' }}>{error}</p>
-          <button onClick={() => navigate(-1)} className="px-6 py-2.5 rounded-xl font-bold text-sm" style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.8)', border: '1px solid rgba(255,255,255,0.12)' }}>
+          <button onClick={() => navigate('/organizer/dashboard')} className="px-6 py-2.5 rounded-xl font-bold text-sm" style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.8)', border: '1px solid rgba(255,255,255,0.12)' }}>
             Go Back
           </button>
         </div>
@@ -105,7 +105,7 @@ export default function CancellationRequestPage() {
       {/* Sticky header */}
       <div className="sticky top-0 z-20" style={{ background: 'rgba(7,7,26,0.95)', borderBottom: '1px solid rgba(251,146,60,0.2)', backdropFilter: 'blur(20px)' }}>
         <div className="px-4 py-3 flex items-center gap-3">
-          <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-sm font-medium" style={{ color: 'rgba(255,255,255,0.6)' }}>
+          <button onClick={() => navigate('/organizer/dashboard')} className="flex items-center gap-1.5 text-sm font-medium" style={{ color: 'rgba(255,255,255,0.6)' }}>
             <ArrowLeft className="w-4 h-4" /> Back
           </button>
           <span className="text-sm font-black text-white">Cancellation Request</span>
@@ -301,7 +301,7 @@ export default function CancellationRequestPage() {
               <h2 className="text-lg font-black text-white mb-2">{resultModal.title}</h2>
               <p className="text-sm mb-5" style={{ color: 'rgba(255,255,255,0.6)' }}>{resultModal.message}</p>
               <button
-                onClick={() => { setResultModal(null); navigate(-1); }}
+                onClick={() => { setResultModal(null); navigate('/organizer/dashboard'); }}
                 className="w-full py-3 rounded-xl font-black text-sm"
                 style={{
                   background: resultModal.type === 'success' ? 'linear-gradient(135deg,#00ff88,#00d4ff)' : 'linear-gradient(135deg,#ef4444,#dc2626)',

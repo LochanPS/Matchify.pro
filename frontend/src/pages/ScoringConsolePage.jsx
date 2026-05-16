@@ -167,7 +167,7 @@ const ScoringConsolePage = () => {
         <div className="text-center">
           <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
           <p className="text-gray-400">Match not found</p>
-          <button onClick={() => navigate(-1)} className="mt-4" style={{ color: '#00ff88' }}>Go Back</button>
+          <button onClick={() => navigate('/dashboard')} className="mt-4" style={{ color: '#00ff88' }}>Go Back</button>
         </div>
       </div>
     );
@@ -181,7 +181,7 @@ const ScoringConsolePage = () => {
       </div>
       <div className="relative max-w-4xl mx-auto">
         <div className="flex items-center justify-between mb-6">
-          <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
+          <button onClick={() => navigate('/dashboard')} className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
             <ArrowLeft className="w-5 h-5" /><span>Back</span>
           </button>
           <div className="flex items-center gap-4">

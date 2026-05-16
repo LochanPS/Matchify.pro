@@ -136,7 +136,7 @@ export default function TournamentCategoryDetails() {
       {/* Sticky Header */}
       <div className="relative sticky top-0 z-20" style={{ background: 'rgba(7,7,26,0.95)', borderBottom: '1px solid rgba(0,255,136,0.15)', backdropFilter: 'blur(20px)' }}>
         <div className="max-w-4xl mx-auto px-4 py-4">
-          <button onClick={() => navigate(-1)} className="flex items-center gap-2 mb-3 text-sm font-medium transition-colors" style={{ color: 'rgba(255,255,255,0.6)' }}
+          <button onClick={() => navigate(category?.category?.tournament?.id ? `/tournaments/${category.category.tournament.id}` : '/dashboard')} className="flex items-center gap-2 mb-3 text-sm font-medium transition-colors" style={{ color: 'rgba(255,255,255,0.6)' }}
             onMouseEnter={e => e.currentTarget.style.color = '#00ff88'}
             onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.6)'}
           >

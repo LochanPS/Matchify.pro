@@ -277,7 +277,7 @@ export default function TournamentManagementPage() {
       <div className="relative sticky top-0 z-20" style={{ background: 'rgba(7,7,26,0.95)', borderBottom: '1px solid rgba(0,255,136,0.15)', backdropFilter: 'blur(20px)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => navigate('/organizer/dashboard')}
             className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-3 group"
           >
             <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />

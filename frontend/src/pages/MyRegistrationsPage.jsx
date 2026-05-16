@@ -171,7 +171,7 @@ export default function MyRegistrationsPage() {
       {/* Header */}
       <div className="sticky top-0 z-20 border-b backdrop-blur-xl px-4 py-4" style={{ background: 'rgba(7,7,26,0.95)', borderColor: 'rgba(0,255,136,0.12)' }}>
         <div className="max-w-2xl mx-auto flex items-center gap-4">
-          <button onClick={() => navigate(-1)} className="flex items-center gap-1.5">
+          <button onClick={() => navigate('/dashboard')} className="flex items-center gap-1.5">
             <ArrowLeft className="w-5 h-5" style={{ color: '#00ff88' }} />
             <span className="text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.6)' }}>Back</span>
           </button>

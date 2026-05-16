@@ -98,7 +98,7 @@ const LiveMatchDetail = () => {
       {/* Sticky Header */}
       <div className="sticky top-0 z-20" style={{ background: 'rgba(7,7,26,0.95)', borderBottom: '1px solid rgba(0,255,136,0.15)', backdropFilter: 'blur(20px)' }}>
         <div className="px-4 py-3 flex items-center justify-between gap-3">
-          <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-sm font-medium" style={{ color: 'rgba(255,255,255,0.6)' }}>
+          <button onClick={() => navigate('/live-matches')} className="flex items-center gap-1.5 text-sm font-medium" style={{ color: 'rgba(255,255,255,0.6)' }}>
             <ArrowLeft className="w-4 h-4" /> Back
           </button>
 

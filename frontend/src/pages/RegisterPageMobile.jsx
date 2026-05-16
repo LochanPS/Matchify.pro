@@ -53,18 +53,21 @@ const RegisterPageMobile = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!formData.name || !formData.phone || !formData.password) {
-      setError('Name, Phone and Password are required');
+
+    if (!formData.name) {
+      setError('Full name is required');
       return;
     }
-    if (!/^[0-9]{10}$/.test(formData.phone)) {
-      setError('Enter valid 10-digit phone number');
+    if (!formData.email && !formData.phone) {
+      setError('Enter your email or phone number (at least one required)');
       return;
     }
-    // Email is optional, but if provided, validate it
     if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      setError('Enter valid email address');
+      setError('Enter a valid email address');
+      return;
+    }
+    if (formData.phone && !/^[0-9]{10}$/.test(formData.phone)) {
+      setError('Enter a valid 10-digit phone number');
       return;
     }
     
@@ -99,6 +102,8 @@ const RegisterPageMobile = () => {
     
     try {
       const { confirmPassword, ...dataToSend } = formData;
+      if (!dataToSend.email) delete dataToSend.email;
+      if (!dataToSend.phone) delete dataToSend.phone;
       await register(dataToSend);
       
       if (redirectUrl) {
@@ -434,47 +439,58 @@ const RegisterPageMobile = () => {
               </div>
             </div>
 
-            {/* Phone Number */}
+            {/* Contact — Email OR Phone */}
             <div>
-              <label className="block text-sm font-semibold text-white mb-2">
-                Phone Number
-              </label>
-              <div className="relative">
-                <PhoneIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
-                <input
-                  name="phone"
-                  type="tel"
-                  required
-                  maxLength={10}
-                  className="w-full pl-10 pr-4 py-3 rounded-xl text-white text-sm placeholder-gray-500 outline-none"
-                  style={{ 
-                    background: 'rgba(255,255,255,0.05)', 
-                    border: '1px solid rgba(255,255,255,0.1)' 
-                  }}
-                  placeholder="9876543210"
-                  value={formData.phone}
-                  onChange={handleChange}
-                />
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-semibold text-white">Sign-in Contact</label>
+                {!formData.email && !formData.phone ? (
+                  <span className="text-xs font-semibold" style={{ color: 'rgba(251,191,36,0.9)' }}>⚠ At least one required</span>
+                ) : (
+                  <span className="text-xs font-semibold" style={{ color: '#00ff88' }}>✓ Looks good</span>
+                )}
               </div>
-            </div>
+              <p className="text-xs mb-3" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                Enter email, phone, or both — use either to sign in
+              </p>
 
-            {/* Email - Optional */}
-            <div>
-              <label className="block text-sm font-semibold text-white mb-2">
-                Email <span style={{ color: 'rgba(255,255,255,0.4)', fontWeight: 400, fontSize: '11px' }}>(Optional)</span>
-              </label>
-              <div className="relative">
+              {/* Email */}
+              <div className="relative mb-3">
                 <EnvelopeIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
                 <input
                   name="email"
                   type="email"
                   className="w-full pl-10 pr-4 py-3 rounded-xl text-white text-sm placeholder-gray-500 outline-none"
-                  style={{ 
-                    background: 'rgba(255,255,255,0.05)', 
-                    border: '1px solid rgba(255,255,255,0.1)' 
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: formData.email ? '1px solid rgba(0,255,136,0.4)' : '1px solid rgba(255,255,255,0.1)',
                   }}
-                  placeholder="you@example.com"
+                  placeholder="Email address (optional)"
                   value={formData.email}
+                  onChange={handleChange}
+                />
+              </div>
+
+              {/* OR divider */}
+              <div className="flex items-center gap-3 mb-3">
+                <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.08)' }} />
+                <span className="text-xs font-bold" style={{ color: 'rgba(255,255,255,0.25)' }}>OR</span>
+                <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.08)' }} />
+              </div>
+
+              {/* Phone */}
+              <div className="relative">
+                <PhoneIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                <input
+                  name="phone"
+                  type="tel"
+                  maxLength={10}
+                  className="w-full pl-10 pr-4 py-3 rounded-xl text-white text-sm placeholder-gray-500 outline-none"
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: formData.phone ? '1px solid rgba(0,255,136,0.4)' : '1px solid rgba(255,255,255,0.1)',
+                  }}
+                  placeholder="Phone number (optional)"
+                  value={formData.phone}
                   onChange={handleChange}
                 />
               </div>

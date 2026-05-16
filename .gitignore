@@ -43,8 +43,8 @@ logs/
 *.sqlite3
 *.db
 
-# Prisma
-backend/prisma/migrations/
+# Prisma - migrations MUST be committed for prisma migrate deploy on Vercel
+# backend/prisma/migrations/
 
 # Uploads (if you store files locally)
 uploads/

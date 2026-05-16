@@ -96,8 +96,9 @@ const NotificationDropdown = ({ onClose }) => {
       case 'MATCH_ASSIGNED':
       case 'MATCH_STARTING_SOON':
         if (data.matchId) {
-          // Navigate to match configuration page first
-          return `/match/${data.matchId}/conduct`;
+          // Include umpireId so ConductMatchPage unlocks Start Match button
+          const uid = data.umpireId || '';
+          return `/match/${data.matchId}/conduct${uid ? `?umpireId=${uid}` : ''}`;
         }
         if (data.tournamentId) {
           return `/tournaments/${data.tournamentId}`;

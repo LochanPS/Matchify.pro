@@ -1364,6 +1364,7 @@ const assignUmpire = async (req, res) => {
         message: message,
         data: {
           matchId: match.id,
+          umpireId: umpireId,
           tournamentId: match.tournamentId,
           categoryId: match.categoryId,
           matchNumber: match.matchNumber,

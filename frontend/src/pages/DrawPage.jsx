@@ -2567,8 +2567,12 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                                 /* Both players — UMPIRE is the ONLY way to conduct */
                                 <button
                                   onClick={() => {
-                                    const bracketMatchData = { matchNumber: match.matchNumber, round: ri + 1, player1, player2 };
-                                    onAssignUmpire(dbMatch, bracketMatchData);
+                                    if (hasUmpire && dbMatch?.umpireId) {
+                                      navigate(`/match/${dbMatch.id}/conduct?umpireId=${dbMatch.umpireId}`);
+                                    } else {
+                                      const bracketMatchData = { matchNumber: match.matchNumber, round: ri + 1, player1, player2 };
+                                      onAssignUmpire(dbMatch, bracketMatchData);
+                                    }
                                   }}
                                   className={`w-full py-2 rounded-lg border-2 transition-all text-[10px] font-black flex items-center justify-center gap-1 ${
                                     hasUmpire
@@ -2632,6 +2636,7 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
 
 // Round Robin Display with Match Schedule
 const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onChangeResult, onViewMatchDetails, categoryFormat }) => {
+  const navigate = useNavigate();
   if (!data?.groups) return <p className="text-gray-400 text-center p-8">No group data</p>;
 
   // Find database matches for each group match
@@ -2884,8 +2889,12 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                         <div className="mt-2.5">
                           <button
                             onClick={() => {
-                              const bracketMatchData = { matchNumber: match.matchNumber, round: 1, player1: match.player1, player2: match.player2, groupName: group.groupName };
-                              onAssignUmpire(dbMatch, bracketMatchData);
+                              if (hasUmpire && dbMatch?.umpireId) {
+                                navigate(`/match/${dbMatch.id}/conduct?umpireId=${dbMatch.umpireId}`);
+                              } else {
+                                const bracketMatchData = { matchNumber: match.matchNumber, round: 1, player1: match.player1, player2: match.player2, groupName: group.groupName };
+                                onAssignUmpire(dbMatch, bracketMatchData);
+                              }
                             }}
                             className={`w-full py-2.5 rounded-lg transition-all flex items-center justify-center gap-2 text-xs font-black ${
                               hasUmpire
@@ -2894,7 +2903,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                             }`}
                           >
                             <Gavel className="w-4 h-4" />
-                            {hasUmpire ? 'READY' : 'ASSIGN'}
+                            {hasUmpire ? '✓ CONDUCT' : 'ASSIGN'}
                           </button>
                         </div>
                       )}

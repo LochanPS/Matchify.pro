@@ -182,7 +182,11 @@ const NotificationDetailPage = () => {
         if (data.tournamentId) return `/tournaments/${data.tournamentId}/draws`;
         return '/tournaments';
       case 'MATCH_ASSIGNED': case 'MATCH_STARTING_SOON':
-        if (data.matchId) return `/match/${data.matchId}/conduct`;
+        if (data.matchId) {
+          // umpireId from notification data so ConductMatchPage unlocks Start Match
+          const uid = data.umpireId || data.userId || '';
+          return `/match/${data.matchId}/conduct${uid ? `?umpireId=${uid}` : ''}`;
+        }
         if (data.tournamentId) return `/tournaments/${data.tournamentId}`;
         return '/tournaments';
       case 'TOURNAMENT_CANCELLED': case 'TOURNAMENT_REMINDER':

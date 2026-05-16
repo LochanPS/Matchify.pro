@@ -42,10 +42,7 @@ const ConductMatchPage = () => {
     if (!matchId) { setError('Match ID is missing'); setLoading(false); return; }
     try {
       setLoading(true);
-      const [matchRes, umpireRes] = await Promise.all([
-        api.get(`/matches/${matchId}`),
-        umpireId ? api.get(`/users/${umpireId}`).catch(() => null) : Promise.resolve(null),
-      ]);
+      const matchRes = await api.get(`/matches/${matchId}`);
       const m = matchRes.data.match;
       setMatch(m);
       if (m?.category?.scoringFormat) {
@@ -54,7 +51,17 @@ const ConductMatchPage = () => {
         setMaxSets(cfg.sets);
         setExtension(!m.category.scoringFormat.toLowerCase().includes('noext'));
       }
-      if (umpireRes) setUmpire(umpireRes.data.user);
+      // Resolve umpire: use match.umpire from DB response (already fetched by service),
+      // or fall back to fetching by URL umpireId param if needed
+      if (m?.umpire) {
+        setUmpire(m.umpire);
+      } else if (umpireId || m?.umpireId) {
+        const resolvedUmpireId = umpireId || m?.umpireId;
+        try {
+          const umpireRes = await api.get(`/users/${resolvedUmpireId}`);
+          setUmpire(umpireRes.data.user);
+        } catch (_) { /* non-critical */ }
+      }
     } catch (err) {
       if (err.response?.status === 404) setError('Match not found.');
       else if (err.code === 'ERR_NETWORK' || !err.response) setError('Network error. Check your connection.');
@@ -113,6 +120,37 @@ const ConductMatchPage = () => {
           <div className="w-10 h-10 rounded-full border-4 border-t-transparent animate-spin mx-auto"
             style={{ borderColor: `${B.green} transparent transparent transparent` }} />
           <p className="mt-3 text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>Loading match…</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Match already in progress — send to scoring page (render-phase, no async navigate)
+  if (match?.status === 'IN_PROGRESS' || match?.status === 'COMPLETED') {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-6" style={{ background: B.bg }}>
+        <div className="text-center">
+          <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
+            style={{ background: 'linear-gradient(135deg,rgba(0,255,136,0.25),rgba(0,200,83,0.15))', border: '1px solid rgba(0,255,136,0.4)' }}>
+            <Play className="w-7 h-7" style={{ color: B.green }} />
+          </div>
+          <h2 className="text-lg font-black text-white mb-1">
+            {match.status === 'COMPLETED' ? 'Match Completed' : 'Match In Progress'}
+          </h2>
+          <p className="text-sm mb-5" style={{ color: 'rgba(255,255,255,0.5)' }}>
+            {match.status === 'COMPLETED' ? 'This match has already been completed.' : 'This match has already been started.'}
+          </p>
+          <button
+            onClick={() => navigate(`/match/${matchId}/score`)}
+            className="px-6 py-3 rounded-xl font-black text-sm"
+            style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#07071a', boxShadow: '0 4px 16px rgba(0,200,83,0.35)' }}>
+            {match.status === 'COMPLETED' ? 'View Match Result' : 'Go to Scoring →'}
+          </button>
+          <div className="mt-3">
+            <button onClick={() => navigate(-1)} className="text-sm font-bold" style={{ color: 'rgba(255,255,255,0.4)' }}>
+              ← Back
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -385,7 +423,7 @@ const ConductMatchPage = () => {
 
           {/* ── Action Buttons ────────────────────────────────────────────── */}
           {(!player1 || !player2) ? (
-            /* BYE match — one player missing, no umpire needed */
+            /* BYE match — one player missing */
             <div className="space-y-3">
               <button
                 onClick={handleGiveBye}
@@ -403,27 +441,8 @@ const ConductMatchPage = () => {
                 </p>
               </div>
             </div>
-          ) : !umpireId ? (
-            /* Both players present but NO umpire assigned — block */
-            <div className="space-y-3">
-              <div className="w-full py-4 rounded-2xl font-black text-base flex items-center justify-center gap-2 select-none"
-                style={{ background: 'rgba(255,255,255,0.04)', border: '1.5px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.25)', cursor: 'not-allowed' }}>
-                <Play className="w-5 h-5" />
-                Start Match
-              </div>
-              <div className="flex items-start gap-3 px-4 py-3.5 rounded-2xl"
-                style={{ background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.3)' }}>
-                <Gavel className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: '#f87171' }} />
-                <div>
-                  <p className="text-sm font-black mb-1" style={{ color: '#f87171' }}>Umpire Required</p>
-                  <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                    Go back to the draw and tap <strong className="text-white">ASSIGN UMPIRE TO CONDUCT</strong> on this match to assign a match official first.
-                  </p>
-                </div>
-              </div>
-            </div>
           ) : (
-            /* Both players + umpire assigned — allow start */
+            /* Both players present — allow start */
             <button
               onClick={handleStartMatch}
               disabled={assigning}

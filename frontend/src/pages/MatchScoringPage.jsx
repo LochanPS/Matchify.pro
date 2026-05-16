@@ -47,12 +47,6 @@ const MatchScoringPage = () => {
       const response = await api.get(`/matches/${matchId}`);
       const matchData = response.data.match;
 
-      if ((matchData.status === 'PENDING' || matchData.status === 'READY' || matchData.status === 'SCHEDULED') &&
-          !matchData.score && !matchData.scoreJson) {
-        navigate(`/match/${matchId}/conduct`, { replace: true });
-        return;
-      }
-
       setMatch(matchData);
 
       if (matchData.score && matchData.score.sets) {
@@ -269,6 +263,26 @@ const MatchScoringPage = () => {
         <div className="text-center">
           <AlertTriangle className="w-10 h-10 mx-auto mb-3" style={{ color: B.red }} />
           <h2 className="text-lg font-bold text-white">Match not found</h2>
+        </div>
+      </div>
+    );
+  }
+
+  // Match not yet started and no config saved — redirect back to conduct setup
+  if ((match.status === 'PENDING' || match.status === 'READY' || match.status === 'SCHEDULED') &&
+      !match.score && !match.scoreJson) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-6" style={{ background: B.bg }}>
+        <div className="text-center">
+          <AlertTriangle className="w-10 h-10 mx-auto mb-3" style={{ color: B.amber }} />
+          <h2 className="text-lg font-bold text-white mb-2">Match Not Started</h2>
+          <p className="text-sm mb-5" style={{ color: 'rgba(255,255,255,0.5)' }}>Configure and start this match first.</p>
+          <button
+            onClick={() => navigate(`/match/${matchId}/conduct`, { replace: true })}
+            className="px-6 py-3 rounded-xl font-black text-sm"
+            style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.8)' }}>
+            ← Back to Setup
+          </button>
         </div>
       </div>
     );

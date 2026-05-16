@@ -119,16 +119,16 @@ router.post('/register', async (req, res) => {
     // Create user with all roles as comma-separated string
     const user = await prisma.user.create({
       data: {
-        email: email || null,
+        ...(email ? { email } : {}),
+        ...(cleanedPhone ? { phone: cleanedPhone } : {}),
         password: hashedPassword,
-        roles: userRoles.join(','), // Store as comma-separated string
+        roles: userRoles.join(','),
         name,
-        phone: cleanedPhone,
         dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
         city,
         state,
         gender,
-        matchifyCode, // Add matchify code
+        matchifyCode,
         walletBalance: initialBalance
       }
     });

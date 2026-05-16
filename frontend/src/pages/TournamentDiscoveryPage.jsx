@@ -53,6 +53,7 @@ export default function TournamentDiscoveryPage() {
     endDate: ''
   });
   const [showFilters, setShowFilters] = useState(false);
+  const [fetchTrigger, setFetchTrigger] = useState(0);
 
   // Infinite scroll observer
   useEffect(() => {
@@ -78,18 +79,24 @@ export default function TournamentDiscoveryPage() {
 
   useEffect(() => {
     fetchTournaments();
-  }, [page]);
+  }, [page, fetchTrigger]);
 
   useEffect(() => {
     // Reset when filters or tab change
+    // If page is already 1, setPage(1) is a no-op and won't trigger fetchTournaments.
+    // In that case, increment fetchTrigger to force a fetch.
     setTournaments([]);
-    setPage(1);
     setHasMore(true);
+    if (page !== 1) {
+      setPage(1);
+    } else {
+      setFetchTrigger(t => t + 1);
+    }
   }, [filters, searchQuery, activeTab]);
 
   const fetchTournaments = async () => {
     if (!hasMore && page > 1) return;
-    
+
     setLoading(true);
     try {
       const params = { page: page.toString(), limit: '10' };
@@ -101,13 +108,13 @@ export default function TournamentDiscoveryPage() {
 
       const response = await tournamentAPI.getTournaments(params);
       const newTournaments = response.data?.tournaments || [];
-      
+
       if (page === 1) {
         setTournaments(newTournaments);
       } else {
         setTournaments(prev => [...prev, ...newTournaments]);
       }
-      
+
       setTotal(response.data?.pagination?.total || 0);
       setHasMore(newTournaments.length === 10); // If we got less than limit, no more pages
     } catch (error) {
@@ -124,9 +131,12 @@ export default function TournamentDiscoveryPage() {
   const handleSearch = (e) => {
     e.preventDefault();
     setTournaments([]);
-    setPage(1);
     setHasMore(true);
-    fetchTournaments();
+    if (page !== 1) {
+      setPage(1);
+    } else {
+      setFetchTrigger(t => t + 1);
+    }
   };
 
   const handleFilterChange = (key, value) => {

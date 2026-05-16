@@ -189,26 +189,32 @@ router.post('/:tournamentId/payout-50-1/mark-paid', authenticate, requireAdmin, 
       }
     });
 
-    // Send notification to organizer
-    const tournament = await prisma.tournament.findUnique({
-      where: { id: tournamentId },
-      select: { organizerId: true, name: true }
-    });
+    // Send notification to organizer — wrapped separately so a failure here
+    // does NOT affect the payout update already committed above.
+    try {
+      const tournament = await prisma.tournament.findUnique({
+        where: { id: tournamentId },
+        select: { organizerId: true, name: true }
+      });
 
-    await prisma.notification.create({
-      data: {
-        userId: tournament.organizerId,
-        type: 'PAYOUT_RECEIVED',
-        title: 'Payment Received - First 30%',
-        message: `You have received first 30% payout (₹${payment.payout50Percent1.toFixed(2)}) for tournament "${tournament.name}"`,
-        data: JSON.stringify({
-          tournamentId,
-          amount: payment.payout50Percent1,
-          percentage: 30,
-          installment: 1
-        })
-      }
-    });
+      const amount = payment.payout50Percent1 ?? 0;
+      await prisma.notification.create({
+        data: {
+          userId: tournament.organizerId,
+          type: 'PAYOUT_RECEIVED',
+          title: 'Payment Received - First 30%',
+          message: `You have received first 30% payout (₹${Number(amount).toFixed(2)}) for tournament "${tournament.name}"`,
+          data: JSON.stringify({
+            tournamentId,
+            amount,
+            percentage: 30,
+            installment: 1
+          })
+        }
+      });
+    } catch (notifErr) {
+      console.error('Notification error (non-critical):', notifErr);
+    }
 
     res.json({
       success: true,
@@ -264,26 +270,32 @@ router.post('/:tournamentId/payout-50-2/mark-paid', authenticate, requireAdmin, 
       data: { status: 'completed' }
     });
 
-    // Send notification to organizer
-    const tournament = await prisma.tournament.findUnique({
-      where: { id: tournamentId },
-      select: { organizerId: true, name: true }
-    });
+    // Send notification to organizer — wrapped separately so a failure here
+    // does NOT roll back the payout/status updates already committed above.
+    try {
+      const tournament = await prisma.tournament.findUnique({
+        where: { id: tournamentId },
+        select: { organizerId: true, name: true }
+      });
 
-    await prisma.notification.create({
-      data: {
-        userId: tournament.organizerId,
-        type: 'PAYOUT_RECEIVED',
-        title: 'Payment Received - Second 65%',
-        message: `You have received final 65% payout (₹${payment.payout50Percent2.toFixed(2)}) for tournament "${tournament.name}"`,
-        data: JSON.stringify({
-          tournamentId,
-          amount: payment.payout50Percent2,
-          percentage: 65,
-          installment: 2
-        })
-      }
-    });
+      const amount = payment.payout50Percent2 ?? 0;
+      await prisma.notification.create({
+        data: {
+          userId: tournament.organizerId,
+          type: 'PAYOUT_RECEIVED',
+          title: 'Payment Received - Second 65%',
+          message: `You have received final 65% payout (₹${Number(amount).toFixed(2)}) for tournament "${tournament.name}"`,
+          data: JSON.stringify({
+            tournamentId,
+            amount,
+            percentage: 65,
+            installment: 2
+          })
+        }
+      });
+    } catch (notifErr) {
+      console.error('Notification error (non-critical):', notifErr);
+    }
 
     res.json({
       success: true,

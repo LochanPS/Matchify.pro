@@ -36,6 +36,7 @@ const RegisterPageMobile = () => {
     confirmPassword: '',
   });
   const [error, setError] = useState('');
+  const [conflictError, setConflictError] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -49,6 +50,7 @@ const RegisterPageMobile = () => {
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     setError('');
+    setConflictError(false);
   };
 
   const handleSubmit = async (e) => {
@@ -113,7 +115,13 @@ const RegisterPageMobile = () => {
       
       navigate('/dashboard?role=PLAYER');
     } catch (err) {
-      setError(getErrorMessage(err, 'Registration failed. Please try again.'));
+      const status = err?.response?.status;
+      if (status === 409) {
+        setConflictError(true);
+        setError('');
+      } else {
+        setError(getErrorMessage(err, 'Registration failed. Please try again.'));
+      }
     } finally {
       setLoading(false);
     }
@@ -357,15 +365,31 @@ const RegisterPageMobile = () => {
               <p className="text-sm text-gray-300 font-medium">Start your badminton journey</p>
             </div>
 
-          {/* Error Message */}
+          {/* Conflict Error — account already exists */}
+          {conflictError && (
+            <div
+              className="mb-4 p-3 rounded-xl text-sm"
+              style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)' }}
+            >
+              <p className="font-bold mb-1" style={{ color: '#f87171' }}>⚠️ Account already exists</p>
+              <p className="text-xs mb-2" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                This email or phone is already registered.
+              </p>
+              <Link
+                to={redirectUrl ? `/login?redirect=${encodeURIComponent(redirectUrl)}` : '/login'}
+                className="inline-block w-full text-center py-2 rounded-lg text-xs font-bold transition-all"
+                style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', color: '#07071a' }}
+              >
+                Sign in instead →
+              </Link>
+            </div>
+          )}
+
+          {/* Generic Error Message */}
           {error && (
-            <div 
+            <div
               className="mb-4 p-3 rounded-lg text-sm"
-              style={{ 
-                background: 'rgba(239,68,68,0.1)', 
-                border: '1px solid rgba(239,68,68,0.3)', 
-                color: '#f87171' 
-              }}
+              style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: '#f87171' }}
             >
               ⚠️ {error}
             </div>

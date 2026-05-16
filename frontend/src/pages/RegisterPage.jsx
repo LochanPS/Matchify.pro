@@ -76,6 +76,7 @@ const RegisterPage = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [conflictError, setConflictError] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
@@ -90,6 +91,7 @@ const RegisterPage = () => {
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     setError('');
+    setConflictError(false);
   };
 
   const handleSubmit = async (e) => {
@@ -157,8 +159,12 @@ const RegisterPage = () => {
       navigate('/dashboard?role=PLAYER');
     } catch (err) {
       console.error('Registration error:', err);
-      // Show specific error message from backend
-      setError(getErrorMessage(err, 'Registration failed. Please try again.'));
+      if (err?.response?.status === 409) {
+        setConflictError(true);
+        setError('');
+      } else {
+        setError(getErrorMessage(err, 'Registration failed. Please try again.'));
+      }
     } finally {
       setLoading(false);
     }
@@ -249,6 +255,20 @@ const RegisterPage = () => {
             <h2 className="text-2xl sm:text-3xl font-black text-white mb-1">Create Account</h2>
             <p className="text-sm" style={{ color:'rgba(255,255,255,0.4)' }}>Start your badminton journey today</p>
           </div>
+
+          {conflictError && (
+            <div className="mb-5 p-4 rounded-xl text-sm" style={{ background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.3)' }}>
+              <p className="font-bold mb-1" style={{ color:'#f87171' }}>⚠️ Account already exists</p>
+              <p className="text-xs mb-3" style={{ color:'rgba(255,255,255,0.5)' }}>This email or phone is already registered on Matchify.pro.</p>
+              <Link
+                to={redirectUrl ? `/login?redirect=${encodeURIComponent(redirectUrl)}` : '/login'}
+                className="inline-block w-full text-center py-2.5 rounded-lg text-sm font-bold"
+                style={{ background:'linear-gradient(135deg,#00ff88,#00d4ff)', color:'#07071a' }}
+              >
+                Sign in to your account →
+              </Link>
+            </div>
+          )}
 
           {error && (
             <div className="mb-5 p-4 rounded-xl text-sm flex items-start gap-2"

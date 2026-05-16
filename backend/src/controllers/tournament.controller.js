@@ -863,6 +863,33 @@ const uploadPosters = async (req, res) => {
   }
 };
 
+// DELETE /api/tournaments/:id/posters/:posterId - Delete a tournament poster
+const deletePoster = async (req, res) => {
+  try {
+    const { id, posterId } = req.params;
+    const userId = req.user.id;
+
+    const tournament = await prisma.tournament.findUnique({ where: { id } });
+    if (!tournament) return res.status(404).json({ success: false, error: 'Tournament not found' });
+    if (tournament.organizerId !== userId) return res.status(403).json({ success: false, error: 'Not authorized' });
+
+    const poster = await prisma.tournamentPoster.findUnique({ where: { id: posterId } });
+    if (!poster || poster.tournamentId !== id) return res.status(404).json({ success: false, error: 'Poster not found' });
+
+    // Delete from Cloudinary if it's a cloud URL
+    if (poster.publicId && !poster.publicId.startsWith('local_')) {
+      try { await cloudinary.uploader.destroy(poster.publicId); } catch (e) { /* ignore */ }
+    }
+
+    await prisma.tournamentPoster.delete({ where: { id: posterId } });
+
+    res.json({ success: true, message: 'Poster deleted successfully' });
+  } catch (error) {
+    console.error('Delete poster error:', error);
+    res.status(500).json({ success: false, error: 'Failed to delete poster' });
+  }
+};
+
 // ==================== CATEGORY ENDPOINTS ====================
 
 // POST /api/tournaments/:id/categories - Create category
@@ -1664,6 +1691,7 @@ export {
   updateTournament,
   deleteTournament,
   uploadPosters,
+  deletePoster,
   uploadPaymentQR,
   updatePaymentInfo,
   upload, // Export multer middleware

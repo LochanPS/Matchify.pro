@@ -6,6 +6,7 @@ import {
   updateTournament,
   deleteTournament,
   uploadPosters,
+  deletePoster,
   uploadPaymentQR,
   updatePaymentInfo,
   upload,
@@ -58,6 +59,9 @@ router.delete('/:id', deleteTournament);
 
 // POST /api/tournaments/:id/posters - Upload posters (max 5 files)
 router.post('/:id/posters', upload.array('posters', 5), uploadPosters);
+
+// DELETE /api/tournaments/:id/posters/:posterId - Delete a poster
+router.delete('/:id/posters/:posterId', deletePoster);
 
 // POST /api/tournaments/:id/payment-qr - Upload payment QR code
 router.post('/:id/payment-qr', upload.single('paymentQR'), uploadPaymentQR);

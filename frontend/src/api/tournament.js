@@ -123,6 +123,15 @@ export const tournamentAPI = {
     return response.data;
   },
 
+  // Delete a poster (organizer only)
+  deletePoster: async (tournamentId, posterId) => {
+    const response = await axios.delete(
+      `${API_URL}/tournaments/${tournamentId}/posters/${posterId}`,
+      { headers: getAuthHeader() }
+    );
+    return response.data;
+  },
+
   // Update payment info (organizer only)
   updatePaymentInfo: async (tournamentId, paymentInfo) => {
     const response = await axios.put(

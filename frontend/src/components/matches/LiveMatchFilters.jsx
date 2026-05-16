@@ -80,7 +80,7 @@ const LiveMatchFilters = ({ filters, onFilterChange }) => {
           <option value="">All Formats</option>
           <option value="SINGLES">Singles</option>
           <option value="DOUBLES">Doubles</option>
-          <option value="MIXED_DOUBLES">Mixed Doubles</option>
+          <option value="MIXED_DOUBLES">Neutral Doubles</option>
         </select>
       </div>
 

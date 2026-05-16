@@ -172,9 +172,9 @@ const CategoryForm = ({ initialData, onSave, onCancel }) => {
             onChange={(e) => handleChange('gender', e.target.value)}
             className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-purple-500 transition-all"
           >
-            <option value="OPEN">Open (All)</option>
-            <option value="MALE">Male</option>
-            <option value="FEMALE">Female</option>
+            <option value="OPEN">Neutral</option>
+            <option value="MALE">Men's</option>
+            <option value="FEMALE">Women's</option>
           </select>
         </div>
       </div>

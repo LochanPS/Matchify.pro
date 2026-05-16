@@ -1,4 +1,5 @@
 ﻿import { getErrorMessage } from '../utils/errorMessage';
+import { getGenderLabel } from '../utils/genderLabel';
 import { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { getPartnerInvitation, confirmPartner } from '../api/partner';
@@ -269,7 +270,7 @@ const PartnerConfirmationPage = () => {
                     </span>
                     <span className="px-2.5 py-1 rounded-lg text-xs font-semibold"
                       style={{ background: 'rgba(0,212,255,0.15)', color: BRAND.cyan, border: '1px solid rgba(0,212,255,0.3)' }}>
-                      {invitation.category.gender}
+                      {getGenderLabel(invitation.category.gender)}
                     </span>
                   </div>
                 </div>

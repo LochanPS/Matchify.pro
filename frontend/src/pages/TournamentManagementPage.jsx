@@ -17,6 +17,7 @@ import {
   completeRefund,
 } from '../api/organizer';
 import { formatDateIndian } from '../utils/dateFormat';
+import { getGenderLabel } from '../utils/genderLabel';
 import {
   Users,
   Download,
@@ -564,7 +565,7 @@ export default function TournamentManagementPage() {
                       </td>
                       <td className="px-5 py-4">
                         <div className="text-white text-sm font-semibold">{registration.category.name}</div>
-                        <div className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>{registration.category.format} · {registration.category.gender}</div>
+                        <div className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>{registration.category.format} · {getGenderLabel(registration.category.gender)}</div>
                       </td>
                       <td className="px-5 py-4">
                         {registration.partner ? (

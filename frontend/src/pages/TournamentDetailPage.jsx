@@ -4,6 +4,7 @@ import { tournamentAPI } from '../api/tournament';
 import { useAuth } from '../contexts/AuthContext';
 import { formatDateLongIndian, formatDateTimeIndian } from '../utils/dateFormat';
 import { getImageUrl } from '../utils/imageUrl';
+import { getGenderLabel } from '../utils/genderLabel';
 import api from '../utils/api';
 import {
   MapPinIcon,
@@ -914,7 +915,7 @@ const TournamentDetailPage = () => {
                               {category.format}
                             </span>
                             <span className="px-2 py-0.5 rounded-full text-xs font-medium border" style={{ background: 'rgba(59,130,246,0.12)', color: '#60a5fa', borderColor: 'rgba(59,130,246,0.3)' }}>
-                              {category.gender}
+                              {getGenderLabel(category.gender)}
                             </span>
                             {category.ageGroup && (
                               <span className="px-2 py-0.5 rounded-full text-xs font-medium border" style={{ background: 'rgba(0,212,255,0.12)', color: '#00d4ff', borderColor: 'rgba(0,212,255,0.3)' }}>
@@ -1744,7 +1745,7 @@ const TournamentDetailPage = () => {
                   <option value="" style={{ background: '#0d1025' }}>Select a category</option>
                   {tournament?.categories?.map((category) => (
                     <option key={category.id} value={category.id} style={{ background: '#0d1025' }}>
-                      {category.name} - {category.format} ({category.gender})
+                      {category.name} - {category.format} ({getGenderLabel(category.gender)})
                     </option>
                   ))}
                 </select>

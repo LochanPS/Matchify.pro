@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { registrationAPI } from '../api/registration';
 import { Loader, Calendar, MapPin, Users, CreditCard, XCircle, Trophy, ArrowRight, ArrowLeft, X, CheckCircle, AlertTriangle, Upload, QrCode, Clock } from 'lucide-react';
 import { formatDateIndian } from '../utils/dateFormat';
+import { getGenderLabel } from '../utils/genderLabel';
 import { TrophyIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 import RefundDetailsModal from '../components/RefundDetailsModal';
 
@@ -277,7 +278,7 @@ export default function MyRegistrationsPage() {
                         <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl" style={{ background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.2)' }}>
                           <span className="font-bold text-white text-sm">{registration.category.name}</span>
                           <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: 'rgba(0,212,255,0.12)', color: '#00d4ff', border: '1px solid rgba(0,212,255,0.25)' }}>
-                            {registration.category.format} • {registration.category.gender}
+                            {registration.category.format} • {getGenderLabel(registration.category.gender)}
                           </span>
                         </span>
                       </div>

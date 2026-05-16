@@ -1,4 +1,5 @@
 ﻿import { getErrorMessage } from '../utils/errorMessage';
+import { getGenderLabel } from '../utils/genderLabel';
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
@@ -122,7 +123,7 @@ export default function CancellationRequestPage() {
             <div className="min-w-0">
               <p className="text-sm font-black text-white truncate">{registration.tournament?.name}</p>
               <p className="text-xs truncate" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                {registration.category?.name} · {registration.category?.format} · {registration.category?.gender}
+                {registration.category?.name} · {registration.category?.format} · {getGenderLabel(registration.category?.gender)}
               </p>
             </div>
           </div>

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { PlusIcon, TrashIcon, PencilIcon } from '@heroicons/react/24/outline';
 import { AlertTriangle, X, CheckCircle } from 'lucide-react';
 import CategoryForm from '../CategoryForm';
+import { getGenderLabel } from '../../../utils/genderLabel';
 
 const CategoriesStep = ({ formData, updateFormData, onNext, onPrev }) => {
   const [showForm, setShowForm] = useState(false);
@@ -106,7 +107,7 @@ const CategoriesStep = ({ formData, updateFormData, onNext, onPrev }) => {
                           <span className="font-bold text-gray-300">Format:</span> {category.format}
                         </div>
                         <div>
-                          <span className="font-bold text-gray-300">Gender:</span> {category.gender}
+                          <span className="font-bold text-gray-300">Gender:</span> {getGenderLabel(category.gender)}
                         </div>
                         {category.ageGroup && (
                           <div>

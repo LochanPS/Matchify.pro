@@ -1,4 +1,5 @@
 import { getErrorMessage } from '../utils/errorMessage';
+import { getGenderLabel } from '../utils/genderLabel';
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
@@ -273,7 +274,7 @@ const ManageCategoriesPage = () => {
                       <div className="grid grid-cols-2 gap-2">
                         {[
                           { label: 'Format', value: category.format },
-                          { label: 'Gender', value: category.gender },
+                          { label: 'Gender', value: getGenderLabel(category.gender) },
                           category.ageGroup && { label: 'Age Group', value: category.ageGroup },
                           { label: 'Registered', value: category.registrationCount || 0, color: B.cyan },
                         ].filter(Boolean).map(({ label, value, color }) => (

@@ -1,5 +1,6 @@
 import { CheckCircleIcon } from '@heroicons/react/24/solid';
 import { CheckCheck } from 'lucide-react';
+import { getGenderLabel } from '../../utils/genderLabel';
 
 export default function CategorySelector({ categories, selectedCategories, onSelectionChange, alreadyRegisteredCategories = [] }) {
   const handleToggle = (categoryId) => {
@@ -103,7 +104,7 @@ export default function CategorySelector({ categories, selectedCategories, onSel
                     color: category.gender === 'women' ? '#f472b6' : category.gender === 'mixed' ? '#00ff88' : '#00d4ff',
                     border: `1px solid ${category.gender === 'women' ? 'rgba(236,72,153,0.25)' : category.gender === 'mixed' ? 'rgba(0,255,136,0.2)' : 'rgba(0,212,255,0.2)'}`,
                   }}>
-                  {category.gender}
+                  {getGenderLabel(category.gender)}
                 </span>
                 {category.maxParticipants && (
                   <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>

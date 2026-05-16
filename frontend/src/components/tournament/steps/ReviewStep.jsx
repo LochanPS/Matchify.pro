@@ -1,5 +1,6 @@
 import { CheckCircleIcon, PencilIcon } from '@heroicons/react/24/outline';
 import { formatDateIndian } from '../../../utils/dateFormat';
+import { getGenderLabel } from '../../../utils/genderLabel';
 
 const ReviewStep = ({ formData, goToStep, onPrev, onSubmit, isSubmitting }) => {
   const formatDate = (dateString) => {
@@ -172,7 +173,7 @@ const ReviewStep = ({ formData, goToStep, onPrev, onSubmit, isSubmitting }) => {
                   <span className="font-bold text-gray-300">Format:</span> {category.format}
                 </div>
                 <div>
-                  <span className="font-bold text-gray-300">Gender:</span> {category.gender}
+                  <span className="font-bold text-gray-300">Gender:</span> {getGenderLabel(category.gender)}
                 </div>
                 {category.ageGroup && (
                   <div>

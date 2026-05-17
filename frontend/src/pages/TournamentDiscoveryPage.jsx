@@ -645,7 +645,7 @@ function buildShareMessage(tournament) {
       url,
       ``,
       `━━━━━━━━━━━━━━━━━━━`,
-      `Powered by Matchify.pro ✨`,
+      `www.matchify.pro`,
     ].join('\n'),
     url,
   };

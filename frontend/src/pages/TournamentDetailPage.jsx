@@ -185,7 +185,7 @@ const TournamentDetailPage = () => {
       url,
       ``,
       `━━━━━━━━━━━━━━━━━━━`,
-      `Powered by Matchify.pro ✨`,
+      `www.matchify.pro`,
     ].join('\n');
     if (navigator.share) {
       // Pass text only — URL already embedded. Prevents WhatsApp double-URL.

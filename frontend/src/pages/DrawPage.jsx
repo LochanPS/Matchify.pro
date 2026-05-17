@@ -232,32 +232,18 @@ const DrawPage = () => {
   };
 
   // Handle refresh parameter from URL (when returning from match completion)
+  // Page was hard-reloaded via window.location.href so initial fetch already has fresh data.
+  // Just clear the param and show a brief success message — no re-fetch needed.
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
     const shouldRefresh = urlParams.get('refresh');
 
-    if (shouldRefresh === 'true' && activeCategory) {
-      setRefreshing(true);
-      setSuccess('Match completed! Updating bracket...');
-
-      const run = async () => {
-        try {
-          await fetchDrawPageFull(activeCategory.id);
-        } catch (_) {}
-        setRefreshing(false);
-        setSuccess('Bracket updated successfully! Winner advanced to next round.');
-
-        // Clear the refresh parameter from URL without a hard reload
-        const newSearch = location.search.replace(/[?&]refresh=true/, '').replace(/^&/, '?');
-        window.history.replaceState({}, '', location.pathname + (newSearch || ''));
-
-        setTimeout(() => setSuccess(null), 5000);
-      };
-
-      const t = setTimeout(run, 500);
-      return () => clearTimeout(t);
+    if (shouldRefresh === 'true') {
+      // Clear ?refresh=true from URL
+      const newSearch = location.search.replace(/[?&]refresh=true/, '').replace(/^&/, '?');
+      window.history.replaceState({}, '', location.pathname + (newSearch || ''));
     }
-  }, [activeCategory, location.search]);
+  }, [location.search]);
 
   const fetchTournamentData = async () => {
     try {

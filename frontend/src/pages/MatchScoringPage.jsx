@@ -8,6 +8,7 @@ import {
   AlertTriangle, X, Clock, Calendar, ArrowLeft
 } from 'lucide-react';
 import { pauseTimer, resumeTimer } from '../api/matches';
+import SlideToConfirm from '../components/SlideToConfirm';
 
 const B = {
   bg: '#07071a',
@@ -527,11 +528,15 @@ const MatchScoringPage = () => {
                   <p className="text-base font-bold text-white">Set {completedSetData.setNumber}: {completedSetData.score}</p>
                 </div>
                 <div className="px-5 pb-5">
-                  <button onClick={handleConfirmMatchWinner}
-                    className="w-full py-3.5 rounded-xl font-black text-sm transition-all flex items-center justify-center gap-2"
-                    style={{ background: 'linear-gradient(135deg,#f59e0b,#fbbf24)', color: '#07071a', boxShadow: '0 4px 16px rgba(245,158,11,0.35)' }}>
-                    <Trophy className="w-4 h-4" /> Confirm {completedSetData.matchWinnerName} as Winner
-                  </button>
+                  <SlideToConfirm
+                    label={`Slide to confirm ${completedSetData.matchWinnerName} as Winner →`}
+                    onConfirm={handleConfirmMatchWinner}
+                    color="#f59e0b"
+                    disabled={saving}
+                  />
+                  <p className="text-center text-xs mt-2" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                    Slide right to confirm
+                  </p>
                 </div>
               </>
             ) : (

@@ -476,552 +476,209 @@ router.put('/:matchId/resume', authenticate, async (req, res) => {
   }
 });
 
-// End match
+// End match — optimised: respond immediately, run non-critical work in background
 router.put('/:matchId/end', authenticate, async (req, res) => {
   try {
     const { matchId } = req.params;
     const { winnerId, finalScore } = req.body;
     const userId = req.user.userId || req.user.id;
-    
-    // 🔍 DEBUG: Log match completion request
-    console.log(`\n🏁 Match End Request - Match ${matchId}`);
-    console.log(`   Winner ID: ${winnerId}`);
-    console.log(`   Has finalScore: ${!!finalScore}`);
-    console.log(`   finalScore.sets: ${finalScore?.sets ? JSON.stringify(finalScore.sets) : 'MISSING'}`);
-    
-    // ⚠️ VALIDATION: Ensure scoreJson is provided
-    if (!finalScore || !finalScore.sets || !Array.isArray(finalScore.sets) || finalScore.sets.length === 0) {
-      console.error(`❌ Match ${matchId} - Cannot complete without score data!`);
-      return res.status(400).json({ 
-        success: false, 
-        error: 'Cannot complete match without score data. Please ensure all sets are recorded.' 
-      });
+
+    if (!finalScore?.sets?.length) {
+      return res.status(400).json({ success: false, error: 'Cannot complete match without score data.' });
     }
 
+    // ── 1. Fetch match ─────────────────────────────────────────────────────────
     const match = await prisma.match.findUnique({
       where: { id: matchId },
-      include: {
-        tournament: { select: { organizerId: true } }
-      }
+      include: { tournament: { select: { organizerId: true } } }
     });
+    if (!match) return res.status(404).json({ success: false, error: 'Match not found' });
 
-    if (!match) {
-      return res.status(404).json({ success: false, error: 'Match not found' });
-    }
-
-    // Check authorization
     const userRoles = req.user.roles || [];
-    const isAuthorized = 
-      match.umpireId === userId ||
-      match.tournament.organizerId === userId ||
-      userRoles.includes('ADMIN');
-
-    if (!isAuthorized) {
+    if (match.umpireId !== userId && match.tournament.organizerId !== userId && !userRoles.includes('ADMIN')) {
       return res.status(403).json({ success: false, error: 'Not authorized to end this match' });
     }
 
-    // Calculate final duration if timer exists
-    let totalDuration = null;
-    if (finalScore && finalScore.timer && finalScore.timer.startedAt) {
-      const startTime = new Date(finalScore.timer.startedAt).getTime();
-      const endTime = Date.now();
+    // ── 2. Compute duration ────────────────────────────────────────────────────
+    if (finalScore.timer?.startedAt) {
       const totalPausedTime = finalScore.timer.totalPausedTime || 0;
-      totalDuration = Math.floor((endTime - startTime - totalPausedTime) / 1000); // in seconds
-    }
-
-    // Update final score with completion time
-    if (finalScore && finalScore.timer) {
+      const totalDuration = Math.floor((Date.now() - new Date(finalScore.timer.startedAt).getTime() - totalPausedTime) / 1000);
       finalScore.timer.completedAt = new Date().toISOString();
       finalScore.timer.totalDuration = totalDuration;
       finalScore.timer.totalDurationFormatted = formatDuration(totalDuration);
     }
 
-    // Get player details for notifications and stats
-    // Guard: guest IDs (prefixed with "guest-") are not real User records
+    // ── 3. Fetch players + parent match in parallel ───────────────────────────
     const isGuestId = (id) => !id || id.startsWith('guest-');
-    const player1 = isGuestId(match.player1Id) ? null : await prisma.user.findUnique({ where: { id: match.player1Id } });
-    const player2 = isGuestId(match.player2Id) ? null : await prisma.user.findUnique({ where: { id: match.player2Id } });
     const loserId = winnerId === match.player1Id ? match.player2Id : match.player1Id;
-    const winner = winnerId === match.player1Id ? player1 : player2;
-    const loser = winnerId === match.player1Id ? player2 : player1;
 
-    // Update match
-    const scoreJsonString = JSON.stringify(finalScore);
-    console.log(`   Saving scoreJson (${scoreJsonString.length} chars): ${scoreJsonString.substring(0, 100)}...`);
-    
-    const updatedMatch = await prisma.match.update({
-      where: { id: matchId },
-      data: {
-        status: 'COMPLETED',
-        winnerId: winnerId,
-        completedAt: new Date(),
-        scoreJson: scoreJsonString,
-        updatedAt: new Date()
-      },
-      include: {
-        tournament: true,
-        category: true
-      }
-    });
-    
-    console.log(`✅ Match ${matchId} completed successfully with scoreJson saved`);
-
-    // 1. Update Player Statistics
-    if (player1 && player2) {
-      // Update winner stats
-      await prisma.user.update({
-        where: { id: winnerId },
-        data: {
-          matchesWon: { increment: 1 },
-          tournamentsPlayed: { increment: 0 } // Will be updated when tournament ends
-        }
-      });
-
-      // Update loser stats
-      await prisma.user.update({
-        where: { id: loserId },
-        data: {
-          matchesLost: { increment: 1 }
-        }
-      });
-    }
-
-    // 2. Advance Winner to Next Round (Update Bracket)
+    // Determine parent match lookup
+    let parentMatchPromise = Promise.resolve(null);
     if (match.parentMatchId) {
-      const parentMatch = await prisma.match.findUnique({
-        where: { id: match.parentMatchId }
-      });
-
-      if (parentMatch) {
-        // Determine which position the winner should take in parent match
-        const updateData = {};
-        if (match.winnerPosition === 'player1') {
-          updateData.player1Id = winnerId;
-        } else if (match.winnerPosition === 'player2') {
-          updateData.player2Id = winnerId;
+      parentMatchPromise = prisma.match.findUnique({ where: { id: match.parentMatchId } });
+    } else if (match.stage === 'KNOCKOUT' && match.round > 1) {
+      parentMatchPromise = prisma.match.findFirst({
+        where: {
+          tournamentId: match.tournamentId,
+          categoryId: match.categoryId,
+          round: match.round - 1,
+          matchNumber: Math.ceil(match.matchNumber / 2),
+          stage: 'KNOCKOUT'
         }
-
-        // Update parent match with winner
-        await prisma.match.update({
-          where: { id: match.parentMatchId },
-          data: updateData
-        });
-      }
+      });
     }
 
-    // 3. Send Notifications
-    try {
-      // Determine round name for notifications
-      const getRoundName = (round) => {
-        if (round === 1) return 'Final';
-        if (round === 2) return 'Semi Finals';
-        if (round === 3) return 'Quarter Finals';
-        if (round === 4) return 'Round of 16';
-        return `Round ${round}`;
-      };
+    const [player1, player2, parentMatch, updatedMatch] = await Promise.all([
+      isGuestId(match.player1Id) ? Promise.resolve(null) : prisma.user.findUnique({ where: { id: match.player1Id }, select: { id: true, name: true } }),
+      isGuestId(match.player2Id) ? Promise.resolve(null) : prisma.user.findUnique({ where: { id: match.player2Id }, select: { id: true, name: true } }),
+      parentMatchPromise,
+      // ── 4. Mark match COMPLETED ──────────────────────────────────────────────
+      prisma.match.update({
+        where: { id: matchId },
+        data: { status: 'COMPLETED', winnerId, completedAt: new Date(), scoreJson: JSON.stringify(finalScore), updatedAt: new Date() },
+        include: { tournament: true, category: true }
+      })
+    ]);
 
-      const roundName = getRoundName(match.round);
-      const matchLabel = `${roundName} - Match #${match.matchNumber}`;
+    const winner = winnerId === match.player1Id ? player1 : player2;
+    const loser  = winnerId === match.player1Id ? player2 : player1;
 
-      // Get umpire details for organizer notification
-      let umpireInfo = '';
-      if (match.umpireId) {
-        const umpire = await prisma.user.findUnique({
-          where: { id: match.umpireId },
-          select: { name: true }
-        });
-        umpireInfo = umpire ? `\nUmpire: ${umpire.name}` : '';
-      }
-
-      const courtInfo = match.courtNumber ? `\nCourt: ${match.courtNumber}` : '';
-
-      // Notify winner
-      await prisma.notification.create({
-        data: {
-          userId: winnerId,
-          type: 'MATCH_WON',
-          title: '🏆 Victory!',
-          message: `Congratulations! You won your ${roundName} match in ${updatedMatch.tournament.name} - ${updatedMatch.category.name}`,
-          data: JSON.stringify({
-            matchId: match.id,
-            tournamentId: match.tournamentId,
-            categoryId: match.categoryId,
-            score: finalScore,
-            round: match.round,
-            roundName: roundName
-          })
-        }
-      });
-
-      // Notify loser
-      await prisma.notification.create({
-        data: {
-          userId: loserId,
-          type: 'MATCH_LOST',
-          title: 'Match Complete',
-          message: `Your ${roundName} match in ${updatedMatch.tournament.name} - ${updatedMatch.category.name} has ended`,
-          data: JSON.stringify({
-            matchId: match.id,
-            tournamentId: match.tournamentId,
-            categoryId: match.categoryId,
-            score: finalScore,
-            round: match.round,
-            roundName: roundName
-          })
-        }
-      });
-
-      // Notify organizer with detailed info
-      await prisma.notification.create({
-        data: {
-          userId: updatedMatch.tournament.organizerId,
-          type: 'MATCH_COMPLETED',
-          title: 'Match Completed',
-          message: `${matchLabel} completed: ${winner?.name} defeated ${loser?.name}${umpireInfo}${courtInfo}`,
-          data: JSON.stringify({
-            matchId: match.id,
-            tournamentId: match.tournamentId,
-            categoryId: match.categoryId,
-            winnerId: winnerId,
-            loserId: loserId,
-            round: match.round,
-            roundName: roundName,
-            courtNumber: match.courtNumber,
-            umpireId: match.umpireId
-          })
-        }
-      });
-    } catch (notifError) {
-      console.error('Error sending notifications:', notifError);
-      // Don't fail the request if notifications fail
+    // ── 5. Advance winner to next round (critical — draw page needs this) ──────
+    if (parentMatch) {
+      const winnerPos = match.winnerPosition || (match.matchNumber % 2 === 1 ? 'player1' : 'player2');
+      const advanceData = winnerPos === 'player1' ? { player1Id: winnerId } : { player2Id: winnerId };
+      const bothReady   = winnerPos === 'player1' ? !!parentMatch.player2Id : !!parentMatch.player1Id;
+      if (bothReady) advanceData.status = 'READY';
+      await prisma.match.update({ where: { id: parentMatch.id }, data: advanceData });
     }
 
-    // 4. Update Round Robin Standings (if applicable)
-    try {
-      const draw = await prisma.draw.findUnique({
-        where: { tournamentId_categoryId: { tournamentId: match.tournamentId, categoryId: match.categoryId } }
-      });
-      
-      if (draw) {
-        // SAFETY CHECK: Validate bracket JSON before parsing
-        if (!draw.bracketJson) {
-          console.warn('⚠️ No bracketJson found in draw, skipping bracket update');
-          throw new Error('No bracketJson found');
-        }
-
-        let bracketJson;
-        try {
-          bracketJson = typeof draw.bracketJson === 'string' ? JSON.parse(draw.bracketJson) : draw.bracketJson;
-        } catch (parseError) {
-          console.error('❌ Failed to parse bracketJson:', parseError);
-          throw new Error('Invalid bracketJson format');
-        }
-
-        // SAFETY CHECK: Validate bracket structure
-        if (!bracketJson || typeof bracketJson !== 'object') {
-          console.error('❌ Invalid bracket structure');
-          throw new Error('Invalid bracket structure');
-        }
-        
-        if (bracketJson.format === 'ROUND_ROBIN' || bracketJson.format === 'ROUND_ROBIN_KNOCKOUT') {
-          console.log('🔍 Round Robin match completed, updating standings and match result...');
-          
-          // Find which group this match belongs to
-          let targetGroup = null;
-          for (const group of bracketJson.groups) {
-            const hasPlayer1 = group.participants.some(p => p.id === match.player1Id);
-            const hasPlayer2 = group.participants.some(p => p.id === match.player2Id);
-            if (hasPlayer1 && hasPlayer2) {
-              targetGroup = group;
-              break;
-            }
-          }
-
-          if (targetGroup) {
-            // Get all completed matches for this group
-            const allMatches = await prisma.match.findMany({
-              where: {
-                tournamentId: match.tournamentId,
-                categoryId: match.categoryId,
-                status: 'COMPLETED'
-              }
-            });
-
-            // Filter matches that belong to this group
-            const groupMatches = allMatches.filter(m => {
-              const hasP1 = targetGroup.participants.some(p => p.id === m.player1Id);
-              const hasP2 = targetGroup.participants.some(p => p.id === m.player2Id);
-              return hasP1 && hasP2;
-            });
-
-            // Reset all participant stats
-            targetGroup.participants.forEach(p => {
-              p.played = 0;
-              p.wins = 0;
-              p.losses = 0;
-              p.points = 0;
-            });
-
-            // Calculate new standings
-            groupMatches.forEach(m => {
-              const player1 = targetGroup.participants.find(p => p.id === m.player1Id);
-              const player2 = targetGroup.participants.find(p => p.id === m.player2Id);
-
-              if (player1 && player2) {
-                player1.played++;
-                player2.played++;
-
-                if (m.winnerId === m.player1Id) {
-                  player1.wins++;
-                  player1.points += 2; // Win = 2 points
-                  player2.losses++;
-                } else if (m.winnerId === m.player2Id) {
-                  player2.wins++;
-                  player2.points += 2; // Win = 2 points
-                  player1.losses++;
-                }
-              }
-            });
-
-            // Sort participants by points (descending), then by wins
-            targetGroup.participants.sort((a, b) => {
-              if (b.points !== a.points) return b.points - a.points;
-              return b.wins - a.wins;
-            });
-
-            // CRITICAL FIX: Update the match result in bracket JSON
-            // Find and update the specific match with winner info
-            const matchInBracket = targetGroup.matches.find(m => m.matchNumber === match.matchNumber);
-            if (matchInBracket) {
-              matchInBracket.status = 'completed';
-              matchInBracket.winner = winnerId === match.player1Id ? 1 : 2;
-              matchInBracket.winnerId = winnerId;
-              matchInBracket.score = finalScore;
-              console.log(`✅ Updated match ${match.matchNumber} in bracket JSON with winner`);
-            }
-
-            // Update the draw
-            await prisma.draw.update({
-              where: { tournamentId_categoryId: { tournamentId: match.tournamentId, categoryId: match.categoryId } },
-              data: { bracketJson: JSON.stringify(bracketJson), updatedAt: new Date() }
-            });
-
-            console.log(`✅ Updated standings for ${targetGroup.groupName}:`, targetGroup.participants.map(p => `${p.name}: ${p.points}pts (${p.wins}W-${p.losses}L)`));
-          } else if (match.stage === 'KNOCKOUT' && bracketJson.knockout && bracketJson.knockout.rounds) {
-            // This is a knockout stage match in Round Robin + Knockout format
-            console.log('🔍 Round Robin Knockout stage match completed, updating bracket JSON...');
-            
-            // Find the match in the knockout bracket by round and position
-            const totalRounds = bracketJson.knockout.rounds.length;
-            const bracketRoundIndex = totalRounds - match.round;
-            
-            if (bracketRoundIndex >= 0 && bracketRoundIndex < bracketJson.knockout.rounds.length) {
-              const bracketRound = bracketJson.knockout.rounds[bracketRoundIndex];
-              
-              // Get all matches in this round from database to find position
-              const roundMatches = await prisma.match.findMany({
-                where: {
-                  tournamentId: match.tournamentId,
-                  categoryId: match.categoryId,
-                  stage: 'KNOCKOUT',
-                  round: match.round
-                },
-                orderBy: { matchNumber: 'asc' }
-              });
-              
-              const matchPositionInRound = roundMatches.findIndex(m => m.id === match.id);
-              
-              if (matchPositionInRound !== -1 && matchPositionInRound < bracketRound.matches.length) {
-                const completedMatchInBracket = bracketRound.matches[matchPositionInRound];
-                
-                completedMatchInBracket.status = 'completed';
-                completedMatchInBracket.winner = {
-                  id: winnerId,
-                  name: winner?.name || 'Winner'
-                };
-                completedMatchInBracket.winnerId = winnerId;
-                completedMatchInBracket.score = finalScore;
-                console.log(`✅ Updated knockout match at position ${matchPositionInRound} in bracket JSON with winner`);
-                
-                // Advance winner to parent match in knockout bracket
-                if (match.parentMatchId) {
-                  console.log(`🔄 Advancing winner to parent match...`);
-                  
-                  const parentDbMatch = await prisma.match.findUnique({
-                    where: { id: match.parentMatchId }
-                  });
-                  
-                  if (parentDbMatch) {
-                    const parentBracketRoundIndex = totalRounds - parentDbMatch.round;
-                    
-                    if (parentBracketRoundIndex >= 0 && parentBracketRoundIndex < bracketJson.knockout.rounds.length) {
-                      const parentBracketRound = bracketJson.knockout.rounds[parentBracketRoundIndex];
-                      
-                      // Get parent round matches to find position
-                      const parentRoundMatches = await prisma.match.findMany({
-                        where: {
-                          tournamentId: match.tournamentId,
-                          categoryId: match.categoryId,
-                          stage: 'KNOCKOUT',
-                          round: parentDbMatch.round
-                        },
-                        orderBy: { matchNumber: 'asc' }
-                      });
-                      
-                      const parentPositionInRound = parentRoundMatches.findIndex(m => m.id === parentDbMatch.id);
-                      
-                      if (parentPositionInRound !== -1 && parentPositionInRound < parentBracketRound.matches.length) {
-                        const parentMatchInBracket = parentBracketRound.matches[parentPositionInRound];
-                        
-                        if (match.winnerPosition === 'player1') {
-                          parentMatchInBracket.player1 = {
-                            id: winnerId,
-                            name: winner?.name || 'Winner'
-                          };
-                          console.log(`✅ Advanced ${winner?.name} to parent match as player1`);
-                        } else if (match.winnerPosition === 'player2') {
-                          parentMatchInBracket.player2 = {
-                            id: winnerId,
-                            name: winner?.name || 'Winner'
-                          };
-                          console.log(`✅ Advanced ${winner?.name} to parent match as player2`);
-                        }
-                        
-                        if (parentMatchInBracket.player1 && parentMatchInBracket.player2) {
-                          parentMatchInBracket.status = 'ready';
-                          console.log(`✅ Parent match is now READY`);
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-            
-            // Update the draw
-            await prisma.draw.update({
-              where: { tournamentId_categoryId: { tournamentId: match.tournamentId, categoryId: match.categoryId } },
-              data: { bracketJson: JSON.stringify(bracketJson), updatedAt: new Date() }
-            });
-          }
-        } else if (bracketJson.format === 'KNOCKOUT' || bracketJson.format === 'single_elimination') {
-          // Update knockout bracket match result
-          console.log('🔍 Knockout match completed, updating bracket JSON...');
-          
-          // SAFETY CHECK: Validate rounds array exists
-          if (!bracketJson.rounds || !Array.isArray(bracketJson.rounds)) {
-            console.error('❌ Invalid bracket structure: rounds array missing');
-            throw new Error('Invalid bracket structure: rounds array missing');
-          }
-          
-          // Find the match in the bracket
-          let completedMatchInBracket = null;
-          for (const round of bracketJson.rounds) {
-            if (!round.matches || !Array.isArray(round.matches)) {
-              console.warn('⚠️ Round missing matches array, skipping');
-              continue;
-            }
-            
-            const matchInBracket = round.matches.find(m => m.matchNumber === match.matchNumber);
-            if (matchInBracket) {
-              matchInBracket.status = 'completed';
-              matchInBracket.winner = {
-                id: winnerId,
-                name: winner?.name || 'Winner'
-              };
-              matchInBracket.winnerId = winnerId;
-              matchInBracket.score = finalScore;
-              completedMatchInBracket = matchInBracket;
-              console.log(`✅ Updated knockout match ${match.matchNumber} in bracket JSON with winner`);
-              break;
-            }
-          }
-          
-          // CRITICAL FIX: Advance winner to parent match in bracket JSON
-          if (match.parentMatchId && completedMatchInBracket) {
-            console.log(`🔄 Advancing winner to parent match...`);
-            
-            // Find parent match in bracket JSON
-            const parentDbMatch = await prisma.match.findUnique({
-              where: { id: match.parentMatchId }
-            });
-            
-            if (parentDbMatch) {
-              let parentMatchFound = false;
-              for (const round of bracketJson.rounds) {
-                if (!round.matches || !Array.isArray(round.matches)) continue;
-                
-                const parentMatchInBracket = round.matches.find(m => m.matchNumber === parentDbMatch.matchNumber);
-                if (parentMatchInBracket) {
-                  // Determine which position the winner should take
-                  if (match.winnerPosition === 'player1') {
-                    parentMatchInBracket.player1 = {
-                      id: winnerId,
-                      name: winner?.name || 'Winner'
-                    };
-                    console.log(`✅ Advanced ${winner?.name} to parent match ${parentDbMatch.matchNumber} as player1`);
-                  } else if (match.winnerPosition === 'player2') {
-                    parentMatchInBracket.player2 = {
-                      id: winnerId,
-                      name: winner?.name || 'Winner'
-                    };
-                    console.log(`✅ Advanced ${winner?.name} to parent match ${parentDbMatch.matchNumber} as player2`);
-                  }
-                  
-                  // Update parent match status to READY if both players are now assigned
-                  if (parentMatchInBracket.player1 && parentMatchInBracket.player2) {
-                    parentMatchInBracket.status = 'ready';
-                    console.log(`✅ Parent match ${parentDbMatch.matchNumber} is now READY`);
-                  }
-                  parentMatchFound = true;
-                  break;
-                }
-              }
-              
-              if (!parentMatchFound) {
-                console.warn(`⚠️ Parent match ${parentDbMatch.matchNumber} not found in bracket JSON`);
-              }
-            } else {
-              console.warn(`⚠️ Parent match with ID ${match.parentMatchId} not found in database`);
-            }
-          }
-          
-          // SAFETY CHECK: Validate bracket JSON before saving
-          try {
-            JSON.stringify(bracketJson);
-          } catch (stringifyError) {
-            console.error('❌ Bracket JSON cannot be stringified:', stringifyError);
-            throw new Error('Invalid bracket JSON structure');
-          }
-          
-          // Update the draw
-          await prisma.draw.update({
-            where: { tournamentId_categoryId: { tournamentId: match.tournamentId, categoryId: match.categoryId } },
-            data: { bracketJson: JSON.stringify(bracketJson), updatedAt: new Date() }
-          });
-          
-          console.log('✅ Bracket JSON updated successfully');
-        }
-      }
-    } catch (standingsError) {
-      console.error('❌ Error updating bracket JSON:', standingsError);
-      // Don't fail the request if bracket update fails
-    }
-
+    // ── 6. RESPOND TO CLIENT — everything below is non-critical ───────────────
     res.json({
       success: true,
       message: 'Match ended successfully',
       match: updatedMatch,
       summary: {
         winner: winner?.name,
-        loser: loser?.name,
+        loser:  loser?.name,
         duration: finalScore?.timer?.totalDurationFormatted,
-        finalScore: finalScore
+        finalScore
       }
     });
+
+    // ── 7. Background: stats + notifications + bracket JSON ───────────────────
+    // Fire-and-forget — client already received success response above
+    const runBackground = async () => {
+      const getRoundName = (r) => r === 1 ? 'Final' : r === 2 ? 'Semi Finals' : r === 3 ? 'Quarter Finals' : r === 4 ? 'Round of 16' : `Round ${r}`;
+      const roundName = getRoundName(match.round);
+      const notifData = JSON.stringify({ matchId: match.id, tournamentId: match.tournamentId, categoryId: match.categoryId, round: match.round, roundName });
+
+      try {
+        // Stats + umpire lookup + notifications all in parallel
+        const tasks = [];
+
+        // Player stats
+        if (!isGuestId(winnerId) && !isGuestId(loserId) && player1 && player2) {
+          tasks.push(prisma.user.update({ where: { id: winnerId }, data: { matchesWon: { increment: 1 } } }));
+          tasks.push(prisma.user.update({ where: { id: loserId },  data: { matchesLost: { increment: 1 } } }));
+        }
+
+        // Notifications
+        if (!isGuestId(winnerId)) {
+          tasks.push(prisma.notification.create({ data: {
+            userId: winnerId, type: 'MATCH_WON', title: '🏆 Victory!',
+            message: `Congratulations! You won your ${roundName} match in ${updatedMatch.tournament.name} - ${updatedMatch.category.name}`,
+            data: notifData
+          }}));
+        }
+        if (!isGuestId(loserId)) {
+          tasks.push(prisma.notification.create({ data: {
+            userId: loserId, type: 'MATCH_LOST', title: 'Match Complete',
+            message: `Your ${roundName} match in ${updatedMatch.tournament.name} - ${updatedMatch.category.name} has ended`,
+            data: notifData
+          }}));
+        }
+        tasks.push(prisma.notification.create({ data: {
+          userId: updatedMatch.tournament.organizerId, type: 'MATCH_COMPLETED', title: 'Match Completed',
+          message: `Match #${match.matchNumber} (${roundName}) completed: ${winner?.name || 'Player'} defeated ${loser?.name || 'Player'}`,
+          data: notifData
+        }}));
+
+        await Promise.all(tasks);
+      } catch (bgErr) {
+        console.error('Background stats/notif error:', bgErr);
+      }
+
+      // Bracket JSON update (standings / advance in stored JSON)
+      try {
+        const draw = await prisma.draw.findUnique({
+          where: { tournamentId_categoryId: { tournamentId: match.tournamentId, categoryId: match.categoryId } }
+        });
+        if (!draw?.bracketJson) return;
+
+        const bracketJson = typeof draw.bracketJson === 'string' ? JSON.parse(draw.bracketJson) : draw.bracketJson;
+        if (!bracketJson || typeof bracketJson !== 'object') return;
+
+        const winnerName = winner?.name || 'Winner';
+
+        if (bracketJson.format === 'ROUND_ROBIN' || (bracketJson.format === 'ROUND_ROBIN_KNOCKOUT' && match.stage === 'GROUP')) {
+          // Find group
+          let targetGroup = null;
+          for (const group of (bracketJson.groups || [])) {
+            if (group.participants?.some(p => p.id === match.player1Id) &&
+                group.participants?.some(p => p.id === match.player2Id)) {
+              targetGroup = group; break;
+            }
+          }
+          if (targetGroup) {
+            const allMatches = await prisma.match.findMany({ where: { tournamentId: match.tournamentId, categoryId: match.categoryId, status: 'COMPLETED' } });
+            const groupMatches = allMatches.filter(m => targetGroup.participants.some(p => p.id === m.player1Id) && targetGroup.participants.some(p => p.id === m.player2Id));
+            targetGroup.participants.forEach(p => { p.played = 0; p.wins = 0; p.losses = 0; p.points = 0; });
+            groupMatches.forEach(m => {
+              const p1 = targetGroup.participants.find(p => p.id === m.player1Id);
+              const p2 = targetGroup.participants.find(p => p.id === m.player2Id);
+              if (!p1 || !p2) return;
+              p1.played++; p2.played++;
+              if (m.winnerId === m.player1Id) { p1.wins++; p1.points += 2; p2.losses++; }
+              else if (m.winnerId === m.player2Id) { p2.wins++; p2.points += 2; p1.losses++; }
+            });
+            targetGroup.participants.sort((a, b) => b.points !== a.points ? b.points - a.points : b.wins - a.wins);
+            const mib = targetGroup.matches?.find(m => m.matchNumber === match.matchNumber);
+            if (mib) { mib.status = 'completed'; mib.winner = winnerId === match.player1Id ? 1 : 2; mib.winnerId = winnerId; mib.score = finalScore; }
+            await prisma.draw.update({ where: { tournamentId_categoryId: { tournamentId: match.tournamentId, categoryId: match.categoryId } }, data: { bracketJson: JSON.stringify(bracketJson), updatedAt: new Date() } });
+          }
+        } else if (bracketJson.format === 'KNOCKOUT' || bracketJson.format === 'single_elimination' ||
+                   (bracketJson.format === 'ROUND_ROBIN_KNOCKOUT' && match.stage === 'KNOCKOUT')) {
+          const rounds = bracketJson.knockout?.rounds || bracketJson.rounds;
+          if (!Array.isArray(rounds)) return;
+          // Mark completed match
+          for (const round of rounds) {
+            const mib = round.matches?.find(m => m.matchNumber === match.matchNumber);
+            if (mib) { mib.status = 'completed'; mib.winner = { id: winnerId, name: winnerName }; mib.winnerId = winnerId; mib.score = finalScore; break; }
+          }
+          // Advance winner in bracket JSON
+          if (parentMatch) {
+            for (const round of rounds) {
+              const pmib = round.matches?.find(m => m.matchNumber === parentMatch.matchNumber);
+              if (pmib) {
+                const wp = match.winnerPosition || (match.matchNumber % 2 === 1 ? 'player1' : 'player2');
+                pmib[wp] = { id: winnerId, name: winnerName };
+                if (pmib.player1 && pmib.player2) pmib.status = 'ready';
+                break;
+              }
+            }
+          }
+          await prisma.draw.update({ where: { tournamentId_categoryId: { tournamentId: match.tournamentId, categoryId: match.categoryId } }, data: { bracketJson: JSON.stringify(bracketJson), updatedAt: new Date() } });
+        }
+      } catch (bracketErr) {
+        console.error('Background bracket JSON update error:', bracketErr);
+      }
+    };
+
+    runBackground(); // intentionally not awaited
+
   } catch (error) {
     console.error('Error ending match:', error);
-    res.status(500).json({ success: false, error: 'Failed to end match' });
+    if (!res.headersSent) res.status(500).json({ success: false, error: 'Failed to end match' });
   }
 });
 

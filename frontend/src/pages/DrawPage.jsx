@@ -87,6 +87,8 @@ const DrawPage = () => {
   const [tournamentUmpires, setTournamentUmpires] = useState([]);
   const [showUmpireModal, setShowUmpireModal] = useState(false);
   const [selectedMatchForUmpire, setSelectedMatchForUmpire] = useState(null);
+  const pollIntervalRef = React.useRef(null);
+  const activeCategoryIdRef = React.useRef(null); // stable ref for polling closure
   const [tournamentStats, setTournamentStats] = useState({
     totalPlayers: 0,
     confirmedPlayers: 0,
@@ -142,6 +144,13 @@ const DrawPage = () => {
       setCategories(cats || []);
       setMatches(fetchedMatches || []);
       setTournamentStats(stats);
+
+      // Prefetch umpires in background so ASSIGN modal opens instantly
+      if (user?.id) {
+        tournamentAPI.getTournamentUmpires(tournamentId)
+          .then(r => setTournamentUmpires(r.umpires || []))
+          .catch(() => {});
+      }
 
       // Set active category from response categories
       const active = catId
@@ -244,6 +253,41 @@ const DrawPage = () => {
       window.history.replaceState({}, '', location.pathname + (newSearch || ''));
     }
   }, [location.search]);
+
+  // Lightweight match-only refresh — used by polling and after local actions
+  const fetchMatchesOnly = React.useCallback(async (catId) => {
+    const id = catId || activeCategoryIdRef.current;
+    if (!tournamentId || !id) return;
+    try {
+      const res = await api.get(
+        `/tournaments/${tournamentId}/categories/${id}/matches`,
+        { headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' } }
+      );
+      setMatches(res.data.matches || []);
+    } catch {
+      // silent — polling errors should not surface to user
+    }
+  }, [tournamentId]);
+
+  // Keep ref in sync so polling closure always has the latest categoryId
+  React.useEffect(() => {
+    activeCategoryIdRef.current = activeCategory?.id || null;
+  }, [activeCategory?.id]);
+
+  // Poll for match updates every 15s — lightweight, only fetches matches array
+  // Keeps draw page live for organizers watching while umpires play
+  React.useEffect(() => {
+    if (!tournamentId || !activeCategory?.id) return;
+
+    // Start polling
+    pollIntervalRef.current = setInterval(() => {
+      fetchMatchesOnly(activeCategoryIdRef.current);
+    }, 15000);
+
+    return () => {
+      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
+    };
+  }, [tournamentId, activeCategory?.id, fetchMatchesOnly]);
 
   // Silent auto-repair: for ROUND_ROBIN_KNOCKOUT, when organizer views the knockout
   // stage, silently call repair-knockout once so winner propagation is up-to-date.
@@ -668,8 +712,7 @@ const DrawPage = () => {
 
   // Open umpire assignment modal - create match if needed
   const openUmpireModal = async (matchData, bracketMatch) => {
-    // Fetch umpires first
-    await fetchTournamentUmpires();
+    // Umpires already prefetched during page load — no blocking fetch needed
     
     // If we have a database match, use it directly
     if (matchData && matchData.id) {
@@ -706,18 +749,18 @@ const DrawPage = () => {
   // Assign umpire to match
   const assignUmpireToMatch = async (umpireId) => {
     if (!selectedMatchForUmpire) return;
-    
+
+    const matchId = selectedMatchForUmpire.id;
     try {
-      await api.put(`/matches/${selectedMatchForUmpire.id}/umpire`, { umpireId });
+      await api.put(`/matches/${matchId}/umpire`, { umpireId });
+
+      // Optimistic patch — just update umpireId in local matches state.
+      // No full refetch needed; umpire assignment doesn't change bracket structure.
+      setMatches(prev => prev.map(m => m.id === matchId ? { ...m, umpireId } : m));
+
       setSuccess('Umpire assigned successfully!');
       setShowUmpireModal(false);
-      
-      // Don't redirect here - let the modal buttons handle it
       setSelectedMatchForUmpire(null);
-      
-      // Refresh draw + matches + stats to show updated umpire assignment
-      await fetchDrawPageFull(activeCategory.id);
-      
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       console.error('Error assigning umpire:', err);

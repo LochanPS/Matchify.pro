@@ -185,19 +185,28 @@ class WalletService {
   }
 
   // Deduct amount from wallet (for registrations)
+  // Balance check is inside the transaction to prevent TOCTOU race conditions
+  // where two concurrent requests both pass the check before either commits.
   async deductAmount(userId, amount, description, referenceId = null) {
     if (!amount || isNaN(amount) || amount <= 0) {
       throw new Error('Invalid amount');
     }
 
-    const balance = await this.getBalance(userId);
-
-    if (balance < amount) {
-      throw new Error('Insufficient wallet balance');
-    }
-
     const result = await prisma.$transaction(async (tx) => {
-      // Create transaction
+      // Re-read balance inside the transaction — prevents race condition
+      const user = await tx.user.findUnique({
+        where: { id: userId },
+        select: { walletBalance: true },
+      });
+
+      if (!user) throw new Error('User not found');
+
+      const balance = user.walletBalance;
+      if (balance < amount) {
+        throw new Error('Insufficient wallet balance');
+      }
+
+      // Create transaction record
       const transaction = await tx.walletTransaction.create({
         data: {
           userId: userId,
@@ -221,7 +230,7 @@ class WalletService {
       });
 
       return transaction;
-    });
+    }, { isolationLevel: 'Serializable' });
 
     return result;
   }
@@ -305,13 +314,20 @@ class WalletService {
       throw new Error('Invalid amount');
     }
 
-    const balance = await this.getBalance(userId);
-
-    if (balance < amount) {
-      throw new Error('Insufficient wallet balance');
-    }
-
     const result = await prisma.$transaction(async (tx) => {
+      // Re-read balance inside transaction to prevent race condition
+      const user = await tx.user.findUnique({
+        where: { id: userId },
+        select: { walletBalance: true },
+      });
+
+      if (!user) throw new Error('User not found');
+
+      const balance = user.walletBalance;
+      if (balance < amount) {
+        throw new Error('Insufficient wallet balance');
+      }
+
       const transaction = await tx.walletTransaction.create({
         data: {
           userId: userId,
@@ -334,7 +350,7 @@ class WalletService {
       });
 
       return transaction;
-    });
+    }, { isolationLevel: 'Serializable' });
 
     return result;
   }

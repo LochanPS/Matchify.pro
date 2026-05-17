@@ -31,155 +31,128 @@ function initializeScore(config = {}) {
 
 /**
  * Add point to match
+ *
+ * Wraps the read-modify-write cycle in a Serializable transaction so that two
+ * concurrent point taps never both read the same scoreJson and overwrite each
+ * other, which would silently lose a point.
  */
 async function addPoint(matchId, player) {
-  const match = await prisma.match.findUnique({
-    where: { id: matchId },
-  });
+  let matchSnapshot = null; // captured inside tx, needed for post-tx side effects
 
-  if (!match) {
-    throw new Error('Match not found');
-  }
+  const result = await prisma.$transaction(async (tx) => {
+    const match = await tx.match.findUnique({ where: { id: matchId } });
 
-  if (match.status !== 'ONGOING' && match.status !== 'IN_PROGRESS') {
-    throw new Error('Match is not ongoing');
-  }
-
-  // Get current score or initialize
-  let scoreData = match.scoreJson ? JSON.parse(match.scoreJson) : initializeScore();
-  
-  // Get match config from score data
-  const matchConfig = scoreData.matchConfig || {
-    pointsPerSet: 21,
-    setsToWin: 2,
-    maxSets: 3,
-    extension: true
-  };
-
-  // Validate score update
-  const currentPlayerScore = scoreData.currentScore[player];
-  const validation = validateScoreUpdate(
-    currentPlayerScore,
-    currentPlayerScore + 1,
-    matchConfig
-  );
-
-  if (!validation.valid) {
-    throw new Error(validation.error);
-  }
-
-  // Increment score
-  scoreData.currentScore[player] += 1;
-
-  // Add to history
-  scoreData.history.push({
-    set: scoreData.currentSet,
-    player,
-    score: { ...scoreData.currentScore },
-    timestamp: new Date().toISOString(),
-  });
-
-  // Update server
-  const totalPoints = scoreData.currentScore.player1 + scoreData.currentScore.player2;
-  scoreData.currentServer = determineServer(totalPoints, scoreData.currentServer);
-
-  // Check if game is complete (using match config)
-  if (isGameComplete(scoreData.currentScore.player1, scoreData.currentScore.player2, matchConfig)) {
-    const winner = getGameWinner(scoreData.currentScore.player1, scoreData.currentScore.player2, matchConfig);
-    
-    // Save set result
-    scoreData.sets.push({
-      setNumber: scoreData.currentSet,
-      score: { ...scoreData.currentScore },
-      winner,
-    });
-
-    // Check if match is complete (using match config)
-    if (isMatchComplete(scoreData.sets, matchConfig)) {
-      const matchWinner = getMatchWinner(scoreData.sets, matchConfig);
-      
-      // Determine actual winner ID
-      const winnerId = matchWinner === 'player1' ? match.player1Id : match.player2Id;
-      
-      // Update match status
-      await prisma.match.update({
-        where: { id: matchId },
-        data: {
-          scoreJson: JSON.stringify(scoreData),
-          status: 'COMPLETED',
-          winnerId: winnerId,
-          completedAt: new Date(),
-        },
-      });
-
-      // WINNER ADVANCEMENT: If there's a parent match, advance the winner
-      if (match.parentMatchId && match.winnerPosition) {
-        const updateData = {};
-        if (match.winnerPosition === 'player1') {
-          updateData.player1Id = winnerId;
-        } else {
-          updateData.player2Id = winnerId;
-        }
-
-        // Check if parent match now has both players
-        const parentMatch = await prisma.match.findUnique({
-          where: { id: match.parentMatchId }
-        });
-
-        if (parentMatch) {
-          const bothPlayersReady = 
-            (match.winnerPosition === 'player1' && parentMatch.player2Id) ||
-            (match.winnerPosition === 'player2' && parentMatch.player1Id);
-
-          if (bothPlayersReady) {
-            updateData.status = 'READY'; // Both players assigned, match ready to start
-          }
-
-          await prisma.match.update({
-            where: { id: match.parentMatchId },
-            data: updateData
-          });
-          
-          console.log(`✅ Winner ${winnerId} advanced to next round${updateData.status === 'READY' ? ' (match now READY)' : ' (waiting for opponent)'}`);
-        }
-      }
-
-      // Check if this is the final match
-      const isFinal = match.round === 1 && !match.parentMatchId;
-      if (isFinal) {
-        const loserId = winnerId === match.player1Id ? match.player2Id : match.player1Id;
-        await prisma.category.update({
-          where: { id: match.categoryId },
-          data: {
-            winnerId: winnerId,
-            runnerUpId: loserId,
-            status: 'completed'
-          }
-        });
-        console.log(`🏆 Finals completed! Winner: ${winnerId}, Runner-up: ${loserId}`);
-      }
-
-      return { scoreData, matchComplete: true, winner: matchWinner };
+    if (!match) throw new Error('Match not found');
+    if (match.status !== 'ONGOING' && match.status !== 'IN_PROGRESS') {
+      throw new Error('Match is not ongoing');
     }
 
-    // Start next set
-    scoreData.currentSet += 1;
-    scoreData.currentScore = { player1: 0, player2: 0 };
-    
-    // Winner of previous set serves first in next set
-    scoreData.currentServer = winner;
-  }
+    matchSnapshot = match;
 
-  // Update match
-  await prisma.match.update({
-    where: { id: matchId },
-    data: {
-      scoreJson: JSON.stringify(scoreData),
-      updatedAt: new Date(),
-    },
-  });
+    // Get current score or initialize
+    let scoreData = match.scoreJson ? JSON.parse(match.scoreJson) : initializeScore();
 
-  return { scoreData, matchComplete: false };
+    const matchConfig = scoreData.matchConfig || {
+      pointsPerSet: 21,
+      setsToWin: 2,
+      maxSets: 3,
+      extension: true,
+    };
+
+    // Validate score update
+    const currentPlayerScore = scoreData.currentScore[player];
+    const validation = validateScoreUpdate(currentPlayerScore, currentPlayerScore + 1, matchConfig);
+    if (!validation.valid) throw new Error(validation.error);
+
+    // Increment score
+    scoreData.currentScore[player] += 1;
+
+    // Add to history
+    scoreData.history.push({
+      set: scoreData.currentSet,
+      player,
+      score: { ...scoreData.currentScore },
+      timestamp: new Date().toISOString(),
+    });
+
+    // Update server
+    const totalPoints = scoreData.currentScore.player1 + scoreData.currentScore.player2;
+    scoreData.currentServer = determineServer(totalPoints, scoreData.currentServer);
+
+    // Check if set is complete
+    if (isGameComplete(scoreData.currentScore.player1, scoreData.currentScore.player2, matchConfig)) {
+      const winner = getGameWinner(scoreData.currentScore.player1, scoreData.currentScore.player2, matchConfig);
+
+      scoreData.sets.push({
+        setNumber: scoreData.currentSet,
+        score: { ...scoreData.currentScore },
+        winner,
+      });
+
+      // Check if match is complete
+      if (isMatchComplete(scoreData.sets, matchConfig)) {
+        const matchWinner = getMatchWinner(scoreData.sets, matchConfig);
+        const winnerId = matchWinner === 'player1' ? match.player1Id : match.player2Id;
+
+        // Update match — all writes in same tx
+        await tx.match.update({
+          where: { id: matchId },
+          data: {
+            scoreJson: JSON.stringify(scoreData),
+            status: 'COMPLETED',
+            winnerId,
+            completedAt: new Date(),
+          },
+        });
+
+        // Advance winner to parent match (still inside tx — atomic with completion)
+        if (match.parentMatchId && match.winnerPosition) {
+          const updateData = match.winnerPosition === 'player1'
+            ? { player1Id: winnerId }
+            : { player2Id: winnerId };
+
+          const parentMatch = await tx.match.findUnique({ where: { id: match.parentMatchId } });
+          if (parentMatch) {
+            const bothPlayersReady =
+              (match.winnerPosition === 'player1' && parentMatch.player2Id) ||
+              (match.winnerPosition === 'player2' && parentMatch.player1Id);
+            if (bothPlayersReady) updateData.status = 'READY';
+
+            await tx.match.update({ where: { id: match.parentMatchId }, data: updateData });
+            console.log(`✅ Winner ${winnerId} advanced to next round${updateData.status === 'READY' ? ' (READY)' : ''}`);
+          }
+        }
+
+        // Mark category complete if this is the final
+        const isFinal = match.round === 1 && !match.parentMatchId;
+        if (isFinal) {
+          const loserId = winnerId === match.player1Id ? match.player2Id : match.player1Id;
+          await tx.category.update({
+            where: { id: match.categoryId },
+            data: { winnerId, runnerUpId: loserId, status: 'completed' },
+          });
+          console.log(`🏆 Finals completed! Winner: ${winnerId}, Runner-up: ${loserId}`);
+        }
+
+        return { scoreData, matchComplete: true, winner: matchWinner };
+      }
+
+      // Start next set
+      scoreData.currentSet += 1;
+      scoreData.currentScore = { player1: 0, player2: 0 };
+      scoreData.currentServer = winner;
+    }
+
+    // Regular point update
+    await tx.match.update({
+      where: { id: matchId },
+      data: { scoreJson: JSON.stringify(scoreData), updatedAt: new Date() },
+    });
+
+    return { scoreData, matchComplete: false };
+  }, { isolationLevel: 'Serializable' });
+
+  return result;
 }
 
 /**

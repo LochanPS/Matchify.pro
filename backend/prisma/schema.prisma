@@ -449,9 +449,14 @@ model Academy {
   sports            String          // JSON array of sports
   sportDetails      String          // JSON object with sport-specific details
   description       String?
+  type              String?         // "Private Academy", "Club", "Sports Complex", etc.
+  amenities         String?         // JSON array of amenity strings
+  openingHours      String?         // e.g. "Mon-Sat: 6AM-10PM"
+  instagram         String?         // Instagram handle (without @)
   phone             String
   email             String?
   website           String?
+  upiId             String?         // Academy UPI ID for court booking payments
   photos            String?         // JSON array of photo URLs
   academyQrCode     String?         // Academy's own QR code for payments
   paymentScreenshot String          // Cloudinary URL of payment screenshot
@@ -475,11 +480,89 @@ model Academy {
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
 
+  courts            Court[]
+
   @@index([status])
   @@index([city, state])
   @@index([createdAt])
   @@index([isDeleted])
   @@map("academies")
+}
+
+// ============================================
+// COURT BOOKING SYSTEM
+// ============================================
+
+model Court {
+  id            String   @id @default(uuid())
+  academyId     String
+  name          String   // "Court 1", "Badminton Court A", etc.
+  sport         String   // "Badminton", "Squash", etc.
+  description   String?
+  pricePerHour  Float    // Price in INR
+  photos        String?  // JSON array of photo URLs
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  academy       Academy            @relation(fields: [academyId], references: [id], onDelete: Cascade)
+  availability  CourtAvailability[]
+  bookings      CourtBooking[]
+
+  @@index([academyId])
+  @@index([sport])
+  @@index([isActive])
+  @@map("courts")
+}
+
+model CourtAvailability {
+  id           String   @id @default(uuid())
+  courtId      String
+  dayOfWeek    Int      // 0=Sun, 1=Mon, ..., 6=Sat
+  openTime     String   // "06:00"
+  closeTime    String   // "22:00"
+  slotDuration Int      @default(60) // minutes per slot
+  isOpen       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  court        Court    @relation(fields: [courtId], references: [id], onDelete: Cascade)
+
+  @@unique([courtId, dayOfWeek])
+  @@index([courtId])
+  @@map("court_availability")
+}
+
+model CourtBooking {
+  id                 String    @id @default(uuid())
+  courtId            String
+  academyId          String
+  userId             String
+  bookingDate        String    // "2026-05-20" (YYYY-MM-DD)
+  startTime          String    // "10:00"
+  endTime            String    // "11:00"
+  durationMinutes    Int
+  amount             Float
+  paymentScreenshot  String?   // Cloudinary URL
+  screenshotPublicId String?
+  status             String    @default("pending") // pending, confirmed, rejected, cancelled
+  rejectionReason    String?
+  cancelledAt        DateTime?
+  cancellationReason String?
+  verifiedBy         String?   // Academy owner user ID
+  verifiedAt         DateTime?
+  notes              String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  court              Court     @relation(fields: [courtId], references: [id], onDelete: Cascade)
+
+  @@index([courtId])
+  @@index([academyId])
+  @@index([userId])
+  @@index([bookingDate])
+  @@index([status])
+  @@map("court_bookings")
 }
 
 

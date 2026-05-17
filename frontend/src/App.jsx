@@ -59,6 +59,11 @@ const RefundIssuePage           = lazy(() => import('./pages/RefundIssuePage'))
 const SearchAcademiesPage       = lazy(() => import('./pages/SearchAcademiesPage'))
 const AcademyDetailPage         = lazy(() => import('./pages/AcademyDetailPage'))
 const AddAcademyPage            = lazy(() => import('./pages/AddAcademyPage'))
+const AcademyOwnerDashboard     = lazy(() => import('./pages/AcademyOwnerDashboard'))
+const ManageCourtsPage          = lazy(() => import('./pages/ManageCourtsPage'))
+const OwnerBookingsPage         = lazy(() => import('./pages/OwnerBookingsPage'))
+const CourtBookingPage          = lazy(() => import('./pages/CourtBookingPage'))
+const MyBookingsPage            = lazy(() => import('./pages/MyBookingsPage'))
 const TermsOfService            = lazy(() => import('./pages/TermsOfService'))
 const PrivacyPolicy             = lazy(() => import('./pages/PrivacyPolicy'))
 // Admin layout & pages
@@ -166,6 +171,21 @@ function AppContent() {
           <Route path="/academies" element={<SearchAcademiesPage />} />
           <Route path="/academies/add" element={<AddAcademyPage />} />
           <Route path="/academies/:id" element={<AcademyDetailPage />} />
+          <Route path="/academies/:academyId/courts/:courtId/book" element={
+            <ProtectedRoute><CourtBookingPage /></ProtectedRoute>
+          } />
+          <Route path="/my-bookings" element={
+            <ProtectedRoute><MyBookingsPage /></ProtectedRoute>
+          } />
+          <Route path="/my-academy" element={
+            <ProtectedRoute><AcademyOwnerDashboard /></ProtectedRoute>
+          } />
+          <Route path="/owner/academies/:academyId/courts" element={
+            <ProtectedRoute><ManageCourtsPage /></ProtectedRoute>
+          } />
+          <Route path="/owner/academies/:academyId/bookings" element={
+            <ProtectedRoute><OwnerBookingsPage /></ProtectedRoute>
+          } />
           <Route path="/tournaments/:id" element={<TournamentDetailPage />} />
           <Route path="/tournaments/:tournamentId/draws/:categoryId?" element={<DrawPage />} />
           <Route path="/leaderboard" element={<Leaderboard />} />

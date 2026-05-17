@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, MapPin, Phone, Mail, Globe, Building2,
-  ChevronLeft, ChevronRight, BadgeCheck, Clock, Plus
+  ChevronLeft, ChevronRight, BadgeCheck, Clock, Plus,
+  IndianRupee, Calendar
 } from 'lucide-react';
 import api from '../utils/api';
+import { useAuth } from '../contexts/AuthContext';
 
 const B = {
   bg: '#07071a',
@@ -69,7 +71,9 @@ function formatFacilityDetail(sport, raw) {
 export default function AcademyDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [academy, setAcademy] = useState(null);
+  const [courts, setCourts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [photoIndex, setPhotoIndex] = useState(0);
@@ -78,8 +82,11 @@ export default function AcademyDetailPage() {
     (async () => {
       try {
         setLoading(true);
-        const res = await api.get(`/academies/${id}`);
-        const raw = res.data?.data?.academy;
+        const [acadRes, courtsRes] = await Promise.allSettled([
+          api.get(`/academies/${id}`),
+          api.get(`/academies/${id}/courts`)
+        ]);
+        const raw = acadRes.value?.data?.data?.academy;
         if (!raw) throw new Error('Not found');
         setAcademy({
           ...raw,
@@ -92,6 +99,9 @@ export default function AcademyDetailPage() {
           amenities: Array.isArray(raw.amenities) ? raw.amenities
             : JSON.parse(raw.amenities || '[]'),
         });
+        if (courtsRes.value?.data?.data?.courts) {
+          setCourts(courtsRes.value.data.data.courts);
+        }
       } catch {
         setError(true);
       } finally {
@@ -152,7 +162,7 @@ export default function AcademyDetailPage() {
   );
 
   return (
-    <div className="min-h-screen pb-8" style={{ background: B.bg }}>
+    <div className="min-h-screen" style={{ background: B.bg, paddingBottom: courts.length > 0 ? 88 : 32 }}>
 
       {/* ── Hero photo / gradient ── */}
       <div className="relative w-full overflow-hidden" style={{ height: 220 }}>
@@ -338,6 +348,47 @@ export default function AcademyDetailPage() {
           </Section>
         )}
 
+        {/* Courts — Book a Court */}
+        {courts.length > 0 && (
+          <Section title="Book a Court" accent={B.cyan}>
+            <div className="space-y-3">
+              {courts.map(court => (
+                <div key={court.id}
+                  className="rounded-xl overflow-hidden"
+                  style={{ background: 'rgba(0,212,255,0.05)', border: '1px solid rgba(0,212,255,0.15)' }}>
+                  <div className="p-3 flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-2xl"
+                      style={{ background: SPORT_META[court.sport]?.bg || 'rgba(255,255,255,0.06)' }}>
+                      {SPORT_META[court.sport]?.emoji || '🏟️'}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-black text-white">{court.name}</p>
+                      <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>{court.sport}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-black" style={{ color: B.cyan }}>₹{court.pricePerHour}</p>
+                      <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>per hour</p>
+                    </div>
+                  </div>
+                  <div className="px-3 pb-3">
+                    <button
+                      onClick={() => {
+                        if (!user) { navigate('/login'); return; }
+                        navigate(`/academies/${id}/courts/${court.id}/book`);
+                      }}
+                      className="w-full py-2.5 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 transition-all active:scale-[0.98]"
+                      style={{ background: 'rgba(0,212,255,0.15)', color: B.cyan, border: '1px solid rgba(0,212,255,0.25)' }}
+                    >
+                      <Calendar className="w-3.5 h-3.5" />
+                      Check Availability & Book
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Section>
+        )}
+
         {/* Contact */}
         <Section title="Contact" accent={B.green}>
           <div className="space-y-2.5">
@@ -433,6 +484,25 @@ export default function AcademyDetailPage() {
         </button>
 
       </div>
+
+      {/* Sticky Book CTA */}
+      {courts.length > 0 && (
+        <div className="fixed bottom-0 left-0 right-0 px-4 pb-6 pt-3 z-40"
+          style={{ background: 'linear-gradient(to top, rgba(7,7,26,0.98) 60%, transparent)' }}>
+          <button
+            onClick={() => {
+              if (!user) { navigate('/login'); return; }
+              navigate(`/academies/${id}/courts/${courts[0].id}/book`);
+            }}
+            className="w-full py-4 rounded-2xl text-sm font-black flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+            style={{ background: `linear-gradient(135deg, ${B.cyan}, #0099bb)`, color: '#000' }}
+          >
+            <Calendar className="w-4 h-4" />
+            Book a Court
+            {courts.length > 1 && <span className="text-xs opacity-70">· {courts.length} courts</span>}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

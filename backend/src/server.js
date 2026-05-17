@@ -69,6 +69,8 @@ import cleanPhoneNumbersRoutes from './routes/admin/clean-phone-numbers.routes.j
 import adminPaymentRoutes from './routes/adminPayment.routes.js';
 import smsRoutes from './routes/sms.routes.js';
 import academyRoutes from './routes/academy.routes.js';
+import courtRoutes from './routes/court.routes.js';
+import courtBookingRoutes from './routes/courtBooking.routes.js';
 import userRoutes from './routes/user.routes.js';
 
 // Import multi-role routes
@@ -320,6 +322,12 @@ app.use('/api/sms', smsRoutes);
 
 // Academy routes
 app.use('/api/academies', academyRoutes);
+
+// Court routes (owner management + public slots)
+app.use('/api', courtRoutes);
+
+// Court booking routes
+app.use('/api/court-bookings', courtBookingRoutes);
 
 // User routes
 app.use('/api/users', userRoutes);

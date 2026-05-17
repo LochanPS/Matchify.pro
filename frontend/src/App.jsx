@@ -72,6 +72,7 @@ const UserManagementPage        = lazy(() => import('./pages/admin/UserManagemen
 const InviteManagementPage      = lazy(() => import('./pages/admin/InviteManagementPage'))
 const AuditLogsPage             = lazy(() => import('./pages/admin/AuditLogsPage'))
 const AcademyApprovalsPage      = lazy(() => import('./pages/admin/AcademyApprovalsPage'))
+const AdminManageAcademiesPage  = lazy(() => import('./pages/admin/AdminManageAcademiesPage'))
 const PaymentVerificationPage   = lazy(() => import('./pages/admin/PaymentVerificationPage'))
 const RefundRequestsPage        = lazy(() => import('./pages/admin/RefundRequestsPage'))
 const TournamentPaymentsPage    = lazy(() => import('./pages/admin/TournamentPaymentsPage'))
@@ -492,6 +493,7 @@ function AppContent() {
             <Route path="invites" element={<InviteManagementPage />} />
             <Route path="audit-logs" element={<AuditLogsPage />} />
             <Route path="academies" element={<AcademyApprovalsPage />} />
+            <Route path="academies/manage" element={<AdminManageAcademiesPage />} />
             {/* <Route path="kyc" element={<AdminKYCDashboard />} /> */}
             
             {/* Payment System Routes */}

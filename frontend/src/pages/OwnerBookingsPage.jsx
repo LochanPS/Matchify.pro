@@ -300,7 +300,7 @@ export default function OwnerBookingsPage() {
         {[
           { label: 'Pending', value: stats.pending || 0, color: B.amber },
           { label: 'Confirmed', value: stats.confirmed || 0, color: B.green },
-          { label: 'Revenue', value: `₹${((stats.revenue || 0) / 100).toFixed(0)}k`, color: B.cyan },
+          { label: 'Revenue', value: (stats.revenue || 0) >= 1000 ? `₹${((stats.revenue || 0) / 1000).toFixed(1)}k` : `₹${stats.revenue || 0}`, color: B.cyan },
         ].map(s => (
           <div key={s.label} className="rounded-2xl p-3 text-center" style={{ background: B.card, border: `1px solid ${B.border}` }}>
             <p className="text-xl font-black" style={{ color: s.color }}>{s.value}</p>

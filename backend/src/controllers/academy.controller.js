@@ -7,7 +7,8 @@ export const createAcademy = async (req, res) => {
     const {
       name, address, city, state, pincode,
       sports, sportDetails, description,
-      phone, email, website
+      phone, email, website,
+      type, amenities, openingHours, instagram, upiId
     } = req.body;
 
     // Validate required fields
@@ -21,6 +22,9 @@ export const createAcademy = async (req, res) => {
     // Parse sports and sportDetails if they're strings
     const parsedSports = typeof sports === 'string' ? sports : JSON.stringify(sports);
     const parsedSportDetails = typeof sportDetails === 'string' ? sportDetails : JSON.stringify(sportDetails);
+    const parsedAmenities = amenities
+      ? (typeof amenities === 'string' ? amenities : JSON.stringify(amenities))
+      : JSON.stringify([]);
 
     // Upload payment screenshot to Cloudinary
     let paymentScreenshotUrl = null;
@@ -101,6 +105,11 @@ export const createAcademy = async (req, res) => {
         photos: JSON.stringify(photoUrls),
         academyQrCode: academyQrCodeUrl,
         paymentScreenshot: paymentScreenshotUrl,
+        type: type || null,
+        amenities: parsedAmenities,
+        openingHours: openingHours || null,
+        instagram: instagram || null,
+        upiId: upiId || null,
         status: 'pending',
         submittedBy,
         submittedByName,
@@ -122,7 +131,7 @@ export const createAcademy = async (req, res) => {
           userId: adminUser.id,
           type: 'ACADEMY_SUBMISSION',
           title: '🏢 New Academy Submission',
-          message: `New academy "${name}" from ${city}, ${state} is awaiting approval. Payment: ₹200`,
+          message: `New academy "${name}" from ${city}, ${state} is awaiting approval. Payment: ₹300`,
           data: JSON.stringify({
             academyId: academy.id,
             academyName: name,
@@ -160,65 +169,72 @@ export const getAcademies = async (req, res) => {
   try {
     const { search, city, sport, page = 1, limit = 20 } = req.query;
 
-    // Simple query - just get approved academies
-    let where = { status: 'approved' };
+    // Build Prisma where clause with all filters
+    const where = {
+      status: 'approved',
+      NOT: { isDeleted: true },
+    };
 
-    console.log('Fetching approved academies...');
-
-    const academies = await prisma.academy.findMany({
-      where,
-      orderBy: { createdAt: 'desc' },
-      skip: (parseInt(page) - 1) * parseInt(limit),
-      take: parseInt(limit)
-    });
-
-    console.log(`Found ${academies.length} approved academies`);
-
-    // Filter by city if specified
-    let filteredAcademies = academies;
     if (city) {
-      filteredAcademies = filteredAcademies.filter(a => 
-        a.city?.toLowerCase().includes(city.toLowerCase())
-      );
+      where.city = { contains: city, mode: 'insensitive' };
     }
 
-    // Filter by search if specified
     if (search) {
-      const searchLower = search.toLowerCase();
-      filteredAcademies = filteredAcademies.filter(a => 
-        a.name?.toLowerCase().includes(searchLower) ||
-        a.city?.toLowerCase().includes(searchLower) ||
-        a.state?.toLowerCase().includes(searchLower)
-      );
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { city: { contains: search, mode: 'insensitive' } },
+        { state: { contains: search, mode: 'insensitive' } },
+      ];
     }
 
-    // Filter by sport if specified
+    // sport filter is post-query (JSON field) — fetch all matching rows then filter
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+
+    console.log('Fetching approved academies...', where);
+
+    // When sport filter is active, we can't paginate accurately in DB
+    // so fetch all and paginate in memory only for sport filter
+    let academies;
+    let total;
+
     if (sport) {
-      filteredAcademies = filteredAcademies.filter(a => {
-        try {
-          const sports = JSON.parse(a.sports || '[]');
-          return sports.includes(sport);
-        } catch {
-          return false;
-        }
+      // Fetch all matching (no pagination) then filter by sport
+      const all = await prisma.academy.findMany({ where, orderBy: { createdAt: 'desc' } });
+      const filtered = all.filter(a => {
+        try { return JSON.parse(a.sports || '[]').includes(sport); }
+        catch { return false; }
       });
+      total = filtered.length;
+      academies = filtered.slice((pageNum - 1) * limitNum, pageNum * limitNum);
+    } else {
+      [academies, total] = await Promise.all([
+        prisma.academy.findMany({
+          where,
+          orderBy: { createdAt: 'desc' },
+          skip: (pageNum - 1) * limitNum,
+          take: limitNum,
+        }),
+        prisma.academy.count({ where }),
+      ]);
     }
+
+    console.log(`Found ${academies.length} approved academies (total ${total})`);
 
     // Parse JSON fields
-    const formattedAcademies = filteredAcademies.map(a => ({
+    const formattedAcademies = academies.map(a => ({
       ...a,
       sports: JSON.parse(a.sports || '[]'),
       sportDetails: JSON.parse(a.sportDetails || '{}'),
-      photos: JSON.parse(a.photos || '[]')
+      photos: JSON.parse(a.photos || '[]'),
+      amenities: (() => { try { return JSON.parse(a.amenities || '[]'); } catch { return []; } })(),
     }));
-
-    const total = await prisma.academy.count({ where });
 
     res.json({
       success: true,
       data: {
         academies: formattedAcademies,
-        pagination: { total, page: parseInt(page), limit: parseInt(limit), totalPages: Math.ceil(total / parseInt(limit)) }
+        pagination: { total, page: pageNum, limit: limitNum, totalPages: Math.ceil(total / limitNum) }
       }
     });
 
@@ -240,7 +256,8 @@ export const getPendingAcademies = async (req, res) => {
       ...a,
       sports: JSON.parse(a.sports || '[]'),
       sportDetails: JSON.parse(a.sportDetails || '{}'),
-      photos: JSON.parse(a.photos || '[]')
+      photos: JSON.parse(a.photos || '[]'),
+      amenities: (() => { try { return JSON.parse(a.amenities || '[]'); } catch { return []; } })(),
     }));
 
     res.json({ success: true, data: { academies: formattedAcademies } });
@@ -375,7 +392,8 @@ export const getAcademyById = async (req, res) => {
           ...academy,
           sports: JSON.parse(academy.sports || '[]'),
           sportDetails: JSON.parse(academy.sportDetails || '{}'),
-          photos: JSON.parse(academy.photos || '[]')
+          photos: JSON.parse(academy.photos || '[]'),
+          amenities: (() => { try { return JSON.parse(academy.amenities || '[]'); } catch { return []; } })(),
         }
       }
     });
@@ -406,7 +424,8 @@ export const getAllAcademiesAdmin = async (req, res) => {
       ...a,
       sports: JSON.parse(a.sports || '[]'),
       sportDetails: JSON.parse(a.sportDetails || '{}'),
-      photos: JSON.parse(a.photos || '[]')
+      photos: JSON.parse(a.photos || '[]'),
+      amenities: (() => { try { return JSON.parse(a.amenities || '[]'); } catch { return []; } })(),
     }));
 
     res.json({ success: true, data: { academies: formattedAcademies } });

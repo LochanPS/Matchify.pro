@@ -154,7 +154,7 @@ export default function AddAcademyPage() {
     name: '', type: '', address: '', city: '', state: '', pincode: '',
     sports: [], sportDetails: {}, amenities: [],
     openingHours: '', description: '',
-    phone: '', email: '', website: '', instagram: '',
+    phone: '', email: '', website: '', instagram: '', upiId: '',
   };
   const [form, setForm] = useState(defaultForm);
 
@@ -236,6 +236,7 @@ export default function AddAcademyPage() {
     const r = new FileReader();
     r.onload = ev => setPaymentScreenshot({ file, preview: ev.target.result });
     r.readAsDataURL(file);
+    setErrors(p => ({ ...p, payment: '' }));
   };
 
   // Validation
@@ -568,6 +569,12 @@ export default function AddAcademyPage() {
                   placeholder="youracademy"
                   className={inputCls() + ' pl-7'} style={inputStyle()} />
               </div>
+            </Field>
+
+            <Field label="UPI ID for Court Payments" hint="Players will pay you directly via UPI when booking courts (e.g. 9876543210@upi)">
+              <input value={form.upiId} onChange={e => set('upiId', e.target.value)}
+                placeholder="e.g. 9876543210@upi or yourname@okaxis"
+                className={inputCls()} style={inputStyle()} />
             </Field>
 
             {/* Photos */}

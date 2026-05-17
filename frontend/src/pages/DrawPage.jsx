@@ -2780,27 +2780,28 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                       )}
                     </div>
 
-                    {/* Stats: P · W · L · PTS — fixed total width, no gap overflow */}
-                    <div className="flex-shrink-0 flex items-center" style={{ gap: '4px' }}>
+                    {/* Stats: P · W · L · PTS · TP — fixed total width, no gap overflow */}
+                    <div className="flex-shrink-0 flex items-center" style={{ gap: '3px' }}>
                       {[
-                        { val: (p.wins || 0) + (p.losses || 0), label: 'P', bg: 'rgba(255,255,255,0.07)', color: '#fff', labelColor: 'rgba(255,255,255,0.35)' },
-                        { val: p.wins || 0, label: 'W', bg: 'rgba(0,255,136,0.1)', color: '#34d399', labelColor: 'rgba(0,255,136,0.55)' },
-                        { val: p.losses || 0, label: 'L', bg: 'rgba(239,68,68,0.1)', color: '#f87171', labelColor: 'rgba(239,68,68,0.55)' },
-                        { val: p.points || 0, label: 'PTS', bg: 'rgba(0,255,136,0.18)', color: '#6ee7b7', labelColor: 'rgba(0,255,136,0.65)', border: '1px solid rgba(0,255,136,0.3)', bold: true },
-                      ].map(({ val, label, bg, color, labelColor, border, bold }) => (
+                        { val: (p.wins || 0) + (p.losses || 0), label: 'P',   bg: 'rgba(255,255,255,0.07)',  color: '#fff',     labelColor: 'rgba(255,255,255,0.35)', w: '26px' },
+                        { val: p.wins || 0,                      label: 'W',   bg: 'rgba(0,255,136,0.1)',     color: '#34d399',  labelColor: 'rgba(0,255,136,0.55)',   w: '26px' },
+                        { val: p.losses || 0,                    label: 'L',   bg: 'rgba(239,68,68,0.1)',     color: '#f87171',  labelColor: 'rgba(239,68,68,0.55)',   w: '26px' },
+                        { val: p.points || 0,                    label: 'PTS', bg: 'rgba(0,255,136,0.18)',    color: '#6ee7b7',  labelColor: 'rgba(0,255,136,0.65)',   w: '34px', border: '1px solid rgba(0,255,136,0.3)', bold: true },
+                        { val: p.totalPoints || 0,               label: 'TP',  bg: 'rgba(0,212,255,0.15)',    color: '#67e8f9',  labelColor: 'rgba(0,212,255,0.65)',   w: '34px', border: '1px solid rgba(0,212,255,0.3)', bold: true },
+                      ].map(({ val, label, bg, color, labelColor, border, bold, w }) => (
                         <div
                           key={label}
                           className="flex flex-col items-center justify-center"
                           style={{
-                            width: label === 'PTS' ? '36px' : '28px',
+                            width: w,
                             height: '36px',
                             background: bg,
                             border: border || 'none',
                             borderRadius: '8px',
                           }}
                         >
-                          <span style={{ fontSize: '12px', fontWeight: bold ? '900' : '700', color, lineHeight: 1 }}>{val}</span>
-                          <span style={{ fontSize: '9px', color: labelColor, lineHeight: 1, marginTop: '2px' }}>{label}</span>
+                          <span style={{ fontSize: '11px', fontWeight: bold ? '900' : '700', color, lineHeight: 1 }}>{val}</span>
+                          <span style={{ fontSize: '8px', color: labelColor, lineHeight: 1, marginTop: '2px' }}>{label}</span>
                         </div>
                       ))}
                     </div>
@@ -2811,7 +2812,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
             {/* Points System */}
             <div className="mt-3 p-3 rounded-xl" style={{ background: 'rgba(0,0,0,0.25)', border: '1px solid rgba(255,255,255,0.08)' }}>
               <p className="text-[10px] font-black uppercase tracking-wider mb-2 text-center" style={{ color: 'rgba(255,255,255,0.35)' }}>Points System</p>
-              <div className="flex items-center justify-center gap-3 text-xs font-bold">
+              <div className="flex items-center justify-center gap-2 text-xs font-bold flex-wrap">
                 <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg" style={{ background: 'rgba(0,255,136,0.1)', border: '1px solid rgba(0,255,136,0.2)' }}>
                   <span className="w-4 h-4 rounded flex items-center justify-center text-[9px] font-black" style={{ background: '#00ff88', color: '#07071a' }}>W</span>
                   <span style={{ color: '#00ff88' }}>+2 pts</span>
@@ -2820,9 +2821,13 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                   <span className="w-4 h-4 bg-red-500 rounded flex items-center justify-center text-[9px] text-white font-black">L</span>
                   <span style={{ color: '#f87171' }}>+0 pts</span>
                 </div>
+                <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg" style={{ background: 'rgba(0,212,255,0.08)', border: '1px solid rgba(0,212,255,0.2)' }}>
+                  <span className="w-4 h-4 rounded flex items-center justify-center text-[9px] font-black" style={{ background: '#00d4ff', color: '#07071a' }}>TP</span>
+                  <span style={{ color: '#67e8f9' }}>Game pts</span>
+                </div>
               </div>
               <p className="text-[9px] text-center mt-2" style={{ color: 'rgba(255,255,255,0.25)' }}>
-                P = Played · W = Won · L = Lost · PTS = Points
+                P = Played · W = Won · L = Lost · PTS = Points · TP = Total Points
               </p>
             </div>
           </div>

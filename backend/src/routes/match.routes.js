@@ -632,12 +632,24 @@ router.put('/:matchId/end', authenticate, async (req, res) => {
           if (targetGroup) {
             const allMatches = await prisma.match.findMany({ where: { tournamentId: match.tournamentId, categoryId: match.categoryId, status: 'COMPLETED' } });
             const groupMatches = allMatches.filter(m => targetGroup.participants.some(p => p.id === m.player1Id) && targetGroup.participants.some(p => p.id === m.player2Id));
-            targetGroup.participants.forEach(p => { p.played = 0; p.wins = 0; p.losses = 0; p.points = 0; });
+            targetGroup.participants.forEach(p => { p.played = 0; p.wins = 0; p.losses = 0; p.points = 0; p.totalPoints = 0; });
             groupMatches.forEach(m => {
               const p1 = targetGroup.participants.find(p => p.id === m.player1Id);
               const p2 = targetGroup.participants.find(p => p.id === m.player2Id);
               if (!p1 || !p2) return;
               p1.played++; p2.played++;
+              // Accumulate total game points (TP) from scoreJson
+              if (m.scoreJson) {
+                try {
+                  const sd = typeof m.scoreJson === 'string' ? JSON.parse(m.scoreJson) : m.scoreJson;
+                  if (sd?.sets && Array.isArray(sd.sets)) {
+                    let t1 = 0, t2 = 0;
+                    sd.sets.forEach(s => { t1 += s.player1 ?? s.p1 ?? s.score1 ?? 0; t2 += s.player2 ?? s.p2 ?? s.score2 ?? 0; });
+                    p1.totalPoints = (p1.totalPoints || 0) + t1;
+                    p2.totalPoints = (p2.totalPoints || 0) + t2;
+                  }
+                } catch (_) {}
+              }
               if (m.winnerId === m.player1Id) { p1.wins++; p1.points += 2; p2.losses++; }
               else if (m.winnerId === m.player2Id) { p2.wins++; p2.points += 2; p1.losses++; }
             });

@@ -240,6 +240,36 @@ export const getDrawPage = async (req, res) => {
         });
       });
 
+      // Cascade winners into TBD slots for later rounds.
+      // Needed when parentMatchId was not set during draw creation — the DB final
+      // match still has null player1Id/player2Id even after semi-finals complete.
+      // rounds[0] = earliest round (SF/QF), rounds[last] = Final.
+      for (let ri = 1; ri < bracketData.rounds.length; ri++) {
+        const round = bracketData.rounds[ri];
+        if (!Array.isArray(round.matches)) continue;
+        const feederRound = bracketData.rounds[ri - 1];
+        if (!Array.isArray(feederRound?.matches)) continue;
+
+        round.matches.forEach((match, mi) => {
+          // player1 slot fed by feederRound match at index mi*2
+          if (!match.player1) {
+            const feeder = feederRound.matches[mi * 2];
+            const wId = feeder?.dbMatch?.winnerId;
+            if (wId && playerMap[wId]) {
+              match.player1 = { id: wId, name: playerMap[wId].name, partnerName: partnerMap[wId] || null };
+            }
+          }
+          // player2 slot fed by feederRound match at index mi*2+1
+          if (!match.player2) {
+            const feeder = feederRound.matches[mi * 2 + 1];
+            const wId = feeder?.dbMatch?.winnerId;
+            if (wId && playerMap[wId]) {
+              match.player2 = { id: wId, name: playerMap[wId].name, partnerName: partnerMap[wId] || null };
+            }
+          }
+        });
+      }
+
     } else if (bracketData.format === 'ROUND_ROBIN' && bracketData.groups) {
       bracketData.groups.forEach(group => {
         // Update participant names

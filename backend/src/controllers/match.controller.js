@@ -1138,11 +1138,11 @@ const endMatch = async (req, res) => {
         // Don't fail the match completion if points awarding fails
       }
     } else if (match.parentMatchId && match.winnerPosition) {
-      // Knockout: Update bracket - advance winner to next match
+      // Knockout: Update bracket - advance winner to next match (parentMatchId set)
       const updateData = match.winnerPosition === 'player1'
         ? { player1Id: winnerId }
         : { player2Id: winnerId };
-      
+
       // Check if parent match now has both players
       const parentMatch = await prisma.match.findUnique({
         where: { id: match.parentMatchId }
@@ -1150,7 +1150,7 @@ const endMatch = async (req, res) => {
 
       if (parentMatch) {
         // Check if both players are now assigned
-        const bothPlayersReady = 
+        const bothPlayersReady =
           (match.winnerPosition === 'player1' && parentMatch.player2Id) ||
           (match.winnerPosition === 'player2' && parentMatch.player1Id);
 
@@ -1158,12 +1158,41 @@ const endMatch = async (req, res) => {
           updateData.status = 'READY'; // Both players assigned, match ready to start
         }
       }
-      
+
       await prisma.match.update({
         where: { id: match.parentMatchId },
         data: updateData
       });
       console.log(`Winner ${winnerId} advanced to next round${updateData.status === 'READY' ? ' (match now READY)' : ' (waiting for opponent)'}`);
+    } else if (!match.parentMatchId && match.stage === 'KNOCKOUT' && match.round > 1) {
+      // Fallback advancement: parentMatchId not set (draw created without linking).
+      // Use standard bracket math: parent = ceil(matchNumber/2), position = odd→player1, even→player2
+      const nextRound = match.round - 1;
+      const nextMatchNumber = Math.ceil(match.matchNumber / 2);
+      const winnerPos = match.matchNumber % 2 === 1 ? 'player1' : 'player2';
+
+      const parentMatch = await prisma.match.findFirst({
+        where: {
+          tournamentId: match.tournamentId,
+          categoryId:   match.categoryId,
+          round:        nextRound,
+          matchNumber:  nextMatchNumber,
+          stage:        'KNOCKOUT'
+        }
+      });
+
+      if (parentMatch) {
+        const updateData = winnerPos === 'player1'
+          ? { player1Id: winnerId }
+          : { player2Id: winnerId };
+
+        const bothPlayersReady =
+          winnerPos === 'player1' ? !!parentMatch.player2Id : !!parentMatch.player1Id;
+        if (bothPlayersReady) updateData.status = 'READY';
+
+        await prisma.match.update({ where: { id: parentMatch.id }, data: updateData });
+        console.log(`Winner ${winnerId} advanced to round ${nextRound} match ${nextMatchNumber} (${winnerPos}) via fallback round/matchNumber logic`);
+      }
     }
 
     // Check if this is a Round Robin match and update standings

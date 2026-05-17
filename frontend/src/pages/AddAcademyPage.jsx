@@ -4,9 +4,9 @@ import {
   Building2, MapPin, Dumbbell, Upload, X, Plus,
   CheckCircle, ArrowLeft, Loader2, Save, Clock,
   Phone, Mail, Globe, Instagram, Camera, CreditCard,
-  ChevronRight, Users, IndianRupee, CalendarDays, Wifi,
+  ChevronRight, Users, Wifi,
   ParkingCircle, Shirt, Droplets, UtensilsCrossed, Wind,
-  ShoppingBag, HeartPulse, Trophy, Info
+  ShoppingBag, HeartPulse, Trophy
 } from 'lucide-react';
 import api from '../utils/api';
 
@@ -117,13 +117,13 @@ function StepIndicator({ current, total }) {
 function Field({ label, error, required, children, hint }) {
   return (
     <div>
-      <label className="block text-xs font-bold mb-1.5 uppercase tracking-wide"
-        style={{ color: 'rgba(255,255,255,0.45)' }}>
+      <label className="block text-sm font-black mb-1.5"
+        style={{ color: 'rgba(255,255,255,0.7)' }}>
         {label}{required && <span style={{ color: '#f87171' }}> *</span>}
       </label>
       {children}
-      {hint && !error && <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>{hint}</p>}
-      {error && <p className="text-xs mt-1 font-semibold" style={{ color: '#f87171' }}>{error}</p>}
+      {hint && !error && <p className="text-xs mt-1.5 font-medium" style={{ color: 'rgba(255,255,255,0.3)' }}>{hint}</p>}
+      {error && <p className="text-xs mt-1.5 font-bold" style={{ color: '#f87171' }}>{error}</p>}
     </div>
   );
 }
@@ -153,7 +153,7 @@ export default function AddAcademyPage() {
   const defaultForm = {
     name: '', type: '', address: '', city: '', state: '', pincode: '',
     sports: [], sportDetails: {}, amenities: [],
-    openingHours: '', monthlyFee: '', description: '',
+    openingHours: '', description: '',
     phone: '', email: '', website: '', instagram: '',
   };
   const [form, setForm] = useState(defaultForm);
@@ -333,7 +333,7 @@ export default function AddAcademyPage() {
               {step > 1 ? 'Back' : 'Academies'}
             </span>
           </button>
-          <div className="text-xs font-semibold" style={{ color: 'rgba(255,255,255,0.3)' }}>
+          <div className="text-xs font-black" style={{ color: 'rgba(255,255,255,0.4)' }}>
             Step {step} of 3
           </div>
           {lastSaved && (
@@ -349,9 +349,9 @@ export default function AddAcademyPage() {
 
         {/* Title */}
         <div className="mb-5">
-          <h1 className="text-xl font-black text-white">List Your Academy</h1>
-          <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
-            One-time listing fee ₹{LISTING_FEE} · Reach thousands of players
+          <h1 className="text-2xl font-black text-white">List Your Academy</h1>
+          <p className="text-sm font-semibold mt-1" style={{ color: 'rgba(255,255,255,0.45)' }}>
+            One-time fee of ₹{LISTING_FEE} · Goes live after admin approval
           </p>
         </div>
 
@@ -470,7 +470,7 @@ export default function AddAcademyPage() {
             {form.sports.length > 0 && (
               <div className="rounded-xl p-4 space-y-3"
                 style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${B.border}` }}>
-                <p className="text-xs font-black uppercase tracking-wide" style={{ color: B.green }}>
+                <p className="text-sm font-black" style={{ color: B.green }}>
                   Facility Details
                 </p>
                 {form.sports.map(sport => {
@@ -516,23 +516,16 @@ export default function AddAcademyPage() {
             </Field>
 
             {/* Opening hours */}
-            <Field label="Opening Hours" hint="e.g. 6:00 AM – 10:00 PM">
+            <Field label="Opening Hours" hint="When is your academy open for players?">
               <input value={form.openingHours} onChange={e => set('openingHours', e.target.value)}
-                placeholder="6:00 AM – 10:00 PM"
-                className={inputCls()} style={inputStyle()} />
-            </Field>
-
-            {/* Monthly fee */}
-            <Field label="Monthly Fee" hint="e.g. ₹1500/month or ₹500–₹2000/month">
-              <input value={form.monthlyFee} onChange={e => set('monthlyFee', e.target.value)}
-                placeholder="₹1500/month"
+                placeholder="e.g. 6:00 AM – 10:00 PM, Mon–Sun"
                 className={inputCls()} style={inputStyle()} />
             </Field>
 
             {/* Description */}
-            <Field label="About Your Academy" hint="Training programs, achievements, facilities overview...">
+            <Field label="About Your Academy" hint="Describe your training programs, achievements, and what sets you apart">
               <textarea value={form.description} onChange={e => set('description', e.target.value)}
-                placeholder="Tell players what makes your academy special..."
+                placeholder="e.g. Professional coaching for all levels, state-level players trained, annual tournaments hosted..."
                 rows={3} className={inputCls() + ' resize-none'} style={inputStyle()} />
             </Field>
 

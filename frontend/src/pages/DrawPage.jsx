@@ -85,6 +85,7 @@ const DrawPage = () => {
   const [matches, setMatches] = useState([]);
   const [success, setSuccess] = useState(null);
   const [tournamentUmpires, setTournamentUmpires] = useState([]);
+  const [loadingUmpires, setLoadingUmpires] = useState(false);
   const [showUmpireModal, setShowUmpireModal] = useState(false);
   const [selectedMatchForUmpire, setSelectedMatchForUmpire] = useState(null);
   const pollIntervalRef = React.useRef(null);
@@ -149,7 +150,7 @@ const DrawPage = () => {
       if (user?.id) {
         tournamentAPI.getTournamentUmpires(tournamentId)
           .then(r => setTournamentUmpires(r.umpires || []))
-          .catch(() => {});
+          .catch(err => console.warn('⚠️ Umpire prefetch failed:', err?.response?.status, err?.message));
       }
 
       // Set active category from response categories
@@ -712,7 +713,15 @@ const DrawPage = () => {
 
   // Open umpire assignment modal - create match if needed
   const openUmpireModal = async (matchData, bracketMatch) => {
-    // Umpires already prefetched during page load — no blocking fetch needed
+    // If prefetch hasn't completed yet, fetch now (non-blocking — modal opens immediately
+    // with a loading spinner, then populates when data arrives)
+    if (tournamentUmpires.length === 0) {
+      setLoadingUmpires(true);
+      tournamentAPI.getTournamentUmpires(tournamentId)
+        .then(r => setTournamentUmpires(r.umpires || []))
+        .catch(() => {})
+        .finally(() => setLoadingUmpires(false));
+    }
     
     // If we have a database match, use it directly
     if (matchData && matchData.id) {
@@ -1711,6 +1720,7 @@ const DrawPage = () => {
         <AssignUmpireModal
           match={selectedMatchForUmpire}
           umpires={tournamentUmpires}
+          loadingUmpires={loadingUmpires}
           onClose={() => {
             setShowUmpireModal(false);
             setSelectedMatchForUmpire(null);
@@ -4409,7 +4419,7 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
 };
 
 // Assign Umpire Modal
-const AssignUmpireModal = ({ match, umpires, onClose, onAssign }) => {
+const AssignUmpireModal = ({ match, umpires, loadingUmpires, onClose, onAssign }) => {
   const navigate = useNavigate();
   const [selectedUmpire, setSelectedUmpire] = useState(match?.umpireId || null);
   const [assigning, setAssigning] = useState(false);
@@ -4468,7 +4478,13 @@ const AssignUmpireModal = ({ match, umpires, onClose, onAssign }) => {
 
         {/* Umpire list */}
         <div className="px-5 py-4">
-          {umpires.length === 0 ? (
+          {loadingUmpires ? (
+            <div className="text-center py-8">
+              <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin mx-auto mb-3"
+                style={{ borderColor: 'rgba(0,255,136,0.3)', borderTopColor: '#00ff88' }} />
+              <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>Loading umpires…</p>
+            </div>
+          ) : umpires.length === 0 ? (
             <div className="text-center py-8">
               <Gavel className="w-10 h-10 mx-auto mb-3" style={{ color: 'rgba(255,255,255,0.2)' }} />
               <p className="text-sm font-bold text-white mb-1">No umpires added</p>

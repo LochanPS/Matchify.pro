@@ -1,5 +1,6 @@
 import express from 'express';
 import { generateDraw, getDraw, deleteDraw, restartDraw, createConfiguredDraw, getCategoryPlayers, assignPlayersToDraw, bulkAssignAllPlayers, shuffleAssignedPlayers, arrangeKnockoutMatchups, continueToKnockout } from '../controllers/draw.controller.js';
+import { getDrawPage } from '../controllers/drawPage.controller.js';
 import { authenticate, optionalAuth } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -31,6 +32,9 @@ router.post(
   authenticate,
   generateDraw
 );
+
+// Combined draw page endpoint — tournament + categories + draw + matches + stats in one call (PUBLIC)
+router.get('/tournaments/:tournamentId/draw-page/:categoryId', getDrawPage);
 
 // Get draw (PUBLIC - no authentication required for viewing)
 router.get(

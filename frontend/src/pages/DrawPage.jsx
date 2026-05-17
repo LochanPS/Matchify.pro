@@ -117,45 +117,89 @@ const DrawPage = () => {
   const [showPlayersModal, setShowPlayersModal] = useState(false);
   const [registeredPlayers, setRegisteredPlayers] = useState([]);
 
+  // ─── Combined draw-page fetch (single round trip) ────────────────────────────
+  const fetchDrawPageFull = async (catId) => {
+    if (!tournamentId || !catId) return;
+
+    setLoading(true);
+    setBracketLoading(true);
+    setError(null);
+
+    try {
+      const response = await api.get(
+        `/tournaments/${tournamentId}/draw-page/${catId}`,
+        { headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' } }
+      );
+
+      if (!response.data.success) {
+        setBracket(null);
+        return;
+      }
+
+      const { tournament: t, categories: cats, draw, matches: fetchedMatches, stats } = response.data.data;
+
+      setTournament(t);
+      setCategories(cats || []);
+      setMatches(fetchedMatches || []);
+      setTournamentStats(stats);
+
+      // Set active category from response categories
+      const active = catId
+        ? (cats || []).find(c => c.id === catId) || (cats || [])[0]
+        : (cats || [])[0];
+      if (active) setActiveCategory(active);
+
+      if (draw) {
+        const bracketData = draw.bracketJson;
+        setBracket(typeof bracketData === 'string' ? JSON.parse(bracketData) : bracketData);
+      } else {
+        setBracket(null);
+      }
+    } catch (err) {
+      console.error('❌ Error fetching draw page:', err);
+      if (err.response?.status === 404) {
+        setBracket(null);
+        setError(null);
+      } else if (err.code === 'ERR_NETWORK' || !err.response) {
+        setError('Network error: Cannot connect to server. Please check your connection and try again.');
+      } else {
+        setBracket(null);
+        setError(null);
+      }
+    } finally {
+      setLoading(false);
+      setBracketLoading(false);
+    }
+  };
+
+  // ─── Main load effect ─────────────────────────────────────────────────────────
+  // If categoryId is in the URL → one combined call (no waterfall).
+  // If not (rare) → fall back to old fetchTournamentData so activeCategory gets set,
+  //   then the second effect picks it up.
   useEffect(() => {
-    console.log('🔄 useEffect triggered - fetchTournamentData');
-    console.log('Tournament ID from params:', tournamentId);
-    fetchTournamentData();
-    
-    // Check if we're returning from match completion
+    if (!tournamentId) return;
+
+    // Check if returning from match completion
     const state = window.history.state?.usr;
     if (state?.matchComplete) {
-      setMatchCompleteData({
-        winner: state.winner,
-        duration: state.duration
-      });
+      setMatchCompleteData({ winner: state.winner, duration: state.duration });
       setShowSuccessModal(true);
-      
-      // Clear the state
       window.history.replaceState({}, document.title);
     }
-  }, [tournamentId]);
 
-  useEffect(() => {
-    // Guard clause: Only fetch bracket when both values exist
-    if (!tournamentId || !activeCategory?.id) {
-      return;
+    if (categoryId) {
+      fetchDrawPageFull(categoryId);
+    } else {
+      fetchTournamentData();
     }
-    
-    console.log('🔄 useEffect triggered - fetchBracket');
-    console.log('Tournament ID:', tournamentId);
-    console.log('Active category:', activeCategory.id, activeCategory.name);
-    console.log('✅ Both tournamentId and activeCategory ready, fetching bracket...');
-    
-    fetchBracket();
-  }, [tournamentId, activeCategory?.id]);
+  }, [tournamentId, categoryId]);
 
-  // Fetch stats when bracket changes
+  // Fallback: when no categoryId in URL, fetchTournamentData sets activeCategory,
+  // then this effect fires and fetches draw+matches+stats.
   useEffect(() => {
-    if (activeCategory && bracket) {
-      fetchTournamentStats();
-    }
-  }, [activeCategory, bracket]);
+    if (!tournamentId || !activeCategory?.id || categoryId) return;
+    fetchDrawPageFull(activeCategory.id);
+  }, [activeCategory?.id]);
 
   // Check if round robin stage is complete
   const isRoundRobinComplete = () => {
@@ -198,8 +242,7 @@ const DrawPage = () => {
 
       const run = async () => {
         try {
-          await fetchBracket();
-          await fetchTournamentStats();
+          await fetchDrawPageFull(activeCategory.id);
         } catch (_) {}
         setRefreshing(false);
         setSuccess('Bracket updated successfully! Winner advanced to next round.');

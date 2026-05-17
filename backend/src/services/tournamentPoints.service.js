@@ -296,6 +296,9 @@ class TournamentPointsService {
           tournamentsPlayed: true,
           matchesWon: true,
           matchesLost: true,
+          matchifyCode: true,
+          phone: true,
+          email: true,
           playerProfile: {
             select: {
               matchifyPoints: true,

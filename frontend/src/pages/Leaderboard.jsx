@@ -37,6 +37,7 @@ export default function Leaderboard() {
   const [scope, setScope] = useState('country');
   const [userCity, setUserCity] = useState(null);
   const [userState, setUserState] = useState(null);
+  const [selectedPlayer, setSelectedPlayer] = useState(null);
 
   useEffect(() => {
     fetchMyRanks();
@@ -273,7 +274,7 @@ export default function Leaderboard() {
           <div className="mb-5">
             <div className="flex items-end justify-center gap-3" style={{ height: '148px' }}>
               {/* 2nd */}
-              <div className="flex flex-col items-center" style={{ width: '30%' }}>
+              <div className="flex flex-col items-center cursor-pointer" style={{ width: '30%' }} onClick={() => setSelectedPlayer(leaderboard[1])}>
                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gray-300 to-gray-500 flex items-center justify-center ring-2 ring-gray-300/50 shadow-lg mb-1 relative">
                   {leaderboard[1].profilePhoto ? (
                     <img src={leaderboard[1].profilePhoto} alt={leaderboard[1].name} className="w-full h-full rounded-full object-cover" />
@@ -290,7 +291,7 @@ export default function Leaderboard() {
               </div>
 
               {/* 1st */}
-              <div className="flex flex-col items-center" style={{ width: '34%' }}>
+              <div className="flex flex-col items-center cursor-pointer" style={{ width: '34%' }} onClick={() => setSelectedPlayer(leaderboard[0])}>
                 <Crown className="w-6 h-6 text-yellow-400 mb-1" />
                 <div className="w-16 h-16 rounded-full bg-gradient-to-br from-yellow-400 to-amber-500 flex items-center justify-center ring-2 ring-yellow-400/60 shadow-xl mb-1 relative">
                   {leaderboard[0].profilePhoto ? (
@@ -308,7 +309,7 @@ export default function Leaderboard() {
               </div>
 
               {/* 3rd */}
-              <div className="flex flex-col items-center" style={{ width: '30%' }}>
+              <div className="flex flex-col items-center cursor-pointer" style={{ width: '30%' }} onClick={() => setSelectedPlayer(leaderboard[2])}>
                 <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-orange-700 flex items-center justify-center ring-2 ring-orange-500/50 shadow-lg mb-1 relative">
                   {leaderboard[2].profilePhoto ? (
                     <img src={leaderboard[2].profilePhoto} alt={leaderboard[2].name} className="w-full h-full rounded-full object-cover" />
@@ -357,7 +358,7 @@ export default function Leaderboard() {
                         borderColor: 'rgba(255,255,255,0.04)',
                         background: myRanks?.id === player.id ? 'rgba(0,255,136,0.07)' : 'transparent',
                       }}
-                      onClick={() => navigate(`/profile/${player.id}`)}
+                      onClick={() => setSelectedPlayer(player)}
                     >
                       <td className="px-3 py-3">
                         <div className={`inline-flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-xl font-bold text-sm ${getRankBadge(player.rank)}`}>
@@ -445,5 +446,128 @@ export default function Leaderboard() {
         </div>
       </div>
     </div>
+
+    {/* ── Player Profile Modal ─────────────────────────────────────────────── */}
+    {selectedPlayer && (
+      <div
+        className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
+        style={{ background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(10px)' }}
+        onClick={() => setSelectedPlayer(null)}
+      >
+        <div
+          className="w-full max-w-sm rounded-3xl overflow-hidden"
+          style={{
+            background: 'linear-gradient(160deg, #0d1025 0%, #07071a 100%)',
+            border: '1px solid rgba(0,255,136,0.25)',
+            boxShadow: '0 0 60px rgba(0,255,136,0.12)',
+          }}
+          onClick={e => e.stopPropagation()}
+        >
+          {/* Green accent bar */}
+          <div className="h-1 w-full" style={{ background: 'linear-gradient(90deg,#00ff88,#00d4ff)' }} />
+
+          <div className="p-6">
+            {/* Photo + name */}
+            <div className="flex flex-col items-center mb-5">
+              <div
+                className="w-24 h-24 rounded-3xl overflow-hidden mb-3 flex items-center justify-center"
+                style={{
+                  background: 'linear-gradient(135deg,#00ff88,#00d4ff)',
+                  boxShadow: '0 0 32px rgba(0,255,136,0.35)',
+                  border: '2px solid rgba(0,255,136,0.4)',
+                }}
+              >
+                {selectedPlayer.profilePhoto ? (
+                  <img src={selectedPlayer.profilePhoto} alt={selectedPlayer.name} className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-3xl font-black text-white">{selectedPlayer.name?.charAt(0)}</span>
+                )}
+              </div>
+              <h2 className="text-xl font-black text-white text-center">{selectedPlayer.name}</h2>
+              {selectedPlayer.city && (
+                <p className="text-sm mt-0.5 flex items-center gap-1" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                  <MapPin className="w-3 h-3" />{selectedPlayer.city}{selectedPlayer.state ? `, ${selectedPlayer.state}` : ''}
+                </p>
+              )}
+              {/* Rank badge */}
+              <div
+                className="mt-2 px-3 py-1 rounded-full text-xs font-black"
+                style={{ background: 'rgba(0,255,136,0.15)', border: '1px solid rgba(0,255,136,0.35)', color: '#00ff88' }}
+              >
+                #{selectedPlayer.rank} on Leaderboard
+              </div>
+            </div>
+
+            {/* Info cards */}
+            <div className="space-y-2.5 mb-5">
+              {/* Matchify ID */}
+              {selectedPlayer.matchifyCode && (
+                <div
+                  className="flex items-center gap-3 px-4 py-3 rounded-2xl"
+                  style={{ background: 'rgba(0,212,255,0.08)', border: '1px solid rgba(0,212,255,0.2)' }}
+                >
+                  <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
+                    style={{ background: 'rgba(0,212,255,0.15)' }}>
+                    <Star className="w-4 h-4" style={{ color: B.cyan }} />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-bold uppercase tracking-wider mb-0.5" style={{ color: 'rgba(0,212,255,0.6)' }}>Matchify ID</p>
+                    <p className="text-sm font-black" style={{ color: B.cyan }}>{selectedPlayer.matchifyCode}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Contact — phone preferred, email fallback */}
+              {(selectedPlayer.phone || selectedPlayer.email) && (
+                <div
+                  className="flex items-center gap-3 px-4 py-3 rounded-2xl"
+                  style={{ background: 'rgba(0,255,136,0.06)', border: '1px solid rgba(0,255,136,0.15)' }}
+                >
+                  <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
+                    style={{ background: 'rgba(0,255,136,0.12)' }}>
+                    <Globe className="w-4 h-4" style={{ color: B.green }} />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-bold uppercase tracking-wider mb-0.5" style={{ color: 'rgba(0,255,136,0.55)' }}>
+                      {selectedPlayer.phone ? 'Phone' : 'Email'}
+                    </p>
+                    <p className="text-sm font-bold text-white truncate">
+                      {selectedPlayer.phone
+                        ? `+91 ${selectedPlayer.phone.replace(/^91/, '').replace(/(\d{5})(\d{5})/, '$1 $2')}`
+                        : selectedPlayer.email}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Stats row */}
+            <div className="grid grid-cols-4 gap-2 mb-5">
+              {[
+                { val: selectedPlayer.totalPoints ?? 0,       label: 'Points', color: '#fbbf24' },
+                { val: selectedPlayer.tournamentsPlayed ?? 0, label: 'Played', color: B.cyan },
+                { val: selectedPlayer.matchesWon ?? 0,        label: 'Won',    color: B.green },
+                { val: selectedPlayer.matchesLost ?? 0,       label: 'Lost',   color: '#f87171' },
+              ].map(({ val, label, color }) => (
+                <div key={label} className="text-center py-2.5 rounded-2xl"
+                  style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                  <p className="text-lg font-black" style={{ color }}>{val}</p>
+                  <p className="text-[10px] font-bold" style={{ color: 'rgba(255,255,255,0.4)' }}>{label}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Close */}
+            <button
+              onClick={() => setSelectedPlayer(null)}
+              className="w-full py-3 rounded-2xl font-black text-sm transition-all"
+              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)' }}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
   );
 }

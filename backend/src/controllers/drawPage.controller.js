@@ -304,17 +304,46 @@ export const getDrawPage = async (req, res) => {
         recalcStandings(group);
       });
 
-      // Knockout stage
+      // Knockout stage — use index-based lookup because KO matchNumbers are
+      // global (offset after group matches), NOT per-round 1-based.
       bracketData.knockout?.rounds?.forEach((round, ri) => {
+        const dbRound = bracketData.knockout.rounds.length - ri;
+        const roundDbMatches = matches
+          .filter(m => m.stage === 'KNOCKOUT' && m.round === dbRound)
+          .sort((a, b) => a.matchNumber - b.matchNumber);
+
         round.matches?.forEach((match, mi) => {
-          const dbm = matches.find(m =>
-            m.stage       === 'KNOCKOUT' &&
-            m.round       === (bracketData.knockout.rounds.length - ri) &&
-            m.matchNumber === (mi + 1)
-          );
+          const dbm = roundDbMatches[mi];
           if (dbm) injectMatch(match, dbm, true);
         });
       });
+
+      // Cascade winners into TBD slots for later KO rounds.
+      // rounds[0] = first KO round (QF/SF), rounds[last] = Final.
+      if (bracketData.knockout?.rounds?.length > 1) {
+        for (let ri = 1; ri < bracketData.knockout.rounds.length; ri++) {
+          const round = bracketData.knockout.rounds[ri];
+          const feederRound = bracketData.knockout.rounds[ri - 1];
+          if (!Array.isArray(round?.matches) || !Array.isArray(feederRound?.matches)) continue;
+
+          round.matches.forEach((match, mi) => {
+            if (!match.player1) {
+              const feeder = feederRound.matches[mi * 2];
+              const wId = feeder?.dbMatch?.winnerId;
+              if (wId && playerMap[wId]) {
+                match.player1 = { id: wId, name: playerMap[wId].name, partnerName: partnerMap[wId] || null };
+              }
+            }
+            if (!match.player2) {
+              const feeder = feederRound.matches[mi * 2 + 1];
+              const wId = feeder?.dbMatch?.winnerId;
+              if (wId && playerMap[wId]) {
+                match.player2 = { id: wId, name: playerMap[wId].name, partnerName: partnerMap[wId] || null };
+              }
+            }
+          });
+        }
+      }
     }
 
     // ─── Send response ─────────────────────────────────────────────────────────

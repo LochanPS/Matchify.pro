@@ -89,13 +89,18 @@ export const restartDraw = async (req, res) => {
         });
       }
 
-      // Reset bracketJson knockout rounds — null out players, set pending
+      // Reset bracketJson knockout rounds
+      // bracketJson.knockout.rounds[0] = first KO round (keep players, clear winner)
+      // bracketJson.knockout.rounds[1+] = later rounds (clear players + winner)
       if (bracketJson?.knockout?.rounds) {
-        bracketJson.knockout.rounds.forEach(round => {
+        bracketJson.knockout.rounds.forEach((round, roundIdx) => {
           round.matches.forEach(match => {
-            // Only clear non-first-round slots in bracketJson too
-            // (first KO round slots were populated by continueToKnockout — keep them)
             match.winner = null;
+            if (roundIdx > 0) {
+              // Later rounds: players come from match winners — clear them
+              match.player1 = null;
+              match.player2 = null;
+            }
           });
         });
 

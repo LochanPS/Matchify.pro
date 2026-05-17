@@ -527,11 +527,10 @@ const DrawPage = () => {
     
     try {
       await api.post(`/tournaments/${tournamentId}/categories/${activeCategory.id}/draw/restart`);
-      
-      // Refresh bracket and matches
-      await fetchBracket();
-      await fetchTournamentStats();
-      
+
+      // Refresh everything with fresh data
+      await fetchDrawPageFull(activeCategory.id);
+
       setSuccess('Draw restarted successfully! All matches have been reset.');
       setShowRestartModal(false);
       setTimeout(() => setSuccess(null), 5000);
@@ -1003,38 +1002,26 @@ const DrawPage = () => {
                     
                     {/* Row 3: Restart & Delete */}
                     <button
-                      onClick={() => hasPlayedMatches && !isCategoryCompleted && setShowRestartModal(true)}
-                      disabled={!hasPlayedMatches || isCategoryCompleted}
-                      title={
-                        isCategoryCompleted 
-                          ? 'Category has ended - draw is locked' 
-                          : !hasPlayedMatches 
-                            ? 'No matches have been played yet' 
-                            : 'Restart all matches'
-                      }
+                      onClick={() => !isCategoryCompleted && setShowRestartModal(true)}
+                      disabled={isCategoryCompleted}
+                      title={isCategoryCompleted ? 'Category has ended - draw is locked' : 'Restart all matches'}
                       className={`px-4 py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm ${
-                        !hasPlayedMatches || isCategoryCompleted
-                          ? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50' 
+                        isCategoryCompleted
+                          ? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50'
                           : 'bg-gradient-to-r from-gray-600 to-gray-700 text-white shadow-gray-500/30 hover:shadow-gray-500/50 hover:scale-105'
                       }`}
                     >
                       <Zap className="w-5 h-5" />
                       Restart
                     </button>
-                    
+
                     <button
-                      onClick={() => !hasPlayedMatches && !isCategoryCompleted && setShowDeleteModal(true)}
-                      disabled={hasPlayedMatches || isCategoryCompleted}
-                      title={
-                        isCategoryCompleted
-                          ? 'Category has ended - draw is locked'
-                          : hasPlayedMatches 
-                            ? 'Cannot delete draw - matches have been played' 
-                            : 'Delete Draw'
-                      }
+                      onClick={() => !isCategoryCompleted && setShowDeleteModal(true)}
+                      disabled={isCategoryCompleted}
+                      title={isCategoryCompleted ? 'Category has ended - draw is locked' : 'Delete Draw'}
                       className={`px-4 py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm ${
-                        hasPlayedMatches || isCategoryCompleted
-                          ? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50' 
+                        isCategoryCompleted
+                          ? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50'
                           : 'bg-gradient-to-r from-red-500 to-rose-600 text-white shadow-red-500/30 hover:shadow-red-500/50 hover:scale-105'
                       }`}
                     >
@@ -2586,13 +2573,15 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                               <button
                                 onClick={() => {
                                   const bracketMatchData = { matchNumber: match.matchNumber, round: ri + 1, player1, player2 };
-                                  const matchDataToUse = dbMatch || {
-                                    matchNumber: match.matchNumber, status: 'COMPLETED', winner: match.winner,
-                                    winnerId: match.winner === 1 ? player1?.id : player2?.id,
-                                    score: match.scoreJson || match.score || null,
-                                    scoreJson: match.scoreJson || null,
-                                    player1, player2,
-                                  };
+                                  const matchDataToUse = dbMatch
+                                    ? { ...dbMatch, score: dbMatch.score ?? dbMatch.scoreJson ?? null }
+                                    : {
+                                        matchNumber: match.matchNumber, status: 'COMPLETED', winner: match.winner,
+                                        winnerId: match.winner === 1 ? player1?.id : player2?.id,
+                                        score: match.scoreJson || match.score || null,
+                                        scoreJson: match.scoreJson || null,
+                                        player1, player2,
+                                      };
                                   onViewMatchDetails(matchDataToUse, bracketMatchData);
                                 }}
                                 className="w-full py-2 rounded-lg bg-blue-500/20 text-blue-300 border-2 border-blue-500/40 transition-all text-[10px] font-black flex items-center justify-center gap-1"
@@ -2904,13 +2893,15 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                           <button
                             onClick={() => {
                               const bracketMatchData = { matchNumber: match.matchNumber, round: 1, player1: match.player1, player2: match.player2, groupName: group.groupName };
-                              const matchDataToUse = dbMatch || {
-                                matchNumber: match.matchNumber, status: 'COMPLETED', winner: match.winner,
-                                winnerId: match.winner === 1 ? match.player1?.id : match.player2?.id,
-                                score: match.scoreJson || match.score || null,
-                                scoreJson: match.scoreJson || null,
-                                player1: match.player1, player2: match.player2,
-                              };
+                              const matchDataToUse = dbMatch
+                                ? { ...dbMatch, score: dbMatch.score ?? dbMatch.scoreJson ?? null }
+                                : {
+                                    matchNumber: match.matchNumber, status: 'COMPLETED', winner: match.winner,
+                                    winnerId: match.winner === 1 ? match.player1?.id : match.player2?.id,
+                                    score: match.scoreJson || match.score || null,
+                                    scoreJson: match.scoreJson || null,
+                                    player1: match.player1, player2: match.player2,
+                                  };
                               onViewMatchDetails(matchDataToUse, bracketMatchData);
                             }}
                             className="flex-1 py-2.5 rounded-lg bg-blue-500/20 text-blue-300 border-2 border-blue-500/40 transition-all text-xs font-black flex items-center justify-center gap-2"
@@ -3409,7 +3400,7 @@ const DeleteDrawModal = ({ categoryName, onClose, onConfirm, deleting }) => {
             <div className="flex items-start gap-3">
               <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
               <p className="text-sm text-red-300">
-                All match assignments and player positions will be removed. You'll need to create a new draw and reassign players.
+                All match assignments, scores, and player positions will be permanently removed. You'll need to create a new draw and reassign players.
               </p>
             </div>
           </div>

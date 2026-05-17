@@ -127,6 +127,7 @@ export default function Leaderboard() {
   }
 
   return (
+    <>
     <div className="min-h-screen" style={{ background: B.bg }}>
       {/* Background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
@@ -569,5 +570,6 @@ export default function Leaderboard() {
         </div>
       </div>
     )}
+    </>
   );
 }

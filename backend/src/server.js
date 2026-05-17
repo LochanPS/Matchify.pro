@@ -301,6 +301,11 @@ app.get('/api/debug/routes', (req, res) => {
   res.json({ routes, total: routes.length });
 });
 
+// Root endpoint — prevents 404 on GET /
+app.get('/', (req, res) => {
+  res.status(200).json({ status: 'ok', service: 'Matchify.pro API' });
+});
+
 // API root endpoint
 app.get('/api', (req, res) => {
   res.status(200).json({

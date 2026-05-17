@@ -189,7 +189,7 @@ const MatchScoringPage = () => {
       const drawsUrl = tId
         ? `/tournaments/${tId}/draws/${cId || ''}?refresh=true`
         : '/dashboard';
-      navigate(drawsUrl, { state: { matchComplete: true, winner: response.data.summary?.winner, categoryId: cId } });
+      window.location.href = drawsUrl;
     } catch (err) {
       setError(getErrorMessage(err, 'Failed to end match'));
     } finally { setSaving(false); }

@@ -533,15 +533,20 @@ const DrawPage = () => {
     setError(null);
     
     try {
-      await api.post(`/tournaments/${tournamentId}/categories/${activeCategory.id}/draw/restart`);
+      await api.post(`/tournaments/${tournamentId}/categories/${activeCategory.id}/draw/restart`, {
+        activeStage
+      });
 
       // Refresh everything with fresh data
       await fetchDrawPageFull(activeCategory.id);
 
+      const isHybrid = bracket?.format === 'ROUND_ROBIN_KNOCKOUT';
       setSuccess(
-        bracket?.format === 'ROUND_ROBIN_KNOCKOUT'
+        isHybrid && activeStage === 'knockout'
           ? 'Knockout stage restarted. Group results preserved.'
-          : 'Draw restarted successfully! All matches have been reset.'
+          : isHybrid && activeStage === 'roundrobin'
+            ? 'Full draw restarted. All group and knockout matches have been reset.'
+            : 'Draw restarted successfully! All matches have been reset.'
       );
       setShowRestartModal(false);
       setTimeout(() => setSuccess(null), 5000);
@@ -1018,9 +1023,11 @@ const DrawPage = () => {
                       title={
                         isCategoryCompleted
                           ? 'Category has ended - draw is locked'
-                          : bracket?.format === 'ROUND_ROBIN_KNOCKOUT'
+                          : bracket?.format === 'ROUND_ROBIN_KNOCKOUT' && activeStage === 'knockout'
                             ? 'Restart knockout stage only (group results preserved)'
-                            : 'Restart all matches'
+                            : bracket?.format === 'ROUND_ROBIN_KNOCKOUT' && activeStage === 'roundrobin'
+                              ? 'Restart entire draw (groups + knockout)'
+                              : 'Restart all matches'
                       }
                       className={`px-4 py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm ${
                         isCategoryCompleted
@@ -1029,7 +1036,9 @@ const DrawPage = () => {
                       }`}
                     >
                       <Zap className="w-5 h-5" />
-                      {bracket?.format === 'ROUND_ROBIN_KNOCKOUT' ? 'Restart KO' : 'Restart'}
+                      {bracket?.format === 'ROUND_ROBIN_KNOCKOUT'
+                        ? activeStage === 'knockout' ? 'Restart KO' : 'Restart All'
+                        : 'Restart'}
                     </button>
 
                     <button
@@ -2098,23 +2107,33 @@ const DrawPage = () => {
       {/* Restart Draws Confirmation Modal */}
       {showRestartModal && (() => {
         const isHybrid = bracket?.format === 'ROUND_ROBIN_KNOCKOUT';
+        // koOnly = hybrid AND currently on knockout tab → restart KO only
+        // rrFull = hybrid AND currently on roundrobin tab → restart everything
+        const koOnly = isHybrid && activeStage === 'knockout';
+        const rrFull = isHybrid && activeStage === 'roundrobin';
         return (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div
               className="rounded-3xl p-8 max-w-lg w-full shadow-2xl"
               style={{
                 background: '#0d1025',
-                border: isHybrid ? '2px solid rgba(168,85,247,0.5)' : '2px solid rgba(249,115,22,0.4)'
+                border: koOnly
+                  ? '2px solid rgba(168,85,247,0.5)'
+                  : rrFull
+                    ? '2px solid rgba(249,115,22,0.6)'
+                    : '2px solid rgba(249,115,22,0.4)'
               }}
             >
               {/* Icon */}
               <div
                 className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg"
                 style={{
-                  background: isHybrid
+                  background: koOnly
                     ? 'linear-gradient(135deg,#a855f7,#7c3aed)'
                     : 'linear-gradient(135deg,#f97316,#d97706)',
-                  boxShadow: isHybrid ? '0 0 30px rgba(168,85,247,0.4)' : '0 0 30px rgba(249,115,22,0.4)'
+                  boxShadow: koOnly
+                    ? '0 0 30px rgba(168,85,247,0.4)'
+                    : '0 0 30px rgba(249,115,22,0.4)'
                 }}
               >
                 <Zap className="w-10 h-10 text-white" />
@@ -2122,35 +2141,55 @@ const DrawPage = () => {
 
               {/* Title */}
               <h2 className="text-2xl font-bold text-center mb-2 text-white">
-                {isHybrid ? 'Restart Knockout Stage?' : 'Restart All Matches?'}
+                {koOnly
+                  ? 'Restart Knockout Stage?'
+                  : rrFull
+                    ? 'Restart Entire Draw?'
+                    : 'Restart All Matches?'}
               </h2>
-              <p className="text-center text-sm mb-5" style={{ color: isHybrid ? '#c084fc' : '#fb923c' }}>
-                {isHybrid ? 'Group stage results will NOT be affected' : activeCategory?.name}
+              <p className="text-center text-sm mb-5" style={{ color: koOnly ? '#c084fc' : '#fb923c' }}>
+                {koOnly
+                  ? 'Group stage results will NOT be affected'
+                  : rrFull
+                    ? 'Both group stage and knockout will be reset'
+                    : activeCategory?.name}
               </p>
 
-              {/* What changes */}
+              {/* What resets */}
               <div
                 className="rounded-xl p-4 mb-4"
                 style={{
-                  background: isHybrid ? 'rgba(168,85,247,0.08)' : 'rgba(249,115,22,0.08)',
-                  border: isHybrid ? '1px solid rgba(168,85,247,0.3)' : '1px solid rgba(249,115,22,0.3)'
+                  background: koOnly ? 'rgba(168,85,247,0.08)' : 'rgba(249,115,22,0.08)',
+                  border: koOnly ? '1px solid rgba(168,85,247,0.3)' : '1px solid rgba(249,115,22,0.3)'
                 }}
               >
                 <div className="flex gap-3">
                   <AlertTriangle
                     className="w-5 h-5 flex-shrink-0 mt-0.5"
-                    style={{ color: isHybrid ? '#c084fc' : '#fb923c' }}
+                    style={{ color: koOnly ? '#c084fc' : '#fb923c' }}
                   />
-                  <div className="text-sm" style={{ color: isHybrid ? '#e9d5ff' : '#fed7aa' }}>
+                  <div className="text-sm" style={{ color: koOnly ? '#e9d5ff' : '#fed7aa' }}>
                     <p className="font-bold mb-2">
-                      {isHybrid ? 'Knockout stage will be reset:' : 'All matches will be reset:'}
+                      {koOnly
+                        ? 'Knockout stage will be reset:'
+                        : rrFull
+                          ? 'Everything will be reset:'
+                          : 'All matches will be reset:'}
                     </p>
                     <ul className="list-disc list-inside space-y-1 ml-1">
-                      {isHybrid ? (
+                      {koOnly ? (
                         <>
                           <li>All knockout match scores cleared</li>
-                          <li>All knockout match statuses reset to Pending</li>
+                          <li>All knockout statuses reset to Pending</li>
                           <li>Winners removed from Semi-Final / Final slots</li>
+                          <li>Umpire and court assignments cleared</li>
+                        </>
+                      ) : rrFull ? (
+                        <>
+                          <li>All group match scores cleared</li>
+                          <li>All group standings and points reset to zero</li>
+                          <li>All knockout match scores cleared</li>
+                          <li>Winners removed from all knockout slots</li>
                           <li>Umpire and court assignments cleared</li>
                         </>
                       ) : (
@@ -2176,7 +2215,7 @@ const DrawPage = () => {
                   <div className="w-5 h-5 flex-shrink-0 mt-0.5 text-[#00ff88] font-black text-base leading-none">✓</div>
                   <div className="text-sm text-[#86efac]">
                     <p className="font-bold mb-1">Will be kept:</p>
-                    {isHybrid ? (
+                    {koOnly ? (
                       <>
                         <p>• All group stage matches and scores</p>
                         <p>• Group standings and points</p>
@@ -2185,7 +2224,7 @@ const DrawPage = () => {
                       </>
                     ) : (
                       <>
-                        <p>• Player assignments in Round 1</p>
+                        <p>• Player assignments in the first round</p>
                         <p>• Draw structure and bracket format</p>
                       </>
                     )}
@@ -2214,10 +2253,10 @@ const DrawPage = () => {
                   disabled={restarting}
                   className="flex-1 py-3 text-white rounded-xl font-semibold transition-all flex items-center justify-center gap-2"
                   style={{
-                    background: isHybrid
+                    background: koOnly
                       ? 'linear-gradient(135deg,#a855f7,#7c3aed)'
                       : 'linear-gradient(135deg,#f97316,#d97706)',
-                    boxShadow: restarting ? 'none' : isHybrid
+                    boxShadow: restarting ? 'none' : koOnly
                       ? '0 4px 20px rgba(168,85,247,0.3)'
                       : '0 4px 20px rgba(249,115,22,0.3)'
                   }}
@@ -2230,7 +2269,11 @@ const DrawPage = () => {
                   ) : (
                     <>
                       <Zap className="w-5 h-5" />
-                      {isHybrid ? 'Restart Knockout Stage' : 'Restart All Matches'}
+                      {koOnly
+                        ? 'Restart Knockout Stage'
+                        : rrFull
+                          ? 'Restart Entire Draw'
+                          : 'Restart All Matches'}
                     </>
                   )}
                 </button>

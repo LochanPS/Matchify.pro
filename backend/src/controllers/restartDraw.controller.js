@@ -52,7 +52,11 @@ export const restartDraw = async (req, res) => {
 
     const isHybrid = bracketJson?.format === 'ROUND_ROBIN_KNOCKOUT';
 
-    if (isHybrid) {
+    // activeStage sent from frontend: 'knockout' = reset KO only, 'roundrobin' = reset everything
+    const activeStage = req.body?.activeStage;
+    const knockoutOnlyRestart = isHybrid && activeStage === 'knockout';
+
+    if (knockoutOnlyRestart) {
       // ── ROUND_ROBIN_KNOCKOUT: only restart knockout stage ──────────────────
       const knockoutMatches = await prisma.match.findMany({
         where: { tournamentId, categoryId, stage: 'KNOCKOUT' },
@@ -164,8 +168,8 @@ export const restartDraw = async (req, res) => {
     console.log(`   - First round matches: ${firstRoundMatches.length} (players preserved)`);
     console.log(`   - Other matches: ${matches.length - firstRoundMatches.length} (players cleared)`);
 
-    // Reset Round Robin standings
-    if (bracketJson?.format === 'ROUND_ROBIN') {
+    // Reset Round Robin standings (for ROUND_ROBIN or ROUND_ROBIN_KNOCKOUT full restart)
+    if (bracketJson?.format === 'ROUND_ROBIN' || bracketJson?.format === 'ROUND_ROBIN_KNOCKOUT') {
       if (bracketJson.groups) {
         bracketJson.groups.forEach(group => {
           group.participants.forEach(participant => {

@@ -538,6 +538,36 @@ export default function TournamentRegistrationPage() {
                       style={{ background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.2)', color: '#fbbf24' }}>
                       ⚠️ Pay exactly ₹{calculateTotal()} and screenshot the confirmation.
                     </div>
+
+                    {/* UPI Deep Link Button */}
+                    {adminPaymentSettings?.upiId && (() => {
+                      const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+                      const upiLink = `upi://pay?pa=${encodeURIComponent(adminPaymentSettings.upiId)}&pn=${encodeURIComponent(adminPaymentSettings.accountHolder || 'Matchify.pro')}&am=${calculateTotal()}&cu=INR&tn=${encodeURIComponent('Tournament Registration')}`;
+                      return isIOS ? (
+                        <div className="mt-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-center"
+                          style={{ background: 'rgba(0,212,255,0.07)', border: '1px solid rgba(0,212,255,0.2)', color: 'rgba(0,212,255,0.8)' }}>
+                          📱 On iPhone, scan the QR code above with your camera app
+                        </div>
+                      ) : (
+                        <a
+                          href={upiLink}
+                          className="mt-3 flex items-center justify-center gap-2 w-full py-3 rounded-xl text-sm font-black transition-all active:scale-95"
+                          style={{
+                            background: 'linear-gradient(135deg, #00d4ff22, #7c3aed22)',
+                            border: '1px solid rgba(0,212,255,0.35)',
+                            color: '#fff',
+                            textDecoration: 'none',
+                          }}
+                          onClick={() => {
+                            // Small timeout so the app opens before any state changes
+                            setTimeout(() => {}, 0);
+                          }}
+                        >
+                          <span style={{ fontSize: '1.1rem' }}>📲</span>
+                          Pay ₹{calculateTotal()} with UPI App
+                        </a>
+                      );
+                    })()}
                   </>
                 )}
               </div>

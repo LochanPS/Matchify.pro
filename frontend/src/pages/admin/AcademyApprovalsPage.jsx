@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import {
   Building2, CheckCircle, XCircle, Eye, MapPin, Phone,
   Mail, Globe, Loader2, ChevronDown, ChevronUp, BadgeCheck,
-  Clock, AlertCircle, Instagram
+  Clock, AlertCircle, Instagram, Trash2
 } from 'lucide-react';
 import api from '../../utils/api';
 
@@ -28,11 +28,21 @@ export default function AcademyApprovalsPage() {
   const [rejectReasons, setRejectReasons] = useState({});
   const [actionLoading, setActionLoading] = useState(null); // id being actioned
   const [toast, setToast] = useState(null);
+  const [deleteConfirm, setDeleteConfirm] = useState(null); // { id, name }
+  const [deleteReason, setDeleteReason] = useState('');
 
   const showToast = (msg, ok = true) => {
     setToast({ msg, ok });
     setTimeout(() => setToast(null), 3000);
   };
+
+  const parseAcademy = a => ({
+    ...a,
+    sports: typeof a.sports === 'string' ? JSON.parse(a.sports || '[]') : a.sports,
+    sportDetails: typeof a.sportDetails === 'string' ? JSON.parse(a.sportDetails || '{}') : a.sportDetails,
+    amenities: typeof a.amenities === 'string' ? JSON.parse(a.amenities || '[]') : (a.amenities || []),
+    photos: typeof a.photos === 'string' ? JSON.parse(a.photos || '[]') : (a.photos || []),
+  });
 
   const fetchAcademies = async () => {
     try {
@@ -40,26 +50,13 @@ export default function AcademyApprovalsPage() {
       let res;
       if (tab === 'pending') {
         res = await api.get('/academies/admin/pending');
-        setAcademies(
-          (res.data?.data?.academies || []).map(a => ({
-            ...a,
-            sports: typeof a.sports === 'string' ? JSON.parse(a.sports || '[]') : a.sports,
-            sportDetails: typeof a.sportDetails === 'string' ? JSON.parse(a.sportDetails || '{}') : a.sportDetails,
-            amenities: typeof a.amenities === 'string' ? JSON.parse(a.amenities || '[]') : (a.amenities || []),
-            photos: typeof a.photos === 'string' ? JSON.parse(a.photos || '[]') : (a.photos || []),
-          }))
-        );
+        setAcademies((res.data?.data?.academies || []).map(parseAcademy));
+      } else if (tab === 'all') {
+        res = await api.get('/academies/admin/all');
+        setAcademies((res.data?.data?.academies || []).map(parseAcademy));
       } else {
         res = await api.get(`/academies/admin/all?status=${tab}`);
-        setAcademies(
-          (res.data?.data?.academies || []).map(a => ({
-            ...a,
-            sports: typeof a.sports === 'string' ? JSON.parse(a.sports || '[]') : a.sports,
-            sportDetails: typeof a.sportDetails === 'string' ? JSON.parse(a.sportDetails || '{}') : a.sportDetails,
-            amenities: typeof a.amenities === 'string' ? JSON.parse(a.amenities || '[]') : (a.amenities || []),
-            photos: typeof a.photos === 'string' ? JSON.parse(a.photos || '[]') : (a.photos || []),
-          }))
-        );
+        setAcademies((res.data?.data?.academies || []).map(parseAcademy));
       }
     } catch (err) {
       showToast('Failed to load academies', false);
@@ -90,6 +87,20 @@ export default function AcademyApprovalsPage() {
       setExpanded(null);
       showToast('Academy rejected');
     } catch { showToast('Failed to reject', false); }
+    finally { setActionLoading(null); }
+  };
+
+  const deleteAcademy = async () => {
+    if (!deleteConfirm) return;
+    setActionLoading(deleteConfirm.id + '_delete');
+    try {
+      await api.delete(`/academies/admin/${deleteConfirm.id}`, { data: { reason: deleteReason || 'Removed by admin' } });
+      setAcademies(p => p.filter(a => a.id !== deleteConfirm.id));
+      setExpanded(null);
+      setDeleteConfirm(null);
+      setDeleteReason('');
+      showToast('Academy deleted');
+    } catch { showToast('Failed to delete', false); }
     finally { setActionLoading(null); }
   };
 
@@ -144,11 +155,63 @@ export default function AcademyApprovalsPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 mb-6">
+      <div className="flex gap-2 mb-6 flex-wrap">
         <TabBtn id="pending" label="Pending" count={tab === 'pending' ? academies.length : null} />
-        <TabBtn id="approved" label="Approved" />
+        <TabBtn id="approved" label="Approved" count={tab === 'approved' ? academies.length : null} />
         <TabBtn id="rejected" label="Rejected" />
+        <TabBtn id="all" label="All" count={tab === 'all' ? academies.length : null} />
       </div>
+
+      {/* Delete confirmation modal */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-6"
+          style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)' }}>
+          <div className="w-full max-w-sm rounded-2xl p-6 space-y-4"
+            style={{ background: '#12121a', border: '1px solid rgba(239,68,68,0.3)' }}>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{ background: 'rgba(239,68,68,0.15)' }}>
+                <Trash2 className="w-5 h-5" style={{ color: '#f87171' }} />
+              </div>
+              <div>
+                <p className="font-black text-white">Delete Academy?</p>
+                <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.45)' }}>{deleteConfirm.name}</p>
+              </div>
+            </div>
+            <p className="text-sm" style={{ color: 'rgba(255,255,255,0.55)' }}>
+              This will soft-delete the academy and notify the owner. Action is reversible from the database only.
+            </p>
+            <div>
+              <p className="text-xs font-black mb-1.5" style={{ color: 'rgba(255,255,255,0.4)' }}>Reason (optional)</p>
+              <input
+                value={deleteReason}
+                onChange={e => setDeleteReason(e.target.value)}
+                placeholder="Reason for deletion..."
+                className="w-full px-3 py-2.5 text-sm text-white rounded-xl focus:outline-none"
+                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
+              />
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setDeleteConfirm(null)}
+                className="flex-1 py-3 rounded-xl text-sm font-black"
+                style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.5)' }}>
+                Cancel
+              </button>
+              <button
+                onClick={deleteAcademy}
+                disabled={actionLoading === deleteConfirm.id + '_delete'}
+                className="flex-1 py-3 rounded-xl text-sm font-black flex items-center justify-center gap-2 disabled:opacity-50"
+                style={{ background: 'rgba(239,68,68,0.2)', color: '#f87171', border: '1px solid rgba(239,68,68,0.3)' }}>
+                {actionLoading === deleteConfirm.id + '_delete'
+                  ? <Loader2 className="w-4 h-4 animate-spin" />
+                  : <Trash2 className="w-4 h-4" />}
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* List */}
       {loading ? (
@@ -188,6 +251,19 @@ export default function AcademyApprovalsPage() {
                             Awaiting
                           </span>
                         )}
+                        {tab === 'all' && (
+                          <span className="px-2 py-0.5 rounded-full text-xs font-bold"
+                            style={{
+                              background: academy.status === 'approved' ? 'rgba(0,255,136,0.12)'
+                                : academy.status === 'pending' ? 'rgba(251,191,36,0.12)'
+                                : 'rgba(239,68,68,0.12)',
+                              color: academy.status === 'approved' ? '#00ff88'
+                                : academy.status === 'pending' ? '#fbbf24'
+                                : '#f87171'
+                            }}>
+                            {academy.status}
+                          </span>
+                        )}
                       </div>
                       <div className="flex items-center gap-1.5 text-xs mb-2"
                         style={{ color: 'rgba(255,255,255,0.45)' }}>
@@ -209,7 +285,7 @@ export default function AcademyApprovalsPage() {
                       </div>
                     </div>
 
-                    {/* Action buttons — pending only */}
+                    {/* Action buttons */}
                     <div className="flex items-center gap-2 flex-shrink-0">
                       {tab === 'pending' && (
                         <>
@@ -229,6 +305,16 @@ export default function AcademyApprovalsPage() {
                           </button>
                         </>
                       )}
+                      <button
+                        onClick={() => { setDeleteConfirm({ id: academy.id, name: academy.name }); setDeleteReason(''); }}
+                        disabled={isActioning}
+                        title="Delete academy"
+                        className="p-1.5 rounded-xl transition-all disabled:opacity-50"
+                        style={{ background: 'rgba(239,68,68,0.1)', color: '#f87171', border: '1px solid rgba(239,68,68,0.2)' }}>
+                        {actionLoading === academy.id + '_delete'
+                          ? <Loader2 className="w-4 h-4 animate-spin" />
+                          : <Trash2 className="w-4 h-4" />}
+                      </button>
                       <button onClick={() => setExpanded(isExpanded ? null : academy.id)}
                         className="p-1.5 rounded-xl transition-all"
                         style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.5)' }}>
@@ -356,6 +442,18 @@ export default function AcademyApprovalsPage() {
                         <p className="text-sm text-white leading-relaxed">{academy.description}</p>
                       </div>
                     )}
+
+                    {/* Delete button in expanded view */}
+                    <div className="pt-1">
+                      <button
+                        onClick={() => { setDeleteConfirm({ id: academy.id, name: academy.name }); setDeleteReason(''); }}
+                        disabled={isActioning}
+                        className="w-full py-2.5 rounded-xl text-sm font-black flex items-center justify-center gap-2 disabled:opacity-50"
+                        style={{ background: 'rgba(239,68,68,0.08)', color: '#f87171', border: '1px solid rgba(239,68,68,0.2)' }}>
+                        <Trash2 className="w-4 h-4" />
+                        Delete Academy
+                      </button>
+                    </div>
 
                     {/* Reject reason input */}
                     {tab === 'pending' && (

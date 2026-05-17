@@ -264,6 +264,11 @@ const ConductMatchPage = () => {
                 <p className="text-sm font-black text-white leading-tight line-clamp-2">
                   {player1?.name || 'Player 1'}
                 </p>
+                {player1?.partnerName && (
+                  <p className="text-xs font-bold leading-tight mt-0.5" style={{ color: B.green }}>
+                    & {player1.partnerName}
+                  </p>
+                )}
                 {!player1 && (
                   <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.35)' }}>Awaiting player</p>
                 )}
@@ -300,6 +305,11 @@ const ConductMatchPage = () => {
                 <p className="text-sm font-black text-white leading-tight line-clamp-2">
                   {player2?.name || 'Player 2'}
                 </p>
+                {player2?.partnerName && (
+                  <p className="text-xs font-bold leading-tight mt-0.5" style={{ color: B.purple }}>
+                    & {player2.partnerName}
+                  </p>
+                )}
                 {!player2 && (
                   <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.35)' }}>Awaiting player</p>
                 )}

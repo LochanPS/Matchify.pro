@@ -268,23 +268,27 @@ class MatchService {
 
     if (!match) return null;
 
-    // Helper function to get player data (handles both real users and guest players)
+    const isDoubles = match.category?.format === 'doubles';
+
+    // Helper function to get player data with partner name for doubles
     const getPlayerData = async (playerId) => {
       if (!playerId) return null;
-      
-      // Check if it's a guest player (ID starts with "guest-")
+
+      // Guest player (ID starts with "guest-")
       if (playerId.startsWith('guest-')) {
         const registrationId = playerId.replace('guest-', '');
         const registration = await prisma.registration.findUnique({
           where: { id: registrationId },
-          select: { 
-            id: true, 
-            guestName: true, 
+          select: {
+            id: true,
+            guestName: true,
             guestEmail: true,
-            userId: true
+            userId: true,
+            // For guest doubles pairs stored as "Name1 & Name2" in guestName,
+            // partnerName is already embedded; expose as-is.
           }
         });
-        
+
         if (registration) {
           return {
             id: playerId,
@@ -296,12 +300,32 @@ class MatchService {
         }
         return null;
       }
-      
+
       // Regular user
-      return await prisma.user.findUnique({
+      const user = await prisma.user.findUnique({
         where: { id: playerId },
         select: { id: true, name: true, email: true, profilePhoto: true }
       });
+
+      if (!user) return null;
+
+      // For doubles categories, look up partner name from registration
+      if (isDoubles) {
+        const reg = await prisma.registration.findFirst({
+          where: {
+            categoryId: match.categoryId,
+            userId: playerId,
+          },
+          include: {
+            partner: { select: { id: true, name: true } }
+          }
+        });
+        if (reg?.partner) {
+          return { ...user, partnerName: reg.partner.name, partnerId: reg.partner.id };
+        }
+      }
+
+      return user;
     };
 
     // Fetch player details

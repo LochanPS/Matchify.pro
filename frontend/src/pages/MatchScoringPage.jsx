@@ -135,10 +135,10 @@ const MatchScoringPage = () => {
 
       if (matchWon || idx >= maxSets - 1) {
         const matchWinnerId = winner === 1 ? match.player1?.id : match.player2?.id;
-        const matchWinnerName = winner === 1 ? match.player1?.name : match.player2?.name;
+        const matchWinnerName = winner === 1 ? p1Display : p2Display;
         setCompletedSetData({ setNumber: idx + 1, winner: matchWinnerName, score: `${p1}-${p2}`, newScore, isMatchComplete: true, matchWinnerId, matchWinnerName });
       } else {
-        setCompletedSetData({ setNumber: idx + 1, winner: winner === 1 ? match.player1?.name : match.player2?.name, score: `${p1}-${p2}`, newScore, isMatchComplete: false });
+        setCompletedSetData({ setNumber: idx + 1, winner: winner === 1 ? p1Display : p2Display, score: `${p1}-${p2}`, newScore, isMatchComplete: false });
       }
       setShowSetCompleteModal(true);
     } else {
@@ -295,6 +295,14 @@ const MatchScoringPage = () => {
   const canStart = match.status === 'PENDING' || match.status === 'SCHEDULED' || match.status === 'READY';
   const canScore = !isCompleted && !isPaused;
 
+  // Helper: show "Name & PartnerName" for doubles, just "Name" for singles
+  const p1Display = match.player1
+    ? (match.player1.partnerName ? `${match.player1.name} & ${match.player1.partnerName}` : match.player1.name)
+    : 'Player 1';
+  const p2Display = match.player2
+    ? (match.player2.partnerName ? `${match.player2.name} & ${match.player2.partnerName}` : match.player2.name)
+    : 'Player 2';
+
   return (
     <div className="min-h-screen" style={{ background: B.bg }}>
 
@@ -398,7 +406,7 @@ const MatchScoringPage = () => {
                   : { background: 'rgba(255,255,255,0.05)', border: `1px solid ${B.border}`, color: 'rgba(255,255,255,0.7)' }}>
                 {p1Sets}
               </div>
-              <p className="text-xs font-black text-white leading-tight" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{match.player1?.name || 'Player 1'}</p>
+              <p className="text-xs font-black text-white leading-tight" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p1Display}</p>
               <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.6)' }}>Sets Won</p>
             </div>
 
@@ -418,7 +426,7 @@ const MatchScoringPage = () => {
                   : { background: 'rgba(255,255,255,0.05)', border: `1px solid ${B.border}`, color: 'rgba(255,255,255,0.7)' }}>
                 {p2Sets}
               </div>
-              <p className="text-xs font-black text-white leading-tight" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{match.player2?.name || 'Player 2'}</p>
+              <p className="text-xs font-black text-white leading-tight" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p2Display}</p>
               <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.6)' }}>Sets Won</p>
             </div>
           </div>
@@ -430,7 +438,7 @@ const MatchScoringPage = () => {
             {/* Player 1 */}
             <div className="rounded-2xl overflow-hidden" style={{ background: B.card, border: `1px solid ${B.border}`, opacity: isPaused ? 0.45 : 1 }}>
               <div className="px-3 pt-3 pb-2 text-center border-b" style={{ borderColor: B.border }}>
-                <p className="text-xs font-black text-white truncate">{match.player1?.name || 'Player 1'}</p>
+                <p className="text-xs font-black text-white truncate">{p1Display}</p>
               </div>
               <div className="p-3 space-y-2">
                 <button onClick={() => addPoint(1)} disabled={isPaused || !canScore}
@@ -449,7 +457,7 @@ const MatchScoringPage = () => {
             {/* Player 2 */}
             <div className="rounded-2xl overflow-hidden" style={{ background: B.card, border: `1px solid ${B.border}`, opacity: isPaused ? 0.45 : 1 }}>
               <div className="px-3 pt-3 pb-2 text-center border-b" style={{ borderColor: B.border }}>
-                <p className="text-xs font-black text-white truncate">{match.player2?.name || 'Player 2'}</p>
+                <p className="text-xs font-black text-white truncate">{p2Display}</p>
               </div>
               <div className="p-3 space-y-2">
                 <button onClick={() => addPoint(2)} disabled={isPaused || !canScore}
@@ -474,7 +482,7 @@ const MatchScoringPage = () => {
             <Trophy className="w-10 h-10 mx-auto mb-3" style={{ color: B.amber }} />
             <h3 className="text-lg font-black text-white mb-1">Match Completed</h3>
             <p className="text-sm" style={{ color: 'rgba(255,255,255,0.65)' }}>
-              Winner: <span className="font-bold text-white">{match.winnerId === match.player1?.id ? match.player1?.name : match.player2?.name}</span>
+              Winner: <span className="font-bold text-white">{match.winnerId === match.player1?.id ? p1Display : p2Display}</span>
             </p>
             {score.timer?.totalDurationFormatted && (
               <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.55)' }}>Duration: {score.timer.totalDurationFormatted}</p>
@@ -573,12 +581,12 @@ const MatchScoringPage = () => {
               <button onClick={() => handleEndMatch(match.player1?.id)} disabled={saving}
                 className="w-full py-3.5 rounded-xl font-black text-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                 style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#07071a' }}>
-                <Trophy className="w-4 h-4" /> {match.player1?.name} Wins
+                <Trophy className="w-4 h-4" /> {p1Display} Wins
               </button>
               <button onClick={() => handleEndMatch(match.player2?.id)} disabled={saving}
                 className="w-full py-3.5 rounded-xl font-black text-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                 style={{ background: 'linear-gradient(135deg,#7c3aed,#a855f7)', color: '#fff' }}>
-                <Trophy className="w-4 h-4" /> {match.player2?.name} Wins
+                <Trophy className="w-4 h-4" /> {p2Display} Wins
               </button>
               <button onClick={() => setShowEndModal(false)}
                 className="w-full py-3 rounded-xl text-sm font-bold transition-all"

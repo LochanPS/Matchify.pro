@@ -64,6 +64,7 @@ import SearchAcademiesPage from './pages/SearchAcademiesPage'
 import AddAcademyPage from './pages/AddAcademyPage'
 import TermsOfService from './pages/TermsOfService'
 import PrivacyPolicy from './pages/PrivacyPolicy'
+import SupportFooter from './components/SupportFooter'
 
 // Payment System Pages
 import PaymentVerificationPage from './pages/admin/PaymentVerificationPage'
@@ -465,6 +466,7 @@ function AppContent() {
           {/* Catch all route */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        {!isAdminRoute && <SupportFooter />}
       </div>{/* end page-width constraint */}
     </div>
   );

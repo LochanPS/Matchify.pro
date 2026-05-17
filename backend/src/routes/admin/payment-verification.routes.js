@@ -1,6 +1,7 @@
 import express from 'express';
 import prisma from '../../lib/prisma.js';
 import { authenticate, requireAdmin } from '../../middleware/auth.js';
+import { PLATFORM_FEE_PERCENT } from '../../config/constants.js';
 
 const router = express.Router();
 
@@ -292,7 +293,7 @@ async function updateTournamentPayment(tournamentId, amount) {
   }
 
   const totalCollected = tournamentPayment.totalCollected + amount;
-  const platformFeeAmount = totalCollected * 0.03; // 3% of total
+  const platformFeeAmount = totalCollected * (PLATFORM_FEE_PERCENT / 100);
   const organizerShare = totalCollected - platformFeeAmount; // For display only
   const payout50Percent1 = totalCollected * 0.30; // 30% of TOTAL
   const payout50Percent2 = totalCollected * 0.67; // 67% of TOTAL

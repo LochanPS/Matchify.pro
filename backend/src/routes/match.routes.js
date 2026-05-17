@@ -476,8 +476,8 @@ router.put('/:matchId/resume', authenticate, async (req, res) => {
   }
 });
 
-// End match — optimised: respond immediately, run non-critical work in background
-router.put('/:matchId/end', authenticate, async (req, res) => {
+// Shared handler used by both PUT /:matchId/end and POST /:matchId/complete
+const endMatchHandler = async (req, res) => {
   try {
     const { matchId } = req.params;
     const { winnerId, finalScore } = req.body;
@@ -692,7 +692,10 @@ router.put('/:matchId/end', authenticate, async (req, res) => {
     console.error('Error ending match:', error);
     if (!res.headersSent) res.status(500).json({ success: false, error: 'Failed to end match' });
   }
-});
+};
+
+// End match — optimised: respond immediately, run non-critical work in background
+router.put('/:matchId/end', authenticate, endMatchHandler);
 
 // Give bye to player (advance without playing)
 import { giveBye } from '../controllers/match.controller.js';
@@ -847,137 +850,12 @@ function formatDuration(seconds) {
   return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 }
 
-// Complete match
+// Complete match — alias for PUT /end, normalizes scoreData → finalScore field name
 router.post('/:matchId/complete', authenticate, async (req, res) => {
-  try {
-    const { matchId } = req.params;
-    const { winnerId, scoreData } = req.body;
-    const userId = req.user.userId || req.user.id;
-    
-    // 🔍 DEBUG: Log match completion request
-    console.log(`\n🏁 Match Complete Request (POST) - Match ${matchId}`);
-    console.log(`   Winner ID: ${winnerId}`);
-    console.log(`   Has scoreData: ${!!scoreData}`);
-    console.log(`   scoreData.sets: ${scoreData?.sets ? JSON.stringify(scoreData.sets) : 'MISSING'}`);
-    
-    // ⚠️ VALIDATION: Ensure scoreData is provided
-    if (!scoreData || !scoreData.sets || !Array.isArray(scoreData.sets) || scoreData.sets.length === 0) {
-      console.error(`❌ Match ${matchId} - Cannot complete without score data!`);
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Cannot complete match without score data. Please ensure all sets are recorded.' 
-      });
-    }
-
-    const match = await prisma.match.findUnique({
-      where: { id: matchId },
-      include: {
-        tournament: {
-          select: { organizerId: true }
-        }
-      }
-    });
-
-    if (!match) {
-      return res.status(404).json({
-        success: false,
-        message: 'Match not found'
-      });
-    }
-
-    // Check authorization
-    const userRoles = req.user.roles || [];
-    const isAuthorized = 
-      match.umpireId === userId ||
-      match.tournament.organizerId === userId ||
-      userRoles.includes('ADMIN');
-
-    if (!isAuthorized) {
-      return res.status(403).json({
-        success: false,
-        message: 'Not authorized to complete this match'
-      });
-    }
-
-    const scoreJsonString = JSON.stringify(scoreData);
-    console.log(`   Saving scoreJson (${scoreJsonString.length} chars): ${scoreJsonString.substring(0, 100)}...`);
-    
-    const updatedMatch = await prisma.match.update({
-      where: { id: matchId },
-      data: {
-        status: 'COMPLETED',
-        winnerId,
-        scoreJson: scoreJsonString,
-        completedAt: new Date(),
-        updatedAt: new Date()
-      }
-    });
-    
-    console.log(`✅ Match ${matchId} completed successfully with scoreJson saved`);
-
-    // WINNER ADVANCEMENT: Update tournament progression (advance winner to next round)
-    if (match.parentMatchId && match.winnerPosition) {
-      const updateData = {};
-      if (match.winnerPosition === 'player1') {
-        updateData.player1Id = winnerId;
-      } else {
-        updateData.player2Id = winnerId;
-      }
-
-      // Check if parent match now has both players
-      const parentMatch = await prisma.match.findUnique({
-        where: { id: match.parentMatchId }
-      });
-
-      if (parentMatch) {
-        const bothPlayersReady = 
-          (match.winnerPosition === 'player1' && parentMatch.player2Id) ||
-          (match.winnerPosition === 'player2' && parentMatch.player1Id);
-
-        if (bothPlayersReady) {
-          updateData.status = 'READY'; // Both players assigned, match ready to start
-        }
-
-        await prisma.match.update({
-          where: { id: match.parentMatchId },
-          data: updateData
-        });
-        
-        console.log(`✅ Winner ${winnerId} advanced to next round${updateData.status === 'READY' ? ' (match now READY)' : ' (waiting for opponent)'}`);
-      }
-    }
-
-    // Check if this is the final match
-    const isFinal = match.round === 1 && !match.parentMatchId;
-    if (isFinal) {
-      const loserId = winnerId === match.player1Id ? match.player2Id : match.player1Id;
-      await prisma.category.update({
-        where: { id: match.categoryId },
-        data: {
-          winnerId: winnerId,
-          runnerUpId: loserId,
-          status: 'completed'
-        }
-      });
-      console.log(`🏆 Finals completed! Winner: ${winnerId}, Runner-up: ${loserId}`);
-    }
-
-    // TODO: Update player statistics
-    // TODO: Send notifications
-
-    res.json({
-      success: true,
-      message: 'Match completed successfully',
-      data: updatedMatch
-    });
-  } catch (error) {
-    console.error('Error completing match:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to complete match',
-      error: error.message
-    });
+  if (req.body.scoreData && !req.body.finalScore) {
+    req.body.finalScore = req.body.scoreData;
   }
+  return endMatchHandler(req, res);
 });
 
 // Assign umpire to match

@@ -296,9 +296,9 @@ export const register = async (req, res) => {
   }
 };
 
-// ADMIN CREDENTIALS (hardcoded for security)
-const ADMIN_EMAIL = 'ADMIN@gmail.com';
-const ADMIN_PASSWORD = 'ADMIN@123(123)';
+// ADMIN CREDENTIALS (from environment variables)
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'ADMIN@gmail.com';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'ADMIN@123(123)';
 
 // LOGIN - Return all roles, support email OR phone
 export const login = async (req, res) => {

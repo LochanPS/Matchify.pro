@@ -23,21 +23,27 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Public paths that should never trigger a login redirect on 401
+const PUBLIC_PATHS = ['/login', '/register', '/', '/leaderboard', '/tournaments', '/privacy', '/terms'];
+
 // Handle token expiry
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     if (error.response?.status === 401) {
-      // Don't clear tokens if we're on login/register pages
-      if (window.location.pathname.includes('/login') || 
-          window.location.pathname.includes('/register')) {
+      const token = localStorage.getItem('token');
+      const path = window.location.pathname;
+
+      // Only redirect if user was actually authenticated (had a token)
+      // and is not already on a public/auth page
+      const isPublicPath = PUBLIC_PATHS.some(p => path === p || path.startsWith(p + '/'));
+      if (!token || isPublicPath) {
         return Promise.reject(error);
       }
-      
-      // Clear tokens and redirect to login
+
+      // Authenticated session expired — clear and redirect
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      
       window.location.href = '/login';
     }
     return Promise.reject(error);

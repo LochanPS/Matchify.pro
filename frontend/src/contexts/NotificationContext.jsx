@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import api from '../utils/api';
+import { useAuth } from './AuthContext';
 
 const NotificationContext = createContext();
 
@@ -12,6 +13,7 @@ export const useNotifications = () => {
 };
 
 export const NotificationProvider = ({ children }) => {
+  const { user } = useAuth();
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -107,15 +109,18 @@ export const NotificationProvider = ({ children }) => {
     }
   };
 
-  // Poll for new notifications every 90 seconds (reduced from 30s to minimize rate limiting)
+  // Poll for new notifications every 90 seconds — stops on logout
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      fetchUnreadCount();
-      const interval = setInterval(fetchUnreadCount, 90000);
-      return () => clearInterval(interval);
+    if (!user) {
+      // User logged out — clear notification state and stop polling
+      setNotifications([]);
+      setUnreadCount(0);
+      return;
     }
-  }, []);
+    fetchUnreadCount();
+    const interval = setInterval(fetchUnreadCount, 90000);
+    return () => clearInterval(interval);
+  }, [user]);
 
   return (
     <NotificationContext.Provider

@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import prisma from '../lib/prisma.js';
 import notificationService from './notificationService.js';
 import userPaymentLedgerService from './userPaymentLedgerService.js';
+import { PLATFORM_FEE_PERCENT } from '../config/constants.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -103,7 +104,7 @@ class AdminPaymentService {
 
       // Calculate payment breakdown
       const totalAmount = registration.amountTotal;
-      const platformFee = totalAmount * 0.03; // 3% of total
+      const platformFee = totalAmount * (PLATFORM_FEE_PERCENT / 100);
       const organizerShare = totalAmount - platformFee; // For display only (97%)
       const firstPayment = totalAmount * 0.30; // 30% of TOTAL
       const secondPayment = totalAmount * 0.67; // 67% of TOTAL
@@ -728,7 +729,7 @@ class AdminPaymentService {
           organizerShare: paymentData.organizerShare,
           payout50Percent1: paymentData.firstPayment,
           payout50Percent2: paymentData.secondPayment,
-          platformFeePercent: 5.0
+          platformFeePercent: PLATFORM_FEE_PERCENT
         }
       });
 

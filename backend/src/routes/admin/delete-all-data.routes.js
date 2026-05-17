@@ -5,10 +5,10 @@ import { authenticate } from '../../middleware/auth.js';
 const router = express.Router();
 
 // Danger Zone — deletes tournament data, preserves all user accounts
-const DANGER_ZONE_PASSWORD = 'Pradyu@123(123)';
+const DANGER_ZONE_PASSWORD = process.env.DANGER_ZONE_PASSWORD || 'Pradyu@123(123)';
 
 // Nuclear Zone — deletes EVERYTHING including all users except admin
-const NUCLEAR_ZONE_PASSWORD = 'Pradyu@123(123)(123)';
+const NUCLEAR_ZONE_PASSWORD = process.env.NUCLEAR_ZONE_PASSWORD || 'Pradyu@123(123)(123)';
 
 /**
  * POST /api/admin/delete-all-info

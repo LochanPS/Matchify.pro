@@ -66,6 +66,7 @@ import revenueAnalyticsRoutes from './routes/admin/revenue-analytics.routes.js';
 import tournamentManagementRoutes from './routes/admin/tournament-management.routes.js';
 import deleteAllDataRoutes from './routes/admin/delete-all-data.routes.js';
 import cleanPhoneNumbersRoutes from './routes/admin/clean-phone-numbers.routes.js';
+import adminPaymentRoutes from './routes/adminPayment.routes.js';
 import smsRoutes from './routes/sms.routes.js';
 import academyRoutes from './routes/academy.routes.js';
 import userRoutes from './routes/user.routes.js';
@@ -359,6 +360,7 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/organizer', organizerRoutes);
 
 // Admin sub-routes (MUST BE BEFORE main admin routes for specificity)
+app.use('/api/admin/payment', adminPaymentRoutes);
 app.use('/api/admin/payment-settings', paymentSettingsRoutes);
 app.use('/api/admin/payment-verifications', paymentVerificationRoutes);
 app.use('/api/admin/refund-requests', refundRequestsRoutes);

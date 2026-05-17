@@ -403,7 +403,7 @@ class AdminController {
           isImpersonating: true,
           adminId: adminId
         },
-        process.env.JWT_SECRET || 'your-secret-key',
+        process.env.JWT_SECRET,
         { expiresIn: '24h' }
       );
 
@@ -473,7 +473,7 @@ class AdminController {
         // Generate admin JWT
         const token = jwt.sign(
           { userId: 'admin', email: 'ADMIN@gmail.com', roles: ['ADMIN'], isAdmin: true },
-          process.env.JWT_SECRET || 'your-secret-key',
+          process.env.JWT_SECRET,
           { expiresIn: '7d' }
         );
 
@@ -561,7 +561,7 @@ class AdminController {
           email: admin.email, 
           roles: adminRoles
         },
-        process.env.JWT_SECRET || 'your-secret-key',
+        process.env.JWT_SECRET,
         { expiresIn: '24h' }
       );
 
@@ -619,7 +619,7 @@ class AdminController {
       const { confirmPassword } = req.body;
 
       // Require admin password confirmation
-      if (confirmPassword !== 'ADMIN@123(123)') {
+      if (confirmPassword !== (process.env.ADMIN_CONFIRM_PASSWORD || 'ADMIN@123(123)')) {
         return res.status(403).json({
           success: false,
           message: 'Invalid admin password confirmation',

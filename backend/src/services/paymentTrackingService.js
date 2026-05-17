@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import prisma from '../lib/prisma.js';
+import { PLATFORM_FEE_PERCENT } from '../config/constants.js';
 
 /**
  * Payment Split Formula (UPDATED):
@@ -47,8 +48,8 @@ export async function createOrUpdateTournamentPayment(tournamentId) {
     const totalRegistrations = tournament.registrations.length;
 
     // Calculate payment split
-    const platformFeePercent = 3;
-    const platformFeeAmount = Math.round(totalCollected * 0.03); // 3% of total
+    const platformFeePercent = PLATFORM_FEE_PERCENT;
+    const platformFeeAmount = Math.round(totalCollected * (PLATFORM_FEE_PERCENT / 100));
     const organizerShare = totalCollected - platformFeeAmount; // For display only
 
     // CRITICAL: 30% and 67% are of TOTAL, not organizer share

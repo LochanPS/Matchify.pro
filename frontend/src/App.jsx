@@ -5,6 +5,7 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import AnimatedBackground from './components/AnimatedBackground'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { NotificationProvider } from './contexts/NotificationContext'
+import { WebSocketProvider } from './contexts/WebSocketContext'
 import { Toaster } from 'react-hot-toast'
 import Navbar from './components/Navbar'
 import ScrollToTop from './components/ScrollToTop'
@@ -506,7 +507,9 @@ function App() {
             },
           }}
         />
-        <AppContent />
+        <WebSocketProvider>
+          <AppContent />
+        </WebSocketProvider>
       </NotificationProvider>
     </AuthProvider>
   );

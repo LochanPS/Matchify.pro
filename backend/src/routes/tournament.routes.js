@@ -31,7 +31,7 @@ const router = express.Router();
 router.get('/', getTournaments); // Get all tournaments (with filters)
 router.get('/:id', getTournament); // Get single tournament
 router.get('/:id/categories', getCategories); // Get tournament categories (public)
-router.get('/:tournamentId/categories/:categoryId/registrations', getCategoryRegistrations); // Get category registrations
+router.get('/:tournamentId/categories/:categoryId/registrations', authenticate, getCategoryRegistrations); // Get category registrations
 
 // Match routes (require authentication but allow admins)
 router.get('/:tournamentId/categories/:categoryId/matches', authenticate, getMatches);

@@ -253,7 +253,7 @@ router.post('/users/:id/login-as', authenticate, requireAdmin, async (req, res) 
         isImpersonating: true,
         adminId: adminId
       },
-      process.env.JWT_SECRET || 'your-secret-key',
+      process.env.JWT_SECRET,
       { expiresIn: '24h' }
     );
 
@@ -304,7 +304,7 @@ router.post('/return-to-admin', authenticate, async (req, res) => {
           roles: ['ADMIN'],
           isAdmin: true
         },
-        process.env.JWT_SECRET || 'your-secret-key',
+        process.env.JWT_SECRET,
         { expiresIn: '24h' }
       );
 
@@ -323,10 +323,15 @@ router.post('/return-to-admin', authenticate, async (req, res) => {
       });
     }
 
-    // Get the admin user from database - try by ID first
+    // Verify adminId is present in the token
+    if (!req.user.adminId) {
+      return res.status(403).json({ success: false, error: 'Invalid impersonation token: missing adminId' });
+    }
+
+    // Get the admin user from database — must match the exact adminId in the token
     let admin = null;
-    
-    if (req.user.adminId && req.user.adminId !== 'admin') {
+
+    if (req.user.adminId !== 'admin') {
       admin = await prisma.user.findUnique({
         where: { id: req.user.adminId },
         select: {
@@ -336,27 +341,22 @@ router.post('/return-to-admin', authenticate, async (req, res) => {
           roles: true
         }
       });
-    }
-    
-    // Fallback: find admin by email
-    if (!admin) {
-      console.log('Admin ID not found, searching by email');
-      admin = await prisma.user.findFirst({
-        where: { 
-          roles: { contains: 'ADMIN' }
-        },
-        select: {
-          id: true,
-          email: true,
-          name: true,
-          roles: true
+
+      // Verify the resolved user actually has ADMIN role
+      if (admin) {
+        const adminRolesCheck = typeof admin.roles === 'string' ? admin.roles.split(',') : (admin.roles || []);
+        if (!adminRolesCheck.includes('ADMIN')) {
+          console.log('❌ adminId resolved to non-admin user');
+          return res.status(403).json({ success: false, error: 'Invalid impersonation token' });
         }
-      });
+      }
     }
+
+    // NOTE: No fallback to find-any-admin — prevents privilege escalation
 
     console.log('Admin found:', admin);
 
-    if (!admin) {
+    if (!admin && req.user.adminId !== 'admin') {
       console.log('❌ Admin account not found');
       return res.status(404).json({
         success: false,
@@ -381,7 +381,7 @@ router.post('/return-to-admin', authenticate, async (req, res) => {
         email: admin.email, 
         roles: adminRoles
       },
-      process.env.JWT_SECRET || 'your-secret-key',
+      process.env.JWT_SECRET,
       { expiresIn: '24h' }
     );
 

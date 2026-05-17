@@ -4,6 +4,7 @@ import cloudinary from '../config/cloudinary.js';
 import multer from 'multer';
 import notificationService from '../services/notificationService.js';
 import tournamentPointsService from '../services/tournamentPoints.service.js';
+import { PLATFORM_FEE_PERCENT } from '../config/constants.js';
 
 // Configure multer for memory storage
 const upload = multer({ storage: multer.memoryStorage() });
@@ -229,7 +230,7 @@ const createTournament = async (req, res) => {
         data: {
           tournamentId: tournament.id,
           organizerId: userId,
-          platformFeePercent: 5, // 5% platform fee
+          platformFeePercent: PLATFORM_FEE_PERCENT,
         }
       });
 

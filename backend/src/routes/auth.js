@@ -425,7 +425,7 @@ router.post('/refresh-token', async (req, res) => {
     }
 
     // Generate new tokens
-    const newAccessToken = generateAccessToken(user.id, user.role);
+    const newAccessToken = generateAccessToken(user.id, user.roles);
     const newRefreshToken = generateRefreshToken(user.id);
 
     // Update refresh token in database

@@ -13,13 +13,16 @@
      All Tailwind text-* classes inherit this automatically. */
   html {
     font-size: clamp(15px, 4.27vw, 17px);
+    /* Dark background on html/body prevents white flash on iOS overscroll bounce */
+    background-color: #07071a;
   }
-  
+
   /* Ensure all text is readable on mobile */
   body {
     @apply text-base;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    background-color: #07071a;
   }
   
   /* Headings - Responsive sizing */

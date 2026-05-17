@@ -98,8 +98,11 @@ function AppContent() {
     return false;
   };
 
-  // Hide Navbar for admin dashboard only (unified dashboard shows navbar)
-  const shouldShowNavbar = !location.pathname.startsWith('/admin-dashboard');
+  // Hide global Navbar on pages that have their own built-in fixed header
+  // (/, /login, /register each render their own top bar — showing both = double header)
+  const pagesWithOwnHeader = ['/', '/login', '/register'];
+  const shouldShowNavbar = !location.pathname.startsWith('/admin-dashboard') &&
+                           !pagesWithOwnHeader.includes(location.pathname);
 
   // Admin routes need full-width desktop layout — all other pages constrained
   // to 480px mobile-app width so they look identical on any phone or tablet.

@@ -1,5 +1,5 @@
 import express from 'express';
-import { generateDraw, getDraw, deleteDraw, restartDraw, createConfiguredDraw, getCategoryPlayers, assignPlayersToDraw, bulkAssignAllPlayers, shuffleAssignedPlayers, arrangeKnockoutMatchups, continueToKnockout } from '../controllers/draw.controller.js';
+import { generateDraw, getDraw, deleteDraw, restartDraw, createConfiguredDraw, getCategoryPlayers, assignPlayersToDraw, bulkAssignAllPlayers, shuffleAssignedPlayers, arrangeKnockoutMatchups, continueToKnockout, repairKnockoutRelationships } from '../controllers/draw.controller.js';
 import { getDrawPage } from '../controllers/drawPage.controller.js';
 import { authenticate, optionalAuth } from '../middleware/auth.js';
 
@@ -22,6 +22,9 @@ router.post('/tournaments/:tournamentId/categories/:categoryId/draw/arrange-knoc
 
 // Continue to knockout stage automatically (organizer only)
 router.post('/tournaments/:tournamentId/categories/:categoryId/draw/continue-to-knockout', authenticate, continueToKnockout);
+
+// Repair knockout parent relationships (organizer/admin — fixes draws created before the index-based fix)
+router.post('/tournaments/:tournamentId/categories/:categoryId/draw/repair-knockout', authenticate, repairKnockoutRelationships);
 
 // Restart draw - reset all match results (organizer only)
 router.post('/tournaments/:tournamentId/categories/:categoryId/draw/restart', authenticate, restartDraw);

@@ -1590,9 +1590,8 @@ const assignPlayersToDraw = async (req, res) => {
     return { updatedDraw, matchCount: 0 };
     }); // End transaction
     
-    // 🔒 RELIABILITY FIX: Set parent relationships AFTER transaction completes
-    // This ensures all matches exist before setting relationships
-    if (bracketJson.format === 'KNOCKOUT' && result.matchCount > 0) {
+    // Set parent relationships AFTER transaction completes (all matches must exist first)
+    if (bracketJson.format === 'KNOCKOUT' || bracketJson.format === 'ROUND_ROBIN_KNOCKOUT') {
       await setKnockoutParentRelationships(tournamentId, categoryId);
     }
 
@@ -1809,17 +1808,20 @@ async function setKnockoutParentRelationships(tournamentId, categoryId) {
     
     console.log(`   Processing Round ${currentRound} (${roundMatches.length} matches) → Parent Round ${parentRound}`);
     
+    // Use index-based lookup — matchNumbers are global counters so value-based search
+    // fails for ROUND_ROBIN_KNOCKOUT where KO matches are numbered after group matches.
+    const parentRoundMatches = allMatches
+      .filter(m => m.round === parentRound)
+      .sort((a, b) => a.matchNumber - b.matchNumber);
+
     for (let i = 0; i < roundMatches.length; i++) {
       const match = roundMatches[i];
-      const parentMatchNumber = Math.floor(i / 2) + 1;
-      
-      const parentMatch = allMatches.find(
-        m => m.round === parentRound && m.matchNumber === parentMatchNumber
-      );
-      
+
+      const parentMatch = parentRoundMatches[Math.floor(i / 2)];
+
       if (parentMatch) {
         const winnerPosition = i % 2 === 0 ? 'player1' : 'player2';
-        
+
         await prisma.match.update({
           where: { id: match.id },
           data: {
@@ -1827,10 +1829,10 @@ async function setKnockoutParentRelationships(tournamentId, categoryId) {
             winnerPosition: winnerPosition
           }
         });
-        
+
         console.log(`     ✓ Match ${match.matchNumber} → Parent Match ${parentMatch.matchNumber} as ${winnerPosition}`);
       } else {
-        console.log(`     ⚠️  No parent found for Match ${match.matchNumber}`);
+        console.log(`     ⚠️  No parent found for Match ${match.matchNumber} (round ${currentRound} → ${parentRound})`);
       }
     }
   }
@@ -3107,6 +3109,9 @@ const continueToKnockout = async (req, res) => {
       });
     }
 
+    // Re-establish parent relationships — ensures winner advancement works in /end handler
+    await setKnockoutParentRelationships(tournamentId, categoryId);
+
     console.log('✅ Knockout stage created successfully!');
 
     res.json({
@@ -3122,6 +3127,69 @@ const continueToKnockout = async (req, res) => {
   }
 };
 
+/**
+ * Repair knockout parent relationships AND advance winners from already-completed matches.
+ * POST /api/tournaments/:tournamentId/categories/:categoryId/draw/repair-knockout
+ * Fixes draws where parentMatchId was never set (index-based bug).
+ */
+const repairKnockoutRelationships = async (req, res) => {
+  try {
+    const { tournamentId, categoryId } = req.params;
+    const userId = req.user.id || req.user.userId;
+
+    const tournament = await prisma.tournament.findUnique({ where: { id: tournamentId } });
+    if (!tournament) return res.status(404).json({ success: false, error: 'Tournament not found' });
+    if (tournament.organizerId !== userId && !req.user.roles?.includes('ADMIN')) {
+      return res.status(403).json({ success: false, error: 'Not authorized' });
+    }
+
+    // Step 1: Fix parent relationships
+    await setKnockoutParentRelationships(tournamentId, categoryId);
+
+    // Step 2: Advance winners from already-completed knockout matches
+    const completedKnockoutMatches = await prisma.match.findMany({
+      where: { tournamentId, categoryId, stage: 'KNOCKOUT', status: 'COMPLETED', winnerId: { not: null } },
+      include: { parentMatch: true },
+      orderBy: { round: 'desc' } // process highest rounds first (early rounds)
+    });
+
+    let advancedCount = 0;
+    for (const match of completedKnockoutMatches) {
+      if (!match.parentMatchId) continue;
+
+      const parentMatch = await prisma.match.findUnique({ where: { id: match.parentMatchId } });
+      if (!parentMatch) continue;
+
+      const winnerPos = match.winnerPosition;
+      if (!winnerPos) continue;
+
+      // Only update if the slot is still empty (don't overwrite existing assignment)
+      if (winnerPos === 'player1' && parentMatch.player1Id) continue;
+      if (winnerPos === 'player2' && parentMatch.player2Id) continue;
+
+      const updateData = winnerPos === 'player1'
+        ? { player1Id: match.winnerId }
+        : { player2Id: match.winnerId };
+
+      // Set READY if both players now filled
+      const otherSlotFilled = winnerPos === 'player1' ? !!parentMatch.player2Id : !!parentMatch.player1Id;
+      if (otherSlotFilled) updateData.status = 'READY';
+
+      await prisma.match.update({ where: { id: parentMatch.id }, data: updateData });
+      advancedCount++;
+    }
+
+    res.json({
+      success: true,
+      message: `Knockout bracket repaired. Parent relationships fixed. ${advancedCount} winner(s) advanced.`,
+      advancedCount
+    });
+  } catch (error) {
+    console.error('Repair knockout relationships error:', error);
+    res.status(500).json({ success: false, error: 'Failed to repair relationships' });
+  }
+};
+
 export {
   generateDraw,
   getDraw,
@@ -3133,5 +3201,6 @@ export {
   bulkAssignAllPlayers,
   shuffleAssignedPlayers,
   arrangeKnockoutMatchups,
-  continueToKnockout
+  continueToKnockout,
+  repairKnockoutRelationships
 };

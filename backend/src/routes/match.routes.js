@@ -514,18 +514,28 @@ const endMatchHandler = async (req, res) => {
 
     // Determine parent match lookup
     let parentMatchPromise = Promise.resolve(null);
+    let fallbackWinnerPos = null; // set by the IIFE below when parentMatchId is missing
     if (match.parentMatchId) {
       parentMatchPromise = prisma.match.findUnique({ where: { id: match.parentMatchId } });
     } else if (match.stage === 'KNOCKOUT' && match.round > 1) {
-      parentMatchPromise = prisma.match.findFirst({
-        where: {
-          tournamentId: match.tournamentId,
-          categoryId: match.categoryId,
-          round: match.round - 1,
-          matchNumber: Math.ceil(match.matchNumber / 2),
-          stage: 'KNOCKOUT'
-        }
-      });
+      // Fallback: use index-based lookup because matchNumbers are global counters
+      // (matchNumber-based lookup only works for pure KNOCKOUT with per-round numbering)
+      parentMatchPromise = (async () => {
+        const [currentRoundMatches, parentRoundMatches] = await Promise.all([
+          prisma.match.findMany({
+            where: { tournamentId: match.tournamentId, categoryId: match.categoryId, round: match.round, stage: 'KNOCKOUT' },
+            orderBy: { matchNumber: 'asc' }
+          }),
+          prisma.match.findMany({
+            where: { tournamentId: match.tournamentId, categoryId: match.categoryId, round: match.round - 1, stage: 'KNOCKOUT' },
+            orderBy: { matchNumber: 'asc' }
+          })
+        ]);
+        const myIndex = currentRoundMatches.findIndex(m => m.id === matchId);
+        if (myIndex === -1) return null;
+        fallbackWinnerPos = myIndex % 2 === 0 ? 'player1' : 'player2';
+        return parentRoundMatches[Math.floor(myIndex / 2)] || null;
+      })();
     }
 
     const [player1, player2, parentMatch, updatedMatch] = await Promise.all([
@@ -545,7 +555,7 @@ const endMatchHandler = async (req, res) => {
 
     // ── 5. Advance winner to next round (critical — draw page needs this) ──────
     if (parentMatch) {
-      const winnerPos = match.winnerPosition || (match.matchNumber % 2 === 1 ? 'player1' : 'player2');
+      const winnerPos = match.winnerPosition || fallbackWinnerPos || (match.matchNumber % 2 === 1 ? 'player1' : 'player2');
       const advanceData = winnerPos === 'player1' ? { player1Id: winnerId } : { player2Id: winnerId };
       const bothReady   = winnerPos === 'player1' ? !!parentMatch.player2Id : !!parentMatch.player1Id;
       if (bothReady) advanceData.status = 'READY';
@@ -662,23 +672,62 @@ const endMatchHandler = async (req, res) => {
                    (bracketJson.format === 'ROUND_ROBIN_KNOCKOUT' && match.stage === 'KNOCKOUT')) {
           const rounds = bracketJson.knockout?.rounds || bracketJson.rounds;
           if (!Array.isArray(rounds)) return;
-          // Mark completed match
-          for (const round of rounds) {
-            const mib = round.matches?.find(m => m.matchNumber === match.matchNumber);
-            if (mib) { mib.status = 'completed'; mib.winner = { id: winnerId, name: winnerName }; mib.winnerId = winnerId; mib.score = finalScore; break; }
-          }
-          // Advance winner in bracket JSON
-          if (parentMatch) {
-            for (const round of rounds) {
-              const pmib = round.matches?.find(m => m.matchNumber === parentMatch.matchNumber);
+
+          // For ROUND_ROBIN_KNOCKOUT the bracketJson uses per-round matchNumbers (1, 2, 1…)
+          // but DB matchNumbers are global. Use index-based lookup instead.
+          const isHybridKO = bracketJson.format === 'ROUND_ROBIN_KNOCKOUT';
+
+          if (isHybridKO) {
+            // Find this match's position within its DB round
+            const dbRoundMatches = await prisma.match.findMany({
+              where: { tournamentId: match.tournamentId, categoryId: match.categoryId, round: match.round, stage: 'KNOCKOUT' },
+              orderBy: { matchNumber: 'asc' }
+            });
+            const myIndex = dbRoundMatches.findIndex(m => m.id === match.id);
+            if (myIndex === -1) return;
+
+            const totalKnockoutRounds = rounds.length; // bracketJson rounds length
+            const bracketRoundIdx = totalKnockoutRounds - match.round; // reverse mapping
+            const bracketRound = rounds[bracketRoundIdx];
+            const mib = bracketRound?.matches?.[myIndex];
+            if (mib) {
+              mib.status = 'completed';
+              mib.winner = { id: winnerId, name: winnerName };
+              mib.winnerId = winnerId;
+              mib.score = finalScore;
+            }
+
+            // Advance winner in bracket JSON parent slot
+            if (parentMatch) {
+              const parentBracketRoundIdx = bracketRoundIdx + 1;
+              const parentBracketRound = rounds[parentBracketRoundIdx];
+              const parentPos = Math.floor(myIndex / 2);
+              const pmib = parentBracketRound?.matches?.[parentPos];
               if (pmib) {
-                const wp = match.winnerPosition || (match.matchNumber % 2 === 1 ? 'player1' : 'player2');
+                const wp = match.winnerPosition || fallbackWinnerPos || (myIndex % 2 === 0 ? 'player1' : 'player2');
                 pmib[wp] = { id: winnerId, name: winnerName };
                 if (pmib.player1 && pmib.player2) pmib.status = 'ready';
-                break;
+              }
+            }
+          } else {
+            // Pure KNOCKOUT — matchNumbers are per-round, value search works
+            for (const round of rounds) {
+              const mib = round.matches?.find(m => m.matchNumber === match.matchNumber);
+              if (mib) { mib.status = 'completed'; mib.winner = { id: winnerId, name: winnerName }; mib.winnerId = winnerId; mib.score = finalScore; break; }
+            }
+            if (parentMatch) {
+              for (const round of rounds) {
+                const pmib = round.matches?.find(m => m.matchNumber === parentMatch.matchNumber);
+                if (pmib) {
+                  const wp = match.winnerPosition || fallbackWinnerPos || (match.matchNumber % 2 === 1 ? 'player1' : 'player2');
+                  pmib[wp] = { id: winnerId, name: winnerName };
+                  if (pmib.player1 && pmib.player2) pmib.status = 'ready';
+                  break;
+                }
               }
             }
           }
+
           await prisma.draw.update({ where: { tournamentId_categoryId: { tournamentId: match.tournamentId, categoryId: match.categoryId } }, data: { bracketJson: JSON.stringify(bracketJson), updatedAt: new Date() } });
         }
       } catch (bracketErr) {

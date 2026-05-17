@@ -104,18 +104,20 @@ class MatchService {
       if (bracket.format === 'ROUND_ROBIN_KNOCKOUT') {
         const knockoutMatches = createdMatches.filter(m => m.stage === 'KNOCKOUT');
         const maxRound = Math.max(...knockoutMatches.map(m => m.round));
-        
+
         for (let currentRound = maxRound; currentRound >= 2; currentRound--) {
-          const roundMatches = knockoutMatches.filter(m => m.round === currentRound);
-          
+          const roundMatches = knockoutMatches
+            .filter(m => m.round === currentRound)
+            .sort((a, b) => a.matchNumber - b.matchNumber);
+
+          // Use index-based parent lookup — matchNumbers are global so value search fails
+          const parentRoundMatches = knockoutMatches
+            .filter(m => m.round === currentRound - 1)
+            .sort((a, b) => a.matchNumber - b.matchNumber);
+
           for (let i = 0; i < roundMatches.length; i++) {
             const match = roundMatches[i];
-            const parentRound = currentRound - 1;
-            const parentMatchNumber = Math.floor(i / 2) + 1;
-            
-            const parentMatch = knockoutMatches.find(
-              m => m.round === parentRound && m.matchNumber === parentMatchNumber
-            );
+            const parentMatch = parentRoundMatches[Math.floor(i / 2)];
 
             if (parentMatch) {
               const winnerPosition = i % 2 === 0 ? 'player1' : 'player2';

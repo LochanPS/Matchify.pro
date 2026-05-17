@@ -41,16 +41,87 @@ export const restartDraw = async (req, res) => {
       });
     }
 
-    // Get all matches for this category
+    // Get draw to check format
+    const draw = await prisma.draw.findUnique({
+      where: { tournamentId_categoryId: { tournamentId, categoryId } }
+    });
+
+    const bracketJson = draw
+      ? (typeof draw.bracketJson === 'string' ? JSON.parse(draw.bracketJson) : draw.bracketJson)
+      : null;
+
+    const isHybrid = bracketJson?.format === 'ROUND_ROBIN_KNOCKOUT';
+
+    if (isHybrid) {
+      // ── ROUND_ROBIN_KNOCKOUT: only restart knockout stage ──────────────────
+      const knockoutMatches = await prisma.match.findMany({
+        where: { tournamentId, categoryId, stage: 'KNOCKOUT' },
+        orderBy: [{ round: 'desc' }, { matchNumber: 'asc' }]
+      });
+
+      if (knockoutMatches.length === 0) {
+        return res.status(400).json({
+          success: false,
+          error: 'No knockout matches found to restart'
+        });
+      }
+
+      // Find the highest round (= first KO round, fewest players advanced)
+      const maxKoRound = Math.max(...knockoutMatches.map(m => m.round));
+
+      for (const match of knockoutMatches) {
+        const isFirstKoRound = match.round === maxKoRound;
+        await prisma.match.update({
+          where: { id: match.id },
+          data: {
+            status: 'PENDING',
+            winnerId: null,
+            scoreJson: null,
+            startedAt: null,
+            completedAt: null,
+            umpireId: null,
+            courtNumber: null,
+            // First KO round keeps players (they come from group advancement);
+            // later rounds clear players (they come from match winners)
+            ...(!isFirstKoRound ? { player1Id: null, player2Id: null } : {}),
+            updatedAt: new Date()
+          }
+        });
+      }
+
+      // Reset bracketJson knockout rounds — null out players, set pending
+      if (bracketJson?.knockout?.rounds) {
+        bracketJson.knockout.rounds.forEach(round => {
+          round.matches.forEach(match => {
+            // Only clear non-first-round slots in bracketJson too
+            // (first KO round slots were populated by continueToKnockout — keep them)
+            match.winner = null;
+          });
+        });
+
+        await prisma.draw.update({
+          where: { tournamentId_categoryId: { tournamentId, categoryId } },
+          data: { bracketJson: JSON.stringify(bracketJson), updatedAt: new Date() }
+        });
+      }
+
+      console.log(`✅ Restarted ${knockoutMatches.length} KNOCKOUT matches for category ${category.name} (group stage preserved)`);
+
+      return res.json({
+        success: true,
+        message: 'Knockout stage restarted successfully. Group results preserved.',
+        stats: {
+          totalMatches: knockoutMatches.length,
+          firstRoundMatches: knockoutMatches.filter(m => m.round === maxKoRound).length,
+          resetMatches: knockoutMatches.filter(m => m.round < maxKoRound).length
+        }
+      });
+    }
+
+    // ── Pure KNOCKOUT / ROUND_ROBIN: restart everything ───────────────────────
     const matches = await prisma.match.findMany({
-      where: {
-        tournamentId,
-        categoryId
-      },
-      orderBy: [
-        { round: 'desc' },
-        { matchNumber: 'asc' }
-      ]
+      where: { tournamentId, categoryId },
+      orderBy: [{ round: 'desc' }, { matchNumber: 'asc' }]
     });
 
     if (matches.length === 0) {
@@ -67,33 +138,18 @@ export const restartDraw = async (req, res) => {
     // Reset all matches
     for (const match of matches) {
       const isFirstRound = match.round === maxRound;
-      
+
       await prisma.match.update({
         where: { id: match.id },
         data: {
-          // Reset status
           status: 'PENDING',
-          
-          // Clear winner
           winnerId: null,
-          
-          // Clear scores
           scoreJson: null,
-          
-          // Clear times
           startedAt: null,
           completedAt: null,
-          
-          // Clear umpire and court
           umpireId: null,
           courtNumber: null,
-          
-          // For non-first-round matches, clear players (they'll be filled by winners)
-          ...(isFirstRound ? {} : {
-            player1Id: null,
-            player2Id: null
-          }),
-          
+          ...(isFirstRound ? {} : { player1Id: null, player2Id: null }),
           updatedAt: new Date()
         }
       });
@@ -103,34 +159,24 @@ export const restartDraw = async (req, res) => {
     console.log(`   - First round matches: ${firstRoundMatches.length} (players preserved)`);
     console.log(`   - Other matches: ${matches.length - firstRoundMatches.length} (players cleared)`);
 
-    // Reset Round Robin standings if applicable
-    const draw = await prisma.draw.findUnique({
-      where: { tournamentId_categoryId: { tournamentId, categoryId } }
-    });
-
-    if (draw) {
-      const bracketJson = typeof draw.bracketJson === 'string' ? JSON.parse(draw.bracketJson) : draw.bracketJson;
-      
-      if (bracketJson.format === 'ROUND_ROBIN' || bracketJson.format === 'ROUND_ROBIN_KNOCKOUT') {
-        // Reset all group standings
-        if (bracketJson.groups) {
-          bracketJson.groups.forEach(group => {
-            group.participants.forEach(participant => {
-              participant.played = 0;
-              participant.wins = 0;
-              participant.losses = 0;
-              participant.points = 0;
-            });
+    // Reset Round Robin standings
+    if (bracketJson?.format === 'ROUND_ROBIN') {
+      if (bracketJson.groups) {
+        bracketJson.groups.forEach(group => {
+          group.participants.forEach(participant => {
+            participant.played = 0;
+            participant.wins = 0;
+            participant.losses = 0;
+            participant.points = 0;
           });
+        });
 
-          // Update the draw with reset standings
-          await prisma.draw.update({
-            where: { tournamentId_categoryId: { tournamentId, categoryId } },
-            data: { bracketJson: JSON.stringify(bracketJson), updatedAt: new Date() }
-          });
+        await prisma.draw.update({
+          where: { tournamentId_categoryId: { tournamentId, categoryId } },
+          data: { bracketJson: JSON.stringify(bracketJson), updatedAt: new Date() }
+        });
 
-          console.log(`✅ Reset Round Robin standings for all groups`);
-        }
+        console.log(`✅ Reset Round Robin standings for all groups`);
       }
     }
 

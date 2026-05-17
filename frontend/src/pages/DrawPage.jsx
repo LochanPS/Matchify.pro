@@ -245,6 +245,27 @@ const DrawPage = () => {
     }
   }, [location.search]);
 
+  // Silent auto-repair: for ROUND_ROBIN_KNOCKOUT, when organizer views the knockout
+  // stage, silently call repair-knockout once so winner propagation is up-to-date.
+  const autoRepairDoneRef = React.useRef(false);
+  useEffect(() => {
+    const organizer = user?.id && tournament?.organizerId && user.id === tournament.organizerId;
+    if (
+      !organizer ||
+      bracket?.format !== 'ROUND_ROBIN_KNOCKOUT' ||
+      activeStage !== 'knockout' ||
+      !activeCategory?.id ||
+      !tournamentId ||
+      autoRepairDoneRef.current
+    ) return;
+
+    autoRepairDoneRef.current = true;
+    api
+      .post(`/tournaments/${tournamentId}/categories/${activeCategory.id}/draw/repair-knockout`)
+      .then(() => fetchBracket())
+      .catch(() => {}); // silent — never surface errors to user
+  }, [user?.id, tournament?.organizerId, bracket?.format, activeStage, activeCategory?.id, tournamentId]);
+
   const fetchTournamentData = async () => {
     try {
       setLoading(true);
@@ -3051,34 +3072,6 @@ const GroupsKnockoutDisplay = ({
             </div>
           ) : (
             <>
-              {/* Organizer: repair button if winners haven't propagated */}
-              {isOrganizer && (
-                <div className="mb-3 flex justify-end">
-                  <button
-                    onClick={async () => {
-                      if (!activeCategory || assigning) return;
-                      setAssigning(true);
-                      try {
-                        const res = await api.post(`/tournaments/${tournamentId}/categories/${activeCategory.id}/draw/repair-knockout`);
-                        await fetchBracket();
-                        setSuccess(res.data.message || 'Bracket repaired successfully!');
-                        setTimeout(() => setSuccess(null), 5000);
-                      } catch (err) {
-                        setError(err.response?.data?.error || 'Failed to repair bracket');
-                      } finally {
-                        setAssigning(false);
-                      }
-                    }}
-                    disabled={assigning}
-                    className="px-4 py-2 rounded-xl text-xs font-bold transition-all disabled:opacity-50 flex items-center gap-1.5"
-                    style={{ background: 'rgba(168,85,247,0.15)', border: '1px solid rgba(168,85,247,0.4)', color: '#c084fc' }}
-                  >
-                    <Settings className="w-3.5 h-3.5" />
-                    {assigning ? 'Repairing…' : 'Fix Bracket'}
-                  </button>
-                </div>
-              )}
-
               {/* ALWAYS show knockout bracket - even if empty */}
               <KnockoutDisplay
                 data={data.knockout}

@@ -538,7 +538,11 @@ const DrawPage = () => {
       // Refresh everything with fresh data
       await fetchDrawPageFull(activeCategory.id);
 
-      setSuccess('Draw restarted successfully! All matches have been reset.');
+      setSuccess(
+        bracket?.format === 'ROUND_ROBIN_KNOCKOUT'
+          ? 'Knockout stage restarted. Group results preserved.'
+          : 'Draw restarted successfully! All matches have been reset.'
+      );
       setShowRestartModal(false);
       setTimeout(() => setSuccess(null), 5000);
     } catch (err) {
@@ -1011,7 +1015,13 @@ const DrawPage = () => {
                     <button
                       onClick={() => !isCategoryCompleted && setShowRestartModal(true)}
                       disabled={isCategoryCompleted}
-                      title={isCategoryCompleted ? 'Category has ended - draw is locked' : 'Restart all matches'}
+                      title={
+                        isCategoryCompleted
+                          ? 'Category has ended - draw is locked'
+                          : bracket?.format === 'ROUND_ROBIN_KNOCKOUT'
+                            ? 'Restart knockout stage only (group results preserved)'
+                            : 'Restart all matches'
+                      }
                       className={`px-4 py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm ${
                         isCategoryCompleted
                           ? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50'
@@ -1019,7 +1029,7 @@ const DrawPage = () => {
                       }`}
                     >
                       <Zap className="w-5 h-5" />
-                      Restart
+                      {bracket?.format === 'ROUND_ROBIN_KNOCKOUT' ? 'Restart KO' : 'Restart'}
                     </button>
 
                     <button
@@ -2086,74 +2096,149 @@ const DrawPage = () => {
       )}
 
       {/* Restart Draws Confirmation Modal */}
-      {showRestartModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="rounded-3xl p-8 max-w-lg w-full shadow-2xl" style={{ background: '#0d1025', border: '2px solid rgba(249,115,22,0.4)' }}>
-            {/* Warning Icon */}
-            <div className="w-20 h-20 bg-gradient-to-br from-orange-500 to-amber-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-orange-500/50">
-              <Zap className="w-10 h-10 text-white" />
-            </div>
+      {showRestartModal && (() => {
+        const isHybrid = bracket?.format === 'ROUND_ROBIN_KNOCKOUT';
+        return (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div
+              className="rounded-3xl p-8 max-w-lg w-full shadow-2xl"
+              style={{
+                background: '#0d1025',
+                border: isHybrid ? '2px solid rgba(168,85,247,0.5)' : '2px solid rgba(249,115,22,0.4)'
+              }}
+            >
+              {/* Icon */}
+              <div
+                className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg"
+                style={{
+                  background: isHybrid
+                    ? 'linear-gradient(135deg,#a855f7,#7c3aed)'
+                    : 'linear-gradient(135deg,#f97316,#d97706)',
+                  boxShadow: isHybrid ? '0 0 30px rgba(168,85,247,0.4)' : '0 0 30px rgba(249,115,22,0.4)'
+                }}
+              >
+                <Zap className="w-10 h-10 text-white" />
+              </div>
 
-            {/* Title */}
-            <h2 className="text-2xl font-bold text-center mb-4 text-white">
-              Restart All Matches?
-            </h2>
+              {/* Title */}
+              <h2 className="text-2xl font-bold text-center mb-2 text-white">
+                {isHybrid ? 'Restart Knockout Stage?' : 'Restart All Matches?'}
+              </h2>
+              <p className="text-center text-sm mb-5" style={{ color: isHybrid ? '#c084fc' : '#fb923c' }}>
+                {isHybrid ? 'Group stage results will NOT be affected' : activeCategory?.name}
+              </p>
 
-            {/* Warning Message */}
-            <div className="bg-orange-500/10 border border-orange-500/30 rounded-xl p-4 mb-6">
-              <div className="flex gap-3">
-                <AlertTriangle className="w-5 h-5 text-orange-400 flex-shrink-0 mt-0.5" />
-                <div className="text-sm text-orange-300">
-                  <p className="font-semibold mb-2">This will reset all matches in this category:</p>
-                  <ul className="list-disc list-inside space-y-1 ml-2">
-                    <li>All match scores will be cleared</li>
-                    <li>All match statuses reset to PENDING</li>
-                    <li>Winners removed from advanced rounds</li>
-                    <li>Umpire and court assignments cleared</li>
-                    <li>Match times and durations removed</li>
-                  </ul>
-                  <p className="mt-3 font-semibold">✓ Player assignments in Round 1 will be kept</p>
-                  <p className="font-semibold">✓ Draw structure will remain intact</p>
+              {/* What changes */}
+              <div
+                className="rounded-xl p-4 mb-4"
+                style={{
+                  background: isHybrid ? 'rgba(168,85,247,0.08)' : 'rgba(249,115,22,0.08)',
+                  border: isHybrid ? '1px solid rgba(168,85,247,0.3)' : '1px solid rgba(249,115,22,0.3)'
+                }}
+              >
+                <div className="flex gap-3">
+                  <AlertTriangle
+                    className="w-5 h-5 flex-shrink-0 mt-0.5"
+                    style={{ color: isHybrid ? '#c084fc' : '#fb923c' }}
+                  />
+                  <div className="text-sm" style={{ color: isHybrid ? '#e9d5ff' : '#fed7aa' }}>
+                    <p className="font-bold mb-2">
+                      {isHybrid ? 'Knockout stage will be reset:' : 'All matches will be reset:'}
+                    </p>
+                    <ul className="list-disc list-inside space-y-1 ml-1">
+                      {isHybrid ? (
+                        <>
+                          <li>All knockout match scores cleared</li>
+                          <li>All knockout match statuses reset to Pending</li>
+                          <li>Winners removed from Semi-Final / Final slots</li>
+                          <li>Umpire and court assignments cleared</li>
+                        </>
+                      ) : (
+                        <>
+                          <li>All match scores cleared</li>
+                          <li>All match statuses reset to Pending</li>
+                          <li>Winners removed from advanced rounds</li>
+                          <li>Umpire and court assignments cleared</li>
+                          <li>Match times and durations removed</li>
+                        </>
+                      )}
+                    </ul>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Category Info */}
-            <div className="rounded-xl p-4 mb-6">
-              <p className="text-gray-400 text-sm mb-1">Category</p>
-              <p className="text-white font-semibold">{activeCategory?.name}</p>
-            </div>
+              {/* What is preserved */}
+              <div
+                className="rounded-xl p-4 mb-6"
+                style={{ background: 'rgba(0,255,136,0.06)', border: '1px solid rgba(0,255,136,0.25)' }}
+              >
+                <div className="flex gap-3">
+                  <div className="w-5 h-5 flex-shrink-0 mt-0.5 text-[#00ff88] font-black text-base leading-none">✓</div>
+                  <div className="text-sm text-[#86efac]">
+                    <p className="font-bold mb-1">Will be kept:</p>
+                    {isHybrid ? (
+                      <>
+                        <p>• All group stage matches and scores</p>
+                        <p>• Group standings and points</p>
+                        <p>• Player assignments in the first knockout round</p>
+                        <p>• Draw structure</p>
+                      </>
+                    ) : (
+                      <>
+                        <p>• Player assignments in Round 1</p>
+                        <p>• Draw structure and bracket format</p>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
 
-            {/* Action Buttons */}
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowRestartModal(false)}
-                disabled={restarting}
-                className="flex-1 py-3 rounded-xl font-semibold transition-all" style={{ background: 'rgba(255,255,255,0.06)', color: 'white' }}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={restartDraws}
-                disabled={restarting}
-                className="flex-1 py-3 bg-gradient-to-r from-orange-500 to-amber-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-orange-500/30 transition-all flex items-center justify-center gap-2"
-              >
-                {restarting ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    Restarting...
-                  </>
-                ) : (
-                  <>
-                    <Zap className="w-5 h-5" />
-                    Restart Matches
-                  </>
-                )}
-              </button>
+              {/* Category label */}
+              <div className="rounded-xl px-4 py-3 mb-6" style={{ background: 'rgba(255,255,255,0.04)' }}>
+                <p className="text-gray-400 text-xs mb-0.5">Category</p>
+                <p className="text-white font-semibold">{activeCategory?.name}</p>
+              </div>
+
+              {/* Buttons */}
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowRestartModal(false)}
+                  disabled={restarting}
+                  className="flex-1 py-3 rounded-xl font-semibold transition-all"
+                  style={{ background: 'rgba(255,255,255,0.06)', color: 'white' }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={restartDraws}
+                  disabled={restarting}
+                  className="flex-1 py-3 text-white rounded-xl font-semibold transition-all flex items-center justify-center gap-2"
+                  style={{
+                    background: isHybrid
+                      ? 'linear-gradient(135deg,#a855f7,#7c3aed)'
+                      : 'linear-gradient(135deg,#f97316,#d97706)',
+                    boxShadow: restarting ? 'none' : isHybrid
+                      ? '0 4px 20px rgba(168,85,247,0.3)'
+                      : '0 4px 20px rgba(249,115,22,0.3)'
+                  }}
+                >
+                  {restarting ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Restarting...
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="w-5 h-5" />
+                      {isHybrid ? 'Restart Knockout Stage' : 'Restart All Matches'}
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* End Category Confirmation Modal */}
       {showEndTournamentModal && (

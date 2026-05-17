@@ -98,11 +98,14 @@ function AppContent() {
     return false;
   };
 
-  // Hide global Navbar on pages that have their own built-in fixed header
-  // (/, /login, /register each render their own top bar — showing both = double header)
-  const pagesWithOwnHeader = ['/', '/login', '/register'];
+  // Hide global Navbar on pages that have their own built-in fixed header.
+  // /login and /register ALWAYS have their own header (hide global Navbar always).
+  // / (HomePageMobile) only shows its own header when user is NOT logged in —
+  // when logged in, the home page's header is hidden so we MUST show global Navbar.
+  const alwaysOwnHeader = ['/login', '/register'];
   const shouldShowNavbar = !location.pathname.startsWith('/admin-dashboard') &&
-                           !pagesWithOwnHeader.includes(location.pathname);
+                           !alwaysOwnHeader.includes(location.pathname) &&
+                           !(location.pathname === '/' && !user);
 
   // Admin routes need full-width desktop layout — all other pages constrained
   // to 480px mobile-app width so they look identical on any phone or tablet.

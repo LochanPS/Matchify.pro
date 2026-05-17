@@ -1,484 +1,317 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Building2, MapPin, Dumbbell, Image, Upload, X, Plus, 
-  CreditCard, CheckCircle, ArrowLeft, Loader2, Save, Clock
+import {
+  Building2, MapPin, Dumbbell, Upload, X, Plus,
+  CheckCircle, ArrowLeft, Loader2, Save, Clock,
+  Phone, Mail, Globe, Instagram, Camera, CreditCard,
+  ChevronRight, Users, IndianRupee, CalendarDays, Wifi,
+  ParkingCircle, Shirt, Droplets, UtensilsCrossed, Wind,
+  ShoppingBag, HeartPulse, Trophy, Info
 } from 'lucide-react';
 import api from '../utils/api';
 
-const DRAFT_KEY = 'matchify_academy_draft';
-
-// Custom Toast Component
-const Toast = ({ message, show, onClose }) => {
-  useEffect(() => {
-    if (show) {
-      const timer = setTimeout(onClose, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [show, onClose]);
-
-  if (!show) return null;
-
-  return (
-    <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 animate-fade-in">
-      <div className="flex items-center gap-3 px-5 py-3 backdrop-blur-lg text-white rounded-xl shadow-lg" style={{ background: 'rgba(0,255,136,0.9)', boxShadow: '0 8px 20px rgba(0,255,136,0.3)' }}>
-        <CheckCircle className="w-5 h-5" />
-        <span className="font-medium">{message}</span>
-      </div>
-    </div>
-  );
+const B = {
+  bg: '#07071a',
+  card: 'rgba(255,255,255,0.04)',
+  cardHover: 'rgba(255,255,255,0.07)',
+  border: 'rgba(255,255,255,0.08)',
+  green: '#00ff88',
+  cyan: '#00d4ff',
+  purple: '#a855f7',
+  amber: '#fbbf24',
 };
 
-// Sports with their specific facility questions
+const DRAFT_KEY = 'matchify_academy_draft_v2';
+const LISTING_FEE = 300;
+
+// ── constants ────────────────────────────────────────────────────────────────
 const SPORTS_CONFIG = {
-  'Badminton': { label: 'Badminton Courts', type: 'number', placeholder: 'Enter number of courts', suffix: 'Courts' },
-  'Tennis': { label: 'Tennis Courts', type: 'number', placeholder: 'Enter number of courts', suffix: 'Courts' },
-  'Table Tennis': { label: 'Table Tennis Tables', type: 'number', placeholder: 'Enter number of tables', suffix: 'Tables' },
-  'Squash': { label: 'Squash Courts', type: 'number', placeholder: 'Enter number of courts', suffix: 'Courts' },
-  'Basketball': { label: 'Basketball Courts', type: 'number', placeholder: 'Enter number of courts', suffix: 'Courts' },
-  'Volleyball': { label: 'Volleyball Courts', type: 'number', placeholder: 'Enter number of courts', suffix: 'Courts' },
-  'Swimming': { label: 'Swimming Pool Size', type: 'text', placeholder: 'e.g., 25m x 10m, Olympic size, 50m', suffix: '' },
-  'Cricket': { label: 'Cricket Facilities', type: 'text', placeholder: 'e.g., 2 nets, 1 ground, Full size ground', suffix: '' },
-  'Football': { label: 'Football Ground', type: 'text', placeholder: 'e.g., Full size, 5-a-side, 7-a-side, 100x60m', suffix: '' },
-  'Gym': { label: 'Gym Area', type: 'text', placeholder: 'e.g., 2000 sq ft, 500 sq m', suffix: '' },
-  'Yoga': { label: 'Yoga Hall', type: 'text', placeholder: 'e.g., 30 people capacity, 800 sq ft', suffix: '' },
-  'Athletics': { label: 'Athletics Track', type: 'text', placeholder: 'e.g., 400m track, 100m straight, 200m oval', suffix: '' },
+  Badminton:      { emoji: '🏸', label: 'Courts', type: 'number', placeholder: 'No. of courts' },
+  Tennis:         { emoji: '🎾', label: 'Courts', type: 'number', placeholder: 'No. of courts' },
+  'Table Tennis': { emoji: '🏓', label: 'Tables', type: 'number', placeholder: 'No. of tables' },
+  Squash:         { emoji: '🎱', label: 'Courts', type: 'number', placeholder: 'No. of courts' },
+  Basketball:     { emoji: '🏀', label: 'Courts', type: 'number', placeholder: 'No. of courts' },
+  Volleyball:     { emoji: '🏐', label: 'Courts', type: 'number', placeholder: 'No. of courts' },
+  Swimming:       { emoji: '🏊', label: 'Pool size', type: 'text', placeholder: 'e.g. 25m × 10m' },
+  Cricket:        { emoji: '🏏', label: 'Facilities', type: 'text', placeholder: 'e.g. 2 nets, 1 ground' },
+  Football:       { emoji: '⚽', label: 'Ground', type: 'text', placeholder: 'e.g. Full size, 5-a-side' },
+  Gym:            { emoji: '💪', label: 'Area', type: 'text', placeholder: 'e.g. 2000 sq ft' },
+  Yoga:           { emoji: '🧘', label: 'Hall', type: 'text', placeholder: 'e.g. 30 person capacity' },
+  Athletics:      { emoji: '🏃', label: 'Track', type: 'text', placeholder: 'e.g. 400m track' },
 };
 
-const SPORTS_OPTIONS = Object.keys(SPORTS_CONFIG);
-
-// Indian Cities with States for Autocomplete
-const INDIAN_CITIES = [
-  { city: 'Mumbai', state: 'Maharashtra' },
-  { city: 'Delhi', state: 'Delhi' },
-  { city: 'Bangalore', state: 'Karnataka' },
-  { city: 'Hyderabad', state: 'Telangana' },
-  { city: 'Ahmedabad', state: 'Gujarat' },
-  { city: 'Chennai', state: 'Tamil Nadu' },
-  { city: 'Kolkata', state: 'West Bengal' },
-  { city: 'Pune', state: 'Maharashtra' },
-  { city: 'Jaipur', state: 'Rajasthan' },
-  { city: 'Surat', state: 'Gujarat' },
-  { city: 'Lucknow', state: 'Uttar Pradesh' },
-  { city: 'Kanpur', state: 'Uttar Pradesh' },
-  { city: 'Nagpur', state: 'Maharashtra' },
-  { city: 'Indore', state: 'Madhya Pradesh' },
-  { city: 'Thane', state: 'Maharashtra' },
-  { city: 'Bhopal', state: 'Madhya Pradesh' },
-  { city: 'Visakhapatnam', state: 'Andhra Pradesh' },
-  { city: 'Pimpri-Chinchwad', state: 'Maharashtra' },
-  { city: 'Patna', state: 'Bihar' },
-  { city: 'Vadodara', state: 'Gujarat' },
-  { city: 'Ghaziabad', state: 'Uttar Pradesh' },
-  { city: 'Ludhiana', state: 'Punjab' },
-  { city: 'Agra', state: 'Uttar Pradesh' },
-  { city: 'Nashik', state: 'Maharashtra' },
-  { city: 'Faridabad', state: 'Haryana' },
-  { city: 'Meerut', state: 'Uttar Pradesh' },
-  { city: 'Rajkot', state: 'Gujarat' },
-  { city: 'Kalyan-Dombivali', state: 'Maharashtra' },
-  { city: 'Vasai-Virar', state: 'Maharashtra' },
-  { city: 'Varanasi', state: 'Uttar Pradesh' },
-  { city: 'Srinagar', state: 'Jammu and Kashmir' },
-  { city: 'Aurangabad', state: 'Maharashtra' },
-  { city: 'Dhanbad', state: 'Jharkhand' },
-  { city: 'Amritsar', state: 'Punjab' },
-  { city: 'Navi Mumbai', state: 'Maharashtra' },
-  { city: 'Allahabad', state: 'Uttar Pradesh' },
-  { city: 'Ranchi', state: 'Jharkhand' },
-  { city: 'Howrah', state: 'West Bengal' },
-  { city: 'Coimbatore', state: 'Tamil Nadu' },
-  { city: 'Jabalpur', state: 'Madhya Pradesh' },
-  { city: 'Gwalior', state: 'Madhya Pradesh' },
-  { city: 'Vijayawada', state: 'Andhra Pradesh' },
-  { city: 'Jodhpur', state: 'Rajasthan' },
-  { city: 'Madurai', state: 'Tamil Nadu' },
-  { city: 'Raipur', state: 'Chhattisgarh' },
-  { city: 'Kota', state: 'Rajasthan' },
-  { city: 'Chandigarh', state: 'Chandigarh' },
-  { city: 'Guwahati', state: 'Assam' },
-  { city: 'Solapur', state: 'Maharashtra' },
-  { city: 'Hubli-Dharwad', state: 'Karnataka' },
-  { city: 'Mysore', state: 'Karnataka' },
-  { city: 'Tiruchirappalli', state: 'Tamil Nadu' },
-  { city: 'Bareilly', state: 'Uttar Pradesh' },
-  { city: 'Aligarh', state: 'Uttar Pradesh' },
-  { city: 'Tiruppur', state: 'Tamil Nadu' },
-  { city: 'Moradabad', state: 'Uttar Pradesh' },
-  { city: 'Jalandhar', state: 'Punjab' },
-  { city: 'Bhubaneswar', state: 'Odisha' },
-  { city: 'Salem', state: 'Tamil Nadu' },
-  { city: 'Warangal', state: 'Telangana' },
-  { city: 'Mira-Bhayandar', state: 'Maharashtra' },
-  { city: 'Thiruvananthapuram', state: 'Kerala' },
-  { city: 'Bhiwandi', state: 'Maharashtra' },
-  { city: 'Saharanpur', state: 'Uttar Pradesh' },
-  { city: 'Guntur', state: 'Andhra Pradesh' },
-  { city: 'Amravati', state: 'Maharashtra' },
-  { city: 'Bikaner', state: 'Rajasthan' },
-  { city: 'Noida', state: 'Uttar Pradesh' },
-  { city: 'Jamshedpur', state: 'Jharkhand' },
-  { city: 'Bhilai', state: 'Chhattisgarh' },
-  { city: 'Cuttack', state: 'Odisha' },
-  { city: 'Firozabad', state: 'Uttar Pradesh' },
-  { city: 'Kochi', state: 'Kerala' },
-  { city: 'Bhavnagar', state: 'Gujarat' },
-  { city: 'Dehradun', state: 'Uttarakhand' },
-  { city: 'Durgapur', state: 'West Bengal' },
-  { city: 'Asansol', state: 'West Bengal' },
-  { city: 'Nanded', state: 'Maharashtra' },
-  { city: 'Kolhapur', state: 'Maharashtra' },
-  { city: 'Ajmer', state: 'Rajasthan' },
-  { city: 'Gulbarga', state: 'Karnataka' },
-  { city: 'Jamnagar', state: 'Gujarat' },
-  { city: 'Ujjain', state: 'Madhya Pradesh' },
-  { city: 'Loni', state: 'Uttar Pradesh' },
-  { city: 'Siliguri', state: 'West Bengal' },
-  { city: 'Jhansi', state: 'Uttar Pradesh' },
-  { city: 'Ulhasnagar', state: 'Maharashtra' },
-  { city: 'Jammu', state: 'Jammu and Kashmir' },
-  { city: 'Mangalore', state: 'Karnataka' },
-  { city: 'Erode', state: 'Tamil Nadu' },
-  { city: 'Belgaum', state: 'Karnataka' },
-  { city: 'Ambattur', state: 'Tamil Nadu' },
-  { city: 'Tirunelveli', state: 'Tamil Nadu' },
-  { city: 'Malegaon', state: 'Maharashtra' },
-  { city: 'Gaya', state: 'Bihar' },
-  { city: 'Udaipur', state: 'Rajasthan' },
-  { city: 'Maheshtala', state: 'West Bengal' },
-  { city: 'Davanagere', state: 'Karnataka' },
-  { city: 'Kozhikode', state: 'Kerala' },
-  { city: 'Akola', state: 'Maharashtra' },
-  { city: 'Kurnool', state: 'Andhra Pradesh' },
-  { city: 'Bokaro', state: 'Jharkhand' },
-  { city: 'Rajahmundry', state: 'Andhra Pradesh' },
-  { city: 'Ballari', state: 'Karnataka' },
-  { city: 'Agartala', state: 'Tripura' },
-  { city: 'Bhagalpur', state: 'Bihar' },
-  { city: 'Latur', state: 'Maharashtra' },
-  { city: 'Dhule', state: 'Maharashtra' },
-  { city: 'Korba', state: 'Chhattisgarh' },
-  { city: 'Bhilwara', state: 'Rajasthan' },
-  { city: 'Brahmapur', state: 'Odisha' },
-  { city: 'Mysuru', state: 'Karnataka' },
-  { city: 'Muzaffarpur', state: 'Bihar' },
-  { city: 'Ahmednagar', state: 'Maharashtra' },
-  { city: 'Kollam', state: 'Kerala' },
-  { city: 'Raghunathganj', state: 'West Bengal' },
-  { city: 'Bilaspur', state: 'Chhattisgarh' },
-  { city: 'Shahjahanpur', state: 'Uttar Pradesh' },
-  { city: 'Thrissur', state: 'Kerala' },
-  { city: 'Alwar', state: 'Rajasthan' },
-  { city: 'Kakinada', state: 'Andhra Pradesh' },
-  { city: 'Nizamabad', state: 'Telangana' },
-  { city: 'Sagar', state: 'Madhya Pradesh' },
-  { city: 'Tumkur', state: 'Karnataka' },
-  { city: 'Hisar', state: 'Haryana' },
-  { city: 'Rohtak', state: 'Haryana' },
-  { city: 'Panipat', state: 'Haryana' },
-  { city: 'Darbhanga', state: 'Bihar' },
-  { city: 'Kharagpur', state: 'West Bengal' },
-  { city: 'Aizawl', state: 'Mizoram' },
-  { city: 'Ichalkaranji', state: 'Maharashtra' },
-  { city: 'Tirupati', state: 'Andhra Pradesh' },
-  { city: 'Karnal', state: 'Haryana' },
-  { city: 'Bathinda', state: 'Punjab' },
-  { city: 'Rampur', state: 'Uttar Pradesh' },
-  { city: 'Shillong', state: 'Meghalaya' },
-  { city: 'Patiala', state: 'Punjab' },
-  { city: 'Imphal', state: 'Manipur' },
-  { city: 'Hapur', state: 'Uttar Pradesh' },
-  { city: 'Anantapur', state: 'Andhra Pradesh' },
-  { city: 'Nellore', state: 'Andhra Pradesh' },
-  { city: 'Rourkela', state: 'Odisha' },
-  { city: 'Vellore', state: 'Tamil Nadu' },
-  { city: 'Barasat', state: 'West Bengal' },
-  { city: 'Khammam', state: 'Telangana' },
-  { city: 'Parbhani', state: 'Maharashtra' },
-  { city: 'Shimla', state: 'Himachal Pradesh' },
-  { city: 'Gangtok', state: 'Sikkim' },
-  { city: 'Itanagar', state: 'Arunachal Pradesh' },
-  { city: 'Kohima', state: 'Nagaland' },
-  { city: 'Port Blair', state: 'Andaman and Nicobar Islands' },
-  { city: 'Silvassa', state: 'Dadra and Nagar Haveli' },
-  { city: 'Daman', state: 'Daman and Diu' },
-  { city: 'Kavaratti', state: 'Lakshadweep' },
-  { city: 'Puducherry', state: 'Puducherry' },
+const AMENITIES = [
+  { id: 'parking',       label: 'Parking',         icon: ParkingCircle },
+  { id: 'changing_room', label: 'Changing Rooms',  icon: Shirt },
+  { id: 'water',         label: 'Water Dispenser', icon: Droplets },
+  { id: 'cafeteria',     label: 'Cafeteria',       icon: UtensilsCrossed },
+  { id: 'ac',            label: 'AC Courts',       icon: Wind },
+  { id: 'shuttle_shop',  label: 'Shuttle Shop',    icon: ShoppingBag },
+  { id: 'first_aid',     label: 'First Aid',       icon: HeartPulse },
+  { id: 'wifi',          label: 'WiFi',            icon: Wifi },
+  { id: 'spectator',     label: 'Spectator Seating', icon: Users },
+  { id: 'coaching',      label: 'Coaching',        icon: Trophy },
 ];
 
-// Load draft from localStorage
+const ACADEMY_TYPES = ['Private Academy', 'Government / SAI', 'Sports Club', 'Multi-Sport Complex', 'School Academy'];
+
+const INDIAN_CITIES = [
+  { city: 'Mumbai', state: 'Maharashtra' }, { city: 'Delhi', state: 'Delhi' },
+  { city: 'Bangalore', state: 'Karnataka' }, { city: 'Hyderabad', state: 'Telangana' },
+  { city: 'Ahmedabad', state: 'Gujarat' }, { city: 'Chennai', state: 'Tamil Nadu' },
+  { city: 'Kolkata', state: 'West Bengal' }, { city: 'Pune', state: 'Maharashtra' },
+  { city: 'Jaipur', state: 'Rajasthan' }, { city: 'Surat', state: 'Gujarat' },
+  { city: 'Lucknow', state: 'Uttar Pradesh' }, { city: 'Kanpur', state: 'Uttar Pradesh' },
+  { city: 'Nagpur', state: 'Maharashtra' }, { city: 'Indore', state: 'Madhya Pradesh' },
+  { city: 'Thane', state: 'Maharashtra' }, { city: 'Bhopal', state: 'Madhya Pradesh' },
+  { city: 'Visakhapatnam', state: 'Andhra Pradesh' }, { city: 'Patna', state: 'Bihar' },
+  { city: 'Vadodara', state: 'Gujarat' }, { city: 'Ghaziabad', state: 'Uttar Pradesh' },
+  { city: 'Ludhiana', state: 'Punjab' }, { city: 'Agra', state: 'Uttar Pradesh' },
+  { city: 'Nashik', state: 'Maharashtra' }, { city: 'Faridabad', state: 'Haryana' },
+  { city: 'Rajkot', state: 'Gujarat' }, { city: 'Noida', state: 'Uttar Pradesh' },
+  { city: 'Chandigarh', state: 'Chandigarh' }, { city: 'Coimbatore', state: 'Tamil Nadu' },
+  { city: 'Kochi', state: 'Kerala' }, { city: 'Dehradun', state: 'Uttarakhand' },
+  { city: 'Mysuru', state: 'Karnataka' }, { city: 'Mangalore', state: 'Karnataka' },
+  { city: 'Bhubaneswar', state: 'Odisha' }, { city: 'Amritsar', state: 'Punjab' },
+  { city: 'Thiruvananthapuram', state: 'Kerala' }, { city: 'Guwahati', state: 'Assam' },
+  { city: 'Raipur', state: 'Chhattisgarh' }, { city: 'Vijayawada', state: 'Andhra Pradesh' },
+  { city: 'Jodhpur', state: 'Rajasthan' }, { city: 'Madurai', state: 'Tamil Nadu' },
+  { city: 'Tiruppur', state: 'Tamil Nadu' }, { city: 'Jabalpur', state: 'Madhya Pradesh' },
+  { city: 'Udaipur', state: 'Rajasthan' }, { city: 'Varanasi', state: 'Uttar Pradesh' },
+  { city: 'Ranchi', state: 'Jharkhand' }, { city: 'Patiala', state: 'Punjab' },
+  { city: 'Tirupati', state: 'Andhra Pradesh' }, { city: 'Vellore', state: 'Tamil Nadu' },
+];
+
+// ── helpers ──────────────────────────────────────────────────────────────────
 const loadDraft = () => {
   try {
-    const saved = localStorage.getItem(DRAFT_KEY);
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      return {
-        formData: parsed.formData || null,
-        lastSaved: parsed.lastSaved || null
-      };
-    }
-  } catch (e) {
-    console.error('Error loading draft:', e);
-  }
-  return { formData: null, lastSaved: null };
+    const s = localStorage.getItem(DRAFT_KEY);
+    return s ? JSON.parse(s) : null;
+  } catch { return null; }
 };
 
-const AddAcademyPage = () => {
+function StepIndicator({ current, total }) {
+  return (
+    <div className="flex items-center justify-center gap-2 mb-6">
+      {Array.from({ length: total }, (_, i) => i + 1).map(n => (
+        <div key={n} className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-black transition-all"
+            style={{
+              background: n < current ? B.green : n === current
+                ? 'linear-gradient(135deg,#00ff88,#00d4ff)' : 'rgba(255,255,255,0.06)',
+              color: n <= current ? '#07071a' : 'rgba(255,255,255,0.3)',
+              border: n > current ? `1px solid rgba(255,255,255,0.1)` : 'none',
+            }}>
+            {n < current ? '✓' : n}
+          </div>
+          {n < total && (
+            <div className="w-8 h-0.5 rounded"
+              style={{ background: n < current ? B.green : 'rgba(255,255,255,0.08)' }} />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function Field({ label, error, required, children, hint }) {
+  return (
+    <div>
+      <label className="block text-xs font-bold mb-1.5 uppercase tracking-wide"
+        style={{ color: 'rgba(255,255,255,0.45)' }}>
+        {label}{required && <span style={{ color: '#f87171' }}> *</span>}
+      </label>
+      {children}
+      {hint && !error && <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>{hint}</p>}
+      {error && <p className="text-xs mt-1 font-semibold" style={{ color: '#f87171' }}>{error}</p>}
+    </div>
+  );
+}
+
+const inputCls = (err) =>
+  `w-full px-3.5 py-3 rounded-xl text-sm text-white placeholder-white/25 focus:outline-none transition-all`;
+const inputStyle = (err) => ({
+  background: 'rgba(255,255,255,0.05)',
+  border: `1px solid ${err ? 'rgba(248,113,113,0.6)' : B.border}`,
+});
+
+// ── Page ─────────────────────────────────────────────────────────────────────
+export default function AddAcademyPage() {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [draftRestored, setDraftRestored] = useState(false);
   const [lastSaved, setLastSaved] = useState(null);
-  const [showDraftBanner, setShowDraftBanner] = useState(false);
-  const [toast, setToast] = useState({ show: false, message: '' });
-  
-  const defaultFormData = {
-    name: '',
-    address: '',
-    city: '',
-    state: '',
-    pincode: '',
-    sports: [],
-    sportDetails: {},
-    additionalSportsInfo: '',
-    description: '',
-    phone: '',
-    email: '',
-    website: '',
-  };
-  
-  const [formData, setFormData] = useState(defaultFormData);
-  const [photos, setPhotos] = useState([]);
-  const [academyQrCode, setAcademyQrCode] = useState(null);
-  const [paymentScreenshot, setPaymentScreenshot] = useState(null);
   const [errors, setErrors] = useState({});
   const [citySuggestions, setCitySuggestions] = useState([]);
-  const [showCitySuggestions, setShowCitySuggestions] = useState(false);
+  const [showCitySugg, setShowCitySugg] = useState(false);
+  const [photos, setPhotos] = useState([]);
+  const [paymentScreenshot, setPaymentScreenshot] = useState(null);
+  const photoInputRef = useRef(null);
+  const payInputRef = useRef(null);
 
-  // Load draft on mount
+  const defaultForm = {
+    name: '', type: '', address: '', city: '', state: '', pincode: '',
+    sports: [], sportDetails: {}, amenities: [],
+    openingHours: '', monthlyFee: '', description: '',
+    phone: '', email: '', website: '', instagram: '',
+  };
+  const [form, setForm] = useState(defaultForm);
+
+  // Load draft
   useEffect(() => {
-    const { formData: savedData, lastSaved: savedTime } = loadDraft();
-    if (savedData && Object.values(savedData).some(v => v && (Array.isArray(v) ? v.length > 0 : typeof v === 'object' ? Object.keys(v).length > 0 : v.toString().trim()))) {
-      setShowDraftBanner(true);
-      setFormData(savedData);
-      setLastSaved(savedTime);
+    const d = loadDraft();
+    if (d?.form && d.form.name) {
+      setForm(d.form);
+      setDraftRestored(true);
     }
   }, []);
 
-  // Auto-save to localStorage
+  // Auto-save
   const saveDraft = useCallback(() => {
-    const now = new Date().toISOString();
-    localStorage.setItem(DRAFT_KEY, JSON.stringify({
-      formData,
-      lastSaved: now
-    }));
-    setLastSaved(now);
-  }, [formData]);
+    localStorage.setItem(DRAFT_KEY, JSON.stringify({ form, savedAt: new Date().toISOString() }));
+    setLastSaved(new Date());
+  }, [form]);
 
-  // Auto-save every 5 seconds if there are changes
   useEffect(() => {
-    const hasData = formData.name || formData.address || formData.city || formData.sports.length > 0;
-    if (hasData && step === 1) {
-      const timer = setTimeout(() => {
-        saveDraft();
-      }, 2000); // Auto-save after 2 seconds of inactivity
-      return () => clearTimeout(timer);
-    }
-  }, [formData, step, saveDraft]);
+    if (!form.name) return;
+    const t = setTimeout(saveDraft, 1500);
+    return () => clearTimeout(t);
+  }, [form, saveDraft]);
 
-  // Clear draft after successful submission
-  const clearDraft = () => {
-    localStorage.removeItem(DRAFT_KEY);
-    setLastSaved(null);
+  const clearDraft = () => { localStorage.removeItem(DRAFT_KEY); setLastSaved(null); };
+
+  // Field handlers
+  const set = (key, val) => {
+    setForm(p => ({ ...p, [key]: val }));
+    if (errors[key]) setErrors(p => ({ ...p, [key]: '' }));
   };
 
-  const discardDraft = () => {
-    clearDraft();
-    setFormData(defaultFormData);
-    setShowDraftBanner(false);
-  };
-
-  const formatLastSaved = (isoString) => {
-    if (!isoString) return '';
-    const date = new Date(isoString);
-    return date.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-  };
-
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
-
-    // City autocomplete
-    if (name === 'city' && value.length >= 2) {
-      const matches = INDIAN_CITIES.filter(item =>
-        item.city.toLowerCase().includes(value.toLowerCase())
-      ).slice(0, 5);
+  const handleCity = (val) => {
+    set('city', val);
+    if (val.length >= 2) {
+      const matches = INDIAN_CITIES.filter(c => c.city.toLowerCase().startsWith(val.toLowerCase())).slice(0, 5);
       setCitySuggestions(matches);
-      setShowCitySuggestions(matches.length > 0);
-    } else if (name === 'city') {
-      setShowCitySuggestions(false);
-    }
+      setShowCitySugg(matches.length > 0);
+    } else setShowCitySugg(false);
   };
 
-  const handleCitySelect = (city, state) => {
-    setFormData(prev => ({ ...prev, city, state }));
-    setShowCitySuggestions(false);
-    setCitySuggestions([]);
-    if (errors.city) setErrors(prev => ({ ...prev, city: '' }));
-    if (errors.state) setErrors(prev => ({ ...prev, state: '' }));
+  const selectCity = (city, state) => {
+    setForm(p => ({ ...p, city, state }));
+    setShowCitySugg(false);
+    setErrors(p => ({ ...p, city: '', state: '' }));
   };
 
-  const handleSportDetailChange = (sport, value) => {
-    setFormData(prev => ({
-      ...prev,
-      sportDetails: { ...prev.sportDetails, [sport]: value }
+  const toggleSport = (s) => {
+    setForm(p => {
+      const has = p.sports.includes(s);
+      const sports = has ? p.sports.filter(x => x !== s) : [...p.sports, s];
+      const sportDetails = { ...p.sportDetails };
+      if (has) delete sportDetails[s];
+      return { ...p, sports, sportDetails };
+    });
+    if (errors.sports) setErrors(p => ({ ...p, sports: '' }));
+  };
+
+  const toggleAmenity = (id) => {
+    setForm(p => ({
+      ...p,
+      amenities: p.amenities.includes(id)
+        ? p.amenities.filter(a => a !== id)
+        : [...p.amenities, id],
     }));
-    if (errors[`sport_${sport}`]) {
-      setErrors(prev => ({ ...prev, [`sport_${sport}`]: '' }));
-    }
   };
 
-  const toggleSport = (sport) => {
-    setFormData(prev => {
-      const isSelected = prev.sports.includes(sport);
-      const newSports = isSelected 
-        ? prev.sports.filter(s => s !== sport)
-        : [...prev.sports, sport];
-      
-      // Remove sport detail if sport is deselected
-      const newSportDetails = { ...prev.sportDetails };
-      if (isSelected) {
-        delete newSportDetails[sport];
-      }
-      
-      return { ...prev, sports: newSports, sportDetails: newSportDetails };
+  const handlePhotos = (e) => {
+    Array.from(e.target.files).forEach(file => {
+      const r = new FileReader();
+      r.onload = ev => setPhotos(p => [...p, { file, preview: ev.target.result }]);
+      r.readAsDataURL(file);
     });
   };
 
-  const handlePhotoUpload = (e) => {
-    const files = Array.from(e.target.files);
-    files.forEach(file => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setPhotos(prev => [...prev, { file, preview: event.target.result }]);
-      };
-      reader.readAsDataURL(file);
-    });
-  };
-
-  const removePhoto = (index) => {
-    setPhotos(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const handleAcademyQrUpload = (e) => {
+  const handlePayment = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setAcademyQrCode({ file, preview: event.target.result });
-      };
-      reader.readAsDataURL(file);
-    }
+    if (!file) return;
+    const r = new FileReader();
+    r.onload = ev => setPaymentScreenshot({ file, preview: ev.target.result });
+    r.readAsDataURL(file);
   };
 
-  const handlePaymentScreenshot = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setPaymentScreenshot({ file, preview: event.target.result });
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-
-  const validateForm = () => {
-    const newErrors = {};
-    if (!formData.name.trim()) newErrors.name = 'Academy name is required';
-    if (!formData.address.trim()) newErrors.address = 'Address is required';
-    if (!formData.city.trim()) newErrors.city = 'City is required';
-    if (!formData.state.trim()) newErrors.state = 'State is required';
-    if (formData.sports.length === 0) newErrors.sports = 'Select at least one sport';
-    if (!formData.phone.trim()) newErrors.phone = 'Phone number is required';
-    
-    // Validate sport details
-    formData.sports.forEach(sport => {
-      if (!formData.sportDetails[sport]?.trim()) {
-        newErrors[`sport_${sport}`] = `${SPORTS_CONFIG[sport].label} is required`;
-      }
+  // Validation
+  const validateStep1 = () => {
+    const e = {};
+    if (!form.name.trim()) e.name = 'Academy name is required';
+    if (!form.address.trim()) e.address = 'Address is required';
+    if (!form.city.trim()) e.city = 'City is required';
+    if (!form.state.trim()) e.state = 'State is required';
+    if (form.sports.length === 0) e.sports = 'Select at least one sport';
+    form.sports.forEach(s => {
+      if (!form.sportDetails[s]?.trim()) e[`sport_${s}`] = `${SPORTS_CONFIG[s]?.label || 'Detail'} required`;
     });
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    setErrors(e);
+    return Object.keys(e).length === 0;
   };
 
-  const handleProceedToPayment = () => {
-    if (validateForm()) {
-      setStep(2);
-    }
+  const validateStep2 = () => {
+    const e = {};
+    if (!form.phone.trim()) e.phone = 'Phone number is required';
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
+
+  const handleNext = () => {
+    if (step === 1 && validateStep1()) setStep(2);
+    else if (step === 2 && validateStep2()) setStep(3);
   };
 
   const handleSubmit = async () => {
     if (!paymentScreenshot) {
-      setToast({ show: true, message: 'Please upload payment screenshot' });
+      setErrors({ payment: 'Upload payment screenshot' });
       return;
     }
-    
     setLoading(true);
     try {
-      const submitData = new FormData();
-      Object.keys(formData).forEach(key => {
-        if (key === 'sports' || key === 'sportDetails') {
-          submitData.append(key, JSON.stringify(formData[key]));
+      const fd = new FormData();
+      Object.entries(form).forEach(([k, v]) => {
+        if (k === 'sports' || k === 'sportDetails' || k === 'amenities') {
+          fd.append(k, JSON.stringify(v));
         } else {
-          submitData.append(key, formData[key]);
+          fd.append(k, v);
         }
       });
-      
-      photos.forEach((photo) => {
-        submitData.append('photos', photo.file);
-      });
-      
-      if (academyQrCode) {
-        submitData.append('academyQrCode', academyQrCode.file);
-      }
-      
-      submitData.append('paymentScreenshot', paymentScreenshot.file);
-      
-      await api.post('/academies', submitData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-      
-      setStep(3);
+      photos.forEach(p => fd.append('photos', p.file));
+      fd.append('paymentScreenshot', paymentScreenshot.file);
+      await api.post('/academies', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
       clearDraft();
-    } catch (error) {
-      console.error('Error submitting academy:', error);
-      setToast({ show: true, message: error.response?.data?.error || 'Failed to submit. Please try again.' });
+      setStep(4);
+    } catch (err) {
+      setErrors({ payment: err.response?.data?.error || 'Submission failed. Try again.' });
     } finally {
       setLoading(false);
     }
   };
 
-
-  // Step 3: Success
-  if (step === 3) {
+  // ── Step 4: Success ─────────────────────────────────────────────────────────
+  if (step === 4) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4" style={{ background: '#07071a' }}>
-        <div className="backdrop-blur-lg rounded-2xl border border-white/10 p-8 max-w-md w-full text-center" style={{ background: 'rgba(13,16,37,0.9)' }}>
-          <div className="w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center" style={{ background: 'rgba(0,255,136,0.15)' }}>
-            <CheckCircle className="w-10 h-10" style={{ color: '#00ff88' }} />
+      <div className="min-h-screen flex items-center justify-center p-6" style={{ background: B.bg }}>
+        <div className="w-full max-w-sm text-center">
+          <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-5"
+            style={{ background: 'rgba(0,255,136,0.12)', border: '2px solid rgba(0,255,136,0.3)' }}>
+            <CheckCircle className="w-10 h-10" style={{ color: B.green }} />
           </div>
-          <h2 className="text-2xl font-bold text-white mb-3">Academy Submitted!</h2>
-          <p className="text-gray-400 mb-6">
-            Your academy has been submitted for review. We'll verify your payment and approve it within 24-48 hours.
+          <h2 className="text-2xl font-black text-white mb-2">Submitted!</h2>
+          <p className="text-sm mb-2" style={{ color: 'rgba(255,255,255,0.5)', lineHeight: 1.7 }}>
+            Your academy has been submitted for review.
           </p>
-          <button
-            onClick={() => navigate('/academies')}
-            className="w-full py-3 font-semibold rounded-xl transition-all"
-            style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', color: '#07071a' }}
-          >
+          <p className="text-xs mb-8 px-4" style={{ color: 'rgba(255,255,255,0.35)', lineHeight: 1.6 }}>
+            We'll verify your payment and approve your listing within 24–48 hours.
+            You'll receive a notification once it's live.
+          </p>
+          <button onClick={() => navigate('/academies')}
+            className="w-full py-3.5 rounded-2xl font-black text-sm"
+            style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', color: '#07071a' }}>
             Back to Academies
           </button>
         </div>
@@ -486,519 +319,411 @@ const AddAcademyPage = () => {
     );
   }
 
-  // Step 2: Payment
-  if (step === 2) {
-    return (
-      <div className="min-h-screen py-8 px-4" style={{ background: '#07071a' }}>
-        <div className="max-w-lg mx-auto">
-          <button
-            onClick={() => setStep(1)}
-            className="flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            Back to Form
-          </button>
+  return (
+    <div className="min-h-screen pb-12" style={{ background: B.bg }}>
 
-          <div className="backdrop-blur-lg rounded-2xl border border-white/10 p-6" style={{ background: 'rgba(13,16,37,0.9)' }}>
-            <div className="text-center mb-6">
-              <CreditCard className="w-12 h-12 mx-auto mb-3" style={{ color: '#00ff88' }} />
-              <h2 className="text-2xl font-bold text-white mb-2">Complete Payment</h2>
-              <p className="text-gray-400">Pay ₹200 to list your academy on Matchify.pro</p>
+      {/* Header */}
+      <div className="sticky top-0 z-20 px-4 pt-4 pb-3"
+        style={{ background: B.bg, borderBottom: `1px solid ${B.border}` }}>
+        <div className="flex items-center justify-between mb-1">
+          <button onClick={() => step > 1 ? setStep(s => s - 1) : navigate('/academies')}
+            className="flex items-center gap-2">
+            <ArrowLeft className="w-5 h-5" style={{ color: B.green }} />
+            <span className="text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.6)' }}>
+              {step > 1 ? 'Back' : 'Academies'}
+            </span>
+          </button>
+          <div className="text-xs font-semibold" style={{ color: 'rgba(255,255,255,0.3)' }}>
+            Step {step} of 3
+          </div>
+          {lastSaved && (
+            <div className="flex items-center gap-1 text-xs" style={{ color: 'rgba(0,255,136,0.5)' }}>
+              <Save className="w-3 h-3" />
+              Saved
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="px-4 pt-4">
+
+        {/* Title */}
+        <div className="mb-5">
+          <h1 className="text-xl font-black text-white">List Your Academy</h1>
+          <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
+            One-time listing fee ₹{LISTING_FEE} · Reach thousands of players
+          </p>
+        </div>
+
+        <StepIndicator current={step} total={3} />
+
+        {/* Draft banner */}
+        {draftRestored && (
+          <div className="mb-4 px-3 py-2.5 rounded-xl flex items-center justify-between"
+            style={{ background: 'rgba(0,212,255,0.07)', border: '1px solid rgba(0,212,255,0.2)' }}>
+            <div className="flex items-center gap-2">
+              <Clock className="w-3.5 h-3.5" style={{ color: B.cyan }} />
+              <span className="text-xs font-semibold" style={{ color: B.cyan }}>Draft restored</span>
+            </div>
+            <button onClick={() => { clearDraft(); setForm(defaultForm); setDraftRestored(false); }}
+              className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
+              Discard
+            </button>
+          </div>
+        )}
+
+        {/* ── STEP 1 ────────────────────────────────────────────── */}
+        {step === 1 && (
+          <div className="space-y-4">
+
+            {/* Academy name */}
+            <Field label="Academy Name" required error={errors.name}>
+              <input value={form.name} onChange={e => set('name', e.target.value)}
+                placeholder="e.g. Shuttlers Badminton Academy"
+                className={inputCls(errors.name)} style={inputStyle(errors.name)} />
+            </Field>
+
+            {/* Type */}
+            <Field label="Academy Type">
+              <div className="flex flex-wrap gap-2">
+                {ACADEMY_TYPES.map(t => (
+                  <button key={t} type="button" onClick={() => set('type', t)}
+                    className="px-3 py-1.5 rounded-xl text-xs font-bold transition-all"
+                    style={{
+                      background: form.type === t ? B.purple : 'rgba(255,255,255,0.05)',
+                      color: form.type === t ? '#fff' : 'rgba(255,255,255,0.5)',
+                      border: `1px solid ${form.type === t ? B.purple : B.border}`,
+                    }}>
+                    {t}
+                  </button>
+                ))}
+              </div>
+            </Field>
+
+            {/* Address */}
+            <Field label="Full Address" required error={errors.address}>
+              <textarea value={form.address} onChange={e => set('address', e.target.value)}
+                placeholder="Door no, street, area..."
+                rows={2} className={inputCls(errors.address) + ' resize-none'}
+                style={inputStyle(errors.address)} />
+            </Field>
+
+            {/* City + State + Pincode */}
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="City" required error={errors.city}>
+                <div className="relative">
+                  <input value={form.city} onChange={e => handleCity(e.target.value)}
+                    onBlur={() => setTimeout(() => setShowCitySugg(false), 200)}
+                    placeholder="City" autoComplete="off"
+                    className={inputCls(errors.city)} style={inputStyle(errors.city)} />
+                  {showCitySugg && (
+                    <div className="absolute z-50 w-full mt-1 rounded-xl overflow-hidden"
+                      style={{ background: '#0d1025', border: `1px solid ${B.border}`, boxShadow: '0 8px 24px rgba(0,0,0,0.5)' }}>
+                      {citySuggestions.map((item, i) => (
+                        <div key={i} onMouseDown={() => selectCity(item.city, item.state)}
+                          className="px-3 py-2.5 cursor-pointer text-sm"
+                          style={{ borderBottom: `1px solid ${B.border}` }}
+                          onMouseEnter={e => e.currentTarget.style.background = 'rgba(168,85,247,0.15)'}
+                          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                          <div className="font-bold text-white">{item.city}</div>
+                          <div className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>{item.state}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </Field>
+              <Field label="State" required error={errors.state}>
+                <input value={form.state} readOnly placeholder="Auto-filled"
+                  className={inputCls(errors.state) + ' cursor-not-allowed'}
+                  style={{ ...inputStyle(errors.state), opacity: form.state ? 1 : 0.5 }} />
+              </Field>
             </div>
 
-            {/* QR Code */}
-            <div className="bg-white rounded-2xl p-4 mb-6">
-              <div className="rounded-xl p-5" style={{ background: '#07071a' }}>
-                <div className="flex items-center justify-center gap-2 mb-4">
-                  <span className="text-2xl">🏸</span>
-                  <span className="text-xl font-semibold text-amber-400">P S LOCHAN</span>
-                </div>
-                
-                {/* QR Code - Using UPI QR Generator */}
-                <div className="bg-white p-3 rounded-lg mx-auto w-fit">
-                  <img 
-                    src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=upi://pay?pa=9742628582@slc%26pn=P%20S%20LOCHAN%26am=200%26cu=INR%26tn=Matchify%20Academy%20Listing"
-                    alt="Payment QR Code"
-                    className="w-[250px] h-[250px]"
+            <Field label="Pincode">
+              <input value={form.pincode} onChange={e => set('pincode', e.target.value)}
+                placeholder="e.g. 560001" maxLength={6}
+                className={inputCls()} style={inputStyle()} />
+            </Field>
+
+            {/* Sports */}
+            <Field label="Sports Available" required error={errors.sports}>
+              <div className="flex flex-wrap gap-2">
+                {Object.entries(SPORTS_CONFIG).map(([sport, cfg]) => {
+                  const active = form.sports.includes(sport);
+                  return (
+                    <button key={sport} type="button" onClick={() => toggleSport(sport)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all"
+                      style={{
+                        background: active ? 'rgba(0,255,136,0.15)' : 'rgba(255,255,255,0.04)',
+                        color: active ? B.green : 'rgba(255,255,255,0.5)',
+                        border: `1px solid ${active ? 'rgba(0,255,136,0.4)' : B.border}`,
+                      }}>
+                      {cfg.emoji} {sport}
+                    </button>
+                  );
+                })}
+              </div>
+            </Field>
+
+            {/* Sport details */}
+            {form.sports.length > 0 && (
+              <div className="rounded-xl p-4 space-y-3"
+                style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${B.border}` }}>
+                <p className="text-xs font-black uppercase tracking-wide" style={{ color: B.green }}>
+                  Facility Details
+                </p>
+                {form.sports.map(sport => {
+                  const cfg = SPORTS_CONFIG[sport];
+                  return (
+                    <Field key={sport} label={`${cfg.emoji} ${sport} — ${cfg.label}`}
+                      required error={errors[`sport_${sport}`]}>
+                      <input type={cfg.type}
+                        value={form.sportDetails[sport] || ''}
+                        onChange={e => {
+                          setForm(p => ({ ...p, sportDetails: { ...p.sportDetails, [sport]: e.target.value } }));
+                          if (errors[`sport_${sport}`]) setErrors(p => ({ ...p, [`sport_${sport}`]: '' }));
+                        }}
+                        placeholder={cfg.placeholder}
+                        min={cfg.type === 'number' ? 1 : undefined}
+                        className={inputCls(errors[`sport_${sport}`])}
+                        style={inputStyle(errors[`sport_${sport}`])} />
+                    </Field>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Amenities */}
+            <Field label="Amenities">
+              <div className="flex flex-wrap gap-2">
+                {AMENITIES.map(({ id, label, icon: Icon }) => {
+                  const active = form.amenities.includes(id);
+                  return (
+                    <button key={id} type="button" onClick={() => toggleAmenity(id)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all"
+                      style={{
+                        background: active ? 'rgba(0,212,255,0.12)' : 'rgba(255,255,255,0.04)',
+                        color: active ? B.cyan : 'rgba(255,255,255,0.5)',
+                        border: `1px solid ${active ? 'rgba(0,212,255,0.35)' : B.border}`,
+                      }}>
+                      <Icon className="w-3 h-3" />
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
+            </Field>
+
+            {/* Opening hours */}
+            <Field label="Opening Hours" hint="e.g. 6:00 AM – 10:00 PM">
+              <input value={form.openingHours} onChange={e => set('openingHours', e.target.value)}
+                placeholder="6:00 AM – 10:00 PM"
+                className={inputCls()} style={inputStyle()} />
+            </Field>
+
+            {/* Monthly fee */}
+            <Field label="Monthly Fee" hint="e.g. ₹1500/month or ₹500–₹2000/month">
+              <input value={form.monthlyFee} onChange={e => set('monthlyFee', e.target.value)}
+                placeholder="₹1500/month"
+                className={inputCls()} style={inputStyle()} />
+            </Field>
+
+            {/* Description */}
+            <Field label="About Your Academy" hint="Training programs, achievements, facilities overview...">
+              <textarea value={form.description} onChange={e => set('description', e.target.value)}
+                placeholder="Tell players what makes your academy special..."
+                rows={3} className={inputCls() + ' resize-none'} style={inputStyle()} />
+            </Field>
+
+            <button onClick={handleNext}
+              className="w-full py-3.5 rounded-2xl font-black text-sm flex items-center justify-center gap-2"
+              style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', color: '#07071a' }}>
+              Next: Contact & Photos
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
+        {/* ── STEP 2 ────────────────────────────────────────────── */}
+        {step === 2 && (
+          <div className="space-y-4">
+
+            <Field label="Phone Number" required error={errors.phone}>
+              <input value={form.phone} onChange={e => set('phone', e.target.value)}
+                type="tel" placeholder="+91 98765 43210"
+                className={inputCls(errors.phone)} style={inputStyle(errors.phone)} />
+            </Field>
+
+            <Field label="Email">
+              <input value={form.email} onChange={e => set('email', e.target.value)}
+                type="email" placeholder="academy@email.com"
+                className={inputCls()} style={inputStyle()} />
+            </Field>
+
+            <Field label="Website" hint="Your academy website if any">
+              <input value={form.website} onChange={e => set('website', e.target.value)}
+                type="url" placeholder="www.youracademy.com"
+                className={inputCls()} style={inputStyle()} />
+            </Field>
+
+            <Field label="Instagram" hint="Instagram handle (e.g. @youracademy)">
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold"
+                  style={{ color: 'rgba(255,255,255,0.3)' }}>@</span>
+                <input value={form.instagram} onChange={e => set('instagram', e.target.value)}
+                  placeholder="youracademy"
+                  className={inputCls() + ' pl-7'} style={inputStyle()} />
+              </div>
+            </Field>
+
+            {/* Photos */}
+            <Field label="Academy Photos" hint="Up to 20 photos — courts, facilities, coaches">
+              <div className="grid grid-cols-3 gap-2">
+                {photos.map((p, i) => (
+                  <div key={i} className="relative aspect-square rounded-xl overflow-hidden">
+                    <img src={p.preview} alt="" className="w-full h-full object-cover" />
+                    <button type="button" onClick={() => setPhotos(ps => ps.filter((_, j) => j !== i))}
+                      className="absolute top-1 right-1 w-6 h-6 rounded-full flex items-center justify-center"
+                      style={{ background: 'rgba(239,68,68,0.9)' }}>
+                      <X className="w-3 h-3 text-white" />
+                    </button>
+                  </div>
+                ))}
+                {photos.length < 20 && (
+                  <button type="button" onClick={() => photoInputRef.current?.click()}
+                    className="aspect-square rounded-xl flex flex-col items-center justify-center cursor-pointer transition-all"
+                    style={{ background: 'rgba(255,255,255,0.04)', border: `2px dashed ${B.border}` }}>
+                    <Camera className="w-5 h-5 mb-1" style={{ color: 'rgba(255,255,255,0.3)' }} />
+                    <span className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>Add</span>
+                    <input ref={photoInputRef} type="file" accept="image/*" multiple
+                      onChange={handlePhotos} className="hidden" />
+                  </button>
+                )}
+              </div>
+            </Field>
+
+            <button onClick={handleNext}
+              className="w-full py-3.5 rounded-2xl font-black text-sm flex items-center justify-center gap-2"
+              style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', color: '#07071a' }}>
+              Next: Payment
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
+        {/* ── STEP 3: Payment ───────────────────────────────────── */}
+        {step === 3 && (
+          <div className="space-y-4">
+
+            {/* Fee summary */}
+            <div className="rounded-2xl p-4"
+              style={{ background: 'rgba(0,255,136,0.06)', border: '1px solid rgba(0,255,136,0.2)' }}>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-sm font-bold text-white">Academy Listing Fee</span>
+                <span className="text-2xl font-black" style={{ color: B.green }}>₹{LISTING_FEE}</span>
+              </div>
+              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                One-time fee · Listed after payment verification · 24–48 hr approval
+              </p>
+            </div>
+
+            {/* QR + UPI */}
+            <div className="rounded-2xl overflow-hidden"
+              style={{ background: B.card, border: `1px solid ${B.border}` }}>
+              <div className="px-4 py-3 flex items-center gap-3"
+                style={{ borderBottom: `1px solid ${B.border}`, background: 'rgba(0,212,255,0.05)' }}>
+                <CreditCard className="w-4 h-4" style={{ color: B.cyan }} />
+                <p className="text-sm font-black text-white">Pay via UPI</p>
+              </div>
+              <div className="p-4 flex flex-col items-center">
+                {/* QR */}
+                <div className="p-3 bg-white rounded-2xl shadow-lg mb-3">
+                  <img
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`upi://pay?pa=9742628582@slc&pn=Matchify.pro&am=${LISTING_FEE}&cu=INR&tn=Academy+Listing+Fee`)}`}
+                    alt="Payment QR"
+                    className="w-48 h-48 rounded-xl"
                   />
-                  {/* Google Pay Logo in center */}
-                  <div className="relative -mt-[140px] flex justify-center mb-[115px]">
-                    <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg">
-                      <img 
-                        src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Google_Pay_Logo.svg/512px-Google_Pay_Logo.svg.png" 
-                        alt="GPay"
-                        className="w-8 h-8"
-                      />
-                    </div>
-                  </div>
                 </div>
-                
-                <p className="text-center text-gray-400 text-sm mt-4">Scan to pay with any UPI app</p>
-                
-                {/* Account Details */}
-                <div className="mt-4 p-3 bg-gray-800/50 rounded-lg space-y-2">
+
+                {/* UPI details */}
+                <div className="w-full space-y-2 rounded-xl p-3"
+                  style={{ background: 'rgba(255,255,255,0.04)', border: `1px solid ${B.border}` }}>
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-500">UPI ID:</span>
-                    <span className="text-white font-medium">9742628582@slc</span>
+                    <span style={{ color: 'rgba(255,255,255,0.45)' }}>UPI ID</span>
+                    <span className="font-black text-white">9742628582@slc</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-500">Name:</span>
-                    <span className="text-white font-medium">P S LOCHAN</span>
+                    <span style={{ color: 'rgba(255,255,255,0.45)' }}>Name</span>
+                    <span className="font-bold text-white">Matchify.pro</span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm pt-2 mt-1"
+                    style={{ borderTop: `1px solid ${B.border}` }}>
+                    <span className="font-bold text-white">Amount</span>
+                    <span className="text-xl font-black" style={{ color: B.cyan }}>₹{LISTING_FEE}</span>
                   </div>
                 </div>
+
+                <p className="text-xs mt-3 text-center px-2"
+                  style={{ color: B.amber }}>
+                  ⚠️ Pay exactly ₹{LISTING_FEE} and take a screenshot of the confirmation
+                </p>
               </div>
             </div>
 
-            <div className="rounded-xl p-4 mb-6" style={{ background: 'rgba(168,85,247,0.1)', border: '1px solid rgba(168,85,247,0.3)' }}>
-              <p className="text-center font-semibold text-lg" style={{ color: '#00ff88' }}>Amount: ₹200</p>
-            </div>
-
-
-            {/* Upload Screenshot */}
-            <div className="mb-6">
-              <label className="block text-sm text-gray-400 mb-2">Upload Payment Screenshot *</label>
-              {paymentScreenshot ? (
-                <div className="relative">
-                  <img 
-                    src={paymentScreenshot.preview} 
-                    alt="Payment Screenshot" 
-                    className="w-full h-48 object-contain bg-slate-700 rounded-xl"
-                  />
-                  <button
-                    onClick={() => setPaymentScreenshot(null)}
-                    className="absolute top-2 right-2 p-1 bg-red-500 rounded-full text-white"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              ) : (
-                <label className="flex flex-col items-center justify-center h-32 border-2 border-dashed border-gray-600 rounded-xl cursor-pointer transition-colors" style={{ borderColor: 'rgba(255,255,255,0.15)' }}>
-                  <Upload className="w-8 h-8 text-gray-500 mb-2" />
-                  <span className="text-gray-400 text-sm">Click to upload screenshot</span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handlePaymentScreenshot}
-                    className="hidden"
-                  />
-                </label>
-              )}
+            {/* Screenshot upload */}
+            <div className="rounded-2xl overflow-hidden"
+              style={{ background: B.card, border: `1px solid ${B.border}` }}>
+              <div className="px-4 py-3 flex items-center gap-3"
+                style={{ borderBottom: `1px solid ${B.border}`, background: 'rgba(0,255,136,0.04)' }}>
+                <Upload className="w-4 h-4" style={{ color: B.green }} />
+                <p className="text-sm font-black text-white">Upload Payment Screenshot</p>
+              </div>
+              <div className="p-4">
+                {paymentScreenshot ? (
+                  <div className="relative">
+                    <img src={paymentScreenshot.preview} alt="Payment"
+                      className="w-full rounded-xl" />
+                    <button onClick={() => setPaymentScreenshot(null)}
+                      className="absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center"
+                      style={{ background: 'rgba(239,68,68,0.9)' }}>
+                      <X className="w-4 h-4 text-white" />
+                    </button>
+                  </div>
+                ) : (
+                  <div onClick={() => payInputRef.current?.click()}
+                    className="border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer"
+                    style={{ borderColor: 'rgba(0,255,136,0.2)', background: 'rgba(0,255,136,0.02)' }}>
+                    <Camera className="w-10 h-10 mx-auto mb-2" style={{ color: 'rgba(255,255,255,0.25)' }} />
+                    <p className="text-sm font-bold text-white mb-1">Tap to upload screenshot</p>
+                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>PNG, JPG up to 10MB</p>
+                    <input ref={payInputRef} type="file" accept="image/*"
+                      onChange={handlePayment} className="hidden" />
+                  </div>
+                )}
+                {errors.payment && (
+                  <p className="text-xs mt-2 font-semibold" style={{ color: '#f87171' }}>{errors.payment}</p>
+                )}
+              </div>
             </div>
 
             <button
               onClick={handleSubmit}
               disabled={loading || !paymentScreenshot}
-              className="w-full py-3 font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', color: '#fff' }}
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Submitting...
-                </>
-              ) : (
-                'Submit Academy'
-              )}
+              className="w-full py-3.5 rounded-2xl font-black text-sm flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
+              style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', color: '#07071a' }}>
+              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle className="w-5 h-5" />}
+              {loading ? 'Submitting...' : 'Submit Academy'}
             </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
-
-  // Step 1: Form
-  return (
-    <div className="min-h-screen py-8 px-4" style={{ background: '#07071a' }}>
-      <div className="max-w-2xl mx-auto">
-        {/* Draft Restored Banner */}
-        {showDraftBanner && (
-          <div className="mb-4 p-4 bg-blue-500/20 border border-blue-500/30 rounded-xl flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Clock className="w-5 h-5 text-blue-400" />
-              <span className="text-blue-300 text-sm">Draft restored from your last session</span>
-            </div>
-            <button
-              onClick={discardDraft}
-              className="text-blue-400 hover:text-blue-300 text-sm underline"
-            >
-              Discard & Start Fresh
-            </button>
+            <p className="text-xs text-center" style={{ color: 'rgba(255,255,255,0.3)' }}>
+              By submitting you agree to Matchify.pro listing terms.
+              Listing goes live after admin verification.
+            </p>
           </div>
         )}
 
-        <div className="flex items-center justify-between mb-6">
-          <button
-            onClick={() => navigate('/academies')}
-            className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            Back to Academies
-          </button>
-          
-          {/* Auto-save indicator */}
-          {lastSaved && (
-            <div className="flex items-center gap-2 text-gray-500 text-sm">
-              <Save className="w-4 h-4" />
-              <span>Saved at {formatLastSaved(lastSaved)}</span>
-            </div>
-          )}
-        </div>
-
-        <div className="backdrop-blur-lg rounded-2xl border border-white/10 p-6 md:p-8" style={{ background: 'rgba(13,16,37,0.9)' }}>
-          <div className="text-center mb-8">
-            <Building2 className="w-12 h-12 mx-auto mb-3" style={{ color: '#00ff88' }} />
-            <h1 className="text-2xl font-bold text-white mb-2">Add Your Academy</h1>
-            <p className="text-gray-400">List your academy on Matchify.pro for ₹200</p>
-          </div>
-
-          {/* Academy Name */}
-          <div className="mb-5">
-            <label className="block text-sm text-gray-400 mb-2">Academy Name *</label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleInputChange}
-              placeholder="Enter academy name"
-              className={`w-full px-4 py-3 bg-slate-700/50 text-white rounded-xl border ${errors.name ? 'border-red-500' : 'border-gray-600'} focus:outline-none focus:border-green-500`}
-            />
-            {errors.name && <p className="text-red-400 text-sm mt-1">{errors.name}</p>}
-          </div>
-
-          {/* Address */}
-          <div className="mb-5">
-            <label className="block text-sm text-gray-400 mb-2">Full Address *</label>
-            <textarea
-              name="address"
-              value={formData.address}
-              onChange={handleInputChange}
-              placeholder="Enter complete address"
-              rows={2}
-              className={`w-full px-4 py-3 bg-slate-700/50 text-white rounded-xl border ${errors.address ? 'border-red-500' : 'border-gray-600'} focus:outline-none focus:border-green-500 resize-none`}
-            />
-            {errors.address && <p className="text-red-400 text-sm mt-1">{errors.address}</p>}
-          </div>
-
-          {/* City, State, Pincode */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
-            <div className="relative">
-              <label className="block text-sm text-gray-400 mb-2">City *</label>
-              <input
-                type="text"
-                name="city"
-                value={formData.city}
-                onChange={handleInputChange}
-                onFocus={() => {
-                  if (formData.city.length >= 2 && citySuggestions.length > 0) {
-                    setShowCitySuggestions(true);
-                  }
-                }}
-                onBlur={() => {
-                  setTimeout(() => setShowCitySuggestions(false), 300);
-                }}
-                placeholder="City"
-                autoComplete="off"
-                className={`w-full px-4 py-3 bg-slate-700/50 text-white rounded-xl border ${errors.city ? 'border-red-500' : 'border-gray-600'} focus:outline-none focus:border-green-500`}
-              />
-              {errors.city && <p className="text-red-400 text-sm mt-1">{errors.city}</p>}
-              
-              {/* City Suggestions Dropdown */}
-              {showCitySuggestions && citySuggestions.length > 0 && (
-                <div className="absolute z-50 w-full mt-1 rounded-xl overflow-hidden" style={{ background: '#0d1025', border: '1px solid rgba(168,85,247,0.3)', boxShadow: '0 8px 24px rgba(168,85,247,0.2)' }}>
-                  {citySuggestions.map((item, index) => (
-                    <div
-                      key={index}
-                      onMouseDown={(e) => {
-                        e.preventDefault();
-                        handleCitySelect(item.city, item.state);
-                      }}
-                      className="px-4 py-3 cursor-pointer transition-colors"
-                      style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
-                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(168,85,247,0.15)'}
-                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                    >
-                      <div className="text-white font-medium">{item.city}</div>
-                      <div className="text-gray-400 text-sm">{item.state}</div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm text-gray-400 mb-2">State *</label>
-              <input
-                type="text"
-                name="state"
-                value={formData.state}
-                onChange={handleInputChange}
-                placeholder="State (auto-filled)"
-                readOnly
-                className={`w-full px-4 py-3 bg-slate-700/30 text-white rounded-xl border ${errors.state ? 'border-red-500' : 'border-gray-600'} focus:outline-none focus:border-green-500 cursor-not-allowed`}
-              />
-              {errors.state && <p className="text-red-400 text-sm mt-1">{errors.state}</p>}
-            </div>
-            <div>
-              <label className="block text-sm text-gray-400 mb-2">Pincode</label>
-              <input
-                type="text"
-                name="pincode"
-                value={formData.pincode}
-                onChange={handleInputChange}
-                placeholder="Pincode"
-                className="w-full px-4 py-3 bg-slate-700/50 text-white rounded-xl border border-gray-600 focus:outline-none focus:border-green-500"
-              />
-            </div>
-          </div>
-
-
-          {/* Sports Selection */}
-          <div className="mb-5">
-            <label className="block text-sm text-gray-400 mb-2">Sports Available *</label>
-            <div className="flex flex-wrap gap-2">
-              {SPORTS_OPTIONS.map(sport => (
-                <button
-                  key={sport}
-                  type="button"
-                  onClick={() => toggleSport(sport)}
-                  className="px-4 py-2 rounded-xl text-sm font-medium transition-all"
-                  style={formData.sports.includes(sport)
-                    ? { background: '#00ff88', color: '#fff' }
-                    : { background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.7)' }}
-                >
-                  {sport}
-                </button>
-              ))}
-            </div>
-            {errors.sports && <p className="text-red-400 text-sm mt-1">{errors.sports}</p>}
-          </div>
-
-          {/* Dynamic Sport-Specific Questions */}
-          {formData.sports.length > 0 && (
-            <div className="mb-5 p-4 rounded-xl" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(168,85,247,0.2)' }}>
-              <h3 className="text-sm font-semibold mb-4 flex items-center gap-2" style={{ color: '#00ff88' }}>
-                <Dumbbell className="w-4 h-4" />
-                Facility Details for Selected Sports
-              </h3>
-              <div className="space-y-4">
-                {formData.sports.map(sport => {
-                  const config = SPORTS_CONFIG[sport];
-                  return (
-                    <div key={sport}>
-                      <label className="block text-sm text-gray-400 mb-2">
-                        {config.label} *
-                      </label>
-                      <div className="relative">
-                        <input
-                          type={config.type}
-                          value={formData.sportDetails[sport] || ''}
-                          onChange={(e) => handleSportDetailChange(sport, e.target.value)}
-                          placeholder={config.placeholder}
-                          min={config.type === 'number' ? '1' : undefined}
-                          className={`w-full px-4 py-3 bg-slate-700/50 text-white rounded-xl border ${
-                            errors[`sport_${sport}`] ? 'border-red-500' : 'border-gray-600'
-                          } focus:outline-none focus:border-green-500 ${config.suffix ? 'pr-20' : ''}`}
-                        />
-                        {config.suffix && (
-                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-medium pointer-events-none">
-                            {config.suffix}
-                          </span>
-                        )}
-                      </div>
-                      {errors[`sport_${sport}`] && (
-                        <p className="text-red-400 text-sm mt-1">{errors[`sport_${sport}`]}</p>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Additional Sports Information */}
-              <div className="mt-4 pt-4 border-t border-slate-600/50">
-                <label className="block text-sm text-gray-400 mb-2">
-                  Additional Sports Information (Optional)
-                </label>
-                <textarea
-                  name="additionalSportsInfo"
-                  value={formData.additionalSportsInfo}
-                  onChange={handleInputChange}
-                  placeholder="Any other sports facilities or additional details you'd like to mention..."
-                  rows={3}
-                  className="w-full px-4 py-3 bg-slate-700/50 text-white rounded-xl border border-gray-600 focus:outline-none focus:border-green-500 resize-none"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  e.g., Indoor/outdoor facilities, equipment provided, coaching available, etc.
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* Description */}
-          <div className="mb-5">
-            <label className="block text-sm text-gray-400 mb-2">Description</label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleInputChange}
-              placeholder="Tell us about your academy..."
-              rows={3}
-              className="w-full px-4 py-3 bg-slate-700/50 text-white rounded-xl border border-gray-600 focus:outline-none focus:border-green-500 resize-none"
-            />
-          </div>
-
-
-          {/* Contact Info */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
-            <div>
-              <label className="block text-sm text-gray-400 mb-2">Phone Number *</label>
-              <input
-                type="tel"
-                name="phone"
-                value={formData.phone}
-                onChange={handleInputChange}
-                placeholder="+91 98765 43210"
-                className={`w-full px-4 py-3 bg-slate-700/50 text-white rounded-xl border ${errors.phone ? 'border-red-500' : 'border-gray-600'} focus:outline-none focus:border-green-500`}
-              />
-              {errors.phone && <p className="text-red-400 text-sm mt-1">{errors.phone}</p>}
-            </div>
-            <div>
-              <label className="block text-sm text-gray-400 mb-2">Email</label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                placeholder="academy@email.com"
-                className="w-full px-4 py-3 bg-slate-700/50 text-white rounded-xl border border-gray-600 focus:outline-none focus:border-green-500"
-              />
-            </div>
-          </div>
-
-          {/* Website */}
-          <div className="mb-5">
-            <label className="block text-sm text-gray-400 mb-2">Website (optional)</label>
-            <input
-              type="url"
-              name="website"
-              value={formData.website}
-              onChange={handleInputChange}
-              placeholder="www.youracademy.com"
-              className="w-full px-4 py-3 bg-slate-700/50 text-white rounded-xl border border-gray-600 focus:outline-none focus:border-green-500"
-            />
-          </div>
-
-          {/* Photos */}
-          <div className="mb-6">
-            <label className="block text-sm text-gray-400 mb-2">
-              <Image className="w-4 h-4 inline mr-1" />
-              Academy Photos (optional)
-            </label>
-            <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-              {photos.map((photo, index) => (
-                <div key={index} className="relative aspect-square">
-                  <img
-                    src={photo.preview}
-                    alt={`Photo ${index + 1}`}
-                    className="w-full h-full object-cover rounded-xl"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removePhoto(index)}
-                    className="absolute -top-2 -right-2 p-1 bg-red-500 rounded-full text-white shadow-lg"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </div>
-              ))}
-              <label className="aspect-square flex flex-col items-center justify-center border-2 border-dashed border-gray-600 rounded-xl cursor-pointer hover:border-green-500 transition-colors">
-                <Plus className="w-6 h-6 text-gray-500 mb-1" />
-                <span className="text-gray-500 text-xs">Add Photo</span>
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handlePhotoUpload}
-                  className="hidden"
-                />
-              </label>
-            </div>
-          </div>
-
-          {/* Academy QR Code */}
-          <div className="mb-6">
-            <label className="block text-sm text-gray-400 mb-2">
-              Your Academy's Payment QR Code (optional)
-            </label>
-            <p className="text-xs text-gray-500 mb-3">Upload your UPI/Payment QR code so players can pay you directly</p>
-            {academyQrCode ? (
-              <div className="relative w-fit">
-                <img 
-                  src={academyQrCode.preview} 
-                  alt="Academy QR Code" 
-                  className="w-48 h-48 object-contain bg-white rounded-xl p-2"
-                />
-                <button
-                  type="button"
-                  onClick={() => setAcademyQrCode(null)}
-                  className="absolute -top-2 -right-2 p-1 bg-red-500 rounded-full text-white shadow-lg"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-            ) : (
-              <label className="flex flex-col items-center justify-center w-48 h-48 border-2 border-dashed border-gray-600 rounded-xl cursor-pointer hover:border-green-500 transition-colors">
-                <CreditCard className="w-8 h-8 text-gray-500 mb-2" />
-                <span className="text-gray-400 text-sm text-center px-2">Upload QR Code</span>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleAcademyQrUpload}
-                  className="hidden"
-                />
-              </label>
-            )}
-          </div>
-
-          {/* Price Info */}
-          <div className="rounded-xl p-4 mb-6" style={{ background: 'rgba(168,85,247,0.1)', border: '1px solid rgba(168,85,247,0.3)' }}>
-            <div className="flex items-center justify-between">
-              <span className="text-gray-300">Listing Fee</span>
-              <span className="font-bold text-xl" style={{ color: '#00ff88' }}>₹200</span>
-            </div>
-            <p className="text-gray-500 text-sm mt-2">One-time payment to list your academy</p>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex gap-3">
-            <button
-              onClick={() => {
-                saveDraft();
-                setToast({ show: true, message: 'Draft saved successfully!' });
-              }}
-              className="flex-1 py-3 bg-slate-700 hover:bg-slate-600 text-white font-semibold rounded-xl transition-all flex items-center justify-center gap-2"
-            >
-              <Save className="w-5 h-5" />
-              Save Draft
-            </button>
-            <button
-              onClick={handleProceedToPayment}
-              className="flex-[2] py-3 font-semibold rounded-xl transition-all"
-              style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', color: '#fff' }}
-            >
-              Proceed to Payment
-            </button>
-          </div>
-        </div>
       </div>
-      
-      {/* Toast Notification */}
-      <Toast 
-        show={toast.show} 
-        message={toast.message} 
-        onClose={() => setToast({ show: false, message: '' })} 
-      />
     </div>
   );
-};
-
-export default AddAcademyPage;
+}

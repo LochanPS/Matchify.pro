@@ -940,7 +940,7 @@ const DrawPage = () => {
             <span className="text-sm">Back to Tournament</span>
           </button>
 
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div className="flex flex-col md:flex-row items-start md:items-start justify-between gap-4">
             <div className="flex items-center gap-5">
               <div className="w-16 h-16 bg-gradient-to-br from-emerald-400 via-teal-500 to-emerald-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-emerald-500/30">
                 <Layers className="w-8 h-8 text-white" />
@@ -952,7 +952,7 @@ const DrawPage = () => {
             </div>
 
             {isOrganizer && (
-              <div className="grid grid-cols-2 gap-3 w-full max-w-2xl">
+              <div className="grid grid-cols-2 gap-2 w-full md:max-w-xs">
                 {bracket && (
                   <>
                     {/* Row 1: Assign Players & Edit Groups */}
@@ -1284,22 +1284,20 @@ const DrawPage = () => {
       {/* Messages */}
       <div className="max-w-2xl mx-auto px-4 mt-4">
         {error && (
-          <div className="mb-4 bg-red-500/10 border border-red-500/30 rounded-xl p-4 flex items-center gap-3">
-            <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0" />
-            <span className="text-red-300 font-medium">{error}</span>
-            <button onClick={() => setError(null)} className="ml-auto text-red-400 hover:text-red-300"><X className="w-5 h-5" /></button>
+          <div className="mb-4 bg-red-500/10 border border-red-500/30 rounded-xl p-3 flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+            <span className="text-red-300 font-medium text-sm flex-1 min-w-0 break-words">{error}</span>
+            <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300 flex-shrink-0"><X className="w-5 h-5" /></button>
           </div>
         )}
         {success && (
-          <div className="mb-4 rounded-xl p-4 flex items-center gap-3" style={{ background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.25)' }}>
-            <CheckCircle className="w-5 h-5 icon-green flex-shrink-0" />
-            <span className="text-[#00ff88] font-medium">{success}</span>
-            {refreshing && (
-              <div className="ml-auto">
-                <div className="w-5 h-5 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></div>
-              </div>
-            )}
-            <button onClick={() => setSuccess(null)} className="ml-auto icon-green hover:text-[#00ff88]"><X className="w-5 h-5" /></button>
+          <div className="mb-4 rounded-xl p-3 flex items-start gap-3" style={{ background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.25)' }}>
+            <CheckCircle className="w-5 h-5 icon-green flex-shrink-0 mt-0.5" />
+            <span className="text-[#00ff88] font-medium text-sm flex-1 min-w-0 break-words">{success}</span>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              {refreshing && <div className="w-4 h-4 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></div>}
+              <button onClick={() => setSuccess(null)} className="icon-green hover:text-[#00ff88]"><X className="w-5 h-5" /></button>
+            </div>
           </div>
         )}
       </div>
@@ -2112,42 +2110,43 @@ const DrawPage = () => {
         const koOnly = isHybrid && activeStage === 'knockout';
         const rrFull = isHybrid && activeStage === 'roundrobin';
         return (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4">
             <div
-              className="rounded-3xl p-8 max-w-lg w-full shadow-2xl"
+              className="rounded-2xl sm:rounded-3xl p-5 sm:p-7 max-w-lg w-full shadow-2xl overflow-y-auto"
               style={{
                 background: '#0d1025',
                 border: koOnly
                   ? '2px solid rgba(168,85,247,0.5)'
                   : rrFull
                     ? '2px solid rgba(249,115,22,0.6)'
-                    : '2px solid rgba(249,115,22,0.4)'
+                    : '2px solid rgba(249,115,22,0.4)',
+                maxHeight: '92vh'
               }}
             >
               {/* Icon */}
               <div
-                className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg"
+                className="w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg"
                 style={{
                   background: koOnly
                     ? 'linear-gradient(135deg,#a855f7,#7c3aed)'
                     : 'linear-gradient(135deg,#f97316,#d97706)',
                   boxShadow: koOnly
-                    ? '0 0 30px rgba(168,85,247,0.4)'
-                    : '0 0 30px rgba(249,115,22,0.4)'
+                    ? '0 0 24px rgba(168,85,247,0.4)'
+                    : '0 0 24px rgba(249,115,22,0.4)'
                 }}
               >
-                <Zap className="w-10 h-10 text-white" />
+                <Zap className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
               </div>
 
               {/* Title */}
-              <h2 className="text-2xl font-bold text-center mb-2 text-white">
+              <h2 className="text-xl sm:text-2xl font-bold text-center mb-1.5 text-white">
                 {koOnly
                   ? 'Restart Knockout Stage?'
                   : rrFull
                     ? 'Restart Entire Draw?'
                     : 'Restart All Matches?'}
               </h2>
-              <p className="text-center text-sm mb-5" style={{ color: koOnly ? '#c084fc' : '#fb923c' }}>
+              <p className="text-center text-xs sm:text-sm mb-4" style={{ color: koOnly ? '#c084fc' : '#fb923c' }}>
                 {koOnly
                   ? 'Group stage results will NOT be affected'
                   : rrFull
@@ -2157,7 +2156,7 @@ const DrawPage = () => {
 
               {/* What resets */}
               <div
-                className="rounded-xl p-4 mb-4"
+                className="rounded-xl p-3 sm:p-4 mb-3"
                 style={{
                   background: koOnly ? 'rgba(168,85,247,0.08)' : 'rgba(249,115,22,0.08)',
                   border: koOnly ? '1px solid rgba(168,85,247,0.3)' : '1px solid rgba(249,115,22,0.3)'
@@ -2168,15 +2167,15 @@ const DrawPage = () => {
                     className="w-5 h-5 flex-shrink-0 mt-0.5"
                     style={{ color: koOnly ? '#c084fc' : '#fb923c' }}
                   />
-                  <div className="text-sm" style={{ color: koOnly ? '#e9d5ff' : '#fed7aa' }}>
-                    <p className="font-bold mb-2">
+                  <div className="text-xs sm:text-sm" style={{ color: koOnly ? '#e9d5ff' : '#fed7aa' }}>
+                    <p className="font-bold mb-1.5">
                       {koOnly
                         ? 'Knockout stage will be reset:'
                         : rrFull
                           ? 'Everything will be reset:'
                           : 'All matches will be reset:'}
                     </p>
-                    <ul className="list-disc list-inside space-y-1 ml-1">
+                    <ul className="list-disc list-inside space-y-0.5 ml-1">
                       {koOnly ? (
                         <>
                           <li>All knockout match scores cleared</li>
@@ -2208,12 +2207,12 @@ const DrawPage = () => {
 
               {/* What is preserved */}
               <div
-                className="rounded-xl p-4 mb-6"
+                className="rounded-xl p-3 sm:p-4 mb-3"
                 style={{ background: 'rgba(0,255,136,0.06)', border: '1px solid rgba(0,255,136,0.25)' }}
               >
                 <div className="flex gap-3">
                   <div className="w-5 h-5 flex-shrink-0 mt-0.5 text-[#00ff88] font-black text-base leading-none">✓</div>
-                  <div className="text-sm text-[#86efac]">
+                  <div className="text-xs sm:text-sm text-[#86efac]">
                     <p className="font-bold mb-1">Will be kept:</p>
                     {koOnly ? (
                       <>
@@ -2233,9 +2232,9 @@ const DrawPage = () => {
               </div>
 
               {/* Category label */}
-              <div className="rounded-xl px-4 py-3 mb-6" style={{ background: 'rgba(255,255,255,0.04)' }}>
+              <div className="rounded-xl px-3 py-2.5 mb-4" style={{ background: 'rgba(255,255,255,0.04)' }}>
                 <p className="text-gray-400 text-xs mb-0.5">Category</p>
-                <p className="text-white font-semibold">{activeCategory?.name}</p>
+                <p className="text-white font-semibold text-sm">{activeCategory?.name}</p>
               </div>
 
               {/* Buttons */}

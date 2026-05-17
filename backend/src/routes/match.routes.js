@@ -93,30 +93,16 @@ router.get('/:matchId', authenticate, async (req, res) => {
       });
     };
 
-    if (match.player1Id) {
-      player1 = await getPlayerData(match.player1Id);
-    }
-
-    if (match.player2Id) {
-      player2 = await getPlayerData(match.player2Id);
-    }
-
-    // For doubles matches
-    if (match.team1Player1Id) {
-      team1Player1 = await getPlayerData(match.team1Player1Id);
-    }
-
-    if (match.team1Player2Id) {
-      team1Player2 = await getPlayerData(match.team1Player2Id);
-    }
-
-    if (match.team2Player1Id) {
-      team2Player1 = await getPlayerData(match.team2Player1Id);
-    }
-
-    if (match.team2Player2Id) {
-      team2Player2 = await getPlayerData(match.team2Player2Id);
-    }
+    // Fetch all player data in parallel — was sequential (up to 6 round trips)
+    [player1, player2, team1Player1, team1Player2, team2Player1, team2Player2] =
+      await Promise.all([
+        match.player1Id      ? getPlayerData(match.player1Id)      : Promise.resolve(null),
+        match.player2Id      ? getPlayerData(match.player2Id)      : Promise.resolve(null),
+        match.team1Player1Id ? getPlayerData(match.team1Player1Id) : Promise.resolve(null),
+        match.team1Player2Id ? getPlayerData(match.team1Player2Id) : Promise.resolve(null),
+        match.team2Player1Id ? getPlayerData(match.team2Player1Id) : Promise.resolve(null),
+        match.team2Player2Id ? getPlayerData(match.team2Player2Id) : Promise.resolve(null),
+      ]);
 
     const matchData = {
       ...match,

@@ -100,7 +100,11 @@ export const register = async (req, res) => {
     // Clean phone number if provided
     let cleanedPhone = null;
     if (phone) {
-      cleanedPhone = phone.replace(/[\s\-\+]/g, '').replace(/^91/, '');
+      cleanedPhone = phone.replace(/[\s\-\+]/g, '');
+      // Only strip 91 country code prefix if number is 12 digits (91 + 10 digits)
+      if (cleanedPhone.length === 12 && cleanedPhone.startsWith('91')) {
+        cleanedPhone = cleanedPhone.slice(2);
+      }
       
       console.log('📝 Register - Original phone:', phone, 'Cleaned phone:', cleanedPhone);
 
@@ -338,9 +342,13 @@ export const login = async (req, res) => {
     // Clean phone number if it's a phone
     let cleanedCredential = email;
     if (!isEmail) {
-      cleanedCredential = email.replace(/[\s\-\+]/g, '').replace(/^91/, '');
+      cleanedCredential = email.replace(/[\s\-\+]/g, '');
+      // Only strip 91 country code prefix if number is 12 digits (91 + 10 digits)
+      if (cleanedCredential.length === 12 && cleanedCredential.startsWith('91')) {
+        cleanedCredential = cleanedCredential.slice(2);
+      }
     }
-    
+
     const isPhone = /^[0-9]{10}$/.test(cleanedCredential);
     
     console.log('🔐 Login attempt:');

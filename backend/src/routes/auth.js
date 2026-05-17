@@ -66,7 +66,11 @@ router.post('/register', async (req, res) => {
 
     // Validate phone format if provided
     if (phone) {
-      const cleanedPhoneCheck = phone.replace(/[\s\-\+]/g, '').replace(/^91/, '');
+      let cleanedPhoneCheck = phone.replace(/[\s\-\+]/g, '');
+      // Only strip 91 country code prefix if number is 12 digits (91 + 10 digits)
+      if (cleanedPhoneCheck.length === 12 && cleanedPhoneCheck.startsWith('91')) {
+        cleanedPhoneCheck = cleanedPhoneCheck.slice(2);
+      }
       if (!/^[0-9]{10}$/.test(cleanedPhoneCheck)) {
         return res.status(400).json({
           error: 'Invalid phone number. Enter 10-digit number without country code.'
@@ -220,8 +224,12 @@ router.post('/login', async (req, res) => {
     const isEmail = email.includes('@');
     let cleanedCredential = email;
     if (!isEmail) {
-      // Clean phone: remove spaces, dashes, +, strip leading country code 91
-      cleanedCredential = email.replace(/[\s\-\+]/g, '').replace(/^91/, '');
+      // Clean phone: remove spaces, dashes, +
+      cleanedCredential = email.replace(/[\s\-\+]/g, '');
+      // Only strip 91 country code prefix if number is 12 digits (91 + 10 digits)
+      if (cleanedCredential.length === 12 && cleanedCredential.startsWith('91')) {
+        cleanedCredential = cleanedCredential.slice(2);
+      }
     }
     const isPhone = /^[0-9]{10}$/.test(cleanedCredential);
 

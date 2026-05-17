@@ -37,7 +37,16 @@ export const getDrawPage = async (req, res) => {
         orderBy: [{ round: 'desc' }, { matchNumber: 'asc' }]
       }),
       prisma.registration.findMany({
-        where: { tournamentId, categoryId }
+        where:  { tournamentId, categoryId },
+        select: {
+          id: true,
+          status: true,
+          userId: true,
+          guestName: true,
+          guestEmail: true,
+          partner: { select: { id: true, name: true } },
+          user:    { select: { id: true, name: true } }
+        }
       })
     ]);
 
@@ -80,7 +89,8 @@ export const getDrawPage = async (req, res) => {
 
     const guestRegistrationIds = Array.from(guestPlayerIds).map(id => id.replace('guest-', ''));
 
-    const [players, guestRegistrations, regWithPartners] = await Promise.all([
+    // Phase 2: Only player name lookup needs a DB call — partner data already in registrations
+    const [players, guestRegistrations] = await Promise.all([
       playerIds.size > 0
         ? prisma.user.findMany({
             where:  { id: { in: Array.from(playerIds) } },
@@ -95,11 +105,7 @@ export const getDrawPage = async (req, res) => {
               user: { select: { id: true, name: true } }
             }
           })
-        : Promise.resolve([]),
-      prisma.registration.findMany({
-        where:  { tournamentId, categoryId },
-        select: { userId: true, partner: { select: { id: true, name: true } } }
-      })
+        : Promise.resolve([])
     ]);
 
     // Build lookup maps
@@ -113,8 +119,9 @@ export const getDrawPage = async (req, res) => {
       };
     });
 
+    // Partner map built from Phase 1 registrations (no extra DB call needed)
     const partnerMap = {};
-    regWithPartners.forEach(reg => {
+    registrations.forEach(reg => {
       if (reg.userId && reg.partner) partnerMap[reg.userId] = reg.partner.name;
     });
 

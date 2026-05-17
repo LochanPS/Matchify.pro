@@ -599,10 +599,10 @@ const DrawPage = () => {
       
       setSuccess(`Category '${activeCategory.name}' ended successfully! Points awarded to ${totalPlayersAwarded} players.`);
       setShowEndTournamentModal(false);
-      
-      // Refresh tournament data
-      await fetchTournamentData();
-      
+
+      // Refresh everything (bracket + matches + stats + tournament/categories)
+      await fetchDrawPageFull(activeCategory.id);
+
       setTimeout(() => setSuccess(null), 5000);
     } catch (err) {
       console.error('❌ Error ending category:', err);
@@ -700,8 +700,8 @@ const DrawPage = () => {
       // Don't redirect here - let the modal buttons handle it
       setSelectedMatchForUmpire(null);
       
-      // Refresh the draw to show updated umpire assignment
-      await fetchTournamentData();
+      // Refresh draw + matches + stats to show updated umpire assignment
+      await fetchDrawPageFull(activeCategory.id);
       
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {

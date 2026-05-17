@@ -86,6 +86,7 @@ const DrawPage = () => {
   const [success, setSuccess] = useState(null);
   const [tournamentUmpires, setTournamentUmpires] = useState([]);
   const [loadingUmpires, setLoadingUmpires] = useState(false);
+  const [umpiresError, setUmpiresError] = useState(null);
   const [showUmpireModal, setShowUmpireModal] = useState(false);
   const [selectedMatchForUmpire, setSelectedMatchForUmpire] = useState(null);
   const pollIntervalRef = React.useRef(null);
@@ -698,61 +699,56 @@ const DrawPage = () => {
     setShowAssignModal(true);
   };
 
-  // Fetch tournament umpires
-  const fetchTournamentUmpires = async () => {
+  // Fetch tournament umpires — always fresh, shows errors, supports retry
+  const loadUmpires = async () => {
+    setLoadingUmpires(true);
+    setUmpiresError(null);
     try {
       const response = await tournamentAPI.getTournamentUmpires(tournamentId);
-      console.log('Fetched umpires:', response);
       setTournamentUmpires(response.umpires || []);
-      return response.umpires || [];
     } catch (err) {
-      console.error('Error fetching umpires:', err);
-      return [];
+      console.error('Error fetching umpires:', err?.response?.status, err?.message);
+      setUmpiresError(err?.response?.data?.error || 'Failed to load umpires');
+    } finally {
+      setLoadingUmpires(false);
     }
   };
 
+  // Keep for backward compat (used nowhere else now)
+  const fetchTournamentUmpires = loadUmpires;
+
   // Open umpire assignment modal - create match if needed
   const openUmpireModal = async (matchData, bracketMatch) => {
-    // If prefetch hasn't completed yet, fetch now (non-blocking — modal opens immediately
-    // with a loading spinner, then populates when data arrives)
-    if (tournamentUmpires.length === 0) {
-      setLoadingUmpires(true);
-      tournamentAPI.getTournamentUmpires(tournamentId)
-        .then(r => setTournamentUmpires(r.umpires || []))
-        .catch(() => {})
-        .finally(() => setLoadingUmpires(false));
-    }
-    
-    // If we have a database match, use it directly
+    let matchRecord = null;
+
     if (matchData && matchData.id) {
-      setSelectedMatchForUmpire(matchData);
-      setShowUmpireModal(true);
-      return;
-    }
-    
-    // If no database match exists, create one first
-    if (bracketMatch && activeCategory) {
+      // DB match already exists — use it directly
+      matchRecord = matchData;
+    } else if (bracketMatch && activeCategory) {
+      // No DB match yet — create it first
       try {
         setError(null);
-        // Create the match in the database
         const response = await api.post(`/tournaments/${tournamentId}/categories/${activeCategory.id}/matches`, {
           matchNumber: bracketMatch.matchNumber,
           round: bracketMatch.round || 1,
           player1Id: bracketMatch.player1?.id,
           player2Id: bracketMatch.player2?.id
         });
-        
-        const newMatch = response.data.match;
-        setSelectedMatchForUmpire(newMatch);
-        setShowUmpireModal(true);
-        
-        // Refresh bracket to get updated matches
+        matchRecord = response.data.match;
         fetchBracket();
       } catch (err) {
         console.error('Error creating match:', err);
         setError(getErrorMessage(err, 'Failed to create match. Please try again.'));
+        return;
       }
     }
+
+    if (!matchRecord) return;
+
+    // Open modal immediately with spinner, then load umpires
+    setSelectedMatchForUmpire(matchRecord);
+    setShowUmpireModal(true);
+    await loadUmpires();
   };
 
   // Assign umpire to match
@@ -1721,6 +1717,8 @@ const DrawPage = () => {
           match={selectedMatchForUmpire}
           umpires={tournamentUmpires}
           loadingUmpires={loadingUmpires}
+          umpiresError={umpiresError}
+          onRetryUmpires={loadUmpires}
           onClose={() => {
             setShowUmpireModal(false);
             setSelectedMatchForUmpire(null);
@@ -4419,7 +4417,7 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
 };
 
 // Assign Umpire Modal
-const AssignUmpireModal = ({ match, umpires, loadingUmpires, onClose, onAssign }) => {
+const AssignUmpireModal = ({ match, umpires, loadingUmpires, umpiresError, onRetryUmpires, onClose, onAssign }) => {
   const navigate = useNavigate();
   const [selectedUmpire, setSelectedUmpire] = useState(match?.umpireId || null);
   const [assigning, setAssigning] = useState(false);
@@ -4483,6 +4481,19 @@ const AssignUmpireModal = ({ match, umpires, loadingUmpires, onClose, onAssign }
               <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin mx-auto mb-3"
                 style={{ borderColor: 'rgba(0,255,136,0.3)', borderTopColor: '#00ff88' }} />
               <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>Loading umpires…</p>
+            </div>
+          ) : umpiresError ? (
+            <div className="text-center py-8">
+              <AlertTriangle className="w-10 h-10 mx-auto mb-3" style={{ color: '#f87171' }} />
+              <p className="text-sm font-bold text-white mb-1">Failed to load umpires</p>
+              <p className="text-xs mb-4" style={{ color: 'rgba(255,255,255,0.4)' }}>{umpiresError}</p>
+              <button
+                onClick={onRetryUmpires}
+                className="px-4 py-2 rounded-xl text-xs font-bold"
+                style={{ background: 'rgba(0,255,136,0.1)', border: '1px solid rgba(0,255,136,0.3)', color: '#00ff88' }}
+              >
+                Retry
+              </button>
             </div>
           ) : umpires.length === 0 ? (
             <div className="text-center py-8">

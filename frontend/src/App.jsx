@@ -1,6 +1,7 @@
 // Matchify.pro - Premier Badminton Tournament Platform
-// Version: 1.0.4 - Brand theme + animated background
-// Last Updated: May 9, 2026
+// Version: 1.0.5 - Lazy-loaded routes, optimised bundle
+// Last Updated: May 18, 2026
+import { lazy, Suspense } from 'react'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import AnimatedBackground from './components/AnimatedBackground'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
@@ -14,71 +15,80 @@ import MandatoryProfilePhotoModal from './components/MandatoryProfilePhotoModal'
 import ImpersonationBanner from './components/ImpersonationBanner'
 import ProtectedRoute from './components/ProtectedRoute'
 import RoleRoute from './components/RoleRoute'
-import HomePage from './pages/HomePageMobile'
-import LoginPage from './pages/LoginPageMobile'
-import RegisterPage from './pages/RegisterPageMobile'
-import ProfilePage from './pages/ProfilePage'
-import Wallet from './pages/Wallet'
-import TournamentsPage from './pages/TournamentsPage'
-import TournamentDetailPage from './pages/TournamentDetailPage'
-import TournamentDiscoveryPage from './pages/TournamentDiscoveryPage'
-import CreateTournament from './pages/CreateTournament'
-import EditTournament from './pages/EditTournament'
-import ViewDrawsPage from './pages/ViewDrawsPage'
-import PlayerViewDrawsPage from './pages/PlayerViewDrawsPage'
-import DrawPage from './pages/DrawPage'
-import TournamentRegistrationPage from './pages/TournamentRegistrationPage'
-import MyRegistrationsPage from './pages/MyRegistrationsPage'
-import PartnerConfirmationPage from './pages/PartnerConfirmationPage'
-import TournamentManagementPage from './pages/TournamentManagementPage'
-import ManageCategoriesPage from './pages/ManageCategoriesPage'
-import PlayerDashboard from './pages/PlayerDashboard'
-import OrganizerDashboard from './pages/OrganizerDashboard'
-import OrganizerProfilePage from './pages/OrganizerProfilePage'
-import UmpireDashboard from './pages/UmpireDashboard'
-import UnifiedDashboard from './pages/UnifiedDashboardMobile'
-import UmpireScoring from './pages/UmpireScoring'
-import MatchScoringPage from './pages/MatchScoringPage'
-import AdminDashboard from './pages/AdminDashboard'
-import Leaderboard from './pages/Leaderboard'
-import MyPoints from './pages/MyPoints'
-import ScoringConsolePage from './pages/ScoringConsolePage'
-import MatchListPage from './pages/MatchListPage'
-import SpectatorViewPage from './pages/SpectatorViewPage'
-import ConductMatchPage from './pages/ConductMatchPage'
-import LiveTournamentDashboard from './pages/LiveTournamentDashboard'
-import LiveMatches from './pages/LiveMatches'
-import LiveMatchDetail from './pages/LiveMatchDetail'
-import OrganizerTournamentHistory from './pages/OrganizerTournamentHistory'
-import TournamentCategoryDetails from './pages/TournamentCategoryDetails'
-import NotificationsPage from './pages/NotificationsPage'
-import AdminLayout from './pages/admin/AdminLayout'
-import AdminDashboardPage from './pages/admin/AdminDashboardPage'
-import UserManagementPage from './pages/admin/UserManagementPage'
-import InviteManagementPage from './pages/admin/InviteManagementPage'
-import AuditLogsPage from './pages/admin/AuditLogsPage'
-import AcademyApprovalsPage from './pages/admin/AcademyApprovalsPage'
-import CancellationRequestPage from './pages/CancellationRequestPage'
-import NotificationDetailPage from './pages/NotificationDetailPage'
-import RefundIssuePage from './pages/RefundIssuePage'
-import SearchAcademiesPage from './pages/SearchAcademiesPage'
-import AddAcademyPage from './pages/AddAcademyPage'
-import TermsOfService from './pages/TermsOfService'
-import PrivacyPolicy from './pages/PrivacyPolicy'
 import SupportFooter from './components/SupportFooter'
 
-// Payment System Pages
-import PaymentVerificationPage from './pages/admin/PaymentVerificationPage'
-import RefundRequestsPage from './pages/admin/RefundRequestsPage'
-import TournamentPaymentsPage from './pages/admin/TournamentPaymentsPage'
-import OrganizerPayoutsPage from './pages/admin/OrganizerPayoutsPage'
-import RevenueDashboardPage from './pages/admin/RevenueDashboardPage'
-import QRSettingsPage from './pages/admin/QRSettingsPage'
+// ── Lazy-loaded pages (loaded only when first visited) ──────────────────────
+const HomePage                  = lazy(() => import('./pages/HomePageMobile'))
+const LoginPage                 = lazy(() => import('./pages/LoginPageMobile'))
+const RegisterPage              = lazy(() => import('./pages/RegisterPageMobile'))
+const ProfilePage               = lazy(() => import('./pages/ProfilePage'))
+const Wallet                    = lazy(() => import('./pages/Wallet'))
+const TournamentsPage           = lazy(() => import('./pages/TournamentsPage'))
+const TournamentDetailPage      = lazy(() => import('./pages/TournamentDetailPage'))
+const TournamentDiscoveryPage   = lazy(() => import('./pages/TournamentDiscoveryPage'))
+const CreateTournament          = lazy(() => import('./pages/CreateTournament'))
+const EditTournament            = lazy(() => import('./pages/EditTournament'))
+const ViewDrawsPage             = lazy(() => import('./pages/ViewDrawsPage'))
+const PlayerViewDrawsPage       = lazy(() => import('./pages/PlayerViewDrawsPage'))
+const DrawPage                  = lazy(() => import('./pages/DrawPage'))
+const TournamentRegistrationPage = lazy(() => import('./pages/TournamentRegistrationPage'))
+const MyRegistrationsPage       = lazy(() => import('./pages/MyRegistrationsPage'))
+const PartnerConfirmationPage   = lazy(() => import('./pages/PartnerConfirmationPage'))
+const TournamentManagementPage  = lazy(() => import('./pages/TournamentManagementPage'))
+const ManageCategoriesPage      = lazy(() => import('./pages/ManageCategoriesPage'))
+const OrganizerProfilePage      = lazy(() => import('./pages/OrganizerProfilePage'))
+const UnifiedDashboard          = lazy(() => import('./pages/UnifiedDashboardMobile'))
+const UmpireScoring             = lazy(() => import('./pages/UmpireScoring'))
+const MatchScoringPage          = lazy(() => import('./pages/MatchScoringPage'))
+const AdminDashboard            = lazy(() => import('./pages/AdminDashboard'))
+const Leaderboard               = lazy(() => import('./pages/Leaderboard'))
+const MyPoints                  = lazy(() => import('./pages/MyPoints'))
+const ScoringConsolePage        = lazy(() => import('./pages/ScoringConsolePage'))
+const MatchListPage             = lazy(() => import('./pages/MatchListPage'))
+const SpectatorViewPage         = lazy(() => import('./pages/SpectatorViewPage'))
+const ConductMatchPage          = lazy(() => import('./pages/ConductMatchPage'))
+const LiveTournamentDashboard   = lazy(() => import('./pages/LiveTournamentDashboard'))
+const LiveMatches               = lazy(() => import('./pages/LiveMatches'))
+const LiveMatchDetail           = lazy(() => import('./pages/LiveMatchDetail'))
+const OrganizerTournamentHistory = lazy(() => import('./pages/OrganizerTournamentHistory'))
+const TournamentCategoryDetails = lazy(() => import('./pages/TournamentCategoryDetails'))
+const NotificationsPage         = lazy(() => import('./pages/NotificationsPage'))
+const NotificationDetailPage    = lazy(() => import('./pages/NotificationDetailPage'))
+const CancellationRequestPage   = lazy(() => import('./pages/CancellationRequestPage'))
+const RefundIssuePage           = lazy(() => import('./pages/RefundIssuePage'))
+const SearchAcademiesPage       = lazy(() => import('./pages/SearchAcademiesPage'))
+const AddAcademyPage            = lazy(() => import('./pages/AddAcademyPage'))
+const TermsOfService            = lazy(() => import('./pages/TermsOfService'))
+const PrivacyPolicy             = lazy(() => import('./pages/PrivacyPolicy'))
+// Admin layout & pages
+const AdminLayout               = lazy(() => import('./pages/admin/AdminLayout'))
+const UserManagementPage        = lazy(() => import('./pages/admin/UserManagementPage'))
+const InviteManagementPage      = lazy(() => import('./pages/admin/InviteManagementPage'))
+const AuditLogsPage             = lazy(() => import('./pages/admin/AuditLogsPage'))
+const AcademyApprovalsPage      = lazy(() => import('./pages/admin/AcademyApprovalsPage'))
+const PaymentVerificationPage   = lazy(() => import('./pages/admin/PaymentVerificationPage'))
+const RefundRequestsPage        = lazy(() => import('./pages/admin/RefundRequestsPage'))
+const TournamentPaymentsPage    = lazy(() => import('./pages/admin/TournamentPaymentsPage'))
+const OrganizerPayoutsPage      = lazy(() => import('./pages/admin/OrganizerPayoutsPage'))
+const RevenueDashboardPage      = lazy(() => import('./pages/admin/RevenueDashboardPage'))
+const QRSettingsPage            = lazy(() => import('./pages/admin/QRSettingsPage'))
 
-// KYC features disabled
-// import KYCSubmission from './pages/organizer/KYCSubmission'
-// import VideoCallPage from './pages/organizer/VideoCallPage'
-// import AdminKYCDashboard from './pages/admin/AdminKYCDashboard'
+// Minimal full-screen loading fallback — matches app dark theme
+function PageLoader() {
+  return (
+    <div style={{
+      minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
+    }}>
+      <div style={{
+        width: 36, height: 36, borderRadius: '50%',
+        border: '3px solid rgba(0,212,255,0.15)',
+        borderTopColor: '#00d4ff',
+        animation: 'spin 0.7s linear infinite',
+      }} />
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+    </div>
+  )
+}
 
 // Inner component that can access AuthContext
 function AppContent() {
@@ -143,6 +153,7 @@ function AppContent() {
           is just 100% width — zero visual change for mobile users.
           Admin dashboard excluded (it has its own full-width sidebar layout). */}
       <div style={!isAdminRoute ? { maxWidth: '480px', margin: '0 auto', position: 'relative' } : {}}>
+      <Suspense fallback={<PageLoader />}>
       <Routes>
             {/* Public routes */}
           <Route path="/" element={<HomePage />} />
@@ -473,6 +484,7 @@ function AppContent() {
           {/* Catch all route */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+      </Suspense>
         {!isAdminRoute && <SupportFooter />}
       </div>{/* end page-width constraint */}
     </div>

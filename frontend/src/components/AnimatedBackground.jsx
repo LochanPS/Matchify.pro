@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-// Seeded pseudo-random so SSR/hydration stable
+// Seeded pseudo-random — stable across renders, no hydration mismatch
 function seededRand(seed) {
   let s = seed;
   return () => {
@@ -20,8 +20,8 @@ export default function AnimatedBackground({ variant = 'default', className = ''
   const { stars, orbs, balloons } = useMemo(() => {
     const rand = seededRand(42);
 
-    // Stars — small twinkling dots
-    const stars = Array.from({ length: 80 }, (_, i) => ({
+    // Stars — reduced from 80 → 45 (same visual, less DOM nodes)
+    const stars = Array.from({ length: 45 }, (_, i) => ({
       id: i,
       x: rand() * 100,
       y: rand() * 100,
@@ -32,7 +32,7 @@ export default function AnimatedBackground({ variant = 'default', className = ''
       color: [BRAND.green, BRAND.cyan, BRAND.purple, BRAND.amber, '#ffffff'][Math.floor(rand() * 5)],
     }));
 
-    // Orbs — large blurred glowing blobs
+    // Orbs — large blurred glowing blobs (kept at 5, blur handled via CSS class)
     const orbColors = [
       `radial-gradient(circle, rgba(0,255,136,0.18) 0%, transparent 70%)`,
       `radial-gradient(circle, rgba(0,212,255,0.15) 0%, transparent 70%)`,
@@ -40,7 +40,7 @@ export default function AnimatedBackground({ variant = 'default', className = ''
       `radial-gradient(circle, rgba(251,191,36,0.12) 0%, transparent 70%)`,
       `radial-gradient(circle, rgba(0,255,136,0.1) 0%, transparent 70%)`,
     ];
-    const orbs = Array.from({ length: 6 }, (_, i) => ({
+    const orbs = Array.from({ length: 5 }, (_, i) => ({
       id: i,
       x: rand() * 90,
       y: rand() * 90,
@@ -50,12 +50,12 @@ export default function AnimatedBackground({ variant = 'default', className = ''
       delay: rand() * 8,
     }));
 
-    // Balloons — medium glowing circles that float upward
+    // Balloons — reduced from 18 → 10
     const balloonColors = [BRAND.green, BRAND.cyan, BRAND.purple, BRAND.amber];
-    const balloons = Array.from({ length: 18 }, (_, i) => ({
+    const balloons = Array.from({ length: 10 }, (_, i) => ({
       id: i,
       x: rand() * 95,
-      startY: rand() * 40 + 60,   // start near bottom
+      startY: rand() * 40 + 60,
       size: rand() * 12 + 4,
       color: balloonColors[i % balloonColors.length],
       opacity: rand() * 0.45 + 0.1,
@@ -75,7 +75,7 @@ export default function AnimatedBackground({ variant = 'default', className = ''
       }
       aria-hidden="true"
     >
-      {/* CSS keyframes */}
+      {/* CSS keyframes — animations disabled for users who prefer reduced motion */}
       <style>{`
         @keyframes mbg-twinkle {
           0%, 100% { opacity: var(--op); transform: scale(1); }
@@ -93,17 +93,16 @@ export default function AnimatedBackground({ variant = 'default', className = ''
           75%  { transform: translateY(-75vh) translateX(6px); }
           100% { transform: translateY(-105vh) translateX(0px); opacity: 0; }
         }
-        @keyframes mbg-shoot {
-          0%   { transform: translateX(0) translateY(0); opacity: 0.9; width: 80px; }
-          100% { transform: translateX(200px) translateY(120px); opacity: 0; width: 1px; }
+        @media (prefers-reduced-motion: reduce) {
+          .mbg-star, .mbg-orb, .mbg-balloon { animation: none !important; }
         }
       `}</style>
 
-      {/* Gradient orbs */}
+      {/* Gradient orbs — will-change promotes to GPU compositor layer */}
       {orbs.map(o => (
         <div
           key={o.id}
-          className="absolute rounded-full blur-3xl"
+          className="mbg-orb absolute rounded-full blur-3xl"
           style={{
             left: `${o.x}%`,
             top: `${o.y}%`,
@@ -111,6 +110,7 @@ export default function AnimatedBackground({ variant = 'default', className = ''
             height: `${o.size}px`,
             background: o.bg,
             animation: `mbg-float-orb ${o.dur}s ease-in-out ${o.delay}s infinite`,
+            willChange: 'transform',
           }}
         />
       ))}
@@ -119,7 +119,7 @@ export default function AnimatedBackground({ variant = 'default', className = ''
       {stars.map(s => (
         <div
           key={s.id}
-          className="absolute rounded-full"
+          className="mbg-star absolute rounded-full"
           style={{
             '--op': s.opacity,
             left: `${s.x}%`,
@@ -130,6 +130,7 @@ export default function AnimatedBackground({ variant = 'default', className = ''
             opacity: s.opacity,
             boxShadow: `0 0 ${s.size * 3}px ${s.color}`,
             animation: `mbg-twinkle ${s.dur}s ease-in-out ${s.delay}s infinite`,
+            willChange: 'transform, opacity',
           }}
         />
       ))}
@@ -138,7 +139,7 @@ export default function AnimatedBackground({ variant = 'default', className = ''
       {balloons.map(b => (
         <div
           key={b.id}
-          className="absolute rounded-full"
+          className="mbg-balloon absolute rounded-full"
           style={{
             '--bop': b.opacity,
             left: `${b.x}%`,
@@ -149,6 +150,7 @@ export default function AnimatedBackground({ variant = 'default', className = ''
             opacity: b.opacity,
             boxShadow: `0 0 ${b.size * 2}px ${b.color}, 0 0 ${b.size * 4}px ${b.color}44`,
             animation: `mbg-balloon ${b.dur}s linear ${b.delay}s infinite`,
+            willChange: 'transform, opacity',
           }}
         />
       ))}

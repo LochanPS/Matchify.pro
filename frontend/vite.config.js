@@ -24,9 +24,23 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    sourcemap: true,
+    // No sourcemaps in production — reduces bundle size and hides source code
+    sourcemap: false,
+    // Increase warning threshold (many small lazy chunks are fine)
+    chunkSizeWarningLimit: 600,
+    rollupOptions: {
+      output: {
+        // Split heavy vendor libs into separate cached chunks
+        manualChunks: {
+          'vendor-react':  ['react', 'react-dom', 'react-router-dom'],
+          'vendor-ui':     ['lucide-react', '@heroicons/react'],
+          'vendor-misc':   ['react-hot-toast', 'axios'],
+        },
+      },
+    },
   },
+  // Only expose NODE_ENV — never serialise all process.env (could leak secrets)
   define: {
-    'process.env': process.env
-  }
+    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
+  },
 })

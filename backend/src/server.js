@@ -232,75 +232,18 @@ app.get('/health', (req, res) => {
   });
 });
 
-// API Health check endpoint (for testing)
+// API Health check endpoint — no sensitive config details exposed
 app.get('/api/health', (req, res) => {
-  let envStatus = { configured: [], missing: [], warnings: [] };
-  let hasIssues = false;
-  
-  try {
-    if (getEnvironmentStatus) {
-      envStatus = getEnvironmentStatus();
-      hasIssues = envStatus.missing.length > 0;
-    }
-  } catch (error) {
-    console.warn('Health check: Environment status unavailable');
-  }
-  
-  res.status(hasIssues ? 503 : 200).json({
-    status: hasIssues ? 'degraded' : 'healthy',
-    message: hasIssues 
-      ? 'MATCHIFY.PRO API is running but has configuration issues' 
-      : 'MATCHIFY.PRO API is running',
+  res.status(200).json({
+    status: 'healthy',
+    message: 'MATCHIFY.PRO API is running',
     timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    environment: process.env.NODE_ENV || 'development',
+    uptime: Math.floor(process.uptime()),
     version: '1.0.1',
-    authRoutesLoaded: !!authRoutes,
-    deploymentTime: '2026-05-06T19:00:00Z',
-    configuration: {
-      database: !!process.env.DATABASE_URL,
-      jwt: !!process.env.JWT_SECRET && !!process.env.JWT_REFRESH_SECRET,
-      cors: !!process.env.CORS_ORIGIN,
-      cloudinary: !!process.env.CLOUDINARY_CLOUD_NAME,
-      razorpay: !!process.env.RAZORPAY_KEY_ID,
-      sendgrid: !!process.env.SENDGRID_API_KEY
-    },
-    environmentVariables: {
-      configured: envStatus.configured.length,
-      missing: envStatus.missing.length,
-      warnings: envStatus.warnings.length
-    },
-    ...(hasIssues && {
-      issues: {
-        missing: envStatus.missing,
-        warnings: envStatus.warnings
-      }
-    })
   });
 });
 
-// Debug endpoint to list all routes
-app.get('/api/debug/routes', (req, res) => {
-  const routes = [];
-  app._router.stack.forEach((middleware) => {
-    if (middleware.route) {
-      routes.push({
-        path: middleware.route.path,
-        methods: Object.keys(middleware.route.methods)
-      });
-    } else if (middleware.name === 'router') {
-      middleware.handle.stack.forEach((handler) => {
-        if (handler.route) {
-          routes.push({
-            path: handler.route.path,
-            methods: Object.keys(handler.route.methods)
-          });
-        }
-      });
-    }
-  });
-  res.json({ routes, total: routes.length });
-});
+// Debug endpoint removed — was public with no auth, exposed full route map to attackers
 
 // Root endpoint — prevents 404 on GET /
 app.get('/', (req, res) => {
@@ -328,10 +271,9 @@ app.get('/api', (req, res) => {
   });
 });
 
-// Auth routes (both old and new multi-role) - with stricter rate limiting
+// Auth routes — stricter rate limiting to prevent brute force
 console.log('🔧 Mounting auth routes at /api/auth');
-
-app.use('/api/auth', authRoutes);  // Temporarily removed authLimiter for debugging
+app.use('/api/auth', authLimiter, authRoutes);
 console.log('✅ Auth routes mounted');
 // app.use('/api/multi-auth', authLimiter, multiRoleAuthRoutes);
 

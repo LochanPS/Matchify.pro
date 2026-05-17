@@ -55,109 +55,75 @@ const getMatches = async (req, res) => {
       ]
     });
 
-    // Get player details for each match
-    const matchesWithPlayers = await Promise.all(
-      matches.map(async (match) => {
-        // Helper function to get player with partner info for doubles
-        const getPlayerWithPartner = async (playerId, categoryFormat) => {
-          if (!playerId) return null;
-          
-          // Check if this is a guest player (ID starts with "guest-")
-          if (playerId.startsWith('guest-')) {
-            // Extract registration ID from guest player ID
-            const registrationId = playerId.replace('guest-', '');
-            
-            // Fetch guest player from Registration table
-            const registration = await prisma.registration.findUnique({
-              where: { id: registrationId },
-              select: { id: true, guestName: true }
-            });
-            
-            if (!registration) return null;
-            
-            // Return guest player data in same format as User
-            return {
-              id: playerId,
-              name: registration.guestName || 'Unknown',
-              profilePhoto: null,
-              isGuest: true
-            };
-          }
-          
-          // Regular user player
-          const player = await prisma.user.findUnique({
-            where: { id: playerId },
-            select: { id: true, name: true, profilePhoto: true }
-          });
-          
-          if (!player) return null;
-          
-          // If doubles category, find partner from registration
-          if (categoryFormat === 'doubles') {
-            const registration = await prisma.registration.findFirst({
-              where: {
-                categoryId: match.categoryId,
-                userId: playerId,
-                status: { in: ['confirmed', 'pending'] }
-              },
-              include: {
-                partner: {
-                  select: { id: true, name: true }
-                }
-              }
-            });
-            
-            if (registration?.partner) {
-              return {
-                ...player,
-                partnerName: registration.partner.name,
-                partnerId: registration.partner.id
-              };
-            }
-          }
-          
-          return player;
-        };
+    // ── Batch all player/umpire lookups — one query per entity type, not N per match ──
+    const regularPlayerIds = new Set();
+    const guestRegistrationIds = new Set();
+    const umpireIds = new Set();
 
-        const player1 = await getPlayerWithPartner(match.player1Id, match.category.format);
-        const player2 = await getPlayerWithPartner(match.player2Id, match.category.format);
+    for (const match of matches) {
+      for (const id of [match.player1Id, match.player2Id, match.winnerId]) {
+        if (!id) continue;
+        if (id.startsWith('guest-')) guestRegistrationIds.add(id.replace('guest-', ''));
+        else regularPlayerIds.add(id);
+      }
+      if (match.umpireId) umpireIds.add(match.umpireId);
+    }
 
-        const winner = match.winnerId
-          ? await prisma.user.findUnique({
-              where: { id: match.winnerId },
-              select: { id: true, name: true }
-            })
-          : null;
+    const isDoubles = matches[0]?.category?.format === 'doubles';
 
-        const umpire = match.umpireId
-          ? await prisma.user.findUnique({
-              where: { id: match.umpireId },
-              select: { id: true, name: true, email: true }
-            })
-          : null;
+    const [usersRaw, guestRegsRaw, umpiresRaw, partnerRegsRaw] = await Promise.all([
+      regularPlayerIds.size > 0
+        ? prisma.user.findMany({ where: { id: { in: [...regularPlayerIds] } }, select: { id: true, name: true, profilePhoto: true } })
+        : [],
+      guestRegistrationIds.size > 0
+        ? prisma.registration.findMany({ where: { id: { in: [...guestRegistrationIds] } }, select: { id: true, guestName: true } })
+        : [],
+      umpireIds.size > 0
+        ? prisma.user.findMany({ where: { id: { in: [...umpireIds] } }, select: { id: true, name: true, email: true } })
+        : [],
+      isDoubles && regularPlayerIds.size > 0
+        ? prisma.registration.findMany({
+            where: { categoryId: matches[0].categoryId, userId: { in: [...regularPlayerIds] }, status: { in: ['confirmed', 'pending'] } },
+            include: { partner: { select: { id: true, name: true } } }
+          })
+        : [],
+    ]);
 
-        return {
-          id: match.id,
-          round: match.round,
-          matchNumber: match.matchNumber,
-          stage: match.stage, // ADD THIS - needed for Round Robin vs Knockout detection
-          courtNumber: match.courtNumber,
-          categoryName: match.category.name,
-          categoryFormat: match.category.format, // Add format to know if doubles
-          player1: player1 || { name: 'TBD' },
-          player2: player2 || { name: 'TBD' },
-          player1Seed: match.player1Seed,
-          player2Seed: match.player2Seed,
-          status: match.status,
-          score: match.scoreJson ? JSON.parse(match.scoreJson) : null,
-          winner,
-          winnerId: match.winnerId,
-          umpire,
-          startedAt: match.startedAt,
-          completedAt: match.completedAt
-        };
-      })
-    );
+    // Build lookup maps
+    const userMap    = Object.fromEntries(usersRaw.map(u => [u.id, u]));
+    const guestMap   = Object.fromEntries(guestRegsRaw.map(r => [`guest-${r.id}`, { id: `guest-${r.id}`, name: r.guestName || 'Unknown', profilePhoto: null, isGuest: true }]));
+    const umpireMap  = Object.fromEntries(umpiresRaw.map(u => [u.id, u]));
+    const partnerMap = Object.fromEntries(partnerRegsRaw.filter(r => r.partner).map(r => [r.userId, r.partner]));
+
+    const resolvePlayer = (id) => {
+      if (!id) return null;
+      if (id.startsWith('guest-')) return guestMap[id] || null;
+      const u = userMap[id];
+      if (!u) return null;
+      const partner = partnerMap[id];
+      return partner ? { ...u, partnerName: partner.name, partnerId: partner.id } : u;
+    };
+
+    const matchesWithPlayers = matches.map(match => ({
+      id:             match.id,
+      round:          match.round,
+      matchNumber:    match.matchNumber,
+      stage:          match.stage,
+      courtNumber:    match.courtNumber,
+      categoryName:   match.category.name,
+      categoryFormat: match.category.format,
+      player1:        resolvePlayer(match.player1Id) || { name: 'TBD' },
+      player2:        resolvePlayer(match.player2Id) || { name: 'TBD' },
+      player1Seed:    match.player1Seed,
+      player2Seed:    match.player2Seed,
+      status:         match.status,
+      score:          match.scoreJson ? JSON.parse(match.scoreJson) : null,
+      winner:         match.winnerId ? (userMap[match.winnerId] || null) : null,
+      winnerId:       match.winnerId,
+      umpire:         match.umpireId ? (umpireMap[match.umpireId] || null) : null,
+      startedAt:      match.startedAt,
+      completedAt:    match.completedAt,
+    }));
 
     // Group matches by round
     const matchesByRound = {};
@@ -1238,44 +1204,47 @@ const getUmpireMatches = async (req, res) => {
   try {
     const userId = req.user.userId || req.user.id;
 
+    // Scope to tournaments where this user is actually registered as an umpire.
+    // Previously used { OR: [{ umpireId }, { status: 'PENDING' }] } which leaked
+    // ALL pending matches from every tournament to any umpire-role user.
+    const umpireTournaments = await prisma.tournamentUmpire.findMany({
+      where: { umpireId: userId },
+      select: { tournamentId: true }
+    });
+    const tournamentIds = umpireTournaments.map(t => t.tournamentId);
+
     const matches = await prisma.match.findMany({
       where: {
+        tournamentId: { in: tournamentIds },
         OR: [
           { umpireId: userId },
-          { status: 'PENDING' } // Show all pending matches for umpires to pick
+          { status: { in: ['PENDING', 'READY'] } }
         ]
       },
       include: {
         tournament: { select: { id: true, name: true } },
-        category: { select: { id: true, name: true } }
+        category:   { select: { id: true, name: true } }
       },
-      orderBy: [{ status: 'asc' }, { scheduledTime: 'asc' }]
+      orderBy: [{ status: 'asc' }, { round: 'asc' }, { matchNumber: 'asc' }]
     });
 
-    // Get player details
-    const matchesWithPlayers = await Promise.all(
-      matches.map(async (match) => {
-        const player1 = match.player1Id
-          ? await prisma.user.findUnique({
-              where: { id: match.player1Id },
-              select: { id: true, name: true }
-            })
-          : null;
-        const player2 = match.player2Id
-          ? await prisma.user.findUnique({
-              where: { id: match.player2Id },
-              select: { id: true, name: true }
-            })
-          : null;
+    // Batch player lookups — one query, not N
+    const playerIds = new Set();
+    for (const m of matches) {
+      if (m.player1Id && !m.player1Id.startsWith('guest-')) playerIds.add(m.player1Id);
+      if (m.player2Id && !m.player2Id.startsWith('guest-')) playerIds.add(m.player2Id);
+    }
+    const players = playerIds.size > 0
+      ? await prisma.user.findMany({ where: { id: { in: [...playerIds] } }, select: { id: true, name: true } })
+      : [];
+    const playerMap = Object.fromEntries(players.map(p => [p.id, p]));
 
-        return {
-          ...match,
-          player1: player1 || { name: 'TBD' },
-          player2: player2 || { name: 'TBD' },
-          score: match.scoreJson ? JSON.parse(match.scoreJson) : null
-        };
-      })
-    );
+    const matchesWithPlayers = matches.map(m => ({
+      ...m,
+      player1: (m.player1Id ? playerMap[m.player1Id] : null) || { name: 'TBD' },
+      player2: (m.player2Id ? playerMap[m.player2Id] : null) || { name: 'TBD' },
+      score:   m.scoreJson ? JSON.parse(m.scoreJson) : null
+    }));
 
     res.json({ success: true, matches: matchesWithPlayers });
   } catch (error) {

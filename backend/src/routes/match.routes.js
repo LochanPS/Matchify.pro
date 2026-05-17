@@ -538,29 +538,35 @@ const endMatchHandler = async (req, res) => {
       })();
     }
 
-    const [player1, player2, parentMatch, updatedMatch] = await Promise.all([
+    const [player1, player2, parentMatch] = await Promise.all([
       isGuestId(match.player1Id) ? Promise.resolve(null) : prisma.user.findUnique({ where: { id: match.player1Id }, select: { id: true, name: true } }),
       isGuestId(match.player2Id) ? Promise.resolve(null) : prisma.user.findUnique({ where: { id: match.player2Id }, select: { id: true, name: true } }),
       parentMatchPromise,
-      // ── 4. Mark match COMPLETED ──────────────────────────────────────────────
-      prisma.match.update({
-        where: { id: matchId },
-        data: { status: 'COMPLETED', winnerId, completedAt: new Date(), scoreJson: JSON.stringify(finalScore), updatedAt: new Date() },
-        include: { tournament: true, category: true }
-      })
     ]);
 
     const winner = winnerId === match.player1Id ? player1 : player2;
     const loser  = winnerId === match.player1Id ? player2 : player1;
 
-    // ── 5. Advance winner to next round (critical — draw page needs this) ──────
-    if (parentMatch) {
-      const winnerPos = match.winnerPosition || fallbackWinnerPos || (match.matchNumber % 2 === 1 ? 'player1' : 'player2');
-      const advanceData = winnerPos === 'player1' ? { player1Id: winnerId } : { player2Id: winnerId };
-      const bothReady   = winnerPos === 'player1' ? !!parentMatch.player2Id : !!parentMatch.player1Id;
-      if (bothReady) advanceData.status = 'READY';
-      await prisma.match.update({ where: { id: parentMatch.id }, data: advanceData });
-    }
+    // ── 4+5. Mark COMPLETED and advance winner atomically ─────────────────────
+    // Both writes in a single transaction so a crash between them can't leave the
+    // match completed but the bracket not advanced (or vice versa).
+    const updatedMatch = await prisma.$transaction(async (tx) => {
+      const completed = await tx.match.update({
+        where: { id: matchId },
+        data: { status: 'COMPLETED', winnerId, completedAt: new Date(), scoreJson: JSON.stringify(finalScore), updatedAt: new Date() },
+        include: { tournament: true, category: true }
+      });
+
+      if (parentMatch) {
+        const winnerPos   = match.winnerPosition || fallbackWinnerPos || (match.matchNumber % 2 === 1 ? 'player1' : 'player2');
+        const advanceData = winnerPos === 'player1' ? { player1Id: winnerId } : { player2Id: winnerId };
+        const bothReady   = winnerPos === 'player1' ? !!parentMatch.player2Id : !!parentMatch.player1Id;
+        if (bothReady) advanceData.status = 'READY';
+        await tx.match.update({ where: { id: parentMatch.id }, data: advanceData });
+      }
+
+      return completed;
+    });
 
     // ── 6. RESPOND TO CLIENT — everything below is non-critical ───────────────
     res.json({

@@ -1,23 +1,15 @@
 import express from 'express';
 import prisma from '../../lib/prisma.js';
+import { authenticate, requireAdmin } from '../../middleware/auth.js';
 
 const router = express.Router();
 
-// Admin password for this operation
-const ADMIN_PASSWORD = 'Pradyu@123(123)(123)';
-
 /**
  * POST /api/admin/clean-phone-numbers
- * Clean all phone numbers in the database
+ * Clean all phone numbers in the database — admin JWT required
  */
-router.post('/clean-phone-numbers', async (req, res) => {
+router.post('/clean-phone-numbers', authenticate, requireAdmin, async (req, res) => {
   try {
-    const { password } = req.body;
-    
-    // Verify admin password
-    if (password !== ADMIN_PASSWORD) {
-      return res.status(401).json({ error: 'Invalid admin password' });
-    }
     
     console.log('🔧 Starting phone number cleanup via API...');
     

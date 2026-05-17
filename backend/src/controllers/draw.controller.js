@@ -158,69 +158,56 @@ const generateDraw = async (req, res) => {
       });
     }
 
-    // Calculate seeds for all participants
-    const participantsWithSeeds = [];
-    
-    for (const registration of registrations) {
-      const playerId = getPlayerId(registration);
-      const playerName = getPlayerName(registration);
-      const playerEmail = getPlayerEmail(registration);
-      
-      // Only calculate seed score for real users, guests get default score of 0
-      const seedScore = registration.userId 
-        ? await seedingService.calculateSeedScore(registration.userId)
-        : 0;
-      
-      participantsWithSeeds.push({
-        id: playerId,
-        registrationId: registration.id,
-        name: playerName,
-        email: playerEmail,
-        seedScore: seedScore,
-        seed: 0, // Will be assigned after sorting
-        // Doubles partner — null for singles registrations
-        partnerName: registration.partner?.name || null,
-        partnerId: registration.partnerId || null
-      });
-    }
+    // Calculate seeds — parallel, not sequential (was N sequential awaits = Vercel timeout on 32+ players)
+    const participantsWithSeeds = await Promise.all(
+      registrations.map(async (registration) => {
+        const seedScore = registration.userId
+          ? await seedingService.calculateSeedScore(registration.userId)
+          : 0;
+        return {
+          id:             getPlayerId(registration),
+          registrationId: registration.id,
+          name:           getPlayerName(registration),
+          email:          getPlayerEmail(registration),
+          seedScore,
+          seed:        0, // assigned after sort
+          partnerName: registration.partner?.name || null,
+          partnerId:   registration.partnerId    || null,
+        };
+      })
+    );
 
     // Sort by seed score (highest first) and assign seeds
     participantsWithSeeds.sort((a, b) => b.seedScore - a.seedScore);
-    participantsWithSeeds.forEach((p, index) => {
-      p.seed = index + 1;
-    });
+    participantsWithSeeds.forEach((p, index) => { p.seed = index + 1; });
 
-    // Generate bracket
+    // Generate bracket structure
     const bracket = bracketService.generateSingleEliminationBracket(participantsWithSeeds);
 
-    // 🧹 CLEANUP: Delete any old matches from previous draws BEFORE creating new ones
-    console.log('🧹 Cleaning up old matches before creating new draw...');
-    const deletedCount = await prisma.match.deleteMany({
-      where: {
-        tournamentId: tournamentId,
-        categoryId: categoryId
-      }
-    });
-    console.log(`✅ Deleted ${deletedCount.count} old matches`);
+    // Delete old matches + create new matches + create draw — all in one transaction.
+    // Previously three separate writes: a crash between any two left the category in
+    // a permanently broken state (no matches, no draw).
+    console.log('🧹 Rebuilding draw in atomic transaction...');
+    let matches, draw;
+    await prisma.$transaction(async (tx) => {
+      const deleted = await tx.match.deleteMany({ where: { tournamentId, categoryId } });
+      console.log(`✅ Deleted ${deleted.count} old matches`);
 
-    // Generate match records from bracket
-    const matches = await matchService.generateMatchesFromBracket(
-      bracket,
-      tournamentId,
-      categoryId
-    );
+      matches = await matchService.generateMatchesFromBracket(bracket, tournamentId, categoryId, tx);
+
+      // Upsert draw (delete existing first if any — upsert not available on composite key easily)
+      await tx.draw.deleteMany({ where: { tournamentId, categoryId } });
+      draw = await tx.draw.create({
+        data: {
+          tournamentId,
+          categoryId,
+          format: 'single_elimination',
+          bracketJson: JSON.stringify(bracket),
+        }
+      });
+    });
 
     console.log(`✅ Created ${matches.length} new matches in database`);
-
-    // Save draw to database
-    const draw = await prisma.draw.create({
-      data: {
-        tournamentId: tournamentId,
-        categoryId: categoryId,
-        format: 'single_elimination',
-        bracketJson: JSON.stringify(bracket)
-      }
-    });
 
     res.status(201).json({
       success: true,

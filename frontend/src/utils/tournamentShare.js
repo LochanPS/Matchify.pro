@@ -78,7 +78,7 @@ export function buildShareMessage(tournament) {
   lines.push(D);
 
   // 2. Tournament name
-  lines.push(tournament.name.toUpperCase());
+  lines.push(tournament.name);
   lines.push(D);
 
   // 3. Venue / Date / Time

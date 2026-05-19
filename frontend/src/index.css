@@ -14,7 +14,7 @@
   html {
     font-size: clamp(15px, 4.27vw, 17px);
     /* Dark background on html/body prevents white flash on iOS overscroll bounce */
-    background-color: #0d0e2b;
+    background-color: #161730;
   }
 
   /* Ensure all text is readable on mobile */
@@ -22,7 +22,7 @@
     @apply text-base;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background-color: #0d0e2b;
+    background-color: #161730;
   }
   
   /* Headings - Responsive sizing */

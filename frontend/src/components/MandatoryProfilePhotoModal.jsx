@@ -1,22 +1,132 @@
-import { useState, useRef } from 'react';
-import { Camera, Upload, X } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Camera, Upload, X, Check } from 'lucide-react';
 import { profileAPI } from '../api/profile';
 import { useAuth } from '../contexts/AuthContext';
+import api from '../utils/api';
+
+const INDIAN_STATES = [
+  'Andhra Pradesh','Arunachal Pradesh','Assam','Bihar','Chhattisgarh','Goa','Gujarat',
+  'Haryana','Himachal Pradesh','Jharkhand','Karnataka','Kerala','Madhya Pradesh',
+  'Maharashtra','Manipur','Meghalaya','Mizoram','Nagaland','Odisha','Punjab',
+  'Rajasthan','Sikkim','Tamil Nadu','Telangana','Tripura','Uttar Pradesh',
+  'Uttarakhand','West Bengal','Andaman and Nicobar Islands','Chandigarh',
+  'Dadra and Nagar Haveli and Daman and Diu','Delhi','Jammu and Kashmir',
+  'Ladakh','Lakshadweep','Puducherry'
+];
+
+const CITY_STATE_MAP = {
+  'Amaravati':'Andhra Pradesh','Visakhapatnam':'Andhra Pradesh','Vijayawada':'Andhra Pradesh',
+  'Guntur':'Andhra Pradesh','Tirupati':'Andhra Pradesh','Itanagar':'Arunachal Pradesh',
+  'Guwahati':'Assam','Dibrugarh':'Assam','Silchar':'Assam','Patna':'Bihar',
+  'Gaya':'Bihar','Muzaffarpur':'Bihar','Raipur':'Chhattisgarh','Bhilai':'Chhattisgarh',
+  'Bilaspur':'Chhattisgarh','Panaji':'Goa','Panjim':'Goa','Margao':'Goa',
+  'Ahmedabad':'Gujarat','Surat':'Gujarat','Vadodara':'Gujarat','Rajkot':'Gujarat',
+  'Gandhinagar':'Gujarat','Bhavnagar':'Gujarat','Jamnagar':'Gujarat',
+  'Faridabad':'Haryana','Gurugram':'Haryana','Gurgaon':'Haryana','Rohtak':'Haryana',
+  'Panipat':'Haryana','Hisar':'Haryana','Ambala':'Haryana','Shimla':'Himachal Pradesh',
+  'Dharamshala':'Himachal Pradesh','Manali':'Himachal Pradesh','Ranchi':'Jharkhand',
+  'Jamshedpur':'Jharkhand','Dhanbad':'Jharkhand','Bokaro':'Jharkhand',
+  'Bangalore':'Karnataka','Bengaluru':'Karnataka','Mysore':'Karnataka','Mysuru':'Karnataka',
+  'Hubli':'Karnataka','Mangalore':'Karnataka','Mangaluru':'Karnataka','Davangere':'Karnataka',
+  'Belgaum':'Karnataka','Kochi':'Kerala','Cochin':'Kerala','Thiruvananthapuram':'Kerala',
+  'Trivandrum':'Kerala','Kozhikode':'Kerala','Calicut':'Kerala','Thrissur':'Kerala',
+  'Kollam':'Kerala','Kannur':'Kerala','Alappuzha':'Kerala','Kottayam':'Kerala',
+  'Indore':'Madhya Pradesh','Bhopal':'Madhya Pradesh','Jabalpur':'Madhya Pradesh',
+  'Gwalior':'Madhya Pradesh','Ujjain':'Madhya Pradesh','Mumbai':'Maharashtra',
+  'Pune':'Maharashtra','Nagpur':'Maharashtra','Nashik':'Maharashtra','Thane':'Maharashtra',
+  'Aurangabad':'Maharashtra','Solapur':'Maharashtra','Navi Mumbai':'Maharashtra',
+  'Kolhapur':'Maharashtra','Pimpri-Chinchwad':'Maharashtra','Imphal':'Manipur',
+  'Shillong':'Meghalaya','Aizawl':'Mizoram','Kohima':'Nagaland','Dimapur':'Nagaland',
+  'Bhubaneswar':'Odisha','Cuttack':'Odisha','Rourkela':'Odisha','Berhampur':'Odisha',
+  'Ludhiana':'Punjab','Amritsar':'Punjab','Jalandhar':'Punjab','Patiala':'Punjab',
+  'Mohali':'Punjab','Chandigarh':'Chandigarh','Jaipur':'Rajasthan','Jodhpur':'Rajasthan',
+  'Kota':'Rajasthan','Bikaner':'Rajasthan','Udaipur':'Rajasthan','Ajmer':'Rajasthan',
+  'Gangtok':'Sikkim','Chennai':'Tamil Nadu','Coimbatore':'Tamil Nadu','Madurai':'Tamil Nadu',
+  'Salem':'Tamil Nadu','Trichy':'Tamil Nadu','Tiruchirappalli':'Tamil Nadu',
+  'Tiruppur':'Tamil Nadu','Vellore':'Tamil Nadu','Erode':'Tamil Nadu','Hosur':'Tamil Nadu',
+  'Hyderabad':'Telangana','Warangal':'Telangana','Karimnagar':'Telangana',
+  'Secunderabad':'Telangana','Nizamabad':'Telangana','Agartala':'Tripura',
+  'Lucknow':'Uttar Pradesh','Kanpur':'Uttar Pradesh','Agra':'Uttar Pradesh',
+  'Varanasi':'Uttar Pradesh','Banaras':'Uttar Pradesh','Ghaziabad':'Uttar Pradesh',
+  'Noida':'Uttar Pradesh','Greater Noida':'Uttar Pradesh','Meerut':'Uttar Pradesh',
+  'Allahabad':'Uttar Pradesh','Prayagraj':'Uttar Pradesh','Bareilly':'Uttar Pradesh',
+  'Gorakhpur':'Uttar Pradesh','Aligarh':'Uttar Pradesh','Dehradun':'Uttarakhand',
+  'Haridwar':'Uttarakhand','Rishikesh':'Uttarakhand','Roorkee':'Uttarakhand',
+  'Kolkata':'West Bengal','Calcutta':'West Bengal','Howrah':'West Bengal',
+  'Durgapur':'West Bengal','Asansol':'West Bengal','Siliguri':'West Bengal',
+  'Kharagpur':'West Bengal','Darjeeling':'West Bengal','Delhi':'Delhi','New Delhi':'Delhi',
+  'Srinagar':'Jammu and Kashmir','Jammu':'Jammu and Kashmir','Leh':'Ladakh',
+  'Puducherry':'Puducherry','Pondicherry':'Puducherry',
+};
+
+const CITIES = Object.keys(CITY_STATE_MAP).sort();
+
+const F = {
+  bg: '#07071a',
+  card: '#0d1025',
+  border: 'rgba(255,255,255,0.08)',
+  input: 'rgba(255,255,255,0.05)',
+  green: '#00ff88',
+  sub: 'rgba(255,255,255,0.5)',
+  dim: 'rgba(255,255,255,0.3)',
+};
+
+function Field({ label, required, children }) {
+  return (
+    <div>
+      <label className="block text-xs font-semibold mb-1.5" style={{ color: F.sub }}>
+        {label} {required && <span style={{ color: '#ff6b6b' }}>*</span>}
+      </label>
+      {children}
+    </div>
+  );
+}
 
 export default function MandatoryProfilePhotoModal({ isOpen }) {
   const { user, updateUser } = useAuth();
+  const [step, setStep] = useState(1); // 1=photo, 2=details
   const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const [preview, setPreview] = useState(null);
+  const [preview, setPreview] = useState(user?.profilePhoto || null);
   const [selectedFile, setSelectedFile] = useState(null);
-  const [dragging, setDragging] = useState(false);
+  const [photoUploaded, setPhotoUploaded] = useState(!!user?.profilePhoto);
   const inputRef = useRef(null);
+
+  const [form, setForm] = useState({
+    phone: user?.phone || '',
+    city: user?.city || '',
+    state: user?.state || '',
+    gender: user?.gender || '',
+  });
+  const [cityInput, setCityInput] = useState(user?.city || '');
+  const [stateInput, setStateInput] = useState(user?.state || '');
+  const [showCities, setShowCities] = useState(false);
+  const [showStates, setShowStates] = useState(false);
+  const cityRef = useRef(null);
+  const stateRef = useRef(null);
+
+  const filteredCities = cityInput.trim()
+    ? CITIES.filter(c => c.toLowerCase().includes(cityInput.toLowerCase())).slice(0, 8)
+    : [];
+  const filteredStates = stateInput.trim()
+    ? INDIAN_STATES.filter(s => s.toLowerCase().includes(stateInput.toLowerCase())).slice(0, 8)
+    : INDIAN_STATES.slice(0, 8);
+
+  useEffect(() => {
+    const close = (e) => {
+      if (cityRef.current && !cityRef.current.contains(e.target)) setShowCities(false);
+      if (stateRef.current && !stateRef.current.contains(e.target)) setShowStates(false);
+    };
+    document.addEventListener('mousedown', close);
+    return () => document.removeEventListener('mousedown', close);
+  }, []);
 
   if (!isOpen) return null;
 
   const processFile = (file) => {
     if (!file) return;
-    if (!file.type.startsWith('image/')) { setError('Please select an image file (JPG, PNG, GIF)'); return; }
+    if (!file.type.startsWith('image/')) { setError('Please select an image file'); return; }
     if (file.size > 5 * 1024 * 1024) { setError('Image must be less than 5MB'); return; }
     setError('');
     setSelectedFile(file);
@@ -25,19 +135,15 @@ export default function MandatoryProfilePhotoModal({ isOpen }) {
     reader.readAsDataURL(file);
   };
 
-  const handleDrop = (e) => {
-    e.preventDefault();
-    setDragging(false);
-    processFile(e.dataTransfer.files?.[0]);
-  };
-
-  const handleUpload = async () => {
+  const handleUploadPhoto = async () => {
     if (!selectedFile) { setError('Please select a photo first'); return; }
     setUploading(true);
     setError('');
     try {
       const response = await profileAPI.uploadPhoto(selectedFile);
       updateUser({ ...user, profilePhoto: response.profilePhoto });
+      setPhotoUploaded(true);
+      setStep(2);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to upload photo. Please try again.');
     } finally {
@@ -45,108 +151,267 @@ export default function MandatoryProfilePhotoModal({ isOpen }) {
     }
   };
 
+  const handleSaveDetails = async () => {
+    if (!form.phone || form.phone.length < 10) { setError('Enter a valid 10-digit phone number'); return; }
+    if (!form.city.trim()) { setError('Enter your city'); return; }
+    if (!form.state || !INDIAN_STATES.includes(form.state)) { setError('Select a valid state'); return; }
+    if (!form.gender) { setError('Select your gender'); return; }
+
+    setSaving(true);
+    setError('');
+    try {
+      const response = await api.put('/profile', form);
+      if (response.data.user) updateUser(response.data.user);
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to save profile');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const inputStyle = {
+    width: '100%', padding: '10px 14px', borderRadius: 12,
+    background: F.input, border: `1px solid ${F.border}`,
+    color: 'white', outline: 'none', fontSize: 14,
+  };
+
+  const dropdownStyle = {
+    position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 50,
+    marginTop: 4, background: '#0d1025', border: `1px solid ${F.border}`,
+    borderRadius: 12, overflow: 'hidden', boxShadow: '0 16px 40px rgba(0,0,0,0.6)',
+  };
+
   return (
     <div className="fixed inset-0 flex items-center justify-center z-[9999] p-4"
-      style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)' }}>
+      style={{ background: 'rgba(0,0,0,0.88)', backdropFilter: 'blur(8px)' }}>
 
-      {/* Glow blobs */}
-      <div className="absolute top-1/3 left-1/3 w-80 h-80 rounded-full pointer-events-none"
-        style={{ background: 'radial-gradient(circle, rgba(0,255,136,0.08) 0%, transparent 70%)', filter: 'blur(40px)' }} />
-      <div className="absolute bottom-1/3 right-1/3 w-80 h-80 rounded-full pointer-events-none"
-        style={{ background: 'radial-gradient(circle, rgba(0,212,255,0.06) 0%, transparent 70%)', filter: 'blur(40px)' }} />
+      <div className="absolute top-1/3 left-1/3 w-72 h-72 rounded-full pointer-events-none"
+        style={{ background: 'radial-gradient(circle, rgba(0,255,136,0.07) 0%, transparent 70%)', filter: 'blur(40px)' }} />
 
       <div className="relative w-full max-w-sm rounded-3xl overflow-hidden shadow-2xl"
-        style={{ background: '#0d1025', border: '1px solid rgba(0,255,136,0.15)' }}>
+        style={{ background: F.card, border: `1px solid rgba(0,255,136,0.15)` }}>
 
-        {/* Top accent line */}
-        <div className="h-1 w-full" style={{ background: 'linear-gradient(90deg, #00ff88, #00d4ff, #a855f7)' }} />
+        {/* Top gradient line */}
+        <div className="h-1" style={{ background: 'linear-gradient(90deg,#00ff88,#00d4ff,#a855f7)' }} />
 
-        <div className="p-6">
-          {/* Title */}
-          <div className="text-center mb-6">
-            <div className="w-14 h-14 rounded-2xl mx-auto mb-3 flex items-center justify-center"
-              style={{ background: 'rgba(0,255,136,0.1)', border: '1px solid rgba(0,255,136,0.2)' }}>
-              <Camera size={26} style={{ color: '#00ff88' }} />
-            </div>
-            <h2 className="text-xl font-black text-white mb-1">Add Your Photo</h2>
-            <p className="text-sm" style={{ color: 'rgba(255,255,255,0.45)' }}>
-              Required to join tournaments
-            </p>
-          </div>
-
-          {/* Upload Area */}
-          <div
-            onClick={() => !preview && inputRef.current?.click()}
-            onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
-            onDragLeave={() => setDragging(false)}
-            onDrop={handleDrop}
-            className="relative mb-4 rounded-2xl overflow-hidden cursor-pointer transition-all"
-            style={{
-              height: preview ? 220 : 160,
-              border: `2px dashed ${dragging ? '#00ff88' : preview ? 'transparent' : 'rgba(0,255,136,0.25)'}`,
-              background: preview ? 'transparent' : dragging ? 'rgba(0,255,136,0.06)' : 'rgba(255,255,255,0.02)',
-            }}>
-
-            {preview ? (
-              <>
-                <img src={preview} alt="Preview" className="w-full h-full object-cover" />
-                <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 50%)' }} />
-                <button
-                  onClick={(e) => { e.stopPropagation(); setPreview(null); setSelectedFile(null); }}
-                  className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all"
-                  style={{ background: 'rgba(255,59,48,0.9)', backdropFilter: 'blur(4px)' }}>
-                  <X size={14} className="text-white" />
-                </button>
-                <div className="absolute bottom-3 left-3 flex items-center gap-1.5">
-                  <div className="w-2 h-2 rounded-full" style={{ background: '#00ff88' }} />
-                  <span className="text-xs font-medium text-white">Photo selected</span>
+        <div className="p-5">
+          {/* Step indicator */}
+          <div className="flex items-center justify-center gap-2 mb-5">
+            {[1,2].map(s => (
+              <div key={s} className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all"
+                  style={{
+                    background: step >= s ? F.green : 'rgba(255,255,255,0.08)',
+                    color: step >= s ? '#003320' : F.dim,
+                  }}>
+                  {step > s ? <Check size={12} /> : s}
                 </div>
-              </>
-            ) : (
-              <div className="flex flex-col items-center justify-center h-full gap-2 px-4">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-1"
-                  style={{ background: 'rgba(0,255,136,0.1)' }}>
-                  <Upload size={18} style={{ color: '#00ff88' }} />
-                </div>
-                <p className="text-white font-semibold text-sm">Tap to upload</p>
-                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>JPG, PNG or GIF · max 5MB</p>
+                {s < 2 && <div className="w-8 h-px" style={{ background: step > s ? F.green : F.border }} />}
               </div>
-            )}
+            ))}
           </div>
 
-          <input ref={inputRef} type="file" accept="image/*" onChange={(e) => processFile(e.target.files?.[0])} className="hidden" />
+          {/* STEP 1: Photo */}
+          {step === 1 && (
+            <>
+              <div className="text-center mb-4">
+                <h2 className="text-lg font-black text-white mb-0.5">Add Your Photo</h2>
+                <p className="text-xs" style={{ color: F.dim }}>Helps organizers identify you</p>
+              </div>
 
-          {error && (
-            <div className="mb-4 px-3 py-2.5 rounded-xl text-xs flex items-center gap-2"
-              style={{ background: 'rgba(255,59,48,0.1)', border: '1px solid rgba(255,59,48,0.2)', color: '#ff6b6b' }}>
-              ⚠️ {error}
-            </div>
+              {/* Photo upload */}
+              <div
+                onClick={() => !preview && inputRef.current?.click()}
+                className="relative mb-4 rounded-2xl overflow-hidden cursor-pointer transition-all"
+                style={{
+                  height: preview ? 200 : 140,
+                  border: `2px dashed ${preview ? 'transparent' : 'rgba(0,255,136,0.25)'}`,
+                  background: preview ? 'transparent' : 'rgba(255,255,255,0.02)',
+                }}>
+                {preview ? (
+                  <>
+                    <img src={preview} alt="Preview" className="w-full h-full object-cover" />
+                    <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 50%)' }} />
+                    <button onClick={(e) => { e.stopPropagation(); setPreview(null); setSelectedFile(null); setPhotoUploaded(false); }}
+                      className="absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center"
+                      style={{ background: 'rgba(255,59,48,0.9)' }}>
+                      <X size={12} className="text-white" />
+                    </button>
+                    <div className="absolute bottom-2 left-3 flex items-center gap-1.5">
+                      <div className="w-1.5 h-1.5 rounded-full" style={{ background: F.green }} />
+                      <span className="text-xs text-white font-medium">Photo ready</span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full gap-1.5">
+                    <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'rgba(0,255,136,0.1)' }}>
+                      <Upload size={16} style={{ color: F.green }} />
+                    </div>
+                    <p className="text-white font-semibold text-sm">Tap to upload</p>
+                    <p className="text-xs" style={{ color: F.dim }}>JPG, PNG · max 5MB</p>
+                  </div>
+                )}
+              </div>
+
+              <input ref={inputRef} type="file" accept="image/*"
+                onChange={(e) => processFile(e.target.files?.[0])} className="hidden" />
+
+              {error && (
+                <div className="mb-3 px-3 py-2 rounded-xl text-xs flex items-center gap-2"
+                  style={{ background: 'rgba(255,59,48,0.1)', border: '1px solid rgba(255,59,48,0.2)', color: '#ff6b6b' }}>
+                  ⚠️ {error}
+                </div>
+              )}
+
+              <button onClick={handleUploadPhoto} disabled={!selectedFile || uploading}
+                className="w-full py-3 rounded-2xl font-bold text-sm transition-all"
+                style={{
+                  background: selectedFile && !uploading ? 'linear-gradient(135deg,#00ff88,#00c853)' : 'rgba(255,255,255,0.06)',
+                  color: selectedFile && !uploading ? '#003320' : F.dim,
+                  cursor: !selectedFile || uploading ? 'not-allowed' : 'pointer',
+                  boxShadow: selectedFile && !uploading ? '0 8px 20px rgba(0,255,136,0.2)' : 'none',
+                }}>
+                {uploading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <div className="w-4 h-4 border-2 rounded-full animate-spin" style={{ borderColor: 'rgba(0,51,32,0.3)', borderTopColor: '#003320' }} />
+                    Uploading...
+                  </span>
+                ) : '✨ Upload & Next'}
+              </button>
+            </>
           )}
 
-          {/* Upload Button */}
-          <button
-            onClick={handleUpload}
-            disabled={!selectedFile || uploading}
-            className="w-full py-3.5 rounded-2xl font-bold text-sm transition-all"
-            style={{
-              background: selectedFile && !uploading
-                ? 'linear-gradient(135deg, #00ff88, #00c853)'
-                : 'rgba(255,255,255,0.06)',
-              color: selectedFile && !uploading ? '#003320' : 'rgba(255,255,255,0.3)',
-              cursor: !selectedFile || uploading ? 'not-allowed' : 'pointer',
-              boxShadow: selectedFile && !uploading ? '0 8px 24px rgba(0,255,136,0.25)' : 'none',
-            }}>
-            {uploading ? (
-              <span className="flex items-center justify-center gap-2">
-                <div className="w-4 h-4 border-2 rounded-full animate-spin" style={{ borderColor: 'rgba(0,51,32,0.3)', borderTopColor: '#003320' }} />
-                Uploading...
-              </span>
-            ) : '✨ Upload & Continue'}
-          </button>
+          {/* STEP 2: Details */}
+          {step === 2 && (
+            <>
+              <div className="text-center mb-4">
+                <h2 className="text-lg font-black text-white mb-0.5">Complete Your Profile</h2>
+                <p className="text-xs" style={{ color: F.dim }}>Required to register for tournaments</p>
+              </div>
 
-          <p className="text-center text-xs mt-3" style={{ color: 'rgba(255,255,255,0.25)' }}>
-            Helps organizers & players identify you at tournaments
-          </p>
+              <div className="space-y-3">
+                {/* Phone */}
+                <Field label="Phone Number" required>
+                  <div className="flex">
+                    <span className="flex items-center px-3 text-sm rounded-l-xl font-medium"
+                      style={{ background: 'rgba(255,255,255,0.08)', border: `1px solid ${F.border}`, borderRight: 'none', color: F.sub }}>
+                      +91
+                    </span>
+                    <input type="tel" value={form.phone}
+                      onChange={(e) => setForm(f => ({ ...f, phone: e.target.value.replace(/\D/g,'').slice(0,10) }))}
+                      placeholder="9876543210"
+                      style={{ ...inputStyle, borderRadius: '0 12px 12px 0', flex: 1 }} />
+                  </div>
+                </Field>
+
+                {/* City */}
+                <Field label="City" required>
+                  <div ref={cityRef} style={{ position: 'relative' }}>
+                    <input type="text" value={cityInput}
+                      onChange={(e) => { setCityInput(e.target.value); setForm(f => ({ ...f, city: e.target.value })); setShowCities(true); }}
+                      onFocus={() => setShowCities(true)}
+                      placeholder="Type your city..."
+                      style={inputStyle} autoComplete="off" />
+                    {showCities && filteredCities.length > 0 && (
+                      <div style={dropdownStyle}>
+                        {filteredCities.map(c => (
+                          <button key={c} type="button"
+                            onClick={() => {
+                              setCityInput(c); setForm(f => ({ ...f, city: c })); setShowCities(false);
+                              const st = CITY_STATE_MAP[c];
+                              if (st) { setStateInput(st); setForm(f => ({ ...f, state: st })); }
+                            }}
+                            className="w-full px-4 py-2.5 text-left text-sm flex justify-between items-center transition-colors"
+                            style={{ color: 'rgba(255,255,255,0.8)' }}
+                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,255,136,0.08)'}
+                            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                            <span>{c}</span>
+                            <span className="text-xs" style={{ color: F.dim }}>{CITY_STATE_MAP[c]}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </Field>
+
+                {/* State */}
+                <Field label="State" required>
+                  <div ref={stateRef} style={{ position: 'relative' }}>
+                    <input type="text" value={stateInput}
+                      onChange={(e) => { setStateInput(e.target.value); setForm(f => ({ ...f, state: '' })); setShowStates(true); }}
+                      onFocus={() => setShowStates(true)}
+                      placeholder="Select your state..."
+                      style={{ ...inputStyle, borderColor: form.state ? 'rgba(0,255,136,0.3)' : F.border }}
+                      autoComplete="off" />
+                    {form.state && (
+                      <Check size={14} className="absolute right-3 top-1/2 -translate-y-1/2" style={{ color: F.green }} />
+                    )}
+                    {showStates && filteredStates.length > 0 && (
+                      <div style={{ ...dropdownStyle, maxHeight: 160, overflowY: 'auto' }}>
+                        {filteredStates.map(s => (
+                          <button key={s} type="button"
+                            onClick={() => { setStateInput(s); setForm(f => ({ ...f, state: s })); setShowStates(false); }}
+                            className="w-full px-4 py-2.5 text-left text-sm transition-colors"
+                            style={{ color: form.state === s ? F.green : 'rgba(255,255,255,0.8)' }}
+                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,255,136,0.08)'}
+                            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                            {s}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </Field>
+
+                {/* Gender */}
+                <Field label="Gender" required>
+                  <div className="flex gap-2">
+                    {[['MALE','♂ Male'],['FEMALE','♀ Female'],['OTHER','⚧ Other']].map(([val, label]) => (
+                      <button key={val} type="button"
+                        onClick={() => setForm(f => ({ ...f, gender: val }))}
+                        className="flex-1 py-2 rounded-xl text-xs font-semibold transition-all"
+                        style={{
+                          background: form.gender === val ? 'rgba(0,255,136,0.15)' : 'rgba(255,255,255,0.04)',
+                          border: `1px solid ${form.gender === val ? 'rgba(0,255,136,0.4)' : F.border}`,
+                          color: form.gender === val ? F.green : F.sub,
+                        }}>
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </Field>
+              </div>
+
+              {error && (
+                <div className="mt-3 px-3 py-2 rounded-xl text-xs flex items-center gap-2"
+                  style={{ background: 'rgba(255,59,48,0.1)', border: '1px solid rgba(255,59,48,0.2)', color: '#ff6b6b' }}>
+                  ⚠️ {error}
+                </div>
+              )}
+
+              <div className="flex gap-2 mt-4">
+                <button onClick={() => setStep(1)} className="px-4 py-3 rounded-2xl text-sm font-semibold transition-all"
+                  style={{ background: 'rgba(255,255,255,0.05)', border: `1px solid ${F.border}`, color: F.sub }}>
+                  ← Back
+                </button>
+                <button onClick={handleSaveDetails} disabled={saving}
+                  className="flex-1 py-3 rounded-2xl font-bold text-sm transition-all"
+                  style={{
+                    background: 'linear-gradient(135deg,#00ff88,#00c853)',
+                    color: '#003320',
+                    boxShadow: '0 8px 20px rgba(0,255,136,0.2)',
+                    opacity: saving ? 0.7 : 1,
+                  }}>
+                  {saving ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <div className="w-4 h-4 border-2 rounded-full animate-spin" style={{ borderColor: 'rgba(0,51,32,0.3)', borderTopColor: '#003320' }} />
+                      Saving...
+                    </span>
+                  ) : '🎾 Save & Continue'}
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

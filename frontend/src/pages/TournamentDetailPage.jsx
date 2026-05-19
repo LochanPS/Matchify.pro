@@ -1127,7 +1127,7 @@ const TournamentDetailPage = () => {
               </div>
               
               {/* View Draws Button - Emerald */}
-              {tournament.status === 'published' && (
+              {['published', 'completed'].includes(tournament.status) && (
                 <button
                   onClick={() => {
                     if (tournament.categories && tournament.categories.length > 0) {

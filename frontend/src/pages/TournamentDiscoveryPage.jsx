@@ -14,7 +14,7 @@ import {
   CurrencyRupeeIcon,
   ShareIcon
 } from '@heroicons/react/24/outline';
-import { Loader } from 'lucide-react';
+import { Loader, GitBranch } from 'lucide-react';
 import { tournamentAPI } from '../api/tournament';
 import { formatDateIndian } from '../utils/dateFormat';
 
@@ -840,27 +840,52 @@ function TournamentCard({ tournament, navigate, index }) {
         )}
 
         {/* CTA Button */}
-        <button
-          onClick={(e) => { e.stopPropagation(); navigate(`/tournaments/${tournament.id}`); }}
-          className="w-full py-3 rounded-xl font-black text-sm transition-all flex items-center justify-center gap-2 relative overflow-hidden"
-          style={{
-            background: isRegistrationOpen
-              ? `linear-gradient(135deg,${accentColor}cc,${accentColor})`
-              : 'rgba(255,255,255,0.07)',
-            color: isRegistrationOpen ? '#07071a' : 'rgba(255,255,255,0.55)',
-            border: isRegistrationOpen ? 'none' : '1px solid rgba(255,255,255,0.1)',
-            boxShadow: isRegistrationOpen ? `0 4px 18px ${accentColor}50` : 'none',
-          }}
-        >
-          <span className="relative z-10 font-black">
-            {isRegistrationOpen ? '🚀 Register Now' : 'View Details'}
-          </span>
-          <ArrowRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform relative z-10" />
-          {isRegistrationOpen && (
+        {tournament.status === 'completed' ? (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              const firstCat = tournament.categories?.[0]?.id;
+              navigate(firstCat
+                ? `/tournaments/${tournament.id}/draws/${firstCat}`
+                : `/tournaments/${tournament.id}/draws`
+              );
+            }}
+            className="w-full py-3 rounded-xl font-black text-sm transition-all flex items-center justify-center gap-2 relative overflow-hidden"
+            style={{
+              background: 'linear-gradient(135deg, rgba(168,85,247,0.25), rgba(99,102,241,0.2))',
+              color: '#c084fc',
+              border: '1.5px solid rgba(168,85,247,0.45)',
+              boxShadow: '0 4px 18px rgba(168,85,247,0.25)',
+            }}
+          >
+            <GitBranch className="w-4 h-4 relative z-10" />
+            <span className="relative z-10 font-black">View Draws</span>
             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
-              style={{ background: 'radial-gradient(circle at center, rgba(255,255,255,0.2), transparent)' }} />
-          )}
-        </button>
+              style={{ background: 'radial-gradient(circle at center, rgba(168,85,247,0.2), transparent)' }} />
+          </button>
+        ) : (
+          <button
+            onClick={(e) => { e.stopPropagation(); navigate(`/tournaments/${tournament.id}`); }}
+            className="w-full py-3 rounded-xl font-black text-sm transition-all flex items-center justify-center gap-2 relative overflow-hidden"
+            style={{
+              background: isRegistrationOpen
+                ? `linear-gradient(135deg,${accentColor}cc,${accentColor})`
+                : 'rgba(255,255,255,0.07)',
+              color: isRegistrationOpen ? '#07071a' : 'rgba(255,255,255,0.55)',
+              border: isRegistrationOpen ? 'none' : '1px solid rgba(255,255,255,0.1)',
+              boxShadow: isRegistrationOpen ? `0 4px 18px ${accentColor}50` : 'none',
+            }}
+          >
+            <span className="relative z-10 font-black">
+              {isRegistrationOpen ? '🚀 Register Now' : 'View Details'}
+            </span>
+            <ArrowRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform relative z-10" />
+            {isRegistrationOpen && (
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                style={{ background: 'radial-gradient(circle at center, rgba(255,255,255,0.2), transparent)' }} />
+            )}
+          </button>
+        )}
       </div>
     </div>
   );

@@ -272,8 +272,10 @@ class TournamentPointsService {
     try {
       console.log('🔍 Fetching leaderboard:', { limit, scope, city, state });
       
-      // Build where clause based on scope - SHOW ALL USERS
-      const whereClause = {};
+      // Build where clause based on scope — exclude ADMIN users from leaderboard
+      const whereClause = {
+        NOT: { roles: { contains: 'ADMIN' } }
+      };
 
       if (scope === 'city' && city) {
         whereClause.city = city;

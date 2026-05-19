@@ -110,7 +110,7 @@ router.get('/player/:userId', async (req, res) => {
 router.get('/platform-stats', async (req, res) => {
   try {
     const [playerCount, tournamentCount, cityCount] = await Promise.all([
-      prisma.user.count({ where: { isActive: true } }),
+      prisma.user.count({ where: { isActive: true, NOT: { roles: { contains: 'ADMIN' } } } }),
       prisma.tournament.count({ where: { status: { not: 'draft' } } }),
       prisma.tournament.findMany({
         where: { status: { not: 'draft' }, city: { not: null } },

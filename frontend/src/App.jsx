@@ -1,7 +1,7 @@
 // Matchify.pro - Premier Badminton Tournament Platform
-// Version: 1.0.5 - Lazy-loaded routes, optimised bundle
-// Last Updated: May 18, 2026
-import { lazy, Suspense } from 'react'
+// Version: 1.0.6 - Chunk error boundary, lazy-loaded routes
+// Last Updated: May 19, 2026
+import { lazy, Suspense, Component } from 'react'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import AnimatedBackground from './components/AnimatedBackground'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
@@ -80,6 +80,66 @@ const OrganizerPayoutsPage      = lazy(() => import('./pages/admin/OrganizerPayo
 const RevenueDashboardPage      = lazy(() => import('./pages/admin/RevenueDashboardPage'))
 const QRSettingsPage            = lazy(() => import('./pages/admin/QRSettingsPage'))
 
+// ── Chunk Error Boundary ─────────────────────────────────────────────────────
+// Catches lazy-import failures (network blip, stale cache after deploy).
+// ChunkLoadError / "Failed to fetch dynamically imported module" → auto-reload.
+// Any other render error → show a tap-to-reload card.
+class ChunkErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, reloading: false };
+  }
+
+  static getDerivedStateFromError(error) {
+    const msg = error?.message || '';
+    const isChunkError =
+      error?.name === 'ChunkLoadError' ||
+      msg.includes('Failed to fetch dynamically imported module') ||
+      msg.includes('Loading chunk') ||
+      msg.includes('Unexpected token');
+    if (isChunkError) {
+      // Reload once — prevents infinite loop by checking flag in sessionStorage
+      if (!sessionStorage.getItem('_chunkReloaded')) {
+        sessionStorage.setItem('_chunkReloaded', '1');
+        window.location.reload();
+        return { hasError: false, reloading: true };
+      }
+    }
+    return { hasError: true, reloading: false };
+  }
+
+  componentDidCatch() {
+    sessionStorage.removeItem('_chunkReloaded');
+  }
+
+  render() {
+    if (this.state.reloading) return null;
+    if (this.state.hasError) {
+      return (
+        <div style={{
+          minHeight: '60vh', display: 'flex', flexDirection: 'column',
+          alignItems: 'center', justifyContent: 'center', gap: 16, padding: 24,
+        }}>
+          <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 14 }}>
+            Something went wrong loading this page.
+          </p>
+          <button
+            onClick={() => { sessionStorage.removeItem('_chunkReloaded'); window.location.reload(); }}
+            style={{
+              padding: '10px 24px', borderRadius: 12, border: '1px solid rgba(0,212,255,0.3)',
+              background: 'rgba(0,212,255,0.1)', color: '#00d4ff', fontSize: 14,
+              fontWeight: 700, cursor: 'pointer',
+            }}
+          >
+            Reload Page
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 // Minimal full-screen loading fallback — matches app dark theme
 function PageLoader() {
   return (
@@ -133,7 +193,7 @@ function AppContent() {
                        user?.isAdmin;
 
   return (
-    <div className="min-h-screen" style={{ background: '#07071a' }}>
+    <div className="min-h-screen" style={{ background: '#161730' }}>
       {/* Global animated background — stars + glowing orbs + floating balloons, fixed behind every page */}
       <AnimatedBackground fullWidth={isAdminRoute} />
       <ScrollToTop />
@@ -160,6 +220,7 @@ function AppContent() {
           is just 100% width — zero visual change for mobile users.
           Admin dashboard excluded (it has its own full-width sidebar layout). */}
       <div style={!isAdminRoute ? { maxWidth: '480px', margin: '0 auto', position: 'relative' } : {}}>
+      <ChunkErrorBoundary>
       <Suspense fallback={<PageLoader />}>
       <Routes>
             {/* Public routes */}
@@ -502,6 +563,7 @@ function AppContent() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>
+      </ChunkErrorBoundary>
         {!isAdminRoute && <SupportFooter />}
       </div>{/* end page-width constraint */}
     </div>

@@ -262,12 +262,12 @@
    don't look washed out (1.10 × 0.909 ≈ 1.0).
    ─────────────────────────────────────────────────────────────────────────── */
 #root {
-  filter: brightness(1.1);
+  filter: brightness(1.18);
 }
 
 #root img,
 #root video {
-  filter: brightness(0.909);
+  filter: brightness(0.847);
 }
 
 /* Custom scrollbar */

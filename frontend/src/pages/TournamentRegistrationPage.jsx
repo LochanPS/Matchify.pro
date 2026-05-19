@@ -1,44 +1,17 @@
 import { getErrorMessage } from '../utils/errorMessage';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { tournamentAPI } from '../api/tournament';
 import { registrationAPI } from '../api/registration';
 import { getPublicPaymentSettings } from '../api/payment';
 import CategorySelector from '../components/registration/CategorySelector';
-import PaymentSummary from '../components/registration/PaymentSummary';
 import { ArrowLeftIcon, UserGroupIcon, CameraIcon, CheckCircleIcon, XMarkIcon, ClockIcon } from '@heroicons/react/24/outline';
 import { Loader, Upload, QrCode, AlertCircle, Search } from 'lucide-react';
 
-function CopyUpiButton({ upiId, amount }) {
-  const [copied, setCopied] = useState(false);
-  const copy = () => {
-    navigator.clipboard.writeText(upiId).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
-  };
-  return (
-    <div className="mt-3 space-y-2">
-      <div className="px-3 py-2 rounded-xl text-xs font-semibold text-center"
-        style={{ background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.2)', color: '#fbbf24' }}>
-        Open any UPI app → Send Money → paste UPI ID → enter <strong>₹{amount}</strong>
-      </div>
-      <button
-        onClick={copy}
-        className="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-sm font-black transition-all active:scale-95"
-        style={{
-          background: copied ? 'rgba(0,255,136,0.15)' : 'rgba(0,212,255,0.1)',
-          border: copied ? '1px solid rgba(0,255,136,0.4)' : '1px solid rgba(0,212,255,0.35)',
-          color: copied ? '#00ff88' : '#00d4ff',
-        }}
-      >
-        {copied ? '✅ Copied!' : '📋 Copy UPI ID'}
-      </button>
-    </div>
-  );
-}
-
+// ─────────────────────────────────────────────────────────────────────────────
+// Constants
+// ─────────────────────────────────────────────────────────────────────────────
 const BRAND = {
   bg: '#07071a',
   green: '#00ff88',
@@ -48,11 +21,109 @@ const BRAND = {
   cardBorder: 'rgba(255,255,255,0.08)',
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Download QR — fetch as blob to bypass cross-origin anchor restriction
+// ─────────────────────────────────────────────────────────────────────────────
+const downloadQR = async (url) => {
+  try {
+    const res = await fetch(url);
+    const blob = await res.blob();
+    const objectUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = objectUrl;
+    a.download = 'matchify-payment-qr.png';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(objectUrl);
+  } catch {
+    window.open(url, '_blank');
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CopyField — label + value + copy button
+// ─────────────────────────────────────────────────────────────────────────────
+function CopyField({ label, value, mono = false, highlight = false }) {
+  const [copied, setCopied] = useState(false);
+  const copy = () => {
+    navigator.clipboard.writeText(String(value)).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }).catch(() => {});
+  };
+  return (
+    <div
+      className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl"
+      style={{
+        background: highlight ? 'rgba(0,255,136,0.07)' : 'rgba(255,255,255,0.05)',
+        border: highlight ? '1px solid rgba(0,255,136,0.2)' : '1px solid rgba(255,255,255,0.08)',
+      }}
+    >
+      <div className="min-w-0 flex-1">
+        <p className="text-xs mb-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>{label}</p>
+        <p
+          className={`text-sm font-bold text-white truncate ${mono ? 'font-mono' : ''}`}
+          style={highlight ? { color: BRAND.green } : {}}
+        >
+          {value}
+        </p>
+      </div>
+      <button
+        onClick={copy}
+        className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all active:scale-95"
+        style={{
+          background: copied ? 'rgba(0,255,136,0.15)' : 'rgba(255,255,255,0.08)',
+          border: copied ? '1px solid rgba(0,255,136,0.4)' : '1px solid rgba(255,255,255,0.12)',
+          color: copied ? '#00ff88' : 'rgba(255,255,255,0.6)',
+          minWidth: '64px',
+        }}
+      >
+        {copied ? '✓ Done' : '📋 Copy'}
+      </button>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// UpiAppButton — copies UPI ID then opens specific app
+// ─────────────────────────────────────────────────────────────────────────────
+function UpiAppButton({ label, emoji, scheme, upiId, onCopied }) {
+  const handleClick = () => {
+    // Always copy UPI ID first — user has it even if app fails to open
+    navigator.clipboard.writeText(upiId).catch(() => {});
+    onCopied?.();
+    // Small delay so clipboard write completes before app switch
+    setTimeout(() => {
+      window.location.href = scheme;
+    }, 80);
+  };
+
+  return (
+    <button
+      onClick={handleClick}
+      className="flex flex-col items-center gap-1.5 py-3 px-1 rounded-2xl transition-all active:scale-95 flex-1"
+      style={{
+        background: 'rgba(255,255,255,0.05)',
+        border: '1px solid rgba(255,255,255,0.1)',
+      }}
+    >
+      <span style={{ fontSize: '1.6rem', lineHeight: 1 }}>{emoji}</span>
+      <span className="text-xs font-bold text-white leading-tight text-center">{label}</span>
+    </button>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Main Component
+// ─────────────────────────────────────────────────────────────────────────────
 export default function TournamentRegistrationPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
   const fileInputRef = useRef(null);
+
+  const DRAFT_KEY = `matchify_reg_draft_${id}`;
 
   const [tournament, setTournament] = useState(null);
   const [categories, setCategories] = useState([]);
@@ -67,77 +138,159 @@ export default function TournamentRegistrationPage() {
   const [step, setStep] = useState(1);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [alreadyRegisteredCategories, setAlreadyRegisteredCategories] = useState([]);
-  const [adminPaymentSettings, setAdminPaymentSettings] = useState(null);
+  const [paymentSettings, setPaymentSettings] = useState(null);
   const [isRegistrationClosed, setIsRegistrationClosed] = useState(false);
   const [searchingPartner, setSearchingPartner] = useState({});
+  const [upiCopiedToast, setUpiCopiedToast] = useState(false);
 
+  // ── Load draft + data on mount ───────────────────────────────────────────
   useEffect(() => {
     fetchTournamentData();
-    fetchAdminPaymentSettings();
+    fetchPaymentSettings();
+    // Restore draft if fresh (< 24h old)
+    try {
+      const draft = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null');
+      if (draft && Array.isArray(draft.selectedCategories) && draft.selectedCategories.length > 0) {
+        const ageMs = Date.now() - (draft.timestamp || 0);
+        if (ageMs < 24 * 60 * 60 * 1000) {
+          setSelectedCategories(draft.selectedCategories);
+          if (draft.partnerCodes) setPartnerCodes(draft.partnerCodes);
+          if (draft.partnerInfo) setPartnerInfo(draft.partnerInfo);
+        }
+      }
+    } catch {}
   }, [id]);
 
   useEffect(() => {
     if (tournament) {
-      const now = new Date();
-      const closeDate = new Date(tournament.registrationCloseDate);
-      setIsRegistrationClosed(now > closeDate);
+      setIsRegistrationClosed(new Date() > new Date(tournament.registrationCloseDate));
     }
   }, [tournament]);
 
-  const getAlreadyRegisteredCategoryNames = () => {
-    if (alreadyRegisteredCategories.length === 0) return null;
-    return alreadyRegisteredCategories
-      .map(catId => categories.find(c => c.id === catId)?.name)
-      .filter(Boolean)
-      .join(', ');
+  // ── Draft helpers ────────────────────────────────────────────────────────
+  const saveDraft = useCallback(() => {
+    try {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify({
+        selectedCategories,
+        partnerCodes,
+        partnerInfo,
+        timestamp: Date.now(),
+      }));
+    } catch {}
+  }, [selectedCategories, partnerCodes, partnerInfo, DRAFT_KEY]);
+
+  const clearDraft = () => {
+    try { localStorage.removeItem(DRAFT_KEY); } catch {}
   };
 
-  const fetchAdminPaymentSettings = async () => {
+  // ── Data fetching ────────────────────────────────────────────────────────
+  const fetchPaymentSettings = async () => {
     try {
-      const response = await getPublicPaymentSettings();
-      setAdminPaymentSettings(response.data);
-    } catch (error) {
-      console.error('Error fetching admin payment settings:', error);
-    }
+      const res = await getPublicPaymentSettings();
+      setPaymentSettings(res.data);
+    } catch {}
   };
 
   const fetchTournamentData = async () => {
     try {
       setLoading(true);
-      const [tournamentData, categoriesData, myRegistrations] = await Promise.all([
+      const [tData, catData, myRegs] = await Promise.all([
         tournamentAPI.getTournament(id),
         tournamentAPI.getCategories(id),
         registrationAPI.getMyRegistrations(),
       ]);
-      setTournament(tournamentData.data);
-      setCategories(categoriesData.categories || []);
-      const registeredCategoryIds = (myRegistrations.registrations || [])
-        .filter(reg =>
-          reg.tournament.id === id &&
-          reg.status !== 'cancelled' &&
-          reg.status !== 'rejected'
-        )
-        .map(reg => reg.category.id);
-      setAlreadyRegisteredCategories(registeredCategoryIds);
-    } catch (err) {
-      console.error('Error fetching tournament:', err);
+      setTournament(tData.data);
+      setCategories(catData.categories || []);
+      const regCatIds = (myRegs.registrations || [])
+        .filter(r => r.tournament.id === id && r.status !== 'cancelled' && r.status !== 'rejected')
+        .map(r => r.category.id);
+      setAlreadyRegisteredCategories(regCatIds);
+    } catch {
       setError('Failed to load tournament details');
     } finally {
       setLoading(false);
     }
   };
 
+  // ── Helpers ──────────────────────────────────────────────────────────────
+  const calculateTotal = () =>
+    selectedCategories.reduce((sum, catId) => {
+      const cat = categories.find(c => c.id === catId);
+      return sum + (cat?.entryFee || 0);
+    }, 0);
+
+  const getAlreadyRegisteredCategoryNames = () =>
+    alreadyRegisteredCategories
+      .map(catId => categories.find(c => c.id === catId)?.name)
+      .filter(Boolean)
+      .join(', ');
+
+  const selectedDoublesCategories = selectedCategories.filter(catId =>
+    categories.find(c => c.id === catId)?.format === 'doubles'
+  );
+
+  const showUpiCopied = () => {
+    setUpiCopiedToast(true);
+    setTimeout(() => setUpiCopiedToast(false), 2500);
+  };
+
+  // ── Step 1: proceed to payment ───────────────────────────────────────────
+  const handleProceedToPayment = () => {
+    setError('');
+    if (!selectedCategories.length) {
+      setError('Select at least one category');
+      return;
+    }
+    for (const catId of selectedDoublesCategories) {
+      const cat = categories.find(c => c.id === catId);
+      const code = partnerCodes[catId];
+      if (!code) { setError(`Partner ID required for ${cat?.name}`); return; }
+      if (!/^#\d+$/.test(code) && !/^#[A-Z]\d{5}$/i.test(code)) {
+        setError(`Invalid Matchify.pro ID for ${cat?.name} — format: #1, #12`);
+        return;
+      }
+      if (!partnerInfo[catId]) { setError(`Verify partner ID for ${cat?.name}`); return; }
+    }
+    saveDraft();
+    setStep(2);
+  };
+
+  // ── Partner search ───────────────────────────────────────────────────────
+  const handlePartnerCodeChange = (categoryId, code) => {
+    let val = code.replace(/[^#\d]/g, '');
+    if (!val.startsWith('#')) val = '#' + val.replace(/#/g, '');
+    setPartnerCodes(p => ({ ...p, [categoryId]: val }));
+    setPartnerInfo(p => ({ ...p, [categoryId]: null }));
+  };
+
+  const fetchPartnerByCode = async (categoryId, code) => {
+    setError('');
+    if (!/^#\d+$/.test(code) && !/^#[A-Z]\d{5}$/i.test(code)) {
+      setError('Enter valid ID like #1, #12, #100'); return;
+    }
+    setSearchingPartner(p => ({ ...p, [categoryId]: true }));
+    try {
+      const res = await registrationAPI.getPartnerByCode(code);
+      if (res.success && res.user) {
+        setPartnerInfo(p => ({ ...p, [categoryId]: res.user }));
+      } else {
+        setError('No player found with this ID');
+        setPartnerInfo(p => ({ ...p, [categoryId]: null }));
+      }
+    } catch (err) {
+      setError(getErrorMessage(err, 'Player not found'));
+      setPartnerInfo(p => ({ ...p, [categoryId]: null }));
+    } finally {
+      setSearchingPartner(p => ({ ...p, [categoryId]: false }));
+    }
+  };
+
+  // ── Screenshot ───────────────────────────────────────────────────────────
   const handleScreenshotSelect = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!file.type.startsWith('image/')) {
-      setError('Please upload an image file (JPG, PNG, etc.)');
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      setError('Image size should be less than 5MB');
-      return;
-    }
+    if (!file.type.startsWith('image/')) { setError('Upload an image file (JPG, PNG)'); return; }
+    if (file.size > 5 * 1024 * 1024) { setError('Image must be under 5MB'); return; }
     setPaymentScreenshot(file);
     setPaymentPreview(URL.createObjectURL(file));
     setError('');
@@ -149,45 +302,12 @@ export default function TournamentRegistrationPage() {
     setPaymentPreview(null);
   };
 
-  const handleProceedToPayment = () => {
-    setError('');
-    if (selectedCategories.length === 0) {
-      setError('Please select at least one category');
-      return;
-    }
-    const doublesCategories = selectedCategories.filter(catId => {
-      const cat = categories.find(c => c.id === catId);
-      return cat?.format === 'doubles';
-    });
-    for (const catId of doublesCategories) {
-      const code = partnerCodes[catId];
-      if (!code) {
-        const cat = categories.find(c => c.id === catId);
-        setError(`Partner Matchify.pro ID required for ${cat?.name}`);
-        return;
-      }
-      if (!/^#\d+$/.test(code) && !/^#[A-Z]\d{5}$/i.test(code)) {
-        const cat = categories.find(c => c.id === catId);
-        setError(`Invalid Matchify.pro ID for ${cat?.name} — format: #1, #12, #100`);
-        return;
-      }
-      if (!partnerInfo[catId]) {
-        const cat = categories.find(c => c.id === catId);
-        setError(`Search and verify partner ID for ${cat?.name}`);
-        return;
-      }
-    }
-    setStep(2);
-  };
-
+  // ── Submit registration ──────────────────────────────────────────────────
   const handleRegister = async () => {
+    if (!paymentScreenshot) { setError('Upload payment screenshot to continue'); return; }
+    setSubmitting(true);
+    setError('');
     try {
-      setError('');
-      if (!paymentScreenshot) {
-        setError('Upload your payment screenshot to continue');
-        return;
-      }
-      setSubmitting(true);
       const formData = new FormData();
       formData.append('tournamentId', id);
       formData.append('categoryIds', JSON.stringify(selectedCategories));
@@ -198,61 +318,16 @@ export default function TournamentRegistrationPage() {
       formData.append('partnerEmails', JSON.stringify(partnerEmails));
       formData.append('paymentScreenshot', paymentScreenshot);
       await registrationAPI.createRegistrationWithScreenshot(formData);
+      clearDraft();
       setShowSuccessModal(true);
     } catch (err) {
-      console.error('Registration error:', err);
-      setError(getErrorMessage(err, 'Registration failed. Please try again.'));
+      setError(getErrorMessage(err, 'Registration failed. Try again.'));
     } finally {
       setSubmitting(false);
     }
   };
 
-  const handlePartnerCodeChange = (categoryId, code) => {
-    // Allow only digits after #
-    let val = code.replace(/[^#\d]/g, '');
-    if (!val.startsWith('#')) val = '#' + val.replace(/#/g, '');
-    setPartnerCodes(prev => ({ ...prev, [categoryId]: val }));
-    setPartnerInfo(prev => ({ ...prev, [categoryId]: null }));
-  };
-
-  const fetchPartnerByCode = async (categoryId, code) => {
-    try {
-      setError('');
-      const isNewFmt = /^#\d+$/.test(code);
-      const isOldFmt = /^#[A-Z]\d{5}$/i.test(code);
-      if (!isNewFmt && !isOldFmt) {
-        setError('Enter a valid Matchify.pro ID like #1, #12, #100');
-        return;
-      }
-      setSearchingPartner(prev => ({ ...prev, [categoryId]: true }));
-      const response = await registrationAPI.getPartnerByCode(code);
-      if (response.success && response.user) {
-        setPartnerInfo(prev => ({ ...prev, [categoryId]: response.user }));
-      } else {
-        setError('No player found with this Matchify.pro ID');
-        setPartnerInfo(prev => ({ ...prev, [categoryId]: null }));
-      }
-    } catch (err) {
-      console.error('Error fetching partner:', err);
-      setError(getErrorMessage(err, 'Player not found'));
-      setPartnerInfo(prev => ({ ...prev, [categoryId]: null }));
-    } finally {
-      setSearchingPartner(prev => ({ ...prev, [categoryId]: false }));
-    }
-  };
-
-  const calculateTotal = () =>
-    selectedCategories.reduce((total, catId) => {
-      const cat = categories.find(c => c.id === catId);
-      return total + (cat?.entryFee || 0);
-    }, 0);
-
-  const selectedDoublesCategories = selectedCategories.filter(catId => {
-    const cat = categories.find(c => c.id === catId);
-    return cat?.format === 'doubles';
-  });
-
-  // ── Loading ──────────────────────────────────────────────────────────────
+  // ── Render: loading ──────────────────────────────────────────────────────
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: BRAND.bg }}>
@@ -278,7 +353,6 @@ export default function TournamentRegistrationPage() {
     );
   }
 
-  // ── Registration Closed ──────────────────────────────────────────────────
   if (isRegistrationClosed) {
     return (
       <div className="min-h-screen px-4 py-8 flex flex-col" style={{ background: BRAND.bg }}>
@@ -295,10 +369,7 @@ export default function TournamentRegistrationPage() {
             </div>
             <h2 className="text-xl font-black text-white mb-2">Registration Closed</h2>
             <p className="text-sm mb-1" style={{ color: 'rgba(255,255,255,0.5)' }}>
-              Deadline was{' '}
-              {new Date(tournament.registrationCloseDate).toLocaleDateString('en-IN', {
-                day: 'numeric', month: 'short', year: 'numeric'
-              })}
+              Deadline was {new Date(tournament.registrationCloseDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
             </p>
             <button onClick={() => navigate(`/tournaments/${id}`)}
               className="mt-6 px-6 py-3 rounded-xl font-bold text-sm text-white"
@@ -311,12 +382,34 @@ export default function TournamentRegistrationPage() {
     );
   }
 
-  // ── Main ─────────────────────────────────────────────────────────────────
+  const upiId = paymentSettings?.upiId?.trim() || '';
+  const total = calculateTotal();
+  const accountHolder = paymentSettings?.accountHolder || 'Matchify.pro';
+  const qrUrl = paymentSettings?.qrCodeUrl || null;
+
+  // ── Render: main ─────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen pb-10" style={{ background: BRAND.bg }}>
-      {/* Header */}
+    <div className="min-h-screen pb-12" style={{ background: BRAND.bg }}>
+
+      {/* ── UPI Copied Toast ──────────────────────────────────────────────── */}
+      {upiCopiedToast && (
+        <div
+          className="fixed top-5 left-1/2 z-50 px-5 py-2.5 rounded-2xl text-sm font-black shadow-lg"
+          style={{
+            transform: 'translateX(-50%)',
+            background: '#00ff88',
+            color: '#07071a',
+            animation: 'fadeInDown 0.2s ease',
+          }}
+        >
+          ✓ UPI ID copied — paste in your UPI app
+        </div>
+      )}
+
+      {/* ── Header ───────────────────────────────────────────────────────── */}
       <div className="px-4 pt-6 pb-4">
-        <button onClick={() => navigate(`/tournaments/${id}`)} className="flex items-center gap-1.5 mb-5 text-sm font-bold"
+        <button onClick={() => navigate(`/tournaments/${id}`)}
+          className="flex items-center gap-1.5 mb-5 text-sm font-bold"
           style={{ color: 'rgba(255,255,255,0.5)' }}>
           <ArrowLeftIcon className="h-4 w-4" /> Back
         </button>
@@ -326,14 +419,13 @@ export default function TournamentRegistrationPage() {
         </p>
       </div>
 
-      {/* Step Indicator */}
+      {/* ── Step Indicator ───────────────────────────────────────────────── */}
       <div className="px-4 mb-5">
         <div className="flex items-center gap-2">
-          {/* Step 1 */}
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-black"
               style={{
-                background: step >= 1 ? (step > 1 ? BRAND.green : BRAND.purple) : 'rgba(255,255,255,0.1)',
+                background: step > 1 ? BRAND.green : step === 1 ? BRAND.purple : 'rgba(255,255,255,0.1)',
                 color: step >= 1 ? '#07071a' : 'rgba(255,255,255,0.4)',
               }}>
               {step > 1 ? '✓' : '1'}
@@ -342,14 +434,13 @@ export default function TournamentRegistrationPage() {
               Categories
             </span>
           </div>
-          {/* Connector */}
-          <div className="flex-1 h-0.5 rounded-full mx-1" style={{ background: step >= 2 ? BRAND.green : 'rgba(255,255,255,0.1)' }} />
-          {/* Step 2 */}
+          <div className="flex-1 h-0.5 rounded-full mx-1"
+            style={{ background: step >= 2 ? BRAND.green : 'rgba(255,255,255,0.1)' }} />
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-black"
               style={{
                 background: step >= 2 ? BRAND.purple : 'rgba(255,255,255,0.1)',
-                color: step >= 2 ? '#07071a' : 'rgba(255,255,255,0.4)',
+                color: step >= 2 ? '#fff' : 'rgba(255,255,255,0.4)',
               }}>
               2
             </div>
@@ -361,18 +452,8 @@ export default function TournamentRegistrationPage() {
       </div>
 
       <div className="px-4 space-y-4">
-        {/* Already Registered Notice */}
-        {alreadyRegisteredCategories.length > 0 && getAlreadyRegisteredCategoryNames() && (
-          <div className="flex items-start gap-2.5 px-4 py-3 rounded-xl"
-            style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)' }}>
-            <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: '#f87171' }} />
-            <p className="text-xs font-semibold" style={{ color: '#f87171' }}>
-              Already registered for: {getAlreadyRegisteredCategoryNames()}
-            </p>
-          </div>
-        )}
 
-        {/* Error */}
+        {/* ── Error Banner ─────────────────────────────────────────────── */}
         {error && (
           <div className="flex items-start gap-2.5 px-4 py-3 rounded-xl"
             style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)' }}>
@@ -381,10 +462,23 @@ export default function TournamentRegistrationPage() {
           </div>
         )}
 
-        {/* ── STEP 1 ─────────────────────────────────────────────────────── */}
+        {/* ════════════════════════════════════════════════════════════════
+            STEP 1 — Category Selection
+        ════════════════════════════════════════════════════════════════ */}
         {step === 1 && (
           <>
-            {/* Category Selector */}
+            {/* Already registered notice */}
+            {alreadyRegisteredCategories.length > 0 && (
+              <div className="flex items-start gap-2.5 px-4 py-3 rounded-xl"
+                style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)' }}>
+                <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: '#f87171' }} />
+                <p className="text-xs font-semibold" style={{ color: '#f87171' }}>
+                  Already registered: {getAlreadyRegisteredCategoryNames()}
+                </p>
+              </div>
+            )}
+
+            {/* Category selector */}
             <div className="rounded-2xl p-4" style={{ background: BRAND.card, border: `1px solid ${BRAND.cardBorder}` }}>
               <CategorySelector
                 categories={categories}
@@ -394,7 +488,7 @@ export default function TournamentRegistrationPage() {
               />
             </div>
 
-            {/* Partner Details */}
+            {/* Partner details for doubles */}
             {selectedDoublesCategories.length > 0 && (
               <div className="rounded-2xl p-4" style={{ background: 'rgba(0,255,136,0.05)', border: '1px solid rgba(0,255,136,0.18)' }}>
                 <div className="flex items-center gap-2 mb-4">
@@ -407,7 +501,6 @@ export default function TournamentRegistrationPage() {
                     const partner = partnerInfo[catId];
                     const isSearching = searchingPartner[catId];
                     const code = partnerCodes[catId] || '#';
-                    // Valid to search when # + at least 1 digit
                     const canSearch = /^#\d+$/.test(code) || /^#[A-Z]\d{5}$/i.test(code);
                     return (
                       <div key={catId} className="space-y-2">
@@ -422,11 +515,7 @@ export default function TournamentRegistrationPage() {
                             onChange={e => handlePartnerCodeChange(catId, e.target.value)}
                             placeholder="#1"
                             className="flex-1 px-3 py-3 rounded-xl text-white font-mono text-sm"
-                            style={{
-                              background: 'rgba(0,0,0,0.3)',
-                              border: '1.5px solid rgba(0,255,136,0.25)',
-                              outline: 'none',
-                            }}
+                            style={{ background: 'rgba(0,0,0,0.3)', border: '1.5px solid rgba(0,255,136,0.25)', outline: 'none' }}
                           />
                           <button
                             type="button"
@@ -434,26 +523,24 @@ export default function TournamentRegistrationPage() {
                             disabled={!canSearch || isSearching}
                             className="px-4 py-3 rounded-xl font-black text-xs transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5"
                             style={canSearch && !isSearching
-                              ? { background: 'linear-gradient(135deg,#00ff88,#00ff88)', color: '#07071a' }
+                              ? { background: BRAND.green, color: '#07071a' }
                               : { background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.4)' }}
                           >
                             {isSearching
-                              ? <div className="w-4 h-4 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: '#07071a transparent transparent transparent' }} />
+                              ? <div className="w-4 h-4 rounded-full border-2 border-t-transparent animate-spin"
+                                  style={{ borderColor: '#07071a transparent transparent transparent' }} />
                               : <Search className="w-4 h-4" />}
-                            {isSearching ? '' : 'Search'}
+                            {!isSearching && 'Find'}
                           </button>
                         </div>
-
-                        {/* Partner found */}
                         {partner && (
                           <div className="flex items-center gap-3 p-3 rounded-xl"
                             style={{ background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.25)' }}>
                             {partner.profilePhoto ? (
-                              <img src={partner.profilePhoto} alt={partner.name}
-                                className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
+                              <img src={partner.profilePhoto} alt={partner.name} className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
                             ) : (
                               <div className="w-10 h-10 rounded-full flex items-center justify-center font-black text-sm flex-shrink-0"
-                                style={{ background: 'linear-gradient(135deg,#00ff88,#00ff88)', color: '#07071a' }}>
+                                style={{ background: BRAND.green, color: '#07071a' }}>
                                 {partner.name?.charAt(0)?.toUpperCase()}
                               </div>
                             )}
@@ -471,9 +558,8 @@ export default function TournamentRegistrationPage() {
                             <CheckCircleIcon className="w-5 h-5 flex-shrink-0" style={{ color: BRAND.green }} />
                           </div>
                         )}
-
                         <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                          Partner receives a confirmation once you register.
+                          Partner gets a confirmation once you register.
                         </p>
                       </div>
                     );
@@ -482,24 +568,38 @@ export default function TournamentRegistrationPage() {
               </div>
             )}
 
-            {/* Payment Summary */}
+            {/* Fee breakdown */}
             {selectedCategories.length > 0 && (
-              <PaymentSummary
-                selectedCategories={selectedCategories}
-                categories={categories}
-                tournament={tournament}
-              />
+              <div className="rounded-2xl overflow-hidden" style={{ background: BRAND.card, border: `1px solid ${BRAND.cardBorder}` }}>
+                <div className="px-4 py-3" style={{ borderBottom: `1px solid ${BRAND.cardBorder}`, background: 'rgba(168,85,247,0.05)' }}>
+                  <p className="text-xs font-black uppercase tracking-widest" style={{ color: 'rgba(168,85,247,0.8)' }}>Fee Summary</p>
+                </div>
+                <div className="p-4 space-y-2">
+                  {selectedCategories.map(catId => {
+                    const cat = categories.find(c => c.id === catId);
+                    return cat ? (
+                      <div key={catId} className="flex justify-between text-sm">
+                        <span style={{ color: 'rgba(255,255,255,0.55)' }}>{cat.name}</span>
+                        <span className="font-bold text-white">₹{cat.entryFee}</span>
+                      </div>
+                    ) : null;
+                  })}
+                  <div className="flex justify-between items-center pt-3 mt-1"
+                    style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+                    <span className="text-sm font-black text-white">Total</span>
+                    <span className="text-2xl font-black" style={{ color: BRAND.purple }}>₹{total}</span>
+                  </div>
+                </div>
+              </div>
             )}
 
-            {/* Proceed Button */}
+            {/* Proceed button */}
             <button
               onClick={handleProceedToPayment}
               disabled={selectedCategories.length === 0}
               className="w-full py-4 rounded-2xl font-black text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed"
               style={{
-                background: selectedCategories.length > 0
-                  ? 'linear-gradient(135deg,#7c3aed,#a855f7)'
-                  : 'rgba(255,255,255,0.08)',
+                background: selectedCategories.length > 0 ? 'linear-gradient(135deg,#7c3aed,#a855f7)' : 'rgba(255,255,255,0.08)',
                 color: selectedCategories.length > 0 ? '#fff' : 'rgba(255,255,255,0.4)',
                 boxShadow: selectedCategories.length > 0 ? '0 4px 20px rgba(168,85,247,0.4)' : 'none',
               }}
@@ -509,102 +609,178 @@ export default function TournamentRegistrationPage() {
           </>
         )}
 
-        {/* ── STEP 2 ─────────────────────────────────────────────────────── */}
+        {/* ════════════════════════════════════════════════════════════════
+            STEP 2 — Payment
+        ════════════════════════════════════════════════════════════════ */}
         {step === 2 && (
           <>
-            {/* QR & Payment Info */}
-            <div className="rounded-2xl overflow-hidden" style={{ background: BRAND.card, border: `1px solid ${BRAND.cardBorder}` }}>
-              <div className="px-4 py-3 flex items-center gap-3"
-                style={{ borderBottom: `1px solid ${BRAND.cardBorder}`, background: 'rgba(0,212,255,0.05)' }}>
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-                  style={{ background: 'rgba(0,212,255,0.15)', border: '1px solid rgba(0,212,255,0.3)' }}>
-                  <QrCode className="w-4 h-4" style={{ color: BRAND.cyan }} />
-                </div>
-                <div>
-                  <p className="text-sm font-black text-white">Pay via UPI</p>
-                  <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Scan QR or use UPI ID</p>
-                </div>
-              </div>
-
-              <div className="p-4">
-                {!adminPaymentSettings?.qrCodeUrl && !adminPaymentSettings?.upiId ? (
-                  <div className="rounded-xl p-6 text-center"
-                    style={{ background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.2)' }}>
-                    <p className="text-sm font-semibold" style={{ color: '#f87171' }}>Payment details not set up. Contact support.</p>
-                  </div>
-                ) : (
-                  <>
-                    {adminPaymentSettings?.qrCodeUrl && (
-                      <div className="flex flex-col items-center mb-4 gap-2">
-                        <div className="p-3 bg-white rounded-2xl shadow-lg">
-                          <img
-                            src={adminPaymentSettings.qrCodeUrl}
-                            alt="Payment QR"
-                            className="w-52 h-52 object-contain rounded-xl"
-                            onError={e => { e.target.style.display = 'none'; }}
-                          />
-                        </div>
-                        <button
-                          onClick={async () => {
-                            try {
-                              const res = await fetch(adminPaymentSettings.qrCodeUrl);
-                              const blob = await res.blob();
-                              const objectUrl = URL.createObjectURL(blob);
-                              const a = document.createElement('a');
-                              a.href = objectUrl;
-                              a.download = 'matchify-payment-qr.png';
-                              document.body.appendChild(a);
-                              a.click();
-                              document.body.removeChild(a);
-                              URL.revokeObjectURL(objectUrl);
-                            } catch {
-                              window.open(adminPaymentSettings.qrCodeUrl, '_blank');
-                            }
-                          }}
-                          className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all active:scale-95"
-                          style={{
-                            background: 'rgba(0,255,136,0.10)',
-                            border: '1px solid rgba(0,255,136,0.30)',
-                            color: '#00ff88',
-                          }}
-                        >
-                          ⬇️ Download QR Code
-                        </button>
-                      </div>
-                    )}
-
-                    <div className="space-y-2 rounded-xl p-3"
-                      style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
-                      <div className="flex justify-between text-sm">
-                        <span style={{ color: 'rgba(255,255,255,0.5)' }}>UPI ID</span>
-                        <span className="font-bold text-white">{adminPaymentSettings?.upiId || '—'}</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span style={{ color: 'rgba(255,255,255,0.5)' }}>Account</span>
-                        <span className="font-bold text-white">{adminPaymentSettings?.accountHolder || '—'}</span>
-                      </div>
-                      <div className="flex justify-between items-center pt-2 mt-1" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-                        <span className="text-sm font-bold text-white">Amount</span>
-                        <span className="text-2xl font-black" style={{ color: BRAND.cyan }}>₹{calculateTotal()}</span>
-                      </div>
-                    </div>
-
-                    <div className="mt-3 px-3 py-2 rounded-xl text-xs font-semibold"
-                      style={{ background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.2)', color: '#fbbf24' }}>
-                      ⚠️ Pay exactly ₹{calculateTotal()} and screenshot the confirmation.
-                    </div>
-
-                    {/* Copy UPI ID button */}
-                    {adminPaymentSettings?.upiId && (
-                      <CopyUpiButton upiId={adminPaymentSettings.upiId.trim()} amount={calculateTotal()} />
-                    )}
-                  </>
-                )}
+            {/* ── Amount Header ─────────────────────────────────────────── */}
+            <div className="rounded-2xl p-5 text-center"
+              style={{
+                background: 'linear-gradient(135deg, rgba(0,255,136,0.1), rgba(0,212,255,0.07))',
+                border: '1px solid rgba(0,255,136,0.2)',
+              }}>
+              <p className="text-xs font-bold uppercase tracking-widest mb-2"
+                style={{ color: 'rgba(255,255,255,0.45)' }}>Pay to complete registration</p>
+              <p className="text-6xl font-black" style={{ color: BRAND.green }}>₹{total}</p>
+              <p className="text-sm font-bold mt-2 text-white">{tournament?.name}</p>
+              <div className="flex justify-center gap-3 mt-2 flex-wrap">
+                {selectedCategories.map(catId => {
+                  const cat = categories.find(c => c.id === catId);
+                  return cat ? (
+                    <span key={catId} className="text-xs px-2 py-1 rounded-lg"
+                      style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)' }}>
+                      {cat.name} · ₹{cat.entryFee}
+                    </span>
+                  ) : null;
+                })}
               </div>
             </div>
 
-            {/* Screenshot Upload */}
-            <div className="rounded-2xl overflow-hidden" style={{ background: BRAND.card, border: `1px solid ${BRAND.cardBorder}` }}>
+            {/* ── Pay Using ─────────────────────────────────────────────── */}
+            {!upiId && !qrUrl ? (
+              <div className="rounded-2xl p-6 text-center"
+                style={{ background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.2)' }}>
+                <p className="text-sm font-semibold" style={{ color: '#f87171' }}>
+                  Payment details not configured. Contact support.
+                </p>
+              </div>
+            ) : (
+              <>
+                {/* ── UPI ID + Amount + App Buttons ─────────────────────── */}
+                <div className="rounded-2xl overflow-hidden"
+                  style={{ background: BRAND.card, border: `1px solid ${BRAND.cardBorder}` }}>
+                  <div className="px-4 py-3 flex items-center gap-2"
+                    style={{ borderBottom: `1px solid ${BRAND.cardBorder}`, background: 'rgba(0,212,255,0.04)' }}>
+                    <QrCode className="w-4 h-4" style={{ color: BRAND.cyan }} />
+                    <p className="text-sm font-black text-white">Pay via UPI</p>
+                  </div>
+                  <div className="p-4 space-y-3">
+
+                    {/* UPI ID copy field */}
+                    {upiId && (
+                      <CopyField label="UPI ID (paste in any UPI app)" value={upiId} mono highlight />
+                    )}
+
+                    {/* Amount copy field */}
+                    <CopyField label="Amount to send" value={`₹${total}`} highlight />
+
+                    {/* Account name */}
+                    {accountHolder && (
+                      <div className="px-4 py-2.5 rounded-xl"
+                        style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                        <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Pay to</p>
+                        <p className="text-sm font-bold text-white">{accountHolder}</p>
+                      </div>
+                    )}
+
+                    {/* App buttons */}
+                    {upiId && (
+                      <>
+                        <div className="pt-1">
+                          <p className="text-xs font-bold mb-2" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                            Open UPI app (copies UPI ID automatically)
+                          </p>
+                          <div className="grid grid-cols-4 gap-2">
+                            <UpiAppButton
+                              label="GPay"
+                              emoji="🟢"
+                              scheme={`tez://upi/pay?pa=${upiId}&pn=${encodeURIComponent(accountHolder)}`}
+                              upiId={upiId}
+                              onCopied={showUpiCopied}
+                            />
+                            <UpiAppButton
+                              label="PhonePe"
+                              emoji="🟣"
+                              scheme={`phonepe://pay?transactionId=${Date.now()}&upiId=${upiId}&purpose=p2p`}
+                              upiId={upiId}
+                              onCopied={showUpiCopied}
+                            />
+                            <UpiAppButton
+                              label="Paytm"
+                              emoji="🔵"
+                              scheme={`paytmmp://pay?pa=${upiId}`}
+                              upiId={upiId}
+                              onCopied={showUpiCopied}
+                            />
+                            <UpiAppButton
+                              label="BHIM"
+                              emoji="🇮🇳"
+                              scheme={`bhim://pay?pa=${upiId}`}
+                              upiId={upiId}
+                              onCopied={showUpiCopied}
+                            />
+                          </div>
+                        </div>
+                        <p className="text-xs text-center" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                          UPI ID is copied to clipboard when you tap any app button
+                        </p>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* ── QR Code ───────────────────────────────────────────── */}
+                {qrUrl && (
+                  <div className="rounded-2xl p-4"
+                    style={{ background: BRAND.card, border: `1px solid ${BRAND.cardBorder}` }}>
+                    <p className="text-xs font-bold uppercase tracking-widest mb-3 text-center"
+                      style={{ color: 'rgba(255,255,255,0.4)' }}>Or scan QR code</p>
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="p-3 bg-white rounded-2xl shadow-lg">
+                        <img
+                          src={qrUrl}
+                          alt="Payment QR Code"
+                          className="w-52 h-52 object-contain rounded-xl"
+                          onError={e => { e.target.style.display = 'none'; }}
+                        />
+                      </div>
+                      <button
+                        onClick={() => downloadQR(qrUrl)}
+                        className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all active:scale-95"
+                        style={{
+                          background: 'rgba(0,255,136,0.10)',
+                          border: '1px solid rgba(0,255,136,0.30)',
+                          color: '#00ff88',
+                        }}
+                      >
+                        ⬇️ Download QR Code
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* ── How to Pay ────────────────────────────────────────── */}
+                <div className="rounded-2xl p-4"
+                  style={{ background: 'rgba(168,85,247,0.06)', border: '1px solid rgba(168,85,247,0.18)' }}>
+                  <p className="text-xs font-black uppercase tracking-widest mb-3" style={{ color: BRAND.purple }}>
+                    How to pay
+                  </p>
+                  {[
+                    `Tap an app button above — UPI ID auto-copies`,
+                    `OR scan the QR code with your camera app`,
+                    `Send exactly ₹${total} — use the copied UPI ID`,
+                    `Take a screenshot of the payment success screen`,
+                    `Come back here and upload the screenshot below`,
+                    `Admin verifies and confirms your registration`,
+                  ].map((step, i) => (
+                    <div key={i} className="flex items-start gap-3 mt-2.5">
+                      <span
+                        className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0 mt-0.5"
+                        style={{ background: BRAND.purple, color: '#fff' }}
+                      >
+                        {i + 1}
+                      </span>
+                      <p className="text-xs leading-relaxed" style={{ color: 'rgba(255,255,255,0.6)' }}>{step}</p>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {/* ── Screenshot Upload ─────────────────────────────────────── */}
+            <div className="rounded-2xl overflow-hidden"
+              style={{ background: BRAND.card, border: `1px solid ${BRAND.cardBorder}` }}>
               <div className="px-4 py-3 flex items-center gap-3"
                 style={{ borderBottom: `1px solid ${BRAND.cardBorder}`, background: 'rgba(0,255,136,0.04)' }}>
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center"
@@ -612,64 +788,64 @@ export default function TournamentRegistrationPage() {
                   <Upload className="w-4 h-4" style={{ color: BRAND.green }} />
                 </div>
                 <div>
-                  <p className="text-sm font-black text-white">Upload Screenshot</p>
-                  <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Required for verification</p>
+                  <p className="text-sm font-black text-white">Upload Payment Screenshot</p>
+                  <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                    {paymentScreenshot ? 'Screenshot ready' : 'Required for verification'}
+                  </p>
                 </div>
               </div>
-
               <div className="p-4">
                 {!paymentPreview ? (
                   <div
                     onClick={() => fileInputRef.current?.click()}
                     className="border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all"
                     style={{ borderColor: 'rgba(0,255,136,0.2)', background: 'rgba(0,255,136,0.02)' }}
+                    onTouchStart={e => e.currentTarget.style.background = 'rgba(0,255,136,0.05)'}
+                    onTouchEnd={e => e.currentTarget.style.background = 'rgba(0,255,136,0.02)'}
                   >
                     <CameraIcon className="w-12 h-12 mx-auto mb-3" style={{ color: 'rgba(255,255,255,0.3)' }} />
-                    <p className="text-sm font-bold text-white mb-1">Tap to upload payment screenshot</p>
-                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>PNG, JPG up to 5MB</p>
-                    <input ref={fileInputRef} type="file" accept="image/*" onChange={handleScreenshotSelect} className="hidden" />
+                    <p className="text-sm font-bold text-white mb-1">Tap to upload screenshot</p>
+                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>JPG, PNG · max 5MB</p>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      onChange={handleScreenshotSelect}
+                      className="hidden"
+                    />
                   </div>
                 ) : (
                   <div className="relative">
                     <img src={paymentPreview} alt="Payment Screenshot" className="w-full rounded-xl" />
-                    <button onClick={removeScreenshot}
+                    <button
+                      onClick={removeScreenshot}
                       className="absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center"
-                      style={{ background: 'rgba(239,68,68,0.9)' }}>
+                      style={{ background: 'rgba(239,68,68,0.9)' }}
+                    >
                       <XMarkIcon className="w-4 h-4 text-white" />
                     </button>
-                    <div className="mt-3 flex items-center gap-2">
+                    <div className="mt-3 flex items-center gap-2 px-1">
                       <CheckCircleIcon className="w-4 h-4" style={{ color: BRAND.green }} />
-                      <span className="text-sm font-bold" style={{ color: BRAND.green }}>Screenshot uploaded</span>
+                      <span className="text-sm font-bold" style={{ color: BRAND.green }}>Screenshot ready</span>
                     </div>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* What's Next */}
-            <div className="rounded-xl px-4 py-3"
-              style={{ background: 'rgba(168,85,247,0.06)', border: '1px solid rgba(168,85,247,0.18)' }}>
-              <p className="text-xs font-black mb-2" style={{ color: BRAND.purple }}>What happens next?</p>
-              {['Organizer reviews your payment screenshot', 'Registration confirmed once verified', 'Notification sent when approved'].map((t, i) => (
-                <div key={i} className="flex items-start gap-2 mt-1.5">
-                  <span className="text-xs font-black mt-0.5" style={{ color: BRAND.purple }}>{i + 1}.</span>
-                  <p className="text-xs" style={{ color: 'rgba(255,255,255,0.55)' }}>{t}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Buttons */}
+            {/* ── Submit Buttons ────────────────────────────────────────── */}
             <div className="flex gap-3">
               <button
                 onClick={() => { setStep(1); setError(''); }}
                 className="px-5 py-4 rounded-2xl font-bold text-sm"
                 style={{ background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.12)' }}
               >
-                Back
+                ← Back
               </button>
               <button
                 onClick={handleRegister}
-                disabled={submitting || !paymentScreenshot || (!adminPaymentSettings?.qrCodeUrl && !adminPaymentSettings?.upiId)}
+                disabled={submitting || !paymentScreenshot}
                 className="flex-1 py-4 rounded-2xl font-black text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 style={{
                   background: paymentScreenshot ? 'linear-gradient(135deg,#00ff88,#00ff88)' : 'rgba(255,255,255,0.08)',
@@ -678,15 +854,9 @@ export default function TournamentRegistrationPage() {
                 }}
               >
                 {submitting ? (
-                  <>
-                    <Loader className="animate-spin h-4 w-4" />
-                    Submitting…
-                  </>
+                  <><Loader className="animate-spin h-4 w-4" /> Submitting…</>
                 ) : (
-                  <>
-                    <CheckCircleIcon className="w-4 h-4" />
-                    Complete Registration
-                  </>
+                  <><CheckCircleIcon className="w-4 h-4" /> Complete Registration</>
                 )}
               </button>
             </div>
@@ -694,13 +864,14 @@ export default function TournamentRegistrationPage() {
         )}
       </div>
 
-      {/* ── Success Modal ──────────────────────────────────────────────────── */}
+      {/* ════════════════════════════════════════════════════════════════════
+          Success Modal
+      ════════════════════════════════════════════════════════════════════ */}
       {showSuccessModal && (
         <div className="fixed inset-0 flex items-end justify-center z-50 p-4"
           style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)' }}>
           <div className="w-full max-w-sm rounded-3xl overflow-hidden"
             style={{ background: '#0d0d2b', border: '1px solid rgba(255,255,255,0.1)' }}>
-            {/* Green success header */}
             <div className="pt-8 pb-5 px-6 text-center"
               style={{ background: 'linear-gradient(180deg,rgba(0,255,136,0.12) 0%,transparent 100%)' }}>
               <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
@@ -708,13 +879,9 @@ export default function TournamentRegistrationPage() {
                 <CheckCircleIcon className="w-9 h-9 text-white" />
               </div>
               <h2 className="text-xl font-black text-white mb-1">Registration Submitted!</h2>
-              <p className="text-sm" style={{ color: 'rgba(255,255,255,0.55)' }}>
-                {tournament?.name}
-              </p>
+              <p className="text-sm" style={{ color: 'rgba(255,255,255,0.55)' }}>{tournament?.name}</p>
             </div>
-
             <div className="px-5 pb-6 space-y-3">
-              {/* Status */}
               <div className="rounded-xl p-4"
                 style={{ background: 'rgba(251,191,36,0.07)', border: '1px solid rgba(251,191,36,0.2)' }}>
                 <div className="flex items-center gap-3 mb-2">
@@ -724,11 +891,9 @@ export default function TournamentRegistrationPage() {
                 <div className="space-y-1 text-xs" style={{ color: 'rgba(251,191,36,0.8)' }}>
                   <p>✓ Payment screenshot uploaded</p>
                   <p>✓ Registration details saved</p>
-                  <p>⏳ Awaiting organizer approval</p>
+                  <p>⏳ Awaiting admin approval</p>
                 </div>
               </div>
-
-              {/* Buttons */}
               <button
                 onClick={() => navigate('/registrations')}
                 className="w-full py-4 rounded-2xl font-black text-sm"

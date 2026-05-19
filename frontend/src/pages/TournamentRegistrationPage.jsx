@@ -557,7 +557,7 @@ export default function TournamentRegistrationPage() {
                     {/* UPI Deep Link Button */}
                     {adminPaymentSettings?.upiId && (() => {
                       const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-                      const upiLink = `upi://pay?pa=${encodeURIComponent(adminPaymentSettings.upiId)}&pn=${encodeURIComponent(adminPaymentSettings.accountHolder || 'Matchify.pro')}&am=${calculateTotal().toFixed(2)}&cu=INR&tn=${encodeURIComponent('Tournament Registration')}`;
+                      const upiLink = `upi://pay?pa=${adminPaymentSettings.upiId.trim()}&pn=${encodeURIComponent(adminPaymentSettings.accountHolder || 'Matchify')}&am=${calculateTotal().toFixed(2)}&cu=INR&tn=TournamentRegistration`;
                       return isIOS ? (
                         <div className="mt-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-center"
                           style={{ background: 'rgba(0,212,255,0.07)', border: '1px solid rgba(0,212,255,0.2)', color: 'rgba(0,212,255,0.8)' }}>

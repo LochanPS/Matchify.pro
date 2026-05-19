@@ -145,10 +145,6 @@ const UserDetailsModal = ({ userId, onClose }) => {
                 </h3>
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-gray-400">Wallet Balance:</span>
-                    <span className="font-bold text-green-400">₹{user.walletBalance}</span>
-                  </div>
-                  <div className="flex justify-between">
                     <span className="text-gray-400">Registrations:</span>
                     <span className="font-medium text-white">{user.registrations?.length || 0}</span>
                   </div>

@@ -113,7 +113,7 @@ const NotificationDropdown = ({ onClose }) => {
         return '/tournaments';
       
       case 'REFUND_PROCESSED':
-        return '/wallet';
+        return '/registrations';
       
       case 'POINTS_AWARDED':
         return '/points';

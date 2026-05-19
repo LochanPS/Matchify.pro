@@ -22,7 +22,7 @@ const HomePage                  = lazy(() => import('./pages/HomePageMobile'))
 const LoginPage                 = lazy(() => import('./pages/LoginPageMobile'))
 const RegisterPage              = lazy(() => import('./pages/RegisterPageMobile'))
 const ProfilePage               = lazy(() => import('./pages/ProfilePage'))
-const Wallet                    = lazy(() => import('./pages/Wallet'))
+// Wallet disabled for now
 const TournamentsPage           = lazy(() => import('./pages/TournamentsPage'))
 const TournamentDetailPage      = lazy(() => import('./pages/TournamentDetailPage'))
 const TournamentDiscoveryPage   = lazy(() => import('./pages/TournamentDiscoveryPage'))
@@ -359,14 +359,7 @@ function AppContent() {
             }
           />
           
-          <Route
-            path="/wallet"
-            element={
-              <ProtectedRoute>
-                <Wallet />
-              </ProtectedRoute>
-            }
-          />
+          {/* Wallet route disabled for now */}
           
           <Route
             path="/notifications"

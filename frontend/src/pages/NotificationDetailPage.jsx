@@ -192,7 +192,7 @@ const NotificationDetailPage = () => {
       case 'TOURNAMENT_CANCELLED': case 'TOURNAMENT_REMINDER':
         if (data.tournamentId) return `/tournaments/${data.tournamentId}`;
         return '/tournaments';
-      case 'REFUND_PROCESSED': return '/wallet';
+      case 'REFUND_PROCESSED': return '/registrations';
       case 'POINTS_AWARDED': return '/leaderboard';
       default: return null;
     }
@@ -208,7 +208,7 @@ const NotificationDetailPage = () => {
       case 'TOURNAMENT_CANCELLED': case 'TOURNAMENT_REMINDER': return 'View Tournament Details';
       case 'PAYMENT_VERIFICATION_REQUIRED': case 'REGISTRATION_PENDING': return 'View Tournament Dashboard';
       case 'CANCELLATION_REQUEST': return 'Review Cancellation Request';
-      case 'REFUND_PROCESSED': return 'View My Wallet';
+      case 'REFUND_PROCESSED': return 'View My Registrations';
       case 'POINTS_AWARDED': return 'View Leaderboard';
       default: return 'Take Action';
     }

@@ -55,13 +55,6 @@ export default function ProfileStats({ stats, user }) {
       glow: 'group-hover:shadow-blue-500/20',
     },
     {
-      icon: RupeeIcon,
-      label: 'Wallet Balance',
-      value: `₹${user?.walletBalance || 0}`,
-      color: 'bg-purple-500/20 text-purple-400',
-      glow: 'group-hover:shadow-purple-500/20',
-    },
-    {
       icon: Calendar,
       label: 'Member Since',
       value: formatDate(user?.createdAt),

@@ -506,7 +506,7 @@ export default function TournamentRegistrationPage() {
                 ) : (
                   <>
                     {adminPaymentSettings?.qrCodeUrl && (
-                      <div className="flex justify-center mb-4">
+                      <div className="flex flex-col items-center mb-4 gap-2">
                         <div className="p-3 bg-white rounded-2xl shadow-lg">
                           <img
                             src={adminPaymentSettings.qrCodeUrl}
@@ -515,6 +515,21 @@ export default function TournamentRegistrationPage() {
                             onError={e => { e.target.style.display = 'none'; }}
                           />
                         </div>
+                        <a
+                          href={adminPaymentSettings.qrCodeUrl}
+                          download="matchify-payment-qr.png"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all active:scale-95"
+                          style={{
+                            background: 'rgba(0,255,136,0.10)',
+                            border: '1px solid rgba(0,255,136,0.30)',
+                            color: '#00ff88',
+                            textDecoration: 'none',
+                          }}
+                        >
+                          ⬇️ Download QR Code
+                        </a>
                       </div>
                     )}
 

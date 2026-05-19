@@ -257,18 +257,11 @@
 }
 
 /* ── Global brightness lift ─────────────────────────────────────────────────
-   Raises perceived brightness of the whole UI by ~10% without touching
-   individual component styles. Images/videos are counteracted so they
-   don't look washed out (1.10 × 0.909 ≈ 1.0).
+   NOTE: filter on #root was removed — it breaks position:fixed modals on
+   iOS Safari (fixed children get positioned relative to filtered parent,
+   not viewport, causing overlays to render off-screen when page is scrolled).
+   Brightness is handled via the lighter base background (#161730) instead.
    ─────────────────────────────────────────────────────────────────────────── */
-#root {
-  filter: brightness(1.18);
-}
-
-#root img,
-#root video {
-  filter: brightness(0.847);
-}
 
 /* Custom scrollbar */
 .custom-scrollbar::-webkit-scrollbar {

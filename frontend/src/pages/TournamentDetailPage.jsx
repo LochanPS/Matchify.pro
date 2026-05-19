@@ -237,9 +237,12 @@ const TournamentDetailPage = () => {
       const response = await tournamentAPI.getTournamentUmpires(id);
       if (response.success) {
         setUmpires(response.umpires || []);
+      } else {
+        setUmpires([]);
       }
     } catch (err) {
       console.error('Error fetching umpires:', err);
+      setUmpires([]); // Don't leave UI stuck — show empty list on error/timeout
     } finally {
       setLoadingUmpires(false);
     }

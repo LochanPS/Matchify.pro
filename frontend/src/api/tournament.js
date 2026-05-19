@@ -1,4 +1,5 @@
 import axios from 'axios';
+import api from '../utils/api'; // has 20s timeout + auth interceptor
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://matchify-probackend.vercel.app/api';
 
@@ -144,26 +145,23 @@ export const tournamentAPI = {
 
   // Umpire management (organizer only)
   addUmpireByCode: async (tournamentId, umpireCode) => {
-    const response = await axios.post(
-      `${API_URL}/tournaments/${tournamentId}/umpires`,
-      { umpireCode },
-      { headers: getAuthHeader() }
+    const response = await api.post(
+      `/tournaments/${tournamentId}/umpires`,
+      { umpireCode }
     );
     return response.data;
   },
 
   getTournamentUmpires: async (tournamentId) => {
-    const response = await axios.get(
-      `${API_URL}/tournaments/${tournamentId}/umpires`,
-      { headers: getAuthHeader() }
+    const response = await api.get(
+      `/tournaments/${tournamentId}/umpires`
     );
     return response.data;
   },
 
   removeUmpire: async (tournamentId, umpireId) => {
-    const response = await axios.delete(
-      `${API_URL}/tournaments/${tournamentId}/umpires/${umpireId}`,
-      { headers: getAuthHeader() }
+    const response = await api.delete(
+      `/tournaments/${tournamentId}/umpires/${umpireId}`
     );
     return response.data;
   },

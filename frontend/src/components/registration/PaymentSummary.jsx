@@ -28,6 +28,35 @@ const downloadQR = async (url) => {
   }
 };
 
+function CopyUpiButton({ upiId, amount }) {
+  const [copied, setCopied] = useState(false);
+  const copy = () => {
+    navigator.clipboard.writeText(upiId).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+  return (
+    <div className="mt-2 space-y-2">
+      <div className="px-3 py-2 rounded-xl text-xs font-semibold text-center"
+        style={{ background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.2)', color: '#fbbf24' }}>
+        Open any UPI app → Send Money → paste UPI ID → enter <strong>₹{amount}</strong>
+      </div>
+      <button
+        onClick={copy}
+        className="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-sm font-black transition-all active:scale-95"
+        style={{
+          background: copied ? 'rgba(0,255,136,0.15)' : 'rgba(0,212,255,0.1)',
+          border: copied ? '1px solid rgba(0,255,136,0.4)' : '1px solid rgba(0,212,255,0.35)',
+          color: copied ? '#00ff88' : '#00d4ff',
+        }}
+      >
+        {copied ? '✅ Copied!' : '📋 Copy UPI ID'}
+      </button>
+    </div>
+  );
+}
+
 export default function PaymentSummary({ selectedCategories, categories, tournament }) {
   const [adminPaymentSettings, setAdminPaymentSettings] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -125,38 +154,9 @@ export default function PaymentSummary({ selectedCategories, categories, tournam
               style={{ background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.2)', color: '#fbbf24' }}>
               Pay <strong>₹{totalAmount}</strong> using any UPI app
             </div>
-            {adminPaymentSettings?.upiId && (() => {
-              const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-              // No `am` param — pre-filled amount triggers P2M/merchant classification
-              // causing bank limit errors. User enters amount manually (P2P flow).
-              const upiLink = `upi://pay?pa=${adminPaymentSettings.upiId.trim()}`;
-              return isIOS ? (
-                <div className="mt-2 px-3 py-2.5 rounded-xl text-xs font-semibold text-center"
-                  style={{ background: 'rgba(0,212,255,0.07)', border: '1px solid rgba(0,212,255,0.2)', color: 'rgba(0,212,255,0.8)' }}>
-                  📱 On iPhone, scan QR above with your camera app
-                </div>
-              ) : (
-                <>
-                  <div className="mt-2 px-3 py-2 rounded-xl text-xs font-black text-center"
-                    style={{ background: 'rgba(0,255,136,0.1)', border: '1px solid rgba(0,255,136,0.3)', color: '#00ff88' }}>
-                    Enter <strong>₹{totalAmount}</strong> as the amount in your UPI app
-                  </div>
-                  <a
-                    href={upiLink}
-                    className="mt-2 flex items-center justify-center gap-2 w-full py-3 rounded-xl text-sm font-black transition-all active:scale-95"
-                    style={{
-                      background: 'linear-gradient(135deg, #00d4ff22, #7c3aed22)',
-                      border: '1px solid rgba(0,212,255,0.35)',
-                      color: '#fff',
-                      textDecoration: 'none',
-                    }}
-                  >
-                    <span style={{ fontSize: '1.1rem' }}>📲</span>
-                    Open UPI App
-                  </a>
-                </>
-              );
-            })()}
+            {adminPaymentSettings?.upiId && (
+              <CopyUpiButton upiId={adminPaymentSettings.upiId.trim()} amount={totalAmount} />
+            )}
             <div className="mt-2 px-3 py-2 rounded-xl text-xs"
               style={{ background: 'rgba(0,212,255,0.06)', border: '1px solid rgba(0,212,255,0.18)', color: 'rgba(0,212,255,0.8)' }}>
               🔒 All payments go to Matchify.pro. Organizer paid after verification.

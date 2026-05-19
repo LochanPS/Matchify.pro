@@ -1,85 +1,40 @@
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || 'https://matchify-probackend.vercel.app/api';
-
-// Get auth token from localStorage
-const getAuthHeader = () => {
-  const token = localStorage.getItem('token');
-  return { Authorization: `Bearer ${token}` };
-};
+import api from '../utils/api';
 
 export const walletAPI = {
-  // Get wallet balance
   getBalance: async () => {
-    const response = await axios.get(`${API_URL}/wallet/balance`, {
-      headers: getAuthHeader(),
-    });
+    const response = await api.get('/wallet/balance');
     return response.data;
   },
 
-  // Get wallet summary
   getSummary: async () => {
-    const response = await axios.get(`${API_URL}/wallet/summary`, {
-      headers: getAuthHeader(),
-    });
+    const response = await api.get('/wallet/summary');
     return response.data;
   },
 
-  // Create top-up order
   createTopupOrder: async (amount) => {
-    const response = await axios.post(
-      `${API_URL}/wallet/topup`,
-      { amount },
-      { headers: getAuthHeader() }
-    );
+    const response = await api.post('/wallet/topup', { amount });
     return response.data;
   },
 
-  // Verify payment
   verifyPayment: async (paymentData) => {
-    const response = await axios.post(
-      `${API_URL}/wallet/topup/verify`,
-      paymentData,
-      { headers: getAuthHeader() }
-    );
+    const response = await api.post('/wallet/topup/verify', paymentData);
     return response.data;
   },
 
-  // Get transaction history
   getTransactions: async (page = 1, limit = 20, type = null) => {
-    const params = new URLSearchParams({
-      page: page.toString(),
-      limit: limit.toString(),
-    });
-    
-    if (type) {
-      params.append('type', type);
-    }
-
-    const response = await axios.get(
-      `${API_URL}/wallet/transactions?${params}`,
-      { headers: getAuthHeader() }
-    );
+    const params = new URLSearchParams({ page: page.toString(), limit: limit.toString() });
+    if (type) params.append('type', type);
+    const response = await api.get(`/wallet/transactions?${params}`);
     return response.data;
   },
 
-  // Deduct amount (internal use)
   deductAmount: async (amount, description, referenceId) => {
-    const response = await axios.post(
-      `${API_URL}/wallet/deduct`,
-      { amount, description, referenceId },
-      { headers: getAuthHeader() }
-    );
+    const response = await api.post('/wallet/deduct', { amount, description, referenceId });
     return response.data;
   },
 
-  // Refund amount (internal use)
   refundAmount: async (amount, description, referenceId) => {
-    const response = await axios.post(
-      `${API_URL}/wallet/refund`,
-      { amount, description, referenceId },
-      { headers: getAuthHeader() }
-    );
+    const response = await api.post('/wallet/refund', { amount, description, referenceId });
     return response.data;
   },
 };

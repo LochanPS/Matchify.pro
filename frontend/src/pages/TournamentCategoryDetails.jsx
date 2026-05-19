@@ -1,6 +1,6 @@
 ﻿import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../utils/api';
 import {
   ArrowLeft, Trophy, Users, Swords, CheckCircle, Clock,
   Download, Star, TrendingUp
@@ -30,11 +30,7 @@ export default function TournamentCategoryDetails() {
 
   const fetchCategoryDetails = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(
-        `${import.meta.env.VITE_API_URL || 'https://matchify-probackend.vercel.app/api'}/organizer/categories/${categoryId}/details`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const response = await api.get(`/organizer/categories/${categoryId}/details`);
       if (response.data.success) {
         setCategory(response.data.data);
       }

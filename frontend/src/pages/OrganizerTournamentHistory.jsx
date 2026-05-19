@@ -1,6 +1,6 @@
 ﻿import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../utils/api';
 import TournamentHistoryCard from '../components/TournamentHistoryCard';
 import { ArrowLeftIcon, TrophyIcon } from '@heroicons/react/24/outline';
 import { Filter, X, RefreshCw } from 'lucide-react';
@@ -23,17 +23,13 @@ export default function OrganizerTournamentHistory() {
   const fetchHistory = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
       const params = new URLSearchParams();
       if (filters.status) params.append('status', filters.status);
       if (filters.startDate) params.append('startDate', filters.startDate);
       if (filters.endDate) params.append('endDate', filters.endDate);
       params.append('page', filters.page);
       params.append('limit', 10);
-      const response = await axios.get(
-        `${import.meta.env.VITE_API_URL || 'https://matchify-probackend.vercel.app/api'}/organizer/history?${params}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const response = await api.get(`/organizer/history?${params}`);
       if (response.data.success) {
         setTournaments(response.data.data.tournaments);
         setPagination(response.data.data.pagination);

@@ -1,54 +1,34 @@
-import axios from 'axios';
-import api from '../utils/api'; // has 20s timeout + auth interceptor
-
-const API_URL = import.meta.env.VITE_API_URL || 'https://matchify-probackend.vercel.app/api';
-
-// Get auth token from localStorage
-const getAuthHeader = () => {
-  const token = localStorage.getItem('token');
-  return token ? { Authorization: `Bearer ${token}` } : {};
-};
+import api from '../utils/api'; // 20s timeout + auth interceptor on every call
 
 export const tournamentAPI = {
   // Get all tournaments (public)
   getTournaments: async (params = {}) => {
     const queryString = new URLSearchParams(params).toString();
-    const response = await axios.get(`${API_URL}/tournaments?${queryString}`);
+    const response = await api.get(`/tournaments?${queryString}`);
     return response.data;
   },
 
   // Get single tournament (public)
   getTournament: async (id) => {
-    const response = await axios.get(`${API_URL}/tournaments/${id}`);
+    const response = await api.get(`/tournaments/${id}`);
     return response.data;
   },
 
   // Create tournament (organizer only)
   createTournament: async (tournamentData) => {
-    const response = await axios.post(
-      `${API_URL}/tournaments`,
-      tournamentData,
-      { headers: getAuthHeader() }
-    );
+    const response = await api.post('/tournaments', tournamentData);
     return response.data;
   },
 
   // Update tournament (organizer only)
   updateTournament: async (id, tournamentData) => {
-    const response = await axios.put(
-      `${API_URL}/tournaments/${id}`,
-      tournamentData,
-      { headers: getAuthHeader() }
-    );
+    const response = await api.put(`/tournaments/${id}`, tournamentData);
     return response.data;
   },
 
   // Delete tournament (organizer only)
   deleteTournament: async (id) => {
-    const response = await axios.delete(
-      `${API_URL}/tournaments/${id}`,
-      { headers: getAuthHeader() }
-    );
+    const response = await api.delete(`/tournaments/${id}`);
     return response.data;
   },
 
@@ -58,48 +38,39 @@ export const tournamentAPI = {
     files.forEach((file) => {
       formData.append('posters', file);
     });
-
-    const response = await axios.post(
-      `${API_URL}/tournaments/${id}/posters`,
+    const response = await api.post(
+      `/tournaments/${id}/posters`,
       formData,
-      {
-        headers: {
-          ...getAuthHeader(),
-          'Content-Type': 'multipart/form-data',
-        },
-      }
+      { headers: { 'Content-Type': 'multipart/form-data' } }
     );
     return response.data;
   },
 
   // Category endpoints
   createCategory: async (tournamentId, categoryData) => {
-    const response = await axios.post(
-      `${API_URL}/tournaments/${tournamentId}/categories`,
-      categoryData,
-      { headers: getAuthHeader() }
+    const response = await api.post(
+      `/tournaments/${tournamentId}/categories`,
+      categoryData
     );
     return response.data;
   },
 
   getCategories: async (tournamentId) => {
-    const response = await axios.get(`${API_URL}/tournaments/${tournamentId}/categories`);
+    const response = await api.get(`/tournaments/${tournamentId}/categories`);
     return response.data;
   },
 
   updateCategory: async (tournamentId, categoryId, categoryData) => {
-    const response = await axios.put(
-      `${API_URL}/tournaments/${tournamentId}/categories/${categoryId}`,
-      categoryData,
-      { headers: getAuthHeader() }
+    const response = await api.put(
+      `/tournaments/${tournamentId}/categories/${categoryId}`,
+      categoryData
     );
     return response.data;
   },
 
   deleteCategory: async (tournamentId, categoryId) => {
-    const response = await axios.delete(
-      `${API_URL}/tournaments/${tournamentId}/categories/${categoryId}`,
-      { headers: getAuthHeader() }
+    const response = await api.delete(
+      `/tournaments/${tournamentId}/categories/${categoryId}`
     );
     return response.data;
   },
@@ -110,35 +81,27 @@ export const tournamentAPI = {
     formData.append('paymentQR', file);
     if (upiId) formData.append('upiId', upiId);
     if (accountHolderName) formData.append('accountHolderName', accountHolderName);
-
-    const response = await axios.post(
-      `${API_URL}/tournaments/${tournamentId}/payment-qr`,
+    const response = await api.post(
+      `/tournaments/${tournamentId}/payment-qr`,
       formData,
-      {
-        headers: {
-          ...getAuthHeader(),
-          'Content-Type': 'multipart/form-data',
-        },
-      }
+      { headers: { 'Content-Type': 'multipart/form-data' } }
     );
     return response.data;
   },
 
   // Delete a poster (organizer only)
   deletePoster: async (tournamentId, posterId) => {
-    const response = await axios.delete(
-      `${API_URL}/tournaments/${tournamentId}/posters/${posterId}`,
-      { headers: getAuthHeader() }
+    const response = await api.delete(
+      `/tournaments/${tournamentId}/posters/${posterId}`
     );
     return response.data;
   },
 
   // Update payment info (organizer only)
   updatePaymentInfo: async (tournamentId, paymentInfo) => {
-    const response = await axios.put(
-      `${API_URL}/tournaments/${tournamentId}/payment-info`,
-      paymentInfo,
-      { headers: getAuthHeader() }
+    const response = await api.put(
+      `/tournaments/${tournamentId}/payment-info`,
+      paymentInfo
     );
     return response.data;
   },
@@ -153,9 +116,7 @@ export const tournamentAPI = {
   },
 
   getTournamentUmpires: async (tournamentId) => {
-    const response = await api.get(
-      `/tournaments/${tournamentId}/umpires`
-    );
+    const response = await api.get(`/tournaments/${tournamentId}/umpires`);
     return response.data;
   },
 

@@ -1,36 +1,16 @@
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || 'https://matchify-probackend.vercel.app/api';
-
-// Create axios instance with auth header
-const getAuthHeader = () => {
-  const token = localStorage.getItem('token');
-  return token ? { Authorization: `Bearer ${token}` } : {};
-};
+import api from '../utils/api';
 
 const adminService = {
   // ==================== DASHBOARD ====================
-  
-  /**
-   * Get platform statistics
-   */
   async getStats(startDate, endDate) {
     const params = {};
     if (startDate) params.startDate = startDate;
     if (endDate) params.endDate = endDate;
-    
-    const response = await axios.get(`${API_URL}/admin/stats`, {
-      headers: getAuthHeader(),
-      params
-    });
+    const response = await api.get(`/admin/stats`, { params });
     return response.data;
   },
 
   // ==================== USER MANAGEMENT ====================
-  
-  /**
-   * Get all users with filters
-   */
   async getUsers({ page = 1, limit = 20, search, role, status, city, state }) {
     const params = { page, limit };
     if (search) params.search = search;
@@ -38,97 +18,46 @@ const adminService = {
     if (status) params.status = status;
     if (city) params.city = city;
     if (state) params.state = state;
-    
-    const response = await axios.get(`${API_URL}/admin/users`, {
-      headers: getAuthHeader(),
-      params
-    });
+    const response = await api.get(`/admin/users`, { params });
     return response.data;
   },
 
-  /**
-   * Get user details by ID
-   */
   async getUserDetails(userId) {
-    const response = await axios.get(`${API_URL}/admin/users/${userId}`, {
-      headers: getAuthHeader()
-    });
+    const response = await api.get(`/admin/users/${userId}`);
     return response.data;
   },
 
-  /**
-   * Suspend a user
-   */
   async suspendUser(userId, reason, durationDays) {
-    const response = await axios.post(
-      `${API_URL}/admin/users/${userId}/suspend`,
-      { reason, durationDays },
-      { headers: getAuthHeader() }
-    );
+    const response = await api.post(`/admin/users/${userId}/suspend`, { reason, durationDays });
     return response.data;
   },
 
-  /**
-   * Unsuspend a user
-   */
   async unsuspendUser(userId) {
-    const response = await axios.post(
-      `${API_URL}/admin/users/${userId}/unsuspend`,
-      {},
-      { headers: getAuthHeader() }
-    );
+    const response = await api.post(`/admin/users/${userId}/unsuspend`, {});
     return response.data;
   },
 
-  /**
-   * Login as a user (impersonation)
-   */
   async loginAsUser(userId) {
-    const response = await axios.post(
-      `${API_URL}/admin/users/${userId}/login-as`,
-      {},
-      { headers: getAuthHeader() }
-    );
+    const response = await api.post(`/admin/users/${userId}/login-as`, {});
     return response.data;
   },
 
   // ==================== TOURNAMENT MANAGEMENT ====================
-  
-  /**
-   * Get all tournaments with filters
-   */
   async getTournaments({ page = 1, limit = 20, status, organizerId, search }) {
     const params = { page, limit };
     if (status) params.status = status;
     if (organizerId) params.organizerId = organizerId;
     if (search) params.search = search;
-    
-    const response = await axios.get(`${API_URL}/admin/tournaments`, {
-      headers: getAuthHeader(),
-      params
-    });
+    const response = await api.get(`/admin/tournaments`, { params });
     return response.data;
   },
 
-  /**
-   * Cancel a tournament (emergency)
-   */
   async cancelTournament(tournamentId, reason) {
-    const response = await axios.delete(
-      `${API_URL}/admin/tournaments/${tournamentId}`,
-      {
-        headers: getAuthHeader(),
-        data: { reason }
-      }
-    );
+    const response = await api.delete(`/admin/tournaments/${tournamentId}`, { data: { reason } });
     return response.data;
   },
 
   // ==================== AUDIT LOGS ====================
-  
-  /**
-   * Get audit logs with filters
-   */
   async getAuditLogs({ page = 1, limit = 50, action, entityType, adminId, startDate, endDate }) {
     const params = { page, limit };
     if (action) params.action = action;
@@ -136,28 +65,15 @@ const adminService = {
     if (adminId) params.adminId = adminId;
     if (startDate) params.startDate = startDate;
     if (endDate) params.endDate = endDate;
-    
-    const response = await axios.get(`${API_URL}/admin/audit-logs`, {
-      headers: getAuthHeader(),
-      params
-    });
+    const response = await api.get(`/admin/audit-logs`, { params });
     return response.data;
   },
 
-  /**
-   * Get audit logs for specific entity
-   */
   async getEntityAuditLogs(entityType, entityId) {
-    const response = await axios.get(
-      `${API_URL}/admin/audit-logs/${entityType}/${entityId}`,
-      { headers: getAuthHeader() }
-    );
+    const response = await api.get(`/admin/audit-logs/${entityType}/${entityId}`);
     return response.data;
   },
 
-  /**
-   * Export audit logs as CSV
-   */
   async exportAuditLogs({ action, entityType, adminId, startDate, endDate }) {
     const params = {};
     if (action) params.action = action;
@@ -165,14 +81,7 @@ const adminService = {
     if (adminId) params.adminId = adminId;
     if (startDate) params.startDate = startDate;
     if (endDate) params.endDate = endDate;
-    
-    const response = await axios.get(`${API_URL}/admin/audit-logs/export`, {
-      headers: getAuthHeader(),
-      params,
-      responseType: 'blob'
-    });
-    
-    // Create download link
+    const response = await api.get(`/admin/audit-logs/export`, { params, responseType: 'blob' });
     const url = window.URL.createObjectURL(new Blob([response.data]));
     const link = document.createElement('a');
     link.href = url;
@@ -180,188 +89,91 @@ const adminService = {
     document.body.appendChild(link);
     link.click();
     link.remove();
-    
     return { success: true };
   },
 
   // ==================== ADMIN INVITES ====================
-  
-  /**
-   * Get all admin invites
-   */
   async getInvites({ page = 1, limit = 20, status }) {
     const params = { page, limit };
     if (status) params.status = status;
-    
-    const response = await axios.get(`${API_URL}/admin/invites`, {
-      headers: getAuthHeader(),
-      params
-    });
+    const response = await api.get(`/admin/invites`, { params });
     return response.data;
   },
 
-  /**
-   * Create new admin invite
-   */
   async createInvite(email, role, duration = '7d') {
-    const response = await axios.post(
-      `${API_URL}/admin/invites`,
-      { email, role, duration },
-      { headers: getAuthHeader() }
-    );
+    const response = await api.post(`/admin/invites`, { email, role, duration });
     return response.data;
   },
 
-  /**
-   * Revoke an invite
-   */
   async revokeInvite(inviteId) {
-    const response = await axios.delete(
-      `${API_URL}/admin/invites/${inviteId}/revoke`,
-      { headers: getAuthHeader() }
-    );
+    const response = await api.delete(`/admin/invites/${inviteId}/revoke`);
     return response.data;
   },
 
-  /**
-   * Delete an invite
-   */
   async deleteInvite(inviteId) {
-    const response = await axios.delete(
-      `${API_URL}/admin/invites/${inviteId}`,
-      { headers: getAuthHeader() }
-    );
+    const response = await api.delete(`/admin/invites/${inviteId}`);
     return response.data;
   },
 
   // ==================== PAYMENT MANAGEMENT ====================
-  
-  /**
-   * Get payment dashboard data
-   */
   async getPaymentDashboard() {
-    const response = await axios.get(`${API_URL}/admin/payment/dashboard`, {
-      headers: getAuthHeader()
-    });
+    const response = await api.get(`/admin/payment/dashboard`);
     return response.data;
   },
 
-  /**
-   * Get payment notifications
-   */
   async getPaymentNotifications() {
-    const response = await axios.get(`${API_URL}/admin/payment/notifications`, {
-      headers: getAuthHeader()
-    });
+    const response = await api.get(`/admin/payment/notifications`);
     return response.data;
   },
 
-  /**
-   * Get payment schedule
-   */
   async getPaymentSchedule() {
-    const response = await axios.get(`${API_URL}/admin/payment/schedule`, {
-      headers: getAuthHeader()
-    });
+    const response = await api.get(`/admin/payment/schedule`);
     return response.data;
   },
 
-  /**
-   * Get pending payment verifications
-   */
   async getPendingVerifications() {
-    const response = await axios.get(`${API_URL}/admin/payment/pending-verifications`, {
-      headers: getAuthHeader()
-    });
+    const response = await api.get(`/admin/payment/pending-verifications`);
     return response.data;
   },
 
-  /**
-   * Approve payment
-   */
   async approvePayment(registrationId, notes) {
-    const response = await axios.post(
-      `${API_URL}/admin/payment/approve/${registrationId}`,
-      { notes },
-      { headers: getAuthHeader() }
-    );
+    const response = await api.post(`/admin/payment/approve/${registrationId}`, { notes });
     return response.data;
   },
 
-  /**
-   * Reject payment
-   */
   async rejectPayment(registrationId, reason) {
-    const response = await axios.post(
-      `${API_URL}/admin/payment/reject/${registrationId}`,
-      { reason },
-      { headers: getAuthHeader() }
-    );
+    const response = await api.post(`/admin/payment/reject/${registrationId}`, { reason });
     return response.data;
   },
 
-  /**
-   * Get pending organizer payouts
-   */
   async getPendingPayouts() {
-    const response = await axios.get(`${API_URL}/admin/payment/pending-payouts`, {
-      headers: getAuthHeader()
-    });
+    const response = await api.get(`/admin/payment/pending-payouts`);
     return response.data;
   },
 
-  /**
-   * Mark organizer payment as paid
-   */
   async markPaymentPaid(tournamentId, paymentType, transactionRef, notes) {
-    const response = await axios.post(
-      `${API_URL}/admin/payment/mark-paid/${tournamentId}`,
-      { paymentType, transactionRef, notes },
-      { headers: getAuthHeader() }
-    );
+    const response = await api.post(`/admin/payment/mark-paid/${tournamentId}`, { paymentType, transactionRef, notes });
     return response.data;
   },
 
-  /**
-   * Generate daily report
-   */
   async getDailyReport(date) {
     const params = {};
     if (date) params.date = date;
-    
-    const response = await axios.get(`${API_URL}/admin/payment/daily-report`, {
-      headers: getAuthHeader(),
-      params
-    });
+    const response = await api.get(`/admin/payment/daily-report`, { params });
     return response.data;
   },
 
-  /**
-   * Generate monthly report
-   */
   async getMonthlyReport() {
-    const response = await axios.get(`${API_URL}/admin/payment/monthly-report`, {
-      headers: getAuthHeader()
-    });
+    const response = await api.get(`/admin/payment/monthly-report`);
     return response.data;
   },
 
-  /**
-   * Export payment data as CSV
-   */
   async exportPaymentCSV(startDate, endDate, type) {
     const params = {};
     if (startDate) params.startDate = startDate;
     if (endDate) params.endDate = endDate;
     if (type) params.type = type;
-    
-    const response = await axios.get(`${API_URL}/admin/payment/export-csv`, {
-      headers: getAuthHeader(),
-      params,
-      responseType: 'blob'
-    });
-    
-    // Create download link
+    const response = await api.get(`/admin/payment/export-csv`, { params, responseType: 'blob' });
     const url = window.URL.createObjectURL(new Blob([response.data]));
     const link = document.createElement('a');
     link.href = url;
@@ -369,104 +181,52 @@ const adminService = {
     document.body.appendChild(link);
     link.click();
     link.remove();
-    
     return { success: true };
   },
 
-  /**
-   * Run daily payment tasks manually
-   */
   async runDailyTasks() {
-    const response = await axios.post(
-      `${API_URL}/admin/payment/run-daily-tasks`,
-      {},
-      { headers: getAuthHeader() }
-    );
+    const response = await api.post(`/admin/payment/run-daily-tasks`, {});
     return response.data;
   },
 
-  /**
-   * Check for payments due
-   */
   async checkDuePayments() {
-    const response = await axios.post(
-      `${API_URL}/admin/payment/check-due-payments`,
-      {},
-      { headers: getAuthHeader() }
-    );
+    const response = await api.post(`/admin/payment/check-due-payments`, {});
     return response.data;
   },
 
   // ==================== USER LEDGER MANAGEMENT ====================
-  
-  /**
-   * Get all users with payment summaries
-   */
   async getUsersLedger({ page = 1, limit = 50, search, sortBy = 'currentBalance', order = 'desc' }) {
     const params = { page, limit, sortBy, order };
     if (search) params.search = search;
-    
-    const response = await axios.get(`${API_URL}/admin/user-ledger/users`, {
-      headers: getAuthHeader(),
-      params
-    });
+    const response = await api.get(`/admin/user-ledger/users`, { params });
     return response.data;
   },
 
-  /**
-   * Get specific user's payment summary
-   */
   async getUserSummary(userId) {
-    const response = await axios.get(`${API_URL}/admin/user-ledger/user/${userId}`, {
-      headers: getAuthHeader()
-    });
+    const response = await api.get(`/admin/user-ledger/user/${userId}`);
     return response.data;
   },
 
-  /**
-   * Get user's transaction history
-   */
   async getUserTransactions(userId, { page = 1, limit = 50, type, category, startDate, endDate }) {
     const params = { page, limit };
     if (type) params.type = type;
     if (category) params.category = category;
     if (startDate) params.startDate = startDate;
     if (endDate) params.endDate = endDate;
-    
-    const response = await axios.get(`${API_URL}/admin/user-ledger/user/${userId}/transactions`, {
-      headers: getAuthHeader(),
-      params
-    });
+    const response = await api.get(`/admin/user-ledger/user/${userId}/transactions`, { params });
     return response.data;
   },
 
-  /**
-   * Record a payment transaction
-   */
   async recordPaymentTransaction(data) {
-    const response = await axios.post(
-      `${API_URL}/admin/user-ledger/record-payment`,
-      data,
-      { headers: getAuthHeader() }
-    );
+    const response = await api.post(`/admin/user-ledger/record-payment`, data);
     return response.data;
   },
 
-  /**
-   * Export user's complete ledger as CSV
-   */
   async exportUserLedger(userId, startDate, endDate) {
     const params = {};
     if (startDate) params.startDate = startDate;
     if (endDate) params.endDate = endDate;
-    
-    const response = await axios.get(`${API_URL}/admin/user-ledger/user/${userId}/export`, {
-      headers: getAuthHeader(),
-      params,
-      responseType: 'blob'
-    });
-    
-    // Create download link
+    const response = await api.get(`/admin/user-ledger/user/${userId}/export`, { params, responseType: 'blob' });
     const url = window.URL.createObjectURL(new Blob([response.data]));
     const link = document.createElement('a');
     link.href = url;
@@ -474,78 +234,40 @@ const adminService = {
     document.body.appendChild(link);
     link.click();
     link.remove();
-    
     return { success: true };
   },
 
-  /**
-   * Get ledger statistics
-   */
   async getLedgerStats() {
-    const response = await axios.get(`${API_URL}/admin/user-ledger/stats`, {
-      headers: getAuthHeader()
-    });
+    const response = await api.get(`/admin/user-ledger/stats`);
     return response.data;
   },
 
-  /**
-   * Get quick stats for dashboard
-   */
   async getQuickStats() {
-    const response = await axios.get(`${API_URL}/admin/payment/quick-stats`, {
-      headers: getAuthHeader()
-    });
+    const response = await api.get(`/admin/payment/quick-stats`);
     return response.data;
   },
 
   // ==================== PAYMENT VERIFICATION ====================
-  
-  /**
-   * Get payment verifications
-   */
   async getPaymentVerifications({ page = 1, limit = 20, status, tournamentId }) {
     const params = { page, limit };
     if (status) params.status = status;
     if (tournamentId) params.tournamentId = tournamentId;
-    
-    const response = await axios.get(`${API_URL}/admin/payment-verifications`, {
-      headers: getAuthHeader(),
-      params
-    });
+    const response = await api.get(`/admin/payment-verifications`, { params });
     return response.data;
   },
 
-  /**
-   * Get payment verification stats
-   */
   async getPaymentVerificationStats() {
-    const response = await axios.get(`${API_URL}/admin/payment-verifications/stats`, {
-      headers: getAuthHeader()
-    });
+    const response = await api.get(`/admin/payment-verifications/stats`);
     return response.data;
   },
 
-  /**
-   * Approve payment verification
-   */
   async approvePaymentVerification(verificationId) {
-    const response = await axios.post(
-      `${API_URL}/admin/payment-verifications/${verificationId}/approve`,
-      {},
-      { headers: getAuthHeader() }
-    );
+    const response = await api.post(`/admin/payment-verifications/${verificationId}/approve`, {});
     return response.data;
   },
 
-  /**
-   * Reject payment verification
-   */
   async rejectPaymentVerification(verificationId, rejectionData) {
-    const response = await axios.post(
-      `${API_URL}/admin/payment-verifications/${verificationId}/reject`,
-      rejectionData,
-      { headers: getAuthHeader() }
-    );
+    const response = await api.post(`/admin/payment-verifications/${verificationId}/reject`, rejectionData);
     return response.data;
   }
 };

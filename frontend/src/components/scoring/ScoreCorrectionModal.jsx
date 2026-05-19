@@ -1,9 +1,7 @@
 import { getErrorMessage } from '../../utils/errorMessage';
 import React, { useState } from 'react';
 import { X, AlertTriangle, CheckCircle } from 'lucide-react';
-import axios from 'axios';
-
-const API_URL = import.meta.env.VITE_API_URL || 'https://matchify-probackend.vercel.app/api';
+import api from '../../utils/api';
 
 const ScoreCorrectionModal = ({ matchId, currentScore, onClose, onSuccess }) => {
   const [correctionType, setCorrectionType] = useState('set_score');
@@ -29,17 +27,9 @@ const ScoreCorrectionModal = ({ matchId, currentScore, onClose, onSuccess }) => 
         return;
       }
 
-      const token = localStorage.getItem('token');
-      const response = await axios.post(
-        `${API_URL}/matches/${matchId}/corrections`,
-        {
-          correctionType,
-          details,
-          proposedScore: parsedScore,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+      const response = await api.post(
+        `/matches/${matchId}/corrections`,
+        { correctionType, details, proposedScore: parsedScore }
       );
 
       if (response.data.success) {

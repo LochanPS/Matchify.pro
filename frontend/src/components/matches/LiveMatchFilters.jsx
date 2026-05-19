@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../../utils/api';
 
 const LiveMatchFilters = ({ filters, onFilterChange }) => {
   const [tournaments, setTournaments] = useState([]);
@@ -11,7 +11,7 @@ const LiveMatchFilters = ({ filters, onFilterChange }) => {
 
   const fetchTournaments = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_API_URL || 'https://matchify-probackend.vercel.app/api'}/tournaments`, {
+      const response = await api.get(`/tournaments`, {
         params: { status: 'ongoing' }
       });
       setTournaments(response.data.tournaments || []);

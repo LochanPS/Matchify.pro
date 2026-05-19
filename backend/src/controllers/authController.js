@@ -485,8 +485,9 @@ export const login = async (req, res) => {
     const userRoles = user.roles ? user.roles.split(',') : ['PLAYER'];
 
     // Generate JWT with all roles
+    const isAdminUser = userRoles.includes('ADMIN');
     const token = jwt.sign(
-      { userId: user.id, email: user.email, roles: userRoles, isAdmin: false },
+      { userId: user.id, email: user.email, roles: userRoles, isAdmin: isAdminUser },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
@@ -510,7 +511,7 @@ export const login = async (req, res) => {
         playerCode: updatedUser.playerCode,
         umpireCode: updatedUser.umpireCode,
         roles: userRoles,
-        isAdmin: false,
+        isAdmin: isAdminUser,
         profiles: {
           player: updatedUser.playerProfile,
           organizer: updatedUser.organizerProfile,

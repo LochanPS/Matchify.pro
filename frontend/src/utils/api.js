@@ -9,6 +9,7 @@ if (import.meta.env.DEV) {
 
 const api = axios.create({
   baseURL: API_BASE_URL,
+  timeout: 20000, // 20s — covers Vercel serverless cold starts (~10-15s)
   headers: {
     'Content-Type': 'application/json',
   },
@@ -26,10 +27,20 @@ api.interceptors.request.use((config) => {
 // Public paths that should never trigger a login redirect on 401
 const PUBLIC_PATHS = ['/login', '/register', '/', '/leaderboard', '/tournaments', '/privacy', '/terms'];
 
-// Handle token expiry
+// Handle token expiry + timeout
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
+    // Timeout — backend cold start took too long
+    if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+      console.warn('⏱️ Request timed out:', error.config?.url);
+      return Promise.reject({
+        ...error,
+        message: 'Request timed out. Please try again.',
+        isTimeout: true,
+      });
+    }
+
     if (error.response?.status === 401) {
       const token = localStorage.getItem('token');
       const path = window.location.pathname;

@@ -144,15 +144,18 @@ class ChunkErrorBoundary extends Component {
 function PageLoader() {
   return (
     <div style={{
-      minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
+      minHeight: '100vh', display: 'flex', flexDirection: 'column',
+      alignItems: 'center', justifyContent: 'center', gap: 12,
+      background: '#161730',
     }}>
       <div style={{
-        width: 36, height: 36, borderRadius: '50%',
+        width: 40, height: 40, borderRadius: '50%',
         border: '3px solid rgba(0,212,255,0.15)',
         borderTopColor: '#00d4ff',
-        animation: 'spin 0.7s linear infinite',
+        animation: 'pageLoaderSpin 0.7s linear infinite',
       }} />
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 12 }}>Loading…</span>
+      <style>{`@keyframes pageLoaderSpin { to { transform: rotate(360deg); } }`}</style>
     </div>
   )
 }

@@ -73,6 +73,7 @@ model User {
   // Organizer request relations
   organizerRequest     OrganizerRequest?   @relation("UserOrganizerRequest")
   reviewedRequests     OrganizerRequest[]  @relation("AdminReviewedRequests")
+  pointsLogs           PointsLog[]
 
   @@index([email])
   @@index([phone])

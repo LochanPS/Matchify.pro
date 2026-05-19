@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Camera, Upload, X, AlertCircle } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Camera, Upload, X } from 'lucide-react';
 import { profileAPI } from '../api/profile';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -9,58 +9,36 @@ export default function MandatoryProfilePhotoModal({ isOpen }) {
   const [error, setError] = useState('');
   const [preview, setPreview] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [dragging, setDragging] = useState(false);
+  const inputRef = useRef(null);
 
   if (!isOpen) return null;
 
-  const handleFileSelect = (e) => {
-    const file = e.target.files?.[0];
+  const processFile = (file) => {
     if (!file) return;
-
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      setError('Please select an image file (JPG, PNG, GIF)');
-      return;
-    }
-
-    // Validate file size (5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      setError('Image must be less than 5MB');
-      return;
-    }
-
+    if (!file.type.startsWith('image/')) { setError('Please select an image file (JPG, PNG, GIF)'); return; }
+    if (file.size > 5 * 1024 * 1024) { setError('Image must be less than 5MB'); return; }
     setError('');
     setSelectedFile(file);
-
-    // Create preview
     const reader = new FileReader();
-    reader.onloadend = () => {
-      setPreview(reader.result);
-    };
+    reader.onloadend = () => setPreview(reader.result);
     reader.readAsDataURL(file);
   };
 
-  const handleUpload = async () => {
-    if (!selectedFile) {
-      setError('Please select a photo first');
-      return;
-    }
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDragging(false);
+    processFile(e.dataTransfer.files?.[0]);
+  };
 
+  const handleUpload = async () => {
+    if (!selectedFile) { setError('Please select a photo first'); return; }
     setUploading(true);
     setError('');
-
     try {
-      const formData = new FormData();
-      formData.append('photo', selectedFile);
-
       const response = await profileAPI.uploadPhoto(selectedFile);
-      
-      // Update user context with new profile photo
-      const updatedUser = { ...user, profilePhoto: response.profilePhoto };
-      updateUser(updatedUser);
-
-      // Success - modal will close automatically because user now has photo
+      updateUser({ ...user, profilePhoto: response.profilePhoto });
     } catch (err) {
-      console.error('Upload error:', err);
       setError(err.response?.data?.error || 'Failed to upload photo. Please try again.');
     } finally {
       setUploading(false);
@@ -68,105 +46,106 @@ export default function MandatoryProfilePhotoModal({ isOpen }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-[9999] p-4">
-      {/* Animated Background */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-emerald-500/20 to-green-500/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-r from-cyan-500/20 to-emerald-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-      </div>
+    <div className="fixed inset-0 flex items-center justify-center z-[9999] p-4"
+      style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)' }}>
 
-      <div className="relative bg-slate-800 border border-white/10 rounded-2xl max-w-md w-full overflow-hidden shadow-2xl">
-        {/* Header */}
-        <div className="relative bg-gradient-to-r from-emerald-600 via-green-600 to-emerald-600 px-6 py-5">
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0wIDBoNDB2NDBIMHoiLz48cGF0aCBkPSJNMjAgMjBtLTEgMGExIDEgMCAxIDAgMiAwYTEgMSAwIDEgMCAtMiAwIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMSkiLz48L2c+PC9zdmc+')] opacity-30"></div>
-          <div className="relative flex items-center gap-3">
-            <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-              <Camera className="text-white" size={24} />
-            </div>
-            <div>
-              <h2 className="text-xl font-bold text-white">Complete Your Profile</h2>
-              <p className="text-emerald-100 text-sm">Add a photo to stand out</p>
-            </div>
-          </div>
-        </div>
+      {/* Glow blobs */}
+      <div className="absolute top-1/3 left-1/3 w-80 h-80 rounded-full pointer-events-none"
+        style={{ background: 'radial-gradient(circle, rgba(0,255,136,0.08) 0%, transparent 70%)', filter: 'blur(40px)' }} />
+      <div className="absolute bottom-1/3 right-1/3 w-80 h-80 rounded-full pointer-events-none"
+        style={{ background: 'radial-gradient(circle, rgba(0,212,255,0.06) 0%, transparent 70%)', filter: 'blur(40px)' }} />
+
+      <div className="relative w-full max-w-sm rounded-3xl overflow-hidden shadow-2xl"
+        style={{ background: '#0d1025', border: '1px solid rgba(0,255,136,0.15)' }}>
+
+        {/* Top accent line */}
+        <div className="h-1 w-full" style={{ background: 'linear-gradient(90deg, #00ff88, #00d4ff, #a855f7)' }} />
 
         <div className="p-6">
-          {/* Info Message */}
-          <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 px-4 py-3.5 rounded-xl mb-6 flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
-            <div className="text-sm leading-relaxed">
-              <p className="font-semibold mb-1.5">Make Your Profile Shine ✨</p>
-              <p className="text-emerald-200/90">
-                A profile photo helps fellow players recognize you at tournaments, builds trust within the community, and makes your profile look professional and complete.
-              </p>
+          {/* Title */}
+          <div className="text-center mb-6">
+            <div className="w-14 h-14 rounded-2xl mx-auto mb-3 flex items-center justify-center"
+              style={{ background: 'rgba(0,255,136,0.1)', border: '1px solid rgba(0,255,136,0.2)' }}>
+              <Camera size={26} style={{ color: '#00ff88' }} />
             </div>
+            <h2 className="text-xl font-black text-white mb-1">Add Your Photo</h2>
+            <p className="text-sm" style={{ color: 'rgba(255,255,255,0.45)' }}>
+              Required to join tournaments
+            </p>
           </div>
 
+          {/* Upload Area */}
+          <div
+            onClick={() => !preview && inputRef.current?.click()}
+            onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+            onDragLeave={() => setDragging(false)}
+            onDrop={handleDrop}
+            className="relative mb-4 rounded-2xl overflow-hidden cursor-pointer transition-all"
+            style={{
+              height: preview ? 220 : 160,
+              border: `2px dashed ${dragging ? '#00ff88' : preview ? 'transparent' : 'rgba(0,255,136,0.25)'}`,
+              background: preview ? 'transparent' : dragging ? 'rgba(0,255,136,0.06)' : 'rgba(255,255,255,0.02)',
+            }}>
+
+            {preview ? (
+              <>
+                <img src={preview} alt="Preview" className="w-full h-full object-cover" />
+                <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 50%)' }} />
+                <button
+                  onClick={(e) => { e.stopPropagation(); setPreview(null); setSelectedFile(null); }}
+                  className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all"
+                  style={{ background: 'rgba(255,59,48,0.9)', backdropFilter: 'blur(4px)' }}>
+                  <X size={14} className="text-white" />
+                </button>
+                <div className="absolute bottom-3 left-3 flex items-center gap-1.5">
+                  <div className="w-2 h-2 rounded-full" style={{ background: '#00ff88' }} />
+                  <span className="text-xs font-medium text-white">Photo selected</span>
+                </div>
+              </>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full gap-2 px-4">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-1"
+                  style={{ background: 'rgba(0,255,136,0.1)' }}>
+                  <Upload size={18} style={{ color: '#00ff88' }} />
+                </div>
+                <p className="text-white font-semibold text-sm">Tap to upload</p>
+                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>JPG, PNG or GIF · max 5MB</p>
+              </div>
+            )}
+          </div>
+
+          <input ref={inputRef} type="file" accept="image/*" onChange={(e) => processFile(e.target.files?.[0])} className="hidden" />
+
           {error && (
-            <div className="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-xl mb-4 flex items-center gap-2">
-              <span>⚠️</span> {error}
+            <div className="mb-4 px-3 py-2.5 rounded-xl text-xs flex items-center gap-2"
+              style={{ background: 'rgba(255,59,48,0.1)', border: '1px solid rgba(255,59,48,0.2)', color: '#ff6b6b' }}>
+              ⚠️ {error}
             </div>
           )}
 
-          {/* Upload Area */}
-          <div className="space-y-4">
-            {/* Preview or Upload Button */}
-            {preview ? (
-              <div className="relative">
-                <img
-                  src={preview}
-                  alt="Preview"
-                  className="w-full h-64 object-cover rounded-xl border-2 border-white/10"
-                />
-                <button
-                  onClick={() => {
-                    setPreview(null);
-                    setSelectedFile(null);
-                  }}
-                  className="absolute top-2 right-2 p-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
-                >
-                  <X size={20} />
-                </button>
-              </div>
-            ) : (
-              <label className="block cursor-pointer">
-                <div className="border-2 border-dashed border-emerald-500/30 rounded-xl p-8 hover:border-emerald-500/60 hover:bg-emerald-500/5 transition-all">
-                  <div className="text-center">
-                    <Upload className="w-12 h-12 text-emerald-400 mx-auto mb-3" />
-                    <p className="text-white font-semibold mb-1">Click to upload your photo</p>
-                    <p className="text-gray-400 text-sm">JPG, PNG or GIF (max 5MB)</p>
-                    <p className="text-emerald-400 text-xs mt-2">📸 Show your best smile!</p>
-                  </div>
-                </div>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileSelect}
-                  className="hidden"
-                />
-              </label>
-            )}
+          {/* Upload Button */}
+          <button
+            onClick={handleUpload}
+            disabled={!selectedFile || uploading}
+            className="w-full py-3.5 rounded-2xl font-bold text-sm transition-all"
+            style={{
+              background: selectedFile && !uploading
+                ? 'linear-gradient(135deg, #00ff88, #00c853)'
+                : 'rgba(255,255,255,0.06)',
+              color: selectedFile && !uploading ? '#003320' : 'rgba(255,255,255,0.3)',
+              cursor: !selectedFile || uploading ? 'not-allowed' : 'pointer',
+              boxShadow: selectedFile && !uploading ? '0 8px 24px rgba(0,255,136,0.25)' : 'none',
+            }}>
+            {uploading ? (
+              <span className="flex items-center justify-center gap-2">
+                <div className="w-4 h-4 border-2 rounded-full animate-spin" style={{ borderColor: 'rgba(0,51,32,0.3)', borderTopColor: '#003320' }} />
+                Uploading...
+              </span>
+            ) : '✨ Upload & Continue'}
+          </button>
 
-            {/* Upload Button */}
-            <button
-              onClick={handleUpload}
-              disabled={!selectedFile || uploading}
-              className="w-full py-4 bg-gradient-to-r from-emerald-500 via-green-600 to-emerald-500 text-white rounded-xl font-bold hover:shadow-lg hover:shadow-emerald-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-            >
-              {uploading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Uploading...
-                </span>
-              ) : (
-                '✨ Upload Photo & Continue'
-              )}
-            </button>
-          </div>
-
-          {/* Note */}
-          <p className="text-center text-gray-400 text-xs mt-4 leading-relaxed">
-            Your profile photo is required to ensure a safe and trustworthy community. It helps organizers and players identify participants at tournaments.
+          <p className="text-center text-xs mt-3" style={{ color: 'rgba(255,255,255,0.25)' }}>
+            Helps organizers & players identify you at tournaments
           </p>
         </div>
       </div>

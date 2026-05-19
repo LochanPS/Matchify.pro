@@ -31,8 +31,8 @@ export function initializeSocket(server) {
         if (process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL) {
           return callback(null, true);
         }
-        
-        callback(null, true); // Allow all for now
+
+        callback(new Error('Not allowed by Socket.IO CORS'));
       },
       methods: ['GET', 'POST'],
       credentials: true

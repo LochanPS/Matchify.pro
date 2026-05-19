@@ -126,11 +126,9 @@ const allowedOrigins = [
   process.env.CORS_ORIGIN
 ].filter(Boolean);
 
-// Regex patterns for dynamic origins
+// Regex patterns for dynamic origins — scoped to matchify only
 const allowedOriginPatterns = [
-  /^https:\/\/matchify-.*\.vercel\.app$/,  // All Matchify Vercel preview deployments
-  /^https:\/\/.*\.vercel\.app$/,            // All Vercel deployments
-  /^https:\/\/.*\.onrender\.com$/           // All Render deployments
+  /^https:\/\/matchify(-pro)?(-[a-z0-9]+)?(-destroyerforevers-projects)?\.vercel\.app$/,  // Matchify Vercel preview deployments only
 ];
 
 app.use(cors({

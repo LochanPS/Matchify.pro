@@ -275,6 +275,8 @@ model Registration {
   refundRejectionReason String?
   refundPaymentScreenshot String? // Organizer's payment proof when sending refund
   refundPaymentScreenshotPublicId String? // Cloudinary public ID
+  refundAccountName  String?    // Account holder name for refund transfer
+  refundCompletedAt  DateTime?  // When refund was marked complete
   isQuickAdded       Boolean    @default(false) // True if added by super admin without payment
   quickAddedBy       String?    // Admin user ID who quick added this player
   // Guest registration fields (when userId is null)

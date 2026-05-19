@@ -296,9 +296,12 @@ export const register = async (req, res) => {
   }
 };
 
-// ADMIN CREDENTIALS (from environment variables)
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'ADMIN@gmail.com';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'ADMIN@123(123)';
+// ADMIN CREDENTIALS — must be set via environment variables, no fallback
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
+  console.error('❌ ADMIN_EMAIL and ADMIN_PASSWORD env vars must be set');
+}
 
 // LOGIN - Return all roles, support email OR phone
 export const login = async (req, res) => {

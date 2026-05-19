@@ -313,14 +313,7 @@ function AppContent() {
             }
           />
           
-          <Route
-            path="/notifications/:notificationId"
-            element={
-              <ProtectedRoute>
-                <NotificationDetailPage />
-              </ProtectedRoute>
-            }
-          />
+          {/* Duplicate removed — /notifications/:id is defined above */}
           
           <Route
             path="/refund-issue/:registrationId"

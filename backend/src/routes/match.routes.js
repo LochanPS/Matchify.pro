@@ -2,12 +2,114 @@ import express from 'express';
 import prisma from '../lib/prisma.js';
 import { authenticate, authorize } from '../middleware/auth.js';
 import { assignUmpire, getUmpireMatches } from '../controllers/match.controller.js';
+import { broadcastScoreUpdate, broadcastMatchStatus, broadcastMatchComplete } from '../services/socketService.js';
 
 const router = express.Router();
 
 // Get matches assigned to the currently authenticated umpire
 // MUST be before /:matchId so 'umpire-matches' is not treated as a matchId
 router.get('/umpire-matches', authenticate, getUmpireMatches);
+
+// GET /live — all in-progress matches (must be before /:matchId)
+router.get('/live', authenticate, async (req, res) => {
+  try {
+    const matches = await prisma.match.findMany({
+      where: { status: 'IN_PROGRESS' },
+      include: {
+        tournament: { select: { id: true, name: true } },
+        category:   { select: { id: true, name: true } },
+      },
+      orderBy: { updatedAt: 'desc' },
+      take: 50,
+    });
+    const parsed = matches.map(m => ({
+      ...m,
+      score: m.scoreJson ? (() => { try { return JSON.parse(m.scoreJson); } catch { return null; } })() : null,
+    }));
+    res.json({ success: true, matches: parsed });
+  } catch (error) {
+    console.error('Error fetching live matches:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch live matches' });
+  }
+});
+
+// GET /:matchId/status — quick poll endpoint (before /:matchId to match correctly)
+router.get('/:matchId/status', authenticate, async (req, res) => {
+  try {
+    const match = await prisma.match.findUnique({
+      where: { id: req.params.matchId },
+      select: { id: true, status: true, winnerId: true, updatedAt: true, scoreJson: true },
+    });
+    if (!match) return res.status(404).json({ success: false, error: 'Match not found' });
+    res.json({
+      success: true,
+      status: match.status,
+      winnerId: match.winnerId,
+      updatedAt: match.updatedAt,
+      score: match.scoreJson ? (() => { try { return JSON.parse(match.scoreJson); } catch { return null; } })() : null,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Failed to get match status' });
+  }
+});
+
+// PUT /:matchId/undo — undo last point (alias: remove last event from score)
+router.put('/:matchId/undo', authenticate, async (req, res) => {
+  try {
+    const { matchId } = req.params;
+    const userId = req.user.userId || req.user.id;
+
+    const match = await prisma.match.findUnique({
+      where: { id: matchId },
+      include: { tournament: { select: { organizerId: true } } },
+    });
+    if (!match) return res.status(404).json({ success: false, error: 'Match not found' });
+
+    const userRoles = req.user.roles || [];
+    if (match.umpireId !== userId && match.tournament.organizerId !== userId && !userRoles.includes('ADMIN')) {
+      return res.status(403).json({ success: false, error: 'Not authorized' });
+    }
+
+    const score = match.scoreJson ? (() => { try { return JSON.parse(match.scoreJson); } catch { return null; } })() : null;
+    if (!score) return res.status(400).json({ success: false, error: 'No score data to undo' });
+
+    // Pop last point from current set
+    const sets = score.sets || [];
+    const currentSetIdx = sets.findIndex(s => s.status === 'in_progress') ?? sets.length - 1;
+    const currentSet = sets[currentSetIdx >= 0 ? currentSetIdx : sets.length - 1];
+
+    if (currentSet?.points?.length > 0) {
+      const lastPoint = currentSet.points.pop();
+      // Reverse the score
+      if (lastPoint?.scorer === 'player1') currentSet.player1Score = Math.max(0, (currentSet.player1Score || 0) - 1);
+      if (lastPoint?.scorer === 'player2') currentSet.player2Score = Math.max(0, (currentSet.player2Score || 0) - 1);
+    }
+
+    const updated = await prisma.match.update({
+      where: { id: matchId },
+      data: { scoreJson: JSON.stringify(score), updatedAt: new Date() },
+    });
+
+    broadcastScoreUpdate(matchId, score);
+    res.json({ success: true, message: 'Last point undone', score });
+  } catch (error) {
+    console.error('Error undoing point:', error);
+    res.status(500).json({ success: false, error: 'Failed to undo point' });
+  }
+});
+
+// GET /:matchId/live — full match details for live spectating (alias of /:matchId)
+router.get('/:matchId/live', authenticate, async (req, res) => {
+  req.url = `/${req.params.matchId}`;
+  // Re-use the same match detail logic by redirecting internally
+  return res.redirect(307, `/api/matches/${req.params.matchId}`);
+});
+
+// Start match — accept both POST (correct) and PUT (legacy frontend compatibility)
+router.put('/:matchId/start', authenticate, async (req, res, next) => {
+  req.method = 'POST';
+  next();
+});
 
 // Get match details
 router.get('/:matchId', authenticate, async (req, res) => {
@@ -175,6 +277,9 @@ router.put('/:matchId/score', authenticate, async (req, res) => {
         updatedAt: new Date()
       }
     });
+
+    // Broadcast real-time score update to all spectators
+    broadcastScoreUpdate(matchId, score);
 
     res.json({
       success: true,
@@ -344,6 +449,9 @@ router.post('/:matchId/start', authenticate, async (req, res) => {
     finalMatch.player1 = player1;
     finalMatch.player2 = player2;
     finalMatch.score = scoreData;
+
+    // Broadcast match started
+    broadcastMatchStatus(matchId, 'IN_PROGRESS', { score: scoreData });
 
     res.json({
       success: true,
@@ -569,6 +677,9 @@ const endMatchHandler = async (req, res) => {
     });
 
     // ── 6. RESPOND TO CLIENT — everything below is non-critical ───────────────
+    // Broadcast match completion to live spectators
+    broadcastMatchComplete(matchId, winnerId, finalScore);
+
     res.json({
       success: true,
       message: 'Match ended successfully',

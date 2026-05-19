@@ -333,8 +333,6 @@ router.put('/registrations/:id/approve-refund', authenticate, approveRefund);
 router.put('/registrations/:id/reject-refund', authenticate, rejectRefund);
 router.put('/registrations/:id/complete-refund', authenticate, upload.single('paymentScreenshot'), completeRefund);
 
-export default router;
-
 // GET /organizer/profile/:id - Get organizer profile
 router.get('/profile/:id?', authenticate, async (req, res) => {
   try {
@@ -366,7 +364,7 @@ router.get('/profile/:id?', authenticate, async (req, res) => {
         },
         _count: {
           select: {
-            tournamentsOrganized: true,
+            tournaments: true,   // fixed: was tournamentsOrganized
           }
         }
       }
@@ -398,7 +396,7 @@ router.get('/profile/:id?', authenticate, async (req, res) => {
         }
       },
       select: {
-        totalAmount: true,
+        totalCollected: true,    // fixed: was totalAmount
         payout50Percent1: true,
         payout50Percent2: true,
         payout50Status1: true,
@@ -406,11 +404,11 @@ router.get('/profile/:id?', authenticate, async (req, res) => {
       }
     });
 
-    const totalRevenue = payments.reduce((sum, p) => sum + (p.totalAmount || 0), 0);
+    const totalRevenue = payments.reduce((sum, p) => sum + (p.totalCollected || 0), 0);  // fixed
     const paidOut = payments.reduce((sum, p) => {
       let paid = 0;
-      if (p.payout50Status1 === 'PAID') paid += p.payout50Percent1 || 0;
-      if (p.payout50Status2 === 'PAID') paid += p.payout50Percent2 || 0;
+      if (p.payout50Status1 === 'paid') paid += p.payout50Percent1 || 0;  // fixed: lowercase
+      if (p.payout50Status2 === 'paid') paid += p.payout50Percent2 || 0;  // fixed: lowercase
       return sum + paid;
     }, 0);
     const pending = totalRevenue - paidOut;
@@ -421,7 +419,7 @@ router.get('/profile/:id?', authenticate, async (req, res) => {
         ...user,
         organizerProfile: user.organizerProfile || {},
         stats: {
-          tournamentsOrganized: user._count.tournamentsOrganized,
+          tournamentsOrganized: user._count.tournaments,  // fixed
           totalParticipants,
           totalRevenue,
           paidOut,
@@ -434,3 +432,5 @@ router.get('/profile/:id?', authenticate, async (req, res) => {
     res.status(500).json({ success: false, error: 'Failed to get organizer profile' });
   }
 });
+
+export default router;

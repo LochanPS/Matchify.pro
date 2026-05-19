@@ -456,4 +456,7 @@ router.get('/tournaments/:tournamentId/quick-added-players', authenticate, requi
 router.post('/users/:id/suspend', authenticate, requireAdmin, AdminController.suspendUser);
 router.post('/users/:id/unsuspend', authenticate, requireAdmin, AdminController.unsuspendUser);
 
+// Dashboard stats
+router.get('/stats', authenticate, requireAdmin, AdminController.getStats);
+
 export default router;

@@ -17,6 +17,7 @@ import {
 import { Loader, GitBranch } from 'lucide-react';
 import { tournamentAPI } from '../api/tournament';
 import { formatDateIndian } from '../utils/dateFormat';
+import { buildShareMessage, shareTournament as doShareTournament } from '../utils/tournamentShare';
 
 // Pre-generated particle data — deterministic, no Math.random in render
 const DISC_PARTICLES = Array.from({ length: 15 }, (_, i) => ({
@@ -619,49 +620,10 @@ export default function TournamentDiscoveryPage() {
 }
 
 
-// ── Shareable link helper ────────────────────────────────────────────────────
-function getTournamentShareUrl(id) {
-  return `${window.location.origin}/tournaments/${id}`;
-}
-
-function buildShareMessage(tournament) {
-  const url = getTournamentShareUrl(tournament.id);
-  const dateStr = new Date(tournament.startDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
-  const cats = (tournament.categories || []).map(c => `   • ${c.name}`).join('\n');
-  const catBlock = cats ? `\n🏸 Categories:\n${cats}\n` : '';
-  return {
-    title: `${tournament.name} — Matchify.pro`,
-    text: [
-      `🎾 MATCHIFY.PRO PRESENTS`,
-      ``,
-      `━━━━━━━━━━━━━━━━━━━`,
-      `🏆 ${tournament.name.toUpperCase()}`,
-      `━━━━━━━━━━━━━━━━━━━`,
-      ``,
-      `📍 ${tournament.city}${tournament.state ? `, ${tournament.state}` : ''}`,
-      `📅 ${dateStr}`,
-      catBlock,
-      `🔗 View & Register:`,
-      url,
-      ``,
-      `━━━━━━━━━━━━━━━━━━━`,
-      `www.matchify.pro`,
-    ].join('\n'),
-    url,
-  };
-}
-
+// ── Share helpers re-exported from utility ───────────────────────────────────
 async function shareTournament(tournament, e) {
   e?.stopPropagation();
-  const { title, text } = buildShareMessage(tournament);
-  if (navigator.share) {
-    // Pass text only — URL already embedded. Prevents WhatsApp double-URL.
-    try { await navigator.share({ title, text }); } catch (_) {}
-  } else {
-    await navigator.clipboard.writeText(text);
-    return 'copied';
-  }
-  return 'shared';
+  return doShareTournament(tournament);
 }
 
 // Tournament Card Component - Event Poster Style

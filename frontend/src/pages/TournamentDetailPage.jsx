@@ -22,6 +22,7 @@ import {
   ShareIcon,
 } from '@heroicons/react/24/outline';
 import { Edit, Users, Eye, Layers, GitBranch } from 'lucide-react';
+import { shareTournament as doShareTournament } from '../utils/tournamentShare';
 
 // Delete Tournament Modal Component - Emerald Theme with Fixed Text Visibility
 const DeleteTournamentModal = ({ isOpen, onClose, onConfirm, tournamentName, isDeleting }) => {
@@ -167,31 +168,10 @@ const TournamentDetailPage = () => {
 
   const handleShare = async () => {
     if (!tournament) return;
-    const url = `${window.location.origin}/tournaments/${tournament.id}`;
-    const dateStr = formatDate(tournament.startDate);
-    const cats = (tournament.categories || []).map(c => `   • ${c.name}`).join('\n');
-    const catBlock = cats ? `\n🏸 Categories:\n${cats}\n` : '';
-    const text = [
-      `🎾 MATCHIFY.PRO PRESENTS`,
-      ``,
-      `━━━━━━━━━━━━━━━━━━━`,
-      `🏆 ${tournament.name.toUpperCase()}`,
-      `━━━━━━━━━━━━━━━━━━━`,
-      ``,
-      `📍 ${tournament.city}${tournament.state ? `, ${tournament.state}` : ''}`,
-      `📅 ${dateStr}`,
-      catBlock,
-      `🔗 View & Register:`,
-      url,
-      ``,
-      `━━━━━━━━━━━━━━━━━━━`,
-      `www.matchify.pro`,
-    ].join('\n');
-    if (navigator.share) {
-      // Pass text only — URL already embedded. Prevents WhatsApp double-URL.
-      try { await navigator.share({ title: `${tournament.name} — Matchify.pro`, text }); } catch (_) {}
-    } else {
-      await navigator.clipboard.writeText(text);
+    const result = await doShareTournament(tournament, (state) => setShareState(state));
+    if (result === 'whatsapp') {
+      // opened wa.me — no UI feedback needed
+    } else if (result === 'copied') {
       setShareState('copied');
       setTimeout(() => setShareState('idle'), 2000);
     }

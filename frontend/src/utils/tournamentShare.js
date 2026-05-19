@@ -19,8 +19,8 @@ function formatPrize(n) {
   return Number(n).toLocaleString('en-IN');
 }
 
-
-const DIVIDER = '———————————————————';
+/** Divider line used between sections */
+const D = '─────────────────────────────────────';
 
 /** Build the WhatsApp-perfect share message */
 export function buildShareMessage(tournament) {
@@ -30,9 +30,7 @@ export function buildShareMessage(tournament) {
   // ── Date ───────────────────────────────────────────────────────
   const startDate = new Date(tournament.startDate);
   const dateStr = startDate.toLocaleDateString('en-IN', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
+    day: 'numeric', month: 'long', year: 'numeric',
   });
   const dayStr = startDate.toLocaleDateString('en-IN', { weekday: 'long' });
 
@@ -40,110 +38,88 @@ export function buildShareMessage(tournament) {
   const timeStr = formatTime(tournament.matchStartTime);
 
   // ── Venue ──────────────────────────────────────────────────────
-  const venueParts = [tournament.venue, tournament.city].filter(Boolean);
-  const venueStr = venueParts.join(', ');
+  const venueStr = [tournament.venue, tournament.city].filter(Boolean).join(', ');
 
-  // ── Categories ─────────────────────────────────────────────────
-  const categoryLines = cats.map(c => `  · ${c.name}`).join('\n');
-
-  // ── Entry Fee ──────────────────────────────────────────────────
-  // All same → single value line; different → per-category lines
-  const fees = [...new Set(cats.map(c => c.entryFee).filter(f => f != null))];
-  let entryFeeSection = null;
-  if (fees.length === 1) {
-    entryFeeSection = `Entry Fee:\n₹${formatPrize(fees[0])} Per Team`;
-  } else if (fees.length > 1) {
-    const feeLines = cats
-      .filter(c => c.entryFee != null)
-      .map(c => `  · ${c.name}: ₹${formatPrize(c.entryFee)}`)
-      .join('\n');
-    entryFeeSection = `Entry Fee:\n${feeLines}`;
-  }
+  // ── Categories with per-category entry fee ─────────────────────
+  // Doubles category → show "Per Team", Singles → just the fee
+  const catLines = cats.map(c => {
+    const isDoubles = /double/i.test(c.name);
+    const fee = c.entryFee != null
+      ? ` - ₹${formatPrize(c.entryFee)}${isDoubles ? ' Per Team' : ''}`
+      : '';
+    return `${c.name}${fee}`;
+  });
 
   // ── Awards ─────────────────────────────────────────────────────
-  // Use prizeDescription (text) if set; else fall back to numeric amounts
-  let awardsSection = null;
-  const descLines = cats
-    .map(c => c.prizeDescription)
-    .filter(Boolean)
-    .join('\n');
-
+  // Use prizeDescription text if set, else build from numeric prizes
+  const descLines = cats.map(c => c.prizeDescription).filter(Boolean).join('\n');
+  let awardsLines = [];
   if (descLines) {
-    awardsSection = `🏆 Awards:\n${descLines}`;
+    awardsLines = descLines.split('\n').map(l => l.trim()).filter(Boolean);
   } else {
     const totalWinner = cats.reduce((s, c) => s + (c.prizeWinner || 0), 0);
     const totalRunner = cats.reduce((s, c) => s + (c.prizeRunnerUp || 0), 0);
     const totalSemi   = cats.reduce((s, c) => s + (c.prizeSemiFinalist || 0), 0);
-    if (totalWinner > 0 || totalRunner > 0 || totalSemi > 0) {
-      const lines = ['🏆 Awards:'];
-      if (totalWinner > 0) lines.push(`🥇 Winner: ₹${formatPrize(totalWinner)}`);
-      if (totalRunner > 0) lines.push(`🥈 Runner up: ₹${formatPrize(totalRunner)}`);
-      if (totalSemi > 0)   lines.push(`🥉 Semi Finalist: ₹${formatPrize(totalSemi)}`);
-      awardsSection = lines.join('\n');
-    }
+    if (totalWinner > 0) awardsLines.push(`🥇 Winner: ₹${formatPrize(totalWinner)}`);
+    if (totalRunner > 0) awardsLines.push(`🥈 Runner up: ₹${formatPrize(totalRunner)}`);
+    if (totalSemi > 0)   awardsLines.push(`🥉 Semi Finalist: ₹${formatPrize(totalSemi)}`);
   }
-
-  // ── Shuttle ────────────────────────────────────────────────────
-  const shuttleSection = tournament.shuttleBrand
-    ? `${tournament.shuttleBrand} will be used`
-    : null;
 
   // ── Contact ────────────────────────────────────────────────────
   const contactPhone =
     tournament.contactPhone || tournament.whatsappNumber || tournament.organizer?.phone;
   const contactName = tournament.organizer?.name || tournament.organizer?.username || '';
-  let contactSection = null;
+
+  // ── Assemble — each block separated by divider ─────────────────
+  const lines = [];
+
+  // 1. Header
+  lines.push('MATCHIFY.PRO PRESENTS');
+  lines.push(D);
+
+  // 2. Tournament name
+  lines.push(tournament.name.toUpperCase());
+  lines.push(D);
+
+  // 3. Venue / Date / Time
+  if (venueStr) lines.push(`Venue: ${venueStr}`);
+  lines.push('');
+  lines.push(`Date: ${dateStr} (${dayStr})`);
+  lines.push('');
+  if (timeStr) { lines.push(`Time: ${timeStr}`); lines.push(''); }
+  lines.push(D);
+
+  // 4. Categories + entry fees
+  if (catLines.length) {
+    catLines.forEach(l => lines.push(l));
+    lines.push(D);
+  }
+
+  // 5. Awards
+  if (awardsLines.length) {
+    lines.push('🏆 Awards:');
+    awardsLines.forEach(l => lines.push(l));
+    lines.push(D);
+  }
+
+  // 6. Contact
   if (contactName || contactPhone) {
-    const lines = ['🔑 Contact:'];
+    lines.push('📞 Contact');
     if (contactName)  lines.push(contactName);
     if (contactPhone) lines.push(contactPhone);
-    contactSection = lines.join('\n');
+    lines.push(D);
   }
 
-  // ── Assemble ───────────────────────────────────────────────────
-  const sections = [];
+  // 7. Link
+  lines.push('🔗 View & Register:');
+  lines.push(url);
+  lines.push(D);
 
-  // Header block (title between dividers)
-  sections.push([
-    DIVIDER,
-    `MATCHIFY.PRO @${tournament.name.toUpperCase()}`,
-    DIVIDER,
-  ].join('\n'));
+  // 8. Footer
+  lines.push('🌐 www.matchify.pro');
+  lines.push(D);
 
-  // Venue
-  if (venueStr) sections.push(`Venue: ${venueStr}`);
-
-  // Date
-  sections.push(`Date: ${dateStr} (${dayStr})`);
-
-  // Time
-  if (timeStr) sections.push(`Time: ${timeStr}`);
-
-  // Categories
-  if (categoryLines) {
-    sections.push(`Category:\n${categoryLines}`);
-  }
-
-  // Entry fee
-  if (entryFeeSection) sections.push(entryFeeSection);
-
-  // Awards
-  if (awardsSection) sections.push(awardsSection);
-
-  // Shuttle
-  if (shuttleSection) sections.push(shuttleSection);
-
-  // Contact
-  if (contactSection) sections.push(contactSection);
-
-  // Link
-  sections.push(`🔗 View & Register:\n${url}`);
-
-  // Footer
-  sections.push(`${DIVIDER}\n🌐 www.matchify.pro`);
-
-  // Join sections with blank line between each
-  const text = sections.join('\n\n');
+  const text = lines.join('\n');
 
   return {
     title: `${tournament.name} — Matchify.pro`,

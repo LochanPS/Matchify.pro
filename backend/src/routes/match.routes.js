@@ -695,6 +695,8 @@ const endMatchHandler = async (req, res) => {
     // ── 4+5. Mark COMPLETED and advance winner atomically ─────────────────────
     // Both writes in a single transaction so a crash between them can't leave the
     // match completed but the bracket not advanced (or vice versa).
+    const isFinal = !parentMatch && match.round === 1;
+
     const updatedMatch = await prisma.$transaction(async (tx) => {
       const completed = await tx.match.update({
         where: { id: matchId },
@@ -708,6 +710,18 @@ const endMatchHandler = async (req, res) => {
         const bothReady   = winnerPos === 'player1' ? !!parentMatch.player2Id : !!parentMatch.player1Id;
         if (bothReady) advanceData.status = 'READY';
         await tx.match.update({ where: { id: parentMatch.id }, data: advanceData });
+      }
+
+      // Final match: close category and record winner/runner-up
+      if (isFinal) {
+        await tx.category.update({
+          where: { id: match.categoryId },
+          data: {
+            status: 'completed',
+            winnerId: !isGuestId(winnerId) ? winnerId : null,
+            runnerUpId: !isGuestId(loserId) ? loserId : null,
+          }
+        });
       }
 
       return completed;
@@ -886,6 +900,17 @@ const endMatchHandler = async (req, res) => {
         }
       } catch (bracketErr) {
         console.error('Background bracket JSON update error:', bracketErr);
+      }
+
+      // Award tournament points when category final is completed
+      if (isFinal) {
+        try {
+          const tournamentPointsService = (await import('../services/tournamentPoints.service.js')).default;
+          await tournamentPointsService.awardTournamentPoints(match.tournamentId, match.categoryId);
+          console.log(`✅ Tournament points awarded for category ${match.categoryId}`);
+        } catch (pointsErr) {
+          console.error('Background points award error:', pointsErr);
+        }
       }
     };
 

@@ -114,7 +114,7 @@ export default function PaymentSummary({ selectedCategories, categories, tournam
             </div>
             {adminPaymentSettings?.upiId && (() => {
               const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-              const upiLink = `upi://pay?pa=${encodeURIComponent(adminPaymentSettings.upiId)}&pn=${encodeURIComponent(adminPaymentSettings.accountHolderName || 'Matchify.pro')}&am=${totalAmount}&cu=INR&tn=${encodeURIComponent('Tournament Registration')}`;
+              const upiLink = `upi://pay?pa=${encodeURIComponent(adminPaymentSettings.upiId)}&pn=${encodeURIComponent(adminPaymentSettings.accountHolderName || 'Matchify.pro')}&am=${totalAmount.toFixed(2)}&cu=INR&tn=${encodeURIComponent('Tournament Registration')}`;
               return isIOS ? (
                 <div className="mt-2 px-3 py-2.5 rounded-xl text-xs font-semibold text-center"
                   style={{ background: 'rgba(0,212,255,0.07)', border: '1px solid rgba(0,212,255,0.2)', color: 'rgba(0,212,255,0.8)' }}>

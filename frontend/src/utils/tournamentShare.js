@@ -19,6 +19,21 @@ function formatPrize(n) {
   return Number(n).toLocaleString('en-IN');
 }
 
+/**
+ * Resolve image URL — handles relative /uploads/ paths from local/backend.
+ * In production, poster URLs are full Supabase URLs already.
+ */
+function resolveImageUrl(url) {
+  if (!url) return null;
+  if (url.startsWith('/uploads')) {
+    const base =
+      (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL?.replace('/api', '')) ||
+      'https://matchify-probackend.vercel.app';
+    return `${base}${url}`;
+  }
+  return url;
+}
+
 /** Build the WhatsApp-perfect share message */
 export function buildShareMessage(tournament) {
   const url = `${window.location.origin}/tournaments/${tournament.id}`;
@@ -46,76 +61,85 @@ export function buildShareMessage(tournament) {
   // ── Entry Fee ──────────────────────────────────────────────────
   // If all same fee → single line; if different → per category
   const fees = [...new Set(cats.map(c => c.entryFee).filter(f => f != null))];
-  let entryFeeBlock = '';
+  let entryFeeLines = [];
   if (fees.length === 1) {
-    entryFeeBlock = `\nEntry Fee: ₹${formatPrize(fees[0])} Per Team`;
+    entryFeeLines = [`Entry Fee: ₹${formatPrize(fees[0])} Per Team`];
   } else if (fees.length > 1) {
-    // Show per category
-    const feeLines = cats
-      .filter(c => c.entryFee != null)
-      .map(c => `· ${c.name}: ₹${formatPrize(c.entryFee)}`)
-      .join('\n');
-    entryFeeBlock = `\nEntry Fee:\n${feeLines}`;
+    entryFeeLines = [
+      'Entry Fee:',
+      ...cats
+        .filter(c => c.entryFee != null)
+        .map(c => `· ${c.name}: ₹${formatPrize(c.entryFee)}`),
+    ];
   }
 
   // ── Awards ─────────────────────────────────────────────────────
-  // Aggregate across categories — take max prizes if multiple categories
   const totalWinner = cats.reduce((s, c) => s + (c.prizeWinner || 0), 0);
   const totalRunner = cats.reduce((s, c) => s + (c.prizeRunnerUp || 0), 0);
   const totalSemi   = cats.reduce((s, c) => s + (c.prizeSemiFinalist || 0), 0);
-
-  let awardsBlock = '';
+  let awardsLines = [];
   if (totalWinner > 0 || totalRunner > 0 || totalSemi > 0) {
-    const lines = ['🏆 Awards:'];
-    if (totalWinner > 0) lines.push(`Winner: ₹${formatPrize(totalWinner)}`);
-    if (totalRunner > 0) lines.push(`Runner up: ₹${formatPrize(totalRunner)}`);
-    if (totalSemi > 0)   lines.push(`Semi Finalist: ₹${formatPrize(totalSemi)}`);
-    awardsBlock = '\n' + lines.join('\n');
+    awardsLines.push('🏆 Awards:');
+    if (totalWinner > 0) awardsLines.push(`Winner: ₹${formatPrize(totalWinner)}`);
+    if (totalRunner > 0) awardsLines.push(`Runner up: ₹${formatPrize(totalRunner)}`);
+    if (totalSemi > 0)   awardsLines.push(`Semi Finalist: ₹${formatPrize(totalSemi)}`);
   }
 
   // ── Shuttle brand ──────────────────────────────────────────────
-  const shuttleBlock = tournament.shuttleBrand
-    ? `\n${tournament.shuttleBrand} Shuttle`
-    : '';
+  const shuttleLine = tournament.shuttleBrand ? `${tournament.shuttleBrand} Shuttle` : null;
 
   // ── Contact ────────────────────────────────────────────────────
   const contactPhone =
     tournament.contactPhone || tournament.whatsappNumber || tournament.organizer?.phone;
   const contactName = tournament.organizer?.name || tournament.organizer?.username || '';
-  let contactBlock = '';
-  if (contactPhone || contactName) {
-    const contactStr = [contactName, contactPhone].filter(Boolean).join(' - ');
-    contactBlock = `\n🔑 Contact: ${contactStr}`;
-  }
+  const contactStr = [contactName, contactPhone].filter(Boolean).join(' - ');
+  const contactLine = contactStr ? `🔑 Contact: ${contactStr}` : null;
 
   // ── Assemble ───────────────────────────────────────────────────
-  const lines = [
-    `MATCHIFY.PRO @${tournament.name.toUpperCase()}`,
+  // Header: MATCHIFY.PRO on its own line, tournament name below (bold in WhatsApp)
+  const parts = [
+    `*MATCHIFY.PRO*`,
+    `*${tournament.name.toUpperCase()}*`,
     ``,
-    venueStr ? `Venue: ${venueStr}` : null,
-    `Date: ${dateStr} (${dayStr})`,
-    timeStr ? `Time: ${timeStr}` : null,
-  ].filter(l => l !== null);
+  ];
+
+  if (venueStr) parts.push(`Venue: ${venueStr}`);
+  parts.push(`Date: ${dateStr} (${dayStr})`);
+  if (timeStr)  parts.push(`Time: ${timeStr}`);
 
   if (categoryLines) {
-    lines.push('');
-    lines.push('Category:');
-    lines.push(categoryLines);
+    parts.push('');
+    parts.push('Category:');
+    parts.push(categoryLines);
   }
 
-  if (entryFeeBlock) lines.push(entryFeeBlock.trim());
-  if (awardsBlock)   lines.push(awardsBlock.trim());
-  if (shuttleBlock)  lines.push(shuttleBlock.trim());
-  if (contactBlock)  lines.push('');
-  if (contactBlock)  lines.push(contactBlock.trim());
+  if (entryFeeLines.length) {
+    parts.push('');
+    parts.push(...entryFeeLines);
+  }
 
-  lines.push('');
-  lines.push(`🔗 View & Register: ${url}`);
-  lines.push('');
-  lines.push('———————————');
-  lines.push('🌐 www.matchify.pro');
+  if (awardsLines.length) {
+    parts.push('');
+    parts.push(...awardsLines);
+  }
 
-  const text = lines.join('\n');
+  if (shuttleLine) {
+    parts.push('');
+    parts.push(shuttleLine);
+  }
+
+  if (contactLine) {
+    parts.push('');
+    parts.push(contactLine);
+  }
+
+  parts.push('');
+  parts.push(`🔗 View & Register: ${url}`);
+  parts.push('');
+  parts.push('———————————');
+  parts.push('🌐 www.matchify.pro');
+
+  const text = parts.join('\n');
 
   return {
     title: `${tournament.name} — Matchify.pro`,
@@ -126,13 +150,16 @@ export function buildShareMessage(tournament) {
 
 /**
  * Fetch a URL as a File object for Web Share API.
- * Returns null on failure (CORS, network, etc.)
+ * Returns null on any failure (CORS, network, etc.)
  */
-async function urlToFile(url, filename = 'poster.jpg') {
+async function urlToFile(rawUrl, filename = 'poster.jpg') {
+  const url = resolveImageUrl(rawUrl);
+  if (!url) return null;
   try {
-    const res = await fetch(url, { mode: 'cors' });
+    const res = await fetch(url, { mode: 'cors', credentials: 'omit' });
     if (!res.ok) return null;
     const blob = await res.blob();
+    if (!blob.size) return null;
     return new File([blob], filename, { type: blob.type || 'image/jpeg' });
   } catch {
     return null;
@@ -140,60 +167,60 @@ async function urlToFile(url, filename = 'poster.jpg') {
 }
 
 /**
- * Share a tournament with poster image(s) + WhatsApp-formatted text.
- *
- * Strategy:
- * 1. Build message
- * 2. If navigator.share + files supported → try to fetch poster → share with file
- * 3. Fallback: navigator.share text-only
- * 4. Fallback: open wa.me deep link
- * 5. Last resort: copy to clipboard
- *
- * @param {object} tournament  Full tournament object
- * @param {function} [setCopied]  Optional callback when clipboard fallback fires
- * @returns {Promise<'shared'|'copied'|'whatsapp'>}
+ * Get the primary poster's resolved full URL from a tournament object.
  */
-export async function shareTournament(tournament, setCopied) {
+function getPosterUrl(tournament) {
+  const posters = tournament.posters || [];
+  const primary = posters.find(p => p.isPrimary) || posters[0];
+  if (!primary) return null;
+  // poster.imageUrl is the canonical field from the DB
+  return resolveImageUrl(primary.imageUrl || primary.url || primary.preview);
+}
+
+/**
+ * Share a tournament with poster image + WhatsApp-formatted text.
+ *
+ * Priority:
+ * 1. Web Share API + poster File (mobile native share sheet with image)
+ * 2. Web Share API text-only (if image fetch fails)
+ * 3. wa.me deep link (desktop / no share API)
+ *
+ * @param {object} tournament  Full tournament object from API
+ * @returns {Promise<'shared'|'whatsapp'>}
+ */
+export async function shareTournament(tournament) {
   const { title, text } = buildShareMessage(tournament);
 
-  // ── Try Web Share API with poster file ────────────────────────
   if (navigator.share) {
-    // Check if files are supported
-    const canShareFiles = typeof navigator.canShare === 'function';
-
-    // Get primary poster URL
-    const primaryPoster = (tournament.posters || []).find(p => p.isPrimary) || tournament.posters?.[0];
-    const posterUrl = primaryPoster?.url || primaryPoster?.imageUrl || primaryPoster?.preview;
-
-    let shared = false;
-
-    if (posterUrl && canShareFiles) {
-      const file = await urlToFile(posterUrl, `${tournament.name.replace(/\s+/g, '_')}_poster.jpg`);
-      if (file && navigator.canShare({ files: [file] })) {
-        try {
-          await navigator.share({ title, text, files: [file] });
-          shared = true;
-        } catch (err) {
-          // User cancelled or error — fall through
-          if (err?.name === 'AbortError') return 'shared'; // user cancelled = intentional
+    // ── Attempt share with image ──────────────────────────────────
+    if (typeof navigator.canShare === 'function') {
+      const posterUrl = getPosterUrl(tournament);
+      if (posterUrl) {
+        const safeName = tournament.name.replace(/[^a-zA-Z0-9_-]/g, '_');
+        const file = await urlToFile(posterUrl, `${safeName}_poster.jpg`);
+        if (file && navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({ title, text, files: [file] });
+            return 'shared';
+          } catch (err) {
+            if (err?.name === 'AbortError') return 'shared'; // user dismissed = ok
+            // Otherwise fall through to text-only
+          }
         }
       }
     }
 
-    if (!shared) {
-      // Text-only share
-      try {
-        await navigator.share({ title, text });
-        return 'shared';
-      } catch (err) {
-        if (err?.name === 'AbortError') return 'shared';
-      }
-    } else {
+    // ── Text-only share fallback ───────────────────────────────────
+    try {
+      await navigator.share({ title, text });
       return 'shared';
+    } catch (err) {
+      if (err?.name === 'AbortError') return 'shared';
+      // Fall through to wa.me
     }
   }
 
-  // ── WhatsApp deep link fallback ────────────────────────────────
+  // ── wa.me deep link fallback (desktop or unsupported browsers) ──
   const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
   window.open(waUrl, '_blank');
   return 'whatsapp';

@@ -142,6 +142,7 @@ export default function TournamentRegistrationPage() {
   const [isRegistrationClosed, setIsRegistrationClosed] = useState(false);
   const [searchingPartner, setSearchingPartner] = useState({});
   const [upiCopiedToast, setUpiCopiedToast] = useState(false);
+  const [paymentRef, setPaymentRef] = useState('');
 
   // ── Load draft + data on mount ───────────────────────────────────────────
   useEffect(() => {
@@ -156,6 +157,7 @@ export default function TournamentRegistrationPage() {
           setSelectedCategories(draft.selectedCategories);
           if (draft.partnerCodes) setPartnerCodes(draft.partnerCodes);
           if (draft.partnerInfo) setPartnerInfo(draft.partnerInfo);
+          if (draft.paymentRef) setPaymentRef(draft.paymentRef);
         }
       }
     } catch {}
@@ -168,12 +170,13 @@ export default function TournamentRegistrationPage() {
   }, [tournament]);
 
   // ── Draft helpers ────────────────────────────────────────────────────────
-  const saveDraft = useCallback(() => {
+  const saveDraft = useCallback((ref) => {
     try {
       localStorage.setItem(DRAFT_KEY, JSON.stringify({
         selectedCategories,
         partnerCodes,
         partnerInfo,
+        paymentRef: ref,
         timestamp: Date.now(),
       }));
     } catch {}
@@ -251,7 +254,9 @@ export default function TournamentRegistrationPage() {
       }
       if (!partnerInfo[catId]) { setError(`Verify partner ID for ${cat?.name}`); return; }
     }
-    saveDraft();
+    const ref = `MCT-${Date.now().toString(36).toUpperCase().slice(-6)}`;
+    setPaymentRef(ref);
+    saveDraft(ref);
     setStep(2);
   };
 
@@ -637,6 +642,11 @@ export default function TournamentRegistrationPage() {
               </div>
             </div>
 
+            {/* ── Transaction Reference ─────────────────────────────────── */}
+            {paymentRef && (
+              <CopyField label="Transaction Reference (share with admin if asked)" value={paymentRef} mono />
+            )}
+
             {/* ── Pay Using ─────────────────────────────────────────────── */}
             {!upiId && !qrUrl ? (
               <div className="rounded-2xl p-6 text-center"
@@ -685,28 +695,28 @@ export default function TournamentRegistrationPage() {
                             <UpiAppButton
                               label="GPay"
                               emoji="🟢"
-                              scheme={`tez://upi/pay?pa=${upiId}&pn=${encodeURIComponent(accountHolder)}`}
+                              scheme={`tez://upi/pay?pa=${upiId}&pn=${encodeURIComponent(accountHolder)}&am=${total.toFixed(2)}&cu=INR&tn=${paymentRef}`}
                               upiId={upiId}
                               onCopied={showUpiCopied}
                             />
                             <UpiAppButton
                               label="PhonePe"
                               emoji="🟣"
-                              scheme={`phonepe://pay?transactionId=${Date.now()}&upiId=${upiId}&purpose=p2p`}
+                              scheme={`phonepe://pay?transactionId=${paymentRef}&amount=${total.toFixed(2)}&upiId=${upiId}&purpose=p2p`}
                               upiId={upiId}
                               onCopied={showUpiCopied}
                             />
                             <UpiAppButton
                               label="Paytm"
                               emoji="🔵"
-                              scheme={`paytmmp://pay?pa=${upiId}`}
+                              scheme={`paytmmp://pay?pa=${upiId}&pn=${encodeURIComponent(accountHolder)}&am=${total.toFixed(2)}&cu=INR&tn=${paymentRef}`}
                               upiId={upiId}
                               onCopied={showUpiCopied}
                             />
                             <UpiAppButton
                               label="BHIM"
                               emoji="🇮🇳"
-                              scheme={`bhim://pay?pa=${upiId}`}
+                              scheme={`bhim://pay?pa=${upiId}&pn=${encodeURIComponent(accountHolder)}&am=${total.toFixed(2)}&cu=INR&tn=${paymentRef}`}
                               upiId={upiId}
                               onCopied={showUpiCopied}
                             />

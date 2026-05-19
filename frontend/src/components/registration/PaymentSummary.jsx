@@ -112,6 +112,30 @@ export default function PaymentSummary({ selectedCategories, categories, tournam
               style={{ background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.2)', color: '#fbbf24' }}>
               Pay <strong>₹{totalAmount}</strong> using any UPI app
             </div>
+            {adminPaymentSettings?.upiId && (() => {
+              const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+              const upiLink = `upi://pay?pa=${encodeURIComponent(adminPaymentSettings.upiId)}&pn=${encodeURIComponent(adminPaymentSettings.accountHolderName || 'Matchify.pro')}&am=${totalAmount}&cu=INR&tn=${encodeURIComponent('Tournament Registration')}`;
+              return isIOS ? (
+                <div className="mt-2 px-3 py-2.5 rounded-xl text-xs font-semibold text-center"
+                  style={{ background: 'rgba(0,212,255,0.07)', border: '1px solid rgba(0,212,255,0.2)', color: 'rgba(0,212,255,0.8)' }}>
+                  📱 On iPhone, scan QR above with your camera app
+                </div>
+              ) : (
+                <a
+                  href={upiLink}
+                  className="mt-2 flex items-center justify-center gap-2 w-full py-3 rounded-xl text-sm font-black transition-all active:scale-95"
+                  style={{
+                    background: 'linear-gradient(135deg, #00d4ff22, #7c3aed22)',
+                    border: '1px solid rgba(0,212,255,0.35)',
+                    color: '#fff',
+                    textDecoration: 'none',
+                  }}
+                >
+                  <span style={{ fontSize: '1.1rem' }}>📲</span>
+                  Pay ₹{totalAmount} with UPI App
+                </a>
+              );
+            })()}
             <div className="mt-2 px-3 py-2 rounded-xl text-xs"
               style={{ background: 'rgba(0,212,255,0.06)', border: '1px solid rgba(0,212,255,0.18)', color: 'rgba(0,212,255,0.8)' }}>
               🔒 All payments go to Matchify.pro. Organizer paid after verification.

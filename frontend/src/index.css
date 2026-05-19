@@ -14,7 +14,7 @@
   html {
     font-size: clamp(15px, 4.27vw, 17px);
     /* Dark background on html/body prevents white flash on iOS overscroll bounce */
-    background-color: #07071a;
+    background-color: #0d0e2b;
   }
 
   /* Ensure all text is readable on mobile */
@@ -22,7 +22,7 @@
     @apply text-base;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background-color: #07071a;
+    background-color: #0d0e2b;
   }
   
   /* Headings - Responsive sizing */
@@ -254,6 +254,20 @@
 
 .badge-info {
   @apply bg-blue-500/20 text-blue-400 border-blue-500/30;
+}
+
+/* ── Global brightness lift ─────────────────────────────────────────────────
+   Raises perceived brightness of the whole UI by ~10% without touching
+   individual component styles. Images/videos are counteracted so they
+   don't look washed out (1.10 × 0.909 ≈ 1.0).
+   ─────────────────────────────────────────────────────────────────────────── */
+#root {
+  filter: brightness(1.1);
+}
+
+#root img,
+#root video {
+  filter: brightness(0.909);
 }
 
 /* Custom scrollbar */

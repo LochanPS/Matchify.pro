@@ -11,6 +11,23 @@ const getImageUrl = (url) => {
   return url;
 };
 
+const downloadQR = async (url) => {
+  try {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    const objectUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = objectUrl;
+    a.download = 'matchify-payment-qr.png';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(objectUrl);
+  } catch {
+    window.open(url, '_blank');
+  }
+};
+
 export default function PaymentSummary({ selectedCategories, categories, tournament }) {
   const [adminPaymentSettings, setAdminPaymentSettings] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -86,21 +103,17 @@ export default function PaymentSummary({ selectedCategories, categories, tournam
               <img src={qrImageUrl} alt="Payment QR" className="w-44 h-44 object-contain rounded-lg mx-auto" />
             </div>
             <div className="mt-2">
-              <a
-                href={qrImageUrl}
-                download="matchify-payment-qr.png"
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                onClick={() => downloadQR(qrImageUrl)}
                 className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all active:scale-95"
                 style={{
                   background: 'rgba(0,255,136,0.10)',
                   border: '1px solid rgba(0,255,136,0.30)',
                   color: '#00ff88',
-                  textDecoration: 'none',
                 }}
               >
                 ⬇️ Download QR Code
-              </a>
+              </button>
             </div>
             {adminPaymentSettings?.accountHolderName && (
               <p className="mt-2.5 text-xs font-bold text-white">{adminPaymentSettings.accountHolderName}</p>

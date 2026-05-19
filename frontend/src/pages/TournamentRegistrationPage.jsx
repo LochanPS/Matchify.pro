@@ -515,21 +515,32 @@ export default function TournamentRegistrationPage() {
                             onError={e => { e.target.style.display = 'none'; }}
                           />
                         </div>
-                        <a
-                          href={adminPaymentSettings.qrCodeUrl}
-                          download="matchify-payment-qr.png"
-                          target="_blank"
-                          rel="noopener noreferrer"
+                        <button
+                          onClick={async () => {
+                            try {
+                              const res = await fetch(adminPaymentSettings.qrCodeUrl);
+                              const blob = await res.blob();
+                              const objectUrl = URL.createObjectURL(blob);
+                              const a = document.createElement('a');
+                              a.href = objectUrl;
+                              a.download = 'matchify-payment-qr.png';
+                              document.body.appendChild(a);
+                              a.click();
+                              document.body.removeChild(a);
+                              URL.revokeObjectURL(objectUrl);
+                            } catch {
+                              window.open(adminPaymentSettings.qrCodeUrl, '_blank');
+                            }
+                          }}
                           className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all active:scale-95"
                           style={{
                             background: 'rgba(0,255,136,0.10)',
                             border: '1px solid rgba(0,255,136,0.30)',
                             color: '#00ff88',
-                            textDecoration: 'none',
                           }}
                         >
                           ⬇️ Download QR Code
-                        </a>
+                        </button>
                       </div>
                     )}
 

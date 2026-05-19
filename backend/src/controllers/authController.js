@@ -308,8 +308,8 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Check for admin login
-    if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+    // Check for admin login (case-insensitive email comparison)
+    if (email?.toLowerCase() === ADMIN_EMAIL?.toLowerCase() && password === ADMIN_PASSWORD) {
       // Try to find admin user in database
       let adminUser = await prisma.user.findUnique({
         where: { email: ADMIN_EMAIL }

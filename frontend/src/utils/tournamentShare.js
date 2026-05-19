@@ -197,21 +197,19 @@ export async function shareTournament(tournament) {
   const { title, text } = buildShareMessage(tournament);
 
   if (navigator.share) {
-    // ── Try image-only share + clipboard ─────────────────────────
+    // ── Try image + text together ─────────────────────────────────
     if (typeof navigator.canShare === 'function') {
       const posterUrl = getPosterUrl(tournament);
       if (posterUrl) {
         const safeName = tournament.name.replace(/[^a-zA-Z0-9_-]/g, '_');
         const file = await urlToFile(posterUrl, `${safeName}_poster.jpg`);
         if (file && navigator.canShare({ files: [file] })) {
-          // Copy message to clipboard first, then open share sheet with image only
-          try { await navigator.clipboard.writeText(text); } catch (_) {}
           try {
-            await navigator.share({ files: [file] });
-            return 'image'; // caller shows "caption copied" toast
+            await navigator.share({ files: [file], text });
+            return 'shared';
           } catch (err) {
-            if (err?.name === 'AbortError') return 'image';
-            // Fall through to text share
+            if (err?.name === 'AbortError') return 'shared';
+            // Fall through to text-only share
           }
         }
       }

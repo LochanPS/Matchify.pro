@@ -649,18 +649,11 @@ function TournamentCard({ tournament, navigate, index }) {
   ];
   const [accentColor, accentGlow] = accentPairs[index % accentPairs.length];
 
-  const [shareState, setShareState] = useState('idle'); // idle | copied | caption
+  const [shareState, setShareState] = useState('idle'); // idle | shared
 
   const handleShare = async (e) => {
     e.stopPropagation();
-    const result = await shareTournament(tournament, e);
-    if (result === 'image') {
-      setShareState('caption');
-      setTimeout(() => setShareState('idle'), 4000);
-    } else if (result === 'copied') {
-      setShareState('copied');
-      setTimeout(() => setShareState('idle'), 2000);
-    }
+    await shareTournament(tournament, e);
   };
 
   const statusStyle = getStatusStyle(tournament.status);
@@ -734,15 +727,15 @@ function TournamentCard({ tournament, navigate, index }) {
           title="Share tournament"
           className="absolute top-2 left-2 flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-bold transition-all"
           style={{
-            background: shareState === 'caption' ? 'rgba(0,212,255,0.9)' : shareState === 'copied' ? 'rgba(0,255,136,0.9)' : 'rgba(0,0,0,0.65)',
-            color: shareState === 'caption' ? '#001a22' : shareState === 'copied' ? '#003320' : 'rgba(255,255,255,0.9)',
+            background: 'rgba(0,0,0,0.65)',
+            color: 'rgba(255,255,255,0.9)',
             backdropFilter: 'blur(8px)',
-            border: `1px solid ${shareState === 'caption' ? 'rgba(0,212,255,0.5)' : shareState === 'copied' ? 'rgba(0,255,136,0.5)' : 'rgba(255,255,255,0.2)'}`,
+            border: '1px solid rgba(255,255,255,0.2)',
             boxShadow: '0 2px 8px rgba(0,0,0,0.5)',
           }}
         >
           <ShareIcon className="w-3.5 h-3.5" />
-          <span>{shareState === 'caption' ? 'Caption Copied! 📋' : shareState === 'copied' ? 'Copied!' : 'Share'}</span>
+          <span>Share</span>
         </button>
 
         {/* Bottom: city + countdown */}

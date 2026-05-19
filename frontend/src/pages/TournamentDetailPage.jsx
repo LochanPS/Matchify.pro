@@ -168,15 +168,7 @@ const TournamentDetailPage = () => {
 
   const handleShare = async () => {
     if (!tournament) return;
-    const result = await doShareTournament(tournament);
-    if (result === 'image') {
-      // Image shared via native sheet; caption was copied to clipboard
-      setShareState('caption');
-      setTimeout(() => setShareState('idle'), 4000);
-    } else if (result === 'copied') {
-      setShareState('copied');
-      setTimeout(() => setShareState('idle'), 2000);
-    }
+    await doShareTournament(tournament);
   };
 
   useEffect(() => {
@@ -559,21 +551,14 @@ const TournamentDetailPage = () => {
               onClick={handleShare}
               className="absolute top-4 right-4 flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-semibold text-sm backdrop-blur-md transition-all"
               style={{
-                background: shareState === 'caption' ? 'rgba(0,212,255,0.85)' : shareState === 'copied' ? 'rgba(0,255,136,0.85)' : 'rgba(0,0,0,0.5)',
-                color: shareState === 'caption' ? '#001a22' : shareState === 'copied' ? '#003320' : 'rgba(255,255,255,0.85)',
-                border: `1px solid ${shareState === 'caption' ? 'rgba(0,212,255,0.4)' : shareState === 'copied' ? 'rgba(0,255,136,0.4)' : 'rgba(255,255,255,0.15)'}`,
+                background: 'rgba(0,0,0,0.5)',
+                color: 'rgba(255,255,255,0.85)',
+                border: '1px solid rgba(255,255,255,0.15)',
               }}
             >
               <ShareIcon className="h-4 w-4" />
-              {shareState === 'caption' ? 'Caption Copied!' : shareState === 'copied' ? 'Copied!' : 'Share'}
+              Share
             </button>
-            {/* Caption hint toast */}
-            {shareState === 'caption' && (
-              <div className="absolute top-14 right-4 px-3 py-2 rounded-xl text-xs font-medium backdrop-blur-md text-center max-w-[180px]"
-                style={{ background: 'rgba(0,212,255,0.9)', color: '#001a22' }}>
-                Paste as caption in WhatsApp 📋
-              </div>
-            )}
 
             {/* Thumbnail strip if multiple posters */}
             {tournament.posters.length > 1 && (
@@ -664,13 +649,13 @@ const TournamentDetailPage = () => {
                 onClick={handleShare}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-semibold transition-all"
                 style={{
-                  background: shareState === 'caption' ? 'rgba(0,212,255,0.2)' : shareState === 'copied' ? 'rgba(0,255,136,0.2)' : 'rgba(255,255,255,0.06)',
-                  color: shareState === 'caption' ? '#00d4ff' : shareState === 'copied' ? '#00ff88' : 'rgba(255,255,255,0.7)',
-                  border: `1px solid ${shareState === 'caption' ? 'rgba(0,212,255,0.4)' : shareState === 'copied' ? 'rgba(0,255,136,0.4)' : 'rgba(255,255,255,0.15)'}`,
+                  background: 'rgba(255,255,255,0.06)',
+                  color: 'rgba(255,255,255,0.7)',
+                  border: '1px solid rgba(255,255,255,0.15)',
                 }}
               >
                 <ShareIcon className="h-4 w-4" />
-                {shareState === 'caption' ? 'Caption Copied!' : shareState === 'copied' ? 'Copied!' : 'Share'}
+                Share
               </button>
             </div>
             <div className="flex flex-wrap items-center gap-2 mb-2">

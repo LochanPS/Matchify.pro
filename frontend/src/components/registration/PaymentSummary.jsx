@@ -85,6 +85,23 @@ export default function PaymentSummary({ selectedCategories, categories, tournam
             <div className="inline-block p-2 bg-white rounded-xl">
               <img src={qrImageUrl} alt="Payment QR" className="w-44 h-44 object-contain rounded-lg mx-auto" />
             </div>
+            <div className="mt-2">
+              <a
+                href={qrImageUrl}
+                download="matchify-payment-qr.png"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all active:scale-95"
+                style={{
+                  background: 'rgba(0,255,136,0.10)',
+                  border: '1px solid rgba(0,255,136,0.30)',
+                  color: '#00ff88',
+                  textDecoration: 'none',
+                }}
+              >
+                ⬇️ Download QR Code
+              </a>
+            </div>
             {adminPaymentSettings?.accountHolderName && (
               <p className="mt-2.5 text-xs font-bold text-white">{adminPaymentSettings.accountHolderName}</p>
             )}

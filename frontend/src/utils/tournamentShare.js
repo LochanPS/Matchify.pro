@@ -19,20 +19,6 @@ function formatPrize(n) {
   return Number(n).toLocaleString('en-IN');
 }
 
-/**
- * Resolve image URL — handles relative /uploads/ paths from backend.
- * In production, poster URLs are full Supabase URLs already.
- */
-function resolveImageUrl(url) {
-  if (!url) return null;
-  if (url.startsWith('/uploads')) {
-    const base =
-      (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL?.replace('/api', '')) ||
-      'https://matchify-probackend.vercel.app';
-    return `${base}${url}`;
-  }
-  return url;
-}
 
 const DIVIDER = '———————————————————';
 
@@ -166,13 +152,16 @@ export function buildShareMessage(tournament) {
   };
 }
 
-/**
- * Fetch a URL as a File object for Web Share API.
- * Returns null on any failure (CORS, network, etc.)
- */
-async function urlToFile(rawUrl, filename = 'poster.jpg') {
-  const url = resolveImageUrl(rawUrl);
+/** Fetch a URL as a File. Returns null on any failure. */
+async function urlToFile(url, filename = 'poster.jpg') {
   if (!url) return null;
+  // Resolve relative /uploads/ paths to full backend URL
+  if (url.startsWith('/uploads')) {
+    const base =
+      (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL?.replace('/api', '')) ||
+      'https://matchify-probackend.vercel.app';
+    url = `${base}${url}`;
+  }
   try {
     const res = await fetch(url, { mode: 'cors', credentials: 'omit' });
     if (!res.ok) return null;
@@ -184,60 +173,60 @@ async function urlToFile(rawUrl, filename = 'poster.jpg') {
   }
 }
 
-/**
- * Get the primary poster's resolved full URL from a tournament object.
- */
+/** Get primary poster URL from tournament object. */
 function getPosterUrl(tournament) {
   const posters = tournament.posters || [];
   const primary = posters.find(p => p.isPrimary) || posters[0];
-  if (!primary) return null;
-  return resolveImageUrl(primary.imageUrl || primary.url || primary.preview);
+  return primary?.imageUrl || primary?.url || primary?.preview || null;
 }
 
 /**
- * Share a tournament with poster image + WhatsApp-formatted text.
+ * Share a tournament — image first, message as caption.
  *
- * Priority:
- * 1. Web Share API + poster File (mobile native share sheet with image)
- * 2. Web Share API text-only (if image fetch fails)
- * 3. wa.me deep link (desktop / no share API)
+ * Strategy:
+ * 1. If poster available → share image file only via Web Share API
+ *    + copy message text to clipboard simultaneously
+ *    → Returns 'image' so caller can show "Caption copied — paste in WhatsApp"
+ * 2. No poster / file share not supported → share full text via Web Share API
+ * 3. No Web Share API → open wa.me deep link with full text
  *
  * @param {object} tournament  Full tournament object from API
- * @returns {Promise<'shared'|'whatsapp'>}
+ * @returns {Promise<'image'|'shared'|'whatsapp'>}
  */
 export async function shareTournament(tournament) {
   const { title, text } = buildShareMessage(tournament);
 
   if (navigator.share) {
-    // ── Attempt share with image ──────────────────────────────────
+    // ── Try image-only share + clipboard ─────────────────────────
     if (typeof navigator.canShare === 'function') {
       const posterUrl = getPosterUrl(tournament);
       if (posterUrl) {
         const safeName = tournament.name.replace(/[^a-zA-Z0-9_-]/g, '_');
         const file = await urlToFile(posterUrl, `${safeName}_poster.jpg`);
         if (file && navigator.canShare({ files: [file] })) {
+          // Copy message to clipboard first, then open share sheet with image only
+          try { await navigator.clipboard.writeText(text); } catch (_) {}
           try {
-            await navigator.share({ title, text, files: [file] });
-            return 'shared';
+            await navigator.share({ files: [file] });
+            return 'image'; // caller shows "caption copied" toast
           } catch (err) {
-            if (err?.name === 'AbortError') return 'shared';
-            // Fall through to text-only
+            if (err?.name === 'AbortError') return 'image';
+            // Fall through to text share
           }
         }
       }
     }
 
-    // ── Text-only share fallback ───────────────────────────────────
+    // ── Text-only share fallback ──────────────────────────────────
     try {
       await navigator.share({ title, text });
       return 'shared';
     } catch (err) {
       if (err?.name === 'AbortError') return 'shared';
-      // Fall through to wa.me
     }
   }
 
-  // ── wa.me deep link fallback (desktop or unsupported browsers) ──
+  // ── wa.me deep link fallback (desktop / unsupported) ─────────
   const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
   window.open(waUrl, '_blank');
   return 'whatsapp';

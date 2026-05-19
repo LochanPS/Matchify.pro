@@ -559,7 +559,7 @@ export default function TournamentRegistrationPage() {
                       const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
                       // No `am` param — pre-filled amount triggers P2M/merchant classification
                       // causing bank limit errors. User enters amount manually (P2P flow).
-                      const upiLink = `upi://pay?pa=${adminPaymentSettings.upiId.trim()}&pn=${encodeURIComponent(adminPaymentSettings.accountHolder || 'Matchify')}&cu=INR&tn=TournamentRegistration`;
+                      const upiLink = `upi://pay?pa=${adminPaymentSettings.upiId.trim()}`;
                       return isIOS ? (
                         <div className="mt-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-center"
                           style={{ background: 'rgba(0,212,255,0.07)', border: '1px solid rgba(0,212,255,0.2)', color: 'rgba(0,212,255,0.8)' }}>

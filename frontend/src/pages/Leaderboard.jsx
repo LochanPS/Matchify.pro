@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
+import { useAuth } from '../contexts/AuthContext';
 import { Trophy, Medal, Award, Target, Crown, Star, ArrowLeft, MapPin, Globe, Building } from 'lucide-react';
 
 // Pre-generated particle data — deterministic, no Math.random in render
@@ -29,6 +30,7 @@ const B = {
 
 export default function Leaderboard() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [leaderboard, setLeaderboard] = useState([]);
   const [myRanks, setMyRanks] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -40,8 +42,8 @@ export default function Leaderboard() {
   const [selectedPlayer, setSelectedPlayer] = useState(null);
 
   useEffect(() => {
-    fetchMyRanks();
-  }, []);
+    if (user) fetchMyRanks();
+  }, [user]);
 
   useEffect(() => {
     fetchLeaderboard();

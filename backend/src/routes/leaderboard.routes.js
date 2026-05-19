@@ -1,6 +1,7 @@
 import express from 'express';
 import tournamentPointsService from '../services/tournamentPoints.service.js';
 import { authenticate } from '../middleware/auth.js';
+import prisma from '../lib/prisma.js';
 
 const router = express.Router();
 
@@ -99,6 +100,36 @@ router.get('/player/:userId', async (req, res) => {
       success: false,
       error: 'Failed to fetch player rank'
     });
+  }
+});
+
+/**
+ * Public platform stats (no auth required)
+ * GET /api/leaderboard/platform-stats
+ */
+router.get('/platform-stats', async (req, res) => {
+  try {
+    const [playerCount, tournamentCount, cityCount] = await Promise.all([
+      prisma.user.count({ where: { isActive: true } }),
+      prisma.tournament.count({ where: { status: { not: 'draft' } } }),
+      prisma.tournament.findMany({
+        where: { status: { not: 'draft' }, city: { not: null } },
+        select: { city: true },
+        distinct: ['city'],
+      }),
+    ]);
+
+    res.json({
+      success: true,
+      stats: {
+        players: playerCount,
+        tournaments: tournamentCount,
+        cities: cityCount.length,
+      },
+    });
+  } catch (error) {
+    console.error('Platform stats error:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch stats' });
   }
 });
 

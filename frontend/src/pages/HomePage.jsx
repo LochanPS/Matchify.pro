@@ -9,15 +9,16 @@ import {
   BoltIcon,
 } from '@heroicons/react/24/outline';
 import { StarIcon } from '@heroicons/react/24/solid';
-import { useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import api from '../utils/api';
 
 // ─── All static data outside component — zero re-render cost ────────────────
 
-const STATS = [
-  { value: '1,000+', label: 'Active Players', icon: '🏸' },
-  { value: '50+',    label: 'Tournaments',    icon: '🏆' },
-  { value: '25+',    label: 'Cities',         icon: '📍' },
-  { value: '₹10L+',  label: 'Prize Money',    icon: '💰' },
+const DEFAULT_STATS = [
+  { value: '…',     label: 'Active Players', icon: '🏸' },
+  { value: '…',     label: 'Tournaments',    icon: '🏆' },
+  { value: '…',     label: 'Cities',         icon: '📍' },
+  { value: '₹10L+', label: 'Prize Money',    icon: '💰' },
 ];
 
 const PROBLEMS = [
@@ -229,6 +230,24 @@ function DashboardMockup() {
 // ─── Main component ──────────────────────────────────────────────────────────
 function HomePage() {
   const { user } = useAuth();
+  const [stats, setStats] = useState(DEFAULT_STATS);
+
+  // Fetch real platform stats
+  useEffect(() => {
+    api.get('/leaderboard/platform-stats')
+      .then(res => {
+        if (res.data?.success) {
+          const { players, tournaments, cities } = res.data.stats;
+          setStats([
+            { value: players >= 1000 ? `${(players / 1000).toFixed(1)}K+` : `${players}+`, label: 'Active Players', icon: '🏸' },
+            { value: `${tournaments}+`, label: 'Tournaments', icon: '🏆' },
+            { value: `${cities}+`,      label: 'Cities',      icon: '📍' },
+            { value: '₹10L+',           label: 'Prize Money', icon: '💰' },
+          ]);
+        }
+      })
+      .catch(() => { /* keep defaults */ });
+  }, []);
 
   // Inject CSS once on mount
   useEffect(() => {
@@ -361,7 +380,7 @@ function HomePage() {
         <Reveal>
           <div className="mx-auto" style={{ maxWidth:460 }}>
             <div className="grid grid-cols-4 gap-2">
-              {STATS.map((s, i) => (
+              {stats.map((s, i) => (
                 <div key={i} className="flex flex-col items-center gap-1 py-4 px-2 rounded-2xl"
                   style={{ background:'rgba(0,255,136,.04)', border:'1px solid rgba(0,255,136,.1)' }}>
                   <span className="text-xl">{s.icon}</span>

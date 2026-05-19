@@ -173,6 +173,8 @@ model Tournament {
   paymentQRPublicId     String?
   upiId                 String?
   accountHolderName     String?
+  contactPhone          String?            // Organizer contact number for this tournament
+  whatsappNumber        String?            // WhatsApp number (may differ from contactPhone)
   createdAt             DateTime           @default(now())
   updatedAt             DateTime           @updatedAt
   categories            Category[]

@@ -88,6 +88,8 @@ const CreateTournament = () => {
         privacy: formData.privacy,
         shuttleType: formData.shuttleType || null,
         shuttleBrand: formData.shuttleBrand || null,
+        contactPhone: formData.contactPhone?.trim() || null,
+        whatsappNumber: formData.whatsappNumber?.trim() || null,
         registrationOpenDate: formData.registrationOpenDate,
         registrationCloseDate: formData.registrationCloseDate,
         startDate: formData.startDate,

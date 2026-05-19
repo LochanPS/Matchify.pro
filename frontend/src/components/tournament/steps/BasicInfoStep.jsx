@@ -409,6 +409,45 @@ const BasicInfoStep = ({ formData, updateFormData, onNext }) => {
         {errors.zone && <p className="mt-1 text-xs text-red-400">{errors.zone}</p>}
       </div>
 
+      {/* Contact Info — Optional */}
+      <div className="rounded-2xl p-4 space-y-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+        <div>
+          <p className="text-sm font-black text-white mb-0.5">Contact Information</p>
+          <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Visible to players on the tournament page — both fields optional</p>
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold mb-1.5" style={{ color: 'rgba(168,85,247,0.9)' }}>
+            📞 Contact Phone
+          </label>
+          <input
+            type="tel"
+            value={formData.contactPhone || ''}
+            onChange={(e) => updateFormData('contactPhone', e.target.value)}
+            placeholder="+91 98765 43210"
+            className="w-full px-3 py-2.5 text-sm rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 transition-all"
+            style={{ background: 'rgba(0,0,0,0.3)', border: '1.5px solid rgba(168,85,247,0.3)' }}
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold mb-1.5" style={{ color: 'rgba(37,211,102,0.9)' }}>
+            💬 WhatsApp Number
+          </label>
+          <input
+            type="tel"
+            value={formData.whatsappNumber || ''}
+            onChange={(e) => updateFormData('whatsappNumber', e.target.value)}
+            placeholder="+91 98765 43210 (leave blank if same as above)"
+            className="w-full px-3 py-2.5 text-sm rounded-xl text-white placeholder-gray-500 focus:ring-2 transition-all"
+            style={{ background: 'rgba(0,0,0,0.3)', border: '1.5px solid rgba(37,211,102,0.3)' }}
+          />
+          <p className="mt-1 text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>
+            Players will see a WhatsApp button to message you directly
+          </p>
+        </div>
+      </div>
+
       {/* Navigation */}
       <div className="flex justify-end pt-4 border-t border-white/10">
         <button

@@ -68,6 +68,8 @@ export const useTournamentForm = (existingDraftId = null) => {
     pincode: '',
     shuttleType: '',
     shuttleBrand: '',
+    contactPhone: '',
+    whatsappNumber: '',
     
     // Step 2: Dates
     registrationOpenDate: '',

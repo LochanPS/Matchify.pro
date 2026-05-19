@@ -119,7 +119,9 @@ const createTournament = async (req, res) => {
       country = 'India',
       format, // singles, doubles, both
       privacy = 'public',
-      
+      contactPhone,
+      whatsappNumber,
+
       // Step 2: Dates
       registrationOpenDate,
       registrationCloseDate,
@@ -218,6 +220,8 @@ const createTournament = async (req, res) => {
           startDate: startDate,                    // Store as string
           endDate: endDate,                        // Store as string
           status: 'draft', // Will be published later
+          contactPhone: contactPhone?.trim() || null,
+          whatsappNumber: whatsappNumber?.trim() || null,
           // Use Matchify payment QR code
           paymentQRUrl: paymentSettings?.qrCodeUrl || null,
           upiId: paymentSettings?.upiId || null,
@@ -593,6 +597,8 @@ const updateTournament = async (req, res) => {
       registrationCloseDate,
       startDate,
       endDate,
+      contactPhone,
+      whatsappNumber,
     } = req.body;
 
     // Build update data
@@ -608,6 +614,8 @@ const updateTournament = async (req, res) => {
     if (format) updateData.format = format;
     if (privacy) updateData.privacy = privacy;
     if (status) updateData.status = status;
+    if (contactPhone !== undefined) updateData.contactPhone = contactPhone?.trim() || null;
+    if (whatsappNumber !== undefined) updateData.whatsappNumber = whatsappNumber?.trim() || null;
     
     // Store dates as strings - no conversion needed
     if (registrationOpenDate) updateData.registrationOpenDate = registrationOpenDate;

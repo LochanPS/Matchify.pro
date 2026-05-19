@@ -675,7 +675,7 @@ model TournamentPayment {
   totalRegistrations    Int      @default(0)
   
   // Platform fee (5%)
-  platformFeePercent    Float    @default(5)
+  platformFeePercent    Float    @default(3)
   platformFeeAmount     Float    @default(0)
   
   // Organizer payouts (50% + 50%)

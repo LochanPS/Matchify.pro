@@ -131,24 +131,20 @@ router.get('/dashboard', authenticate, async (req, res) => {
       }
     });
 
-    // Get ALL registrations for this organizer (not just recent 10)
+    // Get recent registrations with pagination (max 50 per request)
+    const page = parseInt(req.query.regPage) || 1;
+    const regLimit = Math.min(parseInt(req.query.regLimit) || 50, 100);
     const allRegistrations = await prisma.registration.findMany({
-      where: {
-        tournament: {
-          organizerId
-        }
-      },
+      where: { tournament: { organizerId } },
       orderBy: { createdAt: 'desc' },
+      take: regLimit,
+      skip: (page - 1) * regLimit,
       include: {
         user: {
           select: { id: true, name: true, email: true, phone: true, city: true, state: true, profilePhoto: true }
         },
-        tournament: {
-          select: { id: true, name: true }
-        },
-        category: {
-          select: { name: true, entryFee: true, format: true, gender: true }
-        }
+        tournament: { select: { id: true, name: true } },
+        category: { select: { name: true, entryFee: true, format: true, gender: true } }
       }
     });
 

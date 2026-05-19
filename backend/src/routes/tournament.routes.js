@@ -1,4 +1,5 @@
 import express from 'express';
+import prisma from '../lib/prisma.js';
 import {
   createTournament,
   getTournaments,
@@ -36,6 +37,54 @@ router.get('/:tournamentId/categories/:categoryId/registrations', authenticate, 
 // Match routes (require authentication but allow admins)
 router.get('/:tournamentId/categories/:categoryId/matches', authenticate, getMatches);
 router.post('/:tournamentId/categories/:categoryId/matches', authenticate, createMatch);
+
+// GET /tournaments/:id/matches — all matches for a tournament (all categories)
+// Used by frontend api/matches.js getTournamentMatches()
+router.get('/:tournamentId/matches', authenticate, async (req, res) => {
+  try {
+    const { tournamentId } = req.params;
+    const { categoryId, status, round } = req.query;
+
+    const where = { tournamentId };
+    if (categoryId) where.categoryId = categoryId;
+    if (status)     where.status     = status;
+    if (round)      where.round      = parseInt(round);
+
+    const matches = await prisma.match.findMany({
+      where,
+      include: {
+        category: { select: { id: true, name: true } },
+      },
+      orderBy: [{ round: 'asc' }, { matchNumber: 'asc' }],
+    });
+
+    // Batch-fetch all unique player IDs — avoids N+1
+    const playerIds = [...new Set(
+      matches.flatMap(m => [m.player1Id, m.player2Id, m.team1Player1Id, m.team1Player2Id, m.team2Player1Id, m.team2Player2Id])
+        .filter(Boolean)
+    )];
+    const players = playerIds.length
+      ? await prisma.user.findMany({ where: { id: { in: playerIds } }, select: { id: true, name: true, profilePhoto: true } })
+      : [];
+    const playerMap = Object.fromEntries(players.map(p => [p.id, p]));
+
+    const result = matches.map(m => ({
+      ...m,
+      score: m.scoreJson ? (() => { try { return JSON.parse(m.scoreJson); } catch { return null; } })() : null,
+      player1: playerMap[m.player1Id] || null,
+      player2: playerMap[m.player2Id] || null,
+      team1Player1: playerMap[m.team1Player1Id] || null,
+      team1Player2: playerMap[m.team1Player2Id] || null,
+      team2Player1: playerMap[m.team2Player1Id] || null,
+      team2Player2: playerMap[m.team2Player2Id] || null,
+    }));
+
+    res.json({ success: true, matches: result });
+  } catch (error) {
+    console.error('Error fetching tournament matches:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch matches' });
+  }
+});
 
 // Restart draw route (require authentication, organizer only)
 router.post('/:tournamentId/categories/:categoryId/draw/restart', authenticate, restartDraw);

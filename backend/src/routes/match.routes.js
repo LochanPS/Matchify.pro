@@ -232,10 +232,13 @@ router.get('/:matchId', authenticate, async (req, res) => {
 });
 
 // Update match score
+// Accepts two modes:
+//   1. Full score object: { score: { sets: [...], ... } }
+//   2. Point-by-point increment: { player: 'player1' | 'player2' }
 router.put('/:matchId/score', authenticate, async (req, res) => {
   try {
     const { matchId } = req.params;
-    const { score } = req.body;
+    let { score, player } = req.body;
     const userId = req.user.userId || req.user.id;
 
     // Verify match exists and user has permission
@@ -267,6 +270,40 @@ router.put('/:matchId/score', authenticate, async (req, res) => {
         success: false,
         message: 'Not authorized to update this match'
       });
+    }
+
+    // ── Point-by-point mode: { player: 'player1'|'player2' } ──────
+    if (player && !score) {
+      const current = match.scoreJson
+        ? (() => { try { return JSON.parse(match.scoreJson); } catch { return null; } })()
+        : null;
+
+      if (!current) {
+        return res.status(400).json({ success: false, message: 'Match score not initialised — start the match first' });
+      }
+
+      // Find current active set
+      const sets = current.sets || [];
+      let activeSetIdx = sets.findIndex(s => s.status === 'in_progress');
+      if (activeSetIdx === -1) activeSetIdx = sets.length - 1; // fallback to last set
+
+      if (activeSetIdx >= 0) {
+        const activeSet = sets[activeSetIdx];
+        if (player === 'player1') {
+          activeSet.player1Score = (activeSet.player1Score || 0) + 1;
+        } else if (player === 'player2') {
+          activeSet.player2Score = (activeSet.player2Score || 0) + 1;
+        }
+        // Track point history
+        if (!activeSet.points) activeSet.points = [];
+        activeSet.points.push({ scorer: player, timestamp: new Date().toISOString() });
+        current.sets = sets;
+      }
+      score = current;
+    }
+
+    if (!score) {
+      return res.status(400).json({ success: false, message: 'score or player field required' });
     }
 
     // Update match with the complete score object
@@ -1069,32 +1106,24 @@ router.get('/tournament/:tournamentId', authenticate, async (req, res) => {
       ]
     });
 
-    // Get player details for each match
-    const matchesWithPlayers = await Promise.all(
-      matches.map(async (match) => {
-        const players = {};
-        
-        if (match.player1Id) {
-          players.player1 = await prisma.user.findUnique({
-            where: { id: match.player1Id },
-            select: { id: true, name: true, email: true }
-          });
-        }
-        
-        if (match.player2Id) {
-          players.player2 = await prisma.user.findUnique({
-            where: { id: match.player2Id },
-            select: { id: true, name: true, email: true }
-          });
-        }
+    // Batch-fetch all unique player IDs — single query instead of N+1
+    const playerIds = [...new Set(
+      matches.flatMap(m => [m.player1Id, m.player2Id]).filter(Boolean)
+    )];
+    const players = playerIds.length
+      ? await prisma.user.findMany({
+          where: { id: { in: playerIds } },
+          select: { id: true, name: true, email: true }
+        })
+      : [];
+    const playerMap = Object.fromEntries(players.map(p => [p.id, p]));
 
-        return {
-          ...match,
-          ...players,
-          scoreData: match.scoreJson ? JSON.parse(match.scoreJson) : null
-        };
-      })
-    );
+    const matchesWithPlayers = matches.map(match => ({
+      ...match,
+      player1: playerMap[match.player1Id] || null,
+      player2: playerMap[match.player2Id] || null,
+      scoreData: match.scoreJson ? (() => { try { return JSON.parse(match.scoreJson); } catch { return null; } })() : null,
+    }));
 
     res.json({
       success: true,

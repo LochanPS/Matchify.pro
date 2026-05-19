@@ -72,6 +72,8 @@ import academyRoutes from './routes/academy.routes.js';
 import courtRoutes from './routes/court.routes.js';
 import courtBookingRoutes from './routes/courtBooking.routes.js';
 import userRoutes from './routes/user.routes.js';
+import kycRoutes from './routes/kyc.routes.js';
+import kycPaymentRoutes from './routes/kyc-payment.routes.js';
 
 // Import multi-role routes
 // import multiRoleAuthRoutes from './routes/multiRoleAuth.routes.js';
@@ -330,7 +332,9 @@ app.use('/api/court-bookings', courtBookingRoutes);
 // User routes
 app.use('/api/users', userRoutes);
 
-// KYC routes - DISABLED (KYC feature removed)
+// KYC routes
+app.use('/api/kyc', kycRoutes);
+app.use('/api/kyc', kycPaymentRoutes);
 
 // ============================================
 // LEADERBOARD ROUTES (MUST BE BEFORE MATCH ROUTES)

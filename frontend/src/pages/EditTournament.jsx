@@ -63,6 +63,8 @@ const EditTournament = () => {
     zone: '',
     format: '',
     privacy: '',
+    contactPhone: '',
+    whatsappNumber: '',
   });
 
   // Date fields
@@ -115,6 +117,8 @@ const EditTournament = () => {
         zone: t.zone || '',
         format: t.format || '',
         privacy: t.privacy || 'public',
+        contactPhone: t.contactPhone || '',
+        whatsappNumber: t.whatsappNumber || '',
       });
       setDateData({
         registrationOpenDate: formatDateForInput(t.registrationOpenDate),
@@ -456,6 +460,36 @@ const EditTournament = () => {
                     className="w-full px-3 py-3 rounded-xl text-white text-sm capitalize" style={selectStyle}>
                     {PRIVACY.map(p => <option key={p} value={p} style={{ background: '#1a1a2e' }} className="capitalize">{p}</option>)}
                   </select>
+                </div>
+              </div>
+
+              {/* Contact Info */}
+              <div className="rounded-xl p-4 space-y-3" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                <div>
+                  <p className="text-xs font-black text-white mb-0.5">Contact Information</p>
+                  <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>Optional — visible to players on the tournament page</p>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold mb-1.5" style={{ color: 'rgba(168,85,247,0.9)' }}>📞 Contact Phone</label>
+                  <input
+                    type="tel"
+                    value={infoData.contactPhone}
+                    onChange={e => setInfoData(p => ({ ...p, contactPhone: e.target.value }))}
+                    placeholder="+91 98765 43210"
+                    className="w-full px-3 py-2.5 rounded-xl text-white text-sm placeholder-gray-500 focus:outline-none"
+                    style={{ background: B.input, border: '1.5px solid rgba(168,85,247,0.3)' }}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold mb-1.5" style={{ color: 'rgba(37,211,102,0.9)' }}>💬 WhatsApp Number</label>
+                  <input
+                    type="tel"
+                    value={infoData.whatsappNumber}
+                    onChange={e => setInfoData(p => ({ ...p, whatsappNumber: e.target.value }))}
+                    placeholder="+91 98765 43210 (leave blank if same as above)"
+                    className="w-full px-3 py-2.5 rounded-xl text-white text-sm placeholder-gray-500 focus:outline-none"
+                    style={{ background: B.input, border: '1.5px solid rgba(37,211,102,0.3)' }}
+                  />
                 </div>
               </div>
 

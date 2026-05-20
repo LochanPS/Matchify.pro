@@ -1158,22 +1158,37 @@ router.get('/tournament/:tournamentId', authenticate, async (req, res) => {
       ]
     });
 
-    // Batch-fetch all unique player IDs — single query instead of N+1
-    const playerIds = [...new Set(
-      matches.flatMap(m => [m.player1Id, m.player2Id]).filter(Boolean)
+    // Batch-fetch all unique player IDs — handles both real users and guest players
+    const allPlayerIds = [...new Set(
+      matches.flatMap(m => [m.player1Id, m.player2Id, m.team1Player1Id, m.team1Player2Id, m.team2Player1Id, m.team2Player2Id]).filter(Boolean)
     )];
-    const players = playerIds.length
-      ? await prisma.user.findMany({
-          where: { id: { in: playerIds } },
-          select: { id: true, name: true, email: true }
-        })
-      : [];
-    const playerMap = Object.fromEntries(players.map(p => [p.id, p]));
+    const regularIds = allPlayerIds.filter(id => !id.startsWith('guest-'));
+    const guestRegIds = allPlayerIds
+      .filter(id => id.startsWith('guest-'))
+      .map(id => id.replace('guest-', ''));
+
+    const [users, guestRegs] = await Promise.all([
+      regularIds.length
+        ? prisma.user.findMany({ where: { id: { in: regularIds } }, select: { id: true, name: true, email: true } })
+        : [],
+      guestRegIds.length
+        ? prisma.registration.findMany({ where: { id: { in: guestRegIds } }, select: { id: true, guestName: true, guestEmail: true } })
+        : [],
+    ]);
+
+    const playerMap = Object.fromEntries(users.map(p => [p.id, p]));
+    guestRegs.forEach(r => {
+      playerMap[`guest-${r.id}`] = { id: `guest-${r.id}`, name: r.guestName || 'Guest Player', email: r.guestEmail || null };
+    });
 
     const matchesWithPlayers = matches.map(match => ({
       ...match,
-      player1: playerMap[match.player1Id] || null,
-      player2: playerMap[match.player2Id] || null,
+      player1:      playerMap[match.player1Id]      || null,
+      player2:      playerMap[match.player2Id]      || null,
+      team1Player1: playerMap[match.team1Player1Id] || null,
+      team1Player2: playerMap[match.team1Player2Id] || null,
+      team2Player1: playerMap[match.team2Player1Id] || null,
+      team2Player2: playerMap[match.team2Player2Id] || null,
       scoreData: match.scoreJson ? (() => { try { return JSON.parse(match.scoreJson); } catch { return null; } })() : null,
     }));
 

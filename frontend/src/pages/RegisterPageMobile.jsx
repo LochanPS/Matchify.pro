@@ -292,7 +292,7 @@ const RegisterPageMobile = () => {
               }}
             />
             <div className="relative">
-              <MatchifyLogo size={100} variant="full" />
+              <MatchifyLogo size={72} variant="full" />
             </div>
           </div>
           <p className="text-xs text-gray-300 font-medium">India's Premier Badminton Platform</p>

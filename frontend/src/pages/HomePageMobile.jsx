@@ -14,17 +14,29 @@ import {
 } from '@heroicons/react/24/outline';
 import { StarIcon } from '@heroicons/react/24/solid';
 
-const HOME_M_PARTICLES = Array.from({ length: 20 }, (_, i) => ({
-  w: (i * 7 + 1) % 2 + 1,
-  h: (i * 11 + 1) % 2 + 1,
+// Dense sparkle field — matches logo background
+const HOME_M_PARTICLES = Array.from({ length: 60 }, (_, i) => ({
+  w: [1,1,1,2,2,3][i % 6],
+  h: [1,1,1,2,2,3][i % 6],
   x: (i * 37 + 11) % 97,
-  y: (i * 53 + 7) % 91,
-  c: ['#00ff88', '#00d4ff', 'rgba(255,255,255,0.8)'][i % 3],
-  o: ((i * 13) % 50) / 100 + 0.2,
-  dur: (i * 7) % 10 + 5,
-  delay: (i * 3) % 5,
-  glow: (i * 11) % 15 + 5,
+  y: (i * 53 + 7)  % 99,
+  c: ['#00ffcc','#00d4ff','#ffffff','#a0f0e0','#7df9ff','#00ff88'][(i * 3) % 6],
+  o: ((i * 17) % 55) / 100 + 0.15,
+  dur: (i * 7) % 12 + 4,
+  delay: (i * 3) % 6,
+  glow: (i * 11) % 14 + 4,
+  star: i % 8 === 0,   // every 8th particle is a 4-pointed star shape
 }));
+
+// Teal nebula blobs — replicate the logo's depth
+const NEBULAS = [
+  { x: 75, y:  3, size: 320, color: 'rgba(0,180,160,0.18)', dur: 10, delay: 0 },
+  { x: 10, y: 20, size: 260, color: 'rgba(0,120,200,0.14)', dur: 13, delay: 3 },
+  { x: 55, y: 45, size: 200, color: 'rgba(0,200,180,0.12)', dur:  9, delay: 1 },
+  { x: 20, y: 65, size: 280, color: 'rgba(0,100,180,0.13)', dur: 11, delay: 2 },
+  { x: 80, y: 75, size: 220, color: 'rgba(0,180,140,0.16)', dur: 14, delay: 5 },
+  { x: 40, y: 88, size: 180, color: 'rgba(0,140,200,0.11)', dur:  8, delay: 4 },
+];
 
 // Authentic reviews from real-sounding Indian badminton players
 const REVIEWS = [
@@ -121,7 +133,8 @@ const HomePageMobile = () => {
   ];
 
   return (
-    <div className="min-h-screen relative overflow-hidden" style={{ background: '#07071a' }}>
+    <div className="min-h-screen relative overflow-hidden"
+      style={{ background: 'linear-gradient(160deg, #04060f 0%, #060d1a 40%, #050b16 70%, #04070f 100%)' }}>
 
       {/* ── Sticky Navbar ─────────────────────────────────────────── */}
       {!user && (
@@ -166,35 +179,75 @@ const HomePageMobile = () => {
         </div>
       )}
 
-      {/* ── Ambient Background ────────────────────────────────────── */}
+      {/* ── Ambient Background — logo-style dark nebula + sparkles ── */}
       <div
         className="fixed top-0 bottom-0 pointer-events-none overflow-hidden"
         style={{ left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: '480px' }}
       >
-        <div className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl opacity-25"
-          style={{ background: 'radial-gradient(circle, rgba(0,255,136,0.45) 0%, transparent 70%)', animation: 'float 8s ease-in-out infinite' }} />
-        <div className="absolute top-1/4 left-0 w-80 h-80 rounded-full blur-3xl opacity-20"
-          style={{ background: 'radial-gradient(circle, rgba(99,102,241,0.45) 0%, transparent 70%)', animation: 'float 10s ease-in-out infinite reverse', animationDelay: '2s' }} />
-        <div className="absolute bottom-1/4 right-1/4 w-72 h-72 rounded-full blur-3xl opacity-15"
-          style={{ background: 'radial-gradient(circle, rgba(6,182,212,0.4) 0%, transparent 70%)', animation: 'float 12s ease-in-out infinite', animationDelay: '4s' }} />
+        {/* Teal nebula glow blobs */}
+        {NEBULAS.map((n, i) => (
+          <div key={i} className="absolute rounded-full blur-3xl"
+            style={{
+              width: `${n.size}px`, height: `${n.size}px`,
+              left: `${n.x}%`, top: `${n.y}%`,
+              transform: 'translate(-50%,-50%)',
+              background: `radial-gradient(circle, ${n.color} 0%, transparent 70%)`,
+              animation: `float ${n.dur}s ease-in-out infinite`,
+              animationDelay: `${n.delay}s`,
+            }} />
+        ))}
+
+        {/* Sparkle particles */}
         {HOME_M_PARTICLES.map((p, i) => (
-          <div key={i} className="absolute rounded-full" style={{
-            width: `${p.w}px`, height: `${p.h}px`,
-            left: `${p.x}%`, top: `${p.y}%`,
-            background: p.c, opacity: p.o,
-            animation: `float ${p.dur}s ease-in-out infinite`,
-            animationDelay: `${p.delay}s`,
-            boxShadow: `0 0 ${p.glow}px ${p.c}`,
-          }} />
+          p.star
+            /* 4-pointed star using CSS cross shape */
+            ? <div key={i} className="absolute" style={{
+                left: `${p.x}%`, top: `${p.y}%`,
+                width: `${p.w * 2 + 2}px`, height: `${p.w * 2 + 2}px`,
+                opacity: p.o + 0.15,
+                animation: `sparkle ${p.dur}s ease-in-out infinite`,
+                animationDelay: `${p.delay}s`,
+              }}>
+                <div style={{
+                  position: 'absolute', left: '50%', top: 0,
+                  width: '2px', height: '100%',
+                  transform: 'translateX(-50%)',
+                  background: `linear-gradient(to bottom, transparent, ${p.c}, transparent)`,
+                  boxShadow: `0 0 ${p.glow}px ${p.c}`,
+                }} />
+                <div style={{
+                  position: 'absolute', top: '50%', left: 0,
+                  width: '100%', height: '2px',
+                  transform: 'translateY(-50%)',
+                  background: `linear-gradient(to right, transparent, ${p.c}, transparent)`,
+                  boxShadow: `0 0 ${p.glow}px ${p.c}`,
+                }} />
+              </div>
+            /* regular circle sparkle */
+            : <div key={i} className="absolute rounded-full" style={{
+                width: `${p.w}px`, height: `${p.h}px`,
+                left: `${p.x}%`, top: `${p.y}%`,
+                background: p.c, opacity: p.o,
+                animation: `twinkle ${p.dur}s ease-in-out infinite`,
+                animationDelay: `${p.delay}s`,
+                boxShadow: `0 0 ${p.glow}px ${p.c}`,
+              }} />
         ))}
       </div>
 
       <style>{`
         @keyframes float {
-          0%,100% { transform: translate(0,0) scale(1); }
-          25%  { transform: translate(20px,-20px) scale(1.05); }
-          50%  { transform: translate(-15px,15px) scale(0.95); }
-          75%  { transform: translate(15px,10px) scale(1.02); }
+          0%,100% { transform: translate(-50%,-50%) scale(1); }
+          33%  { transform: translate(-50%,-50%) translate(18px,-16px) scale(1.06); }
+          66%  { transform: translate(-50%,-50%) translate(-14px,12px) scale(0.94); }
+        }
+        @keyframes twinkle {
+          0%,100% { opacity: var(--op,0.3); transform: scale(1); }
+          50%      { opacity: 1; transform: scale(1.8); }
+        }
+        @keyframes sparkle {
+          0%,100% { opacity: 0.2; transform: scale(0.8) rotate(0deg); }
+          50%      { opacity: 1;   transform: scale(1.4) rotate(45deg); }
         }
         @keyframes glow {
           0%,100% { opacity: 0.5; filter: brightness(1); }

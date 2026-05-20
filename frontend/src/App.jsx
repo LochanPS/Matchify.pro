@@ -420,29 +420,6 @@ function AppContent() {
             }
           />
           
-          {/* Organizer KYC Routes - DISABLED */}
-          {/* <Route
-            path="/organizer/kyc/submit"
-            element={
-              <ProtectedRoute>
-                <RoleRoute allowedRoles={['ORGANIZER']} blockAdmin={true}>
-                  <KYCSubmission />
-                </RoleRoute>
-              </ProtectedRoute>
-            }
-          />
-          
-          <Route
-            path="/organizer/kyc/video-call"
-            element={
-              <ProtectedRoute>
-                <RoleRoute allowedRoles={['ORGANIZER']} blockAdmin={true}>
-                  <VideoCallPage />
-                </RoleRoute>
-              </ProtectedRoute>
-            }
-          /> */}
-          
           <Route
             path="/organizer/profile/:id?"
             element={
@@ -544,7 +521,6 @@ function AppContent() {
             <Route path="audit-logs" element={<AuditLogsPage />} />
             <Route path="academies" element={<AcademyApprovalsPage />} />
             <Route path="academies/manage" element={<AdminManageAcademiesPage />} />
-            {/* <Route path="kyc" element={<AdminKYCDashboard />} /> */}
             
             {/* Payment System Routes */}
             <Route path="payment-verifications" element={<PaymentVerificationPage />} />

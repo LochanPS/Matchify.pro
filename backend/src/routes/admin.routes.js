@@ -165,7 +165,6 @@ router.get('/users/:id', authenticate, requireAdmin, async (req, res) => {
         isVerifiedUmpire: true,
         tournamentsRegistered: true,
         matchesUmpired: true,
-        availableForKYC: true,
         createdAt: true,
         updatedAt: true,
         _count: {

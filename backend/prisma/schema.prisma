@@ -48,9 +48,6 @@ model User {
   tournamentsRegistered Int                @default(0)     // Count for player verification
   matchesUmpired       Int                @default(0)     // Count for umpire verification
   
-  // KYC for admins
-  availableForKYC      Boolean             @default(false) // Admin toggle for KYC availability
-  
   // Profile relations
   playerProfile        PlayerProfile?
   organizerProfile     OrganizerProfile?
@@ -65,10 +62,6 @@ model User {
   walletTransactions   WalletTransaction[]
   umpiredMatches       Match[]             @relation("UmpireMatches")
   tournamentUmpires    TournamentUmpire[]  @relation("TournamentUmpires")
-  
-  // KYC relations
-  kycSubmissions       OrganizerKYC[]      @relation("OrganizerKYC")
-  kycReviews           OrganizerKYC[]      @relation("KYCReviewer")
   
   // Organizer request relations
   organizerRequest     OrganizerRequest?   @relation("UserOrganizerRequest")
@@ -574,40 +567,6 @@ model CourtBooking {
 }
 
 
-// ============================================
-// ORGANIZER KYC VERIFICATION SYSTEM
-// ============================================
-
-model OrganizerKYC {
-  id                  String    @id @default(uuid())
-  organizerId         String    @unique
-  organizer           User      @relation("OrganizerKYC", fields: [organizerId], references: [id], onDelete: Cascade)
-  
-  // Document
-  aadhaarImageUrl     String
-  aadhaarNumber       String?   // Optional: last 4 digits only for display
-  
-  // Video Call
-  videoCallStartedAt  DateTime?
-  videoCallEndedAt    DateTime?
-  videoRoomUrl        String?   // Daily.co room URL
-  
-  // Review
-  status              String    @default("PENDING") // PENDING, IN_PROGRESS, APPROVED, REJECTED
-  reviewedBy          String?   // Admin user ID
-  reviewer            User?     @relation("KYCReviewer", fields: [reviewedBy], references: [id])
-  reviewedAt          DateTime?
-  rejectionReason     String?
-  adminNotes          String?
-  
-  // Metadata
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
-  
-  @@index([organizerId])
-  @@index([status])
-  @@map("organizer_kyc")
-}
 
 // ============================================
 // ORGANIZER REQUEST & VERIFICATION SYSTEM

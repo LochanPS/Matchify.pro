@@ -222,10 +222,6 @@ const DrawPage = () => {
     // Get all round robin matches (stage = 'GROUP')
     const roundRobinMatches = matches.filter(m => m.stage === 'GROUP');
     
-      roundRobinMatches: roundRobinMatches.length,
-      completedRoundRobin: roundRobinMatches.filter(m => m.status === 'COMPLETED').length,
-      knockoutMatches: matches.filter(m => m.stage === 'KNOCKOUT').length
-    });
     
     if (roundRobinMatches.length === 0) {
       return false;
@@ -350,10 +346,6 @@ const DrawPage = () => {
       return;
     }
 
-      tournamentId,
-      categoryId: activeCategory.id,
-      categoryName: activeCategory.name
-    });
 
     setBracketLoading(true);
     setError(null);
@@ -388,10 +380,6 @@ const DrawPage = () => {
       }
 
       const parsedBracket = typeof bracketData === 'string' ? JSON.parse(bracketData) : bracketData;
-        format: parsedBracket.format,
-        hasRounds: !!parsedBracket.rounds,
-        hasGroups: !!parsedBracket.groups
-      });
 
       setBracket(parsedBracket);
     } catch (err) {
@@ -1244,13 +1232,6 @@ const DrawPage = () => {
                             <p className="font-semibold text-white truncate">
                               {(() => {
                                 const name = registration.displayName || registration.user?.name || 'Unknown';
-                                  id: registration.id, 
-                                  displayName: registration.displayName,
-                                  userName: registration.user?.name,
-                                  guestName: registration.guestName,
-                                  isGuest: registration.isGuest,
-                                  finalName: name
-                                });
                                 return name;
                               })()}
                             </p>

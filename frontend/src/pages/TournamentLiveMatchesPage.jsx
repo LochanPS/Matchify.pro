@@ -234,9 +234,9 @@ export default function TournamentLiveMatchesPage() {
   const [error, setError]               = useState('');
   const [lastRefresh, setLastRefresh]   = useState(null);
 
-  const fetchAll = useCallback(async () => {
+  const fetchAll = useCallback(async (showSpinner = false) => {
     try {
-      setLoading(true);
+      if (showSpinner) setLoading(true);
       setError('');
       const [liveRes, doneRes] = await Promise.all([
         getTournamentLiveMatches(id),
@@ -248,20 +248,20 @@ export default function TournamentLiveMatchesPage() {
     } catch {
       setError('Failed to load matches. Pull down to retry.');
     } finally {
-      setLoading(false);
+      if (showSpinner) setLoading(false);
     }
   }, [id]);
 
-  /* initial fetch */
-  useEffect(() => { fetchAll(); }, [fetchAll]);
+  /* initial fetch — show spinner only on first load */
+  useEffect(() => { fetchAll(true); }, [fetchAll]);
 
   /* socket: join tournament room + listen for events */
   useEffect(() => {
     if (!socket) return;
     socket.emit('join-tournament', id);
 
-    const onMatchStarted = () => fetchAll();
-    const onMatchEnded   = () => fetchAll();
+    const onMatchStarted = () => fetchAll(false);
+    const onMatchEnded   = () => fetchAll(false);
 
     socket.on('match-started', onMatchStarted);
     socket.on('match-ended',   onMatchEnded);
@@ -292,9 +292,9 @@ export default function TournamentLiveMatchesPage() {
     };
   }, [socket, liveMatches]);
 
-  /* fallback poll every 30s */
+  /* poll every 4s — socket disabled in production (Vercel serverless) */
   useEffect(() => {
-    const t = setInterval(fetchAll, 30000);
+    const t = setInterval(() => fetchAll(false), 4000);
     return () => clearInterval(t);
   }, [fetchAll]);
 

@@ -560,6 +560,8 @@ const DrawPage = () => {
     try {
       await api.delete(`/tournaments/${tournamentId}/categories/${activeCategory.id}/draw`);
       setBracket(null);
+      setMatches([]);
+      setTournamentStats(prev => ({ ...prev, totalMatches: 0, completedMatches: 0 }));
       setSuccess('Draw deleted successfully!');
       setShowDeleteModal(false);
       setTimeout(() => setSuccess(null), 3000);
@@ -618,16 +620,15 @@ const DrawPage = () => {
         knockoutSlots
       });
       
-      console.log('✅ Saved! Refreshing bracket and matches...');
-      
-      // Wait a moment for database to update
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Refresh bracket AND matches
-      await fetchBracket();
-      
-      console.log('✅ Bracket refreshed, matches:', matches.length);
-      
+      console.log('✅ Saved! Refreshing draw page...');
+
+      // Use full draw-page refresh so tournament/categories/matches/stats all update correctly.
+      // fetchBracket uses getDraw which has matchNumber-based KO lookup and can miss
+      // globally-numbered KO matches created by assignPlayersToDraw.
+      await fetchDrawPageFull(activeCategory.id);
+
+      console.log('✅ Draw page refreshed');
+
       // Auto-switch to Knockout tab
       setActiveStage('knockout');
       
@@ -1502,8 +1503,8 @@ const DrawPage = () => {
                   setAssigning(true);
                   try {
                     const response = await api.post(`/tournaments/${tournamentId}/categories/${activeCategory.id}/draw/continue-to-knockout`);
-                    
-                    await fetchBracket();
+
+                    await fetchDrawPageFull(activeCategory.id);
                     
                     setSuccess(response.data.message || 'Knockout stage started successfully!');
                     setShowContinueKnockoutModal(false);

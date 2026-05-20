@@ -860,12 +860,15 @@ const getDraw = async (req, res) => {
       // Update knockout stage in mixed format
       if (bracketData.knockout) {
         bracketData.knockout.rounds.forEach((round, roundIndex) => {
+          // Use index-based lookup instead of matchNumber-based, because KO matches created
+          // by assignPlayersToDraw use global matchNumbers (not per-round 1-based).
+          const dbRound = bracketData.knockout.rounds.length - roundIndex;
+          const roundDbMatches = matches
+            .filter(m => m.stage === 'KNOCKOUT' && m.round === dbRound)
+            .sort((a, b) => a.matchNumber - b.matchNumber);
+
           round.matches.forEach((match, matchIndex) => {
-            const dbMatch = matches.find(m => 
-              m.stage === 'KNOCKOUT' &&
-              m.round === (bracketData.knockout.rounds.length - roundIndex) && 
-              m.matchNumber === (matchIndex + 1)
-            );
+            const dbMatch = roundDbMatches[matchIndex];
 
             if (dbMatch) {
               if (dbMatch.player1Id && playerMap[dbMatch.player1Id]) {
@@ -1038,8 +1041,11 @@ const restartDraw = async (req, res) => {
   try {
     const { tournamentId, categoryId } = req.params;
     const userId = req.user.userId || req.user.id;
+    // activeStage: 'knockout' = KO-only restart on hybrid format; anything else = full restart
+    const { activeStage } = req.body;
+    const koOnly = activeStage === 'knockout';
 
-    console.log('🔄 Restarting draw for tournament:', tournamentId, 'category:', categoryId);
+    console.log('🔄 Restarting draw for tournament:', tournamentId, 'category:', categoryId, koOnly ? '(KO only)' : '(full)');
 
     // Verify tournament exists and user is the organizer
     const tournament = await prisma.tournament.findUnique({
@@ -1090,16 +1096,21 @@ const restartDraw = async (req, res) => {
       });
     }
 
-    // Reset all matches - clear results; for later knockout rounds also clear winner-advanced player slots
-    console.log('🧹 Resetting all match results...');
-    const matches = await prisma.match.findMany({
+    // Reset matches - for koOnly, skip GROUP stage matches entirely
+    console.log('🧹 Resetting match results...');
+    const allMatches = await prisma.match.findMany({
       where: { tournamentId, categoryId }
     });
 
-    // Highest round number = the initial/seeded round; lower round numbers were filled by winner advancement
-    const maxRound = matches.length > 0 ? Math.max(...matches.map(m => m.round)) : 1;
+    // KO-only restart: only reset KNOCKOUT stage matches, leave GROUP stage untouched
+    const matchesToReset = koOnly
+      ? allMatches.filter(m => m.stage === 'KNOCKOUT')
+      : allMatches;
 
-    for (const match of matches) {
+    // Highest round among matches being reset — used to detect winner-advanced slots
+    const maxRound = matchesToReset.length > 0 ? Math.max(...matchesToReset.map(m => m.round)) : 1;
+
+    for (const match of matchesToReset) {
       const updateData = {
         winnerId: null,
         scoreJson: null,
@@ -1127,94 +1138,70 @@ const restartDraw = async (req, res) => {
       });
     }
 
-    console.log(`✅ Reset ${matches.length} matches`);
+    console.log(`✅ Reset ${matchesToReset.length} matches (koOnly=${koOnly})`);
 
     // Reset bracket JSON - clear winners but keep structure
     console.log('🔧 Resetting bracket JSON...');
     let bracketJson = JSON.parse(draw.bracketJson);
 
-    // Reset knockout bracket
-    if (bracketJson.rounds && Array.isArray(bracketJson.rounds)) {
-      bracketJson.rounds.forEach(round => {
-        if (round.matches && Array.isArray(round.matches)) {
-          round.matches.forEach(match => {
-            match.winner = null;
-            match.winnerId = null;
-            match.score = null;
-            match.scoreJson = null;
-            match.completed = false;
-            match.status = match.player1 && match.player2 ? 'ready' : 'pending';
-            
-            // Clear dbMatch data
-            if (match.dbMatch) {
-              match.dbMatch.winnerId = null;
-              match.dbMatch.scoreJson = null;
-              match.dbMatch.score = null;
-              match.dbMatch.startedAt = null;
-              match.dbMatch.completedAt = null;
-              match.dbMatch.status = match.player1 && match.player2 ? 'READY' : 'PENDING';
-            }
-          });
-        }
-      });
+    // Helper: reset a single match's result fields
+    const resetMatchJson = (match, keepPlayers = true) => {
+      match.winner = null;
+      match.winnerId = null;
+      match.score = null;
+      match.scoreJson = null;
+      match.completed = false;
+      if (!keepPlayers) {
+        match.player1 = null;
+        match.player2 = null;
+      }
+      match.status = (keepPlayers && match.player1 && match.player2) ? 'ready' : 'pending';
+      if (match.dbMatch) {
+        match.dbMatch.winnerId = null;
+        match.dbMatch.scoreJson = null;
+        match.dbMatch.score = null;
+        match.dbMatch.startedAt = null;
+        match.dbMatch.completedAt = null;
+        match.dbMatch.status = (keepPlayers && match.player1 && match.player2) ? 'READY' : 'PENDING';
+      }
+    };
+
+    if (!koOnly) {
+      // Full restart: reset pure KNOCKOUT rounds
+      if (bracketJson.rounds && Array.isArray(bracketJson.rounds)) {
+        bracketJson.rounds.forEach(round => {
+          if (round.matches && Array.isArray(round.matches)) {
+            round.matches.forEach(m => resetMatchJson(m, true));
+          }
+        });
+      }
+
+      // Full restart: reset group stage standings + matches
+      if (bracketJson.groups && Array.isArray(bracketJson.groups)) {
+        bracketJson.groups.forEach(group => {
+          if (group.participants && Array.isArray(group.participants)) {
+            group.participants.forEach(p => {
+              p.played = 0; p.wins = 0; p.losses = 0; p.points = 0;
+            });
+          }
+          if (group.matches && Array.isArray(group.matches)) {
+            group.matches.forEach(m => resetMatchJson(m, true));
+          }
+        });
+      }
     }
 
-    // Reset round robin groups
-    if (bracketJson.groups && Array.isArray(bracketJson.groups)) {
-      bracketJson.groups.forEach(group => {
-        // Reset participant standings
-        if (group.participants && Array.isArray(group.participants)) {
-          group.participants.forEach(p => {
-            p.played = 0;
-            p.wins = 0;
-            p.losses = 0;
-            p.points = 0;
-          });
-        }
-        
-        // Reset group matches
-        if (group.matches && Array.isArray(group.matches)) {
-          group.matches.forEach(match => {
-            match.winner = null;
-            match.winnerId = null;
-            match.score = null;
-            match.scoreJson = null;
-            match.completed = false;
-            match.status = 'pending';
-            
-            if (match.dbMatch) {
-              match.dbMatch.winnerId = null;
-              match.dbMatch.scoreJson = null;
-              match.dbMatch.score = null;
-              match.dbMatch.startedAt = null;
-              match.dbMatch.completedAt = null;
-              match.dbMatch.status = 'PENDING';
-            }
-          });
-        }
-      });
-    }
-
-    // Reset hybrid format knockout stage
+    // Always reset hybrid knockout stage (both full and KO-only restart)
     if (bracketJson.knockout && bracketJson.knockout.rounds) {
-      bracketJson.knockout.rounds.forEach(round => {
+      const koRounds = bracketJson.knockout.rounds;
+      const isFirstKoRound = (ri) => ri === koRounds.length - 1; // last in array = first played
+      koRounds.forEach((round, ri) => {
         if (round.matches && Array.isArray(round.matches)) {
           round.matches.forEach(match => {
-            match.winner = null;
-            match.winnerId = null;
-            match.score = null;
-            match.scoreJson = null;
-            match.completed = false;
-            match.status = match.player1 && match.player2 ? 'ready' : 'pending';
-            
-            if (match.dbMatch) {
-              match.dbMatch.winnerId = null;
-              match.dbMatch.scoreJson = null;
-              match.dbMatch.score = null;
-              match.dbMatch.startedAt = null;
-              match.dbMatch.completedAt = null;
-              match.dbMatch.status = match.player1 && match.player2 ? 'READY' : 'PENDING';
-            }
+            // For the first KO round, keep player assignments (only clear results)
+            // For later KO rounds, also clear player slots (they were filled by winner advancement)
+            const keepPlayers = isFirstKoRound(ri);
+            resetMatchJson(match, keepPlayers);
           });
         }
       });
@@ -1235,11 +1222,14 @@ const restartDraw = async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Draw restarted successfully. All match results have been cleared.',
+      message: koOnly
+        ? 'Knockout stage restarted. Group stage results are preserved.'
+        : 'Draw restarted successfully. All match results have been cleared.',
       data: {
-        matchesReset: matches.length,
+        matchesReset: matchesToReset.length,
         playersKept: true,
-        structurePreserved: true
+        structurePreserved: true,
+        koOnly
       }
     });
 
@@ -2129,19 +2119,14 @@ const bulkAssignAllPlayers = async (req, res) => {
         }
       }
 
-      // Delete existing matches and create new ones
-      await prisma.match.deleteMany({
-        where: { tournamentId, categoryId }
-      });
-
-      // Create match records for all rounds
+      // Build match records for all rounds
       const matchRecords = [];
       const totalRounds = bracketJson.rounds.length;
-      
+
       for (let roundIdx = 0; roundIdx < bracketJson.rounds.length; roundIdx++) {
         const round = bracketJson.rounds[roundIdx];
         const reverseRoundNumber = totalRounds - roundIdx;
-        
+
         for (let matchIdx = 0; matchIdx < round.matches.length; matchIdx++) {
           const match = round.matches[matchIdx];
           matchRecords.push({
@@ -2159,11 +2144,16 @@ const bulkAssignAllPlayers = async (req, res) => {
         }
       }
 
+      // Delete existing matches and create new ones — wrapped in transaction for atomicity
+      await prisma.$transaction(async (tx) => {
+        await tx.match.deleteMany({ where: { tournamentId, categoryId } });
+        if (matchRecords.length > 0) {
+          await tx.match.createMany({ data: matchRecords });
+        }
+      });
+
       if (matchRecords.length > 0) {
-        // First create all matches
-        await prisma.match.createMany({ data: matchRecords });
-        
-        // Then fetch them back to set parent relationships
+        // Fetch newly created matches to set parent relationships
         const createdMatches = await prisma.match.findMany({
           where: { tournamentId, categoryId, stage: 'KNOCKOUT' },
           orderBy: [{ round: 'desc' }, { matchNumber: 'asc' }]

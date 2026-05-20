@@ -82,12 +82,12 @@ function Field({ label, required, children }) {
   );
 }
 
-// DiceBear avatars — no local files needed, always available
+// DiceBear lorelei — clean illustrated portrait style, 200px, distinct looks
 const AVATARS = [
-  'https://api.dicebear.com/7.x/avataaars/png?seed=matchify1&backgroundColor=b6e3f4',
-  'https://api.dicebear.com/7.x/avataaars/png?seed=matchify2&backgroundColor=c0aede',
-  'https://api.dicebear.com/7.x/avataaars/png?seed=matchify3&backgroundColor=d1f4d1',
-  'https://api.dicebear.com/7.x/avataaars/png?seed=matchify4&backgroundColor=ffd5dc',
+  'https://api.dicebear.com/7.x/lorelei/png?seed=court1&size=200&backgroundColor=0a0a2e',
+  'https://api.dicebear.com/7.x/lorelei/png?seed=court2&size=200&backgroundColor=1a0a2e',
+  'https://api.dicebear.com/7.x/lorelei/png?seed=court3&size=200&backgroundColor=0a1a2e',
+  'https://api.dicebear.com/7.x/lorelei/png?seed=court4&size=200&backgroundColor=0a2e1a',
 ];
 
 export default function MandatoryProfilePhotoModal({ isOpen }) {
@@ -331,26 +331,33 @@ export default function MandatoryProfilePhotoModal({ isOpen }) {
               {photoTab === 'avatar' && (
                 <div className="mb-3">
                   <p className="text-xs text-center mb-3 font-medium" style={{ color: F.sub }}>
-                    Pick an avatar to represent you
+                    Pick an avatar — it will be your profile photo
                   </p>
-                  <div className="grid grid-cols-4 gap-2.5">
+                  <div className="grid grid-cols-2 gap-3">
                     {AVATARS.map((url, i) => {
                       const isSelected = selectedAvatar === url;
                       return (
                         <button key={i} type="button" onClick={() => handleSelectAvatar(url)}
-                          className="relative aspect-square rounded-2xl overflow-hidden transition-all"
+                          className="relative rounded-2xl overflow-hidden transition-all"
                           style={{
+                            aspectRatio: '1',
                             border: isSelected ? '2.5px solid #00ff88' : '2px solid rgba(255,255,255,0.1)',
-                            boxShadow: isSelected ? '0 0 16px rgba(0,255,136,0.4)' : 'none',
-                            transform: isSelected ? 'scale(1.06)' : 'scale(1)',
+                            boxShadow: isSelected ? '0 0 20px rgba(0,255,136,0.45)' : '0 2px 8px rgba(0,0,0,0.3)',
+                            transform: isSelected ? 'scale(1.04)' : 'scale(1)',
+                            background: 'rgba(255,255,255,0.04)',
                           }}>
-                          <img src={url} alt={`Avatar ${i + 1}`} className="w-full h-full object-cover" />
+                          <img
+                            src={url}
+                            alt={`Avatar ${i + 1}`}
+                            className="w-full h-full object-cover"
+                            loading="eager"
+                          />
                           {isSelected && (
-                            <div className="absolute inset-0 flex items-center justify-center"
-                              style={{ background: 'rgba(0,255,136,0.15)' }}>
-                              <div className="w-6 h-6 rounded-full flex items-center justify-center"
+                            <div className="absolute inset-0 flex items-start justify-end p-2"
+                              style={{ background: 'rgba(0,255,136,0.08)' }}>
+                              <div className="w-6 h-6 rounded-full flex items-center justify-center shadow-lg"
                                 style={{ background: F.green }}>
-                                <Check size={12} color="#003320" strokeWidth={3} />
+                                <Check size={13} color="#003320" strokeWidth={3} />
                               </div>
                             </div>
                           )}
@@ -362,7 +369,7 @@ export default function MandatoryProfilePhotoModal({ isOpen }) {
                     <div className="mt-3 flex items-center justify-center gap-2 py-2 rounded-xl"
                       style={{ background: 'rgba(0,255,136,0.07)', border: '1px solid rgba(0,255,136,0.15)' }}>
                       <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: F.green }} />
-                      <span className="text-xs font-semibold" style={{ color: F.green }}>Avatar selected</span>
+                      <span className="text-xs font-semibold" style={{ color: F.green }}>Avatar selected — will be saved as your photo</span>
                     </div>
                   )}
                 </div>

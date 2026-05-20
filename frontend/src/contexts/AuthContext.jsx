@@ -28,7 +28,6 @@ export const AuthProvider = ({ children }) => {
         
         // Skip for any admin user (hardcoded or database)
         if (payload.isAdmin || (user.roles && (Array.isArray(user.roles) ? user.roles.includes('ADMIN') : user.roles === 'ADMIN'))) {
-          console.log('Skipping profile fetch for admin user');
           return null;
         }
       }
@@ -56,7 +55,6 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       // Silently handle profile fetch errors - user data from login is sufficient
-      console.log('Profile fetch skipped or failed:', error.message);
       
       // If token is invalid, clear storage
       if (error.response?.status === 401) {

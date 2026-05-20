@@ -360,17 +360,8 @@ function AppContent() {
           />
           
           {/* Wallet route disabled for now */}
-          
-          <Route
-            path="/notifications"
-            element={
-              <ProtectedRoute>
-                <NotificationsPage />
-              </ProtectedRoute>
-            }
-          />
-          
-          {/* Duplicate removed — /notifications/:id is defined above */}
+
+          {/* /notifications defined above — duplicate removed */}
           
           <Route
             path="/refund-issue/:registrationId"

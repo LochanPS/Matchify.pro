@@ -39,7 +39,7 @@ const DASH_PARTICLES = Array.from({ length: 15 }, (_, i) => ({
 }));
 
 const UnifiedDashboardMobile = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [registrations, setRegistrations] = useState([]);
@@ -50,6 +50,8 @@ const UnifiedDashboardMobile = () => {
   const [showPhotoViewer, setShowPhotoViewer] = useState(false);
   const [myTournaments, setMyTournaments] = useState([]);
   const [publishingId, setPublishingId] = useState(null);
+  const [fetchError, setFetchError] = useState('');
+  const [copied, setCopied] = useState(false);
 
   // Get user roles
   let userRoles = [];
@@ -108,7 +110,7 @@ const UnifiedDashboardMobile = () => {
 
       setRegistrations(regRes.data.registrations || []);
     } catch (error) {
-      console.error('Error fetching dashboard data:', error);
+      setFetchError('Failed to load dashboard data. Pull down to retry.');
     } finally {
       setLoading(false);
     }
@@ -185,6 +187,24 @@ const UnifiedDashboardMobile = () => {
 
   return (
     <div className="min-h-screen relative overflow-hidden pt-16" style={{ background: '#07071a' }}>
+
+      {/* ── Copied toast ── */}
+      {copied && (
+        <div className="fixed top-20 left-1/2 z-[9999] px-4 py-2 rounded-xl text-sm font-bold shadow-xl"
+          style={{ transform: 'translateX(-50%)', background: 'rgba(0,255,136,0.95)', color: '#003320', pointerEvents: 'none' }}>
+          ✓ Copied to clipboard!
+        </div>
+      )}
+
+      {/* ── Fetch error banner ── */}
+      {fetchError && (
+        <div className="fixed top-20 left-1/2 z-[9998] px-4 py-2 rounded-xl text-xs font-semibold shadow-xl flex items-center gap-2"
+          style={{ transform: 'translateX(-50%)', background: 'rgba(239,68,68,0.95)', color: 'white', whiteSpace: 'nowrap' }}>
+          ⚠️ {fetchError}
+          <button onClick={() => { setFetchError(''); fetchDashboardData(); }}
+            className="underline ml-1">Retry</button>
+        </div>
+      )}
       {/* Animated Background Elements */}
       <div className="fixed top-0 bottom-0 pointer-events-none overflow-hidden" style={{ left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: "480px" }}>
         {/* Large Gradient Orbs */}
@@ -549,8 +569,8 @@ const UnifiedDashboardMobile = () => {
               <button
                 onClick={() => {
                   setShowMenu(false);
-                  // Add logout logic here
-                  navigate('/logout');
+                  logout();
+                  navigate('/login');
                 }}
                 className="w-full flex items-center justify-center gap-2 p-4 rounded-xl font-bold text-base transition-all relative overflow-hidden group mt-6"
                 style={{ 
@@ -748,7 +768,8 @@ const UnifiedDashboardMobile = () => {
                   onClick={() => {
                     const code = matchifyCode || userProfile?.matchifyCode || user?.matchifyCode;
                     navigator.clipboard.writeText(code);
-                    alert('Matchify ID copied!');
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
                   }}
                   className="p-2 rounded-lg transition-all relative z-10"
                   style={{ 
@@ -847,7 +868,8 @@ const UnifiedDashboardMobile = () => {
                   <button
                     onClick={() => {
                       navigator.clipboard.writeText(matchifyCode);
-                      alert('Matchify code copied!');
+                      setCopied(true);
+                      setTimeout(() => setCopied(false), 2000);
                     }}
                     className="p-3 rounded-lg transition-all"
                     style={{ 

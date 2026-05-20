@@ -216,29 +216,23 @@ const DrawPage = () => {
   const isRoundRobinComplete = () => {
     if (!bracket || bracket.format !== 'ROUND_ROBIN_KNOCKOUT') return false;
     if (!matches || matches.length === 0) {
-      console.log('⚠️ No matches found yet. Draw may not be created.');
       return false;
     }
     
     // Get all round robin matches (stage = 'GROUP')
     const roundRobinMatches = matches.filter(m => m.stage === 'GROUP');
     
-    console.log('📊 Match Status:', {
       roundRobinMatches: roundRobinMatches.length,
       completedRoundRobin: roundRobinMatches.filter(m => m.status === 'COMPLETED').length,
       knockoutMatches: matches.filter(m => m.stage === 'KNOCKOUT').length
     });
     
     if (roundRobinMatches.length === 0) {
-      console.log('⚠️ No GROUP stage matches found. This means:');
-      console.log('   1. Draw has not been created yet, OR');
-      console.log('   2. Only knockout matches exist (no round robin)');
       return false;
     }
     
     // Check if all round robin matches are completed
     const allComplete = roundRobinMatches.every(m => m.status === 'COMPLETED');
-    console.log('✅ Round Robin Complete:', allComplete);
     return allComplete;
   };
 
@@ -315,7 +309,6 @@ const DrawPage = () => {
   const fetchTournamentData = async () => {
     try {
       setLoading(true);
-      console.log('🔄 Fetching tournament data for ID:', tournamentId);
 
       // Parallel fetch — tournament + categories in one round trip
       const [tournamentData, categoriesData] = await Promise.all([
@@ -323,24 +316,19 @@ const DrawPage = () => {
         tournamentAPI.getCategories(tournamentId),
       ]);
       setTournament(tournamentData.data);
-      console.log('✅ Tournament data fetched:', tournamentData.data.name);
 
       const cats = categoriesData.categories || [];
       setCategories(cats);
-      console.log('✅ Categories fetched:', cats.length, 'categories');
 
       const active = categoryId
         ? cats.find(c => c.id === categoryId)
         : cats[0];
       
       if (active) {
-        console.log('✅ Active category set:', active.id, active.name);
         setActiveCategory(active);
       } else if (cats.length > 0) {
-        console.log('✅ Active category set to first:', cats[0].id, cats[0].name);
         setActiveCategory(cats[0]);
       } else {
-        console.log('⚠️ No categories found');
       }
     } catch (err) {
       console.error('❌ Error fetching tournament data:', err);
@@ -362,7 +350,6 @@ const DrawPage = () => {
       return;
     }
 
-    console.log('🔄 Fetching bracket for:', {
       tournamentId,
       categoryId: activeCategory.id,
       categoryName: activeCategory.name
@@ -381,14 +368,11 @@ const DrawPage = () => {
         api.get(`/tournaments/${tournamentId}/categories/${activeCategory.id}/matches`).catch(() => ({ data: { matches: [] } })),
       ]);
 
-      console.log('✅ Draw API response:', response.data);
       setMatches(matchesResponse.data.matches || []);
-      console.log('✅ Matches fetched:', matchesResponse.data.matches?.length || 0);
 
       const draw = response.data.draw;
 
       if (!draw) {
-        console.log('⚠️ No draw data in response');
         setError(null);
         setBracket(null);
         return;
@@ -398,14 +382,12 @@ const DrawPage = () => {
       const bracketData = draw.bracketJson || draw.bracket;
 
       if (!bracketData) {
-        console.log('⚠️ No bracketJson in draw data');
         setError(null);
         setBracket(null);
         return;
       }
 
       const parsedBracket = typeof bracketData === 'string' ? JSON.parse(bracketData) : bracketData;
-      console.log('✅ Bracket parsed successfully:', {
         format: parsedBracket.format,
         hasRounds: !!parsedBracket.rounds,
         hasGroups: !!parsedBracket.groups
@@ -448,8 +430,6 @@ const DrawPage = () => {
       
       // Handle different error scenarios
       if (err.response?.status === 404) {
-        console.log('ℹ️ Draw not found (404) - This is normal if draw hasn\'t been created yet');
-        console.log('ℹ️ Showing "Draw Not Generated Yet" message');
         setError(null);
         setBracket(null);
       } else if (err.code === 'ERR_NETWORK' || !err.response) {
@@ -484,11 +464,6 @@ const DrawPage = () => {
       // This is the most reliable source since matches are already created
       const actualTotalMatches = matches.length;
 
-      console.log('📊 Tournament Stats:');
-      console.log('  Total Players:', registrations.length);
-      console.log('  Confirmed Players:', registrations.filter(r => r.status === 'confirmed').length);
-      console.log('  Total Matches:', actualTotalMatches);
-      console.log('  Completed Matches:', matches.filter(m => m.status === 'COMPLETED').length);
 
       setTournamentStats({
         totalPlayers: registrations.length,
@@ -528,7 +503,6 @@ const DrawPage = () => {
       try {
         const matchesResponse = await api.get(`/tournaments/${tournamentId}/categories/${activeCategory.id}/matches`);
         setMatches(matchesResponse.data.matches || []);
-        console.log('✅ Matches loaded after draw creation:', matchesResponse.data.matches?.length || 0);
       } catch (matchErr) {
         console.error('⚠️ Failed to load matches:', matchErr);
         setMatches([]);
@@ -614,20 +588,17 @@ const DrawPage = () => {
     setError(null);
     
     try {
-      console.log('💾 Saving knockout matchups:', knockoutSlots);
       
       await api.post(`/tournaments/${tournamentId}/categories/${activeCategory.id}/draw/arrange-knockout`, {
         knockoutSlots
       });
       
-      console.log('✅ Saved! Refreshing draw page...');
 
       // Use full draw-page refresh so tournament/categories/matches/stats all update correctly.
       // fetchBracket uses getDraw which has matchNumber-based KO lookup and can miss
       // globally-numbered KO matches created by assignPlayersToDraw.
       await fetchDrawPageFull(activeCategory.id);
 
-      console.log('✅ Draw page refreshed');
 
       // Auto-switch to Knockout tab
       setActiveStage('knockout');
@@ -653,7 +624,6 @@ const DrawPage = () => {
       
       const response = await api.put(url);
       
-      console.log('6. Response received:', response.data);
       
       // Show detailed success message with points info
       const pointsInfo = response.data.pointsAwarded || {};
@@ -839,7 +809,6 @@ const DrawPage = () => {
       try {
         const matchesResponse = await api.get(`/tournaments/${tournamentId}/categories/${activeCategory.id}/matches`);
         setMatches(matchesResponse.data.matches || []);
-        console.log('✅ Matches refreshed after assignment:', matchesResponse.data.matches?.length || 0);
       } catch (matchErr) {
         console.error('⚠️ Failed to refresh matches:', matchErr);
         // Don't fail the whole operation if match refresh fails
@@ -1162,12 +1131,7 @@ const DrawPage = () => {
                       } else {
                         setShowPlayersModal(true);
                         try {
-                          console.log('🔍 Fetching registrations for:', { tournamentId, categoryId: activeCategory.id });
                           const response = await api.get(`/tournaments/${tournamentId}/categories/${activeCategory.id}/registrations`);
-                          console.log('🔍 API Response:', response);
-                          console.log('🔍 Response data:', response.data);
-                          console.log('🔍 Registrations array:', response.data.registrations);
-                          console.log('🔍 First registration FULL OBJECT:', JSON.stringify(response.data.registrations?.[0], null, 2));
                           setRegisteredPlayers(response.data.registrations || []);
                         } catch (err) {
                           console.error('❌ Error fetching players:', err);
@@ -1280,7 +1244,6 @@ const DrawPage = () => {
                             <p className="font-semibold text-white truncate">
                               {(() => {
                                 const name = registration.displayName || registration.user?.name || 'Unknown';
-                                console.log('🔍 Displaying registration:', { 
                                   id: registration.id, 
                                   displayName: registration.displayName,
                                   userName: registration.user?.name,
@@ -2499,7 +2462,6 @@ const getDetailedSetScores = (scoreData, playerNumber) => {
     
     // Check if it has sets array
     if (!parsedScore || !parsedScore.sets || !Array.isArray(parsedScore.sets)) {
-      console.log('❌ No sets array found in score data:', parsedScore);
       return '';
     }
     
@@ -2520,7 +2482,6 @@ const getDetailedSetScores = (scoreData, playerNumber) => {
       }
     });
     
-    console.log(`✅ Formatted scores for player ${playerNumber}:`, setScores.join(', '));
     return setScores.join(', ');
   } catch (err) {
     console.error('❌ Error formatting detailed scores:', err, 'Score data:', scoreData);
@@ -2540,7 +2501,6 @@ const getCompleteMatchScore = (scoreData) => {
     }
     
     if (!parsedScore || !parsedScore.sets || !Array.isArray(parsedScore.sets)) {
-      console.log('❌ No sets array found in score data for complete score');
       return '';
     }
     
@@ -2860,7 +2820,6 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
   // Find database matches for each group match
   const findDbMatch = (groupMatch, groupIndex) => {
     if (!matches || !Array.isArray(matches)) {
-      console.log('⚠️ No matches array available');
       return null;
     }
     
@@ -2870,9 +2829,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
     const found = matches.find(m => m.matchNumber === groupMatch.matchNumber);
     
     if (!found) {
-      console.log('⚠️ No DB match found for match number:', groupMatch.matchNumber);
     } else {
-      console.log('✅ Found DB match:', found.matchNumber, 'Status:', found.status, 'Winner:', found.winnerId);
     }
     return found;
   };
@@ -3951,7 +3908,6 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
       try {
         const matchesResponse = await api.get(`/tournaments/${tournamentId}/categories/${activeCategory.id}/matches`);
         setMatches(matchesResponse.data.matches || []);
-        console.log('✅ Matches refreshed after bulk assign:', matchesResponse.data.matches?.length || 0);
       } catch (matchErr) {
         console.error('⚠️ Failed to refresh matches:', matchErr);
       }
@@ -3978,7 +3934,6 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
       try {
         const matchesResponse = await api.get(`/tournaments/${tournamentId}/categories/${activeCategory.id}/matches`);
         setMatches(matchesResponse.data.matches || []);
-        console.log('✅ Matches refreshed after shuffle:', matchesResponse.data.matches?.length || 0);
       } catch (matchErr) {
         console.error('⚠️ Failed to refresh matches:', matchErr);
       }
@@ -4601,7 +4556,6 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
       const players = [];
       const advanceCount = bracket.advanceFromGroup || 1; // How many from each group
       
-      console.log('🎯 Advance from each group:', advanceCount);
       
       bracket.groups.forEach((group, groupIndex) => {
         const groupLetter = String.fromCharCode(65 + groupIndex);
@@ -4641,7 +4595,6 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
         }
       });
       
-      console.log('🎯 Found', players.length, 'advancing players:', players);
       
       setAdvancingPlayers(players);
       
@@ -4653,7 +4606,6 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
       const numMatches = Math.max(Math.floor(totalPlayers / 2), 1);
       const slots = [];
       
-      console.log('🎯 Creating', numMatches, 'knockout matches for', totalPlayers, 'players');
       
       for (let i = 0; i < numMatches; i++) {
         slots.push({
@@ -4720,8 +4672,6 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
     // Validate all slots are filled
     const allFilled = knockoutSlots.every(slot => slot.player1 && slot.player2);
     
-    console.log('💾 Saving knockout slots:', knockoutSlots);
-    console.log('All slots filled?', allFilled);
     
     if (!allFilled) {
       alert('Please assign all players to knockout matches');

@@ -227,6 +227,31 @@ const PaymentVerificationPage = () => {
                     </div>
                   </div>
 
+                  {/* Transaction Details */}
+                  <div className="rounded-xl p-4 border border-yellow-500/30 bg-yellow-500/5">
+                    <h3 className="text-lg font-bold text-white mb-2">Transaction Details</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="col-span-2">
+                        <p className="text-gray-400 text-sm mb-1">UTR / Transaction ID</p>
+                        {verification.utrId ? (
+                          <div className="flex items-center gap-2">
+                            <p className="text-yellow-300 font-mono font-bold text-lg tracking-wider">
+                              {verification.utrId}
+                            </p>
+                            <button
+                              onClick={() => navigator.clipboard.writeText(verification.utrId)}
+                              className="text-xs px-2 py-1 rounded bg-slate-700 hover:bg-slate-600 text-gray-300 transition"
+                            >
+                              Copy
+                            </button>
+                          </div>
+                        ) : (
+                          <p className="text-gray-500 italic text-sm">Not provided (old registration)</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Actions */}
                   {filter === 'pending' && (
                     <div className="flex gap-4 pt-4">

@@ -153,6 +153,10 @@ const TournamentDetailPage = () => {
   const [umpireError, setUmpireError] = useState('');
   const [umpireSuccess, setUmpireSuccess] = useState('');
 
+  // Admin delete state
+  const [showAdminDeleteModal, setShowAdminDeleteModal] = useState(false);
+  const [adminDeleting, setAdminDeleting] = useState(false);
+
   // Quick Add Player state (Admin only)
   const [showQuickAddModal, setShowQuickAddModal] = useState(false);
   const [quickAddData, setQuickAddData] = useState({
@@ -429,6 +433,39 @@ const TournamentDetailPage = () => {
       setQuickAddError(err.response?.data?.error || 'Failed to add player');
     } finally {
       setQuickAddLoading(false);
+    }
+  };
+
+  // Admin-only: delete without requiring a reason
+  const handleAdminDelete = async () => {
+    try {
+      setAdminDeleting(true);
+      const response = await api.delete(`/tournaments/${id}`);
+      if (response.data.success) {
+        setShowAdminDeleteModal(false);
+        setDeleteResultModal({
+          type: 'success',
+          title: 'Tournament Deleted',
+          message: 'Tournament has been permanently deleted by admin.',
+          redirectTo: '/admin/dashboard'
+        });
+      } else {
+        setDeleteResultModal({
+          type: 'error',
+          title: 'Deletion Failed',
+          message: response.data.error || 'Failed to delete tournament.'
+        });
+      }
+    } catch (err) {
+      console.error('Admin delete error:', err);
+      setDeleteResultModal({
+        type: 'error',
+        title: 'Deletion Failed',
+        message: err.response?.data?.error || 'Failed to delete tournament.'
+      });
+    } finally {
+      setAdminDeleting(false);
+      setShowAdminDeleteModal(false);
     }
   };
 
@@ -1311,6 +1348,14 @@ const TournamentDetailPage = () => {
                     <UserPlusIcon className="h-4 w-4" />
                     Quick Add Player
                   </button>
+                  <button
+                    onClick={() => setShowAdminDeleteModal(true)}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-bold text-sm transition-all hover:scale-[1.02]"
+                    style={{ background: 'linear-gradient(135deg,#ef4444,#dc2626)', color: 'white', boxShadow: '0 4px 12px rgba(239,68,68,0.25)' }}
+                  >
+                    <TrashIcon className="h-4 w-4" />
+                    Delete Tournament
+                  </button>
                 </div>
               </div>
             )}
@@ -1325,6 +1370,68 @@ const TournamentDetailPage = () => {
         tournamentName={tournament?.name}
         isDeleting={deleting}
       />
+
+      {/* Admin Delete Tournament Modal — no reason required */}
+      {showAdminDeleteModal && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden"
+            style={{ background: 'linear-gradient(180deg,#0f0f2e 0%,#0d1117 100%)', border: '2px solid rgba(239,68,68,0.5)' }}>
+            {/* Header */}
+            <div className="p-5" style={{ background: 'linear-gradient(135deg,rgba(239,68,68,0.25),rgba(220,38,38,0.15))', borderBottom: '1px solid rgba(239,68,68,0.3)' }}>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+                  style={{ background: 'rgba(239,68,68,0.2)', border: '1px solid rgba(239,68,68,0.4)' }}>
+                  <TrashIcon className="h-6 w-6 text-red-400" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-black text-white">Delete Tournament</h2>
+                  <p className="text-xs mt-0.5" style={{ color: 'rgba(252,165,165,0.8)' }}>Admin action · Cannot be undone</p>
+                </div>
+              </div>
+            </div>
+            {/* Body */}
+            <div className="p-5">
+              <p className="text-sm mb-1" style={{ color: 'rgba(255,255,255,0.7)' }}>
+                Permanently delete <span className="font-black text-white">"{tournament?.name}"</span>?
+              </p>
+              <p className="text-xs mb-5" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                All draws, matches, registrations and data will be erased. Registered players will not be notified.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowAdminDeleteModal(false)}
+                  disabled={adminDeleting}
+                  className="flex-1 px-4 py-2.5 rounded-xl font-bold text-sm disabled:opacity-50 transition-all"
+                  style={{ border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.7)' }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleAdminDelete}
+                  disabled={adminDeleting}
+                  className="flex-1 px-4 py-2.5 rounded-xl font-bold text-sm text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"
+                  style={{ background: 'linear-gradient(135deg,#ef4444,#dc2626)', boxShadow: '0 4px 15px rgba(239,68,68,0.3)' }}
+                >
+                  {adminDeleting ? (
+                    <span className="flex items-center gap-2">
+                      <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+                      </svg>
+                      Deleting...
+                    </span>
+                  ) : (
+                    <>
+                      <TrashIcon className="h-4 w-4" />
+                      Delete Forever
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Add Umpire Modal */}
       {showUmpireModal && (

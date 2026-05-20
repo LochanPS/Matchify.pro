@@ -643,10 +643,14 @@ const updateTournament = async (req, res) => {
 const deleteTournament = async (req, res) => {
   try {
     const { id } = req.params;
-    const userId = req.user.id;
+    const userId = req.user.userId || req.user.id;
     const { reason } = req.body; // Get cancellation reason from request body
 
-    // Check if tournament exists and user is the organizer
+    // Determine if caller is admin
+    const callerRoles = req.user.roles || [req.user.role];
+    const callerIsAdmin = callerRoles.includes('ADMIN');
+
+    // Check if tournament exists and user is the organizer (or admin)
     const tournament = await prisma.tournament.findUnique({
       where: { id },
       include: {
@@ -665,15 +669,16 @@ const deleteTournament = async (req, res) => {
       return res.status(404).json({ success: false, error: 'Tournament not found' });
     }
 
-    if (tournament.organizerId !== userId) {
+    // Admin can delete any tournament; organizer can only delete their own
+    if (!callerIsAdmin && tournament.organizerId !== userId) {
       return res.status(403).json({
         success: false,
         error: 'Only the tournament organizer can delete this tournament',
       });
     }
 
-    // Require cancellation reason if there are registrations
-    if (tournament.registrations.length > 0 && !reason) {
+    // Require cancellation reason if there are registrations AND caller is not admin
+    if (!callerIsAdmin && tournament.registrations.length > 0 && !reason) {
       return res.status(400).json({
         success: false,
         error: 'Please provide a reason for cancelling the tournament as there are registered participants',

@@ -103,6 +103,7 @@ const MatchScoringPage = () => {
 
   const addPoint = (player) => {
     if (isPaused) return;
+    if (showSetCompleteModal) return; // block double-tap while set/match modal is open
     const newScore = { ...score };
     const idx = newScore.currentSet;
     const currentSet = { ...newScore.sets[idx] };
@@ -136,6 +137,13 @@ const MatchScoringPage = () => {
 
       if (matchWon || idx >= maxSets - 1) {
         const matchWinnerId = winner === 1 ? match.player1?.id : match.player2?.id;
+        if (!matchWinnerId) {
+          // Player data missing — fall back to manual end-match modal
+          setError('Cannot determine winner — player data missing. End match manually.');
+          setShowSetCompleteModal(false);
+          setShowEndModal(true);
+          return;
+        }
         const matchWinnerName = winner === 1 ? p1Display : p2Display;
         setCompletedSetData({ setNumber: idx + 1, winner: matchWinnerName, score: `${p1}-${p2}`, newScore, isMatchComplete: true, matchWinnerId, matchWinnerName });
       } else {

@@ -120,9 +120,12 @@ export const getDrawPage = async (req, res) => {
     });
 
     // Partner map built from Phase 1 registrations (no extra DB call needed)
+    // Key by userId for real users OR by guest-{regId} for guest registrations
     const partnerMap = {};
     registrations.forEach(reg => {
-      if (reg.userId && reg.partner) partnerMap[reg.userId] = reg.partner.name;
+      if (!reg.partner) return;
+      const pid = reg.userId || `guest-${reg.id}`;
+      partnerMap[pid] = reg.partner.name;
     });
 
     // ─── Phase 3: Parse bracket JSON ──────────────────────────────────────────

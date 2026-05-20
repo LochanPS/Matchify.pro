@@ -105,13 +105,7 @@ router.get('/:matchId/live', authenticate, async (req, res) => {
   return res.redirect(307, `/api/matches/${req.params.matchId}`);
 });
 
-// Start match — accept both POST (correct) and PUT (legacy frontend compatibility)
-router.put('/:matchId/start', authenticate, async (req, res, next) => {
-  req.method = 'POST';
-  next();
-});
-
-// Get match details
+// GET match details (defined before PUT /start so Express doesn't confuse them)
 router.get('/:matchId', authenticate, async (req, res) => {
   try {
     const { matchId } = req.params;
@@ -290,9 +284,9 @@ router.put('/:matchId/score', authenticate, async (req, res) => {
       if (activeSetIdx >= 0) {
         const activeSet = sets[activeSetIdx];
         if (player === 'player1') {
-          activeSet.player1Score = (activeSet.player1Score || 0) + 1;
+          activeSet.player1 = (activeSet.player1 || 0) + 1;
         } else if (player === 'player2') {
-          activeSet.player2Score = (activeSet.player2Score || 0) + 1;
+          activeSet.player2 = (activeSet.player2 || 0) + 1;
         }
         // Track point history
         if (!activeSet.points) activeSet.points = [];
@@ -334,8 +328,8 @@ router.put('/:matchId/score', authenticate, async (req, res) => {
   }
 });
 
-// Start match
-router.post('/:matchId/start', authenticate, async (req, res) => {
+// Start match handler — shared by POST (primary) and PUT (legacy alias)
+const startMatchHandler = async (req, res) => {
   try {
     const { matchId } = req.params;
     const userId = req.user.userId || req.user.id;
@@ -504,19 +498,30 @@ router.post('/:matchId/start', authenticate, async (req, res) => {
       error: error.message
     });
   }
-});
+};
+
+router.post('/:matchId/start', authenticate, startMatchHandler);
+router.put('/:matchId/start', authenticate, startMatchHandler); // legacy alias
 
 // Pause match timer
 router.put('/:matchId/pause', authenticate, async (req, res) => {
   try {
     const { matchId } = req.params;
+    const userId = req.user.userId || req.user.id;
 
     const match = await prisma.match.findUnique({
-      where: { id: matchId }
+      where: { id: matchId },
+      include: { tournament: { select: { organizerId: true } } }
     });
 
     if (!match) {
       return res.status(404).json({ success: false, error: 'Match not found' });
+    }
+
+    const userRoles = req.user.roles || [];
+    const isAuthorized = match.umpireId === userId || match.tournament.organizerId === userId || userRoles.includes('ADMIN');
+    if (!isAuthorized) {
+      return res.status(403).json({ success: false, error: 'Not authorized to pause this match' });
     }
 
     if (match.status !== 'IN_PROGRESS') {
@@ -563,13 +568,21 @@ router.put('/:matchId/pause', authenticate, async (req, res) => {
 router.put('/:matchId/resume', authenticate, async (req, res) => {
   try {
     const { matchId } = req.params;
+    const userId = req.user.userId || req.user.id;
 
     const match = await prisma.match.findUnique({
-      where: { id: matchId }
+      where: { id: matchId },
+      include: { tournament: { select: { organizerId: true } } }
     });
 
     if (!match) {
       return res.status(404).json({ success: false, error: 'Match not found' });
+    }
+
+    const userRoles = req.user.roles || [];
+    const isAuthorized = match.umpireId === userId || match.tournament.organizerId === userId || userRoles.includes('ADMIN');
+    if (!isAuthorized) {
+      return res.status(403).json({ success: false, error: 'Not authorized to resume this match' });
     }
 
     if (match.status !== 'IN_PROGRESS') {
@@ -696,7 +709,7 @@ const endMatchHandler = async (req, res) => {
     // ── 4+5. Mark COMPLETED and advance winner atomically ─────────────────────
     // Both writes in a single transaction so a crash between them can't leave the
     // match completed but the bracket not advanced (or vice versa).
-    const isFinal = !parentMatch && match.round === 1;
+    const isFinal = !parentMatch && match.round === 1 && match.stage !== 'GROUP';
 
     const updatedMatch = await prisma.$transaction(async (tx) => {
       const completed = await tx.match.update({

@@ -1090,11 +1090,14 @@ const restartDraw = async (req, res) => {
       });
     }
 
-    // Reset all matches - clear results but keep player assignments and structure
+    // Reset all matches - clear results; for later knockout rounds also clear winner-advanced player slots
     console.log('🧹 Resetting all match results...');
     const matches = await prisma.match.findMany({
       where: { tournamentId, categoryId }
     });
+
+    // Highest round number = the initial/seeded round; lower round numbers were filled by winner advancement
+    const maxRound = matches.length > 0 ? Math.max(...matches.map(m => m.round)) : 1;
 
     for (const match of matches) {
       const updateData = {
@@ -1106,8 +1109,13 @@ const restartDraw = async (req, res) => {
         updatedAt: new Date()
       };
 
-      // Set status based on player assignment
-      if (match.player1Id && match.player2Id) {
+      // Later KNOCKOUT rounds were filled by winner advancement — null out their player slots
+      const isLaterKnockoutRound = match.stage === 'KNOCKOUT' && match.round < maxRound;
+      if (isLaterKnockoutRound) {
+        updateData.player1Id = null;
+        updateData.player2Id = null;
+        updateData.status = 'PENDING';
+      } else if (match.player1Id && match.player2Id) {
         updateData.status = 'READY';
       } else {
         updateData.status = 'PENDING';
@@ -1604,7 +1612,7 @@ const assignPlayersToDraw = async (req, res) => {
  */
 const createConfiguredDraw = async (req, res) => {
   try {
-    const userId = req.user.id || req.user.userId;
+    const userId = req.user.userId || req.user.id;
     const { tournamentId, categoryId, format, bracketSize, numberOfGroups, playersPerGroup, advanceFromGroup, customGroupSizes } = req.body;
 
     // Check if category is completed
@@ -2231,30 +2239,32 @@ const bulkAssignAllPlayers = async (req, res) => {
         globalMatchNumber += group.matches.length;
       });
 
-      // Create database Match records
-      await prisma.match.deleteMany({
-        where: { tournamentId, categoryId }
-      });
-
+      // Create database Match records atomically — delete + re-create in one transaction
+      const matchRecords = [];
       for (const group of bracketJson.groups) {
         for (const match of group.matches) {
           if (match.player1?.id && match.player2?.id) {
-            await prisma.match.create({
-              data: {
-                tournamentId,
-                categoryId,
-                matchNumber: match.matchNumber,
-                round: 1,
-                player1Id: match.player1.id,
-                player2Id: match.player2.id,
-                player1Seed: match.player1.seed,
-                player2Seed: match.player2.seed,
-                status: 'PENDING'
-              }
+            matchRecords.push({
+              tournamentId,
+              categoryId,
+              matchNumber: match.matchNumber,
+              round: 1,
+              player1Id: match.player1.id,
+              player2Id: match.player2.id,
+              player1Seed: match.player1.seed,
+              player2Seed: match.player2.seed,
+              status: 'PENDING'
             });
           }
         }
       }
+
+      await prisma.$transaction(async (tx) => {
+        await tx.match.deleteMany({ where: { tournamentId, categoryId } });
+        if (matchRecords.length > 0) {
+          await tx.match.createMany({ data: matchRecords });
+        }
+      });
     }
 
     // Save updated draw
@@ -2379,12 +2389,11 @@ const shuffleAssignedPlayers = async (req, res) => {
         return res.status(400).json({ success: false, error: 'No players to shuffle' });
       }
 
-      // Simple shuffle - just reverse order or rotate
+      // Fisher-Yates shuffle for truly random draw order
       const shuffledPlayers = [...assignedPlayers];
-      // Rotate by 1 position
-      if (shuffledPlayers.length > 1) {
-        const first = shuffledPlayers.shift();
-        shuffledPlayers.push(first);
+      for (let i = shuffledPlayers.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffledPlayers[i], shuffledPlayers[j]] = [shuffledPlayers[j], shuffledPlayers[i]];
       }
 
       // Clear all unlocked slots first
@@ -2585,6 +2594,10 @@ const arrangeKnockoutMatchups = async (req, res) => {
     const { tournamentId, categoryId } = req.params;
     const { knockoutSlots } = req.body;
     const userId = req.user.userId || req.user.id;
+
+    if (!Array.isArray(knockoutSlots) || knockoutSlots.length === 0) {
+      return res.status(400).json({ success: false, error: 'knockoutSlots must be a non-empty array' });
+    }
 
     console.log('🎯 Arranging knockout matchups for', knockoutSlots.length, 'slots');
 
@@ -2950,11 +2963,24 @@ const continueToKnockout = async (req, res) => {
 
     console.log('✅ Validation passed');
 
-    // Get player details
-    const players = await prisma.user.findMany({
-      where: { id: { in: selectedPlayerIds } },
-      select: { id: true, name: true }
-    });
+    // Get player details — handle both real users and guest players (IDs starting with "guest-")
+    const regularIds = selectedPlayerIds.filter(id => !String(id).startsWith('guest-'));
+    const guestIds   = selectedPlayerIds.filter(id =>  String(id).startsWith('guest-'));
+
+    const [regularPlayers, guestRegistrations] = await Promise.all([
+      regularIds.length > 0
+        ? prisma.user.findMany({ where: { id: { in: regularIds } }, select: { id: true, name: true } })
+        : Promise.resolve([]),
+      guestIds.length > 0
+        ? prisma.registration.findMany({
+            where: { id: { in: guestIds.map(id => id.replace('guest-', '')) } },
+            select: { id: true, guestName: true }
+          })
+        : Promise.resolve([])
+    ]);
+
+    const guestPlayers = guestRegistrations.map(r => ({ id: `guest-${r.id}`, name: r.guestName || 'Guest' }));
+    const players = [...regularPlayers, ...guestPlayers];
 
     if (players.length !== knockoutDrawSize) {
       return res.status(400).json({ success: false, error: 'Some selected players not found' });

@@ -208,13 +208,14 @@ const updateMatchResult = async (req, res) => {
 
     // Check authorization
     const isOrganizer = match.tournament.organizerId === userId;
-    const isUmpire = req.user.role === 'UMPIRE';
-    const isAdmin = req.user.role === 'ADMIN';
+    const userRoles = req.user.roles || [];
+    const isUmpire = userRoles.includes('UMPIRE') || req.user.role === 'UMPIRE';
+    const isAdmin  = userRoles.includes('ADMIN')  || req.user.role === 'ADMIN';
 
     if (!isOrganizer && !isUmpire && !isAdmin) {
-      return res.status(403).json({ 
+      return res.status(403).json({
         success: false,
-        error: 'Not authorized to update match results' 
+        error: 'Not authorized to update match results'
       });
     }
 
@@ -549,6 +550,10 @@ const giveBye = async (req, res) => {
     const { matchId } = req.params;
     const { winnerId } = req.body;
     const userId = req.user.userId || req.user.id;
+
+    if (!winnerId) {
+      return res.status(400).json({ success: false, error: 'winnerId is required' });
+    }
 
     console.log('🎯 Give Bye - Match:', matchId, 'Winner:', winnerId);
 

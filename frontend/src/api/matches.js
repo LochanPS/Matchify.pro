@@ -14,12 +14,12 @@ export const getTournamentMatches = async (tournamentId, filters = {}) => {
 };
 
 export const getTournamentLiveMatches = async (tournamentId) => {
-  const response = await api.get(`/matches/tournament/${tournamentId}?status=IN_PROGRESS`);
+  const response = await api.get(`/matches/tournament/${tournamentId}?status=IN_PROGRESS`, { _skipLogout: true });
   return response.data;
 };
 
 export const getTournamentCompletedMatches = async (tournamentId) => {
-  const response = await api.get(`/matches/tournament/${tournamentId}?status=COMPLETED`);
+  const response = await api.get(`/matches/tournament/${tournamentId}?status=COMPLETED`, { _skipLogout: true });
   return response.data;
 };
 

@@ -41,7 +41,7 @@ export const NotificationProvider = ({ children }) => {
       const token = localStorage.getItem('token');
       if (!token) return;
       
-      const response = await api.get('/notifications/unread-count');
+      const response = await api.get('/notifications/unread-count', { _skipLogout: true });
       console.log('📊 Unread count response:', response.data);
       setUnreadCount(response.data.count || 0);
     } catch (error) {

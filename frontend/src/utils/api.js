@@ -42,6 +42,12 @@ api.interceptors.response.use(
     }
 
     if (error.response?.status === 401) {
+      // Background polls (Live Matches, notification count) set _skipLogout: true
+      // so they never trigger auto-logout — only user-initiated requests do.
+      if (error.config?._skipLogout) {
+        return Promise.reject(error);
+      }
+
       const token = localStorage.getItem('token');
       const path = window.location.pathname;
 

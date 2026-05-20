@@ -251,7 +251,7 @@ const LoginPageMobile = () => {
               }}
             />
             <div className="relative">
-              <MatchifyLogo size={56} variant="full" />
+              <MatchifyLogo size={100} variant="full" />
             </div>
           </div>
           <p className="text-xs text-gray-300 font-medium">India's Premier Badminton Platform</p>

@@ -2,7 +2,7 @@
  * MatchifyLogo — PNG logo image
  *
  * Props:
- *   size       {number}  — logo height in px (default 40)
+ *   size       {number}  — logo height in px (default 48)
  *   variant    {'full'|'icon'|'text'}
  *   className  {string}
  */
@@ -11,14 +11,17 @@ export default function MatchifyLogo({
   variant = 'full',
   className = '',
 }) {
-  // All variants render the same PNG — size/cropping differ
-  const style = {
+  // Logo image has dark background — mix-blend-mode:screen makes dark areas
+  // invisible on dark navbars while keeping bright teal/green logo elements vivid.
+  // aspect ratio is 1082:992 ≈ 1.09:1 — nearly square, so width ≈ size * 1.09
+  const imgStyle = {
     height: `${size}px`,
-    width: 'auto',
+    width: `${Math.round(size * 1.09)}px`,
     display: 'block',
     objectFit: 'contain',
     flexShrink: 0,
-    filter: 'drop-shadow(0 0 6px rgba(0,220,130,0.35))',
+    mixBlendMode: 'screen',
+    filter: `brightness(1.3) contrast(1.1) drop-shadow(0 0 8px rgba(0,230,140,0.5))`,
   };
 
   return (
@@ -29,7 +32,7 @@ export default function MatchifyLogo({
       <img
         src="/logo.png"
         alt="Matchify.pro"
-        style={style}
+        style={imgStyle}
         draggable={false}
       />
     </span>

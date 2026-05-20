@@ -50,6 +50,7 @@ const ConductMatchPage          = lazy(() => import('./pages/ConductMatchPage'))
 const LiveTournamentDashboard   = lazy(() => import('./pages/LiveTournamentDashboard'))
 const LiveMatches               = lazy(() => import('./pages/LiveMatches'))
 const LiveMatchDetail           = lazy(() => import('./pages/LiveMatchDetail'))
+const TournamentLiveMatchesPage = lazy(() => import('./pages/TournamentLiveMatchesPage'))
 const OrganizerTournamentHistory = lazy(() => import('./pages/OrganizerTournamentHistory'))
 const TournamentCategoryDetails = lazy(() => import('./pages/TournamentCategoryDetails'))
 const NotificationsPage         = lazy(() => import('./pages/NotificationsPage'))
@@ -349,6 +350,10 @@ function AppContent() {
           <Route
             path="/tournaments/:id/draws"
             element={<ViewDrawsPage />}
+          />
+          <Route
+            path="/tournaments/:id/live"
+            element={<TournamentLiveMatchesPage />}
           />
           <Route
             path="/profile"

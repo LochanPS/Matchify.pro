@@ -2,7 +2,7 @@ import express from 'express';
 import prisma from '../lib/prisma.js';
 import { authenticate, authorize } from '../middleware/auth.js';
 import { assignUmpire, getUmpireMatches } from '../controllers/match.controller.js';
-import { broadcastScoreUpdate, broadcastMatchStatus, broadcastMatchComplete } from '../services/socketService.js';
+import { broadcastScoreUpdate, broadcastMatchStatus, broadcastMatchComplete, broadcastToTournament } from '../services/socketService.js';
 
 const router = express.Router();
 
@@ -484,6 +484,15 @@ const startMatchHandler = async (req, res) => {
 
     // Broadcast match started
     broadcastMatchStatus(matchId, 'IN_PROGRESS', { score: scoreData });
+    broadcastToTournament(match.tournamentId, 'match-started', {
+      matchId,
+      player1: player1 ? { id: player1.id, name: player1.name } : null,
+      player2: player2 ? { id: player2.id, name: player2.name } : null,
+      category: finalMatch.category ? { id: finalMatch.category.id, name: finalMatch.category.name } : null,
+      courtNumber: match.courtNumber,
+      matchNumber: match.matchNumber,
+      startedAt: new Date().toISOString(),
+    });
 
     res.json({
       success: true,
@@ -744,6 +753,10 @@ const endMatchHandler = async (req, res) => {
     // ── 6. RESPOND TO CLIENT — everything below is non-critical ───────────────
     // Broadcast match completion to live spectators
     broadcastMatchComplete(matchId, winnerId, finalScore);
+    broadcastToTournament(match.tournamentId, 'match-ended', {
+      matchId,
+      winnerId,
+    });
 
     res.json({
       success: true,

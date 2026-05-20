@@ -1194,22 +1194,37 @@ const TournamentDetailPage = () => {
                 >
                   <GitBranch className="w-5 h-5" />
                   <span>View Draws</span>
-                  <div 
+                  <div
                     className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
                     style={{ background: 'radial-gradient(circle at center, rgba(0,200,83,0.2), transparent)' }}
+                  />
+                </button>
+              )}
+
+              {/* Live Matches Button */}
+              {['published', 'completed'].includes(tournament.status) && (
+                <button
+                  onClick={() => navigate(`/tournaments/${id}/live`)}
+                  className="w-full mt-3 flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl font-black text-base transition-all hover:scale-[1.02] relative overflow-hidden group"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(255,68,102,0.18) 0%, rgba(255,100,120,0.12) 100%)',
+                    border: '2px solid rgba(255,68,102,0.45)',
+                    color: '#ff4466',
+                    boxShadow: '0 4px 15px rgba(255,68,102,0.25)'
+                  }}
+                >
+                  <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#ff4466', boxShadow: '0 0 6px #ff4466', display: 'inline-block', animation: 'liveDot 1.4s ease-in-out infinite' }} />
+                  <span>Live Matches</span>
+                  <style>{`@keyframes liveDot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.4)}}`}</style>
+                  <div
+                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                    style={{ background: 'radial-gradient(circle at center, rgba(255,68,102,0.15), transparent)' }}
                   />
                 </button>
               )}
             </div>
             
             {/* Organizer Management - Colorful Mobile Design */}
-            {console.log('🔍 Organizer Check:', {
-              userId: user?.id,
-              organizerId: tournament.organizerId,
-              isMatch: user?.id === tournament.organizerId,
-              userName: user?.name,
-              userEmail: user?.email
-            })}
             {user && user.id === tournament.organizerId && (
               <div
                 className="rounded-2xl p-5 relative overflow-hidden"
@@ -1265,9 +1280,28 @@ const TournamentDetailPage = () => {
                   >
                     <GitBranch className="w-5 h-5" />
                     <span>View Draws</span>
-                    <div 
+                    <div
                       className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
                       style={{ background: 'radial-gradient(circle at center, rgba(0,200,83,0.2), transparent)' }}
+                    />
+                  </button>
+
+                  {/* Live Matches - Red */}
+                  <button
+                    onClick={() => navigate(`/tournaments/${id}/live`)}
+                    className="w-full flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl font-black text-base transition-all hover:scale-[1.02] relative overflow-hidden group"
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(255,68,102,0.18) 0%, rgba(255,100,120,0.12) 100%)',
+                      border: '2px solid rgba(255,68,102,0.45)',
+                      color: '#ff4466',
+                      boxShadow: '0 4px 15px rgba(255,68,102,0.25)'
+                    }}
+                  >
+                    <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#ff4466', boxShadow: '0 0 6px #ff4466', display: 'inline-block', animation: 'liveDot 1.4s ease-in-out infinite' }} />
+                    <span>Live Matches</span>
+                    <div
+                      className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                      style={{ background: 'radial-gradient(circle at center, rgba(255,68,102,0.15), transparent)' }}
                     />
                   </button>
 

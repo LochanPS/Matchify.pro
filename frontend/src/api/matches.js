@@ -13,6 +13,16 @@ export const getTournamentMatches = async (tournamentId, filters = {}) => {
   return response.data;
 };
 
+export const getTournamentLiveMatches = async (tournamentId) => {
+  const response = await api.get(`/matches/tournament/${tournamentId}?status=IN_PROGRESS`);
+  return response.data;
+};
+
+export const getTournamentCompletedMatches = async (tournamentId) => {
+  const response = await api.get(`/matches/tournament/${tournamentId}?status=COMPLETED`);
+  return response.data;
+};
+
 export const startMatch = async (matchId) => {
   const response = await api.put(`/matches/${matchId}/start`, {});
   return response.data;

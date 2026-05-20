@@ -82,11 +82,12 @@ function Field({ label, required, children }) {
   );
 }
 
+// DiceBear avatars — no local files needed, always available
 const AVATARS = [
-  '/avatars/avatar1.png',
-  '/avatars/avatar2.png',
-  '/avatars/avatar3.png',
-  '/avatars/avatar4.png',
+  'https://api.dicebear.com/7.x/avataaars/png?seed=matchify1&backgroundColor=b6e3f4',
+  'https://api.dicebear.com/7.x/avataaars/png?seed=matchify2&backgroundColor=c0aede',
+  'https://api.dicebear.com/7.x/avataaars/png?seed=matchify3&backgroundColor=d1f4d1',
+  'https://api.dicebear.com/7.x/avataaars/png?seed=matchify4&backgroundColor=ffd5dc',
 ];
 
 export default function MandatoryProfilePhotoModal({ isOpen }) {

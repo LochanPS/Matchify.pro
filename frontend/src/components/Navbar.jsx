@@ -144,7 +144,7 @@ const Navbar = () => {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-8">
               <Link to="/admin-dashboard" className="hover:opacity-90 transition-opacity">
-                <MatchifyLogo size={42} variant="full" />
+                <MatchifyLogo size={56} variant="full" />
               </Link>
               <nav className="hidden md:flex items-center gap-1">
                 <NavLink to="/admin-dashboard" active={location.pathname === '/admin-dashboard'}><LayoutDashboard className="w-4 h-4" />Dashboard</NavLink>
@@ -180,7 +180,7 @@ const Navbar = () => {
           {/* Logo + desktop nav */}
           <div className="flex items-center gap-6 sm:gap-8">
             <Link to="/" className="hover:opacity-90 transition-opacity flex-shrink-0">
-              <MatchifyLogo size={42} variant="full" />
+              <MatchifyLogo size={56} variant="full" />
             </Link>
             <nav className="hidden md:flex items-center gap-1">
               <NavLink to="/tournaments" active={isActiveLink('/tournaments')}><Trophy className="w-4 h-4" />Tournaments</NavLink>

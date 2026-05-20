@@ -7,7 +7,7 @@
  *   className  {string}
  */
 export default function MatchifyLogo({
-  size = 40,
+  size = 48,
   variant = 'full',
   className = '',
 }) {
@@ -18,6 +18,7 @@ export default function MatchifyLogo({
     display: 'block',
     objectFit: 'contain',
     flexShrink: 0,
+    filter: 'drop-shadow(0 0 6px rgba(0,220,130,0.35))',
   };
 
   return (

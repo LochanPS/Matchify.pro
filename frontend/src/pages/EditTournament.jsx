@@ -47,6 +47,7 @@ const EditTournament = () => {
 
   const [tournament, setTournament] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
@@ -94,6 +95,19 @@ const EditTournament = () => {
     fetchTournament();
   }, [id]);
 
+  // Auto-dismiss error after 5s, success after 3s
+  useEffect(() => {
+    if (!error) return;
+    const t = setTimeout(() => setError(null), 5000);
+    return () => clearTimeout(t);
+  }, [error]);
+
+  useEffect(() => {
+    if (!success) return;
+    const t = setTimeout(() => setSuccess(null), 3000);
+    return () => clearTimeout(t);
+  }, [success]);
+
   const fetchTournament = async () => {
     try {
       setLoading(true);
@@ -131,7 +145,7 @@ const EditTournament = () => {
         accountHolderName: t.accountHolderName || '',
       });
     } catch (err) {
-      setError('Failed to load tournament');
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
@@ -300,17 +314,31 @@ const EditTournament = () => {
     );
   }
 
-  if (!tournament) {
+  if (loadError || (!loading && !tournament)) {
     return (
       <div className="min-h-screen flex items-center justify-center px-6" style={{ background: B.bg }}>
-        <div className="text-center">
-          <AlertTriangle className="w-10 h-10 mx-auto mb-3" style={{ color: '#f87171' }} />
-          <p className="text-white font-bold mb-4">Tournament not found</p>
-          <button onClick={() => navigate('/tournaments')}
-            className="px-5 py-2.5 rounded-xl text-sm font-bold"
-            style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.8)' }}>
-            Browse Tournaments
-          </button>
+        <div className="text-center max-w-xs">
+          <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4"
+            style={{ background: 'rgba(251,191,36,0.1)', border: '1px solid rgba(251,191,36,0.25)' }}>
+            <AlertTriangle className="w-8 h-8" style={{ color: '#fbbf24' }} />
+          </div>
+          <p className="text-white font-black text-lg mb-1">Couldn't load tournament</p>
+          <p className="text-sm mb-5" style={{ color: 'rgba(255,255,255,0.45)' }}>
+            Check your connection and try again.
+          </p>
+          <div className="flex gap-3 justify-center">
+            <button
+              onClick={() => { setLoadError(false); setLoading(true); fetchTournament(); }}
+              className="px-5 py-2.5 rounded-xl text-sm font-black"
+              style={{ background: 'linear-gradient(135deg,rgba(168,85,247,0.3),rgba(124,58,237,0.2))', border: '1px solid rgba(168,85,247,0.4)', color: '#c084fc' }}>
+              Try Again
+            </button>
+            <button onClick={() => navigate(-1)}
+              className="px-5 py-2.5 rounded-xl text-sm font-bold"
+              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)' }}>
+              Go Back
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -353,10 +381,10 @@ const EditTournament = () => {
         {/* Messages */}
         {error && (
           <div className="mb-4 flex items-start gap-2.5 px-4 py-3 rounded-xl"
-            style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)' }}>
-            <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: '#f87171' }} />
-            <p className="text-xs font-semibold flex-1" style={{ color: '#f87171' }}>{error}</p>
-            <button onClick={() => setError(null)}><X className="w-4 h-4" style={{ color: '#f87171' }} /></button>
+            style={{ background: 'rgba(251,191,36,0.07)', border: '1px solid rgba(251,191,36,0.22)' }}>
+            <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: '#fbbf24' }} />
+            <p className="text-xs font-semibold flex-1" style={{ color: 'rgba(255,255,255,0.8)' }}>{error}</p>
+            <button onClick={() => setError(null)} style={{ opacity: 0.5 }}><X className="w-4 h-4 text-white" /></button>
           </div>
         )}
         {success && (

@@ -48,7 +48,12 @@ const RegisterPageMobile = () => {
   const redirectUrl = searchParams.get('redirect');
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    let value = e.target.value;
+    // Phone field: digits only, max 10
+    if (e.target.name === 'phone') {
+      value = value.replace(/\D/g, '').slice(0, 10);
+    }
+    setFormData({ ...formData, [e.target.name]: value });
     setError('');
     setConflictError(false);
   };
@@ -502,18 +507,22 @@ const RegisterPageMobile = () => {
               </div>
 
               {/* Phone */}
-              <div className="relative">
-                <PhoneIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+              <div className="flex items-stretch rounded-xl overflow-hidden"
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: formData.phone ? '1px solid rgba(0,229,200,0.4)' : '1px solid rgba(255,255,255,0.1)',
+                }}>
+                <span className="flex items-center px-3 text-sm font-bold flex-shrink-0"
+                  style={{ color: '#00e5c8', borderRight: '1px solid rgba(255,255,255,0.12)', background: 'rgba(0,229,200,0.07)' }}>
+                  +91
+                </span>
                 <input
                   name="phone"
                   type="tel"
+                  inputMode="numeric"
                   maxLength={10}
-                  className="w-full pl-10 pr-4 py-3 rounded-xl text-white text-sm placeholder-gray-500 outline-none"
-                  style={{
-                    background: 'rgba(255,255,255,0.05)',
-                    border: formData.phone ? '1px solid rgba(0,255,136,0.4)' : '1px solid rgba(255,255,255,0.1)',
-                  }}
-                  placeholder="Phone number (optional)"
+                  className="flex-1 px-3 py-3 bg-transparent text-white text-sm placeholder-gray-500 outline-none"
+                  placeholder="10-digit number (optional)"
                   value={formData.phone}
                   onChange={handleChange}
                 />

@@ -32,7 +32,12 @@ const LoginPageMobile = () => {
   const redirectUrl = searchParams.get('redirect');
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    let value = e.target.value;
+    // Phone field: digits only, max 10
+    if (e.target.name === 'credential' && loginType === 'phone') {
+      value = value.replace(/\D/g, '').slice(0, 10);
+    }
+    setFormData({ ...formData, [e.target.name]: value });
     setError('');
   };
 
@@ -377,31 +382,41 @@ const LoginPageMobile = () => {
               <label className="block text-sm font-semibold text-white mb-2">
                 {loginType === 'phone' ? 'Phone Number' : 'Email Address'}
               </label>
-              <div className="relative">
-                {loginType === 'phone' ? (
-                  <PhoneIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
-                ) : (
+              {loginType === 'phone' ? (
+                <div className="flex items-stretch rounded-xl overflow-hidden"
+                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                  <span className="flex items-center px-3 text-sm font-bold flex-shrink-0"
+                    style={{ color: '#00e5c8', borderRight: '1px solid rgba(255,255,255,0.12)', background: 'rgba(0,229,200,0.07)' }}>
+                    +91
+                  </span>
+                  <input
+                    name="credential"
+                    type="tel"
+                    inputMode="numeric"
+                    required
+                    autoComplete="tel"
+                    className="flex-1 px-3 py-3.5 bg-transparent text-white text-sm placeholder-gray-500 outline-none"
+                    placeholder="9876543210"
+                    value={formData.credential}
+                    onChange={handleChange}
+                    maxLength={10}
+                  />
+                </div>
+              ) : (
+                <div className="relative">
                   <EnvelopeIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
-                )}
-                <input
-                  name="credential"
-                  type={loginType === 'phone' ? 'tel' : 'email'}
-                  required
-                  autoComplete={loginType === 'phone' ? 'tel' : 'email'}
-                  className="w-full pl-10 pr-4 py-3.5 rounded-xl text-white text-sm placeholder-gray-500 outline-none"
-                  style={{ 
-                    background: 'rgba(255,255,255,0.05)', 
-                    border: '1px solid rgba(255,255,255,0.1)' 
-                  }}
-                  placeholder={loginType === 'phone' ? '9876543210' : 'you@example.com'}
-                  value={formData.credential}
-                  onChange={handleChange}
-                  maxLength={loginType === 'phone' ? 10 : undefined}
-                  pattern={loginType === 'phone' ? '[0-9]{10}' : undefined}
-                />
-              </div>
-              {loginType === 'phone' && (
-                <p className="text-xs text-gray-400 mt-1">Enter 10-digit phone number without country code</p>
+                  <input
+                    name="credential"
+                    type="email"
+                    required
+                    autoComplete="email"
+                    className="w-full pl-10 pr-4 py-3.5 rounded-xl text-white text-sm placeholder-gray-500 outline-none"
+                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
+                    placeholder="you@example.com"
+                    value={formData.credential}
+                    onChange={handleChange}
+                  />
+                </div>
               )}
             </div>
 

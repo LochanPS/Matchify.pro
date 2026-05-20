@@ -82,12 +82,12 @@ function Field({ label, required, children }) {
   );
 }
 
-// DiceBear lorelei — clean illustrated portrait style, 200px, distinct looks
+// Local avatars — 2 boys + 2 girls
 const AVATARS = [
-  'https://api.dicebear.com/7.x/lorelei/png?seed=court1&size=200&backgroundColor=0a0a2e',
-  'https://api.dicebear.com/7.x/lorelei/png?seed=court2&size=200&backgroundColor=1a0a2e',
-  'https://api.dicebear.com/7.x/lorelei/png?seed=court3&size=200&backgroundColor=0a1a2e',
-  'https://api.dicebear.com/7.x/lorelei/png?seed=court4&size=200&backgroundColor=0a2e1a',
+  '/avatars/avatar1.jpg',
+  '/avatars/avatar2.jpg',
+  '/avatars/avatar3.jpg',
+  '/avatars/avatar4.jpg',
 ];
 
 export default function MandatoryProfilePhotoModal({ isOpen }) {

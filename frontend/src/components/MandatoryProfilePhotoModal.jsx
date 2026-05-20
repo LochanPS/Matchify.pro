@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Camera, Upload, X, Check } from 'lucide-react';
+import { Upload, X, Check, Camera, Sparkles } from 'lucide-react';
 import { profileAPI } from '../api/profile';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../utils/api';
@@ -82,14 +82,23 @@ function Field({ label, required, children }) {
   );
 }
 
+const AVATARS = [
+  '/avatars/avatar1.png',
+  '/avatars/avatar2.png',
+  '/avatars/avatar3.png',
+  '/avatars/avatar4.png',
+];
+
 export default function MandatoryProfilePhotoModal({ isOpen }) {
   const { user, updateUser } = useAuth();
   const [step, setStep] = useState(1); // 1=photo, 2=details
+  const [photoTab, setPhotoTab] = useState('upload'); // 'upload' | 'avatar'
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [preview, setPreview] = useState(user?.profilePhoto || null);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedAvatar, setSelectedAvatar] = useState(null);
   const [photoUploaded, setPhotoUploaded] = useState(!!user?.profilePhoto);
   const inputRef = useRef(null);
 
@@ -135,12 +144,27 @@ export default function MandatoryProfilePhotoModal({ isOpen }) {
     reader.readAsDataURL(file);
   };
 
+  const handleSelectAvatar = (url) => {
+    setSelectedAvatar(url);
+    setPreview(url);
+    setSelectedFile(null);
+    setError('');
+  };
+
   const handleUploadPhoto = async () => {
-    if (!selectedFile) { setError('Please select a photo first'); return; }
+    if (!selectedFile && !selectedAvatar) { setError('Please choose a photo or select an avatar'); return; }
     setUploading(true);
     setError('');
     try {
-      const response = await profileAPI.uploadPhoto(selectedFile);
+      let fileToUpload = selectedFile;
+      if (!fileToUpload && selectedAvatar) {
+        // Fetch avatar image and convert to File for consistent server-side handling
+        const res = await fetch(selectedAvatar);
+        const blob = await res.blob();
+        const name = selectedAvatar.split('/').pop() || 'avatar.png';
+        fileToUpload = new File([blob], name, { type: blob.type || 'image/png' });
+      }
+      const response = await profileAPI.uploadPhoto(fileToUpload);
       updateUser({ ...user, profilePhoto: response.profilePhoto });
       setPhotoUploaded(true);
       setStep(2);
@@ -214,47 +238,134 @@ export default function MandatoryProfilePhotoModal({ isOpen }) {
           {/* STEP 1: Photo */}
           {step === 1 && (
             <>
+              {/* Header */}
               <div className="text-center mb-4">
-                <h2 className="text-lg font-black text-white mb-0.5">Add Your Photo</h2>
-                <p className="text-xs" style={{ color: F.dim }}>Helps organizers identify you</p>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full mb-2 text-xs font-bold"
+                  style={{ background: 'rgba(0,255,136,0.1)', border: '1px solid rgba(0,255,136,0.2)', color: F.green }}>
+                  <Camera size={10} /> Required
+                </div>
+                <h2 className="text-lg font-black text-white mb-1">Set Your Profile Photo</h2>
+                <p className="text-xs leading-relaxed" style={{ color: F.sub }}>
+                  Organizers use this to identify you during check-in and on draw sheets.
+                  Make it clear and recognizable.
+                </p>
               </div>
 
-              {/* Photo upload */}
-              <div
-                onClick={() => !preview && inputRef.current?.click()}
-                className="relative mb-4 rounded-2xl overflow-hidden cursor-pointer transition-all"
-                style={{
-                  height: preview ? 200 : 140,
-                  border: `2px dashed ${preview ? 'transparent' : 'rgba(0,255,136,0.25)'}`,
-                  background: preview ? 'transparent' : 'rgba(255,255,255,0.02)',
-                }}>
-                {preview ? (
-                  <>
-                    <img src={preview} alt="Preview" className="w-full h-full object-cover" />
-                    <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 50%)' }} />
-                    <button onClick={(e) => { e.stopPropagation(); setPreview(null); setSelectedFile(null); setPhotoUploaded(false); }}
-                      className="absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center"
-                      style={{ background: 'rgba(255,59,48,0.9)' }}>
-                      <X size={12} className="text-white" />
-                    </button>
-                    <div className="absolute bottom-2 left-3 flex items-center gap-1.5">
-                      <div className="w-1.5 h-1.5 rounded-full" style={{ background: F.green }} />
-                      <span className="text-xs text-white font-medium">Photo ready</span>
-                    </div>
-                  </>
-                ) : (
-                  <div className="flex flex-col items-center justify-center h-full gap-1.5">
-                    <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'rgba(0,255,136,0.1)' }}>
-                      <Upload size={16} style={{ color: F.green }} />
-                    </div>
-                    <p className="text-white font-semibold text-sm">Tap to upload</p>
-                    <p className="text-xs" style={{ color: F.dim }}>JPG, PNG · max 5MB</p>
+              {/* Visibility notice */}
+              <div className="flex items-start gap-2.5 px-3 py-2.5 rounded-xl mb-4"
+                style={{ background: 'rgba(168,85,247,0.08)', border: '1px solid rgba(168,85,247,0.2)' }}>
+                <span className="text-base mt-0.5">👁️</span>
+                <div>
+                  <p className="text-xs font-bold text-white mb-0.5">Visible to organizers & players</p>
+                  <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                    Your photo appears on the draw sheet, match cards, and leaderboard.
+                  </p>
+                </div>
+              </div>
+
+              {/* Tabs */}
+              <div className="flex rounded-xl p-1 mb-4" style={{ background: 'rgba(255,255,255,0.05)', border: `1px solid ${F.border}` }}>
+                {[
+                  { key: 'upload', icon: <Upload size={12} />, label: 'Upload Photo' },
+                  { key: 'avatar', icon: <Sparkles size={12} />, label: 'Choose Avatar' },
+                ].map(tab => (
+                  <button key={tab.key} type="button"
+                    onClick={() => { setPhotoTab(tab.key); setError(''); }}
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold transition-all"
+                    style={{
+                      background: photoTab === tab.key ? F.green : 'transparent',
+                      color: photoTab === tab.key ? '#003320' : F.sub,
+                      boxShadow: photoTab === tab.key ? '0 2px 8px rgba(0,255,136,0.25)' : 'none',
+                    }}>
+                    {tab.icon} {tab.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* ── Upload Tab ── */}
+              {photoTab === 'upload' && (
+                <>
+                  <div
+                    onClick={() => inputRef.current?.click()}
+                    className="relative mb-3 rounded-2xl overflow-hidden cursor-pointer transition-all group"
+                    style={{
+                      height: preview && !selectedAvatar ? 170 : 130,
+                      border: `2px dashed ${preview && !selectedAvatar ? 'rgba(0,255,136,0.4)' : 'rgba(0,255,136,0.2)'}`,
+                      background: preview && !selectedAvatar ? 'transparent' : 'rgba(0,255,136,0.02)',
+                    }}>
+                    {preview && !selectedAvatar ? (
+                      <>
+                        <img src={preview} alt="Preview" className="w-full h-full object-cover" />
+                        <div className="absolute inset-0" style={{ background: 'linear-gradient(to top,rgba(0,0,0,0.55) 0%,transparent 55%)' }} />
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setPreview(null); setSelectedFile(null); setPhotoUploaded(false); }}
+                          className="absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center"
+                          style={{ background: 'rgba(255,59,48,0.9)' }}>
+                          <X size={12} className="text-white" />
+                        </button>
+                        <div className="absolute bottom-2 left-3 flex items-center gap-1.5">
+                          <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: F.green }} />
+                          <span className="text-xs text-white font-semibold">Photo selected</span>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center h-full gap-2 transition-all group-hover:scale-105">
+                        <div className="w-10 h-10 rounded-2xl flex items-center justify-center"
+                          style={{ background: 'linear-gradient(135deg,rgba(0,255,136,0.15),rgba(0,212,255,0.1))' }}>
+                          <Upload size={18} style={{ color: F.green }} />
+                        </div>
+                        <div className="text-center">
+                          <p className="text-white font-bold text-sm">Tap to upload your photo</p>
+                          <p className="text-xs mt-0.5" style={{ color: F.dim }}>JPG, PNG · max 5MB</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
+                  <input ref={inputRef} type="file" accept="image/*"
+                    onChange={(e) => { processFile(e.target.files?.[0]); setSelectedAvatar(null); }} className="hidden" />
+                </>
+              )}
 
-              <input ref={inputRef} type="file" accept="image/*"
-                onChange={(e) => processFile(e.target.files?.[0])} className="hidden" />
+              {/* ── Avatar Tab ── */}
+              {photoTab === 'avatar' && (
+                <div className="mb-3">
+                  <p className="text-xs text-center mb-3 font-medium" style={{ color: F.sub }}>
+                    Pick an avatar to represent you
+                  </p>
+                  <div className="grid grid-cols-4 gap-2.5">
+                    {AVATARS.map((url, i) => {
+                      const isSelected = selectedAvatar === url;
+                      return (
+                        <button key={i} type="button" onClick={() => handleSelectAvatar(url)}
+                          className="relative aspect-square rounded-2xl overflow-hidden transition-all"
+                          style={{
+                            border: isSelected ? '2.5px solid #00ff88' : '2px solid rgba(255,255,255,0.1)',
+                            boxShadow: isSelected ? '0 0 16px rgba(0,255,136,0.4)' : 'none',
+                            transform: isSelected ? 'scale(1.06)' : 'scale(1)',
+                          }}>
+                          <img src={url} alt={`Avatar ${i + 1}`} className="w-full h-full object-cover" />
+                          {isSelected && (
+                            <div className="absolute inset-0 flex items-center justify-center"
+                              style={{ background: 'rgba(0,255,136,0.15)' }}>
+                              <div className="w-6 h-6 rounded-full flex items-center justify-center"
+                                style={{ background: F.green }}>
+                                <Check size={12} color="#003320" strokeWidth={3} />
+                              </div>
+                            </div>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {selectedAvatar && (
+                    <div className="mt-3 flex items-center justify-center gap-2 py-2 rounded-xl"
+                      style={{ background: 'rgba(0,255,136,0.07)', border: '1px solid rgba(0,255,136,0.15)' }}>
+                      <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: F.green }} />
+                      <span className="text-xs font-semibold" style={{ color: F.green }}>Avatar selected</span>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {error && (
                 <div className="mb-3 px-3 py-2 rounded-xl text-xs flex items-center gap-2"
@@ -263,21 +374,32 @@ export default function MandatoryProfilePhotoModal({ isOpen }) {
                 </div>
               )}
 
-              <button onClick={handleUploadPhoto} disabled={!selectedFile || uploading}
-                className="w-full py-3 rounded-2xl font-bold text-sm transition-all"
-                style={{
-                  background: selectedFile && !uploading ? 'linear-gradient(135deg,#00ff88,#00c853)' : 'rgba(255,255,255,0.06)',
-                  color: selectedFile && !uploading ? '#003320' : F.dim,
-                  cursor: !selectedFile || uploading ? 'not-allowed' : 'pointer',
-                  boxShadow: selectedFile && !uploading ? '0 8px 20px rgba(0,255,136,0.2)' : 'none',
-                }}>
-                {uploading ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <div className="w-4 h-4 border-2 rounded-full animate-spin" style={{ borderColor: 'rgba(0,51,32,0.3)', borderTopColor: '#003320' }} />
-                    Uploading...
-                  </span>
-                ) : '✨ Upload & Next'}
-              </button>
+              {/* Continue button */}
+              {(() => {
+                const ready = (photoTab === 'upload' && selectedFile) || (photoTab === 'avatar' && selectedAvatar);
+                return (
+                  <button onClick={handleUploadPhoto} disabled={!ready || uploading}
+                    className="w-full py-3 rounded-2xl font-bold text-sm transition-all"
+                    style={{
+                      background: ready && !uploading ? 'linear-gradient(135deg,#00ff88,#00c853)' : 'rgba(255,255,255,0.06)',
+                      color: ready && !uploading ? '#003320' : F.dim,
+                      cursor: !ready || uploading ? 'not-allowed' : 'pointer',
+                      boxShadow: ready && !uploading ? '0 8px 20px rgba(0,255,136,0.25)' : 'none',
+                    }}>
+                    {uploading ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <div className="w-4 h-4 border-2 rounded-full animate-spin"
+                          style={{ borderColor: 'rgba(0,51,32,0.3)', borderTopColor: '#003320' }} />
+                        Uploading...
+                      </span>
+                    ) : (
+                      <span className="flex items-center justify-center gap-2">
+                        <Check size={14} /> Continue to Profile Details
+                      </span>
+                    )}
+                  </button>
+                );
+              })()}
             </>
           )}
 

@@ -205,9 +205,9 @@ function AppContent() {
         {shouldShowNavbar && <Navbar />}
       </div>
       
-      {/* Mandatory Profile Photo Modal - CANNOT BE CLOSED */}
+      {/* Profile Photo Modal — skippable, re-prompts on next login */}
       {showProfilePhotoModal && user && !user.isAdmin && (
-        <MandatoryProfilePhotoModal isOpen={showProfilePhotoModal} />
+        <MandatoryProfilePhotoModal isOpen={showProfilePhotoModal} onSkip={() => setShowProfilePhotoModal(false)} />
       )}
       
       {/* Profile Completion Modal - shows when user has incomplete profile */}

@@ -90,7 +90,7 @@ const AVATARS = [
   '/avatars/avatar4.jpg',
 ];
 
-export default function MandatoryProfilePhotoModal({ isOpen }) {
+export default function MandatoryProfilePhotoModal({ isOpen, onSkip }) {
   const { user, updateUser } = useAuth();
   const [step, setStep] = useState(1); // 1=photo, 2=details
   const [photoTab, setPhotoTab] = useState('upload'); // 'upload' | 'avatar'
@@ -408,6 +408,13 @@ export default function MandatoryProfilePhotoModal({ isOpen }) {
                   </button>
                 );
               })()}
+              {onSkip && (
+                <button type="button" onClick={onSkip}
+                  className="w-full mt-2 py-2 text-xs font-medium transition-opacity hover:opacity-80"
+                  style={{ color: F.dim, background: 'none', border: 'none' }}>
+                  Skip for now — I'll complete this later
+                </button>
+              )}
             </>
           )}
 
@@ -540,6 +547,13 @@ export default function MandatoryProfilePhotoModal({ isOpen }) {
                   ) : '🎾 Save & Continue'}
                 </button>
               </div>
+              {onSkip && (
+                <button type="button" onClick={onSkip}
+                  className="w-full mt-2 py-2 text-xs font-medium transition-opacity hover:opacity-80"
+                  style={{ color: F.dim, background: 'none', border: 'none' }}>
+                  Skip for now — I'll complete this later
+                </button>
+              )}
             </>
           )}
         </div>

@@ -86,35 +86,6 @@ function CopyField({ label, value, mono = false, highlight = false }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// UpiAppButton — copies UPI ID then opens specific app
-// ─────────────────────────────────────────────────────────────────────────────
-function UpiAppButton({ label, emoji, scheme, upiId, onCopied }) {
-  const handleClick = () => {
-    // Always copy UPI ID first — user has it even if app fails to open
-    navigator.clipboard.writeText(upiId).catch(() => {});
-    onCopied?.();
-    // Small delay so clipboard write completes before app switch
-    setTimeout(() => {
-      window.location.href = scheme;
-    }, 80);
-  };
-
-  return (
-    <button
-      onClick={handleClick}
-      className="flex flex-col items-center gap-1.5 py-3 px-1 rounded-2xl transition-all active:scale-95 flex-1"
-      style={{
-        background: 'rgba(255,255,255,0.05)',
-        border: '1px solid rgba(255,255,255,0.1)',
-      }}
-    >
-      <span style={{ fontSize: '1.6rem', lineHeight: 1 }}>{emoji}</span>
-      <span className="text-xs font-bold text-white leading-tight text-center">{label}</span>
-    </button>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
 // Main Component
 // ─────────────────────────────────────────────────────────────────────────────
 export default function TournamentRegistrationPage() {
@@ -141,8 +112,7 @@ export default function TournamentRegistrationPage() {
   const [paymentSettings, setPaymentSettings] = useState(null);
   const [isRegistrationClosed, setIsRegistrationClosed] = useState(false);
   const [searchingPartner, setSearchingPartner] = useState({});
-  const [upiCopiedToast, setUpiCopiedToast] = useState(false);
-  const [paymentRef, setPaymentRef] = useState('');
+  const [utrId, setUtrId] = useState('');
 
   // ── Load draft + data on mount ───────────────────────────────────────────
   useEffect(() => {
@@ -157,7 +127,6 @@ export default function TournamentRegistrationPage() {
           setSelectedCategories(draft.selectedCategories);
           if (draft.partnerCodes) setPartnerCodes(draft.partnerCodes);
           if (draft.partnerInfo) setPartnerInfo(draft.partnerInfo);
-          if (draft.paymentRef) setPaymentRef(draft.paymentRef);
         }
       }
     } catch {}
@@ -170,13 +139,12 @@ export default function TournamentRegistrationPage() {
   }, [tournament]);
 
   // ── Draft helpers ────────────────────────────────────────────────────────
-  const saveDraft = useCallback((ref) => {
+  const saveDraft = useCallback(() => {
     try {
       localStorage.setItem(DRAFT_KEY, JSON.stringify({
         selectedCategories,
         partnerCodes,
         partnerInfo,
-        paymentRef: ref,
         timestamp: Date.now(),
       }));
     } catch {}
@@ -232,11 +200,6 @@ export default function TournamentRegistrationPage() {
     categories.find(c => c.id === catId)?.format === 'doubles'
   );
 
-  const showUpiCopied = () => {
-    setUpiCopiedToast(true);
-    setTimeout(() => setUpiCopiedToast(false), 2500);
-  };
-
   // ── Step 1: proceed to payment ───────────────────────────────────────────
   const handleProceedToPayment = () => {
     setError('');
@@ -254,9 +217,7 @@ export default function TournamentRegistrationPage() {
       }
       if (!partnerInfo[catId]) { setError(`Verify partner ID for ${cat?.name}`); return; }
     }
-    const ref = `MCT-${Date.now().toString(36).toUpperCase().slice(-6)}`;
-    setPaymentRef(ref);
-    saveDraft(ref);
+    saveDraft();
     setStep(2);
   };
 
@@ -310,6 +271,11 @@ export default function TournamentRegistrationPage() {
   // ── Submit registration ──────────────────────────────────────────────────
   const handleRegister = async () => {
     if (!paymentScreenshot) { setError('Upload payment screenshot to continue'); return; }
+    const trimmedUtr = utrId.trim();
+    if (!trimmedUtr) { setError('Enter the UTR / Transaction ID from your UPI payment'); return; }
+    if (!/^\d{12}$/.test(trimmedUtr) && !/^[A-Z0-9]{10,25}$/i.test(trimmedUtr)) {
+      setError('Enter a valid UTR ID (12-digit number from your UPI app)'); return;
+    }
     setSubmitting(true);
     setError('');
     try {
@@ -321,6 +287,7 @@ export default function TournamentRegistrationPage() {
         if (partnerInfo[catId]) partnerEmails[catId] = partnerInfo[catId].email;
       });
       formData.append('partnerEmails', JSON.stringify(partnerEmails));
+      formData.append('utrId', trimmedUtr);
       formData.append('paymentScreenshot', paymentScreenshot);
       await registrationAPI.createRegistrationWithScreenshot(formData);
       clearDraft();
@@ -395,21 +362,6 @@ export default function TournamentRegistrationPage() {
   // ── Render: main ─────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen pb-12" style={{ background: BRAND.bg }}>
-
-      {/* ── UPI Copied Toast ──────────────────────────────────────────────── */}
-      {upiCopiedToast && (
-        <div
-          className="fixed top-5 left-1/2 z-50 px-5 py-2.5 rounded-2xl text-sm font-black shadow-lg"
-          style={{
-            transform: 'translateX(-50%)',
-            background: '#00ff88',
-            color: '#07071a',
-            animation: 'fadeInDown 0.2s ease',
-          }}
-        >
-          ✓ UPI ID copied — paste in your UPI app
-        </div>
-      )}
 
       {/* ── Header ───────────────────────────────────────────────────────── */}
       <div className="px-4 pt-6 pb-4">
@@ -642,11 +594,6 @@ export default function TournamentRegistrationPage() {
               </div>
             </div>
 
-            {/* ── Transaction Reference ─────────────────────────────────── */}
-            {paymentRef && (
-              <CopyField label="Transaction Reference (share with admin if asked)" value={paymentRef} mono />
-            )}
-
             {/* ── Pay Using ─────────────────────────────────────────────── */}
             {!upiId && !qrUrl ? (
               <div className="rounded-2xl p-6 text-center"
@@ -684,49 +631,6 @@ export default function TournamentRegistrationPage() {
                       </div>
                     )}
 
-                    {/* App buttons */}
-                    {upiId && (
-                      <>
-                        <div className="pt-1">
-                          <p className="text-xs font-bold mb-2" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                            Open UPI app (copies UPI ID automatically)
-                          </p>
-                          <div className="grid grid-cols-4 gap-2">
-                            <UpiAppButton
-                              label="GPay"
-                              emoji="🟢"
-                              scheme={`tez://upi/pay?pa=${upiId}&pn=${encodeURIComponent(accountHolder)}&am=${total.toFixed(2)}&cu=INR&tn=${paymentRef}`}
-                              upiId={upiId}
-                              onCopied={showUpiCopied}
-                            />
-                            <UpiAppButton
-                              label="PhonePe"
-                              emoji="🟣"
-                              scheme={`phonepe://pay?transactionId=${paymentRef}&amount=${total.toFixed(2)}&upiId=${upiId}&purpose=p2p`}
-                              upiId={upiId}
-                              onCopied={showUpiCopied}
-                            />
-                            <UpiAppButton
-                              label="Paytm"
-                              emoji="🔵"
-                              scheme={`paytmmp://pay?pa=${upiId}&pn=${encodeURIComponent(accountHolder)}&am=${total.toFixed(2)}&cu=INR&tn=${paymentRef}`}
-                              upiId={upiId}
-                              onCopied={showUpiCopied}
-                            />
-                            <UpiAppButton
-                              label="BHIM"
-                              emoji="🇮🇳"
-                              scheme={`bhim://pay?pa=${upiId}&pn=${encodeURIComponent(accountHolder)}&am=${total.toFixed(2)}&cu=INR&tn=${paymentRef}`}
-                              upiId={upiId}
-                              onCopied={showUpiCopied}
-                            />
-                          </div>
-                        </div>
-                        <p className="text-xs text-center" style={{ color: 'rgba(255,255,255,0.3)' }}>
-                          UPI ID is copied to clipboard when you tap any app button
-                        </p>
-                      </>
-                    )}
                   </div>
                 </div>
 
@@ -767,11 +671,12 @@ export default function TournamentRegistrationPage() {
                     How to pay
                   </p>
                   {[
-                    `Tap an app button above — UPI ID auto-copies`,
-                    `OR scan the QR code with your camera app`,
-                    `Send exactly ₹${total} — use the copied UPI ID`,
-                    `Take a screenshot of the payment success screen`,
-                    `Come back here and upload the screenshot below`,
+                    `Open any UPI app (GPay, PhonePe, Paytm, BHIM, etc.)`,
+                    `Go to Send Money → paste the UPI ID above`,
+                    `Enter exactly ₹${total} and send`,
+                    `On the payment success screen, note the UTR / Transaction ID (12-digit number)`,
+                    `Take a screenshot of the success screen`,
+                    `Enter the UTR ID and upload the screenshot below`,
                     `Admin verifies and confirms your registration`,
                   ].map((step, i) => (
                     <div key={i} className="flex items-start gap-3 mt-2.5">
@@ -787,6 +692,31 @@ export default function TournamentRegistrationPage() {
                 </div>
               </>
             )}
+
+            {/* ── UTR Input ─────────────────────────────────────────────── */}
+            <div className="rounded-2xl p-4"
+              style={{ background: BRAND.card, border: `1px solid ${BRAND.cardBorder}` }}>
+              <label className="block text-sm font-black text-white mb-1">
+                UTR / Transaction ID <span style={{ color: '#f87171' }}>*</span>
+              </label>
+              <p className="text-xs mb-3" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                Find this in your UPI app after payment — it's the 12-digit number on the success screen or in SMS
+              </p>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={utrId}
+                onChange={e => setUtrId(e.target.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase())}
+                placeholder="e.g. 123456789012"
+                maxLength={25}
+                className="w-full px-4 py-3 rounded-xl text-white font-mono text-sm"
+                style={{
+                  background: 'rgba(0,0,0,0.3)',
+                  border: utrId.trim() ? '1.5px solid rgba(0,255,136,0.4)' : '1.5px solid rgba(255,255,255,0.15)',
+                  outline: 'none',
+                }}
+              />
+            </div>
 
             {/* ── Screenshot Upload ─────────────────────────────────────── */}
             <div className="rounded-2xl overflow-hidden"
@@ -855,12 +785,12 @@ export default function TournamentRegistrationPage() {
               </button>
               <button
                 onClick={handleRegister}
-                disabled={submitting || !paymentScreenshot}
+                disabled={submitting || !paymentScreenshot || !utrId.trim()}
                 className="flex-1 py-4 rounded-2xl font-black text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 style={{
-                  background: paymentScreenshot ? 'linear-gradient(135deg,#00ff88,#00ff88)' : 'rgba(255,255,255,0.08)',
-                  color: paymentScreenshot ? '#07071a' : 'rgba(255,255,255,0.4)',
-                  boxShadow: paymentScreenshot ? '0 4px 20px rgba(0,255,136,0.4)' : 'none',
+                  background: (paymentScreenshot && utrId.trim()) ? 'linear-gradient(135deg,#00ff88,#00ff88)' : 'rgba(255,255,255,0.08)',
+                  color: (paymentScreenshot && utrId.trim()) ? '#07071a' : 'rgba(255,255,255,0.4)',
+                  boxShadow: (paymentScreenshot && utrId.trim()) ? '0 4px 20px rgba(0,255,136,0.4)' : 'none',
                 }}
               >
                 {submitting ? (

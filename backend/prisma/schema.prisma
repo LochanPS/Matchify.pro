@@ -264,6 +264,7 @@ model Registration {
   razorpayPaymentId  String?
   razorpaySignature  String?
   paymentScreenshot  String?    // Screenshot of payment for organizer verification
+  utrId              String?    // UPI Transaction Reference (UTR) shared by player
   status             String     @default("pending") // pending, confirmed, cancelled, cancellation_requested
   paymentStatus      String     @default("pending") // pending, submitted, verified, rejected
   cancelledAt        DateTime?
@@ -729,7 +730,8 @@ model PaymentVerification {
   amount            Float
   paymentScreenshot String    // Cloudinary URL
   screenshotPublicId String?  // Cloudinary public ID
-  
+  utrId             String?   // UPI Transaction Reference (UTR) shared by player
+
   // Verification
   status            String    @default("pending") // pending, approved, rejected
   verifiedBy        String?   // Admin ID

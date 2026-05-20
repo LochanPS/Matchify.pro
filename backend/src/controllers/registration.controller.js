@@ -515,7 +515,7 @@ const cancelRegistration = async (req, res) => {
 // POST /api/registrations/with-screenshot - Register with payment screenshot
 const createRegistrationWithScreenshot = async (req, res) => {
   try {
-    const { tournamentId, categoryIds, partnerEmails } = req.body;
+    const { tournamentId, categoryIds, partnerEmails, utrId } = req.body;
     const userId = req.user.id;
     const screenshotFile = req.file;
 
@@ -762,6 +762,7 @@ const createRegistrationWithScreenshot = async (req, res) => {
             amountWallet: 0,
             amountRazorpay: 0,
             paymentScreenshot: screenshotUrl,
+            utrId: utrId || null,
             paymentStatus: 'submitted', // Screenshot submitted, awaiting verification
             status: 'pending', // Reset to pending
           },
@@ -800,6 +801,7 @@ const createRegistrationWithScreenshot = async (req, res) => {
             amountWallet: 0,
             amountRazorpay: 0,
             paymentScreenshot: screenshotUrl,
+            utrId: utrId || null,
             paymentStatus: 'submitted', // Screenshot submitted, awaiting verification
             status: 'pending', // Pending until organizer confirms
           },
@@ -840,6 +842,7 @@ const createRegistrationWithScreenshot = async (req, res) => {
           data: {
             amount: category.entryFee,
             paymentScreenshot: screenshotUrl,
+            utrId: utrId || null,
             status: 'pending',
             rejectionReason: null,
             verifiedBy: null,
@@ -863,6 +866,7 @@ const createRegistrationWithScreenshot = async (req, res) => {
             userId,
             amount: category.entryFee,
             paymentScreenshot: screenshotUrl,
+            utrId: utrId || null,
             status: 'pending',
           },
         });

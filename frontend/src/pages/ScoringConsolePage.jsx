@@ -85,7 +85,7 @@ const ScoringConsolePage = () => {
     try {
       setProcessing(true); setError(null);
       const data = await addPoint(matchId, player);
-      setScore(data.score || data.scoreData);
+      setScore(data.score || data.scoreData || (data.data?.scoreJson ? JSON.parse(data.data.scoreJson) : null));
       if (data.matchComplete) { setMatchComplete(true); setWinner(data.winner); setMatch(prev => ({ ...prev, status: 'COMPLETED' })); }
       setProcessing(false);
     } catch (err) { setError(getErrorMessage(err, 'Failed to add point')); setProcessing(false); }

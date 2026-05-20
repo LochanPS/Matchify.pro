@@ -321,6 +321,7 @@ router.put('/:matchId/score', authenticate, async (req, res) => {
     res.json({
       success: true,
       message: 'Match score updated successfully',
+      score,
       data: updatedMatch
     });
   } catch (error) {

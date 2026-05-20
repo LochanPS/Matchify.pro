@@ -75,7 +75,7 @@ async function checkCategoryNotCompleted(categoryId, res) {
 const generateDraw = async (req, res) => {
   try {
     const { tournamentId, categoryId } = req.params;
-    const userId = req.user.id;
+    const userId = req.user.userId || req.user.id;
 
     // Verify tournament exists and user is the organizer
     const tournament = await prisma.tournament.findUnique({
@@ -970,7 +970,7 @@ const getDraw = async (req, res) => {
 const deleteDraw = async (req, res) => {
   try {
     const { tournamentId, categoryId } = req.params;
-    const userId = req.user.id;
+    const userId = req.user.userId || req.user.id;
 
     // Check if category is completed
     if (await checkCategoryNotCompleted(categoryId, res)) {
@@ -1037,7 +1037,7 @@ const deleteDraw = async (req, res) => {
 const restartDraw = async (req, res) => {
   try {
     const { tournamentId, categoryId } = req.params;
-    const userId = req.user.id;
+    const userId = req.user.userId || req.user.id;
 
     console.log('🔄 Restarting draw for tournament:', tournamentId, 'category:', categoryId);
 
@@ -1316,7 +1316,7 @@ const getCategoryPlayers = async (req, res) => {
  */
 const assignPlayersToDraw = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.userId || req.user.id;
     const { tournamentId, categoryId, assignments } = req.body;
     // assignments: [{ slot: 1, playerId: 'xxx', playerName: 'John' }, ...]
 
@@ -2007,7 +2007,7 @@ function generateEmptyKnockoutBracket(size) {
  */
 const bulkAssignAllPlayers = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.userId || req.user.id;
     const { tournamentId, categoryId } = req.body;
 
     // Verify tournament and ownership
@@ -2285,7 +2285,7 @@ const bulkAssignAllPlayers = async (req, res) => {
  */
 const shuffleAssignedPlayers = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.userId || req.user.id;
     const { tournamentId, categoryId } = req.body;
 
     // Verify tournament and ownership
@@ -2584,7 +2584,7 @@ const arrangeKnockoutMatchups = async (req, res) => {
   try {
     const { tournamentId, categoryId } = req.params;
     const { knockoutSlots } = req.body;
-    const userId = req.user.id;
+    const userId = req.user.userId || req.user.id;
 
     console.log('🎯 Arranging knockout matchups for', knockoutSlots.length, 'slots');
 
@@ -2903,7 +2903,7 @@ const continueToKnockout = async (req, res) => {
   try {
     const { tournamentId, categoryId } = req.params;
     const { knockoutDrawSize, selectedPlayerIds } = req.body;
-    const userId = req.user.id;
+    const userId = req.user.userId || req.user.id;
 
     console.log('🎯 Continue to Knockout - Creating knockout bracket...');
     console.log(`   Draw Size: ${knockoutDrawSize}`);

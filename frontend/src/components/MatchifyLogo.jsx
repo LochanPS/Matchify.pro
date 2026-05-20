@@ -1,7 +1,6 @@
 /**
- * MatchifyLogo — Matchify.pro PNG logo
+ * MatchifyLogo — Matchify.pro PNG logo (transparent background)
  * Aspect ratio: ~2.32:1 (landscape)
- * mix-blend-mode:screen → dark bg invisible on dark navbars, teal logo pops.
  *
  * Props:
  *   size       {number}  — height in px (default 40)
@@ -21,8 +20,7 @@ export default function MatchifyLogo({
     display: 'block',
     objectFit: 'contain',
     flexShrink: 0,
-    mixBlendMode: 'screen',
-    filter: 'brightness(1.35) contrast(1.1) saturate(1.3) drop-shadow(0 0 8px rgba(0,220,180,0.45))',
+    filter: 'drop-shadow(0 0 10px rgba(0,220,180,0.5)) brightness(1.1)',
   };
 
   return (

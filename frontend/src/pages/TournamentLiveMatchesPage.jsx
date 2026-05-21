@@ -221,6 +221,21 @@ function MatchCard({ match, isCompleted }) {
   );
 }
 
+/* ─── smart diff: only update state if data actually changed ─── */
+function diffAndUpdate(setter, newItems) {
+  setter(prev => {
+    if (prev.length !== newItems.length) return newItems;
+    const changed = newItems.some((m, i) => {
+      const p = prev[i];
+      if (!p || p.id !== m.id) return true;
+      // Compare score + status only — these are the things that change
+      return p.status !== m.status ||
+        JSON.stringify(p.scoreData) !== JSON.stringify(m.scoreData);
+    });
+    return changed ? newItems : prev; // return prev = no re-render
+  });
+}
+
 /* ─── main page ──────────────────────────────────────────────── */
 export default function TournamentLiveMatchesPage() {
   const { id } = useParams();
@@ -234,23 +249,33 @@ export default function TournamentLiveMatchesPage() {
   const [error, setError]               = useState('');
   const [lastRefresh, setLastRefresh]   = useState(null);
 
+  // Ref so socket effects don't need liveMatches as dependency
+  const liveMatchesRef = useRef([]);
+  useEffect(() => { liveMatchesRef.current = liveMatches; }, [liveMatches]);
+  // Stable ref for fetchAll so interval never restarts
+  const fetchAllRef = useRef(null);
+
   const fetchAll = useCallback(async (showSpinner = false) => {
     try {
       if (showSpinner) setLoading(true);
-      setError('');
       const [liveRes, doneRes] = await Promise.all([
         getTournamentLiveMatches(id),
         getTournamentCompletedMatches(id),
       ]);
-      setLiveMatches(liveRes.matches || []);
-      setDoneMatches(doneRes.matches || []);
+      diffAndUpdate(setLiveMatches, liveRes.matches || []);
+      diffAndUpdate(setDoneMatches, doneRes.matches || []);
       setLastRefresh(new Date());
+      // Only clear error if one existed — avoids pointless re-render
+      setError(prev => prev ? '' : prev);
     } catch {
       setError('Failed to load matches. Pull down to retry.');
     } finally {
       if (showSpinner) setLoading(false);
     }
   }, [id]);
+
+  // Keep ref in sync with latest fetchAll
+  useEffect(() => { fetchAllRef.current = fetchAll; }, [fetchAll]);
 
   /* initial fetch — show spinner only on first load */
   useEffect(() => { fetchAll(true); }, [fetchAll]);
@@ -260,8 +285,8 @@ export default function TournamentLiveMatchesPage() {
     if (!socket) return;
     socket.emit('join-tournament', id);
 
-    const onMatchStarted = () => fetchAll(false);
-    const onMatchEnded   = () => fetchAll(false);
+    const onMatchStarted = () => fetchAllRef.current?.(false);
+    const onMatchEnded   = () => fetchAllRef.current?.(false);
 
     socket.on('match-started', onMatchStarted);
     socket.on('match-ended',   onMatchEnded);
@@ -271,13 +296,11 @@ export default function TournamentLiveMatchesPage() {
       socket.off('match-started', onMatchStarted);
       socket.off('match-ended',   onMatchEnded);
     };
-  }, [socket, id, fetchAll]);
+  }, [socket, id]); // no fetchAll dep — uses ref
 
-  /* socket: listen for score updates on live matches */
+  /* socket: score updates — stable, never re-registers on poll */
   useEffect(() => {
-    if (!socket || !liveMatches.length) return;
-
-    liveMatches.forEach(m => socket.emit('join-match', m.id));
+    if (!socket) return;
 
     const onScoreUpdate = ({ matchId, score }) => {
       setLiveMatches(prev => prev.map(m =>
@@ -285,18 +308,35 @@ export default function TournamentLiveMatchesPage() {
       ));
     };
     socket.on('score-update', onScoreUpdate);
+    return () => socket.off('score-update', onScoreUpdate);
+  }, [socket]); // stable — no liveMatches dep
 
-    return () => {
-      liveMatches.forEach(m => socket.emit('leave-match', m.id));
-      socket.off('score-update', onScoreUpdate);
-    };
+  /* join/leave match rooms only when set of IDs actually changes */
+  const joinedMatchIds = useRef(new Set());
+  useEffect(() => {
+    if (!socket) return;
+    const newIds = new Set(liveMatches.map(m => m.id));
+    // Join new matches
+    newIds.forEach(mid => {
+      if (!joinedMatchIds.current.has(mid)) {
+        socket.emit('join-match', mid);
+        joinedMatchIds.current.add(mid);
+      }
+    });
+    // Leave removed matches
+    joinedMatchIds.current.forEach(mid => {
+      if (!newIds.has(mid)) {
+        socket.emit('leave-match', mid);
+        joinedMatchIds.current.delete(mid);
+      }
+    });
   }, [socket, liveMatches]);
 
-  /* poll every 4s — socket disabled in production (Vercel serverless) */
+  /* poll every 4s — uses ref so interval never restarts */
   useEffect(() => {
-    const t = setInterval(() => fetchAll(false), 4000);
+    const t = setInterval(() => fetchAllRef.current?.(false), 4000);
     return () => clearInterval(t);
-  }, [fetchAll]);
+  }, []); // empty deps — starts once, never restarts
 
   const activeList = tab === 'live' ? liveMatches : doneMatches;
 

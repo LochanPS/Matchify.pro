@@ -9,15 +9,20 @@
  *   disabled   – disable interactions while parent is saving
  */
 
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useState, useCallback, useEffect } from 'react';
 import { Trophy } from 'lucide-react';
 
 const THRESHOLD = 0.78; // 78% of track = confirm
 
 export default function SlideToConfirm({ label, onConfirm, color = '#f59e0b', disabled = false }) {
   const trackRef  = useRef(null);
-  const [pct, setPct]           = useState(0);     // 0–1
-  const [dragging, setDragging] = useState(false);
+  const handleRef = useRef(null);
+  // draggingRef mirrors dragging state so the imperative touchmove handler
+  // never reads a stale closure value.
+  const draggingRef = useRef(false);
+
+  const [pct, setPct]             = useState(0);     // 0–1
+  const [dragging, setDragging]   = useState(false);
   const [confirmed, setConfirmed] = useState(false);
   const startX = useRef(0);
 
@@ -35,16 +40,18 @@ export default function SlideToConfirm({ label, onConfirm, color = '#f59e0b', di
   const onStart = (clientX) => {
     if (disabled || confirmed) return;
     startX.current = clientX;
+    draggingRef.current = true;
     setDragging(true);
   };
 
-  const onMove = (clientX) => {
-    if (!dragging) return;
+  const onMove = useCallback((clientX) => {
+    if (!draggingRef.current) return;
     setPct(calcPct(clientX));
-  };
+  }, [calcPct]);
 
   const onEnd = async () => {
-    if (!dragging) return;
+    if (!draggingRef.current) return;
+    draggingRef.current = false;
     setDragging(false);
     if (pct >= THRESHOLD) {
       setConfirmed(true);
@@ -61,10 +68,25 @@ export default function SlideToConfirm({ label, onConfirm, color = '#f59e0b', di
   const onMouseMove = (e) => onMove(e.clientX);
   const onMouseUp   = () => onEnd();
 
-  // ── touch events ──────────────────────────────────────────────────────────
+  // ── touch start / end as React props (no preventDefault needed) ───────────
   const onTouchStart = (e) => onStart(e.touches[0].clientX);
-  const onTouchMove  = (e) => { e.preventDefault(); onMove(e.touches[0].clientX); };
   const onTouchEnd   = () => onEnd();
+
+  // ── touchmove: must use { passive: false } to allow e.preventDefault() ────
+  // React 17+ registers all touch handlers as passive, so calling preventDefault
+  // inside a React onTouchMove prop triggers a browser warning and doesn't work.
+  // Solution: attach the listener imperatively via useEffect.
+  useEffect(() => {
+    const el = handleRef.current;
+    if (!el) return;
+    const touchMoveHandler = (e) => {
+      if (!draggingRef.current) return;
+      e.preventDefault(); // prevents page scroll while sliding
+      onMove(e.touches[0].clientX);
+    };
+    el.addEventListener('touchmove', touchMoveHandler, { passive: false });
+    return () => el.removeEventListener('touchmove', touchMoveHandler);
+  }, [onMove]);
 
   const trackW = '100%';
   const fillPct = `${Math.round(pct * 100)}%`;
@@ -124,11 +146,10 @@ export default function SlideToConfirm({ label, onConfirm, color = '#f59e0b', di
         {confirmed ? '✓ Confirmed!' : label}
       </span>
 
-      {/* handle */}
+      {/* handle — touchmove attached imperatively (passive:false) */}
       <div
         onMouseDown={onMouseDown}
         onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
         style={{
           position: 'absolute',
@@ -144,16 +165,13 @@ export default function SlideToConfirm({ label, onConfirm, color = '#f59e0b', di
           alignItems: 'center',
           justifyContent: 'center',
           transform: `translateX(calc(${fillPct} * (var(--tw, 1))))`,
-          // Use inline calc relative to track width via the pct value
-          // We shift the handle by (pct * (trackWidth - handleWidth))
-          // Since we can't read trackWidth in CSS easily, we override transform:
           transition,
           cursor: disabled ? 'not-allowed' : 'grab',
           boxShadow: `0 2px 12px ${color}55`,
           zIndex: 2,
         }}
-        // Override transform with exact pixel value via ref
         ref={el => {
+          handleRef.current = el;
           if (!el) return;
           const trackWidth = trackRef.current?.getBoundingClientRect().width || 300;
           const maxShift = trackWidth - handleWidth;

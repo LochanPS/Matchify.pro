@@ -627,6 +627,8 @@ const endMatchHandler = async (req, res) => {
     // match completed but the bracket not advanced (or vice versa).
     const isFinal = !parentMatch && match.round === 1 && match.stage !== 'GROUP';
 
+    // timeout:30000 — prevents P2028 "Unable to start a transaction in the given time"
+    // Default Prisma transaction timeout is 5s which stalls under pool pressure
     const updatedMatch = await prisma.$transaction(async (tx) => {
       const completed = await tx.match.update({
         where: { id: matchId },
@@ -655,7 +657,7 @@ const endMatchHandler = async (req, res) => {
       }
 
       return completed;
-    });
+    }, { timeout: 30000 });
 
     // ── 6. RESPOND TO CLIENT — everything below is non-critical ───────────────
     // Broadcast match completion to live spectators

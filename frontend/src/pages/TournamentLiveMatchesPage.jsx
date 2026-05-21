@@ -346,8 +346,13 @@ export default function TournamentLiveMatchesPage() {
   const fetchAllRef = useRef(null);
   // Track whether initial load succeeded — suppress error banner on background poll failures
   const hasDataRef = useRef(false);
+  // Prevent overlapping requests — if a fetch is in-flight, skip new poll ticks
+  // Without this, a 30s timeout means up to 10 concurrent requests pile up
+  const isFetchingRef = useRef(false);
 
   const fetchAll = useCallback(async (showSpinner = false) => {
+    if (isFetchingRef.current) return; // drop concurrent poll
+    isFetchingRef.current = true;
     try {
       if (showSpinner) setLoading(true);
       // Single request — fetch all matches, filter client-side.
@@ -363,6 +368,7 @@ export default function TournamentLiveMatchesPage() {
       // Show error only on initial load; suppress background poll failures
       if (!hasDataRef.current) setError('Failed to load matches — retrying…');
     } finally {
+      isFetchingRef.current = false;
       if (showSpinner) setLoading(false);
     }
   }, [id]);
@@ -425,12 +431,11 @@ export default function TournamentLiveMatchesPage() {
     });
   }, [socket, liveMatches]);
 
-  /* poll every 4s — uses ref so interval never restarts
-     If initial load failed (no data yet), retry every 3s until data arrives */
+  /* poll every 5s — uses ref so interval never restarts */
   useEffect(() => {
     const t = setInterval(() => {
       fetchAllRef.current?.(false);
-    }, hasDataRef.current ? 4000 : 3000);
+    }, 5000);
     return () => clearInterval(t);
   }, []); // empty deps — starts once, never restarts
 

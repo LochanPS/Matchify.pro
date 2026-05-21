@@ -2,8 +2,9 @@
  * MatchifyLogo — Matchify.pro PNG logo
  * Aspect ratio: ~1.092:1 (1083×992)
  *
- * Logo background color is #070D1B — matches the app's dark background (#07071a).
- * No background removal needed; navbar uses the same dark color so logo blends in naturally.
+ * mix-blend-mode: screen makes dark background pixels invisible regardless of
+ * what color sits behind the logo (purple navbar, dark hero, white, anything).
+ * Only the bright elements — teal shield, M, sparkles, text — remain visible.
  *
  * Props:
  *   size       {number}  — height in px (default 40)
@@ -17,14 +18,6 @@ export default function MatchifyLogo({
 }) {
   const RATIO = 1.092; // 1083 / 992
 
-  const imgStyle = {
-    height: `${size}px`,
-    width: `${Math.round(size * RATIO)}px`,
-    display: 'block',
-    objectFit: 'contain',
-    flexShrink: 0,
-  };
-
   return (
     <span
       className={className}
@@ -33,8 +26,16 @@ export default function MatchifyLogo({
       <img
         src="/logo.png"
         alt="Matchify.pro"
-        style={imgStyle}
         draggable={false}
+        style={{
+          height: `${size}px`,
+          width: `${Math.round(size * RATIO)}px`,
+          display: 'block',
+          objectFit: 'contain',
+          flexShrink: 0,
+          mixBlendMode: 'screen',
+          filter: 'brightness(1.15) drop-shadow(0 0 8px rgba(0,212,255,0.4))',
+        }}
       />
     </span>
   );

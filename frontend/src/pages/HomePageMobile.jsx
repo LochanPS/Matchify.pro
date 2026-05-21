@@ -307,7 +307,7 @@ const HomePageMobile = () => {
               }}
             />
             <div className="relative">
-              <MatchifyLogo size={90} variant="full" />
+              <MatchifyLogo size={110} variant="full" />
             </div>
           </div>
 

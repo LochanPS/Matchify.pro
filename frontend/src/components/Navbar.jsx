@@ -144,7 +144,7 @@ const Navbar = () => {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-8">
               <Link to="/admin-dashboard" className="hover:opacity-90 transition-opacity ml-2">
-                <MatchifyLogo size={64} variant="full" />
+                <MatchifyLogo size={70} variant="full" />
               </Link>
               <nav className="hidden md:flex items-center gap-1">
                 <NavLink to="/admin-dashboard" active={location.pathname === '/admin-dashboard'}><LayoutDashboard className="w-4 h-4" />Dashboard</NavLink>

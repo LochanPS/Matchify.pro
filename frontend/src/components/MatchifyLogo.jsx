@@ -1,12 +1,17 @@
 /**
  * MatchifyLogo — Matchify.pro PNG logo
- * Aspect ratio: ~1.092:1 (1083×992)
+ * Full image: 1083×992px
  *
- * The logo PNG has teal sparkle particles at the top corners which create a
- * visible "card border" when displayed small. We clip 12% from top and 3%
- * from bottom (sparkles live there; shield+text are vertically centered),
- * then use mix-blend-mode:screen so the remaining dark background dissolves
- * into whatever background sits behind the logo.
+ * Key finding from pixel sampling:
+ *   - Logo content (shield + sparkles + text) occupies the TOP 56% of the image
+ *   - Bottom 44% is pure dark empty space → causes the visible "card/box" look
+ *   - Content starts at y=0, ends at y≈558
+ *
+ * Fix:
+ *   1. overflow:hidden container shows only top 62% (content + small padding)
+ *      — eliminates the large dark empty bottom that made it look like a box
+ *   2. mix-blend-mode:screen — dark pixels between logo elements become
+ *      transparent (show background through) on any background color
  *
  * Props:
  *   size       {number}  — visible height in px (default 40)
@@ -18,31 +23,26 @@ export default function MatchifyLogo({
   variant = 'full',
   className = '',
 }) {
-  const RATIO = 1.092; // full-image width / height  (1083 / 992)
+  const RATIO        = 1.092;  // full image width/height (1083/992)
+  const SHOW_FRAC    = 0.62;   // show top 62% — content ends at 56%, small padding added
 
-  // Clip percentages — removes corner sparkles, keeps shield + text
-  const CLIP_TOP    = 0.12;
-  const CLIP_BOTTOM = 0.03;
-
-  // Full render height before clipping
-  const fullH = Math.round(size / (1 - CLIP_TOP - CLIP_BOTTOM));
+  // Full render dimensions
+  const fullH = Math.round(size / SHOW_FRAC);
   const fullW = Math.round(fullH * RATIO);
 
-  // Visible window
+  // Visible window — same width as full, cropped height
   const visH = size;
   const visW = fullW;
-
-  const offsetTop = Math.round(fullH * CLIP_TOP);
 
   return (
     <span
       className={className}
       style={{
-        display: 'inline-flex',
+        display:    'inline-flex',
         alignItems: 'center',
-        overflow: 'hidden',
-        height: `${visH}px`,
-        width: `${visW}px`,
+        overflow:   'hidden',
+        height:     `${visH}px`,
+        width:      `${visW}px`,
         flexShrink: 0,
       }}
     >
@@ -51,13 +51,13 @@ export default function MatchifyLogo({
         alt="Matchify.pro"
         draggable={false}
         style={{
-          height: `${fullH}px`,
-          width: `${fullW}px`,
-          display: 'block',
-          flexShrink: 0,
-          marginTop: `-${offsetTop}px`,
+          height:       `${fullH}px`,
+          width:        `${fullW}px`,
+          display:      'block',
+          flexShrink:   0,
+          marginTop:    0,
           mixBlendMode: 'screen',
-          filter: 'brightness(1.1)',
+          filter:       'brightness(1.1)',
         }}
       />
     </span>

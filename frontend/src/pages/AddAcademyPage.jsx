@@ -9,6 +9,7 @@ import {
   ShoppingBag, HeartPulse, Trophy
 } from 'lucide-react';
 import api from '../utils/api';
+import { fetchUpload } from '../utils/fetchUpload';
 
 const B = {
   bg: '#07071a',
@@ -283,7 +284,7 @@ export default function AddAcademyPage() {
       });
       photos.forEach(p => fd.append('photos', p.file));
       fd.append('paymentScreenshot', paymentScreenshot.file);
-      await api.post('/academies', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+      await fetchUpload('/academies', fd);
       clearDraft();
       setStep(4);
     } catch (err) {

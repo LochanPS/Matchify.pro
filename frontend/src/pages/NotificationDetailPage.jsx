@@ -4,6 +4,7 @@ import { ArrowLeft, ExternalLink, Calendar, Clock, Upload, CheckCircle, Loader }
 import { useNotifications } from '../contexts/NotificationContext';
 import { format } from 'date-fns';
 import api from '../utils/api';
+import { fetchUpload } from '../utils/fetchUpload';
 import { toast } from 'react-hot-toast';
 
 // Deterministic particles — no Math.random in render
@@ -51,7 +52,7 @@ const RefundDetailsForm = ({ registrationId, refundAmount, tournamentName, rejec
       submitData.append('upiId', formData.upiId.trim());
       submitData.append('accountName', formData.accountName.trim());
       if (formData.qrCode) submitData.append('refundQrCode', formData.qrCode);
-      await api.post(`/registrations/${registrationId}/submit-refund-details`, submitData, { headers: { 'Content-Type': 'multipart/form-data' } });
+      await fetchUpload(`/registrations/${registrationId}/submit-refund-details`, submitData);
       toast.success('Refund details submitted successfully!');
       onSuccess();
     } catch (error) {

@@ -5,6 +5,7 @@ import {
   ChevronRight, Upload, CheckCircle, X, Check, AlertCircle
 } from 'lucide-react';
 import api from '../utils/api';
+import { fetchUpload } from '../utils/fetchUpload';
 
 const B = {
   bg: '#0a0a0f', card: '#12121a', card2: '#1a1a26',
@@ -195,9 +196,7 @@ export default function CourtBookingPage() {
       if (notes) formData.append('notes', notes);
       formData.append('paymentScreenshot', screenshot);
 
-      await api.post('/court-bookings', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      await fetchUpload('/court-bookings', formData);
 
       setBookingDone(true);
     } catch (err) {

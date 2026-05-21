@@ -70,11 +70,8 @@ export const rejectRefund = async (registrationId, reason) => {
 };
 
 // Mark refund as completed (with payment screenshot proof)
+// Uses native fetch — axios default Content-Type: application/json breaks multer.
 export const completeRefund = async (registrationId, formData) => {
-  const response = await api.put(`/organizer/registrations/${registrationId}/complete-refund`, formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  });
-  return response.data;
+  const { fetchUpload } = await import('../utils/fetchUpload');
+  return fetchUpload(`/organizer/registrations/${registrationId}/complete-refund`, formData, { method: 'PUT' });
 };

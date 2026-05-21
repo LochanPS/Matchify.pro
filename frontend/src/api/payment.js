@@ -1,4 +1,5 @@
 import api from '../utils/api';
+import { fetchUpload } from '../utils/fetchUpload';
 
 // Payment Settings
 export const getPaymentSettings = async () => {
@@ -12,13 +13,9 @@ export const getPublicPaymentSettings = async () => {
   return response.data;
 };
 
+// Uses native fetch — axios default Content-Type: application/json breaks multer.
 export const updatePaymentSettings = async (formData) => {
-  const response = await api.put('/admin/payment-settings', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  });
-  return response.data;
+  return fetchUpload('/admin/payment-settings', formData, { method: 'PUT' });
 };
 
 // Payment Verifications

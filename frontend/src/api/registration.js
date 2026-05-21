@@ -1,4 +1,5 @@
 import api from '../utils/api';
+import { fetchUpload } from '../utils/fetchUpload';
 
 export const registrationAPI = {
   createRegistration: async (registrationData) => {
@@ -6,11 +7,10 @@ export const registrationAPI = {
     return response.data;
   },
 
+  // Uses native fetch — axios default Content-Type: application/json breaks multer.
+  // See utils/fetchUpload.js for full explanation.
   createRegistrationWithScreenshot: async (formData) => {
-    const response = await api.post('/registrations/with-screenshot', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
-    return response.data;
+    return fetchUpload('/registrations/with-screenshot', formData);
   },
 
   getMyRegistrations: async (status = null) => {
@@ -24,11 +24,9 @@ export const registrationAPI = {
     return response.data;
   },
 
+  // Uses native fetch for the same reason as createRegistrationWithScreenshot.
   cancelRegistrationWithDetails: async (id, formData) => {
-    const response = await api.post(`/registrations/${id}/cancel`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    });
-    return response.data;
+    return fetchUpload(`/registrations/${id}/cancel`, formData);
   },
 
   verifyPayment: async (id, status) => {

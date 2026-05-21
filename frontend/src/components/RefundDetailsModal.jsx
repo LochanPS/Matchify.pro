@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { X, Upload, CheckCircle, Loader, AlertTriangle } from 'lucide-react';
 import api from '../utils/api';
+import { fetchUpload } from '../utils/fetchUpload';
 import { toast } from 'react-hot-toast';
 
 export default function RefundDetailsModal({ registration, onClose, onSuccess }) {
@@ -54,11 +55,7 @@ export default function RefundDetailsModal({ registration, onClose, onSuccess })
         submitData.append('refundQrCode', formData.qrCode);
       }
 
-      await api.post(`/registrations/${registration.id}/submit-refund-details`, submitData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      await fetchUpload(`/registrations/${registration.id}/submit-refund-details`, submitData);
 
       toast.success('Refund details submitted successfully!');
       onSuccess();

@@ -1,4 +1,5 @@
 import api from '../utils/api';
+import { fetchUpload } from '../utils/fetchUpload';
 
 export const profileAPI = {
   // Get own profile
@@ -14,16 +15,11 @@ export const profileAPI = {
   },
 
   // Upload profile photo
+  // Uses native fetch — axios default Content-Type: application/json breaks multer.
   uploadPhoto: async (file) => {
     const formData = new FormData();
     formData.append('photo', file);
-    
-    const response = await api.post('/profile/photo', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-    return response.data;
+    return fetchUpload('/profile/photo', formData);
   },
 
   // Delete profile photo

@@ -1,6 +1,6 @@
 /**
- * MatchifyLogo — Matchify.pro PNG logo (transparent background)
- * Aspect ratio: ~2.32:1 (landscape)
+ * MatchifyLogo — Matchify.pro PNG logo
+ * Aspect ratio: ~1.092:1 (1083×992)
  *
  * Props:
  *   size       {number}  — height in px (default 40)
@@ -12,7 +12,7 @@ export default function MatchifyLogo({
   variant = 'full',
   className = '',
 }) {
-  const RATIO = 2.318; // width / height of cropped logo.png
+  const RATIO = 1.092; // width / height — 1083 / 992
 
   const imgStyle = {
     height: `${size}px`,
@@ -20,7 +20,7 @@ export default function MatchifyLogo({
     display: 'block',
     objectFit: 'contain',
     flexShrink: 0,
-    filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.9)) drop-shadow(0 0 16px rgba(255,255,255,0.15)) brightness(1.25)',
+    filter: 'drop-shadow(0 2px 12px rgba(0,212,255,0.4))',
   };
 
   return (

@@ -4,6 +4,7 @@ import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { EyeIcon, EyeSlashIcon, EnvelopeIcon, LockClosedIcon, ArrowRightIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import { Zap, Trophy, Users, MapPin, Ban, AlertTriangle } from 'lucide-react';
+import MatchifyLogo from '../components/MatchifyLogo';
 
 // Fixed star positions — no random on re-render
 const STARS = [
@@ -140,40 +141,7 @@ const LoginPage = () => {
         <div className="relative z-10 flex flex-col items-center text-center">
           {/* Logo */}
           <div className="mb-6 animate-float">
-            <svg width="96" height="96" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <linearGradient id="ls-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#00c853" />
-                  <stop offset="100%" stopColor="#00a844" />
-                </linearGradient>
-                <filter id="ls-glow" x="-50%" y="-50%" width="200%" height="200%">
-                  <feGaussianBlur stdDeviation="2" result="blur" />
-                  <feFlood floodColor="#00c853" floodOpacity="0.3" />
-                  <feComposite in2="blur" operator="in" />
-                  <feMerge>
-                    <feMergeNode />
-                    <feMergeNode in="SourceGraphic" />
-                  </feMerge>
-                </filter>
-              </defs>
-              <path d="M 20 50 Q 35 25, 50 20 Q 65 25, 80 50" fill="none" stroke="url(#ls-grad)" strokeWidth="3" strokeLinecap="round" opacity="0.6" />
-              <g filter="url(#ls-glow)">
-                <line x1="50" y1="65" x2="35" y2="30" stroke="#00c853" strokeWidth="2" strokeLinecap="round" />
-                <line x1="50" y1="65" x2="42" y2="25" stroke="#00c853" strokeWidth="2" strokeLinecap="round" />
-                <line x1="50" y1="65" x2="50" y2="22" stroke="#00c853" strokeWidth="2.5" strokeLinecap="round" />
-                <line x1="50" y1="65" x2="58" y2="25" stroke="#00c853" strokeWidth="2" strokeLinecap="round" />
-                <line x1="50" y1="65" x2="65" y2="30" stroke="#00c853" strokeWidth="2" strokeLinecap="round" />
-                <path d="M 35 30 Q 50 18, 65 30" fill="none" stroke="#00c853" strokeWidth="2.5" strokeLinecap="round" />
-                <circle cx="35" cy="30" r="2" fill="#00c853" />
-                <circle cx="42" cy="25" r="2" fill="#00c853" />
-                <circle cx="50" cy="22" r="2.5" fill="#00c853" />
-                <circle cx="58" cy="25" r="2" fill="#00c853" />
-                <circle cx="65" cy="30" r="2" fill="#00c853" />
-              </g>
-              <ellipse cx="50" cy="68" rx="12" ry="9" fill="url(#ls-grad)" filter="url(#ls-glow)" />
-              <ellipse cx="50" cy="68" rx="7" ry="5" fill="#007c35" />
-              <ellipse cx="47" cy="66" rx="3" ry="2" fill="rgba(255,255,255,0.4)" />
-            </svg>
+            <MatchifyLogo size={130} variant="full" />
           </div>
 
           <h1 className="text-5xl font-black mb-3" style={{ letterSpacing: '-0.02em' }}>
@@ -226,43 +194,7 @@ const LoginPage = () => {
           {/* Mobile logo */}
           <div className="lg:hidden text-center mb-8">
             <Link to="/" className="inline-flex flex-col items-center gap-2">
-              <svg width="56" height="56" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                  <linearGradient id="mlg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#00c853" />
-                    <stop offset="100%" stopColor="#00a844" />
-                  </linearGradient>
-                  <filter id="mlg-glow" x="-50%" y="-50%" width="200%" height="200%">
-                    <feGaussianBlur stdDeviation="2" result="blur" />
-                    <feFlood floodColor="#00c853" floodOpacity="0.3" />
-                    <feComposite in2="blur" operator="in" />
-                    <feMerge>
-                      <feMergeNode />
-                      <feMergeNode in="SourceGraphic" />
-                    </feMerge>
-                  </filter>
-                </defs>
-                <path d="M 20 50 Q 35 25, 50 20 Q 65 25, 80 50" fill="none" stroke="url(#mlg-grad)" strokeWidth="3" strokeLinecap="round" opacity="0.6" />
-                <g filter="url(#mlg-glow)">
-                  <line x1="50" y1="65" x2="35" y2="30" stroke="#00c853" strokeWidth="2" strokeLinecap="round" />
-                  <line x1="50" y1="65" x2="42" y2="25" stroke="#00c853" strokeWidth="2" strokeLinecap="round" />
-                  <line x1="50" y1="65" x2="50" y2="22" stroke="#00c853" strokeWidth="2.5" strokeLinecap="round" />
-                  <line x1="50" y1="65" x2="58" y2="25" stroke="#00c853" strokeWidth="2" strokeLinecap="round" />
-                  <line x1="50" y1="65" x2="65" y2="30" stroke="#00c853" strokeWidth="2" strokeLinecap="round" />
-                  <path d="M 35 30 Q 50 18, 65 30" fill="none" stroke="#00c853" strokeWidth="2.5" strokeLinecap="round" />
-                  <circle cx="35" cy="30" r="2" fill="#00c853" />
-                  <circle cx="42" cy="25" r="2" fill="#00c853" />
-                  <circle cx="50" cy="22" r="2.5" fill="#00c853" />
-                  <circle cx="58" cy="25" r="2" fill="#00c853" />
-                  <circle cx="65" cy="30" r="2" fill="#00c853" />
-                </g>
-                <ellipse cx="50" cy="68" rx="12" ry="9" fill="url(#mlg-grad)" filter="url(#mlg-glow)" />
-                <ellipse cx="50" cy="68" rx="7" ry="5" fill="#007c35" />
-                <ellipse cx="47" cy="66" rx="3" ry="2" fill="rgba(255,255,255,0.4)" />
-              </svg>
-              <span className="text-2xl font-black tracking-tight">
-                <span style={{ color: '#00c853', textShadow: '0 0 12px rgba(0,200,83,0.3)' }}>matchify.pro</span>
-              </span>
+              <MatchifyLogo size={80} variant="full" />
               <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>India's Premier Badminton Platform</span>
             </Link>
           </div>

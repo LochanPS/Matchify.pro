@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
+import MatchifyLogo from '../MatchifyLogo';
 
 const Sidebar = () => {
   const location = useLocation();
@@ -28,8 +29,8 @@ const Sidebar = () => {
   return (
     <div className="w-64 bg-slate-900 border-r border-slate-700 text-white min-h-screen flex flex-col">
       {/* Logo */}
-      <div className="p-6 border-b border-slate-700">
-        <h1 className="text-2xl font-bold text-white">MATCHIFY<span className="text-teal-400">.PRO</span></h1>
+      <div className="p-6 border-b border-slate-700 flex flex-col gap-1">
+        <MatchifyLogo size={44} variant="full" />
         <p className="text-sm text-gray-400 mt-1">Admin Panel</p>
       </div>
 

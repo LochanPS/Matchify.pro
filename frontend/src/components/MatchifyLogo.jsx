@@ -1,12 +1,13 @@
 /**
- * MatchifyLogo — Matchify.pro PNG logo (transparent background)
+ * MatchifyLogo — Matchify.pro PNG logo
  *
- * logo.png is 1083×992px. Background pixels have been made fully transparent.
- * Logo content (shield + sparkles + Matchify.pro text) occupies the TOP 60%
- * of the image (y=0 to y≈595). Bottom 40% is transparent empty space.
+ * logo.png is 1083×992px. Content (shield + sparkles + text) occupies TOP 60%
+ * of image height. Bottom 40% is empty dark space.
  *
- * overflow:hidden on the container clips that empty space so the element
- * height matches the visible logo height — no extra whitespace in layout.
+ * overflow:hidden clips the empty bottom space.
+ * mix-blend-mode:screen makes the dark navy background pixels merge with
+ * whatever is behind the logo (purple navbar, dark hero, etc.) so the logo
+ * appears to float without a visible box/card.
  *
  * Props:
  *   size      {number} — visible height in px (default 40)
@@ -36,10 +37,12 @@ export default function MatchifyLogo({ size = 40, className = '' }) {
         alt="Matchify.pro"
         draggable={false}
         style={{
-          height:   `${fullH}px`,
-          width:    `${fullW}px`,
-          display:  'block',
-          flexShrink: 0,
+          height:      `${fullH}px`,
+          width:       `${fullW}px`,
+          display:     'block',
+          flexShrink:  0,
+          mixBlendMode: 'screen',
+          filter:      'brightness(1.4) contrast(1.1)',
         }}
       />
     </span>

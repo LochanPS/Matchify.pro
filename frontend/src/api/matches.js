@@ -13,14 +13,23 @@ export const getTournamentMatches = async (tournamentId, filters = {}) => {
   return response.data;
 };
 
-export const getTournamentLiveMatches = async (tournamentId) => {
-  const response = await api.get(`/matches/tournament/${tournamentId}?status=IN_PROGRESS`, { _skipLogout: true, timeout: 30000 });
+// Single call — fetch ALL match statuses at once, filter client-side.
+// Previously two separate requests (IN_PROGRESS + COMPLETED) = 2 DB queries per poll.
+// Now 1 request = 1 DB query per poll. Halves connection pressure under load.
+export const getTournamentAllMatches = async (tournamentId) => {
+  const response = await api.get(`/matches/tournament/${tournamentId}`, { _skipLogout: true, timeout: 30000 });
   return response.data;
 };
 
+// Legacy aliases kept so other callers don't break, but they share one request
+export const getTournamentLiveMatches = async (tournamentId) => {
+  const data = await getTournamentAllMatches(tournamentId);
+  return { ...data, matches: (data.matches || []).filter(m => m.status === 'IN_PROGRESS') };
+};
+
 export const getTournamentCompletedMatches = async (tournamentId) => {
-  const response = await api.get(`/matches/tournament/${tournamentId}?status=COMPLETED`, { _skipLogout: true, timeout: 30000 });
-  return response.data;
+  const data = await getTournamentAllMatches(tournamentId);
+  return { ...data, matches: (data.matches || []).filter(m => m.status === 'COMPLETED') };
 };
 
 export const startMatch = async (matchId) => {

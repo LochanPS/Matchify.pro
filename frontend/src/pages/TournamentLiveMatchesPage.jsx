@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { Radio, Trophy, Clock, Users, Wifi, WifiOff } from 'lucide-react';
-import { getTournamentLiveMatches, getTournamentCompletedMatches } from '../api/matches';
+import { getTournamentAllMatches } from '../api/matches';
 import { useWebSocket } from '../contexts/WebSocketContext';
 
 /* ─── colour tokens ─────────────────────────────────────────── */
@@ -350,19 +350,18 @@ export default function TournamentLiveMatchesPage() {
   const fetchAll = useCallback(async (showSpinner = false) => {
     try {
       if (showSpinner) setLoading(true);
-      const [liveRes, doneRes] = await Promise.all([
-        getTournamentLiveMatches(id),
-        getTournamentCompletedMatches(id),
-      ]);
-      diffAndUpdate(setLiveMatches, liveRes.matches || []);
-      diffAndUpdate(setDoneMatches, doneRes.matches || []);
+      // Single request — fetch all matches, filter client-side.
+      // Halves DB queries vs two separate live/completed calls.
+      const res = await getTournamentAllMatches(id);
+      const all = res.matches || [];
+      diffAndUpdate(setLiveMatches, all.filter(m => m.status === 'IN_PROGRESS'));
+      diffAndUpdate(setDoneMatches, all.filter(m => m.status === 'COMPLETED'));
       setLastRefresh(new Date());
       hasDataRef.current = true;
-      // Only clear error if one existed — avoids pointless re-render
       setError(prev => prev ? '' : prev);
     } catch {
-      // Only show error banner on initial load — suppress background poll failures when data is already showing
-      if (!hasDataRef.current) setError('Failed to load matches. Pull down to retry.');
+      // Show error only on initial load; suppress background poll failures
+      if (!hasDataRef.current) setError('Failed to load matches — retrying…');
     } finally {
       if (showSpinner) setLoading(false);
     }
@@ -426,9 +425,12 @@ export default function TournamentLiveMatchesPage() {
     });
   }, [socket, liveMatches]);
 
-  /* poll every 4s — uses ref so interval never restarts */
+  /* poll every 4s — uses ref so interval never restarts
+     If initial load failed (no data yet), retry every 3s until data arrives */
   useEffect(() => {
-    const t = setInterval(() => fetchAllRef.current?.(false), 4000);
+    const t = setInterval(() => {
+      fetchAllRef.current?.(false);
+    }, hasDataRef.current ? 4000 : 3000);
     return () => clearInterval(t);
   }, []); // empty deps — starts once, never restarts
 

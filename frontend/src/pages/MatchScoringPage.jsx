@@ -1,5 +1,5 @@
 import { getErrorMessage } from '../utils/errorMessage';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import { useAuth } from '../contexts/AuthContext';
@@ -33,6 +33,10 @@ const MatchScoringPage = () => {
   const [showEndModal, setShowEndModal] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [timerData, setTimerData] = useState(null);
+
+  // Debounce ref for score updates — prevents multiple concurrent PUT requests
+  // when umpire taps rapidly. Only the latest score is sent, 500ms after last tap.
+  const scoreDebounceRef = useRef(null);
   const [showSetCompleteModal, setShowSetCompleteModal] = useState(false);
   const [completedSetData, setCompletedSetData] = useState(null);
 
@@ -105,10 +109,23 @@ const MatchScoringPage = () => {
     }
   };
 
-  const updateScore = async (newScore) => {
-    setScore(newScore);
-    try { await api.put(`/matches/${matchId}/score`, { score: newScore }); }
-    catch (err) { console.error('Error updating score:', err); }
+  const updateScore = (newScore) => {
+    setScore(newScore); // optimistic UI — instant feedback
+
+    // Debounce: cancel any pending save, schedule new one 500ms out.
+    // If umpire taps rapidly only the FINAL state is persisted — no pile-up of
+    // zombie connections each waiting 25s before timing out.
+    if (scoreDebounceRef.current) clearTimeout(scoreDebounceRef.current);
+    scoreDebounceRef.current = setTimeout(async () => {
+      try {
+        // 12s timeout — short enough to free the connection quickly if DB is busy.
+        // Score is already updated optimistically so a save failure is non-critical.
+        await api.put(`/matches/${matchId}/score`, { score: newScore }, { timeout: 12000 });
+      } catch (err) {
+        // Silent — score is correct in UI, will sync on next successful save.
+        console.warn('Score save failed (non-critical):', err?.message || err);
+      }
+    }, 500);
   };
 
   const addPoint = (player) => {

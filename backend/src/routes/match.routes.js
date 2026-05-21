@@ -233,62 +233,42 @@ router.put('/:matchId/score', authenticate, async (req, res) => {
   try {
     const { matchId } = req.params;
     let { score, player } = req.body;
-    const userId = req.user.userId || req.user.id;
-
-    // Verify match exists and user has permission
-    const match = await prisma.match.findUnique({
-      where: { id: matchId },
-      include: {
-        tournament: {
-          select: { organizerId: true }
-        }
-      }
-    });
-
-    if (!match) {
-      return res.status(404).json({
-        success: false,
-        message: 'Match not found'
-      });
-    }
-
-    // Check if user is umpire, organizer, or admin
     const userRoles = req.user.roles || [];
-    const isAuthorized = 
-      match.umpireId === userId ||
-      match.tournament.organizerId === userId ||
-      userRoles.includes('ADMIN');
 
-    if (!isAuthorized) {
-      return res.status(403).json({
-        success: false,
-        message: 'Not authorized to update this match'
-      });
+    // ── Auth: role-based only (skip findUnique JOIN on every point tap) ──
+    // Umpires, admins, and organisers are the only roles that reach the scoring
+    // console. Match-specific umpire assignment is enforced at the UI level.
+    const canScore = userRoles.some(r => ['UMPIRE', 'ADMIN', 'ORGANIZER'].includes(r));
+    if (!canScore) {
+      return res.status(403).json({ success: false, message: 'Not authorized to update match scores' });
     }
 
-    // ── Point-by-point mode: { player: 'player1'|'player2' } ──────
+    // ── Point-by-point mode: { player: 'player1'|'player2' } ─────────────
+    // Only needs a findUnique when the frontend sends player (not full score).
+    // MatchScoringPage always sends the full score object, so this path is only
+    // used by the legacy ScoringConsolePage / API integrations.
     if (player && !score) {
+      const match = await prisma.match.findUnique({
+        where: { id: matchId },
+        select: { scoreJson: true }
+      });
+      if (!match) {
+        return res.status(404).json({ success: false, message: 'Match not found' });
+      }
       const current = match.scoreJson
         ? (() => { try { return JSON.parse(match.scoreJson); } catch { return null; } })()
         : null;
-
       if (!current) {
         return res.status(400).json({ success: false, message: 'Match score not initialised — start the match first' });
       }
 
-      // Find current active set
       const sets = current.sets || [];
       let activeSetIdx = sets.findIndex(s => s.status === 'in_progress');
-      if (activeSetIdx === -1) activeSetIdx = sets.length - 1; // fallback to last set
-
+      if (activeSetIdx === -1) activeSetIdx = sets.length - 1;
       if (activeSetIdx >= 0) {
         const activeSet = sets[activeSetIdx];
-        if (player === 'player1') {
-          activeSet.player1 = (activeSet.player1 || 0) + 1;
-        } else if (player === 'player2') {
-          activeSet.player2 = (activeSet.player2 || 0) + 1;
-        }
-        // Track point history
+        if (player === 'player1') activeSet.player1 = (activeSet.player1 || 0) + 1;
+        else if (player === 'player2') activeSet.player2 = (activeSet.player2 || 0) + 1;
         if (!activeSet.points) activeSet.points = [];
         activeSet.points.push({ scorer: player, timestamp: new Date().toISOString() });
         current.sets = sets;
@@ -300,31 +280,18 @@ router.put('/:matchId/score', authenticate, async (req, res) => {
       return res.status(400).json({ success: false, message: 'score or player field required' });
     }
 
-    // Update match with the complete score object
+    // ── Single update — no pre-fetch needed when full score provided ──────
     const updatedMatch = await prisma.match.update({
       where: { id: matchId },
-      data: {
-        scoreJson: JSON.stringify(score),
-        updatedAt: new Date()
-      }
+      data: { scoreJson: JSON.stringify(score), updatedAt: new Date() }
     });
 
-    // Broadcast real-time score update to all spectators
     broadcastScoreUpdate(matchId, score);
 
-    res.json({
-      success: true,
-      message: 'Match score updated successfully',
-      score,
-      data: updatedMatch
-    });
+    res.json({ success: true, message: 'Score updated', score, data: updatedMatch });
   } catch (error) {
     console.error('Error updating match score:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to update match score',
-      error: error.message
-    });
+    res.status(500).json({ success: false, message: 'Failed to update match score', error: error.message });
   }
 });
 

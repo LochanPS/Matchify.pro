@@ -420,28 +420,44 @@ const BasicInfoStep = ({ formData, updateFormData, onNext }) => {
           <label className="block text-xs font-bold mb-1.5" style={{ color: 'rgba(168,85,247,0.9)' }}>
             📞 Contact Phone
           </label>
-          <input
-            type="tel"
-            value={formData.contactPhone || ''}
-            onChange={(e) => updateFormData('contactPhone', e.target.value)}
-            placeholder="+91 98765 43210"
-            className="w-full px-3 py-2.5 text-sm rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 transition-all"
-            style={{ background: 'rgba(0,0,0,0.3)', border: '1.5px solid rgba(168,85,247,0.3)' }}
-          />
+          <div className="flex overflow-hidden rounded-xl" style={{ border: '1.5px solid rgba(168,85,247,0.3)' }}>
+            <span className="flex items-center px-3 text-sm font-bold flex-shrink-0"
+              style={{ background: 'rgba(168,85,247,0.12)', borderRight: '1px solid rgba(168,85,247,0.25)', color: 'rgba(168,85,247,0.9)' }}>
+              +91
+            </span>
+            <input
+              type="tel"
+              inputMode="numeric"
+              maxLength={10}
+              value={(formData.contactPhone || '').replace(/^\+?91/, '')}
+              onChange={(e) => updateFormData('contactPhone', '+91' + e.target.value.replace(/\D/g, '').slice(0, 10))}
+              placeholder="9876543210"
+              className="flex-1 px-3 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+              style={{ background: 'rgba(0,0,0,0.3)' }}
+            />
+          </div>
         </div>
 
         <div>
           <label className="block text-xs font-bold mb-1.5" style={{ color: 'rgba(37,211,102,0.9)' }}>
             💬 WhatsApp Number
           </label>
-          <input
-            type="tel"
-            value={formData.whatsappNumber || ''}
-            onChange={(e) => updateFormData('whatsappNumber', e.target.value)}
-            placeholder="+91 98765 43210 (leave blank if same as above)"
-            className="w-full px-3 py-2.5 text-sm rounded-xl text-white placeholder-gray-500 focus:ring-2 transition-all"
-            style={{ background: 'rgba(0,0,0,0.3)', border: '1.5px solid rgba(37,211,102,0.3)' }}
-          />
+          <div className="flex overflow-hidden rounded-xl" style={{ border: '1.5px solid rgba(37,211,102,0.3)' }}>
+            <span className="flex items-center px-3 text-sm font-bold flex-shrink-0"
+              style={{ background: 'rgba(37,211,102,0.1)', borderRight: '1px solid rgba(37,211,102,0.2)', color: 'rgba(37,211,102,0.9)' }}>
+              +91
+            </span>
+            <input
+              type="tel"
+              inputMode="numeric"
+              maxLength={10}
+              value={(formData.whatsappNumber || '').replace(/^\+?91/, '')}
+              onChange={(e) => updateFormData('whatsappNumber', '+91' + e.target.value.replace(/\D/g, '').slice(0, 10))}
+              placeholder="9876543210 (leave blank if same as above)"
+              className="flex-1 px-3 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 transition-all"
+              style={{ background: 'rgba(0,0,0,0.3)' }}
+            />
+          </div>
           <p className="mt-1 text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>
             Players will see a WhatsApp button to message you directly
           </p>

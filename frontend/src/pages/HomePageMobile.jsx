@@ -149,7 +149,7 @@ const HomePageMobile = () => {
         >
           <div className="max-w-md mx-auto px-4 py-2.5 flex items-center justify-between">
             <Link to="/" className="flex items-center">
-              <MatchifyLogo size={40} variant="full" />
+              <MatchifyLogo size={52} variant="full" />
             </Link>
             <div className="flex items-center gap-2">
               <Link
@@ -307,7 +307,7 @@ const HomePageMobile = () => {
               }}
             />
             <div className="relative">
-              <MatchifyLogo size={72} variant="full" />
+              <MatchifyLogo size={120} variant="full" />
             </div>
           </div>
 

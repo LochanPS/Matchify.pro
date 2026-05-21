@@ -254,6 +254,8 @@ export default function TournamentLiveMatchesPage() {
   useEffect(() => { liveMatchesRef.current = liveMatches; }, [liveMatches]);
   // Stable ref for fetchAll so interval never restarts
   const fetchAllRef = useRef(null);
+  // Track whether initial load succeeded — suppress error banner on background poll failures
+  const hasDataRef = useRef(false);
 
   const fetchAll = useCallback(async (showSpinner = false) => {
     try {
@@ -265,10 +267,12 @@ export default function TournamentLiveMatchesPage() {
       diffAndUpdate(setLiveMatches, liveRes.matches || []);
       diffAndUpdate(setDoneMatches, doneRes.matches || []);
       setLastRefresh(new Date());
+      hasDataRef.current = true;
       // Only clear error if one existed — avoids pointless re-render
       setError(prev => prev ? '' : prev);
     } catch {
-      setError('Failed to load matches. Pull down to retry.');
+      // Only show error banner on initial load — suppress background poll failures when data is already showing
+      if (!hasDataRef.current) setError('Failed to load matches. Pull down to retry.');
     } finally {
       if (showSpinner) setLoading(false);
     }

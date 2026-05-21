@@ -1,6 +1,6 @@
 import express from 'express';
 import prisma from '../lib/prisma.js';
-import { authenticate, authorize } from '../middleware/auth.js';
+import { authenticate, authorize, optionalAuth } from '../middleware/auth.js';
 import { assignUmpire, getUmpireMatches } from '../controllers/match.controller.js';
 import { broadcastScoreUpdate, broadcastMatchStatus, broadcastMatchComplete, broadcastToTournament } from '../services/socketService.js';
 
@@ -1121,8 +1121,9 @@ router.put('/:matchId/umpire', authenticate, assignUmpire);
 router.post('/:matchId/assign-umpire', authenticate, assignUmpire);
 
 // Get tournament matches
-router.get('/tournament/:tournamentId', authenticate, async (req, res) => {
+router.get('/tournament/:tournamentId', optionalAuth, async (req, res) => {
   try {
+    await prisma.$connect();
     const { tournamentId } = req.params;
     const { categoryId, round, status } = req.query;
 

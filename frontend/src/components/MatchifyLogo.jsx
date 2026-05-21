@@ -20,7 +20,8 @@ export default function MatchifyLogo({
     display: 'block',
     objectFit: 'contain',
     flexShrink: 0,
-    filter: 'drop-shadow(0 2px 12px rgba(0,212,255,0.4))',
+    mixBlendMode: 'screen',
+    filter: 'drop-shadow(0 2px 12px rgba(0,212,255,0.5)) brightness(1.1)',
   };
 
   return (

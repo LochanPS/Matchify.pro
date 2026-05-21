@@ -154,28 +154,8 @@ const RegisterPageMobile = () => {
       >
         <div className="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2">
-            <div className="relative">
-              <div 
-                className="absolute inset-0 blur-lg opacity-60"
-                style={{ 
-                  background: 'radial-gradient(circle, rgba(0,255,136,0.6) 0%, transparent 70%)',
-                  animation: 'glow 3s ease-in-out infinite'
-                }}
-              />
-              <MatchifyLogo size={28} variant="icon" />
-            </div>
-            <span 
-              className="font-bold text-base"
-              style={{ 
-                background: 'linear-gradient(135deg, #00ff88, #00ff88)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text'
-              }}
-            >
-              matchify.pro
-            </span>
+          <Link to="/" className="flex items-center">
+            <MatchifyLogo size={44} />
           </Link>
 
           {/* Sign In Button */}
@@ -288,16 +268,19 @@ const RegisterPageMobile = () => {
         
         {/* Logo Section with Glow */}
         <div className="text-center mb-6" style={{ animation: 'fadeIn 0.6s ease-out 0.3s both' }}>
-          <div className="flex justify-center mb-3 relative" style={{ animation: 'scaleIn 0.6s ease-out 0.4s both' }}>
-            <div 
-              className="absolute inset-0 blur-2xl opacity-60"
-              style={{ 
-                background: 'radial-gradient(circle, rgba(0,255,136,0.6) 0%, transparent 70%)',
-                animation: 'glow 3s ease-in-out infinite'
-              }}
-            />
-            <div className="relative">
-              <MatchifyLogo size={72} variant="full" />
+          <div className="flex justify-center mb-3" style={{ animation: 'scaleIn 0.6s ease-out 0.4s both', position: 'relative' }}>
+            <div style={{
+              position: 'absolute',
+              top: '50%', left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: 220, height: 100,
+              background: 'radial-gradient(ellipse, rgba(0,255,136,0.45) 0%, transparent 70%)',
+              filter: 'blur(20px)',
+              animation: 'glow 3s ease-in-out infinite',
+              pointerEvents: 'none',
+            }} />
+            <div style={{ position: 'relative' }}>
+              <MatchifyLogo size={90} />
             </div>
           </div>
           <p className="text-xs text-gray-300 font-medium">India's Premier Badminton Platform</p>

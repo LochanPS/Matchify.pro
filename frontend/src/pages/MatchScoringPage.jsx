@@ -77,19 +77,29 @@ const MatchScoringPage = () => {
     try {
       setSaving(true);
       setError(null);
-      const response = await api.post(`/matches/${matchId}/start`);
+      // 45s timeout — Vercel cold start + DB queries can take up to 30s on first hit
+      const response = await api.post(`/matches/${matchId}/start`, {}, { timeout: 45000 });
       setMatch(response.data.match);
-      if (response.data.match.score) {
+      if (response.data.match?.score) {
         setScore(response.data.match.score);
         setTimerData(response.data.match.score.timer);
       }
     } catch (err) {
-      // Suppress auth errors silently — umpire/organizer assignment may not be set
-      const msg = getErrorMessage(err, '');
-      if (err.response?.status !== 403 && !msg.toLowerCase().includes('authorized')) {
-        setError(msg || 'Failed to start match');
+      const status = err?.response?.status;
+      const serverMsg = err?.response?.data?.message || err?.response?.data?.error;
+      const isTimeout = err?.isTimeout || err?.code === 'ECONNABORTED';
+
+      // Suppress auth errors silently — umpire/organizer assignment handles this
+      if (status === 403) return;
+
+      if (isTimeout) {
+        setError('Server is warming up — please tap Start Match again in a few seconds.');
+      } else if (serverMsg) {
+        setError(serverMsg);
+      } else {
+        setError('Failed to start match. Please try again.');
       }
-      console.error('Start match error:', err.response?.data);
+      console.error('Start match error:', serverMsg || err?.message || err);
     } finally {
       setSaving(false);
     }
@@ -360,11 +370,24 @@ const MatchScoringPage = () => {
 
         {/* Error */}
         {error && (
-          <div className="mb-4 flex items-start gap-2.5 px-4 py-3 rounded-xl"
+          <div className="mb-4 px-4 py-3 rounded-xl"
             style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)' }}>
-            <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: B.red }} />
-            <p className="text-xs font-semibold flex-1" style={{ color: B.red }}>{error}</p>
-            <button onClick={() => setError(null)}><X className="w-4 h-4" style={{ color: B.red }} /></button>
+            <div className="flex items-start gap-2.5">
+              <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: B.red }} />
+              <p className="text-xs font-semibold flex-1" style={{ color: B.red }}>{error}</p>
+              <button onClick={() => setError(null)}><X className="w-4 h-4" style={{ color: B.red }} /></button>
+            </div>
+            {/* Retry button for timeout / server-busy errors */}
+            {(error.includes('warming up') || error.includes('try again') || error.includes('Please try')) && !match?.status?.includes('IN_PROGRESS') && (
+              <button
+                onClick={() => { setError(null); handleStartMatch(); }}
+                disabled={saving}
+                className="mt-2 w-full py-2 rounded-lg text-xs font-bold"
+                style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.35)', color: B.red }}
+              >
+                {saving ? 'Retrying…' : '↺ Tap to Retry'}
+              </button>
+            )}
           </div>
         )}
 

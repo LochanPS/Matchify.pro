@@ -329,183 +329,123 @@ router.put('/:matchId/score', authenticate, async (req, res) => {
 });
 
 // Start match handler — shared by POST (primary) and PUT (legacy alias)
+// ── Player data helper (guest-safe) ───────────────────────────────────────
+const _getPlayerData = async (playerId) => {
+  if (!playerId) return null;
+  if (playerId.startsWith('guest-')) {
+    const reg = await prisma.registration.findUnique({
+      where: { id: playerId.replace('guest-', '') },
+      select: { id: true, guestName: true, guestEmail: true }
+    });
+    return reg ? { id: playerId, name: reg.guestName || 'Guest Player', email: reg.guestEmail || null, profilePhoto: null, isGuest: true } : null;
+  }
+  return prisma.user.findUnique({
+    where: { id: playerId },
+    select: { id: true, name: true, email: true, profilePhoto: true }
+  });
+};
+
 const startMatchHandler = async (req, res) => {
   try {
     const { matchId } = req.params;
     const userId = req.user.userId || req.user.id;
 
+    // ── Step 1: fetch match (1 query) ─────────────────────────────────────
     const match = await prisma.match.findUnique({
       where: { id: matchId },
       include: {
-        tournament: {
-          select: { organizerId: true }
-        }
+        tournament: { select: { organizerId: true, id: true, name: true } },
+        category:   { select: { id: true, name: true } },
+        umpire:     { select: { id: true, name: true, email: true } }
       }
     });
 
     if (!match) {
-      return res.status(404).json({
-        success: false,
-        message: 'Match not found'
-      });
+      return res.status(404).json({ success: false, message: 'Match not found' });
     }
 
-    // Check authorization
+    // Authorization check
     const userRoles = req.user.roles || [];
-    const isAuthorized = 
+    const isAuthorized =
       match.umpireId === userId ||
       match.tournament.organizerId === userId ||
       userRoles.includes('ADMIN');
 
     if (!isAuthorized) {
-      return res.status(403).json({
-        success: false,
-        message: 'Not authorized to start this match'
-      });
+      return res.status(403).json({ success: false, message: 'Not authorized to start this match' });
     }
 
-    const updatedMatch = await prisma.match.update({
-      where: { id: matchId },
-      data: {
-        status: 'IN_PROGRESS',
-        startedAt: new Date(),
-        updatedAt: new Date()
-      },
-      include: {
-        tournament: { select: { id: true, name: true } },
-        category: { select: { id: true, name: true } },
-        umpire: { select: { id: true, name: true, email: true } }
-      }
-    });
-
-    // Fetch players separately since they're not relations
-    // Helper function to get player data (handles both real users and guest players)
-    const getPlayerData = async (playerId) => {
-      if (!playerId) return null;
-      
-      // Check if it's a guest player (ID starts with "guest-")
-      if (playerId.startsWith('guest-')) {
-        const registrationId = playerId.replace('guest-', '');
-        const registration = await prisma.registration.findUnique({
-          where: { id: registrationId },
-          select: { 
-            id: true, 
-            guestName: true, 
-            guestEmail: true,
-            userId: true
-          }
-        });
-        
-        if (registration) {
-          return {
-            id: playerId,
-            name: registration.guestName || 'Guest Player',
-            email: registration.guestEmail || null,
-            profilePhoto: null,
-            isGuest: true
-          };
-        }
-        return null;
-      }
-      
-      // Regular user
-      return await prisma.user.findUnique({
-        where: { id: playerId },
-        select: { id: true, name: true, email: true, profilePhoto: true }
-      });
+    // ── Step 2: build score + fetch both players in parallel (2 queries) ──
+    const now = new Date();
+    const timer = {
+      startedAt: now.toISOString(),
+      isPaused: false,
+      totalPausedTime: 0,
+      pauseHistory: []
     };
 
-    let player1 = null;
-    let player2 = null;
-    
-    if (updatedMatch.player1Id) {
-      player1 = await getPlayerData(updatedMatch.player1Id);
-    }
-    
-    if (updatedMatch.player2Id) {
-      player2 = await getPlayerData(updatedMatch.player2Id);
-    }
-
-    // Initialize score with timer
-    const initialScore = {
+    let scoreData = {
       sets: [{ player1: 0, player2: 0 }],
       currentSet: 0,
-      matchConfig: {
-        pointsPerSet: 21,
-        setsToWin: 2,
-        maxSets: 3,
-        extension: true
-      },
-      timer: {
-        startedAt: new Date().toISOString(),
-        isPaused: false,
-        totalPausedTime: 0,
-        pauseHistory: []
-      }
+      matchConfig: { pointsPerSet: 21, setsToWin: 2, maxSets: 3, extension: true },
+      timer
     };
 
-    // Parse existing scoreJson if it exists
-    let scoreData = initialScore;
-    if (updatedMatch.scoreJson) {
+    if (match.scoreJson) {
       try {
-        const parsed = typeof updatedMatch.scoreJson === 'string' 
-          ? JSON.parse(updatedMatch.scoreJson) 
-          : updatedMatch.scoreJson;
-        
-        // Merge with timer and ensure sets array has at least one set
+        const parsed = typeof match.scoreJson === 'string' ? JSON.parse(match.scoreJson) : match.scoreJson;
         scoreData = {
           ...parsed,
-          sets: parsed.sets && parsed.sets.length > 0 ? parsed.sets : [{ player1: 0, player2: 0 }],
+          sets: parsed.sets?.length > 0 ? parsed.sets : [{ player1: 0, player2: 0 }],
           currentSet: parsed.currentSet || 0,
-          timer: initialScore.timer
+          timer
         };
       } catch (e) {
         console.error('Error parsing scoreJson:', e);
       }
     }
 
-    // Update match with score including timer
+    const [player1, player2] = await Promise.all([
+      _getPlayerData(match.player1Id),
+      _getPlayerData(match.player2Id)
+    ]);
+
+    // ── Step 3: single update — status + scoreJson together (1 query) ─────
     const finalMatch = await prisma.match.update({
       where: { id: matchId },
       data: {
+        status: 'IN_PROGRESS',
+        startedAt: now,
+        updatedAt: now,
         scoreJson: JSON.stringify(scoreData)
       },
       include: {
         tournament: { select: { id: true, name: true } },
-        category: { select: { id: true, name: true } },
-        umpire: { select: { id: true, name: true, email: true } }
+        category:   { select: { id: true, name: true } },
+        umpire:     { select: { id: true, name: true, email: true } }
       }
     });
 
-    // Add players and parsed score to response
     finalMatch.player1 = player1;
     finalMatch.player2 = player2;
     finalMatch.score = scoreData;
 
-    // Broadcast match started
+    // Broadcast (fire-and-forget — don't block the response)
     broadcastMatchStatus(matchId, 'IN_PROGRESS', { score: scoreData });
     broadcastToTournament(match.tournamentId, 'match-started', {
       matchId,
       player1: player1 ? { id: player1.id, name: player1.name } : null,
       player2: player2 ? { id: player2.id, name: player2.name } : null,
-      category: finalMatch.category ? { id: finalMatch.category.id, name: finalMatch.category.name } : null,
+      category: match.category,
       courtNumber: match.courtNumber,
       matchNumber: match.matchNumber,
-      startedAt: new Date().toISOString(),
+      startedAt: now.toISOString(),
     });
 
-    res.json({
-      success: true,
-      message: 'Match started successfully',
-      match: finalMatch
-    });
+    res.json({ success: true, message: 'Match started successfully', match: finalMatch });
   } catch (error) {
     console.error('Error starting match:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to start match',
-      error: error.message
-    });
+    res.status(500).json({ success: false, message: 'Failed to start match', error: error.message });
   }
 };
 

@@ -12,7 +12,6 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   getTournamentRegistrations,
   exportParticipants,
-  updateTournamentStatus,
   removeRegistration,
   completeRefund,
 } from '../api/organizer';

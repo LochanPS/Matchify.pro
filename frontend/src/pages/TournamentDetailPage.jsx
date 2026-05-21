@@ -274,6 +274,7 @@ const TournamentDetailPage = () => {
       
       if (response.success) {
         setUmpireSuccess(`Umpire "${response.umpire.name}" added successfully!`);
+        setTimeout(() => setUmpireSuccess(''), 3000);
         setUmpireCode('#');
         fetchUmpires(); // Refresh the list
       } else {

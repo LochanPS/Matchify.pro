@@ -609,17 +609,17 @@ const updateTournament = async (req, res) => {
 
     // Build update data
     const updateData = {};
-    if (name) updateData.name = name.trim();
-    if (description) updateData.description = description.trim();
-    if (venue) updateData.venue = venue.trim();
-    if (address) updateData.address = address.trim();
-    if (city) updateData.city = city.trim();
-    if (state) updateData.state = state.trim();
-    if (pincode) updateData.pincode = pincode.trim();
-    if (zone) updateData.zone = zone;
-    if (format) updateData.format = format;
-    if (privacy) updateData.privacy = privacy;
-    if (status) updateData.status = status;
+    if (name !== undefined) updateData.name = name.trim();
+    if (description !== undefined) updateData.description = description.trim();
+    if (venue !== undefined) updateData.venue = venue.trim();
+    if (address !== undefined) updateData.address = address.trim();
+    if (city !== undefined) updateData.city = city.trim();
+    if (state !== undefined) updateData.state = state.trim();
+    if (pincode !== undefined) updateData.pincode = pincode.trim();
+    if (zone !== undefined) updateData.zone = zone;
+    if (format !== undefined) updateData.format = format;
+    if (privacy !== undefined) updateData.privacy = privacy;
+    if (status !== undefined) updateData.status = status;
     if (contactPhone !== undefined) updateData.contactPhone = contactPhone?.trim() || null;
     if (whatsappNumber !== undefined) updateData.whatsappNumber = whatsappNumber?.trim() || null;
     
@@ -1458,14 +1458,24 @@ const addUmpireByCode = async (req, res) => {
         name: true,
         email: true,
         matchifyCode: true,
-        profilePhoto: true
+        profilePhoto: true,
+        roles: true
       }
     });
 
     if (!umpire) {
       return res.status(404).json({
         success: false,
-        error: 'No player found with this Matchify.pro ID. Please check and try again.'
+        error: 'No user found with this Matchify.pro ID. Please check and try again.'
+      });
+    }
+
+    // Verify the user has the UMPIRE role (roles stored as comma-separated string)
+    const userRoles = umpire.roles ? umpire.roles.split(',').map(r => r.trim().toUpperCase()) : [];
+    if (!userRoles.includes('UMPIRE')) {
+      return res.status(400).json({
+        success: false,
+        error: 'This user does not have the Umpire role. They must register as an umpire first.'
       });
     }
 

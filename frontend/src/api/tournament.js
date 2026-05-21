@@ -28,8 +28,8 @@ export const tournamentAPI = {
   },
 
   // Delete tournament (organizer only)
-  deleteTournament: async (id) => {
-    const response = await api.delete(`/tournaments/${id}`);
+  deleteTournament: async (id, reason = '') => {
+    const response = await api.delete(`/tournaments/${id}`, { data: { reason } });
     return response.data;
   },
 

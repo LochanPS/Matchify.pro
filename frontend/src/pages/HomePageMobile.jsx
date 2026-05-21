@@ -306,8 +306,8 @@ const HomePageMobile = () => {
                 animation: 'glow 3s ease-in-out infinite',
               }}
             />
-            <div className="relative">
-              <MatchifyLogo size={110} variant="full" />
+            <div className="relative flex justify-center items-center">
+              <MatchifyLogo size={110} variant="full" className="mx-auto" />
             </div>
           </div>
 

@@ -31,11 +31,8 @@ export const WebSocketProvider = ({ children }) => {
     // Skip to prevent infinite reconnect error spam.
     const isLocalDev = wsUrl.includes('localhost') || wsUrl.includes('127.0.0.1');
     if (!isLocalDev) {
-      console.log('ℹ️ WebSocket disabled in production (no persistent connections on serverless).');
       return;
     }
-
-    console.log('🔌 WebSocket connecting to:', wsUrl);
 
     const socketInstance = io(wsUrl, {
       autoConnect: true,

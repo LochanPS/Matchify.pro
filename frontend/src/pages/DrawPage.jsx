@@ -121,8 +121,8 @@ const DrawPage = () => {
   const [showPlayersModal, setShowPlayersModal] = useState(false);
   const [registeredPlayers, setRegisteredPlayers] = useState([]);
 
-  // ─── Combined draw-page fetch (single round trip) ────────────────────────────
-  const fetchDrawPageFull = async (catId) => {
+  // ─── Combined draw-page fetch (single round trip, auto-retry once on 500) ───
+  const fetchDrawPageFull = async (catId, _retryCount = 0) => {
     if (!tournamentId || !catId) return;
 
     setLoading(true);
@@ -132,7 +132,7 @@ const DrawPage = () => {
     try {
       const response = await api.get(
         `/tournaments/${tournamentId}/draw-page/${catId}`,
-        { headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' } }
+        { headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' }, _skipLogout: true }
       );
 
       if (!response.data.success) {
@@ -167,12 +167,20 @@ const DrawPage = () => {
         setBracket(null);
       }
     } catch (err) {
-      console.error('❌ Error fetching draw page:', err);
-      if (err.response?.status === 404) {
+      const status = err.response?.status;
+      // Auto-retry once on 500 (Vercel cold start / transient DB issue) after 2s
+      if (status === 500 && _retryCount === 0) {
+        setTimeout(() => fetchDrawPageFull(catId, 1), 2000);
+        return; // keep spinner — finally won't run because of early return
+      }
+      if (status === 404) {
         setBracket(null);
         setError(null);
       } else if (err.code === 'ERR_NETWORK' || !err.response) {
-        setError('Network error: Cannot connect to server. Please check your connection and try again.');
+        setError('Connection issue — please check your internet and try again.');
+      } else if (status === 500) {
+        const detail = err.response?.data?.details;
+        setError(detail ? `Server error: ${detail}` : 'Server error — please try refreshing the page.');
       } else {
         setBracket(null);
         setError(null);

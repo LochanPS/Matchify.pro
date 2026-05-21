@@ -14,6 +14,9 @@ export const getDrawPage = async (req, res) => {
   try {
     const { tournamentId, categoryId } = req.params;
 
+    // Ensure DB connection is alive (important for Vercel serverless cold starts)
+    await prisma.$connect();
+
     // ─── Phase 1: All independent DB queries in parallel ──────────────────────
     const [tournament, categories, draw, matches, registrations] = await Promise.all([
       prisma.tournament.findUnique({
@@ -380,7 +383,7 @@ export const getDrawPage = async (req, res) => {
     res.status(500).json({
       success: false,
       error: 'Failed to load draw page data',
-      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      details: error.message  // expose in all envs for debugging
     });
   }
 };

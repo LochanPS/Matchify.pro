@@ -18,13 +18,6 @@ const authenticate = async (req, res, next) => {
     // Verify token
     const decoded = verifyAccessToken(token);
 
-    console.log('🔓 Token decoded:', {
-      userId: decoded.userId,
-      email: decoded.email,
-      isImpersonating: decoded.isImpersonating,
-      adminId: decoded.adminId
-    });
-
     // Get user from database
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId }

@@ -23,6 +23,9 @@ class TournamentPointsService {
     try {
       console.log(`🏆 Awarding tournament points for category ${categoryId}`);
 
+      // Pre-warm DB connection — prevents cold-start silent failures
+      await prisma.$connect();
+
       // Get category
       const category = await prisma.category.findUnique({
         where: { id: categoryId },
@@ -57,11 +60,18 @@ class TournamentPointsService {
       console.log(`📊 Found ${matches.length} completed matches`);
 
       // Calculate points for each player based on their wins
+      // Skip guest players (quick-added by admin — no user account, format: "guest-<registrationId>")
       const playerPoints = new Map();
 
       matches.forEach(match => {
         const winnerId = match.winnerId;
         if (!winnerId) return;
+        // Quick-added players have IDs prefixed "guest-" — they have no user account,
+        // so they must not receive points or appear on the leaderboard.
+        if (winnerId.startsWith('guest-')) {
+          console.log(`⏭️  Skipping guest player ${winnerId} — quick-added, no leaderboard entry`);
+          return;
+        }
 
         // Determine points based on match stage
         let points = 0;

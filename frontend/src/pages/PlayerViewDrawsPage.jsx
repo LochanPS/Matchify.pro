@@ -66,7 +66,9 @@ const PlayerViewDrawsPage = () => {
       }
     } catch (err) {
       console.error('Error fetching tournament:', err);
-      setError('Failed to load tournament: ' + (err.response?.data?.error || err.message));
+      // Only show error on initial load; api.js auto-retries 5xx so if we reach
+      // here it's a genuine failure — but keep it subtle and auto-dismissing.
+      setError('Could not load tournament. Please check your connection.');
     } finally {
       setLoading(false);
     }
@@ -89,12 +91,20 @@ const PlayerViewDrawsPage = () => {
       if (err.response?.status === 404) {
         setDraw(null);
       } else if (!silent) {
-        setError(`Failed to load draw: ${err.response?.data?.error || err.message}`);
+        // Don't show raw API error — keep message friendly
+        setError('Draw unavailable right now. Please try again shortly.');
       }
     } finally {
       if (!silent) setLoadingDraw(false);
     }
   };
+
+  // Auto-dismiss connection errors after 6s — don't alarm the user
+  useEffect(() => {
+    if (!error) return;
+    const t = setTimeout(() => setError(null), 6000);
+    return () => clearTimeout(t);
+  }, [error]);
 
   const handleRefresh = async () => {
     if (!selectedCategory) return;
@@ -173,12 +183,10 @@ const PlayerViewDrawsPage = () => {
 
         {/* Error Message */}
         {error && (
-          <div className="mb-6 bg-red-500/10 border border-red-500/30 rounded-xl p-4 flex items-center gap-3">
-            <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0" />
-            <span className="text-red-300 font-medium">{error}</span>
-            <button onClick={() => setError(null)} className="ml-auto text-red-400 hover:text-red-300">
-              <X className="w-5 h-5" />
-            </button>
+          <div className="mb-6 rounded-xl p-3 flex items-center gap-3" style={{ background: 'rgba(255,170,0,0.08)', border: '1px solid rgba(255,170,0,0.2)' }}>
+            <AlertTriangle className="w-4 h-4 flex-shrink-0" style={{ color: '#ffaa00' }} />
+            <span className="text-sm" style={{ color: '#ffcc66' }}>{error}</span>
+            <button onClick={() => setError(null)} className="ml-auto" style={{ color: 'rgba(255,255,255,0.35)', background: 'none', border: 'none', cursor: 'pointer', fontSize: 18, lineHeight: 1 }}>×</button>
           </div>
         )}
 

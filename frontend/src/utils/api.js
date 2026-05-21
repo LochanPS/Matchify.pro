@@ -9,7 +9,7 @@ if (import.meta.env.DEV) {
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 20000, // 20s — covers Vercel serverless cold starts (~10-15s)
+  timeout: 25000, // 25s — cold-start headroom (Vercel serverless ~10-15s + Prisma connect)
   headers: {
     'Content-Type': 'application/json',
   },
@@ -28,12 +28,8 @@ api.interceptors.request.use((config) => {
 const PUBLIC_PATHS = ['/login', '/register', '/', '/leaderboard', '/tournaments', '/privacy', '/terms'];
 
 // ── Silent token refresh ───────────────────────────────────────────────────
-// When the access token expires the backend returns 401.
-// Instead of logging the user out immediately, we try to silently refresh
-// using the stored refresh token, then replay the original request.
-// Guards against multiple concurrent requests all trying to refresh at once.
 let isRefreshing = false;
-let refreshQueue = []; // pending requests waiting for a new token
+let refreshQueue = [];
 
 function processQueue(error, newToken = null) {
   refreshQueue.forEach(({ resolve, reject }) =>
@@ -49,57 +45,77 @@ function doLogout() {
   window.location.href = '/login';
 }
 
-// Handle token expiry + timeout
+// ── Retryable status codes for GET requests ────────────────────────────────
+// Vercel cold starts often return 500/502/504 on first hit; a second attempt
+// almost always succeeds. Only GET is retried — POST/PUT/DELETE are not
+// idempotent and are handled explicitly per handler where needed.
+const RETRY_STATUS = new Set([500, 502, 503, 504]);
+const MAX_AUTO_RETRIES = 2;
+const RETRY_DELAY_MS = 1500;
+
+function sleep(ms) {
+  return new Promise(r => setTimeout(r, ms));
+}
+
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    // Timeout — backend cold start took too long
+    const config = error.config || {};
+    const isGet = (config.method || '').toLowerCase() === 'get';
+    const retryCount = config._retryCount || 0;
+
+    // ── Auto-retry GET requests on 5xx / network errors ──────────────────
+    // Transparent: calling code never sees transient cold-start failures.
+    const isRetryable =
+      isGet &&
+      retryCount < MAX_AUTO_RETRIES &&
+      !config._noRetry && // opt-out flag
+      (
+        RETRY_STATUS.has(error.response?.status) ||
+        error.code === 'ECONNABORTED' ||
+        error.code === 'ERR_NETWORK' ||
+        !error.response // pure network error
+      );
+
+    if (isRetryable) {
+      config._retryCount = retryCount + 1;
+      await sleep(RETRY_DELAY_MS);
+      return api(config);
+    }
+
+    // ── Timeout — translate to friendly message ───────────────────────────
     if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
-      console.warn('⏱️ Request timed out:', error.config?.url);
       return Promise.reject({
         ...error,
-        message: 'Request timed out. Please try again.',
+        message: 'Server took too long to respond. Please try again.',
         isTimeout: true,
       });
     }
 
+    // ── 401 — try silent token refresh, then replay ───────────────────────
     if (error.response?.status === 401) {
-      // Background polls (Live Matches, notification count) set _skipLogout: true
-      // so they never trigger auto-logout — only user-initiated requests do.
-      if (error.config?._skipLogout) {
+      if (config?._skipLogout) {
         return Promise.reject(error);
       }
 
       const path = window.location.pathname;
       const isPublicPath = PUBLIC_PATHS.some(p => path === p || path.startsWith(p + '/'));
-
-      // Already on a public/auth page — don't redirect, just reject
-      if (isPublicPath) {
-        return Promise.reject(error);
-      }
+      if (isPublicPath) return Promise.reject(error);
 
       const refreshToken = localStorage.getItem('refreshToken');
+      if (!refreshToken) { doLogout(); return Promise.reject(error); }
 
-      // No refresh token stored → full logout
-      if (!refreshToken) {
-        doLogout();
-        return Promise.reject(error);
-      }
-
-      // Another request is already refreshing — queue this one
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           refreshQueue.push({ resolve, reject });
         }).then((newToken) => {
-          error.config.headers.Authorization = `Bearer ${newToken}`;
-          return api(error.config);
+          config.headers.Authorization = `Bearer ${newToken}`;
+          return api(config);
         });
       }
 
       isRefreshing = true;
-
       try {
-        // Use raw axios so this call doesn't go through our interceptor again
         const { data } = await axios.post(
           `${API_BASE_URL}/auth/refresh-token`,
           { refreshToken },
@@ -110,16 +126,11 @@ api.interceptors.response.use(
 
         localStorage.setItem('token', newAccessToken);
         if (newRefreshToken) localStorage.setItem('refreshToken', newRefreshToken);
-
-        // Update default header for future requests
         api.defaults.headers.common.Authorization = `Bearer ${newAccessToken}`;
 
-        // Flush queued requests with the new token
         processQueue(null, newAccessToken);
-
-        // Replay the original request that triggered the 401
-        error.config.headers.Authorization = `Bearer ${newAccessToken}`;
-        return api(error.config);
+        config.headers.Authorization = `Bearer ${newAccessToken}`;
+        return api(config);
       } catch (refreshError) {
         processQueue(refreshError, null);
         doLogout();

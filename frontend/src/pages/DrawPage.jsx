@@ -193,6 +193,13 @@ const DrawPage = () => {
 
   // ─── Main load effect ─────────────────────────────────────────────────────────
   // If categoryId is in the URL → one combined call (no waterfall).
+  // Auto-dismiss connection errors after 6s — keeps screen clean
+  useEffect(() => {
+    if (!error) return;
+    const t = setTimeout(() => setError(null), 6000);
+    return () => clearTimeout(t);
+  }, [error]);
+
   // If not (rare) → fall back to old fetchTournamentData so activeCategory gets set,
   //   then the second effect picks it up.
   useEffect(() => {
@@ -1285,10 +1292,10 @@ const DrawPage = () => {
       {/* Messages */}
       <div className="max-w-2xl mx-auto px-4 mt-4">
         {error && (
-          <div className="mb-4 bg-red-500/10 border border-red-500/30 rounded-xl p-3 flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-            <span className="text-red-300 font-medium text-sm flex-1 min-w-0 break-words">{error}</span>
-            <button onClick={() => setError(null)} className="text-red-400 hover:text-red-300 flex-shrink-0"><X className="w-5 h-5" /></button>
+          <div className="mb-4 rounded-xl p-3 flex items-center gap-3" style={{ background: 'rgba(255,170,0,0.08)', border: '1px solid rgba(255,170,0,0.2)' }}>
+            <AlertTriangle className="w-4 h-4 flex-shrink-0" style={{ color: '#ffaa00' }} />
+            <span className="text-sm flex-1 min-w-0 break-words" style={{ color: '#ffcc66' }}>{error}</span>
+            <button onClick={() => setError(null)} className="flex-shrink-0" style={{ color: 'rgba(255,255,255,0.35)', background: 'none', border: 'none', cursor: 'pointer', fontSize: 18, lineHeight: 1 }}>×</button>
           </div>
         )}
         {success && (

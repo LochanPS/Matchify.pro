@@ -1,48 +1,33 @@
 /**
- * MatchifyLogo — Matchify.pro PNG logo
- * Full image: 1083×992px
+ * MatchifyLogo — Matchify.pro PNG logo (transparent background)
  *
- * Key finding from pixel sampling:
- *   - Logo content (shield + sparkles + text) occupies the TOP 56% of the image
- *   - Bottom 44% is pure dark empty space → causes the visible "card/box" look
- *   - Content starts at y=0, ends at y≈558
+ * logo.png is 1083×992px. Background pixels have been made fully transparent.
+ * Logo content (shield + sparkles + Matchify.pro text) occupies the TOP 60%
+ * of the image (y=0 to y≈595). Bottom 40% is transparent empty space.
  *
- * Fix:
- *   1. overflow:hidden container shows only top 62% (content + small padding)
- *      — eliminates the large dark empty bottom that made it look like a box
- *   2. mix-blend-mode:screen — dark pixels between logo elements become
- *      transparent (show background through) on any background color
+ * overflow:hidden on the container clips that empty space so the element
+ * height matches the visible logo height — no extra whitespace in layout.
  *
  * Props:
- *   size       {number}  — visible height in px (default 40)
- *   variant    {'full'|'icon'|'text'}
- *   className  {string}
+ *   size      {number} — visible height in px (default 40)
+ *   className {string}
  */
-export default function MatchifyLogo({
-  size = 40,
-  variant = 'full',
-  className = '',
-}) {
-  const RATIO        = 1.092;  // full image width/height (1083/992)
-  const SHOW_FRAC    = 0.62;   // show top 62% — content ends at 56%, small padding added
+export default function MatchifyLogo({ size = 40, className = '' }) {
+  const RATIO     = 1.092; // full PNG width / height (1083 / 992)
+  const SHOW_FRAC = 0.60;  // content occupies top 60% of image
 
-  // Full render dimensions
-  const fullH = Math.round(size / SHOW_FRAC);
-  const fullW = Math.round(fullH * RATIO);
-
-  // Visible window — same width as full, cropped height
-  const visH = size;
-  const visW = fullW;
+  const fullH = Math.round(size / SHOW_FRAC); // render image at this height
+  const fullW = Math.round(fullH * RATIO);     // preserve aspect ratio
 
   return (
     <span
       className={className}
       style={{
         display:    'inline-flex',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         overflow:   'hidden',
-        height:     `${visH}px`,
-        width:      `${visW}px`,
+        height:     `${size}px`,
+        width:      `${fullW}px`,
         flexShrink: 0,
       }}
     >
@@ -51,13 +36,10 @@ export default function MatchifyLogo({
         alt="Matchify.pro"
         draggable={false}
         style={{
-          height:       `${fullH}px`,
-          width:        `${fullW}px`,
-          display:      'block',
-          flexShrink:   0,
-          marginTop:    0,
-          mixBlendMode: 'screen',
-          filter:       'brightness(1.1)',
+          height:   `${fullH}px`,
+          width:    `${fullW}px`,
+          display:  'block',
+          flexShrink: 0,
         }}
       />
     </span>

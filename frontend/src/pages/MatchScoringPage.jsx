@@ -162,7 +162,7 @@ const MatchScoringPage = () => {
 
       updateScore(newScore);
 
-      if (matchWon || idx >= maxSets - 1) {
+      if (matchWon) {
         const matchWinnerId = winner === 1 ? match.player1?.id : match.player2?.id;
         if (!matchWinnerId) {
           // Player data missing — fall back to manual end-match modal

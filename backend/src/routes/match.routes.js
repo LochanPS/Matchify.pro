@@ -342,6 +342,11 @@ const startMatchHandler = async (req, res) => {
       return res.status(403).json({ success: false, message: 'Not authorized to start this match' });
     }
 
+    // Guard: prevent re-starting a match already in progress or completed
+    if (match.status === 'IN_PROGRESS' || match.status === 'COMPLETED') {
+      return res.status(400).json({ success: false, message: 'Match has already been started' });
+    }
+
     // ── Step 2: build score + fetch both players in parallel (2 queries) ──
     const now = new Date();
     const timer = {

@@ -1,8 +1,9 @@
 import express from 'express';
 import { authenticate } from '../middleware/auth.js';
-import { 
-  getNotifications, 
-  markNotificationAsRead, 
+import prisma from '../lib/prisma.js';
+import {
+  getNotifications,
+  markNotificationAsRead,
   markAllNotificationsAsRead,
   deleteNotificationById,
   deleteAllNotificationsForUser
@@ -16,17 +17,14 @@ router.get('/', authenticate, getNotifications);
 // GET /api/notifications/unread-count - Get count of unread notifications
 router.get('/unread-count', authenticate, async (req, res) => {
   try {
-    const { PrismaClient } = await import('@prisma/client');
-    const prisma = new PrismaClient();
-    
+    // Use singleton prisma (imported above) — never create a new PrismaClient per
+    // request; that leaks connections and causes P2024 exhaustion under load.
     const count = await prisma.notification.count({
       where: {
         userId: req.user.id,
         read: false
       }
     });
-    
-    await prisma.$disconnect();
     res.json({ count });
   } catch (error) {
     console.error('Error getting unread count:', error);

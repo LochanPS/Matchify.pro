@@ -8,7 +8,12 @@ import { PrismaClient } from '@prisma/client';
 // The DATABASE_URL must include ?connection_limit=1&pgbouncer=true (PgBouncer/Supabase pooler).
 // This code also enforces limit=1 via datasourceUrl as a safety net in case the env var
 // does not already carry the query params.
-let prisma;
+//
+// CRITICAL: Use globalThis in ALL environments. In production (Vercel), a warm container
+// re-uses the same Node.js process for multiple requests, but module scope may be
+// re-evaluated between invocations in some edge cases. Without globalThis, multiple
+// PrismaClient instances can accumulate inside a single container — each holding its own
+// connection — rapidly exhausting the pool and causing P2024 errors.
 
 function buildDatasourceUrl() {
   const url = process.env.DATABASE_URL || '';
@@ -28,18 +33,12 @@ function buildDatasourceUrl() {
   }
 }
 
-if (process.env.NODE_ENV === 'production') {
-  prisma = new PrismaClient({
+if (!globalThis.__prisma) {
+  globalThis.__prisma = new PrismaClient({
     datasourceUrl: buildDatasourceUrl(),
+    ...(process.env.NODE_ENV !== 'production' && { log: ['error', 'warn'] }),
   });
-} else {
-  // In development, use a global variable to preserve the client across hot reloads
-  if (!global.prisma) {
-    global.prisma = new PrismaClient({
-      log: ['error', 'warn'],
-    });
-  }
-  prisma = global.prisma;
 }
 
+const prisma = globalThis.__prisma;
 export default prisma;

@@ -392,6 +392,19 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// ── P2024 helpers (local to this file) ────────────────────────────────────
+const _rtSleep = ms => new Promise(r => setTimeout(r, ms));
+function _rtIsP2024(err) {
+  return err?.code === 'P2024' || (err?.message || '').includes('connection pool');
+}
+async function _rtWithDbRetry(fn) {
+  try { return await fn(); }
+  catch (err) {
+    if (_rtIsP2024(err)) { await _rtSleep(350); return await fn(); }
+    throw err;
+  }
+}
+
 // POST /auth/refresh-token
 router.post('/refresh-token', async (req, res) => {
   try {
@@ -406,10 +419,10 @@ router.post('/refresh-token', async (req, res) => {
     // Verify refresh token
     const decoded = verifyRefreshToken(refreshToken);
 
-    // Find user and verify stored refresh token matches
-    const user = await prisma.user.findUnique({
+    // Find user and verify stored refresh token matches (retry once on P2024)
+    const user = await _rtWithDbRetry(() => prisma.user.findUnique({
       where: { id: decoded.userId }
-    });
+    }));
 
     if (!user || user.refreshToken !== refreshToken) {
       return res.status(401).json({
@@ -429,10 +442,10 @@ router.post('/refresh-token', async (req, res) => {
     const newRefreshToken = generateRefreshToken(user.id);
 
     // Update refresh token in database
-    await prisma.user.update({
+    await _rtWithDbRetry(() => prisma.user.update({
       where: { id: user.id },
       data: { refreshToken: newRefreshToken }
-    });
+    }));
 
     res.json({
       accessToken: newAccessToken,
@@ -440,6 +453,11 @@ router.post('/refresh-token', async (req, res) => {
     });
   } catch (error) {
     console.error('Refresh token error:', error);
+    // P2024 = DB connection pool exhausted — NOT a real auth failure.
+    // Return 503 so the frontend interceptor does NOT call doLogout().
+    if (_rtIsP2024(error)) {
+      return res.status(503).json({ error: 'Server busy, please retry' });
+    }
     res.status(401).json({
       error: 'Invalid or expired refresh token'
     });

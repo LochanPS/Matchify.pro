@@ -133,7 +133,15 @@ api.interceptors.response.use(
         return api(config);
       } catch (refreshError) {
         processQueue(refreshError, null);
-        doLogout();
+        // 503/502/504 = server busy (DB connection pool exhausted) — NOT a real
+        // auth failure. Do NOT logout: the user's session is still valid; the
+        // server just couldn't handle the request right now. Let the caller
+        // surface an error so the user can retry without losing their session.
+        const refreshStatus = refreshError?.response?.status;
+        const isTransient = refreshStatus === 503 || refreshStatus === 502 || refreshStatus === 504;
+        if (!isTransient) {
+          doLogout();
+        }
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

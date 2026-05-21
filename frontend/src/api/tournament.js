@@ -38,10 +38,13 @@ export const tournamentAPI = {
     files.forEach((file) => {
       formData.append('posters', file);
     });
+    // DO NOT set Content-Type manually — axios sets multipart/form-data WITH boundary
+    // automatically when it detects FormData. Setting it manually strips the boundary
+    // parameter, breaking multer's multipart parser on the server.
     const response = await api.post(
       `/tournaments/${id}/posters`,
       formData,
-      { headers: { 'Content-Type': 'multipart/form-data' } }
+      { timeout: 120000 } // 2 min — image upload + Cloudinary processing
     );
     return response.data;
   },
@@ -81,10 +84,11 @@ export const tournamentAPI = {
     formData.append('paymentQR', file);
     if (upiId) formData.append('upiId', upiId);
     if (accountHolderName) formData.append('accountHolderName', accountHolderName);
+    // DO NOT set Content-Type manually — same reason as uploadPosters above
     const response = await api.post(
       `/tournaments/${tournamentId}/payment-qr`,
       formData,
-      { headers: { 'Content-Type': 'multipart/form-data' } }
+      { timeout: 120000 }
     );
     return response.data;
   },

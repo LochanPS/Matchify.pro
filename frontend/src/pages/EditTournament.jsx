@@ -34,6 +34,47 @@ const B = {
   amber: '#fbbf24',
 };
 
+/**
+ * Compress an image file client-side using Canvas API.
+ * Keeps each image under 1.5 MB to stay well under Vercel's 4.5 MB
+ * request-body limit for serverless functions.
+ * Falls back to the original file on any error.
+ */
+function compressImage(file) {
+  return new Promise((resolve) => {
+    if (!file.type.startsWith('image/')) { resolve(file); return; }
+    const objectUrl = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      const MAX_DIM = 1200;
+      let { width, height } = img;
+      if (width > MAX_DIM || height > MAX_DIM) {
+        const ratio = Math.min(MAX_DIM / width, MAX_DIM / height);
+        width  = Math.round(width  * ratio);
+        height = Math.round(height * ratio);
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width  = width;
+      canvas.height = height;
+      canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+      const tryQuality = (q) => {
+        canvas.toBlob((blob) => {
+          if (!blob) { resolve(file); return; }
+          if (blob.size <= 1.5 * 1024 * 1024 || q <= 0.3) {
+            resolve(new File([blob], file.name.replace(/\.\w+$/, '.jpg'), { type: 'image/jpeg' }));
+          } else {
+            tryQuality(Math.max(0.3, q - 0.1));
+          }
+        }, 'image/jpeg', q);
+      };
+      tryQuality(0.85);
+    };
+    img.onerror = () => { URL.revokeObjectURL(objectUrl); resolve(file); };
+    img.src = objectUrl;
+  });
+}
+
 const ZONES = ['North', 'South', 'East', 'West', 'Central', 'Northeast'];
 const FORMATS = ['singles', 'doubles', 'both'];
 const PRIVACY = ['public', 'private'];
@@ -199,7 +240,8 @@ const EditTournament = () => {
     setError(null);
     try {
       if (newQRFile) {
-        await tournamentAPI.uploadPaymentQR(id, newQRFile, paymentData.upiId, paymentData.accountHolderName);
+        const compressedQR = await compressImage(newQRFile);
+        await tournamentAPI.uploadPaymentQR(id, compressedQR, paymentData.upiId, paymentData.accountHolderName);
         setNewQRFile(null);
         setNewQRPreview(null);
       } else {
@@ -272,8 +314,13 @@ const EditTournament = () => {
     setUploadingPosters(true);
     setError(null);
     try {
-      await tournamentAPI.uploadPosters(id, newPosterFiles);
-      // revoke previews
+      // Compress images client-side before upload.
+      // Vercel serverless functions have a 4.5 MB request-body limit.
+      // Compression keeps each image ≤1.5 MB so even 3 posters at once
+      // fit comfortably within that limit.
+      const compressed = await Promise.all(newPosterFiles.map(compressImage));
+      await tournamentAPI.uploadPosters(id, compressed);
+      // revoke object-URL previews
       newPosterPreviews.forEach(URL.revokeObjectURL);
       setNewPosterFiles([]);
       setNewPosterPreviews([]);

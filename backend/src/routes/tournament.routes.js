@@ -106,14 +106,31 @@ router.put('/:id', updateTournament);
 // DELETE /api/tournaments/:id - Delete tournament
 router.delete('/:id', deleteTournament);
 
+// Multer error handler — converts multer's LIMIT_FILE_SIZE error to a clean JSON 400
+// so the frontend can show a human-readable message instead of "Network Error".
+const handleUploadError = (uploadMiddleware) => (req, res, next) => {
+  uploadMiddleware(req, res, (err) => {
+    if (err) {
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({ success: false, error: 'File too large. Each image must be under 4 MB.' });
+      }
+      if (err.code === 'LIMIT_FILE_COUNT') {
+        return res.status(400).json({ success: false, error: 'Too many files. Maximum 5 posters allowed.' });
+      }
+      return res.status(400).json({ success: false, error: err.message || 'Upload failed' });
+    }
+    next();
+  });
+};
+
 // POST /api/tournaments/:id/posters - Upload posters (max 5 files)
-router.post('/:id/posters', upload.array('posters', 5), uploadPosters);
+router.post('/:id/posters', handleUploadError(upload.array('posters', 5)), uploadPosters);
 
 // DELETE /api/tournaments/:id/posters/:posterId - Delete a poster
 router.delete('/:id/posters/:posterId', deletePoster);
 
 // POST /api/tournaments/:id/payment-qr - Upload payment QR code
-router.post('/:id/payment-qr', upload.single('paymentQR'), uploadPaymentQR);
+router.post('/:id/payment-qr', handleUploadError(upload.single('paymentQR')), uploadPaymentQR);
 
 // PUT /api/tournaments/:id/payment-info - Update payment info
 router.put('/:id/payment-info', updatePaymentInfo);

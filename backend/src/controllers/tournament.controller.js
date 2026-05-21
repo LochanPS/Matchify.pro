@@ -7,7 +7,13 @@ import tournamentPointsService from '../services/tournamentPoints.service.js';
 import { PLATFORM_FEE_PERCENT } from '../config/constants.js';
 
 // Configure multer for memory storage
-const upload = multer({ storage: multer.memoryStorage() });
+// fileSize limit: 4 MB per file — stays under Vercel's 4.5 MB serverless body limit.
+// Without a limit, oversized uploads cause Vercel to close the connection before the
+// handler runs, which axios surfaces as "Network Error" (no response at all).
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 4 * 1024 * 1024, files: 5 }, // 4 MB per file, max 5 files
+});
 
 // Helper function to generate empty draw structure
 function generateEmptyDraw(format, bracketSize) {

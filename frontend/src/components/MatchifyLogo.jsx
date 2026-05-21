@@ -24,12 +24,12 @@ export default function MatchifyLogo({ size = 40, className = '' }) {
     <span
       className={className}
       style={{
-        display:    'inline-flex',
-        alignItems: 'flex-start',
+        display:    'block',
         overflow:   'hidden',
         height:     `${size}px`,
         width:      `${fullW}px`,
         flexShrink: 0,
+        margin:     '0 auto',
       }}
     >
       <img

@@ -110,11 +110,28 @@ class ChunkErrorBoundary extends Component {
   }
 
   componentDidCatch() {
-    sessionStorage.removeItem('_chunkReloaded');
+    // Only clear the reload flag when we're showing the error UI (not reloading)
+    // so the user can tap "Reload Page" and get a fresh attempt.
+    if (!this.state.reloading) {
+      sessionStorage.removeItem('_chunkReloaded');
+    }
   }
 
   render() {
-    if (this.state.reloading) return null;
+    if (this.state.reloading) return (
+      <div style={{
+        minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: '#07071a',
+      }}>
+        <div style={{
+          width: 40, height: 40, borderRadius: '50%',
+          border: '3px solid rgba(0,212,255,0.15)',
+          borderTopColor: '#00d4ff',
+          animation: 'pageLoaderSpin 0.7s linear infinite',
+        }} />
+        <style>{`@keyframes pageLoaderSpin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
     if (this.state.hasError) {
       return (
         <div style={{

@@ -140,31 +140,32 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await api.post('/auth/login', { email, password });
       
-      const { user: userData, accessToken, token } = response.data;
+      const { user: userData, accessToken, token, refreshToken } = response.data;
       const authToken = accessToken || token; // Support both field names
-      
+
       if (!authToken) {
         throw new Error('No token received from server');
       }
-      
+
       // Ensure roles is an array
       if (userData.roles && typeof userData.roles === 'string') {
         userData.roles = userData.roles.split(',').map(r => r.trim());
       }
-      
+
       // Ensure isAdmin is set if user has ADMIN role
       if (!userData.isAdmin && userData.roles) {
-        userData.isAdmin = Array.isArray(userData.roles) 
+        userData.isAdmin = Array.isArray(userData.roles)
           ? userData.roles.includes('ADMIN')
           : userData.roles === 'ADMIN' || userData.roles.includes('ADMIN');
       }
-      
+
       // Set default currentRole
       if (!userData.currentRole) {
         userData.currentRole = userData.roles && userData.roles[0] ? userData.roles[0] : 'PLAYER';
       }
-      
+
       localStorage.setItem('token', authToken);
+      if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
       localStorage.setItem('user', JSON.stringify(userData));
       
       setUser(userData);
@@ -194,20 +195,21 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       const response = await api.post('/auth/register', userData);
-      const { user: newUser, accessToken, token } = response.data;
+      const { user: newUser, accessToken, token, refreshToken } = response.data;
       const authToken = accessToken || token; // Support both field names
-      
+
       // Ensure roles is an array
       if (newUser.roles && typeof newUser.roles === 'string') {
         newUser.roles = newUser.roles.split(',').map(r => r.trim());
       }
-      
+
       // Set default currentRole to PLAYER if not set
       if (!newUser.currentRole) {
         newUser.currentRole = newUser.roles && newUser.roles[0] ? newUser.roles[0] : 'PLAYER';
       }
-      
+
       localStorage.setItem('token', authToken);
+      if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
       localStorage.setItem('user', JSON.stringify(newUser));
       setUser(newUser);
       

@@ -27,6 +27,28 @@ api.interceptors.request.use((config) => {
 // Public paths that should never trigger a login redirect on 401
 const PUBLIC_PATHS = ['/login', '/register', '/', '/leaderboard', '/tournaments', '/privacy', '/terms'];
 
+// ── Silent token refresh ───────────────────────────────────────────────────
+// When the access token expires the backend returns 401.
+// Instead of logging the user out immediately, we try to silently refresh
+// using the stored refresh token, then replay the original request.
+// Guards against multiple concurrent requests all trying to refresh at once.
+let isRefreshing = false;
+let refreshQueue = []; // pending requests waiting for a new token
+
+function processQueue(error, newToken = null) {
+  refreshQueue.forEach(({ resolve, reject }) =>
+    error ? reject(error) : resolve(newToken)
+  );
+  refreshQueue = [];
+}
+
+function doLogout() {
+  localStorage.removeItem('token');
+  localStorage.removeItem('refreshToken');
+  localStorage.removeItem('user');
+  window.location.href = '/login';
+}
+
 // Handle token expiry + timeout
 api.interceptors.response.use(
   (response) => response,
@@ -48,21 +70,65 @@ api.interceptors.response.use(
         return Promise.reject(error);
       }
 
-      const token = localStorage.getItem('token');
       const path = window.location.pathname;
-
-      // Only redirect if user was actually authenticated (had a token)
-      // and is not already on a public/auth page
       const isPublicPath = PUBLIC_PATHS.some(p => path === p || path.startsWith(p + '/'));
-      if (!token || isPublicPath) {
+
+      // Already on a public/auth page — don't redirect, just reject
+      if (isPublicPath) {
         return Promise.reject(error);
       }
 
-      // Authenticated session expired — clear and redirect
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
+      const refreshToken = localStorage.getItem('refreshToken');
+
+      // No refresh token stored → full logout
+      if (!refreshToken) {
+        doLogout();
+        return Promise.reject(error);
+      }
+
+      // Another request is already refreshing — queue this one
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          refreshQueue.push({ resolve, reject });
+        }).then((newToken) => {
+          error.config.headers.Authorization = `Bearer ${newToken}`;
+          return api(error.config);
+        });
+      }
+
+      isRefreshing = true;
+
+      try {
+        // Use raw axios so this call doesn't go through our interceptor again
+        const { data } = await axios.post(
+          `${API_BASE_URL}/auth/refresh-token`,
+          { refreshToken },
+          { timeout: 15000 }
+        );
+        const newAccessToken = data.accessToken;
+        const newRefreshToken = data.refreshToken;
+
+        localStorage.setItem('token', newAccessToken);
+        if (newRefreshToken) localStorage.setItem('refreshToken', newRefreshToken);
+
+        // Update default header for future requests
+        api.defaults.headers.common.Authorization = `Bearer ${newAccessToken}`;
+
+        // Flush queued requests with the new token
+        processQueue(null, newAccessToken);
+
+        // Replay the original request that triggered the 401
+        error.config.headers.Authorization = `Bearer ${newAccessToken}`;
+        return api(error.config);
+      } catch (refreshError) {
+        processQueue(refreshError, null);
+        doLogout();
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
+      }
     }
+
     return Promise.reject(error);
   }
 );

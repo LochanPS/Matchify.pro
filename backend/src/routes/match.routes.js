@@ -1063,7 +1063,6 @@ router.post('/:matchId/assign-umpire', authenticate, assignUmpire);
 // Get tournament matches
 router.get('/tournament/:tournamentId', optionalAuth, async (req, res) => {
   try {
-    await prisma.$connect();
     const { tournamentId } = req.params;
     const { categoryId, round, status } = req.query;
 

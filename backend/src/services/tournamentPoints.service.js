@@ -22,9 +22,6 @@ class TournamentPointsService {
     try {
       console.log(`🏆 Awarding tournament points for category ${categoryId}`);
 
-      // Pre-warm DB connection — prevents cold-start silent failures
-      await prisma.$connect();
-
       // Get category
       const category = await prisma.category.findUnique({
         where: { id: categoryId },

@@ -93,9 +93,9 @@ class UrgentEmailHelpers {
       console.log(`[MATCH REMINDERS] Sent ${upcomingMatches.length} reminders`);
     } catch (error) {
       console.error('[MATCH REMINDERS ERROR]:', error);
-    } finally {
-      await prisma.$disconnect();
     }
+    // NOTE: Never call prisma.$disconnect() on the singleton — it kills the shared
+    // connection for all subsequent requests in this Lambda container.
   }
 
   /**
@@ -148,9 +148,8 @@ class UrgentEmailHelpers {
       console.log(`[TOURNAMENT REMINDERS] Sent reminders for ${upcomingTournaments.length} tournaments`);
     } catch (error) {
       console.error('[TOURNAMENT REMINDERS ERROR]:', error);
-    } finally {
-      await prisma.$disconnect();
     }
+    // NOTE: Never call prisma.$disconnect() on the singleton.
   }
 }
 

@@ -14,9 +14,6 @@ export const getDrawPage = async (req, res) => {
   try {
     const { tournamentId, categoryId } = req.params;
 
-    // Ensure DB connection is alive (important for Vercel serverless cold starts)
-    await prisma.$connect();
-
     // ─── Phase 1: All independent DB queries in parallel ──────────────────────
     const [tournament, categories, draw, matches, registrations] = await Promise.all([
       prisma.tournament.findUnique({

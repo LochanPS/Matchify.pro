@@ -52,6 +52,13 @@ const ScoringConsolePage = () => {
     }
   };
 
+  // Auto-dismiss non-critical errors after 5s so the screen stays clean
+  useEffect(() => {
+    if (!error) return;
+    const t = setTimeout(() => setError(null), 5000);
+    return () => clearTimeout(t);
+  }, [error]);
+
   useEffect(() => {
     fetchMatch();
     const cleanup = joinMatch(matchId,
@@ -82,24 +89,45 @@ const ScoringConsolePage = () => {
   };
 
   const handleAddPoint = async (player) => {
-    try {
-      setProcessing(true); setError(null);
+    setProcessing(true); setError(null);
+    const attempt = async () => {
       const data = await addPoint(matchId, player);
       setScore(data.score || data.scoreData || (data.data?.scoreJson ? JSON.parse(data.data.scoreJson) : null));
       if (data.matchComplete) { setMatchComplete(true); setWinner(data.winner); setMatch(prev => ({ ...prev, status: 'COMPLETED' })); }
-      setProcessing(false);
-    } catch (err) { setError(getErrorMessage(err, 'Failed to add point')); setProcessing(false); }
+    };
+    try {
+      await attempt();
+    } catch {
+      // Silent retry once after 1.5s (handles Vercel cold-start 500s)
+      try {
+        await new Promise(r => setTimeout(r, 1500));
+        await attempt();
+      } catch (err) {
+        setError(getErrorMessage(err, 'Point not saved — please tap again'));
+      }
+    }
+    setProcessing(false);
   };
 
   const handleUndo = async () => {
+    setProcessing(true); setError(null);
     try {
-      setProcessing(true); setError(null);
       const data = await undoLastPoint(matchId);
       setScore(data.score);
       setMatchComplete(false); setWinner(null);
       setMatch(prev => ({ ...prev, status: 'IN_PROGRESS' }));
-      setProcessing(false);
-    } catch (err) { setError(getErrorMessage(err, 'Failed to undo point')); setProcessing(false); }
+    } catch {
+      try {
+        await new Promise(r => setTimeout(r, 1500));
+        const data = await undoLastPoint(matchId);
+        setScore(data.score);
+        setMatchComplete(false); setWinner(null);
+        setMatch(prev => ({ ...prev, status: 'IN_PROGRESS' }));
+      } catch (err) {
+        setError(getErrorMessage(err, 'Undo failed — please try again'));
+      }
+    }
+    setProcessing(false);
   };
 
   const handlePauseTimer = async () => {
@@ -229,9 +257,21 @@ const ScoringConsolePage = () => {
         )}
 
         {error && (
-          <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 mb-6 flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-red-400 mt-0.5" />
-            <div><p className="font-semibold text-red-300">Error</p><p className="text-red-400">{error}</p></div>
+          <div
+            className="flex items-center justify-between gap-3 rounded-xl px-4 py-3 mb-4"
+            style={{
+              background: 'rgba(255,170,0,0.1)',
+              border: '1px solid rgba(255,170,0,0.25)',
+            }}
+          >
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 flex-shrink-0" style={{ color: '#ffaa00' }} />
+              <p className="text-sm" style={{ color: '#ffcc66' }}>{error}</p>
+            </div>
+            <button
+              onClick={() => setError(null)}
+              style={{ color: 'rgba(255,255,255,0.4)', fontSize: 18, lineHeight: 1, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+            >×</button>
           </div>
         )}
 

@@ -45,177 +45,308 @@ function getPlayerName(match, side) {
   return 'TBD';
 }
 
-/* Render score sets: completed sets small badge, current set large */
-function ScoreDisplay({ scoreData, isCompleted, winnerId, player1Id, player2Id }) {
-  if (!scoreData?.sets?.length) {
-    return <span style={{ color: C.dim, fontSize: 12 }}>No score yet</span>;
-  }
-
-  const sets = scoreData.sets;
-  const currentIdx = isCompleted ? sets.length - 1 : (scoreData.currentSet ?? sets.length - 1);
-
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-      {sets.map((s, i) => {
-        const p1 = s.player1 ?? s.p1 ?? 0;
-        const p2 = s.player2 ?? s.p2 ?? 0;
-        const isCurrent = i === currentIdx && !isCompleted;
-        return (
-          <div
-            key={i}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 4,
-              padding: isCurrent ? '4px 10px' : '2px 8px',
-              borderRadius: 8,
-              background: isCurrent ? 'rgba(0,255,136,0.1)' : 'rgba(255,255,255,0.06)',
-              border: `1px solid ${isCurrent ? 'rgba(0,255,136,0.3)' : 'rgba(255,255,255,0.1)'}`,
-            }}
-          >
-            <span style={{
-              fontSize: isCurrent ? 18 : 13,
-              fontWeight: 900,
-              color: p1 > p2 ? C.green : C.white,
-              minWidth: isCurrent ? 22 : 16,
-              textAlign: 'center',
-            }}>{p1}</span>
-            <span style={{ color: C.dim, fontSize: isCurrent ? 14 : 11 }}>–</span>
-            <span style={{
-              fontSize: isCurrent ? 18 : 13,
-              fontWeight: 900,
-              color: p2 > p1 ? C.green : C.white,
-              minWidth: isCurrent ? 22 : 16,
-              textAlign: 'center',
-            }}>{p2}</span>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
 /* ─── single match card ──────────────────────────────────────── */
 function MatchCard({ match, isCompleted }) {
   const p1Name = getPlayerName(match, 1);
   const p2Name = getPlayerName(match, 2);
   const score  = match.scoreData || match.score;
-  const isP1Winner = isCompleted && match.winnerId && match.winnerId === (match.player1Id || match.team1Player1Id);
-  const isP2Winner = isCompleted && match.winnerId && match.winnerId !== (match.player1Id || match.team1Player1Id) && match.winnerId;
+  const sets   = score?.sets || [];
+  const currentIdx = isCompleted
+    ? sets.length - 1
+    : (score?.currentSet ?? sets.length - 1);
+  const setsToWin = score?.matchConfig?.setsToWin || 2;
+
+  // Compute how many sets each player has won
+  let p1SetWins = 0, p2SetWins = 0;
+  sets.forEach((s, i) => {
+    if (isCompleted || i < currentIdx) {
+      const sp1 = s.player1 ?? s.p1 ?? 0;
+      const sp2 = s.player2 ?? s.p2 ?? 0;
+      if (sp1 > sp2) p1SetWins++;
+      else if (sp2 > sp1) p2SetWins++;
+    }
+  });
+
+  // Current set lead
+  const curSet = sets[currentIdx] || null;
+  const curP1  = curSet?.player1 ?? curSet?.p1 ?? 0;
+  const curP2  = curSet?.player2 ?? curSet?.p2 ?? 0;
+  const lead   = curP1 - curP2;
+
+  const isP1Winner = isCompleted && match.winnerId &&
+    match.winnerId === (match.player1Id || match.team1Player1Id);
+  const isP2Winner = isCompleted && match.winnerId && !isP1Winner;
+
+  const p1Short = p1Name.split(' ')[0];
+  const p2Short = p2Name.split(' ')[0];
 
   return (
-    <div
-      style={{
-        background: C.card,
-        border: `1px solid ${isCompleted ? 'rgba(255,255,255,0.08)' : 'rgba(0,255,136,0.2)'}`,
-        borderRadius: 16,
-        padding: '16px',
-        position: 'relative',
-        overflow: 'hidden',
-      }}
-    >
-      {/* top stripe for live */}
+    <div style={{
+      background: C.card,
+      border: `1px solid ${isCompleted ? 'rgba(255,215,0,0.12)' : 'rgba(0,255,136,0.18)'}`,
+      borderRadius: 20,
+      overflow: 'hidden',
+    }}>
+      {/* live gradient stripe */}
       {!isCompleted && (
-        <div style={{
-          position: 'absolute', top: 0, left: 0, right: 0, height: 2,
-          background: 'linear-gradient(90deg, #00ff88, #00d4ff)',
-        }} />
+        <div style={{ height: 3, background: 'linear-gradient(90deg, #00ff88, #00d4ff)' }} />
       )}
 
-      {/* header row: status + category + court */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          {!isCompleted ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+      <div style={{ padding: '14px 16px' }}>
+
+        {/* ── header: status • category • court • # ── */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            {!isCompleted ? (
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 4,
+                background: 'rgba(255,68,102,0.15)', padding: '3px 9px',
+                borderRadius: 20, border: '1px solid rgba(255,68,102,0.3)',
+              }}>
+                <span style={{
+                  width: 6, height: 6, borderRadius: '50%',
+                  background: C.red, boxShadow: `0 0 6px ${C.red}`,
+                  animation: 'livePulse 1.4s ease-in-out infinite',
+                  display: 'inline-block',
+                }} />
+                <span style={{ fontSize: 10, fontWeight: 800, color: C.red, letterSpacing: 1 }}>LIVE</span>
+              </div>
+            ) : (
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 4,
+                background: 'rgba(255,215,0,0.1)', padding: '3px 9px',
+                borderRadius: 20, border: '1px solid rgba(255,215,0,0.25)',
+              }}>
+                <Trophy size={10} color={C.gold} />
+                <span style={{ fontSize: 10, fontWeight: 700, color: C.gold }}>FINAL</span>
+              </div>
+            )}
+            {match.category?.name && (
               <span style={{
-                width: 8, height: 8, borderRadius: '50%',
-                background: C.red,
-                boxShadow: `0 0 6px ${C.red}`,
-                animation: 'livePulse 1.4s ease-in-out infinite',
-                display: 'inline-block',
-              }} />
-              <span style={{ fontSize: 11, fontWeight: 800, color: C.red, letterSpacing: 1 }}>LIVE</span>
+                fontSize: 10, color: C.cyan, fontWeight: 600,
+                background: 'rgba(0,212,255,0.08)', padding: '2px 8px',
+                borderRadius: 10, border: '1px solid rgba(0,212,255,0.15)',
+              }}>{match.category.name}</span>
+            )}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            {match.courtNumber && (
+              <span style={{
+                fontSize: 10, color: C.sub,
+                background: 'rgba(255,255,255,0.05)', padding: '2px 8px',
+                borderRadius: 10, border: '1px solid rgba(255,255,255,0.08)',
+              }}>Court {match.courtNumber}</span>
+            )}
+            <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)' }}>#{match.matchNumber}</span>
+          </div>
+        </div>
+
+        {/* ── players + set-win dots ── */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 14 }}>
+          {/* P1 */}
+          <div style={{ flex: 1, textAlign: 'right' }}>
+            <p style={{
+              fontSize: 15, fontWeight: 800,
+              color: isP1Winner ? C.green : C.white,
+              margin: '0 0 6px', lineHeight: 1.2,
+            }}>
+              {p1Name}{isP1Winner ? ' 🏆' : ''}
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 4 }}>
+              {Array.from({ length: setsToWin }).map((_, i) => (
+                <div key={i} style={{
+                  width: 9, height: 9, borderRadius: '50%',
+                  background: i < p1SetWins ? C.green : 'rgba(255,255,255,0.1)',
+                  border: `1.5px solid ${i < p1SetWins ? C.green : 'rgba(255,255,255,0.18)'}`,
+                  boxShadow: i < p1SetWins ? `0 0 5px ${C.green}70` : 'none',
+                }} />
+              ))}
             </div>
-          ) : (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-              <Trophy size={12} color={C.gold} />
-              <span style={{ fontSize: 11, fontWeight: 700, color: C.gold }}>COMPLETED</span>
+          </div>
+
+          {/* VS divider */}
+          <div style={{
+            flexShrink: 0, paddingTop: 2,
+            fontSize: 11, fontWeight: 700,
+            color: 'rgba(255,255,255,0.18)',
+          }}>VS</div>
+
+          {/* P2 */}
+          <div style={{ flex: 1, textAlign: 'left' }}>
+            <p style={{
+              fontSize: 15, fontWeight: 800,
+              color: isP2Winner ? C.green : C.white,
+              margin: '0 0 6px', lineHeight: 1.2,
+            }}>
+              {isP2Winner ? '🏆 ' : ''}{p2Name}
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'flex-start', gap: 4 }}>
+              {Array.from({ length: setsToWin }).map((_, i) => (
+                <div key={i} style={{
+                  width: 9, height: 9, borderRadius: '50%',
+                  background: i < p2SetWins ? C.cyan : 'rgba(255,255,255,0.1)',
+                  border: `1.5px solid ${i < p2SetWins ? C.cyan : 'rgba(255,255,255,0.18)'}`,
+                  boxShadow: i < p2SetWins ? `0 0 5px ${C.cyan}70` : 'none',
+                }} />
+              ))}
             </div>
-          )}
-          {match.category?.name && (
+          </div>
+        </div>
+
+        {/* ── score table ── */}
+        {sets.length > 0 ? (
+          <div style={{
+            background: 'rgba(0,0,0,0.25)',
+            border: '1px solid rgba(255,255,255,0.06)',
+            borderRadius: 14, overflow: 'hidden', marginBottom: 10,
+          }}>
+            {/* column headers */}
+            <div style={{
+              display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.06)',
+              padding: '5px 12px',
+            }}>
+              <div style={{ flex: 1 }} />
+              {sets.map((_, i) => {
+                const isCur = i === currentIdx && !isCompleted;
+                return (
+                  <div key={i} style={{
+                    width: isCur ? 72 : 44,
+                    textAlign: 'center', fontSize: 9, fontWeight: 700,
+                    color: isCur ? C.green : C.dim,
+                    letterSpacing: 0.5, textTransform: 'uppercase',
+                  }}>
+                    {isCur ? `▶ S${i + 1}` : `S${i + 1}`}
+                  </div>
+                );
+              })}
+              <div style={{ flex: 1 }} />
+            </div>
+
+            {/* P1 row */}
+            <div style={{ display: 'flex', alignItems: 'center', padding: '8px 12px 4px' }}>
+              <div style={{ flex: 1, textAlign: 'right', paddingRight: 10 }}>
+                <span style={{ fontSize: 11, fontWeight: 600, color: C.sub }}>{p1Short}</span>
+              </div>
+              {sets.map((s, i) => {
+                const sp1 = s.player1 ?? s.p1 ?? 0;
+                const sp2 = s.player2 ?? s.p2 ?? 0;
+                const isCur = i === currentIdx && !isCompleted;
+                const winning = sp1 > sp2;
+                return (
+                  <div key={i} style={{
+                    width: isCur ? 72 : 44,
+                    textAlign: 'center',
+                    fontSize: isCur ? 28 : 16,
+                    fontWeight: 900,
+                    lineHeight: 1,
+                    color: winning
+                      ? (isCur ? C.green : 'rgba(0,255,136,0.75)')
+                      : (isCur ? C.white : C.sub),
+                  }}>{sp1}</div>
+                );
+              })}
+              <div style={{ flex: 1 }} />
+            </div>
+
+            {/* separator */}
+            <div style={{ display: 'flex', padding: '2px 12px' }}>
+              <div style={{ flex: 1 }} />
+              {sets.map((_, i) => {
+                const isCur = i === currentIdx && !isCompleted;
+                return (
+                  <div key={i} style={{
+                    width: isCur ? 72 : 44, textAlign: 'center',
+                    color: 'rgba(255,255,255,0.12)',
+                    fontSize: isCur ? 13 : 9,
+                  }}>—</div>
+                );
+              })}
+              <div style={{ flex: 1 }} />
+            </div>
+
+            {/* P2 row */}
+            <div style={{ display: 'flex', alignItems: 'center', padding: '4px 12px 8px' }}>
+              <div style={{ flex: 1, textAlign: 'right', paddingRight: 10 }}>
+                <span style={{ fontSize: 11, fontWeight: 600, color: C.sub }}>{p2Short}</span>
+              </div>
+              {sets.map((s, i) => {
+                const sp1 = s.player1 ?? s.p1 ?? 0;
+                const sp2 = s.player2 ?? s.p2 ?? 0;
+                const isCur = i === currentIdx && !isCompleted;
+                const winning = sp2 > sp1;
+                return (
+                  <div key={i} style={{
+                    width: isCur ? 72 : 44,
+                    textAlign: 'center',
+                    fontSize: isCur ? 28 : 16,
+                    fontWeight: 900,
+                    lineHeight: 1,
+                    color: winning
+                      ? (isCur ? C.cyan : 'rgba(0,212,255,0.75)')
+                      : (isCur ? C.white : C.sub),
+                  }}>{sp2}</div>
+                );
+              })}
+              <div style={{ flex: 1 }} />
+            </div>
+          </div>
+        ) : (
+          <div style={{
+            background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.05)',
+            borderRadius: 14, padding: '14px', marginBottom: 10, textAlign: 'center',
+          }}>
+            <span style={{ fontSize: 12, color: C.dim }}>Waiting to start…</span>
+          </div>
+        )}
+
+        {/* ── lead indicator ── */}
+        {!isCompleted && curSet && lead !== 0 && (
+          <div style={{ textAlign: 'center', marginBottom: 10 }}>
             <span style={{
-              fontSize: 11, color: C.cyan, fontWeight: 600,
-              background: 'rgba(0,212,255,0.1)', padding: '2px 7px', borderRadius: 6,
-            }}>{match.category.name}</span>
-          )}
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          {match.courtNumber && (
-            <span style={{ fontSize: 11, color: C.dim }}>Court {match.courtNumber}</span>
-          )}
-          <span style={{ fontSize: 11, color: C.dim }}>
-            #{match.matchNumber}
-          </span>
-        </div>
-      </div>
+              fontSize: 11, fontWeight: 700,
+              color: lead > 0 ? C.green : C.cyan,
+              background: lead > 0 ? 'rgba(0,255,136,0.08)' : 'rgba(0,212,255,0.08)',
+              padding: '3px 14px', borderRadius: 20,
+              border: `1px solid ${lead > 0 ? 'rgba(0,255,136,0.2)' : 'rgba(0,212,255,0.2)'}`,
+            }}>
+              {lead > 0 ? p1Short : p2Short} leads +{Math.abs(lead)}
+            </span>
+          </div>
+        )}
+        {!isCompleted && curSet && lead === 0 && (curP1 > 0 || curP2 > 0) && (
+          <div style={{ textAlign: 'center', marginBottom: 10 }}>
+            <span style={{
+              fontSize: 11, fontWeight: 700, color: C.gold,
+              background: 'rgba(255,215,0,0.08)', padding: '3px 14px',
+              borderRadius: 20, border: '1px solid rgba(255,215,0,0.2)',
+            }}>Tied {curP1}–{curP2}</span>
+          </div>
+        )}
 
-      {/* players VS row */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-        {/* player 1 */}
-        <div style={{ flex: 1, textAlign: 'right' }}>
-          <p style={{
-            fontSize: 15, fontWeight: 800,
-            color: isP1Winner ? C.green : C.white,
-            margin: 0, lineHeight: 1.2,
-          }}>{p1Name}</p>
-          {isP1Winner && (
-            <span style={{ fontSize: 10, color: C.green, fontWeight: 700 }}>Winner ✓</span>
-          )}
-        </div>
-
-        {/* VS badge */}
+        {/* ── footer ── */}
         <div style={{
-          flexShrink: 0,
-          width: 34, height: 34,
-          borderRadius: '50%',
-          background: 'rgba(255,255,255,0.06)',
-          border: '1px solid rgba(255,255,255,0.12)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 11, fontWeight: 800, color: C.dim,
-        }}>VS</div>
-
-        {/* player 2 */}
-        <div style={{ flex: 1, textAlign: 'left' }}>
-          <p style={{
-            fontSize: 15, fontWeight: 800,
-            color: isP2Winner ? C.green : C.white,
-            margin: 0, lineHeight: 1.2,
-          }}>{p2Name}</p>
-          {isP2Winner && (
-            <span style={{ fontSize: 10, color: C.green, fontWeight: 700 }}>Winner ✓</span>
+          gap: 8, paddingTop: 10,
+          borderTop: '1px solid rgba(255,255,255,0.05)',
+        }}>
+          <Clock size={10} color={C.dim} />
+          <span style={{ fontSize: 10, color: C.dim }}>
+            {isCompleted
+              ? `Ended ${timeAgo(match.completedAt)}`
+              : `Started ${timeAgo(match.startedAt)}`}
+          </span>
+          {sets.length > 0 && (
+            <>
+              <span style={{ color: 'rgba(255,255,255,0.1)', fontSize: 10 }}>•</span>
+              <span style={{ fontSize: 10, color: C.dim }}>
+                {isCompleted
+                  ? `${sets.length} set${sets.length > 1 ? 's' : ''} played`
+                  : `Set ${currentIdx + 1}${sets.length > 1 ? ` of ${sets.length}` : ''}`}
+              </span>
+            </>
           )}
         </div>
-      </div>
 
-      {/* score */}
-      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}>
-        <ScoreDisplay
-          scoreData={score}
-          isCompleted={isCompleted}
-          winnerId={match.winnerId}
-          player1Id={match.player1Id}
-          player2Id={match.player2Id}
-        />
-      </div>
-
-      {/* footer: time */}
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 4 }}>
-        <Clock size={11} color={C.dim} />
-        <span style={{ fontSize: 11, color: C.dim }}>
-          {isCompleted
-            ? `Ended ${timeAgo(match.completedAt)}`
-            : `Started ${timeAgo(match.startedAt)}`}
-        </span>
       </div>
     </div>
   );

@@ -2,12 +2,14 @@
  * MatchifyLogo — Matchify.pro PNG logo
  * Aspect ratio: ~1.092:1 (1083×992)
  *
- * mix-blend-mode: screen makes dark background pixels invisible regardless of
- * what color sits behind the logo (purple navbar, dark hero, white, anything).
- * Only the bright elements — teal shield, M, sparkles, text — remain visible.
+ * The logo PNG has teal sparkle particles at the top corners which create a
+ * visible "card border" when displayed small. We clip 12% from top and 3%
+ * from bottom (sparkles live there; shield+text are vertically centered),
+ * then use mix-blend-mode:screen so the remaining dark background dissolves
+ * into whatever background sits behind the logo.
  *
  * Props:
- *   size       {number}  — height in px (default 40)
+ *   size       {number}  — visible height in px (default 40)
  *   variant    {'full'|'icon'|'text'}
  *   className  {string}
  */
@@ -16,25 +18,46 @@ export default function MatchifyLogo({
   variant = 'full',
   className = '',
 }) {
-  const RATIO = 1.092; // 1083 / 992
+  const RATIO = 1.092; // full-image width / height  (1083 / 992)
+
+  // Clip percentages — removes corner sparkles, keeps shield + text
+  const CLIP_TOP    = 0.12;
+  const CLIP_BOTTOM = 0.03;
+
+  // Full render height before clipping
+  const fullH = Math.round(size / (1 - CLIP_TOP - CLIP_BOTTOM));
+  const fullW = Math.round(fullH * RATIO);
+
+  // Visible window
+  const visH = size;
+  const visW = fullW;
+
+  const offsetTop = Math.round(fullH * CLIP_TOP);
 
   return (
     <span
       className={className}
-      style={{ display: 'inline-flex', alignItems: 'center' }}
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        overflow: 'hidden',
+        height: `${visH}px`,
+        width: `${visW}px`,
+        flexShrink: 0,
+      }}
     >
       <img
         src="/logo.png"
         alt="Matchify.pro"
         draggable={false}
         style={{
-          height: `${size}px`,
-          width: `${Math.round(size * RATIO)}px`,
+          height: `${fullH}px`,
+          width: `${fullW}px`,
           display: 'block',
-          objectFit: 'contain',
           flexShrink: 0,
+          marginTop: `-${offsetTop}px`,
           mixBlendMode: 'screen',
-          filter: 'brightness(1.15) drop-shadow(0 0 8px rgba(0,212,255,0.4))',
+          filter: 'brightness(1.1)',
         }}
       />
     </span>

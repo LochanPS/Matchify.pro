@@ -172,8 +172,8 @@ const Navbar = () => {
 
   // ── Main navbar ───────────────────────────────────────────────────────────
   return (
-    <header className="sticky top-0 z-50 backdrop-blur-lg border-b shadow-lg shadow-purple-900/40"
-      style={{ background: 'linear-gradient(135deg, rgba(88,28,135,0.97) 0%, rgba(67,20,100,0.97) 50%, rgba(49,15,75,0.97) 100%)', borderColor: 'rgba(168,85,247,0.3)' }}>
+    <header className="sticky top-0 z-50 backdrop-blur-lg border-b shadow-lg shadow-black/40"
+      style={{ background: 'rgba(7,7,26,0.97)', borderColor: 'rgba(0,212,255,0.15)' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16">
 

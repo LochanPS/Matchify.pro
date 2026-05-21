@@ -1,5 +1,54 @@
 import api from '../utils/api'; // 20s timeout + auth interceptor on every call
 
+/**
+ * Multipart file upload via native fetch (NOT axios).
+ *
+ * Why not axios for uploads?
+ * The shared axios instance has `Content-Type: application/json` as a
+ * default header. Axios v1.x does NOT reliably clear this default when the
+ * request body is FormData, so the server receives Content-Type: application/json
+ * instead of multipart/form-data;boundary=.... Multer cannot parse JSON-typed
+ * bodies — req.files is always undefined → 400 "No files uploaded".
+ *
+ * With native fetch + FormData body + NO Content-Type header, the browser
+ * always sets the correct `multipart/form-data; boundary=<uuid>` automatically.
+ * This is the only fully reliable approach for multipart uploads in this setup.
+ */
+async function _fetchUpload(path, formData, timeoutMs = 120000) {
+  const token = localStorage.getItem('token');
+  const baseUrl = api.defaults.baseURL || 'https://matchify-probackend.vercel.app/api';
+  const url = `${baseUrl}${path}`;
+
+  const controller = new AbortController();
+  const tid = setTimeout(() => controller.abort(), timeoutMs);
+
+  let response;
+  try {
+    response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        // Authorization only — intentionally no Content-Type so browser sets
+        // multipart/form-data;boundary=... automatically from the FormData body.
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: formData,
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(tid);
+  }
+
+  let data;
+  try { data = await response.json(); } catch { data = {}; }
+
+  if (!response.ok) {
+    const err = new Error(data?.error || data?.message || `Upload failed (${response.status})`);
+    err.response = { status: response.status, data };
+    throw err;
+  }
+  return data;
+}
+
 export const tournamentAPI = {
   // Get all tournaments (public)
   getTournaments: async (params = {}) => {
@@ -33,20 +82,11 @@ export const tournamentAPI = {
   },
 
   // Upload tournament posters (organizer only)
+  // Uses native fetch — see _fetchUpload comment above for why not axios.
   uploadPosters: async (id, files) => {
     const formData = new FormData();
-    files.forEach((file) => {
-      formData.append('posters', file);
-    });
-    // DO NOT set Content-Type manually — axios sets multipart/form-data WITH boundary
-    // automatically when it detects FormData. Setting it manually strips the boundary
-    // parameter, breaking multer's multipart parser on the server.
-    const response = await api.post(
-      `/tournaments/${id}/posters`,
-      formData,
-      { timeout: 120000 } // 2 min — image upload + Cloudinary processing
-    );
-    return response.data;
+    files.forEach((file) => formData.append('posters', file));
+    return _fetchUpload(`/tournaments/${id}/posters`, formData);
   },
 
   // Category endpoints
@@ -79,18 +119,13 @@ export const tournamentAPI = {
   },
 
   // Upload payment QR code (organizer only)
+  // Uses native fetch — see _fetchUpload comment above for why not axios.
   uploadPaymentQR: async (tournamentId, file, upiId, accountHolderName) => {
     const formData = new FormData();
     formData.append('paymentQR', file);
     if (upiId) formData.append('upiId', upiId);
     if (accountHolderName) formData.append('accountHolderName', accountHolderName);
-    // DO NOT set Content-Type manually — same reason as uploadPosters above
-    const response = await api.post(
-      `/tournaments/${tournamentId}/payment-qr`,
-      formData,
-      { timeout: 120000 }
-    );
-    return response.data;
+    return _fetchUpload(`/tournaments/${tournamentId}/payment-qr`, formData);
   },
 
   // Delete a poster (organizer only)

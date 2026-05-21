@@ -180,7 +180,7 @@ const Navbar = () => {
           {/* Logo + desktop nav */}
           <div className="flex items-center gap-6 sm:gap-8">
             <Link to="/" className="hover:opacity-90 transition-opacity flex-shrink-0 ml-2">
-              <MatchifyLogo size={64} variant="full" />
+              <MatchifyLogo size={64} onPurple />
             </Link>
             <nav className="hidden md:flex items-center gap-1">
               <NavLink to="/tournaments" active={isActiveLink('/tournaments')}><Trophy className="w-4 h-4" />Tournaments</NavLink>

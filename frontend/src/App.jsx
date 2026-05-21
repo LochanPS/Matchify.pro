@@ -1,7 +1,8 @@
 // Matchify.pro - Premier Badminton Tournament Platform
 // Version: 1.0.6 - Chunk error boundary, lazy-loaded routes
 // Last Updated: May 19, 2026
-import { lazy, Suspense, Component } from 'react'
+import { lazy, Suspense, Component, useEffect } from 'react'
+import api from './utils/api'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import AnimatedBackground from './components/AnimatedBackground'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
@@ -182,6 +183,18 @@ function PageLoader() {
 function AppContent() {
   const { user, showProfileCompletion, showProfilePhotoModal, completeProfile } = useAuth();
   const location = useLocation();
+
+  // ── Option D: Keepwarm ping ──────────────────────────────────────────────
+  // Ping /api/health every 8 minutes to prevent Vercel cold starts.
+  // Silent — no error shown, no retry, no auth needed.
+  useEffect(() => {
+    const ping = () =>
+      api.get('/health', { _skipLogout: true, _noRetry: true, timeout: 5000 })
+        .catch(() => {}); // always silent
+    ping(); // warm up immediately on app load
+    const t = setInterval(ping, 8 * 60 * 1000);
+    return () => clearInterval(t);
+  }, []);
   
   // Check if impersonating
   const isImpersonating = () => {

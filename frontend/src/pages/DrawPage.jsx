@@ -1,4 +1,5 @@
 ﻿import { getErrorMessage } from '../utils/errorMessage';
+import { getDrawCache, setDrawCache } from '../utils/drawCache';
 /**
  * DrawPage - Tournament Bracket Display
  * 
@@ -125,8 +126,24 @@ const DrawPage = () => {
   const fetchDrawPageFull = async (catId, _retryCount = 0) => {
     if (!tournamentId || !catId) return;
 
-    setLoading(true);
-    setBracketLoading(true);
+    // ── Option A: show cached draw instantly ─────────────────────────────────
+    const cached = getDrawCache(tournamentId, catId);
+    if (cached) {
+      // Apply cached data immediately — 0ms perceived load
+      if (cached.tournament) setTournament(cached.tournament);
+      if (cached.categories) setCategories(cached.categories);
+      if (cached.matches)    setMatches(cached.matches);
+      if (cached.stats)      setTournamentStats(cached.stats);
+      if (cached.activeCategory) setActiveCategory(cached.activeCategory);
+      setBracket(cached.bracket ?? null);
+      setLoading(false);
+      setBracketLoading(false);
+      // Fall through — fetch fresh in background without showing spinner
+    } else {
+      setLoading(true);
+      setBracketLoading(true);
+    }
+
     setError(null);
 
     try {
@@ -136,7 +153,7 @@ const DrawPage = () => {
       );
 
       if (!response.data.success) {
-        setBracket(null);
+        if (!cached) setBracket(null);
         return;
       }
 
@@ -160,13 +177,29 @@ const DrawPage = () => {
         : (cats || [])[0];
       if (active) setActiveCategory(active);
 
+      let bracketData = null;
       if (draw) {
-        const bracketData = draw.bracketJson;
-        setBracket(typeof bracketData === 'string' ? JSON.parse(bracketData) : bracketData);
+        bracketData = draw.bracketJson;
+        if (typeof bracketData === 'string') bracketData = JSON.parse(bracketData);
+        setBracket(bracketData);
       } else {
-        setBracket(null);
+        if (!cached) setBracket(null);
       }
+
+      // Save fresh data to cache for next visit
+      setDrawCache(tournamentId, catId, {
+        tournament: t,
+        categories: cats || [],
+        matches: fetchedMatches || [],
+        stats,
+        bracket: bracketData,
+        activeCategory: active || null,
+      });
+
     } catch (err) {
+      // If user is already seeing cached data, suppress the error silently
+      if (cached) return;
+
       const status = err.response?.status;
       // Auto-retry once on 500 (Vercel cold start / transient DB issue) after 2s
       if (status === 500 && _retryCount === 0) {

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { tournamentAPI } from '../api/tournament';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../utils/api';
+import { getDrawCache, setDrawCache } from '../utils/drawCache';
 import {
   ArrowLeft,
   GitBranch,
@@ -75,23 +76,36 @@ const PlayerViewDrawsPage = () => {
   };
 
   const fetchDraw = async (categoryId, silent = false) => {
-    if (!silent) setLoadingDraw(true);
+    // Option A: show cached data instantly, fetch fresh in background
+    const cached = getDrawCache(id, categoryId);
+    if (cached) {
+      setDraw(cached.draw ?? null);
+      setCategoryMatches(cached.categoryMatches ?? []);
+      setLoadingDraw(false);
+      // Fall through — fetch fresh without showing spinner
+    } else if (!silent) {
+      setLoadingDraw(true);
+    }
+
     try {
       const [drawResponse, matchesResponse] = await Promise.all([
         api.get(`/tournaments/${id}/categories/${categoryId}/draw`),
         api.get(`/tournaments/${id}/categories/${categoryId}/matches`).catch(() => ({ data: { matches: [] } }))
       ]);
-      if (drawResponse.data?.success && drawResponse.data.draw) {
-        setDraw(drawResponse.data.draw);
-      } else {
-        setDraw(null);
-      }
-      setCategoryMatches(matchesResponse.data?.matches || []);
+      const freshDraw = (drawResponse.data?.success && drawResponse.data.draw)
+        ? drawResponse.data.draw
+        : null;
+      const freshMatches = matchesResponse.data?.matches || [];
+      setDraw(freshDraw);
+      setCategoryMatches(freshMatches);
+      // Save to cache on success
+      setDrawCache(id, categoryId, { draw: freshDraw, categoryMatches: freshMatches });
     } catch (err) {
       if (err.response?.status === 404) {
         setDraw(null);
+      } else if (cached) {
+        // Cache is showing — suppress error silently
       } else if (!silent) {
-        // Don't show raw API error — keep message friendly
         setError('Draw unavailable right now. Please try again shortly.');
       }
     } finally {

@@ -17,7 +17,7 @@ import {
   Upload,
   X,
   QrCode,
-  Image,
+  Image as ImageIcon,
   MapPin,
   Info,
 } from 'lucide-react';
@@ -636,7 +636,7 @@ const EditTournament = () => {
               style={{ borderBottom: `1px solid ${B.border}`, background: 'rgba(251,191,36,0.04)' }}>
               <div className="w-8 h-8 rounded-xl flex items-center justify-center"
                 style={{ background: 'rgba(251,191,36,0.15)', border: '1px solid rgba(251,191,36,0.3)' }}>
-                <Image className="w-4 h-4" style={{ color: B.amber }} />
+                <ImageIcon className="w-4 h-4" style={{ color: B.amber }} />
               </div>
               <div className="flex-1">
                 <h2 className="text-sm font-black text-white">Tournament Posters</h2>
@@ -696,7 +696,7 @@ const EditTournament = () => {
               {existingPosterCount === 0 && newPosterPreviews.length === 0 && (
                 <div className="flex flex-col items-center py-8 rounded-xl"
                   style={{ background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.1)' }}>
-                  <Image className="w-10 h-10 mb-2" style={{ color: 'rgba(255,255,255,0.2)' }} />
+                  <ImageIcon className="w-10 h-10 mb-2" style={{ color: 'rgba(255,255,255,0.2)' }} />
                   <p className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>No posters uploaded yet</p>
                   <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.2)' }}>Posters appear on the tournament page</p>
                 </div>

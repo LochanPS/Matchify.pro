@@ -270,11 +270,9 @@ export default function TournamentRegistrationPage() {
 
   // ── Submit registration ──────────────────────────────────────────────────
   const handleRegister = async () => {
-    if (!paymentScreenshot) { setError('Upload payment screenshot to continue'); return; }
     const trimmedUtr = utrId.trim();
-    if (!trimmedUtr) { setError('Enter the UTR / Transaction ID from your UPI payment'); return; }
-    if (!/^\d{12}$/.test(trimmedUtr) && !/^[A-Z0-9]{10,25}$/i.test(trimmedUtr)) {
-      setError('Enter a valid UTR ID (12-digit number from your UPI app)'); return;
+    if (!trimmedUtr && !paymentScreenshot) {
+      setError('Provide UTR / Transaction ID or upload payment screenshot (or both)'); return;
     }
     setSubmitting(true);
     setError('');
@@ -287,8 +285,8 @@ export default function TournamentRegistrationPage() {
         if (partnerInfo[catId]) partnerEmails[catId] = partnerInfo[catId].email;
       });
       formData.append('partnerEmails', JSON.stringify(partnerEmails));
-      formData.append('utrId', trimmedUtr);
-      formData.append('paymentScreenshot', paymentScreenshot);
+      if (trimmedUtr) formData.append('utrId', trimmedUtr);
+      if (paymentScreenshot) formData.append('paymentScreenshot', paymentScreenshot);
       await registrationAPI.createRegistrationWithScreenshot(formData);
       clearDraft();
       setShowSuccessModal(true);
@@ -730,7 +728,7 @@ export default function TournamentRegistrationPage() {
                 <div>
                   <p className="text-sm font-black text-white">Upload Payment Screenshot</p>
                   <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>
-                    {paymentScreenshot ? 'Screenshot ready' : 'Required for verification'}
+                    {paymentScreenshot ? 'Screenshot ready' : 'Optional if UTR / Transaction ID provided'}
                   </p>
                 </div>
               </div>
@@ -784,12 +782,12 @@ export default function TournamentRegistrationPage() {
               </button>
               <button
                 onClick={handleRegister}
-                disabled={submitting || !paymentScreenshot || !utrId.trim()}
+                disabled={submitting || (!paymentScreenshot && !utrId.trim())}
                 className="flex-1 py-4 rounded-2xl font-black text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 style={{
-                  background: (paymentScreenshot && utrId.trim()) ? 'linear-gradient(135deg,#00ff88,#00ff88)' : 'rgba(255,255,255,0.08)',
-                  color: (paymentScreenshot && utrId.trim()) ? '#07071a' : 'rgba(255,255,255,0.4)',
-                  boxShadow: (paymentScreenshot && utrId.trim()) ? '0 4px 20px rgba(0,255,136,0.4)' : 'none',
+                  background: (paymentScreenshot || utrId.trim()) ? 'linear-gradient(135deg,#00ff88,#00ff88)' : 'rgba(255,255,255,0.08)',
+                  color: (paymentScreenshot || utrId.trim()) ? '#07071a' : 'rgba(255,255,255,0.4)',
+                  boxShadow: (paymentScreenshot || utrId.trim()) ? '0 4px 20px rgba(0,255,136,0.4)' : 'none',
                 }}
               >
                 {submitting ? (

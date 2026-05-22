@@ -2805,129 +2805,55 @@ const arrangeKnockoutMatchups = async (req, res) => {
       });
     }
 
-    // STEP 7: Reset knockout match player assignments (but preserve parent relationships)
-    console.log('🧹 Resetting knockout match player assignments in database');
-    for (const match of knockoutMatches) {
-      await prisma.match.update({
-        where: { id: match.id },
-        data: {
-          player1Id: null,
-          player2Id: null,
-          status: 'PENDING',
-          winnerId: null,
-          scoreJson: null,
-          startedAt: null,
-          completedAt: null,
-          umpireId: null
-          // NOTE: Do NOT reset parentMatchId and winnerPosition - they should persist
-        }
-      });
-    }
+    // STEP 7: Reset all knockout match player assignments in ONE query (preserve parentMatchId/winnerPosition)
+    console.log('🧹 Resetting knockout match player assignments');
+    await prisma.match.updateMany({
+      where: { tournamentId, categoryId, stage: 'KNOCKOUT' },
+      data: {
+        player1Id: null,
+        player2Id: null,
+        status: 'PENDING',
+        winnerId: null,
+        scoreJson: null,
+        startedAt: null,
+        completedAt: null,
+        umpireId: null
+      }
+    });
 
-    // STEP 8: Assign players to first round knockout matches in database
+    // STEP 8: Assign players to first-round matches in ONE transaction
     const maxRound = Math.max(...knockoutMatches.map(m => m.round));
     const firstRoundMatches = knockoutMatches.filter(m => m.round === maxRound);
-    
-    console.log(`🎯 Received ${knockoutSlots.length} knockout slots from frontend:`);
-    knockoutSlots.forEach((slot, i) => {
-      console.log(`   Slot ${i + 1}: ${slot.player1?.name || 'NULL'} vs ${slot.player2?.name || 'NULL'}`);
-    });
-    
-    console.log(`🎯 Found ${firstRoundMatches.length} first round matches in database`);
-    firstRoundMatches.forEach((match, i) => {
-      console.log(`   DB Match ${i + 1}: matchNumber=${match.matchNumber}, id=${match.id}`);
-    });
-    
-    console.log(`🎯 Assigning players to first round (Round ${maxRound}) matches in database`);
-    
-    for (let i = 0; i < knockoutSlots.length && i < firstRoundMatches.length; i++) {
-      const slot = knockoutSlots[i];
-      const isBye = slot.player1 && !slot.player2;
 
-      await prisma.match.update({
-        where: { id: firstRoundMatches[i].id },
-        data: {
-          player1Id: slot.player1?.id || null,
-          player2Id: slot.player2?.id || null,
-          status: isBye ? 'COMPLETED' : 'PENDING',
-          winnerId: isBye ? slot.player1.id : null,
-          completedAt: isBye ? new Date() : null
-        }
-      });
+    console.log(`🎯 Assigning ${knockoutSlots.length} slots to first round (Round ${maxRound})`);
 
-      if (isBye) {
-        console.log(`   ✓ Match ${i + 1}: ${slot.player1.name} vs BYE → COMPLETED (auto-advance)`);
-      } else {
-        console.log(`   ✓ Match ${i + 1}: ${slot.player1?.name || 'TBD'} vs ${slot.player2?.name || 'TBD'}`);
-      }
-    }
-
-    console.log('✅ Knockout matchups arranged successfully!');
-
-    // STEP 9: Set parent match relationships for winner advancement
-    console.log('🔗 Setting parent match relationships...');
-    
-    // Get all knockout matches sorted by round
-    const allKnockoutMatches = await prisma.match.findMany({
-      where: {
-        tournamentId,
-        categoryId,
-        stage: 'KNOCKOUT'
-      },
-      orderBy: [
-        { round: 'desc' },
-        { matchNumber: 'asc' }
-      ]
-    });
-    
-    // For each round (except final), set parent relationships
-    const rounds = [...new Set(allKnockoutMatches.map(m => m.round))].sort((a, b) => b - a);
-    
-    for (const currentRound of rounds) {
-      if (currentRound === 1) continue; // Skip final (no parent)
-      
-      const roundMatches = allKnockoutMatches.filter(m => m.round === currentRound);
-      const parentRound = currentRound - 1;
-      const parentRoundMatches = allKnockoutMatches.filter(m => m.round === parentRound);
-      
-      for (let i = 0; i < roundMatches.length; i++) {
-        const match = roundMatches[i];
-        const parentMatchIndex = Math.floor(i / 2);
-        
-        // Get parent match by index in the parent round, not by matchNumber
-        const parentMatch = parentRoundMatches[parentMatchIndex];
-        
-        if (parentMatch) {
-          const winnerPosition = i % 2 === 0 ? 'player1' : 'player2';
-          
-          await prisma.match.update({
-            where: { id: match.id },
+    await prisma.$transaction(
+      knockoutSlots
+        .slice(0, firstRoundMatches.length)
+        .map((slot, i) => {
+          const isBye = slot.player1 && !slot.player2;
+          if (isBye) console.log(`   Slot ${i + 1}: ${slot.player1.name} vs BYE → auto-advance`);
+          else console.log(`   Slot ${i + 1}: ${slot.player1?.name || 'TBD'} vs ${slot.player2?.name || 'TBD'}`);
+          return prisma.match.update({
+            where: { id: firstRoundMatches[i].id },
             data: {
-              parentMatchId: parentMatch.id,
-              winnerPosition: winnerPosition
+              player1Id: slot.player1?.id || null,
+              player2Id: slot.player2?.id || null,
+              status: isBye ? 'COMPLETED' : 'PENDING',
+              winnerId: isBye ? slot.player1.id : null,
+              completedAt: isBye ? new Date() : null
             }
           });
-          
-          console.log(`   ✓ Match ${match.matchNumber} (Round ${currentRound}) → Parent: Match ${parentMatch.matchNumber} (Round ${parentRound}) as ${winnerPosition}`);
-        }
-      }
-    }
-    
-    console.log('✅ Parent relationships set!');
+        })
+    );
 
-    // Fetch updated draw with all data
-    const finalDraw = await prisma.draw.findUnique({
-      where: { id: draw.id },
-      include: {
-        tournament: true,
-        category: true
-      }
-    });
+    // STEP 9: Parent relationships — already set when matches were first created.
+    // No need to re-set on re-arrange (bracket structure doesn't change, only players do).
+    console.log('✅ Knockout draw arranged successfully!');
 
     res.json({
       success: true,
-      message: 'Knockout matchups arranged successfully',
-      draw: finalDraw
+      message: 'Knockout matchups arranged successfully'
     });
   } catch (error) {
     console.error('❌ Arrange knockout matchups error:', error);

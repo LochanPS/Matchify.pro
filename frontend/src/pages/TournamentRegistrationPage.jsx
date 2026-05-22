@@ -111,6 +111,7 @@ export default function TournamentRegistrationPage() {
   const [step, setStep] = useState(1);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [alreadyRegisteredCategories, setAlreadyRegisteredCategories] = useState([]);
+  const [existingRegistrations, setExistingRegistrations] = useState([]); // full objects for already-registered cats
   const [paymentSettings, setPaymentSettings] = useState(null);
   const [isRegistrationClosed, setIsRegistrationClosed] = useState(false);
   const [searchingPartner, setSearchingPartner] = useState({});
@@ -178,10 +179,10 @@ export default function TournamentRegistrationPage() {
       ]);
       setTournament(tData.data);
       setCategories(catData.categories || []);
-      const regCatIds = (myRegs.registrations || [])
-        .filter(r => r.tournament.id === id && r.status !== 'cancelled' && r.status !== 'rejected')
-        .map(r => r.category.id);
-      setAlreadyRegisteredCategories(regCatIds);
+      const existingRegs = (myRegs.registrations || [])
+        .filter(r => r.tournament.id === id && r.status !== 'cancelled' && r.status !== 'rejected');
+      setAlreadyRegisteredCategories(existingRegs.map(r => r.category.id));
+      setExistingRegistrations(existingRegs);
     } catch {
       setError('Failed to load tournament details');
     } finally {
@@ -462,14 +463,53 @@ export default function TournamentRegistrationPage() {
         ════════════════════════════════════════════════════════════════ */}
         {step === 1 && (
           <>
-            {/* Already registered notice */}
-            {alreadyRegisteredCategories.length > 0 && (
-              <div className="flex items-start gap-2.5 px-4 py-3 rounded-xl"
-                style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)' }}>
-                <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: '#f87171' }} />
-                <p className="text-xs font-semibold" style={{ color: '#f87171' }}>
-                  Already registered: {getAlreadyRegisteredCategoryNames()}
-                </p>
+            {/* Already registered notice — per-registration status */}
+            {existingRegistrations.length > 0 && (
+              <div className="space-y-2">
+                {existingRegistrations.map(reg => {
+                  const isPending = reg.status === 'pending';
+                  const isConfirmed = reg.status === 'confirmed';
+                  const isSubmitted = reg.paymentStatus === 'submitted';
+                  const isVerified = reg.paymentStatus === 'verified' || reg.paymentStatus === 'completed';
+                  return (
+                    <div
+                      key={reg.id}
+                      className="flex items-start gap-2.5 px-4 py-3 rounded-xl"
+                      style={
+                        isConfirmed
+                          ? { background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.3)' }
+                          : { background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.3)' }
+                      }
+                    >
+                      {isConfirmed
+                        ? <CheckCircleIcon className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: '#00ff88' }} />
+                        : <ClockIcon className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: '#fbbf24' }} />
+                      }
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-bold" style={{ color: isConfirmed ? '#00ff88' : '#fbbf24' }}>
+                          {reg.category.name}:{' '}
+                          {isConfirmed
+                            ? 'Registration confirmed ✓'
+                            : isSubmitted
+                              ? 'Payment submitted — awaiting admin verification'
+                              : 'Registration pending'}
+                        </p>
+                        {isPending && !isVerified && (
+                          <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                            Your registration was received. Check My Registrations for status.
+                          </p>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => navigate('/registrations')}
+                        className="flex-shrink-0 text-xs font-bold px-2.5 py-1 rounded-lg"
+                        style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.12)' }}
+                      >
+                        View
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
             )}
 

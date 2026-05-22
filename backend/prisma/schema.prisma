@@ -687,7 +687,7 @@ model PaymentVerification {
   
   // Payment details
   amount            Float
-  paymentScreenshot String    // Cloudinary URL
+  paymentScreenshot String?   // Cloudinary URL (null when player provides UTR only)
   screenshotPublicId String?  // Cloudinary public ID
   utrId             String?   // UPI Transaction Reference (UTR) shared by player
 

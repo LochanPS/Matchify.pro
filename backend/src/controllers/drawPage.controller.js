@@ -44,6 +44,7 @@ export const getDrawPage = async (req, res) => {
           userId: true,
           guestName: true,
           guestEmail: true,
+          guestPartnerName: true,
           partner: { select: { id: true, name: true } },
           user:    { select: { id: true, name: true } }
         }
@@ -123,9 +124,10 @@ export const getDrawPage = async (req, res) => {
     // Key by userId for real users OR by guest-{regId} for guest registrations
     const partnerMap = {};
     registrations.forEach(reg => {
-      if (!reg.partner) return;
+      const partnerName = reg.partner?.name || reg.guestPartnerName || null;
+      if (!partnerName) return;
       const pid = reg.userId || `guest-${reg.id}`;
-      partnerMap[pid] = reg.partner.name;
+      partnerMap[pid] = partnerName;
     });
 
     // ─── Phase 3: Parse bracket JSON ──────────────────────────────────────────

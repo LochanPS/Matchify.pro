@@ -674,7 +674,7 @@ export default function TournamentRegistrationPage() {
                     `Enter exactly ₹${total} and send`,
                     `On the payment success screen, note the UTR / Transaction ID (12-digit number)`,
                     `Take a screenshot of the success screen`,
-                    `Enter the UTR ID and upload the screenshot below`,
+                    `Enter the UTR / Transaction ID OR upload a screenshot (or both — at least one is required)`,
                     `Admin verifies and confirms your registration`,
                   ].map((step, i) => (
                     <div key={i} className="flex items-start gap-3 mt-2.5">
@@ -695,7 +695,7 @@ export default function TournamentRegistrationPage() {
             <div className="rounded-2xl p-4"
               style={{ background: BRAND.card, border: `1px solid ${BRAND.cardBorder}` }}>
               <label className="block text-sm font-black text-white mb-1">
-                UTR / Transaction ID <span style={{ color: '#f87171' }}>*</span>
+                UTR / Transaction ID
               </label>
               <p className="text-xs mb-3" style={{ color: 'rgba(255,255,255,0.4)' }}>
                 Find this in your UPI app after payment — it's the 12-digit number on the success screen or in SMS
@@ -714,6 +714,16 @@ export default function TournamentRegistrationPage() {
                   outline: 'none',
                 }}
               />
+            </div>
+
+            {/* ── OR divider ────────────────────────────────────────────── */}
+            <div className="flex items-center gap-3">
+              <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.1)' }} />
+              <span className="text-xs font-black px-3 py-1 rounded-full"
+                style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)' }}>
+                OR BOTH — AT LEAST ONE REQUIRED
+              </span>
+              <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.1)' }} />
             </div>
 
             {/* ── Screenshot Upload ─────────────────────────────────────── */}

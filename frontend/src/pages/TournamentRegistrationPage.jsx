@@ -207,6 +207,13 @@ export default function TournamentRegistrationPage() {
       setError('Select at least one category');
       return;
     }
+    const allAlreadyRegistered = selectedCategories.every(catId =>
+      alreadyRegisteredCategories.includes(catId)
+    );
+    if (allAlreadyRegistered) {
+      setError('You are already registered for the selected category. Choose a different category.');
+      return;
+    }
     for (const catId of selectedDoublesCategories) {
       const cat = categories.find(c => c.id === catId);
       const code = partnerCodes[catId];
@@ -549,18 +556,25 @@ export default function TournamentRegistrationPage() {
             )}
 
             {/* Proceed button */}
-            <button
-              onClick={handleProceedToPayment}
-              disabled={selectedCategories.length === 0}
-              className="w-full py-4 rounded-2xl font-black text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-              style={{
-                background: selectedCategories.length > 0 ? 'linear-gradient(135deg,#7c3aed,#a855f7)' : 'rgba(255,255,255,0.08)',
-                color: selectedCategories.length > 0 ? '#fff' : 'rgba(255,255,255,0.4)',
-                boxShadow: selectedCategories.length > 0 ? '0 4px 20px rgba(168,85,247,0.4)' : 'none',
-              }}
-            >
-              Continue to Payment →
-            </button>
+            {(() => {
+              const allAlreadyRegistered = selectedCategories.length > 0 &&
+                selectedCategories.every(catId => alreadyRegisteredCategories.includes(catId));
+              const canProceed = selectedCategories.length > 0 && !allAlreadyRegistered;
+              return (
+                <button
+                  onClick={handleProceedToPayment}
+                  disabled={!canProceed}
+                  className="w-full py-4 rounded-2xl font-black text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                  style={{
+                    background: canProceed ? 'linear-gradient(135deg,#7c3aed,#a855f7)' : 'rgba(255,255,255,0.08)',
+                    color: canProceed ? '#fff' : 'rgba(255,255,255,0.4)',
+                    boxShadow: canProceed ? '0 4px 20px rgba(168,85,247,0.4)' : 'none',
+                  }}
+                >
+                  {allAlreadyRegistered ? 'Already Registered' : 'Continue to Payment →'}
+                </button>
+              );
+            })()}
           </>
         )}
 

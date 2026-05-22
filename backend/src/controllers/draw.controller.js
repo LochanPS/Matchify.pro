@@ -131,7 +131,7 @@ const generateDraw = async (req, res) => {
       where: {
         tournamentId: tournamentId,
         categoryId: categoryId,
-        paymentStatus: 'completed',
+        paymentStatus: { in: ['verified', 'completed'] },
         status: 'confirmed'
       },
       include: {

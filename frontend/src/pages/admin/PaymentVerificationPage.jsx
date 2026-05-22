@@ -21,7 +21,7 @@ const PaymentVerificationPage = () => {
     try {
       setLoading(true);
       const [verificationsData, statsData] = await Promise.all([
-        getPaymentVerifications({ status: filter }),
+        getPaymentVerifications({ status: filter, limit: 200 }),
         getPaymentVerificationStats(),
       ]);
       setVerifications(verificationsData.data);
@@ -160,7 +160,7 @@ const PaymentVerificationPage = () => {
             <p className="text-gray-400 text-lg">No {filter} payments found</p>
           </div>
         ) : (
-          verifications.map((verification) => (
+          verifications.filter(v => v.registration && v.registration.user).map((verification) => (
             <div
               key={verification.id}
               className="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-lg hover:shadow-teal-500/20 transition"

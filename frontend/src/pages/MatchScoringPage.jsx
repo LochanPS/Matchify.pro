@@ -214,6 +214,7 @@ const MatchScoringPage = () => {
   };
 
   const handleEndMatch = async (winnerId) => {
+    if (!winnerId) { setError('Cannot end match: winner not identified. Refresh page and try again.'); return; }
     try {
       setSaving(true);
       const response = await api.put(`/matches/${matchId}/end`, { winnerId, finalScore: score });

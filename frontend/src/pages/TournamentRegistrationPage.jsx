@@ -294,6 +294,17 @@ export default function TournamentRegistrationPage() {
     if (!trimmedUtr && !paymentScreenshot) {
       setError('Provide UTR / Transaction ID or upload payment screenshot (or both)'); return;
     }
+    // Safety: re-validate doubles partner before submit (guards against mode-switching edge cases)
+    for (const catId of selectedDoublesCategories) {
+      const cat = categories.find(c => c.id === catId);
+      const mode = partnerMode[catId] || 'id';
+      if (mode === 'id' && !partnerInfo[catId]) {
+        setError(`Partner not verified for ${cat?.name}. Go back and verify partner ID.`); return;
+      }
+      if (mode === 'name' && !partnerNames[catId]?.trim()) {
+        setError(`Partner name missing for ${cat?.name}. Go back and enter partner name.`); return;
+      }
+    }
     setSubmitting(true);
     setError('');
     try {

@@ -26,51 +26,22 @@ router.get('/', authenticate, requireAdmin, async (req, res) => {
       prisma.paymentVerification.count({ where })
     ]);
 
-    // Manually fetch related data for each verification
-    const enrichedVerifications = await Promise.all(
-      verifications.map(async (verification) => {
-        const registration = await prisma.registration.findUnique({
-          where: { id: verification.registrationId },
-          include: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-                phone: true
-              }
-            },
-            partner: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-                matchifyCode: true
-              }
-            },
-            category: {
-              select: {
-                id: true,
-                name: true,
-                format: true
-              }
-            },
-            tournament: {
-              select: {
-                id: true,
-                name: true,
-                startDate: true
-              }
-            }
-          }
-        });
-
-        return {
-          ...verification,
-          registration
-        };
-      })
-    );
+    // Batch fetch all registrations in a single query (avoids N+1 DB connections)
+    const registrationIds = verifications.map(v => v.registrationId).filter(Boolean);
+    const registrations = await prisma.registration.findMany({
+      where: { id: { in: registrationIds } },
+      include: {
+        user: { select: { id: true, name: true, email: true, phone: true } },
+        partner: { select: { id: true, name: true, email: true, matchifyCode: true } },
+        category: { select: { id: true, name: true, format: true } },
+        tournament: { select: { id: true, name: true, startDate: true } }
+      }
+    });
+    const registrationMap = Object.fromEntries(registrations.map(r => [r.id, r]));
+    const enrichedVerifications = verifications.map(verification => ({
+      ...verification,
+      registration: registrationMap[verification.registrationId] || null
+    }));
 
     res.json({
       success: true,

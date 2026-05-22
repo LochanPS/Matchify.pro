@@ -287,13 +287,20 @@ export default function MyRegistrationsPage() {
                       {registration.category.format === 'doubles' && (
                         <div className="mb-3 p-3 rounded-xl" style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.06)' }}>
                           <p className="text-xs font-bold mb-1.5" style={{ color: 'rgba(255,255,255,0.75)' }}>Doubles Partner</p>
-                          {!registration.partnerConfirmed && registration.partnerEmail && (
+                          {registration.guestPartnerName && (
+                            <div className="flex items-center gap-1.5" style={{ color: '#a855f7' }}>
+                              <Users className="h-4 w-4" />
+                              <span className="text-xs font-semibold">{registration.guestPartnerName}</span>
+                              <span className="ml-1 text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(168,85,247,0.12)', color: '#a855f7', border: '1px solid rgba(168,85,247,0.25)' }}>Name Only</span>
+                            </div>
+                          )}
+                          {!registration.guestPartnerName && !registration.partnerConfirmed && registration.partnerEmail && (
                             <div className="flex items-center gap-1.5" style={{ color: '#fbbf24' }}>
                               <span>⏳</span>
                               <span className="text-xs">Waiting for {registration.partnerEmail} to accept</span>
                             </div>
                           )}
-                          {registration.partnerConfirmed && registration.partner && (
+                          {!registration.guestPartnerName && registration.partnerConfirmed && registration.partner && (
                             <div className="flex items-center gap-1.5" style={{ color: '#00ff88' }}>
                               <Users className="h-4 w-4" />
                               <span className="text-xs font-semibold">{registration.partner.name}</span>

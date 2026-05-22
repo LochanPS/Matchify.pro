@@ -280,6 +280,7 @@ model Registration {
   guestEmail         String?    // Email for guest registrations
   guestPhone         String?    // Phone for guest registrations
   guestGender        String?    // Gender for guest registrations
+  guestPartnerName   String?    // Doubles partner name when partner has no Matchify ID
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
   partnerToken       String?

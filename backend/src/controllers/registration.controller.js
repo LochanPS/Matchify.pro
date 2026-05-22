@@ -16,7 +16,7 @@ if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
 // POST /api/registrations - Register for tournament
 const createRegistration = async (req, res) => {
   try {
-    const { tournamentId, categoryIds, partnerEmails } = req.body; // Changed to partnerEmails object
+    const { tournamentId, categoryIds, partnerEmails, partnerNames } = req.body; // partnerEmails = {catId: email}, partnerNames = {catId: name} (OR feature)
     const userId = req.user.id;
 
     // Validation
@@ -141,21 +141,29 @@ const createRegistration = async (req, res) => {
     const registrations = [];
 
     for (const category of categories) {
-      // Get partner email for this specific category
+      // Get partner info for this specific category
       const categoryPartnerEmail = partnerEmails?.[category.id];
+      const categoryPartnerName = partnerNames?.[category.id]; // guest partner name (no Matchify ID)
       let partnerId = null;
       let partnerToken = null;
+      let guestPartnerName = null;
 
       // Handle partner for doubles categories
-      if (category.format === 'doubles' && categoryPartnerEmail) {
-        const partner = await prisma.user.findUnique({
-          where: { email: categoryPartnerEmail },
-        });
-        if (partner) {
-          partnerId = partner.id;
+      if (category.format === 'doubles') {
+        if (categoryPartnerEmail) {
+          // Matchify ID path: look up partner by email
+          const partner = await prisma.user.findUnique({
+            where: { email: categoryPartnerEmail },
+          });
+          if (partner) {
+            partnerId = partner.id;
+          }
+          // Generate unique token for this category's partner confirmation
+          partnerToken = crypto.randomBytes(32).toString('hex');
+        } else if (categoryPartnerName && categoryPartnerName.trim()) {
+          // Name-only path: store guest partner name, no lookup needed
+          guestPartnerName = categoryPartnerName.trim();
         }
-        // Generate unique token for this category's partner confirmation
-        partnerToken = crypto.randomBytes(32).toString('hex');
       }
 
       // Wrap create + count update in a transaction to prevent race conditions
@@ -178,6 +186,7 @@ const createRegistration = async (req, res) => {
               partnerId,
               partnerEmail: !partnerId && categoryPartnerEmail ? categoryPartnerEmail : null,
               partnerToken,
+              guestPartnerName,
               amountTotal: category.entryFee,
               amountWallet: 0,
               amountRazorpay: 0,
@@ -201,6 +210,7 @@ const createRegistration = async (req, res) => {
               partnerId,
               partnerEmail: !partnerId && categoryPartnerEmail ? categoryPartnerEmail : null,
               partnerToken,
+              guestPartnerName,
               amountTotal: category.entryFee,
               amountWallet: 0,
               amountRazorpay: 0,
@@ -515,13 +525,14 @@ const cancelRegistration = async (req, res) => {
 // POST /api/registrations/with-screenshot - Register with payment screenshot
 const createRegistrationWithScreenshot = async (req, res) => {
   try {
-    const { tournamentId, categoryIds, partnerEmails, utrId } = req.body;
+    const { tournamentId, categoryIds, partnerEmails, partnerNames, utrId } = req.body;
     const userId = req.user.id;
     const screenshotFile = req.file;
 
     // Parse JSON strings
     const parsedCategoryIds = JSON.parse(categoryIds);
     const parsedPartnerEmails = JSON.parse(partnerEmails || '{}');
+    const parsedPartnerNames = JSON.parse(partnerNames || '{}');
 
     // Validation
     if (!tournamentId || !parsedCategoryIds || parsedCategoryIds.length === 0) {
@@ -716,17 +727,23 @@ const createRegistrationWithScreenshot = async (req, res) => {
 
     for (const category of categories) {
       const categoryPartnerEmail = parsedPartnerEmails?.[category.id];
+      const categoryPartnerName = parsedPartnerNames?.[category.id];
       let partnerId = null;
       let partnerToken = null;
+      let guestPartnerName = null;
 
-      if (category.format === 'doubles' && categoryPartnerEmail) {
-        const partner = await prisma.user.findUnique({
-          where: { email: categoryPartnerEmail },
-        });
-        if (partner) {
-          partnerId = partner.id;
+      if (category.format === 'doubles') {
+        if (categoryPartnerEmail) {
+          const partner = await prisma.user.findUnique({
+            where: { email: categoryPartnerEmail },
+          });
+          if (partner) {
+            partnerId = partner.id;
+          }
+          partnerToken = crypto.randomBytes(32).toString('hex');
+        } else if (categoryPartnerName && categoryPartnerName.trim()) {
+          guestPartnerName = categoryPartnerName.trim();
         }
-        partnerToken = crypto.randomBytes(32).toString('hex');
       }
 
       // Check if there's an existing rejected/cancelled registration
@@ -760,6 +777,7 @@ const createRegistrationWithScreenshot = async (req, res) => {
             partnerId,
             partnerEmail: !partnerId && categoryPartnerEmail ? categoryPartnerEmail : null,
             partnerToken,
+            guestPartnerName,
             amountTotal: category.entryFee,
             amountWallet: 0,
             amountRazorpay: 0,
@@ -799,6 +817,7 @@ const createRegistrationWithScreenshot = async (req, res) => {
             partnerId,
             partnerEmail: !partnerId && categoryPartnerEmail ? categoryPartnerEmail : null,
             partnerToken,
+            guestPartnerName,
             amountTotal: category.entryFee,
             amountWallet: 0,
             amountRazorpay: 0,

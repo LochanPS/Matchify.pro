@@ -171,7 +171,7 @@ const generateDraw = async (req, res) => {
           email:          getPlayerEmail(registration),
           seedScore,
           seed:        0, // assigned after sort
-          partnerName: registration.partner?.name || null,
+          partnerName: registration.partner?.name || registration.guestPartnerName || null,
           partnerId:   registration.partnerId    || null,
         };
       })
@@ -364,12 +364,14 @@ const getDraw = async (req, res) => {
       where: { tournamentId: tournamentId, categoryId: categoryId },
       select: {
         userId: true,
+        guestPartnerName: true,
         partner: { select: { id: true, name: true } }
       }
     });
     regWithPartners.forEach(reg => {
-      if (reg.userId && reg.partner) {
-        partnerMap[reg.userId] = reg.partner.name;
+      if (reg.userId) {
+        const name = reg.partner?.name || reg.guestPartnerName || null;
+        if (name) partnerMap[reg.userId] = name;
       }
     });
 
@@ -1291,7 +1293,7 @@ const getCategoryPlayers = async (req, res) => {
       phone: reg.userId && reg.user ? reg.user.phone : reg.guestPhone,
       seed: index + 1,
       // Doubles partner
-      partnerName: reg.partner?.name || null,
+      partnerName: reg.partner?.name || reg.guestPartnerName || null,
       partnerId: reg.partnerId || null
     }));
 

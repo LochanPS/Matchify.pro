@@ -116,8 +116,8 @@ export default function CategorySelector({ categories, selectedCategories, onSel
               {/* Doubles partner notice */}
               {category.format === 'doubles' && isSelected && !isAlreadyRegistered && (
                 <div className="mt-2.5 px-3 py-2 rounded-xl text-xs font-bold"
-                  style={{ background: 'rgba(251,191,36,0.08)', color: '#fbbf24', border: '1px solid rgba(251,191,36,0.2)' }}>
-                  ⚠️ Partner Matchify.pro ID required
+                  style={{ background: 'rgba(168,85,247,0.08)', color: '#c084fc', border: '1px solid rgba(168,85,247,0.25)' }}>
+                  👥 Enter partner Matchify.pro ID or name below
                 </div>
               )}
             </div>

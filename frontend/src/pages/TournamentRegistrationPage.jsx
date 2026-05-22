@@ -101,6 +101,8 @@ export default function TournamentRegistrationPage() {
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [partnerCodes, setPartnerCodes] = useState({});
   const [partnerInfo, setPartnerInfo] = useState({});
+  const [partnerMode, setPartnerMode] = useState({}); // catId -> 'id' | 'name'
+  const [partnerNames, setPartnerNames] = useState({}); // catId -> string (name-only mode)
   const [paymentScreenshot, setPaymentScreenshot] = useState(null);
   const [paymentPreview, setPaymentPreview] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -127,6 +129,8 @@ export default function TournamentRegistrationPage() {
           setSelectedCategories(draft.selectedCategories);
           if (draft.partnerCodes) setPartnerCodes(draft.partnerCodes);
           if (draft.partnerInfo) setPartnerInfo(draft.partnerInfo);
+          if (draft.partnerMode) setPartnerMode(draft.partnerMode);
+          if (draft.partnerNames) setPartnerNames(draft.partnerNames);
         }
       }
     } catch {}
@@ -145,10 +149,12 @@ export default function TournamentRegistrationPage() {
         selectedCategories,
         partnerCodes,
         partnerInfo,
+        partnerMode,
+        partnerNames,
         timestamp: Date.now(),
       }));
     } catch {}
-  }, [selectedCategories, partnerCodes, partnerInfo, DRAFT_KEY]);
+  }, [selectedCategories, partnerCodes, partnerInfo, partnerMode, partnerNames, DRAFT_KEY]);
 
   const clearDraft = () => {
     try { localStorage.removeItem(DRAFT_KEY); } catch {}
@@ -216,13 +222,20 @@ export default function TournamentRegistrationPage() {
     }
     for (const catId of selectedDoublesCategories) {
       const cat = categories.find(c => c.id === catId);
-      const code = partnerCodes[catId];
-      if (!code) { setError(`Partner ID required for ${cat?.name}`); return; }
-      if (!/^#\d+$/.test(code) && !/^#[A-Z]\d{5}$/i.test(code)) {
-        setError(`Invalid Matchify.pro ID for ${cat?.name} — format: #1, #12`);
-        return;
+      const mode = partnerMode[catId] || 'id';
+      if (mode === 'id') {
+        const code = partnerCodes[catId];
+        if (!code || code === '#') { setError(`Enter partner Matchify.pro ID for ${cat?.name}`); return; }
+        if (!/^#\d+$/.test(code) && !/^#[A-Z]\d{5}$/i.test(code)) {
+          setError(`Invalid Matchify.pro ID for ${cat?.name} — format: #1, #12`);
+          return;
+        }
+        if (!partnerInfo[catId]) { setError(`Tap Find to verify partner ID for ${cat?.name}`); return; }
+      } else {
+        const name = partnerNames[catId]?.trim();
+        if (!name) { setError(`Enter partner name for ${cat?.name}`); return; }
+        if (name.length < 2) { setError(`Partner name too short for ${cat?.name}`); return; }
       }
-      if (!partnerInfo[catId]) { setError(`Verify partner ID for ${cat?.name}`); return; }
     }
     saveDraft();
     setStep(2);
@@ -288,10 +301,19 @@ export default function TournamentRegistrationPage() {
       formData.append('tournamentId', id);
       formData.append('categoryIds', JSON.stringify(selectedCategories));
       const partnerEmails = {};
+      const partnerNamesPayload = {};
       Object.keys(partnerInfo).forEach(catId => {
-        if (partnerInfo[catId]) partnerEmails[catId] = partnerInfo[catId].email;
+        if (partnerInfo[catId] && (partnerMode[catId] || 'id') === 'id') {
+          partnerEmails[catId] = partnerInfo[catId].email;
+        }
+      });
+      Object.keys(partnerNames).forEach(catId => {
+        if (partnerMode[catId] === 'name' && partnerNames[catId]?.trim()) {
+          partnerNamesPayload[catId] = partnerNames[catId].trim();
+        }
       });
       formData.append('partnerEmails', JSON.stringify(partnerEmails));
+      formData.append('partnerNames', JSON.stringify(partnerNamesPayload));
       if (trimmedUtr) formData.append('utrId', trimmedUtr);
       if (paymentScreenshot) formData.append('paymentScreenshot', paymentScreenshot);
       await registrationAPI.createRegistrationWithScreenshot(formData);
@@ -464,65 +486,126 @@ export default function TournamentRegistrationPage() {
                     const isSearching = searchingPartner[catId];
                     const code = partnerCodes[catId] || '#';
                     const canSearch = /^#\d+$/.test(code) || /^#[A-Z]\d{5}$/i.test(code);
+                    const mode = partnerMode[catId] || 'id';
+                    const guestName = partnerNames[catId] || '';
                     return (
                       <div key={catId} className="space-y-2">
                         <label className="block text-xs font-bold" style={{ color: BRAND.green }}>
-                          Partner ID for <span className="text-white">{category?.name}</span>
+                          Partner for <span className="text-white">{category?.name}</span>
                           <span style={{ color: '#f87171' }}> *</span>
                         </label>
-                        <div className="flex gap-2">
-                          <input
-                            type="text"
-                            value={code}
-                            onChange={e => handlePartnerCodeChange(catId, e.target.value)}
-                            placeholder="#1"
-                            className="flex-1 px-3 py-3 rounded-xl text-white font-mono text-sm"
-                            style={{ background: 'rgba(0,0,0,0.3)', border: '1.5px solid rgba(0,255,136,0.25)', outline: 'none' }}
-                          />
+
+                        {/* Mode toggle */}
+                        <div className="flex gap-1 p-1 rounded-xl" style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.08)' }}>
                           <button
                             type="button"
-                            onClick={() => fetchPartnerByCode(catId, code)}
-                            disabled={!canSearch || isSearching}
-                            className="px-4 py-3 rounded-xl font-black text-xs transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5"
-                            style={canSearch && !isSearching
+                            onClick={() => {
+                              setPartnerMode(m => ({ ...m, [catId]: 'id' }));
+                              setPartnerNames(n => ({ ...n, [catId]: '' }));
+                            }}
+                            className="flex-1 py-2 rounded-lg text-xs font-black transition-all"
+                            style={mode === 'id'
                               ? { background: BRAND.green, color: '#07071a' }
-                              : { background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.4)' }}
+                              : { background: 'transparent', color: 'rgba(255,255,255,0.45)' }}
                           >
-                            {isSearching
-                              ? <div className="w-4 h-4 rounded-full border-2 border-t-transparent animate-spin"
-                                  style={{ borderColor: '#07071a transparent transparent transparent' }} />
-                              : <Search className="w-4 h-4" />}
-                            {!isSearching && 'Find'}
+                            Matchify.pro ID
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setPartnerMode(m => ({ ...m, [catId]: 'name' }));
+                              setPartnerCodes(p => ({ ...p, [catId]: '#' }));
+                              setPartnerInfo(p => ({ ...p, [catId]: null }));
+                            }}
+                            className="flex-1 py-2 rounded-lg text-xs font-black transition-all"
+                            style={mode === 'name'
+                              ? { background: 'rgba(168,85,247,0.85)', color: '#fff' }
+                              : { background: 'transparent', color: 'rgba(255,255,255,0.45)' }}
+                          >
+                            Name Only
                           </button>
                         </div>
-                        {partner && (
-                          <div className="flex items-center gap-3 p-3 rounded-xl"
-                            style={{ background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.25)' }}>
-                            {partner.profilePhoto ? (
-                              <img src={partner.profilePhoto} alt={partner.name} className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
-                            ) : (
-                              <div className="w-10 h-10 rounded-full flex items-center justify-center font-black text-sm flex-shrink-0"
-                                style={{ background: BRAND.green, color: '#07071a' }}>
-                                {partner.name?.charAt(0)?.toUpperCase()}
+
+                        {mode === 'id' ? (
+                          <>
+                            <div className="flex gap-2">
+                              <input
+                                type="text"
+                                value={code}
+                                onChange={e => handlePartnerCodeChange(catId, e.target.value)}
+                                placeholder="#1"
+                                className="flex-1 px-3 py-3 rounded-xl text-white font-mono text-sm"
+                                style={{ background: 'rgba(0,0,0,0.3)', border: '1.5px solid rgba(0,255,136,0.25)', outline: 'none' }}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => fetchPartnerByCode(catId, code)}
+                                disabled={!canSearch || isSearching}
+                                className="px-4 py-3 rounded-xl font-black text-xs transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5"
+                                style={canSearch && !isSearching
+                                  ? { background: BRAND.green, color: '#07071a' }
+                                  : { background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.4)' }}
+                              >
+                                {isSearching
+                                  ? <div className="w-4 h-4 rounded-full border-2 border-t-transparent animate-spin"
+                                      style={{ borderColor: '#07071a transparent transparent transparent' }} />
+                                  : <Search className="w-4 h-4" />}
+                                {!isSearching && 'Find'}
+                              </button>
+                            </div>
+                            {partner && (
+                              <div className="flex items-center gap-3 p-3 rounded-xl"
+                                style={{ background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.25)' }}>
+                                {partner.profilePhoto ? (
+                                  <img src={partner.profilePhoto} alt={partner.name} className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
+                                ) : (
+                                  <div className="w-10 h-10 rounded-full flex items-center justify-center font-black text-sm flex-shrink-0"
+                                    style={{ background: BRAND.green, color: '#07071a' }}>
+                                    {partner.name?.charAt(0)?.toUpperCase()}
+                                  </div>
+                                )}
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-white font-bold text-sm truncate">{partner.name}</p>
+                                  <p className="text-xs font-mono truncate" style={{ color: BRAND.green }}>
+                                    {partner.matchifyCode || partner.email}
+                                  </p>
+                                  {partner.city && partner.state && (
+                                    <p className="text-xs truncate" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                                      {partner.city}, {partner.state}
+                                    </p>
+                                  )}
+                                </div>
+                                <CheckCircleIcon className="w-5 h-5 flex-shrink-0" style={{ color: BRAND.green }} />
                               </div>
                             )}
-                            <div className="flex-1 min-w-0">
-                              <p className="text-white font-bold text-sm truncate">{partner.name}</p>
-                              <p className="text-xs font-mono truncate" style={{ color: BRAND.green }}>
-                                {partner.matchifyCode || partner.email}
-                              </p>
-                              {partner.city && partner.state && (
-                                <p className="text-xs truncate" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                                  {partner.city}, {partner.state}
+                            <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                              Partner gets a confirmation once you register.
+                            </p>
+                          </>
+                        ) : (
+                          <>
+                            <input
+                              type="text"
+                              value={guestName}
+                              onChange={e => setPartnerNames(n => ({ ...n, [catId]: e.target.value }))}
+                              placeholder="Partner's full name"
+                              className="w-full px-3 py-3 rounded-xl text-white text-sm"
+                              style={{ background: 'rgba(0,0,0,0.3)', border: '1.5px solid rgba(168,85,247,0.4)', outline: 'none' }}
+                            />
+                            {guestName.trim().length >= 2 && (
+                              <div className="flex items-center gap-2 px-3 py-2 rounded-xl"
+                                style={{ background: 'rgba(168,85,247,0.1)', border: '1px solid rgba(168,85,247,0.3)' }}>
+                                <CheckCircleIcon className="w-4 h-4 flex-shrink-0" style={{ color: '#a855f7' }} />
+                                <p className="text-xs font-bold" style={{ color: '#a855f7' }}>
+                                  "{guestName.trim()}" will appear in draws
                                 </p>
-                              )}
-                            </div>
-                            <CheckCircleIcon className="w-5 h-5 flex-shrink-0" style={{ color: BRAND.green }} />
-                          </div>
+                              </div>
+                            )}
+                            <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                              Use this if your partner is not on Matchify.pro. Their name appears in draws as entered.
+                            </p>
+                          </>
                         )}
-                        <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                          Partner gets a confirmation once you register.
-                        </p>
                       </div>
                     );
                   })}

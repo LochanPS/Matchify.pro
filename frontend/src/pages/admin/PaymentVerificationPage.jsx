@@ -230,6 +230,26 @@ const PaymentVerificationPage = () => {
                         <p className="text-gray-400 text-sm">Format</p>
                         <p className="text-white font-medium">{verification.registration.category.format}</p>
                       </div>
+                      {verification.registration.category.format === 'doubles' && (
+                        <div className="col-span-2">
+                          <p className="text-gray-400 text-sm">Doubles Partner</p>
+                          {verification.registration.partner ? (
+                            <p className="text-purple-300 font-medium">
+                              {verification.registration.partner.name}
+                              {verification.registration.partner.matchifyCode && (
+                                <span className="ml-2 text-xs text-gray-400 font-mono">{verification.registration.partner.matchifyCode}</span>
+                              )}
+                            </p>
+                          ) : verification.registration.guestPartnerName ? (
+                            <p className="text-purple-300 font-medium">
+                              {verification.registration.guestPartnerName}
+                              <span className="ml-2 text-xs bg-purple-900/40 text-purple-400 px-2 py-0.5 rounded-full">Name Only</span>
+                            </p>
+                          ) : (
+                            <p className="text-gray-500 italic text-sm">No partner specified</p>
+                          )}
+                        </div>
+                      )}
                       <div>
                         <p className="text-gray-400 text-sm">Submitted</p>
                         <p className="text-white font-medium">

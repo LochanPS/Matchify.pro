@@ -40,6 +40,14 @@ router.get('/', authenticate, requireAdmin, async (req, res) => {
                 phone: true
               }
             },
+            partner: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                matchifyCode: true
+              }
+            },
             category: {
               select: {
                 id: true,

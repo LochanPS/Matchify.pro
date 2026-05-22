@@ -531,10 +531,10 @@ const createRegistrationWithScreenshot = async (req, res) => {
       });
     }
 
-    if (!screenshotFile) {
+    if (!screenshotFile && !utrId) {
       return res.status(400).json({
         success: false,
-        error: 'Payment screenshot is required',
+        error: 'Provide UTR / Transaction ID or upload a payment screenshot (at least one is required)',
       });
     }
 
@@ -662,13 +662,14 @@ const createRegistrationWithScreenshot = async (req, res) => {
       categories.push(category);
     }
 
-    // Upload screenshot to Cloudinary
+    // Upload screenshot to Cloudinary (only if screenshot provided)
     let screenshotUrl = null;
+    if (screenshotFile) {
     const cloudinary = (await import('../config/cloudinary.js')).default;
-    
+
     // Check if Cloudinary is configured
-    const isCloudinaryConfigured = process.env.CLOUDINARY_CLOUD_NAME && 
-                                    process.env.CLOUDINARY_API_KEY && 
+    const isCloudinaryConfigured = process.env.CLOUDINARY_CLOUD_NAME &&
+                                    process.env.CLOUDINARY_API_KEY &&
                                     process.env.CLOUDINARY_API_SECRET &&
                                     !process.env.CLOUDINARY_CLOUD_NAME.includes('your-');
 
@@ -708,6 +709,7 @@ const createRegistrationWithScreenshot = async (req, res) => {
         error: 'Image upload service not configured. Please contact support.',
       });
     }
+    } // end if (screenshotFile)
 
     // Create registrations with screenshot
     const registrations = [];

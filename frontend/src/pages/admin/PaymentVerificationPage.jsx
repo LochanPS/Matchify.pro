@@ -168,13 +168,25 @@ const PaymentVerificationPage = () => {
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Payment Screenshot */}
                 <div className="lg:col-span-1">
-                  <img
-                    src={verification.registration.tournament.paymentScreenshot || verification.paymentScreenshot}
-                    alt="Payment Screenshot"
-                    className="w-full h-64 object-contain bg-slate-900 rounded-lg cursor-pointer hover:scale-105 transition"
-                    onClick={() => setSelectedPayment(verification)}
-                  />
-                  <p className="text-center text-gray-400 text-sm mt-2">Click to enlarge</p>
+                  {verification.paymentScreenshot ? (
+                    <>
+                      <img
+                        src={verification.paymentScreenshot}
+                        alt="Payment Screenshot"
+                        className="w-full h-64 object-contain bg-slate-900 rounded-lg cursor-pointer hover:scale-105 transition"
+                        onClick={() => setSelectedPayment(verification)}
+                      />
+                      <p className="text-center text-gray-400 text-sm mt-2">Click to enlarge</p>
+                    </>
+                  ) : (
+                    <div className="w-full h-64 bg-slate-900 rounded-lg flex flex-col items-center justify-center border border-slate-700">
+                      <p className="text-gray-400 text-sm font-medium">No screenshot uploaded</p>
+                      <p className="text-gray-500 text-xs mt-1">Player provided UTR only</p>
+                      {verification.utrId && (
+                        <p className="text-teal-400 text-sm font-bold mt-3">UTR: {verification.utrId}</p>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* Payment Details */}
@@ -300,14 +312,14 @@ const PaymentVerificationPage = () => {
       </div>
 
       {/* Image Modal */}
-      {selectedPayment && (
+      {selectedPayment && selectedPayment.paymentScreenshot && (
         <div
           className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4"
           onClick={() => setSelectedPayment(null)}
         >
           <div className="max-w-4xl w-full">
             <img
-              src={selectedPayment.registration.tournament.paymentScreenshot || selectedPayment.paymentScreenshot}
+              src={selectedPayment.paymentScreenshot}
               alt="Payment Screenshot"
               className="w-full h-auto rounded-lg"
             />

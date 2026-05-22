@@ -2897,8 +2897,8 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                     key={pi}
                     className="flex items-center rounded-xl border-2 transition-all"
                     style={{
-                      padding: '10px 10px',
-                      gap: '8px',
+                      padding: '8px 8px',
+                      gap: '6px',
                       background: pi === 0
                         ? 'linear-gradient(135deg, rgba(0,255,136,0.12), rgba(0,255,136,0.08))'
                         : 'rgba(255,255,255,0.04)',
@@ -2925,11 +2925,11 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                     <div className="flex-1 min-w-0 overflow-hidden">
                       {p.id ? (
                         <>
-                          <p className="font-bold text-white leading-tight text-sm truncate">
+                          <p className="font-bold text-white leading-tight text-sm truncate" title={p.name}>
                             {p.name || `Slot ${pi + 1}`}
                           </p>
                           {p.partnerName && (
-                            <p className="text-xs leading-tight truncate" style={{ color: '#00ff88' }}>
+                            <p className="text-xs leading-tight truncate" style={{ color: '#00ff88' }} title={p.partnerName}>
                               & {p.partnerName}
                             </p>
                           )}
@@ -2941,14 +2941,14 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                       )}
                     </div>
 
-                    {/* Stats: P · W · L · PTS · TP — fixed total width, no gap overflow */}
-                    <div className="flex-shrink-0 flex items-center" style={{ gap: '3px' }}>
+                    {/* Stats: P · W · L · PTS · TP — compact fixed widths, name column gets max space */}
+                    <div className="flex-shrink-0 flex items-center" style={{ gap: '2px' }}>
                       {[
-                        { val: (p.wins || 0) + (p.losses || 0), label: 'P',   bg: 'rgba(255,255,255,0.07)',  color: '#fff',     labelColor: 'rgba(255,255,255,0.35)', w: '26px' },
-                        { val: p.wins || 0,                      label: 'W',   bg: 'rgba(0,255,136,0.1)',     color: '#34d399',  labelColor: 'rgba(0,255,136,0.55)',   w: '26px' },
-                        { val: p.losses || 0,                    label: 'L',   bg: 'rgba(239,68,68,0.1)',     color: '#f87171',  labelColor: 'rgba(239,68,68,0.55)',   w: '26px' },
-                        { val: p.points || 0,                    label: 'PTS', bg: 'rgba(0,255,136,0.18)',    color: '#6ee7b7',  labelColor: 'rgba(0,255,136,0.65)',   w: '34px', border: '1px solid rgba(0,255,136,0.3)', bold: true },
-                        { val: p.totalPoints || 0,               label: 'TP',  bg: 'rgba(0,212,255,0.15)',    color: '#67e8f9',  labelColor: 'rgba(0,212,255,0.65)',   w: '34px', border: '1px solid rgba(0,212,255,0.3)', bold: true },
+                        { val: (p.wins || 0) + (p.losses || 0), label: 'P',   bg: 'rgba(255,255,255,0.07)',  color: '#fff',     labelColor: 'rgba(255,255,255,0.35)', w: '22px' },
+                        { val: p.wins || 0,                      label: 'W',   bg: 'rgba(0,255,136,0.1)',     color: '#34d399',  labelColor: 'rgba(0,255,136,0.55)',   w: '22px' },
+                        { val: p.losses || 0,                    label: 'L',   bg: 'rgba(239,68,68,0.1)',     color: '#f87171',  labelColor: 'rgba(239,68,68,0.55)',   w: '22px' },
+                        { val: p.points || 0,                    label: 'PTS', bg: 'rgba(0,255,136,0.18)',    color: '#6ee7b7',  labelColor: 'rgba(0,255,136,0.65)',   w: '28px', border: '1px solid rgba(0,255,136,0.3)', bold: true },
+                        { val: p.totalPoints || 0,               label: 'TP',  bg: 'rgba(0,212,255,0.15)',    color: '#67e8f9',  labelColor: 'rgba(0,212,255,0.65)',   w: '28px', border: '1px solid rgba(0,212,255,0.3)', bold: true },
                       ].map(({ val, label, bg, color, labelColor, border, bold, w }) => (
                         <div
                           key={label}

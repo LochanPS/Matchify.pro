@@ -750,7 +750,6 @@ export default function TournamentRegistrationPage() {
                       ref={fileInputRef}
                       type="file"
                       accept="image/*"
-                      capture="environment"
                       onChange={handleScreenshotSelect}
                       className="hidden"
                     />

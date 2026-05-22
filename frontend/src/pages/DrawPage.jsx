@@ -2921,15 +2921,15 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                       {pi + 1}
                     </div>
 
-                    {/* Player Name — flex-1, strictly clipped */}
-                    <div className="flex-1 min-w-0 overflow-hidden">
+                    {/* Player Name — flex-1, wraps for long doubles names */}
+                    <div className="flex-1 min-w-0">
                       {p.id ? (
                         <>
-                          <p className="font-bold text-white leading-tight text-sm truncate" title={p.name}>
+                          <p className="font-bold text-white leading-tight text-sm break-words" title={p.name}>
                             {p.name || `Slot ${pi + 1}`}
                           </p>
                           {p.partnerName && (
-                            <p className="text-xs leading-tight truncate" style={{ color: '#00ff88' }} title={p.partnerName}>
+                            <p className="text-xs leading-tight break-words" style={{ color: '#00ff88' }} title={p.partnerName}>
                               & {p.partnerName}
                             </p>
                           )}

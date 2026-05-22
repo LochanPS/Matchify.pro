@@ -2654,16 +2654,45 @@ const arrangeKnockoutMatchups = async (req, res) => {
     // STEP 3: Assign players to first round matches in bracketJson
     if (bracketJson.knockout.rounds[0] && bracketJson.knockout.rounds[0].matches) {
       const firstRound = bracketJson.knockout.rounds[0].matches;
-      
+
       console.log('📝 Assigning players to first round in bracketJson');
       knockoutSlots.forEach((slot, index) => {
         if (firstRound[index]) {
           firstRound[index].player1 = slot.player1;
-          firstRound[index].player2 = slot.player2;
-          firstRound[index].status = 'PENDING';
-          console.log(`   Match ${index + 1}: ${slot.player1?.name || 'TBD'} vs ${slot.player2?.name || 'TBD'}`);
+          firstRound[index].player2 = slot.player2 || null;
+          // Bye match: player2 absent → player1 auto-advances (pre-completed)
+          if (slot.player1 && !slot.player2) {
+            firstRound[index].status = 'COMPLETED';
+            firstRound[index].winner = 1;
+            firstRound[index].winnerId = slot.player1.id;
+            console.log(`   Match ${index + 1}: ${slot.player1.name} vs BYE → ${slot.player1.name} auto-advances`);
+          } else {
+            firstRound[index].status = 'PENDING';
+            console.log(`   Match ${index + 1}: ${slot.player1?.name || 'TBD'} vs ${slot.player2?.name || 'TBD'}`);
+          }
         }
       });
+
+      // Cascade bye winners into subsequent rounds in bracketJson
+      for (let ri = 1; ri < bracketJson.knockout.rounds.length; ri++) {
+        const round = bracketJson.knockout.rounds[ri];
+        const feederRound = bracketJson.knockout.rounds[ri - 1];
+        if (!Array.isArray(round?.matches) || !Array.isArray(feederRound?.matches)) continue;
+        round.matches.forEach((match, mi) => {
+          if (!match.player1) {
+            const feeder = feederRound.matches[mi * 2];
+            if (feeder?.status === 'COMPLETED') {
+              match.player1 = feeder.winner === 1 ? feeder.player1 : feeder.player2;
+            }
+          }
+          if (!match.player2) {
+            const feeder = feederRound.matches[mi * 2 + 1];
+            if (feeder?.status === 'COMPLETED') {
+              match.player2 = feeder.winner === 1 ? feeder.player1 : feeder.player2;
+            }
+          }
+        });
+      }
     }
 
     // STEP 4: Save updated bracketJson
@@ -2813,17 +2842,24 @@ const arrangeKnockoutMatchups = async (req, res) => {
     
     for (let i = 0; i < knockoutSlots.length && i < firstRoundMatches.length; i++) {
       const slot = knockoutSlots[i];
-      
+      const isBye = slot.player1 && !slot.player2;
+
       await prisma.match.update({
         where: { id: firstRoundMatches[i].id },
         data: {
           player1Id: slot.player1?.id || null,
           player2Id: slot.player2?.id || null,
-          status: 'PENDING'
+          status: isBye ? 'COMPLETED' : 'PENDING',
+          winnerId: isBye ? slot.player1.id : null,
+          completedAt: isBye ? new Date() : null
         }
       });
-      
-      console.log(`   ✓ Match ${i + 1}: ${slot.player1?.name || 'TBD'} vs ${slot.player2?.name || 'TBD'}`);
+
+      if (isBye) {
+        console.log(`   ✓ Match ${i + 1}: ${slot.player1.name} vs BYE → COMPLETED (auto-advance)`);
+      } else {
+        console.log(`   ✓ Match ${i + 1}: ${slot.player1?.name || 'TBD'} vs ${slot.player2?.name || 'TBD'}`);
+      }
     }
 
     console.log('✅ Knockout matchups arranged successfully!');

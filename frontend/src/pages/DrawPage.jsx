@@ -4574,202 +4574,157 @@ const AssignUmpireModal = ({ match, umpires, loadingUmpires, umpiresError, onRet
   );
 };
 
-// Arrange Knockout Matchups Modal
+// Arrange Knockout Draw Modal — position-based seeding
+// Organiser taps a player chip, then taps a bracket slot to place them.
+// Empty slots = BYE (auto-advance). Backend receives same knockoutSlots format.
 const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
-  const [knockoutSlots, setKnockoutSlots] = useState([]);
+  const [positions, setPositions] = useState([]);       // length=bracketSize, each null|player
   const [advancingPlayers, setAdvancingPlayers] = useState([]);
+  const [bracketSize, setBracketSize] = useState(null);
+  const [pickedPlayer, setPickedPlayer] = useState(null); // player currently "in hand"
+
+  const nextPow2 = (n) => { let p = 4; while (p < n) p *= 2; return p; };
+
+  // Rebuild positions array when organiser changes bracket size
+  const handleBracketSizeChange = (newSize) => {
+    setBracketSize(newSize);
+    setPositions(prev => {
+      const pos = Array(newSize).fill(null);
+      prev.forEach((p, i) => { if (i < newSize) pos[i] = p; });
+      return pos;
+    });
+    setPickedPlayer(null);
+  };
 
   useEffect(() => {
-    if (bracket && bracket.groups) {
-      // Get advancing players based on advanceFromGroup setting
-      const players = [];
-      const advanceCount = bracket.advanceFromGroup || 1; // How many from each group
-      
-      
-      bracket.groups.forEach((group, groupIndex) => {
-        const groupLetter = String.fromCharCode(65 + groupIndex);
-        
-        // Get standings if available, otherwise use participants
-        const standings = group.standings || [];
-        
-        if (standings.length > 0) {
-          // Use standings (sorted by points)
-          const topPlayers = standings
-            .filter(standing => standing.playerId)
-            .sort((a, b) => b.points - a.points)
-            .slice(0, advanceCount) // Take only top N
-            .map((standing, rank) => ({
-              id: standing.playerId,
-              name: standing.playerName,
-              group: groupLetter,
-              rank: rank + 1,
-              points: standing.points
-            }));
-          
-          players.push(...topPlayers);
-        } else {
-          // Fallback: use participants
-          const participants = group.participants || [];
-          participants.slice(0, advanceCount).forEach((participant, index) => {
-            if (participant && participant.id) {
-              players.push({
-                id: participant.id,
-                name: participant.name,
-                group: groupLetter,
-                rank: index + 1,
-                points: 0
-              });
-            }
+    if (!bracket?.groups) return;
+    const advanceCount = bracket.advanceFromGroup || 1;
+    const players = [];
+
+    bracket.groups.forEach((group, groupIndex) => {
+      const groupLetter = String.fromCharCode(65 + groupIndex);
+      const standings = group.standings || [];
+      if (standings.length > 0) {
+        standings
+          .filter(s => s.playerId)
+          .sort((a, b) => b.points - a.points)
+          .slice(0, advanceCount)
+          .forEach((s, rank) => players.push({
+            id: s.playerId, name: s.playerName,
+            partnerName: s.partnerName || null,
+            group: groupLetter, rank: rank + 1, points: s.points
+          }));
+      } else {
+        (group.participants || []).slice(0, advanceCount).forEach((p, i) => {
+          if (p?.id) players.push({
+            id: p.id, name: p.name,
+            partnerName: p.partnerName || null,
+            group: groupLetter, rank: i + 1, points: p.points || 0
           });
-        }
+        });
+      }
+    });
+
+    setAdvancingPlayers(players);
+
+    const defaultSize = nextPow2(players.length);
+    setBracketSize(defaultSize);
+
+    // Build positions array, restoring existing KO draw if already seeded
+    const pos = Array(defaultSize).fill(null);
+    if (bracket.knockout?.rounds?.[0]?.matches) {
+      bracket.knockout.rounds[0].matches.forEach((match, mi) => {
+        const p1 = players.find(p => p.id === match.player1?.id);
+        const p2 = players.find(p => p.id === match.player2?.id);
+        if (p1) pos[mi * 2] = p1;
+        if (p2) pos[mi * 2 + 1] = p2;
       });
-      
-      
-      setAdvancingPlayers(players);
-      
-      // Create knockout slots based on number of advancing players
-      // For 2 players = 1 match (final)
-      // For 4 players = 2 matches (semifinals)
-      // For 8 players = 4 matches (quarterfinals)
-      const totalPlayers = players.length;
-      const numMatches = Math.max(Math.floor(totalPlayers / 2), 1);
-      const slots = [];
-      
-      
-      for (let i = 0; i < numMatches; i++) {
-        slots.push({
-          matchNumber: i + 1,
-          player1: null,
-          player2: null
-        });
-      }
-      
-      // If knockout bracket already exists with player assignments, preserve them
-      if (bracket.knockout && bracket.knockout.rounds && bracket.knockout.rounds[0] && bracket.knockout.rounds[0].matches) {
-        const existingMatches = bracket.knockout.rounds[0].matches;
-        existingMatches.forEach((match, index) => {
-          if (index < slots.length) {
-            slots[index].player1 = match.player1 || null;
-            slots[index].player2 = match.player2 || null;
-          }
-        });
-      }
-      
-      setKnockoutSlots(slots);
     }
+    setPositions(pos);
   }, [bracket]);
 
-  const assignPlayerToSlot = (player, matchIndex, position) => {
-    const newSlots = [...knockoutSlots];
-    
-    // Remove player from any existing slot
-    newSlots.forEach(slot => {
-      if (slot.player1?.id === player.id) slot.player1 = null;
-      if (slot.player2?.id === player.id) slot.player2 = null;
-    });
-    
-    // Assign to new slot
-    if (position === 1) {
-      newSlots[matchIndex].player1 = player;
-    } else {
-      newSlots[matchIndex].player2 = player;
+  // Tap a position slot
+  const handlePositionClick = (posIdx) => {
+    const occupant = positions[posIdx];
+
+    if (pickedPlayer) {
+      // A player is in hand — place them here
+      const newPos = [...positions];
+      // If this slot is occupied, put that player back in hand (swap)
+      const displaced = newPos[posIdx];
+      // Remove picked player from their old slot if they were already placed
+      const oldIdx = newPos.findIndex(p => p?.id === pickedPlayer.id);
+      if (oldIdx !== -1) newPos[oldIdx] = displaced || null;
+      else if (displaced) {/* displaced goes back to pool — setPickedPlayer below handles it */}
+      newPos[posIdx] = pickedPlayer;
+      setPositions(newPos);
+      // If we displaced someone, put them in hand; otherwise clear hand
+      setPickedPlayer(displaced && displaced.id !== pickedPlayer.id ? displaced : null);
+    } else if (occupant) {
+      // No player in hand — pick up the occupant
+      const newPos = [...positions];
+      newPos[posIdx] = null;
+      setPositions(newPos);
+      setPickedPlayer(occupant);
     }
-    
-    setKnockoutSlots(newSlots);
+    // else: empty slot, no player in hand → ignore
   };
 
-  const removePlayerFromSlot = (matchIndex, position) => {
-    const newSlots = [...knockoutSlots];
-    if (position === 1) {
-      newSlots[matchIndex].player1 = null;
+  // Tap a player chip in the pool
+  const handlePoolPlayerClick = (player) => {
+    if (pickedPlayer?.id === player.id) {
+      setPickedPlayer(null); // deselect
     } else {
-      newSlots[matchIndex].player2 = null;
+      setPickedPlayer(player);
     }
-    setKnockoutSlots(newSlots);
-  };
-
-  const getAssignedPlayerIds = () => {
-    const ids = new Set();
-    knockoutSlots.forEach(slot => {
-      if (slot.player1) ids.add(slot.player1.id);
-      if (slot.player2) ids.add(slot.player2.id);
-    });
-    return ids;
   };
 
   const handleSave = () => {
-    // Validate all slots are filled
-    const allFilled = knockoutSlots.every(slot => slot.player1 && slot.player2);
-    
-    
-    if (!allFilled) {
-      alert('Please assign all players to knockout matches');
-      return;
+    const slots = [];
+    for (let i = 0; i < positions.length; i += 2) {
+      let p1 = positions[i];
+      let p2 = positions[i + 1] || null;
+      // If only p2 set (organiser placed in bottom of pair), treat as p1 (BYE logic needs p1)
+      if (!p1 && p2) { p1 = p2; p2 = null; }
+      if (!p1) {
+        alert(`Match slot ${i / 2 + 1} has no player. Every bracket position pair must have at least one player.`);
+        return;
+      }
+      slots.push({ matchNumber: i / 2 + 1, player1: p1, player2: p2 });
     }
-    
-    onSave(knockoutSlots);
+    onSave(slots);
   };
 
-  const assignedIds = getAssignedPlayerIds();
-  const unassignedPlayers = advancingPlayers.filter(p => !assignedIds.has(p.id));
+  const assignedIds = new Set(positions.filter(Boolean).map(p => p.id));
+  const poolPlayers = advancingPlayers.filter(p => !assignedIds.has(p.id));
+  const filledCount = positions.filter(Boolean).length;
+  const byeCount = (bracketSize || 0) - filledCount;
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      {/* Animated Background - MUCH BRIGHTER & MORE VISIBLE */}
+      {/* Animated Background */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {/* Large pulsing orbs */}
-        <div 
-          className="absolute top-10 right-10 w-96 h-96 rounded-full blur-3xl"
-          style={{ 
-            background: 'radial-gradient(circle, rgba(0,255,136,0.5) 0%, rgba(0,255,136,0.3) 50%, transparent 70%)',
-            animation: 'float 8s ease-in-out infinite, pulse 4s ease-in-out infinite'
-          }}
-        />
-        <div 
-          className="absolute bottom-10 left-10 w-80 h-80 rounded-full blur-3xl"
-          style={{ 
-            background: 'radial-gradient(circle, rgba(20,184,166,0.5) 0%, rgba(13,148,136,0.3) 50%, transparent 70%)',
-            animation: 'float 10s ease-in-out infinite reverse, pulse 5s ease-in-out infinite',
-            animationDelay: '2s'
-          }}
-        />
-        <div 
-          className="absolute top-1/2 left-1/2 w-72 h-72 rounded-full blur-3xl"
-          style={{ 
-            background: 'radial-gradient(circle, rgba(16,185,129,0.4) 0%, transparent 70%)',
-            animation: 'float 12s ease-in-out infinite, pulse 6s ease-in-out infinite',
-            animationDelay: '4s'
-          }}
-        />
-        {/* Floating particles */}
+        <div className="absolute top-10 right-10 w-96 h-96 rounded-full blur-3xl"
+          style={{ background: 'radial-gradient(circle, rgba(0,255,136,0.5) 0%, rgba(0,255,136,0.3) 50%, transparent 70%)', animation: 'float 8s ease-in-out infinite, pulse 4s ease-in-out infinite' }} />
+        <div className="absolute bottom-10 left-10 w-80 h-80 rounded-full blur-3xl"
+          style={{ background: 'radial-gradient(circle, rgba(20,184,166,0.5) 0%, rgba(13,148,136,0.3) 50%, transparent 70%)', animation: 'float 10s ease-in-out infinite reverse, pulse 5s ease-in-out infinite', animationDelay: '2s' }} />
         {ARRANGE_PARTICLES.map((p, i) => (
-          <div
-            key={i}
-            className="absolute rounded-full"
-            style={{
-              width: `${p.w}px`,
-              height: `${p.h}px`,
-              left: `${p.x}%`,
-              top: `${p.y}%`,
-              background: p.c,
-              opacity: p.o,
-              animation: `float ${p.dur}s ease-in-out infinite`,
-              animationDelay: `${p.delay}s`,
-              boxShadow: `0 0 ${p.glow}px ${p.c}`,
-            }}
-          />
+          <div key={i} className="absolute rounded-full"
+            style={{ width: `${p.w}px`, height: `${p.h}px`, left: `${p.x}%`, top: `${p.y}%`, background: p.c, opacity: p.o, animation: `float ${p.dur}s ease-in-out infinite`, animationDelay: `${p.delay}s`, boxShadow: `0 0 ${p.glow}px ${p.c}` }} />
         ))}
       </div>
 
       <div className="relative backdrop-blur-xl rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl" style={{ background: '#0d1025', border: '2px solid rgba(0,255,136,0.2)' }}>
-        {/* Header with gradient */}
+        {/* Header */}
         <div className="p-3 border-b border-emerald-500/20 bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-emerald-500/10">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-[15px] font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 leading-tight">
-                Arrange Knockout Matchups
+                Arrange Knockout Draw
               </h2>
-              <p className="text-gray-400 text-[10px] leading-tight mt-0.5">Select players for knockout matches</p>
+              <p className="text-gray-400 text-[10px] leading-tight mt-0.5">
+                Tap a player → tap a bracket position to place them. Empty positions = BYE.
+              </p>
             </div>
             <button onClick={onClose} className="text-gray-400 hover:text-white p-1.5 hover:bg-emerald-500/20 rounded-lg transition-all hover:scale-110">
               <X className="w-3.5 h-3.5" />
@@ -4777,145 +4732,207 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
           </div>
         </div>
 
-        <div className="p-3">
-          {/* Advancing Players with icon */}
-          <div className="mb-3">
+        <div className="p-3 space-y-3">
+
+          {/* Bracket Size Selector */}
+          {bracketSize && (
+            <div className="p-2 rounded-xl" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <div className="flex gap-2 flex-wrap">
+                  {[4, 8, 16, 32].filter(s => s >= advancingPlayers.length || s === 4).map(s => (
+                    <button key={s} onClick={() => handleBracketSizeChange(s)}
+                      className="px-3 py-1 rounded-lg text-[10px] font-bold transition-all"
+                      style={{
+                        background: bracketSize === s ? 'rgba(0,255,136,0.15)' : 'rgba(255,255,255,0.05)',
+                        border: `1px solid ${bracketSize === s ? 'rgba(0,255,136,0.5)' : 'rgba(255,255,255,0.12)'}`,
+                        color: bracketSize === s ? '#00ff88' : 'rgba(255,255,255,0.5)'
+                      }}>
+                      Round of {s}
+                    </button>
+                  ))}
+                </div>
+                <span className="text-[9px]" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                  {filledCount}/{bracketSize} placed · {byeCount > 0 ? `${byeCount} BYE${byeCount > 1 ? 's' : ''}` : 'no byes'}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Player in hand banner */}
+          {pickedPlayer && (
+            <div className="p-2 rounded-xl flex items-center gap-2 animate-pulse"
+              style={{ background: 'rgba(0,255,136,0.1)', border: '1px solid rgba(0,255,136,0.4)' }}>
+              <div className="w-2 h-2 rounded-full bg-[#00ff88] flex-shrink-0" />
+              <span className="text-[11px] font-bold text-white flex-1">
+                {pickedPlayer.name}
+                {pickedPlayer.partnerName ? ` / ${pickedPlayer.partnerName}` : ''}
+                <span className="text-[#00ff88] ml-1">(Pool {pickedPlayer.group} #{pickedPlayer.rank})</span>
+              </span>
+              <span className="text-[9px]" style={{ color: 'rgba(255,255,255,0.5)' }}>tap a slot →</span>
+              <button onClick={() => setPickedPlayer(null)}
+                className="text-gray-400 hover:text-white p-0.5 rounded transition-all flex-shrink-0">
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+          )}
+
+          {/* Qualifying Players Pool */}
+          <div>
             <h3 className="text-[10px] font-black icon-green mb-2 uppercase tracking-wider flex items-center gap-1.5">
               <Trophy className="w-3 h-3" />
-              Advancing Players ({advancingPlayers.length})
-            </h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5">
-              {unassignedPlayers.map(player => (
-                <div
-                  key={player.id}
-                  className="p-2 bg-gradient-to-br from-slate-700/50 to-slate-800/50 rounded-lg border border-emerald-500/30 hover:border-emerald-500/60 hover:shadow-lg hover:shadow-emerald-500/20 hover:scale-105 transition-all cursor-pointer"
-                >
-                  <div className="text-[11px] font-bold text-white leading-tight">{player.name}</div>
-                  {player.partnerName && (
-                    <div className="text-[9px] text-[#00ff88] leading-tight">& {player.partnerName}</div>
-                  )}
-                  <div className="text-[8px] text-gray-400 mt-0.5 flex items-center gap-1">
-                    <span className="px-1 py-0.5 bg-emerald-500/20 rounded text-[#00ff88] font-bold">Pool {player.group}</span>
-                    <span>#{player.rank}</span>
-                    <span>•</span>
-                    <span className="font-bold icon-green">{player.points}pts</span>
-                  </div>
-                </div>
-              ))}
-              {unassignedPlayers.length === 0 && (
-                <div className="col-span-full text-center icon-green text-[10px] py-3 font-semibold">
-                  ✓ All players assigned
-                </div>
+              Qualifying Players ({advancingPlayers.length})
+              {poolPlayers.length > 0 && (
+                <span className="ml-1 text-[9px] font-normal" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                  — {poolPlayers.length} not yet placed
+                </span>
               )}
+            </h3>
+            <div className="flex flex-wrap gap-1.5">
+              {advancingPlayers.map(player => {
+                const isPlaced = assignedIds.has(player.id);
+                const isPicked = pickedPlayer?.id === player.id;
+                return (
+                  <button
+                    key={player.id}
+                    onClick={() => !isPlaced && handlePoolPlayerClick(player)}
+                    disabled={isPlaced}
+                    className="px-2 py-1.5 rounded-lg text-left transition-all"
+                    style={{
+                      background: isPicked
+                        ? 'rgba(0,255,136,0.2)'
+                        : isPlaced
+                          ? 'rgba(255,255,255,0.03)'
+                          : 'rgba(255,255,255,0.07)',
+                      border: `1px solid ${isPicked ? 'rgba(0,255,136,0.7)' : isPlaced ? 'rgba(255,255,255,0.06)' : 'rgba(0,255,136,0.25)'}`,
+                      opacity: isPlaced ? 0.35 : 1,
+                      cursor: isPlaced ? 'default' : 'pointer',
+                      transform: isPicked ? 'scale(1.04)' : 'scale(1)',
+                      boxShadow: isPicked ? '0 0 10px rgba(0,255,136,0.3)' : 'none'
+                    }}>
+                    <div className="text-[10px] font-bold text-white leading-tight">
+                      {player.name}{player.partnerName ? ` / ${player.partnerName}` : ''}
+                    </div>
+                    <div className="text-[8px] flex items-center gap-1 mt-0.5">
+                      <span className="px-1 rounded font-bold" style={{ background: 'rgba(0,255,136,0.15)', color: '#00ff88' }}>
+                        Pool {player.group}
+                      </span>
+                      <span style={{ color: 'rgba(255,255,255,0.5)' }}>#{player.rank}</span>
+                      {isPlaced && <span style={{ color: 'rgba(0,255,136,0.6)' }}>✓</span>}
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          {/* Knockout Matches with icon */}
+          {/* Bracket Positions — pairs = first-round matches */}
           <div>
             <h3 className="text-[10px] font-black icon-green mb-2 uppercase tracking-wider flex items-center gap-1.5">
               <Zap className="w-3 h-3" />
-              Knockout Matches
+              Bracket Positions
+              <span className="text-[9px] font-normal ml-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                each pair is one first-round match
+              </span>
             </h3>
-            <div className="space-y-2">
-              {knockoutSlots.map((slot, index) => (
-                <div key={index} className="bg-gradient-to-br from-slate-700/30 to-slate-800/30 rounded-lg p-2 border-2 border-emerald-500/20 hover:border-emerald-500/40 transition-all">
-                  <div className="text-[9px] icon-green mb-2 font-bold flex items-center gap-1">
-                    <span className="w-5 h-5 bg-emerald-500/20 rounded flex items-center justify-center text-[10px]">{slot.matchNumber}</span>
-                    Match {slot.matchNumber}
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    {/* Player 1 Slot */}
-                    <div className="space-y-1">
-                      <label className="text-[8px] icon-green font-bold uppercase tracking-wide">Player 1</label>
-                      {slot.player1 ? (
-                        <div className="p-2 bg-gradient-to-br from-emerald-600 to-teal-600 rounded-lg flex items-center justify-between shadow-lg shadow-emerald-500/30 border border-emerald-400/30">
-                          <div className="flex-1 min-w-0">
-                            <div className="text-[11px] font-bold text-white leading-tight">{slot.player1.name}</div>
-                            {slot.player1.partnerName && (
-                              <div className="text-[9px] text-emerald-100 leading-tight">& {slot.player1.partnerName}</div>
-                            )}
-                            <div className="text-[8px] text-emerald-200/80">Pool {slot.player1.group} • #{slot.player1.rank}</div>
-                          </div>
-                          <button
-                            onClick={() => removePlayerFromSlot(index, 1)}
-                            className="text-white/70 hover:text-white p-1 hover:bg-white/20 rounded transition-all flex-shrink-0"
-                          >
-                            <X className="w-3 h-3" />
-                          </button>
-                        </div>
-                      ) : (
-                        <select
-                          onChange={(e) => {
-                            const player = advancingPlayers.find(p => p.id === e.target.value);
-                            if (player) assignPlayerToSlot(player, index, 1);
-                          }}
-                          value=""
-                          className="w-full p-2 bg-slate-800/80 border-2 border-slate-600 hover:border-emerald-500/50 focus:border-emerald-500 rounded-lg text-white text-[11px] transition-all cursor-pointer"
-                        >
-                          <option value="">Select player...</option>
-                          {unassignedPlayers.map(player => (
-                            <option key={player.id} value={player.id}>
-                              {player.name} (Pool {player.group} • #{player.rank})
-                            </option>
-                          ))}
-                        </select>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              {positions.length > 0 && Array.from({ length: positions.length / 2 }, (_, mi) => {
+                const p1 = positions[mi * 2];
+                const p2 = positions[mi * 2 + 1];
+                const isBye = p1 && !p2;
+                return (
+                  <div key={mi}
+                    className="rounded-xl overflow-hidden"
+                    style={{ border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.02)' }}>
+                    {/* Match label */}
+                    <div className="px-2 py-1 flex items-center justify-between"
+                      style={{ background: 'rgba(255,255,255,0.04)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                      <span className="text-[9px] font-black uppercase tracking-wider" style={{ color: 'rgba(0,255,136,0.7)' }}>
+                        Match {mi + 1}
+                      </span>
+                      {isBye && (
+                        <span className="text-[8px] font-bold px-1.5 py-0.5 rounded"
+                          style={{ background: 'rgba(255,193,7,0.15)', color: 'rgba(255,193,7,0.8)', border: '1px solid rgba(255,193,7,0.3)' }}>
+                          BYE
+                        </span>
                       )}
                     </div>
-
-                    {/* Player 2 Slot */}
-                    <div className="space-y-1">
-                      <label className="text-[8px] icon-green font-bold uppercase tracking-wide">Player 2</label>
-                      {slot.player2 ? (
-                        <div className="p-2 bg-gradient-to-br from-emerald-600 to-teal-600 rounded-lg flex items-center justify-between shadow-lg shadow-emerald-500/30 border border-emerald-400/30">
-                          <div className="flex-1 min-w-0">
-                            <div className="text-[11px] font-bold text-white leading-tight">{slot.player2.name}</div>
-                            {slot.player2.partnerName && (
-                              <div className="text-[9px] text-emerald-100 leading-tight">& {slot.player2.partnerName}</div>
-                            )}
-                            <div className="text-[8px] text-emerald-200/80">Pool {slot.player2.group} • #{slot.player2.rank}</div>
-                          </div>
+                    {/* Two position slots */}
+                    <div className="p-1.5 space-y-1">
+                      {[0, 1].map(offset => {
+                        const posIdx = mi * 2 + offset;
+                        const player = positions[posIdx];
+                        const isPicked = pickedPlayer?.id === player?.id;
+                        const isTargetable = !!pickedPlayer && !isPicked;
+                        return (
                           <button
-                            onClick={() => removePlayerFromSlot(index, 2)}
-                            className="text-white/70 hover:text-white p-1 hover:bg-white/20 rounded transition-all flex-shrink-0"
-                          >
-                            <X className="w-3 h-3" />
+                            key={offset}
+                            onClick={() => handlePositionClick(posIdx)}
+                            className="w-full rounded-lg p-2 text-left transition-all"
+                            style={{
+                              background: player
+                                ? isPicked
+                                  ? 'rgba(0,255,136,0.15)'
+                                  : 'linear-gradient(135deg, rgba(0,255,136,0.15), rgba(0,212,255,0.1))'
+                                : isTargetable
+                                  ? 'rgba(0,255,136,0.06)'
+                                  : 'rgba(255,255,255,0.03)',
+                              border: `1px solid ${
+                                player
+                                  ? isPicked ? 'rgba(0,255,136,0.6)' : 'rgba(0,255,136,0.3)'
+                                  : isTargetable ? 'rgba(0,255,136,0.35)' : 'rgba(255,255,255,0.08)'
+                              }`,
+                              cursor: 'pointer'
+                            }}>
+                            {player ? (
+                              <div className="flex items-center gap-1.5">
+                                <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-[9px] font-black"
+                                  style={{ background: 'rgba(0,255,136,0.2)', color: '#00ff88', border: '1px solid rgba(0,255,136,0.4)' }}>
+                                  {posIdx + 1}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="text-[11px] font-bold text-white leading-tight truncate">
+                                    {player.name}{player.partnerName ? ` / ${player.partnerName}` : ''}
+                                  </div>
+                                  <div className="text-[8px] flex items-center gap-1 mt-0.5">
+                                    <span style={{ color: 'rgba(0,255,136,0.7)' }}>Pool {player.group}</span>
+                                    <span style={{ color: 'rgba(255,255,255,0.4)' }}>#{player.rank} · {player.points}pts</span>
+                                  </div>
+                                </div>
+                                <X className="w-3 h-3 flex-shrink-0" style={{ color: 'rgba(255,255,255,0.3)' }} />
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-1.5">
+                                <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-[9px] font-bold"
+                                  style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.3)', border: '1px dashed rgba(255,255,255,0.15)' }}>
+                                  {posIdx + 1}
+                                </div>
+                                <span className="text-[10px]"
+                                  style={{ color: isTargetable ? 'rgba(0,255,136,0.6)' : 'rgba(255,255,255,0.2)' }}>
+                                  {isTargetable ? `Place ${pickedPlayer.name.split('/')[0].trim()} here` : 'Empty — BYE'}
+                                </span>
+                              </div>
+                            )}
                           </button>
-                        </div>
-                      ) : (
-                        <select
-                          onChange={(e) => {
-                            const player = advancingPlayers.find(p => p.id === e.target.value);
-                            if (player) assignPlayerToSlot(player, index, 2);
-                          }}
-                          value=""
-                          className="w-full p-2 bg-slate-800/80 border-2 border-slate-600 hover:border-emerald-500/50 focus:border-emerald-500 rounded-lg text-white text-[11px] transition-all cursor-pointer"
-                        >
-                          <option value="">Select player...</option>
-                          {unassignedPlayers.map(player => (
-                            <option key={player.id} value={player.id}>
-                              {player.name} (Pool {player.group} • #{player.rank})
-                            </option>
-                          ))}
-                        </select>
-                      )}
+                        );
+                      })}
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
+
         </div>
 
+        {/* Footer */}
         <div className="p-3 border-t border-emerald-500/20 flex gap-2 bg-gradient-to-r from-emerald-500/5 via-teal-500/5 to-emerald-500/5">
-          <button onClick={onClose} className="flex-1 px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-600 hover:scale-105 transition-all text-[11px] font-bold shadow-lg">
+          <button onClick={onClose}
+            className="flex-1 px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-600 transition-all text-[11px] font-bold shadow-lg">
             Cancel
           </button>
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="flex-1 px-4 py-2 btn-brand rounded-lg transition-all disabled:opacity-50 text-[11px] font-bold"
-          >
-            {saving ? 'Saving...' : 'Save Matchups'}
+          <button onClick={handleSave} disabled={saving}
+            className="flex-1 px-4 py-2 btn-brand rounded-lg transition-all disabled:opacity-50 text-[11px] font-bold">
+            {saving ? 'Saving...' : `Save Draw${byeCount > 0 ? ` (${byeCount} BYE${byeCount > 1 ? 's' : ''})` : ''}`}
           </button>
         </div>
       </div>

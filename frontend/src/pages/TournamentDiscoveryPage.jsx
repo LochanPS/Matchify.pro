@@ -43,6 +43,7 @@ export default function TournamentDiscoveryPage() {
   const observerTarget = useRef(null);
   
   const [activeTab, setActiveTab] = useState('upcoming');
+  const [tabCounts, setTabCounts] = useState({ upcoming: 0, completed: 0 });
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState({
     city: '',
@@ -55,6 +56,23 @@ export default function TournamentDiscoveryPage() {
   });
   const [showFilters, setShowFilters] = useState(false);
   const [fetchTrigger, setFetchTrigger] = useState(0);
+
+  // Fetch tab counts once on mount
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        const [upRes, comRes] = await Promise.all([
+          tournamentAPI.getTournaments({ page: '1', limit: '1', tab: 'upcoming' }),
+          tournamentAPI.getTournaments({ page: '1', limit: '1', tab: 'completed' }),
+        ]);
+        setTabCounts({
+          upcoming: upRes.data?.pagination?.total || 0,
+          completed: comRes.data?.pagination?.total || 0,
+        });
+      } catch (_) {}
+    };
+    fetchCounts();
+  }, []);
 
   // Infinite scroll observer
   useEffect(() => {
@@ -481,7 +499,7 @@ export default function TournamentDiscoveryPage() {
               color: activeTab === 'upcoming' ? '#07071a' : 'rgba(255,255,255,0.5)',
             }}
           >
-            🏸 Upcoming
+            🏸 Upcoming {tabCounts.upcoming > 0 && <span style={{ fontSize: '11px', fontWeight: 700, background: 'rgba(0,0,0,0.25)', borderRadius: '999px', padding: '1px 7px', marginLeft: '4px' }}>{tabCounts.upcoming}</span>}
           </button>
           <button
             onClick={() => setActiveTab('completed')}
@@ -491,7 +509,7 @@ export default function TournamentDiscoveryPage() {
               color: activeTab === 'completed' ? '#ffffff' : 'rgba(255,255,255,0.5)',
             }}
           >
-            🏆 Completed
+            🏆 Completed {tabCounts.completed > 0 && <span style={{ fontSize: '11px', fontWeight: 700, background: 'rgba(255,255,255,0.15)', borderRadius: '999px', padding: '1px 7px', marginLeft: '4px' }}>{tabCounts.completed}</span>}
           </button>
         </div>
 

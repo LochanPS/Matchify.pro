@@ -25,17 +25,17 @@ import {
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 
-// Star/sparkle field — deterministic, softer colors than home page (no neon)
-const DASH_STARS = Array.from({ length: 50 }, (_, i) => ({
+// Star/sparkle field — same vivid colors as home page
+const DASH_STARS = Array.from({ length: 60 }, (_, i) => ({
   w: [1,1,1,2,2,3][i % 6],
   h: [1,1,1,2,2,3][i % 6],
   x: (i * 37 + 11) % 97,
   y: (i * 53 + 7)  % 99,
-  c: ['#6ee7b7','#67e8f9','#ffffff','#a5f3fc','#93c5fd','#34d399'][(i * 3) % 6],
-  o: ((i * 17) % 45) / 100 + 0.28,
+  c: ['#00ffcc','#00d4ff','#ffffff','#a0f0e0','#7df9ff','#00ff88'][(i * 3) % 6],
+  o: ((i * 17) % 55) / 100 + 0.3,
   dur: (i * 7) % 12 + 4,
   delay: (i * 3) % 6,
-  glow: (i * 11) % 12 + 6,
+  glow: (i * 11) % 16 + 8,
   star: i % 8 === 0,
 }));
 
@@ -271,16 +271,16 @@ const UnifiedDashboardMobile = () => {
           75% { transform: translate(15px, 10px) scale(1.02); }
         }
         @keyframes twinkle {
-          0%, 100% { opacity: var(--op, 0.3); transform: scale(1); }
-          50% { opacity: 1; transform: scale(1.8); }
+          0%, 100% { opacity: var(--op, 0.35); transform: scale(1); filter: brightness(1); }
+          50% { opacity: 1; transform: scale(2.4); filter: brightness(1.6); }
         }
         @keyframes avatarGlow {
           0%, 100% { box-shadow: 0 0 0 3px #00ff88, 0 0 0 6px rgba(0,255,136,0.2), 0 0 20px rgba(0,255,136,0.35); }
           50% { box-shadow: 0 0 0 3px #00ff88, 0 0 0 8px rgba(0,255,136,0.35), 0 0 32px rgba(0,255,136,0.55); }
         }
         @keyframes sparkle {
-          0%, 100% { opacity: 0.2; transform: scale(0.8) rotate(0deg); }
-          50% { opacity: 1; transform: scale(1.4) rotate(45deg); }
+          0%, 100% { opacity: 0.3; transform: scale(0.8) rotate(0deg); filter: brightness(1); }
+          50% { opacity: 1; transform: scale(1.7) rotate(45deg); filter: brightness(2); }
         }
         @keyframes glow {
           0%, 100% { opacity: 0.5; filter: brightness(1); }

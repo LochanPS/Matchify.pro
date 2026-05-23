@@ -362,9 +362,9 @@ const UnifiedDashboardMobile = () => {
                   >
                     <div
                       className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                      style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.2)' }}
+                      style={{ background: 'rgba(16,185,129,0.18)', border: '1px solid rgba(16,185,129,0.38)' }}
                     >
-                      <Icon className="w-5 h-5" style={{ color: '#6ee7b7' }} />
+                      <Icon className="w-5 h-5" style={{ color: '#34d399' }} />
                     </div>
                     <span className="font-bold text-base flex-1">{label}</span>
                     <ArrowRightIcon className="w-4 h-4 flex-shrink-0" style={{ color: 'rgba(255,255,255,0.4)' }} />
@@ -405,34 +405,34 @@ const UnifiedDashboardMobile = () => {
         <div
           className="rounded-2xl p-5 mb-6"
           style={{
-            background: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(255,255,255,0.09)',
+            background: 'rgba(255,255,255,0.06)',
+            border: '1px solid rgba(255,255,255,0.12)',
             animation: 'fadeIn 0.5s ease-out both'
           }}
         >
           <h3 className="text-lg font-black mb-4 text-white">Quick Navigation</h3>
           <div className="grid grid-cols-3 gap-3">
             <Link to="/tournaments" className="flex flex-col items-center gap-2 p-4 rounded-xl transition-all group"
-              style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+              style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.13)' }}>
               <div className="w-12 h-12 rounded-xl flex items-center justify-center"
-                style={{ background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.25)' }}>
-                <TrophyIcon className="w-6 h-6" style={{ color: '#6ee7b7' }} />
+                style={{ background: 'rgba(16,185,129,0.22)', border: '1px solid rgba(16,185,129,0.45)' }}>
+                <TrophyIcon className="w-6 h-6" style={{ color: '#34d399' }} />
               </div>
               <span className="text-xs font-bold text-white text-center">Tournaments</span>
             </Link>
             <Link to="/leaderboard" className="flex flex-col items-center gap-2 p-4 rounded-xl transition-all group"
-              style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+              style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.13)' }}>
               <div className="w-12 h-12 rounded-xl flex items-center justify-center"
-                style={{ background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.25)' }}>
-                <ChartBarIcon className="w-6 h-6" style={{ color: '#6ee7b7' }} />
+                style={{ background: 'rgba(16,185,129,0.22)', border: '1px solid rgba(16,185,129,0.45)' }}>
+                <ChartBarIcon className="w-6 h-6" style={{ color: '#34d399' }} />
               </div>
               <span className="text-xs font-bold text-white text-center">Leaderboard</span>
             </Link>
             <Link to="/academies" className="flex flex-col items-center gap-2 p-4 rounded-xl transition-all group"
-              style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+              style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.13)' }}>
               <div className="w-12 h-12 rounded-xl flex items-center justify-center"
-                style={{ background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.25)' }}>
-                <UserIcon className="w-6 h-6" style={{ color: '#6ee7b7' }} />
+                style={{ background: 'rgba(16,185,129,0.22)', border: '1px solid rgba(16,185,129,0.45)' }}>
+                <UserIcon className="w-6 h-6" style={{ color: '#34d399' }} />
               </div>
               <span className="text-xs font-bold text-white text-center">Academies</span>
             </Link>
@@ -443,8 +443,9 @@ const UnifiedDashboardMobile = () => {
         <div
           className="rounded-2xl p-5 mb-6 relative overflow-hidden"
           style={{
-            background: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(255,255,255,0.09)',
+            background: 'rgba(255,255,255,0.06)',
+            border: '1px solid rgba(255,255,255,0.12)',
+            borderTop: '2px solid rgba(16,185,129,0.5)',
             backdropFilter: 'blur(20px)',
             animation: 'fadeIn 0.8s ease-out 0.2s both'
           }}
@@ -502,15 +503,15 @@ const UnifiedDashboardMobile = () => {
             <div
               className="inline-flex items-center gap-2 px-4 py-2 rounded-lg mb-3"
               style={{
-                background: 'rgba(16,185,129,0.08)',
-                border: '1px solid rgba(16,185,129,0.25)',
+                background: 'rgba(16,185,129,0.1)',
+                border: '1px solid rgba(16,185,129,0.3)',
               }}
             >
               <div className="relative z-10">
                 <p className="text-xs font-bold" style={{ color: 'rgba(255,255,255,0.5)' }}>Matchify ID</p>
                 <p
                   className="text-lg font-mono font-black tracking-wider"
-                  style={{ color: '#6ee7b7' }}
+                  style={{ color: '#34d399' }}
                 >
                   {matchifyCode || userProfile?.matchifyCode || user?.matchifyCode || 'Loading...'}
                 </p>
@@ -597,7 +598,7 @@ const UnifiedDashboardMobile = () => {
                     <p className="text-xs font-bold mb-1" style={{ color: 'rgba(255,255,255,0.45)' }}>Matchify Code</p>
                     <p
                       className="text-2xl font-mono font-black tracking-wider"
-                      style={{ color: '#6ee7b7' }}
+                      style={{ color: '#34d399' }}
                     >
                       {matchifyCode}
                     </p>
@@ -650,8 +651,8 @@ const UnifiedDashboardMobile = () => {
           <div
             className="rounded-2xl p-5 mb-6"
             style={{
-              background: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.09)',
+              background: 'rgba(255,255,255,0.06)',
+              border: '1px solid rgba(255,255,255,0.12)',
               animation: 'slideUp 0.8s ease-out 0.4s both'
             }}
           >
@@ -681,9 +682,9 @@ const UnifiedDashboardMobile = () => {
                   >
                     <div
                       className="inline-flex items-center justify-center w-11 h-11 rounded-xl mb-3"
-                      style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.2)' }}
+                      style={{ background: 'rgba(16,185,129,0.18)', border: '1px solid rgba(16,185,129,0.38)' }}
                     >
-                      <stat.icon className="w-5 h-5" style={{ color: '#6ee7b7' }} />
+                      <stat.icon className="w-5 h-5" style={{ color: '#34d399' }} />
                     </div>
                     <p className="text-3xl font-black text-white mb-1">{stat.value}</p>
                     <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>{stat.label}</p>
@@ -699,8 +700,8 @@ const UnifiedDashboardMobile = () => {
           <div
             className="rounded-2xl p-5 mb-6"
             style={{
-              background: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.09)',
+              background: 'rgba(255,255,255,0.06)',
+              border: '1px solid rgba(255,255,255,0.12)',
               animation: 'slideUp 0.8s ease-out 0.4s both'
             }}
           >
@@ -718,13 +719,13 @@ const UnifiedDashboardMobile = () => {
               <div className="grid grid-cols-2 gap-3">
                 <div
                   className="p-4 rounded-xl"
-                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.09)' }}
+                  style={{ background: 'rgba(255,255,255,0.07)', borderTop: '1px solid rgba(255,255,255,0.12)', borderRight: '1px solid rgba(255,255,255,0.12)', borderBottom: '1px solid rgba(255,255,255,0.12)', borderLeft: '3px solid rgba(16,185,129,0.55)' }}
                 >
                   <div
                     className="inline-flex items-center justify-center w-11 h-11 rounded-xl mb-3"
-                    style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.2)' }}
+                    style={{ background: 'rgba(16,185,129,0.18)', border: '1px solid rgba(16,185,129,0.38)' }}
                   >
-                    <TrophyIcon className="w-6 h-6" style={{ color: '#6ee7b7' }} />
+                    <TrophyIcon className="w-6 h-6" style={{ color: '#34d399' }} />
                   </div>
                   <p className="text-3xl font-black text-white mb-1">{user?.tournamentsOrganized || 0}</p>
                   <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Tournaments Organized</p>
@@ -732,13 +733,13 @@ const UnifiedDashboardMobile = () => {
 
                 <div
                   className="p-4 rounded-xl"
-                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.09)' }}
+                  style={{ background: 'rgba(255,255,255,0.07)', borderTop: '1px solid rgba(255,255,255,0.12)', borderRight: '1px solid rgba(255,255,255,0.12)', borderBottom: '1px solid rgba(255,255,255,0.12)', borderLeft: '3px solid rgba(16,185,129,0.55)' }}
                 >
                   <div
                     className="inline-flex items-center justify-center w-11 h-11 rounded-xl mb-3"
-                    style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.2)' }}
+                    style={{ background: 'rgba(16,185,129,0.18)', border: '1px solid rgba(16,185,129,0.38)' }}
                   >
-                    <UserIcon className="w-6 h-6" style={{ color: '#6ee7b7' }} />
+                    <UserIcon className="w-6 h-6" style={{ color: '#34d399' }} />
                   </div>
                   <p className="text-3xl font-black text-white mb-1">{user?.totalParticipants || 0}</p>
                   <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Total Participants</p>
@@ -774,7 +775,7 @@ const UnifiedDashboardMobile = () => {
                 <Link
                   to="/organizer/history"
                   className="text-xs font-bold"
-                  style={{ color: '#6ee7b7' }}
+                  style={{ color: '#34d399' }}
                 >
                   View All →
                 </Link>
@@ -861,8 +862,8 @@ const UnifiedDashboardMobile = () => {
           <div
             className="rounded-2xl p-5 mb-6"
             style={{
-              background: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.09)',
+              background: 'rgba(255,255,255,0.06)',
+              border: '1px solid rgba(255,255,255,0.12)',
               animation: 'slideUp 0.8s ease-out 0.4s both'
             }}
           >
@@ -876,18 +877,18 @@ const UnifiedDashboardMobile = () => {
               <h3 className="text-lg font-black text-white">Umpire Stats</h3>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div className="p-4 rounded-xl" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.09)' }}>
+              <div className="p-4 rounded-xl" style={{ background: 'rgba(255,255,255,0.07)', borderTop: '1px solid rgba(255,255,255,0.12)', borderRight: '1px solid rgba(255,255,255,0.12)', borderBottom: '1px solid rgba(255,255,255,0.12)', borderLeft: '3px solid rgba(16,185,129,0.55)' }}>
                 <div className="inline-flex items-center justify-center w-11 h-11 rounded-xl mb-3"
-                  style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.2)' }}>
-                  <FireIcon className="w-6 h-6" style={{ color: '#6ee7b7' }} />
+                  style={{ background: 'rgba(16,185,129,0.18)', border: '1px solid rgba(16,185,129,0.38)' }}>
+                  <FireIcon className="w-6 h-6" style={{ color: '#34d399' }} />
                 </div>
                 <p className="text-3xl font-black text-white mb-1">{user?.matchesUmpired || 0}</p>
                 <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Matches Umpired</p>
               </div>
-              <div className="p-4 rounded-xl" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.09)' }}>
+              <div className="p-4 rounded-xl" style={{ background: 'rgba(255,255,255,0.07)', borderTop: '1px solid rgba(255,255,255,0.12)', borderRight: '1px solid rgba(255,255,255,0.12)', borderBottom: '1px solid rgba(255,255,255,0.12)', borderLeft: '3px solid rgba(16,185,129,0.55)' }}>
                 <div className="inline-flex items-center justify-center w-11 h-11 rounded-xl mb-3"
-                  style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.2)' }}>
-                  <TrophyIcon className="w-6 h-6" style={{ color: '#6ee7b7' }} />
+                  style={{ background: 'rgba(16,185,129,0.18)', border: '1px solid rgba(16,185,129,0.38)' }}>
+                  <TrophyIcon className="w-6 h-6" style={{ color: '#34d399' }} />
                 </div>
                 <p className="text-3xl font-black text-white mb-1">{user?.tournamentsUmpired || 0}</p>
                 <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Tournaments</p>
@@ -900,8 +901,8 @@ const UnifiedDashboardMobile = () => {
         <div
           className="rounded-2xl p-5 mb-6"
           style={{
-            background: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(255,255,255,0.09)',
+            background: 'rgba(255,255,255,0.06)',
+            border: '1px solid rgba(255,255,255,0.12)',
             animation: 'fadeIn 0.8s ease-out 0.7s both'
           }}
         >
@@ -911,7 +912,7 @@ const UnifiedDashboardMobile = () => {
                 className="w-10 h-10 rounded-xl flex items-center justify-center"
                 style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.22)' }}
               >
-                <UserIcon className="w-5 h-5" style={{ color: '#6ee7b7' }} />
+                <UserIcon className="w-5 h-5" style={{ color: '#34d399' }} />
               </div>
               <h3 className="text-lg font-black text-white">Profile Information</h3>
             </div>
@@ -971,8 +972,8 @@ const UnifiedDashboardMobile = () => {
         <div
           className="rounded-2xl overflow-hidden mb-6"
           style={{
-            background: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(255,255,255,0.09)',
+            background: 'rgba(255,255,255,0.06)',
+            border: '1px solid rgba(255,255,255,0.12)',
             animation: 'fadeIn 0.8s ease-out 0.8s both'
           }}
         >
@@ -982,14 +983,14 @@ const UnifiedDashboardMobile = () => {
                 className="w-10 h-10 rounded-xl flex items-center justify-center"
                 style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.22)' }}
               >
-                <CalendarIcon className="w-5 h-5" style={{ color: '#6ee7b7' }} />
+                <CalendarIcon className="w-5 h-5" style={{ color: '#34d399' }} />
               </div>
               <h3 className="text-lg font-black text-white">Recent Activity</h3>
             </div>
             <Link
               to="/registrations"
               className="text-sm font-bold flex items-center gap-1 transition-colors"
-              style={{ color: '#6ee7b7' }}
+              style={{ color: '#34d399' }}
             >
               View All
               <ArrowRightIcon className="w-4 h-4" />

@@ -7,6 +7,36 @@ export default {
   theme: {
     extend: {
       colors: {
+        // ── Lifted gray/slate for dark-bg readability ──────────────────────
+        // Standard Tailwind gray-500 (#6b7280) is near-invisible on #161730.
+        // Bumped 400–600 range ~15-25% brighter so muted text stays legible.
+        gray: {
+          50:  '#f9fafb',
+          100: '#f3f4f6',
+          200: '#e5e7eb',
+          300: '#d1d5db',
+          400: '#b3b9c4',  // was #9ca3af
+          500: '#8b939f',  // was #6b7280
+          600: '#6b7280',  // was #4b5563 (promoted one step)
+          700: '#374151',
+          800: '#1f2937',
+          900: '#111827',
+          950: '#030712',
+        },
+        slate: {
+          50:  '#f8fafc',
+          100: '#f1f5f9',
+          200: '#e2e8f0',
+          300: '#cbd5e1',
+          400: '#a8b4c2',  // was #94a3b8
+          500: '#7f8fa0',  // was #64748b
+          600: '#64748b',  // was #475569 (promoted one step)
+          700: '#334155',
+          800: '#1e293b',
+          900: '#0f172a',
+          950: '#020617',
+        },
+        // ───────────────────────────────────────────────────────────────────
         primary: {
           50: '#eff6ff',
           100: '#dbeafe',

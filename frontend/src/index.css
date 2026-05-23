@@ -23,6 +23,8 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     background-color: #161730;
+    color: #ffffff;
+    text-rendering: optimizeLegibility;
   }
   
   /* Headings - Responsive sizing */

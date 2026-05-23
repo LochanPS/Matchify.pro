@@ -26,7 +26,7 @@ import api from '../utils/api';
 import SingleEliminationBracket from '../components/brackets/SingleEliminationBracket';
 import { useAuth } from '../contexts/AuthContext';
 import { ArrowLeftIcon, TrophyIcon } from '@heroicons/react/24/outline';
-import { Loader, Zap, Layers, X, Plus, Settings, Users, CheckCircle, AlertTriangle, Trash2, UserPlus, Gavel, AlertCircle, Play, Trophy, Clock, Eye, Edit } from 'lucide-react';
+import { Loader, Zap, Layers, X, Plus, Settings, Users, CheckCircle, AlertTriangle, Trash2, UserPlus, Gavel, AlertCircle, Play, Trophy, Clock, Eye, Edit, ArrowLeft } from 'lucide-react';
 
 // Pre-generated particle data — deterministic, never re-randomized on render
 const DRAW_BG_PARTICLES = Array.from({ length: 15 }, (_, i) => ({
@@ -2844,6 +2844,7 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
 // Round Robin Display with Match Schedule
 const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onChangeResult, onViewMatchDetails, categoryFormat }) => {
   const navigate = useNavigate();
+  const [activeGroupIdx, setActiveGroupIdx] = React.useState(null); // null = all hidden, number = show that group's matches
   if (!data?.groups) return <p className="text-gray-400 text-center p-8">No group data</p>;
 
   // Find database matches for each group match
@@ -2999,25 +3000,61 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
             </div>
           </div>
 
-          {/* Match Schedule - Mobile Optimized */}
-          <div className="p-4 border-t-2 border-white/10">
-            <h5 className="text-sm font-black text-blue-300 mb-3 flex items-center gap-2 uppercase tracking-wider">
+          {/* View Matches button */}
+          <div className="px-4 pb-4 border-t-2 border-white/10 pt-3">
+            <button
+              onClick={() => setActiveGroupIdx(gi)}
+              className="w-full py-3 rounded-xl font-black text-sm flex items-center justify-center gap-2 transition-all active:scale-95"
+              style={{ background: 'rgba(0,212,255,0.1)', border: '1.5px solid rgba(0,212,255,0.35)', color: '#00d4ff' }}
+            >
               <Clock className="w-4 h-4" />
-              Matches
-            </h5>
-            
-            {group.matches && group.matches.length > 0 ? (
-              <div className="space-y-2.5">
-                {group.matches.map((match, mi) => {
+              View Matches ({group.matches?.length || 0})
+            </button>
+          </div>
+        </div>
+      ))}
+
+      {/* ── Group Matches Modal ──────────────────────────────────────────────── */}
+      {activeGroupIdx !== null && data.groups[activeGroupIdx] && (() => {
+        const group = data.groups[activeGroupIdx];
+        const gi = activeGroupIdx;
+        return (
+          <div
+            className="fixed inset-0 z-50 flex flex-col"
+            style={{ background: '#07071a' }}
+          >
+            {/* Modal Header */}
+            <div
+              className="flex-shrink-0 flex items-center gap-3 px-4 py-3 border-b-2"
+              style={{ background: 'rgba(13,16,37,0.98)', borderColor: 'rgba(0,255,136,0.2)', backdropFilter: 'blur(20px)' }}
+            >
+              <button
+                onClick={() => setActiveGroupIdx(null)}
+                className="flex items-center gap-1.5 text-sm font-black"
+                style={{ color: 'rgba(255,255,255,0.6)' }}
+              >
+                <ArrowLeft className="w-5 h-5" /> Back
+              </button>
+              <div className="flex-1 text-center">
+                <p className="text-base font-black text-white">Group {String.fromCharCode(65 + gi)} Matches</p>
+                <p className="text-xs font-semibold" style={{ color: '#00ff88' }}>{group.matches?.length || 0} matches</p>
+              </div>
+              <div className="w-16" /> {/* spacer to center title */}
+            </div>
+
+            {/* Modal Scrollable Body */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-2.5">
+              {group.matches && group.matches.length > 0 ? (
+                group.matches.map((match, mi) => {
                   const dbMatch = findDbMatch(match, gi);
                   const hasPlayers = match.player1?.id && match.player2?.id;
                   const isCompleted = dbMatch?.status === 'COMPLETED' || (!dbMatch && match.winner && match.player1?.id && match.player2?.id);
                   const isInProgress = dbMatch?.status === 'IN_PROGRESS';
                   const hasUmpire = dbMatch?.umpireId;
-                  
+
                   return (
-                    <div 
-                      key={mi} 
+                    <div
+                      key={mi}
                       className="p-3 rounded-xl border-2 transition-all"
                       style={{
                         background: isCompleted ? 'rgba(0,255,136,0.06)' : isInProgress ? 'rgba(251,191,36,0.06)' : hasPlayers ? 'rgba(0,212,255,0.06)' : 'rgba(255,255,255,0.02)',
@@ -3033,38 +3070,42 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                         {isInProgress && <span className="text-amber-400 text-xs font-bold">🔴 LIVE</span>}
                         {hasUmpire && !isCompleted && !isInProgress && <span className="text-blue-400 text-xs font-bold">⚖️ READY</span>}
                       </div>
-                      
+
                       {/* Players with winner highlight */}
                       {(() => {
                         const p1Won = dbMatch ? dbMatch.winnerId === match.player1?.id : match.winner === 1;
                         const p2Won = dbMatch ? dbMatch.winnerId === match.player2?.id : match.winner === 2;
                         return (
                           <div className="space-y-1.5">
-                            <div className={`py-2 px-3 rounded-xl font-bold text-sm flex items-center justify-between ${hasPlayers ? '' : ''}`}
+                            <div
+                              className="py-2 px-3 rounded-xl font-bold text-sm flex items-center justify-between"
                               style={{
                                 background: p1Won ? 'rgba(0,255,136,0.18)' : hasPlayers ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.03)',
                                 border: p1Won ? '1px solid rgba(0,255,136,0.4)' : '1px solid rgba(255,255,255,0.08)',
                                 color: p1Won ? '#00ff88' : hasPlayers ? 'white' : 'rgba(255,255,255,0.35)',
-                              }}>
+                              }}
+                            >
                               <span className="truncate flex-1 text-xs">{getPlayerDisplay(match.player1) || 'TBD'}</span>
                               {p1Won && <span className="text-[10px] font-black ml-1 flex-shrink-0">🏆 WIN</span>}
                             </div>
                             <div className="text-center">
                               <span className="text-xs font-black" style={{ color: 'rgba(255,255,255,0.3)' }}>VS</span>
                             </div>
-                            <div className="py-2 px-3 rounded-xl font-bold text-sm flex items-center justify-between"
+                            <div
+                              className="py-2 px-3 rounded-xl font-bold text-sm flex items-center justify-between"
                               style={{
                                 background: p2Won ? 'rgba(0,255,136,0.18)' : hasPlayers ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.03)',
                                 border: p2Won ? '1px solid rgba(0,255,136,0.4)' : '1px solid rgba(255,255,255,0.08)',
                                 color: p2Won ? '#00ff88' : hasPlayers ? 'white' : 'rgba(255,255,255,0.35)',
-                              }}>
+                              }}
+                            >
                               <span className="truncate flex-1 text-xs">{getPlayerDisplay(match.player2) || 'TBD'}</span>
                               {p2Won && <span className="text-[10px] font-black ml-1 flex-shrink-0">🏆 WIN</span>}
                             </div>
                           </div>
                         );
                       })()}
-                      
+
                       {/* VIEW — all users when completed */}
                       {isCompleted && hasPlayers && (
                         <div className="mt-2.5 flex gap-2">
@@ -3126,17 +3167,17 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                       )}
                     </div>
                   );
-                })}
-              </div>
-            ) : (
-              <div className="text-center py-8 text-gray-500">
-                <p className="text-sm">No matches generated yet</p>
-                <p className="text-xs mt-1">Assign players to generate matches</p>
-              </div>
-            )}
+                })
+              ) : (
+                <div className="text-center py-16 text-gray-500">
+                  <p className="text-sm">No matches generated yet</p>
+                  <p className="text-xs mt-1">Assign players to generate matches</p>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })()}
     </div>
   );
 };

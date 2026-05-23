@@ -60,7 +60,7 @@ const parseScoringFormat = (fmt) => {
 const MatchScoringPage = () => {
   const { matchId } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  useAuth(); // ensures auth context is active
 
   const [match, setMatch] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -135,10 +135,34 @@ const MatchScoringPage = () => {
       } catch (_) { /* match may already be configured */ }
       // 45s timeout — Vercel cold start + DB queries can take up to 30s on first hit
       const response = await api.post(`/matches/${matchId}/start`, {}, { timeout: 45000 });
-      setMatch(response.data.match);
-      if (response.data.match?.score) {
-        setScore(response.data.match.score);
-        setTimerData(response.data.match.score.timer);
+      const matchData = response.data.match;
+      setMatch(matchData);
+      if (matchData?.score) {
+        // Always inject our configured values into matchConfig so addPoint uses
+        // the correct pointsPerSet/maxSets even if the backend response omits them
+        setScore({
+          ...matchData.score,
+          matchConfig: {
+            pointsPerSet,
+            maxSets,
+            setsToWin: Math.ceil(maxSets / 2),
+            extension: true,
+            ...(matchData.score.matchConfig || {}), // backend overrides if present
+          },
+        });
+        setTimerData(matchData.score.timer);
+      } else {
+        // Backend returned no score object — seed it with our config
+        setScore({
+          sets: [{ player1: 0, player2: 0 }],
+          currentSet: 0,
+          matchConfig: {
+            pointsPerSet,
+            maxSets,
+            setsToWin: Math.ceil(maxSets / 2),
+            extension: true,
+          },
+        });
       }
     } catch (err) {
       const status = err?.response?.status;

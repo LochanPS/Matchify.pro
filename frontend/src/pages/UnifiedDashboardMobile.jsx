@@ -1131,94 +1131,72 @@ const UnifiedDashboardMobile = () => {
         </div>
 
         {/* Quick Actions */}
-        <div 
+        <div
           className="rounded-2xl p-5 mb-6 relative overflow-hidden"
           style={{
-            background: 'linear-gradient(135deg, rgba(245,158,11,0.15) 0%, rgba(251,146,60,0.15) 100%)',
-            border: '2px solid rgba(245,158,11,0.3)',
-            backdropFilter: 'blur(20px)',
-            boxShadow: '0 8px 32px rgba(245,158,11,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
+            background: 'rgba(255,255,255,0.08)',
+            border: '1px solid rgba(255,255,255,0.14)',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
             animation: 'fadeIn 0.8s ease-out 0.9s both'
           }}
         >
-          {/* Animated Glow */}
-          <div 
-            className="absolute bottom-0 left-0 w-48 h-48 rounded-full blur-3xl opacity-20"
-            style={{ 
-              background: 'radial-gradient(circle, rgba(245,158,11,0.8), transparent)',
-              animation: 'glow 4s ease-in-out infinite'
-            }}
-          />
-          
           <div className="relative z-10">
-            <h3 
-              className="text-lg font-black mb-4"
-              style={{ 
-                background: 'linear-gradient(135deg, #ffffff, #fbbf24)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text'
-              }}
-            >
-              Quick Actions
-            </h3>
+            <h3 className="text-lg font-black mb-4 text-white">Quick Actions</h3>
             <div className="space-y-3">
               <Link
                 to="/tournaments"
                 className="flex items-center gap-4 p-4 rounded-xl transition-all relative overflow-hidden group"
-                style={{ 
-                  background: 'linear-gradient(135deg, rgba(59,130,246,0.2), rgba(37,99,235,0.15))',
-                  border: '2px solid rgba(59,130,246,0.3)',
-                  boxShadow: '0 4px 15px rgba(59,130,246,0.2)'
+                style={{
+                  background: 'rgba(16,185,129,0.08)',
+                  border: '1px solid rgba(16,185,129,0.3)',
                 }}
               >
-                <div 
+                <div
                   className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                  style={{ background: 'rgba(59,130,246,0.1)' }}
+                  style={{ background: 'rgba(16,185,129,0.06)' }}
                 />
-                <div 
+                <div
                   className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 relative z-10"
-                  style={{ 
-                    background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
-                    boxShadow: '0 4px 12px rgba(59,130,246,0.4), inset 0 1px 0 rgba(255,255,255,0.3)'
+                  style={{
+                    background: 'linear-gradient(135deg, #10b981, #059669)',
+                    boxShadow: '0 4px 12px rgba(16,185,129,0.35), inset 0 1px 0 rgba(255,255,255,0.2)'
                   }}
                 >
-                  <TrophyIcon className="w-6 h-6 text-white" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
+                  <TrophyIcon className="w-6 h-6 text-white" />
                 </div>
                 <div className="flex-1 relative z-10">
                   <p className="font-bold text-white text-sm">Browse Tournaments</p>
-                  <p className="text-xs text-gray-300">Find your next competition</p>
+                  <p className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>Find your next competition</p>
                 </div>
-                <ArrowRightIcon className="w-5 h-5 text-blue-300 relative z-10" />
+                <ArrowRightIcon className="w-5 h-5 relative z-10" style={{ color: '#34d399' }} />
               </Link>
 
               <Link
                 to="/leaderboard"
                 className="flex items-center gap-4 p-4 rounded-xl transition-all relative overflow-hidden group"
-                style={{ 
-                  background: 'linear-gradient(135deg, rgba(245,158,11,0.2), rgba(251,146,60,0.15))',
-                  border: '2px solid rgba(245,158,11,0.3)',
-                  boxShadow: '0 4px 15px rgba(245,158,11,0.2)'
+                style={{
+                  background: 'rgba(16,185,129,0.08)',
+                  border: '1px solid rgba(16,185,129,0.3)',
                 }}
               >
-                <div 
+                <div
                   className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                  style={{ background: 'rgba(245,158,11,0.1)' }}
+                  style={{ background: 'rgba(16,185,129,0.06)' }}
                 />
-                <div 
+                <div
                   className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 relative z-10"
-                  style={{ 
-                    background: 'linear-gradient(135deg, #f59e0b, #ea580c)',
-                    boxShadow: '0 4px 12px rgba(245,158,11,0.4), inset 0 1px 0 rgba(255,255,255,0.3)'
+                  style={{
+                    background: 'linear-gradient(135deg, #10b981, #059669)',
+                    boxShadow: '0 4px 12px rgba(16,185,129,0.35), inset 0 1px 0 rgba(255,255,255,0.2)'
                   }}
                 >
-                  <ChartBarIcon className="w-6 h-6 text-white" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
+                  <ChartBarIcon className="w-6 h-6 text-white" />
                 </div>
                 <div className="flex-1 relative z-10">
                   <p className="font-bold text-white text-sm">Leaderboard</p>
-                  <p className="text-xs text-gray-300">Check your ranking</p>
+                  <p className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>Check your ranking</p>
                 </div>
-                <ArrowRightIcon className="w-5 h-5 text-amber-300 relative z-10" />
+                <ArrowRightIcon className="w-5 h-5 relative z-10" style={{ color: '#34d399' }} />
               </Link>
             </div>
           </div>

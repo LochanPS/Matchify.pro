@@ -964,6 +964,8 @@ async function updateRoundRobinStandings(tournamentId, categoryId, matchId) {
       p.wins = 0;
       p.losses = 0;
       p.points = 0;
+      p.totalPoints = 0;
+      p.totalPointsAgainst = 0;
     });
 
     // Calculate new standings
@@ -974,6 +976,24 @@ async function updateRoundRobinStandings(tournamentId, categoryId, matchId) {
       if (player1 && player2) {
         player1.played++;
         player2.played++;
+
+        // Parse shuttle points for tiebreaking
+        if (match.scoreJson) {
+          try {
+            const sd = typeof match.scoreJson === 'string' ? JSON.parse(match.scoreJson) : match.scoreJson;
+            if (sd?.sets && Array.isArray(sd.sets)) {
+              let t1 = 0, t2 = 0;
+              sd.sets.forEach(s => {
+                t1 += s.player1 ?? s.p1 ?? s.score1 ?? 0;
+                t2 += s.player2 ?? s.p2 ?? s.score2 ?? 0;
+              });
+              player1.totalPoints = (player1.totalPoints || 0) + t1;
+              player2.totalPoints = (player2.totalPoints || 0) + t2;
+              player1.totalPointsAgainst = (player1.totalPointsAgainst || 0) + t2;
+              player2.totalPointsAgainst = (player2.totalPointsAgainst || 0) + t1;
+            }
+          } catch (_) {}
+        }
 
         if (match.winnerId === match.player1Id) {
           player1.wins++;
@@ -987,10 +1007,13 @@ async function updateRoundRobinStandings(tournamentId, categoryId, matchId) {
       }
     });
 
-    // Sort participants by points (descending), then by wins
+    // Sort: match points DESC → points diff DESC → total points FOR DESC
     targetGroup.participants.sort((a, b) => {
       if (b.points !== a.points) return b.points - a.points;
-      return b.wins - a.wins;
+      const aDiff = (a.totalPoints || 0) - (a.totalPointsAgainst || 0);
+      const bDiff = (b.totalPoints || 0) - (b.totalPointsAgainst || 0);
+      if (bDiff !== aDiff) return bDiff - aDiff;
+      return (b.totalPoints || 0) - (a.totalPoints || 0);
     });
 
     // Update the draw

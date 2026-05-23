@@ -176,7 +176,7 @@ export const getDrawPage = async (req, res) => {
     // ─── Helper: recalculate group standings ───────────────────────────────────
     const recalcStandings = (group) => {
       if (!group.participants || !Array.isArray(group.participants)) return;
-      group.participants.forEach(p => { p.played = 0; p.wins = 0; p.losses = 0; p.points = 0; p.totalPoints = 0; });
+      group.participants.forEach(p => { p.played = 0; p.wins = 0; p.losses = 0; p.points = 0; p.totalPoints = 0; p.totalPointsAgainst = 0; });
 
       // Strategy 1: stage + matchNumber
       let groupMatches = matches.filter(m =>
@@ -217,6 +217,8 @@ export const getDrawPage = async (req, res) => {
               });
               p1.totalPoints = (p1.totalPoints || 0) + t1;
               p2.totalPoints = (p2.totalPoints || 0) + t2;
+              p1.totalPointsAgainst = (p1.totalPointsAgainst || 0) + t2;
+              p2.totalPointsAgainst = (p2.totalPointsAgainst || 0) + t1;
             }
           } catch (_) {}
         }
@@ -225,9 +227,14 @@ export const getDrawPage = async (req, res) => {
         else if (m.winnerId === m.player2Id) { p2.wins++; p2.points += 2; p1.losses++; }
       });
 
-      group.participants.sort((a, b) =>
-        b.points !== a.points ? b.points - a.points : b.wins - a.wins
-      );
+      // Sort: match points DESC → points diff DESC → total points FOR DESC
+      group.participants.sort((a, b) => {
+        if (b.points !== a.points) return b.points - a.points;
+        const aDiff = (a.totalPoints || 0) - (a.totalPointsAgainst || 0);
+        const bDiff = (b.totalPoints || 0) - (b.totalPointsAgainst || 0);
+        if (bDiff !== aDiff) return bDiff - aDiff;
+        return (b.totalPoints || 0) - (a.totalPoints || 0);
+      });
     };
 
     // ─── Inject live data into bracket ────────────────────────────────────────

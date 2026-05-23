@@ -25,17 +25,18 @@ import {
   XMarkIcon,
 } from '@heroicons/react/24/outline';
 
-// Pre-generated particle data — deterministic, no Math.random in render
-const DASH_PARTICLES = Array.from({ length: 15 }, (_, i) => ({
-  w: (i * 7 + 1) % 3 + 1,
-  h: (i * 11 + 1) % 3 + 1,
+// Star/sparkle field — deterministic, softer colors than home page (no neon)
+const DASH_STARS = Array.from({ length: 50 }, (_, i) => ({
+  w: [1,1,1,2,2,3][i % 6],
+  h: [1,1,1,2,2,3][i % 6],
   x: (i * 37 + 11) % 97,
-  y: (i * 53 + 7) % 91,
-  c: ['#00ff88', '#00d4ff', '#a855f7'][i % 3],
-  o: ((i * 13) % 50) / 100 + 0.2,
-  dur: (i * 7) % 8 + 4,
-  delay: (i * 3) % 4,
-  glow: (i * 11) % 15 + 5,
+  y: (i * 53 + 7)  % 99,
+  c: ['#6ee7b7','#67e8f9','#ffffff','#a5f3fc','#93c5fd','#34d399'][(i * 3) % 6],
+  o: ((i * 17) % 45) / 100 + 0.12,
+  dur: (i * 7) % 12 + 4,
+  delay: (i * 3) % 6,
+  glow: (i * 11) % 10 + 3,
+  star: i % 8 === 0,
 }));
 
 const UnifiedDashboardMobile = () => {
@@ -224,6 +225,41 @@ const UnifiedDashboardMobile = () => {
           style={{ width: '270px', height: '270px', left: '20%', top: '72%', transform: 'translate(-50%,-50%)',
             background: 'radial-gradient(circle, rgba(0,100,180,0.12) 0%, transparent 70%)',
             animation: 'float 11s ease-in-out infinite', animationDelay: '2s' }} />
+
+        {/* Star / sparkle field */}
+        {DASH_STARS.map((p, i) => (
+          p.star
+            ? <div key={i} className="absolute" style={{
+                left: `${p.x}%`, top: `${p.y}%`,
+                width: `${p.w * 2 + 2}px`, height: `${p.w * 2 + 2}px`,
+                opacity: p.o + 0.1,
+                animation: `sparkle ${p.dur}s ease-in-out infinite`,
+                animationDelay: `${p.delay}s`,
+              }}>
+                <div style={{
+                  position: 'absolute', left: '50%', top: 0,
+                  width: '2px', height: '100%',
+                  transform: 'translateX(-50%)',
+                  background: `linear-gradient(to bottom, transparent, ${p.c}, transparent)`,
+                  boxShadow: `0 0 ${p.glow}px ${p.c}`,
+                }} />
+                <div style={{
+                  position: 'absolute', top: '50%', left: 0,
+                  width: '100%', height: '2px',
+                  transform: 'translateY(-50%)',
+                  background: `linear-gradient(to right, transparent, ${p.c}, transparent)`,
+                  boxShadow: `0 0 ${p.glow}px ${p.c}`,
+                }} />
+              </div>
+            : <div key={i} className="absolute rounded-full" style={{
+                width: `${p.w}px`, height: `${p.h}px`,
+                left: `${p.x}%`, top: `${p.y}%`,
+                background: p.c, opacity: p.o,
+                animation: `twinkle ${p.dur}s ease-in-out infinite`,
+                animationDelay: `${p.delay}s`,
+                boxShadow: `0 0 ${p.glow}px ${p.c}`,
+              }} />
+        ))}
       </div>
 
       {/* Add keyframes for animations */}
@@ -233,6 +269,14 @@ const UnifiedDashboardMobile = () => {
           25% { transform: translate(20px, -20px) scale(1.05); }
           50% { transform: translate(-15px, 15px) scale(0.95); }
           75% { transform: translate(15px, 10px) scale(1.02); }
+        }
+        @keyframes twinkle {
+          0%, 100% { opacity: var(--op, 0.3); transform: scale(1); }
+          50% { opacity: 1; transform: scale(1.8); }
+        }
+        @keyframes sparkle {
+          0%, 100% { opacity: 0.2; transform: scale(0.8) rotate(0deg); }
+          50% { opacity: 1; transform: scale(1.4) rotate(45deg); }
         }
         @keyframes glow {
           0%, 100% { opacity: 0.5; filter: brightness(1); }

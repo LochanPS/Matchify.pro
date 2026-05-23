@@ -6,9 +6,13 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Vercel serverless: only /tmp is writable. Fall back to /tmp if project dir is read-only.
+const LEDGER_DIR = process.env.LEDGER_DIR
+  || (process.env.VERCEL ? '/tmp/user_ledgers' : path.join(__dirname, '../../user_ledgers'));
+
 class UserPaymentLedgerService {
   constructor() {
-    this.ledgerDir = path.join(__dirname, '../../user_ledgers');
+    this.ledgerDir = LEDGER_DIR;
     this.ensureDirectoryExists();
   }
 

@@ -207,12 +207,28 @@ const UnifiedDashboardMobile = () => {
       )}
       {/* Animated Background Elements */}
       <div className="fixed top-0 bottom-0 pointer-events-none overflow-hidden" style={{ left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: "480px" }}>
-        {/* Subtle background tint — single very faint emerald orb only */}
+        {/* Soft floating ambient orbs — no neon, no particles */}
         <div
-          className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl"
+          className="absolute -top-20 -right-20 w-80 h-80 rounded-full blur-3xl"
           style={{
-            background: 'radial-gradient(circle, rgba(16,185,129,0.06) 0%, transparent 70%)',
-            opacity: 0.5,
+            background: 'radial-gradient(circle, rgba(16,185,129,0.09) 0%, transparent 70%)',
+            animation: 'float 12s ease-in-out infinite',
+          }}
+        />
+        <div
+          className="absolute top-1/3 -left-24 w-72 h-72 rounded-full blur-3xl"
+          style={{
+            background: 'radial-gradient(circle, rgba(99,102,241,0.07) 0%, transparent 70%)',
+            animation: 'float 16s ease-in-out infinite reverse',
+            animationDelay: '4s',
+          }}
+        />
+        <div
+          className="absolute bottom-1/4 right-0 w-64 h-64 rounded-full blur-3xl"
+          style={{
+            background: 'radial-gradient(circle, rgba(16,185,129,0.05) 0%, transparent 70%)',
+            animation: 'float 20s ease-in-out infinite',
+            animationDelay: '8s',
           }}
         />
       </div>

@@ -1,5 +1,5 @@
 import { getErrorMessage } from '../utils/errorMessage';
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import { useAuth } from '../contexts/AuthContext';
@@ -21,6 +21,42 @@ const B = {
   red: '#f87171',
 };
 
+// ── Config stepper used on pre-start setup ────────────────────────────────────
+const ConfigStepper = ({ label, sub, value, min, max, step, onChange }) => (
+  <div className="flex items-center justify-between py-2.5">
+    <div>
+      <p className="text-sm font-bold text-white">{label}</p>
+      {sub && <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.35)' }}>{sub}</p>}
+    </div>
+    <div className="flex items-center gap-3">
+      <button
+        onClick={() => onChange(Math.max(min, value - step))}
+        className="w-9 h-9 rounded-xl flex items-center justify-center transition-all active:scale-90"
+        style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.6)' }}
+      >
+        <Minus className="w-4 h-4" />
+      </button>
+      <span className="text-lg font-black text-white w-8 text-center">{value}</span>
+      <button
+        onClick={() => onChange(Math.min(max, value + step))}
+        className="w-9 h-9 rounded-xl flex items-center justify-center transition-all active:scale-90"
+        style={{ background: 'rgba(0,212,255,0.12)', border: '1px solid rgba(0,212,255,0.25)', color: B.cyan }}
+      >
+        <Plus className="w-4 h-4" />
+      </button>
+    </div>
+  </div>
+);
+
+const parseScoringFormat = (fmt) => {
+  if (!fmt) return { points: 21, sets: 3 };
+  const nxm = fmt.match(/(\d+)x(\d+)/);
+  if (nxm) return { points: parseInt(nxm[1]), sets: parseInt(nxm[2]) };
+  const gm = fmt.match(/(\d+)\s*games?\s*to\s*(\d+)\s*pts?/i);
+  if (gm) return { points: parseInt(gm[2]), sets: parseInt(gm[1]) };
+  return { points: 21, sets: 3 };
+};
+
 const MatchScoringPage = () => {
   const { matchId } = useParams();
   const navigate = useNavigate();
@@ -34,11 +70,12 @@ const MatchScoringPage = () => {
   const [isPaused, setIsPaused] = useState(false);
   const [timerData, setTimerData] = useState(null);
 
-  // Debounce ref for score updates — prevents multiple concurrent PUT requests
-  // when umpire taps rapidly. Only the latest score is sent, 500ms after last tap.
-  const scoreDebounceRef = useRef(null);
   const [showSetCompleteModal, setShowSetCompleteModal] = useState(false);
   const [completedSetData, setCompletedSetData] = useState(null);
+
+  // Config state — pre-filled from category.scoringFormat, editable before start
+  const [pointsPerSet, setPointsPerSet] = useState(21);
+  const [maxSets, setMaxSets] = useState(3);
 
   const [score, setScore] = useState({
     sets: [{ player1: 0, player2: 0 }],
@@ -51,8 +88,14 @@ const MatchScoringPage = () => {
       setLoading(true);
       const response = await api.get(`/matches/${matchId}`);
       const matchData = response.data.match;
-
       setMatch(matchData);
+
+      // Pre-fill config from category scoring format
+      if (matchData?.category?.scoringFormat) {
+        const cfg = parseScoringFormat(matchData.category.scoringFormat);
+        setPointsPerSet(cfg.points);
+        setMaxSets(cfg.sets);
+      }
 
       if (matchData.score && matchData.score.sets) {
         setScore(matchData.score);
@@ -73,7 +116,7 @@ const MatchScoringPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [matchId, navigate]);
+  }, [matchId]);
 
   useEffect(() => { fetchMatch(); }, [fetchMatch]);
 
@@ -81,6 +124,15 @@ const MatchScoringPage = () => {
     try {
       setSaving(true);
       setError(null);
+      // Save config first (same as ConductMatchPage), then start the match
+      try {
+        await api.put(`/matches/${matchId}/config`, {
+          pointsPerSet,
+          maxSets,
+          setsToWin: Math.ceil(maxSets / 2),
+          extension: true,
+        });
+      } catch (_) { /* match may already be configured */ }
       // 45s timeout — Vercel cold start + DB queries can take up to 30s on first hit
       const response = await api.post(`/matches/${matchId}/start`, {}, { timeout: 45000 });
       setMatch(response.data.match);
@@ -92,10 +144,7 @@ const MatchScoringPage = () => {
       const status = err?.response?.status;
       const serverMsg = err?.response?.data?.message || err?.response?.data?.error;
       const isTimeout = err?.isTimeout || err?.code === 'ECONNABORTED';
-
-      // Suppress auth errors silently — umpire/organizer assignment handles this
       if (status === 403) return;
-
       if (isTimeout) {
         setError('Server is warming up — please tap Start Match again in a few seconds.');
       } else if (serverMsg) {
@@ -109,28 +158,25 @@ const MatchScoringPage = () => {
     }
   };
 
+  // Only updates local React state — no API call.
+  // API is called via saveScoreToApi() on set completion.
   const updateScore = (newScore) => {
-    setScore(newScore); // optimistic UI — instant feedback
+    setScore(newScore);
+  };
 
-    // Debounce: cancel any pending save, schedule new one 500ms out.
-    // If umpire taps rapidly only the FINAL state is persisted — no pile-up of
-    // zombie connections each waiting 25s before timing out.
-    if (scoreDebounceRef.current) clearTimeout(scoreDebounceRef.current);
-    scoreDebounceRef.current = setTimeout(async () => {
-      try {
-        // 12s timeout — short enough to free the connection quickly if DB is busy.
-        // Score is already updated optimistically so a save failure is non-critical.
-        await api.put(`/matches/${matchId}/score`, { score: newScore }, { timeout: 12000 });
-      } catch (err) {
-        // Silent — score is correct in UI, will sync on next successful save.
-        console.warn('Score save failed (non-critical):', err?.message || err);
-      }
-    }, 500);
+  // Saves score to DB and triggers WebSocket broadcast.
+  // Called once per set completion (not per point) — keeps API calls minimal.
+  const saveScoreToApi = async (newScore) => {
+    try {
+      await api.put(`/matches/${matchId}/score`, { score: newScore }, { timeout: 12000 });
+    } catch (err) {
+      console.warn('Score save failed (non-critical):', err?.message || err);
+    }
   };
 
   const addPoint = (player) => {
     if (isPaused) return;
-    if (showSetCompleteModal) return; // block double-tap while set/match modal is open
+    if (showSetCompleteModal) return;
     const newScore = { ...score };
     const idx = newScore.currentSet;
     const currentSet = { ...newScore.sets[idx] };
@@ -140,16 +186,17 @@ const MatchScoringPage = () => {
     newScore.sets[idx] = currentSet;
 
     const cfg = newScore.matchConfig || { pointsPerSet: 21, extension: true, setsToWin: 2, maxSets: 3 };
-    const { pointsPerSet, extension } = cfg;
+    const { extension } = cfg;
+    const pts = cfg.pointsPerSet;
     const p1 = currentSet.player1, p2 = currentSet.player2;
 
     let setWon = false, winner = null;
     if (extension) {
-      if ((p1 >= pointsPerSet && p1 - p2 >= 2) || p1 >= 30) { setWon = true; winner = 1; }
-      else if ((p2 >= pointsPerSet && p2 - p1 >= 2) || p2 >= 30) { setWon = true; winner = 2; }
+      if ((p1 >= pts && p1 - p2 >= 2) || p1 >= 30) { setWon = true; winner = 1; }
+      else if ((p2 >= pts && p2 - p1 >= 2) || p2 >= 30) { setWon = true; winner = 2; }
     } else {
-      if (p1 >= pointsPerSet) { setWon = true; winner = 1; }
-      else if (p2 >= pointsPerSet) { setWon = true; winner = 2; }
+      if (p1 >= pts) { setWon = true; winner = 1; }
+      else if (p2 >= pts) { setWon = true; winner = 2; }
     }
 
     if (setWon) {
@@ -157,15 +204,15 @@ const MatchScoringPage = () => {
       newScore.sets[idx] = currentSet;
       const setsWon = getSetsWonFromScore(newScore);
       const setsToWin = cfg.setsToWin || 2;
-      const maxSets = cfg.maxSets || 3;
       const matchWon = setsWon.p1Sets >= setsToWin || setsWon.p2Sets >= setsToWin;
 
       updateScore(newScore);
+      // Save to API on set completion (not per-point) — reduces API calls from ~50/set to 1/set
+      saveScoreToApi(newScore);
 
       if (matchWon) {
         const matchWinnerId = winner === 1 ? match.player1?.id : match.player2?.id;
         if (!matchWinnerId) {
-          // Player data missing — fall back to manual end-match modal
           setError('Cannot determine winner — player data missing. End match manually.');
           setShowSetCompleteModal(false);
           setShowEndModal(true);
@@ -179,6 +226,7 @@ const MatchScoringPage = () => {
       setShowSetCompleteModal(true);
     } else {
       updateScore(newScore);
+      // No API call mid-set — score is tracked locally until set completes
     }
   };
 
@@ -191,6 +239,7 @@ const MatchScoringPage = () => {
     else if (player === 2 && currentSet.player2 > 0) currentSet.player2 -= 1;
     newScore.sets[idx] = currentSet;
     updateScore(newScore);
+    // No API call on undo — only set completion triggers save
   };
 
   const handlePauseTimer = async () => {
@@ -217,11 +266,9 @@ const MatchScoringPage = () => {
     if (!winnerId) { setError('Cannot end match: winner not identified. Refresh page and try again.'); return; }
     try {
       setSaving(true);
-      const response = await api.put(`/matches/${matchId}/end`, { winnerId, finalScore: score });
+      await api.put(`/matches/${matchId}/end`, { winnerId, finalScore: score });
       const tId = match?.tournament?.id || match?.tournamentId;
       const cId = match?.category?.id || match?.categoryId;
-      // Navigate back to draws page with the correct category pre-selected and
-      // ?refresh=true so DrawPage re-fetches the bracket and shows the update.
       const drawsUrl = tId
         ? `/tournaments/${tId}/draws/${cId || ''}?refresh=true`
         : '/dashboard';
@@ -233,7 +280,7 @@ const MatchScoringPage = () => {
 
   const getSetsWonFromScore = (scoreObj) => {
     const cfg = scoreObj.matchConfig || { pointsPerSet: 21, extension: true };
-    const { pointsPerSet, extension } = cfg;
+    const { pointsPerSet: pts, extension } = cfg;
     let p1Sets = 0, p2Sets = 0;
     if (!scoreObj.sets?.length) return { p1Sets: 0, p2Sets: 0 };
     scoreObj.sets.forEach(set => {
@@ -241,11 +288,11 @@ const MatchScoringPage = () => {
       else if (set.winner === 2) p2Sets++;
       else {
         if (extension) {
-          if ((set.player1 >= pointsPerSet && set.player1 - set.player2 >= 2) || set.player1 >= 30) p1Sets++;
-          if ((set.player2 >= pointsPerSet && set.player2 - set.player1 >= 2) || set.player2 >= 30) p2Sets++;
+          if ((set.player1 >= pts && set.player1 - set.player2 >= 2) || set.player1 >= 30) p1Sets++;
+          if ((set.player2 >= pts && set.player2 - set.player1 >= 2) || set.player2 >= 30) p2Sets++;
         } else {
-          if (set.player1 >= pointsPerSet) p1Sets++;
-          if (set.player2 >= pointsPerSet) p2Sets++;
+          if (set.player1 >= pts) p1Sets++;
+          if (set.player2 >= pts) p2Sets++;
         }
       }
     });
@@ -257,12 +304,13 @@ const MatchScoringPage = () => {
   const handleContinueToNextSet = () => {
     if (!completedSetData) return;
     const newScore = { ...completedSetData.newScore };
-    const maxSets = newScore.matchConfig?.maxSets || 3;
-    if (newScore.currentSet < maxSets - 1) {
+    const maxSetsVal = newScore.matchConfig?.maxSets || 3;
+    if (newScore.currentSet < maxSetsVal - 1) {
       newScore.sets.push({ player1: 0, player2: 0 });
       newScore.currentSet = newScore.currentSet + 1;
     }
     updateScore(newScore);
+    saveScoreToApi(newScore); // Save updated set index to DB
     setShowSetCompleteModal(false);
     setCompletedSetData(null);
   };
@@ -305,26 +353,6 @@ const MatchScoringPage = () => {
     );
   }
 
-  // Match not yet started and no config saved — redirect back to conduct setup
-  if ((match.status === 'PENDING' || match.status === 'READY' || match.status === 'SCHEDULED') &&
-      !match.score && !match.scoreJson) {
-    return (
-      <div className="min-h-screen flex items-center justify-center px-6" style={{ background: B.bg }}>
-        <div className="text-center">
-          <AlertTriangle className="w-10 h-10 mx-auto mb-3" style={{ color: B.amber }} />
-          <h2 className="text-lg font-bold text-white mb-2">Match Not Started</h2>
-          <p className="text-sm mb-5" style={{ color: 'rgba(255,255,255,0.5)' }}>Configure and start this match first.</p>
-          <button
-            onClick={() => navigate(`/match/${matchId}/conduct`, { replace: true })}
-            className="px-6 py-3 rounded-xl font-black text-sm"
-            style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.8)' }}>
-            ← Back to Setup
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   const { p1Sets, p2Sets } = getSetsWon();
   const currentSet = score.sets?.[score.currentSet] || { player1: 0, player2: 0 };
   const isInProgress = match.status === 'IN_PROGRESS';
@@ -332,13 +360,14 @@ const MatchScoringPage = () => {
   const canStart = match.status === 'PENDING' || match.status === 'SCHEDULED' || match.status === 'READY';
   const canScore = !isCompleted && !isPaused;
 
-  // Helper: show "Name & PartnerName" for doubles, just "Name" for singles
   const p1Display = match.player1
     ? (match.player1.partnerName ? `${match.player1.name} & ${match.player1.partnerName}` : match.player1.name)
     : 'Player 1';
   const p2Display = match.player2
     ? (match.player2.partnerName ? `${match.player2.name} & ${match.player2.partnerName}` : match.player2.name)
     : 'Player 2';
+
+  const setsToWin = Math.ceil(maxSets / 2);
 
   return (
     <div className="min-h-screen" style={{ background: B.bg }}>
@@ -395,7 +424,6 @@ const MatchScoringPage = () => {
               <p className="text-xs font-semibold flex-1" style={{ color: B.red }}>{error}</p>
               <button onClick={() => setError(null)}><X className="w-4 h-4" style={{ color: B.red }} /></button>
             </div>
-            {/* Retry button for timeout / server-busy errors */}
             {(error.includes('warming up') || error.includes('try again') || error.includes('Please try')) && !match?.status?.includes('IN_PROGRESS') && (
               <button
                 onClick={() => { setError(null); handleStartMatch(); }}
@@ -421,6 +449,31 @@ const MatchScoringPage = () => {
           </div>
         )}
 
+        {/* ── Match Config (shown before start) ───────────────────────────── */}
+        {canStart && (
+          <div className="rounded-2xl p-4 mb-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+            <p className="text-xs font-black mb-2" style={{ color: B.cyan }}>MATCH SETTINGS</p>
+            <ConfigStepper
+              label="Points per set"
+              value={pointsPerSet}
+              min={5}
+              max={50}
+              step={1}
+              onChange={setPointsPerSet}
+            />
+            <div className="h-px" style={{ background: 'rgba(255,255,255,0.06)' }} />
+            <ConfigStepper
+              label="Number of sets"
+              sub={`First to win ${setsToWin} set${setsToWin !== 1 ? 's' : ''}`}
+              value={maxSets}
+              min={1}
+              max={9}
+              step={2}
+              onChange={setMaxSets}
+            />
+          </div>
+        )}
+
         {/* ── Scoreboard ──────────────────────────────────────────────────── */}
         <div className="rounded-2xl overflow-hidden mb-4" style={{ background: B.card, border: `1px solid ${B.border}` }}>
           {/* Set tabs */}
@@ -428,7 +481,6 @@ const MatchScoringPage = () => {
             <div className="flex justify-center gap-2 px-4 pt-4">
               {score.sets.map((set, idx) => {
                 const isCurrent = idx === score.currentSet;
-                const isDone = set.winner != null;
                 return (
                   <div key={idx} className="px-3 py-1.5 rounded-xl text-center min-w-[72px] transition-all"
                     style={isCurrent
@@ -550,10 +602,10 @@ const MatchScoringPage = () => {
               style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#07071a', boxShadow: '0 4px 20px rgba(0,200,83,0.4)' }}>
               {saving
                 ? <><div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#07071a transparent transparent transparent' }} />Starting…</>
-                : <><Play className="w-5 h-5" />START MATCH</>}
+                : <><Play className="w-5 h-5" />START MATCH — {p1Display} vs {p2Display}</>}
             </button>
             <p className="text-center text-xs mt-2" style={{ color: 'rgba(255,255,255,0.55)' }}>
-              You can score now • Start Match to begin timer
+              {pointsPerSet} pts · Best of {maxSets}
             </p>
           </div>
         </div>
@@ -613,7 +665,7 @@ const MatchScoringPage = () => {
                     End Match Here
                   </button>
                   <p className="text-center text-xs" style={{ color: 'rgba(255,255,255,0.55)' }}>
-                    {score.matchConfig?.maxSets === 1 ? '1 set' : `Best of ${score.matchConfig?.maxSets || 3} sets`}
+                    {score.matchConfig?.maxSets === 1 ? '1 set' : `Best of ${score.matchConfig?.maxSets || maxSets} sets`}
                   </p>
                 </div>
               </>

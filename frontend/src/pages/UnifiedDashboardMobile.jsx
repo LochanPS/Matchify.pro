@@ -430,7 +430,7 @@ const UnifiedDashboardMobile = () => {
           <h3 className="text-lg font-black mb-4 text-white">Quick Navigation</h3>
           <div className="grid grid-cols-3 gap-3">
             <Link to="/tournaments" className="flex flex-col items-center gap-2 p-4 rounded-xl transition-all group"
-              style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.13)' }}>
+              style={{ background: 'rgba(255,255,255,0.09)', border: '1px solid rgba(255,255,255,0.15)', boxShadow: '0 2px 8px rgba(0,0,0,0.2)' }}>
               <div className="w-12 h-12 rounded-xl flex items-center justify-center"
                 style={{ background: 'rgba(16,185,129,0.22)', border: '1px solid rgba(16,185,129,0.45)' }}>
                 <TrophyIcon className="w-6 h-6" style={{ color: '#34d399' }} />
@@ -438,7 +438,7 @@ const UnifiedDashboardMobile = () => {
               <span className="text-xs font-bold text-white text-center">Tournaments</span>
             </Link>
             <Link to="/leaderboard" className="flex flex-col items-center gap-2 p-4 rounded-xl transition-all group"
-              style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.13)' }}>
+              style={{ background: 'rgba(255,255,255,0.09)', border: '1px solid rgba(255,255,255,0.15)', boxShadow: '0 2px 8px rgba(0,0,0,0.2)' }}>
               <div className="w-12 h-12 rounded-xl flex items-center justify-center"
                 style={{ background: 'rgba(16,185,129,0.22)', border: '1px solid rgba(16,185,129,0.45)' }}>
                 <ChartBarIcon className="w-6 h-6" style={{ color: '#34d399' }} />
@@ -446,7 +446,7 @@ const UnifiedDashboardMobile = () => {
               <span className="text-xs font-bold text-white text-center">Leaderboard</span>
             </Link>
             <Link to="/academies" className="flex flex-col items-center gap-2 p-4 rounded-xl transition-all group"
-              style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.13)' }}>
+              style={{ background: 'rgba(255,255,255,0.09)', border: '1px solid rgba(255,255,255,0.15)', boxShadow: '0 2px 8px rgba(0,0,0,0.2)' }}>
               <div className="w-12 h-12 rounded-xl flex items-center justify-center"
                 style={{ background: 'rgba(16,185,129,0.22)', border: '1px solid rgba(16,185,129,0.45)' }}>
                 <UserIcon className="w-6 h-6" style={{ color: '#34d399' }} />
@@ -477,7 +477,7 @@ const UnifiedDashboardMobile = () => {
               style={{
                 background: 'linear-gradient(135deg,#10b981,#059669)',
                 color: '#ffffff',
-                boxShadow: '0 4px 12px rgba(16,185,129,0.25)'
+                boxShadow: '0 0 0 3px rgba(16,185,129,0.45), 0 0 0 6px rgba(16,185,129,0.1), 0 8px 24px rgba(16,185,129,0.3)'
               }}
             >
               {user?.profilePhoto ? (
@@ -601,63 +601,20 @@ const UnifiedDashboardMobile = () => {
             )}
           </div>
 
-          {/* Matchify Code */}
-          <div className="mb-5 relative z-10">
-            {matchifyCode && (
-              <div
-                className="p-4 rounded-xl"
-                style={{
-                  background: 'rgba(16,185,129,0.07)',
-                  border: '1px solid rgba(16,185,129,0.2)',
-                }}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-bold mb-1" style={{ color: 'rgba(255,255,255,0.45)' }}>Matchify Code</p>
-                    <p
-                      className="text-2xl font-mono font-black tracking-wider"
-                      style={{ color: '#34d399' }}
-                    >
-                      {matchifyCode}
-                    </p>
-                    <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.35)' }}>
-                      Your universal Matchify.pro ID
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(matchifyCode);
-                      setCopied(true);
-                      setTimeout(() => setCopied(false), 2000);
-                    }}
-                    className="p-3 rounded-lg transition-all"
-                    style={{
-                      background: 'rgba(255,255,255,0.07)',
-                      border: '1px solid rgba(255,255,255,0.12)'
-                    }}
-                  >
-                    <svg className="w-6 h-6 text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-
           {/* Edit Profile Button */}
           <Link
             to="/profile"
-            className="flex items-center justify-center gap-2 w-full py-3 rounded-xl font-semibold text-sm transition-all relative overflow-hidden group z-10"
+            className="flex items-center justify-center gap-2 w-full py-3 rounded-xl font-bold text-sm transition-all relative overflow-hidden group z-10"
             style={{
-              background: 'rgba(255,255,255,0.05)',
-              border: '1px solid rgba(255,255,255,0.1)',
-              color: 'rgba(255,255,255,0.75)',
+              background: 'rgba(16,185,129,0.1)',
+              border: '1.5px solid rgba(16,185,129,0.4)',
+              color: '#34d399',
+              boxShadow: '0 2px 12px rgba(16,185,129,0.15)',
             }}
           >
-            <div 
+            <div
               className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
-              style={{ background: 'rgba(0,255,136,0.1)' }}
+              style={{ background: 'rgba(16,185,129,0.1)' }}
             />
             <UserIcon className="w-5 h-5 relative z-10" />
             <span className="relative z-10">Edit Profile</span>

@@ -32,10 +32,10 @@ const DASH_STARS = Array.from({ length: 50 }, (_, i) => ({
   x: (i * 37 + 11) % 97,
   y: (i * 53 + 7)  % 99,
   c: ['#6ee7b7','#67e8f9','#ffffff','#a5f3fc','#93c5fd','#34d399'][(i * 3) % 6],
-  o: ((i * 17) % 45) / 100 + 0.12,
+  o: ((i * 17) % 45) / 100 + 0.28,
   dur: (i * 7) % 12 + 4,
   delay: (i * 3) % 6,
-  glow: (i * 11) % 10 + 3,
+  glow: (i * 11) % 12 + 6,
   star: i % 8 === 0,
 }));
 
@@ -274,6 +274,10 @@ const UnifiedDashboardMobile = () => {
           0%, 100% { opacity: var(--op, 0.3); transform: scale(1); }
           50% { opacity: 1; transform: scale(1.8); }
         }
+        @keyframes avatarGlow {
+          0%, 100% { box-shadow: 0 0 0 3px #10b981, 0 0 0 6px rgba(16,185,129,0.25), 0 0 20px rgba(16,185,129,0.4); }
+          50% { box-shadow: 0 0 0 3px #34d399, 0 0 0 8px rgba(16,185,129,0.35), 0 0 32px rgba(16,185,129,0.6); }
+        }
         @keyframes sparkle {
           0%, 100% { opacity: 0.2; transform: scale(0.8) rotate(0deg); }
           50% { opacity: 1; transform: scale(1.4) rotate(45deg); }
@@ -469,7 +473,7 @@ const UnifiedDashboardMobile = () => {
             <Link to="/tournaments" className="flex flex-col items-center gap-2 p-4 rounded-xl transition-all group"
               style={{ background: 'rgba(255,255,255,0.09)', border: '1px solid rgba(255,255,255,0.15)', boxShadow: '0 2px 8px rgba(0,0,0,0.2)' }}>
               <div className="w-12 h-12 rounded-xl flex items-center justify-center"
-                style={{ background: 'rgba(16,185,129,0.22)', border: '1px solid rgba(16,185,129,0.45)' }}>
+                style={{ background: 'rgba(16,185,129,0.28)', border: '1px solid rgba(16,185,129,0.65)' }}>
                 <TrophyIcon className="w-6 h-6" style={{ color: '#34d399' }} />
               </div>
               <span className="text-xs font-bold text-white text-center">Tournaments</span>
@@ -477,7 +481,7 @@ const UnifiedDashboardMobile = () => {
             <Link to="/leaderboard" className="flex flex-col items-center gap-2 p-4 rounded-xl transition-all group"
               style={{ background: 'rgba(255,255,255,0.09)', border: '1px solid rgba(255,255,255,0.15)', boxShadow: '0 2px 8px rgba(0,0,0,0.2)' }}>
               <div className="w-12 h-12 rounded-xl flex items-center justify-center"
-                style={{ background: 'rgba(16,185,129,0.22)', border: '1px solid rgba(16,185,129,0.45)' }}>
+                style={{ background: 'rgba(16,185,129,0.28)', border: '1px solid rgba(16,185,129,0.65)' }}>
                 <ChartBarIcon className="w-6 h-6" style={{ color: '#34d399' }} />
               </div>
               <span className="text-xs font-bold text-white text-center">Leaderboard</span>
@@ -485,7 +489,7 @@ const UnifiedDashboardMobile = () => {
             <Link to="/academies" className="flex flex-col items-center gap-2 p-4 rounded-xl transition-all group"
               style={{ background: 'rgba(255,255,255,0.09)', border: '1px solid rgba(255,255,255,0.15)', boxShadow: '0 2px 8px rgba(0,0,0,0.2)' }}>
               <div className="w-12 h-12 rounded-xl flex items-center justify-center"
-                style={{ background: 'rgba(16,185,129,0.22)', border: '1px solid rgba(16,185,129,0.45)' }}>
+                style={{ background: 'rgba(16,185,129,0.28)', border: '1px solid rgba(16,185,129,0.65)' }}>
                 <UserIcon className="w-6 h-6" style={{ color: '#34d399' }} />
               </div>
               <span className="text-xs font-bold text-white text-center">Academies</span>
@@ -499,7 +503,7 @@ const UnifiedDashboardMobile = () => {
           style={{
             background: 'rgba(255,255,255,0.08)',
             border: '1px solid rgba(255,255,255,0.14)',
-            borderTop: '2px solid rgba(16,185,129,0.6)',
+            borderTop: '2px solid #10b981',
             backdropFilter: 'blur(20px)',
             boxShadow: '0 4px 24px rgba(0,0,0,0.4), 0 0 0 1px rgba(16,185,129,0.08)',
             animation: 'fadeIn 0.8s ease-out 0.2s both'
@@ -514,7 +518,8 @@ const UnifiedDashboardMobile = () => {
               style={{
                 background: 'linear-gradient(135deg,#10b981,#059669)',
                 color: '#ffffff',
-                boxShadow: '0 0 0 3px rgba(16,185,129,0.45), 0 0 0 6px rgba(16,185,129,0.1), 0 8px 24px rgba(16,185,129,0.3)'
+                boxShadow: '0 0 0 3px #10b981, 0 0 0 6px rgba(16,185,129,0.25), 0 0 20px rgba(16,185,129,0.4)',
+                animation: 'avatarGlow 3s ease-in-out infinite'
               }}
             >
               {user?.profilePhoto ? (
@@ -538,7 +543,13 @@ const UnifiedDashboardMobile = () => {
             </button>
             
             <h2
-              className="text-2xl font-black mb-1 text-white"
+              className="text-2xl font-black mb-1"
+              style={{
+                background: 'linear-gradient(135deg, #ffffff 0%, #6ee7b7 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+              }}
             >
               {user?.name}
             </h2>
@@ -726,7 +737,7 @@ const UnifiedDashboardMobile = () => {
               <div className="flex items-center gap-3 mb-4">
                 <div
                   className="w-10 h-10 rounded-xl flex items-center justify-center"
-                  style={{ background: 'rgba(16,185,129,0.18)', border: '1px solid rgba(16,185,129,0.35)' }}
+                  style={{ background: 'rgba(16,185,129,0.25)', border: '1px solid rgba(16,185,129,0.6)' }}
                 >
                   <span className="text-xl">🏆</span>
                 </div>
@@ -889,7 +900,7 @@ const UnifiedDashboardMobile = () => {
             <div className="flex items-center gap-3 mb-4">
               <div
                 className="w-10 h-10 rounded-xl flex items-center justify-center"
-                style={{ background: 'rgba(16,185,129,0.18)', border: '1px solid rgba(16,185,129,0.35)' }}
+                style={{ background: 'rgba(16,185,129,0.25)', border: '1px solid rgba(16,185,129,0.6)' }}
               >
                 <span className="text-xl">⚖️</span>
               </div>
@@ -930,7 +941,7 @@ const UnifiedDashboardMobile = () => {
             <div className="flex items-center gap-3 mb-5">
               <div
                 className="w-10 h-10 rounded-xl flex items-center justify-center"
-                style={{ background: 'rgba(16,185,129,0.18)', border: '1px solid rgba(16,185,129,0.35)' }}
+                style={{ background: 'rgba(16,185,129,0.25)', border: '1px solid rgba(16,185,129,0.6)' }}
               >
                 <UserIcon className="w-5 h-5" style={{ color: '#34d399' }} />
               </div>
@@ -1002,7 +1013,7 @@ const UnifiedDashboardMobile = () => {
             <div className="flex items-center gap-3">
               <div
                 className="w-10 h-10 rounded-xl flex items-center justify-center"
-                style={{ background: 'rgba(16,185,129,0.18)', border: '1px solid rgba(16,185,129,0.35)' }}
+                style={{ background: 'rgba(16,185,129,0.25)', border: '1px solid rgba(16,185,129,0.6)' }}
               >
                 <CalendarIcon className="w-5 h-5" style={{ color: '#34d399' }} />
               </div>

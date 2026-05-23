@@ -229,7 +229,7 @@ const StepScore = ({ config, onReset }) => {
 
   const [sets, setSets] = useState([{ p1: 0, p2: 0, winner: 0 }]);
   const [cur, setCur] = useState(0);
-  const [started, setStarted] = useState(false);
+  const [started] = useState(true);
   const [matchOver, setMatchOver] = useState(null); // null | 1 | 2
   const [showConfirm, setShowConfirm] = useState(null); // 1 | 2
 
@@ -467,27 +467,6 @@ const StepScore = ({ config, onReset }) => {
         )}
       </div>
 
-      {/* START MATCH — fixed bottom */}
-      {!started && !matchOver && (
-        <div
-          className="fixed bottom-0 left-0 right-0 p-4"
-          style={{ background: 'rgba(7,7,26,0.97)', borderTop: '1px solid rgba(0,255,136,0.15)' }}
-        >
-          <div className="max-w-sm mx-auto">
-            <button
-              onClick={() => setStarted(true)}
-              className="w-full py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-2 active:scale-95 transition-all"
-              style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#07071a', boxShadow: '0 4px 20px rgba(0,200,83,0.4)' }}
-            >
-              <Play className="w-5 h-5" />
-              START — {teamA} vs {teamB}
-            </button>
-            <p className="text-center text-xs mt-2" style={{ color: 'rgba(255,255,255,0.4)' }}>
-              Tap +/− to adjust starting scores before match begins
-            </p>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

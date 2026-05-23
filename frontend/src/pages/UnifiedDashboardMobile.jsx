@@ -462,13 +462,16 @@ const UnifiedDashboardMobile = () => {
         <div
           className="rounded-2xl p-5 mb-6"
           style={{
-            background: 'rgba(255,255,255,0.08)',
-            border: '1px solid rgba(255,255,255,0.14)',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+            background: 'linear-gradient(160deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.06) 100%)',
+            border: '1px solid rgba(16,185,129,0.22)',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.35), inset 0 1px 0 rgba(16,185,129,0.35)',
             animation: 'fadeIn 0.5s ease-out both'
           }}
         >
-          <h3 className="text-lg font-black mb-4 text-white">Quick Navigation</h3>
+          <div className="flex items-center gap-2.5 mb-4">
+            <div className="w-1.5 h-5 rounded-full" style={{ background: 'linear-gradient(to bottom, #34d399, #059669)' }} />
+            <h3 className="text-lg font-black text-white">Quick Navigation</h3>
+          </div>
           <div className="grid grid-cols-3 gap-3">
             <Link to="/tournaments" className="flex flex-col items-center gap-2 p-4 rounded-xl transition-all group"
               style={{ background: 'rgba(255,255,255,0.09)', border: '1px solid rgba(255,255,255,0.15)', boxShadow: '0 2px 8px rgba(0,0,0,0.2)' }}>
@@ -501,11 +504,11 @@ const UnifiedDashboardMobile = () => {
         <div
           className="rounded-2xl p-5 mb-6 relative overflow-hidden"
           style={{
-            background: 'rgba(255,255,255,0.08)',
-            border: '1px solid rgba(255,255,255,0.14)',
+            background: 'linear-gradient(160deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.06) 100%)',
+            border: '1px solid rgba(16,185,129,0.28)',
             borderTop: '2px solid #10b981',
             backdropFilter: 'blur(20px)',
-            boxShadow: '0 4px 24px rgba(0,0,0,0.4), 0 0 0 1px rgba(16,185,129,0.08)',
+            boxShadow: '0 4px 24px rgba(0,0,0,0.4), 0 0 20px rgba(16,185,129,0.08)',
             animation: 'fadeIn 0.8s ease-out 0.2s both'
           }}
         >
@@ -700,11 +703,11 @@ const UnifiedDashboardMobile = () => {
                     key={index}
                     className="p-4 rounded-xl"
                     style={{
-                      background: 'rgba(255,255,255,0.07)',
-                      borderTop: '1px solid rgba(255,255,255,0.12)',
-                      borderRight: '1px solid rgba(255,255,255,0.12)',
-                      borderBottom: '1px solid rgba(255,255,255,0.12)',
-                      borderLeft: '3px solid rgba(16,185,129,0.55)',
+                      background: 'linear-gradient(135deg, rgba(16,185,129,0.07) 0%, rgba(255,255,255,0.04) 100%)',
+                      borderTop: '1px solid rgba(16,185,129,0.2)',
+                      borderRight: '1px solid rgba(16,185,129,0.2)',
+                      borderBottom: '1px solid rgba(16,185,129,0.2)',
+                      borderLeft: '3px solid #10b981',
                     }}
                   >
                     <div
@@ -794,9 +797,9 @@ const UnifiedDashboardMobile = () => {
             <div
               className="rounded-2xl p-5 mb-6"
               style={{
-                background: 'rgba(255,255,255,0.07)',
-                border: '1px solid rgba(255,255,255,0.13)',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+                background: 'linear-gradient(160deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.06) 100%)',
+                border: '1px solid rgba(16,185,129,0.22)',
+                boxShadow: '0 4px 20px rgba(0,0,0,0.35), inset 0 1px 0 rgba(16,185,129,0.35)',
               }}
             >
               <div className="flex items-center justify-between mb-4">
@@ -931,9 +934,9 @@ const UnifiedDashboardMobile = () => {
         <div
           className="rounded-2xl p-5 mb-6"
           style={{
-            background: 'rgba(255,255,255,0.08)',
-            border: '1px solid rgba(255,255,255,0.14)',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+            background: 'linear-gradient(160deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.06) 100%)',
+            border: '1px solid rgba(16,185,129,0.22)',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.35), inset 0 1px 0 rgba(16,185,129,0.35)',
             animation: 'fadeIn 0.8s ease-out 0.7s both'
           }}
         >
@@ -1003,9 +1006,9 @@ const UnifiedDashboardMobile = () => {
         <div
           className="rounded-2xl overflow-hidden mb-6"
           style={{
-            background: 'rgba(255,255,255,0.08)',
-            border: '1px solid rgba(255,255,255,0.14)',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+            background: 'linear-gradient(160deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.06) 100%)',
+            border: '1px solid rgba(16,185,129,0.22)',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.35), inset 0 1px 0 rgba(16,185,129,0.35)',
             animation: 'fadeIn 0.8s ease-out 0.8s both'
           }}
         >
@@ -1134,21 +1137,25 @@ const UnifiedDashboardMobile = () => {
         <div
           className="rounded-2xl p-5 mb-6 relative overflow-hidden"
           style={{
-            background: 'rgba(255,255,255,0.08)',
-            border: '1px solid rgba(255,255,255,0.14)',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+            background: 'linear-gradient(160deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.06) 100%)',
+            border: '1px solid rgba(16,185,129,0.22)',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.35), inset 0 1px 0 rgba(16,185,129,0.35)',
             animation: 'fadeIn 0.8s ease-out 0.9s both'
           }}
         >
           <div className="relative z-10">
-            <h3 className="text-lg font-black mb-4 text-white">Quick Actions</h3>
+            <div className="flex items-center gap-2.5 mb-4">
+              <div className="w-1.5 h-5 rounded-full" style={{ background: 'linear-gradient(to bottom, #34d399, #059669)' }} />
+              <h3 className="text-lg font-black text-white">Quick Actions</h3>
+            </div>
             <div className="space-y-3">
               <Link
                 to="/tournaments"
                 className="flex items-center gap-4 p-4 rounded-xl transition-all relative overflow-hidden group"
                 style={{
-                  background: 'rgba(16,185,129,0.08)',
-                  border: '1px solid rgba(16,185,129,0.3)',
+                  background: 'linear-gradient(135deg, rgba(16,185,129,0.12), rgba(6,182,212,0.06))',
+                  border: '1px solid rgba(16,185,129,0.5)',
+                  boxShadow: 'inset 0 1px 0 rgba(16,185,129,0.3)',
                 }}
               >
                 <div
@@ -1175,8 +1182,9 @@ const UnifiedDashboardMobile = () => {
                 to="/leaderboard"
                 className="flex items-center gap-4 p-4 rounded-xl transition-all relative overflow-hidden group"
                 style={{
-                  background: 'rgba(16,185,129,0.08)',
-                  border: '1px solid rgba(16,185,129,0.3)',
+                  background: 'linear-gradient(135deg, rgba(16,185,129,0.12), rgba(6,182,212,0.06))',
+                  border: '1px solid rgba(16,185,129,0.5)',
+                  boxShadow: 'inset 0 1px 0 rgba(16,185,129,0.3)',
                 }}
               >
                 <div

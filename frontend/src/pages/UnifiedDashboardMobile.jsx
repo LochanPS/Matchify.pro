@@ -186,7 +186,7 @@ const UnifiedDashboardMobile = () => {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden pt-16" style={{ background: '#0b0e1f' }}>
+    <div className="min-h-screen relative overflow-hidden pt-16" style={{ background: 'linear-gradient(160deg, #04060f 0%, #060d1a 40%, #050b16 70%, #04070f 100%)' }}>
 
       {/* ── Copied toast ── */}
       {copied && (
@@ -207,30 +207,23 @@ const UnifiedDashboardMobile = () => {
       )}
       {/* Animated Background Elements */}
       <div className="fixed top-0 bottom-0 pointer-events-none overflow-hidden" style={{ left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: "480px" }}>
-        {/* Soft floating ambient orbs — no neon, no particles */}
-        <div
-          className="absolute -top-20 -right-20 w-80 h-80 rounded-full blur-3xl"
-          style={{
-            background: 'radial-gradient(circle, rgba(16,185,129,0.09) 0%, transparent 70%)',
-            animation: 'float 12s ease-in-out infinite',
-          }}
-        />
-        <div
-          className="absolute top-1/3 -left-24 w-72 h-72 rounded-full blur-3xl"
-          style={{
-            background: 'radial-gradient(circle, rgba(99,102,241,0.07) 0%, transparent 70%)',
-            animation: 'float 16s ease-in-out infinite reverse',
-            animationDelay: '4s',
-          }}
-        />
-        <div
-          className="absolute bottom-1/4 right-0 w-64 h-64 rounded-full blur-3xl"
-          style={{
-            background: 'radial-gradient(circle, rgba(16,185,129,0.05) 0%, transparent 70%)',
-            animation: 'float 20s ease-in-out infinite',
-            animationDelay: '8s',
-          }}
-        />
+        {/* Nebula orbs — same scale as home page, no neon */}
+        <div className="absolute rounded-full blur-3xl"
+          style={{ width: '300px', height: '300px', left: '75%', top: '3%', transform: 'translate(-50%,-50%)',
+            background: 'radial-gradient(circle, rgba(0,180,160,0.17) 0%, transparent 70%)',
+            animation: 'float 10s ease-in-out infinite' }} />
+        <div className="absolute rounded-full blur-3xl"
+          style={{ width: '250px', height: '250px', left: '10%', top: '22%', transform: 'translate(-50%,-50%)',
+            background: 'radial-gradient(circle, rgba(0,120,200,0.13) 0%, transparent 70%)',
+            animation: 'float 13s ease-in-out infinite', animationDelay: '3s' }} />
+        <div className="absolute rounded-full blur-3xl"
+          style={{ width: '220px', height: '220px', left: '60%', top: '50%', transform: 'translate(-50%,-50%)',
+            background: 'radial-gradient(circle, rgba(16,185,129,0.14) 0%, transparent 70%)',
+            animation: 'float 9s ease-in-out infinite', animationDelay: '1s' }} />
+        <div className="absolute rounded-full blur-3xl"
+          style={{ width: '270px', height: '270px', left: '20%', top: '72%', transform: 'translate(-50%,-50%)',
+            background: 'radial-gradient(circle, rgba(0,100,180,0.12) 0%, transparent 70%)',
+            animation: 'float 11s ease-in-out infinite', animationDelay: '2s' }} />
       </div>
 
       {/* Add keyframes for animations */}

@@ -155,10 +155,10 @@ const UnifiedDashboardMobile = () => {
     : 0;
 
   const stats = [
-    { label: 'Total Points', value: user?.totalPoints || 0, icon: SparklesIcon, gradient: 'linear-gradient(135deg,#f59e0b,#d97706)', bg: 'rgba(245,158,11,0.1)', border: 'rgba(245,158,11,0.2)', val: '#fbbf24' },
-    { label: 'Tournaments', value: user?.tournamentsPlayed || 0, icon: TrophyIcon, gradient: 'linear-gradient(135deg,#00ff88,#00d4ff)', bg: 'rgba(0,255,136,0.1)', border: 'rgba(0,255,136,0.2)', val: '#00ff88' },
-    { label: 'Matches Won', value: user?.matchesWon || 0, icon: FireIcon, gradient: 'linear-gradient(135deg,#00ff88,#00d4ff)', bg: 'rgba(0,255,136,0.1)', border: 'rgba(0,255,136,0.2)', val: '#00ff88' },
-    { label: 'Win Rate', value: `${winRate}%`, icon: BoltIcon, gradient: 'linear-gradient(135deg,#00bcd4,#00d4ff)', bg: 'rgba(0,212,255,0.1)', border: 'rgba(0,212,255,0.2)', val: '#00d4ff' },
+    { label: 'Total Points', value: user?.totalPoints || 0, icon: SparklesIcon },
+    { label: 'Tournaments', value: user?.tournamentsPlayed || 0, icon: TrophyIcon },
+    { label: 'Matches Won', value: user?.matchesWon || 0, icon: FireIcon },
+    { label: 'Win Rate', value: `${winRate}%`, icon: BoltIcon },
   ];
 
   const roleConfig = {
@@ -207,57 +207,14 @@ const UnifiedDashboardMobile = () => {
       )}
       {/* Animated Background Elements */}
       <div className="fixed top-0 bottom-0 pointer-events-none overflow-hidden" style={{ left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: "480px" }}>
-        {/* Large Gradient Orbs */}
-        <div 
-          className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl opacity-30 animate-pulse"
-          style={{ 
-            background: 'radial-gradient(circle, rgba(0,255,136,0.4) 0%, rgba(0,255,136,0.2) 40%, transparent 70%)',
-            animation: 'float 8s ease-in-out infinite'
+        {/* Subtle background tint — single very faint emerald orb only */}
+        <div
+          className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl"
+          style={{
+            background: 'radial-gradient(circle, rgba(16,185,129,0.06) 0%, transparent 70%)',
+            opacity: 0.5,
           }}
         />
-        <div 
-          className="absolute top-1/4 left-0 w-80 h-80 rounded-full blur-3xl opacity-25 animate-pulse"
-          style={{ 
-            background: 'radial-gradient(circle, rgba(168,85,247,0.4) 0%, rgba(139,92,246,0.2) 40%, transparent 70%)',
-            animation: 'float 10s ease-in-out infinite reverse',
-            animationDelay: '2s'
-          }}
-        />
-        <div 
-          className="absolute bottom-1/4 right-1/4 w-72 h-72 rounded-full blur-3xl opacity-20 animate-pulse"
-          style={{ 
-            background: 'radial-gradient(circle, rgba(6,182,212,0.4) 0%, rgba(14,165,233,0.2) 40%, transparent 70%)',
-            animation: 'float 12s ease-in-out infinite',
-            animationDelay: '4s'
-          }}
-        />
-        <div 
-          className="absolute top-1/2 right-1/3 w-64 h-64 rounded-full blur-3xl opacity-15 animate-pulse"
-          style={{ 
-            background: 'radial-gradient(circle, rgba(245,158,11,0.4) 0%, rgba(251,146,60,0.2) 40%, transparent 70%)',
-            animation: 'float 9s ease-in-out infinite reverse',
-            animationDelay: '1s'
-          }}
-        />
-        
-        {/* Floating Particles */}
-        {DASH_PARTICLES.map((p, i) => (
-          <div
-            key={i}
-            className="absolute rounded-full"
-            style={{
-              width: `${p.w}px`,
-              height: `${p.h}px`,
-              left: `${p.x}%`,
-              top: `${p.y}%`,
-              background: p.c,
-              opacity: p.o,
-              animation: `float ${p.dur}s ease-in-out infinite`,
-              animationDelay: `${p.delay}s`,
-              boxShadow: `0 0 ${p.glow}px ${p.c}`,
-            }}
-          />
-        ))}
       </div>
 
       {/* Add keyframes for animations */}
@@ -303,31 +260,14 @@ const UnifiedDashboardMobile = () => {
         >
           <div 
             className="w-[90vw] max-w-md h-[85vh] relative overflow-hidden rounded-2xl"
-            style={{ 
-              background: 'linear-gradient(180deg, #07071a 0%, #0d1a2a 50%, #07071a 100%)',
-              border: '2px solid rgba(0,255,136,0.3)',
-              boxShadow: '0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(0,255,136,0.2)',
+            style={{
+              background: '#0d1025',
+              border: '1px solid rgba(255,255,255,0.1)',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
               animation: 'scaleIn 0.3s ease-out'
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Animated Background Elements */}
-            <div className="absolute inset-0 pointer-events-none overflow-hidden">
-              <div 
-                className="absolute top-0 right-0 w-64 h-64 rounded-full blur-3xl opacity-20"
-                style={{ 
-                  background: 'radial-gradient(circle, rgba(0,255,136,0.6), transparent)',
-                  animation: 'glow 4s ease-in-out infinite'
-                }}
-              />
-              <div 
-                className="absolute bottom-0 left-0 w-64 h-64 rounded-full blur-3xl opacity-15"
-                style={{ 
-                  background: 'radial-gradient(circle, rgba(168,85,247,0.6), transparent)',
-                  animation: 'glow 5s ease-in-out infinite reverse'
-                }}
-              />
-            </div>
 
             <style>{`
               @keyframes slideInRight {
@@ -341,26 +281,14 @@ const UnifiedDashboardMobile = () => {
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
                   <div className="relative">
-                    <div 
-                      className="absolute inset-0 blur-lg opacity-60"
-                      style={{ 
-                        background: 'radial-gradient(circle, rgba(0,255,136,0.6) 0%, transparent 70%)',
-                        animation: 'glow 3s ease-in-out infinite'
+                    <div
+                      className="hidden"
+                      style={{ display: 'none'
                       }}
                     />
                     <MatchifyLogo size={32} variant="icon" />
                   </div>
-                  <h3 
-                    className="text-xl font-black"
-                    style={{ 
-                      background: 'linear-gradient(135deg, #ffffff, #00ff88)',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                      backgroundClip: 'text'
-                    }}
-                  >
-                    Menu
-                  </h3>
+                  <h3 className="text-xl font-black text-white">Menu</h3>
                 </div>
                 <button
                   onClick={() => setShowMenu(false)}
@@ -379,28 +307,19 @@ const UnifiedDashboardMobile = () => {
               </div>
 
               {/* User Profile Section */}
-              <div 
-                className="rounded-xl p-5 mb-6 relative overflow-hidden"
+              <div
+                className="rounded-xl p-5 mb-6"
                 style={{
-                  background: 'linear-gradient(135deg, rgba(0,255,136,0.15) 0%, rgba(99,102,241,0.15) 100%)',
-                  border: '2px solid rgba(0,255,136,0.3)',
-                  boxShadow: '0 4px 15px rgba(0,255,136,0.2), inset 0 1px 0 rgba(255,255,255,0.1)'
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.1)',
                 }}
               >
-                <div 
-                  className="absolute inset-0 opacity-20"
-                  style={{
-                    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
-                    backgroundSize: '200% 100%',
-                    animation: 'shimmer 4s infinite'
-                  }}
-                />
-                <div className="flex items-center gap-4 relative z-10">
-                  <div 
+                <div className="flex items-center gap-4">
+                  <div
                     className="w-16 h-16 rounded-full flex items-center justify-center font-bold text-xl flex-shrink-0"
-                    style={{ 
-                      background: 'linear-gradient(135deg,#00ff88,#00d4ff)', 
-                      color: '#003320',
+                    style={{
+                      background: 'linear-gradient(135deg,#10b981,#059669)',
+                      color: '#ffffff',
                       boxShadow: '0 4px 12px rgba(0,255,136,0.4), inset 0 1px 0 rgba(255,255,255,0.3)'
                     }}
                   >
@@ -424,145 +343,33 @@ const UnifiedDashboardMobile = () => {
 
               {/* Menu Items */}
               <div className="flex-1 overflow-y-auto space-y-3 pr-1">
-                <Link
-                  to="/profile"
-                  onClick={() => setShowMenu(false)}
-                  className="flex items-center gap-4 p-4 rounded-xl text-white transition-all relative overflow-hidden group"
-                  style={{ 
-                    background: 'linear-gradient(135deg, rgba(0,255,136,0.15), rgba(0,255,136,0.1))',
-                    border: '2px solid rgba(0,255,136,0.3)',
-                    boxShadow: '0 2px 10px rgba(0,255,136,0.1)'
-                  }}
-                >
-                  <div 
-                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                    style={{ background: 'rgba(0,255,136,0.1)' }}
-                  />
-                  <div 
-                    className="w-12 h-12 rounded-xl flex items-center justify-center relative z-10 flex-shrink-0"
-                    style={{ 
-                      background: 'linear-gradient(135deg, rgba(0,255,136,0.3), rgba(0,255,136,0.2))',
-                      border: '1px solid rgba(0,255,136,0.4)',
-                      boxShadow: '0 2px 8px rgba(0,255,136,0.3)'
+                {[
+                  { to: '/profile', label: 'Edit Profile', Icon: UserIcon },
+                  { to: '/tournaments', label: 'Browse Tournaments', Icon: TrophyIcon },
+                  { to: '/leaderboard', label: 'Leaderboard', Icon: ChartBarIcon },
+                  { to: '/registrations', label: 'My Registrations', Icon: CalendarIcon },
+                  { to: '/academies', label: 'Academies', Icon: UserIcon },
+                ].map(({ to, label, Icon }) => (
+                  <Link
+                    key={to}
+                    to={to}
+                    onClick={() => setShowMenu(false)}
+                    className="flex items-center gap-4 p-4 rounded-xl text-white transition-all"
+                    style={{
+                      background: 'rgba(255,255,255,0.05)',
+                      border: '1px solid rgba(255,255,255,0.09)',
                     }}
                   >
-                    <UserIcon className="w-6 h-6 text-green-300" />
-                  </div>
-                  <span className="font-bold text-base relative z-10 flex-1">Edit Profile</span>
-                  <ArrowRightIcon className="w-5 h-5 text-green-300 relative z-10 flex-shrink-0" />
-                </Link>
-                
-                <Link
-                  to="/tournaments"
-                  onClick={() => setShowMenu(false)}
-                  className="flex items-center gap-4 p-4 rounded-xl text-white transition-all relative overflow-hidden group"
-                  style={{ 
-                    background: 'linear-gradient(135deg, rgba(59,130,246,0.15), rgba(37,99,235,0.1))',
-                    border: '2px solid rgba(59,130,246,0.3)',
-                    boxShadow: '0 2px 10px rgba(59,130,246,0.1)'
-                  }}
-                >
-                  <div 
-                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                    style={{ background: 'rgba(59,130,246,0.1)' }}
-                  />
-                  <div 
-                    className="w-12 h-12 rounded-xl flex items-center justify-center relative z-10 flex-shrink-0"
-                    style={{ 
-                      background: 'linear-gradient(135deg, rgba(59,130,246,0.3), rgba(37,99,235,0.2))',
-                      border: '1px solid rgba(59,130,246,0.4)',
-                      boxShadow: '0 2px 8px rgba(59,130,246,0.3)'
-                    }}
-                  >
-                    <TrophyIcon className="w-6 h-6 text-blue-300" />
-                  </div>
-                  <span className="font-bold text-base relative z-10 flex-1">Browse Tournaments</span>
-                  <ArrowRightIcon className="w-5 h-5 text-blue-300 relative z-10 flex-shrink-0" />
-                </Link>
-                
-                <Link
-                  to="/leaderboard"
-                  onClick={() => setShowMenu(false)}
-                  className="flex items-center gap-4 p-4 rounded-xl text-white transition-all relative overflow-hidden group"
-                  style={{ 
-                    background: 'linear-gradient(135deg, rgba(245,158,11,0.15), rgba(251,146,60,0.1))',
-                    border: '2px solid rgba(245,158,11,0.3)',
-                    boxShadow: '0 2px 10px rgba(245,158,11,0.1)'
-                  }}
-                >
-                  <div 
-                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                    style={{ background: 'rgba(245,158,11,0.1)' }}
-                  />
-                  <div 
-                    className="w-12 h-12 rounded-xl flex items-center justify-center relative z-10 flex-shrink-0"
-                    style={{ 
-                      background: 'linear-gradient(135deg, rgba(245,158,11,0.3), rgba(251,146,60,0.2))',
-                      border: '1px solid rgba(245,158,11,0.4)',
-                      boxShadow: '0 2px 8px rgba(245,158,11,0.3)'
-                    }}
-                  >
-                    <ChartBarIcon className="w-6 h-6 text-amber-300" />
-                  </div>
-                  <span className="font-bold text-base relative z-10 flex-1">Leaderboard</span>
-                  <ArrowRightIcon className="w-5 h-5 text-amber-300 relative z-10 flex-shrink-0" />
-                </Link>
-                
-                <Link
-                  to="/registrations"
-                  onClick={() => setShowMenu(false)}
-                  className="flex items-center gap-4 p-4 rounded-xl text-white transition-all relative overflow-hidden group"
-                  style={{ 
-                    background: 'linear-gradient(135deg, rgba(168,85,247,0.15), rgba(139,92,246,0.1))',
-                    border: '2px solid rgba(168,85,247,0.3)',
-                    boxShadow: '0 2px 10px rgba(168,85,247,0.1)'
-                  }}
-                >
-                  <div 
-                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                    style={{ background: 'rgba(168,85,247,0.1)' }}
-                  />
-                  <div 
-                    className="w-12 h-12 rounded-xl flex items-center justify-center relative z-10 flex-shrink-0"
-                    style={{ 
-                      background: 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,255,136,0.12))',
-                      border: '1px solid rgba(0,255,136,0.3)',
-                      boxShadow: '0 2px 8px rgba(0,255,136,0.2)'
-                    }}
-                  >
-                    <CalendarIcon className="w-6 h-6 text-green-300" />
-                  </div>
-                  <span className="font-bold text-base relative z-10 flex-1">My Registrations</span>
-                  <ArrowRightIcon className="w-5 h-5 text-green-300 relative z-10 flex-shrink-0" />
-                </Link>
-
-                <Link
-                  to="/academies"
-                  onClick={() => setShowMenu(false)}
-                  className="flex items-center gap-4 p-4 rounded-xl text-white transition-all relative overflow-hidden group"
-                  style={{ 
-                    background: 'linear-gradient(135deg, rgba(0,255,136,0.1), rgba(5,150,105,0.1))',
-                    border: '2px solid rgba(0,255,136,0.2)',
-                    boxShadow: '0 2px 10px rgba(0,255,136,0.08)'
-                  }}
-                >
-                  <div 
-                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                    style={{ background: 'rgba(0,255,136,0.08)' }}
-                  />
-                  <div 
-                    className="w-12 h-12 rounded-xl flex items-center justify-center relative z-10 flex-shrink-0"
-                    style={{ 
-                      background: 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,255,136,0.12))',
-                      border: '1px solid rgba(0,255,136,0.3)',
-                      boxShadow: '0 2px 8px rgba(0,255,136,0.2)'
-                    }}
-                  >
-                    <UserIcon className="w-6 h-6 text-green-300" />
-                  </div>
-                  <span className="font-bold text-base relative z-10 flex-1">Academies</span>
-                  <ArrowRightIcon className="w-5 h-5 text-green-300 relative z-10 flex-shrink-0" />
-                </Link>
+                    <div
+                      className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                      style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.2)' }}
+                    >
+                      <Icon className="w-5 h-5" style={{ color: '#6ee7b7' }} />
+                    </div>
+                    <span className="font-bold text-base flex-1">{label}</span>
+                    <ArrowRightIcon className="w-4 h-4 flex-shrink-0" style={{ color: 'rgba(255,255,255,0.4)' }} />
+                  </Link>
+                ))}
               </div>
 
               {/* Footer - Logout Button */}
@@ -596,99 +403,64 @@ const UnifiedDashboardMobile = () => {
         
         {/* Quick Navigation — moved to top so visible immediately */}
         <div
-          className="rounded-2xl p-5 mb-6 relative overflow-hidden"
+          className="rounded-2xl p-5 mb-6"
           style={{
-            background: 'linear-gradient(135deg, rgba(0,255,136,0.15) 0%, rgba(99,102,241,0.15) 100%)',
-            border: '2px solid rgba(0,255,136,0.3)',
-            backdropFilter: 'blur(20px)',
-            boxShadow: '0 8px 32px rgba(0,255,136,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
+            background: 'rgba(255,255,255,0.04)',
+            border: '1px solid rgba(255,255,255,0.09)',
             animation: 'fadeIn 0.5s ease-out both'
           }}
         >
-          <div className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl opacity-30"
-            style={{ background: 'radial-gradient(circle, rgba(0,255,136,0.6), transparent)', animation: 'glow 4s ease-in-out infinite' }} />
-          <div className="relative z-10">
-            <h3 className="text-lg font-black mb-4"
-              style={{ background: 'linear-gradient(135deg, #ffffff, #00ff88)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-              Quick Navigation
-            </h3>
-            <div className="grid grid-cols-3 gap-3">
-              <Link to="/tournaments" className="flex flex-col items-center gap-2 p-4 rounded-xl transition-all relative overflow-hidden group"
-                style={{ background: 'linear-gradient(135deg, rgba(59,130,246,0.2), rgba(37,99,235,0.15))', border: '2px solid rgba(59,130,246,0.3)', boxShadow: '0 4px 15px rgba(59,130,246,0.2)' }}>
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200" style={{ background: 'rgba(59,130,246,0.1)' }} />
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center relative z-10"
-                  style={{ background: 'linear-gradient(135deg, #3b82f6, #2563eb)', boxShadow: '0 4px 12px rgba(59,130,246,0.4)' }}>
-                  <TrophyIcon className="w-6 h-6 text-white" />
-                </div>
-                <span className="text-xs font-bold text-white text-center relative z-10">Tournaments</span>
-              </Link>
-              <Link to="/leaderboard" className="flex flex-col items-center gap-2 p-4 rounded-xl transition-all relative overflow-hidden group"
-                style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.2), rgba(251,146,60,0.15))', border: '2px solid rgba(245,158,11,0.3)', boxShadow: '0 4px 15px rgba(245,158,11,0.2)' }}>
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200" style={{ background: 'rgba(245,158,11,0.1)' }} />
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center relative z-10"
-                  style={{ background: 'linear-gradient(135deg, #f59e0b, #ea580c)', boxShadow: '0 4px 12px rgba(245,158,11,0.4)' }}>
-                  <ChartBarIcon className="w-6 h-6 text-white" />
-                </div>
-                <span className="text-xs font-bold text-white text-center relative z-10">Leaderboard</span>
-              </Link>
-              <Link to="/academies" className="flex flex-col items-center gap-2 p-4 rounded-xl transition-all relative overflow-hidden group"
-                style={{ background: 'linear-gradient(135deg, rgba(168,85,247,0.2), rgba(139,92,246,0.15))', border: '2px solid rgba(168,85,247,0.3)', boxShadow: '0 4px 15px rgba(168,85,247,0.2)' }}>
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200" style={{ background: 'rgba(168,85,247,0.1)' }} />
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center relative z-10"
-                  style={{ background: 'linear-gradient(135deg, #a855f7, #8b5cf6)', boxShadow: '0 4px 12px rgba(168,85,247,0.4)' }}>
-                  <UserIcon className="w-6 h-6 text-white" />
-                </div>
-                <span className="text-xs font-bold text-white text-center relative z-10">Academies</span>
-              </Link>
-            </div>
+          <h3 className="text-lg font-black mb-4 text-white">Quick Navigation</h3>
+          <div className="grid grid-cols-3 gap-3">
+            <Link to="/tournaments" className="flex flex-col items-center gap-2 p-4 rounded-xl transition-all group"
+              style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center"
+                style={{ background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.25)' }}>
+                <TrophyIcon className="w-6 h-6" style={{ color: '#6ee7b7' }} />
+              </div>
+              <span className="text-xs font-bold text-white text-center">Tournaments</span>
+            </Link>
+            <Link to="/leaderboard" className="flex flex-col items-center gap-2 p-4 rounded-xl transition-all group"
+              style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center"
+                style={{ background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.25)' }}>
+                <ChartBarIcon className="w-6 h-6" style={{ color: '#6ee7b7' }} />
+              </div>
+              <span className="text-xs font-bold text-white text-center">Leaderboard</span>
+            </Link>
+            <Link to="/academies" className="flex flex-col items-center gap-2 p-4 rounded-xl transition-all group"
+              style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center"
+                style={{ background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.25)' }}>
+                <UserIcon className="w-6 h-6" style={{ color: '#6ee7b7' }} />
+              </div>
+              <span className="text-xs font-bold text-white text-center">Academies</span>
+            </Link>
           </div>
         </div>
 
         {/* Profile Card */}
-        <div 
+        <div
           className="rounded-2xl p-5 mb-6 relative overflow-hidden"
           style={{
-            background: 'linear-gradient(135deg, rgba(0,255,136,0.15) 0%, rgba(99,102,241,0.15) 100%)',
-            border: '2px solid rgba(0,255,136,0.3)',
+            background: 'rgba(255,255,255,0.04)',
+            border: '1px solid rgba(255,255,255,0.09)',
             backdropFilter: 'blur(20px)',
-            boxShadow: '0 8px 32px rgba(0,255,136,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
             animation: 'fadeIn 0.8s ease-out 0.2s both'
           }}
         >
-          {/* Animated Background Glow */}
-          <div 
-            className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl opacity-30"
-            style={{ 
-              background: 'radial-gradient(circle, rgba(0,255,136,0.6), transparent)',
-              animation: 'glow 4s ease-in-out infinite'
-            }}
-          />
-          <div 
-            className="absolute bottom-0 left-0 w-32 h-32 rounded-full blur-3xl opacity-30"
-            style={{ 
-              background: 'radial-gradient(circle, rgba(99,102,241,0.6), transparent)',
-              animation: 'glow 4s ease-in-out infinite reverse'
-            }}
-          />
           
           {/* Profile Photo & Name */}
           <div className="flex flex-col items-center text-center mb-5 relative z-10">
             <button
               onClick={() => user?.profilePhoto && setShowPhotoViewer(true)}
               className="w-24 h-24 rounded-full flex items-center justify-center font-bold text-3xl mb-3 relative transition-all hover:scale-105 cursor-pointer group"
-              style={{ 
-                background: 'linear-gradient(135deg,#00ff88,#00d4ff)', 
-                color: '#003320',
-                boxShadow: '0 8px 25px rgba(0,255,136,0.5), 0 0 40px rgba(0,255,136,0.3), inset 0 2px 0 rgba(255,255,255,0.3)'
+              style={{
+                background: 'linear-gradient(135deg,#10b981,#059669)',
+                color: '#ffffff',
+                boxShadow: '0 4px 12px rgba(16,185,129,0.25)'
               }}
             >
-              <div 
-                className="absolute inset-0 rounded-full blur-xl opacity-60 pointer-events-none"
-                style={{ 
-                  background: 'radial-gradient(circle, rgba(0,255,136,0.8) 0%, transparent 70%)',
-                  animation: 'glow 3s ease-in-out infinite'
-                }}
-              />
               {user?.profilePhoto ? (
                 <>
                   <img src={user.profilePhoto} alt={user.name} className="w-full h-full object-cover rounded-full relative z-10" />
@@ -709,16 +481,8 @@ const UnifiedDashboardMobile = () => {
               )}
             </button>
             
-            <h2 
-              className="text-2xl font-black mb-1"
-              style={{ 
-                background: 'linear-gradient(135deg, #ffffff, #00ff88)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-                textShadow: 'none',
-                filter: 'drop-shadow(0 2px 10px rgba(0,255,136,0.3))'
-              }}
+            <h2
+              className="text-2xl font-black mb-1 text-white"
             >
               {user?.name}
             </h2>
@@ -735,30 +499,18 @@ const UnifiedDashboardMobile = () => {
             )}
             
             {/* Matchify Code - Always show, with fallback */}
-            <div 
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg mb-3 relative overflow-hidden"
-              style={{ 
-                background: 'linear-gradient(135deg, rgba(0,255,136,0.25), rgba(0,255,136,0.2))',
-                border: '2px solid rgba(0,255,136,0.5)',
-                boxShadow: '0 4px 12px rgba(0,255,136,0.4), inset 0 1px 0 rgba(255,255,255,0.2)'
+            <div
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg mb-3"
+              style={{
+                background: 'rgba(16,185,129,0.08)',
+                border: '1px solid rgba(16,185,129,0.25)',
               }}
             >
-              <div 
-                className="absolute inset-0 opacity-20"
-                style={{
-                  background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)',
-                  backgroundSize: '200% 100%',
-                  animation: 'shimmer 3s infinite'
-                }}
-              />
               <div className="relative z-10">
-                <p className="text-xs font-bold" style={{ color: '#6ee7b7' }}>Matchify ID</p>
-                <p 
+                <p className="text-xs font-bold" style={{ color: 'rgba(255,255,255,0.5)' }}>Matchify ID</p>
+                <p
                   className="text-lg font-mono font-black tracking-wider"
-                  style={{ 
-                    color: '#00ff88',
-                    textShadow: '0 0 15px rgba(0,255,136,0.6)'
-                  }}
+                  style={{ color: '#6ee7b7' }}
                 >
                   {matchifyCode || userProfile?.matchifyCode || user?.matchifyCode || 'Loading...'}
                 </p>
@@ -772,9 +524,9 @@ const UnifiedDashboardMobile = () => {
                     setTimeout(() => setCopied(false), 2000);
                   }}
                   className="p-2 rounded-lg transition-all relative z-10"
-                  style={{ 
-                    background: 'rgba(0,255,136,0.3)',
-                    border: '1px solid rgba(0,255,136,0.6)'
+                  style={{
+                    background: 'rgba(255,255,255,0.07)',
+                    border: '1px solid rgba(255,255,255,0.12)'
                   }}
                   title="Copy Matchify ID"
                 >
@@ -833,35 +585,23 @@ const UnifiedDashboardMobile = () => {
           {/* Matchify Code */}
           <div className="mb-5 relative z-10">
             {matchifyCode && (
-              <div 
-                className="p-4 rounded-xl relative overflow-hidden"
-                style={{ 
-                  background: 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,255,136,0.15))',
-                  border: '2px solid rgba(0,255,136,0.4)',
-                  boxShadow: '0 4px 15px rgba(0,255,136,0.3), inset 0 1px 0 rgba(255,255,255,0.1)'
+              <div
+                className="p-4 rounded-xl"
+                style={{
+                  background: 'rgba(16,185,129,0.07)',
+                  border: '1px solid rgba(16,185,129,0.2)',
                 }}
               >
-                <div 
-                  className="absolute inset-0 opacity-20"
-                  style={{
-                    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
-                    backgroundSize: '200% 100%',
-                    animation: 'shimmer 4s infinite'
-                  }}
-                />
-                <div className="flex items-center justify-between relative z-10">
+                <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs font-bold mb-1" style={{ color: '#6ee7b7' }}>Matchify Code:</p>
-                    <p 
+                    <p className="text-xs font-bold mb-1" style={{ color: 'rgba(255,255,255,0.45)' }}>Matchify Code</p>
+                    <p
                       className="text-2xl font-mono font-black tracking-wider"
-                      style={{ 
-                        color: '#00ff88',
-                        textShadow: '0 0 20px rgba(0,255,136,0.5)'
-                      }}
+                      style={{ color: '#6ee7b7' }}
                     >
                       {matchifyCode}
                     </p>
-                    <p className="text-xs mt-1" style={{ color: '#6ee7b7' }}>
+                    <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.35)' }}>
                       Your universal Matchify.pro ID
                     </p>
                   </div>
@@ -872,9 +612,9 @@ const UnifiedDashboardMobile = () => {
                       setTimeout(() => setCopied(false), 2000);
                     }}
                     className="p-3 rounded-lg transition-all"
-                    style={{ 
-                      background: 'rgba(0,255,136,0.3)',
-                      border: '1px solid rgba(0,255,136,0.5)'
+                    style={{
+                      background: 'rgba(255,255,255,0.07)',
+                      border: '1px solid rgba(255,255,255,0.12)'
                     }}
                   >
                     <svg className="w-6 h-6 text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -890,11 +630,10 @@ const UnifiedDashboardMobile = () => {
           <Link
             to="/profile"
             className="flex items-center justify-center gap-2 w-full py-3 rounded-xl font-semibold text-sm transition-all relative overflow-hidden group z-10"
-            style={{ 
-              background: 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,255,136,0.15))', 
-              border: '2px solid rgba(0,255,136,0.4)',
-              color: '#00ff88',
-              boxShadow: '0 4px 15px rgba(0,255,136,0.2)'
+            style={{
+              background: 'rgba(255,255,255,0.05)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              color: 'rgba(255,255,255,0.75)',
             }}
           >
             <div 
@@ -908,69 +647,46 @@ const UnifiedDashboardMobile = () => {
 
         {/* Role-Specific Stats */}
         {activeRole === 'PLAYER' && (
-          <div 
-            className="rounded-2xl p-5 mb-6 relative overflow-hidden"
+          <div
+            className="rounded-2xl p-5 mb-6"
             style={{
-              background: 'linear-gradient(135deg, rgba(0,255,136,0.15) 0%, rgba(0,255,136,0.1) 100%)',
-              border: '2px solid rgba(0,255,136,0.3)',
-              backdropFilter: 'blur(20px)',
-              boxShadow: '0 8px 32px rgba(0,255,136,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
+              background: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.09)',
               animation: 'slideUp 0.8s ease-out 0.4s both'
             }}
           >
-            {/* Animated Glow */}
-            <div 
-              className="absolute bottom-0 left-0 w-48 h-48 rounded-full blur-3xl opacity-20"
-              style={{ 
-                background: 'radial-gradient(circle, rgba(0,255,136,0.8), transparent)',
-                animation: 'glow 4s ease-in-out infinite'
-              }}
-            />
-            
-            <div className="relative z-10">
+            <div>
               <div className="flex items-center gap-3 mb-4">
-                <div 
+                <div
                   className="w-10 h-10 rounded-xl flex items-center justify-center"
-                  style={{ 
-                    background: 'linear-gradient(135deg, rgba(0,255,136,0.3), rgba(0,255,136,0.2))',
-                    border: '1px solid rgba(0,255,136,0.4)',
-                    boxShadow: '0 4px 12px rgba(0,255,136,0.3)'
+                  style={{
+                    background: 'rgba(16,185,129,0.12)',
+                    border: '1px solid rgba(16,185,129,0.22)',
                   }}
                 >
                   <span className="text-xl">🏸</span>
                 </div>
-                <h3 
-                  className="text-lg font-black"
-                  style={{ 
-                    background: 'linear-gradient(135deg, #ffffff, #00ff88)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text'
-                  }}
-                >
-                  Player Stats
-                </h3>
+                <h3 className="text-lg font-black text-white">Player Stats</h3>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 {stats.map((stat, index) => (
                   <div
                     key={index}
-                    className="p-4 rounded-xl relative overflow-hidden"
+                    className="p-4 rounded-xl"
                     style={{
-                      background: stat.bg,
-                      border: `1px solid ${stat.border}`,
-                      animation: `scaleIn 0.5s ease-out ${0.5 + index * 0.1}s both`
+                      background: 'rgba(255,255,255,0.05)',
+                      border: '1px solid rgba(255,255,255,0.09)',
                     }}
                   >
                     <div
-                      className="inline-flex items-center justify-center w-11 h-11 rounded-xl mb-3 relative z-10"
-                      style={{ background: stat.gradient }}
+                      className="inline-flex items-center justify-center w-11 h-11 rounded-xl mb-3"
+                      style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.2)' }}
                     >
-                      <stat.icon className="w-5 h-5 text-white" />
+                      <stat.icon className="w-5 h-5" style={{ color: '#6ee7b7' }} />
                     </div>
-                    <p className="text-3xl font-black text-white mb-1 relative z-10">{stat.value}</p>
-                    <p className="text-xs relative z-10" style={{ color: 'rgba(255,255,255,0.55)' }}>{stat.label}</p>
+                    <p className="text-3xl font-black text-white mb-1">{stat.value}</p>
+                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>{stat.label}</p>
                   </div>
                 ))}
               </div>
@@ -981,122 +697,65 @@ const UnifiedDashboardMobile = () => {
         {activeRole === 'ORGANIZER' && (
           <>
           <div
-            className="rounded-2xl p-5 mb-6 relative overflow-hidden"
+            className="rounded-2xl p-5 mb-6"
             style={{
-              background: 'linear-gradient(135deg, rgba(168,85,247,0.15) 0%, rgba(139,92,246,0.15) 100%)',
-              border: '2px solid rgba(168,85,247,0.3)',
-              backdropFilter: 'blur(20px)',
-              boxShadow: '0 8px 32px rgba(168,85,247,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
+              background: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.09)',
               animation: 'slideUp 0.8s ease-out 0.4s both'
             }}
           >
-            {/* Animated Glow */}
-            <div 
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 rounded-full blur-3xl opacity-20"
-              style={{ 
-                background: 'radial-gradient(circle, rgba(168,85,247,0.8), transparent)',
-                animation: 'glow 5s ease-in-out infinite'
-              }}
-            />
-            
-            <div className="relative z-10">
+            <div>
               <div className="flex items-center gap-3 mb-4">
-                <div 
+                <div
                   className="w-10 h-10 rounded-xl flex items-center justify-center"
-                  style={{ 
-                    background: 'linear-gradient(135deg, rgba(168,85,247,0.3), rgba(139,92,246,0.2))',
-                    border: '1px solid rgba(168,85,247,0.4)',
-                    boxShadow: '0 4px 12px rgba(168,85,247,0.3)'
-                  }}
+                  style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.22)' }}
                 >
                   <span className="text-xl">🏆</span>
                 </div>
-                <h3 
-                  className="text-lg font-black"
-                  style={{ 
-                    background: 'linear-gradient(135deg, #ffffff, #c4b5fd)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text'
-                  }}
-                >
-                  Organizer Stats
-                </h3>
+                <h3 className="text-lg font-black text-white">Organizer Stats</h3>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div
-                  className="p-4 rounded-xl relative overflow-hidden"
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(168,85,247,0.2), rgba(139,92,246,0.15))',
-                    border: '2px solid rgba(168,85,247,0.4)',
-                    boxShadow: '0 4px 15px rgba(168,85,247,0.3), inset 0 1px 0 rgba(255,255,255,0.1)',
-                    animation: 'scaleIn 0.5s ease-out 0.5s both'
-                  }}
+                  className="p-4 rounded-xl"
+                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.09)' }}
                 >
-                  <div 
-                    className="absolute inset-0 opacity-20"
-                    style={{
-                      background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
-                      backgroundSize: '200% 100%',
-                      animation: 'shimmer 4s infinite'
-                    }}
-                  />
                   <div
-                    className="inline-flex items-center justify-center w-11 h-11 rounded-xl mb-3 relative z-10"
-                    style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', boxShadow: '0 4px 12px rgba(0,255,136,0.25)' }}
+                    className="inline-flex items-center justify-center w-11 h-11 rounded-xl mb-3"
+                    style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.2)' }}
                   >
-                    <TrophyIcon className="w-6 h-6 text-white" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
+                    <TrophyIcon className="w-6 h-6" style={{ color: '#6ee7b7' }} />
                   </div>
-                  <p className="text-3xl font-black text-white mb-1 relative z-10">{user?.tournamentsOrganized || 0}</p>
-                  <p className="text-xs relative z-10" style={{ color: 'rgba(255,255,255,0.55)' }}>Tournaments Organized</p>
+                  <p className="text-3xl font-black text-white mb-1">{user?.tournamentsOrganized || 0}</p>
+                  <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Tournaments Organized</p>
                 </div>
 
                 <div
-                  className="p-4 rounded-xl relative overflow-hidden"
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(0,255,136,0.1), rgba(0,255,136,0.1))',
-                    border: '2px solid rgba(0,255,136,0.3)',
-                    boxShadow: '0 4px 15px rgba(0,255,136,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
-                    animation: 'scaleIn 0.5s ease-out 0.6s both'
-                  }}
+                  className="p-4 rounded-xl"
+                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.09)' }}
                 >
-                  <div 
-                    className="absolute inset-0 opacity-20"
-                    style={{
-                      background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
-                      backgroundSize: '200% 100%',
-                      animation: 'shimmer 4s infinite',
-                      animationDelay: '0.5s'
-                    }}
-                  />
                   <div
-                    className="inline-flex items-center justify-center w-11 h-11 rounded-xl mb-3 relative z-10"
-                    style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', boxShadow: '0 4px 12px rgba(0,255,136,0.25)' }}
+                    className="inline-flex items-center justify-center w-11 h-11 rounded-xl mb-3"
+                    style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.2)' }}
                   >
-                    <UserIcon className="w-6 h-6 text-white" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
+                    <UserIcon className="w-6 h-6" style={{ color: '#6ee7b7' }} />
                   </div>
-                  <p className="text-3xl font-black text-white mb-1 relative z-10">{user?.totalParticipants || 0}</p>
-                  <p className="text-xs relative z-10" style={{ color: 'rgba(255,255,255,0.55)' }}>Total Participants</p>
+                  <p className="text-3xl font-black text-white mb-1">{user?.totalParticipants || 0}</p>
+                  <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Total Participants</p>
                 </div>
               </div>
 
               <Link
                 to="/tournaments/create"
-                className="flex items-center justify-center gap-2 w-full py-3 rounded-xl font-semibold text-sm transition-all relative overflow-hidden group mt-4"
+                className="flex items-center justify-center gap-2 w-full py-3 rounded-xl font-semibold text-sm transition-all mt-4"
                 style={{
-                  background: 'linear-gradient(135deg, rgba(168,85,247,0.2), rgba(139,92,246,0.15))',
-                  border: '2px solid rgba(168,85,247,0.4)',
-                  color: '#c4b5fd',
-                  boxShadow: '0 4px 15px rgba(168,85,247,0.2)'
+                  background: 'rgba(16,185,129,0.1)',
+                  border: '1px solid rgba(16,185,129,0.22)',
+                  color: '#6ee7b7',
                 }}
               >
-                <div
-                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                  style={{ background: 'rgba(168,85,247,0.1)' }}
-                />
-                <TrophyIcon className="w-5 h-5 relative z-10" />
-                <span className="relative z-10">Create New Tournament</span>
+                <TrophyIcon className="w-5 h-5" />
+                <span>Create New Tournament</span>
               </Link>
             </div>
           </div>
@@ -1106,8 +765,8 @@ const UnifiedDashboardMobile = () => {
             <div
               className="rounded-2xl p-5 mb-6"
               style={{
-                background: 'linear-gradient(135deg, rgba(168,85,247,0.08) 0%, rgba(88,28,135,0.08) 100%)',
-                border: '1px solid rgba(168,85,247,0.25)',
+                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid rgba(255,255,255,0.09)',
               }}
             >
               <div className="flex items-center justify-between mb-4">
@@ -1115,7 +774,7 @@ const UnifiedDashboardMobile = () => {
                 <Link
                   to="/organizer/history"
                   className="text-xs font-bold"
-                  style={{ color: '#a855f7' }}
+                  style={{ color: '#6ee7b7' }}
                 >
                   View All →
                 </Link>
@@ -1164,7 +823,7 @@ const UnifiedDashboardMobile = () => {
                         <Link
                           to={`/tournaments/${t.id}/edit`}
                           className="flex-1 text-center py-1.5 rounded-lg text-xs font-bold transition-all"
-                          style={{ background: 'rgba(168,85,247,0.15)', color: '#c4b5fd', border: '1px solid rgba(168,85,247,0.25)' }}
+                          style={{ background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.1)' }}
                         >
                           Edit
                         </Link>
@@ -1174,8 +833,9 @@ const UnifiedDashboardMobile = () => {
                             disabled={publishingId === t.id || !hasCategories}
                             className="flex-1 py-1.5 rounded-lg text-xs font-black transition-all disabled:opacity-50"
                             style={{
-                              background: hasCategories ? 'linear-gradient(135deg,#00ff88,#00d4ff)' : 'rgba(255,255,255,0.06)',
-                              color: hasCategories ? '#07071a' : 'rgba(255,255,255,0.3)',
+                              background: hasCategories ? 'rgba(16,185,129,0.15)' : 'rgba(255,255,255,0.06)',
+                              color: hasCategories ? '#6ee7b7' : 'rgba(255,255,255,0.3)',
+                              border: hasCategories ? '1px solid rgba(16,185,129,0.25)' : '1px solid transparent',
                             }}
                             title={!hasCategories ? 'Add categories first' : 'Publish tournament'}
                           >
@@ -1198,153 +858,62 @@ const UnifiedDashboardMobile = () => {
         )}
 
         {activeRole === 'UMPIRE' && (
-          <div 
-            className="rounded-2xl p-5 mb-6 relative overflow-hidden"
+          <div
+            className="rounded-2xl p-5 mb-6"
             style={{
-              background: 'linear-gradient(135deg, rgba(59,130,246,0.15) 0%, rgba(37,99,235,0.15) 100%)',
-              border: '2px solid rgba(59,130,246,0.3)',
-              backdropFilter: 'blur(20px)',
-              boxShadow: '0 8px 32px rgba(59,130,246,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
+              background: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.09)',
               animation: 'slideUp 0.8s ease-out 0.4s both'
             }}
           >
-            {/* Animated Glow */}
-            <div 
-              className="absolute top-0 right-0 w-48 h-48 rounded-full blur-3xl opacity-20"
-              style={{ 
-                background: 'radial-gradient(circle, rgba(59,130,246,0.8), transparent)',
-                animation: 'glow 4s ease-in-out infinite'
-              }}
-            />
-            
-            <div className="relative z-10">
-              <div className="flex items-center gap-3 mb-4">
-                <div 
-                  className="w-10 h-10 rounded-xl flex items-center justify-center"
-                  style={{ 
-                    background: 'linear-gradient(135deg, rgba(59,130,246,0.3), rgba(37,99,235,0.2))',
-                    border: '1px solid rgba(59,130,246,0.4)',
-                    boxShadow: '0 4px 12px rgba(59,130,246,0.3)'
-                  }}
-                >
-                  <span className="text-xl">⚖️</span>
-                </div>
-                <h3 
-                  className="text-lg font-black"
-                  style={{ 
-                    background: 'linear-gradient(135deg, #ffffff, #93c5fd)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text'
-                  }}
-                >
-                  Umpire Stats
-                </h3>
+            <div className="flex items-center gap-3 mb-4">
+              <div
+                className="w-10 h-10 rounded-xl flex items-center justify-center"
+                style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.22)' }}
+              >
+                <span className="text-xl">⚖️</span>
               </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div
-                  className="p-4 rounded-xl relative overflow-hidden"
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(59,130,246,0.2), rgba(37,99,235,0.15))',
-                    border: '2px solid rgba(59,130,246,0.4)',
-                    boxShadow: '0 4px 15px rgba(59,130,246,0.3), inset 0 1px 0 rgba(255,255,255,0.1)',
-                    animation: 'scaleIn 0.5s ease-out 0.5s both'
-                  }}
-                >
-                  <div 
-                    className="absolute inset-0 opacity-20"
-                    style={{
-                      background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
-                      backgroundSize: '200% 100%',
-                      animation: 'shimmer 4s infinite'
-                    }}
-                  />
-                  <div
-                    className="inline-flex items-center justify-center w-11 h-11 rounded-xl mb-3 relative z-10"
-                    style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', boxShadow: '0 4px 12px rgba(0,255,136,0.25)' }}
-                  >
-                    <FireIcon className="w-6 h-6 text-white" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
-                  </div>
-                  <p className="text-3xl font-black text-white mb-1 relative z-10">{user?.matchesUmpired || 0}</p>
-                  <p className="text-xs relative z-10" style={{ color: 'rgba(255,255,255,0.55)' }}>Matches Umpired</p>
+              <h3 className="text-lg font-black text-white">Umpire Stats</h3>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-4 rounded-xl" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.09)' }}>
+                <div className="inline-flex items-center justify-center w-11 h-11 rounded-xl mb-3"
+                  style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.2)' }}>
+                  <FireIcon className="w-6 h-6" style={{ color: '#6ee7b7' }} />
                 </div>
-
-                <div
-                  className="p-4 rounded-xl relative overflow-hidden"
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(0,255,136,0.1), rgba(0,255,136,0.1))',
-                    border: '2px solid rgba(0,255,136,0.3)',
-                    boxShadow: '0 4px 15px rgba(0,255,136,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
-                    animation: 'scaleIn 0.5s ease-out 0.6s both'
-                  }}
-                >
-                  <div 
-                    className="absolute inset-0 opacity-20"
-                    style={{
-                      background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
-                      backgroundSize: '200% 100%',
-                      animation: 'shimmer 4s infinite',
-                      animationDelay: '0.5s'
-                    }}
-                  />
-                  <div
-                    className="inline-flex items-center justify-center w-11 h-11 rounded-xl mb-3 relative z-10"
-                    style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', boxShadow: '0 4px 12px rgba(0,255,136,0.25)' }}
-                  >
-                    <TrophyIcon className="w-6 h-6 text-white" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }} />
-                  </div>
-                  <p className="text-3xl font-black text-white mb-1 relative z-10">{user?.tournamentsUmpired || 0}</p>
-                  <p className="text-xs relative z-10" style={{ color: 'rgba(255,255,255,0.55)' }}>Tournaments</p>
+                <p className="text-3xl font-black text-white mb-1">{user?.matchesUmpired || 0}</p>
+                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Matches Umpired</p>
+              </div>
+              <div className="p-4 rounded-xl" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.09)' }}>
+                <div className="inline-flex items-center justify-center w-11 h-11 rounded-xl mb-3"
+                  style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.2)' }}>
+                  <TrophyIcon className="w-6 h-6" style={{ color: '#6ee7b7' }} />
                 </div>
+                <p className="text-3xl font-black text-white mb-1">{user?.tournamentsUmpired || 0}</p>
+                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Tournaments</p>
               </div>
             </div>
           </div>
         )}
 
         {/* Profile Information */}
-        <div 
-          className="rounded-2xl p-5 mb-6 relative overflow-hidden"
+        <div
+          className="rounded-2xl p-5 mb-6"
           style={{
-            background: 'linear-gradient(135deg, rgba(0,255,136,0.1) 0%, rgba(0,255,136,0.1) 100%)',
-            border: '2px solid rgba(0,255,136,0.2)',
-            backdropFilter: 'blur(20px)',
-            boxShadow: '0 8px 32px rgba(99,102,241,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
+            background: 'rgba(255,255,255,0.04)',
+            border: '1px solid rgba(255,255,255,0.09)',
             animation: 'fadeIn 0.8s ease-out 0.7s both'
           }}
         >
-          {/* Animated Glow */}
-          <div 
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 rounded-full blur-3xl opacity-20"
-            style={{ 
-              background: 'radial-gradient(circle, rgba(139,92,246,0.8), transparent)',
-              animation: 'glow 5s ease-in-out infinite'
-            }}
-          />
-          
-          <div className="relative z-10">
+          <div>
             <div className="flex items-center gap-3 mb-5">
-              <div 
+              <div
                 className="w-10 h-10 rounded-xl flex items-center justify-center"
-                style={{ 
-                  background: 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,255,136,0.12))',
-                  border: '1px solid rgba(0,255,136,0.3)',
-                  boxShadow: '0 4px 12px rgba(0,255,136,0.2)'
-                }}
+                style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.22)' }}
               >
-                <UserIcon className="w-5 h-5 text-green-300" />
+                <UserIcon className="w-5 h-5" style={{ color: '#6ee7b7' }} />
               </div>
-              <h3 
-                className="text-lg font-black"
-                style={{ 
-                  background: 'linear-gradient(135deg, #ffffff, #6ee7b7)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text'
-                }}
-              >
-                Profile Information
-              </h3>
+              <h3 className="text-lg font-black text-white">Profile Information</h3>
             </div>
 
             <div className="space-y-4">
@@ -1399,52 +968,28 @@ const UnifiedDashboardMobile = () => {
         </div>
 
         {/* Recent Activity */}
-        <div 
-          className="rounded-2xl overflow-hidden mb-6 relative"
+        <div
+          className="rounded-2xl overflow-hidden mb-6"
           style={{
-            background: 'linear-gradient(135deg, rgba(6,182,212,0.15) 0%, rgba(14,165,233,0.15) 100%)',
-            border: '2px solid rgba(6,182,212,0.3)',
-            backdropFilter: 'blur(20px)',
-            boxShadow: '0 8px 32px rgba(6,182,212,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
+            background: 'rgba(255,255,255,0.04)',
+            border: '1px solid rgba(255,255,255,0.09)',
             animation: 'fadeIn 0.8s ease-out 0.8s both'
           }}
         >
-          {/* Animated Glow */}
-          <div 
-            className="absolute top-0 right-0 w-48 h-48 rounded-full blur-3xl opacity-20"
-            style={{ 
-              background: 'radial-gradient(circle, rgba(6,182,212,0.8), transparent)',
-              animation: 'glow 4s ease-in-out infinite'
-            }}
-          />
-          
-          <div className="p-5 border-b flex items-center justify-between relative z-10" style={{ borderColor: 'rgba(6,182,212,0.2)' }}>
+          <div className="p-5 border-b flex items-center justify-between" style={{ borderColor: 'rgba(255,255,255,0.07)' }}>
             <div className="flex items-center gap-3">
-              <div 
+              <div
                 className="w-10 h-10 rounded-xl flex items-center justify-center"
-                style={{ 
-                  background: 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,255,136,0.12))',
-                  border: '1px solid rgba(0,255,136,0.3)',
-                  boxShadow: '0 4px 12px rgba(0,255,136,0.2)'
-                }}
+                style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.22)' }}
               >
-                <CalendarIcon className="w-5 h-5 text-green-300" />
+                <CalendarIcon className="w-5 h-5" style={{ color: '#6ee7b7' }} />
               </div>
-              <h3 
-                className="text-lg font-black"
-                style={{ 
-                  background: 'linear-gradient(135deg, #ffffff, #6ee7b7)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text'
-                }}
-              >
-                Recent Activity
-              </h3>
+              <h3 className="text-lg font-black text-white">Recent Activity</h3>
             </div>
             <Link
               to="/registrations"
-              className="text-green-300 text-sm font-bold flex items-center gap-1 hover:text-emerald-200 transition-colors"
+              className="text-sm font-bold flex items-center gap-1 transition-colors"
+              style={{ color: '#6ee7b7' }}
             >
               View All
               <ArrowRightIcon className="w-4 h-4" />
@@ -1466,10 +1011,7 @@ const UnifiedDashboardMobile = () => {
               <div className="text-center py-8">
                 <div 
                   className="text-5xl mb-3 inline-block"
-                  style={{ 
-                    filter: 'drop-shadow(0 0 20px rgba(0,255,136,0.6))',
-                    animation: 'float 3s ease-in-out infinite'
-                  }}
+                  style={{ opacity: 0.85 }}
                 >
                   🏸
                 </div>
@@ -1477,21 +1019,15 @@ const UnifiedDashboardMobile = () => {
                 <p className="text-sm text-gray-300 mb-5">Join your first tournament!</p>
                 <Link
                   to="/tournaments"
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm relative overflow-hidden group"
-                  style={{ 
-                    background: 'linear-gradient(135deg, #00ff88 0%, #00d4ff 50%, #00ff88 100%)',
-                    backgroundSize: '200% auto',
-                    color: '#003320',
-                    boxShadow: '0 8px 25px rgba(0,255,136,0.4), 0 0 40px rgba(0,255,136,0.2), inset 0 1px 0 rgba(255,255,255,0.3)',
-                    animation: 'shimmer 3s linear infinite'
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm"
+                  style={{
+                    background: 'rgba(16,185,129,0.12)',
+                    border: '1px solid rgba(16,185,129,0.25)',
+                    color: '#6ee7b7',
                   }}
                 >
-                  <div 
-                    className="absolute inset-0 opacity-0 group-active:opacity-100 transition-opacity"
-                    style={{ background: 'radial-gradient(circle at center, rgba(255,255,255,0.3), transparent)' }}
-                  />
-                  <TrophyIcon className="w-5 h-5 relative z-10" />
-                  <span className="relative z-10">Find Tournaments</span>
+                  <TrophyIcon className="w-5 h-5" />
+                  <span>Find Tournaments</span>
                 </Link>
               </div>
             ) : (
@@ -1507,15 +1043,11 @@ const UnifiedDashboardMobile = () => {
                     }}
                   >
                     <div className="flex items-start gap-3">
-                      <div 
+                      <div
                         className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
-                        style={{ 
-                          background: 'linear-gradient(135deg, rgba(168,85,247,0.3), rgba(139,92,246,0.2))',
-                          border: '1px solid rgba(168,85,247,0.4)',
-                          boxShadow: '0 4px 12px rgba(168,85,247,0.3)'
-                        }}
+                        style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)' }}
                       >
-                        <span className="text-xl" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }}>🏆</span>
+                        <span className="text-xl">🏆</span>
                       </div>
                       <div className="flex-1 min-w-0">
                         <Link 
@@ -1537,21 +1069,21 @@ const UnifiedDashboardMobile = () => {
                             : 'text-gray-300'
                         }`}
                         style={{
-                          background: reg.status === 'confirmed' 
-                            ? 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(0,255,136,0.12))'
+                          background: reg.status === 'confirmed'
+                            ? 'rgba(16,185,129,0.12)'
                             : reg.status === 'pending'
-                            ? 'linear-gradient(135deg, rgba(245,158,11,0.3), rgba(251,146,60,0.2))'
+                            ? 'rgba(245,158,11,0.1)'
                             : reg.status === 'rejected'
-                            ? 'linear-gradient(135deg, rgba(239,68,68,0.3), rgba(220,38,38,0.2))'
-                            : 'linear-gradient(135deg, rgba(107,114,128,0.3), rgba(75,85,99,0.2))',
+                            ? 'rgba(239,68,68,0.1)'
+                            : 'rgba(255,255,255,0.06)',
                           border: `1px solid ${
-                            reg.status === 'confirmed' 
-                              ? 'rgba(0,255,136,0.3)'
+                            reg.status === 'confirmed'
+                              ? 'rgba(16,185,129,0.25)'
                               : reg.status === 'pending'
-                              ? 'rgba(245,158,11,0.4)'
+                              ? 'rgba(245,158,11,0.2)'
                               : reg.status === 'rejected'
-                              ? 'rgba(239,68,68,0.4)'
-                              : 'rgba(107,114,128,0.4)'
+                              ? 'rgba(239,68,68,0.2)'
+                              : 'rgba(255,255,255,0.1)'
                           }`
                         }}>
                           {reg.status?.charAt(0).toUpperCase() + reg.status?.slice(1)}

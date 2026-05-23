@@ -165,28 +165,28 @@ const UnifiedDashboardMobile = () => {
     PLAYER: {
       name: 'Player',
       icon: '🏸',
-      color: '#00ff88',
-      bg: 'rgba(0,255,136,0.1)',
-      border: 'rgba(0,255,136,0.3)'
+      color: '#10b981',
+      bg: 'rgba(16,185,129,0.12)',
+      border: 'rgba(16,185,129,0.35)'
     },
     ORGANIZER: {
       name: 'Organizer',
       icon: '🏆',
-      color: '#a855f7',
-      bg: 'rgba(168,85,247,0.1)',
-      border: 'rgba(168,85,247,0.3)'
+      color: '#8b5cf6',
+      bg: 'rgba(139,92,246,0.12)',
+      border: 'rgba(139,92,246,0.35)'
     },
     UMPIRE: {
       name: 'Umpire',
       icon: '⚖️',
       color: '#3b82f6',
-      bg: 'rgba(59,130,246,0.1)',
-      border: 'rgba(59,130,246,0.3)'
+      bg: 'rgba(59,130,246,0.12)',
+      border: 'rgba(59,130,246,0.35)'
     }
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden pt-16" style={{ background: '#07071a' }}>
+    <div className="min-h-screen relative overflow-hidden pt-16" style={{ background: '#0b0e1f' }}>
 
       {/* ── Copied toast ── */}
       {copied && (
@@ -405,8 +405,9 @@ const UnifiedDashboardMobile = () => {
         <div
           className="rounded-2xl p-5 mb-6"
           style={{
-            background: 'rgba(255,255,255,0.06)',
-            border: '1px solid rgba(255,255,255,0.12)',
+            background: 'rgba(255,255,255,0.08)',
+            border: '1px solid rgba(255,255,255,0.14)',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
             animation: 'fadeIn 0.5s ease-out both'
           }}
         >
@@ -443,10 +444,11 @@ const UnifiedDashboardMobile = () => {
         <div
           className="rounded-2xl p-5 mb-6 relative overflow-hidden"
           style={{
-            background: 'rgba(255,255,255,0.06)',
-            border: '1px solid rgba(255,255,255,0.12)',
-            borderTop: '2px solid rgba(16,185,129,0.5)',
+            background: 'rgba(255,255,255,0.08)',
+            border: '1px solid rgba(255,255,255,0.14)',
+            borderTop: '2px solid rgba(16,185,129,0.6)',
             backdropFilter: 'blur(20px)',
+            boxShadow: '0 4px 24px rgba(0,0,0,0.4), 0 0 0 1px rgba(16,185,129,0.08)',
             animation: 'fadeIn 0.8s ease-out 0.2s both'
           }}
         >
@@ -651,8 +653,9 @@ const UnifiedDashboardMobile = () => {
           <div
             className="rounded-2xl p-5 mb-6"
             style={{
-              background: 'rgba(255,255,255,0.06)',
-              border: '1px solid rgba(255,255,255,0.12)',
+              background: 'rgba(255,255,255,0.08)',
+              border: '1px solid rgba(255,255,255,0.14)',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
               animation: 'slideUp 0.8s ease-out 0.4s both'
             }}
           >
@@ -661,8 +664,8 @@ const UnifiedDashboardMobile = () => {
                 <div
                   className="w-10 h-10 rounded-xl flex items-center justify-center"
                   style={{
-                    background: 'rgba(16,185,129,0.12)',
-                    border: '1px solid rgba(16,185,129,0.22)',
+                    background: 'rgba(16,185,129,0.18)',
+                    border: '1px solid rgba(16,185,129,0.35)',
                   }}
                 >
                   <span className="text-xl">🏸</span>
@@ -676,8 +679,11 @@ const UnifiedDashboardMobile = () => {
                     key={index}
                     className="p-4 rounded-xl"
                     style={{
-                      background: 'rgba(255,255,255,0.05)',
-                      border: '1px solid rgba(255,255,255,0.09)',
+                      background: 'rgba(255,255,255,0.07)',
+                      borderTop: '1px solid rgba(255,255,255,0.12)',
+                      borderRight: '1px solid rgba(255,255,255,0.12)',
+                      borderBottom: '1px solid rgba(255,255,255,0.12)',
+                      borderLeft: '3px solid rgba(16,185,129,0.55)',
                     }}
                   >
                     <div
@@ -700,8 +706,9 @@ const UnifiedDashboardMobile = () => {
           <div
             className="rounded-2xl p-5 mb-6"
             style={{
-              background: 'rgba(255,255,255,0.06)',
-              border: '1px solid rgba(255,255,255,0.12)',
+              background: 'rgba(255,255,255,0.08)',
+              border: '1px solid rgba(255,255,255,0.14)',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
               animation: 'slideUp 0.8s ease-out 0.4s both'
             }}
           >
@@ -709,7 +716,7 @@ const UnifiedDashboardMobile = () => {
               <div className="flex items-center gap-3 mb-4">
                 <div
                   className="w-10 h-10 rounded-xl flex items-center justify-center"
-                  style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.22)' }}
+                  style={{ background: 'rgba(16,185,129,0.18)', border: '1px solid rgba(16,185,129,0.35)' }}
                 >
                   <span className="text-xl">🏆</span>
                 </div>
@@ -766,8 +773,9 @@ const UnifiedDashboardMobile = () => {
             <div
               className="rounded-2xl p-5 mb-6"
               style={{
-                background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(255,255,255,0.09)',
+                background: 'rgba(255,255,255,0.07)',
+                border: '1px solid rgba(255,255,255,0.13)',
+                boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
               }}
             >
               <div className="flex items-center justify-between mb-4">
@@ -862,15 +870,16 @@ const UnifiedDashboardMobile = () => {
           <div
             className="rounded-2xl p-5 mb-6"
             style={{
-              background: 'rgba(255,255,255,0.06)',
-              border: '1px solid rgba(255,255,255,0.12)',
+              background: 'rgba(255,255,255,0.08)',
+              border: '1px solid rgba(255,255,255,0.14)',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
               animation: 'slideUp 0.8s ease-out 0.4s both'
             }}
           >
             <div className="flex items-center gap-3 mb-4">
               <div
                 className="w-10 h-10 rounded-xl flex items-center justify-center"
-                style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.22)' }}
+                style={{ background: 'rgba(16,185,129,0.18)', border: '1px solid rgba(16,185,129,0.35)' }}
               >
                 <span className="text-xl">⚖️</span>
               </div>
@@ -901,8 +910,9 @@ const UnifiedDashboardMobile = () => {
         <div
           className="rounded-2xl p-5 mb-6"
           style={{
-            background: 'rgba(255,255,255,0.06)',
-            border: '1px solid rgba(255,255,255,0.12)',
+            background: 'rgba(255,255,255,0.08)',
+            border: '1px solid rgba(255,255,255,0.14)',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
             animation: 'fadeIn 0.8s ease-out 0.7s both'
           }}
         >
@@ -910,7 +920,7 @@ const UnifiedDashboardMobile = () => {
             <div className="flex items-center gap-3 mb-5">
               <div
                 className="w-10 h-10 rounded-xl flex items-center justify-center"
-                style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.22)' }}
+                style={{ background: 'rgba(16,185,129,0.18)', border: '1px solid rgba(16,185,129,0.35)' }}
               >
                 <UserIcon className="w-5 h-5" style={{ color: '#34d399' }} />
               </div>
@@ -972,16 +982,17 @@ const UnifiedDashboardMobile = () => {
         <div
           className="rounded-2xl overflow-hidden mb-6"
           style={{
-            background: 'rgba(255,255,255,0.06)',
-            border: '1px solid rgba(255,255,255,0.12)',
+            background: 'rgba(255,255,255,0.08)',
+            border: '1px solid rgba(255,255,255,0.14)',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
             animation: 'fadeIn 0.8s ease-out 0.8s both'
           }}
         >
-          <div className="p-5 border-b flex items-center justify-between" style={{ borderColor: 'rgba(255,255,255,0.07)' }}>
+          <div className="p-5 border-b flex items-center justify-between" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
             <div className="flex items-center gap-3">
               <div
                 className="w-10 h-10 rounded-xl flex items-center justify-center"
-                style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.22)' }}
+                style={{ background: 'rgba(16,185,129,0.18)', border: '1px solid rgba(16,185,129,0.35)' }}
               >
                 <CalendarIcon className="w-5 h-5" style={{ color: '#34d399' }} />
               </div>

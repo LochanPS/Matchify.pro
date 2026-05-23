@@ -2701,9 +2701,9 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                               className="flex items-center justify-between px-2.5 py-2 rounded-lg"
                               style={
                                 isPlayer1Winner
-                                  ? { background: 'rgba(16,185,129,0.08)', borderTop: '1px solid rgba(16,185,129,0.15)', borderRight: '1px solid rgba(16,185,129,0.15)', borderBottom: '1px solid rgba(16,185,129,0.15)', borderLeft: '3px solid #10b981' }
+                                  ? { background: 'rgba(16,185,129,0.16)', borderTop: '1px solid rgba(16,185,129,0.28)', borderRight: '1px solid rgba(16,185,129,0.28)', borderBottom: '1px solid rgba(16,185,129,0.28)', borderLeft: '3px solid #10b981' }
                                   : isCompleted
-                                  ? { background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }
+                                  ? { background: 'rgba(239,68,68,0.09)', border: '1px solid rgba(239,68,68,0.18)' }
                                   : { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }
                               }
                             >
@@ -2731,9 +2731,9 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                               className="flex items-center justify-between px-2.5 py-2 rounded-lg"
                               style={
                                 isPlayer2Winner
-                                  ? { background: 'rgba(16,185,129,0.08)', borderTop: '1px solid rgba(16,185,129,0.15)', borderRight: '1px solid rgba(16,185,129,0.15)', borderBottom: '1px solid rgba(16,185,129,0.15)', borderLeft: '3px solid #10b981' }
+                                  ? { background: 'rgba(16,185,129,0.16)', borderTop: '1px solid rgba(16,185,129,0.28)', borderRight: '1px solid rgba(16,185,129,0.28)', borderBottom: '1px solid rgba(16,185,129,0.28)', borderLeft: '3px solid #10b981' }
                                   : isCompleted
-                                  ? { background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }
+                                  ? { background: 'rgba(239,68,68,0.09)', border: '1px solid rgba(239,68,68,0.18)' }
                                   : { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }
                               }
                             >
@@ -3111,9 +3111,9 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                               className="py-2 px-3 rounded-lg flex items-center justify-between"
                               style={
                                 p1Won
-                                  ? { background: 'rgba(16,185,129,0.08)', borderTop: '1px solid rgba(16,185,129,0.15)', borderRight: '1px solid rgba(16,185,129,0.15)', borderBottom: '1px solid rgba(16,185,129,0.15)', borderLeft: '3px solid #10b981' }
+                                  ? { background: 'rgba(16,185,129,0.16)', borderTop: '1px solid rgba(16,185,129,0.28)', borderRight: '1px solid rgba(16,185,129,0.28)', borderBottom: '1px solid rgba(16,185,129,0.28)', borderLeft: '3px solid #10b981' }
                                   : isMatchDone
-                                  ? { background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }
+                                  ? { background: 'rgba(239,68,68,0.09)', border: '1px solid rgba(239,68,68,0.18)' }
                                   : { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }
                               }
                             >
@@ -3135,9 +3135,9 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                               className="py-2 px-3 rounded-lg flex items-center justify-between"
                               style={
                                 p2Won
-                                  ? { background: 'rgba(16,185,129,0.08)', borderTop: '1px solid rgba(16,185,129,0.15)', borderRight: '1px solid rgba(16,185,129,0.15)', borderBottom: '1px solid rgba(16,185,129,0.15)', borderLeft: '3px solid #10b981' }
+                                  ? { background: 'rgba(16,185,129,0.16)', borderTop: '1px solid rgba(16,185,129,0.28)', borderRight: '1px solid rgba(16,185,129,0.28)', borderBottom: '1px solid rgba(16,185,129,0.28)', borderLeft: '3px solid #10b981' }
                                   : isMatchDone
-                                  ? { background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }
+                                  ? { background: 'rgba(239,68,68,0.09)', border: '1px solid rgba(239,68,68,0.18)' }
                                   : { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }
                               }
                             >

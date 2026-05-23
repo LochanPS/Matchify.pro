@@ -335,44 +335,36 @@ const getTournaments = async (req, res) => {
       baseFilters.status = 'published';
     }
 
-    // Location filters (case-insensitive for SQLite)
+    // Location filters (case-insensitive — PostgreSQL requires mode: 'insensitive')
     if (city) {
-      baseFilters.city = { contains: city };
+      baseFilters.city = { contains: city, mode: 'insensitive' };
     }
     if (state) {
-      baseFilters.state = { contains: state };
+      baseFilters.state = { contains: state, mode: 'insensitive' };
     }
     if (zone) {
       baseFilters.zone = zone;
     }
     if (country) {
-      baseFilters.country = { contains: country };
+      baseFilters.country = { contains: country, mode: 'insensitive' };
     }
 
-    // Date range filter (tournaments starting between startDate and endDate)
+    // Date range filter — startDate stored as String (YYYY-MM-DD), use string comparison
     if (startDate || endDate) {
       baseFilters.startDate = {};
-      if (startDate) {
-        baseFilters.startDate.gte = new Date(startDate);
-      }
-      if (endDate) {
-        baseFilters.startDate.lte = new Date(endDate);
-      }
+      if (startDate) baseFilters.startDate.gte = startDate;
+      if (endDate)   baseFilters.startDate.lte = endDate;
     }
 
     // Registration open filter
-    // Note: Since dates are stored as strings, we need to convert current time to string format for comparison
     if (registrationOpen === 'true') {
-      const now = new Date();
-      // For string date comparison, we'll filter in memory after fetching
-      // This is a limitation of storing dates as strings
       if (!baseFilters.status) {
-        baseFilters.status = { in: ['draft', 'published'] }; // Only show upcoming tournaments
+        baseFilters.status = { in: ['draft', 'published'] };
       }
     }
 
-    // Status filter (can be multiple: "draft,published,ongoing") - only if explicitly provided
-    if (status) {
+    // Status filter — only apply if tab not set (tab takes priority)
+    if (status && !tab) {
       const statuses = status.split(',').map(s => s.trim());
       baseFilters.status = { in: statuses };
     }
@@ -387,17 +379,17 @@ const getTournaments = async (req, res) => {
       baseFilters.privacy = privacy;
     }
 
-    // Search by name, description, venue, or city
+    // Search by name, description, venue, or city (case-insensitive)
     if (search) {
       where = {
         AND: [
           baseFilters,
           {
             OR: [
-              { name: { contains: search } },
-              { description: { contains: search } },
-              { venue: { contains: search } },
-              { city: { contains: search } },
+              { name:        { contains: search, mode: 'insensitive' } },
+              { description: { contains: search, mode: 'insensitive' } },
+              { venue:       { contains: search, mode: 'insensitive' } },
+              { city:        { contains: search, mode: 'insensitive' } },
             ],
           },
         ],

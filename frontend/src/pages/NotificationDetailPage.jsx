@@ -184,9 +184,8 @@ const NotificationDetailPage = () => {
         return '/tournaments';
       case 'MATCH_ASSIGNED': case 'MATCH_STARTING_SOON':
         if (data.matchId) {
-          // umpireId from notification data so ConductMatchPage unlocks Start Match
-          const uid = data.umpireId || data.userId || '';
-          return `/match/${data.matchId}/conduct${uid ? `?umpireId=${uid}` : ''}`;
+          // Go directly to scoring page — umpire can start match in one tap
+          return `/match/${data.matchId}/score`;
         }
         if (data.tournamentId) return `/tournaments/${data.tournamentId}`;
         return '/tournaments';
@@ -205,7 +204,7 @@ const NotificationDetailPage = () => {
       case 'REGISTRATION_CONFIRMED': case 'REGISTRATION_REJECTED': case 'PAYMENT_REJECTED':
       case 'REGISTRATION_REMOVED': return 'View My Registrations';
       case 'DRAW_PUBLISHED': return 'View Tournament Draws';
-      case 'MATCH_ASSIGNED': case 'MATCH_STARTING_SOON': return 'Configure & Start Match';
+      case 'MATCH_ASSIGNED': case 'MATCH_STARTING_SOON': return 'Go to Match → Start Now';
       case 'TOURNAMENT_CANCELLED': case 'TOURNAMENT_REMINDER': return 'View Tournament Details';
       case 'PAYMENT_VERIFICATION_REQUIRED': case 'REGISTRATION_PENDING': return 'View Tournament Dashboard';
       case 'CANCELLATION_REQUEST': return 'Review Cancellation Request';

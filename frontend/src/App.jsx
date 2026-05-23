@@ -48,6 +48,7 @@ const ScoringConsolePage        = lazy(() => import('./pages/ScoringConsolePage'
 const MatchListPage             = lazy(() => import('./pages/MatchListPage'))
 const SpectatorViewPage         = lazy(() => import('./pages/SpectatorViewPage'))
 const ConductMatchPage          = lazy(() => import('./pages/ConductMatchPage'))
+const QuickMatchPage            = lazy(() => import('./pages/QuickMatchPage'))
 const LiveTournamentDashboard   = lazy(() => import('./pages/LiveTournamentDashboard'))
 const LiveMatches               = lazy(() => import('./pages/LiveMatches'))
 const LiveMatchDetail           = lazy(() => import('./pages/LiveMatchDetail'))
@@ -312,6 +313,13 @@ function AppContent() {
             </ProtectedRoute>
           } />
           
+          {/* Quick Match — standalone scorer, no tournament required */}
+          <Route path="/quick-match" element={
+            <ProtectedRoute>
+              <QuickMatchPage />
+            </ProtectedRoute>
+          } />
+
           {/* Conduct Match Page - for organizers to assign umpire and umpires to review settings before starting */}
           <Route path="/match/:matchId/conduct" element={
             <ProtectedRoute>

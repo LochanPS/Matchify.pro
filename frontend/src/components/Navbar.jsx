@@ -18,7 +18,8 @@ import {
   Mail,
   ChevronUp,
   Copy,
-  Check
+  Check,
+  Swords
 } from 'lucide-react';
 import {
   ArrowLeftIcon,
@@ -414,6 +415,16 @@ const Navbar = () => {
                   <span className="relative z-10">Create Tournament</span>
                 </Link>
               )}
+
+              {/* ── Quick Match ── */}
+              <button onClick={() => { navigate('/quick-match'); setShowMobileMenu(false); }}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all"
+                style={{ background: 'rgba(0,212,255,0.08)', border: '1px solid rgba(0,212,255,0.25)', color: '#00d4ff' }}>
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(0,212,255,0.15)' }}>
+                  <Swords className="w-4 h-4" />
+                </div>
+                Start a Match
+              </button>
 
               {/* ── Find Competition ── */}
               <button onClick={() => { navigate('/tournaments'); setShowMobileMenu(false); }}

@@ -65,11 +65,7 @@ export const getDrawPage = async (req, res) => {
 
     // No draw yet — return early with just tournament + categories + stats
     if (!draw) {
-      res.set({
-        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
-        'Pragma': 'no-cache',
-        'Expires': '0'
-      });
+      res.set({ 'Cache-Control': 'public, s-maxage=15, stale-while-revalidate=60' });
       return res.json({
         success: true,
         data: { tournament, categories, draw: null, matches: [], stats }
@@ -359,11 +355,12 @@ export const getDrawPage = async (req, res) => {
     }
 
     // ─── Send response ─────────────────────────────────────────────────────────
+    // Cache at Vercel edge CDN for 15 seconds, stale-while-revalidate for 60s.
+    // Under load (50+ users), only 1 function call per 15s hits the DB —
+    // the rest are served from CDN in <100ms. 15s staleness is acceptable
+    // for live tournament scoring (scores update over minutes, not seconds).
     res.set({
-      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
-      'Pragma': 'no-cache',
-      'Expires': '0',
-      'Surrogate-Control': 'no-store'
+      'Cache-Control': 'public, s-maxage=15, stale-while-revalidate=60',
     });
 
     res.json({

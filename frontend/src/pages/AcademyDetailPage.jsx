@@ -77,6 +77,8 @@ export default function AcademyDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [photoIndex, setPhotoIndex] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   useEffect(() => {
     (async () => {
@@ -148,6 +150,11 @@ export default function AcademyDetailPage() {
   const gradient = SPORT_GRADIENT[primarySport] || SPORT_GRADIENT.default;
   const whatsappNum = academy.phone?.replace(/\D/g, '').replace(/^0/, '').replace(/^91/, '');
 
+  const openLightbox = (idx) => { setLightboxIndex(idx); setLightboxOpen(true); };
+  const closeLightbox = () => setLightboxOpen(false);
+  const lbPrev = (e) => { e.stopPropagation(); setLightboxIndex(i => (i - 1 + photos.length) % photos.length); };
+  const lbNext = (e) => { e.stopPropagation(); setLightboxIndex(i => (i + 1) % photos.length); };
+
   // ── Section wrapper ────────────────────────────────────────────────────────
   const Section = ({ title, accent = B.cyan, children }) => (
     <div className="rounded-2xl overflow-hidden"
@@ -162,17 +169,98 @@ export default function AcademyDetailPage() {
   );
 
   return (
-    <div className="min-h-screen" style={{ background: B.bg, paddingBottom: courts.length > 0 ? 88 : 32 }}>
+    <div className="min-h-screen relative" style={{
+      background: '#050810',
+      backgroundImage: 'url(/bg-galaxy.png)',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center top',
+      backgroundRepeat: 'no-repeat',
+      backgroundAttachment: 'fixed',
+      paddingBottom: courts.length > 0 ? 88 : 32,
+    }}>
+      {/* Dark overlay */}
+      <div className="fixed inset-0 pointer-events-none" style={{ background: 'rgba(5,8,16,0.75)', zIndex: 0 }} />
+
+      {/* ── Lightbox ── */}
+      {lightboxOpen && photos.length > 0 && (
+        <div
+          className="fixed inset-0 flex items-center justify-center"
+          style={{ background: 'rgba(0,0,0,0.96)', zIndex: 200 }}
+          onClick={closeLightbox}
+        >
+          {/* Close */}
+          <button
+            onClick={closeLightbox}
+            className="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center"
+            style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.2)', zIndex: 201 }}>
+            <X className="w-5 h-5 text-white" />
+          </button>
+
+          {/* Counter */}
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full"
+            style={{ background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(255,255,255,0.15)', zIndex: 201 }}>
+            <span className="text-sm font-black text-white">{lightboxIndex + 1} / {photos.length}</span>
+          </div>
+
+          {/* Photo */}
+          <img
+            src={photos[lightboxIndex]}
+            alt=""
+            className="max-w-full max-h-[80vh] object-contain rounded-xl select-none"
+            style={{ zIndex: 201 }}
+            onClick={e => e.stopPropagation()}
+          />
+
+          {/* Prev / Next */}
+          {photos.length > 1 && (
+            <>
+              <button onClick={lbPrev}
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full flex items-center justify-center"
+                style={{ background: 'rgba(0,0,0,0.65)', border: '1px solid rgba(255,255,255,0.18)', zIndex: 201 }}>
+                <ChevronLeft className="w-6 h-6 text-white" />
+              </button>
+              <button onClick={lbNext}
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full flex items-center justify-center"
+                style={{ background: 'rgba(0,0,0,0.65)', border: '1px solid rgba(255,255,255,0.18)', zIndex: 201 }}>
+                <ChevronRight className="w-6 h-6 text-white" />
+              </button>
+            </>
+          )}
+
+          {/* Dot indicators */}
+          {photos.length > 1 && (
+            <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-1.5" style={{ zIndex: 201 }}>
+              {photos.map((_, i) => (
+                <button key={i}
+                  onClick={e => { e.stopPropagation(); setLightboxIndex(i); }}
+                  className="rounded-full transition-all"
+                  style={{
+                    width: i === lightboxIndex ? 20 : 7, height: 7,
+                    background: i === lightboxIndex ? '#22d3ee' : 'rgba(255,255,255,0.35)',
+                  }} />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* ── Hero photo / gradient ── */}
-      <div className="relative w-full overflow-hidden" style={{ height: 220 }}>
+      <div className="relative z-10 w-full overflow-hidden" style={{ height: 220 }}>
         {photos.length > 0 ? (
           <>
             <img
               src={photos[photoIndex]}
               alt={academy.name}
-              className="w-full h-full object-cover transition-all duration-300"
+              className="w-full h-full object-cover transition-all duration-300 cursor-pointer"
+              onClick={() => openLightbox(photoIndex)}
             />
+            {/* Tap to view hint */}
+            <div className="absolute bottom-10 right-3 px-2 py-1 rounded-lg pointer-events-none"
+              style={{ background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)' }}>
+              <span className="text-xs font-bold" style={{ color: 'rgba(255,255,255,0.7)' }}>
+                🔍 Tap to enlarge
+              </span>
+            </div>
             {/* bottom fade */}
             <div className="absolute inset-0"
               style={{ background: 'linear-gradient(to bottom, rgba(7,7,26,0.25) 0%, transparent 35%, rgba(7,7,26,0.75) 100%)' }} />
@@ -230,7 +318,7 @@ export default function AcademyDetailPage() {
       </div>
 
       {/* ── Name + meta ── */}
-      <div className="px-4 pt-5 pb-4"
+      <div className="relative z-10 px-4 pt-5 pb-4"
         style={{ borderBottom: `1px solid ${B.border}` }}>
         <div className="flex items-start justify-between gap-3 mb-3">
           <h1 className="text-xl font-black text-white leading-tight flex-1">{academy.name}</h1>
@@ -268,7 +356,32 @@ export default function AcademyDetailPage() {
       </div>
 
       {/* ── Sections ── */}
-      <div className="px-4 pt-4 space-y-3">
+      <div className="relative z-10 px-4 pt-4 space-y-3">
+
+        {/* Photos grid */}
+        {photos.length > 0 && (
+          <Section title={`Photos (${photos.length})`} accent={B.cyan}>
+            <div className="grid grid-cols-3 gap-1.5">
+              {photos.map((url, i) => (
+                <div
+                  key={i}
+                  className="relative overflow-hidden rounded-xl cursor-pointer active:scale-95 transition-transform"
+                  style={{ aspectRatio: '1', background: 'rgba(255,255,255,0.04)' }}
+                  onClick={() => openLightbox(i)}
+                >
+                  <img src={url} alt="" className="w-full h-full object-cover" />
+                  {/* last tile: show "+N more" overlay if > 9 photos */}
+                  {i === 8 && photos.length > 9 && (
+                    <div className="absolute inset-0 flex items-center justify-center rounded-xl"
+                      style={{ background: 'rgba(0,0,0,0.65)' }}>
+                      <span className="text-base font-black text-white">+{photos.length - 9}</span>
+                    </div>
+                  )}
+                </div>
+              )).slice(0, 9)}
+            </div>
+          </Section>
+        )}
 
         {/* Location */}
         <Section title="Location" accent={B.cyan}>
@@ -488,7 +601,7 @@ export default function AcademyDetailPage() {
       {/* Sticky Book CTA */}
       {courts.length > 0 && (
         <div className="fixed bottom-0 left-0 right-0 px-4 pb-6 pt-3 z-40"
-          style={{ background: 'linear-gradient(to top, rgba(7,7,26,0.98) 60%, transparent)' }}>
+          style={{ background: 'linear-gradient(to top, rgba(5,8,16,0.98) 60%, transparent)' }}>
           <button
             onClick={() => {
               if (!user) { navigate('/login'); return; }

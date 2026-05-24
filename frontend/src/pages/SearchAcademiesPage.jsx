@@ -251,11 +251,20 @@ export default function SearchAcademiesPage() {
   };
 
   return (
-    <div className="min-h-screen" style={{ background: B.bg }}>
+    <div className="min-h-screen relative" style={{
+      background: '#050810',
+      backgroundImage: 'url(/bg-galaxy.png)',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center top',
+      backgroundRepeat: 'no-repeat',
+      backgroundAttachment: 'fixed',
+    }}>
+      {/* Dark overlay */}
+      <div className="fixed inset-0 pointer-events-none" style={{ background: 'rgba(5,8,16,0.75)', zIndex: 0 }} />
 
       {/* ── Sticky header ── */}
       <div className="sticky top-0 z-30 px-4 pt-5 pb-4"
-        style={{ background: B.bg, borderBottom: `1px solid ${B.border}` }}>
+        style={{ background: 'rgba(5,8,16,0.88)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', borderBottom: `1px solid ${B.border}` }}>
 
         {/* Top row */}
         <div className="flex items-center justify-between mb-4">
@@ -333,7 +342,7 @@ export default function SearchAcademiesPage() {
       </div>
 
       {/* ── Content ── */}
-      <div className="px-4 pt-4 pb-32">
+      <div className="relative z-10 px-4 pt-4 pb-32">
 
         {/* Results count */}
         {!loading && !error && (
@@ -401,7 +410,7 @@ export default function SearchAcademiesPage() {
       {!loading && academies.length > 0 && (
         <div
           className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] px-4 pb-6 pt-4 z-20"
-          style={{ background: `linear-gradient(to top, ${B.bg} 65%, transparent)` }}
+          style={{ background: 'linear-gradient(to top, rgba(5,8,16,0.97) 65%, transparent)' }}
         >
           <button
             onClick={() => navigate('/academies/add')}

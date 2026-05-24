@@ -280,7 +280,6 @@ router.post('/users/:id/login-as', authenticate, requireAdmin, async (req, res) 
 // Return to admin from impersonation
 router.post('/return-to-admin', authenticate, requireAdmin, async (req, res) => {
   console.log('🔄 Return to admin endpoint hit!');
-  console.log('User data:', req.user);
   try {
     // Check if user is impersonating
     if (!req.user.isImpersonating) {

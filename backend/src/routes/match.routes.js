@@ -220,7 +220,7 @@ router.get('/:matchId', authenticate, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to fetch match details',
-      error: error.message
+      ...(process.env.NODE_ENV !== 'production' && { error: error.message })
     });
   }
 });
@@ -304,7 +304,7 @@ router.put('/:matchId/score', authenticate, async (req, res) => {
     res.json({ success: true, message: 'Score updated', score, data: updatedMatch });
   } catch (error) {
     console.error('Error updating match score:', error);
-    res.status(500).json({ success: false, message: 'Failed to update match score', error: error.message });
+    res.status(500).json({ success: false, message: 'Failed to update match score', ...(process.env.NODE_ENV !== 'production' && { error: error.message }) });
   }
 });
 
@@ -430,7 +430,7 @@ const startMatchHandler = async (req, res) => {
     res.json({ success: true, message: 'Match started successfully', match: finalMatch });
   } catch (error) {
     console.error('Error starting match:', error);
-    res.status(500).json({ success: false, message: 'Failed to start match', error: error.message });
+    res.status(500).json({ success: false, message: 'Failed to start match', ...(process.env.NODE_ENV !== 'production' && { error: error.message }) });
   }
 };
 
@@ -1148,7 +1148,7 @@ router.get('/tournament/:tournamentId', optionalAuth, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to fetch tournament matches',
-      error: error.message
+      ...(process.env.NODE_ENV !== 'production' && { error: error.message })
     });
   }
 });
@@ -1186,7 +1186,7 @@ router.get('/umpires/available', authenticate, async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to fetch umpires',
-      error: error.message
+      ...(process.env.NODE_ENV !== 'production' && { error: error.message })
     });
   }
 });

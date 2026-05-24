@@ -451,7 +451,6 @@ class AdminController {
   static async returnToAdmin(req, res) {
     try {
       console.log('🔄 Return to admin request received');
-      console.log('📋 req.user:', JSON.stringify(req.user, null, 2));
 
       const { adminId, isImpersonating } = req.user || {}; // Get admin ID from impersonation token
 

@@ -40,64 +40,66 @@ router.post('/delete-all-info', authenticate, async (req, res) => {
     console.log('🗑️  DELETE ALL DATA initiated by:', req.user.email);
 
     // Delete all data in correct order (respecting foreign key constraints)
-    const deletionResults = {};
+    // Wrapped in a transaction so partial failure rolls back everything
+    const deletionResults = await prisma.$transaction(async (tx) => {
+    const r = {};
 
     // 1. Delete match-related data
-    deletionResults.matchScores = await prisma.match.deleteMany({});
-    
+    r.matchScores = await tx.match.deleteMany({});
+
     // 2. Delete draws
-    deletionResults.draws = await prisma.draw.deleteMany({});
-    
+    r.draws = await tx.draw.deleteMany({});
+
     // 3. Delete registrations
-    deletionResults.registrations = await prisma.registration.deleteMany({});
-    
+    r.registrations = await tx.registration.deleteMany({});
+
     // 4. Delete payment verifications
-    deletionResults.paymentVerifications = await prisma.paymentVerification.deleteMany({});
-    
+    r.paymentVerifications = await tx.paymentVerification.deleteMany({});
+
     // 5. Delete categories
-    deletionResults.categories = await prisma.category.deleteMany({});
-    
+    r.categories = await tx.category.deleteMany({});
+
     // 6. Delete tournament payments
-    deletionResults.tournamentPayments = await prisma.tournamentPayment.deleteMany({});
-    
+    r.tournamentPayments = await tx.tournamentPayment.deleteMany({});
+
     // 7. Delete tournament posters
-    deletionResults.tournamentPosters = await prisma.tournamentPoster.deleteMany({});
-    
+    r.tournamentPosters = await tx.tournamentPoster.deleteMany({});
+
     // 8. Delete tournament umpires
-    deletionResults.tournamentUmpires = await prisma.tournamentUmpire.deleteMany({});
-    
+    r.tournamentUmpires = await tx.tournamentUmpire.deleteMany({});
+
     // 9. Delete tournaments
-    deletionResults.tournaments = await prisma.tournament.deleteMany({});
-    
+    r.tournaments = await tx.tournament.deleteMany({});
+
     // 10. Delete wallet transactions
-    deletionResults.walletTransactions = await prisma.walletTransaction.deleteMany({});
-    
+    r.walletTransactions = await tx.walletTransaction.deleteMany({});
+
     // 11. Delete notifications
-    deletionResults.notifications = await prisma.notification.deleteMany({});
-    
+    r.notifications = await tx.notification.deleteMany({});
+
     // 12. Delete score correction requests
-    deletionResults.scoreCorrectionRequests = await prisma.scoreCorrectionRequest.deleteMany({});
-    
+    r.scoreCorrectionRequests = await tx.scoreCorrectionRequest.deleteMany({});
+
     // 15. Delete SMS logs
-    deletionResults.smsLogs = await prisma.smsLog.deleteMany({});
-    
+    r.smsLogs = await tx.smsLog.deleteMany({});
+
     // 16. Delete audit logs
-    deletionResults.auditLogs = await prisma.auditLog.deleteMany({});
-    
+    r.auditLogs = await tx.auditLog.deleteMany({});
+
     // 17. Delete academies
-    deletionResults.academies = await prisma.academy.deleteMany({});
-    
+    r.academies = await tx.academy.deleteMany({});
+
     // 18. Delete organizer KYC submissions
-    deletionResults.organizerKYC = await prisma.organizerKYC.deleteMany({});
-    
+    r.organizerKYC = await tx.organizerKYC.deleteMany({});
+
     // 19. Delete organizer requests
-    deletionResults.organizerRequests = await prisma.organizerRequest.deleteMany({});
-    
+    r.organizerRequests = await tx.organizerRequest.deleteMany({});
+
     // 20. Delete payment settings
-    deletionResults.paymentSettings = await prisma.paymentSettings.deleteMany({});
-    
+    r.paymentSettings = await tx.paymentSettings.deleteMany({});
+
     // 21. Reset all users' tournament-related stats to 0 (PRESERVE ALL USER ACCOUNTS)
-    deletionResults.usersReset = await prisma.user.updateMany({
+    r.usersReset = await tx.user.updateMany({
       data: {
         walletBalance: 0,
         totalPoints: 0,
@@ -108,8 +110,10 @@ router.post('/delete-all-info', authenticate, async (req, res) => {
         matchesUmpired: 0
       }
     });
-    
+
     // DO NOT DELETE USERS - All user accounts are preserved
+    return r;
+    }, { timeout: 30000 });
 
     console.log('✅ All data deleted successfully');
     console.log('📊 Deletion results:', deletionResults);
@@ -177,96 +181,92 @@ router.post('/complete-system-reset', authenticate, async (req, res) => {
       });
     }
 
+    const adminEmail = process.env.ADMIN_EMAIL;
+    if (!adminEmail) {
+      return res.status(500).json({ success: false, error: 'ADMIN_EMAIL env var not set — reset aborted to prevent deleting admin account' });
+    }
+
     console.log('☢️  COMPLETE SYSTEM RESET initiated by:', req.user.email);
     console.log('⚠️  This will delete ALL users except admin!');
 
-    const deletionResults = {};
+    // All deletes wrapped in a transaction so partial failure rolls back everything
+    const deletionResults = await prisma.$transaction(async (tx) => {
+    const r = {};
 
     // STEP 1: Delete all match-related data
-    deletionResults.matchScores = await prisma.match.deleteMany({});
-    
+    r.matchScores = await tx.match.deleteMany({});
+
     // STEP 2: Delete draws
-    deletionResults.draws = await prisma.draw.deleteMany({});
-    
+    r.draws = await tx.draw.deleteMany({});
+
     // STEP 3: Delete registrations
-    deletionResults.registrations = await prisma.registration.deleteMany({});
-    
+    r.registrations = await tx.registration.deleteMany({});
+
     // STEP 4: Delete payment verifications
-    deletionResults.paymentVerifications = await prisma.paymentVerification.deleteMany({});
-    
+    r.paymentVerifications = await tx.paymentVerification.deleteMany({});
+
     // STEP 5: Delete categories
-    deletionResults.categories = await prisma.category.deleteMany({});
-    
+    r.categories = await tx.category.deleteMany({});
+
     // STEP 6: Delete tournament payments
-    deletionResults.tournamentPayments = await prisma.tournamentPayment.deleteMany({});
-    
+    r.tournamentPayments = await tx.tournamentPayment.deleteMany({});
+
     // STEP 7: Delete tournament posters
-    deletionResults.tournamentPosters = await prisma.tournamentPoster.deleteMany({});
-    
+    r.tournamentPosters = await tx.tournamentPoster.deleteMany({});
+
     // STEP 8: Delete tournament umpires
-    deletionResults.tournamentUmpires = await prisma.tournamentUmpire.deleteMany({});
-    
+    r.tournamentUmpires = await tx.tournamentUmpire.deleteMany({});
+
     // STEP 9: Delete tournaments
-    deletionResults.tournaments = await prisma.tournament.deleteMany({});
-    
+    r.tournaments = await tx.tournament.deleteMany({});
+
     // STEP 10: Delete wallet transactions
-    deletionResults.walletTransactions = await prisma.walletTransaction.deleteMany({});
-    
+    r.walletTransactions = await tx.walletTransaction.deleteMany({});
+
     // STEP 11: Delete notifications
-    deletionResults.notifications = await prisma.notification.deleteMany({});
-    
+    r.notifications = await tx.notification.deleteMany({});
+
     // STEP 12: Delete score correction requests
-    deletionResults.scoreCorrectionRequests = await prisma.scoreCorrectionRequest.deleteMany({});
-    
+    r.scoreCorrectionRequests = await tx.scoreCorrectionRequest.deleteMany({});
+
     // STEP 13: Delete SMS logs
-    deletionResults.smsLogs = await prisma.smsLog.deleteMany({});
-    
+    r.smsLogs = await tx.smsLog.deleteMany({});
+
     // STEP 14: Delete audit logs
-    deletionResults.auditLogs = await prisma.auditLog.deleteMany({});
-    
+    r.auditLogs = await tx.auditLog.deleteMany({});
+
     // STEP 15: Delete academies
-    deletionResults.academies = await prisma.academy.deleteMany({});
-    
+    r.academies = await tx.academy.deleteMany({});
+
     // STEP 16: Delete organizer KYC submissions
-    deletionResults.organizerKYC = await prisma.organizerKYC.deleteMany({});
-    
+    r.organizerKYC = await tx.organizerKYC.deleteMany({});
+
     // STEP 17: Delete organizer requests
-    deletionResults.organizerRequests = await prisma.organizerRequest.deleteMany({});
-    
+    r.organizerRequests = await tx.organizerRequest.deleteMany({});
+
     // STEP 18: Delete payment settings
-    deletionResults.paymentSettings = await prisma.paymentSettings.deleteMany({});
-    
+    r.paymentSettings = await tx.paymentSettings.deleteMany({});
+
     // STEP 19: Delete user profiles (must be before users)
-    deletionResults.playerProfiles = await prisma.playerProfile.deleteMany({
-      where: {
-        user: {
-          email: { not: 'ADMIN@gmail.com' }
-        }
-      }
+    r.playerProfiles = await tx.playerProfile.deleteMany({
+      where: { user: { email: { not: adminEmail } } }
     });
-    
-    deletionResults.organizerProfiles = await prisma.organizerProfile.deleteMany({
-      where: {
-        user: {
-          email: { not: 'ADMIN@gmail.com' }
-        }
-      }
+
+    r.organizerProfiles = await tx.organizerProfile.deleteMany({
+      where: { user: { email: { not: adminEmail } } }
     });
-    
-    deletionResults.umpireProfiles = await prisma.umpireProfile.deleteMany({
-      where: {
-        user: {
-          email: { not: 'ADMIN@gmail.com' }
-        }
-      }
+
+    r.umpireProfiles = await tx.umpireProfile.deleteMany({
+      where: { user: { email: { not: adminEmail } } }
     });
-    
+
     // STEP 20: DELETE ALL USERS EXCEPT ADMIN
-    deletionResults.usersDeleted = await prisma.user.deleteMany({
-      where: {
-        email: { not: 'ADMIN@gmail.com' }
-      }
+    r.usersDeleted = await tx.user.deleteMany({
+      where: { email: { not: adminEmail } }
     });
+
+    return r;
+    }, { timeout: 30000 });
 
     console.log('☢️  COMPLETE SYSTEM RESET SUCCESSFUL');
     console.log('📊 Deletion results:', deletionResults);

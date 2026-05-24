@@ -201,6 +201,17 @@ const authLimiter = rateLimit({
   },
 });
 
+// Strict rate limiting for admin routes — prevents brute-force on admin panel
+const adminLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Much stricter than the 1000/15min global limit
+  message: 'Too many admin requests from this IP, please try again later.',
+  trustProxy: true,
+  keyGenerator: (req) => {
+    return req.headers['x-forwarded-for']?.split(',')[0] || req.ip || 'unknown';
+  },
+});
+
 // Static file serving for uploads
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -302,18 +313,19 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/organizer', organizerRoutes);
 
 // Admin sub-routes (MUST BE BEFORE main admin routes for specificity)
-app.use('/api/admin/payment', adminPaymentRoutes);
-app.use('/api/admin/payment-settings', paymentSettingsRoutes);
-app.use('/api/admin/payment-verifications', paymentVerificationRoutes);
-app.use('/api/admin/refund-requests', refundRequestsRoutes);
-app.use('/api/admin/tournament-payments', tournamentPaymentsRoutes);
-app.use('/api/admin/revenue', revenueAnalyticsRoutes);
-app.use('/api/admin/tournament-management', tournamentManagementRoutes);
-app.use('/api/admin', deleteAllDataRoutes);
-app.use('/api/admin', cleanPhoneNumbersRoutes);
+// All admin routes share the strict rate limiter
+app.use('/api/admin/payment', adminLimiter, adminPaymentRoutes);
+app.use('/api/admin/payment-settings', adminLimiter, paymentSettingsRoutes);
+app.use('/api/admin/payment-verifications', adminLimiter, paymentVerificationRoutes);
+app.use('/api/admin/refund-requests', adminLimiter, refundRequestsRoutes);
+app.use('/api/admin/tournament-payments', adminLimiter, tournamentPaymentsRoutes);
+app.use('/api/admin/revenue', adminLimiter, revenueAnalyticsRoutes);
+app.use('/api/admin/tournament-management', adminLimiter, tournamentManagementRoutes);
+app.use('/api/admin', adminLimiter, deleteAllDataRoutes);
+app.use('/api/admin', adminLimiter, cleanPhoneNumbersRoutes);
 
 // Admin routes (general - must be AFTER specific routes)
-app.use('/api/admin', adminRoutes);
+app.use('/api/admin', adminLimiter, adminRoutes);
 
 // SMS routes
 app.use('/api/sms', smsRoutes);

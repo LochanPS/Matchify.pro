@@ -438,7 +438,6 @@ export const approveRegistration = async (req, res) => {
     const { id } = req.params;
     const organizerId = req.user.id;
 
-    console.log('✅ Approving registration:', { registrationId: id, organizerId });
 
     // Find registration and verify organizer owns the tournament
     const registration = await prisma.registration.findUnique({
@@ -451,23 +450,13 @@ export const approveRegistration = async (req, res) => {
     });
 
     if (!registration) {
-      console.log('❌ Registration not found:', id);
       return res.status(404).json({
         success: false,
         error: 'Registration not found',
       });
     }
 
-    console.log('📋 Registration found:', {
-      id: registration.id,
-      player: registration.user.name,
-      tournament: registration.tournament.name,
-      currentStatus: registration.status,
-      paymentStatus: registration.paymentStatus
-    });
-
     if (registration.tournament.organizerId !== organizerId) {
-      console.log('❌ Unauthorized - organizer mismatch');
       return res.status(403).json({
         success: false,
         error: 'Not authorized to manage this registration',
@@ -475,7 +464,7 @@ export const approveRegistration = async (req, res) => {
     }
 
     if (registration.status === 'confirmed') {
-      console.log('⚠️ Registration already confirmed');
+;
       return res.status(400).json({
         success: false,
         error: 'Registration is already confirmed',
@@ -491,12 +480,6 @@ export const approveRegistration = async (req, res) => {
       },
     });
 
-    console.log('✅ Registration updated:', {
-      id: updatedRegistration.id,
-      newStatus: updatedRegistration.status,
-      newPaymentStatus: updatedRegistration.paymentStatus
-    });
-
     // Send notification to the player
     await createNotification({
       userId: registration.userId,
@@ -505,7 +488,6 @@ export const approveRegistration = async (req, res) => {
       message: `Your registration for "${registration.category.name}" in "${registration.tournament.name}" has been approved. You're all set to compete!`,
     });
 
-    console.log('✅ Notification sent to player');
 
     res.json({
       success: true,

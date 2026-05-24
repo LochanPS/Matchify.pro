@@ -100,9 +100,9 @@ router.post('/clean-phone-numbers', authenticate, requireAdmin, async (req, res)
     
   } catch (error) {
     console.error('❌ Error cleaning phone numbers:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Failed to clean phone numbers',
-      details: error.message 
+      ...(process.env.NODE_ENV !== 'production' && { details: error.message })
     });
   }
 });

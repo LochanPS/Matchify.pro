@@ -1,6 +1,6 @@
 import express from 'express';
 import walletService from '../services/wallet.service.js';
-import { authenticate } from '../middleware/auth.js';
+import { authenticate, requireAdmin } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -16,7 +16,7 @@ router.get('/balance', authenticate, async (req, res) => {
     console.error('Get balance error:', error);
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: process.env.NODE_ENV !== 'production' ? error.message : 'Internal server error',
     });
   }
 });
@@ -33,7 +33,7 @@ router.get('/summary', authenticate, async (req, res) => {
     console.error('Get wallet summary error:', error);
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: process.env.NODE_ENV !== 'production' ? error.message : 'Internal server error',
     });
   }
 });
@@ -120,7 +120,7 @@ router.get('/transactions', authenticate, async (req, res) => {
     console.error('Get transactions error:', error);
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: process.env.NODE_ENV !== 'production' ? error.message : 'Internal server error',
     });
   }
 });
@@ -158,8 +158,8 @@ router.post('/deduct', authenticate, async (req, res) => {
   }
 });
 
-// Refund amount (for internal use - tournament cancellations)
-router.post('/refund', authenticate, async (req, res) => {
+// Refund amount (admin-only — internal cancellation flows call walletService directly)
+router.post('/refund', authenticate, requireAdmin, async (req, res) => {
   try {
     const { amount, description, referenceId } = req.body;
 

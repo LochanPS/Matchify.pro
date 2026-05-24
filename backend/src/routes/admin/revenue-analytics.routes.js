@@ -52,8 +52,8 @@ router.get('/overview', authenticate, requireAdmin, async (req, res) => {
         // Your earnings
         platformFees: {
           total: platformFeesTotal,
-          percentage: 5,
-          description: '5% of all tournament registrations'
+          percentage: PLATFORM_FEE_PERCENT,
+          description: `${PLATFORM_FEE_PERCENT}% of all tournament registrations`
         },
         
         // Money flow

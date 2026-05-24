@@ -1,6 +1,7 @@
 import express from 'express';
+import { timingSafeEqual } from 'crypto';
 import prisma from '../../lib/prisma.js';
-import { authenticate } from '../../middleware/auth.js';
+import { authenticate, requireAdmin } from '../../middleware/auth.js';
 
 const router = express.Router();
 
@@ -17,20 +18,15 @@ if (!DANGER_ZONE_PASSWORD || !NUCLEAR_ZONE_PASSWORD) {
  * Delete all data and reset everything to zero
  * Requires admin authentication + special password
  */
-router.post('/delete-all-info', authenticate, async (req, res) => {
+router.post('/delete-all-info', authenticate, requireAdmin, async (req, res) => {
   try {
     const { password } = req.body;
 
-    // Check if user is admin
-    if (!req.user.roles || !req.user.roles.includes('ADMIN')) {
-      return res.status(403).json({
-        success: false,
-        error: 'Only admins can delete all data'
-      });
-    }
-
-    // Verify Danger Zone password
-    if (password !== DANGER_ZONE_PASSWORD) {
+    // Verify Danger Zone password (timing-safe to prevent brute-force oracle)
+    const expectedBuf = Buffer.from(DANGER_ZONE_PASSWORD || '');
+    const inputBuf = Buffer.from(password || '');
+    const passwordMatch = expectedBuf.length === inputBuf.length && timingSafeEqual(expectedBuf, inputBuf);
+    if (!passwordMatch) {
       return res.status(401).json({
         success: false,
         error: 'Invalid password'
@@ -161,20 +157,15 @@ router.post('/delete-all-info', authenticate, async (req, res) => {
  * NUCLEAR OPTION: Delete ALL data including ALL users (except admin)
  * Requires admin authentication + special password
  */
-router.post('/complete-system-reset', authenticate, async (req, res) => {
+router.post('/complete-system-reset', authenticate, requireAdmin, async (req, res) => {
   try {
     const { password } = req.body;
 
-    // Check if user is admin
-    if (!req.user.roles || !req.user.roles.includes('ADMIN')) {
-      return res.status(403).json({
-        success: false,
-        error: 'Only admins can perform complete system reset'
-      });
-    }
-
-    // Verify Nuclear Zone password
-    if (password !== NUCLEAR_ZONE_PASSWORD) {
+    // Verify Nuclear Zone password (timing-safe)
+    const expectedBuf = Buffer.from(NUCLEAR_ZONE_PASSWORD || '');
+    const inputBuf = Buffer.from(password || '');
+    const passwordMatch = expectedBuf.length === inputBuf.length && timingSafeEqual(expectedBuf, inputBuf);
+    if (!passwordMatch) {
       return res.status(401).json({
         success: false,
         error: 'Invalid password'

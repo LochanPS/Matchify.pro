@@ -421,8 +421,8 @@ router.post('/refresh-token', async (req, res) => {
       });
     }
 
-    // Generate new tokens
-    const newAccessToken = generateAccessToken(user.id, user.roles);
+    // Generate new tokens — parse roles string to array to keep JWT payload consistent
+    const newAccessToken = generateAccessToken(user.id, typeof user.roles === 'string' ? user.roles.split(',').filter(Boolean) : (user.roles || []));
     const newRefreshToken = generateRefreshToken(user.id);
 
     // Update refresh token in database

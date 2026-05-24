@@ -409,13 +409,25 @@ router.get('/profile/:id?', authenticate, async (req, res) => {
     }, 0);
     const pending = totalRevenue - paidOut;
 
+    // Strip private payment details when viewing someone else's profile
+    const isSelf = req.user.id === organizerId || req.user.id === user.id;
+    const isAdmin = (req.user.roles || []).includes('ADMIN');
+    const organizerProfile = user.organizerProfile || {};
+    const publicOrganizerProfile = (isSelf || isAdmin) ? organizerProfile : {
+      organization: organizerProfile.organization,
+      tournamentsOrganized: organizerProfile.tournamentsOrganized,
+      totalRevenue: organizerProfile.totalRevenue,
+      rating: organizerProfile.rating,
+      // savedUpiId, savedAccountHolder, savedPaymentQRUrl intentionally omitted
+    };
+
     res.json({
       success: true,
       profile: {
         ...user,
-        organizerProfile: user.organizerProfile || {},
+        organizerProfile: publicOrganizerProfile,
         stats: {
-          tournamentsOrganized: user._count.tournaments,  // fixed
+          tournamentsOrganized: user._count.tournaments,
           totalParticipants,
           totalRevenue,
           paidOut,

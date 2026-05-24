@@ -8,6 +8,8 @@ const router = express.Router();
 router.get('/:userId', authenticate, async (req, res) => {
   try {
     const { userId } = req.params;
+    const isSelf = req.user.id === userId || req.user.userId === userId;
+    const isAdmin = (req.user.roles || []).includes('ADMIN');
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -15,16 +17,18 @@ router.get('/:userId', authenticate, async (req, res) => {
         id: true,
         name: true,
         email: true,
-        phone: true,
+        // phone and dateOfBirth only returned to self or admin
+        phone: isSelf || isAdmin,
         profilePhoto: true,
         city: true,
         state: true,
         country: true,
-        dateOfBirth: true,
+        dateOfBirth: isSelf || isAdmin,
         gender: true,
-        roles: true,
+        // roles string is internal — return computed flags instead
+        roles: isSelf || isAdmin,
         playerCode: true,
-        umpireCode: true,
+        umpireCode: isSelf || isAdmin,
         totalPoints: true,
         tournamentsPlayed: true,
         matchesWon: true,
@@ -43,20 +47,21 @@ router.get('/:userId', authenticate, async (req, res) => {
     }
 
     // Strip internal placeholder email for phone-only users
-    if (user.email?.endsWith('@noemail.matchify.internal')) {
-      user = { ...user, email: null };
+    let responseUser = { ...user };
+    if (responseUser.email?.endsWith('@noemail.matchify.internal')) {
+      responseUser = { ...responseUser, email: null };
     }
 
     res.json({
       success: true,
-      user
+      user: responseUser
     });
   } catch (error) {
     console.error('Error fetching user:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch user details',
-      error: error.message
+      ...(process.env.NODE_ENV !== 'production' && { error: error.message })
     });
   }
 });

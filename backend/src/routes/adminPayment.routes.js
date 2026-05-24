@@ -1,18 +1,10 @@
 import express from 'express';
 import adminPaymentService from '../services/adminPaymentService.js';
-import { authenticate } from '../middleware/auth.js';
+import { authenticate, requireAdmin } from '../middleware/auth.js';
 import prisma from '../lib/prisma.js';
 import notificationService from '../services/notificationService.js';
 
 const router = express.Router();
-
-// Middleware to ensure only admins can access these routes
-const requireAdmin = (req, res, next) => {
-  if (!req.user.roles.includes('ADMIN')) {
-    return res.status(403).json({ error: 'Admin access required' });
-  }
-  next();
-};
 
 // ============================================
 // DASHBOARD DATA

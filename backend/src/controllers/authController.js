@@ -359,14 +359,6 @@ export const login = async (req, res) => {
 
     const isPhone = /^[0-9]{10}$/.test(cleanedCredential);
     
-    console.log('🔐 Login attempt:');
-    console.log('   - Original input:', email);
-    console.log('   - Cleaned:', cleanedCredential);
-    console.log('   - Is Email?:', isEmail);
-    console.log('   - Is Phone?:', isPhone);
-    console.log('   - Search field:', isEmail ? 'email' : 'phone');
-    console.log('   - Search value:', cleanedCredential);
-    
     if (!isEmail && !isPhone) {
       return res.status(400).json({ 
         error: 'Invalid credential format. Please enter a valid email or 10-digit phone number.' 
@@ -383,34 +375,9 @@ export const login = async (req, res) => {
       },
     });
 
-    console.log('🔍 Database search result:');
-    if (user) {
-      console.log('   ✅ User FOUND');
-      console.log('   - User ID:', user.id);
-      console.log('   - User name:', user.name);
-      console.log('   - User email:', user.email || 'null');
-      console.log('   - User phone:', user.phone || 'null');
-    } else {
-      console.log('   ❌ User NOT FOUND');
-      console.log('   - Searched by:', isEmail ? 'email' : 'phone');
-      console.log('   - Searched for:', cleanedCredential);
-      
-      // Debug: Show all users with phone numbers
-      if (!isEmail) {
-        const allUsers = await prisma.user.findMany({
-          select: { id: true, name: true, phone: true, email: true },
-          take: 10
-        });
-        console.log('   📋 Sample users in database:');
-        allUsers.forEach(u => {
-          console.log(`      - ${u.name}: phone="${u.phone}" email="${u.email || 'null'}"`);
-        });
-      }
-    }
 
     // If phone login failed, try searching with original format (for backward compatibility)
     if (!user && isPhone && cleanedCredential !== email) {
-      console.log('🔄 Trying fallback search with original phone format:', email);
       user = await prisma.user.findUnique({
         where: { phone: email },
         include: {
@@ -419,11 +386,8 @@ export const login = async (req, res) => {
           umpireProfile: true,
         },
       });
-      console.log('🔍 User found (fallback search):', user ? `Yes (ID: ${user.id}, phone: ${user.phone})` : 'No');
-      
       // If found with old format, update to cleaned format
       if (user) {
-        console.log('📝 Updating phone number from old format to cleaned format');
         user = await prisma.user.update({
           where: { id: user.id },
           data: { phone: cleanedCredential },
@@ -433,12 +397,10 @@ export const login = async (req, res) => {
             umpireProfile: true,
           },
         });
-        console.log('✅ Phone number updated to:', user.phone);
       }
     }
 
     if (!user) {
-      console.log('❌ Login failed - user not found');
       return res.status(401).json({ error: 'Invalid credentials. Please check your phone number/email and try again.' });
     }
 
@@ -480,7 +442,6 @@ export const login = async (req, res) => {
         },
       });
       
-      console.log(`✅ Auto-generated codes for user: ${user.email}`);
     }
 
     // Parse roles from comma-separated string
@@ -523,7 +484,7 @@ export const login = async (req, res) => {
     });
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({ error: 'Login failed', details: error.message });
+    res.status(500).json({ error: 'Login failed', ...(process.env.NODE_ENV !== 'production' && { details: error.message }) });
   }
 };
 

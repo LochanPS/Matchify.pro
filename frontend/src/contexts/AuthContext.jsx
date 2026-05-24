@@ -23,8 +23,17 @@ export const AuthProvider = ({ children }) => {
       const storedUser = localStorage.getItem('user');
       
       if (token && storedUser) {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        const user = JSON.parse(storedUser);
+        let payload, user;
+        try {
+          payload = JSON.parse(atob(token.split('.')[1]));
+          user = JSON.parse(storedUser);
+        } catch {
+          // Malformed token/user in localStorage — clear and re-login
+          localStorage.removeItem('token');
+          localStorage.removeItem('refreshToken');
+          localStorage.removeItem('user');
+          return null;
+        }
         
         // Skip for any admin user (hardcoded or database)
         if (payload.isAdmin || (user.roles && (Array.isArray(user.roles) ? user.roles.includes('ADMIN') : user.roles === 'ADMIN'))) {
@@ -231,11 +240,16 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      // No need to call logout endpoint for simple token auth
+      // Invalidate refresh token in DB so stolen tokens can't be reused
+      const refreshToken = localStorage.getItem('refreshToken');
+      if (refreshToken) {
+        await api.post('/auth/logout', { refreshToken }).catch(() => {});
+      }
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
       localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
       localStorage.removeItem('user');
       setUser(null);
       setShowProfileCompletion(false);

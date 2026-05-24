@@ -1207,12 +1207,12 @@ router.put('/:matchId/config', authenticate, async (req, res) => {
       return res.status(404).json({ success: false, error: 'Match not found' });
     }
 
-    // Check authorization - organizer or umpire can set config
+    // Check authorization — only organizer, assigned umpire, or admin
     const isOrganizer = match.tournament.organizerId === userId;
     const isAssignedUmpire = match.umpireId === userId;
-    const hasUmpireRole = req.user.roles?.includes('umpire') || req.user.roles?.includes('UMPIRE') || req.user.role === 'UMPIRE';
+    const isAdmin = (req.user.roles || []).includes('ADMIN');
 
-    if (!isOrganizer && !isAssignedUmpire && !hasUmpireRole) {
+    if (!isOrganizer && !isAssignedUmpire && !isAdmin) {
       return res.status(403).json({ success: false, error: 'Not authorized to set match config' });
     }
 

@@ -4,6 +4,7 @@ import { ArrowLeft } from 'lucide-react';
 import adminService from '../../services/adminService';
 import InviteForm from '../../components/admin/InviteForm';
 import InviteList from '../../components/admin/InviteList';
+import Spinner from '../../components/Spinner';
 
 const InviteManagementPage = () => {
   const navigate = useNavigate();
@@ -87,7 +88,7 @@ const InviteManagementPage = () => {
 
           {loading ? (
             <div className="bg-slate-800 border border-slate-700 rounded-lg shadow p-12 text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-500 mx-auto"></div>
+              <Spinner size="lg" className="mx-auto" />
               <p className="mt-4 text-gray-400">Loading invites...</p>
             </div>
           ) : (

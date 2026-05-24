@@ -15,6 +15,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { Zap, Trophy, Users, Rocket, Star, Gift } from 'lucide-react';
 import { getErrorMessage } from '../utils/errorMessage';
+import Spinner from '../components/Spinner';
 
 // Fixed star positions — deterministic, no re-render flicker
 const STARS = [
@@ -489,7 +490,7 @@ const RegisterPage = () => {
               >
                 {loading ? (
                   <>
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <Spinner size="md" />
                     Creating account...
                   </>
                 ) : (

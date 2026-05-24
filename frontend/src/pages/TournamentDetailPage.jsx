@@ -24,6 +24,7 @@ import {
 import { Edit, Users, Eye, Layers, GitBranch } from 'lucide-react';
 import { shareTournament as doShareTournament } from '../utils/tournamentShare';
 import LoadingScreen from '../components/LoadingScreen';
+import Spinner from '../components/Spinner';
 
 // Delete Tournament Modal Component - Emerald Theme with Fixed Text Visibility
 const DeleteTournamentModal = ({ isOpen, onClose, onConfirm, tournamentName, isDeleting }) => {
@@ -109,7 +110,7 @@ const DeleteTournamentModal = ({ isOpen, onClose, onConfirm, tournamentName, isD
             >
               {isDeleting ? (
                 <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                  <Spinner size="sm" />
                   <span>Cancelling...</span>
                 </>
               ) : (
@@ -1545,7 +1546,7 @@ const TournamentDetailPage = () => {
               >
                 {addingUmpire ? (
                   <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-t-transparent" style={{ borderColor: '#050810 transparent transparent transparent' }} />
+                    <Spinner size="sm" />
                     Adding…
                   </>
                 ) : (
@@ -1693,7 +1694,7 @@ const TournamentDetailPage = () => {
                   className="flex-1 px-4 py-2.5 text-white rounded-xl font-bold text-sm disabled:opacity-50 flex items-center justify-center gap-1.5 transition-all hover:scale-[1.02]"
                   style={{ background: 'linear-gradient(135deg, #06b6d4, #06b6d4)', color: '#050810' }}>
                   {publishing ? (
-                    <><div className="animate-spin rounded-full h-3.5 w-3.5 border-2 border-white/50 border-t-white"></div><span style={{ color: '#050810' }}>Publishing...</span></>
+                    <><Spinner size="xs" /><span style={{ color: '#050810' }}>Publishing...</span></>
                   ) : <span style={{ color: '#050810' }}>🚀 Publish Now</span>}
                 </button>
               </div>
@@ -1915,7 +1916,7 @@ const TournamentDetailPage = () => {
                 >
                   {quickAddLoading ? (
                     <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <Spinner size="sm" />
                       Adding...
                     </>
                   ) : (

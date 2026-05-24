@@ -4,6 +4,7 @@ import { CheckCheck, ChevronRight, ArrowLeft } from 'lucide-react';
 import { useNotifications } from '../contexts/NotificationContext';
 import { formatDistanceToNow, format } from 'date-fns';
 import MatchifyLogo from '../components/MatchifyLogo';
+import Spinner from '../components/Spinner';
 
 // Pre-generated particle data — deterministic, no Math.random in render
 
@@ -243,13 +244,7 @@ const NotificationsPage = () => {
               animation: 'scaleIn 0.8s ease-out'
             }}
           >
-            <div 
-              className="w-12 h-12 border-4 rounded-full animate-spin mx-auto"
-              style={{ 
-                borderColor: 'rgba(6,182,212,0.3)',
-                borderTopColor: '#06b6d4'
-              }}
-            ></div>
+            <Spinner size="lg" className="mx-auto" />
             <p className="mt-4 font-semibold" style={{ color: 'rgba(255,255,255,0.6)' }}>Loading notifications...</p>
           </div>
         ) : notifications.length === 0 ? (

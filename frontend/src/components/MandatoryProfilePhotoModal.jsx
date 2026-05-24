@@ -3,6 +3,7 @@ import { Upload, X, Check, Camera, Sparkles } from 'lucide-react';
 import { profileAPI } from '../api/profile';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../utils/api';
+import Spinner from '../components/Spinner';
 
 const INDIAN_STATES = [
   'Andhra Pradesh','Arunachal Pradesh','Assam','Bihar','Chhattisgarh','Goa','Gujarat',
@@ -396,8 +397,7 @@ export default function MandatoryProfilePhotoModal({ isOpen, onSkip }) {
                     }}>
                     {uploading ? (
                       <span className="flex items-center justify-center gap-2">
-                        <div className="w-4 h-4 border-2 rounded-full animate-spin"
-                          style={{ borderColor: 'rgba(0,51,32,0.3)', borderTopColor: '#003320' }} />
+                        <Spinner size="sm" />
                         Uploading...
                       </span>
                     ) : (
@@ -541,7 +541,7 @@ export default function MandatoryProfilePhotoModal({ isOpen, onSkip }) {
                   }}>
                   {saving ? (
                     <span className="flex items-center justify-center gap-2">
-                      <div className="w-4 h-4 border-2 rounded-full animate-spin" style={{ borderColor: 'rgba(0,51,32,0.3)', borderTopColor: '#003320' }} />
+                      <Spinner size="sm" />
                       Saving...
                     </span>
                   ) : '🎾 Save & Continue'}

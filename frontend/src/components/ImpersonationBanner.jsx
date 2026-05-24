@@ -3,6 +3,7 @@ import { Shield, LogOut, ArrowLeft, AlertTriangle, X } from 'lucide-react';
 import api from '../utils/api';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import Spinner from '../components/Spinner';
 
 const ImpersonationBanner = () => {
   const [isImpersonating, setIsImpersonating] = useState(false);
@@ -101,7 +102,7 @@ const ImpersonationBanner = () => {
           >
             {isReturning ? (
               <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-600"></div>
+                <Spinner size="sm" />
                 Returning...
               </>
             ) : (

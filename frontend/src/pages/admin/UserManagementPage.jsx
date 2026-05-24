@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { AlertTriangle, CheckCircle, X, UserX, UserCheck, ArrowLeft } from 'lucide-react';
 import adminService from '../../services/adminService';
 import UserDetailsModal from '../../components/admin/UserDetailsModal';
+import Spinner from '../../components/Spinner';
 
 const UserManagementPage = () => {
   const navigate = useNavigate();
@@ -208,7 +209,7 @@ const UserManagementPage = () => {
       <div className="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden">
         {loading ? (
           <div className="p-8 text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-500 mx-auto"></div>
+            <Spinner size="lg" className="mx-auto" />
             <p className="mt-4 text-gray-400">Loading users...</p>
           </div>
         ) : users.length === 0 ? (

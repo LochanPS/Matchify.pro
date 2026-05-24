@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../../utils/api';
 import { toast } from 'react-hot-toast';
 import { ArrowLeft, Loader, CheckCircle, XCircle, AlertTriangle, Image as ImageIcon, CreditCard, User, Mail, Phone, MapPin, Calendar, Trophy } from 'lucide-react';
+import Spinner from '../../components/Spinner';
 
 export default function RefundRequestsPage() {
   const navigate = useNavigate();
@@ -54,7 +55,7 @@ export default function RefundRequestsPage() {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #0a0a1f 0%, #07071a 50%, #0a0a1f 100%)' }}>
         <div className="text-center">
-          <Loader className="w-12 h-12 animate-spin mx-auto text-emerald-500" />
+          <Spinner size="lg" className="mx-auto" />
           <p className="text-gray-400 mt-4">Loading refund requests...</p>
         </div>
       </div>
@@ -277,7 +278,7 @@ export default function RefundRequestsPage() {
                       >
                         {processing ? (
                           <>
-                            <Loader className="w-5 h-5 animate-spin" />
+                            <Spinner size="md" />
                             Processing...
                           </>
                         ) : (

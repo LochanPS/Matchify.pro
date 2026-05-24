@@ -7,6 +7,7 @@ import { getGenderLabel } from '../utils/genderLabel';
 import { TrophyIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 import RefundDetailsModal from '../components/RefundDetailsModal';
 import LoadingScreen from '../components/LoadingScreen';
+import Spinner from '../components/Spinner';
 
 export default function MyRegistrationsPage() {
   const navigate = useNavigate();
@@ -330,7 +331,7 @@ export default function MyRegistrationsPage() {
                           style={{ color: '#ef4444', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)' }}
                         >
                           {cancelling === registration.id ? (
-                            <Loader className="h-3.5 w-3.5 animate-spin" />
+                            <Spinner size="xs" />
                           ) : (
                             <XCircle className="h-3.5 w-3.5" />
                           )}
@@ -510,7 +511,7 @@ export default function MyRegistrationsPage() {
                   className="flex-1 px-4 py-3 rounded-xl font-semibold text-sm disabled:opacity-50 flex items-center justify-center gap-2"
                   style={{ background: 'linear-gradient(135deg,#ef4444,#dc2626)', color: '#fff' }}
                 >
-                  {cancelling ? <><Loader className="h-4 w-4 animate-spin" />Submitting...</> : 'Submit Request'}
+                  {cancelling ? <><Spinner size="sm" />Submitting...</> : 'Submit Request'}
                 </button>
               </div>
             </div>

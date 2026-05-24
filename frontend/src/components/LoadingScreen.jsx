@@ -1,4 +1,5 @@
 import MatchifyLogo from './MatchifyLogo';
+import Spinner from './Spinner';
 
 /**
  * Full-page loading screen with galaxy background.
@@ -44,14 +45,6 @@ const LoadingScreen = ({ message = 'Loading...' }) => {
       </div>
 
       <style>{`
-        @keyframes lsSpinOuter {
-          0%   { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-        @keyframes lsSpinInner {
-          0%   { transform: rotate(0deg); }
-          100% { transform: rotate(-360deg); }
-        }
         @keyframes lsPulse {
           0%, 100% { opacity: 0.55; transform: scale(1); }
           50%       { opacity: 1;    transform: scale(1.06); }
@@ -74,38 +67,8 @@ const LoadingScreen = ({ message = 'Loading...' }) => {
           <MatchifyLogo size={52} variant="icon" />
         </div>
 
-        {/* Spinner rings */}
-        <div className="relative flex items-center justify-center" style={{ width: '72px', height: '72px' }}>
-          {/* Outer ring */}
-          <div style={{
-            position: 'absolute', inset: 0, borderRadius: '50%',
-            border: '3px solid transparent',
-            borderTopColor: '#06b6d4',
-            borderRightColor: 'rgba(6,182,212,0.35)',
-            animation: 'lsSpinOuter 1.1s linear infinite',
-          }} />
-          {/* Middle ring */}
-          <div style={{
-            position: 'absolute', inset: '8px', borderRadius: '50%',
-            border: '2px solid transparent',
-            borderTopColor: '#a855f7',
-            borderLeftColor: 'rgba(168,85,247,0.30)',
-            animation: 'lsSpinInner 1.6s linear infinite',
-          }} />
-          {/* Center dot */}
-          <div style={{
-            width: '10px', height: '10px', borderRadius: '50%',
-            background: 'radial-gradient(circle, #22d3ee, #0891b2)',
-            boxShadow: '0 0 12px rgba(6,182,212,0.80)',
-            animation: 'lsPulse 1.6s ease-in-out infinite',
-          }} />
-          {/* Outer glow halo */}
-          <div style={{
-            position: 'absolute', inset: '-8px', borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(6,182,212,0.14) 0%, transparent 70%)',
-            filter: 'blur(4px)',
-          }} />
-        </div>
+        {/* Spinner */}
+        <Spinner size="xl" />
 
         {/* Message + dots */}
         <div className="flex flex-col items-center gap-3">

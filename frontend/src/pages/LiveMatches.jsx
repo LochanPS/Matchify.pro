@@ -5,6 +5,7 @@ import LiveMatchCard from '../components/matches/LiveMatchCard';
 import LiveMatchFilters from '../components/matches/LiveMatchFilters';
 import { useWebSocket } from '../contexts/WebSocketContext';
 import { ArrowLeft, Radio, Wifi, WifiOff, RefreshCw, Trophy, SlidersHorizontal } from 'lucide-react';
+import Spinner from '../components/Spinner';
 
 const B = {
   bg: '#050810',
@@ -130,8 +131,7 @@ const LiveMatches = () => {
         {/* Content */}
         {loading ? (
           <div className="rounded-2xl border p-12 text-center" style={{ background: B.card, borderColor: B.border }}>
-            <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin mx-auto"
-              style={{ borderColor: 'rgba(248,113,113,0.3)', borderTopColor: '#f87171' }} />
+            <Spinner size="lg" className="mx-auto" />
             <p className="mt-4 text-sm font-medium" style={{ color: B.sub }}>Loading live matches...</p>
           </div>
         ) : error ? (

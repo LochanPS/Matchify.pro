@@ -3,6 +3,7 @@ import { X, Upload, CheckCircle, Loader, AlertTriangle } from 'lucide-react';
 import api from '../utils/api';
 import { fetchUpload } from '../utils/fetchUpload';
 import { toast } from 'react-hot-toast';
+import Spinner from '../components/Spinner';
 
 export default function RefundDetailsModal({ registration, onClose, onSuccess }) {
   const [formData, setFormData] = useState({
@@ -209,7 +210,7 @@ export default function RefundDetailsModal({ registration, onClose, onSuccess })
             >
               {submitting ? (
                 <>
-                  <Loader className="h-4 w-4 animate-spin" />
+                  <Spinner size="sm" />
                   Submitting...
                 </>
               ) : (

@@ -7,6 +7,7 @@ import { approveRefund, rejectRefund } from '../api/organizer';
 import { formatDateIndian } from '../utils/dateFormat';
 import { ArrowLeft, User, Mail, Phone, MapPin, Calendar, CreditCard, QrCode, AlertTriangle, Check, X, Loader, Trophy } from 'lucide-react';
 import LoadingScreen from '../components/LoadingScreen';
+import Spinner from '../components/Spinner';
 
 const getImageUrl = (url) => {
   if (!url) return null;
@@ -205,7 +206,7 @@ export default function CancellationRequestPage() {
               className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-black text-sm transition-all disabled:opacity-50"
               style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#050810', boxShadow: '0 4px 20px rgba(6,182,212,0.3)' }}
             >
-              {actionLoading ? <Loader className="w-5 h-5 animate-spin" /> : <Check className="w-5 h-5" />}
+              {actionLoading ? <Spinner size="md" /> : <Check className="w-5 h-5" />}
               Approve Refund
             </button>
             <button

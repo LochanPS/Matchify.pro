@@ -1,6 +1,7 @@
 import { getErrorMessage } from '../utils/errorMessage';
 import { useState, useRef, useEffect } from 'react';
 import api from '../utils/api';
+import Spinner from '../components/Spinner';
 
 const INDIAN_STATES = [
   'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
@@ -726,7 +727,7 @@ export default function ProfileCompletionModal({ user, onComplete }) {
             >
               {loading ? (
                 <>
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <Spinner size="md" />
                   Saving...
                 </>
               ) : (

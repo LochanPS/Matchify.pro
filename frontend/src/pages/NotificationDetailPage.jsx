@@ -6,6 +6,7 @@ import { format } from 'date-fns';
 import api from '../utils/api';
 import { fetchUpload } from '../utils/fetchUpload';
 import { toast } from 'react-hot-toast';
+import Spinner from '../components/Spinner';
 
 // Deterministic particles — no Math.random in render
 const DETAIL_PARTICLES = Array.from({ length: 18 }, (_, i) => ({
@@ -114,7 +115,7 @@ const RefundDetailsForm = ({ registrationId, refundAmount, tournamentName, rejec
         <button type="submit" disabled={submitting}
           className="w-full py-3.5 rounded-xl font-black text-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2"
           style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#050810', boxShadow: '0 4px 15px rgba(6,182,212,0.35)' }}>
-          {submitting ? <><Loader className="h-4 w-4 animate-spin" /><span>Submitting...</span></> : <><CheckCircle className="h-4 w-4" /><span>Submit Refund Details</span></>}
+          {submitting ? <><Spinner size="sm" /><span>Submitting...</span></> : <><CheckCircle className="h-4 w-4" /><span>Submit Refund Details</span></>}
         </button>
       </form>
     </div>
@@ -218,8 +219,7 @@ const NotificationDetailPage = () => {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: BG }}>
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin mx-auto"
-            style={{ borderColor: 'rgba(168,85,247,0.3)', borderTopColor: '#a855f7' }} />
+          <Spinner size="lg" className="mx-auto" />
           <p className="mt-4 text-sm font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>Loading...</p>
         </div>
       </div>

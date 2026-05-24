@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import Sidebar from '../../components/admin/Sidebar';
+import Spinner from '../../components/Spinner';
 
 const AdminLayout = () => {
   const { user, loading } = useAuth();
@@ -23,7 +24,7 @@ const AdminLayout = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <Spinner size="lg" className="mx-auto" />
           <p className="mt-4 text-gray-600">Loading...</p>
         </div>
       </div>

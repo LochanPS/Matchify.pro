@@ -10,6 +10,7 @@ import { formatDateIndian, formatDateLongIndian } from '../utils/dateFormat';
 import { Edit2, Save, X, Key, Phone, Mail, MapPin, User, AlertTriangle, Camera, Upload, ZoomIn } from 'lucide-react';
 import MatchifyLogo from '../components/MatchifyLogo';
 import LoadingScreen from '../components/LoadingScreen';
+import Spinner from '../components/Spinner';
 import {
   UserCircleIcon,
   PencilSquareIcon,
@@ -536,9 +537,7 @@ export default function ProfilePage() {
               />
               {uploadingPhoto ? (
                 <>
-                  <div 
-                    className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin relative z-10"
-                  ></div>
+                  <Spinner size="md" className="relative z-10" />
                   <span className="relative z-10">Uploading...</span>
                 </>
               ) : (

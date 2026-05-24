@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { getRevenueOverview, getRevenueTimeline, deleteAllData, completeSystemReset } from '../../api/payment';
 import { toast } from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom';
+import Spinner from '../../components/Spinner';
 
 const RevenueDashboardPage = () => {
   const navigate = useNavigate();
@@ -119,7 +120,7 @@ const RevenueDashboardPage = () => {
     return (
       <div className="flex items-center justify-center min-h-screen bg-slate-900">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-500 mx-auto"></div>
+          <Spinner size="lg" className="mx-auto" />
           <p className="mt-4 text-gray-400">Loading...</p>
         </div>
       </div>
@@ -513,7 +514,7 @@ const RevenueDashboardPage = () => {
               >
                 {deleting ? (
                   <span className="flex items-center justify-center gap-2">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <Spinner size="sm" />
                     Deleting...
                   </span>
                 ) : (
@@ -604,7 +605,7 @@ const RevenueDashboardPage = () => {
               >
                 {nuclearDeleting ? (
                   <span className="flex items-center justify-center gap-2">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <Spinner size="sm" />
                     Resetting...
                   </span>
                 ) : (

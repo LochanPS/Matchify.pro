@@ -5,6 +5,7 @@ import {
   Clock, AlertCircle, Instagram, Trash2
 } from 'lucide-react';
 import api from '../../utils/api';
+import Spinner from '../../components/Spinner';
 
 const LISTING_FEE = 300;
 
@@ -204,7 +205,7 @@ export default function AcademyApprovalsPage() {
                 className="flex-1 py-3 rounded-xl text-sm font-black flex items-center justify-center gap-2 disabled:opacity-50"
                 style={{ background: 'rgba(239,68,68,0.2)', color: '#f87171', border: '1px solid rgba(239,68,68,0.3)' }}>
                 {actionLoading === deleteConfirm.id + '_delete'
-                  ? <Loader2 className="w-4 h-4 animate-spin" />
+                  ? <Spinner size="sm" />
                   : <Trash2 className="w-4 h-4" />}
                 Delete
               </button>
@@ -216,7 +217,7 @@ export default function AcademyApprovalsPage() {
       {/* List */}
       {loading ? (
         <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-7 h-7 animate-spin" style={{ color: '#a855f7' }} />
+          <Spinner size="md" />
         </div>
       ) : academies.length === 0 ? (
         <div className="text-center py-16 rounded-2xl"
@@ -293,14 +294,14 @@ export default function AcademyApprovalsPage() {
                             className="px-3 py-1.5 rounded-xl text-xs font-black transition-all disabled:opacity-50"
                             style={{ background: 'rgba(6,182,212,0.15)', color: '#06b6d4', border: '1px solid rgba(6,182,212,0.3)' }}>
                             {actionLoading === academy.id
-                              ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              ? <Spinner size="xs" />
                               : '✓ Approve'}
                           </button>
                           <button onClick={() => reject(academy.id)} disabled={isActioning}
                             className="px-3 py-1.5 rounded-xl text-xs font-black transition-all disabled:opacity-50"
                             style={{ background: 'rgba(239,68,68,0.12)', color: '#f87171', border: '1px solid rgba(239,68,68,0.25)' }}>
                             {actionLoading === academy.id + '_reject'
-                              ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              ? <Spinner size="xs" />
                               : '✗ Reject'}
                           </button>
                         </>
@@ -312,7 +313,7 @@ export default function AcademyApprovalsPage() {
                         className="p-1.5 rounded-xl transition-all disabled:opacity-50"
                         style={{ background: 'rgba(239,68,68,0.1)', color: '#f87171', border: '1px solid rgba(239,68,68,0.2)' }}>
                         {actionLoading === academy.id + '_delete'
-                          ? <Loader2 className="w-4 h-4 animate-spin" />
+                          ? <Spinner size="sm" />
                           : <Trash2 className="w-4 h-4" />}
                       </button>
                       <button onClick={() => setExpanded(isExpanded ? null : academy.id)}
@@ -478,7 +479,7 @@ export default function AcademyApprovalsPage() {
                           className="flex-1 py-3 rounded-xl text-sm font-black flex items-center justify-center gap-2 disabled:opacity-50"
                           style={{ background: 'rgba(239,68,68,0.12)', color: '#f87171', border: '1px solid rgba(239,68,68,0.25)' }}>
                           {actionLoading === academy.id + '_reject'
-                            ? <Loader2 className="w-4 h-4 animate-spin" />
+                            ? <Spinner size="sm" />
                             : <XCircle className="w-4 h-4" />}
                           Reject
                         </button>
@@ -486,7 +487,7 @@ export default function AcademyApprovalsPage() {
                           className="flex-[2] py-3 rounded-xl text-sm font-black flex items-center justify-center gap-2 disabled:opacity-50"
                           style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#07071a' }}>
                           {actionLoading === academy.id
-                            ? <Loader2 className="w-4 h-4 animate-spin" />
+                            ? <Spinner size="sm" />
                             : <CheckCircle className="w-4 h-4" />}
                           Approve ₹{LISTING_FEE} Received
                         </button>

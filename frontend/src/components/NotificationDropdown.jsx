@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { X, CheckCheck, Bell, ChevronRight } from 'lucide-react';
 import { useNotifications } from '../contexts/NotificationContext';
 import { formatDistanceToNow, format } from 'date-fns';
+import Spinner from '../components/Spinner';
 
 const NotificationDropdown = ({ onClose }) => {
   const navigate = useNavigate();
@@ -170,7 +171,7 @@ const NotificationDropdown = ({ onClose }) => {
       <div className="overflow-y-auto flex-1">
         {loading ? (
           <div className="p-8 text-center">
-            <div className="w-8 h-8 border-3 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <Spinner size="md" className="mx-auto" />
             <p className="text-gray-400 mt-3">Loading notifications...</p>
           </div>
         ) : notifications.length === 0 ? (

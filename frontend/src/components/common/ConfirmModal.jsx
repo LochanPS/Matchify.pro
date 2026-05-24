@@ -1,4 +1,5 @@
 import { XMarkIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import Spinner from '../Spinner';
 
 export default function ConfirmModal({
   isOpen,
@@ -47,7 +48,7 @@ export default function ConfirmModal({
             >
               {loading ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <Spinner size="sm" />
                   Processing...
                 </>
               ) : (

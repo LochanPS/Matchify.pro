@@ -18,6 +18,7 @@ import { Loader, GitBranch } from 'lucide-react';
 import { tournamentAPI } from '../api/tournament';
 import { formatDateIndian } from '../utils/dateFormat';
 import { buildShareMessage, shareTournament as doShareTournament } from '../utils/tournamentShare';
+import Spinner from '../components/Spinner';
 
 
 
@@ -500,13 +501,7 @@ export default function TournamentDiscoveryPage() {
               backdropFilter: 'blur(20px)'
             }}
           >
-            <div
-              className="w-16 h-16 border-4 rounded-full animate-spin mx-auto"
-              style={{
-                borderColor: 'rgba(6,182,212,0.2)',
-                borderTopColor: '#06b6d4'
-              }}
-            ></div>
+            <Spinner size="xl" className="mx-auto" />
             <p className="text-white/70 mt-6 font-bold">Loading tournaments...</p>
           </div>
         ) : tournaments.length === 0 ? (
@@ -554,13 +549,7 @@ export default function TournamentDiscoveryPage() {
             <div ref={observerTarget} className="py-8 text-center">
               {loading && page > 1 && (
                 <div className="flex flex-col items-center gap-3">
-                  <div
-                    className="w-12 h-12 border-4 rounded-full animate-spin"
-                    style={{
-                      borderColor: 'rgba(6,182,212,0.2)',
-                      borderTopColor: '#06b6d4'
-                    }}
-                  ></div>
+                  <Spinner size="lg" />
                   <p className="text-white/70 font-bold text-sm">Loading more tournaments...</p>
                 </div>
               )}

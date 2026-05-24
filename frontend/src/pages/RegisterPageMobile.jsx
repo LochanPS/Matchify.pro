@@ -12,6 +12,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { getErrorMessage } from '../utils/errorMessage';
 import MatchifyLogo from '../components/MatchifyLogo';
+import Spinner from '../components/Spinner';
 
 
 
@@ -568,7 +569,7 @@ const RegisterPageMobile = () => {
               />
               {loading ? (
                 <span className="flex items-center justify-center gap-2 relative z-10">
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <Spinner size="md" />
                   Creating...
                 </span>
               ) : (

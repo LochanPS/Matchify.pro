@@ -4,6 +4,7 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../utils/api';
 import { ArrowLeft, Gavel, Trophy, AlertTriangle, Play, Loader, Swords, Settings, Check, X } from 'lucide-react';
 import LoadingScreen from '../components/LoadingScreen';
+import Spinner from '../components/Spinner';
 
 const B = {
   bg: '#050810',
@@ -433,7 +434,7 @@ const ConductMatchPage = () => {
                 disabled={givingBye || (!player1 && !player2)}
                 className="w-full py-4 rounded-2xl font-black text-base transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                 style={{ background: 'linear-gradient(135deg,#f59e0b,#fbbf24)', color: '#050810', boxShadow: '0 6px 20px rgba(245,158,11,0.35)' }}>
-                {givingBye ? <Loader className="w-5 h-5 animate-spin" /> : <Trophy className="w-5 h-5" />}
+                {givingBye ? <Spinner size="md" /> : <Trophy className="w-5 h-5" />}
                 {givingBye ? 'Giving Bye…' : `Give Bye to ${player1?.name || player2?.name || 'Player'}`}
               </button>
               <div className="flex items-start gap-2.5 px-4 py-3 rounded-xl"
@@ -452,7 +453,7 @@ const ConductMatchPage = () => {
               className="w-full py-4 rounded-2xl font-black text-base transition-all disabled:opacity-50 flex items-center justify-center gap-2"
               style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)', color: '#050810', boxShadow: '0 6px 20px rgba(6,182,212,0.35)' }}>
               {assigning
-                ? <><div className="w-5 h-5 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: '#050810 transparent transparent transparent' }} />Starting…</>
+                ? <><Spinner size="md" />Starting…</>
                 : <><Play className="w-5 h-5" />Start Match</>}
             </button>
           )}

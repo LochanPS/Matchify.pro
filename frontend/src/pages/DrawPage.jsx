@@ -27,6 +27,7 @@ import SingleEliminationBracket from '../components/brackets/SingleEliminationBr
 import { useAuth } from '../contexts/AuthContext';
 import { ArrowLeftIcon, TrophyIcon } from '@heroicons/react/24/outline';
 import { Loader, Zap, Layers, X, Plus, Settings, Users, CheckCircle, AlertTriangle, Trash2, UserPlus, Gavel, AlertCircle, Play, Trophy, Clock, Eye, Edit, ArrowLeft } from 'lucide-react';
+import Spinner from '../components/Spinner';
 
 // Pre-generated particle data — deterministic, never re-randomized on render
 const DRAW_BG_PARTICLES = Array.from({ length: 15 }, (_, i) => ({
@@ -1346,7 +1347,7 @@ const DrawPage = () => {
             <CheckCircle className="w-5 h-5 icon-green flex-shrink-0 mt-0.5" />
             <span className="text-[#06b6d4] font-medium text-sm flex-1 min-w-0 break-words">{success}</span>
             <div className="flex items-center gap-2 flex-shrink-0">
-              {refreshing && <div className="w-4 h-4 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></div>}
+              {refreshing && <Spinner size="sm" />}
               <button onClick={() => setSuccess(null)} className="icon-green hover:text-[#06b6d4]"><X className="w-5 h-5" /></button>
             </div>
           </div>
@@ -1380,8 +1381,7 @@ const DrawPage = () => {
       <div className="max-w-2xl mx-auto px-3 py-4">
         {bracketLoading ? (
           <div className="rounded-2xl p-16 text-center border" style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.08)' }}>
-            <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin mx-auto"
-              style={{ borderColor: 'rgba(6,182,212,0.4)', borderTopColor: 'transparent' }} />
+            <Spinner size="lg" className="mx-auto" />
             <p className="mt-4 text-sm font-medium" style={{ color: 'rgba(255,255,255,0.55)' }}>Loading bracket...</p>
           </div>
         ) : drawNotGenerated ? (
@@ -1523,7 +1523,7 @@ const DrawPage = () => {
               >
                 {assigning ? (
                   <>
-                    <Loader className="w-5 h-5 animate-spin" />
+                    <Spinner size="md" />
                     Processing...
                   </>
                 ) : (
@@ -1680,7 +1680,7 @@ const DrawPage = () => {
               >
                 {assigning ? (
                   <>
-                    <Loader className="w-5 h-5 animate-spin" />
+                    <Spinner size="md" />
                     Creating...
                   </>
                 ) : (
@@ -1810,7 +1810,7 @@ const DrawPage = () => {
 
             {changingResult && (
               <div className="mt-4 flex items-center justify-center gap-2 text-amber-400">
-                <div className="w-5 h-5 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
+                <Spinner size="md" />
                 <span className="text-sm">Updating result...</span>
               </div>
             )}
@@ -2316,7 +2316,7 @@ const DrawPage = () => {
                 >
                   {restarting ? (
                     <>
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <Spinner size="md" />
                       Restarting...
                     </>
                   ) : (
@@ -2362,7 +2362,7 @@ const DrawPage = () => {
             <div className="flex gap-3">
               <button onClick={() => setShowEndTournamentModal(false)} disabled={endingTournament} className="flex-1 py-3 rounded-xl font-semibold transition-all">Cancel</button>
               <button onClick={handleEndCategory} disabled={endingTournament} className="flex-1 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl font-semibold hover:shadow-lg hover:shadow-green-500/30 transition-all flex items-center justify-center gap-2">
-                {endingTournament ? <><div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>Ending...</> : <>End Category</>}
+                {endingTournament ? <><Spinner size="md" />Ending...</> : <>End Category</>}
               </button>
             </div>
           </div>
@@ -3615,7 +3615,7 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
           >
             {saving ? (
               <span className="flex items-center justify-center gap-2">
-                <Loader className="w-5 h-5 animate-spin" />
+                <Spinner size="md" />
                 Creating...
               </span>
             ) : (
@@ -3703,7 +3703,7 @@ const DeleteDrawModal = ({ categoryName, onClose, onConfirm, deleting }) => {
           >
             {deleting ? (
               <>
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                <Spinner size="sm" />
                 Deleting...
               </>
             ) : (
@@ -4209,7 +4209,7 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
             </h3>
             {loading ? (
               <div className="flex items-center justify-center py-8">
-                <div className="w-6 h-6 border-3 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+                <Spinner size="md" />
               </div>
             ) : players.length === 0 ? (
               <div className="text-center py-8">
@@ -4494,7 +4494,7 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
             >
               {saving ? (
                 <>
-                  <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  <Spinner size="xs" />
                   Saving...
                 </>
               ) : (
@@ -4573,8 +4573,7 @@ const AssignUmpireModal = ({ match, umpires, loadingUmpires, umpiresError, onRet
         <div className="px-5 py-4">
           {loadingUmpires ? (
             <div className="text-center py-8">
-              <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin mx-auto mb-3"
-                style={{ borderColor: 'rgba(6,182,212,0.3)', borderTopColor: '#06b6d4' }} />
+              <Spinner size="md" className="mx-auto mb-3" />
               <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>Loading umpires…</p>
             </div>
           ) : umpiresError ? (
@@ -4648,7 +4647,7 @@ const AssignUmpireModal = ({ match, umpires, loadingUmpires, umpiresError, onRet
             style={{ background: 'linear-gradient(135deg,#06b6d4,#06b6d4)', color: '#050810', boxShadow: '0 4px 16px rgba(6,182,212,0.35)' }}
           >
             {assigning
-              ? <><div className="w-4 h-4 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#050810 transparent transparent transparent' }} />Starting…</>
+              ? <><Spinner size="sm" />Starting…</>
               : <><Gavel className="w-4 h-4" />Start Match</>}
           </button>
 
@@ -4668,7 +4667,7 @@ const AssignUmpireModal = ({ match, umpires, loadingUmpires, umpiresError, onRet
               style={{ background: 'rgba(0,212,255,0.1)', border: '1px solid rgba(0,212,255,0.3)', color: '#00d4ff' }}
             >
               {assigning
-                ? <div className="w-3.5 h-3.5 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#00d4ff transparent transparent transparent' }} />
+                ? <Spinner size="xs" />
                 : <CheckCircle className="w-3.5 h-3.5" />}
               Assign Only
             </button>

@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { EyeIcon, EyeSlashIcon, EnvelopeIcon, LockClosedIcon, ArrowRightIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import { Zap, Trophy, Users, MapPin, Ban, AlertTriangle } from 'lucide-react';
 import MatchifyLogo from '../components/MatchifyLogo';
+import Spinner from '../components/Spinner';
 
 // Fixed star positions — no random on re-render
 const STARS = [
@@ -302,7 +303,7 @@ const LoginPage = () => {
               >
                 {loading ? (
                   <>
-                    <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                    <Spinner size="sm" />
                     Signing in...
                   </>
                 ) : (

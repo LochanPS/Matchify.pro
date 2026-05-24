@@ -9,6 +9,7 @@ import CategorySelector from '../components/registration/CategorySelector';
 import { ArrowLeftIcon, UserGroupIcon, CameraIcon, CheckCircleIcon, XMarkIcon, ClockIcon } from '@heroicons/react/24/outline';
 import { Loader, Upload, QrCode, AlertCircle, Search } from 'lucide-react';
 import LoadingScreen from '../components/LoadingScreen';
+import Spinner from '../components/Spinner';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Constants
@@ -591,8 +592,7 @@ export default function TournamentRegistrationPage() {
                                   : { background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.4)' }}
                               >
                                 {isSearching
-                                  ? <div className="w-4 h-4 rounded-full border-2 border-t-transparent animate-spin"
-                                      style={{ borderColor: '#050810 transparent transparent transparent' }} />
+                                  ? <Spinner size="sm" />
                                   : <Search className="w-4 h-4" />}
                                 {!isSearching && 'Find'}
                               </button>
@@ -942,7 +942,7 @@ export default function TournamentRegistrationPage() {
                 }}
               >
                 {submitting ? (
-                  <><Loader className="animate-spin h-4 w-4" /> Submitting…</>
+                  <><Spinner size="sm" /> Submitting…</>
                 ) : (
                   <><CheckCircleIcon className="w-4 h-4" /> Complete Registration</>
                 )}

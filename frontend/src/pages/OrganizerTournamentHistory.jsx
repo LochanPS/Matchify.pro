@@ -4,6 +4,7 @@ import api from '../utils/api';
 import TournamentHistoryCard from '../components/TournamentHistoryCard';
 import { ArrowLeftIcon, TrophyIcon } from '@heroicons/react/24/outline';
 import { Filter, X, RefreshCw } from 'lucide-react';
+import Spinner from '../components/Spinner';
 
 const B = {
   bg: '#050810', card: 'rgba(255,255,255,0.04)', border: 'rgba(255,255,255,0.08)',
@@ -147,8 +148,7 @@ export default function OrganizerTournamentHistory() {
         {/* Tournament List */}
         {loading ? (
           <div className="rounded-2xl p-16 text-center border" style={{ background: B.card, borderColor: B.border }}>
-            <div className="w-16 h-16 border-4 border-t-transparent rounded-full animate-spin mx-auto"
-              style={{ borderColor: 'rgba(6,182,212,0.3)', borderTopColor: B.green }} />
+            <Spinner size="xl" className="mx-auto" />
             <p className="mt-6 font-medium" style={{ color: B.sub }}>Loading tournaments...</p>
           </div>
         ) : tournaments.length === 0 ? (

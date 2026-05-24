@@ -8,6 +8,7 @@ import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import api from '../utils/api';
 import MatchifyLogo from '../components/MatchifyLogo';
 import PhotoViewer from '../components/PhotoViewer';
+import Spinner from '../components/Spinner';
 import {
   TrophyIcon,
   ChartBarIcon,
@@ -1024,13 +1025,7 @@ const UnifiedDashboardMobile = () => {
           <div className="p-5">
             {loading ? (
               <div className="flex justify-center py-8">
-                <div
-                  className="w-10 h-10 border-4 rounded-full animate-spin"
-                  style={{
-                    borderColor: 'rgba(6,182,212,0.18)',
-                    borderTopColor: '#06b6d4'
-                  }}
-                ></div>
+                <Spinner size="lg" />
               </div>
             ) : registrations.length === 0 ? (
               <div className="text-center py-8">

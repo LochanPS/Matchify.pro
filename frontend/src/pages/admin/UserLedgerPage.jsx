@@ -9,6 +9,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { TrendingUp, TrendingDown, Users, DollarSign } from 'lucide-react';
 import adminService from '../../services/adminService';
+import Spinner from '../../components/Spinner';
 
 const UserLedgerPage = () => {
   const [users, setUsers] = useState([]);
@@ -128,7 +129,7 @@ const UserLedgerPage = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <Spinner size="xl" className="mx-auto" />
           <p className="text-gray-400 mt-4 font-medium">Loading user ledgers...</p>
         </div>
       </div>

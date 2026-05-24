@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { getPendingPayouts, markPayout50_1Paid, markPayout50_2Paid } from '../../api/payment';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
+import Spinner from '../../components/Spinner';
 
 const OrganizerPayoutsPage = () => {
   const navigate = useNavigate();
@@ -61,7 +62,7 @@ const OrganizerPayoutsPage = () => {
     return (
       <div className="flex items-center justify-center min-h-screen bg-slate-900">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-500 mx-auto"></div>
+          <Spinner size="lg" className="mx-auto" />
           <p className="mt-4 text-gray-400">Loading...</p>
         </div>
       </div>

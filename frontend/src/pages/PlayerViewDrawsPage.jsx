@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import api from '../utils/api';
 import LoadingScreen from '../components/LoadingScreen';
 import { getDrawCache, setDrawCache } from '../utils/drawCache';
+import Spinner from '../components/Spinner';
 import {
   ArrowLeft,
   GitBranch,
@@ -387,8 +388,7 @@ const PlayerViewDrawsPage = () => {
                   <div className="p-6">
                     {loadingDraw ? (
                       <div className="flex flex-col items-center justify-center py-12 gap-4">
-                        <div className="w-10 h-10 border-4 border-t-transparent rounded-full animate-spin"
-                          style={{ borderColor: '#06b6d4 transparent transparent transparent' }} />
+                        <Spinner size="lg" />
                         <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>Loading draw…</p>
                       </div>
                     ) : draw ? (

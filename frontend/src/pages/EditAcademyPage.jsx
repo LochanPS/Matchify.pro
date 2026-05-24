@@ -9,6 +9,7 @@ import {
 import api from '../utils/api';
 import { fetchUpload } from '../utils/fetchUpload';
 import { useAuth } from '../contexts/AuthContext';
+import Spinner from '../components/Spinner';
 
 const B = {
   bg: '#050810',
@@ -633,7 +634,7 @@ export default function EditAcademyPage() {
             <button onClick={handleSubmit} disabled={loading}
               className="w-full py-3.5 rounded-2xl font-black text-sm flex items-center justify-center gap-2 disabled:opacity-40"
               style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#050810' }}>
-              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle className="w-5 h-5" />}
+              {loading ? <Spinner size="md" /> : <CheckCircle className="w-5 h-5" />}
               {loading ? 'Saving...' : 'Save Changes'}
             </button>
           </div>

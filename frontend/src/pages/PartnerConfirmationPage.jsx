@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { getPartnerInvitation, confirmPartner } from '../api/partner';
 import { useAuth } from '../contexts/AuthContext';
+import Spinner from '../components/Spinner';
 import {
   CheckCircle,
   XCircle,
@@ -111,7 +112,7 @@ const PartnerConfirmationPage = () => {
                 You've successfully accepted the partner invitation.
               </p>
               <div className="flex items-center justify-center gap-2" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <Spinner size="sm" />
                 <span className="text-sm">Redirecting to your registrations...</span>
               </div>
             </>
@@ -126,7 +127,7 @@ const PartnerConfirmationPage = () => {
                 You've declined the partner invitation.
               </p>
               <div className="flex items-center justify-center gap-2" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <Spinner size="sm" />
                 <span className="text-sm">Redirecting to home page...</span>
               </div>
             </>
@@ -301,7 +302,7 @@ const PartnerConfirmationPage = () => {
                 style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#050810', boxShadow: '0 4px 20px rgba(6,182,212,0.3)' }}
               >
                 {processing ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <Spinner size="md" />
                 ) : (
                   <CheckCircle className="w-5 h-5" />
                 )}
@@ -314,7 +315,7 @@ const PartnerConfirmationPage = () => {
                 style={{ background: 'linear-gradient(135deg,#f87171,#dc2626)', color: '#fff', boxShadow: '0 4px 20px rgba(239,68,68,0.3)' }}
               >
                 {processing ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <Spinner size="md" />
                 ) : (
                   <XCircle className="w-5 h-5" />
                 )}

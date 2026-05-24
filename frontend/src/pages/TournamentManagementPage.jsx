@@ -18,6 +18,7 @@ import {
 } from '../api/organizer';
 import { formatDateIndian } from '../utils/dateFormat';
 import { getGenderLabel } from '../utils/genderLabel';
+import Spinner from '../components/Spinner';
 import {
   Users,
   Download,
@@ -503,8 +504,7 @@ export default function TournamentManagementPage() {
                             </span>
                           )}
                           {actionLoading === registration.id && (
-                            <div className="w-4 h-4 border-2 border-t-transparent rounded-full animate-spin"
-                              style={{ borderColor: 'rgba(6,182,212,0.3)', borderTopColor: '#06b6d4' }} />
+                            <Spinner size="sm" />
                           )}
                         </div>
 
@@ -638,7 +638,7 @@ export default function TournamentManagementPage() {
                           {registration.status === 'cancelled' && registration.refundStatus === 'completed' && (
                             <span className="text-xs flex items-center gap-1" style={{ color: '#06b6d4' }}><CheckCircle className="h-3.5 w-3.5" />Done</span>
                           )}
-                          {actionLoading === registration.id && <div className="w-4 h-4 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: 'rgba(6,182,212,0.3)', borderTopColor: '#06b6d4' }}></div>}
+                          {actionLoading === registration.id && <Spinner size="sm" />}
                         </div>
                       </td>
                     </tr>
@@ -725,7 +725,7 @@ export default function TournamentManagementPage() {
                     style={{ background: 'linear-gradient(135deg,#ef4444,#dc2626)' }}
                   >
                     {actionLoading ? (
-                      <div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: 'rgba(255,255,255,0.3)', borderTopColor: '#fff' }} />
+                      <Spinner size="md" />
                     ) : (
                       <>
                         <Trash2 className="w-5 h-5" />

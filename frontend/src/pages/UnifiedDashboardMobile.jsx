@@ -16,14 +16,31 @@ import {
   FireIcon,
   BoltIcon,
   MapPinIcon,
-  PhoneIcon,
-  EnvelopeIcon,
   CalendarIcon,
   ArrowRightIcon,
-  Bars3Icon,
-  BellIcon,
   XMarkIcon,
+  StarIcon,
+  BellIcon,
 } from '@heroicons/react/24/outline';
+
+// ─── Design tokens ────────────────────────────────────────────────────────────
+const T = {
+  page:    '#08090e',
+  s1:      '#0d0f18',   // card surface
+  s2:      '#111520',   // elevated surface
+  s3:      '#171c2a',   // hover / active surface
+  border:  'rgba(255,255,255,0.07)',
+  borderS: 'rgba(255,255,255,0.04)',
+  txt:     '#f1f5f9',
+  txt2:    'rgba(255,255,255,0.50)',
+  txt3:    'rgba(255,255,255,0.28)',
+  txt4:    'rgba(255,255,255,0.16)',
+  cyan:    '#06b6d4',   // PRIMARY accent — used sparingly
+  cyanDim: 'rgba(6,182,212,0.12)',
+  live:    '#ef4444',
+  amber:   '#f59e0b',
+  violet:  '#8b5cf6',
+};
 
 const UnifiedDashboardMobile = () => {
   const { user, logout } = useAuth();
@@ -40,7 +57,7 @@ const UnifiedDashboardMobile = () => {
   const [fetchError, setFetchError] = useState('');
   const [copied, setCopied] = useState(false);
 
-  // Get user roles
+  // ─── Role resolution ─────────────────────────────────────────────────────
   let userRoles = [];
   if (typeof user?.roles === 'string') {
     userRoles = user.roles.split(',').map(r => r.trim());
@@ -50,54 +67,42 @@ const UnifiedDashboardMobile = () => {
     userRoles = [user.role];
   }
 
-  // Redirect admin users
   const isAdmin = userRoles.includes('ADMIN') || user?.isAdmin;
   if (isAdmin) {
     navigate('/admin-dashboard', { replace: true });
     return null;
   }
+  if (userRoles.length === 0) userRoles = ['PLAYER'];
 
-  if (userRoles.length === 0) {
-    userRoles = ['PLAYER'];
-  }
-
-  // Get active role from URL or default to first role
   const roleFromUrl = searchParams.get('role');
   const [activeRole, setActiveRole] = useState(
     roleFromUrl && userRoles.includes(roleFromUrl) ? roleFromUrl : userRoles[0] || 'PLAYER'
   );
 
   useEffect(() => {
-    if (activeRole && userRoles.includes(activeRole)) {
-      setSearchParams({ role: activeRole });
-    }
+    if (activeRole && userRoles.includes(activeRole)) setSearchParams({ role: activeRole });
   }, [activeRole]);
 
   useEffect(() => {
-    if (roleFromUrl && userRoles.includes(roleFromUrl) && roleFromUrl !== activeRole) {
+    if (roleFromUrl && userRoles.includes(roleFromUrl) && roleFromUrl !== activeRole)
       setActiveRole(roleFromUrl);
-    }
   }, [roleFromUrl]);
 
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
+  useEffect(() => { fetchDashboardData(); }, []);
 
   const fetchDashboardData = async () => {
     try {
       const [profileRes, regRes] = await Promise.all([
         api.get('/auth/me'),
-        api.get('/registrations/my')
+        api.get('/registrations/my'),
       ]);
-
       if (profileRes.data.user) {
         setUserProfile(profileRes.data.user);
         setMatchifyCode(profileRes.data.user.matchifyCode);
       }
-
       setRegistrations(regRes.data.registrations || []);
-    } catch (error) {
-      setFetchError('Failed to load dashboard data. Pull down to retry.');
+    } catch {
+      setFetchError('Failed to load. Pull to retry.');
     } finally {
       setLoading(false);
     }
@@ -107,15 +112,11 @@ const UnifiedDashboardMobile = () => {
     try {
       const res = await api.get('/tournaments?myTournaments=true&limit=20');
       setMyTournaments(res.data.tournaments || []);
-    } catch (err) {
-      console.error('Error fetching my tournaments:', err);
-    }
+    } catch {}
   };
 
   useEffect(() => {
-    if (activeRole === 'ORGANIZER') {
-      fetchMyTournaments();
-    }
+    if (activeRole === 'ORGANIZER') fetchMyTournaments();
   }, [activeRole]);
 
   const handlePublishTournament = async (tournamentId) => {
@@ -125,1041 +126,613 @@ const UnifiedDashboardMobile = () => {
       setMyTournaments(prev =>
         prev.map(t => t.id === tournamentId ? { ...t, status: 'published' } : t)
       );
-    } catch (err) {
-      console.error('Failed to publish:', err);
-    } finally {
-      setPublishingId(null);
-    }
+    } catch {}
+    finally { setPublishingId(null); }
   };
 
-  const handleRoleSwitch = (role) => {
-    setActiveRole(role);
-    setShowMenu(false);
-  };
+  const handleRoleSwitch = (role) => { setActiveRole(role); setShowMenu(false); };
 
   const winRate = (user?.matchesWon || 0) + (user?.matchesLost || 0) > 0
     ? Math.round((user?.matchesWon / ((user?.matchesWon || 0) + (user?.matchesLost || 0))) * 100)
     : 0;
 
   const stats = [
-    { label: 'Total Points', value: user?.totalPoints || 0, icon: SparklesIcon },
-    { label: 'Tournaments', value: user?.tournamentsPlayed || 0, icon: TrophyIcon },
-    { label: 'Matches Won', value: user?.matchesWon || 0, icon: FireIcon },
-    { label: 'Win Rate', value: `${winRate}%`, icon: BoltIcon },
+    { label: 'Points',     value: user?.totalPoints || 0,         icon: SparklesIcon },
+    { label: 'Tournaments',value: user?.tournamentsPlayed || 0,   icon: TrophyIcon   },
+    { label: 'Matches Won',value: user?.matchesWon || 0,          icon: FireIcon     },
+    { label: 'Win Rate',   value: `${winRate}%`,                  icon: BoltIcon     },
   ];
 
   const roleConfig = {
-    PLAYER: {
-      name: 'Player',
-      icon: '🏸',
-      color: '#06b6d4',
-      bg: 'rgba(6,182,212,0.12)',
-      border: 'rgba(6,182,212,0.35)'
-    },
-    ORGANIZER: {
-      name: 'Organizer',
-      icon: '🏆',
-      color: '#8b5cf6',
-      bg: 'rgba(139,92,246,0.12)',
-      border: 'rgba(139,92,246,0.35)'
-    },
-    UMPIRE: {
-      name: 'Umpire',
-      icon: '⚖️',
-      color: '#3b82f6',
-      bg: 'rgba(59,130,246,0.12)',
-      border: 'rgba(59,130,246,0.35)'
-    }
+    PLAYER:    { name: 'Player',    icon: '🏸', color: T.cyan,   bg: T.cyanDim },
+    ORGANIZER: { name: 'Organizer', icon: '🏆', color: T.violet, bg: 'rgba(139,92,246,0.12)' },
+    UMPIRE:    { name: 'Umpire',    icon: '⚖️', color: '#60a5fa', bg: 'rgba(59,130,246,0.12)' },
   };
 
+  // derive live registrations
+  const activeRegs   = registrations.filter(r => r.tournament?.status === 'ongoing');
+  const upcomingRegs = registrations.filter(r => r.tournament?.status === 'published');
+  const code = matchifyCode || userProfile?.matchifyCode || user?.matchifyCode;
+
+  // ─── Quick actions config (role-aware) ───────────────────────────────────
+  const quickActions = [
+    { to: '/tournaments',   emoji: '🏆', label: 'Tournaments' },
+    { to: '/registrations', emoji: '📋', label: 'My Entries'  },
+    { to: '/leaderboard',   emoji: '📊', label: 'Rankings'    },
+    { to: '/my-points',     emoji: '⭐', label: 'Points'      },
+    { to: '/notifications', emoji: '🔔', label: 'Alerts'      },
+    { to: '/live-matches',  emoji: '📡', label: 'Live'        },
+    { to: '/academies',     emoji: '🏫', label: 'Academies'   },
+  ];
+  if (activeRole === 'ORGANIZER')
+    quickActions.unshift({ to: '/tournaments/create', emoji: '➕', label: 'Create' });
+  if (activeRole === 'UMPIRE')
+    quickActions.unshift({ to: '/umpire/dashboard', emoji: '⚖️', label: 'Scoring' });
+
   return (
-    <div className="min-h-screen relative overflow-hidden pt-16" style={{ background: '#050810' }}>
+    <div className="min-h-screen relative pt-16" style={{ background: T.page }}>
 
-      {/* ── Copied toast ── */}
-      {copied && (
-        <div className="fixed top-20 left-1/2 z-[9999] px-4 py-2 rounded-xl text-sm font-bold shadow-xl"
-          style={{ transform: 'translateX(-50%)', background: 'rgba(6,182,212,0.95)', color: '#001c26', pointerEvents: 'none' }}>
-          ✓ Copied to clipboard!
-        </div>
-      )}
-
-      {/* ── Fetch error banner ── */}
-      {fetchError && (
-        <div className="fixed top-20 left-1/2 z-[9998] px-4 py-2 rounded-xl text-xs font-semibold shadow-xl flex items-center gap-2"
-          style={{ transform: 'translateX(-50%)', background: 'rgba(239,68,68,0.95)', color: 'white', whiteSpace: 'nowrap' }}>
-          ⚠️ {fetchError}
-          <button onClick={() => { setFetchError(''); fetchDashboardData(); }}
-            className="underline ml-1">Retry</button>
-        </div>
-      )}
-
-      {/* ── Ambient Background — 2 large blobs ── */}
-      <div className="fixed top-0 bottom-0 pointer-events-none overflow-hidden" style={{ left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: '480px' }}>
-        {/* Blob 1 — Cyan, top-right */}
-        <div style={{
-          position: 'absolute',
-          width: '440px', height: '440px',
-          top: '-140px', right: '-120px',
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(6,182,212,0.09) 0%, transparent 70%)',
-          filter: 'blur(80px)',
-        }} />
-        {/* Blob 2 — Violet, bottom-left */}
-        <div style={{
-          position: 'absolute',
-          width: '400px', height: '400px',
-          bottom: '5%', left: '-120px',
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(139,92,246,0.07) 0%, transparent 70%)',
-          filter: 'blur(80px)',
-        }} />
-      </div>
-
-      {/* Keyframes */}
+      {/* ── CSS ─────────────────────────────────────────────────────────── */}
       <style>{`
-        @keyframes float {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          25% { transform: translate(20px, -20px) scale(1.05); }
-          50% { transform: translate(-15px, 15px) scale(0.95); }
-          75% { transform: translate(15px, 10px) scale(1.02); }
+        @keyframes dashEnter {
+          from { opacity: 0; transform: translateY(14px); }
+          to   { opacity: 1; transform: translateY(0);    }
+        }
+        @keyframes fadeSlide {
+          from { opacity: 0; transform: translateY(8px); }
+          to   { opacity: 1; transform: translateY(0);   }
+        }
+        @keyframes pulse2 {
+          0%,100% { opacity:1; } 50% { opacity:0.4; }
         }
         @keyframes shimmer {
-          0% { background-position: -200% center; }
-          100% { background-position: 200% center; }
+          0%   { background-position: -200% center; }
+          100% { background-position:  200% center; }
         }
-        @keyframes fadeIn {
-          0% { opacity: 0; transform: translateY(20px); }
-          100% { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes scaleIn {
-          0% { opacity: 0; transform: scale(0.9); }
-          100% { opacity: 1; transform: scale(1); }
-        }
-        @keyframes slideUp {
-          0% { opacity: 0; transform: translateY(30px); }
-          100% { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes pulse {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.05); }
-        }
+        .dash-section { animation: dashEnter 0.45s ease-out both; }
+        .dash-row     { animation: fadeSlide 0.35s ease-out both; }
+        .live-dot { animation: pulse2 1.6s ease-in-out infinite; }
+        .qa-scroll::-webkit-scrollbar { display: none; }
+        .qa-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+        .card-lift { transition: transform 0.18s ease, box-shadow 0.18s ease; }
+        .card-lift:active { transform: scale(0.98); }
       `}</style>
 
-      {/* Side Menu Overlay */}
+      {/* ── Toast ─────────────────────────────────────────────────────────── */}
+      {copied && (
+        <div className="fixed top-20 left-1/2 z-[9999] px-4 py-2 rounded-xl text-xs font-bold shadow-xl"
+          style={{ transform: 'translateX(-50%)', background: T.cyan, color: '#030507', pointerEvents: 'none', whiteSpace: 'nowrap' }}>
+          ✓ ID copied
+        </div>
+      )}
+
+      {/* ── Error banner ─────────────────────────────────────────────────── */}
+      {fetchError && (
+        <div className="fixed top-20 left-1/2 z-[9998] px-4 py-2 rounded-xl text-xs font-semibold shadow-xl flex items-center gap-2"
+          style={{ transform: 'translateX(-50%)', background: 'rgba(239,68,68,0.92)', color: 'white', whiteSpace: 'nowrap' }}>
+          ⚠️ {fetchError}
+          <button onClick={() => { setFetchError(''); fetchDashboardData(); }} className="underline ml-1">Retry</button>
+        </div>
+      )}
+
+      {/* ── Single barely-visible ambient gradient ────────────────────────── */}
+      <div className="fixed pointer-events-none" style={{
+        top: '-120px', right: '-160px',
+        width: '480px', height: '480px',
+        borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(6,182,212,0.035) 0%, transparent 70%)',
+        filter: 'blur(80px)',
+      }} />
+
+      {/* ══════════════════════════════════════════════════════════════════ */}
+      {/* SIDE MENU                                                         */}
+      {/* ══════════════════════════════════════════════════════════════════ */}
       {showMenu && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 flex items-center justify-center"
-          style={{ animation: 'fadeIn 0.3s ease-out' }}
+          className="fixed inset-0 z-40 flex items-center justify-center"
+          style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)', animation: 'dashEnter 0.25s ease-out' }}
           onClick={() => setShowMenu(false)}
         >
           <div
-            className="w-[90vw] max-w-md h-[85vh] relative overflow-hidden rounded-2xl"
-            style={{
-              background: '#0a0f1e',
-              border: '1px solid rgba(255,255,255,0.09)',
-              boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
-              animation: 'scaleIn 0.3s ease-out'
-            }}
-            onClick={(e) => e.stopPropagation()}
+            className="w-[92vw] max-w-sm h-[82vh] relative overflow-hidden rounded-2xl flex flex-col"
+            style={{ background: T.s1, border: `1px solid ${T.border}`, boxShadow: '0 32px 80px rgba(0,0,0,0.7)' }}
+            onClick={e => e.stopPropagation()}
           >
-            <div className="relative z-10 h-full flex flex-col p-6">
-              {/* Header */}
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <MatchifyLogo size={32} variant="icon" />
-                  <h3 className="text-xl font-black text-white">Menu</h3>
-                </div>
-                <button
+            {/* Menu header */}
+            <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: `1px solid ${T.border}` }}>
+              <div className="flex items-center gap-2.5">
+                <MatchifyLogo size={28} variant="icon" />
+                <span className="font-black text-white text-base">Menu</span>
+              </div>
+              <button onClick={() => setShowMenu(false)} className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: T.s2, border: `1px solid ${T.border}` }}>
+                <XMarkIcon className="w-4 h-4" style={{ color: T.txt2 }} />
+              </button>
+            </div>
+
+            {/* User strip */}
+            <div className="flex items-center gap-3 px-5 py-4" style={{ borderBottom: `1px solid ${T.border}` }}>
+              <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0" style={{ background: 'linear-gradient(135deg, #1e3a5f, #1e293b)', border: `1.5px solid ${T.border}` }}>
+                {user?.profilePhoto
+                  ? <img src={user.profilePhoto} alt="" className="w-full h-full object-cover" />
+                  : <div className="flex items-center justify-center h-full font-black text-white text-sm">{user?.name?.charAt(0)?.toUpperCase()}</div>}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-bold text-white text-sm truncate">{user?.name}</p>
+                {code && <p className="text-xs font-mono" style={{ color: T.cyan }}>{code}</p>}
+              </div>
+            </div>
+
+            {/* Nav items */}
+            <div className="flex-1 overflow-y-auto px-4 py-3 space-y-1">
+              {[
+                { to: '/profile',       label: 'Edit Profile',       Icon: UserIcon    },
+                { to: '/tournaments',   label: 'Browse Tournaments',  Icon: TrophyIcon  },
+                { to: '/leaderboard',   label: 'Leaderboard',         Icon: ChartBarIcon},
+                { to: '/registrations', label: 'My Registrations',    Icon: CalendarIcon},
+                { to: '/my-points',     label: 'My Points',           Icon: StarIcon    },
+                { to: '/notifications', label: 'Notifications',        Icon: BellIcon    },
+                { to: '/academies',     label: 'Academies',            Icon: UserIcon    },
+              ].map(({ to, label, Icon }) => (
+                <Link
+                  key={to}
+                  to={to}
                   onClick={() => setShowMenu(false)}
-                  className="p-2.5 rounded-xl transition-all relative overflow-hidden group"
-                  style={{
-                    background: 'rgba(255,255,255,0.06)',
-                    border: '1px solid rgba(255,255,255,0.09)'
-                  }}
+                  className="flex items-center gap-3 px-3.5 py-3 rounded-xl"
+                  style={{ color: T.txt2, transition: 'background 0.15s' }}
+                  onMouseEnter={e => e.currentTarget.style.background = T.s2}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                 >
-                  <div
-                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                    style={{ background: 'rgba(255,255,255,0.05)' }}
-                  />
-                  <XMarkIcon className="w-6 h-6 text-gray-300 relative z-10" />
-                </button>
-              </div>
+                  <Icon className="w-4 h-4 flex-shrink-0" style={{ color: T.txt3 }} />
+                  <span className="text-sm font-semibold">{label}</span>
+                  <ArrowRightIcon className="w-3.5 h-3.5 ml-auto" style={{ color: T.txt4 }} />
+                </Link>
+              ))}
+            </div>
 
-              {/* User Profile Section */}
-              <div
-                className="rounded-xl p-5 mb-6"
-                style={{
-                  background: 'rgba(255,255,255,0.04)',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                }}
-              >
-                <div className="flex items-center gap-4">
-                  <div
-                    className="w-16 h-16 rounded-full flex items-center justify-center font-bold text-xl flex-shrink-0"
-                    style={{
-                      background: 'linear-gradient(135deg, #0e7490, #0369a1)',
-                      color: '#ffffff',
-                      boxShadow: '0 0 0 2px #06b6d4, 0 4px 12px rgba(0,0,0,0.4)'
-                    }}
-                  >
-                    {user?.profilePhoto ? (
-                      <img src={user.profilePhoto} alt={user.name} className="w-full h-full object-cover rounded-full" />
-                    ) : (
-                      user?.name?.charAt(0)?.toUpperCase() || 'P'
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-base font-black text-white truncate">{user?.name}</p>
-                    {displayEmail(user?.email)
-                      ? <p className="text-sm truncate" style={{ color: 'rgba(255,255,255,0.45)' }}>{displayEmail(user.email)}</p>
-                      : user?.phone
-                        ? <p className="text-sm truncate" style={{ color: 'rgba(255,255,255,0.4)' }}>{user.phone}</p>
-                        : null
-                    }
-                  </div>
-                </div>
-              </div>
-
-              {/* Menu Items */}
-              <div className="flex-1 overflow-y-auto space-y-2 pr-1">
-                {[
-                  { to: '/profile', label: 'Edit Profile', Icon: UserIcon },
-                  { to: '/tournaments', label: 'Browse Tournaments', Icon: TrophyIcon },
-                  { to: '/leaderboard', label: 'Leaderboard', Icon: ChartBarIcon },
-                  { to: '/registrations', label: 'My Registrations', Icon: CalendarIcon },
-                  { to: '/academies', label: 'Academies', Icon: UserIcon },
-                ].map(({ to, label, Icon }) => (
-                  <Link
-                    key={to}
-                    to={to}
-                    onClick={() => setShowMenu(false)}
-                    className="flex items-center gap-4 p-4 rounded-xl text-white transition-all"
-                    style={{
-                      background: 'rgba(255,255,255,0.04)',
-                      border: '1px solid rgba(255,255,255,0.07)',
-                    }}
-                  >
-                    <div
-                      className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                      style={{ background: 'rgba(6,182,212,0.12)', border: '1px solid rgba(6,182,212,0.28)' }}
-                    >
-                      <Icon className="w-5 h-5" style={{ color: '#22d3ee' }} />
-                    </div>
-                    <span className="font-bold text-base flex-1">{label}</span>
-                    <ArrowRightIcon className="w-4 h-4 flex-shrink-0" style={{ color: 'rgba(255,255,255,0.3)' }} />
-                  </Link>
-                ))}
-              </div>
-
-              {/* Footer - Logout Button */}
+            {/* Logout */}
+            <div className="px-4 py-4" style={{ borderTop: `1px solid ${T.border}` }}>
               <button
-                onClick={() => {
-                  setShowMenu(false);
-                  logout();
-                  navigate('/login');
-                }}
-                className="w-full flex items-center justify-center gap-2 p-4 rounded-xl font-bold text-base transition-all relative overflow-hidden group mt-6"
-                style={{
-                  background: 'rgba(239,68,68,0.12)',
-                  border: '1.5px solid rgba(239,68,68,0.35)',
-                  color: '#f87171',
-                }}
+                onClick={() => { setShowMenu(false); logout(); navigate('/login'); }}
+                className="w-full py-3 rounded-xl text-sm font-bold"
+                style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#f87171' }}
               >
-                <div
-                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                  style={{ background: 'rgba(239,68,68,0.08)' }}
-                />
-                <span className="relative z-10">Logout</span>
+                Sign out
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Main Content */}
-      <div className="px-4 py-6 max-w-md mx-auto relative z-10">
+      {/* ══════════════════════════════════════════════════════════════════ */}
+      {/* MAIN CONTENT                                                       */}
+      {/* ══════════════════════════════════════════════════════════════════ */}
+      <div className="max-w-md mx-auto relative z-10 pb-10">
 
-        {/* ── Quick Navigation ── */}
-        <div className="mb-8" style={{ animation: 'fadeIn 0.5s ease-out both' }}>
-          <div className="flex items-center gap-2.5 mb-4 px-1">
-            <div className="w-1 h-4 rounded-full" style={{ background: 'linear-gradient(to bottom, #06b6d4, #0891b2)' }} />
-            <span className="text-xs font-bold tracking-widest uppercase" style={{ color: 'rgba(255,255,255,0.38)' }}>Navigation</span>
+        {/* ── §1  HERO ─────────────────────────────────────────────────── */}
+        <div className="px-4 pt-6 pb-5 dash-section" style={{ animationDelay: '0ms' }}>
+
+          {/* Greeting row */}
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <p style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.1em', color: T.txt3, textTransform: 'uppercase', marginBottom: '4px' }}>Welcome back</p>
+              <h1 style={{ fontSize: '26px', fontWeight: 900, color: T.txt, lineHeight: 1.1 }}>
+                {user?.name?.split(' ')[0] || 'Player'}
+              </h1>
+            </div>
+
+            {/* Avatar + menu trigger */}
+            <button
+              onClick={() => setShowMenu(true)}
+              className="w-11 h-11 rounded-full overflow-hidden flex-shrink-0"
+              style={{ background: 'linear-gradient(135deg, #1a2744, #1e293b)', border: `2px solid ${T.border}`, boxShadow: '0 2px 12px rgba(0,0,0,0.5)' }}
+            >
+              {user?.profilePhoto
+                ? <img src={user.profilePhoto} alt="" className="w-full h-full object-cover" />
+                : <div className="flex items-center justify-center h-full font-black text-white" style={{ fontSize: '15px' }}>{user?.name?.charAt(0)?.toUpperCase() || 'P'}</div>}
+            </button>
           </div>
-          <div className="grid grid-cols-3 gap-3">
-            {/* Tournaments — cyan */}
-            <Link to="/tournaments" className="flex flex-col items-center gap-2.5 p-4 rounded-2xl transition-all group"
-              style={{ background: 'rgba(6,182,212,0.07)', border: '1px solid rgba(6,182,212,0.18)' }}>
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center"
-                style={{ background: 'rgba(6,182,212,0.14)', border: '1px solid rgba(6,182,212,0.32)' }}>
-                <TrophyIcon className="w-6 h-6" style={{ color: '#22d3ee' }} />
+
+          {/* Live status + role tags */}
+          <div className="flex items-center gap-2 flex-wrap mb-5">
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style={{ background: 'rgba(239,68,68,0.09)', border: '1px solid rgba(239,68,68,0.18)' }}>
+              <div className="w-1.5 h-1.5 rounded-full live-dot" style={{ background: '#ef4444' }} />
+              <span style={{ fontSize: '11px', fontWeight: 700, color: '#f87171', letterSpacing: '0.06em' }}>LIVE</span>
+            </div>
+
+            {/* Role chips */}
+            {userRoles.map(role => (
+              <div key={role} className="flex items-center gap-1 px-2.5 py-1 rounded-full" style={{ background: T.s1, border: `1px solid ${T.border}` }}>
+                <span style={{ fontSize: '12px' }}>{roleConfig[role]?.icon}</span>
+                <span style={{ fontSize: '11px', fontWeight: 600, color: T.txt3 }}>{roleConfig[role]?.name}</span>
               </div>
-              <span className="text-xs font-bold text-center" style={{ color: '#67e8f9' }}>Tournaments</span>
-            </Link>
-            {/* Leaderboard — blue */}
-            <Link to="/leaderboard" className="flex flex-col items-center gap-2.5 p-4 rounded-2xl transition-all group"
-              style={{ background: 'rgba(59,130,246,0.07)', border: '1px solid rgba(59,130,246,0.18)' }}>
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center"
-                style={{ background: 'rgba(59,130,246,0.14)', border: '1px solid rgba(59,130,246,0.32)' }}>
-                <ChartBarIcon className="w-6 h-6" style={{ color: '#60a5fa' }} />
+            ))}
+          </div>
+
+          {/* Hero stat pills — PLAYER only */}
+          {activeRole === 'PLAYER' && (
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { label: 'Points',   value: user?.totalPoints || 0 },
+                { label: 'Won',      value: user?.matchesWon || 0  },
+                { label: 'Win Rate', value: `${winRate}%`          },
+              ].map((s, i) => (
+                <div key={i} className="rounded-2xl p-3.5" style={{ background: T.s1, border: `1px solid ${T.border}` }}>
+                  <p style={{ fontSize: '11px', color: T.txt3, fontWeight: 500, marginBottom: '6px' }}>{s.label}</p>
+                  <p style={{ fontSize: '20px', fontWeight: 900, color: T.txt, lineHeight: 1 }}>{s.value}</p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Active tournament alert — if user is in an ongoing tournament */}
+          {activeRegs.length > 0 && (
+            <Link to={`/tournaments/${activeRegs[0].tournament?.id}`}
+              className="flex items-center gap-3 rounded-2xl px-4 py-3.5 mt-3 card-lift"
+              style={{ background: T.s1, border: `1px solid rgba(6,182,212,0.22)`, boxShadow: '0 0 0 1px rgba(6,182,212,0.06)' }}>
+              <div className="w-2 h-2 rounded-full live-dot flex-shrink-0" style={{ background: T.cyan }} />
+              <div className="flex-1 min-w-0">
+                <p style={{ fontSize: '12px', color: T.cyan, fontWeight: 700, marginBottom: '1px' }}>Active Tournament</p>
+                <p className="truncate" style={{ fontSize: '13px', fontWeight: 800, color: T.txt }}>{activeRegs[0].tournament?.name}</p>
               </div>
-              <span className="text-xs font-bold text-center" style={{ color: '#93c5fd' }}>Leaderboard</span>
+              <ArrowRightIcon className="w-4 h-4 flex-shrink-0" style={{ color: T.txt4 }} />
             </Link>
-            {/* Academies — violet */}
-            <Link to="/academies" className="flex flex-col items-center gap-2.5 p-4 rounded-2xl transition-all group"
-              style={{ background: 'rgba(139,92,246,0.07)', border: '1px solid rgba(139,92,246,0.18)' }}>
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center"
-                style={{ background: 'rgba(139,92,246,0.14)', border: '1px solid rgba(139,92,246,0.32)' }}>
-                <UserIcon className="w-6 h-6" style={{ color: '#a78bfa' }} />
-              </div>
-              <span className="text-xs font-bold text-center" style={{ color: '#c4b5fd' }}>Academies</span>
-            </Link>
+          )}
+        </div>
+
+        {/* ── DIVIDER ──────────────────────────────────────────────────── */}
+        <div style={{ height: '1px', background: T.borderS, marginInline: '16px', marginBottom: '16px' }} />
+
+        {/* ── §2  COMPACT IDENTITY ROW ─────────────────────────────────── */}
+        <div className="flex items-center gap-3 px-4 mb-5 dash-section" style={{ animationDelay: '60ms' }}>
+          {/* Avatar */}
+          <button
+            onClick={() => user?.profilePhoto && setShowPhotoViewer(true)}
+            className="w-11 h-11 rounded-full overflow-hidden flex-shrink-0"
+            style={{ background: 'linear-gradient(135deg, #1a2744, #1e293b)', border: `1.5px solid ${T.border}` }}
+          >
+            {user?.profilePhoto
+              ? <img src={user.profilePhoto} alt="" className="w-full h-full object-cover" />
+              : <div className="flex items-center justify-center h-full font-black text-white" style={{ fontSize: '15px' }}>{user?.name?.charAt(0)?.toUpperCase()}</div>}
+          </button>
+
+          <div className="flex-1 min-w-0">
+            <p style={{ fontSize: '14px', fontWeight: 800, color: T.txt, marginBottom: '1px' }}>{user?.name}</p>
+            <div className="flex items-center gap-2">
+              <p style={{ fontSize: '12px', fontWeight: 700, color: T.cyan, fontFamily: 'monospace' }}>{code || '—'}</p>
+              {code && (
+                <button
+                  onClick={() => { navigator.clipboard.writeText(code); setCopied(true); setTimeout(() => setCopied(false), 1800); }}
+                  style={{ fontSize: '10px', color: T.txt4, padding: '1px 6px', background: T.s1, border: `1px solid ${T.border}`, borderRadius: '6px', fontWeight: 600 }}
+                >
+                  copy
+                </button>
+              )}
+            </div>
+          </div>
+
+          <Link to="/profile" style={{ fontSize: '12px', fontWeight: 700, color: T.txt3, padding: '6px 12px', background: T.s1, border: `1px solid ${T.border}`, borderRadius: '10px' }}>
+            Edit
+          </Link>
+        </div>
+
+        {/* ── §3  ROLE SWITCHER (multi-role only) ──────────────────────── */}
+        {userRoles.length > 1 && (
+          <div className="mx-4 mb-5 flex gap-1 p-1 rounded-2xl dash-section" style={{ background: T.s1, border: `1px solid ${T.border}`, animationDelay: '80ms' }}>
+            {userRoles.map(role => {
+              const config = roleConfig[role];
+              const isActive = role === activeRole;
+              return (
+                <button
+                  key={role}
+                  onClick={() => handleRoleSwitch(role)}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold transition-all"
+                  style={{
+                    background: isActive ? T.s3 : 'transparent',
+                    color: isActive ? config?.color : T.txt3,
+                    border: isActive ? `1px solid ${T.border}` : '1px solid transparent',
+                  }}
+                >
+                  <span>{config?.icon}</span>
+                  <span>{config?.name}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* ── §4  QUICK ACTIONS (horizontal scroll) ────────────────────── */}
+        <div className="mb-5 dash-section" style={{ animationDelay: '100ms' }}>
+          <p style={{ fontSize: '11px', fontWeight: 700, color: T.txt3, textTransform: 'uppercase', letterSpacing: '0.1em', paddingInline: '16px', marginBottom: '10px' }}>Quick access</p>
+          <div className="flex qa-scroll overflow-x-auto gap-2.5 px-4 pb-1">
+            {quickActions.map((a, i) => (
+              <Link
+                key={a.to}
+                to={a.to}
+                className="flex flex-col items-center gap-1.5 flex-shrink-0 rounded-2xl card-lift"
+                style={{
+                  background: T.s1,
+                  border: `1px solid ${T.border}`,
+                  padding: '12px 14px',
+                  minWidth: '68px',
+                  animation: `dashEnter 0.35s ease-out ${100 + i * 40}ms both`,
+                }}
+              >
+                <span style={{ fontSize: '20px', lineHeight: 1 }}>{a.emoji}</span>
+                <span style={{ fontSize: '11px', fontWeight: 600, color: T.txt3, whiteSpace: 'nowrap', textAlign: 'center' }}>{a.label}</span>
+              </Link>
+            ))}
           </div>
         </div>
 
-        {/* ── Profile Card — banner + avatar overlap ── */}
-        <div
-          className="rounded-3xl mb-6 overflow-hidden"
-          style={{
-            background: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            backdropFilter: 'blur(24px)',
-            boxShadow: '0 8px 40px rgba(0,0,0,0.5)',
-            animation: 'fadeIn 0.8s ease-out 0.2s both'
-          }}
-        >
-          {/* Banner */}
-          <div style={{
-            height: '84px',
-            background: 'linear-gradient(135deg, rgba(6,182,212,0.25) 0%, rgba(99,102,241,0.2) 50%, rgba(139,92,246,0.18) 100%)',
-            position: 'relative',
-            overflow: 'hidden',
-          }}>
-            {/* Banner fade-to-card at bottom */}
-            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '40px', background: 'linear-gradient(to bottom, transparent, rgba(5,8,16,0.55))' }} />
-            {/* Subtle decorative orb inside banner */}
-            <div style={{ position: 'absolute', top: '8px', right: '24px', width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(6,182,212,0.1)', filter: 'blur(14px)' }} />
-            <div style={{ position: 'absolute', top: '12px', left: '32px', width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(139,92,246,0.1)', filter: 'blur(10px)' }} />
-          </div>
-
-          {/* Content */}
-          <div className="px-5 pb-5">
-            {/* Profile Photo & Name */}
-            <div className="flex flex-col items-center text-center mb-5">
-              <button
-                onClick={() => user?.profilePhoto && setShowPhotoViewer(true)}
-                className="w-24 h-24 rounded-full flex items-center justify-center font-bold text-3xl -mt-12 mb-4 relative transition-all hover:scale-105 cursor-pointer group"
-                style={{
-                  background: 'linear-gradient(135deg, #0e7490, #0369a1)',
-                  color: '#ffffff',
-                  boxShadow: '0 0 0 3px #06b6d4, 0 0 0 6px rgba(6,182,212,0.2), 0 8px 24px rgba(0,0,0,0.55)'
-                }}
-              >
-                {user?.profilePhoto ? (
-                  <>
-                    <img src={user.profilePhoto} alt={user.name} className="w-full h-full object-cover rounded-full relative z-10" />
-                    {/* Hover Overlay */}
-                    <div
-                      className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                    >
-                      <div className="text-center">
-                        <svg className="w-8 h-8 text-white mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
-                        </svg>
-                        <span className="text-white text-xs font-bold">View</span>
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <span className="relative z-10">{user?.name?.charAt(0)?.toUpperCase() || 'P'}</span>
-                )}
-              </button>
-
-              <h2 className="text-2xl font-black mb-1 text-white">
-                {user?.name}
-              </h2>
-
-              {displayEmail(user?.email) && (
-                <p className="text-sm mb-1" style={{ color: 'rgba(255,255,255,0.42)' }}>{displayEmail(user.email)}</p>
-              )}
-
-              {user?.city && (
-                <div className="flex items-center gap-1 text-sm mb-3" style={{ color: 'rgba(255,255,255,0.32)' }}>
-                  <MapPinIcon className="w-3.5 h-3.5" />
-                  <span>{user.city}{user.state ? `, ${user.state}` : ''}</span>
-                </div>
-              )}
-
-              {/* Matchify Code */}
-              <div
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg mb-3"
-                style={{
-                  background: 'rgba(6,182,212,0.08)',
-                  border: '1px solid rgba(6,182,212,0.22)',
-                }}
-              >
-                <div>
-                  <p className="text-xs font-semibold tracking-widest uppercase" style={{ color: 'rgba(255,255,255,0.35)' }}>Matchify ID</p>
-                  <p
-                    className="text-lg font-mono font-black tracking-wider"
-                    style={{ color: '#22d3ee' }}
-                  >
-                    {matchifyCode || userProfile?.matchifyCode || user?.matchifyCode || 'Loading...'}
-                  </p>
-                </div>
-                {(matchifyCode || userProfile?.matchifyCode || user?.matchifyCode) && (
-                  <button
-                    onClick={() => {
-                      const code = matchifyCode || userProfile?.matchifyCode || user?.matchifyCode;
-                      navigator.clipboard.writeText(code);
-                      setCopied(true);
-                      setTimeout(() => setCopied(false), 2000);
-                    }}
-                    className="p-2 rounded-lg transition-all"
+        {/* ─────────────────────────────────────────────────────────────── */}
+        {/* PLAYER VIEW                                                     */}
+        {/* ─────────────────────────────────────────────────────────────── */}
+        {activeRole === 'PLAYER' && (
+          <>
+            {/* ── §5  PERFORMANCE STATS ─────────────────────────────── */}
+            <section className="px-4 mb-5 dash-section" style={{ animationDelay: '140ms' }}>
+              <div className="flex items-center justify-between mb-3">
+                <p style={{ fontSize: '11px', fontWeight: 700, color: T.txt3, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Performance</p>
+                <Link to="/my-points" style={{ fontSize: '12px', fontWeight: 700, color: T.cyan }}>Details →</Link>
+              </div>
+              <div className="grid grid-cols-2 gap-2.5">
+                {stats.map((stat, i) => (
+                  <div
+                    key={i}
+                    className="rounded-2xl p-4 card-lift"
                     style={{
-                      background: 'rgba(255,255,255,0.07)',
-                      border: '1px solid rgba(255,255,255,0.11)'
+                      background: T.s1,
+                      border: `1px solid ${T.border}`,
+                      animation: `dashEnter 0.4s ease-out ${200 + i * 50}ms both`,
                     }}
-                    title="Copy Matchify ID"
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#67e8f9' }}>
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                    </svg>
-                  </button>
-                )}
+                    <stat.icon className="w-4 h-4 mb-3" style={{ color: T.txt4 }} />
+                    <p style={{ fontSize: '26px', fontWeight: 900, color: T.txt, lineHeight: 1, marginBottom: '4px' }}>{stat.value}</p>
+                    <p style={{ fontSize: '11px', color: T.txt3, fontWeight: 500 }}>{stat.label}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* ── §6  UPCOMING TOURNAMENTS ──────────────────────────── */}
+            {upcomingRegs.length > 0 && (
+              <section className="px-4 mb-5 dash-section" style={{ animationDelay: '200ms' }}>
+                <div className="flex items-center justify-between mb-3">
+                  <p style={{ fontSize: '11px', fontWeight: 700, color: T.txt3, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Upcoming</p>
+                  <Link to="/registrations" style={{ fontSize: '12px', fontWeight: 700, color: T.cyan }}>All →</Link>
+                </div>
+                <div className="space-y-2">
+                  {upcomingRegs.slice(0, 2).map((reg, i) => (
+                    <Link
+                      key={reg.id}
+                      to={`/tournaments/${reg.tournament?.id}`}
+                      className="flex items-center gap-3 rounded-2xl px-4 py-3.5 card-lift dash-row"
+                      style={{ background: T.s1, border: `1px solid ${T.border}`, animationDelay: `${220 + i * 50}ms` }}
+                    >
+                      <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: T.s2 }}>
+                        <span style={{ fontSize: '16px' }}>🏆</span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="truncate" style={{ fontSize: '13px', fontWeight: 800, color: T.txt, marginBottom: '2px' }}>{reg.tournament?.name}</p>
+                        <p style={{ fontSize: '11px', color: T.txt3 }}>{reg.category?.name} · {reg.tournament?.city}</p>
+                      </div>
+                      <span style={{ fontSize: '11px', fontWeight: 700, color: T.cyan, background: T.cyanDim, padding: '3px 8px', borderRadius: '8px' }}>Open</span>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* ── §7  RECENT ACTIVITY ───────────────────────────────── */}
+            <section className="px-4 mb-5 dash-section" style={{ animationDelay: '240ms' }}>
+              <div className="flex items-center justify-between mb-3">
+                <p style={{ fontSize: '11px', fontWeight: 700, color: T.txt3, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Recent activity</p>
+                <Link to="/registrations" style={{ fontSize: '12px', fontWeight: 700, color: T.cyan }}>All →</Link>
               </div>
 
-              {/* Compact Role Switcher - Only if multiple roles */}
-              {userRoles.length > 1 && (
-                <div className="flex items-center justify-center gap-2 mb-3">
-                  {userRoles.map((role) => {
-                    const config = roleConfig[role];
-                    if (!config) return null;
-
-                    const isActive = role === activeRole;
-
+              {loading ? (
+                <div className="rounded-2xl flex items-center justify-center py-10" style={{ background: T.s1, border: `1px solid ${T.border}` }}>
+                  <div className="w-7 h-7 rounded-full border-2 animate-spin" style={{ borderColor: T.borderS, borderTopColor: T.cyan }} />
+                </div>
+              ) : registrations.length === 0 ? (
+                <div className="rounded-2xl py-10 text-center" style={{ background: T.s1, border: `1px solid ${T.border}` }}>
+                  <p style={{ fontSize: '32px', marginBottom: '10px' }}>🏸</p>
+                  <p style={{ fontSize: '14px', fontWeight: 800, color: T.txt, marginBottom: '6px' }}>No activity yet</p>
+                  <p style={{ fontSize: '12px', color: T.txt3, marginBottom: '20px' }}>Join your first tournament</p>
+                  <Link to="/tournaments" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold"
+                    style={{ background: T.cyan, color: '#030507' }}>
+                    Browse Tournaments
+                  </Link>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {registrations.slice(0, 4).map((reg, i) => {
+                    const statusColor = reg.status === 'confirmed' ? T.cyan : reg.status === 'pending' ? T.amber : '#f87171';
+                    const statusBg   = reg.status === 'confirmed' ? T.cyanDim : reg.status === 'pending' ? 'rgba(245,158,11,0.1)' : 'rgba(239,68,68,0.1)';
                     return (
-                      <button
-                        key={role}
-                        onClick={() => handleRoleSwitch(role)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-semibold transition-all relative overflow-hidden"
-                        style={{
-                          background: isActive
-                            ? `linear-gradient(135deg, ${config.color}, ${config.color}dd)`
-                            : config.bg,
-                          border: `1.5px solid ${config.border}`,
-                          color: isActive ? '#ffffff' : config.color,
-                          boxShadow: 'none',
-                          fontSize: '11px'
-                        }}
+                      <Link
+                        key={reg.id}
+                        to={`/tournaments/${reg.tournament?.id}`}
+                        className="flex items-center gap-3 rounded-2xl px-4 py-3.5 card-lift dash-row"
+                        style={{ background: T.s1, border: `1px solid ${T.border}`, animationDelay: `${260 + i * 45}ms` }}
                       >
-                        {isActive && (
-                          <div
-                            className="absolute inset-0 opacity-30"
-                            style={{
-                              background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
-                              backgroundSize: '200% 100%',
-                              animation: 'shimmer 3s infinite'
-                            }}
-                          />
-                        )}
-                        <span className="text-sm relative z-10">{config.icon}</span>
-                        <span className="relative z-10">{config.name}</span>
-                      </button>
+                        <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: T.s2 }}>
+                          <span style={{ fontSize: '16px' }}>🏆</span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="truncate" style={{ fontSize: '13px', fontWeight: 800, color: T.txt, marginBottom: '2px' }}>{reg.tournament?.name || 'Tournament'}</p>
+                          <p style={{ fontSize: '11px', color: T.txt3 }}>{reg.category?.name} · {new Date(reg.createdAt).toLocaleDateString('en-IN')}</p>
+                        </div>
+                        <span style={{ fontSize: '11px', fontWeight: 700, color: statusColor, background: statusBg, padding: '3px 8px', borderRadius: '8px', flexShrink: 0, textTransform: 'capitalize' }}>
+                          {reg.status}
+                        </span>
+                      </Link>
                     );
                   })}
                 </div>
               )}
-            </div>
+            </section>
 
-            {/* Edit Profile Button */}
-            <Link
-              to="/profile"
-              className="flex items-center justify-center gap-2 w-full py-3 rounded-xl font-bold text-sm transition-all relative overflow-hidden group"
-              style={{
-                background: 'rgba(6,182,212,0.09)',
-                border: '1.5px solid rgba(6,182,212,0.32)',
-                color: '#22d3ee',
-              }}
-            >
-              <div
-                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                style={{ background: 'rgba(6,182,212,0.07)' }}
-              />
-              <UserIcon className="w-5 h-5 relative z-10" />
-              <span className="relative z-10">Edit Profile</span>
-            </Link>
-          </div>
-        </div>
-
-        {/* ── Role-Specific Stats ── */}
-        {activeRole === 'PLAYER' && (
-          <div
-            className="rounded-2xl p-5 mb-6"
-            style={{
-              background: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              boxShadow: '0 4px 24px rgba(0,0,0,0.3)',
-              animation: 'slideUp 0.8s ease-out 0.4s both'
-            }}
-          >
-            <div>
-              <div className="flex items-center gap-3 mb-4">
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center"
-                  style={{
-                    background: 'rgba(6,182,212,0.14)',
-                    border: '1px solid rgba(6,182,212,0.32)',
-                  }}
-                >
-                  <span className="text-xl">🏸</span>
-                </div>
-                <h3 className="text-lg font-black text-white">Player Stats</h3>
+            {/* ── §8  DISCOVER SECTION ─────────────────────────────── */}
+            <section className="px-4 mb-2 dash-section" style={{ animationDelay: '280ms' }}>
+              <div className="grid grid-cols-2 gap-2.5">
+                <Link to="/tournaments" className="rounded-2xl p-5 card-lift" style={{ background: T.s1, border: `1px solid ${T.border}` }}>
+                  <TrophyIcon className="w-5 h-5 mb-3" style={{ color: T.txt4 }} />
+                  <p style={{ fontSize: '14px', fontWeight: 800, color: T.txt, marginBottom: '3px' }}>Browse</p>
+                  <p style={{ fontSize: '11px', color: T.txt3 }}>Find tournaments near you</p>
+                </Link>
+                <Link to="/leaderboard" className="rounded-2xl p-5 card-lift" style={{ background: T.s1, border: `1px solid ${T.border}` }}>
+                  <ChartBarIcon className="w-5 h-5 mb-3" style={{ color: T.txt4 }} />
+                  <p style={{ fontSize: '14px', fontWeight: 800, color: T.txt, marginBottom: '3px' }}>Leaderboard</p>
+                  <p style={{ fontSize: '11px', color: T.txt3 }}>Check your global rank</p>
+                </Link>
               </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                {stats.map((stat, index) => {
-                  const tileAccent = [
-                    { bg: 'rgba(6,182,212,0.1)',   border: 'rgba(6,182,212,0.4)',  left: '#06b6d4', icon: 'rgba(6,182,212,0.22)',  iconBorder: 'rgba(6,182,212,0.5)',  iconColor: '#22d3ee' },
-                    { bg: 'rgba(245,158,11,0.09)',  border: 'rgba(245,158,11,0.35)', left: '#f59e0b', icon: 'rgba(245,158,11,0.2)',   iconBorder: 'rgba(245,158,11,0.45)', iconColor: '#fbbf24' },
-                    { bg: 'rgba(59,130,246,0.09)',  border: 'rgba(59,130,246,0.35)', left: '#3b82f6', icon: 'rgba(59,130,246,0.2)',   iconBorder: 'rgba(59,130,246,0.45)', iconColor: '#60a5fa' },
-                    { bg: 'rgba(139,92,246,0.09)',  border: 'rgba(139,92,246,0.35)', left: '#8b5cf6', icon: 'rgba(139,92,246,0.2)',   iconBorder: 'rgba(139,92,246,0.45)', iconColor: '#a78bfa' },
-                  ][index];
-                  return (
-                    <div
-                      key={index}
-                      className="p-4 rounded-xl"
-                      style={{
-                        background: `linear-gradient(135deg, ${tileAccent.bg} 0%, rgba(255,255,255,0.03) 100%)`,
-                        borderTop: `1px solid ${tileAccent.border}`,
-                        borderRight: `1px solid ${tileAccent.border}`,
-                        borderBottom: `1px solid ${tileAccent.border}`,
-                        borderLeft: `3px solid ${tileAccent.left}`,
-                      }}
-                    >
-                      <div
-                        className="inline-flex items-center justify-center w-11 h-11 rounded-xl mb-3"
-                        style={{ background: tileAccent.icon, border: `1px solid ${tileAccent.iconBorder}` }}
-                      >
-                        <stat.icon className="w-5 h-5" style={{ color: tileAccent.iconColor }} />
-                      </div>
-                      <p className="text-3xl font-black mb-1 text-white">{stat.value}</p>
-                      <p className="text-xs" style={{ color: 'rgba(255,255,255,0.42)' }}>{stat.label}</p>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
+            </section>
+          </>
         )}
 
+        {/* ─────────────────────────────────────────────────────────────── */}
+        {/* ORGANIZER VIEW                                                  */}
+        {/* ─────────────────────────────────────────────────────────────── */}
         {activeRole === 'ORGANIZER' && (
           <>
-          <div
-            className="rounded-2xl p-5 mb-6"
-            style={{
-              background: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              boxShadow: '0 4px 24px rgba(0,0,0,0.3)',
-              animation: 'slideUp 0.8s ease-out 0.4s both'
-            }}
-          >
-            <div>
-              <div className="flex items-center gap-3 mb-4">
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center"
-                  style={{ background: 'rgba(139,92,246,0.16)', border: '1px solid rgba(139,92,246,0.38)' }}
-                >
-                  <span className="text-xl">🏆</span>
-                </div>
-                <h3 className="text-lg font-black text-white">Organizer Stats</h3>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div
-                  className="p-4 rounded-xl"
-                  style={{
-                    background: 'rgba(255,255,255,0.04)',
-                    borderTop: '1px solid rgba(255,255,255,0.09)',
-                    borderRight: '1px solid rgba(255,255,255,0.09)',
-                    borderBottom: '1px solid rgba(255,255,255,0.09)',
-                    borderLeft: '3px solid #8b5cf6'
-                  }}
-                >
-                  <div
-                    className="inline-flex items-center justify-center w-11 h-11 rounded-xl mb-3"
-                    style={{ background: 'rgba(139,92,246,0.14)', border: '1px solid rgba(139,92,246,0.32)' }}
-                  >
-                    <TrophyIcon className="w-6 h-6" style={{ color: '#a78bfa' }} />
+            {/* Overview stats */}
+            <section className="px-4 mb-5 dash-section" style={{ animationDelay: '140ms' }}>
+              <p style={{ fontSize: '11px', fontWeight: 700, color: T.txt3, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '10px' }}>Overview</p>
+              <div className="grid grid-cols-2 gap-2.5">
+                {[
+                  { label: 'Tournaments Organized', value: user?.tournamentsOrganized || 0, icon: '🏆' },
+                  { label: 'Total Participants',     value: user?.totalParticipants || 0,     icon: '👥' },
+                ].map((s, i) => (
+                  <div key={i} className="rounded-2xl p-4 card-lift" style={{ background: T.s1, border: `1px solid ${T.border}` }}>
+                    <span style={{ fontSize: '20px', display: 'block', marginBottom: '10px' }}>{s.icon}</span>
+                    <p style={{ fontSize: '26px', fontWeight: 900, color: T.txt, lineHeight: 1, marginBottom: '4px' }}>{s.value}</p>
+                    <p style={{ fontSize: '11px', color: T.txt3 }}>{s.label}</p>
                   </div>
-                  <p className="text-3xl font-black mb-1 text-white">{user?.tournamentsOrganized || 0}</p>
-                  <p className="text-xs" style={{ color: 'rgba(255,255,255,0.42)' }}>Tournaments Organized</p>
-                </div>
-
-                <div
-                  className="p-4 rounded-xl"
-                  style={{
-                    background: 'rgba(255,255,255,0.04)',
-                    borderTop: '1px solid rgba(255,255,255,0.09)',
-                    borderRight: '1px solid rgba(255,255,255,0.09)',
-                    borderBottom: '1px solid rgba(255,255,255,0.09)',
-                    borderLeft: '3px solid #6366f1'
-                  }}
-                >
-                  <div
-                    className="inline-flex items-center justify-center w-11 h-11 rounded-xl mb-3"
-                    style={{ background: 'rgba(99,102,241,0.14)', border: '1px solid rgba(99,102,241,0.32)' }}
-                  >
-                    <UserIcon className="w-6 h-6" style={{ color: '#818cf8' }} />
-                  </div>
-                  <p className="text-3xl font-black mb-1 text-white">{user?.totalParticipants || 0}</p>
-                  <p className="text-xs" style={{ color: 'rgba(255,255,255,0.42)' }}>Total Participants</p>
-                </div>
+                ))}
               </div>
 
               <Link
                 to="/tournaments/create"
-                className="flex items-center justify-center gap-2 w-full py-3 rounded-xl font-semibold text-sm transition-all mt-4"
-                style={{
-                  background: 'rgba(139,92,246,0.09)',
-                  border: '1px solid rgba(139,92,246,0.28)',
-                  color: '#c4b5fd',
-                }}
+                className="flex items-center justify-center gap-2 w-full mt-2.5 py-3.5 rounded-2xl font-bold text-sm"
+                style={{ background: T.cyan, color: '#030507', fontWeight: 800 }}
               >
-                <TrophyIcon className="w-5 h-5" />
-                <span>Create New Tournament</span>
+                + Create Tournament
               </Link>
-            </div>
-          </div>
+            </section>
 
-          {/* My Tournaments Section */}
-          {myTournaments.length > 0 && (
-            <div
-              className="rounded-2xl p-5 mb-6"
-              style={{
-                background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
-              }}
-            >
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-base font-black text-white">My Tournaments</h3>
-                <Link
-                  to="/organizer/history"
-                  className="text-xs font-bold"
-                  style={{ color: '#a78bfa' }}
-                >
-                  View All →
-                </Link>
-              </div>
-
-              <div className="space-y-3">
-                {myTournaments.slice(0, 5).map(t => {
-                  const isDraft = t.status === 'draft';
-                  const hasCategories = (t.categories?.length || 0) > 0;
-                  return (
-                    <div
-                      key={t.id}
-                      className="rounded-xl p-3"
-                      style={{
-                        background: isDraft ? 'rgba(251,191,36,0.05)' : 'rgba(139,92,246,0.05)',
-                        border: `1px solid ${isDraft ? 'rgba(251,191,36,0.18)' : 'rgba(139,92,246,0.18)'}`,
-                      }}
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-black text-white truncate">{t.name}</p>
-                          <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.42)' }}>
-                            {t.city}{t.state ? `, ${t.state}` : ''} · {t.categories?.length || 0} categories
-                          </p>
+            {/* My Tournaments */}
+            {myTournaments.length > 0 && (
+              <section className="px-4 mb-5 dash-section" style={{ animationDelay: '200ms' }}>
+                <div className="flex items-center justify-between mb-3">
+                  <p style={{ fontSize: '11px', fontWeight: 700, color: T.txt3, textTransform: 'uppercase', letterSpacing: '0.1em' }}>My tournaments</p>
+                  <Link to="/organizer/history" style={{ fontSize: '12px', fontWeight: 700, color: T.cyan }}>All →</Link>
+                </div>
+                <div className="space-y-2">
+                  {myTournaments.slice(0, 5).map((t, i) => {
+                    const isDraft = t.status === 'draft';
+                    const hasCategories = (t.categories?.length || 0) > 0;
+                    const statusColors = {
+                      draft: { c: T.amber, bg: 'rgba(245,158,11,0.1)' },
+                      published: { c: T.cyan, bg: T.cyanDim },
+                      ongoing: { c: '#4ade80', bg: 'rgba(74,222,128,0.1)' },
+                      completed: { c: T.txt3, bg: 'rgba(255,255,255,0.06)' },
+                      cancelled: { c: '#f87171', bg: 'rgba(239,68,68,0.1)' },
+                    };
+                    const sc = statusColors[t.status] || statusColors.draft;
+                    return (
+                      <div key={t.id} className="rounded-2xl p-4 dash-row" style={{ background: T.s1, border: `1px solid ${T.border}`, animationDelay: `${220 + i * 45}ms` }}>
+                        <div className="flex items-start gap-3 mb-3">
+                          <div className="flex-1 min-w-0">
+                            <p className="truncate" style={{ fontSize: '13px', fontWeight: 800, color: T.txt, marginBottom: '2px' }}>{t.name}</p>
+                            <p style={{ fontSize: '11px', color: T.txt3 }}>{t.city}{t.state ? `, ${t.state}` : ''} · {t.categories?.length || 0} categories</p>
+                          </div>
+                          <span style={{ fontSize: '11px', fontWeight: 700, color: sc.c, background: sc.bg, padding: '3px 8px', borderRadius: '8px', flexShrink: 0, textTransform: 'capitalize' }}>
+                            {isDraft ? 'Draft' : t.status}
+                          </span>
                         </div>
-                        <span
-                          className="flex-shrink-0 text-xs font-bold px-2 py-0.5 rounded-full"
-                          style={{
-                            background: isDraft ? 'rgba(251,191,36,0.12)' : 'rgba(139,92,246,0.12)',
-                            color: isDraft ? '#fbbf24' : '#c4b5fd',
-                            border: `1px solid ${isDraft ? 'rgba(251,191,36,0.28)' : 'rgba(139,92,246,0.28)'}`,
-                          }}
-                        >
-                          {isDraft ? 'Draft' : t.status.charAt(0).toUpperCase() + t.status.slice(1)}
-                        </span>
-                      </div>
-
-                      <div className="flex gap-2 mt-2.5">
-                        <Link
-                          to={`/tournaments/${t.id}`}
-                          className="flex-1 text-center py-1.5 rounded-lg text-xs font-bold transition-all"
-                          style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)' }}
-                        >
-                          View
-                        </Link>
-                        <Link
-                          to={`/tournaments/${t.id}/edit`}
-                          className="flex-1 text-center py-1.5 rounded-lg text-xs font-bold transition-all"
-                          style={{ background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.1)' }}
-                        >
-                          Edit
-                        </Link>
-                        {isDraft && (
-                          <button
-                            onClick={() => handlePublishTournament(t.id)}
-                            disabled={publishingId === t.id || !hasCategories}
-                            className="flex-1 py-1.5 rounded-lg text-xs font-black transition-all disabled:opacity-50"
-                            style={{
-                              background: hasCategories ? 'rgba(139,92,246,0.14)' : 'rgba(255,255,255,0.06)',
-                              color: hasCategories ? '#c4b5fd' : 'rgba(255,255,255,0.3)',
-                              border: hasCategories ? '1px solid rgba(139,92,246,0.24)' : '1px solid transparent',
-                            }}
-                            title={!hasCategories ? 'Add categories first' : 'Publish tournament'}
-                          >
-                            {publishingId === t.id ? '...' : '🚀 Publish'}
-                          </button>
+                        <div className="flex gap-2">
+                          <Link to={`/tournaments/${t.id}`} className="flex-1 text-center py-2 rounded-xl text-xs font-bold" style={{ background: T.s2, color: T.txt2, border: `1px solid ${T.border}` }}>View</Link>
+                          <Link to={`/tournaments/${t.id}/edit`} className="flex-1 text-center py-2 rounded-xl text-xs font-bold" style={{ background: T.s2, color: T.txt2, border: `1px solid ${T.border}` }}>Edit</Link>
+                          {isDraft && (
+                            <button
+                              onClick={() => handlePublishTournament(t.id)}
+                              disabled={publishingId === t.id || !hasCategories}
+                              className="flex-1 py-2 rounded-xl text-xs font-bold disabled:opacity-40"
+                              style={{ background: hasCategories ? T.cyan : T.s2, color: hasCategories ? '#030507' : T.txt3 }}
+                              title={!hasCategories ? 'Add categories first' : ''}
+                            >
+                              {publishingId === t.id ? '…' : 'Publish'}
+                            </button>
+                          )}
+                        </div>
+                        {isDraft && !hasCategories && (
+                          <p style={{ fontSize: '11px', color: T.amber, marginTop: '8px' }}>⚠ Add categories before publishing</p>
                         )}
                       </div>
-                      {isDraft && !hasCategories && (
-                        <p className="text-xs mt-1.5" style={{ color: 'rgba(251,191,36,0.7)' }}>
-                          ⚠️ Add categories before publishing
-                        </p>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+                    );
+                  })}
+                </div>
+              </section>
+            )}
           </>
         )}
 
+        {/* ─────────────────────────────────────────────────────────────── */}
+        {/* UMPIRE VIEW                                                     */}
+        {/* ─────────────────────────────────────────────────────────────── */}
         {activeRole === 'UMPIRE' && (
-          <div
-            className="rounded-2xl p-5 mb-6"
-            style={{
-              background: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              boxShadow: '0 4px 24px rgba(0,0,0,0.3)',
-              animation: 'slideUp 0.8s ease-out 0.4s both'
-            }}
-          >
-            <div className="flex items-center gap-3 mb-4">
-              <div
-                className="w-10 h-10 rounded-xl flex items-center justify-center"
-                style={{ background: 'rgba(59,130,246,0.16)', border: '1px solid rgba(59,130,246,0.38)' }}
-              >
-                <span className="text-xl">⚖️</span>
-              </div>
-              <h3 className="text-lg font-black text-white">Umpire Stats</h3>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="p-4 rounded-xl" style={{
-                background: 'rgba(255,255,255,0.04)',
-                borderTop: '1px solid rgba(255,255,255,0.09)',
-                borderRight: '1px solid rgba(255,255,255,0.09)',
-                borderBottom: '1px solid rgba(255,255,255,0.09)',
-                borderLeft: '3px solid #3b82f6'
-              }}>
-                <div className="inline-flex items-center justify-center w-11 h-11 rounded-xl mb-3"
-                  style={{ background: 'rgba(59,130,246,0.14)', border: '1px solid rgba(59,130,246,0.32)' }}>
-                  <FireIcon className="w-6 h-6" style={{ color: '#60a5fa' }} />
+          <section className="px-4 mb-5 dash-section" style={{ animationDelay: '140ms' }}>
+            <p style={{ fontSize: '11px', fontWeight: 700, color: T.txt3, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '10px' }}>Umpire stats</p>
+            <div className="grid grid-cols-2 gap-2.5 mb-4">
+              {[
+                { label: 'Matches Umpired',    value: user?.matchesUmpired || 0,     icon: '⚖️' },
+                { label: 'Tournaments',         value: user?.tournamentsUmpired || 0, icon: '🏆' },
+              ].map((s, i) => (
+                <div key={i} className="rounded-2xl p-4 card-lift" style={{ background: T.s1, border: `1px solid ${T.border}` }}>
+                  <span style={{ fontSize: '20px', display: 'block', marginBottom: '10px' }}>{s.icon}</span>
+                  <p style={{ fontSize: '26px', fontWeight: 900, color: T.txt, lineHeight: 1, marginBottom: '4px' }}>{s.value}</p>
+                  <p style={{ fontSize: '11px', color: T.txt3 }}>{s.label}</p>
                 </div>
-                <p className="text-3xl font-black mb-1 text-white">{user?.matchesUmpired || 0}</p>
-                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.42)' }}>Matches Umpired</p>
-              </div>
-              <div className="p-4 rounded-xl" style={{
-                background: 'rgba(255,255,255,0.04)',
-                borderTop: '1px solid rgba(255,255,255,0.09)',
-                borderRight: '1px solid rgba(255,255,255,0.09)',
-                borderBottom: '1px solid rgba(255,255,255,0.09)',
-                borderLeft: '3px solid #6366f1'
-              }}>
-                <div className="inline-flex items-center justify-center w-11 h-11 rounded-xl mb-3"
-                  style={{ background: 'rgba(99,102,241,0.14)', border: '1px solid rgba(99,102,241,0.32)' }}>
-                  <TrophyIcon className="w-6 h-6" style={{ color: '#818cf8' }} />
-                </div>
-                <p className="text-3xl font-black mb-1 text-white">{user?.tournamentsUmpired || 0}</p>
-                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.42)' }}>Tournaments</p>
-              </div>
+              ))}
             </div>
-          </div>
+            <Link to="/umpire/dashboard"
+              className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl font-bold text-sm"
+              style={{ background: T.s1, border: `1px solid ${T.border}`, color: T.txt2 }}>
+              Open Scoring Console →
+            </Link>
+          </section>
         )}
 
-        {/* ── Profile Information ── */}
-        <div
-          className="rounded-2xl p-5 mb-6"
-          style={{
-            background: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
-            animation: 'fadeIn 0.8s ease-out 0.7s both'
-          }}
-        >
-          <div>
-            <div className="flex items-center gap-3 mb-5">
-              <div
-                className="w-10 h-10 rounded-xl flex items-center justify-center"
-                style={{ background: 'rgba(6,182,212,0.14)', border: '1px solid rgba(6,182,212,0.32)' }}
-              >
-                <UserIcon className="w-5 h-5" style={{ color: '#22d3ee' }} />
-              </div>
-              <h3 className="text-lg font-black text-white">Profile Information</h3>
+        {/* ── §LAST  PROFILE INFO SECTION ──────────────────────────────── */}
+        <section className="px-4 mb-2 dash-section" style={{ animationDelay: '320ms' }}>
+          <div className="rounded-2xl overflow-hidden" style={{ background: T.s1, border: `1px solid ${T.border}` }}>
+            <div className="flex items-center justify-between px-4 py-3.5" style={{ borderBottom: `1px solid ${T.borderS}` }}>
+              <p style={{ fontSize: '11px', fontWeight: 700, color: T.txt3, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Profile details</p>
+              <Link to="/profile" style={{ fontSize: '12px', fontWeight: 700, color: T.cyan }}>Edit</Link>
             </div>
-
-            <div className="space-y-4">
-              <div>
-                <p className="text-xs mb-1 font-semibold tracking-widest uppercase" style={{ color: 'rgba(255,255,255,0.32)' }}>Full Name</p>
-                <p className="text-base font-bold text-white">{userProfile?.name || user?.name || 'N/A'}</p>
-              </div>
-
-              {(() => {
-                const email = displayEmail(userProfile?.email) || displayEmail(user?.email);
-                return email ? (
-                  <div>
-                    <p className="text-xs mb-1 font-semibold tracking-widest uppercase" style={{ color: 'rgba(255,255,255,0.32)' }}>Email Address</p>
-                    <p className="text-sm font-semibold text-white break-all">{email}</p>
-                  </div>
-                ) : null;
-              })()}
-
-              {(userProfile?.phone || user?.phone) && (
-                <div>
-                  <p className="text-xs mb-1 font-semibold tracking-widest uppercase" style={{ color: 'rgba(255,255,255,0.32)' }}>Phone Number</p>
-                  <p className="text-base font-bold text-white">{userProfile?.phone || user?.phone}</p>
-                </div>
-              )}
-
-              {((userProfile?.city || user?.city) || (userProfile?.state || user?.state)) && (
-                <div>
-                  <p className="text-xs mb-1 font-semibold tracking-widest uppercase" style={{ color: 'rgba(255,255,255,0.32)' }}>Location</p>
-                  <p className="text-base font-bold text-white">
-                    {[userProfile?.city || user?.city, userProfile?.state || user?.state, 'India'].filter(Boolean).join(', ')}
-                  </p>
-                </div>
-              )}
-
-              {(userProfile?.gender || user?.gender) && (
-                <div>
-                  <p className="text-xs mb-1 font-semibold tracking-widest uppercase" style={{ color: 'rgba(255,255,255,0.32)' }}>Gender</p>
-                  <p className="text-base font-bold text-white capitalize">{userProfile?.gender || user?.gender}</p>
-                </div>
-              )}
-
-              {userProfile?.createdAt && (
-                <div>
-                  <p className="text-xs mb-1 font-semibold tracking-widest uppercase" style={{ color: 'rgba(255,255,255,0.32)' }}>Member Since</p>
-                  <p className="text-base font-bold text-white">
-                    {new Date(userProfile.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* ── Recent Activity ── */}
-        <div
-          className="rounded-2xl overflow-hidden mb-6"
-          style={{
-            background: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
-            animation: 'fadeIn 0.8s ease-out 0.8s both'
-          }}
-        >
-          <div className="p-5 border-b flex items-center justify-between" style={{ borderColor: 'rgba(255,255,255,0.07)' }}>
-            <div className="flex items-center gap-3">
+            {[
+              { label: 'Name',     value: userProfile?.name   || user?.name   },
+              { label: 'Location', value: [userProfile?.city || user?.city, userProfile?.state || user?.state].filter(Boolean).join(', ') || null },
+              { label: 'Phone',    value: userProfile?.phone  || user?.phone  },
+              { label: 'Email',    value: displayEmail(userProfile?.email) || displayEmail(user?.email) },
+              { label: 'Member since', value: userProfile?.createdAt ? new Date(userProfile.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : null },
+            ].filter(row => row.value).map((row, i, arr) => (
               <div
-                className="w-10 h-10 rounded-xl flex items-center justify-center"
-                style={{ background: 'rgba(6,182,212,0.14)', border: '1px solid rgba(6,182,212,0.32)' }}
+                key={row.label}
+                className="flex items-center justify-between px-4 py-3"
+                style={{ borderBottom: i < arr.length - 1 ? `1px solid ${T.borderS}` : 'none' }}
               >
-                <CalendarIcon className="w-5 h-5" style={{ color: '#22d3ee' }} />
+                <span style={{ fontSize: '12px', color: T.txt3, fontWeight: 500 }}>{row.label}</span>
+                <span className="truncate ml-4" style={{ fontSize: '13px', fontWeight: 700, color: T.txt2, maxWidth: '60%', textAlign: 'right' }}>{row.value}</span>
               </div>
-              <h3 className="text-lg font-black text-white">Recent Activity</h3>
-            </div>
-            <Link
-              to="/registrations"
-              className="text-sm font-bold flex items-center gap-1 transition-colors"
-              style={{ color: '#22d3ee' }}
-            >
-              View All
-              <ArrowRightIcon className="w-4 h-4" />
-            </Link>
+            ))}
           </div>
+        </section>
 
-          <div className="p-5">
-            {loading ? (
-              <div className="flex justify-center py-8">
-                <div
-                  className="w-10 h-10 border-4 rounded-full animate-spin"
-                  style={{
-                    borderColor: 'rgba(6,182,212,0.18)',
-                    borderTopColor: '#06b6d4'
-                  }}
-                ></div>
-              </div>
-            ) : registrations.length === 0 ? (
-              <div className="text-center py-8">
-                <div
-                  className="text-5xl mb-3 inline-block"
-                  style={{ opacity: 0.8 }}
-                >
-                  🏸
-                </div>
-                <h4 className="text-base font-black text-white mb-2">No activity yet</h4>
-                <p className="text-sm mb-5" style={{ color: 'rgba(255,255,255,0.42)' }}>Join your first tournament!</p>
-                <Link
-                  to="/tournaments"
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm"
-                  style={{
-                    background: 'rgba(6,182,212,0.09)',
-                    border: '1px solid rgba(6,182,212,0.24)',
-                    color: '#67e8f9',
-                  }}
-                >
-                  <TrophyIcon className="w-5 h-5" />
-                  <span>Find Tournaments</span>
-                </Link>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {registrations.slice(0, 3).map((reg) => (
-                  <div
-                    key={reg.id}
-                    className="p-4 rounded-xl"
-                    style={{
-                      background: 'rgba(255,255,255,0.04)',
-                      border: '1px solid rgba(255,255,255,0.08)',
-                    }}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div
-                        className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
-                        style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)' }}
-                      >
-                        <span className="text-xl">🏆</span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <Link
-                          to={`/tournaments/${reg.tournament?.id}`}
-                          className="font-bold text-white hover:text-cyan-300 transition-colors block truncate"
-                        >
-                          {reg.tournament?.name || 'Tournament'}
-                        </Link>
-                        <p className="text-xs mt-1 font-medium" style={{ color: 'rgba(255,255,255,0.38)' }}>
-                          {reg.category?.name || 'Category'} • {new Date(reg.createdAt).toLocaleDateString('en-IN')}
-                        </p>
-                        <span className={`inline-block mt-2 px-3 py-1 rounded-lg text-xs font-bold ${
-                          reg.status === 'confirmed'
-                            ? 'text-green-300'
-                            : reg.status === 'pending'
-                            ? 'text-amber-300'
-                            : reg.status === 'rejected'
-                            ? 'text-red-300'
-                            : 'text-gray-300'
-                        }`}
-                        style={{
-                          background: reg.status === 'confirmed'
-                            ? 'rgba(6,182,212,0.12)'
-                            : reg.status === 'pending'
-                            ? 'rgba(245,158,11,0.1)'
-                            : reg.status === 'rejected'
-                            ? 'rgba(239,68,68,0.1)'
-                            : 'rgba(255,255,255,0.06)',
-                          border: `1px solid ${
-                            reg.status === 'confirmed'
-                              ? 'rgba(6,182,212,0.25)'
-                              : reg.status === 'pending'
-                              ? 'rgba(245,158,11,0.2)'
-                              : reg.status === 'rejected'
-                              ? 'rgba(239,68,68,0.2)'
-                              : 'rgba(255,255,255,0.1)'
-                          }`
-                        }}>
-                          {reg.status?.charAt(0).toUpperCase() + reg.status?.slice(1)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
+      </div>{/* /max-w-md */}
 
-        {/* ── Quick Actions ── */}
-        <div
-          className="rounded-2xl p-5 mb-6"
-          style={{
-            background: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            animation: 'fadeIn 0.8s ease-out 0.9s both'
-          }}
-        >
-          <div className="flex items-center gap-2.5 mb-4">
-            <div className="w-1 h-4 rounded-full" style={{ background: 'linear-gradient(to bottom, #06b6d4, #0891b2)' }} />
-            <h3 className="text-lg font-black text-white">Quick Actions</h3>
-          </div>
-          <div className="space-y-3">
-            <Link
-              to="/tournaments"
-              className="flex items-center gap-4 p-4 rounded-xl transition-all relative overflow-hidden group"
-              style={{
-                background: 'rgba(6,182,212,0.06)',
-                border: '1px solid rgba(6,182,212,0.18)',
-              }}
-            >
-              <div
-                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                style={{ background: 'rgba(6,182,212,0.05)' }}
-              />
-              <div
-                className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 relative z-10"
-                style={{
-                  background: 'linear-gradient(135deg, #0e7490, #0284c7)',
-                  boxShadow: '0 4px 12px rgba(6,182,212,0.28)',
-                }}
-              >
-                <TrophyIcon className="w-6 h-6 text-white" />
-              </div>
-              <div className="flex-1 relative z-10">
-                <p className="font-bold text-white text-sm">Browse Tournaments</p>
-                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.42)' }}>Find your next competition</p>
-              </div>
-              <ArrowRightIcon className="w-5 h-5 relative z-10" style={{ color: '#22d3ee' }} />
-            </Link>
-
-            <Link
-              to="/leaderboard"
-              className="flex items-center gap-4 p-4 rounded-xl transition-all relative overflow-hidden group"
-              style={{
-                background: 'rgba(139,92,246,0.06)',
-                border: '1px solid rgba(139,92,246,0.18)',
-              }}
-            >
-              <div
-                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                style={{ background: 'rgba(139,92,246,0.05)' }}
-              />
-              <div
-                className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 relative z-10"
-                style={{
-                  background: 'linear-gradient(135deg, #6d28d9, #7c3aed)',
-                  boxShadow: '0 4px 12px rgba(139,92,246,0.28)',
-                }}
-              >
-                <ChartBarIcon className="w-6 h-6 text-white" />
-              </div>
-              <div className="flex-1 relative z-10">
-                <p className="font-bold text-white text-sm">Leaderboard</p>
-                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.42)' }}>Check your ranking</p>
-              </div>
-              <ArrowRightIcon className="w-5 h-5 relative z-10" style={{ color: '#a78bfa' }} />
-            </Link>
-          </div>
-        </div>
-
-        {/* Footer Spacing */}
-        <div className="h-6"></div>
-      </div>
-
-      {/* Photo Viewer Modal */}
+      {/* Photo viewer */}
       <PhotoViewer
         isOpen={showPhotoViewer}
         onClose={() => setShowPhotoViewer(false)}

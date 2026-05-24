@@ -605,8 +605,8 @@ const giveBye = async (req, res) => {
 
     console.log('✅ Bye given to winner:', winnerId);
 
-    // Check if this is the final match
-    const isFinal = match.round === 1 && !match.parentMatchId;
+    // Check if this is the final match (not a group stage match)
+    const isFinal = match.round === 1 && !match.parentMatchId && match.stage !== 'GROUP';
 
     if (isFinal) {
       // Update category with winner (no runner-up for bye)
@@ -1107,8 +1107,8 @@ const endMatch = async (req, res) => {
     // Determine the loser
     const loserId = winnerId === match.player1Id ? match.player2Id : match.player1Id;
 
-    // Check if this is the final match (round 1 and no parent match)
-    const isFinal = match.round === 1 && !match.parentMatchId;
+    // Check if this is the final match (round 1, no parent match, not group stage)
+    const isFinal = match.round === 1 && !match.parentMatchId && match.stage !== 'GROUP';
 
     if (isFinal) {
       // Update category with winner and runner-up

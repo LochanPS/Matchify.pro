@@ -123,8 +123,8 @@ async function addPoint(matchId, player) {
           }
         }
 
-        // Mark category complete if this is the final
-        const isFinal = match.round === 1 && !match.parentMatchId;
+        // Mark category complete if this is the final (not a group stage match)
+        const isFinal = match.round === 1 && !match.parentMatchId && match.stage !== 'GROUP';
         if (isFinal) {
           const loserId = winnerId === match.player1Id ? match.player2Id : match.player1Id;
           await tx.category.update({

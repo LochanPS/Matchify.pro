@@ -1123,13 +1123,23 @@ const DrawPage = () => {
             )}
           </div>
           
-          {/* Warning message when tournament is completed */}
-          {isCategoryCompleted && isOrganizer && (
+          {/* Banner: Tournament Completed — only when organizer explicitly ended tournament */}
+          {tournament?.status === 'completed' && isOrganizer && (
             <div className="mt-4 px-4 py-3 bg-green-500/10 border border-green-500/30 rounded-xl flex items-center gap-3">
               <Trophy className="w-5 h-5 text-green-400" />
               <div>
                 <p className="text-green-300 text-sm font-semibold">Tournament Completed</p>
                 <p className="text-green-400/80 text-xs">Draw is now locked and cannot be modified. Points have been awarded to all players.</p>
+              </div>
+            </div>
+          )}
+          {/* Banner: Category Completed — when final match done but tournament still ongoing */}
+          {isCategoryCompleted && tournament?.status !== 'completed' && isOrganizer && (
+            <div className="mt-4 px-4 py-3 bg-cyan-500/10 border border-cyan-500/30 rounded-xl flex items-center gap-3">
+              <Trophy className="w-5 h-5 text-cyan-400" />
+              <div>
+                <p className="text-cyan-300 text-sm font-semibold">Category Completed</p>
+                <p className="text-cyan-400/80 text-xs">All matches in this category are done. End the tournament when all categories are finished.</p>
               </div>
             </div>
           )}

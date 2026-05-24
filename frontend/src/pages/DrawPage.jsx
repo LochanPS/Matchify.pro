@@ -2952,30 +2952,53 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
   return (
     <div className="p-3 space-y-4">
       {data.groups.map((group, gi) => (
-        <div key={gi} className="backdrop-blur-sm rounded-2xl overflow-hidden shadow-xl" style={{ background: 'rgba(13,16,37,0.9)', border: '2px solid rgba(6,182,212,0.15)' }}>
+        <div key={gi} className="rounded-2xl overflow-hidden" style={{ background: '#111826', border: '1px solid rgba(255,255,255,0.07)' }}>
+
           {/* Group Header */}
-          <div className="p-4 border-b-2 border-white/10" style={{ background: 'rgba(6,182,212,0.08)' }}>
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center font-black text-xl shadow-lg" style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#050810' }}>
-                {String.fromCharCode(65 + gi)}
-              </div>
-              <div className="flex-1">
-                <h4 className="text-lg font-black text-white">Group {String.fromCharCode(65 + gi)}</h4>
-                <p className="text-[#06b6d4] text-xs font-semibold">
-                  {group.participants.filter(p => p.id).length} players • {group.matches?.length || 0} matches
-                </p>
-              </div>
+          <div className="flex items-center gap-3 px-4 py-3.5" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+            <div
+              className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-base flex-shrink-0"
+              style={{ background: 'linear-gradient(135deg,#06b6d4,#0891b2)', color: '#fff' }}
+            >
+              {String.fromCharCode(65 + gi)}
+            </div>
+            <div>
+              <h4 className="font-bold text-white" style={{ fontSize: '15px', lineHeight: 1.2 }}>Group {String.fromCharCode(65 + gi)}</h4>
+              <p style={{ color: '#94a3b8', fontSize: '12px', marginTop: '2px' }}>
+                {group.participants.filter(p => p.id).length} players • {group.matches?.length || 0} matches
+              </p>
             </div>
           </div>
 
-          {/* Group Standings - Mobile Optimized */}
-          <div className="p-4">
-            <h5 className="text-sm font-black text-[#06b6d4] mb-3 flex items-center gap-2 uppercase tracking-wider">
-              <Trophy className="w-4 h-4" />
-              Standings
-            </h5>
-            
-            <div className="space-y-2">
+          {/* Standings */}
+          <div className="px-4 pt-3 pb-2">
+            {/* Section label */}
+            <div className="flex items-center gap-1.5 mb-2">
+              <Trophy className="w-3.5 h-3.5" style={{ color: '#06b6d4' }} />
+              <span className="text-xs font-bold uppercase tracking-wider" style={{ color: '#94a3b8' }}>Standings</span>
+            </div>
+
+            {/* Column headers */}
+            <div className="flex items-center px-2 mb-1" style={{ gap: '6px' }}>
+              <div style={{ width: '28px' }} />
+              <div className="flex-1">
+                <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.28)', fontWeight: 600 }}>PAIR</span>
+              </div>
+              {[
+                { h: 'P',   w: '26px' },
+                { h: 'W',   w: '26px' },
+                { h: 'L',   w: '26px' },
+                { h: 'PTS', w: '32px' },
+                { h: 'TP',  w: '32px' },
+              ].map(({ h, w }) => (
+                <div key={h} style={{ width: w, textAlign: 'center' }}>
+                  <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.28)', fontWeight: 600 }}>{h}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Rows */}
+            <div>
               {group.participants
                 .sort((a, b) => {
                   if ((b.points || 0) !== (a.points || 0)) return (b.points || 0) - (a.points || 0);
@@ -2987,110 +3010,104 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                 .map((p, pi) => (
                   <div
                     key={pi}
-                    className="flex items-center rounded-xl border-2 transition-all"
+                    className="flex items-center rounded-xl transition-colors"
                     style={{
-                      padding: '8px 8px',
+                      padding: '9px 8px',
                       gap: '6px',
-                      background: pi === 0
-                        ? 'linear-gradient(135deg, rgba(6,182,212,0.12), rgba(6,182,212,0.08))'
-                        : 'rgba(255,255,255,0.04)',
-                      borderColor: pi === 0 ? 'rgba(6,182,212,0.4)' : 'rgba(255,255,255,0.08)',
+                      marginBottom: '2px',
+                      background: pi === 0 ? 'rgba(6,182,212,0.07)' : 'rgba(15,22,36,0.7)',
+                      borderLeft: pi === 0 ? '3px solid #06b6d4' : '3px solid transparent',
                     }}
                   >
-                    {/* Rank badge — fixed 28×28 */}
+                    {/* Rank badge */}
                     <div
-                      className="flex-shrink-0 flex items-center justify-center rounded-lg font-black text-xs"
+                      className="flex-shrink-0 flex items-center justify-center rounded-md font-bold text-xs"
                       style={{
                         width: '28px', height: '28px',
                         background:
-                          pi === 0 ? 'linear-gradient(135deg,#06b6d4,#06b6d4)' :
-                          pi === 1 ? 'linear-gradient(135deg,#94a3b8,#64748b)' :
-                          pi === 2 ? 'linear-gradient(135deg,#cd7f32,#b45309)' :
-                          'rgba(255,255,255,0.08)',
-                        color: pi < 3 ? '#fff' : 'rgba(255,255,255,0.5)',
+                          pi === 0 ? 'rgba(6,182,212,0.18)' :
+                          pi === 1 ? 'rgba(148,163,184,0.12)' :
+                          pi === 2 ? 'rgba(205,127,50,0.12)' :
+                          'rgba(255,255,255,0.05)',
+                        color:
+                          pi === 0 ? '#06b6d4' :
+                          pi === 1 ? '#94a3b8' :
+                          pi === 2 ? '#cd7f32' :
+                          'rgba(255,255,255,0.3)',
                       }}
                     >
                       {pi + 1}
                     </div>
 
-                    {/* Player Name — flex-1, wraps for long doubles names */}
+                    {/* Player Name */}
                     <div className="flex-1 min-w-0">
                       {p.id ? (
                         <>
-                          <p className="font-bold text-white leading-tight text-sm break-words" title={p.name}>
+                          <p className="font-semibold leading-tight text-sm break-words" style={{ color: '#e5e7eb' }} title={p.name}>
                             {p.name || `Slot ${pi + 1}`}
                           </p>
                           {p.partnerName && (
-                            <p className="text-xs leading-tight break-words" style={{ color: '#06b6d4' }} title={p.partnerName}>
+                            <p className="text-xs leading-tight break-words" style={{ color: '#94a3b8' }} title={p.partnerName}>
                               & {p.partnerName}
                             </p>
                           )}
                         </>
                       ) : (
-                        <p className="font-bold text-sm leading-tight" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                        <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.22)', fontStyle: 'italic' }}>
                           Slot {pi + 1}
                         </p>
                       )}
                     </div>
 
-                    {/* Stats: P · W · L · PTS · TP — compact fixed widths, name column gets max space */}
+                    {/* Stats: P · W · L · PTS · TP — plain colored numbers, no boxes */}
                     <div className="flex-shrink-0 flex items-center" style={{ gap: '2px' }}>
                       {[
-                        { val: (p.wins || 0) + (p.losses || 0), label: 'P',   bg: 'rgba(255,255,255,0.09)',  labelColor: 'rgba(255,255,255,0.55)', w: '22px' },
-                        { val: p.wins || 0,                      label: 'W',   bg: 'rgba(6,182,212,0.15)',    labelColor: '#06b6d4',                w: '22px' },
-                        { val: p.losses || 0,                    label: 'L',   bg: 'rgba(239,68,68,0.15)',    labelColor: '#f87171',                w: '22px' },
-                        { val: p.points || 0,                    label: 'PTS', bg: 'rgba(6,182,212,0.22)',    labelColor: '#06b6d4',                w: '28px', border: '1px solid rgba(6,182,212,0.4)', bold: true },
-                        { val: p.totalPoints || 0,               label: 'TP',  bg: 'rgba(0,212,255,0.2)',     labelColor: '#00d4ff',                w: '28px', border: '1px solid rgba(0,212,255,0.4)', bold: true },
-                      ].map(({ val, label, bg, labelColor, border, bold, w }) => (
-                        <div
-                          key={label}
-                          className="flex flex-col items-center justify-center"
-                          style={{
-                            width: w,
-                            height: '36px',
-                            background: bg,
-                            border: border || 'none',
-                            borderRadius: '8px',
-                          }}
-                        >
-                          <span style={{ fontSize: '12px', fontWeight: bold ? '900' : '800', color: '#ffffff', lineHeight: 1 }}>{val}</span>
-                          <span style={{ fontSize: '8px', color: labelColor, lineHeight: 1, marginTop: '2px', fontWeight: 700 }}>{label}</span>
+                        { val: (p.wins || 0) + (p.losses || 0), color: '#94a3b8', w: '26px' },
+                        { val: p.wins || 0,                      color: '#22c55e', w: '26px' },
+                        { val: p.losses || 0,                    color: '#f87171', w: '26px' },
+                        { val: p.points || 0,                    color: '#06b6d4', w: '32px', bold: true },
+                        { val: p.totalPoints || 0,               color: '#a78bfa', w: '32px', bold: true },
+                      ].map((s, si) => (
+                        <div key={si} className="text-center" style={{ width: s.w }}>
+                          <span style={{ fontSize: '13px', fontWeight: s.bold ? 700 : 600, color: s.color, lineHeight: 1 }}>{s.val}</span>
                         </div>
                       ))}
                     </div>
                   </div>
                 ))}
             </div>
-            
-            {/* Points System */}
-            <div className="mt-3 p-3 rounded-xl" style={{ background: 'rgba(0,0,0,0.25)', border: '1px solid rgba(255,255,255,0.08)' }}>
-              <p className="text-[10px] font-black uppercase tracking-wider mb-2 text-center" style={{ color: 'rgba(255,255,255,0.35)' }}>Points System</p>
-              <div className="flex items-center justify-center gap-2 text-xs font-bold flex-wrap">
-                <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg" style={{ background: 'rgba(6,182,212,0.1)', border: '1px solid rgba(6,182,212,0.2)' }}>
-                  <span className="w-4 h-4 rounded flex items-center justify-center text-[9px] font-black" style={{ background: '#06b6d4', color: '#050810' }}>W</span>
-                  <span style={{ color: '#06b6d4' }}>+2 pts</span>
-                </div>
-                <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)' }}>
-                  <span className="w-4 h-4 bg-red-500 rounded flex items-center justify-center text-[9px] text-white font-black">L</span>
-                  <span style={{ color: '#f87171' }}>+0 pts</span>
-                </div>
-                <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg" style={{ background: 'rgba(0,212,255,0.08)', border: '1px solid rgba(0,212,255,0.2)' }}>
-                  <span className="w-4 h-4 rounded flex items-center justify-center text-[9px] font-black" style={{ background: '#00d4ff', color: '#050810' }}>TP</span>
-                  <span style={{ color: '#67e8f9' }}>Game pts</span>
-                </div>
+          </div>
+
+          {/* Points System Legend */}
+          <div className="mx-4 mb-3 px-3 py-2.5 rounded-xl" style={{ background: 'rgba(11,16,32,0.6)', border: '1px solid rgba(255,255,255,0.05)' }}>
+            <div className="flex items-center justify-center gap-4 flex-wrap mb-1.5">
+              <div className="flex items-center gap-1.5">
+                <span className="w-5 h-5 rounded flex items-center justify-center text-[9px] font-bold"
+                  style={{ background: 'rgba(34,197,94,0.15)', color: '#22c55e' }}>W</span>
+                <span style={{ fontSize: '11px', color: '#22c55e', fontWeight: 600 }}>+2 pts</span>
               </div>
-              <p className="text-[9px] text-center mt-2" style={{ color: 'rgba(255,255,255,0.25)' }}>
-                P = Played · W = Won · L = Lost · PTS = Points · TP = Total Points
-              </p>
+              <div className="flex items-center gap-1.5">
+                <span className="w-5 h-5 rounded flex items-center justify-center text-[9px] font-bold"
+                  style={{ background: 'rgba(248,113,113,0.15)', color: '#f87171' }}>L</span>
+                <span style={{ fontSize: '11px', color: '#f87171', fontWeight: 600 }}>+0 pts</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="w-5 h-5 rounded flex items-center justify-center text-[9px] font-bold"
+                  style={{ background: 'rgba(167,139,250,0.15)', color: '#a78bfa' }}>TP</span>
+                <span style={{ fontSize: '11px', color: '#a78bfa', fontWeight: 600 }}>Game pts</span>
+              </div>
             </div>
+            <p style={{ fontSize: '9px', color: 'rgba(255,255,255,0.22)', textAlign: 'center' }}>
+              P = Played · W = Won · L = Lost · PTS = Points · TP = Total Points
+            </p>
           </div>
 
           {/* View Matches button */}
-          <div className="px-4 pb-4 border-t-2 border-white/10 pt-3">
+          <div className="px-4 pb-4" style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '12px' }}>
             <button
               onClick={() => setActiveGroupIdx(gi)}
-              className="w-full py-3 rounded-xl font-black text-sm flex items-center justify-center gap-2 transition-all active:scale-95"
-              style={{ background: 'rgba(0,212,255,0.1)', border: '1.5px solid rgba(0,212,255,0.35)', color: '#00d4ff' }}
+              className="w-full py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all active:scale-95"
+              style={{ background: 'rgba(6,182,212,0.07)', border: '1px solid rgba(6,182,212,0.18)', color: '#67e8f9' }}
             >
               <Clock className="w-4 h-4" />
               View Matches ({group.matches?.length || 0})
@@ -3335,38 +3352,32 @@ const GroupsKnockoutDisplay = ({
 
   return (
     <div className="space-y-4 p-3">
-      {/* Stage Navigation Tabs - Emerald Theme */}
-      <div className="flex gap-2 p-1.5 rounded-xl border-2" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.1)' }}>
+      {/* Stage Navigation Tabs - Clean Premium */}
+      <div className="flex gap-1 p-1 rounded-xl" style={{ background: 'rgba(11,16,32,0.95)', border: '1px solid rgba(255,255,255,0.07)' }}>
         <button
           onClick={() => setActiveStage('roundrobin')}
-          className={`flex-1 px-2 py-3 rounded-lg font-black transition-all flex items-center justify-center gap-1.5 text-[10px] ${
+          className="flex-1 py-2.5 rounded-lg transition-all flex items-center justify-center gap-2 active:scale-95"
+          style={
             activeStage === 'roundrobin'
-              ? 'tab-active'
-              : 'bg-slate-700/30 text-gray-400 hover:bg-slate-700/50 hover:text-white'
-          }`}
+              ? { background: 'linear-gradient(135deg,#06b6d4,#0891b2)', color: '#fff', boxShadow: '0 2px 14px rgba(6,182,212,0.28)', fontWeight: 700 }
+              : { color: 'rgba(255,255,255,0.38)', background: 'transparent' }
+          }
         >
-          <span className={`px-1.5 py-0.5 rounded text-[9px] font-black whitespace-nowrap ${
-            activeStage === 'roundrobin' ? 'bg-white/20' : 'bg-slate-600/50'
-          }`}>
-            STAGE 1
-          </span>
-          <span className="whitespace-nowrap">GROUPS</span>
+          <span style={{ fontSize: '9px', fontWeight: 600, letterSpacing: '0.09em', opacity: activeStage === 'roundrobin' ? 0.8 : 0.7 }}>STAGE 1</span>
+          <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.06em' }}>GROUPS</span>
         </button>
-        
+
         <button
           onClick={() => setActiveStage('knockout')}
-          className={`flex-1 px-2 py-3 rounded-lg font-black transition-all flex items-center justify-center gap-1.5 text-[10px] ${
+          className="flex-1 py-2.5 rounded-lg transition-all flex items-center justify-center gap-2 active:scale-95"
+          style={
             activeStage === 'knockout'
-              ? 'tab-active'
-              : 'bg-slate-700/30 text-gray-400 hover:bg-slate-700/50 hover:text-white'
-          }`}
+              ? { background: 'linear-gradient(135deg,#06b6d4,#0891b2)', color: '#fff', boxShadow: '0 2px 14px rgba(6,182,212,0.28)', fontWeight: 700 }
+              : { color: 'rgba(255,255,255,0.38)', background: 'transparent' }
+          }
         >
-          <span className={`px-1.5 py-0.5 rounded text-[9px] font-black whitespace-nowrap ${
-            activeStage === 'knockout' ? 'bg-white/20' : 'bg-slate-600/50'
-          }`}>
-            STAGE 2
-          </span>
-          <span className="whitespace-nowrap">KNOCKOUT</span>
+          <span style={{ fontSize: '9px', fontWeight: 600, letterSpacing: '0.09em', opacity: activeStage === 'knockout' ? 0.8 : 0.7 }}>STAGE 2</span>
+          <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.06em' }}>KNOCKOUT</span>
         </button>
       </div>
 

@@ -96,18 +96,26 @@ class WalletService {
       throw new Error('Transaction already completed');
     }
 
-    // Update transaction and user balance in a transaction
+    // Update transaction and user balance atomically
+    // The where clause includes status: PENDING so concurrent duplicate requests
+    // will fail with RecordNotFound after the first one commits — prevents double top-up
     const result = await prisma.$transaction(async (tx) => {
-      // Update transaction
-      const updatedTransaction = await tx.walletTransaction.update({
-        where: { id: transaction.id },
-        data: {
-          status: TRANSACTION_STATUS.COMPLETED,
-          razorpayPaymentId: paymentId,
-          razorpaySignature: signature,
-          updatedAt: new Date(),
-        },
-      });
+      let updatedTransaction;
+      try {
+        updatedTransaction = await tx.walletTransaction.update({
+          where: { id: transaction.id, status: TRANSACTION_STATUS.PENDING },
+          data: {
+            status: TRANSACTION_STATUS.COMPLETED,
+            razorpayPaymentId: paymentId,
+            razorpaySignature: signature,
+            updatedAt: new Date(),
+          },
+        });
+      } catch (e) {
+        // Prisma throws P2025 when no row matched (already processed by concurrent request)
+        if (e.code === 'P2025') throw new Error('Transaction already completed');
+        throw e;
+      }
 
       // Update user balance
       await tx.user.update({
@@ -118,7 +126,7 @@ class WalletService {
       });
 
       return updatedTransaction;
-    });
+    }, { isolationLevel: 'Serializable' });
 
     return result;
   }
@@ -206,6 +214,19 @@ class WalletService {
         throw new Error('Insufficient wallet balance');
       }
 
+      // Idempotency guard: reject duplicate deductions for the same referenceId
+      if (referenceId) {
+        const existing = await tx.walletTransaction.findFirst({
+          where: {
+            userId,
+            referenceId,
+            type: TRANSACTION_TYPES.REGISTRATION_FEE,
+            status: TRANSACTION_STATUS.COMPLETED,
+          },
+        });
+        if (existing) throw new Error('Duplicate deduction: already processed for this reference');
+      }
+
       // Create transaction record
       const transaction = await tx.walletTransaction.create({
         data: {
@@ -241,9 +262,16 @@ class WalletService {
       throw new Error('Invalid amount');
     }
 
-    const balance = await this.getBalance(userId);
-
     const result = await prisma.$transaction(async (tx) => {
+      // Re-read balance inside transaction — prevents stale balanceBefore in audit record
+      const user = await tx.user.findUnique({
+        where: { id: userId },
+        select: { walletBalance: true },
+      });
+
+      if (!user) throw new Error('User not found');
+      const balance = user.walletBalance;
+
       // Create transaction
       const transaction = await tx.walletTransaction.create({
         data: {
@@ -268,7 +296,7 @@ class WalletService {
       });
 
       return transaction;
-    });
+    }, { isolationLevel: 'Serializable' });
 
     return result;
   }

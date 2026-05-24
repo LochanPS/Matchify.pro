@@ -439,7 +439,7 @@ const UnifiedDashboardMobile = () => {
                   WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text',
                   filter:'drop-shadow(0 0 18px rgba(6,182,212,0.55))',
                 }}>
-                  #{matchifyCode || userProfile?.matchifyCode || user?.matchifyCode}
+                  {matchifyCode || userProfile?.matchifyCode || user?.matchifyCode}
                 </p>
               </div>
               <button

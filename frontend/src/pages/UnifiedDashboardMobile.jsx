@@ -410,94 +410,90 @@ const UnifiedDashboardMobile = () => {
           </div>
         </div>
 
-        {/* ── Profile Card — banner + avatar overlap ── */}
-        <div
-          className="rounded-3xl mb-6 overflow-hidden"
+        {/* ── Profile Card ── */}
+        <div className="rounded-3xl mb-6 overflow-hidden"
           style={{
-            background: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            backdropFilter: 'blur(24px)',
-            boxShadow: '0 8px 40px rgba(0,0,0,0.5)',
-            animation: 'fadeIn 0.8s ease-out 0.2s both'
-          }}
-        >
-          {/* Banner */}
-          <div style={{
-            height: '84px',
-            background: 'linear-gradient(135deg, rgba(6,182,212,0.28) 0%, rgba(245,158,11,0.18) 40%, rgba(249,115,22,0.15) 70%, rgba(139,92,246,0.20) 100%)',
-            position: 'relative',
-            overflow: 'hidden',
+            background: 'rgba(10,14,28,0.88)',
+            border: '1px solid rgba(255,255,255,0.10)',
+            backdropFilter: 'blur(28px)',
+            WebkitBackdropFilter: 'blur(28px)',
+            boxShadow: '0 12px 48px rgba(0,0,0,0.65)',
+            animation: 'fadeIn 0.8s ease-out 0.2s both',
           }}>
-            {/* Banner fade-to-card at bottom */}
-            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '40px', background: 'linear-gradient(to bottom, transparent, rgba(5,8,16,0.55))' }} />
-            {/* Subtle decorative orb inside banner */}
-            <div style={{ position: 'absolute', top: '8px', right: '24px', width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(6,182,212,0.1)', filter: 'blur(14px)' }} />
-            <div style={{ position: 'absolute', top: '12px', left: '32px', width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(139,92,246,0.1)', filter: 'blur(10px)' }} />
+
+          {/* ── Banner ── */}
+          <div style={{ height: '100px', position: 'relative', overflow: 'hidden',
+            background: 'linear-gradient(135deg, #0a1e3d 0%, #0e1b50 40%, #150d42 70%, #0a1a35 100%)' }}>
+            {/* left glow */}
+            <div style={{ position:'absolute', inset:0, background:'radial-gradient(ellipse at 20% 60%, rgba(6,182,212,0.22) 0%, transparent 65%)' }} />
+            {/* right glow */}
+            <div style={{ position:'absolute', inset:0, background:'radial-gradient(ellipse at 85% 40%, rgba(139,92,246,0.20) 0%, transparent 60%)' }} />
+            {/* subtle dot grid */}
+            <div style={{ position:'absolute', inset:0, opacity:0.4,
+              backgroundImage:'radial-gradient(circle, rgba(255,255,255,0.12) 1px, transparent 1px)',
+              backgroundSize:'22px 22px' }} />
+            {/* bottom fade */}
+            <div style={{ position:'absolute', bottom:0, left:0, right:0, height:'52px',
+              background:'linear-gradient(to bottom, transparent, rgba(10,14,28,0.95))' }} />
           </div>
 
-          {/* Content */}
-          <div className="px-5 pb-5">
-            {/* Profile Photo & Name */}
-            <div className="flex flex-col items-center text-center mb-5">
-              <button
-                onClick={() => user?.profilePhoto && setShowPhotoViewer(true)}
-                className="w-24 h-24 rounded-full flex items-center justify-center font-bold text-3xl -mt-12 mb-4 relative transition-all hover:scale-105 cursor-pointer group"
-                style={{
-                  background: 'linear-gradient(135deg, #0e7490, #0369a1)',
-                  color: '#ffffff',
-                  boxShadow: '0 0 0 3px #06b6d4, 0 0 0 6px rgba(6,182,212,0.2), 0 8px 24px rgba(0,0,0,0.55)'
-                }}
-              >
-                {user?.profilePhoto ? (
-                  <>
-                    <img src={user.profilePhoto} alt={user.name} className="w-full h-full object-cover rounded-full relative z-10" />
-                    {/* Hover Overlay */}
-                    <div
-                      className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                    >
-                      <div className="text-center">
-                        <svg className="w-8 h-8 text-white mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
-                        </svg>
-                        <span className="text-white text-xs font-bold">View</span>
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <span className="relative z-10">{user?.name?.charAt(0)?.toUpperCase() || 'P'}</span>
-                )}
+          {/* ── Content ── */}
+          <div className="px-5 pb-6">
+
+            {/* Avatar */}
+            <div className="flex flex-col items-center text-center">
+              <button onClick={() => user?.profilePhoto && setShowPhotoViewer(true)}
+                className="-mt-14 mb-4 relative flex-shrink-0" style={{ borderRadius:'50%' }}>
+                {/* gradient ring */}
+                <div className="w-[96px] h-[96px] rounded-full p-[3px] relative"
+                  style={{ background:'linear-gradient(135deg, #22d3ee 0%, #a855f7 50%, #22d3ee 100%)' }}>
+                  <div className="w-full h-full rounded-full overflow-hidden flex items-center justify-center font-black text-3xl text-white"
+                    style={{ background:'linear-gradient(135deg, #0e7490, #0c4a6e)' }}>
+                    {user?.profilePhoto
+                      ? <img src={user.profilePhoto} alt={user.name} className="w-full h-full object-cover" />
+                      : <span>{user?.name?.charAt(0)?.toUpperCase() || 'P'}</span>}
+                  </div>
+                </div>
+                {/* outer glow */}
+                <div style={{ position:'absolute', inset:'-6px', borderRadius:'50%',
+                  background:'linear-gradient(135deg, rgba(6,182,212,0.25), rgba(139,92,246,0.20))',
+                  filter:'blur(10px)', zIndex:-1 }} />
               </button>
 
-              <h2 className="text-2xl font-black mb-1 text-white">
+              {/* Name */}
+              <h2 style={{ fontSize:'22px', fontWeight:900, color:'#ffffff', letterSpacing:'-0.01em', marginBottom:'4px' }}>
                 {user?.name}
               </h2>
 
+              {/* Email */}
               {displayEmail(user?.email) && (
-                <p className="text-sm mb-1" style={{ color: 'rgba(255,255,255,0.42)' }}>{displayEmail(user.email)}</p>
+                <p style={{ fontSize:'13px', color:'rgba(255,255,255,0.42)', marginBottom:'4px' }}>
+                  {displayEmail(user.email)}
+                </p>
               )}
 
+              {/* Location */}
               {user?.city && (
-                <div className="flex items-center gap-1 text-sm mb-3" style={{ color: 'rgba(255,255,255,0.32)' }}>
-                  <MapPinIcon className="w-3.5 h-3.5" />
-                  <span>{user.city}{user.state ? `, ${user.state}` : ''}</span>
+                <div className="flex items-center gap-1 mb-5">
+                  <MapPinIcon className="w-3.5 h-3.5" style={{ color:'rgba(255,255,255,0.28)' }} />
+                  <span style={{ fontSize:'12px', color:'rgba(255,255,255,0.32)' }}>
+                    {user.city}{user.state ? `, ${user.state}` : ''}
+                  </span>
                 </div>
               )}
 
-              {/* Matchify Code */}
-              <div
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg mb-3"
-                style={{
-                  background: 'rgba(6,182,212,0.08)',
-                  border: '1px solid rgba(6,182,212,0.22)',
-                }}
-              >
-                <div>
-                  <p className="text-xs font-semibold tracking-widest uppercase" style={{ color: 'rgba(255,255,255,0.35)' }}>Matchify ID</p>
-                  <p
-                    className="text-lg font-mono font-black tracking-wider"
-                    style={{ color: '#22d3ee' }}
-                  >
-                    {matchifyCode || userProfile?.matchifyCode || user?.matchifyCode || 'Loading...'}
+              {/* Matchify ID — full-width sleek row */}
+              <div className="w-full flex items-center justify-between px-4 py-3.5 rounded-2xl mb-4"
+                style={{ background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.09)' }}>
+                <div className="text-left">
+                  <p style={{ fontSize:'10px', fontWeight:700, letterSpacing:'0.16em',
+                    textTransform:'uppercase', color:'rgba(255,255,255,0.28)', marginBottom:'3px' }}>
+                    Matchify ID
+                  </p>
+                  <p style={{ fontSize:'22px', fontWeight:900, fontFamily:'monospace', letterSpacing:'0.04em',
+                    background:'linear-gradient(135deg, #67e8f9, #06b6d4)',
+                    WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text' }}>
+                    {matchifyCode || userProfile?.matchifyCode || user?.matchifyCode || '—'}
                   </p>
                 </div>
                 {(matchifyCode || userProfile?.matchifyCode || user?.matchifyCode) && (
@@ -508,56 +504,38 @@ const UnifiedDashboardMobile = () => {
                       setCopied(true);
                       setTimeout(() => setCopied(false), 2000);
                     }}
-                    className="p-2 rounded-lg transition-all"
-                    style={{
-                      background: 'rgba(255,255,255,0.07)',
-                      border: '1px solid rgba(255,255,255,0.11)'
-                    }}
-                    title="Copy Matchify ID"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: '#67e8f9' }}>
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                    style={{ background:'rgba(6,182,212,0.12)', border:'1px solid rgba(6,182,212,0.30)' }}>
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                      style={{ width:'18px', height:'18px', color:'#22d3ee' }}>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                        d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                     </svg>
                   </button>
                 )}
               </div>
 
-              {/* Compact Role Switcher - Only if multiple roles */}
+              {/* Role switcher */}
               {userRoles.length > 1 && (
-                <div className="flex items-center justify-center gap-2 mb-3">
-                  {userRoles.map((role) => {
+                <div className="flex gap-2 w-full mb-4">
+                  {userRoles.map(role => {
                     const config = roleConfig[role];
                     if (!config) return null;
-
                     const isActive = role === activeRole;
-
                     return (
-                      <button
-                        key={role}
-                        onClick={() => handleRoleSwitch(role)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-semibold transition-all relative overflow-hidden"
+                      <button key={role} onClick={() => handleRoleSwitch(role)}
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-2xl font-bold transition-all"
                         style={{
                           background: isActive
-                            ? `linear-gradient(135deg, ${config.color}, ${config.color}dd)`
-                            : config.bg,
-                          border: `1.5px solid ${config.border}`,
-                          color: isActive ? '#ffffff' : config.color,
-                          boxShadow: 'none',
-                          fontSize: '11px'
-                        }}
-                      >
-                        {isActive && (
-                          <div
-                            className="absolute inset-0 opacity-30"
-                            style={{
-                              background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
-                              backgroundSize: '200% 100%',
-                              animation: 'shimmer 3s infinite'
-                            }}
-                          />
-                        )}
-                        <span className="text-sm relative z-10">{config.icon}</span>
-                        <span className="relative z-10">{config.name}</span>
+                            ? `linear-gradient(135deg, ${config.color}dd, ${config.color}99)`
+                            : 'rgba(255,255,255,0.05)',
+                          border: isActive ? `1.5px solid ${config.color}55` : '1.5px solid rgba(255,255,255,0.09)',
+                          color: isActive ? '#ffffff' : 'rgba(255,255,255,0.38)',
+                          fontSize: '12px',
+                          boxShadow: isActive ? `0 4px 18px ${config.color}35` : 'none',
+                        }}>
+                        <span style={{ fontSize:'14px' }}>{config.icon}</span>
+                        <span>{config.name}</span>
                       </button>
                     );
                   })}
@@ -565,22 +543,17 @@ const UnifiedDashboardMobile = () => {
               )}
             </div>
 
-            {/* Edit Profile Button */}
-            <Link
-              to="/profile"
-              className="flex items-center justify-center gap-2 w-full py-3 rounded-xl font-bold text-sm transition-all relative overflow-hidden group"
+            {/* Edit Profile — solid CTA */}
+            <Link to="/profile"
+              className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl font-black text-sm"
               style={{
-                background: 'rgba(6,182,212,0.09)',
-                border: '1.5px solid rgba(6,182,212,0.32)',
-                color: '#22d3ee',
-              }}
-            >
-              <div
-                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                style={{ background: 'rgba(6,182,212,0.07)' }}
-              />
-              <UserIcon className="w-5 h-5 relative z-10" />
-              <span className="relative z-10">Edit Profile</span>
+                background: 'linear-gradient(135deg, #06b6d4, #0891b2)',
+                color: '#030c10',
+                boxShadow: '0 6px 22px rgba(6,182,212,0.38)',
+                letterSpacing: '0.02em',
+              }}>
+              <UserIcon className="w-5 h-5" />
+              Edit Profile
             </Link>
           </div>
         </div>

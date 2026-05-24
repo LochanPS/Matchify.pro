@@ -482,21 +482,26 @@ const HomePageMobile = () => {
               <h2 className="text-xl font-black text-white mb-1">Our Community</h2>
               <p className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>Growing every day</p>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              {stats.map((s, i) => {
-                return (
-                  <div key={i} className="p-4 rounded-xl text-center relative overflow-hidden"
-                    style={{
-                      background: 'linear-gradient(135deg, rgba(6,182,212,0.07) 0%, rgba(255,255,255,0.04) 100%)',
-                      border: '1px solid rgba(6,182,212,0.2)',
-                      animation: `scaleIn 0.5s ease-out ${0.9 + i * 0.1}s both`
-                    }}>
-                    <div className="text-3xl mb-2" style={{ animation: 'float 3s ease-in-out infinite' }}>{s.icon}</div>
-                    <p className="text-3xl font-black mb-1 text-white">{s.value}</p>
-                    <p className="text-xs font-semibold" style={{ color: 'rgba(255,255,255,0.7)' }}>{s.label}</p>
-                  </div>
-                );
-              })}
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { value: '2,500+', label: 'Players',     accent: '#22d3ee', border: 'rgba(6,182,212,0.28)',   bg: 'rgba(6,182,212,0.08)'   },
+                { value: '80+',    label: 'Tournaments', accent: '#fbbf24', border: 'rgba(245,158,11,0.28)',  bg: 'rgba(245,158,11,0.08)'  },
+                { value: '30+',    label: 'Cities',      accent: '#fb923c', border: 'rgba(249,115,22,0.28)',  bg: 'rgba(249,115,22,0.08)'  },
+                { value: '₹25L+',  label: 'Prize Pool',  accent: '#a78bfa', border: 'rgba(139,92,246,0.28)',  bg: 'rgba(139,92,246,0.08)'  },
+              ].map((s, i) => (
+                <div key={i} className="p-5 rounded-2xl flex flex-col justify-between"
+                  style={{
+                    background: s.bg,
+                    border: `1px solid ${s.border}`,
+                    backdropFilter: 'blur(16px)',
+                    WebkitBackdropFilter: 'blur(16px)',
+                    animation: `scaleIn 0.45s ease-out ${0.85 + i * 0.08}s both`,
+                    minHeight: '100px',
+                  }}>
+                  <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'rgba(255,255,255,0.4)', letterSpacing: '0.1em' }}>{s.label}</p>
+                  <p className="text-4xl font-black leading-none" style={{ color: s.accent }}>{s.value}</p>
+                </div>
+              ))}
             </div>
           </div>
         </div>

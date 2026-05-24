@@ -130,7 +130,17 @@ const HomePageMobile = () => {
 
   return (
     <div className="min-h-screen relative overflow-hidden"
-      style={{ background: '#050810' }}>
+      style={{
+        background: '#050810',
+        backgroundImage: 'url(/bg-galaxy.png)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center top',
+        backgroundRepeat: 'no-repeat',
+        backgroundAttachment: 'fixed',
+      }}>
+
+      {/* ── Dark overlay so content stays readable over galaxy bg ── */}
+      <div className="fixed inset-0 pointer-events-none" style={{ background: 'rgba(5,8,16,0.68)', zIndex: 0 }} />
 
       {/* ── Sticky Navbar ─────────────────────────────────────────── */}
       {!user && (

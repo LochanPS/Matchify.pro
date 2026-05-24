@@ -3,6 +3,7 @@ import multer from 'multer';
 import { authenticate, optionalAuth } from '../middleware/auth.js';
 import {
   createAcademy,
+  updateAcademy,
   getAcademies,
   getPendingAcademies,
   getAllAcademiesAdmin,
@@ -44,6 +45,13 @@ router.post('/',
     { name: 'photos', maxCount: 20 }
   ]),
   createAcademy
+);
+
+// Update academy (submitter only)
+router.put('/:id',
+  authenticate,
+  upload.fields([{ name: 'photos', maxCount: 20 }]),
+  updateAcademy
 );
 
 // Admin routes

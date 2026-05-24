@@ -164,6 +164,75 @@ export const createAcademy = async (req, res) => {
 };
 
 
+// Update academy (submitter only)
+export const updateAcademy = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user?.userId || req.user?.id;
+
+    const academy = await prisma.academy.findUnique({ where: { id } });
+    if (!academy) return res.status(404).json({ success: false, error: 'Academy not found' });
+
+    if (academy.submittedBy !== userId) {
+      return res.status(403).json({ success: false, error: 'Not authorized to edit this academy' });
+    }
+
+    const {
+      name, address, city, state, pincode,
+      sports, sportDetails, description,
+      phone, email, website, instagram, upiId,
+      type, amenities, openingHours,
+      existingPhotos,
+    } = req.body;
+
+    if (!name || !address || !city || !state || !phone) {
+      return res.status(400).json({ success: false, error: 'Missing required fields' });
+    }
+
+    // Photos to keep
+    let photoUrls = [];
+    try { photoUrls = JSON.parse(existingPhotos || '[]'); } catch { photoUrls = []; }
+
+    // Upload new photos
+    if (req.files?.photos?.length > 0) {
+      for (const photo of req.files.photos) {
+        const result = await new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+            { folder: 'matchify/academy-photos' },
+            (err, res) => err ? reject(err) : resolve(res)
+          );
+          stream.end(photo.buffer);
+        });
+        photoUrls.push(result.secure_url);
+      }
+    }
+
+    const updated = await prisma.academy.update({
+      where: { id },
+      data: {
+        name, address, city, state,
+        pincode: pincode || null,
+        sports: typeof sports === 'string' ? sports : JSON.stringify(sports || []),
+        sportDetails: typeof sportDetails === 'string' ? sportDetails : JSON.stringify(sportDetails || {}),
+        description: description || null,
+        phone, email: email || null, website: website || null,
+        type: type || null,
+        amenities: amenities ? (typeof amenities === 'string' ? amenities : JSON.stringify(amenities)) : JSON.stringify([]),
+        openingHours: openingHours || null,
+        instagram: instagram || null,
+        upiId: upiId || null,
+        photos: JSON.stringify(photoUrls),
+      },
+    });
+
+    console.log(`✅ Academy updated: ${id} - ${name}`);
+    res.json({ success: true, message: 'Academy updated successfully', data: { academy: updated } });
+  } catch (error) {
+    console.error('Error updating academy:', error);
+    res.status(500).json({ success: false, error: 'Failed to update academy' });
+  }
+};
+
 // Get all approved academies (public)
 export const getAcademies = async (req, res) => {
   try {

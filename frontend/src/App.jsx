@@ -62,6 +62,7 @@ const RefundIssuePage           = lazy(() => import('./pages/RefundIssuePage'))
 const SearchAcademiesPage       = lazy(() => import('./pages/SearchAcademiesPage'))
 const AcademyDetailPage         = lazy(() => import('./pages/AcademyDetailPage'))
 const AddAcademyPage            = lazy(() => import('./pages/AddAcademyPage'))
+const EditAcademyPage           = lazy(() => import('./pages/EditAcademyPage'))
 const AcademyOwnerDashboard     = lazy(() => import('./pages/AcademyOwnerDashboard'))
 const ManageCourtsPage          = lazy(() => import('./pages/ManageCourtsPage'))
 const OwnerBookingsPage         = lazy(() => import('./pages/OwnerBookingsPage'))
@@ -268,6 +269,7 @@ function AppContent() {
           <Route path="/academies" element={<SearchAcademiesPage />} />
           <Route path="/academies/add" element={<AddAcademyPage />} />
           <Route path="/academies/:id" element={<AcademyDetailPage />} />
+          <Route path="/academies/:id/edit" element={<ProtectedRoute><EditAcademyPage /></ProtectedRoute>} />
           <Route path="/academies/:academyId/courts/:courtId/book" element={
             <ProtectedRoute><CourtBookingPage /></ProtectedRoute>
           } />

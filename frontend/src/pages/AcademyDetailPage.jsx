@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, MapPin, Phone, Mail, Globe, Building2,
   ChevronLeft, ChevronRight, BadgeCheck, Clock, Plus,
-  IndianRupee, Calendar
+  IndianRupee, Calendar, Pencil, X
 } from 'lucide-react';
 import api from '../utils/api';
 import { useAuth } from '../contexts/AuthContext';
@@ -322,12 +322,29 @@ export default function AcademyDetailPage() {
         style={{ borderBottom: `1px solid ${B.border}` }}>
         <div className="flex items-start justify-between gap-3 mb-3">
           <h1 className="text-xl font-black text-white leading-tight flex-1">{academy.name}</h1>
-          {academy.type && (
-            <span className="flex-shrink-0 px-2.5 py-1 rounded-full text-xs font-black mt-0.5"
-              style={{ background: 'rgba(168,85,247,0.15)', color: '#c084fc', border: '1px solid rgba(168,85,247,0.25)' }}>
-              {academy.type}
-            </span>
-          )}
+          <div className="flex items-center gap-2 flex-shrink-0 mt-0.5">
+            {/* Edit button — owner only */}
+            {user && academy.submittedBy && (user.id === academy.submittedBy || user.userId === academy.submittedBy) && (
+              <button
+                onClick={() => navigate(`/academies/${id}/edit`)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black active:scale-95 transition-transform"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(6,182,212,0.18) 0%, rgba(34,211,238,0.10) 100%)',
+                  border: '1px solid rgba(6,182,212,0.35)',
+                  color: '#22d3ee',
+                  boxShadow: '0 0 12px rgba(6,182,212,0.15)',
+                }}>
+                <Pencil className="w-3 h-3" />
+                Edit
+              </button>
+            )}
+            {academy.type && (
+              <span className="px-2.5 py-1 rounded-full text-xs font-black"
+                style={{ background: 'rgba(168,85,247,0.15)', color: '#c084fc', border: '1px solid rgba(168,85,247,0.25)' }}>
+                {academy.type}
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Sport tags */}

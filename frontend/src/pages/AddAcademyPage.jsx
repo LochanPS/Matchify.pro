@@ -162,23 +162,34 @@ export default function AddAcademyPage() {
   // Load draft
   useEffect(() => {
     const d = loadDraft();
-    if (d?.form && d.form.name) {
-      setForm(d.form);
-      setDraftRestored(true);
+    if (d?.form) {
+      const hasContent = Object.values(d.form).some(v =>
+        typeof v === 'string' ? v.trim().length > 0 :
+        Array.isArray(v) ? v.length > 0 : false
+      );
+      if (hasContent) {
+        setForm(d.form);
+        if (d.step && d.step > 1) setStep(d.step);
+        setDraftRestored(true);
+      }
     }
   }, []);
 
-  // Auto-save
+  // Auto-save (debounced 1.5s) — saves form + current step
   const saveDraft = useCallback(() => {
-    localStorage.setItem(DRAFT_KEY, JSON.stringify({ form, savedAt: new Date().toISOString() }));
+    localStorage.setItem(DRAFT_KEY, JSON.stringify({ form, step, savedAt: new Date().toISOString() }));
     setLastSaved(new Date());
-  }, [form]);
+  }, [form, step]);
 
   useEffect(() => {
-    if (!form.name) return;
+    const hasAnyContent = Object.values(form).some(v =>
+      typeof v === 'string' ? v.trim().length > 0 :
+      Array.isArray(v) ? v.length > 0 : false
+    );
+    if (!hasAnyContent) return;
     const t = setTimeout(saveDraft, 1500);
     return () => clearTimeout(t);
-  }, [form, saveDraft]);
+  }, [form, step, saveDraft]);
 
   const clearDraft = () => { localStorage.removeItem(DRAFT_KEY); setLastSaved(null); };
 
@@ -257,9 +268,18 @@ export default function AddAcademyPage() {
 
   const validateStep2 = () => {
     const e = {};
+    const digits = form.phone.replace(/\D/g, '');
     if (!form.phone.trim()) e.phone = 'Phone number is required';
+    else if (digits.length < 10) e.phone = 'Enter a valid 10-digit number';
     setErrors(e);
     return Object.keys(e).length === 0;
+  };
+
+  // Returns phone with +91 prefix for submission
+  const fullPhone = () => {
+    const p = form.phone.trim();
+    if (!p) return '';
+    return p.startsWith('+') ? p : `+91${p.replace(/\s/g, '')}`;
   };
 
   const handleNext = () => {
@@ -278,6 +298,8 @@ export default function AddAcademyPage() {
       Object.entries(form).forEach(([k, v]) => {
         if (k === 'sports' || k === 'sportDetails' || k === 'amenities') {
           fd.append(k, JSON.stringify(v));
+        } else if (k === 'phone') {
+          fd.append(k, fullPhone());
         } else {
           fd.append(k, v);
         }
@@ -545,9 +567,35 @@ export default function AddAcademyPage() {
           <div className="space-y-4">
 
             <Field label="Phone Number" required error={errors.phone}>
-              <input value={form.phone} onChange={e => set('phone', e.target.value)}
-                type="tel" placeholder="+91 98765 43210"
-                className={inputCls(errors.phone)} style={inputStyle(errors.phone)} />
+              <div className="relative flex items-stretch">
+                <div className="flex items-center gap-1.5 px-3 rounded-l-xl flex-shrink-0 select-none"
+                  style={{
+                    background: 'rgba(6,182,212,0.10)',
+                    border: `1px solid ${errors.phone ? 'rgba(248,113,113,0.6)' : 'rgba(6,182,212,0.30)'}`,
+                    borderRight: 'none',
+                    color: '#22d3ee',
+                    fontWeight: 800,
+                    fontSize: '14px',
+                  }}>
+                  🇮🇳 +91
+                </div>
+                <input
+                  value={form.phone}
+                  onChange={e => {
+                    // Strip any +91 prefix if user types it manually
+                    let val = e.target.value.replace(/^\+91\s?/, '').replace(/^91/, '');
+                    set('phone', val);
+                  }}
+                  type="tel"
+                  placeholder="98765 43210"
+                  className={inputCls(errors.phone)}
+                  style={{
+                    ...inputStyle(errors.phone),
+                    borderRadius: '0 12px 12px 0',
+                    borderLeft: 'none',
+                  }}
+                />
+              </div>
             </Field>
 
             <Field label="Email">

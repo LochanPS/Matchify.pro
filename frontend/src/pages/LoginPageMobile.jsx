@@ -5,18 +5,6 @@ import { EyeIcon, EyeSlashIcon, PhoneIcon, LockClosedIcon, EnvelopeIcon } from '
 import { getErrorMessage } from '../utils/errorMessage';
 import MatchifyLogo from '../components/MatchifyLogo';
 
-// Pre-generated particle data — deterministic, no Math.random in render
-const LOGIN_M_PARTICLES = Array.from({ length: 20 }, (_, i) => ({
-  w: (i * 7 + 1) % 2 + 1,
-  h: (i * 11 + 1) % 2 + 1,
-  x: (i * 37 + 11) % 97,
-  y: (i * 53 + 7) % 91,
-  c: ["#06b6d4", "#00d4ff", "rgba(255,255,255,0.9)"][i % 3],
-  o: ((i * 13) % 50) / 100 + 0.2,
-  dur: (i * 7) % 4 + 3,
-  delay: (i * 3) % 4,
-  glow: (i * 11) % 15 + 5,
-}));
 
 
 const LoginPageMobile = () => {
@@ -100,7 +88,7 @@ const LoginPageMobile = () => {
 
   return (
     <div className="min-h-screen flex flex-col relative overflow-hidden" style={{ 
-      background: '#07071a'
+      background: '#050810'
     }}>
       {/* Sticky Header with Sign In & Sign Up */}
       <div 
@@ -137,51 +125,10 @@ const LoginPageMobile = () => {
         </div>
       </div>
 
-      {/* Animated Background Elements */}
-      <div className="fixed top-0 bottom-0 pointer-events-none overflow-hidden" style={{ left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: "480px" }}>
-        {/* Large Gradient Orbs */}
-        <div 
-          className="absolute top-0 right-0 w-80 h-80 rounded-full blur-3xl opacity-30 animate-pulse"
-          style={{ 
-            background: 'radial-gradient(circle, rgba(6,182,212,0.4) 0%, rgba(6,182,212,0.2) 40%, transparent 70%)',
-            animation: 'float 8s ease-in-out infinite'
-          }}
-        />
-        <div 
-          className="absolute bottom-1/4 left-0 w-72 h-72 rounded-full blur-3xl opacity-25 animate-pulse"
-          style={{ 
-            background: 'radial-gradient(circle, rgba(99,102,241,0.4) 0%, rgba(139,92,246,0.2) 40%, transparent 70%)',
-            animation: 'float 10s ease-in-out infinite reverse',
-            animationDelay: '2s'
-          }}
-        />
-        <div 
-          className="absolute top-1/2 right-1/4 w-64 h-64 rounded-full blur-3xl opacity-20 animate-pulse"
-          style={{ 
-            background: 'radial-gradient(circle, rgba(6,182,212,0.4) 0%, rgba(14,165,233,0.2) 40%, transparent 70%)',
-            animation: 'float 12s ease-in-out infinite',
-            animationDelay: '4s'
-          }}
-        />
-        
-        {/* Floating Particles */}
-        {LOGIN_M_PARTICLES.map((p, i) => (
-          <div
-            key={i}
-            className="absolute rounded-full"
-            style={{
-              width: `${p.w}px`,
-              height: `${p.h}px`,
-              left: `${p.x}%`,
-              top: `${p.y}%`,
-              background: p.c,
-              opacity: p.o,
-              animation: `float ${p.dur}s ease-in-out infinite`,
-              animationDelay: `${p.delay}s`,
-              boxShadow: `0 0 ${p.glow}px ${p.c}`,
-            }}
-          />
-        ))}
+      {/* Ambient Background — 2 blobs */}
+      <div className="fixed top-0 bottom-0 pointer-events-none overflow-hidden" style={{ left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: '480px' }}>
+        <div style={{ position: 'absolute', width: '440px', height: '440px', top: '-140px', right: '-120px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(6,182,212,0.09) 0%, transparent 70%)', filter: 'blur(80px)' }} />
+        <div style={{ position: 'absolute', width: '400px', height: '400px', bottom: '5%', left: '-120px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(139,92,246,0.07) 0%, transparent 70%)', filter: 'blur(80px)' }} />
       </div>
 
       {/* Add keyframes for animations */}
@@ -341,7 +288,7 @@ const LoginPageMobile = () => {
                   onClick={() => handleLoginTypeChange('phone')}
                   className={`py-3 px-4 rounded-xl font-bold text-sm transition-all ${
                     loginType === 'phone'
-                      ? 'bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-lg shadow-emerald-500/50'
+                      ? 'bg-gradient-to-r from-cyan-600 to-cyan-500 text-white shadow-lg shadow-cyan-500/40'
                       : 'bg-white/5 text-gray-400 hover:bg-white/10'
                   }`}
                 >
@@ -352,7 +299,7 @@ const LoginPageMobile = () => {
                   onClick={() => handleLoginTypeChange('email')}
                   className={`py-3 px-4 rounded-xl font-bold text-sm transition-all ${
                     loginType === 'email'
-                      ? 'bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-lg shadow-emerald-500/50'
+                      ? 'bg-gradient-to-r from-cyan-600 to-cyan-500 text-white shadow-lg shadow-cyan-500/40'
                       : 'bg-white/5 text-gray-400 hover:bg-white/10'
                   }`}
                 >

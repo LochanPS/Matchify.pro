@@ -28,14 +28,10 @@ const HOME_M_PARTICLES = Array.from({ length: 60 }, (_, i) => ({
   star: i % 8 === 0,   // every 8th particle is a 4-pointed star shape
 }));
 
-// Teal nebula blobs — replicate the logo's depth
+// Ambient blobs — 2 only, very subtle
 const NEBULAS = [
-  { x: 75, y:  3, size: 320, color: 'rgba(0,180,160,0.18)', dur: 10, delay: 0 },
-  { x: 10, y: 20, size: 260, color: 'rgba(0,120,200,0.14)', dur: 13, delay: 3 },
-  { x: 55, y: 45, size: 200, color: 'rgba(0,200,180,0.12)', dur:  9, delay: 1 },
-  { x: 20, y: 65, size: 280, color: 'rgba(0,100,180,0.13)', dur: 11, delay: 2 },
-  { x: 80, y: 75, size: 220, color: 'rgba(0,180,140,0.16)', dur: 14, delay: 5 },
-  { x: 40, y: 88, size: 180, color: 'rgba(0,140,200,0.11)', dur:  8, delay: 4 },
+  { x: 75, y:  3, size: 440, color: 'rgba(6,182,212,0.08)', dur: 10, delay: 0 },
+  { x: 10, y: 70, size: 400, color: 'rgba(139,92,246,0.06)', dur: 13, delay: 3 },
 ];
 
 // Authentic reviews from real-sounding Indian badminton players

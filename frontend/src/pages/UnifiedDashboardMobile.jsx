@@ -377,7 +377,7 @@ const UnifiedDashboardMobile = () => {
         <div className="mb-8" style={{ animation: 'fadeIn 0.5s ease-out both' }}>
           <div className="flex items-center gap-2.5 mb-4 px-1">
             <div className="w-1 h-4 rounded-full" style={{ background: 'linear-gradient(to bottom, #06b6d4, #0891b2)' }} />
-            <span className="text-xs font-bold tracking-widest uppercase" style={{ color: 'rgba(255,255,255,0.38)' }}>Navigation</span>
+            <span className="text-xs font-bold tracking-widest uppercase" style={{ color: 'rgba(255,255,255,0.38)' }}>Quick Navigation</span>
           </div>
           <div className="grid grid-cols-3 gap-3">
             {/* Tournaments — cyan */}
@@ -409,6 +409,68 @@ const UnifiedDashboardMobile = () => {
             </Link>
           </div>
         </div>
+
+        {/* ── Matchify ID Hero ── */}
+        {(matchifyCode || userProfile?.matchifyCode || user?.matchifyCode) && (
+          <div className="mb-5 rounded-3xl overflow-hidden relative" style={{
+            background: 'linear-gradient(135deg, #060f24 0%, #0b1a42 35%, #11093a 65%, #060f24 100%)',
+            border: '1px solid rgba(6,182,212,0.30)',
+            boxShadow: '0 0 48px rgba(6,182,212,0.14), 0 16px 48px rgba(0,0,0,0.65)',
+            animation: 'fadeIn 0.6s ease-out 0.1s both',
+          }}>
+            {/* aurora glows */}
+            <div style={{ position:'absolute', inset:0, background:'radial-gradient(ellipse at 5% 90%, rgba(6,182,212,0.28) 0%, transparent 55%)' }} />
+            <div style={{ position:'absolute', inset:0, background:'radial-gradient(ellipse at 95% 10%, rgba(139,92,246,0.20) 0%, transparent 50%)' }} />
+            {/* dot grid texture */}
+            <div style={{ position:'absolute', inset:0, opacity:0.25,
+              backgroundImage:'radial-gradient(circle, rgba(255,255,255,0.15) 1px, transparent 1px)',
+              backgroundSize:'20px 20px' }} />
+
+            <div className="relative px-5 py-5 flex items-center justify-between">
+              <div>
+                <p style={{ fontSize:'10px', fontWeight:800, letterSpacing:'0.22em',
+                  textTransform:'uppercase', color:'rgba(6,182,212,0.75)', marginBottom:'6px' }}>
+                  Your Matchify ID
+                </p>
+                <p style={{
+                  fontSize:'54px', fontWeight:900, fontFamily:'monospace',
+                  lineHeight:1, letterSpacing:'-0.02em',
+                  background:'linear-gradient(135deg, #ffffff 0%, #a5f3fc 40%, #22d3ee 100%)',
+                  WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text',
+                  filter:'drop-shadow(0 0 18px rgba(6,182,212,0.55))',
+                }}>
+                  #{matchifyCode || userProfile?.matchifyCode || user?.matchifyCode}
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  const code = matchifyCode || userProfile?.matchifyCode || user?.matchifyCode;
+                  navigator.clipboard.writeText(code);
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 2000);
+                }}
+                className="flex flex-col items-center gap-1.5 px-4 py-3 rounded-2xl transition-all flex-shrink-0"
+                style={{
+                  background: copied ? 'rgba(34,211,238,0.20)' : 'rgba(6,182,212,0.10)',
+                  border: `1.5px solid ${copied ? 'rgba(34,211,238,0.55)' : 'rgba(6,182,212,0.32)'}`,
+                }}>
+                {copied
+                  ? <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ width:'20px', height:'20px', color:'#22d3ee' }}>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                    </svg>
+                  : <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ width:'20px', height:'20px', color:'#22d3ee' }}>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                        d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                }
+                <span style={{ fontSize:'10px', fontWeight:700, letterSpacing:'0.08em',
+                  textTransform:'uppercase', color: copied ? '#22d3ee' : 'rgba(6,182,212,0.65)' }}>
+                  {copied ? 'Copied!' : 'Copy'}
+                </span>
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* ── Profile Card ── */}
         <div className="rounded-3xl mb-6 overflow-hidden"
@@ -481,39 +543,6 @@ const UnifiedDashboardMobile = () => {
                   </span>
                 </div>
               )}
-
-              {/* Matchify ID — full-width sleek row */}
-              <div className="w-full flex items-center justify-between px-4 py-3.5 rounded-2xl mb-4"
-                style={{ background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.09)' }}>
-                <div className="text-left">
-                  <p style={{ fontSize:'10px', fontWeight:700, letterSpacing:'0.16em',
-                    textTransform:'uppercase', color:'rgba(255,255,255,0.28)', marginBottom:'3px' }}>
-                    Matchify ID
-                  </p>
-                  <p style={{ fontSize:'22px', fontWeight:900, fontFamily:'monospace', letterSpacing:'0.04em',
-                    background:'linear-gradient(135deg, #67e8f9, #06b6d4)',
-                    WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text' }}>
-                    {matchifyCode || userProfile?.matchifyCode || user?.matchifyCode || '—'}
-                  </p>
-                </div>
-                {(matchifyCode || userProfile?.matchifyCode || user?.matchifyCode) && (
-                  <button
-                    onClick={() => {
-                      const code = matchifyCode || userProfile?.matchifyCode || user?.matchifyCode;
-                      navigator.clipboard.writeText(code);
-                      setCopied(true);
-                      setTimeout(() => setCopied(false), 2000);
-                    }}
-                    className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                    style={{ background:'rgba(6,182,212,0.12)', border:'1px solid rgba(6,182,212,0.30)' }}>
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                      style={{ width:'18px', height:'18px', color:'#22d3ee' }}>
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                        d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                    </svg>
-                  </button>
-                )}
-              </div>
 
               {/* Role switcher */}
               {userRoles.length > 1 && (

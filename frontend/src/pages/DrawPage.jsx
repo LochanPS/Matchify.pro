@@ -864,10 +864,74 @@ const DrawPage = () => {
 
   if (loading && !tournament) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #0a0a1f 0%, #050810 50%, #0d1a2a 100%)' }}>
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: 'rgba(6,182,212,0.3)', borderTopColor: 'transparent' }}></div>
-          <p className="mt-4 font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>Loading draw...</p>
+      <div className="min-h-screen relative overflow-hidden" style={{ background: 'linear-gradient(180deg, #0a0a1f 0%, #050810 30%, #0d1a2a 60%, #050810 100%)' }}>
+        <style>{`
+          @keyframes draw-float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(20px, -20px) scale(1.05); }
+            50% { transform: translate(-15px, 15px) scale(0.95); }
+            75% { transform: translate(15px, 10px) scale(1.02); }
+          }
+          @keyframes draw-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+          @keyframes draw-pulse-glow {
+            0%, 100% { opacity: 0.5; box-shadow: 0 0 20px rgba(6,182,212,0.3); }
+            50% { opacity: 1; box-shadow: 0 0 40px rgba(6,182,212,0.7); }
+          }
+          @keyframes draw-shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+          }
+          .draw-skeleton {
+            background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(6,182,212,0.07) 50%, rgba(255,255,255,0.03) 75%);
+            background-size: 200% 100%;
+            animation: draw-shimmer 1.8s ease-in-out infinite;
+          }
+        `}</style>
+
+        {/* Animated background orbs — matches main DrawPage */}
+        <div className="fixed inset-0 pointer-events-none overflow-hidden">
+          <div className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl opacity-30"
+            style={{ background: 'radial-gradient(circle, rgba(6,182,212,0.4) 0%, transparent 70%)', animation: 'draw-float 8s ease-in-out infinite' }} />
+          <div className="absolute top-1/4 left-0 w-80 h-80 rounded-full blur-3xl opacity-25"
+            style={{ background: 'radial-gradient(circle, rgba(20,184,166,0.4) 0%, transparent 70%)', animation: 'draw-float 10s ease-in-out infinite reverse', animationDelay: '2s' }} />
+          <div className="absolute bottom-1/3 right-1/4 w-72 h-72 rounded-full blur-3xl opacity-20"
+            style={{ background: 'radial-gradient(circle, rgba(6,182,212,0.3) 0%, transparent 70%)', animation: 'draw-float 12s ease-in-out infinite', animationDelay: '4s' }} />
+        </div>
+
+        {/* Centered content */}
+        <div className="relative min-h-screen flex flex-col items-center justify-center px-6">
+
+          {/* Spinner */}
+          <div className="relative w-20 h-20 mb-6">
+            <div className="absolute inset-0 rounded-full"
+              style={{ background: 'radial-gradient(circle, rgba(6,182,212,0.12) 0%, transparent 70%)', animation: 'draw-pulse-glow 2s ease-in-out infinite' }} />
+            <div className="absolute inset-0 rounded-full border-4"
+              style={{
+                borderColor: 'rgba(6,182,212,0.15)',
+                borderTopColor: '#06b6d4',
+                borderRightColor: 'rgba(6,182,212,0.45)',
+                animation: 'draw-spin 0.9s linear infinite',
+                boxShadow: '0 0 18px rgba(6,182,212,0.4), inset 0 0 10px rgba(6,182,212,0.08)'
+              }} />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-3 h-3 rounded-full"
+                style={{ background: '#06b6d4', boxShadow: '0 0 12px rgba(6,182,212,0.9)', animation: 'draw-pulse-glow 2s ease-in-out infinite' }} />
+            </div>
+          </div>
+
+          <p className="text-lg font-semibold tracking-wide mb-1" style={{ color: '#06b6d4' }}>Loading Draw</p>
+          <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>Fetching bracket data…</p>
+
+          {/* Skeleton bracket slots */}
+          <div className="mt-10 w-full max-w-xs space-y-3">
+            {[1, 0.75, 0.5].map((opacity, i) => (
+              <div key={i} className="draw-skeleton rounded-xl h-16"
+                style={{ border: '1px solid rgba(6,182,212,0.1)', opacity, animationDelay: `${i * 0.2}s` }} />
+            ))}
+          </div>
         </div>
       </div>
     );

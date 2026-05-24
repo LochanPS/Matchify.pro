@@ -2,6 +2,7 @@ import { getErrorMessage } from '../utils/errorMessage';
 import { getGenderLabel } from '../utils/genderLabel';
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import LoadingScreen from '../components/LoadingScreen';
 import {
   Plus,
   Trash2,
@@ -138,15 +139,7 @@ const ManageCategoriesPage = () => {
 
   // ── Loading ──────────────────────────────────────────────────────────────
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: B.bg }}>
-        <div className="text-center">
-          <div className="w-10 h-10 rounded-full border-4 border-t-transparent animate-spin mx-auto"
-            style={{ borderColor: `${B.purple} transparent transparent transparent` }} />
-          <p className="mt-3 text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>Loading categories…</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen message="Loading categories…" />;
   }
 
   if (error && !tournament) {

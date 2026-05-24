@@ -1,4 +1,5 @@
 ﻿import { getErrorMessage } from '../utils/errorMessage';
+import LoadingScreen from '../components/LoadingScreen';
 import { getGenderLabel } from '../utils/genderLabel';
 import { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
@@ -88,19 +89,7 @@ const PartnerConfirmationPage = () => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: BRAND.bg }}>
-        <div className="fixed top-0 bottom-0 pointer-events-none overflow-hidden" style={{ left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: "480px" }}>
-          <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full blur-3xl opacity-[0.08]" style={{ background: BRAND.cyan }} />
-          <div className="absolute top-40 -left-40 w-80 h-80 rounded-full blur-3xl opacity-[0.06]" style={{ background: BRAND.purple }} />
-        </div>
-        <div className="relative text-center">
-          <div className="w-12 h-12 rounded-full border-4 border-t-transparent mx-auto animate-spin mb-4"
-            style={{ borderColor: `${BRAND.green} transparent transparent transparent` }} />
-          <p style={{ color: 'rgba(255,255,255,0.5)' }}>Loading invitation...</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen message="Loading invitation..." />;
   }
 
   if (success) {

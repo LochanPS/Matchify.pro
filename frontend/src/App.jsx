@@ -5,6 +5,7 @@ import { lazy, Suspense, Component, useEffect } from 'react'
 import api from './utils/api'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import AnimatedBackground from './components/AnimatedBackground'
+import LoadingScreen from './components/LoadingScreen'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { NotificationProvider } from './contexts/NotificationContext'
 import { WebSocketProvider } from './contexts/WebSocketContext'
@@ -161,24 +162,9 @@ class ChunkErrorBoundary extends Component {
   }
 }
 
-// Minimal full-screen loading fallback — matches app dark theme
+// Full-page loading fallback for Suspense (lazy-loaded routes)
 function PageLoader() {
-  return (
-    <div style={{
-      minHeight: '100vh', display: 'flex', flexDirection: 'column',
-      alignItems: 'center', justifyContent: 'center', gap: 12,
-      background: '#161730',
-    }}>
-      <div style={{
-        width: 40, height: 40, borderRadius: '50%',
-        border: '3px solid rgba(0,212,255,0.15)',
-        borderTopColor: '#00d4ff',
-        animation: 'pageLoaderSpin 0.7s linear infinite',
-      }} />
-      <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 12 }}>Loading…</span>
-      <style>{`@keyframes pageLoaderSpin { to { transform: rotate(360deg); } }`}</style>
-    </div>
-  )
+  return <LoadingScreen message="Loading..." />;
 }
 
 // Inner component that can access AuthContext

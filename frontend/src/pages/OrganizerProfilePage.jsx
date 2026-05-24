@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../utils/api';
 import VerifiedBadge from '../components/VerifiedBadge';
+import LoadingScreen from '../components/LoadingScreen';
 import {
   UserCircleIcon,
   TrophyIcon,
@@ -48,15 +49,7 @@ export default function OrganizerProfilePage() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: B.bg }}>
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-t-transparent rounded-full animate-spin mx-auto"
-            style={{ borderColor: 'rgba(168,85,247,0.3)', borderTopColor: B.purple }} />
-          <p className="mt-4 font-medium" style={{ color: B.sub }}>Loading profile...</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen message="Loading profile..." />;
   }
 
   if (!profile) {

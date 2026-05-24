@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { getTournamentMatches } from '../api/matches';
 import { joinTournament, leaveTournament } from '../services/socketService';
 import { Play, CheckCircle, Clock, Users, MapPin, Trophy } from 'lucide-react';
+import LoadingScreen from '../components/LoadingScreen';
 
 const LiveTournamentDashboard = () => {
   const { tournamentId } = useParams();
@@ -65,14 +66,7 @@ const LiveTournamentDashboard = () => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg,#0a0a1f 0%,#050810 100%)' }}>
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: 'rgba(6,182,212,0.3)', borderTopColor: '#06b6d4' }} />
-          <p className="mt-4 text-sm font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>Loading tournament...</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen message="Loading tournament..." />;
   }
 
   const statCards = [

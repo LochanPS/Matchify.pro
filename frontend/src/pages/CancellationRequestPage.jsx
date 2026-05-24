@@ -6,6 +6,7 @@ import api from '../utils/api';
 import { approveRefund, rejectRefund } from '../api/organizer';
 import { formatDateIndian } from '../utils/dateFormat';
 import { ArrowLeft, User, Mail, Phone, MapPin, Calendar, CreditCard, QrCode, AlertTriangle, Check, X, Loader, Trophy } from 'lucide-react';
+import LoadingScreen from '../components/LoadingScreen';
 
 const getImageUrl = (url) => {
   if (!url) return null;
@@ -68,14 +69,7 @@ export default function CancellationRequestPage() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: BG }}>
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: 'rgba(251,146,60,0.3)', borderTopColor: '#fb923c' }} />
-          <p className="mt-4 text-sm font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>Loading cancellation request...</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen message="Loading cancellation request..." />;
   }
 
   if (error) {

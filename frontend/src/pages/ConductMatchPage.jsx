@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../utils/api';
 import { ArrowLeft, Gavel, Trophy, AlertTriangle, Play, Loader, Swords, Settings, Check, X } from 'lucide-react';
+import LoadingScreen from '../components/LoadingScreen';
 
 const B = {
   bg: '#050810',
@@ -114,15 +115,7 @@ const ConductMatchPage = () => {
 
   // ── Loading ────────────────────────────────────────────────────────────────
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: B.bg }}>
-        <div className="text-center">
-          <div className="w-10 h-10 rounded-full border-4 border-t-transparent animate-spin mx-auto"
-            style={{ borderColor: `${B.green} transparent transparent transparent` }} />
-          <p className="mt-3 text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>Loading match…</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen message="Loading match…" />;
   }
 
   // Match already in progress — send to scoring page (render-phase, no async navigate)

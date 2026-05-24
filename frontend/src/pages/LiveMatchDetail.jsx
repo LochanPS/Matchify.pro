@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useWebSocket } from '../contexts/WebSocketContext';
 import { matchService } from '../services/matchService';
 import { CheckCircle, ArrowLeft, Share2 } from 'lucide-react';
+import LoadingScreen from '../components/LoadingScreen';
 
 const LiveMatchDetail = () => {
   const { matchId } = useParams();
@@ -70,14 +71,7 @@ const LiveMatchDetail = () => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg,#0a0a1f 0%,#050810 100%)' }}>
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: 'rgba(6,182,212,0.3)', borderTopColor: '#06b6d4' }} />
-          <p className="mt-4 text-sm font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>Loading match...</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen message="Loading match..." />;
   }
 
   if (error || !match) {

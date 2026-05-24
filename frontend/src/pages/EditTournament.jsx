@@ -1,4 +1,5 @@
 import { getErrorMessage } from '../utils/errorMessage';
+import LoadingScreen from '../components/LoadingScreen';
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { tournamentAPI } from '../api/tournament';
@@ -350,15 +351,7 @@ const EditTournament = () => {
   // ── Loading / error states ─────────────────────────────────────────────────
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: B.bg }}>
-        <div className="text-center">
-          <div className="w-10 h-10 rounded-full border-4 border-t-transparent animate-spin mx-auto"
-            style={{ borderColor: `${B.green} transparent transparent transparent` }} />
-          <p className="mt-3 text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>Loading…</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen message="Loading…" />;
   }
 
   if (loadError || (!loading && !tournament)) {

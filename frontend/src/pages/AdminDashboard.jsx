@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import NotificationBell from '../components/NotificationBell';
 import MatchifyLogo from '../components/MatchifyLogo';
+import LoadingScreen from '../components/LoadingScreen';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -82,11 +83,7 @@ export default function AdminDashboard() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
-      </div>
-    );
+    return <LoadingScreen message="Loading..." />;
   }
 
   return (

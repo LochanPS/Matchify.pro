@@ -9,6 +9,7 @@ const MGMT_PARTICLES = Array.from({ length: 18 }, (_, i) => ({
 
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import LoadingScreen from '../components/LoadingScreen';
 import {
   getTournamentRegistrations,
   exportParticipants,
@@ -235,15 +236,7 @@ export default function TournamentManagementPage() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#050810' }}>
-        <div className="text-center">
-          <div className="w-14 h-14 border-4 border-t-transparent rounded-full animate-spin mx-auto mb-4"
-            style={{ borderColor: 'rgba(6,182,212,0.3)', borderTopColor: '#06b6d4' }}></div>
-          <p className="font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>Loading registrations...</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen message="Loading registrations..." />;
   }
 
   return (

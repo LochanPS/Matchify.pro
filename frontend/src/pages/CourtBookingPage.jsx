@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import api from '../utils/api';
 import { fetchUpload } from '../utils/fetchUpload';
+import LoadingScreen from '../components/LoadingScreen';
 
 const B = {
   bg: '#0a0a0f', card: '#12121a', card2: '#1a1a26',
@@ -257,12 +258,7 @@ export default function CourtBookingPage() {
   }
 
   if (loading) {
-    return (
-      <div style={{ minHeight: '100vh', background: B.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ width: 36, height: 36, borderRadius: '50%', border: '3px solid rgba(0,212,255,0.15)', borderTopColor: B.cyan, animation: 'spin 0.7s linear infinite' }} />
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-      </div>
-    );
+    return <LoadingScreen message="Loading court availability..." />;
   }
 
   const upiId = academy?.upiId;

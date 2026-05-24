@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import api from '../utils/api';
 import { useAuth } from '../contexts/AuthContext';
+import LoadingScreen from '../components/LoadingScreen';
 
 const B = {
   bg: '#050810',
@@ -121,17 +122,7 @@ export default function AcademyDetailPage() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: B.bg }}>
-        <div style={{
-          width: 36, height: 36, borderRadius: '50%',
-          border: '3px solid rgba(0,212,255,0.15)',
-          borderTopColor: '#00d4ff',
-          animation: 'spin 0.7s linear infinite',
-        }} />
-        <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
-      </div>
-    );
+    return <LoadingScreen message="Loading..." />;
   }
 
   if (error || !academy) {

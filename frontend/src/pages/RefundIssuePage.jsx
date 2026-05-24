@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import { ArrowLeft, AlertTriangle, X, Clock } from 'lucide-react';
+import LoadingScreen from '../components/LoadingScreen';
 
 export default function RefundIssuePage() {
   const { registrationId } = useParams();
@@ -28,14 +29,7 @@ export default function RefundIssuePage() {
   const BG = 'linear-gradient(180deg,#0a0a1f 0%,#050810 50%,#0a0a1f 100%)';
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: BG }}>
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: 'rgba(239,68,68,0.3)', borderTopColor: '#ef4444' }} />
-          <p className="mt-4 text-sm font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>Loading...</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen message="Loading..." />;
   }
 
   if (error) {

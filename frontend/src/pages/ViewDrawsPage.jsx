@@ -4,6 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { tournamentAPI } from '../api/tournament';
 import { useAuth } from '../contexts/AuthContext';
 import api from '../utils/api';
+import LoadingScreen from '../components/LoadingScreen';
 import {
   ArrowLeft,
   GitBranch,
@@ -123,14 +124,7 @@ const ViewDrawsPage = () => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#050810' }}>
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 rounded-full animate-spin mx-auto mb-4" style={{ borderColor: 'rgba(6,182,212,0.3)', borderTopColor: '#06b6d4' }}></div>
-          <p className="text-gray-400">Loading draws...</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen message="Loading draws..." />;
   }
 
   return (

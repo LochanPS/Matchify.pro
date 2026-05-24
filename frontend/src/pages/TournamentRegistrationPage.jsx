@@ -8,6 +8,7 @@ import { getPublicPaymentSettings } from '../api/payment';
 import CategorySelector from '../components/registration/CategorySelector';
 import { ArrowLeftIcon, UserGroupIcon, CameraIcon, CheckCircleIcon, XMarkIcon, ClockIcon } from '@heroicons/react/24/outline';
 import { Loader, Upload, QrCode, AlertCircle, Search } from 'lucide-react';
+import LoadingScreen from '../components/LoadingScreen';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Constants
@@ -340,15 +341,7 @@ export default function TournamentRegistrationPage() {
 
   // ── Render: loading ──────────────────────────────────────────────────────
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: BRAND.bg }}>
-        <div className="text-center">
-          <div className="w-12 h-12 rounded-full border-4 border-t-transparent mx-auto animate-spin"
-            style={{ borderColor: `${BRAND.green} transparent transparent transparent` }} />
-          <p className="mt-4 text-sm font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>Loading…</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen message="Loading…" />;
   }
 
   if (!tournament) {

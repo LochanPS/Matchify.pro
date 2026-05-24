@@ -9,6 +9,7 @@ import PhotoViewer from '../components/PhotoViewer';
 import { formatDateIndian, formatDateLongIndian } from '../utils/dateFormat';
 import { Edit2, Save, X, Key, Phone, Mail, MapPin, User, AlertTriangle, Camera, Upload, ZoomIn } from 'lucide-react';
 import MatchifyLogo from '../components/MatchifyLogo';
+import LoadingScreen from '../components/LoadingScreen';
 import {
   UserCircleIcon,
   PencilSquareIcon,
@@ -324,15 +325,7 @@ export default function ProfilePage() {
   const canEditName = true; // Name is always editable
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#050810' }}>
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin mx-auto"
-            style={{ borderColor: 'rgba(6,182,212,0.3)', borderTopColor: '#06b6d4' }} />
-          <p className="mt-4 font-semibold" style={{ color: 'rgba(255,255,255,0.6)' }}>Loading profile...</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen message="Loading profile..." />;
   }
 
   return (

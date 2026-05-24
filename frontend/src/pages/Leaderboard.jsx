@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import { useAuth } from '../contexts/AuthContext';
 import { Trophy, Medal, Award, Target, Crown, Star, ArrowLeft, MapPin, Globe, Building } from 'lucide-react';
+import LoadingScreen from '../components/LoadingScreen';
 
 
 const B = {
@@ -103,24 +104,7 @@ export default function Leaderboard() {
   const needsLogin = (scope === 'city' && !userCity) || (scope === 'state' && !userState);
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{
-      background: '#050810',
-      backgroundImage: 'url(/bg-galaxy.png)',
-      backgroundSize: 'cover',
-      backgroundPosition: 'center top',
-      backgroundRepeat: 'no-repeat',
-      backgroundAttachment: 'fixed',
-    }}>
-        <div className="text-center">
-          <div
-            className="w-16 h-16 border-4 rounded-full animate-spin mx-auto"
-            style={{ borderColor: 'rgba(6,182,212,0.3)', borderTopColor: 'transparent' }}
-          />
-          <p className="mt-4 font-medium" style={{ color: B.sub }}>Loading leaderboard...</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen message="Loading leaderboard..." />;
   }
 
   return (

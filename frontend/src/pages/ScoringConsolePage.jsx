@@ -11,6 +11,7 @@ import GamePointIndicator from '../components/scoring/GamePointIndicator';
 import DoublesRotationIndicator from '../components/scoring/DoublesRotationIndicator';
 import ScoreCorrectionModal from '../components/scoring/ScoreCorrectionModal';
 import { AlertCircle, ArrowLeft, RefreshCw, AlertTriangle, Trophy, Target, Clock, MapPin } from 'lucide-react';
+import LoadingScreen from '../components/LoadingScreen';
 
 const ScoringConsolePage = () => {
   const { matchId } = useParams();
@@ -179,14 +180,7 @@ const ScoringConsolePage = () => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#050810' }}>
-        <div className="text-center">
-          <RefreshCw className="w-12 h-12 animate-spin mx-auto mb-4" style={{ color: '#06b6d4' }} />
-          <p className="text-gray-400">Loading match...</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen message="Loading match..." />;
   }
 
   if (!match) {

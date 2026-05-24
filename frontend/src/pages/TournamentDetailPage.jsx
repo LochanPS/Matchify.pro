@@ -23,6 +23,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { Edit, Users, Eye, Layers, GitBranch } from 'lucide-react';
 import { shareTournament as doShareTournament } from '../utils/tournamentShare';
+import LoadingScreen from '../components/LoadingScreen';
 
 // Delete Tournament Modal Component - Emerald Theme with Fixed Text Visibility
 const DeleteTournamentModal = ({ isOpen, onClose, onConfirm, tournamentName, isDeleting }) => {
@@ -495,14 +496,7 @@ const TournamentDetailPage = () => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#050810' }}>
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 rounded-full animate-spin mx-auto" style={{ borderColor: 'rgba(6,182,212,0.3)', borderTopColor: '#06b6d4' }}></div>
-          <p className="mt-4 font-medium" style={{ color: 'rgba(255,255,255,0.6)' }}>Loading tournament...</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen message="Loading tournament..." />;
   }
 
   if (error || !tournament) {

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getMyPoints } from '../api/points';
 import PointsHistoryCard from '../components/PointsHistoryCard';
 import { TrendingUp, Award, Trophy, Target, Crown, ArrowLeft, AlertTriangle } from 'lucide-react';
+import LoadingScreen from '../components/LoadingScreen';
 
 const B = {
   bg: '#050810',
@@ -42,15 +43,7 @@ const MyPoints = () => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: B.bg }}>
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin mx-auto"
-            style={{ borderColor: 'rgba(6,182,212,0.3)', borderTopColor: B.green }} />
-          <p className="mt-4 font-medium" style={{ color: B.sub }}>Loading your points...</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen message="Loading your points..." />;
   }
 
   const total_points = data?.total_points || 0;

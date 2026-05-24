@@ -5,6 +5,7 @@ import { joinMatch, leaveMatch } from '../services/socketService';
 import ScoreBoard from '../components/scoring/ScoreBoard';
 import MatchInfo from '../components/scoring/MatchInfo';
 import { RefreshCw, Users, Wifi } from 'lucide-react';
+import LoadingScreen from '../components/LoadingScreen';
 
 const SpectatorViewPage = () => {
   const { matchId } = useParams();
@@ -43,14 +44,7 @@ const SpectatorViewPage = () => {
   }, [matchId]);
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg,#0a0a1f 0%,#050810 100%)' }}>
-        <div className="text-center">
-          <RefreshCw className="w-10 h-10 animate-spin mx-auto mb-4" style={{ color: '#06b6d4' }} />
-          <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>Loading match...</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen message="Loading match..." />;
   }
 
   if (error || !match) {

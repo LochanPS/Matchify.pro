@@ -91,6 +91,37 @@ const loadDraft = () => {
   } catch { return null; }
 };
 
+/**
+ * Compress an image File via canvas.
+ * Resizes to maxDim on the longest side, re-encodes as JPEG at given quality.
+ * Vercel serverless has a 4.5MB body limit — this keeps uploads safe.
+ */
+const compressImage = (file, { maxDim = 1600, quality = 0.80 } = {}) =>
+  new Promise((resolve) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      let { width, height } = img;
+      if (width > maxDim || height > maxDim) {
+        const ratio = Math.min(maxDim / width, maxDim / height);
+        width = Math.round(width * ratio);
+        height = Math.round(height * ratio);
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+      canvas.toBlob(
+        (blob) => resolve(new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' })),
+        'image/jpeg',
+        quality
+      );
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); resolve(file); }; // fallback: original
+    img.src = url;
+  });
+
 function StepIndicator({ current, total }) {
   return (
     <div className="flex items-center justify-center gap-2 mb-6">
@@ -235,16 +266,18 @@ export default function AddAcademyPage() {
   };
 
   const handlePhotos = (e) => {
-    Array.from(e.target.files).forEach(file => {
+    Array.from(e.target.files).forEach(async (rawFile) => {
+      const file = await compressImage(rawFile, { maxDim: 1280, quality: 0.78 });
       const r = new FileReader();
       r.onload = ev => setPhotos(p => [...p, { file, preview: ev.target.result }]);
       r.readAsDataURL(file);
     });
   };
 
-  const handlePayment = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  const handlePayment = async (e) => {
+    const rawFile = e.target.files[0];
+    if (!rawFile) return;
+    const file = await compressImage(rawFile, { maxDim: 1600, quality: 0.82 });
     const r = new FileReader();
     r.onload = ev => setPaymentScreenshot({ file, preview: ev.target.result });
     r.readAsDataURL(file);
@@ -310,7 +343,7 @@ export default function AddAcademyPage() {
       clearDraft();
       setStep(4);
     } catch (err) {
-      setErrors({ payment: err.response?.data?.error || 'Submission failed. Try again.' });
+      setErrors({ payment: err.response?.data?.error || err.message || 'Submission failed. Try again.' });
     } finally {
       setLoading(false);
     }

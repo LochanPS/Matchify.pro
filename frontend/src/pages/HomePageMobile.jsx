@@ -466,40 +466,48 @@ const HomePageMobile = () => {
         {/* ═══════════════════════════════════════════════════════════
             STATS
         ══════════════════════════════════════════════════════════════ */}
-        <div
-          className="rounded-2xl p-6 mb-6 relative overflow-hidden"
-          style={{
-            background: 'linear-gradient(160deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.06) 100%)',
-            border: '1px solid rgba(6,182,212,0.22)',
-            backdropFilter: 'blur(20px)',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
-            animation: 'fadeIn 0.8s ease-out 0.8s both',
-          }}
-        >
+        <div className="mb-6" style={{ animation: 'fadeIn 0.8s ease-out 0.8s both' }}>
+          {/* Section header */}
+          <div className="text-center mb-5">
+            <h2 className="text-2xl font-black text-white mb-1">Our Community</h2>
+            <p className="text-sm" style={{ color: 'rgba(255,255,255,0.45)' }}>Growing every day</p>
+          </div>
 
-          <div className="relative z-10">
-            <div className="text-center mb-5">
-              <h2 className="text-xl font-black text-white mb-1">Our Community</h2>
-              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>Growing every day</p>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
+          {/* Single unified glass panel */}
+          <div className="rounded-3xl overflow-hidden"
+            style={{
+              background: 'rgba(10,14,30,0.75)',
+              border: '1px solid rgba(255,255,255,0.10)',
+              backdropFilter: 'blur(28px)',
+              WebkitBackdropFilter: 'blur(28px)',
+              boxShadow: '0 8px 40px rgba(0,0,0,0.45)',
+            }}>
+            <div className="grid grid-cols-2">
               {[
-                { value: '2,500+', label: 'Players',     accent: '#22d3ee', border: 'rgba(6,182,212,0.28)',   bg: 'rgba(6,182,212,0.08)'   },
-                { value: '80+',    label: 'Tournaments', accent: '#fbbf24', border: 'rgba(245,158,11,0.28)',  bg: 'rgba(245,158,11,0.08)'  },
-                { value: '30+',    label: 'Cities',      accent: '#fb923c', border: 'rgba(249,115,22,0.28)',  bg: 'rgba(249,115,22,0.08)'  },
-                { value: '₹25L+',  label: 'Prize Pool',  accent: '#a78bfa', border: 'rgba(139,92,246,0.28)',  bg: 'rgba(139,92,246,0.08)'  },
+                { value: '2,500+', label: 'Players',     grad: 'linear-gradient(135deg, #67e8f9, #06b6d4)' },
+                { value: '80+',    label: 'Tournaments', grad: 'linear-gradient(135deg, #fde68a, #f59e0b)' },
+                { value: '30+',    label: 'Cities',      grad: 'linear-gradient(135deg, #fdba74, #f97316)' },
+                { value: '₹25L+',  label: 'Prize Pool',  grad: 'linear-gradient(135deg, #d8b4fe, #a855f7)' },
               ].map((s, i) => (
-                <div key={i} className="p-5 rounded-2xl flex flex-col justify-between"
+                <div key={i} className="flex flex-col items-center justify-center text-center py-8 px-4"
                   style={{
-                    background: s.bg,
-                    border: `1px solid ${s.border}`,
-                    backdropFilter: 'blur(16px)',
-                    WebkitBackdropFilter: 'blur(16px)',
-                    animation: `scaleIn 0.45s ease-out ${0.85 + i * 0.08}s both`,
-                    minHeight: '100px',
+                    borderRight:  i % 2 === 0 ? '1px solid rgba(255,255,255,0.07)' : 'none',
+                    borderBottom: i < 2       ? '1px solid rgba(255,255,255,0.07)' : 'none',
+                    animation: `scaleIn 0.45s ease-out ${0.85 + i * 0.07}s both`,
                   }}>
-                  <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: 'rgba(255,255,255,0.4)', letterSpacing: '0.1em' }}>{s.label}</p>
-                  <p className="text-4xl font-black leading-none" style={{ color: s.accent }}>{s.value}</p>
+                  <p className="font-black mb-2 leading-none"
+                    style={{
+                      fontSize: '38px',
+                      background: s.grad,
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      backgroundClip: 'text',
+                    }}>
+                    {s.value}
+                  </p>
+                  <p style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.40)' }}>
+                    {s.label}
+                  </p>
                 </div>
               ))}
             </div>

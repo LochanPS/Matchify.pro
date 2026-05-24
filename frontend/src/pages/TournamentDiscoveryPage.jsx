@@ -45,6 +45,9 @@ export default function TournamentDiscoveryPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [fetchTrigger, setFetchTrigger] = useState(0);
 
+  // Tab result cache — instant switch, background refresh
+  const tabCache = useRef({ upcoming: null, completed: null });
+
   // Fetch tab counts once on mount
   useEffect(() => {
     const fetchCounts = async () => {
@@ -89,11 +92,23 @@ export default function TournamentDiscoveryPage() {
   }, [page, fetchTrigger]);
 
   useEffect(() => {
-    // Reset when filters or tab change
-    // If page is already 1, setPage(1) is a no-op and won't trigger fetchTournaments.
-    // In that case, increment fetchTrigger to force a fetch.
-    setTournaments([]);
-    setHasMore(true);
+    // If filters/search active, clear this tab's cache so filtered results don't persist
+    const hasActiveFilterOrSearch = searchQuery || Object.values(filters).some(Boolean);
+    if (hasActiveFilterOrSearch) {
+      tabCache.current[activeTab] = null;
+    }
+
+    // On tab switch: restore cached results instantly (no spinner) then background-refresh.
+    const cached = tabCache.current[activeTab];
+    if (cached && cached.tournaments.length > 0) {
+      // Show cached data immediately — no loading flash
+      setTournaments(cached.tournaments);
+      setTotal(cached.total);
+      setHasMore(cached.hasMore);
+    } else {
+      setTournaments([]);
+      setHasMore(true);
+    }
     if (page !== 1) {
       setPage(1);
     } else {
@@ -104,7 +119,10 @@ export default function TournamentDiscoveryPage() {
   const fetchTournaments = async () => {
     if (!hasMore && page > 1) return;
 
-    setLoading(true);
+    // Only show loading spinner if no cached data is already displayed
+    const hasCachedDisplay = page === 1 && tabCache.current[activeTab]?.tournaments?.length > 0;
+    if (!hasCachedDisplay) setLoading(true);
+
     try {
       const params = { page: page.toString(), limit: '10' };
       Object.keys(filters).forEach(key => {
@@ -115,15 +133,23 @@ export default function TournamentDiscoveryPage() {
 
       const response = await tournamentAPI.getTournaments(params);
       const newTournaments = response.data?.tournaments || [];
+      const newTotal = response.data?.pagination?.total || 0;
+      const newHasMore = newTournaments.length === 10;
 
       if (page === 1) {
         setTournaments(newTournaments);
+        setTotal(newTotal);
+        setHasMore(newHasMore);
+        // Update cache for this tab (only page-1 results, no filter/search state)
+        const noFilters = !searchQuery && !Object.values(filters).some(Boolean);
+        if (noFilters) {
+          tabCache.current[activeTab] = { tournaments: newTournaments, total: newTotal, hasMore: newHasMore };
+        }
       } else {
         setTournaments(prev => [...prev, ...newTournaments]);
+        setTotal(newTotal);
+        setHasMore(newHasMore);
       }
-
-      setTotal(response.data?.pagination?.total || 0);
-      setHasMore(newTournaments.length === 10); // If we got less than limit, no more pages
     } catch (error) {
       console.error('Error fetching tournaments:', error);
       if (page === 1) {

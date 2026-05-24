@@ -376,36 +376,60 @@ const UnifiedDashboardMobile = () => {
         {/* ── Quick Navigation ── */}
         <div className="mb-8" style={{ animation: 'fadeIn 0.5s ease-out both' }}>
           <div className="flex items-center gap-2.5 mb-4 px-1">
-            <div className="w-1 h-4 rounded-full" style={{ background: 'linear-gradient(to bottom, #06b6d4, #0891b2)' }} />
-            <span className="text-xs font-bold tracking-widest uppercase" style={{ color: 'rgba(255,255,255,0.38)' }}>Quick Navigation</span>
+            <div className="w-1.5 h-4 rounded-full" style={{ background: 'linear-gradient(to bottom, #22d3ee, #a855f7)' }} />
+            <span className="text-xs font-black tracking-widest uppercase" style={{ color: '#67e8f9', letterSpacing: '0.18em' }}>Quick Navigation</span>
           </div>
           <div className="grid grid-cols-3 gap-3">
             {/* Tournaments — cyan */}
-            <Link to="/tournaments" className="flex flex-col items-center gap-2.5 p-4 rounded-2xl transition-all group"
-              style={{ background: 'rgba(6,182,212,0.07)', border: '1px solid rgba(6,182,212,0.18)' }}>
+            <Link to="/tournaments" className="flex flex-col items-center gap-2.5 p-4 rounded-2xl transition-all active:scale-95"
+              style={{
+                background: 'linear-gradient(145deg, rgba(6,182,212,0.24) 0%, rgba(6,182,212,0.10) 100%)',
+                border: '1.5px solid rgba(6,182,212,0.58)',
+                boxShadow: '0 4px 22px rgba(6,182,212,0.20), inset 0 1px 0 rgba(255,255,255,0.09)'
+              }}>
               <div className="w-12 h-12 rounded-xl flex items-center justify-center"
-                style={{ background: 'rgba(6,182,212,0.14)', border: '1px solid rgba(6,182,212,0.32)' }}>
-                <TrophyIcon className="w-6 h-6" style={{ color: '#22d3ee' }} />
+                style={{
+                  background: 'linear-gradient(135deg, #0e7490 0%, #0284c7 100%)',
+                  border: '1px solid rgba(6,182,212,0.65)',
+                  boxShadow: '0 4px 16px rgba(6,182,212,0.40)'
+                }}>
+                <TrophyIcon className="w-6 h-6 text-white" />
               </div>
-              <span className="text-xs font-bold text-center" style={{ color: '#67e8f9' }}>Tournaments</span>
+              <span className="text-xs font-black text-center" style={{ color: '#67e8f9', textShadow: '0 0 10px rgba(6,182,212,0.65)' }}>Tournaments</span>
             </Link>
             {/* Leaderboard — amber */}
-            <Link to="/leaderboard" className="flex flex-col items-center gap-2.5 p-4 rounded-2xl transition-all group"
-              style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.22)' }}>
+            <Link to="/leaderboard" className="flex flex-col items-center gap-2.5 p-4 rounded-2xl transition-all active:scale-95"
+              style={{
+                background: 'linear-gradient(145deg, rgba(245,158,11,0.24) 0%, rgba(245,158,11,0.10) 100%)',
+                border: '1.5px solid rgba(245,158,11,0.58)',
+                boxShadow: '0 4px 22px rgba(245,158,11,0.20), inset 0 1px 0 rgba(255,255,255,0.09)'
+              }}>
               <div className="w-12 h-12 rounded-xl flex items-center justify-center"
-                style={{ background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.38)' }}>
-                <ChartBarIcon className="w-6 h-6" style={{ color: '#fbbf24' }} />
+                style={{
+                  background: 'linear-gradient(135deg, #b45309 0%, #d97706 100%)',
+                  border: '1px solid rgba(245,158,11,0.65)',
+                  boxShadow: '0 4px 16px rgba(245,158,11,0.40)'
+                }}>
+                <ChartBarIcon className="w-6 h-6 text-white" />
               </div>
-              <span className="text-xs font-bold text-center" style={{ color: '#fcd34d' }}>Leaderboard</span>
+              <span className="text-xs font-black text-center" style={{ color: '#fcd34d', textShadow: '0 0 10px rgba(245,158,11,0.65)' }}>Leaderboard</span>
             </Link>
             {/* Academies — violet */}
-            <Link to="/academies" className="flex flex-col items-center gap-2.5 p-4 rounded-2xl transition-all group"
-              style={{ background: 'rgba(139,92,246,0.07)', border: '1px solid rgba(139,92,246,0.18)' }}>
+            <Link to="/academies" className="flex flex-col items-center gap-2.5 p-4 rounded-2xl transition-all active:scale-95"
+              style={{
+                background: 'linear-gradient(145deg, rgba(139,92,246,0.24) 0%, rgba(139,92,246,0.10) 100%)',
+                border: '1.5px solid rgba(139,92,246,0.58)',
+                boxShadow: '0 4px 22px rgba(139,92,246,0.20), inset 0 1px 0 rgba(255,255,255,0.09)'
+              }}>
               <div className="w-12 h-12 rounded-xl flex items-center justify-center"
-                style={{ background: 'rgba(139,92,246,0.14)', border: '1px solid rgba(139,92,246,0.32)' }}>
-                <UserIcon className="w-6 h-6" style={{ color: '#a78bfa' }} />
+                style={{
+                  background: 'linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%)',
+                  border: '1px solid rgba(139,92,246,0.65)',
+                  boxShadow: '0 4px 16px rgba(139,92,246,0.40)'
+                }}>
+                <UserIcon className="w-6 h-6 text-white" />
               </div>
-              <span className="text-xs font-bold text-center" style={{ color: '#c4b5fd' }}>Academies</span>
+              <span className="text-xs font-black text-center" style={{ color: '#c4b5fd', textShadow: '0 0 10px rgba(139,92,246,0.65)' }}>Academies</span>
             </Link>
           </div>
         </div>
@@ -593,8 +617,8 @@ const UnifiedDashboardMobile = () => {
             className="rounded-2xl p-5 mb-6"
             style={{
               background: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              boxShadow: '0 4px 24px rgba(0,0,0,0.3)',
+              border: '1px solid rgba(255,255,255,0.10)',
+              boxShadow: '0 4px 28px rgba(0,0,0,0.35)',
               animation: 'slideUp 0.8s ease-out 0.4s both'
             }}
           >
@@ -603,8 +627,9 @@ const UnifiedDashboardMobile = () => {
                 <div
                   className="w-10 h-10 rounded-xl flex items-center justify-center"
                   style={{
-                    background: 'rgba(6,182,212,0.14)',
-                    border: '1px solid rgba(6,182,212,0.32)',
+                    background: 'linear-gradient(135deg, rgba(6,182,212,0.25), rgba(6,182,212,0.12))',
+                    border: '1.5px solid rgba(6,182,212,0.50)',
+                    boxShadow: '0 2px 10px rgba(6,182,212,0.20)'
                   }}
                 >
                   <span className="text-xl">🏸</span>
@@ -615,10 +640,10 @@ const UnifiedDashboardMobile = () => {
               <div className="grid grid-cols-2 gap-3">
                 {stats.map((stat, index) => {
                   const tileAccent = [
-                    { bg: 'rgba(6,182,212,0.1)',   border: 'rgba(6,182,212,0.4)',  left: '#06b6d4', icon: 'rgba(6,182,212,0.22)',  iconBorder: 'rgba(6,182,212,0.5)',  iconColor: '#22d3ee' },
-                    { bg: 'rgba(245,158,11,0.09)',  border: 'rgba(245,158,11,0.35)', left: '#f59e0b', icon: 'rgba(245,158,11,0.2)',   iconBorder: 'rgba(245,158,11,0.45)', iconColor: '#fbbf24' },
-                    { bg: 'rgba(59,130,246,0.09)',  border: 'rgba(59,130,246,0.35)', left: '#3b82f6', icon: 'rgba(59,130,246,0.2)',   iconBorder: 'rgba(59,130,246,0.45)', iconColor: '#60a5fa' },
-                    { bg: 'rgba(139,92,246,0.09)',  border: 'rgba(139,92,246,0.35)', left: '#8b5cf6', icon: 'rgba(139,92,246,0.2)',   iconBorder: 'rgba(139,92,246,0.45)', iconColor: '#a78bfa' },
+                    { bg: 'rgba(6,182,212,0.14)',   border: 'rgba(6,182,212,0.48)',  left: '#06b6d4', glow: 'rgba(6,182,212,0.12)', icon: 'rgba(6,182,212,0.28)',  iconBorder: 'rgba(6,182,212,0.58)',  iconColor: '#22d3ee' },
+                    { bg: 'rgba(245,158,11,0.13)',  border: 'rgba(245,158,11,0.44)', left: '#f59e0b', glow: 'rgba(245,158,11,0.10)', icon: 'rgba(245,158,11,0.26)',   iconBorder: 'rgba(245,158,11,0.52)', iconColor: '#fbbf24' },
+                    { bg: 'rgba(59,130,246,0.13)',  border: 'rgba(59,130,246,0.44)', left: '#3b82f6', glow: 'rgba(59,130,246,0.10)', icon: 'rgba(59,130,246,0.26)',   iconBorder: 'rgba(59,130,246,0.52)', iconColor: '#60a5fa' },
+                    { bg: 'rgba(139,92,246,0.13)',  border: 'rgba(139,92,246,0.44)', left: '#8b5cf6', glow: 'rgba(139,92,246,0.10)', icon: 'rgba(139,92,246,0.26)',   iconBorder: 'rgba(139,92,246,0.52)', iconColor: '#a78bfa' },
                   ][index];
                   return (
                     <div
@@ -630,16 +655,17 @@ const UnifiedDashboardMobile = () => {
                         borderRight: `1px solid ${tileAccent.border}`,
                         borderBottom: `1px solid ${tileAccent.border}`,
                         borderLeft: `3px solid ${tileAccent.left}`,
+                        boxShadow: `0 4px 18px ${tileAccent.glow}`
                       }}
                     >
                       <div
                         className="inline-flex items-center justify-center w-11 h-11 rounded-xl mb-3"
-                        style={{ background: tileAccent.icon, border: `1px solid ${tileAccent.iconBorder}` }}
+                        style={{ background: tileAccent.icon, border: `1px solid ${tileAccent.iconBorder}`, boxShadow: `0 2px 10px ${tileAccent.glow}` }}
                       >
                         <stat.icon className="w-5 h-5" style={{ color: tileAccent.iconColor }} />
                       </div>
                       <p className="text-3xl font-black mb-1 text-white">{stat.value}</p>
-                      <p className="text-xs" style={{ color: 'rgba(255,255,255,0.42)' }}>{stat.label}</p>
+                      <p className="text-xs font-semibold" style={{ color: 'rgba(255,255,255,0.52)' }}>{stat.label}</p>
                     </div>
                   );
                 })}
@@ -663,7 +689,11 @@ const UnifiedDashboardMobile = () => {
               <div className="flex items-center gap-3 mb-4">
                 <div
                   className="w-10 h-10 rounded-xl flex items-center justify-center"
-                  style={{ background: 'rgba(139,92,246,0.16)', border: '1px solid rgba(139,92,246,0.38)' }}
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(139,92,246,0.28), rgba(139,92,246,0.12))',
+                    border: '1.5px solid rgba(139,92,246,0.52)',
+                    boxShadow: '0 2px 10px rgba(139,92,246,0.22)'
+                  }}
                 >
                   <span className="text-xl">🏆</span>
                 </div>
@@ -838,7 +868,11 @@ const UnifiedDashboardMobile = () => {
             <div className="flex items-center gap-3 mb-4">
               <div
                 className="w-10 h-10 rounded-xl flex items-center justify-center"
-                style={{ background: 'rgba(59,130,246,0.16)', border: '1px solid rgba(59,130,246,0.38)' }}
+                style={{
+                  background: 'linear-gradient(135deg, rgba(59,130,246,0.28), rgba(59,130,246,0.12))',
+                  border: '1.5px solid rgba(59,130,246,0.52)',
+                  boxShadow: '0 2px 10px rgba(59,130,246,0.22)'
+                }}
               >
                 <span className="text-xl">⚖️</span>
               </div>
@@ -882,8 +916,8 @@ const UnifiedDashboardMobile = () => {
           className="rounded-2xl p-5 mb-6"
           style={{
             background: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
+            border: '1px solid rgba(255,255,255,0.10)',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.32)',
             animation: 'fadeIn 0.8s ease-out 0.7s both'
           }}
         >
@@ -891,7 +925,11 @@ const UnifiedDashboardMobile = () => {
             <div className="flex items-center gap-3 mb-5">
               <div
                 className="w-10 h-10 rounded-xl flex items-center justify-center"
-                style={{ background: 'rgba(6,182,212,0.14)', border: '1px solid rgba(6,182,212,0.32)' }}
+                style={{
+                  background: 'linear-gradient(135deg, rgba(6,182,212,0.26), rgba(6,182,212,0.12))',
+                  border: '1.5px solid rgba(6,182,212,0.50)',
+                  boxShadow: '0 2px 10px rgba(6,182,212,0.20)'
+                }}
               >
                 <UserIcon className="w-5 h-5" style={{ color: '#22d3ee' }} />
               </div>
@@ -954,16 +992,20 @@ const UnifiedDashboardMobile = () => {
           className="rounded-2xl overflow-hidden mb-6"
           style={{
             background: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
+            border: '1px solid rgba(255,255,255,0.10)',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.32)',
             animation: 'fadeIn 0.8s ease-out 0.8s both'
           }}
         >
-          <div className="p-5 border-b flex items-center justify-between" style={{ borderColor: 'rgba(255,255,255,0.07)' }}>
+          <div className="p-5 border-b flex items-center justify-between" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
             <div className="flex items-center gap-3">
               <div
                 className="w-10 h-10 rounded-xl flex items-center justify-center"
-                style={{ background: 'rgba(249,115,22,0.14)', border: '1px solid rgba(249,115,22,0.32)' }}
+                style={{
+                  background: 'linear-gradient(135deg, rgba(249,115,22,0.26), rgba(249,115,22,0.12))',
+                  border: '1.5px solid rgba(249,115,22,0.50)',
+                  boxShadow: '0 2px 10px rgba(249,115,22,0.20)'
+                }}
               >
                 <CalendarIcon className="w-5 h-5" style={{ color: '#fb923c' }} />
               </div>
@@ -1020,14 +1062,18 @@ const UnifiedDashboardMobile = () => {
                     key={reg.id}
                     className="p-4 rounded-xl"
                     style={{
-                      background: 'rgba(255,255,255,0.04)',
-                      border: '1px solid rgba(255,255,255,0.08)',
+                      background: 'linear-gradient(135deg, rgba(6,182,212,0.06) 0%, rgba(255,255,255,0.03) 100%)',
+                      border: '1px solid rgba(6,182,212,0.22)',
+                      borderLeft: '3px solid rgba(6,182,212,0.55)'
                     }}
                   >
                     <div className="flex items-start gap-3">
                       <div
                         className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
-                        style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)' }}
+                        style={{
+                          background: 'linear-gradient(135deg, rgba(6,182,212,0.20), rgba(6,182,212,0.10))',
+                          border: '1px solid rgba(6,182,212,0.38)'
+                        }}
                       >
                         <span className="text-xl">🏆</span>
                       </div>
@@ -1084,92 +1130,111 @@ const UnifiedDashboardMobile = () => {
           className="rounded-2xl p-5 mb-6"
           style={{
             background: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(255,255,255,0.08)',
+            border: '1px solid rgba(255,255,255,0.10)',
+            boxShadow: '0 4px 24px rgba(0,0,0,0.30)',
             animation: 'fadeIn 0.8s ease-out 0.9s both'
           }}
         >
           <div className="flex items-center gap-2.5 mb-4">
-            <div className="w-1 h-4 rounded-full" style={{ background: 'linear-gradient(to bottom, #f97316, #a855f7)' }} />
+            <div className="w-1.5 h-4 rounded-full" style={{ background: 'linear-gradient(to bottom, #f97316, #a855f7)' }} />
             <h3 className="text-lg font-black text-white">Quick Actions</h3>
           </div>
           <div className="space-y-3">
             <Link
               to="/tournaments"
-              className="flex items-center gap-4 p-4 rounded-xl transition-all relative overflow-hidden group"
+              className="flex items-center gap-4 p-4 rounded-xl transition-all relative overflow-hidden active:scale-[0.98]"
               style={{
-                background: 'rgba(6,182,212,0.06)',
-                border: '1px solid rgba(6,182,212,0.18)',
+                background: 'linear-gradient(135deg, rgba(6,182,212,0.14) 0%, rgba(6,182,212,0.06) 100%)',
+                border: '1.5px solid rgba(6,182,212,0.40)',
+                boxShadow: '0 2px 14px rgba(6,182,212,0.12)'
               }}
             >
               <div
-                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                style={{ background: 'rgba(6,182,212,0.05)' }}
-              />
-              <div
-                className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 relative z-10"
+                className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
                 style={{
                   background: 'linear-gradient(135deg, #0e7490, #0284c7)',
-                  boxShadow: '0 4px 12px rgba(6,182,212,0.28)',
+                  boxShadow: '0 4px 16px rgba(6,182,212,0.38)',
                 }}
               >
                 <TrophyIcon className="w-6 h-6 text-white" />
               </div>
-              <div className="flex-1 relative z-10">
-                <p className="font-bold text-white text-sm">Browse Tournaments</p>
-                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.42)' }}>Find your next competition</p>
+              <div className="flex-1">
+                <p className="font-black text-white text-sm">Browse Tournaments</p>
+                <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.48)' }}>Find your next competition</p>
               </div>
-              <ArrowRightIcon className="w-5 h-5 relative z-10" style={{ color: '#22d3ee' }} />
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                style={{ background: 'rgba(6,182,212,0.18)', border: '1px solid rgba(6,182,212,0.35)' }}>
+                <ArrowRightIcon className="w-4 h-4" style={{ color: '#22d3ee' }} />
+              </div>
             </Link>
 
             <Link
               to="/leaderboard"
-              className="flex items-center gap-4 p-4 rounded-xl transition-all relative overflow-hidden group"
-              style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.18)' }}
+              className="flex items-center gap-4 p-4 rounded-xl transition-all relative overflow-hidden active:scale-[0.98]"
+              style={{
+                background: 'linear-gradient(135deg, rgba(245,158,11,0.14) 0%, rgba(245,158,11,0.06) 100%)',
+                border: '1.5px solid rgba(245,158,11,0.40)',
+                boxShadow: '0 2px 14px rgba(245,158,11,0.12)'
+              }}
             >
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: 'rgba(245,158,11,0.05)' }} />
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 relative z-10"
-                style={{ background: 'linear-gradient(135deg, #b45309, #d97706)', boxShadow: '0 4px 12px rgba(245,158,11,0.28)' }}>
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{ background: 'linear-gradient(135deg, #b45309, #d97706)', boxShadow: '0 4px 16px rgba(245,158,11,0.38)' }}>
                 <ChartBarIcon className="w-6 h-6 text-white" />
               </div>
-              <div className="flex-1 relative z-10">
-                <p className="font-bold text-white text-sm">Leaderboard</p>
-                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.42)' }}>Check your ranking</p>
+              <div className="flex-1">
+                <p className="font-black text-white text-sm">Leaderboard</p>
+                <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.48)' }}>Check your ranking</p>
               </div>
-              <ArrowRightIcon className="w-5 h-5 relative z-10" style={{ color: '#fbbf24' }} />
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                style={{ background: 'rgba(245,158,11,0.18)', border: '1px solid rgba(245,158,11,0.35)' }}>
+                <ArrowRightIcon className="w-4 h-4" style={{ color: '#fbbf24' }} />
+              </div>
             </Link>
 
             <Link
               to="/my-points"
-              className="flex items-center gap-4 p-4 rounded-xl transition-all relative overflow-hidden group"
-              style={{ background: 'rgba(249,115,22,0.06)', border: '1px solid rgba(249,115,22,0.18)' }}
+              className="flex items-center gap-4 p-4 rounded-xl transition-all relative overflow-hidden active:scale-[0.98]"
+              style={{
+                background: 'linear-gradient(135deg, rgba(249,115,22,0.14) 0%, rgba(249,115,22,0.06) 100%)',
+                border: '1.5px solid rgba(249,115,22,0.40)',
+                boxShadow: '0 2px 14px rgba(249,115,22,0.12)'
+              }}
             >
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: 'rgba(249,115,22,0.05)' }} />
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 relative z-10"
-                style={{ background: 'linear-gradient(135deg, #c2410c, #ea580c)', boxShadow: '0 4px 12px rgba(249,115,22,0.28)' }}>
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{ background: 'linear-gradient(135deg, #c2410c, #ea580c)', boxShadow: '0 4px 16px rgba(249,115,22,0.38)' }}>
                 <SparklesIcon className="w-6 h-6 text-white" />
               </div>
-              <div className="flex-1 relative z-10">
-                <p className="font-bold text-white text-sm">My Points</p>
-                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.42)' }}>Track your score & progress</p>
+              <div className="flex-1">
+                <p className="font-black text-white text-sm">My Points</p>
+                <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.48)' }}>Track your score & progress</p>
               </div>
-              <ArrowRightIcon className="w-5 h-5 relative z-10" style={{ color: '#fb923c' }} />
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                style={{ background: 'rgba(249,115,22,0.18)', border: '1px solid rgba(249,115,22,0.35)' }}>
+                <ArrowRightIcon className="w-4 h-4" style={{ color: '#fb923c' }} />
+              </div>
             </Link>
 
             <Link
               to="/live-matches"
-              className="flex items-center gap-4 p-4 rounded-xl transition-all relative overflow-hidden group"
-              style={{ background: 'rgba(139,92,246,0.06)', border: '1px solid rgba(139,92,246,0.18)' }}
+              className="flex items-center gap-4 p-4 rounded-xl transition-all relative overflow-hidden active:scale-[0.98]"
+              style={{
+                background: 'linear-gradient(135deg, rgba(139,92,246,0.14) 0%, rgba(139,92,246,0.06) 100%)',
+                border: '1.5px solid rgba(139,92,246,0.40)',
+                boxShadow: '0 2px 14px rgba(139,92,246,0.12)'
+              }}
             >
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: 'rgba(139,92,246,0.05)' }} />
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 relative z-10"
-                style={{ background: 'linear-gradient(135deg, #6d28d9, #7c3aed)', boxShadow: '0 4px 12px rgba(139,92,246,0.28)' }}>
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{ background: 'linear-gradient(135deg, #6d28d9, #7c3aed)', boxShadow: '0 4px 16px rgba(139,92,246,0.38)' }}>
                 <FireIcon className="w-6 h-6 text-white" />
               </div>
-              <div className="flex-1 relative z-10">
-                <p className="font-bold text-white text-sm">Live Matches</p>
-                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.42)' }}>Watch ongoing matches</p>
+              <div className="flex-1">
+                <p className="font-black text-white text-sm">Live Matches</p>
+                <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.48)' }}>Watch ongoing matches</p>
               </div>
-              <ArrowRightIcon className="w-5 h-5 relative z-10" style={{ color: '#a78bfa' }} />
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                style={{ background: 'rgba(139,92,246,0.18)', border: '1px solid rgba(139,92,246,0.35)' }}>
+                <ArrowRightIcon className="w-4 h-4" style={{ color: '#a78bfa' }} />
+              </div>
             </Link>
           </div>
         </div>

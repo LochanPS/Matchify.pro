@@ -459,8 +459,9 @@ const UnifiedDashboardMobile = () => {
         <div
           className="rounded-2xl p-5 mb-6"
           style={{
-            background: 'linear-gradient(160deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.06) 100%)',
-            border: '1px solid rgba(16,185,129,0.22)',
+            background: 'linear-gradient(160deg, rgba(255,255,255,0.09) 0%, rgba(255,255,255,0.05) 100%)',
+            border: '1px solid rgba(255,255,255,0.12)',
+            borderTop: '2px solid rgba(16,185,129,0.6)',
             boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
             animation: 'fadeIn 0.5s ease-out both'
           }}
@@ -470,29 +471,32 @@ const UnifiedDashboardMobile = () => {
             <h3 className="text-lg font-black text-white">Quick Navigation</h3>
           </div>
           <div className="grid grid-cols-3 gap-3">
+            {/* Tournaments — emerald */}
             <Link to="/tournaments" className="flex flex-col items-center gap-2 p-4 rounded-xl transition-all group"
-              style={{ background: 'rgba(255,255,255,0.09)', border: '1px solid rgba(255,255,255,0.15)', boxShadow: '0 2px 8px rgba(0,0,0,0.2)' }}>
+              style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.3)' }}>
               <div className="w-12 h-12 rounded-xl flex items-center justify-center"
-                style={{ background: 'rgba(16,185,129,0.28)', border: '1px solid rgba(16,185,129,0.65)' }}>
-                <TrophyIcon className="w-6 h-6" style={{ color: '#10b981' }} />
+                style={{ background: 'rgba(16,185,129,0.22)', border: '1px solid rgba(16,185,129,0.5)' }}>
+                <TrophyIcon className="w-6 h-6" style={{ color: '#34d399' }} />
               </div>
-              <span className="text-xs font-bold text-white text-center">Tournaments</span>
+              <span className="text-xs font-bold text-center" style={{ color: '#6ee7b7' }}>Tournaments</span>
             </Link>
+            {/* Leaderboard — blue */}
             <Link to="/leaderboard" className="flex flex-col items-center gap-2 p-4 rounded-xl transition-all group"
-              style={{ background: 'rgba(255,255,255,0.09)', border: '1px solid rgba(255,255,255,0.15)', boxShadow: '0 2px 8px rgba(0,0,0,0.2)' }}>
+              style={{ background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.3)' }}>
               <div className="w-12 h-12 rounded-xl flex items-center justify-center"
-                style={{ background: 'rgba(16,185,129,0.28)', border: '1px solid rgba(16,185,129,0.65)' }}>
-                <ChartBarIcon className="w-6 h-6" style={{ color: '#10b981' }} />
+                style={{ background: 'rgba(59,130,246,0.2)', border: '1px solid rgba(59,130,246,0.5)' }}>
+                <ChartBarIcon className="w-6 h-6" style={{ color: '#60a5fa' }} />
               </div>
-              <span className="text-xs font-bold text-white text-center">Leaderboard</span>
+              <span className="text-xs font-bold text-center" style={{ color: '#93c5fd' }}>Leaderboard</span>
             </Link>
+            {/* Academies — violet */}
             <Link to="/academies" className="flex flex-col items-center gap-2 p-4 rounded-xl transition-all group"
-              style={{ background: 'rgba(255,255,255,0.09)', border: '1px solid rgba(255,255,255,0.15)', boxShadow: '0 2px 8px rgba(0,0,0,0.2)' }}>
+              style={{ background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.3)' }}>
               <div className="w-12 h-12 rounded-xl flex items-center justify-center"
-                style={{ background: 'rgba(16,185,129,0.28)', border: '1px solid rgba(16,185,129,0.65)' }}>
-                <UserIcon className="w-6 h-6" style={{ color: '#10b981' }} />
+                style={{ background: 'rgba(139,92,246,0.2)', border: '1px solid rgba(139,92,246,0.5)' }}>
+                <UserIcon className="w-6 h-6" style={{ color: '#a78bfa' }} />
               </div>
-              <span className="text-xs font-bold text-white text-center">Academies</span>
+              <span className="text-xs font-bold text-center" style={{ color: '#c4b5fd' }}>Academies</span>
             </Link>
           </div>
         </div>
@@ -501,11 +505,11 @@ const UnifiedDashboardMobile = () => {
         <div
           className="rounded-2xl p-5 mb-6 relative overflow-hidden"
           style={{
-            background: 'linear-gradient(160deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.06) 100%)',
-            border: '1px solid rgba(16,185,129,0.28)',
-            borderTop: '2px solid rgba(16,185,129,0.5)',
+            background: 'linear-gradient(160deg, rgba(16,185,129,0.08) 0%, rgba(255,255,255,0.05) 60%, rgba(255,255,255,0.03) 100%)',
+            border: '1px solid rgba(16,185,129,0.35)',
+            borderTop: '3px solid #10b981',
             backdropFilter: 'blur(20px)',
-            boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.35)',
             animation: 'fadeIn 0.8s ease-out 0.2s both'
           }}
         >
@@ -643,9 +647,9 @@ const UnifiedDashboardMobile = () => {
             to="/profile"
             className="flex items-center justify-center gap-2 w-full py-3 rounded-xl font-bold text-sm transition-all relative overflow-hidden group z-10"
             style={{
-              background: 'rgba(16,185,129,0.1)',
-              border: '1.5px solid rgba(16,185,129,0.4)',
-              color: '#10b981',
+              background: 'linear-gradient(135deg, rgba(16,185,129,0.2), rgba(5,150,105,0.15))',
+              border: '1.5px solid rgba(16,185,129,0.55)',
+              color: '#34d399',
             }}
           >
             <div
@@ -662,8 +666,9 @@ const UnifiedDashboardMobile = () => {
           <div
             className="rounded-2xl p-5 mb-6"
             style={{
-              background: 'rgba(255,255,255,0.08)',
-              border: '1px solid rgba(255,255,255,0.14)',
+              background: 'linear-gradient(160deg, rgba(255,255,255,0.09) 0%, rgba(255,255,255,0.05) 100%)',
+              border: '1px solid rgba(255,255,255,0.12)',
+              borderTop: '2px solid rgba(16,185,129,0.6)',
               boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
               animation: 'slideUp 0.8s ease-out 0.4s both'
             }}
@@ -673,8 +678,8 @@ const UnifiedDashboardMobile = () => {
                 <div
                   className="w-10 h-10 rounded-xl flex items-center justify-center"
                   style={{
-                    background: 'rgba(16,185,129,0.18)',
-                    border: '1px solid rgba(16,185,129,0.35)',
+                    background: 'rgba(16,185,129,0.2)',
+                    border: '1px solid rgba(16,185,129,0.45)',
                   }}
                 >
                   <span className="text-xl">🏸</span>
@@ -683,28 +688,36 @@ const UnifiedDashboardMobile = () => {
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                {stats.map((stat, index) => (
+                {stats.map((stat, index) => {
+                  const tileAccent = [
+                    { bg: 'rgba(16,185,129,0.1)',   border: 'rgba(16,185,129,0.4)',  left: '#10b981', icon: 'rgba(16,185,129,0.22)',  iconBorder: 'rgba(16,185,129,0.5)',  iconColor: '#34d399' },
+                    { bg: 'rgba(245,158,11,0.09)',  border: 'rgba(245,158,11,0.35)', left: '#f59e0b', icon: 'rgba(245,158,11,0.2)',   iconBorder: 'rgba(245,158,11,0.45)', iconColor: '#fbbf24' },
+                    { bg: 'rgba(59,130,246,0.09)',  border: 'rgba(59,130,246,0.35)', left: '#3b82f6', icon: 'rgba(59,130,246,0.2)',   iconBorder: 'rgba(59,130,246,0.45)', iconColor: '#60a5fa' },
+                    { bg: 'rgba(139,92,246,0.09)',  border: 'rgba(139,92,246,0.35)', left: '#8b5cf6', icon: 'rgba(139,92,246,0.2)',   iconBorder: 'rgba(139,92,246,0.45)', iconColor: '#a78bfa' },
+                  ][index];
+                  return (
                   <div
                     key={index}
                     className="p-4 rounded-xl"
                     style={{
-                      background: 'linear-gradient(135deg, rgba(16,185,129,0.07) 0%, rgba(255,255,255,0.04) 100%)',
-                      borderTop: '1px solid rgba(16,185,129,0.2)',
-                      borderRight: '1px solid rgba(16,185,129,0.2)',
-                      borderBottom: '1px solid rgba(16,185,129,0.2)',
-                      borderLeft: '3px solid rgba(16,185,129,0.55)',
+                      background: `linear-gradient(135deg, ${tileAccent.bg} 0%, rgba(255,255,255,0.03) 100%)`,
+                      borderTop: `1px solid ${tileAccent.border}`,
+                      borderRight: `1px solid ${tileAccent.border}`,
+                      borderBottom: `1px solid ${tileAccent.border}`,
+                      borderLeft: `3px solid ${tileAccent.left}`,
                     }}
                   >
                     <div
                       className="inline-flex items-center justify-center w-11 h-11 rounded-xl mb-3"
-                      style={{ background: 'rgba(16,185,129,0.18)', border: '1px solid rgba(16,185,129,0.38)' }}
+                      style={{ background: tileAccent.icon, border: `1px solid ${tileAccent.iconBorder}` }}
                     >
-                      <stat.icon className="w-5 h-5" style={{ color: '#10b981' }} />
+                      <stat.icon className="w-5 h-5" style={{ color: tileAccent.iconColor }} />
                     </div>
                     <p className="text-3xl font-black mb-1 text-white">{stat.value}</p>
                     <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>{stat.label}</p>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>

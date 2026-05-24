@@ -4,18 +4,6 @@ import api from '../utils/api';
 import { useAuth } from '../contexts/AuthContext';
 import { Trophy, Medal, Award, Target, Crown, Star, ArrowLeft, MapPin, Globe, Building } from 'lucide-react';
 
-// Pre-generated particle data — deterministic, no Math.random in render
-const LB_PARTICLES = Array.from({ length: 15 }, (_, i) => ({
-  w: (i * 7 + 1) % 3 + 1,
-  h: (i * 11 + 1) % 3 + 1,
-  x: (i * 37 + 11) % 97,
-  y: (i * 53 + 7) % 91,
-  c: ['#06b6d4', '#f59e0b', '#00d4ff'][i % 3],
-  o: ((i * 13) % 50) / 100 + 0.2,
-  dur: (i * 7) % 8 + 4,
-  delay: (i * 3) % 4,
-  glow: (i * 11) % 15 + 5,
-}));
 
 const B = {
   bg: '#050810',
@@ -116,7 +104,14 @@ export default function Leaderboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: B.bg }}>
+      <div className="min-h-screen flex items-center justify-center" style={{
+      background: '#050810',
+      backgroundImage: 'url(/bg-galaxy.png)',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center top',
+      backgroundRepeat: 'no-repeat',
+      backgroundAttachment: 'fixed',
+    }}>
         <div className="text-center">
           <div
             className="w-16 h-16 border-4 rounded-full animate-spin mx-auto"
@@ -130,38 +125,21 @@ export default function Leaderboard() {
 
   return (
     <>
-    <div className="min-h-screen" style={{ background: B.bg }}>
-      {/* Background */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full blur-3xl opacity-[0.08]" style={{ background: B.green }} />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full blur-3xl opacity-[0.06]" style={{ background: B.cyan }} />
-        <div className="absolute top-1/2 right-1/3 w-80 h-80 rounded-full blur-3xl opacity-[0.05]" style={{ background: B.purple }} />
-        {LB_PARTICLES.map((p, i) => (
-          <div
-            key={i}
-            className="absolute rounded-full"
-            style={{
-              width: `${p.w}px`, height: `${p.h}px`,
-              left: `${p.x}%`, top: `${p.y}%`,
-              background: p.c, opacity: p.o,
-              animation: `lbfloat ${p.dur}s ease-in-out infinite`,
-              animationDelay: `${p.delay}s`,
-              boxShadow: `0 0 ${p.glow}px ${p.c}`,
-            }}
-          />
-        ))}
-      </div>
+    <div className="min-h-screen relative overflow-hidden" style={{
+      background: '#050810',
+      backgroundImage: 'url(/bg-galaxy.png)',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center top',
+      backgroundRepeat: 'no-repeat',
+      backgroundAttachment: 'fixed',
+    }}>
+      {/* Dark overlay */}
+      <div className="fixed inset-0 pointer-events-none" style={{ background: 'rgba(5,8,16,0.72)', zIndex: 0 }} />
+      {/* Static blobs */}
+      <div className="fixed pointer-events-none" style={{ top:'10%', right:'-10%', width:'320px', height:'320px', borderRadius:'50%', background:'radial-gradient(circle, rgba(6,182,212,0.07) 0%, transparent 70%)', zIndex:0 }} />
+      <div className="fixed pointer-events-none" style={{ bottom:'15%', left:'-8%', width:'280px', height:'280px', borderRadius:'50%', background:'radial-gradient(circle, rgba(139,92,246,0.06) 0%, transparent 70%)', zIndex:0 }} />
 
-      <style>{`
-        @keyframes lbfloat {
-          0%, 100% { transform: translate(0,0) scale(1); }
-          25% { transform: translate(20px,-20px) scale(1.1); }
-          50% { transform: translate(-15px,15px) scale(0.9); }
-          75% { transform: translate(15px,10px) scale(1.05); }
-        }
-      `}</style>
-
-      <div className="relative max-w-2xl mx-auto px-4 py-6">
+      <div className="relative z-10 max-w-2xl mx-auto px-4 py-6">
         {/* Back */}
         <button onClick={() => navigate('/dashboard')} className="flex items-center gap-2 mb-6">
           <ArrowLeft className="w-5 h-5" style={{ color: B.green }} />

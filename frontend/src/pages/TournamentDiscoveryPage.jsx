@@ -19,18 +19,6 @@ import { tournamentAPI } from '../api/tournament';
 import { formatDateIndian } from '../utils/dateFormat';
 import { buildShareMessage, shareTournament as doShareTournament } from '../utils/tournamentShare';
 
-// Pre-generated particle data — deterministic, no Math.random in render
-const DISC_PARTICLES = Array.from({ length: 15 }, (_, i) => ({
-  w: (i * 7 + 2) % 4 + 2,
-  h: (i * 11 + 2) % 4 + 2,
-  x: (i * 37 + 11) % 97,
-  y: (i * 53 + 7) % 91,
-  c: ["#06b6d4", "#00d4ff", "#a855f7", "#06b6d4"][i % 4],
-  o: ((i * 13) % 50) / 100 + 0.2,
-  dur: (i * 7) % 8 + 5,
-  delay: (i * 3) % 5,
-  glow: (i * 11) % 15 + 5,
-}));
 
 
 export default function TournamentDiscoveryPage() {
@@ -170,60 +158,21 @@ export default function TournamentDiscoveryPage() {
   const hasActiveFilters = Object.values(filters).some(v => v) || searchQuery;
 
   return (
-    <div className="min-h-screen relative overflow-hidden pb-6" style={{ background: '#050810' }}>
-      {/* Animated Background Elements */}
-      <div className="fixed top-0 bottom-0 pointer-events-none overflow-hidden" style={{ left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: "480px" }}>
-        <div
-          className="absolute top-0 right-0 w-72 h-72 rounded-full blur-3xl"
-          style={{
-            background: 'radial-gradient(circle, rgba(0,180,160,0.15), transparent)',
-            animation: 'glow 4s ease-in-out infinite'
-          }}
-        />
-        <div
-          className="absolute bottom-1/3 left-0 w-64 h-64 rounded-full blur-3xl"
-          style={{
-            background: 'radial-gradient(circle, rgba(99,102,241,0.1), transparent)',
-            animation: 'glow 5s ease-in-out infinite reverse'
-          }}
-        />
-        <div
-          className="absolute top-1/2 right-1/4 w-56 h-56 rounded-full blur-3xl"
-          style={{
-            background: 'radial-gradient(circle, rgba(6,182,212,0.09), transparent)',
-            animation: 'glow 6s ease-in-out infinite'
-          }}
-        />
-        {DISC_PARTICLES.map((p, i) => (
-          <div
-            key={i}
-            className="absolute rounded-full"
-            style={{
-              width: `${p.w}px`,
-              height: `${p.h}px`,
-              left: `${p.x}%`,
-              top: `${p.y}%`,
-              background: p.c,
-              opacity: p.o,
-              animation: `float ${p.dur}s ease-in-out infinite`,
-              animationDelay: `${p.delay}s`,
-              boxShadow: `0 0 ${p.glow}px ${p.c}`,
-            }}
-          />
-        ))}
-      </div>
+    <div className="min-h-screen relative overflow-hidden pb-6" style={{
+      background: '#050810',
+      backgroundImage: 'url(/bg-galaxy.png)',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center top',
+      backgroundRepeat: 'no-repeat',
+      backgroundAttachment: 'fixed',
+    }}>
+      {/* Dark overlay */}
+      <div className="fixed inset-0 pointer-events-none" style={{ background: 'rgba(5,8,16,0.72)', zIndex: 0 }} />
+      {/* Static blobs */}
+      <div className="fixed pointer-events-none" style={{ top:'8%', right:'-8%', width:'300px', height:'300px', borderRadius:'50%', background:'radial-gradient(circle, rgba(6,182,212,0.07) 0%, transparent 70%)', zIndex:0 }} />
+      <div className="fixed pointer-events-none" style={{ bottom:'20%', left:'-6%', width:'260px', height:'260px', borderRadius:'50%', background:'radial-gradient(circle, rgba(245,158,11,0.06) 0%, transparent 70%)', zIndex:0 }} />
 
       <style>{`
-        @keyframes float {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          25% { transform: translate(15px, -15px) scale(1.05); }
-          50% { transform: translate(-10px, 10px) scale(0.95); }
-          75% { transform: translate(10px, 5px) scale(1.02); }
-        }
-        @keyframes glow {
-          0%, 100% { opacity: 0.3; filter: brightness(1); }
-          50% { opacity: 0.6; filter: brightness(1.3); }
-        }
         @keyframes shimmer {
           0% { background-position: -200% center; }
           100% { background-position: 200% center; }
@@ -231,7 +180,7 @@ export default function TournamentDiscoveryPage() {
       `}</style>
 
       {/* Hero Header - Compact Mobile-First with Back Button */}
-      <div className="relative pt-4">
+      <div className="relative z-10 pt-4">
         <div className="relative max-w-7xl mx-auto px-4 py-3">
           {/* Back Button */}
           <button

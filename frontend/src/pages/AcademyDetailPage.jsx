@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, MapPin, Phone, Mail, Globe, Building2,
-  ChevronLeft, ChevronRight, BadgeCheck, Clock, Plus,
-  IndianRupee, Calendar, Pencil, X
+  ChevronLeft, ChevronRight, BadgeCheck, Clock,
+  IndianRupee, Calendar, Pencil, X, Share2, Copy, Check
 } from 'lucide-react';
 import api from '../utils/api';
 import { useAuth } from '../contexts/AuthContext';
@@ -61,10 +61,7 @@ function formatFacilityDetail(sport, raw) {
   if (!raw) return null;
   const m = SPORT_META[sport];
   const unit = m?.unit || '';
-  // If raw is a number or numeric string and unit exists, append it
-  if (unit && /^\d+$/.test(String(raw).trim())) {
-    return `${raw} ${unit}`;
-  }
+  if (unit && /^\d+$/.test(String(raw).trim())) return `${raw} ${unit}`;
   return raw;
 }
 
@@ -79,6 +76,7 @@ export default function AcademyDetailPage() {
   const [photoIndex, setPhotoIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -92,18 +90,13 @@ export default function AcademyDetailPage() {
         if (!raw) throw new Error('Not found');
         setAcademy({
           ...raw,
-          sports: Array.isArray(raw.sports) ? raw.sports
-            : JSON.parse(raw.sports || '[]'),
+          sports: Array.isArray(raw.sports) ? raw.sports : JSON.parse(raw.sports || '[]'),
           sportDetails: typeof raw.sportDetails === 'object' && !Array.isArray(raw.sportDetails)
             ? raw.sportDetails : JSON.parse(raw.sportDetails || '{}'),
-          photos: Array.isArray(raw.photos) ? raw.photos
-            : JSON.parse(raw.photos || '[]'),
-          amenities: Array.isArray(raw.amenities) ? raw.amenities
-            : JSON.parse(raw.amenities || '[]'),
+          photos: Array.isArray(raw.photos) ? raw.photos : JSON.parse(raw.photos || '[]'),
+          amenities: Array.isArray(raw.amenities) ? raw.amenities : JSON.parse(raw.amenities || '[]'),
         });
-        if (courtsRes.value?.data?.data?.courts) {
-          setCourts(courtsRes.value.data.data.courts);
-        }
+        if (courtsRes.value?.data?.data?.courts) setCourts(courtsRes.value.data.data.courts);
       } catch {
         setError(true);
       } finally {
@@ -111,6 +104,21 @@ export default function AcademyDetailPage() {
       }
     })();
   }, [id]);
+
+  // ── share ──────────────────────────────────────────────────────────────────
+  const handleShare = async () => {
+    const url = window.location.href;
+    const title = academy?.name || 'Academy on Matchify';
+    const text = `Check out ${title} on Matchify.pro!`;
+    if (navigator.share) {
+      try { await navigator.share({ title, text, url }); return; } catch {}
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {}
+  };
 
   if (loading) {
     return (
@@ -149,13 +157,17 @@ export default function AcademyDetailPage() {
   const primarySport = sports[0];
   const gradient = SPORT_GRADIENT[primarySport] || SPORT_GRADIENT.default;
   const whatsappNum = academy.phone?.replace(/\D/g, '').replace(/^0/, '').replace(/^91/, '');
+  const isOwner = user && academy.submittedBy &&
+    (user.id === academy.submittedBy || user.userId === academy.submittedBy);
 
   const openLightbox = (idx) => { setLightboxIndex(idx); setLightboxOpen(true); };
   const closeLightbox = () => setLightboxOpen(false);
   const lbPrev = (e) => { e.stopPropagation(); setLightboxIndex(i => (i - 1 + photos.length) % photos.length); };
   const lbNext = (e) => { e.stopPropagation(); setLightboxIndex(i => (i + 1) % photos.length); };
 
-  // ── Section wrapper ────────────────────────────────────────────────────────
+  // bottom bar height: edit/share row (64px) + book cta (80px if courts)
+  const bottomBarH = 64 + (courts.length > 0 ? 80 : 0);
+
   const Section = ({ title, accent = B.cyan, children }) => (
     <div className="rounded-2xl overflow-hidden"
       style={{ background: B.card, border: `1px solid ${B.border}` }}>
@@ -176,7 +188,7 @@ export default function AcademyDetailPage() {
       backgroundPosition: 'center top',
       backgroundRepeat: 'no-repeat',
       backgroundAttachment: 'fixed',
-      paddingBottom: courts.length > 0 ? 88 : 32,
+      paddingBottom: bottomBarH + 16,
     }}>
       {/* Dark overlay */}
       <div className="fixed inset-0 pointer-events-none" style={{ background: 'rgba(5,8,16,0.75)', zIndex: 0 }} />
@@ -188,21 +200,16 @@ export default function AcademyDetailPage() {
           style={{ background: 'rgba(0,0,0,0.96)', zIndex: 200 }}
           onClick={closeLightbox}
         >
-          {/* Close */}
           <button
             onClick={closeLightbox}
             className="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center"
             style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.2)', zIndex: 201 }}>
             <X className="w-5 h-5 text-white" />
           </button>
-
-          {/* Counter */}
           <div className="absolute top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full"
             style={{ background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(255,255,255,0.15)', zIndex: 201 }}>
             <span className="text-sm font-black text-white">{lightboxIndex + 1} / {photos.length}</span>
           </div>
-
-          {/* Photo */}
           <img
             src={photos[lightboxIndex]}
             alt=""
@@ -210,8 +217,6 @@ export default function AcademyDetailPage() {
             style={{ zIndex: 201 }}
             onClick={e => e.stopPropagation()}
           />
-
-          {/* Prev / Next */}
           {photos.length > 1 && (
             <>
               <button onClick={lbPrev}
@@ -226,8 +231,6 @@ export default function AcademyDetailPage() {
               </button>
             </>
           )}
-
-          {/* Dot indicators */}
           {photos.length > 1 && (
             <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-1.5" style={{ zIndex: 201 }}>
               {photos.map((_, i) => (
@@ -244,42 +247,59 @@ export default function AcademyDetailPage() {
         </div>
       )}
 
-      {/* ── Hero photo / gradient ── */}
-      <div className="relative z-10 w-full overflow-hidden" style={{ height: 220 }}>
+      {/* ── Hero photo ── */}
+      <div className="relative z-10 w-full overflow-hidden" style={{ height: 280 }}>
         {photos.length > 0 ? (
           <>
             <img
               src={photos[photoIndex]}
               alt={academy.name}
-              className="w-full h-full object-cover transition-all duration-300 cursor-pointer"
-              onClick={() => openLightbox(photoIndex)}
+              className="w-full h-full object-cover"
+              style={{ display: 'block' }}
             />
-            {/* Tap to view hint */}
-            <div className="absolute bottom-10 right-3 px-2 py-1 rounded-lg pointer-events-none"
-              style={{ background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)' }}>
-              <span className="text-xs font-bold" style={{ color: 'rgba(255,255,255,0.7)' }}>
-                🔍 Tap to enlarge
-              </span>
-            </div>
-            {/* bottom fade */}
-            <div className="absolute inset-0"
-              style={{ background: 'linear-gradient(to bottom, rgba(7,7,26,0.25) 0%, transparent 35%, rgba(7,7,26,0.75) 100%)' }} />
+            {/* Bottom gradient fade */}
+            <div className="absolute inset-0 pointer-events-none"
+              style={{ background: 'linear-gradient(to bottom, rgba(5,8,16,0.3) 0%, transparent 30%, rgba(5,8,16,0.7) 100%)' }} />
 
+            {/* CENTER "tap to enlarge" overlay — clickable */}
+            <button
+              onClick={() => openLightbox(photoIndex)}
+              className="absolute inset-0 flex flex-col items-center justify-center gap-2 transition-opacity"
+              style={{ background: 'transparent' }}>
+              <div className="flex flex-col items-center gap-1.5 px-5 py-3 rounded-2xl"
+                style={{
+                  background: 'rgba(0,0,0,0.45)',
+                  backdropFilter: 'blur(8px)',
+                  border: '1px solid rgba(255,255,255,0.18)',
+                }}>
+                <span style={{ fontSize: 26 }}>🔍</span>
+                <span className="text-xs font-black text-white tracking-wide">Tap to view photos</span>
+                {photos.length > 1 && (
+                  <span className="text-xs font-semibold" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                    {photos.length} photos
+                  </span>
+                )}
+              </div>
+            </button>
+
+            {/* Slide arrows */}
             {photos.length > 1 && (
               <>
-                <button onClick={() => setPhotoIndex(i => (i - 1 + photos.length) % photos.length)}
+                <button
+                  onClick={e => { e.stopPropagation(); setPhotoIndex(i => (i - 1 + photos.length) % photos.length); }}
                   className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full flex items-center justify-center"
                   style={{ background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(6px)' }}>
                   <ChevronLeft className="w-5 h-5 text-white" />
                 </button>
-                <button onClick={() => setPhotoIndex(i => (i + 1) % photos.length)}
+                <button
+                  onClick={e => { e.stopPropagation(); setPhotoIndex(i => (i + 1) % photos.length); }}
                   className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full flex items-center justify-center"
                   style={{ background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(6px)' }}>
                   <ChevronRight className="w-5 h-5 text-white" />
                 </button>
-                <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5">
+                <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 pointer-events-none">
                   {photos.map((_, i) => (
-                    <button key={i} onClick={() => setPhotoIndex(i)}
+                    <div key={i}
                       className="rounded-full transition-all"
                       style={{
                         width: i === photoIndex ? 18 : 6, height: 6,
@@ -291,10 +311,9 @@ export default function AcademyDetailPage() {
             )}
           </>
         ) : (
-          /* No photo — rich gradient with large emoji */
           <div className="w-full h-full flex flex-col items-center justify-center"
             style={{ background: gradient }}>
-            <span style={{ fontSize: 68, filter: 'drop-shadow(0 4px 16px rgba(0,0,0,0.4))' }}>
+            <span style={{ fontSize: 80, filter: 'drop-shadow(0 4px 24px rgba(0,0,0,0.5))' }}>
               {SPORT_META[primarySport]?.emoji || '🏢'}
             </span>
           </div>
@@ -318,37 +337,22 @@ export default function AcademyDetailPage() {
       </div>
 
       {/* ── Name + meta ── */}
-      <div className="relative z-10 px-4 pt-5 pb-4"
+      <div className="relative z-10 px-4 pt-5 pb-5"
         style={{ borderBottom: `1px solid ${B.border}` }}>
-        <div className="flex items-start justify-between gap-3 mb-3">
-          <h1 className="text-xl font-black text-white leading-tight flex-1">{academy.name}</h1>
-          <div className="flex items-center gap-2 flex-shrink-0 mt-0.5">
-            {/* Edit button — owner only */}
-            {user && academy.submittedBy && (user.id === academy.submittedBy || user.userId === academy.submittedBy) && (
-              <button
-                onClick={() => navigate(`/academies/${id}/edit`)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black active:scale-95 transition-transform"
-                style={{
-                  background: 'linear-gradient(135deg, rgba(6,182,212,0.18) 0%, rgba(34,211,238,0.10) 100%)',
-                  border: '1px solid rgba(6,182,212,0.35)',
-                  color: '#22d3ee',
-                  boxShadow: '0 0 12px rgba(6,182,212,0.15)',
-                }}>
-                <Pencil className="w-3 h-3" />
-                Edit
-              </button>
-            )}
-            {academy.type && (
-              <span className="px-2.5 py-1 rounded-full text-xs font-black"
-                style={{ background: 'rgba(168,85,247,0.15)', color: '#c084fc', border: '1px solid rgba(168,85,247,0.25)' }}>
-                {academy.type}
-              </span>
-            )}
-          </div>
-        </div>
 
-        {/* Sport tags */}
-        <div className="flex flex-wrap gap-1.5 mb-4">
+        {/* Academy name — full width, big, readable */}
+        <h1 className="text-2xl font-black text-white leading-tight mb-2">
+          {academy.name}
+        </h1>
+
+        {/* Type badge + sport tags row */}
+        <div className="flex flex-wrap items-center gap-1.5 mb-3">
+          {academy.type && (
+            <span className="px-3 py-1 rounded-full text-xs font-black"
+              style={{ background: 'rgba(168,85,247,0.18)', color: '#c084fc', border: '1px solid rgba(168,85,247,0.3)' }}>
+              {academy.type}
+            </span>
+          )}
           {sports.map(s => {
             const m = SPORT_META[s] || {};
             return (
@@ -361,7 +365,7 @@ export default function AcademyDetailPage() {
           })}
         </div>
 
-        {/* Opening hours inline */}
+        {/* Opening hours */}
         {academy.openingHours && (
           <div className="flex items-center gap-2">
             <Clock className="w-3.5 h-3.5 flex-shrink-0" style={{ color: B.amber }} />
@@ -379,7 +383,7 @@ export default function AcademyDetailPage() {
         {photos.length > 0 && (
           <Section title={`Photos (${photos.length})`} accent={B.cyan}>
             <div className="grid grid-cols-3 gap-1.5">
-              {photos.map((url, i) => (
+              {photos.slice(0, 9).map((url, i) => (
                 <div
                   key={i}
                   className="relative overflow-hidden rounded-xl cursor-pointer active:scale-95 transition-transform"
@@ -387,7 +391,6 @@ export default function AcademyDetailPage() {
                   onClick={() => openLightbox(i)}
                 >
                   <img src={url} alt="" className="w-full h-full object-cover" />
-                  {/* last tile: show "+N more" overlay if > 9 photos */}
                   {i === 8 && photos.length > 9 && (
                     <div className="absolute inset-0 flex items-center justify-center rounded-xl"
                       style={{ background: 'rgba(0,0,0,0.65)' }}>
@@ -395,7 +398,7 @@ export default function AcademyDetailPage() {
                     </div>
                   )}
                 </div>
-              )).slice(0, 9)}
+              ))}
             </div>
           </Section>
         )}
@@ -444,8 +447,7 @@ export default function AcademyDetailPage() {
                       )}
                     </div>
                     {m.color && (
-                      <div className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-                        style={{ background: m.color }} />
+                      <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: m.color }} />
                     )}
                   </div>
                 );
@@ -478,7 +480,7 @@ export default function AcademyDetailPage() {
           </Section>
         )}
 
-        {/* Courts — Book a Court */}
+        {/* Courts */}
         {courts.length > 0 && (
           <Section title="Book a Court" accent={B.cyan}>
             <div className="space-y-3">
@@ -536,7 +538,6 @@ export default function AcademyDetailPage() {
                 </div>
               </a>
             )}
-
             {whatsappNum && (
               <a href={`https://wa.me/91${whatsappNum}`}
                 target="_blank" rel="noopener noreferrer"
@@ -552,7 +553,6 @@ export default function AcademyDetailPage() {
                 </div>
               </a>
             )}
-
             {academy.email && (
               <a href={`mailto:${academy.email}`}
                 className="flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all active:scale-[0.98]"
@@ -567,7 +567,6 @@ export default function AcademyDetailPage() {
                 </div>
               </a>
             )}
-
             {academy.website && (
               <a href={academy.website.startsWith('http') ? academy.website : `https://${academy.website}`}
                 target="_blank" rel="noopener noreferrer"
@@ -585,7 +584,6 @@ export default function AcademyDetailPage() {
                 </div>
               </a>
             )}
-
             {academy.instagram && (
               <a href={`https://instagram.com/${academy.instagram}`}
                 target="_blank" rel="noopener noreferrer"
@@ -615,24 +613,71 @@ export default function AcademyDetailPage() {
 
       </div>
 
-      {/* Sticky Book CTA */}
-      {courts.length > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 px-4 pb-6 pt-3 z-40"
-          style={{ background: 'linear-gradient(to top, rgba(5,8,16,0.98) 60%, transparent)' }}>
+      {/* ── Fixed bottom action bar ── */}
+      <div className="fixed bottom-0 left-0 right-0 z-40"
+        style={{ background: 'linear-gradient(to top, rgba(5,8,16,0.99) 0%, rgba(5,8,16,0.96) 60%, transparent 100%)' }}>
+
+        {/* Share + Edit row */}
+        <div className="px-4 pt-4 pb-3 flex items-center gap-3">
+          {/* Share — always visible */}
           <button
-            onClick={() => {
-              if (!user) { navigate('/login'); return; }
-              navigate(`/academies/${id}/courts/${courts[0].id}/book`);
-            }}
-            className="w-full py-4 rounded-2xl text-sm font-black flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
-            style={{ background: `linear-gradient(135deg, ${B.cyan}, #0099bb)`, color: '#000' }}
-          >
-            <Calendar className="w-4 h-4" />
-            Book a Court
-            {courts.length > 1 && <span className="text-xs opacity-70">· {courts.length} courts</span>}
+            onClick={handleShare}
+            className="flex-1 py-3.5 rounded-2xl text-sm font-black flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+            style={{
+              background: copied
+                ? 'linear-gradient(135deg, rgba(34,197,94,0.22), rgba(34,197,94,0.10))'
+                : 'linear-gradient(135deg, rgba(251,191,36,0.18), rgba(249,115,22,0.10))',
+              border: copied
+                ? '1px solid rgba(34,197,94,0.4)'
+                : '1px solid rgba(251,191,36,0.35)',
+              color: copied ? '#4ade80' : '#fbbf24',
+              boxShadow: copied
+                ? '0 0 16px rgba(34,197,94,0.12)'
+                : '0 0 16px rgba(251,191,36,0.10)',
+            }}>
+            {copied
+              ? <><Check className="w-4 h-4" /> Link Copied!</>
+              : <><Share2 className="w-4 h-4" /> Share Academy</>}
           </button>
+
+          {/* Edit — owner only */}
+          {isOwner && (
+            <button
+              onClick={() => navigate(`/academies/${id}/edit`)}
+              className="flex-1 py-3.5 rounded-2xl text-sm font-black flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+              style={{
+                background: 'linear-gradient(135deg, rgba(6,182,212,0.22), rgba(34,211,238,0.10))',
+                border: '1px solid rgba(6,182,212,0.45)',
+                color: '#22d3ee',
+                boxShadow: '0 0 20px rgba(6,182,212,0.20)',
+              }}>
+              <Pencil className="w-4 h-4" />
+              Edit Academy
+            </button>
+          )}
         </div>
-      )}
+
+        {/* Book CTA */}
+        {courts.length > 0 && (
+          <div className="px-4 pb-6">
+            <button
+              onClick={() => {
+                if (!user) { navigate('/login'); return; }
+                navigate(`/academies/${id}/courts/${courts[0].id}/book`);
+              }}
+              className="w-full py-4 rounded-2xl text-sm font-black flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+              style={{ background: `linear-gradient(135deg, ${B.cyan}, #0099bb)`, color: '#000' }}
+            >
+              <Calendar className="w-4 h-4" />
+              Book a Court
+              {courts.length > 1 && <span className="text-xs opacity-70">· {courts.length} courts</span>}
+            </button>
+          </div>
+        )}
+
+        {/* Safe bottom pad when no courts */}
+        {courts.length === 0 && <div className="h-4" />}
+      </div>
     </div>
   );
 }

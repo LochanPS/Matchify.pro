@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { timingSafeEqual } from 'crypto';
 import prisma from '../lib/prisma.js';
 
 /**
@@ -308,8 +309,12 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Check for admin login (case-insensitive email comparison)
-    if (email?.toLowerCase() === ADMIN_EMAIL?.toLowerCase() && password === ADMIN_PASSWORD) {
+    // Check for admin login — timing-safe password comparison prevents brute-force timing attacks
+    const adminPassBuf = Buffer.from(ADMIN_PASSWORD || '');
+    const inputPassBuf = Buffer.from(password || '');
+    const passwordMatch = adminPassBuf.length === inputPassBuf.length &&
+      timingSafeEqual(adminPassBuf, inputPassBuf);
+    if (email?.toLowerCase() === ADMIN_EMAIL?.toLowerCase() && passwordMatch) {
       // Try to find admin user in database
       let adminUser = await prisma.user.findUnique({
         where: { email: ADMIN_EMAIL }

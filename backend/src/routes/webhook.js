@@ -88,8 +88,11 @@ router.post('/razorpay', express.raw({ type: 'application/json' }), async (req, 
   }
 });
 
-// Test webhook endpoint (for development)
+// Test webhook endpoint (development only — blocked in production)
 router.post('/test', async (req, res) => {
+  if (process.env.NODE_ENV === 'production') {
+    return res.status(404).json({ error: 'Not found' });
+  }
   try {
     console.log('Test webhook received:', req.body);
     res.json({ status: 'test webhook received', data: req.body });

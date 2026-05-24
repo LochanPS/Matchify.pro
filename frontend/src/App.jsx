@@ -169,7 +169,7 @@ function PageLoader() {
 
 // Inner component that can access AuthContext
 function AppContent() {
-  const { user, showProfileCompletion, showProfilePhotoModal, completeProfile } = useAuth();
+  const { user, showProfileCompletion, showProfilePhotoModal, setShowProfilePhotoModal, completeProfile } = useAuth();
   const location = useLocation();
 
   // ── Option D: Keepwarm ping ──────────────────────────────────────────────

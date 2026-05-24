@@ -1318,20 +1318,49 @@ const assignUmpire = async (req, res) => {
       return res.status(404).json({ success: false, error: 'Umpire not found' });
     }
 
-    // Get player names for notification
-    const player1 = match.player1Id
-      ? await prisma.user.findUnique({
-          where: { id: match.player1Id },
-          select: { name: true }
-        })
-      : null;
+    // ── Resolve player display name (handles regular users + guest-{id} players) ──
+    const resolvePlayerName = async (playerId) => {
+      if (!playerId) return null;
+      if (playerId.startsWith('guest-')) {
+        const regId = playerId.replace('guest-', '');
+        const reg = await prisma.registration.findUnique({
+          where: { id: regId },
+          select: {
+            guestName: true,
+            guestPartnerName: true,
+            user: { select: { name: true } },
+            partner: { select: { name: true } }
+          }
+        });
+        if (!reg) return null;
+        const baseName = reg.user?.name || reg.guestName || 'Unknown';
+        const partnerName = reg.partner?.name || reg.guestPartnerName || null;
+        return partnerName ? `${baseName} & ${partnerName}` : baseName;
+      } else {
+        // Regular user — also check if they have a doubles partner via Registration
+        const [userRow, regRow] = await Promise.all([
+          prisma.user.findUnique({
+            where: { id: playerId },
+            select: { name: true }
+          }),
+          prisma.registration.findFirst({
+            where: { userId: playerId, tournamentId: match.tournamentId, categoryId: match.categoryId },
+            select: {
+              guestPartnerName: true,
+              partner: { select: { name: true } }
+            }
+          })
+        ]);
+        if (!userRow) return null;
+        const partnerName = regRow?.partner?.name || regRow?.guestPartnerName || null;
+        return partnerName ? `${userRow.name} & ${partnerName}` : userRow.name;
+      }
+    };
 
-    const player2 = match.player2Id
-      ? await prisma.user.findUnique({
-          where: { id: match.player2Id },
-          select: { name: true }
-        })
-      : null;
+    const [p1Name, p2Name] = await Promise.all([
+      resolvePlayerName(match.player1Id),
+      resolvePlayerName(match.player2Id)
+    ]);
 
     const updatedMatch = await prisma.match.update({
       where: { id: matchId },
@@ -1350,12 +1379,14 @@ const assignUmpire = async (req, res) => {
 
     // Send notification to umpire
     console.log('📧 Sending notification to umpire:', umpire.name, umpire.email);
-    
+
     const notificationService = await import('../services/notificationService.js');
     const matchDetails = `${roundName} - Match #${match.matchNumber}`;
-    const playersInfo = player1 && player2 
-      ? `${player1.name} vs ${player2.name}` 
-      : 'Players TBD';
+    const playersInfo = p1Name && p2Name
+      ? `${p1Name} vs ${p2Name}`
+      : p1Name || p2Name
+        ? `${p1Name || p2Name} vs TBD`
+        : 'Players TBD';
     
     // Build clean message with only relevant details
     let message = `You have been assigned as umpire for ${matchDetails}\n\n`;
@@ -1397,9 +1428,11 @@ const assignUmpire = async (req, res) => {
           round: match.round,
           roundName,
           courtNumber: match.courtNumber,
-          player1Name: player1?.name || 'TBD',
-          player2Name: player2?.name || 'TBD',
-          matchDetails
+          player1Name: p1Name || 'TBD',
+          player2Name: p2Name || 'TBD',
+          matchDetails,
+          tournamentName: match.tournament.name,
+          categoryName: match.category.name
         },
         sendEmail: true
       });

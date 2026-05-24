@@ -341,6 +341,41 @@ const NotificationDetailPage = () => {
               </div>
             )}
 
+            {/* Match assignment details — players vs players */}
+            {['MATCH_ASSIGNED', 'MATCH_STARTING_SOON'].includes(notification.type) && (data.player1Name || data.player2Name) && (
+              <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(0,212,255,0.06)', border: '1px solid rgba(0,212,255,0.22)' }}>
+                <div className="px-4 py-2.5" style={{ borderBottom: '1px solid rgba(0,212,255,0.15)', background: 'rgba(0,212,255,0.08)' }}>
+                  <p className="text-xs font-black" style={{ color: '#00d4ff' }}>⚖️ Match Details</p>
+                </div>
+                <div className="p-4 space-y-3">
+                  {/* Round + match */}
+                  {data.matchDetails && (
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs w-20 flex-shrink-0" style={{ color: 'rgba(255,255,255,0.45)' }}>Match</span>
+                      <span className="text-sm font-black text-white">{data.matchDetails}</span>
+                    </div>
+                  )}
+                  {/* Players — big VS display */}
+                  <div className="rounded-xl p-3 text-center" style={{ background: 'rgba(0,0,0,0.25)', border: '1px solid rgba(0,212,255,0.12)' }}>
+                    <p className="text-base font-black text-white leading-snug">
+                      {data.player1Name || 'TBD'}
+                    </p>
+                    <p className="text-xs font-black my-1.5" style={{ color: 'rgba(0,212,255,0.6)', letterSpacing: '0.15em' }}>VS</p>
+                    <p className="text-base font-black text-white leading-snug">
+                      {data.player2Name || 'TBD'}
+                    </p>
+                  </div>
+                  {/* Court */}
+                  {data.courtNumber && (
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs w-20 flex-shrink-0" style={{ color: 'rgba(255,255,255,0.45)' }}>Court</span>
+                      <span className="text-sm font-black" style={{ color: '#00d4ff' }}>Court {data.courtNumber}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Points */}
             {(data.points || data.placement) && (
               <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.25)' }}>

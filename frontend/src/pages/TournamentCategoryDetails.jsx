@@ -68,7 +68,7 @@ export default function TournamentCategoryDetails() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #0a0a1f 0%, #07071a 50%, #0a0a1f 100%)' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #0a0a1f 0%, #050810 50%, #0a0a1f 100%)' }}>
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-t-transparent rounded-full animate-spin mx-auto"
             style={{ borderColor: 'rgba(6,182,212,0.3)', borderTopColor: '#06b6d4' }}></div>
@@ -80,13 +80,13 @@ export default function TournamentCategoryDetails() {
 
   if (error || !category) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #0a0a1f 0%, #07071a 50%, #0a0a1f 100%)' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #0a0a1f 0%, #050810 50%, #0a0a1f 100%)' }}>
         <div className="text-center p-8 rounded-2xl border border-red-500/30" style={{ background: 'rgba(239,68,68,0.1)' }}>
           <p className="text-red-400 text-lg font-semibold mb-4">{error || 'Category not found'}</p>
           <button
             onClick={() => navigate('/dashboard?role=ORGANIZER')}
             className="px-6 py-3 rounded-xl font-bold text-white transition-all"
-            style={{ background: 'linear-gradient(135deg, #06b6d4, #00d4ff)', color: '#07071a' }}
+            style={{ background: 'linear-gradient(135deg, #06b6d4, #00d4ff)', color: '#050810' }}
           >
             Back to Dashboard
           </button>
@@ -102,7 +102,7 @@ export default function TournamentCategoryDetails() {
   ];
 
   return (
-    <div className="min-h-screen relative overflow-x-hidden" style={{ background: 'linear-gradient(180deg, #0a0a1f 0%, #07071a 40%, #0d1a2a 70%, #07071a 100%)' }}>
+    <div className="min-h-screen relative overflow-x-hidden" style={{ background: 'linear-gradient(180deg, #0a0a1f 0%, #050810 40%, #0d1a2a 70%, #050810 100%)' }}>
       {/* Animated star particles */}
       <div className="fixed top-0 bottom-0 pointer-events-none overflow-hidden" style={{ left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: "480px" }}>
         <div className="absolute top-0 right-0 w-72 h-72 rounded-full blur-3xl opacity-20"
@@ -143,7 +143,7 @@ export default function TournamentCategoryDetails() {
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
                 style={{ background: 'linear-gradient(135deg, #06b6d4, #00d4ff)' }}>
-                <Trophy className="w-6 h-6" style={{ color: '#07071a' }} />
+                <Trophy className="w-6 h-6" style={{ color: '#050810' }} />
               </div>
               <div>
                 <h1 className="text-lg font-black text-white leading-tight">{category.category.name}</h1>

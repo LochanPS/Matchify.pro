@@ -11,7 +11,7 @@ import { pauseTimer, resumeTimer } from '../api/matches';
 import SlideToConfirm from '../components/SlideToConfirm';
 
 const B = {
-  bg: '#07071a',
+  bg: '#050810',
   card: 'rgba(255,255,255,0.04)',
   border: 'rgba(255,255,255,0.08)',
   green: '#06b6d4',
@@ -569,7 +569,7 @@ const MatchScoringPage = () => {
               <div className="p-3 space-y-2">
                 <button onClick={() => addPoint(1)} disabled={isPaused || !canScore}
                   className="w-full py-5 rounded-xl font-black text-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-                  style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)', color: '#07071a', boxShadow: isPaused ? 'none' : '0 4px 16px rgba(6,182,212,0.35)' }}>
+                  style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)', color: '#050810', boxShadow: isPaused ? 'none' : '0 4px 16px rgba(6,182,212,0.35)' }}>
                   <Plus className="w-6 h-6" /> Point
                 </button>
                 <button onClick={() => removePoint(1)} disabled={isPaused || !canScore}
@@ -588,7 +588,7 @@ const MatchScoringPage = () => {
               <div className="p-3 space-y-2">
                 <button onClick={() => addPoint(2)} disabled={isPaused || !canScore}
                   className="w-full py-5 rounded-xl font-black text-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-                  style={{ background: 'linear-gradient(135deg,#00a3cc,#00d4ff)', color: '#07071a', boxShadow: isPaused ? 'none' : '0 4px 16px rgba(0,212,255,0.35)' }}>
+                  style={{ background: 'linear-gradient(135deg,#00a3cc,#00d4ff)', color: '#050810', boxShadow: isPaused ? 'none' : '0 4px 16px rgba(0,212,255,0.35)' }}>
                   <Plus className="w-6 h-6" /> Point
                 </button>
                 <button onClick={() => removePoint(2)} disabled={isPaused || !canScore}
@@ -623,9 +623,9 @@ const MatchScoringPage = () => {
           <div className="max-w-lg mx-auto">
             <button onClick={handleStartMatch} disabled={saving}
               className="w-full py-4 rounded-2xl font-black text-base transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-              style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)', color: '#07071a', boxShadow: '0 4px 20px rgba(6,182,212,0.4)' }}>
+              style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)', color: '#050810', boxShadow: '0 4px 20px rgba(6,182,212,0.4)' }}>
               {saving
-                ? <><div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#07071a transparent transparent transparent' }} />Starting…</>
+                ? <><div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#050810 transparent transparent transparent' }} />Starting…</>
                 : <><Play className="w-5 h-5" />START MATCH — {p1Display} vs {p2Display}</>}
             </button>
             <p className="text-center text-xs mt-2" style={{ color: 'rgba(255,255,255,0.55)' }}>
@@ -680,7 +680,7 @@ const MatchScoringPage = () => {
                 <div className="px-5 pb-5 space-y-2">
                   <button onClick={handleContinueToNextSet}
                     className="w-full py-3.5 rounded-xl font-black text-sm transition-all flex items-center justify-center gap-2"
-                    style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)', color: '#07071a', boxShadow: '0 4px 16px rgba(6,182,212,0.35)' }}>
+                    style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)', color: '#050810', boxShadow: '0 4px 16px rgba(6,182,212,0.35)' }}>
                     <Play className="w-4 h-4" /> Continue to Set {completedSetData.setNumber + 1}
                   </button>
                   <button onClick={handleEndMatchEarly}
@@ -710,7 +710,7 @@ const MatchScoringPage = () => {
             <div className="p-5 space-y-2.5">
               <button onClick={() => handleEndMatch(match.player1?.id)} disabled={saving}
                 className="w-full py-3.5 rounded-xl font-black text-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-                style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)', color: '#07071a' }}>
+                style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)', color: '#050810' }}>
                 <Trophy className="w-4 h-4" /> {p1Display} Wins
               </button>
               <button onClick={() => handleEndMatch(match.player2?.id)} disabled={saving}

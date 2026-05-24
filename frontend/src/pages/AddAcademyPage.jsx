@@ -12,7 +12,7 @@ import api from '../utils/api';
 import { fetchUpload } from '../utils/fetchUpload';
 
 const B = {
-  bg: '#07071a',
+  bg: '#050810',
   card: 'rgba(255,255,255,0.04)',
   cardHover: 'rgba(255,255,255,0.07)',
   border: 'rgba(255,255,255,0.08)',
@@ -100,7 +100,7 @@ function StepIndicator({ current, total }) {
             style={{
               background: n < current ? B.green : n === current
                 ? 'linear-gradient(135deg,#06b6d4,#00d4ff)' : 'rgba(255,255,255,0.06)',
-              color: n <= current ? '#07071a' : 'rgba(255,255,255,0.3)',
+              color: n <= current ? '#050810' : 'rgba(255,255,255,0.3)',
               border: n > current ? `1px solid rgba(255,255,255,0.1)` : 'none',
             }}>
             {n < current ? '✓' : n}
@@ -313,7 +313,7 @@ export default function AddAcademyPage() {
           </p>
           <button onClick={() => navigate('/academies')}
             className="w-full py-3.5 rounded-2xl font-black text-sm"
-            style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#07071a' }}>
+            style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#050810' }}>
             Back to Academies
           </button>
         </div>
@@ -533,7 +533,7 @@ export default function AddAcademyPage() {
 
             <button onClick={handleNext}
               className="w-full py-3.5 rounded-2xl font-black text-sm flex items-center justify-center gap-2"
-              style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#07071a' }}>
+              style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#050810' }}>
               Next: Contact & Photos
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -606,7 +606,7 @@ export default function AddAcademyPage() {
 
             <button onClick={handleNext}
               className="w-full py-3.5 rounded-2xl font-black text-sm flex items-center justify-center gap-2"
-              style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#07071a' }}>
+              style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#050810' }}>
               Next: Payment
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -712,7 +712,7 @@ export default function AddAcademyPage() {
               onClick={handleSubmit}
               disabled={loading || !paymentScreenshot}
               className="w-full py-3.5 rounded-2xl font-black text-sm flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
-              style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#07071a' }}>
+              style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#050810' }}>
               {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle className="w-5 h-5" />}
               {loading ? 'Submitting...' : 'Submit Academy'}
             </button>

@@ -5,7 +5,7 @@ import PointsHistoryCard from '../components/PointsHistoryCard';
 import { TrendingUp, Award, Trophy, Target, Crown, ArrowLeft, AlertTriangle } from 'lucide-react';
 
 const B = {
-  bg: '#07071a',
+  bg: '#050810',
   card: 'rgba(255,255,255,0.04)',
   border: 'rgba(255,255,255,0.08)',
   cardDark: '#0d1025',
@@ -92,7 +92,7 @@ const MyPoints = () => {
         <div className="flex items-center gap-4 mb-8">
           <div className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg"
             style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', boxShadow: '0 0 20px rgba(6,182,212,0.25)' }}>
-            <Award className="w-7 h-7" style={{ color: '#003320' }} />
+            <Award className="w-7 h-7" style={{ color: '#050810' }} />
           </div>
           <div>
             <h1 className="text-2xl font-black text-white">My Points</h1>

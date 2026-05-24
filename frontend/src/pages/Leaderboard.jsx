@@ -18,7 +18,7 @@ const LB_PARTICLES = Array.from({ length: 15 }, (_, i) => ({
 }));
 
 const B = {
-  bg: '#07071a',
+  bg: '#050810',
   card: 'rgba(255,255,255,0.04)',
   border: 'rgba(255,255,255,0.08)',
   green: '#06b6d4',
@@ -411,7 +411,7 @@ export default function Leaderboard() {
             <button
               onClick={() => setLimit(limit + 50)}
               className="px-8 py-3 rounded-xl font-bold transition-all"
-              style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#003320', boxShadow: '0 0 20px rgba(6,182,212,0.3)' }}
+              style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#050810', boxShadow: '0 0 20px rgba(6,182,212,0.3)' }}
             >
               Load More Players
             </button>
@@ -460,7 +460,7 @@ export default function Leaderboard() {
         <div
           className="w-full max-w-sm rounded-3xl overflow-hidden"
           style={{
-            background: 'linear-gradient(160deg, #0d1025 0%, #07071a 100%)',
+            background: 'linear-gradient(160deg, #0d1025 0%, #050810 100%)',
             border: '1px solid rgba(6,182,212,0.25)',
             boxShadow: '0 0 60px rgba(6,182,212,0.12)',
           }}

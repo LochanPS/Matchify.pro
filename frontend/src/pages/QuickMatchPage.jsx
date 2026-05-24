@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Play, Plus, Minus, Trophy, RotateCcw, Check, Swords } from 'lucide-react';
 
 const B = {
-  bg: '#07071a',
+  bg: '#050810',
   card: 'rgba(255,255,255,0.04)',
   border: 'rgba(255,255,255,0.08)',
   green: '#06b6d4',
@@ -45,7 +45,7 @@ const StepType = ({ onSelect }) => (
       <button
         onClick={() => onSelect('singles')}
         className="w-full py-5 rounded-2xl font-black text-base transition-all active:scale-95"
-        style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#07071a', boxShadow: '0 6px 24px rgba(6,182,212,0.35)' }}
+        style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#050810', boxShadow: '0 6px 24px rgba(6,182,212,0.35)' }}
       >
         🏸 Singles
         <p className="text-xs font-semibold mt-1 opacity-70">1 vs 1</p>
@@ -210,7 +210,7 @@ const StepSetup = ({ type, onBack, onStart }) => {
           <button
             onClick={handleContinue}
             className="w-full py-4 rounded-2xl font-black text-base transition-all active:scale-95 flex items-center justify-center gap-2"
-            style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)', color: '#07071a', boxShadow: '0 6px 20px rgba(6,182,212,0.4)' }}
+            style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)', color: '#050810', boxShadow: '0 6px 20px rgba(6,182,212,0.4)' }}
           >
             <Play className="w-5 h-5" />
             Continue to Match
@@ -439,7 +439,7 @@ const StepScore = ({ config, onReset }) => {
                   <button
                     onClick={() => endManual(showConfirm)}
                     className="flex-1 py-2 rounded-xl text-sm font-black flex items-center justify-center gap-2"
-                    style={{ background: 'linear-gradient(135deg,#f59e0b,#fbbf24)', color: '#07071a' }}
+                    style={{ background: 'linear-gradient(135deg,#f59e0b,#fbbf24)', color: '#050810' }}
                   >
                     <Check className="w-4 h-4" /> Confirm
                   </button>

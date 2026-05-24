@@ -13,7 +13,7 @@ import { Loader, Upload, QrCode, AlertCircle, Search } from 'lucide-react';
 // Constants
 // ─────────────────────────────────────────────────────────────────────────────
 const BRAND = {
-  bg: '#07071a',
+  bg: '#050810',
   green: '#06b6d4',
   cyan: '#00d4ff',
   purple: '#a855f7',
@@ -422,7 +422,7 @@ export default function TournamentRegistrationPage() {
             <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-black"
               style={{
                 background: step > 1 ? BRAND.green : step === 1 ? BRAND.purple : 'rgba(255,255,255,0.1)',
-                color: step >= 1 ? '#07071a' : 'rgba(255,255,255,0.4)',
+                color: step >= 1 ? '#050810' : 'rgba(255,255,255,0.4)',
               }}>
               {step > 1 ? '✓' : '1'}
             </div>
@@ -556,7 +556,7 @@ export default function TournamentRegistrationPage() {
                             }}
                             className="flex-1 py-2 rounded-lg text-xs font-black transition-all"
                             style={mode === 'id'
-                              ? { background: BRAND.green, color: '#07071a' }
+                              ? { background: BRAND.green, color: '#050810' }
                               : { background: 'transparent', color: 'rgba(255,255,255,0.45)' }}
                           >
                             Matchify.pro ID
@@ -594,12 +594,12 @@ export default function TournamentRegistrationPage() {
                                 disabled={!canSearch || isSearching}
                                 className="px-4 py-3 rounded-xl font-black text-xs transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5"
                                 style={canSearch && !isSearching
-                                  ? { background: BRAND.green, color: '#07071a' }
+                                  ? { background: BRAND.green, color: '#050810' }
                                   : { background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.4)' }}
                               >
                                 {isSearching
                                   ? <div className="w-4 h-4 rounded-full border-2 border-t-transparent animate-spin"
-                                      style={{ borderColor: '#07071a transparent transparent transparent' }} />
+                                      style={{ borderColor: '#050810 transparent transparent transparent' }} />
                                   : <Search className="w-4 h-4" />}
                                 {!isSearching && 'Find'}
                               </button>
@@ -611,7 +611,7 @@ export default function TournamentRegistrationPage() {
                                   <img src={partner.profilePhoto} alt={partner.name} className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
                                 ) : (
                                   <div className="w-10 h-10 rounded-full flex items-center justify-center font-black text-sm flex-shrink-0"
-                                    style={{ background: BRAND.green, color: '#07071a' }}>
+                                    style={{ background: BRAND.green, color: '#050810' }}>
                                     {partner.name?.charAt(0)?.toUpperCase()}
                                   </div>
                                 )}
@@ -944,7 +944,7 @@ export default function TournamentRegistrationPage() {
                 className="flex-1 py-4 rounded-2xl font-black text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 style={{
                   background: (paymentScreenshot || utrId.trim()) ? 'linear-gradient(135deg,#06b6d4,#06b6d4)' : 'rgba(255,255,255,0.08)',
-                  color: (paymentScreenshot || utrId.trim()) ? '#07071a' : 'rgba(255,255,255,0.4)',
+                  color: (paymentScreenshot || utrId.trim()) ? '#050810' : 'rgba(255,255,255,0.4)',
                   boxShadow: (paymentScreenshot || utrId.trim()) ? '0 4px 20px rgba(6,182,212,0.4)' : 'none',
                 }}
               >

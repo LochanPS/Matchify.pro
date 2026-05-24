@@ -112,7 +112,7 @@ const LoginPageMobile = () => {
             className="px-4 py-2 rounded-lg font-bold text-sm transition-all relative overflow-hidden group"
             style={{ 
               background: 'linear-gradient(135deg, #06b6d4, #06b6d4)',
-              color: '#003320',
+              color: '#050810',
               boxShadow: '0 4px 12px rgba(6,182,212,0.4), inset 0 1px 0 rgba(255,255,255,0.3)'
             }}
           >
@@ -390,7 +390,7 @@ const LoginPageMobile = () => {
               style={{ 
                 background: 'linear-gradient(135deg, #06b6d4 0%, #06b6d4 50%, #06b6d4 100%)',
                 backgroundSize: '200% auto',
-                color: '#003320',
+                color: '#050810',
                 boxShadow: '0 8px 25px rgba(6,182,212,0.4), 0 0 40px rgba(6,182,212,0.2), inset 0 1px 0 rgba(255,255,255,0.3)',
                 animation: 'shimmer 3s linear infinite, pulse 3s ease-in-out infinite'
               }}

@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 
 const BRAND = {
-  bg: '#07071a',
+  bg: '#050810',
   cardDark: '#0d1025',
   card: 'rgba(255,255,255,0.04)',
   border: 'rgba(255,255,255,0.08)',
@@ -115,7 +115,7 @@ const PartnerConfirmationPage = () => {
             <>
               <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4"
                 style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', boxShadow: '0 8px 30px rgba(6,182,212,0.3)' }}>
-                <CheckCircle className="w-10 h-10" style={{ color: '#07071a' }} />
+                <CheckCircle className="w-10 h-10" style={{ color: '#050810' }} />
               </div>
               <h2 className="text-2xl font-bold text-white mb-2">Invitation Accepted!</h2>
               <p className="mb-4" style={{ color: 'rgba(255,255,255,0.55)' }}>
@@ -164,7 +164,7 @@ const PartnerConfirmationPage = () => {
           <button
             onClick={() => navigate('/')}
             className="w-full py-3 rounded-xl font-bold text-sm"
-            style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#07071a' }}
+            style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#050810' }}
           >
             Go to Home
           </button>
@@ -309,7 +309,7 @@ const PartnerConfirmationPage = () => {
                 onClick={() => handleConfirm('accept')}
                 disabled={processing}
                 className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#07071a', boxShadow: '0 4px 20px rgba(6,182,212,0.3)' }}
+                style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#050810', boxShadow: '0 4px 20px rgba(6,182,212,0.3)' }}
               >
                 {processing ? (
                   <Loader2 className="w-5 h-5 animate-spin" />

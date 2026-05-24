@@ -44,7 +44,7 @@ const SpectatorViewPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg,#0a0a1f 0%,#07071a 100%)' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg,#0a0a1f 0%,#050810 100%)' }}>
         <div className="text-center">
           <RefreshCw className="w-10 h-10 animate-spin mx-auto mb-4" style={{ color: '#06b6d4' }} />
           <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>Loading match...</p>
@@ -55,7 +55,7 @@ const SpectatorViewPage = () => {
 
   if (error || !match) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg,#0a0a1f 0%,#07071a 100%)' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg,#0a0a1f 0%,#050810 100%)' }}>
         <div className="text-center p-8 rounded-2xl" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)' }}>
           <p className="text-red-400 font-semibold">{error || 'Match not found'}</p>
         </div>
@@ -64,7 +64,7 @@ const SpectatorViewPage = () => {
   }
 
   return (
-    <div className="min-h-screen relative" style={{ background: 'linear-gradient(180deg,#0a0a1f 0%,#07071a 40%,#0d1a2a 70%,#07071a 100%)' }}>
+    <div className="min-h-screen relative" style={{ background: 'linear-gradient(180deg,#0a0a1f 0%,#050810 40%,#0d1a2a 70%,#050810 100%)' }}>
       {/* Fixed bg glow */}
       <div className="fixed top-0 bottom-0 pointer-events-none overflow-hidden" style={{ left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: "480px" }}>
         <div className="absolute top-0 right-0 w-72 h-72 rounded-full blur-3xl opacity-15" style={{ background: 'radial-gradient(circle,rgba(6,182,212,0.4) 0%,transparent 70%)' }} />

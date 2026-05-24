@@ -3,7 +3,7 @@ import { ArrowLeftIcon, ScaleIcon, ShieldCheckIcon, DocumentTextIcon } from '@he
 
 const TermsOfService = () => {
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #0a0a1f 0%, #07071a 30%, #0d1a2a 60%, #07071a 100%)' }}>
+    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #0a0a1f 0%, #050810 30%, #0d1a2a 60%, #050810 100%)' }}>
       {/* Header */}
       <div className="border-b relative" style={{ borderColor: 'rgba(6,182,212,0.3)', background: 'linear-gradient(135deg, rgba(7,7,26,0.95), rgba(13,26,42,0.95))' }}>
         <div className="max-w-5xl mx-auto px-4 py-8">
@@ -395,7 +395,7 @@ const TermsOfService = () => {
           <Link 
             to="/register" 
             className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all"
-            style={{ background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: '#003320' }}
+            style={{ background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: '#050810' }}
           >
             <ArrowLeftIcon className="w-5 h-5" />
             Back to Registration

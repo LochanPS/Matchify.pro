@@ -236,7 +236,7 @@ export default function TournamentManagementPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#07071a' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#050810' }}>
         <div className="text-center">
           <div className="w-14 h-14 border-4 border-t-transparent rounded-full animate-spin mx-auto mb-4"
             style={{ borderColor: 'rgba(6,182,212,0.3)', borderTopColor: '#06b6d4' }}></div>
@@ -247,7 +247,7 @@ export default function TournamentManagementPage() {
   }
 
   return (
-    <div className="min-h-screen relative overflow-x-hidden" style={{ background: '#07071a' }}>
+    <div className="min-h-screen relative overflow-x-hidden" style={{ background: '#050810' }}>
       {/* Animated background */}
       <div className="fixed top-0 bottom-0 pointer-events-none overflow-hidden" style={{ left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: "480px" }}>
         <div className="absolute top-0 right-0 w-80 h-80 rounded-full blur-3xl opacity-15"
@@ -298,7 +298,7 @@ export default function TournamentManagementPage() {
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
                 style={{ background: 'linear-gradient(135deg, #06b6d4, #0891b2)' }}>
-                <Users className="w-6 h-6" style={{ color: '#07071a' }} />
+                <Users className="w-6 h-6" style={{ color: '#050810' }} />
               </div>
               <div>
                 <h1 className="text-xl font-black text-white">Tournament Registrations</h1>
@@ -321,7 +321,7 @@ export default function TournamentManagementPage() {
                 onClick={() => handleExport('csv')}
                 disabled={exporting}
                 className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm disabled:opacity-50 transition-all hover:scale-105"
-                style={{ background: 'linear-gradient(135deg, #06b6d4, #0891b2)', color: '#07071a' }}
+                style={{ background: 'linear-gradient(135deg, #06b6d4, #0891b2)', color: '#050810' }}
               >
                 <FileSpreadsheet className="h-4 w-4" />
                 Export CSV
@@ -806,10 +806,10 @@ export default function TournamentManagementPage() {
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.2)' }}>
-                    <CreditCard className="h-6 w-6" style={{ color: '#07071a' }} />
+                    <CreditCard className="h-6 w-6" style={{ color: '#050810' }} />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold" style={{ color: '#07071a' }}>Complete Refund</h2>
+                    <h2 className="text-xl font-bold" style={{ color: '#050810' }}>Complete Refund</h2>
                     <p className="text-sm mt-1" style={{ color: 'rgba(0,51,32,0.8)' }}>Upload payment proof</p>
                   </div>
                 </div>
@@ -820,7 +820,7 @@ export default function TournamentManagementPage() {
                   style={{ background: 'rgba(0,0,0,0.2)' }}
                   aria-label="Close"
                 >
-                  <X className="h-5 w-5" style={{ color: '#07071a' }} />
+                  <X className="h-5 w-5" style={{ color: '#050810' }} />
                 </button>
               </div>
             </div>
@@ -907,7 +907,7 @@ export default function TournamentManagementPage() {
                   onClick={handleCompleteRefund}
                   disabled={actionLoading || !paymentScreenshot}
                   className="flex-1 px-4 py-3 rounded-xl font-semibold transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-                  style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)', color: '#07071a' }}
+                  style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)', color: '#050810' }}
                 >
                   {actionLoading ? (
                     <>

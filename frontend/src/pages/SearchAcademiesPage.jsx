@@ -4,7 +4,7 @@ import { ArrowLeft, Search, Plus, MapPin, Phone, Building2, X, BadgeCheck, Chevr
 import api from '../utils/api';
 
 const B = {
-  bg: '#07071a',
+  bg: '#050810',
   card: 'rgba(255,255,255,0.05)',
   border: 'rgba(255,255,255,0.09)',
   green: '#06b6d4',
@@ -101,8 +101,8 @@ function AcademyCard({ academy, onClick }) {
         {academy.isVerified && (
           <div className="absolute top-3 right-3 flex items-center gap-1 px-2.5 py-1 rounded-full"
             style={{ background: 'rgba(6,182,212,0.92)', backdropFilter: 'blur(6px)' }}>
-            <BadgeCheck className="w-3 h-3" style={{ color: '#07071a' }} />
-            <span className="text-xs font-black" style={{ color: '#07071a' }}>Verified</span>
+            <BadgeCheck className="w-3 h-3" style={{ color: '#050810' }} />
+            <span className="text-xs font-black" style={{ color: '#050810' }}>Verified</span>
           </div>
         )}
 
@@ -270,7 +270,7 @@ export default function SearchAcademiesPage() {
           <button
             onClick={() => navigate('/academies/add')}
             className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-black transition-all active:scale-95"
-            style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#07071a' }}
+            style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#050810' }}
           >
             <Plus className="w-4 h-4" />
             Add
@@ -320,7 +320,7 @@ export default function SearchAcademiesPage() {
                   background: active
                     ? (sport === 'All' ? B.cyan : m.color || B.cyan)
                     : 'rgba(255,255,255,0.06)',
-                  color: active ? '#07071a' : 'rgba(255,255,255,0.5)',
+                  color: active ? '#050810' : 'rgba(255,255,255,0.5)',
                   border: active ? 'none' : `1px solid rgba(255,255,255,0.09)`,
                   boxShadow: active ? `0 2px 12px ${activeColor}40` : 'none',
                 }}
@@ -379,7 +379,7 @@ export default function SearchAcademiesPage() {
             <button
               onClick={() => navigate('/academies/add')}
               className="flex items-center gap-2 px-6 py-3.5 rounded-2xl text-sm font-black transition-all active:scale-95"
-              style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#07071a' }}>
+              style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#050810' }}>
               <Plus className="w-4 h-4" />
               List Your Academy
             </button>

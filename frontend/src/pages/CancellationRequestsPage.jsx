@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 
 const BRAND = {
-  bg: '#07071a',
+  bg: '#050810',
   cardDark: '#0d1025',
   card: 'rgba(255,255,255,0.04)',
   border: 'rgba(255,255,255,0.08)',
@@ -134,7 +134,7 @@ export default function CancellationRequestsPage() {
             <div>
               <h1 className="text-3xl font-bold text-white flex items-center gap-3">
                 <div className="p-2 rounded-xl" style={{ background: 'linear-gradient(135deg,#fbbf24,#f59e0b)' }}>
-                  <AlertTriangle className="w-6 h-6" style={{ color: '#07071a' }} />
+                  <AlertTriangle className="w-6 h-6" style={{ color: '#050810' }} />
                 </div>
                 Cancellation Requests
               </h1>
@@ -180,8 +180,8 @@ export default function CancellationRequestsPage() {
                 className="px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300"
                 style={isActive
                   ? status === 'pending'
-                    ? { background: 'linear-gradient(135deg,#fbbf24,#f59e0b)', color: '#07071a', boxShadow: '0 4px 15px rgba(251,191,36,0.3)' }
-                    : { background: 'linear-gradient(135deg,#00d4ff,#a855f7)', color: '#07071a', boxShadow: '0 4px 15px rgba(0,212,255,0.3)' }
+                    ? { background: 'linear-gradient(135deg,#fbbf24,#f59e0b)', color: '#050810', boxShadow: '0 4px 15px rgba(251,191,36,0.3)' }
+                    : { background: 'linear-gradient(135deg,#00d4ff,#a855f7)', color: '#050810', boxShadow: '0 4px 15px rgba(0,212,255,0.3)' }
                   : { background: BRAND.card, color: 'rgba(255,255,255,0.55)', border: `1px solid ${BRAND.border}` }
                 }
               >

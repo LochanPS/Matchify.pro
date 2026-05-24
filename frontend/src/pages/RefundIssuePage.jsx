@@ -25,7 +25,7 @@ export default function RefundIssuePage() {
     }
   };
 
-  const BG = 'linear-gradient(180deg,#0a0a1f 0%,#07071a 50%,#0a0a1f 100%)';
+  const BG = 'linear-gradient(180deg,#0a0a1f 0%,#050810 50%,#0a0a1f 100%)';
 
   if (loading) {
     return (

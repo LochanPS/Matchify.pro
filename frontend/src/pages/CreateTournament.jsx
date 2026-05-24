@@ -258,7 +258,7 @@ const CreateTournament = () => {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden pb-6" style={{ background:'linear-gradient(180deg, #0a0a1f 0%, #07071a 30%, #0d1a2a 60%, #07071a 100%)' }}>
+    <div className="min-h-screen relative overflow-hidden pb-6" style={{ background:'linear-gradient(180deg, #0a0a1f 0%, #050810 30%, #0d1a2a 60%, #050810 100%)' }}>
       {/* Animated Background Elements */}
       <div className="fixed top-0 bottom-0 pointer-events-none overflow-hidden" style={{ left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: "480px" }}>
         <div 
@@ -485,7 +485,7 @@ const CreateTournament = () => {
                 <button
                   onClick={handleSaveAndExit}
                   className="w-full py-3.5 px-4 rounded-xl hover:shadow-lg transition-all font-semibold flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98]"
-                  style={{ background: 'linear-gradient(135deg, #06b6d4, #00d4ff)', color: '#07071a' }}
+                  style={{ background: 'linear-gradient(135deg, #06b6d4, #00d4ff)', color: '#050810' }}
                 >
                   <Save className="w-5 h-5" />
                   Save as Draft & Exit

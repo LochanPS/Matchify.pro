@@ -124,7 +124,7 @@ const ViewDrawsPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#07071a' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#050810' }}>
         <div className="text-center">
           <div className="w-12 h-12 border-4 rounded-full animate-spin mx-auto mb-4" style={{ borderColor: 'rgba(6,182,212,0.3)', borderTopColor: '#06b6d4' }}></div>
           <p className="text-gray-400">Loading draws...</p>
@@ -134,7 +134,7 @@ const ViewDrawsPage = () => {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: '#07071a' }}>
+    <div className="min-h-screen" style={{ background: '#050810' }}>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -363,7 +363,7 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
                       onClick={() => setConfig({ ...config, numberOfGroups: num, playersPerGroup: Math.floor(config.bracketSize / num) })}
                       className="py-3 rounded-xl font-semibold transition-all"
                       style={config.numberOfGroups === num
-                        ? { background: '#06b6d4', color: '#07071a' }
+                        ? { background: '#06b6d4', color: '#050810' }
                         : { background: 'rgba(255,255,255,0.06)', color: '#d1d5db' }}
                     >
                       {num}
@@ -385,7 +385,7 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
                         onClick={() => setConfig({ ...config, advanceFromGroup: num })}
                         className="py-3 rounded-xl font-semibold transition-all"
                         style={config.advanceFromGroup === num
-                          ? { background: '#06b6d4', color: '#07071a' }
+                          ? { background: '#06b6d4', color: '#050810' }
                           : { background: 'rgba(255,255,255,0.06)', color: '#d1d5db' }}
                       >
                         Top {num}
@@ -427,7 +427,7 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex-1 px-4 py-3 text-white rounded-xl hover:shadow-lg transition-all font-semibold disabled:opacity-50" style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#07071a' }}
+            className="flex-1 px-4 py-3 text-white rounded-xl hover:shadow-lg transition-all font-semibold disabled:opacity-50" style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#050810' }}
           >
             {saving ? 'Creating...' : 'Create Draw'}
           </button>

@@ -9,7 +9,7 @@ import api from '../utils/api';
 import { useAuth } from '../contexts/AuthContext';
 
 const B = {
-  bg: '#07071a',
+  bg: '#050810',
   card: 'rgba(255,255,255,0.05)',
   border: 'rgba(255,255,255,0.09)',
   green: '#06b6d4',
@@ -223,8 +223,8 @@ export default function AcademyDetailPage() {
         {academy.isVerified && (
           <div className="absolute top-4 right-4 flex items-center gap-1.5 px-3 py-1.5 rounded-full"
             style={{ background: 'rgba(6,182,212,0.92)', backdropFilter: 'blur(6px)' }}>
-            <BadgeCheck className="w-3.5 h-3.5" style={{ color: '#07071a' }} />
-            <span className="text-xs font-black" style={{ color: '#07071a' }}>Verified</span>
+            <BadgeCheck className="w-3.5 h-3.5" style={{ color: '#050810' }} />
+            <span className="text-xs font-black" style={{ color: '#050810' }}>Verified</span>
           </div>
         )}
       </div>

@@ -5,7 +5,7 @@ import api from '../utils/api';
 import { ArrowLeft, Gavel, Trophy, AlertTriangle, Play, Loader, Swords, Settings, Check, X } from 'lucide-react';
 
 const B = {
-  bg: '#07071a',
+  bg: '#050810',
   card: 'rgba(255,255,255,0.04)',
   border: 'rgba(255,255,255,0.08)',
   input: 'rgba(0,0,0,0.3)',
@@ -143,7 +143,7 @@ const ConductMatchPage = () => {
           <button
             onClick={() => navigate(`/match/${matchId}/score`)}
             className="px-6 py-3 rounded-xl font-black text-sm"
-            style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)', color: '#07071a', boxShadow: '0 4px 16px rgba(6,182,212,0.35)' }}>
+            style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)', color: '#050810', boxShadow: '0 4px 16px rgba(6,182,212,0.35)' }}>
             {match.status === 'COMPLETED' ? 'View Match Result' : 'Go to Scoring →'}
           </button>
           <div className="mt-3">
@@ -259,7 +259,7 @@ const ConductMatchPage = () => {
                     </div>
                   )}
                   <div className="absolute -bottom-1.5 -right-1.5 w-6 h-6 rounded-lg flex items-center justify-center text-xs font-black"
-                    style={{ background: B.green, color: '#07071a' }}>1</div>
+                    style={{ background: B.green, color: '#050810' }}>1</div>
                 </div>
                 <p className="text-sm font-black text-white leading-tight line-clamp-2">
                   {player1?.name || 'Player 1'}
@@ -439,7 +439,7 @@ const ConductMatchPage = () => {
                 onClick={handleGiveBye}
                 disabled={givingBye || (!player1 && !player2)}
                 className="w-full py-4 rounded-2xl font-black text-base transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-                style={{ background: 'linear-gradient(135deg,#f59e0b,#fbbf24)', color: '#07071a', boxShadow: '0 6px 20px rgba(245,158,11,0.35)' }}>
+                style={{ background: 'linear-gradient(135deg,#f59e0b,#fbbf24)', color: '#050810', boxShadow: '0 6px 20px rgba(245,158,11,0.35)' }}>
                 {givingBye ? <Loader className="w-5 h-5 animate-spin" /> : <Trophy className="w-5 h-5" />}
                 {givingBye ? 'Giving Bye…' : `Give Bye to ${player1?.name || player2?.name || 'Player'}`}
               </button>
@@ -457,9 +457,9 @@ const ConductMatchPage = () => {
               onClick={handleStartMatch}
               disabled={assigning}
               className="w-full py-4 rounded-2xl font-black text-base transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-              style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)', color: '#07071a', boxShadow: '0 6px 20px rgba(6,182,212,0.35)' }}>
+              style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)', color: '#050810', boxShadow: '0 6px 20px rgba(6,182,212,0.35)' }}>
               {assigning
-                ? <><div className="w-5 h-5 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: '#07071a transparent transparent transparent' }} />Starting…</>
+                ? <><div className="w-5 h-5 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: '#050810 transparent transparent transparent' }} />Starting…</>
                 : <><Play className="w-5 h-5" />Start Match</>}
             </button>
           )}

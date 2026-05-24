@@ -485,7 +485,7 @@ const RegisterPage = () => {
                 type="submit"
                 disabled={loading}
                 className="w-full py-3.5 rounded-xl font-bold text-sm transition-all duration-300 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                style={{ background:'linear-gradient(135deg,#0891b2,#06b6d4)', color:'#003320', boxShadow:'0 0 20px rgba(6,182,212,0.35)' }}
+                style={{ background:'linear-gradient(135deg,#0891b2,#06b6d4)', color:'#050810', boxShadow:'0 0 20px rgba(6,182,212,0.35)' }}
               >
                 {loading ? (
                   <>
@@ -557,7 +557,7 @@ const RegisterPage = () => {
                   setTermsAccepted(true);
                   setShowTermsModal(false);
                 }}
-                className="px-6 py-2 rounded-lg hover:shadow-lg transition-all font-bold" style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)', color: '#003320' }}
+                className="px-6 py-2 rounded-lg hover:shadow-lg transition-all font-bold" style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)', color: '#050810' }}
               >
                 I Accept
               </button>
@@ -600,7 +600,7 @@ const RegisterPage = () => {
                   setTermsAccepted(true);
                   setShowPrivacyModal(false);
                 }}
-                className="px-6 py-2 rounded-lg hover:shadow-lg transition-all font-bold" style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)', color: '#003320' }}
+                className="px-6 py-2 rounded-lg hover:shadow-lg transition-all font-bold" style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)', color: '#050810' }}
               >
                 I Accept
               </button>

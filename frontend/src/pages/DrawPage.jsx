@@ -863,7 +863,7 @@ const DrawPage = () => {
 
   if (loading && !tournament) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #0a0a1f 0%, #07071a 50%, #0d1a2a 100%)' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #0a0a1f 0%, #050810 50%, #0d1a2a 100%)' }}>
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: 'rgba(6,182,212,0.3)', borderTopColor: 'transparent' }}></div>
           <p className="mt-4 font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>Loading draw...</p>
@@ -883,7 +883,7 @@ const DrawPage = () => {
 
   return (
     <div className="min-h-screen relative overflow-hidden" style={{ 
-      background: 'linear-gradient(180deg, #0a0a1f 0%, #07071a 30%, #0d1a2a 60%, #07071a 100%)' 
+      background: 'linear-gradient(180deg, #0a0a1f 0%, #050810 30%, #0d1a2a 60%, #050810 100%)' 
     }}>
       {/* Animated Background Elements */}
       <div className="fixed top-0 bottom-0 pointer-events-none overflow-hidden" style={{ left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: "480px" }}>
@@ -952,12 +952,12 @@ const DrawPage = () => {
           0%, 100% { opacity: 0.5; filter: brightness(1); }
           50% { opacity: 1; filter: brightness(1.3); }
         }
-        .btn-brand { background: linear-gradient(135deg, #06b6d4, #00d4ff); color: #07071a !important; }
+        .btn-brand { background: linear-gradient(135deg, #06b6d4, #00d4ff); color: #050810 !important; }
         .btn-brand:hover { box-shadow: 0 8px 25px rgba(6,182,212,0.4); transform: scale(1.05); }
-        .btn-brand-sm { background: linear-gradient(135deg, #06b6d4, #00d4ff); color: #07071a !important; }
+        .btn-brand-sm { background: linear-gradient(135deg, #06b6d4, #00d4ff); color: #050810 !important; }
         .card-brand { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); }
         .card-dark { background: #0d1025; border: 1px solid rgba(255,255,255,0.1); }
-        .tab-active { background: linear-gradient(135deg, #06b6d4, #00d4ff); color: #07071a !important; box-shadow: 0 4px 15px rgba(6,182,212,0.3); }
+        .tab-active { background: linear-gradient(135deg, #06b6d4, #00d4ff); color: #050810 !important; box-shadow: 0 4px 15px rgba(6,182,212,0.3); }
         .icon-green { color: #06b6d4; }
       `}</style>
 
@@ -1240,7 +1240,7 @@ const DrawPage = () => {
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg" style={{ background: 'linear-gradient(135deg,#00d4ff,#a855f7)' }}>
-                      <Users className="w-6 h-6" style={{ color: '#07071a' }} />
+                      <Users className="w-6 h-6" style={{ color: '#050810' }} />
                     </div>
                     <div>
                       <h3 className="text-xl font-bold text-white">Registered Players</h3>
@@ -1459,7 +1459,7 @@ const DrawPage = () => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg" style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)' }}>
-                    <Play className="w-6 h-6" style={{ color: '#07071a' }} />
+                    <Play className="w-6 h-6" style={{ color: '#050810' }} />
                   </div>
                   <div>
                     <h3 className="text-xl font-bold text-white">Matchify.pro says</h3>
@@ -1537,7 +1537,7 @@ const DrawPage = () => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg" style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)' }}>
-                    <Users className="w-6 h-6" style={{ color: '#07071a' }} />
+                    <Users className="w-6 h-6" style={{ color: '#050810' }} />
                   </div>
                   <div>
                     <h3 className="text-xl font-bold text-white">Select Players for Knockout Stage</h3>
@@ -2331,7 +2331,7 @@ const DrawPage = () => {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="rounded-3xl p-8 max-w-lg w-full shadow-2xl" style={{ background: '#0d1025', border: '2px solid rgba(6,182,212,0.3)' }}>
             <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg" style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)' }}>
-              <Trophy className="w-10 h-10" style={{ color: '#07071a' }} />
+              <Trophy className="w-10 h-10" style={{ color: '#050810' }} />
             </div>
             <h2 className="text-2xl font-bold text-center mb-2 text-white">End Category?</h2>
             <p className="text-center font-semibold mb-4" style={{ color: '#00d4ff' }}>{activeCategory?.name}</p>
@@ -2602,7 +2602,7 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
         {/* Header */}
         <div className="p-4 border-b-2 border-white/10" style={{ background: 'rgba(6,182,212,0.08)' }}>
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center font-black text-xl shadow-lg" style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#07071a' }}>
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center font-black text-xl shadow-lg" style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#050810' }}>
               🏆
             </div>
             <div className="flex-1">
@@ -2882,7 +2882,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
           {/* Group Header */}
           <div className="p-4 border-b-2 border-white/10" style={{ background: 'rgba(6,182,212,0.08)' }}>
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center font-black text-xl shadow-lg" style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#07071a' }}>
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center font-black text-xl shadow-lg" style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#050810' }}>
                 {String.fromCharCode(65 + gi)}
               </div>
               <div className="flex-1">
@@ -2993,7 +2993,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
               <p className="text-[10px] font-black uppercase tracking-wider mb-2 text-center" style={{ color: 'rgba(255,255,255,0.35)' }}>Points System</p>
               <div className="flex items-center justify-center gap-2 text-xs font-bold flex-wrap">
                 <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg" style={{ background: 'rgba(6,182,212,0.1)', border: '1px solid rgba(6,182,212,0.2)' }}>
-                  <span className="w-4 h-4 rounded flex items-center justify-center text-[9px] font-black" style={{ background: '#06b6d4', color: '#07071a' }}>W</span>
+                  <span className="w-4 h-4 rounded flex items-center justify-center text-[9px] font-black" style={{ background: '#06b6d4', color: '#050810' }}>W</span>
                   <span style={{ color: '#06b6d4' }}>+2 pts</span>
                 </div>
                 <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)' }}>
@@ -3001,7 +3001,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                   <span style={{ color: '#f87171' }}>+0 pts</span>
                 </div>
                 <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg" style={{ background: 'rgba(0,212,255,0.08)', border: '1px solid rgba(0,212,255,0.2)' }}>
-                  <span className="w-4 h-4 rounded flex items-center justify-center text-[9px] font-black" style={{ background: '#00d4ff', color: '#07071a' }}>TP</span>
+                  <span className="w-4 h-4 rounded flex items-center justify-center text-[9px] font-black" style={{ background: '#00d4ff', color: '#050810' }}>TP</span>
                   <span style={{ color: '#67e8f9' }}>Game pts</span>
                 </div>
               </div>
@@ -3032,7 +3032,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
         return (
           <div
             className="fixed inset-0 z-50 flex flex-col"
-            style={{ background: '#07071a' }}
+            style={{ background: '#050810' }}
           >
             {/* Modal Header */}
             <div
@@ -3411,7 +3411,7 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg" style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)' }}>
-                <Settings className="w-6 h-6" style={{ color: '#07071a' }} />
+                <Settings className="w-6 h-6" style={{ color: '#050810' }} />
               </div>
               <h2 className="text-xl font-bold text-white">Configure Draw</h2>
             </div>
@@ -3528,7 +3528,7 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
                     {config.customGroupSizes?.map((size, idx) => {
                       return (
                         <div key={idx} className="flex items-center gap-3">
-                          <div className="w-20 h-12 rounded-lg flex items-center justify-center font-bold shadow-lg" style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#07071a' }}>
+                          <div className="w-20 h-12 rounded-lg flex items-center justify-center font-bold shadow-lg" style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#050810' }}>
                             Pool {String.fromCharCode(65 + idx)}
                           </div>
                           <input
@@ -4227,7 +4227,7 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                         <div className="w-5 h-5 rounded flex items-center justify-center font-bold text-[10px] flex-shrink-0"
                           style={{
                             background: isSelected ? 'linear-gradient(135deg,#06b6d4,#00d4ff)' : assigned ? 'linear-gradient(135deg,#06b6d4,#a855f7)' : 'linear-gradient(135deg,#a855f7,#00d4ff)',
-                            color: '#07071a',
+                            color: '#050810',
                             boxShadow: isSelected ? '0 0 0 2px #06b6d4' : undefined
                           }}>
                           {player.seed}
@@ -4601,7 +4601,7 @@ const AssignUmpireModal = ({ match, umpires, loadingUmpires, umpiresError, onRet
                   >
                     <div className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm flex-shrink-0"
                       style={isSelected
-                        ? { background: 'linear-gradient(135deg,#06b6d4,#06b6d4)', color: '#07071a' }
+                        ? { background: 'linear-gradient(135deg,#06b6d4,#06b6d4)', color: '#050810' }
                         : { background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)' }}>
                       {umpire.name?.charAt(0)?.toUpperCase() || 'U'}
                     </div>
@@ -4635,10 +4635,10 @@ const AssignUmpireModal = ({ match, umpires, loadingUmpires, umpiresError, onRet
             onClick={handleStartMatch}
             disabled={!selectedUmpire || assigning || umpires.length === 0}
             className="w-full py-3.5 rounded-xl font-black text-sm transition-all disabled:opacity-40 flex items-center justify-center gap-2"
-            style={{ background: 'linear-gradient(135deg,#06b6d4,#06b6d4)', color: '#07071a', boxShadow: '0 4px 16px rgba(6,182,212,0.35)' }}
+            style={{ background: 'linear-gradient(135deg,#06b6d4,#06b6d4)', color: '#050810', boxShadow: '0 4px 16px rgba(6,182,212,0.35)' }}
           >
             {assigning
-              ? <><div className="w-4 h-4 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#07071a transparent transparent transparent' }} />Starting…</>
+              ? <><div className="w-4 h-4 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#050810 transparent transparent transparent' }} />Starting…</>
               : <><Gavel className="w-4 h-4" />Start Match</>}
           </button>
 

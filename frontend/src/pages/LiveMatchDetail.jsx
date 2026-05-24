@@ -71,7 +71,7 @@ const LiveMatchDetail = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg,#0a0a1f 0%,#07071a 100%)' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg,#0a0a1f 0%,#050810 100%)' }}>
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: 'rgba(6,182,212,0.3)', borderTopColor: '#06b6d4' }} />
           <p className="mt-4 text-sm font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>Loading match...</p>
@@ -82,10 +82,10 @@ const LiveMatchDetail = () => {
 
   if (error || !match) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg,#0a0a1f 0%,#07071a 100%)' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg,#0a0a1f 0%,#050810 100%)' }}>
         <div className="text-center p-8 rounded-2xl" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)' }}>
           <p className="text-red-400 font-semibold mb-4">{error || 'Match not found'}</p>
-          <button onClick={() => navigate('/matches/live')} className="px-5 py-2.5 rounded-xl font-bold text-sm" style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#07071a' }}>
+          <button onClick={() => navigate('/matches/live')} className="px-5 py-2.5 rounded-xl font-bold text-sm" style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#050810' }}>
             Back to Live Matches
           </button>
         </div>
@@ -94,7 +94,7 @@ const LiveMatchDetail = () => {
   }
 
   return (
-    <div className="min-h-screen relative" style={{ background: 'linear-gradient(180deg,#0a0a1f 0%,#07071a 50%,#0a0a1f 100%)' }}>
+    <div className="min-h-screen relative" style={{ background: 'linear-gradient(180deg,#0a0a1f 0%,#050810 50%,#0a0a1f 100%)' }}>
       {/* Sticky Header */}
       <div className="sticky top-0 z-20" style={{ background: 'rgba(7,7,26,0.95)', borderBottom: '1px solid rgba(6,182,212,0.15)', backdropFilter: 'blur(20px)' }}>
         <div className="px-4 py-3 flex items-center justify-between gap-3">
@@ -133,7 +133,7 @@ const LiveMatchDetail = () => {
               <p className="text-sm mt-2" style={{ color: 'rgba(255,255,255,0.6)' }}>Match link copied to clipboard!</p>
             </div>
             <div className="p-4" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-              <button onClick={() => setShareModal(false)} className="w-full py-3 rounded-xl font-bold text-sm" style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#07071a' }}>
+              <button onClick={() => setShareModal(false)} className="w-full py-3 rounded-xl font-bold text-sm" style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#050810' }}>
                 OK
               </button>
             </div>

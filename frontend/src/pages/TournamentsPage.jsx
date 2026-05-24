@@ -87,7 +87,7 @@ const TournamentsPage = () => {
 
   if (loading && tournaments.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#07071a' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#050810' }}>
         <div className="text-center">
           <div className="w-20 h-20 border-4 border-t-transparent rounded-full animate-spin mx-auto"
             style={{ borderColor: 'rgba(6,182,212,0.3)', borderTopColor: '#06b6d4' }}></div>
@@ -98,7 +98,7 @@ const TournamentsPage = () => {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: '#07071a' }}>
+    <div className="min-h-screen" style={{ background: '#050810' }}>
       {/* Background orbs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full blur-3xl opacity-[0.07]" style={{ background: '#a855f7' }}></div>
@@ -169,7 +169,7 @@ const TournamentsPage = () => {
               Filters
             </button>
             <button type="submit" className="px-8 py-4 rounded-xl font-semibold transition-all text-white"
-              style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)', color: '#003320' }}>
+              style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)', color: '#050810' }}>
               Search
             </button>
           </form>

@@ -18,17 +18,6 @@ import {
 } from '@heroicons/react/24/outline';
 
 // Pre-generated particle data — deterministic, no Math.random in render
-const PROFILE_PARTICLES = Array.from({ length: 15 }, (_, i) => ({
-  w: (i * 7 + 2) % 4 + 2,
-  h: (i * 11 + 2) % 4 + 2,
-  x: (i * 37 + 11) % 97,
-  y: (i * 53 + 7) % 91,
-  c: ['#06b6d4', '#a855f7', '#06b6d4'][i % 3],
-  o: ((i * 13) % 50) / 100 + 0.2,
-  dur: (i * 7) % 8 + 5,
-  delay: (i * 3) % 5,
-  glow: (i * 11) % 15 + 5,
-}));
 
 // Indian Cities with States for Autocomplete
 const INDIAN_CITIES = [
@@ -336,7 +325,7 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#07071a' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#050810' }}>
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin mx-auto"
             style={{ borderColor: 'rgba(6,182,212,0.3)', borderTopColor: '#06b6d4' }} />
@@ -347,62 +336,15 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden" style={{ background: '#07071a' }}>
-      {/* Animated Background Elements */}
+    <div className="min-h-screen relative overflow-hidden" style={{ background: '#050810' }}>
+      {/* Ambient Blobs */}
       <div className="fixed top-0 bottom-0 pointer-events-none overflow-hidden" style={{ left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: "480px" }}>
-        {/* Large Gradient Orbs */}
-        <div 
-          className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl opacity-30 animate-pulse"
-          style={{ 
-            background: 'radial-gradient(circle, rgba(6,182,212,0.4) 0%, rgba(6,182,212,0.2) 40%, transparent 70%)',
-            animation: 'float 8s ease-in-out infinite'
-          }}
-        />
-        <div 
-          className="absolute top-1/4 left-0 w-80 h-80 rounded-full blur-3xl opacity-25 animate-pulse"
-          style={{ 
-            background: 'radial-gradient(circle, rgba(168,85,247,0.4) 0%, rgba(139,92,246,0.2) 40%, transparent 70%)',
-            animation: 'float 10s ease-in-out infinite reverse',
-            animationDelay: '2s'
-          }}
-        />
-        <div 
-          className="absolute bottom-1/4 right-1/4 w-72 h-72 rounded-full blur-3xl opacity-20 animate-pulse"
-          style={{ 
-            background: 'radial-gradient(circle, rgba(6,182,212,0.4) 0%, rgba(14,165,233,0.2) 40%, transparent 70%)',
-            animation: 'float 12s ease-in-out infinite',
-            animationDelay: '4s'
-          }}
-        />
-        
-        {/* Floating Particles */}
-        {PROFILE_PARTICLES.map((p, i) => (
-          <div
-            key={i}
-            className="absolute rounded-full"
-            style={{
-              width: `${p.w}px`,
-              height: `${p.h}px`,
-              left: `${p.x}%`,
-              top: `${p.y}%`,
-              background: p.c,
-              opacity: p.o,
-              animation: `float ${p.dur}s ease-in-out infinite`,
-              animationDelay: `${p.delay}s`,
-              boxShadow: `0 0 ${p.glow}px ${p.c}`,
-            }}
-          />
-        ))}
+        <div style={{ position: 'absolute', width: '440px', height: '440px', top: '-140px', right: '-120px', background: 'radial-gradient(circle, rgba(6,182,212,0.09) 0%, transparent 70%)', filter: 'blur(80px)', borderRadius: '50%' }} />
+        <div style={{ position: 'absolute', width: '400px', height: '400px', bottom: '5%', left: '-120px', background: 'radial-gradient(circle, rgba(139,92,246,0.07) 0%, transparent 70%)', filter: 'blur(80px)', borderRadius: '50%' }} />
       </div>
 
       {/* Add keyframes for animations */}
       <style>{`
-        @keyframes float {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          25% { transform: translate(20px, -20px) scale(1.05); }
-          50% { transform: translate(-15px, 15px) scale(0.95); }
-          75% { transform: translate(15px, 10px) scale(1.02); }
-        }
         @keyframes glow {
           0%, 100% { opacity: 0.5; filter: brightness(1); }
           50% { opacity: 1; filter: brightness(1.3); }
@@ -537,7 +479,7 @@ export default function ProfilePage() {
                   background: profile?.profilePhoto 
                     ? 'transparent' 
                     : 'linear-gradient(135deg,#06b6d4,#00d4ff)',
-                  color: '#003320',
+                  color: '#050810',
                   boxShadow: '0 8px 25px rgba(168,85,247,0.5), 0 0 40px rgba(168,85,247,0.3), inset 0 2px 0 rgba(255,255,255,0.3)',
                   border: '4px solid rgba(168,85,247,0.5)',
                   animation: 'float 3s ease-in-out infinite'
@@ -787,7 +729,7 @@ export default function ProfilePage() {
                     className="flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-bold text-sm transition-all relative overflow-hidden group disabled:opacity-50"
                     style={{ 
                       background: 'linear-gradient(135deg, #06b6d4, #00d4ff)',
-                      color: '#07071a',
+                      color: '#050810',
                       boxShadow: '0 4px 15px rgba(6,182,212,0.4), inset 0 1px 0 rgba(255,255,255,0.2)'
                     }}
                   >

@@ -60,7 +60,7 @@ const Wallet = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#07071a' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#050810' }}>
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: 'rgba(6,182,212,0.3)', borderTopColor: 'transparent' }}></div>
           <p className="mt-4 font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>Loading wallet...</p>
@@ -70,9 +70,9 @@ const Wallet = () => {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: '#07071a' }}>
+    <div className="min-h-screen" style={{ background: '#050810' }}>
       {/* Hero Header */}
-      <div className="relative overflow-hidden" style={{ background: 'linear-gradient(135deg,#07071a 0%,#0a1a12 50%,#07071a 100%)' }}>
+      <div className="relative overflow-hidden" style={{ background: 'linear-gradient(135deg,#050810 0%,#0a1a12 50%,#050810 100%)' }}>
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-0 left-1/4 w-80 h-80 rounded-full blur-3xl opacity-20" style={{ background: '#06b6d4' }}></div>
           <div className="absolute bottom-0 right-1/4 w-80 h-80 rounded-full blur-3xl opacity-15" style={{ background: '#00d4ff' }}></div>
@@ -91,7 +91,7 @@ const Wallet = () => {
 
           <div className="flex items-center gap-4 mb-8">
             <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center shadow-lg" style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', boxShadow: '0 0 24px rgba(6,182,212,0.3)' }}>
-              <WalletIcon className="w-7 h-7 sm:w-8 sm:h-8" style={{ color: '#003320' }} />
+              <WalletIcon className="w-7 h-7 sm:w-8 sm:h-8" style={{ color: '#050810' }} />
             </div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-white">My Wallet</h1>

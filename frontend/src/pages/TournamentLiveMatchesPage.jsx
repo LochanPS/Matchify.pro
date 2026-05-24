@@ -7,7 +7,7 @@ import { useWebSocket } from '../contexts/WebSocketContext';
 
 /* ─── colour tokens ─────────────────────────────────────────── */
 const C = {
-  bg:       '#07071a',
+  bg:       '#050810',
   card:     'rgba(255,255,255,0.04)',
   border:   'rgba(255,255,255,0.08)',
   green:    '#06b6d4',

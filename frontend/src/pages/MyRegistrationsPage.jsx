@@ -143,7 +143,7 @@ export default function MyRegistrationsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#07071a' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#050810' }}>
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin mx-auto"
             style={{ borderColor: 'rgba(6,182,212,0.3)', borderTopColor: '#06b6d4' }} />
@@ -161,7 +161,7 @@ export default function MyRegistrationsPage() {
   ];
 
   return (
-    <div className="min-h-screen" style={{ background: '#07071a' }}>
+    <div className="min-h-screen" style={{ background: '#050810' }}>
       {/* Background orbs */}
       <div className="fixed top-0 bottom-0 pointer-events-none overflow-hidden" style={{ left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: "480px" }}>
         <div className="absolute top-1/4 left-1/4 w-80 h-80 rounded-full blur-3xl opacity-[0.06]" style={{ background: '#06b6d4' }} />
@@ -177,7 +177,7 @@ export default function MyRegistrationsPage() {
           </button>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', boxShadow: '0 0 16px rgba(6,182,212,0.25)' }}>
-              <Trophy className="w-5 h-5" style={{ color: '#003320' }} />
+              <Trophy className="w-5 h-5" style={{ color: '#050810' }} />
             </div>
             <div>
               <h1 className="text-base font-black text-white">My Registrations</h1>
@@ -198,7 +198,7 @@ export default function MyRegistrationsPage() {
                 className="flex-1 px-4 py-2.5 text-sm font-bold rounded-xl transition-all"
                 style={
                   filter === tab.key
-                    ? { background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#003320', boxShadow: '0 4px 15px rgba(6,182,212,0.25)' }
+                    ? { background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#050810', boxShadow: '0 4px 15px rgba(6,182,212,0.25)' }
                     : { color: 'rgba(255,255,255,0.5)', background: 'transparent' }
                 }
               >
@@ -219,7 +219,7 @@ export default function MyRegistrationsPage() {
             <button
               onClick={() => navigate('/tournaments')}
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm"
-              style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#003320' }}
+              style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#050810' }}
             >
               Browse Tournaments
               <ArrowRight className="w-4 h-4" />
@@ -561,7 +561,7 @@ export default function MyRegistrationsPage() {
                 onClick={() => setResultModal(null)}
                 className="w-full px-4 py-3 rounded-xl font-semibold text-sm"
                 style={resultModal.type === 'success'
-                  ? { background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#003320' }
+                  ? { background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#050810' }
                   : { background: 'linear-gradient(135deg,#ef4444,#dc2626)', color: '#fff' }}
               >
                 Close

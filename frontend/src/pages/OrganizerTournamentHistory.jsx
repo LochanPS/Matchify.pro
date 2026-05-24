@@ -6,7 +6,7 @@ import { ArrowLeftIcon, TrophyIcon } from '@heroicons/react/24/outline';
 import { Filter, X, RefreshCw } from 'lucide-react';
 
 const B = {
-  bg: '#07071a', card: 'rgba(255,255,255,0.04)', border: 'rgba(255,255,255,0.08)',
+  bg: '#050810', card: 'rgba(255,255,255,0.04)', border: 'rgba(255,255,255,0.08)',
   cardDark: '#0d1025', green: '#06b6d4', cyan: '#00d4ff', purple: '#a855f7',
   sub: 'rgba(255,255,255,0.6)', dim: 'rgba(255,255,255,0.4)',
 };

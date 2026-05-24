@@ -496,7 +496,7 @@ const TournamentDetailPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#07071a' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#050810' }}>
         <div className="text-center">
           <div className="w-16 h-16 border-4 rounded-full animate-spin mx-auto" style={{ borderColor: 'rgba(6,182,212,0.3)', borderTopColor: '#06b6d4' }}></div>
           <p className="mt-4 font-medium" style={{ color: 'rgba(255,255,255,0.6)' }}>Loading tournament...</p>
@@ -507,7 +507,7 @@ const TournamentDetailPage = () => {
 
   if (error || !tournament) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#07071a' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#050810' }}>
         <div className="text-center rounded-2xl shadow-xl p-10 max-w-md border" style={{ background: '#0d1025', borderColor: 'rgba(255,255,255,0.1)' }}>
           <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: 'rgba(239,68,68,0.15)' }}>
             <ExclamationTriangleIcon className="w-8 h-8 text-red-400" />
@@ -516,7 +516,7 @@ const TournamentDetailPage = () => {
           <button
             onClick={() => navigate('/tournaments')}
             className="px-6 py-3 rounded-xl font-bold transition-all text-sm"
-            style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#07071a', boxShadow: '0 4px 15px rgba(6,182,212,0.3)' }}
+            style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#050810', boxShadow: '0 4px 15px rgba(6,182,212,0.3)' }}
           >
             Back to Tournaments
           </button>
@@ -528,7 +528,7 @@ const TournamentDetailPage = () => {
   const statusStyle = getStatusStyle(tournament.status);
 
   return (
-    <div className="min-h-screen relative overflow-hidden" style={{ background: '#07071a' }}>
+    <div className="min-h-screen relative overflow-hidden" style={{ background: '#050810' }}>
       {/* Background orbs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-80 h-80 rounded-full blur-3xl opacity-[0.06]" style={{ background: '#a855f7' }} />
@@ -1049,7 +1049,7 @@ const TournamentDetailPage = () => {
                   <button
                     onClick={() => navigate(`/tournaments/${id}/register`)}
                     className="w-full px-5 py-3 rounded-xl font-bold text-base transition-all hover:scale-105"
-                    style={{ background: 'linear-gradient(135deg,#06b6d4,#06b6d4)', color: '#003320' }}
+                    style={{ background: 'linear-gradient(135deg,#06b6d4,#06b6d4)', color: '#050810' }}
                   >
                     Register Now
                   </button>
@@ -1057,7 +1057,7 @@ const TournamentDetailPage = () => {
                   <button
                     onClick={() => setShowLoginModal(true)}
                     className="w-full px-5 py-3 rounded-xl font-bold text-base transition-all hover:scale-105"
-                    style={{ background: 'linear-gradient(135deg,#06b6d4,#06b6d4)', color: '#003320' }}
+                    style={{ background: 'linear-gradient(135deg,#06b6d4,#06b6d4)', color: '#050810' }}
                   >
                     Register Now
                   </button>
@@ -1239,7 +1239,7 @@ const TournamentDetailPage = () => {
                         onClick={() => setShowPublishConfirmModal(true)}
                         disabled={publishing || tournament.categories?.length === 0}
                         className="w-full px-5 py-3.5 rounded-xl font-black text-base transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                        style={{ background: 'linear-gradient(135deg,#06b6d4,#06b6d4)', color: '#003320' }}
+                        style={{ background: 'linear-gradient(135deg,#06b6d4,#06b6d4)', color: '#050810' }}
                       >
                         {publishing ? 'Publishing...' : '🚀 Publish Tournament'}
                       </button>
@@ -1378,7 +1378,7 @@ const TournamentDetailPage = () => {
                   <button
                     onClick={() => setShowQuickAddModal(true)}
                     className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-bold text-sm transition-all"
-                    style={{ background: 'linear-gradient(135deg,#06b6d4,#06b6d4)', color: '#003320' }}
+                    style={{ background: 'linear-gradient(135deg,#06b6d4,#06b6d4)', color: '#050810' }}
                   >
                     <UserPlusIcon className="h-4 w-4" />
                     Quick Add Player
@@ -1546,12 +1546,12 @@ const TournamentDetailPage = () => {
                   background: (!addingUmpire && umpireCode.trim() && umpireCode.trim() !== '#')
                     ? 'linear-gradient(135deg,#06b6d4,#06b6d4)'
                     : 'rgba(255,255,255,0.08)',
-                  color: (!addingUmpire && umpireCode.trim() && umpireCode.trim() !== '#') ? '#07071a' : 'rgba(255,255,255,0.4)',
+                  color: (!addingUmpire && umpireCode.trim() && umpireCode.trim() !== '#') ? '#050810' : 'rgba(255,255,255,0.4)',
                 }}
               >
                 {addingUmpire ? (
                   <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-t-transparent" style={{ borderColor: '#07071a transparent transparent transparent' }} />
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-t-transparent" style={{ borderColor: '#050810 transparent transparent transparent' }} />
                     Adding…
                   </>
                 ) : (
@@ -1584,7 +1584,7 @@ const TournamentDetailPage = () => {
                         style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
                         <div className="flex items-center gap-2.5">
                           <div className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm flex-shrink-0"
-                            style={{ background: 'linear-gradient(135deg,#06b6d4,#06b6d4)', color: '#07071a' }}>
+                            style={{ background: 'linear-gradient(135deg,#06b6d4,#06b6d4)', color: '#050810' }}>
                             {umpire.name?.charAt(0)?.toUpperCase()}
                           </div>
                           <div>
@@ -1640,7 +1640,7 @@ const TournamentDetailPage = () => {
                 <Link
                   to={`/register?redirect=/tournaments/${id}/register`}
                   className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold text-sm transition-all hover:scale-[1.02]"
-                  style={{ background: 'linear-gradient(135deg, #06b6d4, #06b6d4)', color: '#07071a' }}
+                  style={{ background: 'linear-gradient(135deg, #06b6d4, #06b6d4)', color: '#050810' }}
                 >
                   Create Account
                 </Link>
@@ -1697,10 +1697,10 @@ const TournamentDetailPage = () => {
                 </button>
                 <button onClick={handlePublish} disabled={publishing}
                   className="flex-1 px-4 py-2.5 text-white rounded-xl font-bold text-sm disabled:opacity-50 flex items-center justify-center gap-1.5 transition-all hover:scale-[1.02]"
-                  style={{ background: 'linear-gradient(135deg, #06b6d4, #06b6d4)', color: '#07071a' }}>
+                  style={{ background: 'linear-gradient(135deg, #06b6d4, #06b6d4)', color: '#050810' }}>
                   {publishing ? (
-                    <><div className="animate-spin rounded-full h-3.5 w-3.5 border-2 border-white/50 border-t-white"></div><span style={{ color: '#07071a' }}>Publishing...</span></>
-                  ) : <span style={{ color: '#07071a' }}>🚀 Publish Now</span>}
+                    <><div className="animate-spin rounded-full h-3.5 w-3.5 border-2 border-white/50 border-t-white"></div><span style={{ color: '#050810' }}>Publishing...</span></>
+                  ) : <span style={{ color: '#050810' }}>🚀 Publish Now</span>}
                 </button>
               </div>
             </div>
@@ -1727,7 +1727,7 @@ const TournamentDetailPage = () => {
                 className="w-full px-5 py-3 rounded-xl font-black text-base transition-all hover:scale-[1.02]"
                 style={{
                   background: publishResultModal.type === 'success' ? 'linear-gradient(135deg, #06b6d4, #06b6d4)' : 'linear-gradient(135deg, #ef4444, #dc2626)',
-                  color: publishResultModal.type === 'success' ? '#07071a' : 'white',
+                  color: publishResultModal.type === 'success' ? '#050810' : 'white',
                   boxShadow: publishResultModal.type === 'success' ? '0 4px 15px rgba(6,182,212,0.3)' : '0 4px 15px rgba(239,68,68,0.3)'
                 }}>
                 {publishResultModal.type === 'success' ? 'Awesome!' : 'Got it'}
@@ -1762,7 +1762,7 @@ const TournamentDetailPage = () => {
                 className="w-full px-5 py-3 rounded-xl font-black text-base transition-all hover:scale-[1.02]"
                 style={{
                   background: deleteResultModal.type === 'success' ? 'linear-gradient(135deg, #06b6d4, #06b6d4)' : 'linear-gradient(135deg, #ef4444, #dc2626)',
-                  color: deleteResultModal.type === 'success' ? '#07071a' : 'white',
+                  color: deleteResultModal.type === 'success' ? '#050810' : 'white',
                   boxShadow: deleteResultModal.type === 'success' ? '0 4px 15px rgba(6,182,212,0.3)' : '0 4px 15px rgba(239,68,68,0.3)'
                 }}>
                 {deleteResultModal.type === 'success' ? 'Continue' : 'Got it'}
@@ -1804,7 +1804,7 @@ const TournamentDetailPage = () => {
                 <button
                   onClick={() => { setShowPublishPromptModal(false); setShowPublishConfirmModal(true); }}
                   className="w-full px-5 py-3.5 rounded-xl font-black text-base flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"
-                  style={{ background: 'linear-gradient(135deg, #06b6d4, #06b6d4)', color: '#07071a', boxShadow: '0 4px 15px rgba(6,182,212,0.3)' }}>
+                  style={{ background: 'linear-gradient(135deg, #06b6d4, #06b6d4)', color: '#050810', boxShadow: '0 4px 15px rgba(6,182,212,0.3)' }}>
                   <SparklesIcon className="h-5 w-5" />
                   Publish Now
                 </button>

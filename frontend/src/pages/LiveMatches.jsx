@@ -7,7 +7,7 @@ import { useWebSocket } from '../contexts/WebSocketContext';
 import { ArrowLeft, Radio, Wifi, WifiOff, RefreshCw, Trophy, SlidersHorizontal } from 'lucide-react';
 
 const B = {
-  bg: '#07071a',
+  bg: '#050810',
   card: 'rgba(255,255,255,0.04)',
   border: 'rgba(255,255,255,0.08)',
   green: '#06b6d4',

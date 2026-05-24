@@ -318,7 +318,7 @@ function HomePage() {
             <div className="hp-fade d4 flex flex-col gap-3 mb-8">
               <Link to={getDashboardLink()}
                 className="hp-btn flex items-center justify-center gap-2 py-4 rounded-2xl font-black text-base"
-                style={{ background:'linear-gradient(135deg,#0891b2,#06b6d4)', color:'#003320', boxShadow:'0 4px 24px rgba(6,182,212,.4)' }}>
+                style={{ background:'linear-gradient(135deg,#0891b2,#06b6d4)', color:'#050810', boxShadow:'0 4px 24px rgba(6,182,212,.4)' }}>
                 Go to Dashboard
                 <ArrowRightIcon className="w-5 h-5" />
               </Link>
@@ -332,7 +332,7 @@ function HomePage() {
             <div className="hp-fade d4 flex flex-col gap-3 mb-8">
               <Link to="/register"
                 className="hp-btn flex items-center justify-center gap-2.5 py-4 rounded-2xl font-black text-base"
-                style={{ background:'linear-gradient(135deg,#0891b2,#06b6d4)', color:'#003320', boxShadow:'0 4px 24px rgba(6,182,212,.4)' }}>
+                style={{ background:'linear-gradient(135deg,#0891b2,#06b6d4)', color:'#050810', boxShadow:'0 4px 24px rgba(6,182,212,.4)' }}>
                 Create Tournament Free
                 <ArrowRightIcon className="w-5 h-5" />
               </Link>
@@ -354,7 +354,7 @@ function HomePage() {
               <div className="flex -space-x-2">
                 {['R','P','A','K'].map((l, i) => (
                   <div key={i} className="w-7 h-7 rounded-full border-2 flex items-center justify-center text-xs font-black"
-                    style={{ background:'linear-gradient(135deg,#0891b2,#06b6d4)', borderColor:'#07071a', color:'#003320' }}>{l}</div>
+                    style={{ background:'linear-gradient(135deg,#0891b2,#06b6d4)', borderColor:'#07071a', color:'#050810' }}>{l}</div>
                 ))}
               </div>
               <span className="text-xs" style={{ color:'rgba(255,255,255,.45)' }}>1,000+ players</span>
@@ -483,7 +483,7 @@ function HomePage() {
             <Reveal delay={0.4} className="mt-2">
               <Link to="/register"
                 className="hp-btn flex items-center justify-center gap-2 w-full py-4 rounded-2xl font-black text-base"
-                style={{ background:'linear-gradient(135deg,#0891b2,#06b6d4)', color:'#003320', boxShadow:'0 4px 20px rgba(6,182,212,.35)' }}>
+                style={{ background:'linear-gradient(135deg,#0891b2,#06b6d4)', color:'#050810', boxShadow:'0 4px 20px rgba(6,182,212,.35)' }}>
                 Start Organizing Free
                 <ArrowRightIcon className="w-5 h-5" />
               </Link>
@@ -594,7 +594,7 @@ function HomePage() {
                       {/* +1 buttons */}
                       <div className="grid grid-cols-2 gap-2">
                         <div className="py-2 rounded-xl text-center font-black text-xs"
-                          style={{ background:'linear-gradient(135deg,#0891b2,#06b6d4)', color:'#003320' }}>
+                          style={{ background:'linear-gradient(135deg,#0891b2,#06b6d4)', color:'#050810' }}>
                           +1 Rahul
                         </div>
                         <div className="py-2 rounded-xl text-center font-black text-xs"
@@ -763,7 +763,7 @@ function HomePage() {
                 <div className="flex flex-col gap-3">
                   <Link to={user ? getDashboardLink() : '/register'}
                     className="hp-btn flex items-center justify-center gap-2 py-4 rounded-2xl font-black text-base"
-                    style={{ background:'linear-gradient(135deg,#0891b2,#06b6d4)', color:'#003320', boxShadow:'0 4px 24px rgba(6,182,212,.4)' }}>
+                    style={{ background:'linear-gradient(135deg,#0891b2,#06b6d4)', color:'#050810', boxShadow:'0 4px 24px rgba(6,182,212,.4)' }}>
                     {user ? 'Go to Dashboard' : 'Create Tournament Free'}
                     <ArrowRightIcon className="w-5 h-5" />
                   </Link>

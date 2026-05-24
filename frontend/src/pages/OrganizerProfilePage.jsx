@@ -20,7 +20,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 const B = {
-  bg: '#07071a', card: 'rgba(255,255,255,0.04)', border: 'rgba(255,255,255,0.08)',
+  bg: '#050810', card: 'rgba(255,255,255,0.04)', border: 'rgba(255,255,255,0.08)',
   cardDark: '#0d1025', green: '#06b6d4', cyan: '#00d4ff', purple: '#a855f7',
   amber: '#fbbf24', sub: 'rgba(255,255,255,0.6)', dim: 'rgba(255,255,255,0.4)',
 };
@@ -72,7 +72,7 @@ export default function OrganizerProfilePage() {
           <Link
             to="/dashboard"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-medium text-white transition-all"
-            style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)', color: '#07071a', fontWeight: 700 }}
+            style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)', color: '#050810', fontWeight: 700 }}
           >
             <ArrowLeftIcon className="w-5 h-5" />
             Back to Dashboard

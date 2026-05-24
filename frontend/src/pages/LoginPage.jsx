@@ -296,7 +296,7 @@ const LoginPage = () => {
                 className="w-full py-4 rounded-xl font-bold text-sm transition-all duration-300 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 style={{
                   background: 'linear-gradient(135deg, #0891b2, #06b6d4)',
-                  color: '#003320',
+                  color: '#050810',
                   boxShadow: '0 0 25px rgba(6,182,212,0.4)',
                 }}
               >

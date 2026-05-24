@@ -180,7 +180,7 @@ const ScoringConsolePage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#07071a' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#050810' }}>
         <div className="text-center">
           <RefreshCw className="w-12 h-12 animate-spin mx-auto mb-4" style={{ color: '#06b6d4' }} />
           <p className="text-gray-400">Loading match...</p>
@@ -191,7 +191,7 @@ const ScoringConsolePage = () => {
 
   if (!match) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#07071a' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#050810' }}>
         <div className="text-center">
           <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
           <p className="text-gray-400">Match not found</p>
@@ -202,7 +202,7 @@ const ScoringConsolePage = () => {
   }
 
   return (
-    <div className="min-h-screen py-6 px-4" style={{ background: '#07071a' }}>
+    <div className="min-h-screen py-6 px-4" style={{ background: '#050810' }}>
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full filter blur-3xl opacity-[0.07]" style={{ background: '#06b6d4' }}></div>
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full filter blur-3xl opacity-[0.07]" style={{ background: '#00d4ff' }}></div>

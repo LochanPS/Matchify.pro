@@ -143,7 +143,7 @@ const PlayerViewDrawsPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#07071a' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#050810' }}>
         <div className="text-center">
           <div className="w-12 h-12 border-4 rounded-full animate-spin mx-auto mb-4" style={{ borderColor: 'rgba(6,182,212,0.3)', borderTopColor: '#06b6d4' }}></div>
           <p className="text-gray-400">Loading draws...</p>
@@ -153,7 +153,7 @@ const PlayerViewDrawsPage = () => {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: '#07071a' }}>
+    <div className="min-h-screen" style={{ background: '#050810' }}>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -933,7 +933,7 @@ const RoundRobinDraw = ({ data, onViewMatchDetails, categoryFormat, dbMatches = 
           <div className="border-b px-6 py-4" style={{ background: 'rgba(0,212,255,0.08)', borderColor: 'rgba(0,212,255,0.2)' }}>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#00a3cc,#00d4ff)', boxShadow: '0 4px 12px rgba(0,212,255,0.3)' }}>
-                <span className="text-xl font-bold" style={{ color: '#07071a' }}>{String.fromCharCode(65 + gi)}</span>
+                <span className="text-xl font-bold" style={{ color: '#050810' }}>{String.fromCharCode(65 + gi)}</span>
               </div>
               <div>
                 <h4 className="text-lg font-bold text-white">Group {String.fromCharCode(65 + gi)}</h4>

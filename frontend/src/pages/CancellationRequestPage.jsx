@@ -16,7 +16,7 @@ const getImageUrl = (url) => {
   return url;
 };
 
-const BG = 'linear-gradient(180deg,#0a0a1f 0%,#07071a 50%,#0a0a1f 100%)';
+const BG = 'linear-gradient(180deg,#0a0a1f 0%,#050810 50%,#0a0a1f 100%)';
 const CARD = { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px' };
 const ROW = { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', padding: '14px 16px' };
 
@@ -209,7 +209,7 @@ export default function CancellationRequestPage() {
               onClick={handleApprove}
               disabled={actionLoading}
               className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-black text-sm transition-all disabled:opacity-50"
-              style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#07071a', boxShadow: '0 4px 20px rgba(6,182,212,0.3)' }}
+              style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#050810', boxShadow: '0 4px 20px rgba(6,182,212,0.3)' }}
             >
               {actionLoading ? <Loader className="w-5 h-5 animate-spin" /> : <Check className="w-5 h-5" />}
               Approve Refund
@@ -305,7 +305,7 @@ export default function CancellationRequestPage() {
                 className="w-full py-3 rounded-xl font-black text-sm"
                 style={{
                   background: resultModal.type === 'success' ? 'linear-gradient(135deg,#06b6d4,#00d4ff)' : 'linear-gradient(135deg,#ef4444,#dc2626)',
-                  color: resultModal.type === 'success' ? '#07071a' : '#fff',
+                  color: resultModal.type === 'success' ? '#050810' : '#fff',
                 }}
               >
                 Done

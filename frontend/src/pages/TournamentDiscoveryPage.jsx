@@ -170,7 +170,7 @@ export default function TournamentDiscoveryPage() {
   const hasActiveFilters = Object.values(filters).some(v => v) || searchQuery;
 
   return (
-    <div className="min-h-screen relative overflow-hidden pb-6" style={{ background: '#07071a' }}>
+    <div className="min-h-screen relative overflow-hidden pb-6" style={{ background: '#050810' }}>
       {/* Animated Background Elements */}
       <div className="fixed top-0 bottom-0 pointer-events-none overflow-hidden" style={{ left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: "480px" }}>
         <div
@@ -675,7 +675,7 @@ function TournamentCard({ tournament, navigate, index }) {
       className="group relative overflow-hidden cursor-pointer rounded-2xl transition-all duration-300 hover:scale-[1.01]"
       onClick={() => navigate(`/tournaments/${tournament.id}`)}
       style={{
-        background: 'linear-gradient(145deg,#0d0d2b 0%,#07071a 100%)',
+        background: 'linear-gradient(145deg,#0d0d2b 0%,#050810 100%)',
         border: `1.5px solid ${accentGlow}`,
         boxShadow: `0 4px 28px rgba(0,0,0,0.5), 0 0 0 0.5px ${accentGlow}`,
       }}
@@ -695,7 +695,7 @@ function TournamentCard({ tournament, navigate, index }) {
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center relative"
-            style={{ background: `linear-gradient(135deg,#0d0d2b,#07071a)` }}>
+            style={{ background: `linear-gradient(135deg,#0d0d2b,#050810)` }}>
             <div className="absolute inset-0 opacity-8"
               style={{ backgroundImage: `radial-gradient(circle, ${accentGlow} 1px, transparent 1px)`, backgroundSize: '20px 20px' }} />
             <span className="text-6xl opacity-15">🏸</span>
@@ -821,7 +821,7 @@ function TournamentCard({ tournament, navigate, index }) {
               background: isRegistrationOpen
                 ? `linear-gradient(135deg,${accentColor}cc,${accentColor})`
                 : 'rgba(255,255,255,0.07)',
-              color: isRegistrationOpen ? '#07071a' : 'rgba(255,255,255,0.55)',
+              color: isRegistrationOpen ? '#050810' : 'rgba(255,255,255,0.55)',
               border: isRegistrationOpen ? 'none' : '1px solid rgba(255,255,255,0.1)',
             }}
           >

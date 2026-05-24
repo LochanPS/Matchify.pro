@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 
 const B = {
-  bg: '#07071a',
+  bg: '#050810',
   card: 'rgba(255,255,255,0.04)',
   border: 'rgba(255,255,255,0.08)',
   input: 'rgba(0,0,0,0.3)',
@@ -621,9 +621,9 @@ const EditTournament = () => {
               ))}
               <button onClick={handleSaveDates} disabled={saving}
                 className="w-full py-3.5 rounded-xl font-black text-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-                style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#07071a', boxShadow: '0 4px 15px rgba(6,182,212,0.35)' }}>
+                style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#050810', boxShadow: '0 4px 15px rgba(6,182,212,0.35)' }}>
                 {saving
-                  ? <div className="w-4 h-4 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: '#07071a transparent transparent transparent' }} />
+                  ? <div className="w-4 h-4 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: '#050810 transparent transparent transparent' }} />
                   : <Save className="w-4 h-4" />}
                 Save Dates
               </button>
@@ -717,9 +717,9 @@ const EditTournament = () => {
               {newPosterFiles.length > 0 && (
                 <button onClick={handleUploadPosters} disabled={uploadingPosters}
                   className="w-full py-3.5 rounded-xl font-black text-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-                  style={{ background: `linear-gradient(135deg,${B.amber},#f59e0b)`, color: '#07071a', boxShadow: '0 4px 15px rgba(251,191,36,0.3)' }}>
+                  style={{ background: `linear-gradient(135deg,${B.amber},#f59e0b)`, color: '#050810', boxShadow: '0 4px 15px rgba(251,191,36,0.3)' }}>
                   {uploadingPosters
-                    ? <div className="w-4 h-4 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: '#07071a transparent transparent transparent' }} />
+                    ? <div className="w-4 h-4 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: '#050810 transparent transparent transparent' }} />
                     : <Upload className="w-4 h-4" />}
                   Upload {newPosterFiles.length} Poster{newPosterFiles.length > 1 ? 's' : ''}
                 </button>
@@ -787,9 +787,9 @@ const EditTournament = () => {
 
               <button onClick={handleSavePaymentInfo} disabled={saving}
                 className="w-full py-3.5 rounded-xl font-black text-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-                style={{ background: 'linear-gradient(135deg,rgba(0,212,255,0.8),rgba(0,150,200,0.9))', color: '#07071a', boxShadow: '0 4px 15px rgba(0,212,255,0.25)' }}>
+                style={{ background: 'linear-gradient(135deg,rgba(0,212,255,0.8),rgba(0,150,200,0.9))', color: '#050810', boxShadow: '0 4px 15px rgba(0,212,255,0.25)' }}>
                 {saving
-                  ? <div className="w-4 h-4 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: '#07071a transparent transparent transparent' }} />
+                  ? <div className="w-4 h-4 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: '#050810 transparent transparent transparent' }} />
                   : <Save className="w-4 h-4" />}
                 Save Payment Info
               </button>

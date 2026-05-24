@@ -66,7 +66,7 @@ const LiveTournamentDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg,#0a0a1f 0%,#07071a 100%)' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg,#0a0a1f 0%,#050810 100%)' }}>
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: 'rgba(6,182,212,0.3)', borderTopColor: '#06b6d4' }} />
           <p className="mt-4 text-sm font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>Loading tournament...</p>
@@ -90,7 +90,7 @@ const LiveTournamentDashboard = () => {
   ];
 
   return (
-    <div className="min-h-screen relative" style={{ background: 'linear-gradient(180deg,#0a0a1f 0%,#07071a 40%,#0d1a2a 70%,#07071a 100%)' }}>
+    <div className="min-h-screen relative" style={{ background: 'linear-gradient(180deg,#0a0a1f 0%,#050810 40%,#0d1a2a 70%,#050810 100%)' }}>
       {/* Fixed particles bg */}
       <div className="fixed top-0 bottom-0 pointer-events-none overflow-hidden" style={{ left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: "480px" }}>
         <div className="absolute top-0 right-0 w-72 h-72 rounded-full blur-3xl opacity-15" style={{ background: 'radial-gradient(circle,rgba(6,182,212,0.4) 0%,transparent 70%)' }} />
@@ -133,7 +133,7 @@ const LiveTournamentDashboard = () => {
               className="flex-shrink-0 px-3 py-2 rounded-xl text-xs font-bold transition-all"
               style={{
                 background: filter === key ? 'linear-gradient(135deg,#06b6d4,#0891b2)' : 'rgba(255,255,255,0.06)',
-                color: filter === key ? '#07071a' : 'rgba(255,255,255,0.6)',
+                color: filter === key ? '#050810' : 'rgba(255,255,255,0.6)',
                 border: filter === key ? 'none' : '1px solid rgba(255,255,255,0.1)',
               }}
             >
@@ -199,7 +199,7 @@ const LiveTournamentDashboard = () => {
                     className="w-full mt-3 py-2.5 rounded-xl font-bold text-xs transition-all"
                     style={{
                       background: isLive ? 'linear-gradient(135deg,#06b6d4,#0891b2)' : 'rgba(255,255,255,0.08)',
-                      color: isLive ? '#07071a' : 'rgba(255,255,255,0.7)',
+                      color: isLive ? '#050810' : 'rgba(255,255,255,0.7)',
                       border: isLive ? 'none' : '1px solid rgba(255,255,255,0.1)',
                     }}
                   >

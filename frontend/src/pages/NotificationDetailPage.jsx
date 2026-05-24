@@ -113,7 +113,7 @@ const RefundDetailsForm = ({ registrationId, refundAmount, tournamentName, rejec
         </div>
         <button type="submit" disabled={submitting}
           className="w-full py-3.5 rounded-xl font-black text-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-          style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#07071a', boxShadow: '0 4px 15px rgba(6,182,212,0.35)' }}>
+          style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#050810', boxShadow: '0 4px 15px rgba(6,182,212,0.35)' }}>
           {submitting ? <><Loader className="h-4 w-4 animate-spin" /><span>Submitting...</span></> : <><CheckCircle className="h-4 w-4" /><span>Submit Refund Details</span></>}
         </button>
       </form>
@@ -121,7 +121,7 @@ const RefundDetailsForm = ({ registrationId, refundAmount, tournamentName, rejec
   );
 };
 
-const BG = 'linear-gradient(180deg,#0a0a1f 0%,#07071a 50%,#0a0a1f 100%)';
+const BG = 'linear-gradient(180deg,#0a0a1f 0%,#050810 50%,#0a0a1f 100%)';
 
 const NotificationDetailPage = () => {
   const { id } = useParams();
@@ -389,7 +389,7 @@ const NotificationDetailPage = () => {
         {notification.type !== 'PAYMENT_REJECTED' && actionPath && (
           <button onClick={() => navigate(actionPath)}
             className="w-full py-3.5 rounded-2xl font-black text-sm transition-all flex items-center justify-center gap-2 group"
-            style={{ background: `linear-gradient(135deg,${typeColor.accent}cc,${typeColor.accent})`, color: '#07071a', boxShadow: `0 4px 16px ${typeColor.accent}40` }}>
+            style={{ background: `linear-gradient(135deg,${typeColor.accent}cc,${typeColor.accent})`, color: '#050810', boxShadow: `0 4px 16px ${typeColor.accent}40` }}>
             <span>{getActionButtonText(notification.type)}</span>
             <ExternalLink className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
           </button>

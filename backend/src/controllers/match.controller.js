@@ -1408,8 +1408,8 @@ const assignUmpire = async (req, res) => {
       round: match.round,
       roundName,
       courtNumber: match.courtNumber,
-      player1Name: player1?.name || 'TBD',
-      player2Name: player2?.name || 'TBD',
+      player1Name: p1Name || 'TBD',
+      player2Name: p2Name || 'TBD',
       matchDetails
     });
 

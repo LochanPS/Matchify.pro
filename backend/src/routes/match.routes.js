@@ -624,8 +624,28 @@ const endMatchHandler = async (req, res) => {
       parentMatchPromise,
     ]);
 
-    const winner = winnerId === match.player1Id ? player1 : player2;
-    const loser  = winnerId === match.player1Id ? player2 : player1;
+    // Resolve display names — falls back to guest Registration for guest-{id} players
+    const resolveGuestName = async (playerId) => {
+      if (!playerId || !playerId.startsWith('guest-')) return null;
+      const regId = playerId.replace('guest-', '');
+      const reg = await prisma.registration.findUnique({
+        where: { id: regId },
+        select: { guestName: true, user: { select: { name: true } } }
+      });
+      return reg ? (reg.user?.name || reg.guestName || 'Unknown') : 'Unknown';
+    };
+
+    const [guestName1, guestName2] = await Promise.all([
+      resolveGuestName(match.player1Id),
+      resolveGuestName(match.player2Id),
+    ]);
+
+    // player1/player2 are null for guests — supplement with resolved guest names
+    const player1WithName = player1 || (guestName1 ? { id: match.player1Id, name: guestName1 } : null);
+    const player2WithName = player2 || (guestName2 ? { id: match.player2Id, name: guestName2 } : null);
+
+    const winner = winnerId === match.player1Id ? player1WithName : player2WithName;
+    const loser  = winnerId === match.player1Id ? player2WithName : player1WithName;
 
     // ── 4+5. Mark COMPLETED and advance winner atomically ─────────────────────
     // Both writes in a single transaction so a crash between them can't leave the

@@ -35,6 +35,9 @@ const NotificationsPage = () => {
       DRAW_PUBLISHED: '📊',
       MATCH_ASSIGNED: '⚖️',
       MATCH_STARTING_SOON: '⏰',
+      MATCH_COMPLETED: '🏁',
+      MATCH_WON: '🏆',
+      MATCH_LOST: '📋',
       TOURNAMENT_CANCELLED: '❌',
       REFUND_PROCESSED: '💰',
       REFUND_APPROVED: '💰',
@@ -57,10 +60,34 @@ const NotificationsPage = () => {
       PARTNER_ACCEPTED: { bg: 'linear-gradient(135deg, rgba(6,182,212,0.15), rgba(6,182,212,0.1))', border: 'rgba(6,182,212,0.35)', shadow: 'rgba(6,182,212,0.2)' },
       DRAW_PUBLISHED: { bg: 'linear-gradient(135deg, rgba(6,182,212,0.2), rgba(14,165,233,0.15))', border: 'rgba(6,182,212,0.4)', shadow: 'rgba(6,182,212,0.3)' },
       MATCH_ASSIGNED: { bg: 'linear-gradient(135deg, rgba(59,130,246,0.2), rgba(37,99,235,0.15))', border: 'rgba(59,130,246,0.4)', shadow: 'rgba(59,130,246,0.3)' },
+      MATCH_STARTING_SOON: { bg: 'linear-gradient(135deg, rgba(59,130,246,0.2), rgba(37,99,235,0.15))', border: 'rgba(59,130,246,0.4)', shadow: 'rgba(59,130,246,0.3)' },
+      MATCH_COMPLETED: { bg: 'linear-gradient(135deg, rgba(6,182,212,0.15), rgba(6,182,212,0.1))', border: 'rgba(6,182,212,0.35)', shadow: 'rgba(6,182,212,0.2)' },
+      MATCH_WON: { bg: 'linear-gradient(135deg, rgba(245,158,11,0.2), rgba(251,146,60,0.15))', border: 'rgba(245,158,11,0.4)', shadow: 'rgba(245,158,11,0.3)' },
+      MATCH_LOST: { bg: 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(79,70,229,0.1))', border: 'rgba(99,102,241,0.35)', shadow: 'rgba(99,102,241,0.2)' },
       POINTS_AWARDED: { bg: 'linear-gradient(135deg, rgba(245,158,11,0.2), rgba(251,146,60,0.15))', border: 'rgba(245,158,11,0.4)', shadow: 'rgba(245,158,11,0.3)' },
       TOURNAMENT_REMINDER: { bg: 'linear-gradient(135deg, rgba(168,85,247,0.2), rgba(139,92,246,0.15))', border: 'rgba(168,85,247,0.4)', shadow: 'rgba(168,85,247,0.3)' },
     };
     return colors[type] || { bg: 'linear-gradient(135deg, rgba(99,102,241,0.2), rgba(79,70,229,0.15))', border: 'rgba(99,102,241,0.4)', shadow: 'rgba(99,102,241,0.3)' };
+  };
+
+  // Smart preview: for MATCH_ASSIGNED/STARTING_SOON parse data for player names;
+  // for others truncate message cleanly
+  const getPreview = (notification) => {
+    if (['MATCH_ASSIGNED', 'MATCH_STARTING_SOON'].includes(notification.type)) {
+      try {
+        const d = notification.data ? JSON.parse(notification.data) : {};
+        const players = (d.player1Name && d.player2Name && d.player1Name !== 'TBD' && d.player2Name !== 'TBD')
+          ? `${d.player1Name} vs ${d.player2Name}`
+          : (d.player1Name || d.player2Name)
+            ? `${d.player1Name || d.player2Name} vs TBD`
+            : null;
+        const matchInfo = d.matchDetails || d.roundName || null;
+        if (players) {
+          return { players, matchInfo, tournament: d.tournamentName || null };
+        }
+      } catch {}
+    }
+    return null;
   };
 
   const handleNotificationClick = (notification) => {
@@ -318,24 +345,49 @@ const NotificationsPage = () => {
 
                     {/* Content */}
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2 mb-2">
+                      <div className="flex items-start justify-between gap-2 mb-1.5">
                         <h3 className="text-base font-bold text-white leading-tight">
                           {notification.title}
                         </h3>
                         {!notification.read && (
-                          <div 
+                          <div
                             className="w-2 h-2 rounded-full flex-shrink-0 mt-1"
-                            style={{ 
+                            style={{
                               background: '#06b6d4',
                               boxShadow: '0 0 10px rgba(6,182,212,0.8)'
                             }}
-                          ></div>
+                          />
                         )}
                       </div>
-                      
-                      <p className="text-sm mb-3 leading-relaxed" style={{ color: 'rgba(255,255,255,0.65)' }}>
-                        {notification.message}
-                      </p>
+
+                      {/* Smart preview for match notifications; plain text for others */}
+                      {(() => {
+                        const preview = getPreview(notification);
+                        if (preview) {
+                          return (
+                            <div className="mb-3 space-y-1">
+                              {preview.matchInfo && (
+                                <p className="text-xs font-semibold" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                                  {preview.matchInfo}
+                                </p>
+                              )}
+                              <p className="text-sm font-black text-white leading-snug">
+                                {preview.players}
+                              </p>
+                              {preview.tournament && (
+                                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                                  {preview.tournament}
+                                </p>
+                              )}
+                            </div>
+                          );
+                        }
+                        return (
+                          <p className="text-sm mb-3 leading-relaxed whitespace-pre-line" style={{ color: 'rgba(255,255,255,0.65)' }}>
+                            {notification.message}
+                          </p>
+                        );
+                      })()}
                       
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2 text-xs">

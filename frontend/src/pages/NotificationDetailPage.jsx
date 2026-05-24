@@ -372,6 +372,21 @@ const NotificationDetailPage = () => {
                       <span className="text-sm font-black" style={{ color: '#00d4ff' }}>Court {data.courtNumber}</span>
                     </div>
                   )}
+
+                  {/* Configure & Start Match — primary CTA inside the card */}
+                  {data.matchId && (
+                    <button
+                      onClick={() => navigate(`/match/${data.matchId}/score`)}
+                      className="w-full py-4 rounded-2xl text-sm font-black flex items-center justify-center gap-2 transition-all active:scale-[0.98] mt-2"
+                      style={{
+                        background: 'linear-gradient(135deg, #06b6d4 0%, #0099bb 100%)',
+                        color: '#000',
+                        boxShadow: '0 6px 24px rgba(6,182,212,0.45)',
+                        letterSpacing: '0.02em',
+                      }}>
+                      ▶ Configure &amp; Start Match
+                    </button>
+                  )}
                 </div>
               </div>
             )}

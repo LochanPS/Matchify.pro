@@ -364,8 +364,10 @@ const NotificationsPage = () => {
                       {(() => {
                         const preview = getPreview(notification);
                         if (preview) {
+                          let matchId = null;
+                          try { matchId = notification.data ? JSON.parse(notification.data).matchId : null; } catch {}
                           return (
-                            <div className="mb-3 space-y-1">
+                            <div className="mb-2 space-y-1">
                               {preview.matchInfo && (
                                 <p className="text-xs font-semibold" style={{ color: 'rgba(255,255,255,0.4)' }}>
                                   {preview.matchInfo}
@@ -375,9 +377,26 @@ const NotificationsPage = () => {
                                 {preview.players}
                               </p>
                               {preview.tournament && (
-                                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                                <p className="text-xs mb-2" style={{ color: 'rgba(255,255,255,0.45)' }}>
                                   {preview.tournament}
                                 </p>
+                              )}
+                              {/* Configure & Start Match CTA */}
+                              {matchId && (
+                                <button
+                                  onClick={e => {
+                                    e.stopPropagation();
+                                    if (!notification.read) markAsRead(notification.id);
+                                    navigate(`/match/${matchId}/score`);
+                                  }}
+                                  className="w-full py-2.5 rounded-xl text-xs font-black flex items-center justify-center gap-2 transition-all active:scale-[0.97] mt-1"
+                                  style={{
+                                    background: 'linear-gradient(135deg, #06b6d4 0%, #0099bb 100%)',
+                                    color: '#000',
+                                    boxShadow: '0 4px 14px rgba(6,182,212,0.4)',
+                                  }}>
+                                  ▶ Configure &amp; Start Match
+                                </button>
                               )}
                             </div>
                           );
@@ -388,7 +407,7 @@ const NotificationsPage = () => {
                           </p>
                         );
                       })()}
-                      
+
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2 text-xs">
                           <span 

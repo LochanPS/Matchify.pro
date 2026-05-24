@@ -104,18 +104,18 @@ const AgreementStep = ({ onNext, onPrev }) => {
           <div
             className="flex items-center gap-3 p-3 rounded-xl"
             style={{
-              background: "rgba(0,255,136,0.1)",
-              border: "1px solid rgba(0,255,136,0.3)",
+              background: "rgba(6,182,212,0.1)",
+              border: "1px solid rgba(6,182,212,0.3)",
             }}
           >
             <div
               className="flex-shrink-0 w-14 h-14 rounded-xl flex flex-col items-center justify-center"
               style={{
-                background: "linear-gradient(135deg, rgba(0,255,136,0.25), rgba(0,200,83,0.15))",
-                border: "1.5px solid rgba(0,255,136,0.5)",
+                background: "linear-gradient(135deg, rgba(6,182,212,0.25), rgba(6,182,212,0.15))",
+                border: "1.5px solid rgba(6,182,212,0.5)",
               }}
             >
-              <span className="text-lg font-black" style={{ color: "#00ff88", lineHeight: 1 }}>30%</span>
+              <span className="text-lg font-black" style={{ color: "#22d3ee", lineHeight: 1 }}>30%</span>
             </div>
             <div className="flex-1">
               <p className="text-sm font-black text-white">First Payout — Before Tournament</p>
@@ -186,7 +186,7 @@ const AgreementStep = ({ onNext, onPrev }) => {
         >
           <span className="text-xs font-bold text-white">Total</span>
           <div className="flex items-center gap-3 text-xs font-black">
-            <span style={{ color: "#00ff88" }}>30%</span>
+            <span style={{ color: "#22d3ee" }}>30%</span>
             <span style={{ color: "rgba(255,255,255,0.3)" }}>+</span>
             <span style={{ color: "#a78bfa" }}>67%</span>
             <span style={{ color: "rgba(255,255,255,0.3)" }}>+</span>
@@ -257,16 +257,16 @@ const AgreementStep = ({ onNext, onPrev }) => {
         className="w-full flex items-start gap-3 p-4 rounded-2xl transition-all text-left"
         style={{
           background: agreed
-            ? "linear-gradient(135deg, rgba(0,255,136,0.1), rgba(0,212,255,0.08))"
+            ? "linear-gradient(135deg, rgba(6,182,212,0.1), rgba(0,212,255,0.08))"
             : attempted
             ? "rgba(239,68,68,0.08)"
             : "rgba(255,255,255,0.04)",
-          border: `2px solid ${agreed ? "rgba(0,255,136,0.4)" : attempted ? "rgba(239,68,68,0.5)" : "rgba(255,255,255,0.12)"}`,
+          border: `2px solid ${agreed ? "rgba(6,182,212,0.4)" : attempted ? "rgba(239,68,68,0.5)" : "rgba(255,255,255,0.12)"}`,
         }}
       >
         <div className="flex-shrink-0 mt-0.5">
           {agreed ? (
-            <CheckCircleSolid className="w-5 h-5" style={{ color: "#00ff88" }} />
+            <CheckCircleSolid className="w-5 h-5" style={{ color: "#22d3ee" }} />
           ) : (
             <div
               className="w-5 h-5 rounded-full border-2 flex items-center justify-center"
@@ -275,7 +275,7 @@ const AgreementStep = ({ onNext, onPrev }) => {
           )}
         </div>
         <div>
-          <p className="text-sm font-black" style={{ color: agreed ? "#00ff88" : "rgba(255,255,255,0.9)" }}>
+          <p className="text-sm font-black" style={{ color: agreed ? "#22d3ee" : "rgba(255,255,255,0.9)" }}>
             I have read and I fully agree to the Organizer Terms &amp; Conditions
           </p>
           <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.4)" }}>
@@ -317,12 +317,12 @@ const AgreementStep = ({ onNext, onPrev }) => {
           className="flex-1 py-3.5 rounded-xl font-black text-sm transition-all"
           style={{
             background: agreed
-              ? "linear-gradient(135deg,#00ff88,#00d4ff)"
+              ? "linear-gradient(135deg,#06b6d4,#00d4ff)"
               : "rgba(255,255,255,0.06)",
             color: agreed ? "#07071a" : "rgba(255,255,255,0.25)",
             border: agreed ? "none" : "1px solid rgba(255,255,255,0.08)",
             cursor: agreed ? "pointer" : "not-allowed",
-            boxShadow: agreed ? "0 6px 20px rgba(0,255,136,0.35)" : "none",
+            boxShadow: agreed ? "0 6px 20px rgba(6,182,212,0.35)" : "none",
           }}
         >
           {agreed ? "Review Tournament →" : "Accept Terms to Continue"}

@@ -62,7 +62,7 @@ const Wallet = () => {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: '#07071a' }}>
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: 'rgba(0,255,136,0.3)', borderTopColor: 'transparent' }}></div>
+          <div className="w-16 h-16 border-4 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: 'rgba(6,182,212,0.3)', borderTopColor: 'transparent' }}></div>
           <p className="mt-4 font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>Loading wallet...</p>
         </div>
       </div>
@@ -74,7 +74,7 @@ const Wallet = () => {
       {/* Hero Header */}
       <div className="relative overflow-hidden" style={{ background: 'linear-gradient(135deg,#07071a 0%,#0a1a12 50%,#07071a 100%)' }}>
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 left-1/4 w-80 h-80 rounded-full blur-3xl opacity-20" style={{ background: '#00ff88' }}></div>
+          <div className="absolute top-0 left-1/4 w-80 h-80 rounded-full blur-3xl opacity-20" style={{ background: '#06b6d4' }}></div>
           <div className="absolute bottom-0 right-1/4 w-80 h-80 rounded-full blur-3xl opacity-15" style={{ background: '#00d4ff' }}></div>
         </div>
 
@@ -90,7 +90,7 @@ const Wallet = () => {
           </button>
 
           <div className="flex items-center gap-4 mb-8">
-            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center shadow-lg" style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', boxShadow: '0 0 24px rgba(0,255,136,0.3)' }}>
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center shadow-lg" style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', boxShadow: '0 0 24px rgba(6,182,212,0.3)' }}>
               <WalletIcon className="w-7 h-7 sm:w-8 sm:h-8" style={{ color: '#003320' }} />
             </div>
             <div>
@@ -100,7 +100,7 @@ const Wallet = () => {
           </div>
 
           {/* Balance Card */}
-          <div className="rounded-2xl p-6 sm:p-8 border" style={{ background: 'rgba(0,255,136,0.06)', borderColor: 'rgba(0,255,136,0.2)' }}>
+          <div className="rounded-2xl p-6 sm:p-8 border" style={{ background: 'rgba(6,182,212,0.06)', borderColor: 'rgba(6,182,212,0.2)' }}>
             <p className="text-sm mb-2" style={{ color: 'rgba(255,255,255,0.5)' }}>Available Balance</p>
             <p className="font-black text-white" style={{ fontSize: 'clamp(2rem,8vw,3.5rem)' }}>₹{balance.toFixed(2)}</p>
           </div>
@@ -110,13 +110,13 @@ const Wallet = () => {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-          <div className="rounded-2xl p-5 flex items-center gap-4 border" style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(0,255,136,0.12)' }}>
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(0,255,136,0.12)' }}>
-              <ArrowDownLeft className="w-6 h-6" style={{ color: '#00ff88' }} />
+          <div className="rounded-2xl p-5 flex items-center gap-4 border" style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(6,182,212,0.12)' }}>
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(6,182,212,0.12)' }}>
+              <ArrowDownLeft className="w-6 h-6" style={{ color: '#06b6d4' }} />
             </div>
             <div>
               <p className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>Total Credits</p>
-              <p className="text-xl sm:text-2xl font-bold" style={{ color: '#00ff88' }}>+₹{totalCredits.toFixed(2)}</p>
+              <p className="text-xl sm:text-2xl font-bold" style={{ color: '#06b6d4' }}>+₹{totalCredits.toFixed(2)}</p>
             </div>
           </div>
 

@@ -133,7 +133,7 @@ const BasicInfoStep = ({ formData, updateFormData, onNext }) => {
       <h2 
         className="text-lg font-black mb-4"
         style={{
-          background: 'linear-gradient(135deg, #00c853, #00ff88)',
+          background: 'linear-gradient(135deg, #0891b2, #06b6d4)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
           backgroundClip: 'text'
@@ -157,7 +157,7 @@ const BasicInfoStep = ({ formData, updateFormData, onNext }) => {
           }`}
           style={{
             background: 'rgba(0,0,0,0.3)',
-            border: errors.name ? '1.5px solid rgba(239,68,68,0.5)' : '1.5px solid rgba(0,200,83,0.3)'
+            border: errors.name ? '1.5px solid rgba(239,68,68,0.5)' : '1.5px solid rgba(6,182,212,0.3)'
           }}
         />
         {errors.name && <p className="mt-1 text-xs text-red-400">{errors.name}</p>}
@@ -182,7 +182,7 @@ const BasicInfoStep = ({ formData, updateFormData, onNext }) => {
           }`}
           style={{
             background: 'rgba(0,0,0,0.3)',
-            border: errors.description ? '1.5px solid rgba(239,68,68,0.5)' : '1.5px solid rgba(0,200,83,0.3)'
+            border: errors.description ? '1.5px solid rgba(239,68,68,0.5)' : '1.5px solid rgba(6,182,212,0.3)'
           }}
         />
         {errors.description && (
@@ -300,7 +300,7 @@ const BasicInfoStep = ({ formData, updateFormData, onNext }) => {
               className="absolute z-10 w-full mt-1 rounded-xl shadow-lg max-h-48 overflow-y-auto"
               style={{
                 background: 'rgba(0,0,0,0.95)',
-                border: '1.5px solid rgba(0,200,83,0.3)',
+                border: '1.5px solid rgba(6,182,212,0.3)',
                 backdropFilter: 'blur(20px)'
               }}
             >
@@ -342,7 +342,7 @@ const BasicInfoStep = ({ formData, updateFormData, onNext }) => {
               className="absolute z-10 w-full mt-1 rounded-xl shadow-lg max-h-48 overflow-y-auto"
               style={{
                 background: 'rgba(0,0,0,0.95)',
-                border: '1.5px solid rgba(0,200,83,0.3)',
+                border: '1.5px solid rgba(6,182,212,0.3)',
                 backdropFilter: 'blur(20px)'
               }}
             >

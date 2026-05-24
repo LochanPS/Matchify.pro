@@ -128,7 +128,7 @@ export default function UmpireDashboard() {
       <div className="min-h-screen flex items-center justify-center" style={{ background: '#07071a' }}>
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin mx-auto"
-            style={{ borderColor: 'rgba(0,255,136,0.3)', borderTopColor: '#00ff88' }} />
+            style={{ borderColor: 'rgba(6,182,212,0.3)', borderTopColor: '#06b6d4' }} />
           <p className="mt-4 font-medium" style={{ color: 'rgba(255,255,255,0.55)' }}>Loading dashboard...</p>
         </div>
       </div>
@@ -142,7 +142,7 @@ export default function UmpireDashboard() {
       {/* Background orbs */}
       <div className="fixed top-0 bottom-0 pointer-events-none overflow-hidden" style={{ left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: "480px" }}>
         <div className="absolute top-1/4 left-1/4 w-80 h-80 rounded-full blur-3xl opacity-[0.07]" style={{ background: '#a855f7' }} />
-        <div className="absolute bottom-1/4 right-1/4 w-72 h-72 rounded-full blur-3xl opacity-[0.05]" style={{ background: '#00ff88' }} />
+        <div className="absolute bottom-1/4 right-1/4 w-72 h-72 rounded-full blur-3xl opacity-[0.05]" style={{ background: '#06b6d4' }} />
       </div>
       {/* Hero Header */}
       <div className="relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #07071a 0%, #0d0a1f 50%, #07071a 100%)' }}>

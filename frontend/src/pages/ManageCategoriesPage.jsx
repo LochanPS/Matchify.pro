@@ -22,7 +22,7 @@ const B = {
   bg: '#07071a',
   card: 'rgba(255,255,255,0.04)',
   border: 'rgba(255,255,255,0.08)',
-  green: '#00ff88',
+  green: '#06b6d4',
   cyan: '#00d4ff',
   purple: '#a855f7',
   red: '#f87171',
@@ -205,7 +205,7 @@ const ManageCategoriesPage = () => {
         {/* Success message */}
         {successMessage && (
           <div className="mb-4 flex items-start gap-2.5 px-4 py-3 rounded-xl"
-            style={{ background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.25)' }}>
+            style={{ background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.25)' }}>
             <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: B.green }} />
             <p className="text-xs font-semibold flex-1" style={{ color: B.green }}>{successMessage}</p>
           </div>
@@ -287,7 +287,7 @@ const ManageCategoriesPage = () => {
 
                         {/* Entry fee — full width */}
                         <div className="col-span-2 rounded-xl px-3 py-2.5 flex items-center justify-between"
-                          style={{ background: 'rgba(0,255,136,0.06)', border: '1px solid rgba(0,255,136,0.15)' }}>
+                          style={{ background: 'rgba(6,182,212,0.06)', border: '1px solid rgba(6,182,212,0.15)' }}>
                           <div>
                             <p className="text-xs mb-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>Entry Fee</p>
                             <p className="text-sm font-black" style={{ color: B.green }}>₹{category.entryFee}</p>
@@ -351,11 +351,11 @@ const ManageCategoriesPage = () => {
           <div className="rounded-2xl overflow-hidden"
             style={{ background: B.card, border: `1px solid ${B.border}` }}>
             <div className="px-4 py-3 flex items-center gap-3"
-              style={{ borderBottom: `1px solid ${B.border}`, background: editingCategory ? 'rgba(0,212,255,0.04)' : 'rgba(0,255,136,0.04)' }}>
+              style={{ borderBottom: `1px solid ${B.border}`, background: editingCategory ? 'rgba(0,212,255,0.04)' : 'rgba(6,182,212,0.04)' }}>
               <div className="w-8 h-8 rounded-xl flex items-center justify-center"
                 style={{
-                  background: editingCategory ? 'rgba(0,212,255,0.15)' : 'rgba(0,255,136,0.15)',
-                  border: `1px solid ${editingCategory ? 'rgba(0,212,255,0.3)' : 'rgba(0,255,136,0.3)'}`,
+                  background: editingCategory ? 'rgba(0,212,255,0.15)' : 'rgba(6,182,212,0.15)',
+                  border: `1px solid ${editingCategory ? 'rgba(0,212,255,0.3)' : 'rgba(6,182,212,0.3)'}`,
                 }}>
                 {editingCategory
                   ? <Pencil className="w-4 h-4" style={{ color: B.cyan }} />

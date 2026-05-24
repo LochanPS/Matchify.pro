@@ -14,7 +14,7 @@
   html {
     font-size: clamp(15px, 4.27vw, 17px);
     /* Dark background on html/body prevents white flash on iOS overscroll bounce */
-    background-color: #161730;
+    background-color: #050810;
   }
 
   /* Ensure all text is readable on mobile */
@@ -22,7 +22,7 @@
     @apply text-base;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background-color: #161730;
+    background-color: #050810;
     color: #ffffff;
     text-rendering: optimizeLegibility;
   }
@@ -159,12 +159,12 @@
 }
 
 .overflow-x-auto::-webkit-scrollbar-thumb {
-  background: rgba(16, 185, 129, 0.5); /* Emerald */
+  background: rgba(6, 182, 212, 0.4); /* Cyan */
   border-radius: 4px;
 }
 
 .overflow-x-auto::-webkit-scrollbar-thumb:hover {
-  background: rgba(16, 185, 129, 0.7);
+  background: rgba(6, 182, 212, 0.65);
 }
 
 /* Animations */
@@ -277,10 +277,10 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(16, 185, 129, 0.5);
+  background: rgba(6, 182, 212, 0.4);
   border-radius: 4px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(16, 185, 129, 0.7);
+  background: rgba(6, 182, 212, 0.65);
 }

@@ -348,7 +348,7 @@ const CategoryForm = ({ initialData, onSave, onCancel }) => {
 
       <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
         <button type="button" onClick={onCancel} className="px-6 py-2 border border-white/10 text-gray-300 rounded-xl hover:bg-slate-700/50 transition-colors font-medium">Cancel</button>
-        <button type="submit" className="px-6 py-2 rounded-xl text-white font-medium transition-all" style={{ background: 'linear-gradient(135deg, #00c853, #00ff88)', boxShadow: '0 6px 20px rgba(0,200,83,0.4)' }}>{initialData ? 'Update Category' : 'Add Category'}</button>
+        <button type="submit" className="px-6 py-2 rounded-xl text-white font-medium transition-all" style={{ background: 'linear-gradient(135deg, #0891b2, #06b6d4)', boxShadow: '0 6px 20px rgba(6,182,212,0.4)' }}>{initialData ? 'Update Category' : 'Add Category'}</button>
       </div>
     </form>
   );

@@ -30,12 +30,12 @@ const TournamentStepper = ({ currentStep, goToStep, completedSteps }) => {
               `}
               style={{
                 background: currentStep === step.number
-                  ? 'linear-gradient(135deg, #10b981, #34d399)' // Emerald green like screenshot
+                  ? 'linear-gradient(135deg, #06b6d4, #34d399)' // Emerald green like screenshot
                   : completedSteps.includes(step.number)
                   ? 'linear-gradient(135deg, #a855f7, #c084fc)' // Purple like screenshot
                   : 'rgba(71,85,105,0.4)', // Dark gray like screenshot
                 boxShadow: currentStep === step.number
-                  ? '0 8px 25px rgba(16,185,129,0.5), 0 0 20px rgba(16,185,129,0.3)'
+                  ? '0 8px 25px rgba(6,182,212,0.5), 0 0 20px rgba(6,182,212,0.3)'
                   : completedSteps.includes(step.number)
                   ? '0 6px 20px rgba(168,85,247,0.4)'
                   : 'none',

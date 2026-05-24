@@ -90,7 +90,7 @@ const TournamentsPage = () => {
       <div className="min-h-screen flex items-center justify-center" style={{ background: '#07071a' }}>
         <div className="text-center">
           <div className="w-20 h-20 border-4 border-t-transparent rounded-full animate-spin mx-auto"
-            style={{ borderColor: 'rgba(0,255,136,0.3)', borderTopColor: '#00ff88' }}></div>
+            style={{ borderColor: 'rgba(6,182,212,0.3)', borderTopColor: '#06b6d4' }}></div>
           <p className="mt-6 font-medium text-lg" style={{ color: 'rgba(255,255,255,0.6)' }}>Loading tournaments...</p>
         </div>
       </div>
@@ -109,7 +109,7 @@ const TournamentsPage = () => {
       <div className="relative overflow-hidden">
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
           <div className="text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 border" style={{ background: 'rgba(0,255,136,0.1)', borderColor: 'rgba(0,255,136,0.3)', color: '#00ff88' }}>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6 border" style={{ background: 'rgba(6,182,212,0.1)', borderColor: 'rgba(6,182,212,0.3)', color: '#06b6d4' }}>
               <Sparkles className="w-4 h-4 text-amber-400" />
               <span className="text-sm font-medium">Find Your Next Competition</span>
             </div>
@@ -117,7 +117,7 @@ const TournamentsPage = () => {
             <h1 className="text-3xl sm:text-5xl md:text-7xl font-black mb-6">
               <span className="text-white">Discover</span>
               <br />
-              <span style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Tournaments</span>
+              <span style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Tournaments</span>
             </h1>
 
             <p className="text-xl max-w-2xl mx-auto mb-8" style={{ color: 'rgba(255,255,255,0.55)' }}>
@@ -169,7 +169,7 @@ const TournamentsPage = () => {
               Filters
             </button>
             <button type="submit" className="px-8 py-4 rounded-xl font-semibold transition-all text-white"
-              style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#003320' }}>
+              style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)', color: '#003320' }}>
               Search
             </button>
           </form>
@@ -279,8 +279,8 @@ const TournamentsPage = () => {
                           <span>{formatDate(tournament.startDate)}</span>
                         </div>
                         <div className="flex items-center gap-2" style={{ color: 'rgba(255,255,255,0.6)' }}>
-                          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(0,255,136,0.1)' }}>
-                            <Users className="h-4 w-4" style={{ color: '#00ff88' }} />
+                          <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(6,182,212,0.1)' }}>
+                            <Users className="h-4 w-4" style={{ color: '#06b6d4' }} />
                           </div>
                           <span>{tournament._count?.categories || 0} Categories</span>
                         </div>

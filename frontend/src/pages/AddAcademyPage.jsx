@@ -16,7 +16,7 @@ const B = {
   card: 'rgba(255,255,255,0.04)',
   cardHover: 'rgba(255,255,255,0.07)',
   border: 'rgba(255,255,255,0.08)',
-  green: '#00ff88',
+  green: '#06b6d4',
   cyan: '#00d4ff',
   purple: '#a855f7',
   amber: '#fbbf24',
@@ -99,7 +99,7 @@ function StepIndicator({ current, total }) {
           <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-black transition-all"
             style={{
               background: n < current ? B.green : n === current
-                ? 'linear-gradient(135deg,#00ff88,#00d4ff)' : 'rgba(255,255,255,0.06)',
+                ? 'linear-gradient(135deg,#06b6d4,#00d4ff)' : 'rgba(255,255,255,0.06)',
               color: n <= current ? '#07071a' : 'rgba(255,255,255,0.3)',
               border: n > current ? `1px solid rgba(255,255,255,0.1)` : 'none',
             }}>
@@ -300,7 +300,7 @@ export default function AddAcademyPage() {
       <div className="min-h-screen flex items-center justify-center p-6" style={{ background: B.bg }}>
         <div className="w-full max-w-sm text-center">
           <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-5"
-            style={{ background: 'rgba(0,255,136,0.12)', border: '2px solid rgba(0,255,136,0.3)' }}>
+            style={{ background: 'rgba(6,182,212,0.12)', border: '2px solid rgba(6,182,212,0.3)' }}>
             <CheckCircle className="w-10 h-10" style={{ color: B.green }} />
           </div>
           <h2 className="text-2xl font-black text-white mb-2">Submitted!</h2>
@@ -313,7 +313,7 @@ export default function AddAcademyPage() {
           </p>
           <button onClick={() => navigate('/academies')}
             className="w-full py-3.5 rounded-2xl font-black text-sm"
-            style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', color: '#07071a' }}>
+            style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#07071a' }}>
             Back to Academies
           </button>
         </div>
@@ -339,7 +339,7 @@ export default function AddAcademyPage() {
             Step {step} of 3
           </div>
           {lastSaved && (
-            <div className="flex items-center gap-1 text-xs" style={{ color: 'rgba(0,255,136,0.5)' }}>
+            <div className="flex items-center gap-1 text-xs" style={{ color: 'rgba(6,182,212,0.5)' }}>
               <Save className="w-3 h-3" />
               Saved
             </div>
@@ -457,9 +457,9 @@ export default function AddAcademyPage() {
                     <button key={sport} type="button" onClick={() => toggleSport(sport)}
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all"
                       style={{
-                        background: active ? 'rgba(0,255,136,0.15)' : 'rgba(255,255,255,0.04)',
+                        background: active ? 'rgba(6,182,212,0.15)' : 'rgba(255,255,255,0.04)',
                         color: active ? B.green : 'rgba(255,255,255,0.5)',
-                        border: `1px solid ${active ? 'rgba(0,255,136,0.4)' : B.border}`,
+                        border: `1px solid ${active ? 'rgba(6,182,212,0.4)' : B.border}`,
                       }}>
                       {cfg.emoji} {sport}
                     </button>
@@ -533,7 +533,7 @@ export default function AddAcademyPage() {
 
             <button onClick={handleNext}
               className="w-full py-3.5 rounded-2xl font-black text-sm flex items-center justify-center gap-2"
-              style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', color: '#07071a' }}>
+              style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#07071a' }}>
               Next: Contact & Photos
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -606,7 +606,7 @@ export default function AddAcademyPage() {
 
             <button onClick={handleNext}
               className="w-full py-3.5 rounded-2xl font-black text-sm flex items-center justify-center gap-2"
-              style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', color: '#07071a' }}>
+              style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#07071a' }}>
               Next: Payment
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -619,7 +619,7 @@ export default function AddAcademyPage() {
 
             {/* Fee summary */}
             <div className="rounded-2xl p-4"
-              style={{ background: 'rgba(0,255,136,0.06)', border: '1px solid rgba(0,255,136,0.2)' }}>
+              style={{ background: 'rgba(6,182,212,0.06)', border: '1px solid rgba(6,182,212,0.2)' }}>
               <div className="flex items-center justify-between mb-1">
                 <span className="text-sm font-bold text-white">Academy Listing Fee</span>
                 <span className="text-2xl font-black" style={{ color: B.green }}>₹{LISTING_FEE}</span>
@@ -676,7 +676,7 @@ export default function AddAcademyPage() {
             <div className="rounded-2xl overflow-hidden"
               style={{ background: B.card, border: `1px solid ${B.border}` }}>
               <div className="px-4 py-3 flex items-center gap-3"
-                style={{ borderBottom: `1px solid ${B.border}`, background: 'rgba(0,255,136,0.04)' }}>
+                style={{ borderBottom: `1px solid ${B.border}`, background: 'rgba(6,182,212,0.04)' }}>
                 <Upload className="w-4 h-4" style={{ color: B.green }} />
                 <p className="text-sm font-black text-white">Upload Payment Screenshot</p>
               </div>
@@ -694,7 +694,7 @@ export default function AddAcademyPage() {
                 ) : (
                   <div onClick={() => payInputRef.current?.click()}
                     className="border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer"
-                    style={{ borderColor: 'rgba(0,255,136,0.2)', background: 'rgba(0,255,136,0.02)' }}>
+                    style={{ borderColor: 'rgba(6,182,212,0.2)', background: 'rgba(6,182,212,0.02)' }}>
                     <Camera className="w-10 h-10 mx-auto mb-2" style={{ color: 'rgba(255,255,255,0.25)' }} />
                     <p className="text-sm font-bold text-white mb-1">Tap to upload screenshot</p>
                     <p className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>PNG, JPG up to 10MB</p>
@@ -712,7 +712,7 @@ export default function AddAcademyPage() {
               onClick={handleSubmit}
               disabled={loading || !paymentScreenshot}
               className="w-full py-3.5 rounded-2xl font-black text-sm flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
-              style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', color: '#07071a' }}>
+              style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#07071a' }}>
               {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle className="w-5 h-5" />}
               {loading ? 'Submitting...' : 'Submit Academy'}
             </button>

@@ -29,15 +29,15 @@ const PROBLEMS = [
 ];
 
 const STEPS = [
-  { num: '01', title: 'Create your tournament',  desc: 'Set format, categories, prize money, and payment in under 5 minutes.', color: '#00ff88' },
+  { num: '01', title: 'Create your tournament',  desc: 'Set format, categories, prize money, and payment in under 5 minutes.', color: '#06b6d4' },
   { num: '02', title: 'Players register online', desc: 'Share one link. Players sign up and pay via UPI — fully automated.',   color: '#00d4ff' },
   { num: '03', title: 'Manage everything live',  desc: 'Auto-generated draws, live scoring, real-time bracket updates.',        color: '#a855f7' },
 ];
 
 const FEATURES = [
   { Icon: TrophyIcon,        title: 'Automated draw generation',    desc: 'Seeded brackets for Knockout, Round Robin, and Hybrid. One click, done.', tag: '8–256 players',   color: '#f59e0b', bg: 'rgba(245,158,11,0.1)' },
-  { Icon: SignalIcon,        title: 'Live point-by-point scoring',  desc: 'Umpires score from the court. Spectators watch every point in real time.', tag: 'WebSocket live',  color: '#00ff88', bg: 'rgba(0,255,136,0.1)' },
-  { Icon: CurrencyRupeeIcon, title: 'UPI payment collection',       desc: 'Players pay via QR. You verify. Wallet refunds processed instantly.',      tag: '100% secure',     color: '#10b981', bg: 'rgba(16,185,129,0.1)' },
+  { Icon: SignalIcon,        title: 'Live point-by-point scoring',  desc: 'Umpires score from the court. Spectators watch every point in real time.', tag: 'WebSocket live',  color: '#06b6d4', bg: 'rgba(6,182,212,0.1)' },
+  { Icon: CurrencyRupeeIcon, title: 'UPI payment collection',       desc: 'Players pay via QR. You verify. Wallet refunds processed instantly.',      tag: '100% secure',     color: '#06b6d4', bg: 'rgba(6,182,212,0.1)' },
   { Icon: UserGroupIcon,     title: 'Doubles partner network',      desc: 'Players invite partners in-app. Doubles pairs registered automatically.',  tag: "Men's·Women's·Mixed", color: '#06b6d4', bg: 'rgba(6,182,212,0.1)' },
   { Icon: ChartBarIcon,      title: 'Rankings & leaderboards',      desc: 'Matchify Points auto-updated after every result. City and national boards.',tag: 'Auto-updated',    color: '#8b5cf6', bg: 'rgba(139,92,246,0.1)' },
   { Icon: Cog6ToothIcon,     title: 'Full organizer control',       desc: 'Registrations, umpires, draws, payments — all in one clean dashboard.',    tag: 'End-to-end',      color: '#f97316', bg: 'rgba(249,115,22,0.1)' },
@@ -62,7 +62,7 @@ const HP_CSS = `
   .hp-glow  { animation: hp-glow  4s ease-in-out infinite; }
 
   .hp-shim {
-    background: linear-gradient(90deg,#00ff88 0%,#00d4ff 40%,#a855f7 70%,#00ff88 100%);
+    background: linear-gradient(90deg,#06b6d4 0%,#00d4ff 40%,#a855f7 70%,#06b6d4 100%);
     background-size: 200% auto;
     -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -83,7 +83,7 @@ const HP_CSS = `
   .hp-btn:hover  { transform:translateY(-2px) translateZ(0); }
   .hp-btn:active { transform:scale(.96) translateZ(0); }
 
-  .hp-dot { width:8px;height:8px;border-radius:50%;background:#00ff88;box-shadow:0 0 7px #00ff88; animation:hp-dot 1.4s ease-in-out infinite; }
+  .hp-dot { width:8px;height:8px;border-radius:50%;background:#06b6d4;box-shadow:0 0 7px #06b6d4; animation:hp-dot 1.4s ease-in-out infinite; }
 
   .hp-grid {
     background-image:
@@ -155,7 +155,7 @@ function DashboardMockup() {
           <div>
             <div className="flex items-center gap-2 mb-1">
               <div className="hp-dot" />
-              <span className="text-xs font-bold" style={{ color:'#00ff88' }}>LIVE</span>
+              <span className="text-xs font-bold" style={{ color:'#06b6d4' }}>LIVE</span>
               <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background:'rgba(245,158,11,.15)', color:'#fbbf24', fontSize:10 }}>Knockout</span>
             </div>
             <p className="text-sm font-black text-white">Kerala State Open 2026</p>
@@ -163,17 +163,17 @@ function DashboardMockup() {
           </div>
           <div className="text-right flex-shrink-0">
             <p className="text-xs" style={{ color:'rgba(255,255,255,.3)' }}>Prize Pool</p>
-            <p className="text-base font-black" style={{ color:'#00ff88' }}>₹50,000</p>
+            <p className="text-base font-black" style={{ color:'#06b6d4' }}>₹50,000</p>
           </div>
         </div>
 
         {/* Live match card */}
-        <div className="rounded-xl p-3" style={{ background:'rgba(0,255,136,.05)', border:'1px solid rgba(0,255,136,.18)' }}>
+        <div className="rounded-xl p-3" style={{ background:'rgba(6,182,212,.05)', border:'1px solid rgba(6,182,212,.18)' }}>
           <div className="flex items-center justify-between mb-2.5">
             <span className="text-xs font-bold" style={{ color:'rgba(255,255,255,.4)' }}>QF · Match 3</span>
             <div className="flex items-center gap-1.5">
               <div className="hp-dot" style={{ width:6, height:6 }} />
-              <span className="text-xs font-bold" style={{ color:'#00ff88' }}>In Progress</span>
+              <span className="text-xs font-bold" style={{ color:'#06b6d4' }}>In Progress</span>
             </div>
           </div>
           <div className="space-y-2">
@@ -187,12 +187,12 @@ function DashboardMockup() {
                   {!p.serving && <div className="w-1.5 h-1.5" />}
                   <span className="text-xs font-semibold" style={{ color: p.winning ? 'white' : 'rgba(255,255,255,.55)' }}>{p.name}</span>
                 </div>
-                <span className="text-base font-black" style={{ color: p.winning ? '#00ff88' : 'rgba(255,255,255,.5)' }}>{p.score}</span>
+                <span className="text-base font-black" style={{ color: p.winning ? '#06b6d4' : 'rgba(255,255,255,.5)' }}>{p.score}</span>
               </div>
             ))}
           </div>
           <div className="mt-2.5 rounded-full overflow-hidden" style={{ height:3, background:'rgba(255,255,255,.06)' }}>
-            <div className="hp-score-bar" style={{ width:'54.5%', height:'100%', background:'linear-gradient(90deg,#00ff88,#00d4ff)' }} />
+            <div className="hp-score-bar" style={{ width:'54.5%', height:'100%', background:'linear-gradient(90deg,#06b6d4,#00d4ff)' }} />
           </div>
         </div>
 
@@ -213,7 +213,7 @@ function DashboardMockup() {
         <div className="grid grid-cols-3 gap-2">
           {[
             { label:'Registered', val:'24 / 32', color:'#00d4ff' },
-            { label:'Completed',  val:'12 matches', color:'#00ff88' },
+            { label:'Completed',  val:'12 matches', color:'#06b6d4' },
             { label:'Draw',       val:'Auto-gen ✓', color:'#a855f7' },
           ].map((s, i) => (
             <div key={i} className="rounded-xl p-2.5 text-center" style={{ background:'rgba(255,255,255,.03)', border:'1px solid rgba(255,255,255,.06)' }}>
@@ -278,7 +278,7 @@ function HomePage() {
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden" aria-hidden>
         <div className="hp-grid absolute inset-0" />
         <div className="hp-glow hp-float absolute -top-32 -right-32 w-[500px] h-[500px] rounded-full"
-          style={{ background:'radial-gradient(circle, rgba(0,255,136,.1) 0%, transparent 65%)', filter:'blur(1px)' }} />
+          style={{ background:'radial-gradient(circle, rgba(6,182,212,.1) 0%, transparent 65%)', filter:'blur(1px)' }} />
         <div className="hp-glow hp-float absolute top-1/2 -left-40 w-[400px] h-[400px] rounded-full"
           style={{ background:'radial-gradient(circle, rgba(99,102,241,.08) 0%, transparent 65%)', animationDelay:'2s' }} />
         <div className="hp-glow absolute bottom-0 right-0 w-[450px] h-[450px] rounded-full"
@@ -294,7 +294,7 @@ function HomePage() {
           {/* Badge */}
           <div className="hp-fade d1 flex justify-center mb-5">
             <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-black tracking-wider uppercase"
-              style={{ background:'rgba(0,255,136,.08)', border:'1px solid rgba(0,255,136,.22)', color:'#00ff88' }}>
+              style={{ background:'rgba(6,182,212,.08)', border:'1px solid rgba(6,182,212,.22)', color:'#06b6d4' }}>
               🏸 India's #1 Badminton Platform
             </span>
           </div>
@@ -318,7 +318,7 @@ function HomePage() {
             <div className="hp-fade d4 flex flex-col gap-3 mb-8">
               <Link to={getDashboardLink()}
                 className="hp-btn flex items-center justify-center gap-2 py-4 rounded-2xl font-black text-base"
-                style={{ background:'linear-gradient(135deg,#00c853,#00ff88)', color:'#003320', boxShadow:'0 4px 24px rgba(0,255,136,.4)' }}>
+                style={{ background:'linear-gradient(135deg,#0891b2,#06b6d4)', color:'#003320', boxShadow:'0 4px 24px rgba(6,182,212,.4)' }}>
                 Go to Dashboard
                 <ArrowRightIcon className="w-5 h-5" />
               </Link>
@@ -332,7 +332,7 @@ function HomePage() {
             <div className="hp-fade d4 flex flex-col gap-3 mb-8">
               <Link to="/register"
                 className="hp-btn flex items-center justify-center gap-2.5 py-4 rounded-2xl font-black text-base"
-                style={{ background:'linear-gradient(135deg,#00c853,#00ff88)', color:'#003320', boxShadow:'0 4px 24px rgba(0,255,136,.4)' }}>
+                style={{ background:'linear-gradient(135deg,#0891b2,#06b6d4)', color:'#003320', boxShadow:'0 4px 24px rgba(6,182,212,.4)' }}>
                 Create Tournament Free
                 <ArrowRightIcon className="w-5 h-5" />
               </Link>
@@ -343,7 +343,7 @@ function HomePage() {
               </Link>
               <p className="text-center text-xs" style={{ color:'rgba(255,255,255,.35)' }}>
                 Already organizing?{' '}
-                <Link to="/login" style={{ color:'#00ff88' }} className="font-semibold">Sign In</Link>
+                <Link to="/login" style={{ color:'#06b6d4' }} className="font-semibold">Sign In</Link>
               </p>
             </div>
           )}
@@ -354,7 +354,7 @@ function HomePage() {
               <div className="flex -space-x-2">
                 {['R','P','A','K'].map((l, i) => (
                   <div key={i} className="w-7 h-7 rounded-full border-2 flex items-center justify-center text-xs font-black"
-                    style={{ background:'linear-gradient(135deg,#00c853,#00ff88)', borderColor:'#07071a', color:'#003320' }}>{l}</div>
+                    style={{ background:'linear-gradient(135deg,#0891b2,#06b6d4)', borderColor:'#07071a', color:'#003320' }}>{l}</div>
                 ))}
               </div>
               <span className="text-xs" style={{ color:'rgba(255,255,255,.45)' }}>1,000+ players</span>
@@ -382,9 +382,9 @@ function HomePage() {
             <div className="grid grid-cols-4 gap-2">
               {stats.map((s, i) => (
                 <div key={i} className="flex flex-col items-center gap-1 py-4 px-2 rounded-2xl"
-                  style={{ background:'rgba(0,255,136,.04)', border:'1px solid rgba(0,255,136,.1)' }}>
+                  style={{ background:'rgba(6,182,212,.04)', border:'1px solid rgba(6,182,212,.1)' }}>
                   <span className="text-xl">{s.icon}</span>
-                  <span className="text-lg font-black" style={{ color:'#00ff88' }}>{s.value}</span>
+                  <span className="text-lg font-black" style={{ color:'#06b6d4' }}>{s.value}</span>
                   <span className="text-center leading-tight" style={{ color:'rgba(255,255,255,.4)', fontSize:10, fontWeight:500 }}>{s.label}</span>
                 </div>
               ))}
@@ -427,7 +427,7 @@ function HomePage() {
 
           <Reveal delay={0.3} className="mt-5">
             <div className="flex items-center gap-3 p-4 rounded-2xl"
-              style={{ background:'rgba(0,255,136,.05)', border:'1px solid rgba(0,255,136,.2)' }}>
+              style={{ background:'rgba(6,182,212,.05)', border:'1px solid rgba(6,182,212,.2)' }}>
               <span className="text-2xl flex-shrink-0">✅</span>
               <div>
                 <p className="text-sm font-black text-white">Matchify solves all of this.</p>
@@ -459,7 +459,7 @@ function HomePage() {
           <div className="relative flex flex-col gap-0">
             {/* Vertical connecting line */}
             <div className="absolute left-[27px] top-10 bottom-10 w-0.5"
-              style={{ background:'linear-gradient(180deg,#00ff88,#00d4ff,#a855f7)', opacity:.35 }} aria-hidden />
+              style={{ background:'linear-gradient(180deg,#06b6d4,#00d4ff,#a855f7)', opacity:.35 }} aria-hidden />
 
             {STEPS.map((s, i) => (
               <Reveal key={i} delay={i * 0.12}>
@@ -483,7 +483,7 @@ function HomePage() {
             <Reveal delay={0.4} className="mt-2">
               <Link to="/register"
                 className="hp-btn flex items-center justify-center gap-2 w-full py-4 rounded-2xl font-black text-base"
-                style={{ background:'linear-gradient(135deg,#00c853,#00ff88)', color:'#003320', boxShadow:'0 4px 20px rgba(0,255,136,.35)' }}>
+                style={{ background:'linear-gradient(135deg,#0891b2,#06b6d4)', color:'#003320', boxShadow:'0 4px 20px rgba(6,182,212,.35)' }}>
                 Start Organizing Free
                 <ArrowRightIcon className="w-5 h-5" />
               </Link>
@@ -499,12 +499,12 @@ function HomePage() {
         <div className="mx-auto" style={{ maxWidth:460 }}>
           <Reveal className="text-center mb-8">
             <span className="inline-block px-4 py-1.5 rounded-full text-xs font-black tracking-wider uppercase mb-3"
-              style={{ background:'rgba(0,255,136,.08)', color:'#00ff88', border:'1px solid rgba(0,255,136,.18)' }}>
+              style={{ background:'rgba(6,182,212,.08)', color:'#06b6d4', border:'1px solid rgba(6,182,212,.18)' }}>
               ✦ Features
             </span>
             <h2 className="text-2xl font-black leading-tight">
               Everything you need.<br />
-              <span style={{ color:'#00ff88' }}>Nothing you don't.</span>
+              <span style={{ color:'#06b6d4' }}>Nothing you don't.</span>
             </h2>
             <p className="text-sm mt-2" style={{ color:'rgba(255,255,255,.45)' }}>For organizers, players, and umpires.</p>
           </Reveal>
@@ -571,16 +571,16 @@ function HomePage() {
                         <span className="text-xs font-black text-white">Live Scoring</span>
                         <div className="flex items-center gap-1">
                           <div className="hp-dot" style={{ width:6, height:6 }} />
-                          <span style={{ color:'#00ff88', fontSize:10, fontWeight:700 }}>LIVE</span>
+                          <span style={{ color:'#06b6d4', fontSize:10, fontWeight:700 }}>LIVE</span>
                         </div>
                       </div>
                       {/* Big score display */}
-                      <div className="rounded-xl p-3" style={{ background:'rgba(0,255,136,.07)', border:'1px solid rgba(0,255,136,.2)' }}>
+                      <div className="rounded-xl p-3" style={{ background:'rgba(6,182,212,.07)', border:'1px solid rgba(6,182,212,.2)' }}>
                         <p style={{ color:'rgba(255,255,255,.5)', fontSize:9 }} className="mb-1.5 font-semibold">SET 2 · SEMIFINAL</p>
                         <div className="flex items-end justify-between">
                           <div>
                             <p className="text-xs font-black text-white">Rahul S.</p>
-                            <p className="font-black" style={{ color:'#00ff88', fontSize:28, lineHeight:1 }}>19</p>
+                            <p className="font-black" style={{ color:'#06b6d4', fontSize:28, lineHeight:1 }}>19</p>
                           </div>
                           <div className="text-center pb-1">
                             <p style={{ color:'rgba(255,255,255,.2)', fontSize:11 }}>vs</p>
@@ -594,7 +594,7 @@ function HomePage() {
                       {/* +1 buttons */}
                       <div className="grid grid-cols-2 gap-2">
                         <div className="py-2 rounded-xl text-center font-black text-xs"
-                          style={{ background:'linear-gradient(135deg,#00c853,#00ff88)', color:'#003320' }}>
+                          style={{ background:'linear-gradient(135deg,#0891b2,#06b6d4)', color:'#003320' }}>
                           +1 Rahul
                         </div>
                         <div className="py-2 rounded-xl text-center font-black text-xs"
@@ -606,7 +606,7 @@ function HomePage() {
                       <div className="rounded-xl p-2.5" style={{ background:'rgba(255,255,255,.03)', border:'1px solid rgba(255,255,255,.06)' }}>
                         <p style={{ color:'rgba(255,255,255,.35)', fontSize:9 }} className="font-semibold mb-1">SET HISTORY</p>
                         <div className="flex gap-2">
-                          <span style={{ background:'rgba(0,255,136,.12)', color:'#00ff88', fontSize:10, fontWeight:700 }} className="px-2 py-0.5 rounded-lg">21–18</span>
+                          <span style={{ background:'rgba(6,182,212,.12)', color:'#06b6d4', fontSize:10, fontWeight:700 }} className="px-2 py-0.5 rounded-lg">21–18</span>
                           <span style={{ color:'rgba(255,255,255,.4)', fontSize:10, fontWeight:600 }} className="px-2 py-0.5">ongoing...</span>
                         </div>
                       </div>
@@ -746,7 +746,7 @@ function HomePage() {
         <div className="mx-auto" style={{ maxWidth:460 }}>
           <Reveal>
             <div className="relative rounded-3xl overflow-hidden text-center p-8"
-              style={{ background:'linear-gradient(135deg,rgba(0,212,255,.07),rgba(0,255,136,.07))', border:'1px solid rgba(0,212,255,.2)' }}>
+              style={{ background:'linear-gradient(135deg,rgba(0,212,255,.07),rgba(6,182,212,.07))', border:'1px solid rgba(0,212,255,.2)' }}>
               <div className="absolute inset-0 pointer-events-none"
                 style={{ background:'radial-gradient(ellipse at 50% 0%,rgba(0,212,255,.1) 0%,transparent 65%)' }} aria-hidden />
               <div className="relative">
@@ -763,7 +763,7 @@ function HomePage() {
                 <div className="flex flex-col gap-3">
                   <Link to={user ? getDashboardLink() : '/register'}
                     className="hp-btn flex items-center justify-center gap-2 py-4 rounded-2xl font-black text-base"
-                    style={{ background:'linear-gradient(135deg,#00c853,#00ff88)', color:'#003320', boxShadow:'0 4px 24px rgba(0,255,136,.4)' }}>
+                    style={{ background:'linear-gradient(135deg,#0891b2,#06b6d4)', color:'#003320', boxShadow:'0 4px 24px rgba(6,182,212,.4)' }}>
                     {user ? 'Go to Dashboard' : 'Create Tournament Free'}
                     <ArrowRightIcon className="w-5 h-5" />
                   </Link>
@@ -776,7 +776,7 @@ function HomePage() {
                       </Link>
                       <p className="text-xs" style={{ color:'rgba(255,255,255,.35)' }}>
                         Already registered?{' '}
-                        <Link to="/login" style={{ color:'#00ff88' }} className="font-semibold">Sign In →</Link>
+                        <Link to="/login" style={{ color:'#06b6d4' }} className="font-semibold">Sign In →</Link>
                       </p>
                     </>
                   )}
@@ -795,19 +795,19 @@ function HomePage() {
         <div className="mx-auto flex flex-col items-center gap-5" style={{ maxWidth:460 }}>
           <div className="flex items-center gap-2">
             <img src="/logo.png" alt="matchify.pro" className="h-8 w-auto"
-              style={{ filter:'drop-shadow(0 0 8px rgba(0,255,136,.4))' }} />
+              style={{ filter:'drop-shadow(0 0 8px rgba(6,182,212,.4))' }} />
             <span className="font-black text-lg">
               <span className="text-white">matchify</span>
-              <span style={{ color:'#00ff88' }}>.pro</span>
+              <span style={{ color:'#06b6d4' }}>.pro</span>
             </span>
           </div>
           <p className="text-xs text-center" style={{ color:'rgba(255,255,255,.35)' }}>
             Built with ❤️ for the Indian Badminton Community
           </p>
           <div className="rounded-2xl px-5 py-4 border text-center w-full"
-            style={{ background:'rgba(0,255,136,.03)', borderColor:'rgba(0,255,136,.1)' }}>
+            style={{ background:'rgba(6,182,212,.03)', borderColor:'rgba(6,182,212,.1)' }}>
             <p className="text-xs tracking-wider uppercase mb-1.5" style={{ color:'rgba(255,255,255,.35)' }}>Co-Founded By</p>
-            <p className="text-lg font-black mb-1.5" style={{ color:'#00ff88' }}>PS Brothers</p>
+            <p className="text-lg font-black mb-1.5" style={{ color:'#06b6d4' }}>PS Brothers</p>
             <div className="flex justify-center items-center gap-3 text-sm font-semibold text-white">
               <span>PS Lochan</span>
               <span style={{ color:'rgba(255,255,255,.2)' }}>|</span>

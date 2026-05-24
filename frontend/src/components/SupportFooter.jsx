@@ -7,8 +7,8 @@ export default function SupportFooter() {
   return (
     <footer
       style={{
-        borderTop: '1px solid rgba(0,255,136,0.12)',
-        background: 'rgba(0,255,136,0.03)',
+        borderTop: '1px solid rgba(6,182,212,0.12)',
+        background: 'rgba(6,182,212,0.03)',
         backdropFilter: 'blur(8px)',
         padding: '18px 20px',
         textAlign: 'center',
@@ -25,7 +25,7 @@ export default function SupportFooter() {
           marginTop: '5px',
           fontSize: '0.82rem',
           fontWeight: 600,
-          color: '#00ff88',
+          color: '#22d3ee',
           textDecoration: 'none',
           letterSpacing: '0.02em',
           transition: 'color 0.2s, text-shadow 0.2s',
@@ -35,7 +35,7 @@ export default function SupportFooter() {
           e.currentTarget.style.textShadow = '0 0 8px rgba(0,212,255,0.6)';
         }}
         onMouseLeave={e => {
-          e.currentTarget.style.color = '#00ff88';
+          e.currentTarget.style.color = '#22d3ee';
           e.currentTarget.style.textShadow = 'none';
         }}
       >

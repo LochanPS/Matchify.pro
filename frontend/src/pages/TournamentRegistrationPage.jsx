@@ -14,7 +14,7 @@ import { Loader, Upload, QrCode, AlertCircle, Search } from 'lucide-react';
 // ─────────────────────────────────────────────────────────────────────────────
 const BRAND = {
   bg: '#07071a',
-  green: '#00ff88',
+  green: '#06b6d4',
   cyan: '#00d4ff',
   purple: '#a855f7',
   card: 'rgba(255,255,255,0.04)',
@@ -56,8 +56,8 @@ function CopyField({ label, value, mono = false, highlight = false }) {
     <div
       className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl"
       style={{
-        background: highlight ? 'rgba(0,255,136,0.07)' : 'rgba(255,255,255,0.05)',
-        border: highlight ? '1px solid rgba(0,255,136,0.2)' : '1px solid rgba(255,255,255,0.08)',
+        background: highlight ? 'rgba(6,182,212,0.07)' : 'rgba(255,255,255,0.05)',
+        border: highlight ? '1px solid rgba(6,182,212,0.2)' : '1px solid rgba(255,255,255,0.08)',
       }}
     >
       <div className="min-w-0 flex-1">
@@ -73,9 +73,9 @@ function CopyField({ label, value, mono = false, highlight = false }) {
         onClick={copy}
         className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all active:scale-95"
         style={{
-          background: copied ? 'rgba(0,255,136,0.15)' : 'rgba(255,255,255,0.08)',
-          border: copied ? '1px solid rgba(0,255,136,0.4)' : '1px solid rgba(255,255,255,0.12)',
-          color: copied ? '#00ff88' : 'rgba(255,255,255,0.6)',
+          background: copied ? 'rgba(6,182,212,0.15)' : 'rgba(255,255,255,0.08)',
+          border: copied ? '1px solid rgba(6,182,212,0.4)' : '1px solid rgba(255,255,255,0.12)',
+          color: copied ? '#06b6d4' : 'rgba(255,255,255,0.6)',
           minWidth: '64px',
         }}
       >
@@ -477,16 +477,16 @@ export default function TournamentRegistrationPage() {
                       className="flex items-start gap-2.5 px-4 py-3 rounded-xl"
                       style={
                         isConfirmed
-                          ? { background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.3)' }
+                          ? { background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.3)' }
                           : { background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.3)' }
                       }
                     >
                       {isConfirmed
-                        ? <CheckCircleIcon className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: '#00ff88' }} />
+                        ? <CheckCircleIcon className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: '#06b6d4' }} />
                         : <ClockIcon className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: '#fbbf24' }} />
                       }
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-bold" style={{ color: isConfirmed ? '#00ff88' : '#fbbf24' }}>
+                        <p className="text-xs font-bold" style={{ color: isConfirmed ? '#06b6d4' : '#fbbf24' }}>
                           {reg.category.name}:{' '}
                           {isConfirmed
                             ? 'Registration confirmed ✓'
@@ -525,7 +525,7 @@ export default function TournamentRegistrationPage() {
 
             {/* Partner details for doubles */}
             {selectedDoublesCategories.length > 0 && (
-              <div className="rounded-2xl p-4" style={{ background: 'rgba(0,255,136,0.05)', border: '1px solid rgba(0,255,136,0.18)' }}>
+              <div className="rounded-2xl p-4" style={{ background: 'rgba(6,182,212,0.05)', border: '1px solid rgba(6,182,212,0.18)' }}>
                 <div className="flex items-center gap-2 mb-4">
                   <UserGroupIcon className="h-5 w-5" style={{ color: BRAND.green }} />
                   <h3 className="text-sm font-black text-white">Partner Details</h3>
@@ -586,7 +586,7 @@ export default function TournamentRegistrationPage() {
                                 onChange={e => handlePartnerCodeChange(catId, e.target.value)}
                                 placeholder="#1"
                                 className="flex-1 px-3 py-3 rounded-xl text-white font-mono text-sm"
-                                style={{ background: 'rgba(0,0,0,0.3)', border: '1.5px solid rgba(0,255,136,0.25)', outline: 'none' }}
+                                style={{ background: 'rgba(0,0,0,0.3)', border: '1.5px solid rgba(6,182,212,0.25)', outline: 'none' }}
                               />
                               <button
                                 type="button"
@@ -606,7 +606,7 @@ export default function TournamentRegistrationPage() {
                             </div>
                             {partner && (
                               <div className="flex items-center gap-3 p-3 rounded-xl"
-                                style={{ background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.25)' }}>
+                                style={{ background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.25)' }}>
                                 {partner.profilePhoto ? (
                                   <img src={partner.profilePhoto} alt={partner.name} className="w-10 h-10 rounded-full object-cover flex-shrink-0" />
                                 ) : (
@@ -720,8 +720,8 @@ export default function TournamentRegistrationPage() {
             {/* ── Amount Header ─────────────────────────────────────────── */}
             <div className="rounded-2xl p-5 text-center"
               style={{
-                background: 'linear-gradient(135deg, rgba(0,255,136,0.1), rgba(0,212,255,0.07))',
-                border: '1px solid rgba(0,255,136,0.2)',
+                background: 'linear-gradient(135deg, rgba(6,182,212,0.1), rgba(0,212,255,0.07))',
+                border: '1px solid rgba(6,182,212,0.2)',
               }}>
               <p className="text-xs font-bold uppercase tracking-widest mb-2"
                 style={{ color: 'rgba(255,255,255,0.45)' }}>Pay to complete registration</p>
@@ -799,9 +799,9 @@ export default function TournamentRegistrationPage() {
                         onClick={() => downloadQR(qrUrl)}
                         className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all active:scale-95"
                         style={{
-                          background: 'rgba(0,255,136,0.10)',
-                          border: '1px solid rgba(0,255,136,0.30)',
-                          color: '#00ff88',
+                          background: 'rgba(6,182,212,0.10)',
+                          border: '1px solid rgba(6,182,212,0.30)',
+                          color: '#06b6d4',
                         }}
                       >
                         ⬇️ Download QR Code
@@ -858,7 +858,7 @@ export default function TournamentRegistrationPage() {
                 className="w-full px-4 py-3 rounded-xl text-white font-mono text-sm"
                 style={{
                   background: 'rgba(0,0,0,0.3)',
-                  border: utrId.trim() ? '1.5px solid rgba(0,255,136,0.4)' : '1.5px solid rgba(255,255,255,0.15)',
+                  border: utrId.trim() ? '1.5px solid rgba(6,182,212,0.4)' : '1.5px solid rgba(255,255,255,0.15)',
                   outline: 'none',
                 }}
               />
@@ -878,9 +878,9 @@ export default function TournamentRegistrationPage() {
             <div className="rounded-2xl overflow-hidden"
               style={{ background: BRAND.card, border: `1px solid ${BRAND.cardBorder}` }}>
               <div className="px-4 py-3 flex items-center gap-3"
-                style={{ borderBottom: `1px solid ${BRAND.cardBorder}`, background: 'rgba(0,255,136,0.04)' }}>
+                style={{ borderBottom: `1px solid ${BRAND.cardBorder}`, background: 'rgba(6,182,212,0.04)' }}>
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-                  style={{ background: 'rgba(0,255,136,0.15)', border: '1px solid rgba(0,255,136,0.3)' }}>
+                  style={{ background: 'rgba(6,182,212,0.15)', border: '1px solid rgba(6,182,212,0.3)' }}>
                   <Upload className="w-4 h-4" style={{ color: BRAND.green }} />
                 </div>
                 <div>
@@ -895,9 +895,9 @@ export default function TournamentRegistrationPage() {
                   <div
                     onClick={() => fileInputRef.current?.click()}
                     className="border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all"
-                    style={{ borderColor: 'rgba(0,255,136,0.2)', background: 'rgba(0,255,136,0.02)' }}
-                    onTouchStart={e => e.currentTarget.style.background = 'rgba(0,255,136,0.05)'}
-                    onTouchEnd={e => e.currentTarget.style.background = 'rgba(0,255,136,0.02)'}
+                    style={{ borderColor: 'rgba(6,182,212,0.2)', background: 'rgba(6,182,212,0.02)' }}
+                    onTouchStart={e => e.currentTarget.style.background = 'rgba(6,182,212,0.05)'}
+                    onTouchEnd={e => e.currentTarget.style.background = 'rgba(6,182,212,0.02)'}
                   >
                     <CameraIcon className="w-12 h-12 mx-auto mb-3" style={{ color: 'rgba(255,255,255,0.3)' }} />
                     <p className="text-sm font-bold text-white mb-1">Tap to upload screenshot</p>
@@ -943,9 +943,9 @@ export default function TournamentRegistrationPage() {
                 disabled={submitting || (!paymentScreenshot && !utrId.trim())}
                 className="flex-1 py-4 rounded-2xl font-black text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 style={{
-                  background: (paymentScreenshot || utrId.trim()) ? 'linear-gradient(135deg,#00ff88,#00ff88)' : 'rgba(255,255,255,0.08)',
+                  background: (paymentScreenshot || utrId.trim()) ? 'linear-gradient(135deg,#06b6d4,#06b6d4)' : 'rgba(255,255,255,0.08)',
                   color: (paymentScreenshot || utrId.trim()) ? '#07071a' : 'rgba(255,255,255,0.4)',
-                  boxShadow: (paymentScreenshot || utrId.trim()) ? '0 4px 20px rgba(0,255,136,0.4)' : 'none',
+                  boxShadow: (paymentScreenshot || utrId.trim()) ? '0 4px 20px rgba(6,182,212,0.4)' : 'none',
                 }}
               >
                 {submitting ? (
@@ -968,9 +968,9 @@ export default function TournamentRegistrationPage() {
           <div className="w-full max-w-sm rounded-3xl overflow-hidden"
             style={{ background: '#0d0d2b', border: '1px solid rgba(255,255,255,0.1)' }}>
             <div className="pt-8 pb-5 px-6 text-center"
-              style={{ background: 'linear-gradient(180deg,rgba(0,255,136,0.12) 0%,transparent 100%)' }}>
+              style={{ background: 'linear-gradient(180deg,rgba(6,182,212,0.12) 0%,transparent 100%)' }}>
               <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
-                style={{ background: 'linear-gradient(135deg,#00ff88,#00ff88)', boxShadow: '0 0 30px rgba(0,255,136,0.5)' }}>
+                style={{ background: 'linear-gradient(135deg,#06b6d4,#06b6d4)', boxShadow: '0 0 30px rgba(6,182,212,0.5)' }}>
                 <CheckCircleIcon className="w-9 h-9 text-white" />
               </div>
               <h2 className="text-xl font-black text-white mb-1">Registration Submitted!</h2>

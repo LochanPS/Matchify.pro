@@ -171,16 +171,16 @@ export default function CancellationRequestPage() {
         {/* Refund details */}
         <div style={CARD} className="overflow-hidden">
           <div className="px-4 py-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-            <p className="text-xs font-black uppercase tracking-wider flex items-center gap-1.5" style={{ color: 'rgba(0,255,136,0.8)' }}>
+            <p className="text-xs font-black uppercase tracking-wider flex items-center gap-1.5" style={{ color: 'rgba(6,182,212,0.8)' }}>
               <CreditCard className="w-3.5 h-3.5" /> Refund Details
             </p>
           </div>
           <div className="p-4 space-y-3">
             {/* Amount + UPI side by side */}
             <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-xl p-3" style={{ background: 'rgba(0,255,136,0.1)', border: '1px solid rgba(0,255,136,0.25)' }}>
-                <p className="text-xs mb-1" style={{ color: 'rgba(0,255,136,0.7)' }}>Refund Amount</p>
-                <p className="text-xl font-black" style={{ color: '#00ff88' }}>₹{registration.refundAmount || registration.amountTotal}</p>
+              <div className="rounded-xl p-3" style={{ background: 'rgba(6,182,212,0.1)', border: '1px solid rgba(6,182,212,0.25)' }}>
+                <p className="text-xs mb-1" style={{ color: 'rgba(6,182,212,0.7)' }}>Refund Amount</p>
+                <p className="text-xl font-black" style={{ color: '#06b6d4' }}>₹{registration.refundAmount || registration.amountTotal}</p>
               </div>
               <div className="rounded-xl p-3" style={{ background: 'rgba(0,212,255,0.1)', border: '1px solid rgba(0,212,255,0.25)' }}>
                 <p className="text-xs mb-1" style={{ color: 'rgba(0,212,255,0.7)' }}>UPI ID</p>
@@ -209,7 +209,7 @@ export default function CancellationRequestPage() {
               onClick={handleApprove}
               disabled={actionLoading}
               className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-black text-sm transition-all disabled:opacity-50"
-              style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', color: '#07071a', boxShadow: '0 4px 20px rgba(0,255,136,0.3)' }}
+              style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#07071a', boxShadow: '0 4px 20px rgba(6,182,212,0.3)' }}
             >
               {actionLoading ? <Loader className="w-5 h-5 animate-spin" /> : <Check className="w-5 h-5" />}
               Approve Refund
@@ -228,8 +228,8 @@ export default function CancellationRequestPage() {
 
         {/* Already processed states */}
         {registration.status === 'cancelled' && (
-          <div className="rounded-2xl p-5 text-center" style={{ background: 'rgba(0,255,136,0.1)', border: '1px solid rgba(0,255,136,0.3)' }}>
-            <Check className="w-10 h-10 mx-auto mb-2" style={{ color: '#00ff88' }} />
+          <div className="rounded-2xl p-5 text-center" style={{ background: 'rgba(6,182,212,0.1)', border: '1px solid rgba(6,182,212,0.3)' }}>
+            <Check className="w-10 h-10 mx-auto mb-2" style={{ color: '#06b6d4' }} />
             <p className="font-black text-white">Refund Approved ✓</p>
           </div>
         )}
@@ -290,12 +290,12 @@ export default function CancellationRequestPage() {
           <div className="w-full rounded-2xl overflow-hidden" style={{
             maxWidth: '400px',
             background: 'linear-gradient(180deg,#0f0f2e,#0d1117)',
-            border: `2px solid ${resultModal.type === 'success' ? 'rgba(0,255,136,0.4)' : 'rgba(239,68,68,0.4)'}`,
+            border: `2px solid ${resultModal.type === 'success' ? 'rgba(6,182,212,0.4)' : 'rgba(239,68,68,0.4)'}`,
           }}>
             <div className="p-5 text-center">
-              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: resultModal.type === 'success' ? 'rgba(0,255,136,0.15)' : 'rgba(239,68,68,0.15)' }}>
+              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: resultModal.type === 'success' ? 'rgba(6,182,212,0.15)' : 'rgba(239,68,68,0.15)' }}>
                 {resultModal.type === 'success'
-                  ? <Check className="w-8 h-8" style={{ color: '#00ff88' }} />
+                  ? <Check className="w-8 h-8" style={{ color: '#06b6d4' }} />
                   : <X className="w-8 h-8 text-red-400" />}
               </div>
               <h2 className="text-lg font-black text-white mb-2">{resultModal.title}</h2>
@@ -304,7 +304,7 @@ export default function CancellationRequestPage() {
                 onClick={() => { setResultModal(null); navigate('/organizer/dashboard'); }}
                 className="w-full py-3 rounded-xl font-black text-sm"
                 style={{
-                  background: resultModal.type === 'success' ? 'linear-gradient(135deg,#00ff88,#00d4ff)' : 'linear-gradient(135deg,#ef4444,#dc2626)',
+                  background: resultModal.type === 'success' ? 'linear-gradient(135deg,#06b6d4,#00d4ff)' : 'linear-gradient(135deg,#ef4444,#dc2626)',
                   color: resultModal.type === 'success' ? '#07071a' : '#fff',
                 }}
               >

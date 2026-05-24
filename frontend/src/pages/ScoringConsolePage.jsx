@@ -182,7 +182,7 @@ const ScoringConsolePage = () => {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: '#07071a' }}>
         <div className="text-center">
-          <RefreshCw className="w-12 h-12 animate-spin mx-auto mb-4" style={{ color: '#00ff88' }} />
+          <RefreshCw className="w-12 h-12 animate-spin mx-auto mb-4" style={{ color: '#06b6d4' }} />
           <p className="text-gray-400">Loading match...</p>
         </div>
       </div>
@@ -195,7 +195,7 @@ const ScoringConsolePage = () => {
         <div className="text-center">
           <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
           <p className="text-gray-400">Match not found</p>
-          <button onClick={() => navigate('/dashboard')} className="mt-4" style={{ color: '#00ff88' }}>Go Back</button>
+          <button onClick={() => navigate('/dashboard')} className="mt-4" style={{ color: '#06b6d4' }}>Go Back</button>
         </div>
       </div>
     );
@@ -204,7 +204,7 @@ const ScoringConsolePage = () => {
   return (
     <div className="min-h-screen py-6 px-4" style={{ background: '#07071a' }}>
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full filter blur-3xl opacity-[0.07]" style={{ background: '#00ff88' }}></div>
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full filter blur-3xl opacity-[0.07]" style={{ background: '#06b6d4' }}></div>
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full filter blur-3xl opacity-[0.07]" style={{ background: '#00d4ff' }}></div>
       </div>
       <div className="relative max-w-4xl mx-auto">
@@ -219,7 +219,7 @@ const ScoringConsolePage = () => {
                 <span className="text-sm font-semibold">LIVE</span>
               </div>
             )}
-            <button onClick={fetchMatch} disabled={processing} className="flex items-center gap-2 disabled:text-gray-500" style={{ color: '#00ff88' }}>
+            <button onClick={fetchMatch} disabled={processing} className="flex items-center gap-2 disabled:text-gray-500" style={{ color: '#06b6d4' }}>
               <RefreshCw className={`w-5 h-5 ${processing ? 'animate-spin' : ''}`} /><span>Refresh</span>
             </button>
           </div>
@@ -276,11 +276,11 @@ const ScoringConsolePage = () => {
         )}
 
         {matchComplete && winner && (
-          <div className="rounded-xl p-6 mb-6 text-center" style={{ background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.3)' }}>
-            <h2 className="text-3xl font-bold mb-2" style={{ color: '#00ff88' }}>🏆 Match Complete! 🏆</h2>
-            <p className="text-xl mb-3" style={{ color: '#00ff88' }}>{winner === 'player1' ? player1Name : player2Name} wins!</p>
+          <div className="rounded-xl p-6 mb-6 text-center" style={{ background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.3)' }}>
+            <h2 className="text-3xl font-bold mb-2" style={{ color: '#06b6d4' }}>🏆 Match Complete! 🏆</h2>
+            <p className="text-xl mb-3" style={{ color: '#06b6d4' }}>{winner === 'player1' ? player1Name : player2Name} wins!</p>
             {score?.timer && (
-              <div className="mt-4 pt-4" style={{ borderTop: '1px solid rgba(0,255,136,0.2)' }}>
+              <div className="mt-4 pt-4" style={{ borderTop: '1px solid rgba(6,182,212,0.2)' }}>
                 <p className="text-gray-400 text-sm">Match Duration</p>
                 <p className="text-white font-bold text-lg">
                   {score.timer.totalDurationFormatted || formatMatchDuration(score.timer)}

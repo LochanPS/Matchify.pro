@@ -18,7 +18,7 @@ export default function UmpireScoring() {
       <div className="text-center">
         <div
           className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin mx-auto"
-          style={{ borderColor: 'rgba(0,255,136,0.3)', borderTopColor: '#00ff88' }}
+          style={{ borderColor: 'rgba(6,182,212,0.3)', borderTopColor: '#06b6d4' }}
         />
         <p className="mt-4 font-medium" style={{ color: 'rgba(255,255,255,0.55)' }}>Loading scoring console...</p>
       </div>

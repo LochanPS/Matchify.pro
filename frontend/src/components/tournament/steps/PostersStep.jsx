@@ -79,7 +79,7 @@ const PostersStep = ({ formData, updateFormData, onNext, onPrev }) => {
         <h2 
           className="text-xl font-black mb-1.5"
           style={{
-            background: 'linear-gradient(135deg, #10b981, #34d399)',
+            background: 'linear-gradient(135deg, #06b6d4, #34d399)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text'

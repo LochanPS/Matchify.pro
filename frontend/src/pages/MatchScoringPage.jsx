@@ -14,7 +14,7 @@ const B = {
   bg: '#07071a',
   card: 'rgba(255,255,255,0.04)',
   border: 'rgba(255,255,255,0.08)',
-  green: '#00ff88',
+  green: '#06b6d4',
   cyan: '#00d4ff',
   purple: '#a855f7',
   amber: '#fbbf24',
@@ -398,7 +398,7 @@ const MatchScoringPage = () => {
 
       {/* ── Sticky Header ─────────────────────────────────────────────────── */}
       <div className="sticky top-0 z-20 px-4 py-3 flex items-center justify-between"
-        style={{ background: 'rgba(7,7,26,0.95)', borderBottom: `1px solid rgba(0,255,136,0.15)`, backdropFilter: 'blur(20px)' }}>
+        style={{ background: 'rgba(7,7,26,0.95)', borderBottom: `1px solid rgba(6,182,212,0.15)`, backdropFilter: 'blur(20px)' }}>
         <button onClick={handleBack} className="flex items-center gap-1.5 text-sm font-bold"
           style={{ color: 'rgba(255,255,255,0.55)' }}>
           <ArrowLeft className="w-4 h-4" /> Back
@@ -415,7 +415,7 @@ const MatchScoringPage = () => {
             ) : (
               <button onClick={handleResumeTimer} disabled={saving}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all disabled:opacity-50"
-                style={{ background: 'rgba(0,255,136,0.12)', border: '1px solid rgba(0,255,136,0.3)', color: B.green }}>
+                style={{ background: 'rgba(6,182,212,0.12)', border: '1px solid rgba(6,182,212,0.3)', color: B.green }}>
                 <Play className="w-3.5 h-3.5" /> Resume
               </button>
             )}
@@ -508,7 +508,7 @@ const MatchScoringPage = () => {
                 return (
                   <div key={idx} className="px-3 py-1.5 rounded-xl text-center min-w-[72px] transition-all"
                     style={isCurrent
-                      ? { background: 'rgba(0,255,136,0.1)', border: `1.5px solid rgba(0,255,136,0.5)` }
+                      ? { background: 'rgba(6,182,212,0.1)', border: `1.5px solid rgba(6,182,212,0.5)` }
                       : { background: 'rgba(255,255,255,0.04)', border: `1px solid ${B.border}` }}>
                     <div className="text-xs font-bold mb-0.5"
                       style={{ color: isCurrent ? B.green : 'rgba(255,255,255,0.4)' }}>Set {idx + 1}</div>
@@ -528,7 +528,7 @@ const MatchScoringPage = () => {
             <div className="text-center">
               <div className="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center text-3xl font-black mb-2"
                 style={p1Sets > p2Sets
-                  ? { background: 'rgba(0,255,136,0.15)', border: '1.5px solid rgba(0,255,136,0.4)', color: B.green }
+                  ? { background: 'rgba(6,182,212,0.15)', border: '1.5px solid rgba(6,182,212,0.4)', color: B.green }
                   : { background: 'rgba(255,255,255,0.05)', border: `1px solid ${B.border}`, color: 'rgba(255,255,255,0.7)' }}>
                 {p1Sets}
               </div>
@@ -569,7 +569,7 @@ const MatchScoringPage = () => {
               <div className="p-3 space-y-2">
                 <button onClick={() => addPoint(1)} disabled={isPaused || !canScore}
                   className="w-full py-5 rounded-xl font-black text-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-                  style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#07071a', boxShadow: isPaused ? 'none' : '0 4px 16px rgba(0,200,83,0.35)' }}>
+                  style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)', color: '#07071a', boxShadow: isPaused ? 'none' : '0 4px 16px rgba(6,182,212,0.35)' }}>
                   <Plus className="w-6 h-6" /> Point
                 </button>
                 <button onClick={() => removePoint(1)} disabled={isPaused || !canScore}
@@ -604,7 +604,7 @@ const MatchScoringPage = () => {
         {/* Match completed */}
         {isCompleted && (
           <div className="rounded-2xl p-6 text-center"
-            style={{ background: 'rgba(0,255,136,0.06)', border: '1px solid rgba(0,255,136,0.2)' }}>
+            style={{ background: 'rgba(6,182,212,0.06)', border: '1px solid rgba(6,182,212,0.2)' }}>
             <Trophy className="w-10 h-10 mx-auto mb-3" style={{ color: B.amber }} />
             <h3 className="text-lg font-black text-white mb-1">Match Completed</h3>
             <p className="text-sm" style={{ color: 'rgba(255,255,255,0.65)' }}>
@@ -619,11 +619,11 @@ const MatchScoringPage = () => {
 
       {/* ── START MATCH sticky bottom ─────────────────────────────────────── */}
       {canStart && (
-        <div className="fixed bottom-0 left-0 right-0 p-4" style={{ background: 'rgba(7,7,26,0.97)', borderTop: `1px solid rgba(0,255,136,0.15)` }}>
+        <div className="fixed bottom-0 left-0 right-0 p-4" style={{ background: 'rgba(7,7,26,0.97)', borderTop: `1px solid rgba(6,182,212,0.15)` }}>
           <div className="max-w-lg mx-auto">
             <button onClick={handleStartMatch} disabled={saving}
               className="w-full py-4 rounded-2xl font-black text-base transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-              style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#07071a', boxShadow: '0 4px 20px rgba(0,200,83,0.4)' }}>
+              style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)', color: '#07071a', boxShadow: '0 4px 20px rgba(6,182,212,0.4)' }}>
               {saving
                 ? <><div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#07071a transparent transparent transparent' }} />Starting…</>
                 : <><Play className="w-5 h-5" />START MATCH — {p1Display} vs {p2Display}</>}
@@ -668,7 +668,7 @@ const MatchScoringPage = () => {
               <>
                 <div className="px-5 pt-6 pb-4 text-center">
                   <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3"
-                    style={{ background: 'rgba(0,255,136,0.15)', border: '1px solid rgba(0,255,136,0.35)' }}>
+                    style={{ background: 'rgba(6,182,212,0.15)', border: '1px solid rgba(6,182,212,0.35)' }}>
                     <Trophy className="w-7 h-7" style={{ color: B.green }} />
                   </div>
                   <h2 className="text-lg font-black text-white mb-1">Set {completedSetData.setNumber} Complete!</h2>
@@ -680,7 +680,7 @@ const MatchScoringPage = () => {
                 <div className="px-5 pb-5 space-y-2">
                   <button onClick={handleContinueToNextSet}
                     className="w-full py-3.5 rounded-xl font-black text-sm transition-all flex items-center justify-center gap-2"
-                    style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#07071a', boxShadow: '0 4px 16px rgba(0,200,83,0.35)' }}>
+                    style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)', color: '#07071a', boxShadow: '0 4px 16px rgba(6,182,212,0.35)' }}>
                     <Play className="w-4 h-4" /> Continue to Set {completedSetData.setNumber + 1}
                   </button>
                   <button onClick={handleEndMatchEarly}
@@ -710,7 +710,7 @@ const MatchScoringPage = () => {
             <div className="p-5 space-y-2.5">
               <button onClick={() => handleEndMatch(match.player1?.id)} disabled={saving}
                 className="w-full py-3.5 rounded-xl font-black text-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-                style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#07071a' }}>
+                style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)', color: '#07071a' }}>
                 <Trophy className="w-4 h-4" /> {p1Display} Wins
               </button>
               <button onClick={() => handleEndMatch(match.player2?.id)} disabled={saving}
@@ -764,7 +764,7 @@ const MatchTimerDisplay = ({ timer, isPaused }) => {
         <span>Started {fmtTime(timer?.startedAt)}</span>
       </div>
       <div className="flex items-center gap-2">
-        <Clock className="w-4 h-4" style={{ color: isPaused ? '#fbbf24' : '#00ff88' }} />
+        <Clock className="w-4 h-4" style={{ color: isPaused ? '#fbbf24' : '#06b6d4' }} />
         <span className="text-xl font-black font-mono" style={{ color: isPaused ? '#fbbf24' : '#fff' }}>
           {fmt(displayTime)}
         </span>

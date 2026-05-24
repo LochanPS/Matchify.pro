@@ -15,7 +15,7 @@ const DETAIL_PARTICLES = Array.from({ length: 18 }, (_, i) => ({
   o: ((i * 13) % 40) / 100 + 0.1,
   dur: (i * 7) % 7 + 4,
   delay: (i * 3) % 5,
-  c: ['#00ff88','#00d4ff','#a855f7','rgba(255,255,255,0.6)'][i % 4],
+  c: ['#06b6d4','#00d4ff','#a855f7','rgba(255,255,255,0.6)'][i % 4],
 }));
 
 // Embedded Refund Details Form Component
@@ -63,14 +63,14 @@ const RefundDetailsForm = ({ registrationId, refundAmount, tournamentName, rejec
   };
 
   return (
-    <div className="rounded-2xl p-5" style={{ background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.25)' }}>
+    <div className="rounded-2xl p-5" style={{ background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.25)' }}>
       <div className="flex items-center gap-3 mb-5">
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'rgba(0,255,136,0.15)', border: '1px solid rgba(0,255,136,0.3)' }}>
-          <Upload className="w-5 h-5" style={{ color: '#00ff88' }} />
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'rgba(6,182,212,0.15)', border: '1px solid rgba(6,182,212,0.3)' }}>
+          <Upload className="w-5 h-5" style={{ color: '#06b6d4' }} />
         </div>
         <div>
           <h3 className="text-base font-black text-white">Submit Refund Details</h3>
-          <p className="text-xs font-medium" style={{ color: '#00ff88' }}>Refund Amount: ₹{refundAmount}</p>
+          <p className="text-xs font-medium" style={{ color: '#06b6d4' }}>Refund Amount: ₹{refundAmount}</p>
         </div>
       </div>
       {rejectionReason && (
@@ -103,9 +103,9 @@ const RefundDetailsForm = ({ registrationId, refundAmount, tournamentName, rejec
           <input type="file" ref={qrCodeInputRef} onChange={handleQrCodeChange} accept="image/*" className="hidden" />
           <button type="button" onClick={() => qrCodeInputRef.current?.click()}
             className="w-full px-4 py-4 border-2 border-dashed rounded-xl flex flex-col items-center justify-center gap-2 transition-all"
-            style={{ borderColor: formData.qrCode ? 'rgba(0,255,136,0.5)' : 'rgba(255,255,255,0.15)', background: formData.qrCode ? 'rgba(0,255,136,0.06)' : 'transparent' }}>
+            style={{ borderColor: formData.qrCode ? 'rgba(6,182,212,0.5)' : 'rgba(255,255,255,0.15)', background: formData.qrCode ? 'rgba(6,182,212,0.06)' : 'transparent' }}>
             {formData.qrCode ? (
-              <><CheckCircle className="h-7 w-7" style={{ color: '#00ff88' }} /><span className="text-sm font-semibold" style={{ color: '#00ff88' }}>{formData.qrCode.name}</span><span className="text-xs" style={{ color: 'rgba(0,255,136,0.6)' }}>Tap to change</span></>
+              <><CheckCircle className="h-7 w-7" style={{ color: '#06b6d4' }} /><span className="text-sm font-semibold" style={{ color: '#06b6d4' }}>{formData.qrCode.name}</span><span className="text-xs" style={{ color: 'rgba(6,182,212,0.6)' }}>Tap to change</span></>
             ) : (
               <><Upload className="h-7 w-7" style={{ color: 'rgba(255,255,255,0.3)' }} /><span className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>Upload QR Code</span><span className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>PNG, JPG up to 5MB</span></>
             )}
@@ -113,7 +113,7 @@ const RefundDetailsForm = ({ registrationId, refundAmount, tournamentName, rejec
         </div>
         <button type="submit" disabled={submitting}
           className="w-full py-3.5 rounded-xl font-black text-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-          style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', color: '#07071a', boxShadow: '0 4px 15px rgba(0,255,136,0.35)' }}>
+          style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#07071a', boxShadow: '0 4px 15px rgba(6,182,212,0.35)' }}>
           {submitting ? <><Loader className="h-4 w-4 animate-spin" /><span>Submitting...</span></> : <><CheckCircle className="h-4 w-4" /><span>Submit Refund Details</span></>}
         </button>
       </form>
@@ -152,7 +152,7 @@ const NotificationDetailPage = () => {
 
   const getTypeColor = (type) => {
     if (['REGISTRATION_CONFIRMED','REFUND_PROCESSED','REFUND_APPROVED','PARTNER_ACCEPTED','POINTS_AWARDED'].includes(type))
-      return { bg: 'rgba(0,255,136,0.15)', border: 'rgba(0,255,136,0.35)', accent: '#00ff88' };
+      return { bg: 'rgba(6,182,212,0.15)', border: 'rgba(6,182,212,0.35)', accent: '#06b6d4' };
     if (['REGISTRATION_REJECTED','PAYMENT_REJECTED','REGISTRATION_REMOVED','REFUND_REJECTED','TOURNAMENT_CANCELLED','ACCOUNT_SUSPENDED'].includes(type))
       return { bg: 'rgba(239,68,68,0.15)', border: 'rgba(239,68,68,0.35)', accent: '#f87171' };
     if (['PARTNER_INVITATION','DRAW_PUBLISHED','MATCH_ASSIGNED','MATCH_STARTING_SOON'].includes(type))
@@ -334,7 +334,7 @@ const NotificationDetailPage = () => {
                   {(data.playerName || data.partnerName) && (
                     <div className="flex items-start gap-3">
                       <span className="text-xs w-20 flex-shrink-0" style={{ color: 'rgba(255,255,255,0.45)' }}>Partner</span>
-                      <span className="text-sm font-bold flex-1" style={{ color: '#00ff88' }}>{data.playerName || data.partnerName}</span>
+                      <span className="text-sm font-bold flex-1" style={{ color: '#06b6d4' }}>{data.playerName || data.partnerName}</span>
                     </div>
                   )}
                 </div>

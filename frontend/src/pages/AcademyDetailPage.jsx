@@ -12,14 +12,14 @@ const B = {
   bg: '#07071a',
   card: 'rgba(255,255,255,0.05)',
   border: 'rgba(255,255,255,0.09)',
-  green: '#00ff88',
+  green: '#06b6d4',
   cyan: '#00d4ff',
   purple: '#a855f7',
   amber: '#fbbf24',
 };
 
 const SPORT_META = {
-  Badminton:      { emoji: '🏸', color: '#00ff88', bg: 'rgba(0,255,136,0.12)',    border: 'rgba(0,255,136,0.25)',   unit: 'Courts' },
+  Badminton:      { emoji: '🏸', color: '#06b6d4', bg: 'rgba(6,182,212,0.12)',    border: 'rgba(6,182,212,0.25)',   unit: 'Courts' },
   Tennis:         { emoji: '🎾', color: '#00d4ff', bg: 'rgba(0,212,255,0.12)',    border: 'rgba(0,212,255,0.25)',   unit: 'Courts' },
   'Table Tennis': { emoji: '🏓', color: '#a855f7', bg: 'rgba(168,85,247,0.12)',   border: 'rgba(168,85,247,0.25)',  unit: 'Tables' },
   Squash:         { emoji: '🎱', color: '#fbbf24', bg: 'rgba(251,191,36,0.12)',   border: 'rgba(251,191,36,0.25)',  unit: 'Courts' },
@@ -27,14 +27,14 @@ const SPORT_META = {
   Volleyball:     { emoji: '🏐', color: '#ec4899', bg: 'rgba(236,72,153,0.12)',   border: 'rgba(236,72,153,0.25)',  unit: 'Courts' },
   Swimming:       { emoji: '🏊', color: '#38bdf8', bg: 'rgba(56,189,248,0.12)',   border: 'rgba(56,189,248,0.25)',  unit: '' },
   Cricket:        { emoji: '🏏', color: '#a3e635', bg: 'rgba(163,230,53,0.12)',   border: 'rgba(163,230,53,0.25)',  unit: '' },
-  Football:       { emoji: '⚽', color: '#34d399', bg: 'rgba(52,211,153,0.12)',   border: 'rgba(52,211,153,0.25)',  unit: '' },
+  Football:       { emoji: '⚽', color: '#22d3ee', bg: 'rgba(52,211,153,0.12)',   border: 'rgba(52,211,153,0.25)',  unit: '' },
   Gym:            { emoji: '💪', color: '#fb7185', bg: 'rgba(251,113,133,0.12)',  border: 'rgba(251,113,133,0.25)', unit: '' },
   Yoga:           { emoji: '🧘', color: '#c084fc', bg: 'rgba(192,132,252,0.12)',  border: 'rgba(192,132,252,0.25)', unit: '' },
   Athletics:      { emoji: '🏃', color: '#fdba74', bg: 'rgba(253,186,116,0.12)', border: 'rgba(253,186,116,0.25)', unit: '' },
 };
 
 const SPORT_GRADIENT = {
-  Badminton:      'linear-gradient(135deg,rgba(0,255,136,0.22),rgba(0,212,255,0.1))',
+  Badminton:      'linear-gradient(135deg,rgba(6,182,212,0.22),rgba(0,212,255,0.1))',
   Tennis:         'linear-gradient(135deg,rgba(0,212,255,0.22),rgba(168,85,247,0.1))',
   'Table Tennis': 'linear-gradient(135deg,rgba(168,85,247,0.22),rgba(0,212,255,0.1))',
   Squash:         'linear-gradient(135deg,rgba(251,191,36,0.22),rgba(249,115,22,0.1))',
@@ -135,7 +135,7 @@ export default function AcademyDetailPage() {
         </p>
         <button onClick={() => navigate('/academies')}
           className="px-6 py-3 rounded-xl text-sm font-black"
-          style={{ background: 'rgba(0,255,136,0.12)', color: B.green, border: '1px solid rgba(0,255,136,0.25)' }}>
+          style={{ background: 'rgba(6,182,212,0.12)', color: B.green, border: '1px solid rgba(6,182,212,0.25)' }}>
           Back to Academies
         </button>
       </div>
@@ -222,7 +222,7 @@ export default function AcademyDetailPage() {
         {/* Verified badge */}
         {academy.isVerified && (
           <div className="absolute top-4 right-4 flex items-center gap-1.5 px-3 py-1.5 rounded-full"
-            style={{ background: 'rgba(0,255,136,0.92)', backdropFilter: 'blur(6px)' }}>
+            style={{ background: 'rgba(6,182,212,0.92)', backdropFilter: 'blur(6px)' }}>
             <BadgeCheck className="w-3.5 h-3.5" style={{ color: '#07071a' }} />
             <span className="text-xs font-black" style={{ color: '#07071a' }}>Verified</span>
           </div>
@@ -395,13 +395,13 @@ export default function AcademyDetailPage() {
             {academy.phone && (
               <a href={`tel:${academy.phone}`}
                 className="flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all active:scale-[0.98]"
-                style={{ background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.2)' }}>
+                style={{ background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.2)' }}>
                 <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                  style={{ background: 'rgba(0,255,136,0.15)' }}>
+                  style={{ background: 'rgba(6,182,212,0.15)' }}>
                   <Phone className="w-4 h-4" style={{ color: B.green }} />
                 </div>
                 <div className="flex-1">
-                  <p className="text-xs font-bold mb-0.5" style={{ color: 'rgba(0,255,136,0.6)' }}>Phone</p>
+                  <p className="text-xs font-bold mb-0.5" style={{ color: 'rgba(6,182,212,0.6)' }}>Phone</p>
                   <p className="text-sm font-black text-white">{academy.phone}</p>
                 </div>
               </a>
@@ -478,7 +478,7 @@ export default function AcademyDetailPage() {
         <button
           onClick={() => navigate('/academies/add')}
           className="w-full py-4 rounded-2xl text-sm font-black flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
-          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(0,255,136,0.18)', color: B.green }}>
+          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(6,182,212,0.18)', color: B.green }}>
           <Building2 className="w-4 h-4" />
           Own an academy? List it for ₹300
         </button>

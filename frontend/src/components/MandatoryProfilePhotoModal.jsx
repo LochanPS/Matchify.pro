@@ -66,7 +66,7 @@ const F = {
   card: '#0d1025',
   border: 'rgba(255,255,255,0.08)',
   input: 'rgba(255,255,255,0.05)',
-  green: '#00ff88',
+  green: '#22d3ee',
   sub: 'rgba(255,255,255,0.5)',
   dim: 'rgba(255,255,255,0.3)',
 };
@@ -211,13 +211,13 @@ export default function MandatoryProfilePhotoModal({ isOpen, onSkip }) {
       style={{ background: 'rgba(0,0,0,0.88)', backdropFilter: 'blur(8px)' }}>
 
       <div className="absolute top-1/3 left-1/3 w-72 h-72 rounded-full pointer-events-none"
-        style={{ background: 'radial-gradient(circle, rgba(0,255,136,0.07) 0%, transparent 70%)', filter: 'blur(40px)' }} />
+        style={{ background: 'radial-gradient(circle, rgba(6,182,212,0.07) 0%, transparent 70%)', filter: 'blur(40px)' }} />
 
       <div className="relative w-full max-w-sm rounded-3xl overflow-hidden shadow-2xl"
-        style={{ background: F.card, border: `1px solid rgba(0,255,136,0.15)` }}>
+        style={{ background: F.card, border: `1px solid rgba(6,182,212,0.15)` }}>
 
         {/* Top gradient line */}
-        <div className="h-1" style={{ background: 'linear-gradient(90deg,#00ff88,#00d4ff,#a855f7)' }} />
+        <div className="h-1" style={{ background: 'linear-gradient(90deg,#06b6d4,#00d4ff,#a855f7)' }} />
 
         <div className="p-5">
           {/* Step indicator */}
@@ -242,7 +242,7 @@ export default function MandatoryProfilePhotoModal({ isOpen, onSkip }) {
               {/* Header */}
               <div className="text-center mb-4">
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full mb-2 text-xs font-bold"
-                  style={{ background: 'rgba(0,255,136,0.1)', border: '1px solid rgba(0,255,136,0.2)', color: F.green }}>
+                  style={{ background: 'rgba(6,182,212,0.1)', border: '1px solid rgba(6,182,212,0.2)', color: F.green }}>
                   <Camera size={10} /> Required
                 </div>
                 <h2 className="text-lg font-black text-white mb-1">Set Your Profile Photo</h2>
@@ -276,7 +276,7 @@ export default function MandatoryProfilePhotoModal({ isOpen, onSkip }) {
                     style={{
                       background: photoTab === tab.key ? F.green : 'transparent',
                       color: photoTab === tab.key ? '#003320' : F.sub,
-                      boxShadow: photoTab === tab.key ? '0 2px 8px rgba(0,255,136,0.25)' : 'none',
+                      boxShadow: photoTab === tab.key ? '0 2px 8px rgba(6,182,212,0.25)' : 'none',
                     }}>
                     {tab.icon} {tab.label}
                   </button>
@@ -291,8 +291,8 @@ export default function MandatoryProfilePhotoModal({ isOpen, onSkip }) {
                     className="relative mb-3 rounded-2xl overflow-hidden cursor-pointer transition-all group"
                     style={{
                       height: preview && !selectedAvatar ? 170 : 130,
-                      border: `2px dashed ${preview && !selectedAvatar ? 'rgba(0,255,136,0.4)' : 'rgba(0,255,136,0.2)'}`,
-                      background: preview && !selectedAvatar ? 'transparent' : 'rgba(0,255,136,0.02)',
+                      border: `2px dashed ${preview && !selectedAvatar ? 'rgba(6,182,212,0.4)' : 'rgba(6,182,212,0.2)'}`,
+                      background: preview && !selectedAvatar ? 'transparent' : 'rgba(6,182,212,0.02)',
                     }}>
                     {preview && !selectedAvatar ? (
                       <>
@@ -312,7 +312,7 @@ export default function MandatoryProfilePhotoModal({ isOpen, onSkip }) {
                     ) : (
                       <div className="flex flex-col items-center justify-center h-full gap-2 transition-all group-hover:scale-105">
                         <div className="w-10 h-10 rounded-2xl flex items-center justify-center"
-                          style={{ background: 'linear-gradient(135deg,rgba(0,255,136,0.15),rgba(0,212,255,0.1))' }}>
+                          style={{ background: 'linear-gradient(135deg,rgba(6,182,212,0.15),rgba(0,212,255,0.1))' }}>
                           <Upload size={18} style={{ color: F.green }} />
                         </div>
                         <div className="text-center">
@@ -341,8 +341,8 @@ export default function MandatoryProfilePhotoModal({ isOpen, onSkip }) {
                           className="relative rounded-2xl overflow-hidden transition-all"
                           style={{
                             aspectRatio: '1',
-                            border: isSelected ? '2.5px solid #00ff88' : '2px solid rgba(255,255,255,0.1)',
-                            boxShadow: isSelected ? '0 0 20px rgba(0,255,136,0.45)' : '0 2px 8px rgba(0,0,0,0.3)',
+                            border: isSelected ? '2.5px solid #06b6d4' : '2px solid rgba(255,255,255,0.1)',
+                            boxShadow: isSelected ? '0 0 20px rgba(6,182,212,0.45)' : '0 2px 8px rgba(0,0,0,0.3)',
                             transform: isSelected ? 'scale(1.04)' : 'scale(1)',
                             background: 'rgba(255,255,255,0.04)',
                           }}>
@@ -354,7 +354,7 @@ export default function MandatoryProfilePhotoModal({ isOpen, onSkip }) {
                           />
                           {isSelected && (
                             <div className="absolute inset-0 flex items-start justify-end p-2"
-                              style={{ background: 'rgba(0,255,136,0.08)' }}>
+                              style={{ background: 'rgba(6,182,212,0.08)' }}>
                               <div className="w-6 h-6 rounded-full flex items-center justify-center shadow-lg"
                                 style={{ background: F.green }}>
                                 <Check size={13} color="#003320" strokeWidth={3} />
@@ -367,7 +367,7 @@ export default function MandatoryProfilePhotoModal({ isOpen, onSkip }) {
                   </div>
                   {selectedAvatar && (
                     <div className="mt-3 flex items-center justify-center gap-2 py-2 rounded-xl"
-                      style={{ background: 'rgba(0,255,136,0.07)', border: '1px solid rgba(0,255,136,0.15)' }}>
+                      style={{ background: 'rgba(6,182,212,0.07)', border: '1px solid rgba(6,182,212,0.15)' }}>
                       <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: F.green }} />
                       <span className="text-xs font-semibold" style={{ color: F.green }}>Avatar selected — will be saved as your photo</span>
                     </div>
@@ -389,10 +389,10 @@ export default function MandatoryProfilePhotoModal({ isOpen, onSkip }) {
                   <button onClick={handleUploadPhoto} disabled={!ready || uploading}
                     className="w-full py-3 rounded-2xl font-bold text-sm transition-all"
                     style={{
-                      background: ready && !uploading ? 'linear-gradient(135deg,#00ff88,#00c853)' : 'rgba(255,255,255,0.06)',
+                      background: ready && !uploading ? 'linear-gradient(135deg,#06b6d4,#0891b2)' : 'rgba(255,255,255,0.06)',
                       color: ready && !uploading ? '#003320' : F.dim,
                       cursor: !ready || uploading ? 'not-allowed' : 'pointer',
-                      boxShadow: ready && !uploading ? '0 8px 20px rgba(0,255,136,0.25)' : 'none',
+                      boxShadow: ready && !uploading ? '0 8px 20px rgba(6,182,212,0.25)' : 'none',
                     }}>
                     {uploading ? (
                       <span className="flex items-center justify-center gap-2">
@@ -460,7 +460,7 @@ export default function MandatoryProfilePhotoModal({ isOpen, onSkip }) {
                             }}
                             className="w-full px-4 py-2.5 text-left text-sm flex justify-between items-center transition-colors"
                             style={{ color: 'rgba(255,255,255,0.8)' }}
-                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,255,136,0.08)'}
+                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(6,182,212,0.08)'}
                             onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                             <span>{c}</span>
                             <span className="text-xs" style={{ color: F.dim }}>{CITY_STATE_MAP[c]}</span>
@@ -478,7 +478,7 @@ export default function MandatoryProfilePhotoModal({ isOpen, onSkip }) {
                       onChange={(e) => { setStateInput(e.target.value); setForm(f => ({ ...f, state: '' })); setShowStates(true); }}
                       onFocus={() => setShowStates(true)}
                       placeholder="Select your state..."
-                      style={{ ...inputStyle, borderColor: form.state ? 'rgba(0,255,136,0.3)' : F.border }}
+                      style={{ ...inputStyle, borderColor: form.state ? 'rgba(6,182,212,0.3)' : F.border }}
                       autoComplete="off" />
                     {form.state && (
                       <Check size={14} className="absolute right-3 top-1/2 -translate-y-1/2" style={{ color: F.green }} />
@@ -490,7 +490,7 @@ export default function MandatoryProfilePhotoModal({ isOpen, onSkip }) {
                             onClick={() => { setStateInput(s); setForm(f => ({ ...f, state: s })); setShowStates(false); }}
                             className="w-full px-4 py-2.5 text-left text-sm transition-colors"
                             style={{ color: form.state === s ? F.green : 'rgba(255,255,255,0.8)' }}
-                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,255,136,0.08)'}
+                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(6,182,212,0.08)'}
                             onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                             {s}
                           </button>
@@ -508,8 +508,8 @@ export default function MandatoryProfilePhotoModal({ isOpen, onSkip }) {
                         onClick={() => setForm(f => ({ ...f, gender: val }))}
                         className="flex-1 py-2 rounded-xl text-xs font-semibold transition-all"
                         style={{
-                          background: form.gender === val ? 'rgba(0,255,136,0.15)' : 'rgba(255,255,255,0.04)',
-                          border: `1px solid ${form.gender === val ? 'rgba(0,255,136,0.4)' : F.border}`,
+                          background: form.gender === val ? 'rgba(6,182,212,0.15)' : 'rgba(255,255,255,0.04)',
+                          border: `1px solid ${form.gender === val ? 'rgba(6,182,212,0.4)' : F.border}`,
                           color: form.gender === val ? F.green : F.sub,
                         }}>
                         {label}
@@ -534,9 +534,9 @@ export default function MandatoryProfilePhotoModal({ isOpen, onSkip }) {
                 <button onClick={handleSaveDetails} disabled={saving}
                   className="flex-1 py-3 rounded-2xl font-bold text-sm transition-all"
                   style={{
-                    background: 'linear-gradient(135deg,#00ff88,#00c853)',
+                    background: 'linear-gradient(135deg,#06b6d4,#0891b2)',
                     color: '#003320',
-                    boxShadow: '0 8px 20px rgba(0,255,136,0.2)',
+                    boxShadow: '0 8px 20px rgba(6,182,212,0.2)',
                     opacity: saving ? 0.7 : 1,
                   }}>
                   {saving ? (

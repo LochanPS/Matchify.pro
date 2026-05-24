@@ -14,7 +14,7 @@ const ReviewStep = ({ formData, goToStep, onPrev, onSubmit, isSubmitting }) => {
         <h2 
           className="text-lg font-black mb-2"
           style={{
-            background: 'linear-gradient(135deg, #00c853, #00ff88)',
+            background: 'linear-gradient(135deg, #0891b2, #06b6d4)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text'
@@ -270,9 +270,9 @@ const ReviewStep = ({ formData, goToStep, onPrev, onSubmit, isSubmitting }) => {
           disabled={isSubmitting}
           className="px-6 py-2.5 rounded-xl font-bold text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           style={{ 
-            background: 'linear-gradient(135deg, #00c853, #00ff88)',
+            background: 'linear-gradient(135deg, #0891b2, #06b6d4)',
             color: '#ffffff',
-            boxShadow: '0 6px 20px rgba(0,200,83,0.4)'
+            boxShadow: '0 6px 20px rgba(6,182,212,0.4)'
           }}
         >
           {isSubmitting ? (

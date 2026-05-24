@@ -619,7 +619,7 @@ const UnifiedDashboardMobile = () => {
               <div className="grid grid-cols-2 gap-3">
                 {stats.map((stat, index) => {
                   const tileAccent = [
-                    { bg: 'rgba(16,185,129,0.1)',   border: 'rgba(16,185,129,0.4)',  left: '#10b981', icon: 'rgba(16,185,129,0.22)',  iconBorder: 'rgba(16,185,129,0.5)',  iconColor: '#34d399' },
+                    { bg: 'rgba(6,182,212,0.1)',   border: 'rgba(6,182,212,0.4)',  left: '#06b6d4', icon: 'rgba(6,182,212,0.22)',  iconBorder: 'rgba(6,182,212,0.5)',  iconColor: '#22d3ee' },
                     { bg: 'rgba(245,158,11,0.09)',  border: 'rgba(245,158,11,0.35)', left: '#f59e0b', icon: 'rgba(245,158,11,0.2)',   iconBorder: 'rgba(245,158,11,0.45)', iconColor: '#fbbf24' },
                     { bg: 'rgba(59,130,246,0.09)',  border: 'rgba(59,130,246,0.35)', left: '#3b82f6', icon: 'rgba(59,130,246,0.2)',   iconBorder: 'rgba(59,130,246,0.45)', iconColor: '#60a5fa' },
                     { bg: 'rgba(139,92,246,0.09)',  border: 'rgba(139,92,246,0.35)', left: '#8b5cf6', icon: 'rgba(139,92,246,0.2)',   iconBorder: 'rgba(139,92,246,0.45)', iconColor: '#a78bfa' },
@@ -1056,7 +1056,7 @@ const UnifiedDashboardMobile = () => {
                         }`}
                         style={{
                           background: reg.status === 'confirmed'
-                            ? 'rgba(16,185,129,0.12)'
+                            ? 'rgba(6,182,212,0.12)'
                             : reg.status === 'pending'
                             ? 'rgba(245,158,11,0.1)'
                             : reg.status === 'rejected'
@@ -1064,7 +1064,7 @@ const UnifiedDashboardMobile = () => {
                             : 'rgba(255,255,255,0.06)',
                           border: `1px solid ${
                             reg.status === 'confirmed'
-                              ? 'rgba(16,185,129,0.25)'
+                              ? 'rgba(6,182,212,0.25)'
                               : reg.status === 'pending'
                               ? 'rgba(245,158,11,0.2)'
                               : reg.status === 'rejected'

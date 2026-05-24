@@ -20,7 +20,7 @@ const HOME_M_PARTICLES = Array.from({ length: 60 }, (_, i) => ({
   h: [1,1,1,2,2,3][i % 6],
   x: (i * 37 + 11) % 97,
   y: (i * 53 + 7)  % 99,
-  c: ['#00ffcc','#00d4ff','#ffffff','#a0f0e0','#7df9ff','#00ff88'][(i * 3) % 6],
+  c: ['#00ffcc','#00d4ff','#ffffff','#a0f0e0','#7df9ff','#06b6d4'][(i * 3) % 6],
   o: ((i * 17) % 55) / 100 + 0.15,
   dur: (i * 7) % 12 + 4,
   delay: (i * 3) % 6,
@@ -47,7 +47,7 @@ const REVIEWS = [
     state: 'Telangana',
     date: 'Jan 2026',
     badge: 'Verified Player',
-    avatarColors: ['#10b981', '#059669'],
+    avatarColors: ['#06b6d4', '#0891b2'],
     avatarText: '#ffffff',
     stars: 5,
     text: 'Registered for the Hyderabad Smash Open through Matchify. My partner and I made it to the semis — the live draw tracker was brilliant. No more WhatsApp chaos to figure out fixtures!',
@@ -127,14 +127,14 @@ const HomePageMobile = () => {
 
   const benefits = [
     { icon: BoltIcon,        text: 'Instant Registration', color: '#fbbf24', bg: 'rgba(251,191,36,0.1)' },
-    { icon: ShieldCheckIcon, text: 'Secure Payments',      color: '#10b981', bg: 'rgba(16,185,129,0.1)' },
+    { icon: ShieldCheckIcon, text: 'Secure Payments',      color: '#06b6d4', bg: 'rgba(6,182,212,0.1)' },
     { icon: TrophyIcon,      text: 'Fair Play System',     color: '#00d4ff', bg: 'rgba(0,212,255,0.1)' },
     { icon: ChartBarIcon,    text: 'Track Performance',    color: '#a855f7', bg: 'rgba(168,85,247,0.1)' },
   ];
 
   return (
     <div className="min-h-screen relative overflow-hidden"
-      style={{ background: 'linear-gradient(160deg, #04060f 0%, #060d1a 40%, #050b16 70%, #04070f 100%)' }}>
+      style={{ background: '#050810' }}>
 
       {/* ── Sticky Navbar ─────────────────────────────────────────── */}
       {!user && (
@@ -167,7 +167,7 @@ const HomePageMobile = () => {
                 to="/register"
                 className="px-4 py-2 rounded-lg font-bold text-sm"
                 style={{
-                  background: 'linear-gradient(135deg, #10b981, #059669)',
+                  background: 'linear-gradient(135deg, #06b6d4, #0891b2)',
                   color: '#ffffff',
                 }}
               >
@@ -299,7 +299,7 @@ const HomePageMobile = () => {
               className="absolute blur-3xl rounded-full"
               style={{
                 width: '160px', height: '160px',
-                background: 'radial-gradient(circle, rgba(16,185,129,0.12) 0%, transparent 70%)',
+                background: 'radial-gradient(circle, rgba(6,182,212,0.12) 0%, transparent 70%)',
                 top: '50%', left: '50%',
                 transform: 'translate(-50%,-50%)',
                 animation: 'glow 3s ease-in-out infinite',
@@ -313,9 +313,9 @@ const HomePageMobile = () => {
             <div
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-black relative overflow-hidden"
               style={{
-                background: 'rgba(16,185,129,0.1)',
-                border: '1.5px solid rgba(16,185,129,0.35)',
-                color: '#6ee7b7',
+                background: 'rgba(6,182,212,0.1)',
+                border: '1.5px solid rgba(6,182,212,0.35)',
+                color: '#67e8f9',
               }}
             >
               {/* shimmer sweep */}
@@ -327,7 +327,7 @@ const HomePageMobile = () => {
               {/* live dot */}
               <span
                 className="w-2 h-2 rounded-full flex-shrink-0"
-                style={{ background: '#10b981', animation: 'livePulse 1.4s ease-in-out infinite' }}
+                style={{ background: '#06b6d4', animation: 'livePulse 1.4s ease-in-out infinite' }}
               />
               <span className="relative z-10 tracking-wide">India's #1 Badminton Platform</span>
               <FireIcon className="w-3.5 h-3.5 relative z-10" style={{ animation: 'pulse 2s ease-in-out infinite' }} />
@@ -342,7 +342,7 @@ const HomePageMobile = () => {
             <span
               className="block mt-1"
               style={{
-                background: 'linear-gradient(135deg, #34d399 0%, #10b981 100%)',
+                background: 'linear-gradient(135deg, #22d3ee 0%, #06b6d4 100%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
@@ -354,7 +354,7 @@ const HomePageMobile = () => {
 
           {/* Sub-headline */}
           <p className="text-sm font-medium px-4 mb-1" style={{ color: 'rgba(255,255,255,0.6)', animation: 'fadeIn 1s ease-out 0.4s both' }}>
-            Join <span className="font-black" style={{ color: '#10b981' }}>2,500+</span> players across India
+            Join <span className="font-black" style={{ color: '#06b6d4' }}>2,500+</span> players across India
           </p>
           <p className="text-sm px-6 mb-6" style={{ color: 'rgba(255,255,255,0.45)', animation: 'fadeIn 1s ease-out 0.5s both' }}>
             Register for tournaments · track progress · compete with the best
@@ -365,7 +365,7 @@ const HomePageMobile = () => {
             {/* Avatar stack */}
             <div className="flex -space-x-2.5">
               {[
-                { l: 'A', g: ['#10b981','#059669'], c: '#ffffff' },
+                { l: 'A', g: ['#06b6d4','#0891b2'], c: '#ffffff' },
                 { l: 'K', g: ['#a855f7','#7c3aed'], c: '#fff' },
                 { l: 'R', g: ['#f59e0b','#ea580c'], c: '#fff' },
                 { l: 'D', g: ['#06b6d4','#0284c7'], c: '#fff' },
@@ -401,7 +401,7 @@ const HomePageMobile = () => {
                 to={getDashboardLink()}
                 className="flex items-center justify-center gap-2 w-full py-4 rounded-2xl font-black text-base relative overflow-hidden group"
                 style={{
-                  background: 'linear-gradient(135deg, #10b981, #059669)',
+                  background: 'linear-gradient(135deg, #06b6d4, #0891b2)',
                   color: '#ffffff',
                   boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
                 }}
@@ -413,9 +413,9 @@ const HomePageMobile = () => {
                 <ArrowRightIcon className="w-5 h-5 relative z-10" />
               </Link>
               <div className="flex items-center gap-3 px-4 py-3.5 rounded-2xl border"
-                style={{ background: 'rgba(16,185,129,0.06)', borderColor: 'rgba(16,185,129,0.25)' }}>
+                style={{ background: 'rgba(6,182,212,0.06)', borderColor: 'rgba(6,182,212,0.25)' }}>
                 <div className="w-10 h-10 rounded-full flex items-center justify-center font-black text-base flex-shrink-0"
-                  style={{ background: 'linear-gradient(135deg,#10b981,#059669)', color: '#ffffff' }}>
+                  style={{ background: 'linear-gradient(135deg,#06b6d4,#0891b2)', color: '#ffffff' }}>
                   {user.name?.charAt(0).toUpperCase()}
                 </div>
                 <div className="text-left">
@@ -430,7 +430,7 @@ const HomePageMobile = () => {
                 to="/register"
                 className="flex items-center justify-center gap-2 w-full py-4 rounded-2xl font-black text-base relative overflow-hidden group"
                 style={{
-                  background: 'linear-gradient(135deg, #10b981, #059669)',
+                  background: 'linear-gradient(135deg, #06b6d4, #0891b2)',
                   color: '#ffffff',
                   boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
                 }}
@@ -464,7 +464,7 @@ const HomePageMobile = () => {
           className="rounded-2xl p-6 mb-6 relative overflow-hidden"
           style={{
             background: 'linear-gradient(160deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.06) 100%)',
-            border: '1px solid rgba(16,185,129,0.22)',
+            border: '1px solid rgba(6,182,212,0.22)',
             backdropFilter: 'blur(20px)',
             boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
             animation: 'fadeIn 0.8s ease-out 0.8s both',
@@ -481,8 +481,8 @@ const HomePageMobile = () => {
                 return (
                   <div key={i} className="p-4 rounded-xl text-center relative overflow-hidden"
                     style={{
-                      background: 'linear-gradient(135deg, rgba(16,185,129,0.07) 0%, rgba(255,255,255,0.04) 100%)',
-                      border: '1px solid rgba(16,185,129,0.2)',
+                      background: 'linear-gradient(135deg, rgba(6,182,212,0.07) 0%, rgba(255,255,255,0.04) 100%)',
+                      border: '1px solid rgba(6,182,212,0.2)',
                       animation: `scaleIn 0.5s ease-out ${0.9 + i * 0.1}s both`
                     }}>
                     <div className="text-3xl mb-2" style={{ animation: 'float 3s ease-in-out infinite' }}>{s.icon}</div>
@@ -502,7 +502,7 @@ const HomePageMobile = () => {
           className="rounded-2xl p-6 mb-6 relative overflow-hidden"
           style={{
             background: 'linear-gradient(160deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.06) 100%)',
-            border: '1px solid rgba(16,185,129,0.22)',
+            border: '1px solid rgba(6,182,212,0.22)',
             backdropFilter: 'blur(20px)',
             boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
             animation: 'fadeIn 0.8s ease-out 1s both',
@@ -523,7 +523,7 @@ const HomePageMobile = () => {
                 { gradient: 'linear-gradient(135deg,#f59e0b,#ea580c)' },
                 { gradient: 'linear-gradient(135deg,#06b6d4,#0284c7)' },
                 { gradient: 'linear-gradient(135deg,#a855f7,#7c3aed)' },
-                { gradient: 'linear-gradient(135deg,#10b981,#059669)' },
+                { gradient: 'linear-gradient(135deg,#06b6d4,#0891b2)' },
               ].map((scheme, i) => {
                 const f = features[i];
                 return (
@@ -553,7 +553,7 @@ const HomePageMobile = () => {
           style={{ background: 'rgba(13,26,42,0.8)', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)', animation: 'fadeIn 0.8s ease-out 1.2s both' }}>
           <div className="text-center mb-5">
             <h2 className="text-xl font-black text-white mb-1">
-              Why <span style={{ color: '#10b981' }}>Matchify.pro</span>?
+              Why <span style={{ color: '#06b6d4' }}>Matchify.pro</span>?
             </h2>
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -592,7 +592,7 @@ const HomePageMobile = () => {
               <div key={i} className="flex items-center gap-4 p-4 rounded-xl"
                 style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
                 <div className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center text-xs font-black"
-                  style={{ background: 'linear-gradient(135deg,#10b981,#059669)', color: '#ffffff' }}>
+                  style={{ background: 'linear-gradient(135deg,#06b6d4,#0891b2)', color: '#ffffff' }}>
                   {s.step}
                 </div>
                 <div className="flex-1">
@@ -698,7 +698,7 @@ const HomePageMobile = () => {
           className="rounded-2xl p-6 mb-6 text-center relative overflow-hidden"
           style={{
             background: 'linear-gradient(160deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.06) 100%)',
-            border: '1px solid rgba(16,185,129,0.22)',
+            border: '1px solid rgba(6,182,212,0.22)',
             backdropFilter: 'blur(20px)',
             boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
             animation: 'scaleIn 0.8s ease-out 1.5s both',
@@ -718,7 +718,7 @@ const HomePageMobile = () => {
                 to={user ? getDashboardLink() : '/register'}
                 className="flex items-center justify-center gap-2 w-full py-4 rounded-2xl font-black text-base relative overflow-hidden group"
                 style={{
-                  background: 'linear-gradient(135deg, #10b981, #059669)',
+                  background: 'linear-gradient(135deg, #06b6d4, #0891b2)',
                   color: '#ffffff',
                   boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
                 }}
@@ -751,7 +751,7 @@ const HomePageMobile = () => {
           <div className="rounded-2xl px-5 py-4 border"
             style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}>
             <p className="text-xs tracking-wider uppercase mb-2" style={{ color: 'rgba(255,255,255,0.3)' }}>Co-Founded By</p>
-            <p className="text-lg font-black mb-2" style={{ color: '#10b981' }}>PS Brothers</p>
+            <p className="text-lg font-black mb-2" style={{ color: '#06b6d4' }}>PS Brothers</p>
             <div className="flex justify-center items-center gap-3 text-sm font-semibold text-white">
               <span>PS Lochan</span>
               <span style={{ color: 'rgba(255,255,255,0.2)' }}>|</span>

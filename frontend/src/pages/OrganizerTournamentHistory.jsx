@@ -7,7 +7,7 @@ import { Filter, X, RefreshCw } from 'lucide-react';
 
 const B = {
   bg: '#07071a', card: 'rgba(255,255,255,0.04)', border: 'rgba(255,255,255,0.08)',
-  cardDark: '#0d1025', green: '#00ff88', cyan: '#00d4ff', purple: '#a855f7',
+  cardDark: '#0d1025', green: '#06b6d4', cyan: '#00d4ff', purple: '#a855f7',
   sub: 'rgba(255,255,255,0.6)', dim: 'rgba(255,255,255,0.4)',
 };
 
@@ -148,7 +148,7 @@ export default function OrganizerTournamentHistory() {
         {loading ? (
           <div className="rounded-2xl p-16 text-center border" style={{ background: B.card, borderColor: B.border }}>
             <div className="w-16 h-16 border-4 border-t-transparent rounded-full animate-spin mx-auto"
-              style={{ borderColor: 'rgba(0,255,136,0.3)', borderTopColor: B.green }} />
+              style={{ borderColor: 'rgba(6,182,212,0.3)', borderTopColor: B.green }} />
             <p className="mt-6 font-medium" style={{ color: B.sub }}>Loading tournaments...</p>
           </div>
         ) : tournaments.length === 0 ? (

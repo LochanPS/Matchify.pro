@@ -64,9 +64,9 @@ export default function RefundRequestsPage() {
   return (
     <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #0a0a1f 0%, #07071a 50%, #0a0a1f 100%)' }}>
       {/* Header - Emerald Theme */}
-      <div className="relative overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(16,185,129,0.15) 0%, rgba(6,182,212,0.1) 100%)' }}>
+      <div className="relative overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(6,182,212,0.15) 0%, rgba(6,182,212,0.1) 100%)' }}>
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl opacity-10" style={{ background: 'radial-gradient(circle, #10b981, transparent)' }}></div>
+          <div className="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl opacity-10" style={{ background: 'radial-gradient(circle, #06b6d4, transparent)' }}></div>
         </div>
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -79,7 +79,7 @@ export default function RefundRequestsPage() {
           </button>
 
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-2xl" style={{ background: 'linear-gradient(135deg,#10b981,#059669)', boxShadow: '0 8px 25px rgba(16,185,129,0.3)' }}>
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-2xl" style={{ background: 'linear-gradient(135deg,#06b6d4,#0891b2)', boxShadow: '0 8px 25px rgba(6,182,212,0.3)' }}>
               <CreditCard className="w-7 h-7 text-white" />
             </div>
             <div>
@@ -101,7 +101,7 @@ export default function RefundRequestsPage() {
                 className="flex-1 px-4 py-3 text-sm font-bold rounded-xl transition-all"
                 style={
                   filter === status
-                    ? { background: 'linear-gradient(135deg,#10b981,#059669)', color: '#ffffff', boxShadow: '0 4px 15px rgba(16,185,129,0.3)' }
+                    ? { background: 'linear-gradient(135deg,#06b6d4,#0891b2)', color: '#ffffff', boxShadow: '0 4px 15px rgba(6,182,212,0.3)' }
                     : { color: 'rgba(255,255,255,0.5)', background: 'transparent' }
                 }
               >
@@ -114,7 +114,7 @@ export default function RefundRequestsPage() {
         {/* Refund Requests List */}
         {refundRequests.length === 0 ? (
           <div className="rounded-2xl shadow-xl p-12 text-center" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)' }}>
-            <div className="w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-5" style={{ background: 'rgba(16,185,129,0.1)', border: '2px solid rgba(16,185,129,0.2)' }}>
+            <div className="w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-5" style={{ background: 'rgba(6,182,212,0.1)', border: '2px solid rgba(6,182,212,0.2)' }}>
               <CheckCircle className="w-10 h-10 text-emerald-400" />
             </div>
             <h3 className="text-xl font-bold text-white mb-2">No {filter} refund requests</h3>
@@ -235,7 +235,7 @@ export default function RefundRequestsPage() {
                     </div>
 
                     {/* Refund Details */}
-                    <div className="p-4 rounded-xl" style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)' }}>
+                    <div className="p-4 rounded-xl" style={{ background: 'rgba(6,182,212,0.1)', border: '1px solid rgba(6,182,212,0.2)' }}>
                       <h3 className="text-sm font-bold text-emerald-400 mb-3">Refund Payment Details</h3>
                       <div className="space-y-2">
                         <div>
@@ -273,7 +273,7 @@ export default function RefundRequestsPage() {
                         onClick={() => handleProcessRefund(request.id)}
                         disabled={processing}
                         className="w-full py-4 rounded-xl font-bold text-white transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-                        style={{ background: 'linear-gradient(135deg,#10b981,#059669)', boxShadow: '0 4px 15px rgba(16,185,129,0.3)' }}
+                        style={{ background: 'linear-gradient(135deg,#06b6d4,#0891b2)', boxShadow: '0 4px 15px rgba(6,182,212,0.3)' }}
                       >
                         {processing ? (
                           <>
@@ -290,7 +290,7 @@ export default function RefundRequestsPage() {
                     )}
 
                     {filter === 'processed' && (
-                      <div className="p-4 rounded-xl text-center" style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)' }}>
+                      <div className="p-4 rounded-xl text-center" style={{ background: 'rgba(6,182,212,0.1)', border: '1px solid rgba(6,182,212,0.2)' }}>
                         <CheckCircle className="w-8 h-8 text-emerald-400 mx-auto mb-2" />
                         <p className="text-emerald-400 font-bold">Refund Processed</p>
                         {request.refundProcessedAt && (
@@ -324,7 +324,7 @@ export default function RefundRequestsPage() {
             <button
               onClick={() => setShowImageModal(null)}
               className="mt-4 w-full py-3 rounded-xl font-bold text-white transition-all"
-              style={{ background: 'linear-gradient(135deg,#10b981,#059669)' }}
+              style={{ background: 'linear-gradient(135deg,#06b6d4,#0891b2)' }}
             >
               Close
             </button>

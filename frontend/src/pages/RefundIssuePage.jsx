@@ -104,7 +104,7 @@ export default function RefundIssuePage() {
                   <span className="text-xs flex-shrink-0" style={{ color: 'rgba(255,255,255,0.45)' }}>{label}</span>
                   <span
                     className={`text-sm font-bold truncate text-right ${mono ? 'font-mono' : ''}`}
-                    style={{ color: highlight ? '#00ff88' : 'white' }}
+                    style={{ color: highlight ? '#06b6d4' : 'white' }}
                   >
                     {value}
                   </span>

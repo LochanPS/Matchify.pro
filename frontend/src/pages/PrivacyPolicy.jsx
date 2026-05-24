@@ -5,7 +5,7 @@ const PrivacyPolicy = () => {
   return (
     <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #0a0a1f 0%, #07071a 30%, #0d1a2a 60%, #07071a 100%)' }}>
       {/* Header */}
-      <div className="border-b relative" style={{ borderColor: 'rgba(0,200,83,0.3)', background: 'linear-gradient(135deg, rgba(7,7,26,0.95), rgba(13,26,42,0.95))' }}>
+      <div className="border-b relative" style={{ borderColor: 'rgba(6,182,212,0.3)', background: 'linear-gradient(135deg, rgba(7,7,26,0.95), rgba(13,26,42,0.95))' }}>
         <div className="max-w-5xl mx-auto px-4 py-8">
           <Link 
             to="/register" 
@@ -16,7 +16,7 @@ const PrivacyPolicy = () => {
           </Link>
           
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #00c853, #00ff88)' }}>
+            <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #0891b2, #06b6d4)' }}>
               <ShieldCheckIcon className="w-8 h-8 text-white" />
             </div>
             <div>
@@ -33,10 +33,10 @@ const PrivacyPolicy = () => {
 
       {/* Content */}
       <div className="max-w-5xl mx-auto px-4 py-12">
-        <div className="rounded-2xl border p-8 space-y-8" style={{ background: 'rgba(13,26,42,0.6)', borderColor: 'rgba(0,200,83,0.2)' }}>
+        <div className="rounded-2xl border p-8 space-y-8" style={{ background: 'rgba(13,26,42,0.6)', borderColor: 'rgba(6,182,212,0.2)' }}>
           
           {/* Important Notice */}
-          <div className="rounded-xl p-6" style={{ background: 'linear-gradient(135deg, rgba(0,200,83,0.15), rgba(0,255,136,0.1))', border: '2px solid rgba(0,200,83,0.3)' }}>
+          <div className="rounded-xl p-6" style={{ background: 'linear-gradient(135deg, rgba(6,182,212,0.15), rgba(6,182,212,0.1))', border: '2px solid rgba(6,182,212,0.3)' }}>
             <div className="flex items-start gap-3">
               <LockClosedIcon className="w-6 h-6 text-emerald-400 flex-shrink-0 mt-1" />
               <div>
@@ -358,7 +358,7 @@ const PrivacyPolicy = () => {
                 </p>
               </div>
 
-              <div className="rounded-lg p-4" style={{ background: 'rgba(0,200,83,0.1)', border: '1px solid rgba(0,200,83,0.3)' }}>
+              <div className="rounded-lg p-4" style={{ background: 'rgba(6,182,212,0.1)', border: '1px solid rgba(6,182,212,0.3)' }}>
                 <p className="text-emerald-300 font-semibold mb-2">📧 To Exercise Your Rights:</p>
                 <p className="text-sm">
                   Email us at: <a href="mailto:privacy@matchify.pro" className="text-emerald-400 underline">privacy@matchify.pro</a><br/>
@@ -467,7 +467,7 @@ const PrivacyPolicy = () => {
             <div className="text-gray-300 space-y-4 leading-relaxed">
               <p>If you have questions, concerns, or requests regarding this Privacy Policy or your personal data, please contact us:</p>
               
-              <div className="rounded-xl p-6" style={{ background: 'linear-gradient(135deg, rgba(0,200,83,0.15), rgba(0,255,136,0.1))', border: '2px solid rgba(0,200,83,0.3)' }}>
+              <div className="rounded-xl p-6" style={{ background: 'linear-gradient(135deg, rgba(6,182,212,0.15), rgba(6,182,212,0.1))', border: '2px solid rgba(6,182,212,0.3)' }}>
                 <p className="font-semibold text-white mb-3">📧 Contact Information:</p>
                 <ul className="space-y-2 text-sm">
                   <li><strong>Email:</strong> <a href="mailto:privacy@matchify.pro" className="text-emerald-400 underline">privacy@matchify.pro</a></li>
@@ -501,7 +501,7 @@ const PrivacyPolicy = () => {
           <Link 
             to="/register" 
             className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all"
-            style={{ background: 'linear-gradient(135deg, #00c853, #00ff88)', color: '#003320' }}
+            style={{ background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: '#003320' }}
           >
             <ArrowLeftIcon className="w-5 h-5" />
             Back to Registration

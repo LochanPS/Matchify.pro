@@ -134,7 +134,7 @@ export default function AcademyApprovalsPage() {
       {toast && (
         <div className="fixed top-5 right-5 z-50 px-4 py-3 rounded-xl text-sm font-bold shadow-lg"
           style={{
-            background: toast.ok ? 'rgba(0,255,136,0.9)' : 'rgba(239,68,68,0.9)',
+            background: toast.ok ? 'rgba(6,182,212,0.9)' : 'rgba(239,68,68,0.9)',
             color: '#07071a',
           }}>
           {toast.msg}
@@ -243,7 +243,7 @@ export default function AcademyApprovalsPage() {
                       <div className="flex items-center gap-2 flex-wrap mb-1">
                         <h3 className="text-base font-black text-white truncate">{academy.name}</h3>
                         {academy.isVerified && (
-                          <BadgeCheck className="w-4 h-4 flex-shrink-0" style={{ color: '#00ff88' }} />
+                          <BadgeCheck className="w-4 h-4 flex-shrink-0" style={{ color: '#06b6d4' }} />
                         )}
                         {tab === 'pending' && (
                           <span className="px-2 py-0.5 rounded-full text-xs font-bold"
@@ -254,10 +254,10 @@ export default function AcademyApprovalsPage() {
                         {tab === 'all' && (
                           <span className="px-2 py-0.5 rounded-full text-xs font-bold"
                             style={{
-                              background: academy.status === 'approved' ? 'rgba(0,255,136,0.12)'
+                              background: academy.status === 'approved' ? 'rgba(6,182,212,0.12)'
                                 : academy.status === 'pending' ? 'rgba(251,191,36,0.12)'
                                 : 'rgba(239,68,68,0.12)',
-                              color: academy.status === 'approved' ? '#00ff88'
+                              color: academy.status === 'approved' ? '#06b6d4'
                                 : academy.status === 'pending' ? '#fbbf24'
                                 : '#f87171'
                             }}>
@@ -291,7 +291,7 @@ export default function AcademyApprovalsPage() {
                         <>
                           <button onClick={() => approve(academy.id)} disabled={isActioning}
                             className="px-3 py-1.5 rounded-xl text-xs font-black transition-all disabled:opacity-50"
-                            style={{ background: 'rgba(0,255,136,0.15)', color: '#00ff88', border: '1px solid rgba(0,255,136,0.3)' }}>
+                            style={{ background: 'rgba(6,182,212,0.15)', color: '#06b6d4', border: '1px solid rgba(6,182,212,0.3)' }}>
                             {actionLoading === academy.id
                               ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
                               : '✓ Approve'}
@@ -484,7 +484,7 @@ export default function AcademyApprovalsPage() {
                         </button>
                         <button onClick={() => approve(academy.id)} disabled={isActioning}
                           className="flex-[2] py-3 rounded-xl text-sm font-black flex items-center justify-center gap-2 disabled:opacity-50"
-                          style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', color: '#07071a' }}>
+                          style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#07071a' }}>
                           {actionLoading === academy.id
                             ? <Loader2 className="w-4 h-4 animate-spin" />
                             : <CheckCircle className="w-4 h-4" />}

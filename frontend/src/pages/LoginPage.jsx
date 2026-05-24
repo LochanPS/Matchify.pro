@@ -8,30 +8,30 @@ import MatchifyLogo from '../components/MatchifyLogo';
 
 // Fixed star positions — no random on re-render
 const STARS = [
-  { x:4,  y:8,  s:2,   c:'#00ff88', d:0,   dur:2.8 },
+  { x:4,  y:8,  s:2,   c:'#06b6d4', d:0,   dur:2.8 },
   { x:12, y:22, s:1.5, c:'#00d4ff', d:0.4, dur:3.2 },
   { x:22, y:5,  s:1,   c:'#fff',    d:0.8, dur:2.5 },
-  { x:33, y:18, s:2.5, c:'#00ff88', d:1.2, dur:3.5 },
+  { x:33, y:18, s:2.5, c:'#06b6d4', d:1.2, dur:3.5 },
   { x:45, y:30, s:1,   c:'#00d4ff', d:0.3, dur:2.2 },
   { x:55, y:6,  s:1.5, c:'#fff',    d:1.6, dur:3.8 },
-  { x:65, y:25, s:2,   c:'#00ff88', d:0.7, dur:2.9 },
+  { x:65, y:25, s:2,   c:'#06b6d4', d:0.7, dur:2.9 },
   { x:75, y:12, s:1,   c:'#00d4ff', d:1.1, dur:3.1 },
   { x:85, y:38, s:2.5, c:'#fff',    d:0.5, dur:2.6 },
-  { x:92, y:15, s:1.5, c:'#00ff88', d:1.9, dur:3.4 },
+  { x:92, y:15, s:1.5, c:'#06b6d4', d:1.9, dur:3.4 },
   { x:8,  y:55, s:1,   c:'#00d4ff', d:0.2, dur:3.0 },
-  { x:18, y:70, s:2,   c:'#00ff88', d:1.4, dur:2.7 },
+  { x:18, y:70, s:2,   c:'#06b6d4', d:1.4, dur:2.7 },
   { x:28, y:85, s:1.5, c:'#fff',    d:0.6, dur:3.6 },
   { x:40, y:60, s:1,   c:'#00d4ff', d:1.8, dur:2.4 },
-  { x:50, y:78, s:2,   c:'#00ff88', d:0.9, dur:3.3 },
+  { x:50, y:78, s:2,   c:'#06b6d4', d:0.9, dur:3.3 },
   { x:62, y:50, s:1.5, c:'#fff',    d:1.3, dur:2.8 },
   { x:72, y:68, s:1,   c:'#00d4ff', d:0.1, dur:3.7 },
-  { x:82, y:82, s:2.5, c:'#00ff88', d:1.7, dur:2.3 },
+  { x:82, y:82, s:2.5, c:'#06b6d4', d:1.7, dur:2.3 },
   { x:90, y:55, s:1,   c:'#fff',    d:0.4, dur:3.5 },
   { x:96, y:72, s:1.5, c:'#00d4ff', d:2.0, dur:2.9 },
-  { x:3,  y:40, s:2,   c:'#00ff88', d:1.0, dur:3.2 },
+  { x:3,  y:40, s:2,   c:'#06b6d4', d:1.0, dur:3.2 },
   { x:38, y:92, s:1,   c:'#fff',    d:1.5, dur:2.6 },
   { x:58, y:88, s:1.5, c:'#00d4ff', d:0.3, dur:3.9 },
-  { x:78, y:45, s:2,   c:'#00ff88', d:1.6, dur:2.5 },
+  { x:78, y:45, s:2,   c:'#06b6d4', d:1.6, dur:2.5 },
   { x:95, y:90, s:1,   c:'#fff',    d:0.8, dur:3.1 },
 ];
 
@@ -128,14 +128,14 @@ const LoginPage = () => {
       >
         {/* Grid */}
         <div className="absolute inset-0" style={{
-          backgroundImage: 'linear-gradient(rgba(0,255,136,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,136,0.04) 1px,transparent 1px)',
+          backgroundImage: 'linear-gradient(rgba(6,182,212,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(6,182,212,0.04) 1px,transparent 1px)',
           backgroundSize: '60px 60px',
         }} />
 
         <StarField />
 
         {/* Glows */}
-        <div className="absolute top-1/4 left-1/4 w-80 h-80 rounded-full blur-3xl" style={{ background: 'radial-gradient(circle, rgba(0,255,136,0.12) 0%, transparent 70%)' }} />
+        <div className="absolute top-1/4 left-1/4 w-80 h-80 rounded-full blur-3xl" style={{ background: 'radial-gradient(circle, rgba(6,182,212,0.12) 0%, transparent 70%)' }} />
         <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full blur-3xl" style={{ background: 'radial-gradient(circle, rgba(0,212,255,0.08) 0%, transparent 70%)' }} />
 
         <div className="relative z-10 flex flex-col items-center text-center">
@@ -145,12 +145,12 @@ const LoginPage = () => {
           </div>
 
           <h1 className="text-5xl font-black mb-3" style={{ letterSpacing: '-0.02em' }}>
-            <span style={{ color: '#00c853', textShadow: '0 0 15px rgba(0,200,83,0.3)' }}>matchify.pro</span>
+            <span style={{ color: '#0891b2', textShadow: '0 0 15px rgba(6,182,212,0.3)' }}>matchify.pro</span>
           </h1>
           <p className="text-base mb-8" style={{ color: 'rgba(255,255,255,0.5)' }}>India's Premier Badminton Platform</p>
 
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-10 text-sm font-medium"
-            style={{ background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.25)', color: '#00ff88' }}>
+            style={{ background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.25)', color: '#06b6d4' }}>
             <SparklesIcon className="w-4 h-4" />
             Where Champions Are Made
           </div>
@@ -158,7 +158,7 @@ const LoginPage = () => {
           {/* Stats */}
           <div className="grid grid-cols-3 gap-4 w-full max-w-sm">
             {[
-              { icon: Users,  val: '1000+', label: 'Players',     c: '#00ff88' },
+              { icon: Users,  val: '1000+', label: 'Players',     c: '#06b6d4' },
               { icon: Trophy, val: '50+',   label: 'Tournaments', c: '#f59e0b' },
               { icon: MapPin, val: '25+',   label: 'Cities',      c: '#00d4ff' },
             ].map(({ icon: Icon, val, label, c }, i) => (
@@ -183,11 +183,11 @@ const LoginPage = () => {
 
         {/* Ambient glows */}
         <div className="absolute top-0 right-0 w-72 h-72 rounded-full blur-3xl pointer-events-none"
-          style={{ background: 'radial-gradient(circle, rgba(0,255,136,0.07) 0%, transparent 70%)' }} />
+          style={{ background: 'radial-gradient(circle, rgba(6,182,212,0.07) 0%, transparent 70%)' }} />
         <div className="absolute bottom-0 left-0 w-72 h-72 rounded-full blur-3xl pointer-events-none"
           style={{ background: 'radial-gradient(circle, rgba(0,212,255,0.06) 0%, transparent 70%)' }} />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full blur-3xl pointer-events-none"
-          style={{ background: 'radial-gradient(circle, rgba(0,255,136,0.03) 0%, transparent 60%)' }} />
+          style={{ background: 'radial-gradient(circle, rgba(6,182,212,0.03) 0%, transparent 60%)' }} />
 
         <div className="w-full max-w-md relative z-10">
 
@@ -202,15 +202,15 @@ const LoginPage = () => {
           {/* Card */}
           <div className="rounded-2xl p-6 sm:p-8" style={{
             background: 'rgba(13,13,36,0.85)',
-            border: '1px solid rgba(0,255,136,0.12)',
+            border: '1px solid rgba(6,182,212,0.12)',
             backdropFilter: 'blur(20px)',
-            boxShadow: '0 0 40px rgba(0,255,136,0.05), 0 25px 50px rgba(0,0,0,0.4)',
+            boxShadow: '0 0 40px rgba(6,182,212,0.05), 0 25px 50px rgba(0,0,0,0.4)',
           }}>
 
             {/* Heading */}
             <div className="text-center mb-6">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold mb-4"
-                style={{ background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.2)', color: '#00ff88' }}>
+                style={{ background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.2)', color: '#06b6d4' }}>
                 <Zap className="w-3.5 h-3.5" />
                 Ready to Play?
               </div>
@@ -286,7 +286,7 @@ const LoginPage = () => {
                   <input type="checkbox" className="w-4 h-4 rounded accent-green-500" />
                   <span className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Remember me</span>
                 </label>
-                <a href="#" className="text-xs font-medium" style={{ color: '#00ff88' }}>Forgot password?</a>
+                <a href="#" className="text-xs font-medium" style={{ color: '#06b6d4' }}>Forgot password?</a>
               </div>
 
               {/* Submit */}
@@ -295,9 +295,9 @@ const LoginPage = () => {
                 disabled={loading}
                 className="w-full py-4 rounded-xl font-bold text-sm transition-all duration-300 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 style={{
-                  background: 'linear-gradient(135deg, #00c853, #00ff88)',
+                  background: 'linear-gradient(135deg, #0891b2, #06b6d4)',
                   color: '#003320',
-                  boxShadow: '0 0 25px rgba(0,255,136,0.4)',
+                  boxShadow: '0 0 25px rgba(6,182,212,0.4)',
                 }}
               >
                 {loading ? (
@@ -327,7 +327,7 @@ const LoginPage = () => {
                 <Link
                   to={redirectUrl ? `/register?redirect=${encodeURIComponent(redirectUrl)}` : '/register'}
                   className="font-bold transition-colors hover:underline"
-                  style={{ color: '#00ff88' }}
+                  style={{ color: '#06b6d4' }}
                 >
                   Create one free →
                 </Link>
@@ -339,7 +339,7 @@ const LoginPage = () => {
           {/* Mobile stats strip */}
           <div className="lg:hidden mt-6 grid grid-cols-3 gap-3">
             {[
-              { val: '1000+', label: 'Players',     c: '#00ff88' },
+              { val: '1000+', label: 'Players',     c: '#06b6d4' },
               { val: '50+',   label: 'Tournaments', c: '#f59e0b' },
               { val: '25+',   label: 'Cities',      c: '#00d4ff' },
             ].map(({ val, label, c }, i) => (
@@ -380,7 +380,7 @@ const LoginPage = () => {
                 style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.25)' }}>
                 <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
                 <p className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                  Contact <span style={{ color: '#00ff88' }}>support@matchify.pro</span> if this is a mistake.
+                  Contact <span style={{ color: '#06b6d4' }}>support@matchify.pro</span> if this is a mistake.
                 </p>
               </div>
             </div>

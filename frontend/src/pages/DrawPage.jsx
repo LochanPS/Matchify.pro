@@ -32,7 +32,7 @@ import { Loader, Zap, Layers, X, Plus, Settings, Users, CheckCircle, AlertTriang
 const DRAW_BG_PARTICLES = Array.from({ length: 15 }, (_, i) => ({
   w: (i * 7 + 3) % 6 + 2,  h: (i * 11 + 1) % 6 + 2,
   x: (i * 37 + 11) % 97,   y: (i * 53 + 7) % 91,
-  c: ['#00ff88', '#00d4ff', '#a855f7', '#00ff88'][i % 4],
+  c: ['#06b6d4', '#00d4ff', '#a855f7', '#06b6d4'][i % 4],
   o: ((i * 13) % 50) / 100 + 0.2,
   dur: (i * 7) % 10 + 5,   delay: (i * 3) % 5,
   glow: (i * 11) % 20 + 10,
@@ -40,7 +40,7 @@ const DRAW_BG_PARTICLES = Array.from({ length: 15 }, (_, i) => ({
 const ASSIGN_PARTICLES = Array.from({ length: 8 }, (_, i) => ({
   w: (i * 5 + 2) % 4 + 2,  h: (i * 5 + 2) % 4 + 2,
   x: (i * 41 + 17) % 97,   y: (i * 59 + 13) % 91,
-  c: ['#00ff88', '#00d4ff'][i % 2],
+  c: ['#06b6d4', '#00d4ff'][i % 2],
   o: ((i * 17) % 40) / 100 + 0.2,
   dur: (i * 9) % 8 + 4,    delay: (i * 4) % 3,
   glow: (i * 13) % 15 + 5,
@@ -48,7 +48,7 @@ const ASSIGN_PARTICLES = Array.from({ length: 8 }, (_, i) => ({
 const ARRANGE_PARTICLES = Array.from({ length: 18 }, (_, i) => ({
   w: (i * 7 + 3) % 6 + 3,  h: (i * 7 + 3) % 6 + 3,
   x: (i * 43 + 19) % 97,   y: (i * 61 + 11) % 91,
-  c: ['#00ff88', '#00d4ff', '#a855f7', '#00ff88'][i % 4],
+  c: ['#06b6d4', '#00d4ff', '#a855f7', '#06b6d4'][i % 4],
   o: ((i * 19) % 50) / 100 + 0.5,
   dur: (i * 11) % 8 + 4,   delay: (i * 5) % 3,
   glow: (i * 17) % 25 + 15,
@@ -865,7 +865,7 @@ const DrawPage = () => {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: 'linear-gradient(180deg, #0a0a1f 0%, #07071a 50%, #0d1a2a 100%)' }}>
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: 'rgba(0,255,136,0.3)', borderTopColor: 'transparent' }}></div>
+          <div className="w-16 h-16 border-4 border-t-transparent rounded-full animate-spin mx-auto" style={{ borderColor: 'rgba(6,182,212,0.3)', borderTopColor: 'transparent' }}></div>
           <p className="mt-4 font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>Loading draw...</p>
         </div>
       </div>
@@ -891,7 +891,7 @@ const DrawPage = () => {
         <div 
           className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl opacity-30 animate-pulse"
           style={{ 
-            background: 'radial-gradient(circle, rgba(0,255,136,0.4) 0%, rgba(0,255,136,0.2) 40%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(6,182,212,0.4) 0%, rgba(6,182,212,0.2) 40%, transparent 70%)',
             animation: 'float 8s ease-in-out infinite'
           }}
         />
@@ -914,7 +914,7 @@ const DrawPage = () => {
         <div 
           className="absolute top-1/2 right-1/3 w-64 h-64 rounded-full blur-3xl opacity-15 animate-pulse"
           style={{ 
-            background: 'radial-gradient(circle, rgba(16,185,129,0.4) 0%, rgba(5,150,105,0.2) 40%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(6,182,212,0.4) 0%, rgba(5,150,105,0.2) 40%, transparent 70%)',
             animation: 'float 9s ease-in-out infinite reverse',
             animationDelay: '1s'
           }}
@@ -952,26 +952,26 @@ const DrawPage = () => {
           0%, 100% { opacity: 0.5; filter: brightness(1); }
           50% { opacity: 1; filter: brightness(1.3); }
         }
-        .btn-brand { background: linear-gradient(135deg, #00ff88, #00d4ff); color: #07071a !important; }
-        .btn-brand:hover { box-shadow: 0 8px 25px rgba(0,255,136,0.4); transform: scale(1.05); }
-        .btn-brand-sm { background: linear-gradient(135deg, #00ff88, #00d4ff); color: #07071a !important; }
+        .btn-brand { background: linear-gradient(135deg, #06b6d4, #00d4ff); color: #07071a !important; }
+        .btn-brand:hover { box-shadow: 0 8px 25px rgba(6,182,212,0.4); transform: scale(1.05); }
+        .btn-brand-sm { background: linear-gradient(135deg, #06b6d4, #00d4ff); color: #07071a !important; }
         .card-brand { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); }
         .card-dark { background: #0d1025; border: 1px solid rgba(255,255,255,0.1); }
-        .tab-active { background: linear-gradient(135deg, #00ff88, #00d4ff); color: #07071a !important; box-shadow: 0 4px 15px rgba(0,255,136,0.3); }
-        .icon-green { color: #00ff88; }
+        .tab-active { background: linear-gradient(135deg, #06b6d4, #00d4ff); color: #07071a !important; box-shadow: 0 4px 15px rgba(6,182,212,0.3); }
+        .icon-green { color: #06b6d4; }
       `}</style>
 
       {/* Hero Header */}
       <div className="relative overflow-hidden" style={{
         background: 'linear-gradient(135deg, rgba(7,7,26,0.95), rgba(13,26,42,0.95))',
-        borderBottom: '1px solid rgba(0,255,136,0.2)',
-        boxShadow: '0 4px 20px rgba(0,255,136,0.1)'
+        borderBottom: '1px solid rgba(6,182,212,0.2)',
+        boxShadow: '0 4px 20px rgba(6,182,212,0.1)'
       }}>
         <div className="absolute inset-0">
           <div 
             className="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl opacity-20"
             style={{ 
-              background: 'radial-gradient(circle, rgba(0,255,136,0.4) 0%, transparent 70%)',
+              background: 'radial-gradient(circle, rgba(6,182,212,0.4) 0%, transparent 70%)',
               animation: 'glow 3s ease-in-out infinite'
             }}
           />
@@ -1192,20 +1192,20 @@ const DrawPage = () => {
               </div>
 
               {/* Confirmed Players - COMPACT */}
-              <div className="rounded-xl p-2.5" style={{ background: 'rgba(0,255,136,0.06)', border: '1px solid rgba(0,255,136,0.2)' }}>
+              <div className="rounded-xl p-2.5" style={{ background: 'rgba(6,182,212,0.06)', border: '1px solid rgba(6,182,212,0.2)' }}>
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(0,255,136,0.12)' }}>
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(6,182,212,0.12)' }}>
                     <CheckCircle className="w-4 h-4 icon-green" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-lg font-bold text-white leading-none">{tournamentStats.confirmedPlayers}</p>
-                    <p className="text-[#00ff88] text-xs font-medium leading-tight">Confirmed</p>
+                    <p className="text-[#06b6d4] text-xs font-medium leading-tight">Confirmed</p>
                   </div>
                 </div>
               </div>
 
               {/* Total Matches - COMPACT */}
-              <div className="rounded-xl p-2.5" style={{ background: 'rgba(0,255,136,0.06)', border: '1px solid rgba(0,255,136,0.2)' }}>
+              <div className="rounded-xl p-2.5" style={{ background: 'rgba(6,182,212,0.06)', border: '1px solid rgba(6,182,212,0.2)' }}>
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 bg-teal-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
                     <Gavel className="w-4 h-4 text-teal-400" />
@@ -1218,14 +1218,14 @@ const DrawPage = () => {
               </div>
 
               {/* Completed Matches - COMPACT */}
-              <div className="rounded-xl p-2.5" style={{ background: 'rgba(0,255,136,0.06)', border: '1px solid rgba(0,255,136,0.2)' }}>
+              <div className="rounded-xl p-2.5" style={{ background: 'rgba(6,182,212,0.06)', border: '1px solid rgba(6,182,212,0.2)' }}>
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(0,255,136,0.12)' }}>
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(6,182,212,0.12)' }}>
                     <TrophyIcon className="w-4 h-4 icon-green" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-lg font-bold text-white leading-none">{tournamentStats.completedMatches}</p>
-                    <p className="text-[#00ff88] text-xs font-medium leading-tight">Completed</p>
+                    <p className="text-[#06b6d4] text-xs font-medium leading-tight">Completed</p>
                   </div>
                 </div>
               </div>
@@ -1332,12 +1332,12 @@ const DrawPage = () => {
           </div>
         )}
         {success && (
-          <div className="mb-4 rounded-xl p-3 flex items-start gap-3" style={{ background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.25)' }}>
+          <div className="mb-4 rounded-xl p-3 flex items-start gap-3" style={{ background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.25)' }}>
             <CheckCircle className="w-5 h-5 icon-green flex-shrink-0 mt-0.5" />
-            <span className="text-[#00ff88] font-medium text-sm flex-1 min-w-0 break-words">{success}</span>
+            <span className="text-[#06b6d4] font-medium text-sm flex-1 min-w-0 break-words">{success}</span>
             <div className="flex items-center gap-2 flex-shrink-0">
               {refreshing && <div className="w-4 h-4 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></div>}
-              <button onClick={() => setSuccess(null)} className="icon-green hover:text-[#00ff88]"><X className="w-5 h-5" /></button>
+              <button onClick={() => setSuccess(null)} className="icon-green hover:text-[#06b6d4]"><X className="w-5 h-5" /></button>
             </div>
           </div>
         )}
@@ -1371,12 +1371,12 @@ const DrawPage = () => {
         {bracketLoading ? (
           <div className="rounded-2xl p-16 text-center border" style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.08)' }}>
             <div className="w-12 h-12 border-4 border-t-transparent rounded-full animate-spin mx-auto"
-              style={{ borderColor: 'rgba(0,255,136,0.4)', borderTopColor: 'transparent' }} />
+              style={{ borderColor: 'rgba(6,182,212,0.4)', borderTopColor: 'transparent' }} />
             <p className="mt-4 text-sm font-medium" style={{ color: 'rgba(255,255,255,0.55)' }}>Loading bracket...</p>
           </div>
         ) : drawNotGenerated ? (
           <div className="backdrop-blur-sm rounded-2xl p-16 text-center" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
-            <div className="w-24 h-24 rounded-3xl flex items-center justify-center mx-auto mb-6" style={{ background: 'rgba(0,255,136,0.1)', border: '1px solid rgba(0,255,136,0.2)' }}>
+            <div className="w-24 h-24 rounded-3xl flex items-center justify-center mx-auto mb-6" style={{ background: 'rgba(6,182,212,0.1)', border: '1px solid rgba(6,182,212,0.2)' }}>
               <span className="text-5xl">📋</span>
             </div>
             <h3 className="text-2xl font-bold text-white mb-3">Draw Not Generated Yet</h3>
@@ -1453,12 +1453,12 @@ const DrawPage = () => {
       {/* Continue to Knockout Stage Confirmation Modal */}
       {showContinueKnockoutModal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="rounded-2xl max-w-md w-full shadow-2xl" style={{ background: '#0d1025', border: '2px solid rgba(0,255,136,0.25)' }}>
+          <div className="rounded-2xl max-w-md w-full shadow-2xl" style={{ background: '#0d1025', border: '2px solid rgba(6,182,212,0.25)' }}>
             {/* Header */}
-            <div className="p-6 border-b border-white/10" style={{ background: 'rgba(0,255,136,0.06)' }}>
+            <div className="p-6 border-b border-white/10" style={{ background: 'rgba(6,182,212,0.06)' }}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg" style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)' }}>
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg" style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)' }}>
                     <Play className="w-6 h-6" style={{ color: '#07071a' }} />
                   </div>
                   <div>
@@ -1531,12 +1531,12 @@ const DrawPage = () => {
       {/* Select Players for Knockout Modal */}
       {showSelectPlayersModal && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl" style={{ background: '#0d1025', border: '2px solid rgba(0,255,136,0.25)' }}>
+          <div className="rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden shadow-2xl" style={{ background: '#0d1025', border: '2px solid rgba(6,182,212,0.25)' }}>
             {/* Header */}
-            <div className="p-6 border-b border-white/10" style={{ background: 'rgba(0,255,136,0.06)' }}>
+            <div className="p-6 border-b border-white/10" style={{ background: 'rgba(6,182,212,0.06)' }}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg" style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)' }}>
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg" style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)' }}>
                     <Users className="w-6 h-6" style={{ color: '#07071a' }} />
                   </div>
                   <div>
@@ -1573,7 +1573,7 @@ const DrawPage = () => {
                       setSelectedPlayersForKnockout(selectedPlayersForKnockout.slice(0, value));
                     }
                   }}
-                  className="w-full px-4 py-4 rounded-xl text-white text-2xl font-bold focus:outline-none transition-all" style={{ background: 'rgba(255,255,255,0.06)', border: '2px solid rgba(0,255,136,0.25)' }}
+                  className="w-full px-4 py-4 rounded-xl text-white text-2xl font-bold focus:outline-none transition-all" style={{ background: 'rgba(255,255,255,0.06)', border: '2px solid rgba(6,182,212,0.25)' }}
                   placeholder="Enter number (e.g., 4, 6, 8)"
                 />
                 <p className="text-xs text-gray-400 mt-2">
@@ -1754,7 +1754,7 @@ const DrawPage = () => {
                 disabled={changingResult}
                 className={`w-full p-4 rounded-xl border-2 transition-all text-left ${
                   selectedMatchForChange.winnerId === selectedMatchForChange.bracketMatch.player1?.id
-                    ? 'border-[rgba(0,255,136,0.5)] bg-[rgba(0,255,136,0.08)]'
+                    ? 'border-[rgba(6,182,212,0.5)] bg-[rgba(6,182,212,0.08)]'
                     : 'border-white/10 bg-white/[0.03] hover:border-[rgba(251,191,36,0.4)] hover:bg-[rgba(251,191,36,0.06)]'
                 }`}
               >
@@ -1771,7 +1771,7 @@ const DrawPage = () => {
                 disabled={changingResult}
                 className={`w-full p-4 rounded-xl border-2 transition-all text-left ${
                   selectedMatchForChange.winnerId === selectedMatchForChange.bracketMatch.player2?.id
-                    ? 'border-[rgba(0,255,136,0.5)] bg-[rgba(0,255,136,0.08)]'
+                    ? 'border-[rgba(6,182,212,0.5)] bg-[rgba(6,182,212,0.08)]'
                     : 'border-white/10 bg-white/[0.03] hover:border-[rgba(251,191,36,0.4)] hover:bg-[rgba(251,191,36,0.06)]'
                 }`}
               >
@@ -1873,8 +1873,8 @@ const DrawPage = () => {
                       const isP1Winner = set.winner === 1;
                       return (
                         <div key={idx} className="px-3 py-1.5 rounded-lg" style={{
-                          border: isP1Winner ? '2px solid rgba(0,212,255,0.4)' : '2px solid rgba(0,255,136,0.4)',
-                          background: isP1Winner ? 'rgba(0,212,255,0.08)' : 'rgba(0,255,136,0.08)',
+                          border: isP1Winner ? '2px solid rgba(0,212,255,0.4)' : '2px solid rgba(6,182,212,0.4)',
+                          background: isP1Winner ? 'rgba(0,212,255,0.08)' : 'rgba(6,182,212,0.08)',
                         }}>
                           <span className="text-white font-bold text-sm">{p1Score}-{p2Score}</span>
                         </div>
@@ -1893,18 +1893,18 @@ const DrawPage = () => {
                   return (
                     <div className="rounded-xl p-3 border-2 transition-all"
                       style={isWinner
-                        ? { borderColor: 'rgba(0,255,136,0.4)', background: 'rgba(0,255,136,0.07)' }
+                        ? { borderColor: 'rgba(6,182,212,0.4)', background: 'rgba(6,182,212,0.07)' }
                         : { borderColor: 'rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)' }}>
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2 min-w-0 flex-1">
                           {isWinner && <span className="text-base flex-shrink-0">👑</span>}
                           <p className="font-bold text-sm leading-snug min-w-0"
-                            style={{ color: isWinner ? '#00ff88' : '#fff', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
+                            style={{ color: isWinner ? '#06b6d4' : '#fff', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
                             {getPlayerDisplay(selectedMatchDetails.bracketMatch.player1)}
                           </p>
                         </div>
                         {isWinner && (
-                          <span className="flex-shrink-0 px-2 py-0.5 rounded-full text-xs font-bold" style={{ background: 'rgba(0,255,136,0.15)', color: '#00ff88', border: '1px solid rgba(0,255,136,0.3)' }}>
+                          <span className="flex-shrink-0 px-2 py-0.5 rounded-full text-xs font-bold" style={{ background: 'rgba(6,182,212,0.15)', color: '#06b6d4', border: '1px solid rgba(6,182,212,0.3)' }}>
                             Winner
                           </span>
                         )}
@@ -1917,7 +1917,7 @@ const DrawPage = () => {
                             return (
                               <span key={idx} className="px-2 py-0.5 rounded text-xs font-semibold"
                                 style={won
-                                  ? { background: 'rgba(0,255,136,0.12)', color: '#00ff88', border: '1px solid rgba(0,255,136,0.25)' }
+                                  ? { background: 'rgba(6,182,212,0.12)', color: '#06b6d4', border: '1px solid rgba(6,182,212,0.25)' }
                                   : { background: 'rgba(255,255,255,0.06)', color: '#9ca3af', border: '1px solid rgba(255,255,255,0.1)' }}>
                                 {score}
                               </span>
@@ -1941,18 +1941,18 @@ const DrawPage = () => {
                   return (
                     <div className="rounded-xl p-3 border-2 transition-all"
                       style={isWinner
-                        ? { borderColor: 'rgba(0,255,136,0.4)', background: 'rgba(0,255,136,0.07)' }
+                        ? { borderColor: 'rgba(6,182,212,0.4)', background: 'rgba(6,182,212,0.07)' }
                         : { borderColor: 'rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)' }}>
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2 min-w-0 flex-1">
                           {isWinner && <span className="text-base flex-shrink-0">👑</span>}
                           <p className="font-bold text-sm leading-snug min-w-0"
-                            style={{ color: isWinner ? '#00ff88' : '#fff', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
+                            style={{ color: isWinner ? '#06b6d4' : '#fff', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
                             {getPlayerDisplay(selectedMatchDetails.bracketMatch.player2)}
                           </p>
                         </div>
                         {isWinner && (
-                          <span className="flex-shrink-0 px-2 py-0.5 rounded-full text-xs font-bold" style={{ background: 'rgba(0,255,136,0.15)', color: '#00ff88', border: '1px solid rgba(0,255,136,0.3)' }}>
+                          <span className="flex-shrink-0 px-2 py-0.5 rounded-full text-xs font-bold" style={{ background: 'rgba(6,182,212,0.15)', color: '#06b6d4', border: '1px solid rgba(6,182,212,0.3)' }}>
                             Winner
                           </span>
                         )}
@@ -1965,7 +1965,7 @@ const DrawPage = () => {
                             return (
                               <span key={idx} className="px-2 py-0.5 rounded text-xs font-semibold"
                                 style={won
-                                  ? { background: 'rgba(0,255,136,0.12)', color: '#00ff88', border: '1px solid rgba(0,255,136,0.25)' }
+                                  ? { background: 'rgba(6,182,212,0.12)', color: '#06b6d4', border: '1px solid rgba(6,182,212,0.25)' }
                                   : { background: 'rgba(255,255,255,0.06)', color: '#9ca3af', border: '1px solid rgba(255,255,255,0.1)' }}>
                                 {score}
                               </span>
@@ -2124,8 +2124,8 @@ const DrawPage = () => {
             </div>
 
             {/* Success Message */}
-            <div className="rounded-xl p-4 mb-6" style={{ background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.25)' }}>
-              <p className="text-center text-sm" style={{ color: '#00ff88' }}>
+            <div className="rounded-xl p-4 mb-6" style={{ background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.25)' }}>
+              <p className="text-center text-sm" style={{ color: '#06b6d4' }}>
                 ✓ Winner advanced to next round<br />
                 ✓ Notifications sent to players<br />
                 ✓ Bracket updated successfully
@@ -2252,10 +2252,10 @@ const DrawPage = () => {
               {/* What is preserved */}
               <div
                 className="rounded-xl p-3 sm:p-4 mb-3"
-                style={{ background: 'rgba(0,255,136,0.06)', border: '1px solid rgba(0,255,136,0.25)' }}
+                style={{ background: 'rgba(6,182,212,0.06)', border: '1px solid rgba(6,182,212,0.25)' }}
               >
                 <div className="flex gap-3">
-                  <div className="w-5 h-5 flex-shrink-0 mt-0.5 text-[#00ff88] font-black text-base leading-none">✓</div>
+                  <div className="w-5 h-5 flex-shrink-0 mt-0.5 text-[#06b6d4] font-black text-base leading-none">✓</div>
                   <div className="text-xs sm:text-sm text-[#86efac]">
                     <p className="font-bold mb-1">Will be kept:</p>
                     {koOnly ? (
@@ -2329,8 +2329,8 @@ const DrawPage = () => {
       {/* End Category Confirmation Modal */}
       {showEndTournamentModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="rounded-3xl p-8 max-w-lg w-full shadow-2xl" style={{ background: '#0d1025', border: '2px solid rgba(0,255,136,0.3)' }}>
-            <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg" style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)' }}>
+          <div className="rounded-3xl p-8 max-w-lg w-full shadow-2xl" style={{ background: '#0d1025', border: '2px solid rgba(6,182,212,0.3)' }}>
+            <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg" style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)' }}>
               <Trophy className="w-10 h-10" style={{ color: '#07071a' }} />
             </div>
             <h2 className="text-2xl font-bold text-center mb-2 text-white">End Category?</h2>
@@ -2598,16 +2598,16 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
   return (
     <div className="p-3">
       {/* CONTAINED BRACKET - Matches app theme */}
-      <div className="backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden" style={{ background: 'rgba(13,16,37,0.9)', border: '2px solid rgba(0,255,136,0.15)' }}>
+      <div className="backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden" style={{ background: 'rgba(13,16,37,0.9)', border: '2px solid rgba(6,182,212,0.15)' }}>
         {/* Header */}
-        <div className="p-4 border-b-2 border-white/10" style={{ background: 'rgba(0,255,136,0.08)' }}>
+        <div className="p-4 border-b-2 border-white/10" style={{ background: 'rgba(6,182,212,0.08)' }}>
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center font-black text-xl shadow-lg" style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', color: '#07071a' }}>
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center font-black text-xl shadow-lg" style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#07071a' }}>
               🏆
             </div>
             <div className="flex-1">
               <h4 className="text-lg font-black text-white">Knockout Bracket</h4>
-              <p className="text-[#00ff88] text-xs font-semibold">
+              <p className="text-[#06b6d4] text-xs font-semibold">
                 {totalRounds} {totalRounds === 1 ? 'Round' : 'Rounds'} • Pyramid Format
               </p>
             </div>
@@ -2621,9 +2621,9 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
               <div key={ri} className="flex flex-col min-w-[220px]">
                 {/* Round Header */}
                 <div className="mb-4 text-center">
-                  <div className="inline-flex items-center gap-2 px-3 py-2 rounded-xl shadow-lg" style={{ background: 'rgba(0,255,136,0.1)', border: '2px solid rgba(0,255,136,0.25)' }}>
+                  <div className="inline-flex items-center gap-2 px-3 py-2 rounded-xl shadow-lg" style={{ background: 'rgba(6,182,212,0.1)', border: '2px solid rgba(6,182,212,0.25)' }}>
                     <Trophy className="w-4 h-4 icon-green flex-shrink-0" />
-                    <h4 className="text-xs font-black text-[#00ff88] uppercase tracking-wider whitespace-nowrap">
+                    <h4 className="text-xs font-black text-[#06b6d4] uppercase tracking-wider whitespace-nowrap">
                       {getRoundName(ri, data.rounds.length)}
                     </h4>
                   </div>
@@ -2662,15 +2662,15 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                           style={{
                             background: 'rgba(11,13,33,0.92)',
                             border: isLive
-                              ? '2px solid rgba(16,185,129,0.75)'
+                              ? '2px solid rgba(6,182,212,0.75)'
                               : isReady
                               ? '2px solid rgba(255,255,255,0.14)'
                               : isCompleted
-                              ? '2px solid rgba(16,185,129,0.18)'
+                              ? '2px solid rgba(6,182,212,0.18)'
                               : '2px solid rgba(255,255,255,0.07)',
                             borderRadius: '12px',
                             overflow: 'hidden',
-                            boxShadow: isLive ? '0 0 14px rgba(16,185,129,0.18)' : 'none',
+                            boxShadow: isLive ? '0 0 14px rgba(6,182,212,0.18)' : 'none',
                           }}
                         >
                           {/* Match Header */}
@@ -2679,13 +2679,13 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                               #{match.matchNumber || mi + 1}
                             </span>
                             {isLive && (
-                              <span className="px-2 py-0.5 rounded-full text-[10px] font-black flex items-center gap-1" style={{ background: 'rgba(16,185,129,0.15)', color: '#6ee7b7', border: '1px solid rgba(16,185,129,0.35)' }}>
-                                <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#34d399' }}></span>
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-black flex items-center gap-1" style={{ background: 'rgba(6,182,212,0.15)', color: '#67e8f9', border: '1px solid rgba(6,182,212,0.35)' }}>
+                                <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: '#22d3ee' }}></span>
                                 LIVE
                               </span>
                             )}
                             {isCompleted && !isLive && (
-                              <span className="text-[10px] font-black" style={{ color: '#34d399' }}>✓ DONE</span>
+                              <span className="text-[10px] font-black" style={{ color: '#22d3ee' }}>✓ DONE</span>
                             )}
                             {!isCompleted && !isLive && (player1.name === 'TBD') !== (player2.name === 'TBD') && (
                               <span className="px-2 py-0.5 rounded-full text-[10px] font-black" style={{ background: 'rgba(245,158,11,0.1)', color: '#fbbf24', border: '1px solid rgba(245,158,11,0.25)' }}>
@@ -2701,7 +2701,7 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                               className="flex items-center justify-between px-2.5 py-2 rounded-lg"
                               style={
                                 isPlayer1Winner
-                                  ? { background: 'rgba(16,185,129,0.16)', borderTop: '1px solid rgba(16,185,129,0.28)', borderRight: '1px solid rgba(16,185,129,0.28)', borderBottom: '1px solid rgba(16,185,129,0.28)', borderLeft: '3px solid #10b981' }
+                                  ? { background: 'rgba(6,182,212,0.16)', borderTop: '1px solid rgba(6,182,212,0.28)', borderRight: '1px solid rgba(6,182,212,0.28)', borderBottom: '1px solid rgba(6,182,212,0.28)', borderLeft: '3px solid #06b6d4' }
                                   : isCompleted
                                   ? { background: 'rgba(239,68,68,0.09)', border: '1px solid rgba(239,68,68,0.18)' }
                                   : { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }
@@ -2717,7 +2717,7 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                                 {player1Name}
                               </span>
                               {isPlayer1Winner && (
-                                <span className="text-[9px] font-black ml-1 flex-shrink-0" style={{ color: '#34d399' }}>W</span>
+                                <span className="text-[9px] font-black ml-1 flex-shrink-0" style={{ color: '#22d3ee' }}>W</span>
                               )}
                             </div>
 
@@ -2731,7 +2731,7 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                               className="flex items-center justify-between px-2.5 py-2 rounded-lg"
                               style={
                                 isPlayer2Winner
-                                  ? { background: 'rgba(16,185,129,0.16)', borderTop: '1px solid rgba(16,185,129,0.28)', borderRight: '1px solid rgba(16,185,129,0.28)', borderBottom: '1px solid rgba(16,185,129,0.28)', borderLeft: '3px solid #10b981' }
+                                  ? { background: 'rgba(6,182,212,0.16)', borderTop: '1px solid rgba(6,182,212,0.28)', borderRight: '1px solid rgba(6,182,212,0.28)', borderBottom: '1px solid rgba(6,182,212,0.28)', borderLeft: '3px solid #06b6d4' }
                                   : isCompleted
                                   ? { background: 'rgba(239,68,68,0.09)', border: '1px solid rgba(239,68,68,0.18)' }
                                   : { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }
@@ -2747,7 +2747,7 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                                 {player2Name}
                               </span>
                               {isPlayer2Winner && (
-                                <span className="text-[9px] font-black ml-1 flex-shrink-0" style={{ color: '#34d399' }}>W</span>
+                                <span className="text-[9px] font-black ml-1 flex-shrink-0" style={{ color: '#22d3ee' }}>W</span>
                               )}
                             </div>
                           </div>
@@ -2794,7 +2794,7 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                                   className="w-full py-2 rounded-lg border-2 transition-all text-[10px] font-black flex items-center justify-center gap-1"
                                   style={
                                     hasUmpire
-                                      ? { background: 'rgba(16,185,129,0.1)', color: '#6ee7b7', borderColor: 'rgba(16,185,129,0.28)' }
+                                      ? { background: 'rgba(6,182,212,0.1)', color: '#67e8f9', borderColor: 'rgba(6,182,212,0.28)' }
                                       : { background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.65)', borderColor: 'rgba(255,255,255,0.12)' }
                                   }
                                 >
@@ -2840,8 +2840,8 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
         </div>
 
         {/* Scroll Hint */}
-        <div className="px-4 py-2 text-center border-t-2" style={{ background: 'rgba(0,255,136,0.06)', borderColor: 'rgba(0,255,136,0.15)' }}>
-          <p className="text-xs text-[#00ff88] font-semibold flex items-center justify-center gap-2">
+        <div className="px-4 py-2 text-center border-t-2" style={{ background: 'rgba(6,182,212,0.06)', borderColor: 'rgba(6,182,212,0.15)' }}>
+          <p className="text-xs text-[#06b6d4] font-semibold flex items-center justify-center gap-2">
             <span>←</span>
             Swipe to view all rounds
             <span>→</span>
@@ -2878,16 +2878,16 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
   return (
     <div className="p-3 space-y-4">
       {data.groups.map((group, gi) => (
-        <div key={gi} className="backdrop-blur-sm rounded-2xl overflow-hidden shadow-xl" style={{ background: 'rgba(13,16,37,0.9)', border: '2px solid rgba(0,255,136,0.15)' }}>
+        <div key={gi} className="backdrop-blur-sm rounded-2xl overflow-hidden shadow-xl" style={{ background: 'rgba(13,16,37,0.9)', border: '2px solid rgba(6,182,212,0.15)' }}>
           {/* Group Header */}
-          <div className="p-4 border-b-2 border-white/10" style={{ background: 'rgba(0,255,136,0.08)' }}>
+          <div className="p-4 border-b-2 border-white/10" style={{ background: 'rgba(6,182,212,0.08)' }}>
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center font-black text-xl shadow-lg" style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', color: '#07071a' }}>
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center font-black text-xl shadow-lg" style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#07071a' }}>
                 {String.fromCharCode(65 + gi)}
               </div>
               <div className="flex-1">
                 <h4 className="text-lg font-black text-white">Group {String.fromCharCode(65 + gi)}</h4>
-                <p className="text-[#00ff88] text-xs font-semibold">
+                <p className="text-[#06b6d4] text-xs font-semibold">
                   {group.participants.filter(p => p.id).length} players • {group.matches?.length || 0} matches
                 </p>
               </div>
@@ -2896,7 +2896,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
 
           {/* Group Standings - Mobile Optimized */}
           <div className="p-4">
-            <h5 className="text-sm font-black text-[#00ff88] mb-3 flex items-center gap-2 uppercase tracking-wider">
+            <h5 className="text-sm font-black text-[#06b6d4] mb-3 flex items-center gap-2 uppercase tracking-wider">
               <Trophy className="w-4 h-4" />
               Standings
             </h5>
@@ -2918,9 +2918,9 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                       padding: '8px 8px',
                       gap: '6px',
                       background: pi === 0
-                        ? 'linear-gradient(135deg, rgba(0,255,136,0.12), rgba(0,255,136,0.08))'
+                        ? 'linear-gradient(135deg, rgba(6,182,212,0.12), rgba(6,182,212,0.08))'
                         : 'rgba(255,255,255,0.04)',
-                      borderColor: pi === 0 ? 'rgba(0,255,136,0.4)' : 'rgba(255,255,255,0.08)',
+                      borderColor: pi === 0 ? 'rgba(6,182,212,0.4)' : 'rgba(255,255,255,0.08)',
                     }}
                   >
                     {/* Rank badge — fixed 28×28 */}
@@ -2929,7 +2929,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                       style={{
                         width: '28px', height: '28px',
                         background:
-                          pi === 0 ? 'linear-gradient(135deg,#00ff88,#00ff88)' :
+                          pi === 0 ? 'linear-gradient(135deg,#06b6d4,#06b6d4)' :
                           pi === 1 ? 'linear-gradient(135deg,#94a3b8,#64748b)' :
                           pi === 2 ? 'linear-gradient(135deg,#cd7f32,#b45309)' :
                           'rgba(255,255,255,0.08)',
@@ -2947,7 +2947,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                             {p.name || `Slot ${pi + 1}`}
                           </p>
                           {p.partnerName && (
-                            <p className="text-xs leading-tight break-words" style={{ color: '#00ff88' }} title={p.partnerName}>
+                            <p className="text-xs leading-tight break-words" style={{ color: '#06b6d4' }} title={p.partnerName}>
                               & {p.partnerName}
                             </p>
                           )}
@@ -2963,9 +2963,9 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                     <div className="flex-shrink-0 flex items-center" style={{ gap: '2px' }}>
                       {[
                         { val: (p.wins || 0) + (p.losses || 0), label: 'P',   bg: 'rgba(255,255,255,0.09)',  labelColor: 'rgba(255,255,255,0.55)', w: '22px' },
-                        { val: p.wins || 0,                      label: 'W',   bg: 'rgba(0,255,136,0.15)',    labelColor: '#00ff88',                w: '22px' },
+                        { val: p.wins || 0,                      label: 'W',   bg: 'rgba(6,182,212,0.15)',    labelColor: '#06b6d4',                w: '22px' },
                         { val: p.losses || 0,                    label: 'L',   bg: 'rgba(239,68,68,0.15)',    labelColor: '#f87171',                w: '22px' },
-                        { val: p.points || 0,                    label: 'PTS', bg: 'rgba(0,255,136,0.22)',    labelColor: '#00ff88',                w: '28px', border: '1px solid rgba(0,255,136,0.4)', bold: true },
+                        { val: p.points || 0,                    label: 'PTS', bg: 'rgba(6,182,212,0.22)',    labelColor: '#06b6d4',                w: '28px', border: '1px solid rgba(6,182,212,0.4)', bold: true },
                         { val: p.totalPoints || 0,               label: 'TP',  bg: 'rgba(0,212,255,0.2)',     labelColor: '#00d4ff',                w: '28px', border: '1px solid rgba(0,212,255,0.4)', bold: true },
                       ].map(({ val, label, bg, labelColor, border, bold, w }) => (
                         <div
@@ -2992,9 +2992,9 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
             <div className="mt-3 p-3 rounded-xl" style={{ background: 'rgba(0,0,0,0.25)', border: '1px solid rgba(255,255,255,0.08)' }}>
               <p className="text-[10px] font-black uppercase tracking-wider mb-2 text-center" style={{ color: 'rgba(255,255,255,0.35)' }}>Points System</p>
               <div className="flex items-center justify-center gap-2 text-xs font-bold flex-wrap">
-                <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg" style={{ background: 'rgba(0,255,136,0.1)', border: '1px solid rgba(0,255,136,0.2)' }}>
-                  <span className="w-4 h-4 rounded flex items-center justify-center text-[9px] font-black" style={{ background: '#00ff88', color: '#07071a' }}>W</span>
-                  <span style={{ color: '#00ff88' }}>+2 pts</span>
+                <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg" style={{ background: 'rgba(6,182,212,0.1)', border: '1px solid rgba(6,182,212,0.2)' }}>
+                  <span className="w-4 h-4 rounded flex items-center justify-center text-[9px] font-black" style={{ background: '#06b6d4', color: '#07071a' }}>W</span>
+                  <span style={{ color: '#06b6d4' }}>+2 pts</span>
                 </div>
                 <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)' }}>
                   <span className="w-4 h-4 bg-red-500 rounded flex items-center justify-center text-[9px] text-white font-black">L</span>
@@ -3037,7 +3037,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
             {/* Modal Header */}
             <div
               className="flex-shrink-0 flex items-center gap-3 px-4 py-3 border-b-2"
-              style={{ background: 'rgba(13,16,37,0.98)', borderColor: 'rgba(0,255,136,0.2)', backdropFilter: 'blur(20px)' }}
+              style={{ background: 'rgba(13,16,37,0.98)', borderColor: 'rgba(6,182,212,0.2)', backdropFilter: 'blur(20px)' }}
             >
               <button
                 onClick={() => setActiveGroupIdx(null)}
@@ -3048,7 +3048,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
               </button>
               <div className="flex-1 text-center">
                 <p className="text-base font-black text-white">Group {String.fromCharCode(65 + gi)} Matches</p>
-                <p className="text-xs font-semibold" style={{ color: '#00ff88' }}>{group.matches?.length || 0} matches</p>
+                <p className="text-xs font-semibold" style={{ color: '#06b6d4' }}>{group.matches?.length || 0} matches</p>
               </div>
               <div className="w-16" /> {/* spacer to center title */}
             </div>
@@ -3070,13 +3070,13 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                       style={{
                         background: 'rgba(11,13,33,0.92)',
                         border: isInProgress
-                          ? '2px solid rgba(16,185,129,0.7)'
+                          ? '2px solid rgba(6,182,212,0.7)'
                           : isCompleted
-                          ? '1px solid rgba(16,185,129,0.2)'
+                          ? '1px solid rgba(6,182,212,0.2)'
                           : hasUmpire
                           ? '1px solid rgba(255,255,255,0.14)'
                           : '1px solid rgba(255,255,255,0.07)',
-                        boxShadow: isInProgress ? '0 0 12px rgba(16,185,129,0.15)' : 'none',
+                        boxShadow: isInProgress ? '0 0 12px rgba(6,182,212,0.15)' : 'none',
                       }}
                     >
                       {/* Match Header */}
@@ -3085,10 +3085,10 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                           #{match.matchNumber}
                         </span>
                         <div className="flex items-center gap-1.5">
-                          {isCompleted && <span className="text-xs font-black" style={{ color: '#34d399' }}>✓ DONE</span>}
+                          {isCompleted && <span className="text-xs font-black" style={{ color: '#22d3ee' }}>✓ DONE</span>}
                           {isInProgress && (
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-black flex items-center gap-1" style={{ background: 'rgba(16,185,129,0.15)', color: '#6ee7b7', border: '1px solid rgba(16,185,129,0.35)' }}>
-                              <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#34d399' }}></span>
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-black flex items-center gap-1" style={{ background: 'rgba(6,182,212,0.15)', color: '#67e8f9', border: '1px solid rgba(6,182,212,0.35)' }}>
+                              <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#22d3ee' }}></span>
                               LIVE
                             </span>
                           )}
@@ -3111,7 +3111,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                               className="py-2 px-3 rounded-lg flex items-center justify-between"
                               style={
                                 p1Won
-                                  ? { background: 'rgba(16,185,129,0.16)', borderTop: '1px solid rgba(16,185,129,0.28)', borderRight: '1px solid rgba(16,185,129,0.28)', borderBottom: '1px solid rgba(16,185,129,0.28)', borderLeft: '3px solid #10b981' }
+                                  ? { background: 'rgba(6,182,212,0.16)', borderTop: '1px solid rgba(6,182,212,0.28)', borderRight: '1px solid rgba(6,182,212,0.28)', borderBottom: '1px solid rgba(6,182,212,0.28)', borderLeft: '3px solid #06b6d4' }
                                   : isMatchDone
                                   ? { background: 'rgba(239,68,68,0.09)', border: '1px solid rgba(239,68,68,0.18)' }
                                   : { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }
@@ -3126,7 +3126,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                               >
                                 {p1Name}
                               </span>
-                              {p1Won && <span className="text-[10px] font-black ml-1 flex-shrink-0" style={{ color: '#34d399' }}>W</span>}
+                              {p1Won && <span className="text-[10px] font-black ml-1 flex-shrink-0" style={{ color: '#22d3ee' }}>W</span>}
                             </div>
                             <div className="text-center">
                               <span className="text-xs font-black" style={{ color: 'rgba(255,255,255,0.13)' }}>VS</span>
@@ -3135,7 +3135,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                               className="py-2 px-3 rounded-lg flex items-center justify-between"
                               style={
                                 p2Won
-                                  ? { background: 'rgba(16,185,129,0.16)', borderTop: '1px solid rgba(16,185,129,0.28)', borderRight: '1px solid rgba(16,185,129,0.28)', borderBottom: '1px solid rgba(16,185,129,0.28)', borderLeft: '3px solid #10b981' }
+                                  ? { background: 'rgba(6,182,212,0.16)', borderTop: '1px solid rgba(6,182,212,0.28)', borderRight: '1px solid rgba(6,182,212,0.28)', borderBottom: '1px solid rgba(6,182,212,0.28)', borderLeft: '3px solid #06b6d4' }
                                   : isMatchDone
                                   ? { background: 'rgba(239,68,68,0.09)', border: '1px solid rgba(239,68,68,0.18)' }
                                   : { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }
@@ -3150,7 +3150,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                               >
                                 {p2Name}
                               </span>
-                              {p2Won && <span className="text-[10px] font-black ml-1 flex-shrink-0" style={{ color: '#34d399' }}>W</span>}
+                              {p2Won && <span className="text-[10px] font-black ml-1 flex-shrink-0" style={{ color: '#22d3ee' }}>W</span>}
                             </div>
                           </div>
                         );
@@ -3209,7 +3209,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                             className="w-full py-2.5 rounded-lg transition-all flex items-center justify-center gap-2 text-xs font-black border-2"
                             style={
                               hasUmpire
-                                ? { background: 'rgba(16,185,129,0.1)', color: '#6ee7b7', borderColor: 'rgba(16,185,129,0.28)' }
+                                ? { background: 'rgba(6,182,212,0.1)', color: '#67e8f9', borderColor: 'rgba(6,182,212,0.28)' }
                                 : { background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.65)', borderColor: 'rgba(255,255,255,0.12)' }
                             }
                           >
@@ -3317,8 +3317,8 @@ const GroupsKnockoutDisplay = ({
         <div>
           {!data.knockout ? (
             // No knockout data at all - show message to create it
-            <div className="rounded-2xl p-8 text-center border-2 border-dashed" style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(0,255,136,0.25)' }}>
-              <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: 'rgba(0,255,136,0.08)' }}>
+            <div className="rounded-2xl p-8 text-center border-2 border-dashed" style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(6,182,212,0.25)' }}>
+              <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: 'rgba(6,182,212,0.08)' }}>
                 <TrophyIcon className="w-10 h-10 icon-green" />
               </div>
               <h4 className="text-xl font-bold text-white mb-2">Knockout Stage Not Created</h4>
@@ -3328,9 +3328,9 @@ const GroupsKnockoutDisplay = ({
                   : 'The knockout bracket will be available after all round robin matches are completed.'}
               </p>
               
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl" style={{ background: 'rgba(0,255,136,0.1)', border: '2px solid rgba(0,255,136,0.25)' }}>
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl" style={{ background: 'rgba(6,182,212,0.1)', border: '2px solid rgba(6,182,212,0.25)' }}>
                 <Settings className="w-4 h-4 icon-green" />
-                <span className="text-sm text-[#00ff88] font-semibold">
+                <span className="text-sm text-[#06b6d4] font-semibold">
                   {isRoundRobinComplete() ? 'Click "Arrange KO" button in the header' : 'Complete all round robin matches first'}
                 </span>
               </div>
@@ -3405,12 +3405,12 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
 
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl" style={{ background: '#0d1025', border: '2px solid rgba(0,255,136,0.2)' }}>
+      <div className="rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl" style={{ background: '#0d1025', border: '2px solid rgba(6,182,212,0.2)' }}>
         {/* Header */}
-        <div className="p-6 border-b-2 border-white/10" style={{ background: 'rgba(0,255,136,0.05)' }}>
+        <div className="p-6 border-b-2 border-white/10" style={{ background: 'rgba(6,182,212,0.05)' }}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg" style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)' }}>
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg" style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)' }}>
                 <Settings className="w-6 h-6" style={{ color: '#07071a' }} />
               </div>
               <h2 className="text-xl font-bold text-white">Configure Draw</h2>
@@ -3463,7 +3463,7 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
                   const value = e.target.value === '' ? 0 : parseInt(e.target.value);
                   setConfig({ ...config, bracketSize: isNaN(value) ? 0 : Math.max(0, Math.min(128, value)) });
                 }}
-                className="w-full px-4 py-4 rounded-xl text-white text-2xl font-bold focus:outline-none transition-all" style={{ background: 'rgba(255,255,255,0.06)', border: '2px solid rgba(0,255,136,0.25)' }}
+                className="w-full px-4 py-4 rounded-xl text-white text-2xl font-bold focus:outline-none transition-all" style={{ background: 'rgba(255,255,255,0.06)', border: '2px solid rgba(6,182,212,0.25)' }}
                 placeholder="0"
               />
               <div className="absolute right-4 top-1/2 -translate-y-1/2 icon-green text-sm font-medium">
@@ -3492,7 +3492,7 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
                       setConfig({ ...config, numberOfGroups: groups, customGroupSizes: null });
                       setUseCustomGroupSizes(false);
                     }}
-                    className="w-full px-4 py-4 rounded-xl text-white text-2xl font-bold focus:outline-none transition-all" style={{ background: 'rgba(255,255,255,0.06)', border: '2px solid rgba(0,255,136,0.25)' }}
+                    className="w-full px-4 py-4 rounded-xl text-white text-2xl font-bold focus:outline-none transition-all" style={{ background: 'rgba(255,255,255,0.06)', border: '2px solid rgba(6,182,212,0.25)' }}
                     placeholder="0"
                   />
                   <div className="absolute right-4 top-1/2 -translate-y-1/2 icon-green text-sm font-medium">
@@ -3528,7 +3528,7 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
                     {config.customGroupSizes?.map((size, idx) => {
                       return (
                         <div key={idx} className="flex items-center gap-3">
-                          <div className="w-20 h-12 rounded-lg flex items-center justify-center font-bold shadow-lg" style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', color: '#07071a' }}>
+                          <div className="w-20 h-12 rounded-lg flex items-center justify-center font-bold shadow-lg" style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#07071a' }}>
                             Pool {String.fromCharCode(65 + idx)}
                           </div>
                           <input
@@ -3542,7 +3542,7 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
                               newSizes[idx] = isNaN(value) ? 0 : Math.max(0, Math.min(config.bracketSize, value));
                               setConfig({ ...config, customGroupSizes: newSizes });
                             }}
-                            className="flex-1 px-4 py-3 rounded-xl text-white text-xl font-bold focus:outline-none transition-all" style={{ background: 'rgba(255,255,255,0.06)', border: '2px solid rgba(0,255,136,0.25)' }}
+                            className="flex-1 px-4 py-3 rounded-xl text-white text-xl font-bold focus:outline-none transition-all" style={{ background: 'rgba(255,255,255,0.06)', border: '2px solid rgba(6,182,212,0.25)' }}
                             placeholder="0"
                           />
                         </div>
@@ -3554,7 +3554,7 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
                         : 'bg-red-500/20 border-2 border-red-500/50'
                     }`}>
                       <span className="text-sm font-medium text-white">Total:</span>
-                      <span className="text-lg font-bold" style={{ color: config.customGroupSizes?.reduce((a, b) => a + b, 0) === config.bracketSize ? '#00ff88' : '#f87171' }}>
+                      <span className="text-lg font-bold" style={{ color: config.customGroupSizes?.reduce((a, b) => a + b, 0) === config.bracketSize ? '#06b6d4' : '#f87171' }}>
                         {config.customGroupSizes?.reduce((a, b) => a + b, 0)} / {config.bracketSize}
                       </span>
                     </div>
@@ -3716,7 +3716,7 @@ const SlotCard = ({ slot, assigned, canAccept, onSlotClick, onRemove, playerLabe
       onClick={onSlotClick}
       className="p-3 rounded-xl border-2 transition-all"
       style={assigned
-        ? { borderColor: 'rgba(0,255,136,0.5)', background: 'rgba(0,255,136,0.1)' }
+        ? { borderColor: 'rgba(6,182,212,0.5)', background: 'rgba(6,182,212,0.1)' }
         : canAccept
           ? { borderColor: 'rgba(0,212,255,0.6)', background: 'rgba(0,212,255,0.08)', borderStyle: 'dashed', cursor: 'pointer' }
           : { borderColor: 'rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.03)', borderStyle: 'dashed' }}
@@ -3725,7 +3725,7 @@ const SlotCard = ({ slot, assigned, canAccept, onSlotClick, onRemove, playerLabe
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg flex items-center justify-center"
             style={assigned
-              ? { background: 'rgba(0,255,136,0.15)' }
+              ? { background: 'rgba(6,182,212,0.15)' }
               : canAccept
                 ? { background: 'rgba(0,212,255,0.12)' }
                 : { background: 'rgba(255,255,255,0.06)' }}>
@@ -3802,9 +3802,9 @@ const CompactSlotCard = ({ slot, assigned, canAccept, onSlotClick, onRemove, pla
       style={locked
         ? { borderColor: 'rgba(251,191,36,0.3)', background: 'rgba(251,191,36,0.05)', cursor: 'not-allowed' }
         : isDragOver
-          ? { borderColor: 'rgba(0,255,136,1)', background: 'rgba(0,255,136,0.2)', borderStyle: 'dashed' }
+          ? { borderColor: 'rgba(6,182,212,1)', background: 'rgba(6,182,212,0.2)', borderStyle: 'dashed' }
           : assigned
-            ? { borderColor: 'rgba(0,255,136,0.5)', background: 'rgba(0,255,136,0.1)', cursor: 'move' }
+            ? { borderColor: 'rgba(6,182,212,0.5)', background: 'rgba(6,182,212,0.1)', cursor: 'move' }
             : canAccept
               ? { borderColor: 'rgba(0,212,255,0.6)', background: 'rgba(0,212,255,0.08)', borderStyle: 'dashed', cursor: 'pointer' }
               : { borderColor: 'rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.02)', borderStyle: 'dashed' }}
@@ -3813,8 +3813,8 @@ const CompactSlotCard = ({ slot, assigned, canAccept, onSlotClick, onRemove, pla
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0 flex-1">
           <span className="text-[10px] font-bold px-1.5 py-0.5 rounded" style={{
-            background: locked ? 'rgba(251,191,36,0.15)' : assigned ? 'rgba(0,255,136,0.15)' : 'rgba(255,255,255,0.06)',
-            color: locked ? '#fbbf24' : assigned ? '#00ff88' : 'rgba(255,255,255,0.4)'
+            background: locked ? 'rgba(251,191,36,0.15)' : assigned ? 'rgba(6,182,212,0.15)' : 'rgba(255,255,255,0.06)',
+            color: locked ? '#fbbf24' : assigned ? '#06b6d4' : 'rgba(255,255,255,0.4)'
           }}>
             {playerLabel}
           </span>
@@ -4100,7 +4100,7 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
         <div 
           className="absolute top-10 right-10 w-64 h-64 rounded-full blur-3xl opacity-20"
           style={{ 
-            background: 'radial-gradient(circle, rgba(0,255,136,0.5) 0%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(6,182,212,0.5) 0%, transparent 70%)',
             animation: 'float 8s ease-in-out infinite'
           }}
         />
@@ -4131,7 +4131,7 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
         ))}
       </div>
 
-      <div className="relative backdrop-blur-xl rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl" style={{ background: '#0d1025', border: '1px solid rgba(0,255,136,0.2)' }}>
+      <div className="relative backdrop-blur-xl rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl" style={{ background: '#0d1025', border: '1px solid rgba(6,182,212,0.2)' }}>
         <div className="p-4 border-b border-white/10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -4178,7 +4178,7 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
           
           {selectedPlayer && (
             <div className="mt-2 px-3 py-2 bg-emerald-500/20 border border-emerald-500/30 rounded-lg flex items-center justify-between">
-              <span className="text-[#00ff88] text-xs">
+              <span className="text-[#06b6d4] text-xs">
                 Selected: <span className="font-semibold text-white">{selectedPlayer.name}</span> — Click a slot to assign
               </span>
               <button 
@@ -4226,16 +4226,16 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                       <div className="flex items-center gap-1.5">
                         <div className="w-5 h-5 rounded flex items-center justify-center font-bold text-[10px] flex-shrink-0"
                           style={{
-                            background: isSelected ? 'linear-gradient(135deg,#00ff88,#00d4ff)' : assigned ? 'linear-gradient(135deg,#00ff88,#a855f7)' : 'linear-gradient(135deg,#a855f7,#00d4ff)',
+                            background: isSelected ? 'linear-gradient(135deg,#06b6d4,#00d4ff)' : assigned ? 'linear-gradient(135deg,#06b6d4,#a855f7)' : 'linear-gradient(135deg,#a855f7,#00d4ff)',
                             color: '#07071a',
-                            boxShadow: isSelected ? '0 0 0 2px #00ff88' : undefined
+                            boxShadow: isSelected ? '0 0 0 2px #06b6d4' : undefined
                           }}>
                           {player.seed}
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-white font-medium text-[11px] leading-tight">{player.name}</p>
                           {player.partnerName && (
-                            <p className="text-[#00ff88] text-[9px] leading-tight">& {player.partnerName}</p>
+                            <p className="text-[#06b6d4] text-[9px] leading-tight">& {player.partnerName}</p>
                           )}
                         </div>
                         {isSelected ? (
@@ -4302,19 +4302,19 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                       <div className="px-2 py-1.5 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border-b border-white/10 flex items-center justify-between">
                         <div className="flex items-center gap-1.5">
                           <div className="w-6 h-6 bg-emerald-500/30 rounded flex items-center justify-center">
-                            <span className="text-[#00ff88] font-bold text-xs">
+                            <span className="text-[#06b6d4] font-bold text-xs">
                               {String.fromCharCode(65 + groupIndex)}
                             </span>
                           </div>
                           <div>
                             <h4 className="text-white font-bold text-[11px] leading-tight">Pool {String.fromCharCode(65 + groupIndex)}</h4>
-                            <p className="text-[#00ff88] text-[9px] leading-tight">
+                            <p className="text-[#06b6d4] text-[9px] leading-tight">
                               {assignedInPool}/{totalInPool} assigned
                             </p>
                           </div>
                         </div>
                         <div className="px-1.5 py-0.5 bg-emerald-500/20 rounded">
-                          <span className="text-[#00ff88] font-bold text-[9px]">{totalInPool} slots</span>
+                          <span className="text-[#06b6d4] font-bold text-[9px]">{totalInPool} slots</span>
                         </div>
                       </div>
                       
@@ -4339,7 +4339,7 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                               <div className="flex items-center gap-1">
                                 <div className={`w-4 h-4 rounded flex items-center justify-center text-[9px] font-bold flex-shrink-0 ${
                                   assigned 
-                                    ? 'bg-emerald-500/30 text-[#00ff88]' 
+                                    ? 'bg-emerald-500/30 text-[#06b6d4]' 
                                     : 'bg-slate-600/30 text-gray-500'
                                 }`}>
                                   {slot.slot}
@@ -4349,7 +4349,7 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                                     <>
                                       <p className="text-white font-medium text-[9px] leading-tight">{assigned.playerName}</p>
                                       {assigned.partnerName && (
-                                        <p className="text-[#00ff88] text-[8px] leading-tight">& {assigned.partnerName}</p>
+                                        <p className="text-[#06b6d4] text-[8px] leading-tight">& {assigned.partnerName}</p>
                                       )}
                                     </>
                                   ) : (
@@ -4534,7 +4534,7 @@ const AssignUmpireModal = ({ match, umpires, loadingUmpires, umpiresError, onRet
     >
       <div
         className="w-full max-w-sm rounded-2xl overflow-hidden"
-        style={{ background: '#0d1025', border: '1px solid rgba(0,255,136,0.18)' }}
+        style={{ background: '#0d1025', border: '1px solid rgba(6,182,212,0.18)' }}
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
@@ -4542,8 +4542,8 @@ const AssignUmpireModal = ({ match, umpires, loadingUmpires, umpiresError, onRet
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-3">
               <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
-                style={{ background: 'linear-gradient(135deg,rgba(0,255,136,0.25),rgba(0,212,255,0.2))', border: '1px solid rgba(0,255,136,0.3)' }}>
-                <Gavel className="w-5 h-5" style={{ color: '#00ff88' }} />
+                style={{ background: 'linear-gradient(135deg,rgba(6,182,212,0.25),rgba(0,212,255,0.2))', border: '1px solid rgba(6,182,212,0.3)' }}>
+                <Gavel className="w-5 h-5" style={{ color: '#06b6d4' }} />
               </div>
               <div>
                 <h2 className="text-base font-black text-white">Assign Umpire & Start Match</h2>
@@ -4564,7 +4564,7 @@ const AssignUmpireModal = ({ match, umpires, loadingUmpires, umpiresError, onRet
           {loadingUmpires ? (
             <div className="text-center py-8">
               <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin mx-auto mb-3"
-                style={{ borderColor: 'rgba(0,255,136,0.3)', borderTopColor: '#00ff88' }} />
+                style={{ borderColor: 'rgba(6,182,212,0.3)', borderTopColor: '#06b6d4' }} />
               <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>Loading umpires…</p>
             </div>
           ) : umpiresError ? (
@@ -4575,7 +4575,7 @@ const AssignUmpireModal = ({ match, umpires, loadingUmpires, umpiresError, onRet
               <button
                 onClick={onRetryUmpires}
                 className="px-4 py-2 rounded-xl text-xs font-bold"
-                style={{ background: 'rgba(0,255,136,0.1)', border: '1px solid rgba(0,255,136,0.3)', color: '#00ff88' }}
+                style={{ background: 'rgba(6,182,212,0.1)', border: '1px solid rgba(6,182,212,0.3)', color: '#06b6d4' }}
               >
                 Retry
               </button>
@@ -4596,12 +4596,12 @@ const AssignUmpireModal = ({ match, umpires, loadingUmpires, umpiresError, onRet
                     onClick={() => setSelectedUmpire(umpire.id)}
                     className="flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all"
                     style={isSelected
-                      ? { background: 'rgba(0,255,136,0.1)', border: '1.5px solid rgba(0,255,136,0.4)' }
+                      ? { background: 'rgba(6,182,212,0.1)', border: '1.5px solid rgba(6,182,212,0.4)' }
                       : { background: 'rgba(255,255,255,0.04)', border: '1.5px solid rgba(255,255,255,0.07)' }}
                   >
                     <div className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm flex-shrink-0"
                       style={isSelected
-                        ? { background: 'linear-gradient(135deg,#00ff88,#00ff88)', color: '#07071a' }
+                        ? { background: 'linear-gradient(135deg,#06b6d4,#06b6d4)', color: '#07071a' }
                         : { background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)' }}>
                       {umpire.name?.charAt(0)?.toUpperCase() || 'U'}
                     </div>
@@ -4609,7 +4609,7 @@ const AssignUmpireModal = ({ match, umpires, loadingUmpires, umpiresError, onRet
                       <p className="text-sm font-bold text-white truncate">{umpire.name}</p>
                       <p className="text-xs truncate" style={{ color: 'rgba(255,255,255,0.4)' }}>{umpire.email}</p>
                     </div>
-                    {isSelected && <CheckCircle className="w-4 h-4 flex-shrink-0" style={{ color: '#00ff88' }} />}
+                    {isSelected && <CheckCircle className="w-4 h-4 flex-shrink-0" style={{ color: '#06b6d4' }} />}
                   </div>
                 );
               })}
@@ -4619,9 +4619,9 @@ const AssignUmpireModal = ({ match, umpires, loadingUmpires, umpiresError, onRet
           {/* Selected umpire confirmation */}
           {selectedUmpireData && (
             <div className="mt-3 px-3 py-2.5 rounded-xl flex items-center gap-2"
-              style={{ background: 'rgba(0,255,136,0.07)', border: '1px solid rgba(0,255,136,0.2)' }}>
-              <CheckCircle className="w-4 h-4 flex-shrink-0" style={{ color: '#00ff88' }} />
-              <p className="text-xs font-bold" style={{ color: '#00ff88' }}>
+              style={{ background: 'rgba(6,182,212,0.07)', border: '1px solid rgba(6,182,212,0.2)' }}>
+              <CheckCircle className="w-4 h-4 flex-shrink-0" style={{ color: '#06b6d4' }} />
+              <p className="text-xs font-bold" style={{ color: '#06b6d4' }}>
                 {selectedUmpireData.name} will conduct this match
               </p>
             </div>
@@ -4635,7 +4635,7 @@ const AssignUmpireModal = ({ match, umpires, loadingUmpires, umpiresError, onRet
             onClick={handleStartMatch}
             disabled={!selectedUmpire || assigning || umpires.length === 0}
             className="w-full py-3.5 rounded-xl font-black text-sm transition-all disabled:opacity-40 flex items-center justify-center gap-2"
-            style={{ background: 'linear-gradient(135deg,#00ff88,#00ff88)', color: '#07071a', boxShadow: '0 4px 16px rgba(0,255,136,0.35)' }}
+            style={{ background: 'linear-gradient(135deg,#06b6d4,#06b6d4)', color: '#07071a', boxShadow: '0 4px 16px rgba(6,182,212,0.35)' }}
           >
             {assigning
               ? <><div className="w-4 h-4 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#07071a transparent transparent transparent' }} />Starting…</>
@@ -4666,7 +4666,7 @@ const AssignUmpireModal = ({ match, umpires, loadingUmpires, umpiresError, onRet
 
           {/* Hint */}
           <p className="text-center text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>
-            Press "Start Match" to assign <span style={{ color: '#00ff88' }}>{selectedUmpireData?.name || 'umpire'}</span> and begin scoring
+            Press "Start Match" to assign <span style={{ color: '#06b6d4' }}>{selectedUmpireData?.name || 'umpire'}</span> and begin scoring
           </p>
         </div>
       </div>
@@ -4805,7 +4805,7 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
       {/* Animated Background */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-10 right-10 w-96 h-96 rounded-full blur-3xl"
-          style={{ background: 'radial-gradient(circle, rgba(0,255,136,0.5) 0%, rgba(0,255,136,0.3) 50%, transparent 70%)', animation: 'float 8s ease-in-out infinite, pulse 4s ease-in-out infinite' }} />
+          style={{ background: 'radial-gradient(circle, rgba(6,182,212,0.5) 0%, rgba(6,182,212,0.3) 50%, transparent 70%)', animation: 'float 8s ease-in-out infinite, pulse 4s ease-in-out infinite' }} />
         <div className="absolute bottom-10 left-10 w-80 h-80 rounded-full blur-3xl"
           style={{ background: 'radial-gradient(circle, rgba(20,184,166,0.5) 0%, rgba(13,148,136,0.3) 50%, transparent 70%)', animation: 'float 10s ease-in-out infinite reverse, pulse 5s ease-in-out infinite', animationDelay: '2s' }} />
         {ARRANGE_PARTICLES.map((p, i) => (
@@ -4814,7 +4814,7 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
         ))}
       </div>
 
-      <div className="relative backdrop-blur-xl rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl" style={{ background: '#0d1025', border: '2px solid rgba(0,255,136,0.2)' }}>
+      <div className="relative backdrop-blur-xl rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl" style={{ background: '#0d1025', border: '2px solid rgba(6,182,212,0.2)' }}>
         {/* Header */}
         <div className="p-3 border-b border-emerald-500/20 bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-emerald-500/10">
           <div className="flex items-center justify-between">
@@ -4843,9 +4843,9 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
                     <button key={s} onClick={() => handleBracketSizeChange(s)}
                       className="px-3 py-1 rounded-lg text-[10px] font-bold transition-all"
                       style={{
-                        background: bracketSize === s ? 'rgba(0,255,136,0.15)' : 'rgba(255,255,255,0.05)',
-                        border: `1px solid ${bracketSize === s ? 'rgba(0,255,136,0.5)' : 'rgba(255,255,255,0.12)'}`,
-                        color: bracketSize === s ? '#00ff88' : 'rgba(255,255,255,0.5)'
+                        background: bracketSize === s ? 'rgba(6,182,212,0.15)' : 'rgba(255,255,255,0.05)',
+                        border: `1px solid ${bracketSize === s ? 'rgba(6,182,212,0.5)' : 'rgba(255,255,255,0.12)'}`,
+                        color: bracketSize === s ? '#06b6d4' : 'rgba(255,255,255,0.5)'
                       }}>
                       Round of {s}
                     </button>
@@ -4861,12 +4861,12 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
           {/* Player in hand banner */}
           {pickedPlayer && (
             <div className="p-2 rounded-xl flex items-center gap-2 animate-pulse"
-              style={{ background: 'rgba(0,255,136,0.1)', border: '1px solid rgba(0,255,136,0.4)' }}>
-              <div className="w-2 h-2 rounded-full bg-[#00ff88] flex-shrink-0" />
+              style={{ background: 'rgba(6,182,212,0.1)', border: '1px solid rgba(6,182,212,0.4)' }}>
+              <div className="w-2 h-2 rounded-full bg-[#06b6d4] flex-shrink-0" />
               <span className="text-[11px] font-bold text-white flex-1">
                 {pickedPlayer.name}
                 {pickedPlayer.partnerName ? ` / ${pickedPlayer.partnerName}` : ''}
-                <span className="text-[#00ff88] ml-1">(Pool {pickedPlayer.group} #{pickedPlayer.rank})</span>
+                <span className="text-[#06b6d4] ml-1">(Pool {pickedPlayer.group} #{pickedPlayer.rank})</span>
               </span>
               <span className="text-[9px]" style={{ color: 'rgba(255,255,255,0.5)' }}>tap a slot →</span>
               <button onClick={() => setPickedPlayer(null)}
@@ -4899,25 +4899,25 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
                     className="px-2 py-1.5 rounded-lg text-left transition-all"
                     style={{
                       background: isPicked
-                        ? 'rgba(0,255,136,0.2)'
+                        ? 'rgba(6,182,212,0.2)'
                         : isPlaced
                           ? 'rgba(255,255,255,0.03)'
                           : 'rgba(255,255,255,0.07)',
-                      border: `1px solid ${isPicked ? 'rgba(0,255,136,0.7)' : isPlaced ? 'rgba(255,255,255,0.06)' : 'rgba(0,255,136,0.25)'}`,
+                      border: `1px solid ${isPicked ? 'rgba(6,182,212,0.7)' : isPlaced ? 'rgba(255,255,255,0.06)' : 'rgba(6,182,212,0.25)'}`,
                       opacity: isPlaced ? 0.35 : 1,
                       cursor: isPlaced ? 'default' : 'pointer',
                       transform: isPicked ? 'scale(1.04)' : 'scale(1)',
-                      boxShadow: isPicked ? '0 0 10px rgba(0,255,136,0.3)' : 'none'
+                      boxShadow: isPicked ? '0 0 10px rgba(6,182,212,0.3)' : 'none'
                     }}>
                     <div className="text-[10px] font-bold text-white leading-tight">
                       {player.name}{player.partnerName ? ` / ${player.partnerName}` : ''}
                     </div>
                     <div className="text-[8px] flex items-center gap-1 mt-0.5">
-                      <span className="px-1 rounded font-bold" style={{ background: 'rgba(0,255,136,0.15)', color: '#00ff88' }}>
+                      <span className="px-1 rounded font-bold" style={{ background: 'rgba(6,182,212,0.15)', color: '#06b6d4' }}>
                         Pool {player.group}
                       </span>
                       <span style={{ color: 'rgba(255,255,255,0.5)' }}>#{player.rank}</span>
-                      {isPlaced && <span style={{ color: 'rgba(0,255,136,0.6)' }}>✓</span>}
+                      {isPlaced && <span style={{ color: 'rgba(6,182,212,0.6)' }}>✓</span>}
                     </div>
                   </button>
                 );
@@ -4946,7 +4946,7 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
                     {/* Match label */}
                     <div className="px-2 py-1 flex items-center justify-between"
                       style={{ background: 'rgba(255,255,255,0.04)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                      <span className="text-[9px] font-black uppercase tracking-wider" style={{ color: 'rgba(0,255,136,0.7)' }}>
+                      <span className="text-[9px] font-black uppercase tracking-wider" style={{ color: 'rgba(6,182,212,0.7)' }}>
                         Match {mi + 1}
                       </span>
                       {isBye && (
@@ -4971,22 +4971,22 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
                             style={{
                               background: player
                                 ? isPicked
-                                  ? 'rgba(0,255,136,0.15)'
-                                  : 'linear-gradient(135deg, rgba(0,255,136,0.15), rgba(0,212,255,0.1))'
+                                  ? 'rgba(6,182,212,0.15)'
+                                  : 'linear-gradient(135deg, rgba(6,182,212,0.15), rgba(0,212,255,0.1))'
                                 : isTargetable
-                                  ? 'rgba(0,255,136,0.06)'
+                                  ? 'rgba(6,182,212,0.06)'
                                   : 'rgba(255,255,255,0.03)',
                               border: `1px solid ${
                                 player
-                                  ? isPicked ? 'rgba(0,255,136,0.6)' : 'rgba(0,255,136,0.3)'
-                                  : isTargetable ? 'rgba(0,255,136,0.35)' : 'rgba(255,255,255,0.08)'
+                                  ? isPicked ? 'rgba(6,182,212,0.6)' : 'rgba(6,182,212,0.3)'
+                                  : isTargetable ? 'rgba(6,182,212,0.35)' : 'rgba(255,255,255,0.08)'
                               }`,
                               cursor: 'pointer'
                             }}>
                             {player ? (
                               <div className="flex items-center gap-1.5">
                                 <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-[9px] font-black"
-                                  style={{ background: 'rgba(0,255,136,0.2)', color: '#00ff88', border: '1px solid rgba(0,255,136,0.4)' }}>
+                                  style={{ background: 'rgba(6,182,212,0.2)', color: '#06b6d4', border: '1px solid rgba(6,182,212,0.4)' }}>
                                   {posIdx + 1}
                                 </div>
                                 <div className="flex-1 min-w-0">
@@ -4994,7 +4994,7 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
                                     {player.name}{player.partnerName ? ` / ${player.partnerName}` : ''}
                                   </div>
                                   <div className="text-[8px] flex items-center gap-1 mt-0.5">
-                                    <span style={{ color: 'rgba(0,255,136,0.7)' }}>Pool {player.group}</span>
+                                    <span style={{ color: 'rgba(6,182,212,0.7)' }}>Pool {player.group}</span>
                                     <span style={{ color: 'rgba(255,255,255,0.4)' }}>#{player.rank} · {player.points}pts</span>
                                   </div>
                                 </div>
@@ -5007,7 +5007,7 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
                                   {posIdx + 1}
                                 </div>
                                 <span className="text-[10px]"
-                                  style={{ color: isTargetable ? 'rgba(0,255,136,0.6)' : 'rgba(255,255,255,0.2)' }}>
+                                  style={{ color: isTargetable ? 'rgba(6,182,212,0.6)' : 'rgba(255,255,255,0.2)' }}>
                                   {isTargetable ? `Place ${pickedPlayer.name.split('/')[0].trim()} here` : 'Empty — BYE'}
                                 </span>
                               </div>

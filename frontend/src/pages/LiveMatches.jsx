@@ -10,7 +10,7 @@ const B = {
   bg: '#07071a',
   card: 'rgba(255,255,255,0.04)',
   border: 'rgba(255,255,255,0.08)',
-  green: '#00ff88',
+  green: '#06b6d4',
   cyan: '#00d4ff',
   sub: 'rgba(255,255,255,0.6)',
 };
@@ -68,7 +68,7 @@ const LiveMatches = () => {
 
       {/* Sticky header */}
       <div className="sticky top-0 z-20 px-4 py-3 border-b backdrop-blur-xl"
-        style={{ background: 'rgba(7,7,26,0.95)', borderColor: 'rgba(0,255,136,0.12)' }}>
+        style={{ background: 'rgba(7,7,26,0.95)', borderColor: 'rgba(6,182,212,0.12)' }}>
         <div className="max-w-2xl mx-auto flex items-center justify-between gap-3">
           <button onClick={() => navigate('/dashboard')} className="flex items-center gap-2">
             <ArrowLeft className="w-5 h-5" style={{ color: B.green }} />
@@ -87,7 +87,7 @@ const LiveMatches = () => {
             {/* Connection status */}
             <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold border"
               style={isConnected
-                ? { background: 'rgba(0,255,136,0.08)', borderColor: 'rgba(0,255,136,0.25)', color: B.green }
+                ? { background: 'rgba(6,182,212,0.08)', borderColor: 'rgba(6,182,212,0.25)', color: B.green }
                 : { background: 'rgba(248,113,113,0.08)', borderColor: 'rgba(248,113,113,0.25)', color: '#f87171' }}>
               {isConnected ? <><Wifi className="w-3 h-3" /> Live</> : <><WifiOff className="w-3 h-3" /> Off</>}
             </div>
@@ -101,7 +101,7 @@ const LiveMatches = () => {
             <button onClick={() => setShowFilters(!showFilters)}
               className="p-2 rounded-xl border transition-all"
               style={showFilters
-                ? { background: 'rgba(0,255,136,0.12)', borderColor: 'rgba(0,255,136,0.3)', color: B.green }
+                ? { background: 'rgba(6,182,212,0.12)', borderColor: 'rgba(6,182,212,0.3)', color: B.green }
                 : { background: B.card, borderColor: B.border, color: B.sub }}>
               <SlidersHorizontal className="w-4 h-4" />
             </button>

@@ -133,7 +133,7 @@ const PaymentQRStep = ({ formData, updateFormData, updateMultipleFields, onNext,
         <h2 
           className="text-lg font-black mb-2"
           style={{
-            background: 'linear-gradient(135deg, #00c853, #00ff88)',
+            background: 'linear-gradient(135deg, #0891b2, #06b6d4)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text'
@@ -148,7 +148,7 @@ const PaymentQRStep = ({ formData, updateFormData, updateMultipleFields, onNext,
 
       {/* Saved Details Notice */}
       {!loadingSaved && hasSavedDetails && (
-        <div className="rounded-xl p-3 flex items-start gap-2" style={{ background: 'rgba(0,200,83,0.1)', border: '1.5px solid rgba(0,200,83,0.3)' }}>
+        <div className="rounded-xl p-3 flex items-start gap-2" style={{ background: 'rgba(6,182,212,0.1)', border: '1.5px solid rgba(6,182,212,0.3)' }}>
           <CheckCircleIcon className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
           <div>
             <p className="text-xs font-bold text-emerald-300">Auto-filled!</p>

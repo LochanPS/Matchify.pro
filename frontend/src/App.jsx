@@ -587,12 +587,12 @@ function App() {
             style: {
               background: '#0d1a10',
               color: '#f1f5f9',
-              border: '1px solid rgba(0,255,136,0.2)',
-              boxShadow: '0 0 20px rgba(0,255,136,0.1)',
+              border: '1px solid rgba(6,182,212,0.2)',
+              boxShadow: '0 0 20px rgba(6,182,212,0.1)',
             },
             success: {
               iconTheme: {
-                primary: '#00ff88',
+                primary: '#06b6d4',
                 secondary: '#003320',
               },
             },

@@ -13,7 +13,7 @@ const B = {
   card2: '#1a1a26',
   border: 'rgba(255,255,255,0.07)',
   cyan: '#00d4ff',
-  green: '#10b981',
+  green: '#06b6d4',
   amber: '#f59e0b',
   red: '#ef4444',
   purple: '#a855f7',

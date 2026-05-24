@@ -11,7 +11,7 @@ const B = {
   bg: '#07071a',
   card: 'rgba(255,255,255,0.04)',
   border: 'rgba(255,255,255,0.08)',
-  green: '#00ff88',
+  green: '#06b6d4',
   cyan: '#00d4ff',
   purple: '#a855f7',
   amber: '#fbbf24',
@@ -45,7 +45,7 @@ const StepType = ({ onSelect }) => (
       <button
         onClick={() => onSelect('singles')}
         className="w-full py-5 rounded-2xl font-black text-base transition-all active:scale-95"
-        style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', color: '#07071a', boxShadow: '0 6px 24px rgba(0,255,136,0.35)' }}
+        style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#07071a', boxShadow: '0 6px 24px rgba(6,182,212,0.35)' }}
       >
         🏸 Singles
         <p className="text-xs font-semibold mt-1 opacity-70">1 vs 1</p>
@@ -144,7 +144,7 @@ const StepSetup = ({ type, onBack, onStart }) => {
 
         <div className="space-y-5">
           {/* Team A */}
-          <div className="rounded-2xl p-4 space-y-3" style={{ background: 'rgba(0,255,136,0.05)', border: '1px solid rgba(0,255,136,0.2)' }}>
+          <div className="rounded-2xl p-4 space-y-3" style={{ background: 'rgba(6,182,212,0.05)', border: '1px solid rgba(6,182,212,0.2)' }}>
             <p className="text-xs font-black" style={{ color: B.green }}>
               {type === 'singles' ? 'PLAYER 1' : 'TEAM A'}
             </p>
@@ -210,7 +210,7 @@ const StepSetup = ({ type, onBack, onStart }) => {
           <button
             onClick={handleContinue}
             className="w-full py-4 rounded-2xl font-black text-base transition-all active:scale-95 flex items-center justify-center gap-2"
-            style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#07071a', boxShadow: '0 6px 20px rgba(0,200,83,0.4)' }}
+            style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)', color: '#07071a', boxShadow: '0 6px 20px rgba(6,182,212,0.4)' }}
           >
             <Play className="w-5 h-5" />
             Continue to Match
@@ -317,7 +317,7 @@ const StepScore = ({ config, onReset }) => {
 
         {/* Scoreboard */}
         <div className="rounded-2xl overflow-hidden mb-4" style={{ background: B.card, border: `1px solid ${B.border}` }}>
-          <div className="h-0.5" style={{ background: 'linear-gradient(90deg,#00ff88,#a855f7)' }} />
+          <div className="h-0.5" style={{ background: 'linear-gradient(90deg,#06b6d4,#a855f7)' }} />
           <div className="p-5 flex items-center gap-3">
 
             {/* Team A */}
@@ -345,7 +345,7 @@ const StepScore = ({ config, onReset }) => {
                   onClick={() => changeScore(1, 1)}
                   disabled={!!matchOver}
                   className="w-12 h-12 rounded-xl flex items-center justify-center font-black transition-all disabled:opacity-30 active:scale-90"
-                  style={{ background: 'rgba(0,255,136,0.15)', border: '1px solid rgba(0,255,136,0.3)', color: B.green }}
+                  style={{ background: 'rgba(6,182,212,0.15)', border: '1px solid rgba(6,182,212,0.3)', color: B.green }}
                 >
                   <Plus className="w-5 h-5" />
                 </button>
@@ -358,7 +358,7 @@ const StepScore = ({ config, onReset }) => {
               {started && !matchOver && (
                 <span
                   className="text-xs font-bold px-2 py-0.5 rounded-full"
-                  style={{ background: 'rgba(0,255,136,0.1)', color: B.green }}
+                  style={{ background: 'rgba(6,182,212,0.1)', color: B.green }}
                 >
                   LIVE
                 </span>
@@ -450,7 +450,7 @@ const StepScore = ({ config, onReset }) => {
                 <button
                   onClick={() => setShowConfirm(1)}
                   className="flex-1 py-2.5 rounded-xl text-xs font-black truncate"
-                  style={{ background: 'rgba(0,255,136,0.1)', border: '1px solid rgba(0,255,136,0.25)', color: B.green }}
+                  style={{ background: 'rgba(6,182,212,0.1)', border: '1px solid rgba(6,182,212,0.25)', color: B.green }}
                 >
                   🏆 {teamA}
                 </button>

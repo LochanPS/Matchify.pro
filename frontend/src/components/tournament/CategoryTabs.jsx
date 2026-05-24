@@ -6,7 +6,7 @@ const CategoryTabs = ({ categories, activeCategory, onCategoryChange }) => {
   }
 
   return (
-    <div style={{ borderBottom: '1px solid rgba(0,255,136,0.15)', background: 'rgba(7,7,26,0.8)' }}>
+    <div style={{ borderBottom: '1px solid rgba(6,182,212,0.15)', background: 'rgba(7,7,26,0.8)' }}>
       <nav className="flex space-x-6 px-4 overflow-x-auto" aria-label="Categories">
         {categories.map((category) => {
           const isActive = activeCategory?.id === category.id;
@@ -17,8 +17,8 @@ const CategoryTabs = ({ categories, activeCategory, onCategoryChange }) => {
               onClick={() => onCategoryChange(category)}
               className="py-3 px-1 border-b-2 font-semibold text-sm whitespace-nowrap transition-all"
               style={{
-                borderBottomColor: isActive ? '#00ff88' : 'transparent',
-                color: isActive ? '#00ff88' : 'rgba(255,255,255,0.5)',
+                borderBottomColor: isActive ? '#22d3ee' : 'transparent',
+                color: isActive ? '#22d3ee' : 'rgba(255,255,255,0.5)',
               }}
             >
               <span className="flex items-center gap-2">
@@ -27,7 +27,7 @@ const CategoryTabs = ({ categories, activeCategory, onCategoryChange }) => {
                 {category.drawGenerated ? (
                   <span
                     className="text-xs px-2 py-0.5 rounded-full font-semibold"
-                    style={{ background: 'rgba(0,255,136,0.12)', color: '#00ff88', border: '1px solid rgba(0,255,136,0.3)' }}
+                    style={{ background: 'rgba(6,182,212,0.12)', color: '#22d3ee', border: '1px solid rgba(6,182,212,0.3)' }}
                   >
                     Draw Ready
                   </span>

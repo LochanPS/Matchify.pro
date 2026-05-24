@@ -28,7 +28,7 @@ const B = {
   border: 'rgba(255,255,255,0.08)',
   input: 'rgba(0,0,0,0.3)',
   inputBorder: 'rgba(255,255,255,0.1)',
-  green: '#00ff88',
+  green: '#06b6d4',
   cyan: '#00d4ff',
   purple: '#a855f7',
   amber: '#fbbf24',
@@ -436,7 +436,7 @@ const EditTournament = () => {
         )}
         {success && (
           <div className="mb-4 flex items-start gap-2.5 px-4 py-3 rounded-xl"
-            style={{ background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.25)' }}>
+            style={{ background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.25)' }}>
             <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: B.green }} />
             <p className="text-xs font-semibold flex-1" style={{ color: B.green }}>{success}</p>
             <button onClick={() => setSuccess(null)}><X className="w-4 h-4" style={{ color: B.green }} /></button>
@@ -598,9 +598,9 @@ const EditTournament = () => {
           {/* ── Tournament Dates ─────────────────────────────────────────── */}
           <div className="rounded-2xl overflow-hidden" style={{ background: B.card, border: `1px solid ${B.border}` }}>
             <div className="px-4 py-3 flex items-center gap-3"
-              style={{ borderBottom: `1px solid ${B.border}`, background: 'rgba(0,255,136,0.04)' }}>
+              style={{ borderBottom: `1px solid ${B.border}`, background: 'rgba(6,182,212,0.04)' }}>
               <div className="w-8 h-8 rounded-xl flex items-center justify-center"
-                style={{ background: 'rgba(0,255,136,0.15)', border: '1px solid rgba(0,255,136,0.3)' }}>
+                style={{ background: 'rgba(6,182,212,0.15)', border: '1px solid rgba(6,182,212,0.3)' }}>
                 <Calendar className="w-4 h-4" style={{ color: B.green }} />
               </div>
               <h2 className="text-sm font-black text-white">Tournament Dates</h2>
@@ -621,7 +621,7 @@ const EditTournament = () => {
               ))}
               <button onClick={handleSaveDates} disabled={saving}
                 className="w-full py-3.5 rounded-xl font-black text-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-                style={{ background: 'linear-gradient(135deg,#00ff88,#00d4ff)', color: '#07071a', boxShadow: '0 4px 15px rgba(0,255,136,0.35)' }}>
+                style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#07071a', boxShadow: '0 4px 15px rgba(6,182,212,0.35)' }}>
                 {saving
                   ? <div className="w-4 h-4 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: '#07071a transparent transparent transparent' }} />
                   : <Save className="w-4 h-4" />}

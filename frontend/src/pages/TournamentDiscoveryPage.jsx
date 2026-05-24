@@ -25,7 +25,7 @@ const DISC_PARTICLES = Array.from({ length: 15 }, (_, i) => ({
   h: (i * 11 + 2) % 4 + 2,
   x: (i * 37 + 11) % 97,
   y: (i * 53 + 7) % 91,
-  c: ["#00ff88", "#00d4ff", "#a855f7", "#00ff88"][i % 4],
+  c: ["#06b6d4", "#00d4ff", "#a855f7", "#06b6d4"][i % 4],
   o: ((i * 13) % 50) / 100 + 0.2,
   dur: (i * 7) % 8 + 5,
   delay: (i * 3) % 5,
@@ -269,7 +269,7 @@ export default function TournamentDiscoveryPage() {
                 onClick={() => navigate('/tournaments/create')}
                 className="flex-1 flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl font-bold text-sm transition-all relative overflow-hidden group"
                 style={{
-                  background: 'linear-gradient(135deg, #10b981, #059669)',
+                  background: 'linear-gradient(135deg, #06b6d4, #0891b2)',
                   color: '#ffffff',
                   boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
                 }}
@@ -379,7 +379,7 @@ export default function TournamentDiscoveryPage() {
                 {hasActiveFilters && (
                   <button
                     onClick={clearFilters}
-                    className="text-xs flex items-center gap-1 font-bold transition-colors" style={{ color: '#10b981' }}
+                    className="text-xs flex items-center gap-1 font-bold transition-colors" style={{ color: '#06b6d4' }}
                   >
                     <XMarkIcon className="h-3.5 w-3.5" />
                     Clear All
@@ -479,7 +479,7 @@ export default function TournamentDiscoveryPage() {
             onClick={() => setActiveTab('upcoming')}
             className="flex-1 py-3 text-sm font-black transition-all"
             style={{
-              background: activeTab === 'upcoming' ? 'linear-gradient(135deg,#10b981,#059669)' : 'rgba(255,255,255,0.04)',
+              background: activeTab === 'upcoming' ? 'linear-gradient(135deg,#06b6d4,#0891b2)' : 'rgba(255,255,255,0.04)',
               color: activeTab === 'upcoming' ? '#ffffff' : 'rgba(255,255,255,0.5)',
             }}
           >
@@ -500,14 +500,14 @@ export default function TournamentDiscoveryPage() {
         {/* Results Count - Compact */}
         {!loading && (
           <div className="flex items-center justify-between mb-3">
-            <p className="text-sm font-bold" style={{ color: '#10b981' }}>
+            <p className="text-sm font-bold" style={{ color: '#06b6d4' }}>
               Found <span className="text-white">{total}</span> tournament{total !== 1 ? 's' : ''}
             </p>
             {hasActiveFilters && (
               <button
                 onClick={clearFilters}
                 className="text-xs font-bold transition-colors"
-                style={{ color: '#10b981' }}
+                style={{ color: '#06b6d4' }}
               >
                 Clear filters
               </button>
@@ -528,8 +528,8 @@ export default function TournamentDiscoveryPage() {
             <div
               className="w-16 h-16 border-4 rounded-full animate-spin mx-auto"
               style={{
-                borderColor: 'rgba(16,185,129,0.2)',
-                borderTopColor: '#10b981'
+                borderColor: 'rgba(6,182,212,0.2)',
+                borderTopColor: '#06b6d4'
               }}
             ></div>
             <p className="text-white/70 mt-6 font-bold">Loading tournaments...</p>
@@ -546,11 +546,11 @@ export default function TournamentDiscoveryPage() {
             <div 
               className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl flex items-center justify-center mx-auto mb-6"
               style={{
-                background: 'rgba(16,185,129,0.1)',
-                border: '1px solid rgba(16,185,129,0.25)'
+                background: 'rgba(6,182,212,0.1)',
+                border: '1px solid rgba(6,182,212,0.25)'
               }}
             >
-              <TrophyIcon className="w-10 h-10 sm:w-12 sm:h-12" style={{ color: '#10b981' }} />
+              <TrophyIcon className="w-10 h-10 sm:w-12 sm:h-12" style={{ color: '#06b6d4' }} />
             </div>
             <h3 className="text-lg sm:text-xl font-black text-white mb-2">No tournaments found</h3>
             <p className="text-sm sm:text-base text-white/60 mb-6 font-medium">Try adjusting your filters or check back later</p>
@@ -559,7 +559,7 @@ export default function TournamentDiscoveryPage() {
                 onClick={clearFilters}
                 className="px-6 py-3 rounded-xl font-bold transition-all"
                 style={{
-                  background: 'linear-gradient(135deg, #10b981, #059669)',
+                  background: 'linear-gradient(135deg, #06b6d4, #0891b2)',
                   color: '#ffffff',
                 }}
               >
@@ -582,8 +582,8 @@ export default function TournamentDiscoveryPage() {
                   <div
                     className="w-12 h-12 border-4 rounded-full animate-spin"
                     style={{
-                      borderColor: 'rgba(16,185,129,0.2)',
-                      borderTopColor: '#10b981'
+                      borderColor: 'rgba(6,182,212,0.2)',
+                      borderTopColor: '#06b6d4'
                     }}
                   ></div>
                   <p className="text-white/70 font-bold text-sm">Loading more tournaments...</p>
@@ -594,11 +594,11 @@ export default function TournamentDiscoveryPage() {
                   <div
                     className="w-10 h-10 rounded-full flex items-center justify-center"
                     style={{
-                      background: 'rgba(16,185,129,0.1)',
-                      border: '1px solid rgba(16,185,129,0.25)'
+                      background: 'rgba(6,182,212,0.1)',
+                      border: '1px solid rgba(6,182,212,0.25)'
                     }}
                   >
-                    <SparklesIcon className="w-5 h-5" style={{ color: '#10b981' }} />
+                    <SparklesIcon className="w-5 h-5" style={{ color: '#06b6d4' }} />
                   </div>
                   <p className="text-white/60 font-bold text-sm">You've reached the end!</p>
                   <p className="text-white/40 text-xs">That's all the tournaments for now</p>
@@ -623,7 +623,7 @@ async function shareTournament(tournament, e) {
 function TournamentCard({ tournament, navigate, index }) {
   const getStatusStyle = (status) => {
     const styles = {
-      published: { bg: 'linear-gradient(135deg, #10b981, #059669)', text: 'Open', color: '#ffffff' },
+      published: { bg: 'linear-gradient(135deg, #06b6d4, #0891b2)', text: 'Open', color: '#ffffff' },
       ongoing: { bg: 'linear-gradient(135deg, #3b82f6, #60a5fa)', text: 'Live', color: '#ffffff' },
       completed: { bg: 'linear-gradient(135deg, #6b7280, #9ca3af)', text: 'Done', color: '#ffffff' },
       cancelled: { bg: 'linear-gradient(135deg, #ef4444, #dc2626)', text: 'Cancelled', color: '#ffffff' },
@@ -633,7 +633,7 @@ function TournamentCard({ tournament, navigate, index }) {
   };
 
   const accentPairs = [
-    ['#10b981','rgba(16,185,129,0.2)'],
+    ['#06b6d4','rgba(6,182,212,0.2)'],
     ['#00d4ff','rgba(0,212,255,0.25)'],
     ['#a855f7','rgba(168,85,247,0.25)'],
     ['#f59e0b','rgba(245,158,11,0.25)'],

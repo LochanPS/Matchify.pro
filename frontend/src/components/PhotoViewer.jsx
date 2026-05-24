@@ -51,7 +51,7 @@ export default function PhotoViewer({ isOpen, onClose, photoUrl, userName }) {
         <div 
           className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full blur-3xl opacity-20"
           style={{ 
-            background: 'radial-gradient(circle, rgba(0,200,83,0.6), transparent)',
+            background: 'radial-gradient(circle, rgba(6,182,212,0.6), transparent)',
             animation: 'glow 4s ease-in-out infinite reverse'
           }}
         />
@@ -132,14 +132,14 @@ export default function PhotoViewer({ isOpen, onClose, photoUrl, userName }) {
         onClick={handleDownload}
         className="absolute bottom-4 right-4 z-10 flex items-center gap-2 px-5 py-3 rounded-full transition-all group"
         style={{ 
-          background: 'linear-gradient(135deg, rgba(0,200,83,0.3), rgba(0,255,136,0.2))',
-          border: '2px solid rgba(0,200,83,0.5)',
-          boxShadow: '0 4px 15px rgba(0,200,83,0.3)'
+          background: 'linear-gradient(135deg, rgba(6,182,212,0.3), rgba(6,182,212,0.2))',
+          border: '2px solid rgba(6,182,212,0.5)',
+          boxShadow: '0 4px 15px rgba(6,182,212,0.3)'
         }}
       >
         <div 
           className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-          style={{ background: 'rgba(0,200,83,0.2)' }}
+          style={{ background: 'rgba(6,182,212,0.2)' }}
         />
         <Download className="w-5 h-5 text-emerald-300 relative z-10" />
         <span className="text-emerald-300 font-bold text-sm relative z-10">Download</span>

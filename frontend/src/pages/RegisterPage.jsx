@@ -18,30 +18,30 @@ import { getErrorMessage } from '../utils/errorMessage';
 
 // Fixed star positions — deterministic, no re-render flicker
 const STARS = [
-  { x:4,  y:8,  s:2,   c:'#00ff88', d:0,   dur:2.8 },
+  { x:4,  y:8,  s:2,   c:'#06b6d4', d:0,   dur:2.8 },
   { x:12, y:22, s:1.5, c:'#00d4ff', d:0.4, dur:3.2 },
   { x:22, y:5,  s:1,   c:'#fff',    d:0.8, dur:2.5 },
-  { x:33, y:18, s:2.5, c:'#00ff88', d:1.2, dur:3.5 },
+  { x:33, y:18, s:2.5, c:'#06b6d4', d:1.2, dur:3.5 },
   { x:45, y:30, s:1,   c:'#00d4ff', d:0.3, dur:2.2 },
   { x:55, y:6,  s:1.5, c:'#fff',    d:1.6, dur:3.8 },
-  { x:65, y:25, s:2,   c:'#00ff88', d:0.7, dur:2.9 },
+  { x:65, y:25, s:2,   c:'#06b6d4', d:0.7, dur:2.9 },
   { x:75, y:12, s:1,   c:'#00d4ff', d:1.1, dur:3.1 },
   { x:85, y:38, s:2.5, c:'#fff',    d:0.5, dur:2.6 },
-  { x:92, y:15, s:1.5, c:'#00ff88', d:1.9, dur:3.4 },
+  { x:92, y:15, s:1.5, c:'#06b6d4', d:1.9, dur:3.4 },
   { x:8,  y:55, s:1,   c:'#00d4ff', d:0.2, dur:3.0 },
-  { x:18, y:70, s:2,   c:'#00ff88', d:1.4, dur:2.7 },
+  { x:18, y:70, s:2,   c:'#06b6d4', d:1.4, dur:2.7 },
   { x:28, y:85, s:1.5, c:'#fff',    d:0.6, dur:3.6 },
   { x:40, y:60, s:1,   c:'#00d4ff', d:1.8, dur:2.4 },
-  { x:50, y:78, s:2,   c:'#00ff88', d:0.9, dur:3.3 },
+  { x:50, y:78, s:2,   c:'#06b6d4', d:0.9, dur:3.3 },
   { x:62, y:50, s:1.5, c:'#fff',    d:1.3, dur:2.8 },
   { x:72, y:68, s:1,   c:'#00d4ff', d:0.1, dur:3.7 },
-  { x:82, y:82, s:2.5, c:'#00ff88', d:1.7, dur:2.3 },
+  { x:82, y:82, s:2.5, c:'#06b6d4', d:1.7, dur:2.3 },
   { x:90, y:55, s:1,   c:'#fff',    d:0.4, dur:3.5 },
   { x:96, y:72, s:1.5, c:'#00d4ff', d:2.0, dur:2.9 },
-  { x:3,  y:40, s:2,   c:'#00ff88', d:1.0, dur:3.2 },
+  { x:3,  y:40, s:2,   c:'#06b6d4', d:1.0, dur:3.2 },
   { x:38, y:92, s:1,   c:'#fff',    d:1.5, dur:2.6 },
   { x:58, y:88, s:1.5, c:'#00d4ff', d:0.3, dur:3.9 },
-  { x:78, y:45, s:2,   c:'#00ff88', d:1.6, dur:2.5 },
+  { x:78, y:45, s:2,   c:'#06b6d4', d:1.6, dur:2.5 },
   { x:95, y:90, s:1,   c:'#fff',    d:0.8, dur:3.1 },
 ];
 
@@ -182,20 +182,20 @@ const RegisterPage = () => {
       {/* Left Side */}
       <div className="hidden lg:flex lg:w-2/5 relative overflow-hidden flex-col justify-center items-center p-12"
         style={{ background: 'linear-gradient(135deg,#07071a 0%,#0d1a2a 50%,#07071a 100%)' }}>
-        <div className="absolute inset-0" style={{ backgroundImage:'linear-gradient(rgba(0,255,136,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,136,0.04) 1px,transparent 1px)', backgroundSize:'60px 60px' }}/>
+        <div className="absolute inset-0" style={{ backgroundImage:'linear-gradient(rgba(6,182,212,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(6,182,212,0.04) 1px,transparent 1px)', backgroundSize:'60px 60px' }}/>
         <StarField />
-        <div className="absolute top-1/4 left-1/4 w-80 h-80 rounded-full blur-3xl" style={{ background:'radial-gradient(circle,rgba(0,255,136,0.1) 0%,transparent 70%)' }}/>
+        <div className="absolute top-1/4 left-1/4 w-80 h-80 rounded-full blur-3xl" style={{ background:'radial-gradient(circle,rgba(6,182,212,0.1) 0%,transparent 70%)' }}/>
         <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full blur-3xl" style={{ background:'radial-gradient(circle,rgba(0,212,255,0.07) 0%,transparent 70%)' }}/>
         <div className="relative z-10 flex flex-col items-center text-center">
-          <div className="mb-5 animate-float" style={{ filter:'drop-shadow(0 0 30px rgba(0,255,136,0.7))' }}>
+          <div className="mb-5 animate-float" style={{ filter:'drop-shadow(0 0 30px rgba(6,182,212,0.7))' }}>
             <img src="/logo.png" alt="matchify.pro" className="h-20 w-auto" />
           </div>
           <h1 className="text-4xl font-black mb-2">
             <span style={{ color:'#ffffff', textShadow:'0 0 25px rgba(255,255,255,0.3)' }}>matchify</span>
-            <span style={{ color:'#00ff88', textShadow:'0 0 25px rgba(0,255,136,0.5)' }}>.pro</span>
+            <span style={{ color:'#06b6d4', textShadow:'0 0 25px rgba(6,182,212,0.5)' }}>.pro</span>
           </h1>
           <p className="text-sm mb-6" style={{ color:'rgba(255,255,255,0.45)' }}>India's fastest growing badminton community</p>
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8 text-xs font-bold" style={{ background:'rgba(0,255,136,0.08)', border:'1px solid rgba(0,255,136,0.2)', color:'#00ff88' }}>
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8 text-xs font-bold" style={{ background:'rgba(6,182,212,0.08)', border:'1px solid rgba(6,182,212,0.2)', color:'#06b6d4' }}>
             <Rocket className="w-3.5 h-3.5" /> Start Your Journey Today!
           </div>
           <div className="space-y-3 w-full max-w-xs">
@@ -203,7 +203,7 @@ const RegisterPage = () => {
               { icon:<Gift className="w-4 h-4"/>, text:'₹10 welcome bonus',       c:'#f59e0b' },
               { icon:<Star className="w-4 h-4"/>, text:'Free to join',              c:'#a78bfa' },
               { icon:<Users className="w-4 h-4"/>,text:'Multiple roles included',   c:'#00d4ff' },
-              { icon:<Trophy className="w-4 h-4"/>,text:'Track your progress',      c:'#00ff88' },
+              { icon:<Trophy className="w-4 h-4"/>,text:'Track your progress',      c:'#06b6d4' },
             ].map((item,i)=>(
               <div key={i} className="flex items-center gap-3 p-3 rounded-xl border" style={{ background:'rgba(255,255,255,0.03)', borderColor:'rgba(255,255,255,0.08)' }}>
                 <span style={{ color:item.c }}>{item.icon}</span>
@@ -222,19 +222,19 @@ const RegisterPage = () => {
           <StarField />
         </div>
 
-        <div className="absolute top-0 right-0 w-72 h-72 rounded-full blur-3xl pointer-events-none" style={{ background:'radial-gradient(circle,rgba(0,255,136,0.06) 0%,transparent 70%)' }}/>
+        <div className="absolute top-0 right-0 w-72 h-72 rounded-full blur-3xl pointer-events-none" style={{ background:'radial-gradient(circle,rgba(6,182,212,0.06) 0%,transparent 70%)' }}/>
         <div className="absolute bottom-0 left-0 w-72 h-72 rounded-full blur-3xl pointer-events-none" style={{ background:'radial-gradient(circle,rgba(0,212,255,0.05) 0%,transparent 70%)' }}/>
 
         <div className="w-full max-w-xl py-8 relative z-10">
           {/* Mobile Logo */}
           <div className="lg:hidden text-center mb-6">
             <Link to="/" className="inline-flex flex-col items-center gap-1">
-              <div style={{ filter:'drop-shadow(0 0 16px rgba(0,255,136,0.8))' }}>
+              <div style={{ filter:'drop-shadow(0 0 16px rgba(6,182,212,0.8))' }}>
                 <img src="/logo.png" alt="matchify.pro" className="h-14 w-auto" />
               </div>
               <span className="text-2xl font-black tracking-tight">
                 <span style={{ color:'#ffffff', textShadow:'0 0 20px rgba(255,255,255,0.3)' }}>matchify</span>
-                <span style={{ color:'#00ff88', textShadow:'0 0 20px rgba(0,255,136,0.5)' }}>.pro</span>
+                <span style={{ color:'#06b6d4', textShadow:'0 0 20px rgba(6,182,212,0.5)' }}>.pro</span>
               </span>
               <span className="text-xs" style={{ color:'rgba(255,255,255,0.35)' }}>India's Premier Badminton Platform</span>
             </Link>
@@ -243,13 +243,13 @@ const RegisterPage = () => {
           {/* Glass card */}
           <div className="rounded-2xl p-5 sm:p-7" style={{
             background: 'rgba(13,13,36,0.85)',
-            border: '1px solid rgba(0,255,136,0.12)',
+            border: '1px solid rgba(6,182,212,0.12)',
             backdropFilter: 'blur(20px)',
-            boxShadow: '0 0 40px rgba(0,255,136,0.05), 0 25px 50px rgba(0,0,0,0.4)',
+            boxShadow: '0 0 40px rgba(6,182,212,0.05), 0 25px 50px rgba(0,0,0,0.4)',
           }}>
 
           <div className="text-center mb-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold mb-3" style={{ background:'rgba(0,255,136,0.08)', border:'1px solid rgba(0,255,136,0.2)', color:'#00ff88' }}>
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold mb-3" style={{ background:'rgba(6,182,212,0.08)', border:'1px solid rgba(6,182,212,0.2)', color:'#06b6d4' }}>
               <SparklesIcon className="w-3.5 h-3.5" /> Join the Champions!
             </div>
             <h2 className="text-2xl sm:text-3xl font-black text-white mb-1">Create Account</h2>
@@ -263,7 +263,7 @@ const RegisterPage = () => {
               <Link
                 to={redirectUrl ? `/login?redirect=${encodeURIComponent(redirectUrl)}` : '/login'}
                 className="inline-block w-full text-center py-2.5 rounded-lg text-sm font-bold"
-                style={{ background:'linear-gradient(135deg,#00ff88,#00d4ff)', color:'#07071a' }}
+                style={{ background:'linear-gradient(135deg,#06b6d4,#00d4ff)', color:'#07071a' }}
               >
                 Sign in to your account →
               </Link>
@@ -282,22 +282,22 @@ const RegisterPage = () => {
             {/* All Roles Included - Informational */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-3">
-                You'll Get All 3 Roles <span style={{ color: '#00ff88' }}>✓</span>
+                You'll Get All 3 Roles <span style={{ color: '#06b6d4' }}>✓</span>
               </label>
               <div className="grid grid-cols-3 gap-3">
                 {roles.map((role) => (
                   <div
                     key={role.id}
-                    className="relative p-4 rounded-xl border" style={{ background:'rgba(0,255,136,0.06)', borderColor:'rgba(0,255,136,0.25)' }}
+                    className="relative p-4 rounded-xl border" style={{ background:'rgba(6,182,212,0.06)', borderColor:'rgba(6,182,212,0.25)' }}
                   >
-                    <CheckCircleIcon className="absolute top-2 right-2 w-5 h-5" style={{ color: '#00ff88' }} />
+                    <CheckCircleIcon className="absolute top-2 right-2 w-5 h-5" style={{ color: '#06b6d4' }} />
                     <div className="text-2xl mb-2">{role.icon}</div>
                     <p className="font-semibold text-white text-sm">{role.title}</p>
                     <p className="text-xs text-gray-500">{role.desc}</p>
                   </div>
                 ))}
               </div>
-              <p className="mt-2 text-xs flex items-center gap-1" style={{ color: '#00ff88' }}>
+              <p className="mt-2 text-xs flex items-center gap-1" style={{ color: '#06b6d4' }}>
                 <CheckCircleIcon className="w-4 h-4" />
                 Switch between roles anytime from your dashboard
               </p>
@@ -332,7 +332,7 @@ const RegisterPage = () => {
                     ⚠ Enter email or phone
                   </span>
                 ) : (
-                  <span className="text-xs font-semibold" style={{ color: '#00ff88' }}>
+                  <span className="text-xs font-semibold" style={{ color: '#06b6d4' }}>
                     ✓ Looks good
                   </span>
                 )}
@@ -412,13 +412,13 @@ const RegisterPage = () => {
                 </div>
                 {/* Password requirements */}
                 <div className="mt-2 space-y-1">
-                  <p className="text-xs flex items-center gap-1" style={{ color: /[A-Z]/.test(formData.password) ? '#00ff88' : 'rgba(255,255,255,0.35)' }}>
+                  <p className="text-xs flex items-center gap-1" style={{ color: /[A-Z]/.test(formData.password) ? '#06b6d4' : 'rgba(255,255,255,0.35)' }}>
                     <span>{/[A-Z]/.test(formData.password) ? '✓' : '○'}</span> One uppercase letter
                   </p>
-                  <p className="text-xs flex items-center gap-1" style={{ color: (formData.password.match(/[0-9]/g) || []).length >= 2 ? '#00ff88' : 'rgba(255,255,255,0.35)' }}>
+                  <p className="text-xs flex items-center gap-1" style={{ color: (formData.password.match(/[0-9]/g) || []).length >= 2 ? '#06b6d4' : 'rgba(255,255,255,0.35)' }}>
                     <span>{(formData.password.match(/[0-9]/g) || []).length >= 2 ? '✓' : '○'}</span> Two numbers
                   </p>
-                  <p className="text-xs flex items-center gap-1" style={{ color: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(formData.password) ? '#00ff88' : 'rgba(255,255,255,0.35)' }}>
+                  <p className="text-xs flex items-center gap-1" style={{ color: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(formData.password) ? '#06b6d4' : 'rgba(255,255,255,0.35)' }}>
                     <span>{/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(formData.password) ? '✓' : '○'}</span> One symbol (!@#$...)
                   </p>
                 </div>
@@ -485,7 +485,7 @@ const RegisterPage = () => {
                 type="submit"
                 disabled={loading}
                 className="w-full py-3.5 rounded-xl font-bold text-sm transition-all duration-300 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                style={{ background:'linear-gradient(135deg,#00c853,#00ff88)', color:'#003320', boxShadow:'0 0 20px rgba(0,255,136,0.35)' }}
+                style={{ background:'linear-gradient(135deg,#0891b2,#06b6d4)', color:'#003320', boxShadow:'0 0 20px rgba(6,182,212,0.35)' }}
               >
                 {loading ? (
                   <>
@@ -513,7 +513,7 @@ const RegisterPage = () => {
             <p className="text-sm" style={{ color:'rgba(255,255,255,0.4)' }}>
               Already have an account?{' '}
               <Link to={redirectUrl ? `/login?redirect=${encodeURIComponent(redirectUrl)}` : '/login'}
-                className="font-bold transition-colors hover:underline" style={{ color:'#00ff88' }}>
+                className="font-bold transition-colors hover:underline" style={{ color:'#06b6d4' }}>
                 Sign in here →
               </Link>
             </p>
@@ -557,7 +557,7 @@ const RegisterPage = () => {
                   setTermsAccepted(true);
                   setShowTermsModal(false);
                 }}
-                className="px-6 py-2 rounded-lg hover:shadow-lg transition-all font-bold" style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#003320' }}
+                className="px-6 py-2 rounded-lg hover:shadow-lg transition-all font-bold" style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)', color: '#003320' }}
               >
                 I Accept
               </button>
@@ -600,7 +600,7 @@ const RegisterPage = () => {
                   setTermsAccepted(true);
                   setShowPrivacyModal(false);
                 }}
-                className="px-6 py-2 rounded-lg hover:shadow-lg transition-all font-bold" style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#003320' }}
+                className="px-6 py-2 rounded-lg hover:shadow-lg transition-all font-bold" style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)', color: '#003320' }}
               >
                 I Accept
               </button>
@@ -663,14 +663,14 @@ const TermsContent = () => (
 
     <section>
       <h3 className="text-xl font-bold text-white mb-3">3. PAYMENT TERMS</h3>
-      <div className="rounded-lg p-4 mb-4" style={{ background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.25)' }}>
-        <p className="font-semibold mb-2" style={{ color: '#00ff88' }}>💰 PAYMENT BREAKDOWN</p>
+      <div className="rounded-lg p-4 mb-4" style={{ background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.25)' }}>
+        <p className="font-semibold mb-2" style={{ color: '#06b6d4' }}>💰 PAYMENT BREAKDOWN</p>
         <div className="space-y-2 text-sm">
           <div className="flex justify-between">
             <span>Players pay to:</span>
             <span className="font-semibold text-white">Matchify.pro Admin (100%)</span>
           </div>
-          <div className="my-2" style={{ borderTop: '1px solid rgba(0,255,136,0.2)' }}></div>
+          <div className="my-2" style={{ borderTop: '1px solid rgba(6,182,212,0.2)' }}></div>
           <div className="flex justify-between">
             <span>Platform keeps:</span>
             <span className="font-semibold text-purple-300">3% (Platform Fee)</span>
@@ -679,7 +679,7 @@ const TermsContent = () => (
             <span>Organizer gets (Total):</span>
             <span className="font-semibold text-cyan-300">97%</span>
           </div>
-          <div className="my-2" style={{ borderTop: '1px solid rgba(0,255,136,0.2)' }}></div>
+          <div className="my-2" style={{ borderTop: '1px solid rgba(6,182,212,0.2)' }}></div>
           <div className="pl-4 space-y-1">
             <div className="flex justify-between text-xs">
               <span>→ First Payment (BEFORE tournament):</span>
@@ -749,8 +749,8 @@ const TermsContent = () => (
 
     <section>
       <h3 className="text-xl font-bold text-white mb-3">6. GAMBLING DISCLAIMER</h3>
-      <div className="rounded-lg p-4" style={{ background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.2)' }}>
-        <p className="font-semibold mb-2" style={{ color: '#00ff88' }}>✓ GAME OF SKILL</p>
+      <div className="rounded-lg p-4" style={{ background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.2)' }}>
+        <p className="font-semibold mb-2" style={{ color: '#06b6d4' }}>✓ GAME OF SKILL</p>
         <ul className="list-disc pl-6 space-y-2 text-sm">
           <li>Badminton is a <strong>game of SKILL</strong>, not chance</li>
           <li>This platform does NOT involve gambling</li>
@@ -937,8 +937,8 @@ const PrivacyContent = () => (
         <li>Required by tax authorities</li>
       </ul>
 
-      <div className="rounded-lg p-4 mt-4" style={{ background: 'rgba(0,255,136,0.08)', border: '1px solid rgba(0,255,136,0.2)' }}>
-        <p className="font-semibold text-sm" style={{ color: '#00ff88' }}>✓ WE DO NOT:</p>
+      <div className="rounded-lg p-4 mt-4" style={{ background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.2)' }}>
+        <p className="font-semibold text-sm" style={{ color: '#06b6d4' }}>✓ WE DO NOT:</p>
         <ul className="list-disc pl-6 space-y-1 text-sm mt-2">
           <li>Sell your data to third parties</li>
           <li>Use your data for unrelated purposes</li>

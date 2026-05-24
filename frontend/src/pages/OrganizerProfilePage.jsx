@@ -21,7 +21,7 @@ import {
 
 const B = {
   bg: '#07071a', card: 'rgba(255,255,255,0.04)', border: 'rgba(255,255,255,0.08)',
-  cardDark: '#0d1025', green: '#00ff88', cyan: '#00d4ff', purple: '#a855f7',
+  cardDark: '#0d1025', green: '#06b6d4', cyan: '#00d4ff', purple: '#a855f7',
   amber: '#fbbf24', sub: 'rgba(255,255,255,0.6)', dim: 'rgba(255,255,255,0.4)',
 };
 
@@ -72,7 +72,7 @@ export default function OrganizerProfilePage() {
           <Link
             to="/dashboard"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-medium text-white transition-all"
-            style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#07071a', fontWeight: 700 }}
+            style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)', color: '#07071a', fontWeight: 700 }}
           >
             <ArrowLeftIcon className="w-5 h-5" />
             Back to Dashboard
@@ -190,7 +190,7 @@ export default function OrganizerProfilePage() {
 
           <div className="rounded-2xl p-6 border transition-all" style={{ background: B.card, borderColor: B.border }}>
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl shadow-lg mb-4"
-              style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)' }}>
+              style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)' }}>
               <CurrencyRupeeIcon className="w-6 h-6 text-white" />
             </div>
             <p className="text-3xl font-bold text-white">₹{profile.stats.totalRevenue}</p>
@@ -280,7 +280,7 @@ export default function OrganizerProfilePage() {
           <div className="rounded-2xl p-6 border" style={{ background: B.card, borderColor: B.border }}>
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-                style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)' }}>
+                style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)' }}>
                 <BanknotesIcon className="w-5 h-5 text-white" />
               </div>
               <h3 className="text-lg font-bold text-white">Financial Overview</h3>
@@ -353,7 +353,7 @@ export default function OrganizerProfilePage() {
                 style={{ background: 'rgba(0,0,0,0.2)', borderColor: 'rgba(255,255,255,0.06)' }}
               >
                 <div className="w-12 h-12 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform"
-                  style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)' }}>
+                  style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)' }}>
                   <CalendarIcon className="w-6 h-6 text-white" />
                 </div>
                 <div>

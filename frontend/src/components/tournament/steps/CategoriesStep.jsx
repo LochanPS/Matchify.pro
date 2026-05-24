@@ -60,7 +60,7 @@ const CategoriesStep = ({ formData, updateFormData, onNext, onPrev }) => {
         <h2 
           className="text-lg font-black mb-2"
           style={{
-            background: 'linear-gradient(135deg, #00c853, #00ff88)',
+            background: 'linear-gradient(135deg, #0891b2, #06b6d4)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text'

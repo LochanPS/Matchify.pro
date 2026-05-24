@@ -140,7 +140,7 @@ const Navbar = () => {
   if (user?.isAdmin) {
     return (
       <header className="sticky top-0 z-50 backdrop-blur-lg border-b shadow-lg shadow-black/40"
-        style={{ background: 'rgba(7,7,26,0.96)', borderColor: 'rgba(0,255,136,0.1)' }}>
+        style={{ background: 'rgba(7,7,26,0.96)', borderColor: 'rgba(6,182,212,0.1)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-8">
@@ -457,7 +457,7 @@ const Navbar = () => {
                       <Mail className="w-4 h-4 flex-shrink-0 text-purple-400" />
                       <span className="flex-1 text-sm font-semibold text-purple-200 truncate">matchify.pro@gmail.com</span>
                       <button onClick={handleCopyEmail} className="p-1 rounded-lg transition-colors"
-                        style={{ color: emailCopied ? '#00ff88' : '#a855f7' }} title="Copy email">
+                        style={{ color: emailCopied ? '#22d3ee' : '#a855f7' }} title="Copy email">
                         {emailCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                       </button>
                     </div>
@@ -522,7 +522,7 @@ const MobileNavItem = ({ to, children, onClick, icon, color, active }) => {
     orange: { bg: 'rgba(245,158,11,0.1)',  border: 'rgba(245,158,11,0.2)',  activeBg: 'rgba(245,158,11,0.18)',  text: '#fbbf24',  iconBg: 'rgba(245,158,11,0.2)' },
     cyan:   { bg: 'rgba(6,182,212,0.1)',   border: 'rgba(6,182,212,0.2)',   activeBg: 'rgba(6,182,212,0.18)',   text: '#22d3ee',  iconBg: 'rgba(6,182,212,0.2)' },
     purple: { bg: 'rgba(168,85,247,0.1)',  border: 'rgba(168,85,247,0.2)',  activeBg: 'rgba(168,85,247,0.2)',   text: '#c4b5fd',  iconBg: 'rgba(168,85,247,0.25)' },
-    green:  { bg: 'rgba(0,200,83,0.1)',    border: 'rgba(0,200,83,0.2)',    activeBg: 'rgba(0,200,83,0.18)',    text: '#00ff88',  iconBg: 'rgba(0,200,83,0.2)' },
+    green:  { bg: 'rgba(6,182,212,0.1)',    border: 'rgba(6,182,212,0.2)',    activeBg: 'rgba(6,182,212,0.18)',    text: '#22d3ee',  iconBg: 'rgba(6,182,212,0.2)' },
   };
   const s = palette[color] || palette.blue;
   return (

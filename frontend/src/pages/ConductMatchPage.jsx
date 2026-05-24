@@ -10,7 +10,7 @@ const B = {
   border: 'rgba(255,255,255,0.08)',
   input: 'rgba(0,0,0,0.3)',
   inputBorder: 'rgba(255,255,255,0.1)',
-  green: '#00ff88',
+  green: '#06b6d4',
   cyan: '#00d4ff',
   purple: '#a855f7',
   red: '#f87171',
@@ -131,7 +131,7 @@ const ConductMatchPage = () => {
       <div className="min-h-screen flex items-center justify-center px-6" style={{ background: B.bg }}>
         <div className="text-center">
           <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
-            style={{ background: 'linear-gradient(135deg,rgba(0,255,136,0.25),rgba(0,200,83,0.15))', border: '1px solid rgba(0,255,136,0.4)' }}>
+            style={{ background: 'linear-gradient(135deg,rgba(6,182,212,0.25),rgba(6,182,212,0.15))', border: '1px solid rgba(6,182,212,0.4)' }}>
             <Play className="w-7 h-7" style={{ color: B.green }} />
           </div>
           <h2 className="text-lg font-black text-white mb-1">
@@ -143,7 +143,7 @@ const ConductMatchPage = () => {
           <button
             onClick={() => navigate(`/match/${matchId}/score`)}
             className="px-6 py-3 rounded-xl font-black text-sm"
-            style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#07071a', boxShadow: '0 4px 16px rgba(0,200,83,0.35)' }}>
+            style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)', color: '#07071a', boxShadow: '0 4px 16px rgba(6,182,212,0.35)' }}>
             {match.status === 'COMPLETED' ? 'View Match Result' : 'Go to Scoring →'}
           </button>
           <div className="mt-3">
@@ -251,10 +251,10 @@ const ConductMatchPage = () => {
                   {player1?.profilePhoto ? (
                     <img src={player1.profilePhoto} alt={player1.name}
                       className="w-16 h-16 rounded-2xl object-cover"
-                      style={{ border: `2px solid rgba(0,255,136,0.4)`, boxShadow: '0 0 20px rgba(0,255,136,0.2)' }} />
+                      style={{ border: `2px solid rgba(6,182,212,0.4)`, boxShadow: '0 0 20px rgba(6,182,212,0.2)' }} />
                   ) : (
                     <div className="w-16 h-16 rounded-2xl flex items-center justify-center font-black text-xl text-white"
-                      style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', boxShadow: '0 0 20px rgba(0,255,136,0.25)' }}>
+                      style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)', boxShadow: '0 0 20px rgba(6,182,212,0.25)' }}>
                       {player1?.name?.charAt(0)?.toUpperCase() || 'P'}
                     </div>
                   )}
@@ -320,17 +320,17 @@ const ConductMatchPage = () => {
           {/* ── Umpire Card ───────────────────────────────────────────────── */}
           {umpire && (
             <div className="rounded-2xl flex items-center gap-4 px-4 py-3.5"
-              style={{ background: 'rgba(0,255,136,0.06)', border: '1px solid rgba(0,255,136,0.2)' }}>
+              style={{ background: 'rgba(6,182,212,0.06)', border: '1px solid rgba(6,182,212,0.2)' }}>
               <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
-                style={{ background: 'linear-gradient(135deg,rgba(0,255,136,0.3),rgba(0,200,83,0.2))', border: '1px solid rgba(0,255,136,0.3)' }}>
+                style={{ background: 'linear-gradient(135deg,rgba(6,182,212,0.3),rgba(6,182,212,0.2))', border: '1px solid rgba(6,182,212,0.3)' }}>
                 <Gavel className="w-5 h-5" style={{ color: B.green }} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-bold uppercase tracking-widest mb-0.5" style={{ color: 'rgba(0,255,136,0.6)' }}>Match Official</p>
+                <p className="text-xs font-bold uppercase tracking-widest mb-0.5" style={{ color: 'rgba(6,182,212,0.6)' }}>Match Official</p>
                 <p className="text-sm font-black text-white truncate">{umpire.name}</p>
               </div>
               <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg flex-shrink-0"
-                style={{ background: 'rgba(0,255,136,0.1)', border: '1px solid rgba(0,255,136,0.25)' }}>
+                style={{ background: 'rgba(6,182,212,0.1)', border: '1px solid rgba(6,182,212,0.25)' }}>
                 <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: B.green }} />
                 <span className="text-xs font-bold" style={{ color: B.green }}>Ready</span>
               </div>
@@ -400,7 +400,7 @@ const ConductMatchPage = () => {
                     onClick={() => setExtension(true)}
                     className="flex-1 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all"
                     style={extension
-                      ? { background: 'linear-gradient(135deg,rgba(0,255,136,0.25),rgba(0,200,83,0.2))', border: '1.5px solid rgba(0,255,136,0.5)', color: B.green }
+                      ? { background: 'linear-gradient(135deg,rgba(6,182,212,0.25),rgba(6,182,212,0.2))', border: '1.5px solid rgba(6,182,212,0.5)', color: B.green }
                       : { background: 'rgba(255,255,255,0.04)', border: `1.5px solid ${B.inputBorder}`, color: 'rgba(255,255,255,0.4)' }}
                   >
                     {extension && <Check className="w-4 h-4" />}
@@ -457,7 +457,7 @@ const ConductMatchPage = () => {
               onClick={handleStartMatch}
               disabled={assigning}
               className="w-full py-4 rounded-2xl font-black text-base transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-              style={{ background: 'linear-gradient(135deg,#00c853,#00ff88)', color: '#07071a', boxShadow: '0 6px 20px rgba(0,200,83,0.35)' }}>
+              style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)', color: '#07071a', boxShadow: '0 6px 20px rgba(6,182,212,0.35)' }}>
               {assigning
                 ? <><div className="w-5 h-5 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: '#07071a transparent transparent transparent' }} />Starting…</>
                 : <><Play className="w-5 h-5" />Start Match</>}

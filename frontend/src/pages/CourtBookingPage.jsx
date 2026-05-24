@@ -10,7 +10,7 @@ import { fetchUpload } from '../utils/fetchUpload';
 const B = {
   bg: '#0a0a0f', card: '#12121a', card2: '#1a1a26',
   border: 'rgba(255,255,255,0.07)',
-  cyan: '#00d4ff', green: '#10b981', amber: '#f59e0b',
+  cyan: '#00d4ff', green: '#06b6d4', amber: '#f59e0b',
   red: '#ef4444',
   text: 'rgba(255,255,255,0.85)', muted: 'rgba(255,255,255,0.45)',
 };
@@ -508,7 +508,7 @@ export default function CourtBookingPage() {
               disabled={!screenshot || submitting}
               className="w-full py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-2"
               style={{
-                background: screenshot && !submitting ? `linear-gradient(135deg, ${B.green}, #059669)` : B.card2,
+                background: screenshot && !submitting ? `linear-gradient(135deg, ${B.green}, #0891b2)` : B.card2,
                 color: screenshot && !submitting ? '#000' : B.muted
               }}
             >

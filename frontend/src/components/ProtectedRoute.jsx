@@ -10,7 +10,7 @@ const ProtectedRoute = ({ children }) => {
       <div className="flex items-center justify-center min-h-screen" style={{ background: '#07071a' }}>
         <div className="text-center">
           <div className="animate-spin rounded-full h-10 w-10 border-b-2 mx-auto mb-3"
-            style={{ borderColor: '#00ff88' }} />
+            style={{ borderColor: '#22d3ee' }} />
           <div className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>Loading…</div>
         </div>
       </div>

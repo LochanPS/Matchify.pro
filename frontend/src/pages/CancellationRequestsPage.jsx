@@ -21,7 +21,7 @@ const BRAND = {
   cardDark: '#0d1025',
   card: 'rgba(255,255,255,0.04)',
   border: 'rgba(255,255,255,0.08)',
-  green: '#00ff88',
+  green: '#06b6d4',
   cyan: '#00d4ff',
   purple: '#a855f7',
   amber: '#fbbf24',
@@ -70,7 +70,7 @@ export default function CancellationRequestsPage() {
     if (request.status === 'cancelled') {
       return (
         <span className="px-2.5 py-1 rounded-lg text-xs font-semibold"
-          style={{ background: 'rgba(0,255,136,0.12)', color: BRAND.green, border: '1px solid rgba(0,255,136,0.25)' }}>
+          style={{ background: 'rgba(6,182,212,0.12)', color: BRAND.green, border: '1px solid rgba(6,182,212,0.25)' }}>
           Approved
         </span>
       );

@@ -537,7 +537,13 @@ function AppContent() {
           
           
           {/* New Admin Panel Routes */}
-          <Route path="/admin" element={<AdminLayout />}>
+          <Route path="/admin" element={
+            <ProtectedRoute>
+              <RoleRoute allowedRoles={['ADMIN']}>
+                <AdminLayout />
+              </RoleRoute>
+            </ProtectedRoute>
+          }>
             <Route path="users" element={<UserManagementPage />} />
             <Route path="invites" element={<InviteManagementPage />} />
             <Route path="audit-logs" element={<AuditLogsPage />} />

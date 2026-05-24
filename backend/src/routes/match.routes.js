@@ -234,13 +234,26 @@ router.put('/:matchId/score', authenticate, async (req, res) => {
     const { matchId } = req.params;
     let { score, player } = req.body;
     const userRoles = req.user.roles || [];
+    const userId = req.user.userId || req.user.id;
 
-    // ── Auth: role-based only (skip findUnique JOIN on every point tap) ──
-    // Umpires, admins, and organisers are the only roles that reach the scoring
-    // console. Match-specific umpire assignment is enforced at the UI level.
+    // ── Auth: role check first (fast), then assignment check for umpires ──
     const canScore = userRoles.some(r => ['UMPIRE', 'ADMIN', 'ORGANIZER'].includes(r));
     if (!canScore) {
       return res.status(403).json({ success: false, message: 'Not authorized to update match scores' });
+    }
+
+    // For umpires: verify assigned to this specific match (admins/organisers skip)
+    if (userRoles.includes('UMPIRE') && !userRoles.includes('ADMIN') && !userRoles.includes('ORGANIZER')) {
+      const matchAssignment = await prisma.match.findUnique({
+        where: { id: matchId },
+        select: { umpireId: true }
+      });
+      if (!matchAssignment) {
+        return res.status(404).json({ success: false, message: 'Match not found' });
+      }
+      if (matchAssignment.umpireId !== userId) {
+        return res.status(403).json({ success: false, message: 'Not authorized: not assigned as umpire for this match' });
+      }
     }
 
     // ── Point-by-point mode: { player: 'player1'|'player2' } ─────────────

@@ -278,7 +278,7 @@ router.post('/users/:id/login-as', authenticate, requireAdmin, async (req, res) 
 });
 
 // Return to admin from impersonation
-router.post('/return-to-admin', authenticate, async (req, res) => {
+router.post('/return-to-admin', authenticate, requireAdmin, async (req, res) => {
   console.log('🔄 Return to admin endpoint hit!');
   console.log('User data:', req.user);
   try {
@@ -410,7 +410,7 @@ router.post('/return-to-admin', authenticate, async (req, res) => {
  * Manually award tournament points (Admin only)
  * POST /api/admin/award-points/:tournamentId/:categoryId
  */
-router.post('/award-points/:tournamentId/:categoryId', authenticate, async (req, res) => {
+router.post('/award-points/:tournamentId/:categoryId', authenticate, requireAdmin, async (req, res) => {
   try {
     const { tournamentId, categoryId } = req.params;
     const userId = req.user.userId || req.user.id;

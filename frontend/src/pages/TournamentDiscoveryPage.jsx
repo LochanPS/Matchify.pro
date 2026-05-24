@@ -173,24 +173,24 @@ export default function TournamentDiscoveryPage() {
     <div className="min-h-screen relative overflow-hidden pb-6" style={{ background: '#07071a' }}>
       {/* Animated Background Elements */}
       <div className="fixed top-0 bottom-0 pointer-events-none overflow-hidden" style={{ left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: "480px" }}>
-        <div 
-          className="absolute top-0 right-0 w-72 h-72 rounded-full blur-3xl opacity-30"
-          style={{ 
-            background: 'radial-gradient(circle, rgba(0,255,136,0.6), transparent)',
+        <div
+          className="absolute top-0 right-0 w-72 h-72 rounded-full blur-3xl"
+          style={{
+            background: 'radial-gradient(circle, rgba(0,180,160,0.15), transparent)',
             animation: 'glow 4s ease-in-out infinite'
           }}
         />
-        <div 
-          className="absolute bottom-1/3 left-0 w-64 h-64 rounded-full blur-3xl opacity-25"
-          style={{ 
-            background: 'radial-gradient(circle, rgba(168,85,247,0.6), transparent)',
+        <div
+          className="absolute bottom-1/3 left-0 w-64 h-64 rounded-full blur-3xl"
+          style={{
+            background: 'radial-gradient(circle, rgba(99,102,241,0.1), transparent)',
             animation: 'glow 5s ease-in-out infinite reverse'
           }}
         />
-        <div 
-          className="absolute top-1/2 right-1/4 w-56 h-56 rounded-full blur-3xl opacity-20"
-          style={{ 
-            background: 'radial-gradient(circle, rgba(6,182,212,0.6), transparent)',
+        <div
+          className="absolute top-1/2 right-1/4 w-56 h-56 rounded-full blur-3xl"
+          style={{
+            background: 'radial-gradient(circle, rgba(6,182,212,0.09), transparent)',
             animation: 'glow 6s ease-in-out infinite'
           }}
         />
@@ -248,25 +248,15 @@ export default function TournamentDiscoveryPage() {
             <div 
               className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold mb-2 relative overflow-hidden"
               style={{
-                background: 'linear-gradient(135deg, rgba(245,158,11,0.2), rgba(251,146,60,0.15))',
-                border: '2px solid rgba(245,158,11,0.4)',
-                color: '#fbbf24',
-                boxShadow: '0 4px 15px rgba(245,158,11,0.3)'
+                background: 'rgba(245,158,11,0.1)',
+                border: '1px solid rgba(245,158,11,0.35)',
+                color: '#fbbf24'
               }}
             >
               <SparklesIcon className="w-3.5 h-3.5" />
               Find Your Next Competition
             </div>
-            <h1 
-              className="text-2xl sm:text-3xl font-black mb-2"
-              style={{
-                background: 'linear-gradient(135deg, #00ff88, #00ff88, #00ff88)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-                textShadow: '0 0 40px rgba(0,255,136,0.3)'
-              }}
-            >
+            <h1 className="text-2xl sm:text-3xl font-black mb-2 text-white">
               Discover Tournaments
             </h1>
             <p className="text-xs sm:text-sm text-white/70 max-w-2xl mx-auto font-medium mb-3">
@@ -278,10 +268,10 @@ export default function TournamentDiscoveryPage() {
               <button
                 onClick={() => navigate('/tournaments/create')}
                 className="flex-1 flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl font-bold text-sm transition-all relative overflow-hidden group"
-                style={{ 
-                  background: 'linear-gradient(135deg, #00ff88, #00ff88)',
-                  color: '#003320',
-                  boxShadow: '0 8px 25px rgba(0,255,136,0.4)'
+                style={{
+                  background: 'linear-gradient(135deg, #10b981, #059669)',
+                  color: '#ffffff',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
                 }}
               >
                 <div 
@@ -297,11 +287,10 @@ export default function TournamentDiscoveryPage() {
               <button
                 onClick={() => navigate('/dashboard')}
                 className="flex-1 flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl font-bold text-sm transition-all"
-                style={{ 
-                  background: 'linear-gradient(135deg, rgba(168,85,247,0.2), rgba(139,92,246,0.15))',
-                  border: '2px solid rgba(168,85,247,0.4)',
+                style={{
+                  background: 'rgba(168,85,247,0.1)',
+                  border: '1px solid rgba(168,85,247,0.35)',
                   color: '#c4b5fd',
-                  boxShadow: '0 4px 15px rgba(168,85,247,0.3)'
                 }}
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -319,15 +308,15 @@ export default function TournamentDiscoveryPage() {
         <div 
           className="rounded-2xl p-4 mb-4 relative overflow-hidden"
           style={{
-            background: 'linear-gradient(135deg, rgba(0,255,136,0.1) 0%, rgba(99,102,241,0.1) 100%)',
-            border: '2px solid rgba(0,255,136,0.2)',
+            background: 'linear-gradient(160deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.06) 100%)',
+            border: '1px solid rgba(255,255,255,0.1)',
             backdropFilter: 'blur(20px)',
-            boxShadow: '0 8px 32px rgba(0,255,136,0.15)'
+            boxShadow: '0 4px 16px rgba(0,0,0,0.3)'
           }}
         >
           <form onSubmit={handleSearch} className="flex flex-col gap-3">
             <div className="relative">
-              <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: '#00ff88' }} />
+              <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: 'rgba(255,255,255,0.4)' }} />
               <input
                 type="text"
                 placeholder="Search tournaments by name..."
@@ -336,8 +325,7 @@ export default function TournamentDiscoveryPage() {
                 className="w-full pl-10 pr-3 py-3 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all text-white text-sm placeholder-gray-400 font-medium"
                 style={{
                   background: 'rgba(0,0,0,0.3)',
-                  border: '1.5px solid rgba(0,255,136,0.3)',
-                  boxShadow: '0 4px 15px rgba(0,0,0,0.2)'
+                  border: '1px solid rgba(255,255,255,0.12)'
                 }}
               />
             </div>
@@ -349,14 +337,13 @@ export default function TournamentDiscoveryPage() {
                 className="flex-1 px-4 py-3 rounded-xl flex items-center justify-center gap-2 font-bold text-sm transition-all relative overflow-hidden"
                 style={
                   showFilters 
-                    ? { 
+                    ? {
                         background: 'linear-gradient(135deg, #a855f7, #8b5cf6)',
                         color: '#ffffff',
-                        boxShadow: '0 6px 20px rgba(168,85,247,0.4)'
                       }
-                    : { 
+                    : {
                         background: 'rgba(255,255,255,0.05)',
-                        border: '1.5px solid rgba(255,255,255,0.1)',
+                        border: '1px solid rgba(255,255,255,0.1)',
                         color: '#ffffff'
                       }
                 }
@@ -370,10 +357,9 @@ export default function TournamentDiscoveryPage() {
               <button
                 type="submit"
                 className="flex-1 px-6 py-3 rounded-xl font-bold text-sm transition-all relative overflow-hidden group"
-                style={{ 
+                style={{
                   background: 'linear-gradient(135deg, #a855f7, #8b5cf6)',
                   color: '#ffffff',
-                  boxShadow: '0 6px 20px rgba(168,85,247,0.4)'
                 }}
               >
                 <div 
@@ -393,7 +379,7 @@ export default function TournamentDiscoveryPage() {
                 {hasActiveFilters && (
                   <button
                     onClick={clearFilters}
-                    className="text-xs flex items-center gap-1 font-bold transition-colors" style={{ color: '#00ff88' }}
+                    className="text-xs flex items-center gap-1 font-bold transition-colors" style={{ color: '#10b981' }}
                   >
                     <XMarkIcon className="h-3.5 w-3.5" />
                     Clear All
@@ -403,7 +389,7 @@ export default function TournamentDiscoveryPage() {
 
               <div className="grid grid-cols-1 gap-3">
                 <div>
-                  <label className="block text-xs font-bold mb-1.5" style={{ color: '#00ff88' }}>City</label>
+                  <label className="block text-xs font-bold mb-1.5" style={{ color: 'rgba(255,255,255,0.5)' }}>City</label>
                   <input
                     type="text"
                     value={filters.city}
@@ -412,7 +398,7 @@ export default function TournamentDiscoveryPage() {
                     className="w-full px-3 py-2.5 text-sm rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all text-white placeholder-gray-500 font-medium"
                     style={{
                       background: 'rgba(0,0,0,0.3)',
-                      border: '1.5px solid rgba(0,255,136,0.3)'
+                      border: '1px solid rgba(255,255,255,0.12)'
                     }}
                   />
                 </div>
@@ -425,8 +411,7 @@ export default function TournamentDiscoveryPage() {
                     className="w-full px-3 py-2.5 text-sm rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all text-white font-medium"
                     style={{
                       background: 'rgba(0,0,0,0.3)',
-                      border: '1.5px solid rgba(168,85,247,0.5)',
-                      boxShadow: '0 4px 15px rgba(168,85,247,0.2)'
+                      border: '1px solid rgba(255,255,255,0.12)'
                     }}
                   >
                     <option value="">All Statuses</option>
@@ -444,8 +429,7 @@ export default function TournamentDiscoveryPage() {
                     className="w-full px-3 py-2.5 text-sm rounded-xl focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all text-white font-medium"
                     style={{
                       background: 'rgba(0,0,0,0.3)',
-                      border: '1.5px solid rgba(6,182,212,0.5)',
-                      boxShadow: '0 4px 15px rgba(6,182,212,0.2)'
+                      border: '1px solid rgba(255,255,255,0.12)'
                     }}
                   >
                     <option value="">All Formats</option>
@@ -495,8 +479,8 @@ export default function TournamentDiscoveryPage() {
             onClick={() => setActiveTab('upcoming')}
             className="flex-1 py-3 text-sm font-black transition-all"
             style={{
-              background: activeTab === 'upcoming' ? 'linear-gradient(135deg,#00ff88,#00d4ff)' : 'rgba(255,255,255,0.04)',
-              color: activeTab === 'upcoming' ? '#07071a' : 'rgba(255,255,255,0.5)',
+              background: activeTab === 'upcoming' ? 'linear-gradient(135deg,#10b981,#059669)' : 'rgba(255,255,255,0.04)',
+              color: activeTab === 'upcoming' ? '#ffffff' : 'rgba(255,255,255,0.5)',
             }}
           >
             🏸 Upcoming {tabCounts.upcoming > 0 && <span style={{ fontSize: '11px', fontWeight: 700, background: 'rgba(0,0,0,0.25)', borderRadius: '999px', padding: '1px 7px', marginLeft: '4px' }}>{tabCounts.upcoming}</span>}
@@ -516,22 +500,14 @@ export default function TournamentDiscoveryPage() {
         {/* Results Count - Compact */}
         {!loading && (
           <div className="flex items-center justify-between mb-3">
-            <p 
-              className="text-sm font-bold"
-              style={{
-                background: 'linear-gradient(135deg, #00ff88, #00ff88)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text'
-              }}
-            >
+            <p className="text-sm font-bold" style={{ color: '#10b981' }}>
               Found <span className="text-white">{total}</span> tournament{total !== 1 ? 's' : ''}
             </p>
             {hasActiveFilters && (
               <button
                 onClick={clearFilters}
                 className="text-xs font-bold transition-colors"
-                style={{ color: '#00ff88' }}
+                style={{ color: '#10b981' }}
               >
                 Clear filters
               </button>
@@ -544,16 +520,16 @@ export default function TournamentDiscoveryPage() {
           <div 
             className="rounded-2xl p-8 sm:p-16 text-center relative overflow-hidden"
             style={{
-              background: 'linear-gradient(135deg, rgba(0,255,136,0.1) 0%, rgba(99,102,241,0.1) 100%)',
-              border: '2px solid rgba(0,255,136,0.2)',
+              background: 'linear-gradient(160deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.04) 100%)',
+              border: '1px solid rgba(255,255,255,0.1)',
               backdropFilter: 'blur(20px)'
             }}
           >
-            <div 
+            <div
               className="w-16 h-16 border-4 rounded-full animate-spin mx-auto"
-              style={{ 
-                borderColor: 'rgba(0,255,136,0.3)',
-                borderTopColor: '#00ff88'
+              style={{
+                borderColor: 'rgba(16,185,129,0.2)',
+                borderTopColor: '#10b981'
               }}
             ></div>
             <p className="text-white/70 mt-6 font-bold">Loading tournaments...</p>
@@ -562,19 +538,19 @@ export default function TournamentDiscoveryPage() {
           <div 
             className="rounded-2xl p-8 sm:p-16 text-center relative overflow-hidden"
             style={{
-              background: 'linear-gradient(135deg, rgba(0,255,136,0.1) 0%, rgba(99,102,241,0.1) 100%)',
-              border: '2px solid rgba(0,255,136,0.2)',
+              background: 'linear-gradient(160deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.04) 100%)',
+              border: '1px solid rgba(255,255,255,0.1)',
               backdropFilter: 'blur(20px)'
             }}
           >
             <div 
               className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl flex items-center justify-center mx-auto mb-6"
               style={{
-                background: 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(168,85,247,0.2))',
-                border: '2px solid rgba(0,255,136,0.3)'
+                background: 'rgba(16,185,129,0.1)',
+                border: '1px solid rgba(16,185,129,0.25)'
               }}
             >
-              <TrophyIcon className="w-10 h-10 sm:w-12 sm:h-12" style={{ color: '#00ff88' }} />
+              <TrophyIcon className="w-10 h-10 sm:w-12 sm:h-12" style={{ color: '#10b981' }} />
             </div>
             <h3 className="text-lg sm:text-xl font-black text-white mb-2">No tournaments found</h3>
             <p className="text-sm sm:text-base text-white/60 mb-6 font-medium">Try adjusting your filters or check back later</p>
@@ -582,10 +558,9 @@ export default function TournamentDiscoveryPage() {
               <button
                 onClick={clearFilters}
                 className="px-6 py-3 rounded-xl font-bold transition-all"
-                style={{ 
-                  background: 'linear-gradient(135deg, #00ff88, #00ff88)',
-                  color: '#003320',
-                  boxShadow: '0 6px 20px rgba(0,255,136,0.4)'
+                style={{
+                  background: 'linear-gradient(135deg, #10b981, #059669)',
+                  color: '#ffffff',
                 }}
               >
                 Clear all filters
@@ -604,11 +579,11 @@ export default function TournamentDiscoveryPage() {
             <div ref={observerTarget} className="py-8 text-center">
               {loading && page > 1 && (
                 <div className="flex flex-col items-center gap-3">
-                  <div 
+                  <div
                     className="w-12 h-12 border-4 rounded-full animate-spin"
-                    style={{ 
-                      borderColor: 'rgba(0,255,136,0.3)',
-                      borderTopColor: '#00ff88'
+                    style={{
+                      borderColor: 'rgba(16,185,129,0.2)',
+                      borderTopColor: '#10b981'
                     }}
                   ></div>
                   <p className="text-white/70 font-bold text-sm">Loading more tournaments...</p>
@@ -616,14 +591,14 @@ export default function TournamentDiscoveryPage() {
               )}
               {!loading && !hasMore && tournaments.length > 0 && (
                 <div className="flex flex-col items-center gap-2">
-                  <div 
+                  <div
                     className="w-10 h-10 rounded-full flex items-center justify-center"
                     style={{
-                      background: 'linear-gradient(135deg, rgba(0,255,136,0.2), rgba(168,85,247,0.2))',
-                      border: '2px solid rgba(0,255,136,0.3)'
+                      background: 'rgba(16,185,129,0.1)',
+                      border: '1px solid rgba(16,185,129,0.25)'
                     }}
                   >
-                    <SparklesIcon className="w-5 h-5" style={{ color: '#00ff88' }} />
+                    <SparklesIcon className="w-5 h-5" style={{ color: '#10b981' }} />
                   </div>
                   <p className="text-white/60 font-bold text-sm">You've reached the end!</p>
                   <p className="text-white/40 text-xs">That's all the tournaments for now</p>
@@ -648,7 +623,7 @@ async function shareTournament(tournament, e) {
 function TournamentCard({ tournament, navigate, index }) {
   const getStatusStyle = (status) => {
     const styles = {
-      published: { bg: 'linear-gradient(135deg, #00ff88, #00ff88)', text: 'Open', color: '#003320' },
+      published: { bg: 'linear-gradient(135deg, #10b981, #059669)', text: 'Open', color: '#ffffff' },
       ongoing: { bg: 'linear-gradient(135deg, #3b82f6, #60a5fa)', text: 'Live', color: '#ffffff' },
       completed: { bg: 'linear-gradient(135deg, #6b7280, #9ca3af)', text: 'Done', color: '#ffffff' },
       cancelled: { bg: 'linear-gradient(135deg, #ef4444, #dc2626)', text: 'Cancelled', color: '#ffffff' },
@@ -658,7 +633,7 @@ function TournamentCard({ tournament, navigate, index }) {
   };
 
   const accentPairs = [
-    ['#00ff88','rgba(0,255,136,0.25)'],
+    ['#10b981','rgba(16,185,129,0.2)'],
     ['#00d4ff','rgba(0,212,255,0.25)'],
     ['#a855f7','rgba(168,85,247,0.25)'],
     ['#f59e0b','rgba(245,158,11,0.25)'],
@@ -782,7 +757,7 @@ function TournamentCard({ tournament, navigate, index }) {
         </p>
         {/* Tournament name with accent glow */}
         <h3 className="font-black text-base text-white leading-snug line-clamp-2"
-          style={{ textShadow: `0 0 20px ${accentColor}40` }}>
+>
           {tournament.name}
         </h3>
 
@@ -801,7 +776,6 @@ function TournamentCard({ tournament, navigate, index }) {
                   background: `linear-gradient(135deg,${accentGlow},rgba(255,255,255,0.04))`,
                   border: `1px solid ${accentGlow}`,
                   color: accentColor,
-                  boxShadow: `0 0 6px ${accentColor}30`,
                 }}>
                 {tag}
               </span>
@@ -849,7 +823,6 @@ function TournamentCard({ tournament, navigate, index }) {
                 : 'rgba(255,255,255,0.07)',
               color: isRegistrationOpen ? '#07071a' : 'rgba(255,255,255,0.55)',
               border: isRegistrationOpen ? 'none' : '1px solid rgba(255,255,255,0.1)',
-              boxShadow: isRegistrationOpen ? `0 4px 18px ${accentColor}50` : 'none',
             }}
           >
             <span className="relative z-10 font-black">

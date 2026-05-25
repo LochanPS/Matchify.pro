@@ -3292,23 +3292,26 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
               <span className="text-xs font-bold uppercase tracking-wider" style={{ color: '#94a3b8' }}>Standings</span>
             </div>
 
-            {/* Column headers — widths MUST match data row stat widths exactly */}
+            {/* Column headers — stat labels wrapped in gap:0 container to match data cell layout exactly */}
             <div className="flex items-center px-2 mb-1" style={{ gap: '4px' }}>
               <div style={{ width: '28px', flexShrink: 0 }} />
               <div className="flex-1 min-w-0">
                 <span style={{ fontSize: '9px', color: 'rgba(255,255,255,0.35)', fontWeight: 700, letterSpacing: '0.07em' }}>PLAYER</span>
               </div>
-              {[
-                { h: 'P',   w: '22px', c: 'rgba(148,163,184,0.7)' },
-                { h: 'W',   w: '22px', c: 'rgba(74,222,128,0.85)' },
-                { h: 'L',   w: '22px', c: 'rgba(248,113,113,0.85)'},
-                { h: 'PTS', w: '28px', c: 'rgba(245,158,11,0.9)'  },
-                { h: 'TP',  w: '30px', c: 'rgba(196,181,253,0.9)' },
-              ].map(({ h, w, c }) => (
-                <div key={h} style={{ width: w, flexShrink: 0, textAlign: 'center' }}>
-                  <span style={{ fontSize: '9px', color: c, fontWeight: 700 }}>{h}</span>
-                </div>
-              ))}
+              {/* gap:0 here — mirrors data cell container which also has gap:0 */}
+              <div className="flex-shrink-0 flex items-center" style={{ gap: '0px' }}>
+                {[
+                  { h: 'P',   w: '22px', c: 'rgba(148,163,184,0.7)' },
+                  { h: 'W',   w: '22px', c: 'rgba(74,222,128,0.85)' },
+                  { h: 'L',   w: '22px', c: 'rgba(248,113,113,0.85)'},
+                  { h: 'PTS', w: '28px', c: 'rgba(245,158,11,0.9)'  },
+                  { h: 'TP',  w: '30px', c: 'rgba(196,181,253,0.9)' },
+                ].map(({ h, w, c }) => (
+                  <div key={h} style={{ width: w, flexShrink: 0, textAlign: 'center' }}>
+                    <span style={{ fontSize: '9px', color: c, fontWeight: 700 }}>{h}</span>
+                  </div>
+                ))}
+              </div>
             </div>
 
             {/* Rows */}

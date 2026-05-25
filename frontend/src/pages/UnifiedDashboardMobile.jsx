@@ -376,9 +376,8 @@ const UnifiedDashboardMobile = () => {
 
         {/* ── Quick Navigation ── */}
         <div className="mb-8" style={{ animation: 'fadeIn 0.5s ease-out both' }}>
-          <div className="flex items-center gap-2.5 mb-4 px-1">
-            <div className="w-1.5 h-4 rounded-full" style={{ background: 'linear-gradient(to bottom, #22d3ee, #a855f7)' }} />
-            <span className="text-xs font-black tracking-widest uppercase" style={{ color: '#67e8f9', letterSpacing: '0.18em' }}>Quick Navigation</span>
+          <div className="flex items-center gap-2 mb-4 px-1">
+            <span className="text-xs font-black uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.35)', letterSpacing: '0.15em' }}>Quick Access</span>
           </div>
           <div className="grid grid-cols-3 gap-3">
             {/* Tournaments — cyan */}
@@ -599,14 +598,15 @@ const UnifiedDashboardMobile = () => {
 
             {/* Edit Profile — solid CTA */}
             <Link to="/profile"
-              className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl font-black text-sm"
+              className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl font-bold text-sm"
               style={{
-                background: 'linear-gradient(135deg, #06b6d4, #0891b2)',
-                color: '#030c10',
-                boxShadow: '0 6px 22px rgba(6,182,212,0.38)',
+                background: 'rgba(255,255,255,0.07)',
+                border: '1px solid rgba(255,255,255,0.12)',
+                color: 'rgba(255,255,255,0.85)',
                 letterSpacing: '0.02em',
+                transition: 'all 0.2s ease',
               }}>
-              <UserIcon className="w-5 h-5" />
+              <UserIcon className="w-4 h-4" />
               Edit Profile
             </Link>
           </div>
@@ -617,56 +617,45 @@ const UnifiedDashboardMobile = () => {
           <div
             className="rounded-2xl p-5 mb-6"
             style={{
-              background: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.10)',
-              boxShadow: '0 4px 28px rgba(0,0,0,0.35)',
+              background: 'rgba(12,18,32,0.9)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              boxShadow: '0 4px 28px rgba(0,0,0,0.4)',
               animation: 'slideUp 0.8s ease-out 0.4s both'
             }}
           >
             <div>
-              <div className="flex items-center gap-3 mb-4">
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center"
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(6,182,212,0.25), rgba(6,182,212,0.12))',
-                    border: '1.5px solid rgba(6,182,212,0.50)',
-                    boxShadow: '0 2px 10px rgba(6,182,212,0.20)'
-                  }}
-                >
-                  <span className="text-xl">🏸</span>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2.5">
+                  <span className="text-lg">🏸</span>
+                  <h3 className="text-sm font-black text-white tracking-wide">PLAYER STATS</h3>
                 </div>
-                <h3 className="text-lg font-black text-white">Player Stats</h3>
+                <Link to="/my-points" className="text-xs font-semibold"
+                  style={{ color: 'rgba(255,255,255,0.35)', letterSpacing: '0.02em' }}>
+                  View all →
+                </Link>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 {stats.map((stat, index) => {
-                  const tileAccent = [
-                    { bg: 'rgba(6,182,212,0.14)',   border: 'rgba(6,182,212,0.48)',  left: '#06b6d4', glow: 'rgba(6,182,212,0.12)', icon: 'rgba(6,182,212,0.28)',  iconBorder: 'rgba(6,182,212,0.58)',  iconColor: '#22d3ee' },
-                    { bg: 'rgba(245,158,11,0.13)',  border: 'rgba(245,158,11,0.44)', left: '#f59e0b', glow: 'rgba(245,158,11,0.10)', icon: 'rgba(245,158,11,0.26)',   iconBorder: 'rgba(245,158,11,0.52)', iconColor: '#fbbf24' },
-                    { bg: 'rgba(59,130,246,0.13)',  border: 'rgba(59,130,246,0.44)', left: '#3b82f6', glow: 'rgba(59,130,246,0.10)', icon: 'rgba(59,130,246,0.26)',   iconBorder: 'rgba(59,130,246,0.52)', iconColor: '#60a5fa' },
-                    { bg: 'rgba(139,92,246,0.13)',  border: 'rgba(139,92,246,0.44)', left: '#8b5cf6', glow: 'rgba(139,92,246,0.10)', icon: 'rgba(139,92,246,0.26)',   iconBorder: 'rgba(139,92,246,0.52)', iconColor: '#a78bfa' },
+                  const tileAccents = [
+                    { left: '#F59E0B', bg: 'rgba(245,158,11,0.08)', iconBg: 'rgba(245,158,11,0.15)', iconColor: '#FCD34D', numColor: '#FCD34D' },
+                    { left: '#06B6D4', bg: 'rgba(6,182,212,0.08)',  iconBg: 'rgba(6,182,212,0.15)',  iconColor: '#22D3EE', numColor: '#67E8F9' },
+                    { left: '#10B981', bg: 'rgba(16,185,129,0.08)', iconBg: 'rgba(16,185,129,0.15)', iconColor: '#34D399', numColor: '#6EE7B7' },
+                    { left: '#8B5CF6', bg: 'rgba(139,92,246,0.08)', iconBg: 'rgba(139,92,246,0.15)', iconColor: '#A78BFA', numColor: '#C4B5FD' },
                   ][index];
                   return (
-                    <div
-                      key={index}
-                      className="p-4 rounded-xl"
+                    <div key={index} className="p-4 rounded-xl"
                       style={{
-                        background: `linear-gradient(135deg, ${tileAccent.bg} 0%, rgba(255,255,255,0.03) 100%)`,
-                        borderTop: `1px solid ${tileAccent.border}`,
-                        borderRight: `1px solid ${tileAccent.border}`,
-                        borderBottom: `1px solid ${tileAccent.border}`,
-                        borderLeft: `3px solid ${tileAccent.left}`,
-                        boxShadow: `0 4px 18px ${tileAccent.glow}`
-                      }}
-                    >
-                      <div
-                        className="inline-flex items-center justify-center w-11 h-11 rounded-xl mb-3"
-                        style={{ background: tileAccent.icon, border: `1px solid ${tileAccent.iconBorder}`, boxShadow: `0 2px 10px ${tileAccent.glow}` }}
-                      >
-                        <stat.icon className="w-5 h-5" style={{ color: tileAccent.iconColor }} />
+                        background: tileAccents.bg,
+                        border: '1px solid rgba(255,255,255,0.07)',
+                        borderLeft: `3px solid ${tileAccents.left}`,
+                      }}>
+                      <div className="inline-flex items-center justify-center w-9 h-9 rounded-lg mb-3"
+                        style={{ background: tileAccents.iconBg }}>
+                        <stat.icon className="w-4 h-4" style={{ color: tileAccents.iconColor }} />
                       </div>
-                      <p className="text-3xl font-black mb-1 text-white">{stat.value}</p>
-                      <p className="text-xs font-semibold" style={{ color: 'rgba(255,255,255,0.52)' }}>{stat.label}</p>
+                      <p className="text-2xl font-black mb-0.5" style={{ color: tileAccents.numColor, letterSpacing: '-0.01em' }}>{stat.value}</p>
+                      <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)', fontWeight: 600 }}>{stat.label}</p>
                     </div>
                   );
                 })}
@@ -680,25 +669,18 @@ const UnifiedDashboardMobile = () => {
           <div
             className="rounded-2xl p-5 mb-6"
             style={{
-              background: 'rgba(255,255,255,0.04)',
+              background: 'rgba(12,18,32,0.9)',
               border: '1px solid rgba(255,255,255,0.08)',
-              boxShadow: '0 4px 24px rgba(0,0,0,0.3)',
+              boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
               animation: 'slideUp 0.8s ease-out 0.4s both'
             }}
           >
             <div>
-              <div className="flex items-center gap-3 mb-4">
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center"
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(139,92,246,0.28), rgba(139,92,246,0.12))',
-                    border: '1.5px solid rgba(139,92,246,0.52)',
-                    boxShadow: '0 2px 10px rgba(139,92,246,0.22)'
-                  }}
-                >
-                  <span className="text-xl">🏆</span>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2.5">
+                  <span className="text-lg">🏆</span>
+                  <h3 className="text-sm font-black text-white tracking-wide">ORGANIZER STATS</h3>
                 </div>
-                <h3 className="text-lg font-black text-white">Organizer Stats</h3>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -745,14 +727,14 @@ const UnifiedDashboardMobile = () => {
 
               <Link
                 to="/tournaments/create"
-                className="flex items-center justify-center gap-2 w-full py-3 rounded-xl font-semibold text-sm transition-all mt-4"
+                className="flex items-center justify-center gap-2 w-full py-3 rounded-xl font-bold text-sm transition-all mt-4"
                 style={{
-                  background: 'rgba(139,92,246,0.09)',
-                  border: '1px solid rgba(139,92,246,0.28)',
-                  color: '#c4b5fd',
+                  background: 'linear-gradient(135deg, #8B5CF6, #7C3AED)',
+                  color: '#ffffff',
+                  boxShadow: '0 4px 16px rgba(139,92,246,0.3)',
                 }}
               >
-                <TrophyIcon className="w-5 h-5" />
+                <TrophyIcon className="w-4 h-4" />
                 <span>Create New Tournament</span>
               </Link>
             </div>

@@ -173,8 +173,12 @@ const Navbar = () => {
 
   // ── Main navbar ───────────────────────────────────────────────────────────
   return (
-    <header className="sticky top-0 z-50 backdrop-blur-lg border-b shadow-lg shadow-purple-900/40"
-      style={{ background: 'linear-gradient(135deg, rgba(88,28,135,0.97) 0%, rgba(67,20,100,0.97) 50%, rgba(49,15,75,0.97) 100%)', borderColor: 'rgba(168,85,247,0.3)' }}>
+    <header className="sticky top-0 z-50 backdrop-blur-xl border-b"
+      style={{
+        background: 'rgba(6,8,18,0.96)',
+        borderColor: 'rgba(255,255,255,0.08)',
+        boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
+      }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16">
 
@@ -226,7 +230,8 @@ const Navbar = () => {
                 {/* Create Tournament — organizer desktop */}
                 {isOrganizer() && !location.pathname.startsWith('/academies') && (
                   <Link to="/tournaments/create"
-                    className="hidden sm:flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-500 to-violet-600 text-white rounded-xl hover:shadow-lg hover:shadow-purple-500/30 hover:scale-105 transition-all text-sm font-semibold">
+                    className="hidden sm:flex items-center gap-2 px-5 py-2.5 rounded-xl hover:scale-105 transition-all text-sm font-bold"
+                    style={{ background: 'linear-gradient(135deg, #F59E0B, #D97706)', color: '#0C0900', boxShadow: '0 4px 14px rgba(245,158,11,0.3)' }}>
                     <Plus className="w-4 h-4" />Create
                   </Link>
                 )}
@@ -284,14 +289,16 @@ const Navbar = () => {
                 </button>
               </>
             ) : (
-              <div className="flex items-center gap-3">
-                <Link to="/login" className="text-purple-200 hover:text-white px-4 py-2 text-sm font-medium transition-colors rounded-xl hover:bg-purple-500/20">
+              <div className="flex items-center gap-2.5">
+                <Link to="/login"
+                  className="px-4 py-2 text-sm font-medium transition-all rounded-xl"
+                  style={{ color: 'rgba(255,255,255,0.75)', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}>
                   Sign in
                 </Link>
                 <Link to="/register"
-                  className="px-5 py-2.5 rounded-xl hover:scale-105 transition-all text-sm font-bold text-white"
-                  style={{ background: 'linear-gradient(135deg, #a855f7, #c084fc)', boxShadow: '0 0 16px rgba(168,85,247,0.4)' }}>
-                  Sign up
+                  className="px-5 py-2.5 rounded-xl transition-all text-sm font-bold"
+                  style={{ background: 'linear-gradient(135deg, #F59E0B, #D97706)', color: '#0C0900', boxShadow: '0 4px 16px rgba(245,158,11,0.3)' }}>
+                  Get Started
                 </Link>
               </div>
             )}
@@ -312,7 +319,7 @@ const Navbar = () => {
               top: 0, left: '50%', transform: 'translateX(-50%)',
               width: '100%', maxWidth: '480px', maxHeight: '100vh',
               paddingTop: '64px',
-              background: 'linear-gradient(180deg, #1a0a2e 0%, #2d1557 35%, #3d1a6e 65%, #4a1080 100%)',
+              background: 'linear-gradient(180deg, #06080E 0%, #080C18 40%, #0A0F1E 100%)',
             }}>
 
             {/* Background eye-candy */}
@@ -406,10 +413,10 @@ const Navbar = () => {
               {/* ── Create Tournament ── */}
               {isOrganizer() && (
                 <Link to="/tournaments/create" onClick={() => setShowMobileMenu(false)}
-                  className="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm text-white transition-all relative overflow-hidden group"
-                  style={{ background: 'linear-gradient(135deg,#a855f7,#c084fc)', boxShadow: '0 4px 20px rgba(168,85,247,0.4)' }}>
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all relative overflow-hidden group"
+                  style={{ background: 'linear-gradient(135deg,#F59E0B,#D97706)', color: '#0C0900', boxShadow: '0 4px 20px rgba(245,158,11,0.35)' }}>
                   <div className="absolute inset-0 opacity-0 group-active:opacity-20 transition-opacity" style={{ background: 'rgba(255,255,255,0.3)' }} />
-                  <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center relative z-10">
+                  <div className="w-8 h-8 rounded-lg bg-black/20 flex items-center justify-center relative z-10">
                     <Plus className="w-4 h-4" />
                   </div>
                   <span className="relative z-10">Create Tournament</span>
@@ -501,9 +508,14 @@ const Navbar = () => {
 
 const NavLink = ({ to, children, active }) => (
   <Link to={to}
-    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
-      active ? 'text-purple-300 bg-purple-500/30 shadow-sm shadow-purple-500/20' : 'text-purple-100 hover:text-white hover:bg-purple-500/20'
-    }`}>
+    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+      active
+        ? 'text-white bg-white/10 shadow-sm'
+        : 'text-white/70 hover:text-white hover:bg-white/07'
+    }`}
+    style={{
+      ...(active ? { background: 'rgba(255,255,255,0.1)', borderBottom: '2px solid rgba(245,158,11,0.6)' } : {})
+    }}>
     {children}
   </Link>
 );

@@ -606,7 +606,7 @@ const TournamentDetailPage = () => {
                     className="flex-shrink-0 rounded-lg overflow-hidden transition-all"
                     style={{
                       width: '40px', height: '40px',
-                      border: selectedPoster === index ? '2px solid #06b6d4' : '2px solid rgba(255,255,255,0.25)',
+                      border: selectedPoster === index ? '2px solid #F59E0B' : '2px solid rgba(255,255,255,0.2)',
                       opacity: selectedPoster === index ? 1 : 0.6,
                     }}
                   >
@@ -668,7 +668,7 @@ const TournamentDetailPage = () => {
           /* ── No poster: compact header ── */
           <div
             className="relative px-4 pt-5 pb-6"
-            style={{ background: 'linear-gradient(135deg, rgba(6,182,212,0.08) 0%, rgba(0,212,255,0.05) 100%)', borderBottom: '1px solid rgba(6,182,212,0.15)' }}
+            style={{ background: 'linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.02) 100%)', borderBottom: '1px solid rgba(255,255,255,0.08)' }}
           >
             <div className="flex items-center justify-between mb-4">
               <button

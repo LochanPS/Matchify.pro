@@ -196,10 +196,10 @@ const ScoringConsolePage = () => {
   }
 
   return (
-    <div className="min-h-screen py-6 px-4" style={{ background: '#050810' }}>
+    <div className="min-h-screen py-6 px-4" style={{ background: '#040810' }}>
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full filter blur-3xl opacity-[0.07]" style={{ background: '#06b6d4' }}></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 rounded-full filter blur-3xl opacity-[0.07]" style={{ background: '#00d4ff' }}></div>
+        <div className="absolute top-0 left-1/4 w-80 h-80 rounded-full filter blur-3xl opacity-[0.06]" style={{ background: '#F59E0B' }}></div>
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full filter blur-3xl opacity-[0.05]" style={{ background: '#8B5CF6' }}></div>
       </div>
       <div className="relative max-w-4xl mx-auto">
         <div className="flex items-center justify-between mb-6">
@@ -227,19 +227,19 @@ const ScoringConsolePage = () => {
         </div>
 
         <div className="grid grid-cols-3 gap-3 mb-6">
-          <div className="border border-white/10 rounded-xl p-3 text-center" style={{ background: '#0d1025' }}>
-            <Target className="w-4 h-4 text-amber-400 mx-auto mb-1" />
-            <p className="text-gray-500 text-xs">Points</p>
+          <div className="rounded-xl p-3 text-center" style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)' }}>
+            <Target className="w-4 h-4 mx-auto mb-1" style={{ color: '#FCD34D' }} />
+            <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Points</p>
             <p className="text-white font-bold">{matchConfig.pointsPerSet}</p>
           </div>
-          <div className="border border-white/10 rounded-xl p-3 text-center" style={{ background: '#0d1025' }}>
-            <Clock className="w-4 h-4 text-blue-400 mx-auto mb-1" />
-            <p className="text-gray-500 text-xs">Sets</p>
+          <div className="rounded-xl p-3 text-center" style={{ background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.2)' }}>
+            <Clock className="w-4 h-4 mx-auto mb-1" style={{ color: '#22D3EE' }} />
+            <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Sets</p>
             <p className="text-white font-bold">{matchConfig.maxSets === 1 ? '1 Set' : `Best of ${matchConfig.maxSets}`}</p>
           </div>
-          <div className="border border-white/10 rounded-xl p-3 text-center" style={{ background: '#0d1025' }}>
-            <MapPin className="w-4 h-4 text-purple-400 mx-auto mb-1" />
-            <p className="text-gray-500 text-xs">Court</p>
+          <div className="rounded-xl p-3 text-center" style={{ background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.2)' }}>
+            <MapPin className="w-4 h-4 mx-auto mb-1" style={{ color: '#C084FC' }} />
+            <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Court</p>
             <p className="text-white font-bold">{match.courtNumber || '-'}</p>
           </div>
         </div>
@@ -270,9 +270,9 @@ const ScoringConsolePage = () => {
         )}
 
         {matchComplete && winner && (
-          <div className="rounded-xl p-6 mb-6 text-center" style={{ background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.3)' }}>
-            <h2 className="text-3xl font-bold mb-2" style={{ color: '#06b6d4' }}>🏆 Match Complete! 🏆</h2>
-            <p className="text-xl mb-3" style={{ color: '#06b6d4' }}>{winner === 'player1' ? player1Name : player2Name} wins!</p>
+          <div className="rounded-xl p-6 mb-6 text-center" style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.12), rgba(217,119,6,0.08))', border: '1px solid rgba(245,158,11,0.35)', boxShadow: '0 0 32px rgba(245,158,11,0.1)' }}>
+            <h2 className="text-3xl font-black mb-2" style={{ color: '#FCD34D' }}>🏆 Match Complete! 🏆</h2>
+            <p className="text-xl font-bold mb-3 text-white">{winner === 'player1' ? player1Name : player2Name} wins!</p>
             {score?.timer && (
               <div className="mt-4 pt-4" style={{ borderTop: '1px solid rgba(6,182,212,0.2)' }}>
                 <p className="text-gray-400 text-sm">Match Duration</p>

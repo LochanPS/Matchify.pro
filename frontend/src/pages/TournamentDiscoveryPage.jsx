@@ -450,26 +450,32 @@ export default function TournamentDiscoveryPage() {
         </div>
 
         {/* Tab Toggle - Upcoming / Completed */}
-        <div className="flex gap-0 mb-5 rounded-xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.1)' }}>
+        <div className="flex mb-5 rounded-2xl p-1" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
           <button
             onClick={() => setActiveTab('upcoming')}
-            className="flex-1 py-3 text-sm font-black transition-all"
+            className="flex-1 py-2.5 text-sm font-black transition-all rounded-xl flex items-center justify-center gap-1.5"
             style={{
-              background: activeTab === 'upcoming' ? 'linear-gradient(135deg,#06b6d4,#0891b2)' : 'rgba(255,255,255,0.04)',
-              color: activeTab === 'upcoming' ? '#ffffff' : 'rgba(255,255,255,0.5)',
+              background: activeTab === 'upcoming' ? 'rgba(255,255,255,0.1)' : 'transparent',
+              color: activeTab === 'upcoming' ? '#ffffff' : 'rgba(255,255,255,0.45)',
+              boxShadow: activeTab === 'upcoming' ? 'inset 0 1px 0 rgba(255,255,255,0.08)' : 'none',
             }}
           >
-            🏸 Upcoming {tabCounts.upcoming > 0 && <span style={{ fontSize: '11px', fontWeight: 700, background: 'rgba(0,0,0,0.25)', borderRadius: '999px', padding: '1px 7px', marginLeft: '4px' }}>{tabCounts.upcoming}</span>}
+            <span>🏸</span>
+            <span>Upcoming</span>
+            {tabCounts.upcoming > 0 && <span style={{ fontSize: '11px', fontWeight: 700, background: activeTab === 'upcoming' ? 'rgba(245,158,11,0.25)' : 'rgba(255,255,255,0.08)', color: activeTab === 'upcoming' ? '#FCD34D' : 'rgba(255,255,255,0.4)', borderRadius: '999px', padding: '1px 7px' }}>{tabCounts.upcoming}</span>}
           </button>
           <button
             onClick={() => setActiveTab('completed')}
-            className="flex-1 py-3 text-sm font-black transition-all"
+            className="flex-1 py-2.5 text-sm font-black transition-all rounded-xl flex items-center justify-center gap-1.5"
             style={{
-              background: activeTab === 'completed' ? 'linear-gradient(135deg,#a855f7,#6366f1)' : 'rgba(255,255,255,0.04)',
-              color: activeTab === 'completed' ? '#ffffff' : 'rgba(255,255,255,0.5)',
+              background: activeTab === 'completed' ? 'rgba(255,255,255,0.1)' : 'transparent',
+              color: activeTab === 'completed' ? '#ffffff' : 'rgba(255,255,255,0.45)',
+              boxShadow: activeTab === 'completed' ? 'inset 0 1px 0 rgba(255,255,255,0.08)' : 'none',
             }}
           >
-            🏆 Completed {tabCounts.completed > 0 && <span style={{ fontSize: '11px', fontWeight: 700, background: 'rgba(255,255,255,0.15)', borderRadius: '999px', padding: '1px 7px', marginLeft: '4px' }}>{tabCounts.completed}</span>}
+            <span>🏆</span>
+            <span>Completed</span>
+            {tabCounts.completed > 0 && <span style={{ fontSize: '11px', fontWeight: 700, background: activeTab === 'completed' ? 'rgba(139,92,246,0.25)' : 'rgba(255,255,255,0.08)', color: activeTab === 'completed' ? '#C084FC' : 'rgba(255,255,255,0.4)', borderRadius: '999px', padding: '1px 7px' }}>{tabCounts.completed}</span>}
           </button>
         </div>
 
@@ -587,22 +593,22 @@ async function shareTournament(tournament, e) {
 function TournamentCard({ tournament, navigate, index }) {
   const getStatusStyle = (status) => {
     const styles = {
-      published: { bg: 'linear-gradient(135deg, #06b6d4, #0891b2)', text: 'Open', color: '#ffffff' },
-      ongoing: { bg: 'linear-gradient(135deg, #3b82f6, #60a5fa)', text: 'Live', color: '#ffffff' },
-      completed: { bg: 'linear-gradient(135deg, #6b7280, #9ca3af)', text: 'Done', color: '#ffffff' },
-      cancelled: { bg: 'linear-gradient(135deg, #ef4444, #dc2626)', text: 'Cancelled', color: '#ffffff' },
-      draft: { bg: 'linear-gradient(135deg, #f59e0b, #fbbf24)', text: 'Draft', color: '#1a0a00' }
+      published: { bg: 'rgba(16,185,129,0.9)', text: 'Open', color: '#ffffff', shadow: '0 2px 8px rgba(16,185,129,0.5)' },
+      ongoing:   { bg: 'rgba(239,68,68,0.9)',  text: '● Live', color: '#ffffff', shadow: '0 2px 8px rgba(239,68,68,0.5)' },
+      completed: { bg: 'rgba(100,116,139,0.9)', text: 'Ended', color: '#ffffff', shadow: 'none' },
+      cancelled: { bg: 'rgba(239,68,68,0.85)',  text: 'Cancelled', color: '#ffffff', shadow: 'none' },
+      draft:     { bg: 'rgba(245,158,11,0.9)',  text: 'Draft', color: '#0C0900', shadow: '0 2px 8px rgba(245,158,11,0.4)' }
     };
     return styles[status?.toLowerCase()] || styles.draft;
   };
 
   const accentPairs = [
-    ['#06b6d4','rgba(6,182,212,0.2)'],
-    ['#00d4ff','rgba(0,212,255,0.25)'],
-    ['#a855f7','rgba(168,85,247,0.25)'],
-    ['#f59e0b','rgba(245,158,11,0.25)'],
-    ['#ec4899','rgba(236,72,153,0.25)'],
-    ['#06b6d4','rgba(6,182,212,0.25)'],
+    ['#F59E0B','rgba(245,158,11,0.2)'],   // gold
+    ['#06B6D4','rgba(6,182,212,0.18)'],   // cyan
+    ['#8B5CF6','rgba(139,92,246,0.18)'],  // purple
+    ['#10B981','rgba(16,185,129,0.18)'],  // emerald
+    ['#EC4899','rgba(236,72,153,0.18)'],  // pink
+    ['#F59E0B','rgba(245,158,11,0.18)'],  // gold repeat
   ];
   const [accentColor, accentGlow] = accentPairs[index % accentPairs.length];
 
@@ -636,12 +642,13 @@ function TournamentCard({ tournament, navigate, index }) {
 
   return (
     <div
-      className="group relative overflow-hidden cursor-pointer rounded-2xl transition-all duration-300 hover:scale-[1.01]"
+      className="group relative overflow-hidden cursor-pointer rounded-2xl transition-all duration-300 hover:scale-[1.005] hover:shadow-2xl"
       onClick={() => navigate(`/tournaments/${tournament.id}`)}
       style={{
-        background: 'linear-gradient(145deg,#0d0d2b 0%,#050810 100%)',
-        border: `1.5px solid ${accentGlow}`,
-        boxShadow: `0 4px 28px rgba(0,0,0,0.5), 0 0 0 0.5px ${accentGlow}`,
+        background: 'linear-gradient(145deg, #0D1420 0%, #0A0F1A 100%)',
+        border: `1px solid rgba(255,255,255,0.08)`,
+        boxShadow: `0 4px 24px rgba(0,0,0,0.5)`,
+        transition: 'all 0.25s ease',
       }}
     >
       {/* Shine sweep on hover */}
@@ -671,9 +678,9 @@ function TournamentCard({ tournament, navigate, index }) {
           style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.3) 50%, rgba(7,7,26,0.92) 100%)' }} />
 
         {/* Status badge top-right */}
-        <div className="absolute top-2 right-2">
+        <div className="absolute top-2.5 right-2.5">
           <span className="px-2.5 py-1 text-xs font-black rounded-full"
-            style={{ background: statusStyle.bg, color: statusStyle.color, boxShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>
+            style={{ background: statusStyle.bg, color: statusStyle.color, boxShadow: statusStyle.shadow || '0 2px 8px rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)' }}>
             {statusStyle.text}
           </span>
         </div>
@@ -713,15 +720,10 @@ function TournamentCard({ tournament, navigate, index }) {
       </div>
 
       {/* ── CONTENT (no money info) ── */}
-      <div className="p-4 space-y-2" style={{ position: 'relative', zIndex: 2 }}>
-        {/* Matchify.pro Presents — just above tournament name */}
-        <p className="text-xs font-black uppercase tracking-widest"
-          style={{ color: accentColor, opacity: 0.8, letterSpacing: '0.13em' }}>
-          ✦ Matchify.pro Presents
-        </p>
-        {/* Tournament name with accent glow */}
+      <div className="p-4 space-y-3" style={{ position: 'relative', zIndex: 2 }}>
+        {/* Tournament name */}
         <h3 className="font-black text-base text-white leading-snug line-clamp-2"
->
+          style={{ letterSpacing: '-0.01em' }}>
           {tournament.name}
         </h3>
 

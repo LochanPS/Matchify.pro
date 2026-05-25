@@ -101,10 +101,10 @@ export default function UmpireDashboard() {
   };
 
   const statCards = [
-    { label: 'Assigned Matches', value: stats.totalMatches, icon: ClipboardDocumentListIcon, color: 'from-blue-500 to-indigo-600', bgColor: '', textColor: 'text-blue-400', description: 'Currently assigned to you' },
-    { label: 'Completed', value: stats.completedMatches, icon: CheckCircleIcon, color: 'from-green-500 to-emerald-600', bgColor: '', textColor: 'text-green-400', description: 'Successfully umpired' },
-    { label: 'Upcoming', value: stats.upcomingMatches, icon: ClockIcon, color: 'from-amber-500 to-orange-600', bgColor: '', textColor: 'text-amber-400', description: 'Scheduled matches' },
-    { label: 'Today', value: stats.todayMatches, icon: CalendarDaysIcon, color: 'from-red-500 to-rose-600', bgColor: '', textColor: 'text-red-400', description: 'Matches today' },
+    { label: 'Assigned Matches', value: stats.totalMatches, icon: ClipboardDocumentListIcon, color: 'from-cyan-500 to-sky-600', bgColor: '', textColor: 'text-cyan-400', description: 'Currently assigned to you' },
+    { label: 'Completed', value: stats.completedMatches, icon: CheckCircleIcon, color: 'from-emerald-500 to-green-600', bgColor: '', textColor: 'text-emerald-400', description: 'Successfully umpired' },
+    { label: 'Upcoming', value: stats.upcomingMatches, icon: ClockIcon, color: 'from-amber-500 to-yellow-600', bgColor: '', textColor: 'text-amber-400', description: 'Scheduled matches' },
+    { label: 'Today', value: stats.todayMatches, icon: CalendarDaysIcon, color: 'from-violet-500 to-purple-600', bgColor: '', textColor: 'text-violet-400', description: 'Matches today' },
   ];
 
   // Calculate additional stats
@@ -536,7 +536,7 @@ export default function UmpireDashboard() {
             </div>
             <h3 className="text-lg font-bold text-white">Today's Matches</h3>
             {todayMatches.length > 0 && (
-              <span className="bg-red-100 text-red-700 text-xs px-3 py-1 rounded-full font-semibold">{todayMatches.length}</span>
+              <span style={{ background: 'rgba(245,158,11,0.15)', color: '#FCD34D', border: '1px solid rgba(245,158,11,0.3)', fontSize: 11, fontWeight: 700, padding: '2px 10px', borderRadius: 20 }}>{todayMatches.length}</span>
             )}
           </div>
 
@@ -574,7 +574,7 @@ export default function UmpireDashboard() {
                         to={match.status === 'IN_PROGRESS'
                           ? `/match/${match.id}/score`
                           : `/match/${match.id}/conduct?umpireId=${match.umpireId || user?.id}`}
-                        className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-2.5 px-4 rounded-xl text-sm font-medium hover:shadow-lg hover:scale-105 transition-all"
+                        className="w-full flex items-center justify-center gap-2 text-white py-2.5 px-4 rounded-xl text-sm font-medium hover:shadow-lg hover:scale-105 transition-all" style={{ background: 'linear-gradient(135deg, #F59E0B, #D97706)', color: '#0C0900', boxShadow: '0 4px 12px rgba(245,158,11,0.3)' }}
                       >
                         <PlayIcon className="w-4 h-4" />
                         {match.status === 'IN_PROGRESS' ? 'Continue Scoring' : 'Start Scoring'}
@@ -636,7 +636,7 @@ export default function UmpireDashboard() {
                           to={match.status === 'IN_PROGRESS'
                             ? `/match/${match.id}/score`
                             : `/match/${match.id}/conduct?umpireId=${match.umpireId || user?.id}`}
-                          className="flex items-center gap-1 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl text-sm font-medium hover:shadow-lg transition-all"
+                          className="flex items-center gap-1 px-4 py-2 text-white rounded-xl text-sm font-medium hover:shadow-lg transition-all" style={{ background: 'linear-gradient(135deg, #F59E0B, #D97706)', color: '#0C0900', boxShadow: '0 4px 12px rgba(245,158,11,0.25)' }}
                         >
                           {match.status === 'IN_PROGRESS' ? 'Resume' : 'Score'}
                           <ArrowRightIcon className="w-4 h-4" />
@@ -822,7 +822,7 @@ export default function UmpireDashboard() {
             <div className="sticky bottom-0 border-t p-4" style={{ background: '#0d1025', borderColor: 'rgba(255,255,255,0.08)' }}>
               <button
                 onClick={() => setShowLevelInfo(false)}
-                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-4 rounded-xl font-medium hover:shadow-lg transition-all"
+                className="w-full text-white py-3 px-4 rounded-xl font-medium hover:shadow-lg transition-all" style={{ background: 'linear-gradient(135deg, #F59E0B, #D97706)', color: '#0C0900' }}
               >
                 Got it!
               </button>

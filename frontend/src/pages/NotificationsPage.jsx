@@ -56,19 +56,19 @@ const NotificationsPage = () => {
       REGISTRATION_CONFIRMED: { bg: 'linear-gradient(135deg, rgba(245,158,11,0.15), rgba(245,158,11,0.1))', border: 'rgba(245,158,11,0.35)', shadow: 'rgba(245,158,11,0.2)' },
       REGISTRATION_REJECTED: { bg: 'linear-gradient(135deg, rgba(239,68,68,0.2), rgba(220,38,38,0.15))', border: 'rgba(239,68,68,0.4)', shadow: 'rgba(239,68,68,0.3)' },
       REGISTRATION_PENDING: { bg: 'linear-gradient(135deg, rgba(245,158,11,0.2), rgba(251,146,60,0.15))', border: 'rgba(245,158,11,0.4)', shadow: 'rgba(245,158,11,0.3)' },
-      PAYMENT_VERIFICATION_REQUIRED: { bg: 'linear-gradient(135deg, rgba(59,130,246,0.2), rgba(37,99,235,0.15))', border: 'rgba(59,130,246,0.4)', shadow: 'rgba(59,130,246,0.3)' },
+      PAYMENT_VERIFICATION_REQUIRED: { bg: 'linear-gradient(135deg, rgba(245,158,11,0.18), rgba(217,119,6,0.12))', border: 'rgba(245,158,11,0.4)', shadow: 'rgba(245,158,11,0.25)' },
       PARTNER_INVITATION: { bg: 'linear-gradient(135deg, rgba(168,85,247,0.2), rgba(139,92,246,0.15))', border: 'rgba(168,85,247,0.4)', shadow: 'rgba(168,85,247,0.3)' },
       PARTNER_ACCEPTED: { bg: 'linear-gradient(135deg, rgba(245,158,11,0.15), rgba(245,158,11,0.1))', border: 'rgba(245,158,11,0.35)', shadow: 'rgba(245,158,11,0.2)' },
       DRAW_PUBLISHED: { bg: 'linear-gradient(135deg, rgba(245,158,11,0.2), rgba(14,165,233,0.15))', border: 'rgba(245,158,11,0.4)', shadow: 'rgba(245,158,11,0.3)' },
-      MATCH_ASSIGNED: { bg: 'linear-gradient(135deg, rgba(59,130,246,0.2), rgba(37,99,235,0.15))', border: 'rgba(59,130,246,0.4)', shadow: 'rgba(59,130,246,0.3)' },
-      MATCH_STARTING_SOON: { bg: 'linear-gradient(135deg, rgba(59,130,246,0.2), rgba(37,99,235,0.15))', border: 'rgba(59,130,246,0.4)', shadow: 'rgba(59,130,246,0.3)' },
+      MATCH_ASSIGNED: { bg: 'linear-gradient(135deg, rgba(16,185,129,0.18), rgba(5,150,105,0.12))', border: 'rgba(16,185,129,0.4)', shadow: 'rgba(16,185,129,0.25)' },
+      MATCH_STARTING_SOON: { bg: 'linear-gradient(135deg, rgba(16,185,129,0.18), rgba(5,150,105,0.12))', border: 'rgba(16,185,129,0.4)', shadow: 'rgba(16,185,129,0.25)' },
       MATCH_COMPLETED: { bg: 'linear-gradient(135deg, rgba(245,158,11,0.15), rgba(245,158,11,0.1))', border: 'rgba(245,158,11,0.35)', shadow: 'rgba(245,158,11,0.2)' },
       MATCH_WON: { bg: 'linear-gradient(135deg, rgba(245,158,11,0.2), rgba(251,146,60,0.15))', border: 'rgba(245,158,11,0.4)', shadow: 'rgba(245,158,11,0.3)' },
       MATCH_LOST: { bg: 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(79,70,229,0.1))', border: 'rgba(99,102,241,0.35)', shadow: 'rgba(99,102,241,0.2)' },
       POINTS_AWARDED: { bg: 'linear-gradient(135deg, rgba(245,158,11,0.2), rgba(251,146,60,0.15))', border: 'rgba(245,158,11,0.4)', shadow: 'rgba(245,158,11,0.3)' },
       TOURNAMENT_REMINDER: { bg: 'linear-gradient(135deg, rgba(168,85,247,0.2), rgba(139,92,246,0.15))', border: 'rgba(168,85,247,0.4)', shadow: 'rgba(168,85,247,0.3)' },
     };
-    return colors[type] || { bg: 'linear-gradient(135deg, rgba(99,102,241,0.2), rgba(79,70,229,0.15))', border: 'rgba(99,102,241,0.4)', shadow: 'rgba(99,102,241,0.3)' };
+    return colors[type] || { bg: 'linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03))', border: 'rgba(255,255,255,0.1)', shadow: 'rgba(0,0,0,0.2)' };
   };
 
   // Smart preview: for MATCH_ASSIGNED/STARTING_SOON parse data for player names;

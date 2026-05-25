@@ -1344,7 +1344,7 @@ const DrawPage = () => {
                     </div>
                     <div>
                       <h3 className="text-xl font-bold text-white">Registered Players</h3>
-                      <p className="text-blue-300 text-sm">{activeCategory?.name} • {registeredPlayers.length} players</p>
+                      <p className="text-amber-300 text-sm">{activeCategory?.name} • {registeredPlayers.length} players</p>
                     </div>
                   </div>
                   <button
@@ -2843,7 +2843,7 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                                     M{match.matchNumber || mi + 1}
                                   </span>
                                   {isLive && (
-                                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '2px 8px', borderRadius: '20px', background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.35)', fontSize: '9px', fontWeight: 700, color: '#67e8f9' }}>
+                                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '2px 8px', borderRadius: '20px', background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.35)', fontSize: '9px', fontWeight: 700, color: '#FCD34D' }}>
                                       <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#FCD34D', flexShrink: 0 }} />
                                       LIVE
                                     </span>
@@ -2945,7 +2945,7 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                                             }}
                                             style={
                                               hasUmpire
-                                                ? { width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '7px 10px', background: 'rgba(245,158,11,0.1)', color: '#67e8f9', border: '1px solid rgba(245,158,11,0.25)', borderRadius: '10px', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }
+                                                ? { width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '7px 10px', background: 'rgba(245,158,11,0.1)', color: '#FCD34D', border: '1px solid rgba(245,158,11,0.25)', borderRadius: '10px', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }
                                                 : { width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '7px 10px', background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }
                                             }
                                           >
@@ -3246,7 +3246,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
             <button
               onClick={() => setActiveGroupIdx(gi)}
               className="w-full py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all active:scale-95"
-              style={{ background: 'rgba(245,158,11,0.07)', border: '1px solid rgba(245,158,11,0.18)', color: '#67e8f9' }}
+              style={{ background: 'rgba(245,158,11,0.07)', border: '1px solid rgba(245,158,11,0.18)', color: '#FCD34D' }}
             >
               <Clock className="w-4 h-4" />
               View Matches ({group.matches?.length || 0})
@@ -3317,7 +3317,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                         <div className="flex items-center gap-1.5">
                           {isCompleted && <span className="text-xs font-black" style={{ color: '#FCD34D' }}>✓ DONE</span>}
                           {isInProgress && (
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-black flex items-center gap-1" style={{ background: 'rgba(245,158,11,0.15)', color: '#67e8f9', border: '1px solid rgba(245,158,11,0.35)' }}>
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-black flex items-center gap-1" style={{ background: 'rgba(245,158,11,0.15)', color: '#FCD34D', border: '1px solid rgba(245,158,11,0.35)' }}>
                               <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#FCD34D' }}></span>
                               LIVE
                             </span>
@@ -3439,7 +3439,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                             className="w-full py-2.5 rounded-lg transition-all flex items-center justify-center gap-2 text-xs font-black border-2"
                             style={
                               hasUmpire
-                                ? { background: 'rgba(245,158,11,0.1)', color: '#67e8f9', borderColor: 'rgba(245,158,11,0.28)' }
+                                ? { background: 'rgba(245,158,11,0.1)', color: '#FCD34D', borderColor: 'rgba(245,158,11,0.28)' }
                                 : { background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.65)', borderColor: 'rgba(255,255,255,0.12)' }
                             }
                           >
@@ -5262,5 +5262,6 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
     </div>
   );
 };
+
 
 

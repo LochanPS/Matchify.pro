@@ -22,42 +22,46 @@ const MatchListPage = () => {
     }
   };
 
-  const getStatusBadge = (status) => {
-    const badges = {
-      'PENDING': 'bg-gray-100 text-gray-800',
-      'ONGOING': 'bg-blue-100 text-blue-800',
-      'COMPLETED': 'bg-green-100 text-green-800',
+  const getStatusStyle = (status) => {
+    const map = {
+      'PENDING':   { bg: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.5)', border: 'rgba(255,255,255,0.1)' },
+      'ONGOING':   { bg: 'rgba(16,185,129,0.12)',  color: '#34D399',               border: 'rgba(16,185,129,0.3)' },
+      'COMPLETED': { bg: 'rgba(245,158,11,0.12)',  color: '#FCD34D',               border: 'rgba(245,158,11,0.25)' },
     };
-    return badges[status] || 'bg-gray-100 text-gray-800';
+    return map[status] || map['PENDING'];
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
+    <div className="min-h-screen py-8 px-4" style={{ background: '#050810' }}>
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Match Scoring</h1>
+        <h1 className="text-2xl font-black text-white mb-8">Match Scoring</h1>
 
         {/* Match List */}
         <div className="grid gap-4">
-          {matches.map(match => (
-            <div key={match.id} className="bg-white rounded-lg shadow p-6">
-              <div className="flex items-center justify-between">
+          {matches.map(match => {
+            const s = getStatusStyle(match.status);
+            return (
+            <div key={match.id} className="rounded-2xl p-5" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <div className="flex items-center justify-between gap-4">
                 <div>
-                  <h3 className="text-lg font-bold">Match #{match.matchNumber}</h3>
-                  <p className="text-gray-600">{match.category?.name}</p>
-                  <span className={`inline-block mt-2 px-3 py-1 rounded-full text-sm ${getStatusBadge(match.status)}`}>
+                  <h3 className="text-base font-bold text-white">Match #{match.matchNumber}</h3>
+                  <p className="text-sm mt-0.5" style={{ color: 'rgba(255,255,255,0.5)' }}>{match.category?.name}</p>
+                  <span className="inline-block mt-2 px-3 py-1 rounded-full text-xs font-bold" style={{ background: s.bg, color: s.color, border: `1px solid ${s.border}` }}>
                     {match.status}
                   </span>
                 </div>
                 <button
                   onClick={() => navigate(`/scoring/${match.id}`)}
-                  className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 flex items-center gap-2"
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm flex-shrink-0"
+                  style={{ background: 'linear-gradient(135deg,#F59E0B,#D97706)', color: '#050810' }}
                 >
-                  {match.status === 'ONGOING' ? <Play className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {match.status === 'ONGOING' ? <Play className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   {match.status === 'ONGOING' ? 'Score Match' : 'View Match'}
                 </button>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

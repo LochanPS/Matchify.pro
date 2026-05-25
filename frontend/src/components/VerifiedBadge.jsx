@@ -3,10 +3,10 @@ import { ShieldCheckIcon } from '@heroicons/react/24/solid';
 const VerifiedBadge = ({ type = 'player', size = 'md', showText = false, className = '' }) => {
   const colors = {
     player: {
-      bg: 'bg-blue-500/20',
-      border: 'border-blue-500/50',
-      text: 'text-blue-400',
-      icon: 'text-blue-400',
+      bg: 'bg-amber-500/20',
+      border: 'border-amber-500/50',
+      text: 'text-amber-400',
+      icon: 'text-amber-400',
       label: 'Verified Player'
     },
     organizer: {

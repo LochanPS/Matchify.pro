@@ -1140,9 +1140,9 @@ const TournamentDetailPage = () => {
                 <div 
                   className="flex items-center justify-between p-4 rounded-xl transition-all hover:scale-[1.02]"
                   style={{
-                    background: 'linear-gradient(135deg, rgba(59,130,246,0.3) 0%, rgba(37,99,235,0.2) 100%)',
-                    border: '2px solid rgba(59,130,246,0.4)',
-                    boxShadow: '0 4px 15px rgba(59,130,246,0.2)'
+                    background: 'linear-gradient(135deg, rgba(139,92,246,0.25) 0%, rgba(124,58,237,0.15) 100%)',
+                    border: '2px solid rgba(139,92,246,0.4)',
+                    boxShadow: '0 4px 15px rgba(139,92,246,0.2)'
                   }}
                 >
                   <span className="text-white/90 font-bold text-base">Registrations</span>

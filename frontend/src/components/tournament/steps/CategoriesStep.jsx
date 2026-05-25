@@ -139,7 +139,7 @@ const CategoriesStep = ({ formData, updateFormData, onNext, onPrev }) => {
                               <span className="text-amber-400">🥇 ₹{category.prizeWinner}</span>
                             )}
                             {category.prizeRunnerUp && (
-                              <span className="text-blue-400">🥈 ₹{category.prizeRunnerUp}</span>
+                              <span style={{ color: 'rgba(255,255,255,0.65)' }}>🥈 ₹{category.prizeRunnerUp}</span>
                             )}
                             {category.prizeSemiFinalist && (
                               <span className="text-orange-400">🥉 ₹{category.prizeSemiFinalist}</span>

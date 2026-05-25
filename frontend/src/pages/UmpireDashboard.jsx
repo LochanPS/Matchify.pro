@@ -171,15 +171,15 @@ export default function UmpireDashboard() {
                 {/* Player Code & Umpire Code - Show for all users */}
                 <div className="mt-3 flex flex-wrap gap-2">
                   {playerCode && (
-                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/20 border border-blue-500/30 rounded-xl">
-                      <span className="text-blue-400/80 text-sm">Player Code:</span>
-                      <span className="text-blue-400 font-mono font-bold text-lg tracking-wider">{playerCode}</span>
+                    <div className="inline-flex items-center gap-2 px-4 py-2 border rounded-xl">
+                      <span className="text-emerald-400/80 text-sm">Player Code:</span>
+                      <span className="text-emerald-400 font-mono font-bold text-lg tracking-wider">{playerCode}</span>
                       <button
                         onClick={() => navigator.clipboard.writeText(playerCode)}
-                        className="p-1.5 hover:bg-blue-500/20 rounded-lg transition-colors ml-1"
+                        className="p-1.5 hover:bg-emerald-500/20 rounded-lg transition-colors ml-1"
                         title="Copy player code"
                       >
-                        <svg className="w-4 h-4 text-blue-400/60 hover:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-4 h-4 text-emerald-400/60 hover:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                         </svg>
                       </button>
@@ -224,11 +224,11 @@ export default function UmpireDashboard() {
                 </div>
               </div>
               {stats.isVerifiedUmpire && (
-                <div className="flex items-center gap-2 px-6 py-3 bg-blue-500/20 border border-blue-500/30 rounded-xl">
-                  <svg className="w-6 h-6 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                <div className="flex items-center gap-2 px-6 py-3 border rounded-xl">
+                  <svg className="w-6 h-6 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <span className="text-blue-300 font-semibold">Verified Umpire</span>
+                  <span className="text-emerald-300 font-semibold">Verified Umpire</span>
                 </div>
               )}
               {!stats.isVerifiedUmpire && stats.historicalMatches >= 5 && (
@@ -387,7 +387,7 @@ export default function UmpireDashboard() {
                     className="p-1 hover:bg-slate-700 rounded-lg transition-colors"
                     title="View level details"
                   >
-                    <InformationCircleIcon className="w-4 h-4 text-blue-400" />
+                    <InformationCircleIcon className="w-4 h-4 text-emerald-400" />
                   </button>
                 </div>
                 <p className="text-2xl font-bold text-amber-400 mb-2">
@@ -457,9 +457,9 @@ export default function UmpireDashboard() {
                 <p className="text-gray-400 text-sm mb-2">Verification Status</p>
                 {stats.isVerifiedUmpire ? (
                   <div className="flex items-center gap-2">
-                    <ShieldCheckIcon className="w-6 h-6 text-blue-400" />
+                    <ShieldCheckIcon className="w-6 h-6 text-emerald-400" />
                     <div>
-                      <p className="text-blue-400 font-bold">Verified</p>
+                      <p className="text-emerald-400 font-bold">Verified</p>
                       <p className="text-gray-500 text-xs">Trusted umpire</p>
                     </div>
                   </div>
@@ -558,7 +558,7 @@ export default function UmpireDashboard() {
                       <span className={`px-3 py-1 text-xs font-semibold rounded-full ${
                         match.status === 'COMPLETED' ? 'bg-green-500/20 text-green-400' :
                         match.status === 'IN_PROGRESS' ? 'bg-amber-500/20 text-amber-400' :
-                        'bg-blue-500/20 text-blue-400'
+                        'bg-emerald-500/20 text-emerald-400'
                       }`}>
                         {match.status}
                       </span>
@@ -627,7 +627,7 @@ export default function UmpireDashboard() {
                       <span className={`px-3 py-1 text-xs font-semibold rounded-full ${
                         match.status === 'COMPLETED' ? 'bg-green-500/20 text-green-400' :
                         match.status === 'IN_PROGRESS' ? 'bg-amber-500/20 text-amber-400' :
-                        'bg-blue-500/20 text-blue-400'
+                        'bg-emerald-500/20 text-emerald-400'
                       }`}>
                         {match.status}
                       </span>
@@ -720,10 +720,10 @@ export default function UmpireDashboard() {
                 </div>
 
                 {/* Intermediate */}
-                <div className="bg-slate-700/50 border border-blue-500/30 rounded-xl p-4">
+                <div className="bg-slate-700/50 border border-emerald-500/25 rounded-xl p-4">
                   <div className="flex items-center justify-between mb-2">
                     <div>
-                      <h4 className="text-lg font-bold text-blue-400">Intermediate</h4>
+                      <h4 className="text-lg font-bold text-emerald-400">Intermediate</h4>
                       <p className="text-sm text-gray-400">5-9 matches</p>
                     </div>
                     <div className="flex gap-1">
@@ -801,13 +801,13 @@ export default function UmpireDashboard() {
 
               {/* Current Progress */}
               {stats.historicalMatches > 0 && (
-                <div className="mt-6 bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">
+                <div className="mt-6 bg-amber-500/10 border border-amber-500/20 rounded-xl p-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <TrophyIcon className="w-5 h-5 text-blue-400" />
+                    <TrophyIcon className="w-5 h-5 text-emerald-400" />
                     <h4 className="font-bold text-white">Your Progress</h4>
                   </div>
                   <p className="text-gray-300">
-                    You've umpired <span className="font-bold text-blue-400">{stats.historicalMatches}</span> {stats.historicalMatches === 1 ? 'match' : 'matches'}.
+                    You've umpired <span className="font-bold text-emerald-400">{stats.historicalMatches}</span> {stats.historicalMatches === 1 ? 'match' : 'matches'}.
                     {stats.historicalMatches < 5 && ` Complete ${5 - stats.historicalMatches} more to reach Intermediate level!`}
                     {stats.historicalMatches >= 5 && stats.historicalMatches < 10 && ` Complete ${10 - stats.historicalMatches} more to reach Advanced level!`}
                     {stats.historicalMatches >= 10 && stats.historicalMatches < 25 && ` Complete ${25 - stats.historicalMatches} more to reach Expert level!`}
@@ -833,4 +833,5 @@ export default function UmpireDashboard() {
     </div>
   );
 }
+
 

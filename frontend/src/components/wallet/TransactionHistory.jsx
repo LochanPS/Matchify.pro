@@ -88,7 +88,7 @@ const TransactionHistory = ({ onRefresh }) => {
       case 'REGISTRATION_FEE':
         return <ArrowDownIcon className="h-5 w-5 text-red-400" />;
       case 'REFUND':
-        return <CheckCircleIcon className="h-5 w-5 text-blue-400" />;
+        return <CheckCircleIcon className="h-5 w-5 text-emerald-400" />;
       case 'ADMIN_CREDIT':
         return <ArrowUpIcon className="h-5 w-5 text-purple-400" />;
       case 'ADMIN_DEBIT':
@@ -108,7 +108,7 @@ const TransactionHistory = ({ onRefresh }) => {
       case 'REGISTRATION_FEE':
         return 'bg-red-500/20';
       case 'REFUND':
-        return 'bg-blue-500/20';
+        return 'bg-emerald-500/20';
       case 'ADMIN_CREDIT':
         return 'bg-purple-500/20';
       case 'ADMIN_DEBIT':
@@ -123,7 +123,7 @@ const TransactionHistory = ({ onRefresh }) => {
       COMPLETED: { color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30', label: 'Completed' },
       PENDING: { color: 'bg-amber-500/20 text-amber-400 border-amber-500/30', label: 'Pending' },
       FAILED: { color: 'bg-red-500/20 text-red-400 border-red-500/30', label: 'Failed' },
-      REFUNDED: { color: 'bg-blue-500/20 text-blue-400 border-blue-500/30', label: 'Refunded' },
+      REFUNDED: { color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30', label: 'Refunded' },
     };
 
     const config = statusConfig[status] || statusConfig.PENDING;

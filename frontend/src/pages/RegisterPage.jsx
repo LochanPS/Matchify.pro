@@ -712,8 +712,8 @@ const TermsContent = () => (
         <li><strong>To Organizer:</strong> Admin pays organizer in 2 installments (30% + 67%)</li>
       </ul>
 
-      <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3 mt-3">
-        <p className="text-blue-300 text-sm font-semibold">🔒 Why payments go to admin:</p>
+      <div className="bg-amber-500/10 border border-amber-500/25 rounded-lg p-3 mt-3">
+        <p className="text-amber-300 text-sm font-semibold">🔒 Why payments go to admin:</p>
         <ul className="list-disc pl-6 space-y-1 text-xs mt-2">
           <li>Prevents organizer scams</li>
           <li>Ensures fair payment distribution</li>
@@ -776,8 +776,8 @@ const TermsContent = () => (
 
     <section>
       <h3 className="text-xl font-bold text-white mb-3">8. LIMITATION OF LIABILITY</h3>
-      <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
-        <p className="text-blue-300 font-semibold mb-2">MAXIMUM LIABILITY</p>
+      <div className="bg-amber-500/10 border border-amber-500/25 rounded-lg p-4">
+        <p className="text-amber-300 font-semibold mb-2">MAXIMUM LIABILITY</p>
         <ul className="list-disc pl-6 space-y-2 text-sm">
           <li>Platform provided "AS IS" with no warranties</li>
           <li>We are NOT liable for tournament quality, safety, or organization</li>
@@ -861,8 +861,8 @@ const PrivacyContent = () => (
       <p><strong>Version:</strong> 1.0</p>
     </div>
 
-    <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
-      <p className="text-blue-300 font-semibold">🔒 YOUR PRIVACY MATTERS</p>
+    <div className="bg-amber-500/10 border border-amber-500/25 rounded-lg p-4">
+      <p className="text-amber-300 font-semibold">🔒 YOUR PRIVACY MATTERS</p>
       <p className="text-sm mt-2">This Privacy Policy explains how we collect, use, store, and protect your personal data in compliance with the Digital Personal Data Protection Act, 2023.</p>
     </div>
 
@@ -951,8 +951,8 @@ const PrivacyContent = () => (
     <section>
       <h3 className="text-xl font-bold text-white mb-3">4. DATA STORAGE & SECURITY</h3>
       
-      <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
-        <p className="text-blue-300 font-semibold mb-2">🇮🇳 DATA LOCALIZATION</p>
+      <div className="bg-amber-500/10 border border-amber-500/25 rounded-lg p-4">
+        <p className="text-amber-300 font-semibold mb-2">🇮🇳 DATA LOCALIZATION</p>
         <p className="text-sm">All data is stored in India:</p>
         <ul className="list-disc pl-6 space-y-1 text-sm mt-2">
           <li>Database: PostgreSQL on Render (India region)</li>
@@ -1090,4 +1090,5 @@ const PrivacyContent = () => (
 );
 
 export default RegisterPage;
+
 

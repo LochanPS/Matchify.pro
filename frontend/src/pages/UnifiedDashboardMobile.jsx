@@ -852,9 +852,9 @@ const UnifiedDashboardMobile = () => {
               <div
                 className="w-10 h-10 rounded-xl flex items-center justify-center"
                 style={{
-                  background: 'linear-gradient(135deg, rgba(59,130,246,0.28), rgba(59,130,246,0.12))',
-                  border: '1.5px solid rgba(59,130,246,0.52)',
-                  boxShadow: '0 2px 10px rgba(59,130,246,0.22)'
+                  background: 'linear-gradient(135deg, rgba(16,185,129,0.2), rgba(5,150,105,0.1))',
+                  border: '1.5px solid rgba(16,185,129,0.4)',
+                  boxShadow: '0 2px 10px rgba(16,185,129,0.15)'
                 }}
               >
                 <span className="text-xl">⚖️</span>

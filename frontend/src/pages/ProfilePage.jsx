@@ -615,7 +615,7 @@ export default function ProfilePage() {
                 />
                 <div className="flex items-center justify-between relative z-10">
                   <div className="flex-1">
-                    <p className="text-xs font-bold mb-1" style={{ color: '#67e8f9' }}>Matchify ID</p>
+                    <p className="text-xs font-bold mb-1" style={{ color: 'rgba(245,158,11,0.7)' }}>Matchify ID</p>
                     <p 
                       className="text-2xl font-mono font-black tracking-wider"
                       style={{ 
@@ -625,7 +625,7 @@ export default function ProfilePage() {
                     >
                       {profile?.matchifyCode || 'Loading...'}
                     </p>
-                    <p className="text-xs mt-1" style={{ color: '#67e8f9' }}>
+                    <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
                       Your universal Matchify.pro ID
                     </p>
                   </div>
@@ -655,22 +655,22 @@ export default function ProfilePage() {
             {/* Contact Information */}
             <div className="space-y-3 mb-4">
               <div className="flex items-center gap-3 min-w-0">
-                <Mail className="w-5 h-5 text-green-300 flex-shrink-0" />
+                <Mail className="w-5 h-5 flex-shrink-0" style={{ color: '#F59E0B' }} />
                 {profile?.email
-                  ? <span className="text-sm truncate min-w-0 text-gray-300">{profile.email}</span>
-                  : <span className="text-sm text-gray-500 italic">No email added</span>
+                  ? <span className="text-sm truncate min-w-0" style={{ color: 'rgba(255,255,255,0.7)' }}>{profile.email}</span>
+                  : <span className="text-sm italic" style={{ color: 'rgba(255,255,255,0.35)' }}>No email added</span>
                 }
               </div>
               {profile?.phone && (
-                <div className="flex items-center gap-3 text-gray-300 min-w-0">
-                  <Phone className="w-5 h-5 text-blue-400 flex-shrink-0" />
-                  <span className="text-sm truncate min-w-0">{profile?.phone}</span>
+                <div className="flex items-center gap-3 min-w-0">
+                  <Phone className="w-5 h-5 flex-shrink-0" style={{ color: '#F59E0B' }} />
+                  <span className="text-sm truncate min-w-0" style={{ color: 'rgba(255,255,255,0.7)' }}>{profile?.phone}</span>
                 </div>
               )}
               {(profile?.city || profile?.state) && (
-                <div className="flex items-center gap-3 text-gray-300 min-w-0">
-                  <MapPin className="w-5 h-5 text-green-300 flex-shrink-0" />
-                  <span className="text-sm truncate min-w-0">{[profile?.city, profile?.state].filter(Boolean).join(', ')}</span>
+                <div className="flex items-center gap-3 min-w-0">
+                  <MapPin className="w-5 h-5 flex-shrink-0" style={{ color: '#F59E0B' }} />
+                  <span className="text-sm truncate min-w-0" style={{ color: 'rgba(255,255,255,0.7)' }}>{[profile?.city, profile?.state].filter(Boolean).join(', ')}</span>
                 </div>
               )}
             </div>
@@ -682,10 +682,10 @@ export default function ProfilePage() {
                   <button
                     onClick={() => setIsEditing(true)}
                     className="flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-bold text-sm transition-all relative overflow-hidden group"
-                    style={{ 
-                      background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
-                      color: '#ffffff',
-                      boxShadow: '0 4px 15px rgba(59,130,246,0.4), inset 0 1px 0 rgba(255,255,255,0.2)'
+                    style={{
+                      background: 'linear-gradient(135deg, #F59E0B, #D97706)',
+                      color: '#050810',
+                      boxShadow: '0 4px 15px rgba(245,158,11,0.4), inset 0 1px 0 rgba(255,255,255,0.2)'
                     }}
                   >
                     <div 

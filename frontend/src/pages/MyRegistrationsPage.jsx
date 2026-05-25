@@ -136,9 +136,9 @@ export default function MyRegistrationsPage() {
     const styles = {
       completed: { bg: 'bg-green-500/20', text: 'text-green-300' },
       pending: { bg: 'bg-amber-500/20', text: 'text-amber-300' },
-      submitted: { bg: 'bg-blue-500/20', text: 'text-blue-300' },
+      submitted: { bg: 'bg-amber-500/20', text: 'text-amber-300' },
       failed: { bg: 'bg-red-500/20', text: 'text-red-300' },
-      refunded: { bg: 'bg-blue-500/20', text: 'text-blue-300' },
+      refunded: { bg: 'bg-emerald-500/20', text: 'text-emerald-300' },
     };
     return styles[status] || { bg: 'bg-gray-500/20', text: 'text-gray-300' };
   };
@@ -260,8 +260,8 @@ export default function MyRegistrationsPage() {
                           <span className="text-xs truncate">{registration.tournament.city}, {registration.tournament.state}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'rgba(59,130,246,0.15)', border: '1px solid rgba(59,130,246,0.3)' }}>
-                            <Calendar className="h-4 w-4 text-blue-400" />
+                          <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.25)' }}>
+                            <Calendar className="h-4 w-4" style={{ color: '#FCD34D' }} />
                           </div>
                           <span className="text-xs">{formatDateIndian(registration.tournament.startDate)}</span>
                         </div>

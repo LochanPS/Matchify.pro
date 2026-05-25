@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+﻿import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Building2, MapPin, Dumbbell, Upload, X, Plus,
@@ -13,13 +13,13 @@ import { fetchUpload } from '../utils/fetchUpload';
 import Spinner from '../components/Spinner';
 
 const B = {
-  bg: '#050810',
+  bg: '#040810',
   card: 'rgba(255,255,255,0.04)',
   cardHover: 'rgba(255,255,255,0.07)',
   border: 'rgba(255,255,255,0.08)',
-  green: '#06b6d4',
-  cyan: '#00d4ff',
-  purple: '#a855f7',
+  green: '#F59E0B',
+  cyan: '#FCD34D',
+  purple: '#8B5CF6',
   amber: '#fbbf24',
 };
 
@@ -810,3 +810,4 @@ export default function AddAcademyPage() {
     </div>
   );
 }
+

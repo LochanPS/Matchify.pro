@@ -1,15 +1,15 @@
-import { useState, useEffect, useRef } from 'react';
+﻿import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Search, Plus, MapPin, Phone, Building2, X, BadgeCheck, ChevronRight } from 'lucide-react';
 import api from '../utils/api';
 
 const B = {
-  bg: '#050810',
+  bg: '#040810',
   card: 'rgba(255,255,255,0.05)',
   border: 'rgba(255,255,255,0.09)',
-  green: '#06b6d4',
-  cyan: '#00d4ff',
-  purple: '#a855f7',
+  green: '#F59E0B',
+  cyan: '#FCD34D',
+  purple: '#8B5CF6',
   amber: '#fbbf24',
 };
 
@@ -429,3 +429,4 @@ export default function SearchAcademiesPage() {
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-import { getErrorMessage } from '../utils/errorMessage';
+﻿import { getErrorMessage } from '../utils/errorMessage';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -15,10 +15,10 @@ import Spinner from '../components/Spinner';
 // Constants
 // ─────────────────────────────────────────────────────────────────────────────
 const BRAND = {
-  bg: '#050810',
-  green: '#06b6d4',
-  cyan: '#00d4ff',
-  purple: '#a855f7',
+  bg: '#040810',
+  green: '#F59E0B',
+  cyan: '#FCD34D',
+  purple: '#8B5CF6',
   card: 'rgba(255,255,255,0.04)',
   cardBorder: 'rgba(255,255,255,0.08)',
 };
@@ -1003,3 +1003,4 @@ export default function TournamentRegistrationPage() {
     </div>
   );
 }
+

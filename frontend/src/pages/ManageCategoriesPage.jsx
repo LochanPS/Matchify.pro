@@ -1,4 +1,4 @@
-import { getErrorMessage } from '../utils/errorMessage';
+﻿import { getErrorMessage } from '../utils/errorMessage';
 import { getGenderLabel } from '../utils/genderLabel';
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -20,12 +20,12 @@ import api from '../utils/api';
 import CategoryForm from '../components/tournament/CategoryForm';
 
 const B = {
-  bg: '#050810',
+  bg: '#040810',
   card: 'rgba(255,255,255,0.04)',
   border: 'rgba(255,255,255,0.08)',
-  green: '#06b6d4',
-  cyan: '#00d4ff',
-  purple: '#a855f7',
+  green: '#F59E0B',
+  cyan: '#FCD34D',
+  purple: '#8B5CF6',
   red: '#f87171',
 };
 
@@ -419,3 +419,4 @@ const ManageCategoriesPage = () => {
 };
 
 export default ManageCategoriesPage;
+

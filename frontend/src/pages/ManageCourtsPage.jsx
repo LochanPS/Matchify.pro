@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   ArrowLeft, Plus, Edit3, Trash2, ToggleLeft, ToggleRight,
@@ -10,8 +10,8 @@ import api from '../utils/api';
 const B = {
   bg: '#0a0a0f', card: '#12121a', card2: '#1a1a26',
   border: 'rgba(255,255,255,0.07)',
-  cyan: '#00d4ff', green: '#06b6d4', amber: '#f59e0b',
-  red: '#ef4444', purple: '#a855f7',
+  cyan: '#FCD34D', green: '#F59E0B', amber: '#f59e0b',
+  red: '#ef4444', purple: '#8B5CF6',
   text: 'rgba(255,255,255,0.85)', muted: 'rgba(255,255,255,0.45)',
 };
 
@@ -455,3 +455,4 @@ export default function ManageCourtsPage() {
     </div>
   );
 }
+

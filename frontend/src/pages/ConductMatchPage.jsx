@@ -7,15 +7,15 @@ import LoadingScreen from '../components/LoadingScreen';
 import Spinner from '../components/Spinner';
 
 const B = {
-  bg: '#050810',
-  card: 'rgba(255,255,255,0.04)',
+  bg: '#040810',
+  card: 'rgba(12,18,32,0.95)',
   border: 'rgba(255,255,255,0.08)',
   input: 'rgba(0,0,0,0.3)',
   inputBorder: 'rgba(255,255,255,0.1)',
-  green: '#06b6d4',
-  cyan: '#00d4ff',
-  purple: '#a855f7',
-  red: '#f87171',
+  green: '#F59E0B',
+  cyan: '#FCD34D',
+  purple: '#8B5CF6',
+  red: '#F87171',
 };
 
 const ConductMatchPage = () => {

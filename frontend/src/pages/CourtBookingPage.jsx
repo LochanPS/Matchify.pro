@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+﻿import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Calendar, Clock, IndianRupee, ChevronLeft,
@@ -11,7 +11,7 @@ import LoadingScreen from '../components/LoadingScreen';
 const B = {
   bg: '#0a0a0f', card: '#12121a', card2: '#1a1a26',
   border: 'rgba(255,255,255,0.07)',
-  cyan: '#00d4ff', green: '#06b6d4', amber: '#f59e0b',
+  cyan: '#FCD34D', green: '#F59E0B', amber: '#f59e0b',
   red: '#ef4444',
   text: 'rgba(255,255,255,0.85)', muted: 'rgba(255,255,255,0.45)',
 };
@@ -521,3 +521,4 @@ export default function CourtBookingPage() {
     </div>
   );
 }
+

@@ -18,13 +18,13 @@ import {
 } from 'lucide-react';
 
 const BRAND = {
-  bg: '#050810',
+  bg: '#040810',
   cardDark: '#0d1025',
   card: 'rgba(255,255,255,0.04)',
   border: 'rgba(255,255,255,0.08)',
-  green: '#06b6d4',
-  cyan: '#00d4ff',
-  purple: '#a855f7',
+  green: '#F59E0B',
+  cyan: '#FCD34D',
+  purple: '#8B5CF6',
   amber: '#fbbf24',
 };
 
@@ -330,3 +330,4 @@ const PartnerConfirmationPage = () => {
 };
 
 export default PartnerConfirmationPage;
+

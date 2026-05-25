@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+﻿import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   ArrowLeft, Loader2, Save, ChevronRight,
@@ -12,12 +12,12 @@ import { useAuth } from '../contexts/AuthContext';
 import Spinner from '../components/Spinner';
 
 const B = {
-  bg: '#050810',
+  bg: '#040810',
   card: 'rgba(255,255,255,0.04)',
   border: 'rgba(255,255,255,0.08)',
-  green: '#06b6d4',
-  cyan: '#00d4ff',
-  purple: '#a855f7',
+  green: '#F59E0B',
+  cyan: '#FCD34D',
+  purple: '#8B5CF6',
   amber: '#fbbf24',
 };
 
@@ -644,3 +644,4 @@ export default function EditAcademyPage() {
     </div>
   );
 }
+

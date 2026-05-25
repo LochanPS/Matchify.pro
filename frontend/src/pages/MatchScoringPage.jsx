@@ -1,4 +1,4 @@
-import { getErrorMessage } from '../utils/errorMessage';
+﻿import { getErrorMessage } from '../utils/errorMessage';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
@@ -12,12 +12,12 @@ import SlideToConfirm from '../components/SlideToConfirm';
 import LoadingScreen from '../components/LoadingScreen';
 
 const B = {
-  bg: '#050810',
+  bg: '#040810',
   card: 'rgba(255,255,255,0.04)',
   border: 'rgba(255,255,255,0.08)',
-  green: '#06b6d4',
-  cyan: '#00d4ff',
-  purple: '#a855f7',
+  green: '#F59E0B',
+  cyan: '#FCD34D',
+  purple: '#8B5CF6',
   amber: '#fbbf24',
   red: '#f87171',
 };
@@ -770,3 +770,4 @@ const MatchTimerDisplay = ({ timer, isPaused }) => {
 };
 
 export default MatchScoringPage;
+

@@ -21,8 +21,8 @@ import {
 } from '@heroicons/react/24/outline';
 
 const B = {
-  bg: '#050810', card: 'rgba(255,255,255,0.04)', border: 'rgba(255,255,255,0.08)',
-  cardDark: '#0d1025', green: '#06b6d4', cyan: '#00d4ff', purple: '#a855f7',
+  bg: '#040810', card: 'rgba(255,255,255,0.04)', border: 'rgba(255,255,255,0.08)',
+  cardDark: '#0d1025', green: '#F59E0B', cyan: '#FCD34D', purple: '#8B5CF6',
   amber: '#fbbf24', sub: 'rgba(255,255,255,0.6)', dim: 'rgba(255,255,255,0.4)',
 };
 
@@ -376,3 +376,4 @@ export default function OrganizerProfilePage() {
     </div>
   );
 }
+

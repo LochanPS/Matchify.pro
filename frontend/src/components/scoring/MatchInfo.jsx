@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar, MapPin, Users, Trophy, Gavel } from 'lucide-react';
+import { MapPin, Gavel, Hash } from 'lucide-react';
 
 const MatchInfo = ({ match }) => {
   if (!match) return null;
@@ -8,16 +8,16 @@ const MatchInfo = ({ match }) => {
   const player2 = match.player2;
   const umpire = match.umpire;
 
-  const getStatusBadge = (status) => {
-    const badges = {
-      'PENDING': 'bg-gray-500/20 border-gray-500/30 text-gray-400',
-      'READY': 'bg-amber-500/20 border-amber-500/30 text-amber-400',
-      'ONGOING': 'bg-blue-500/20 border-blue-500/30 text-blue-400',
-      'IN_PROGRESS': 'bg-blue-500/20 border-blue-500/30 text-blue-400',
-      'COMPLETED': 'bg-emerald-500/20 border-emerald-500/30 text-emerald-400',
-      'CANCELLED': 'bg-red-500/20 border-red-500/30 text-red-400',
+  const getStatusStyle = (status) => {
+    const map = {
+      'PENDING':     { bg: 'rgba(107,114,128,0.15)', border: 'rgba(107,114,128,0.3)', color: '#9CA3AF', label: 'Pending' },
+      'READY':       { bg: 'rgba(245,158,11,0.12)',  border: 'rgba(245,158,11,0.3)',  color: '#FCD34D', label: 'Ready' },
+      'ONGOING':     { bg: 'rgba(16,185,129,0.12)',  border: 'rgba(16,185,129,0.35)', color: '#34D399', label: '● Live' },
+      'IN_PROGRESS': { bg: 'rgba(16,185,129,0.12)',  border: 'rgba(16,185,129,0.35)', color: '#34D399', label: '● Live' },
+      'COMPLETED':   { bg: 'rgba(6,182,212,0.1)',    border: 'rgba(6,182,212,0.25)',  color: '#67E8F9', label: 'Completed' },
+      'CANCELLED':   { bg: 'rgba(239,68,68,0.12)',   border: 'rgba(239,68,68,0.3)',   color: '#F87171', label: 'Cancelled' },
     };
-    return badges[status] || 'bg-gray-500/20 border-gray-500/30 text-gray-400';
+    return map[status] || map['PENDING'];
   };
 
   const getRoundName = (round) => {
@@ -29,80 +29,149 @@ const MatchInfo = ({ match }) => {
     return `Round ${round}`;
   };
 
+  const statusStyle = getStatusStyle(match.status);
+
+  const PlayerCard = ({ player, side, seed }) => {
+    const isP1 = side === 'p1';
+    const accentColor = isP1 ? '#F59E0B' : '#8B5CF6';
+    const accentBg = isP1 ? 'rgba(245,158,11,0.08)' : 'rgba(139,92,246,0.08)';
+    const accentBorder = isP1 ? 'rgba(245,158,11,0.2)' : 'rgba(139,92,246,0.2)';
+    const avatarGrad = isP1 ? 'linear-gradient(135deg, #F59E0B, #D97706)' : 'linear-gradient(135deg, #8B5CF6, #7C3AED)';
+    const seedBg = isP1 ? 'rgba(245,158,11,0.12)' : 'rgba(139,92,246,0.12)';
+    const seedColor = isP1 ? '#FCD34D' : '#C4B5FD';
+
+    return (
+      <div style={{
+        background: accentBg,
+        border: `1px solid ${accentBorder}`,
+        borderRadius: 14,
+        padding: '16px 12px',
+        textAlign: 'center',
+        flex: 1
+      }}>
+        {player?.profilePhoto ? (
+          <img
+            src={player.profilePhoto}
+            alt={player.name}
+            style={{
+              width: 60, height: 60, borderRadius: '50%',
+              margin: '0 auto 10px', objectFit: 'cover',
+              border: `2px solid ${accentBorder}`
+            }}
+          />
+        ) : (
+          <div style={{
+            width: 60, height: 60, borderRadius: '50%',
+            background: avatarGrad,
+            margin: '0 auto 10px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 22, fontWeight: 800, color: isP1 ? '#0C0900' : '#f5f3ff'
+          }}>
+            {player?.name?.charAt(0) || (isP1 ? 'P1' : 'P2')}
+          </div>
+        )}
+        <p style={{ fontWeight: 700, color: '#fff', fontSize: 14, marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {player?.name || 'TBD'}
+        </p>
+        {seed && (
+          <span style={{
+            display: 'inline-block',
+            background: seedBg,
+            color: seedColor,
+            fontSize: 11, fontWeight: 600,
+            padding: '2px 10px', borderRadius: 20,
+            border: `1px solid ${accentBorder}`
+          }}>
+            Seed {seed}
+          </span>
+        )}
+      </div>
+    );
+  };
+
   return (
-    <div className="bg-slate-800/50 border border-white/10 rounded-xl p-6 mb-6">
-      <div className="flex items-start justify-between mb-4">
+    <div style={{
+      background: 'linear-gradient(145deg, #0C1220, #0A0F1A)',
+      border: '1px solid rgba(255,255,255,0.07)',
+      borderRadius: 16,
+      padding: '20px',
+      marginBottom: 20
+    }}>
+      {/* Header row */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
         <div>
-          <h2 className="text-2xl font-bold text-white mb-1">
-            Match #{match.matchNumber}
-          </h2>
-          <p className="text-gray-400">{getRoundName(match.round)}</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+            <Hash style={{ width: 16, height: 16, color: 'rgba(255,255,255,0.3)' }} />
+            <h2 style={{ fontSize: 20, fontWeight: 800, color: '#fff', margin: 0 }}>
+              Match {match.matchNumber}
+            </h2>
+          </div>
+          <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', margin: 0 }}>
+            {getRoundName(match.round)}
+          </p>
         </div>
-        <span className={`px-4 py-2 rounded-full text-sm font-semibold border ${getStatusBadge(match.status)}`}>
-          {match.status}
+        <span style={{
+          background: statusStyle.bg,
+          border: `1px solid ${statusStyle.border}`,
+          color: statusStyle.color,
+          fontSize: 12, fontWeight: 700,
+          padding: '5px 14px', borderRadius: 20
+        }}>
+          {statusStyle.label}
         </span>
       </div>
 
       {/* Players */}
-      <div className="grid grid-cols-3 gap-4 items-center mb-6">
-        {/* Player 1 */}
-        <div className="text-center p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl">
-          {player1?.profilePhoto ? (
-            <img src={player1.profilePhoto} alt={player1.name} className="w-16 h-16 rounded-full mx-auto mb-2 object-cover border-2 border-blue-500/30" />
-          ) : (
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full mx-auto mb-2 flex items-center justify-center">
-              <span className="text-2xl font-bold text-white">{player1?.name?.charAt(0) || 'P1'}</span>
-            </div>
-          )}
-          <p className="font-bold text-white truncate">{player1?.name || 'TBD'}</p>
-          {match.player1Seed && (
-            <span className="inline-block mt-2 px-3 py-1 bg-blue-500/20 text-blue-400 text-xs rounded-full">
-              Seed {match.player1Seed}
-            </span>
-          )}
+      <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 14 }}>
+        <PlayerCard player={player1} side="p1" seed={match.player1Seed} />
+        <div style={{ textAlign: 'center', padding: '0 4px' }}>
+          <span style={{ fontSize: 16, fontWeight: 700, color: 'rgba(255,255,255,0.25)' }}>VS</span>
         </div>
-
-        {/* VS */}
-        <div className="text-center">
-          <span className="text-2xl font-bold text-gray-500">VS</span>
-        </div>
-
-        {/* Player 2 */}
-        <div className="text-center p-4 bg-purple-500/10 border border-purple-500/20 rounded-xl">
-          {player2?.profilePhoto ? (
-            <img src={player2.profilePhoto} alt={player2.name} className="w-16 h-16 rounded-full mx-auto mb-2 object-cover border-2 border-purple-500/30" />
-          ) : (
-            <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full mx-auto mb-2 flex items-center justify-center">
-              <span className="text-2xl font-bold text-white">{player2?.name?.charAt(0) || 'P2'}</span>
-            </div>
-          )}
-          <p className="font-bold text-white truncate">{player2?.name || 'TBD'}</p>
-          {match.player2Seed && (
-            <span className="inline-block mt-2 px-3 py-1 bg-purple-500/20 text-purple-400 text-xs rounded-full">
-              Seed {match.player2Seed}
-            </span>
-          )}
-        </div>
+        <PlayerCard player={player2} side="p2" seed={match.player2Seed} />
       </div>
 
-      {/* Umpire Info */}
+      {/* Umpire */}
       {umpire && (
-        <div className="flex items-center gap-3 p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl mb-4">
-          <Gavel className="w-5 h-5 text-emerald-400" />
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 10,
+          background: 'rgba(16,185,129,0.08)',
+          border: '1px solid rgba(16,185,129,0.2)',
+          borderRadius: 10, padding: '10px 14px',
+          marginBottom: match.courtNumber ? 10 : 0
+        }}>
+          <div style={{
+            width: 32, height: 32, borderRadius: '50%',
+            background: 'rgba(16,185,129,0.15)',
+            border: '1px solid rgba(16,185,129,0.25)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+          }}>
+            <Gavel style={{ width: 15, height: 15, color: '#34D399' }} />
+          </div>
           <div>
-            <p className="text-xs text-emerald-400">Match Official</p>
-            <p className="font-semibold text-white">{umpire.name}</p>
+            <p style={{ fontSize: 11, color: '#34D399', fontWeight: 600, letterSpacing: '0.04em' }}>Match Official</p>
+            <p style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>{umpire.name}</p>
           </div>
         </div>
       )}
 
-      {/* Court Info */}
+      {/* Court */}
       {match.courtNumber && (
-        <div className="flex items-center gap-3 p-3 bg-slate-700/30 border border-white/5 rounded-xl">
-          <MapPin className="w-5 h-5 text-gray-400" />
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 10,
+          background: 'rgba(255,255,255,0.03)',
+          border: '1px solid rgba(255,255,255,0.07)',
+          borderRadius: 10, padding: '10px 14px'
+        }}>
+          <div style={{
+            width: 32, height: 32, borderRadius: '50%',
+            background: 'rgba(255,255,255,0.06)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+          }}>
+            <MapPin style={{ width: 15, height: 15, color: 'rgba(255,255,255,0.45)' }} />
+          </div>
           <div>
-            <p className="text-xs text-gray-500">Court</p>
-            <p className="font-semibold text-white">{match.courtNumber}</p>
+            <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', fontWeight: 600, letterSpacing: '0.04em' }}>Court</p>
+            <p style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>{match.courtNumber}</p>
           </div>
         </div>
       )}

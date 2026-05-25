@@ -3493,7 +3493,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
             </div>
 
             {/* Modal Scrollable Body */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-2.5">
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {group.matches && group.matches.length > 0 ? (
                 group.matches.map((match, mi) => {
                   const dbMatch = findDbMatch(match, gi);
@@ -3507,15 +3507,19 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                       key={mi}
                       className={`rounded-xl overflow-hidden transition-all${isInProgress ? ' animate-pulse' : ''}`}
                       style={{
-                        background: mi % 2 === 0 ? 'rgba(11,13,33,0.92)' : 'rgba(14,18,40,0.92)',
+                        background: mi % 2 === 0 ? '#07121e' : '#0d1a2e',
                         border: isInProgress
                           ? '2px solid rgba(245,158,11,0.7)'
                           : isCompleted
-                          ? '1.5px solid rgba(245,158,11,0.22)'
+                          ? '1.5px solid rgba(245,158,11,0.3)'
                           : hasUmpire
-                          ? '1.5px solid rgba(255,255,255,0.16)'
-                          : '1.5px solid rgba(255,255,255,0.09)',
-                        boxShadow: isInProgress ? '0 0 14px rgba(245,158,11,0.18)' : '0 2px 8px rgba(0,0,0,0.3)',
+                          ? '1.5px solid rgba(255,255,255,0.18)'
+                          : '1.5px solid rgba(255,255,255,0.11)',
+                        boxShadow: isInProgress
+                          ? '0 0 14px rgba(245,158,11,0.18)'
+                          : mi % 2 === 0
+                          ? '0 2px 12px rgba(0,0,0,0.4)'
+                          : '0 2px 12px rgba(13,26,46,0.6)',
                       }}
                     >
                       {/* Match Header */}
@@ -3559,7 +3563,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                               <span
                                 className="truncate flex-1 text-xs font-bold"
                                 style={{
-                                  color: p1Won ? '#ffffff' : p1Name === 'TBD' ? 'rgba(255,255,255,0.22)' : isMatchDone ? 'rgba(255,255,255,0.55)' : '#ffffff',
+                                  color: p1Name === 'TBD' ? 'rgba(255,255,255,0.22)' : '#ffffff',
                                   fontStyle: p1Name === 'TBD' ? 'italic' : 'normal',
                                 }}
                               >
@@ -3583,7 +3587,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                               <span
                                 className="truncate flex-1 text-xs font-bold"
                                 style={{
-                                  color: p2Won ? '#ffffff' : p2Name === 'TBD' ? 'rgba(255,255,255,0.22)' : isMatchDone ? 'rgba(255,255,255,0.55)' : '#ffffff',
+                                  color: p2Name === 'TBD' ? 'rgba(255,255,255,0.22)' : '#ffffff',
                                   fontStyle: p2Name === 'TBD' ? 'italic' : 'normal',
                                 }}
                               >
@@ -3613,7 +3617,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                               onViewMatchDetails(matchDataToUse, bracketMatchData);
                             }}
                             className="flex-1 py-2.5 rounded-lg text-xs font-black flex items-center justify-center gap-2 transition-all"
-                            style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.65)', border: '1px solid rgba(255,255,255,0.1)' }}
+                            style={{ background: 'rgba(245,158,11,0.1)', color: '#FCD34D', border: '1px solid rgba(245,158,11,0.32)' }}
                           >
                             <Eye className="w-4 h-4" />
                             VIEW

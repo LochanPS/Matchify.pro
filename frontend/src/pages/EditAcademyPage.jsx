@@ -109,7 +109,7 @@ function StepIndicator({ current, total }) {
         <div key={n} className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-black transition-all"
             style={{
-              background: n < current ? B.green : n === current ? 'linear-gradient(135deg,#06b6d4,#00d4ff)' : 'rgba(255,255,255,0.06)',
+              background: n < current ? B.green : n === current ? 'linear-gradient(135deg,#F59E0B,#FCD34D)' : 'rgba(255,255,255,0.06)',
               color: n <= current ? '#050810' : 'rgba(255,255,255,0.3)',
               border: n > current ? '1px solid rgba(255,255,255,0.1)' : 'none',
             }}>
@@ -323,7 +323,7 @@ export default function EditAcademyPage() {
   if (fetching) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: B.bg }}>
-        <div style={{ width:36, height:36, borderRadius:'50%', border:'3px solid rgba(0,212,255,0.15)', borderTopColor:'#00d4ff', animation:'spin 0.7s linear infinite' }} />
+        <div style={{ width:36, height:36, borderRadius:'50%', border:'3px solid rgba(245,158,11,0.15)', borderTopColor:'#FCD34D', animation:'spin 0.7s linear infinite' }} />
         <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
       </div>
     );
@@ -347,7 +347,7 @@ export default function EditAcademyPage() {
             Step {step} of 2
           </div>
           {lastSaved && (
-            <div className="flex items-center gap-1 text-xs" style={{ color: 'rgba(6,182,212,0.5)' }}>
+            <div className="flex items-center gap-1 text-xs" style={{ color: 'rgba(245,158,11,0.5)' }}>
               <Save className="w-3 h-3" />
               Saved
             </div>
@@ -450,9 +450,9 @@ export default function EditAcademyPage() {
                     <button key={sport} type="button" onClick={() => toggleSport(sport)}
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all"
                       style={{
-                        background: active ? 'rgba(6,182,212,0.15)' : 'rgba(255,255,255,0.04)',
+                        background: active ? 'rgba(245,158,11,0.15)' : 'rgba(255,255,255,0.04)',
                         color: active ? B.green : 'rgba(255,255,255,0.5)',
-                        border: `1px solid ${active ? 'rgba(6,182,212,0.4)' : B.border}`,
+                        border: `1px solid ${active ? 'rgba(245,158,11,0.4)' : B.border}`,
                       }}>
                       {cfg.emoji} {sport}
                     </button>
@@ -494,9 +494,9 @@ export default function EditAcademyPage() {
                     <button key={aid} type="button" onClick={() => toggleAmenity(aid)}
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all"
                       style={{
-                        background: active ? 'rgba(0,212,255,0.12)' : 'rgba(255,255,255,0.04)',
+                        background: active ? 'rgba(245,158,11,0.12)' : 'rgba(255,255,255,0.04)',
                         color: active ? B.cyan : 'rgba(255,255,255,0.5)',
-                        border: `1px solid ${active ? 'rgba(0,212,255,0.35)' : B.border}`,
+                        border: `1px solid ${active ? 'rgba(245,158,11,0.35)' : B.border}`,
                       }}>
                       <Icon className="w-3 h-3" />
                       {label}
@@ -520,7 +520,7 @@ export default function EditAcademyPage() {
 
             <button onClick={() => { if (validateStep1()) setStep(2); }}
               className="w-full py-3.5 rounded-2xl font-black text-sm flex items-center justify-center gap-2"
-              style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#050810' }}>
+              style={{ background: 'linear-gradient(135deg,#F59E0B,#FCD34D)', color: '#050810' }}>
               Next: Contact & Photos
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -535,10 +535,10 @@ export default function EditAcademyPage() {
               <div className="relative flex items-stretch">
                 <div className="flex items-center gap-1.5 px-3 rounded-l-xl flex-shrink-0 select-none"
                   style={{
-                    background: 'rgba(6,182,212,0.10)',
-                    border: `1px solid ${errors.phone ? 'rgba(248,113,113,0.6)' : 'rgba(6,182,212,0.30)'}`,
+                    background: 'rgba(245,158,11,0.10)',
+                    border: `1px solid ${errors.phone ? 'rgba(248,113,113,0.6)' : 'rgba(245,158,11,0.30)'}`,
                     borderRight: 'none',
-                    color: '#22d3ee', fontWeight: 800, fontSize: '14px',
+                    color: '#FCD34D', fontWeight: 800, fontSize: '14px',
                   }}>
                   🇮🇳 +91
                 </div>
@@ -633,7 +633,7 @@ export default function EditAcademyPage() {
 
             <button onClick={handleSubmit} disabled={loading}
               className="w-full py-3.5 rounded-2xl font-black text-sm flex items-center justify-center gap-2 disabled:opacity-40"
-              style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#050810' }}>
+              style={{ background: 'linear-gradient(135deg,#F59E0B,#FCD34D)', color: '#050810' }}>
               {loading ? <Spinner size="md" /> : <CheckCircle className="w-5 h-5" />}
               {loading ? 'Saving...' : 'Save Changes'}
             </button>
@@ -644,4 +644,5 @@ export default function EditAcademyPage() {
     </div>
   );
 }
+
 

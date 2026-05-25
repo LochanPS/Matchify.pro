@@ -1,4 +1,4 @@
-// AnimatedBackground — 2 large ambient blobs only
+﻿// AnimatedBackground — 2 large ambient blobs only
 // Premium esports dark aesthetic: no stars, no balloons, no neon
 // Cyan top-right + violet bottom-left, very subtle opacity
 export default function AnimatedBackground({ variant = 'default', className = '', fullWidth = false }) {
@@ -17,7 +17,7 @@ export default function AnimatedBackground({ variant = 'default', className = ''
         width: '440px', height: '440px',
         top: '-140px', right: '-120px',
         borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(6,182,212,0.09) 0%, transparent 70%)',
+        background: 'radial-gradient(circle, rgba(245,158,11,0.09) 0%, transparent 70%)',
         filter: 'blur(80px)',
       }} />
       {/* Blob 2 — Violet, bottom-left */}
@@ -32,3 +32,4 @@ export default function AnimatedBackground({ variant = 'default', className = ''
     </div>
   );
 }
+

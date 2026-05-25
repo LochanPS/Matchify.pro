@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Users } from 'lucide-react';
 
 const DoublesRotationIndicator = ({
@@ -107,11 +107,11 @@ const DoublesRotationIndicator = ({
 
       <div style={{
         marginTop: 10,
-        background: 'rgba(6,182,212,0.06)',
-        border: '1px solid rgba(6,182,212,0.15)',
+        background: 'rgba(245,158,11,0.06)',
+        border: '1px solid rgba(245,158,11,0.15)',
         borderRadius: 8, padding: '7px 12px'
       }}>
-        <p style={{ fontSize: 11, color: 'rgba(6,182,212,0.7)', margin: 0 }}>
+        <p style={{ fontSize: 11, color: 'rgba(245,158,11,0.7)', margin: 0 }}>
           Even score = Right court · Odd score = Left court
         </p>
       </div>
@@ -120,3 +120,4 @@ const DoublesRotationIndicator = ({
 };
 
 export default DoublesRotationIndicator;
+

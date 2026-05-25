@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+﻿import { useState, useRef } from 'react';
 import { X, Upload, CheckCircle, Loader, AlertTriangle } from 'lucide-react';
 import api from '../utils/api';
 import { fetchUpload } from '../utils/fetchUpload';
@@ -206,7 +206,7 @@ export default function RefundDetailsModal({ registration, onClose, onSuccess })
               onClick={handleSubmit}
               disabled={submitting}
               className="flex-1 px-4 py-3 rounded-xl font-semibold text-white transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-              style={{ background: 'linear-gradient(135deg,#06b6d4,#0891b2)', boxShadow: '0 4px 15px rgba(6,182,212,0.3)' }}
+              style={{ background: 'linear-gradient(135deg,#F59E0B,#D97706)', boxShadow: '0 4px 15px rgba(245,158,11,0.3)' }}
             >
               {submitting ? (
                 <>
@@ -223,3 +223,4 @@ export default function RefundDetailsModal({ registration, onClose, onSuccess })
     </div>
   );
 }
+

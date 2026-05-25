@@ -61,12 +61,12 @@ const SpectatorViewPage = () => {
     <div className="min-h-screen relative" style={{ background: 'linear-gradient(180deg,#0a0a1f 0%,#050810 40%,#0d1a2a 70%,#050810 100%)' }}>
       {/* Fixed bg glow */}
       <div className="fixed top-0 bottom-0 pointer-events-none overflow-hidden" style={{ left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: "480px" }}>
-        <div className="absolute top-0 right-0 w-72 h-72 rounded-full blur-3xl opacity-15" style={{ background: 'radial-gradient(circle,rgba(6,182,212,0.4) 0%,transparent 70%)' }} />
-        <div className="absolute bottom-1/3 left-0 w-64 h-64 rounded-full blur-3xl opacity-10" style={{ background: 'radial-gradient(circle,rgba(0,212,255,0.4) 0%,transparent 70%)' }} />
+        <div className="absolute top-0 right-0 w-72 h-72 rounded-full blur-3xl opacity-15" style={{ background: 'radial-gradient(circle,rgba(245,158,11,0.4) 0%,transparent 70%)' }} />
+        <div className="absolute bottom-1/3 left-0 w-64 h-64 rounded-full blur-3xl opacity-10" style={{ background: 'radial-gradient(circle,rgba(245,158,11,0.4) 0%,transparent 70%)' }} />
       </div>
 
       {/* Sticky Header */}
-      <div className="sticky top-0 z-20" style={{ background: 'rgba(7,7,26,0.95)', borderBottom: '1px solid rgba(6,182,212,0.15)', backdropFilter: 'blur(20px)' }}>
+      <div className="sticky top-0 z-20" style={{ background: 'rgba(7,7,26,0.95)', borderBottom: '1px solid rgba(245,158,11,0.15)', backdropFilter: 'blur(20px)' }}>
         <div className="px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <h1 className="text-base font-black text-white">Live Match</h1>
@@ -77,7 +77,7 @@ const SpectatorViewPage = () => {
               </div>
             )}
           </div>
-          <button onClick={fetchMatch} className="flex items-center gap-1.5 text-xs font-semibold" style={{ color: '#06b6d4' }}>
+          <button onClick={fetchMatch} className="flex items-center gap-1.5 text-xs font-semibold" style={{ color: '#F59E0B' }}>
             <RefreshCw className="w-4 h-4" /> Refresh
           </button>
         </div>
@@ -97,10 +97,10 @@ const SpectatorViewPage = () => {
 
         {/* Match Completion Banner */}
         {matchComplete && winner && (
-          <div className="rounded-2xl p-6 text-center" style={{ background: 'linear-gradient(135deg,rgba(6,182,212,0.15),rgba(6,182,212,0.1))', border: '2px solid rgba(6,182,212,0.4)' }}>
+          <div className="rounded-2xl p-6 text-center" style={{ background: 'linear-gradient(135deg,rgba(245,158,11,0.15),rgba(245,158,11,0.1))', border: '2px solid rgba(245,158,11,0.4)' }}>
             <div className="text-4xl mb-2">🏆</div>
             <h2 className="text-xl font-black text-white mb-1">Match Complete!</h2>
-            <p className="text-sm font-semibold" style={{ color: '#06b6d4' }}>
+            <p className="text-sm font-semibold" style={{ color: '#F59E0B' }}>
               {winner === 'player1' ? 'Player 1' : 'Player 2'} wins!
             </p>
           </div>
@@ -117,8 +117,8 @@ const SpectatorViewPage = () => {
         )}
 
         {/* Spectator Info */}
-        <div className="rounded-2xl p-5 text-center" style={{ background: 'rgba(0,212,255,0.08)', border: '1px solid rgba(0,212,255,0.2)' }}>
-          <Users className="w-10 h-10 mx-auto mb-3" style={{ color: '#00d4ff' }} />
+        <div className="rounded-2xl p-5 text-center" style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)' }}>
+          <Users className="w-10 h-10 mx-auto mb-3" style={{ color: '#FCD34D' }} />
           <h3 className="text-sm font-black text-white mb-1">Spectator View</h3>
           <p className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>
             You're watching this match live. Scores update automatically.
@@ -136,7 +136,7 @@ const SpectatorViewPage = () => {
                 <div key={score.history.length - i} className="flex items-center justify-between p-3 rounded-xl" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
                   <div className="flex items-center gap-2.5">
                     <span className="text-xs font-black w-6" style={{ color: 'rgba(255,255,255,0.35)' }}>#{score.history.length - i}</span>
-                    <span className="text-sm font-bold" style={{ color: point.player === 'player1' ? '#00d4ff' : '#06b6d4' }}>
+                    <span className="text-sm font-bold" style={{ color: point.player === 'player1' ? '#FCD34D' : '#F59E0B' }}>
                       {point.player === 'player1' ? 'Player 1' : 'Player 2'}
                     </span>
                   </div>
@@ -155,3 +155,4 @@ const SpectatorViewPage = () => {
 };
 
 export default SpectatorViewPage;
+

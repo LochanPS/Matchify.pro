@@ -14,15 +14,15 @@ const B = {
 };
 
 const SPORT_META = {
-  Badminton:      { emoji: '🏸', color: '#06b6d4', bg: 'rgba(6,182,212,0.12)',    border: 'rgba(6,182,212,0.25)' },
-  Tennis:         { emoji: '🎾', color: '#00d4ff', bg: 'rgba(0,212,255,0.12)',    border: 'rgba(0,212,255,0.25)' },
+  Badminton:      { emoji: '🏸', color: '#F59E0B', bg: 'rgba(245,158,11,0.12)',    border: 'rgba(245,158,11,0.25)' },
+  Tennis:         { emoji: '🎾', color: '#FCD34D', bg: 'rgba(245,158,11,0.12)',    border: 'rgba(245,158,11,0.25)' },
   'Table Tennis': { emoji: '🏓', color: '#a855f7', bg: 'rgba(168,85,247,0.12)',   border: 'rgba(168,85,247,0.25)' },
   Squash:         { emoji: '🎱', color: '#fbbf24', bg: 'rgba(251,191,36,0.12)',   border: 'rgba(251,191,36,0.25)' },
   Basketball:     { emoji: '🏀', color: '#f97316', bg: 'rgba(249,115,22,0.12)',   border: 'rgba(249,115,22,0.25)' },
   Volleyball:     { emoji: '🏐', color: '#ec4899', bg: 'rgba(236,72,153,0.12)',   border: 'rgba(236,72,153,0.25)' },
   Swimming:       { emoji: '🏊', color: '#38bdf8', bg: 'rgba(56,189,248,0.12)',   border: 'rgba(56,189,248,0.25)' },
   Cricket:        { emoji: '🏏', color: '#a3e635', bg: 'rgba(163,230,53,0.12)',   border: 'rgba(163,230,53,0.25)' },
-  Football:       { emoji: '⚽', color: '#22d3ee', bg: 'rgba(52,211,153,0.12)',   border: 'rgba(52,211,153,0.25)' },
+  Football:       { emoji: '⚽', color: '#FCD34D', bg: 'rgba(52,211,153,0.12)',   border: 'rgba(52,211,153,0.25)' },
   Gym:            { emoji: '💪', color: '#fb7185', bg: 'rgba(251,113,133,0.12)',  border: 'rgba(251,113,133,0.25)' },
   Yoga:           { emoji: '🧘', color: '#c084fc', bg: 'rgba(192,132,252,0.12)',  border: 'rgba(192,132,252,0.25)' },
   Athletics:      { emoji: '🏃', color: '#fdba74', bg: 'rgba(253,186,116,0.12)', border: 'rgba(253,186,116,0.25)' },
@@ -32,19 +32,19 @@ const ALL_SPORTS = ['All', ...Object.keys(SPORT_META)];
 
 // ── No-photo gradient map by sport ──────────────────────────────────────────
 const SPORT_GRADIENT = {
-  Badminton:      'linear-gradient(135deg,rgba(6,182,212,0.18),rgba(0,212,255,0.1))',
-  Tennis:         'linear-gradient(135deg,rgba(0,212,255,0.18),rgba(168,85,247,0.1))',
-  'Table Tennis': 'linear-gradient(135deg,rgba(168,85,247,0.18),rgba(0,212,255,0.1))',
+  Badminton:      'linear-gradient(135deg,rgba(245,158,11,0.18),rgba(245,158,11,0.1))',
+  Tennis:         'linear-gradient(135deg,rgba(245,158,11,0.18),rgba(168,85,247,0.1))',
+  'Table Tennis': 'linear-gradient(135deg,rgba(168,85,247,0.18),rgba(245,158,11,0.1))',
   Squash:         'linear-gradient(135deg,rgba(251,191,36,0.18),rgba(249,115,22,0.1))',
   Basketball:     'linear-gradient(135deg,rgba(249,115,22,0.18),rgba(251,191,36,0.1))',
   Volleyball:     'linear-gradient(135deg,rgba(236,72,153,0.18),rgba(168,85,247,0.1))',
-  Swimming:       'linear-gradient(135deg,rgba(56,189,248,0.18),rgba(0,212,255,0.1))',
+  Swimming:       'linear-gradient(135deg,rgba(56,189,248,0.18),rgba(245,158,11,0.1))',
   Cricket:        'linear-gradient(135deg,rgba(163,230,53,0.18),rgba(52,211,153,0.1))',
   Football:       'linear-gradient(135deg,rgba(52,211,153,0.18),rgba(163,230,53,0.1))',
   Gym:            'linear-gradient(135deg,rgba(251,113,133,0.18),rgba(168,85,247,0.1))',
   Yoga:           'linear-gradient(135deg,rgba(192,132,252,0.18),rgba(56,189,248,0.1))',
   Athletics:      'linear-gradient(135deg,rgba(253,186,116,0.18),rgba(251,113,133,0.1))',
-  default:        'linear-gradient(135deg,rgba(0,212,255,0.12),rgba(168,85,247,0.08))',
+  default:        'linear-gradient(135deg,rgba(245,158,11,0.12),rgba(168,85,247,0.08))',
 };
 
 // ── Academy Card ─────────────────────────────────────────────────────────────
@@ -100,7 +100,7 @@ function AcademyCard({ academy, onClick }) {
         {/* Verified badge */}
         {academy.isVerified && (
           <div className="absolute top-3 right-3 flex items-center gap-1 px-2.5 py-1 rounded-full"
-            style={{ background: 'rgba(6,182,212,0.92)', backdropFilter: 'blur(6px)' }}>
+            style={{ background: 'rgba(245,158,11,0.92)', backdropFilter: 'blur(6px)' }}>
             <BadgeCheck className="w-3 h-3" style={{ color: '#050810' }} />
             <span className="text-xs font-black" style={{ color: '#050810' }}>Verified</span>
           </div>
@@ -175,8 +175,8 @@ function AcademyCard({ academy, onClick }) {
               onClick={e => e.stopPropagation()}
               className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-black transition-all active:scale-95"
               style={{
-                background: 'rgba(6,182,212,0.12)',
-                border: '1px solid rgba(6,182,212,0.3)',
+                background: 'rgba(245,158,11,0.12)',
+                border: '1px solid rgba(245,158,11,0.3)',
                 color: B.green,
               }}
             >
@@ -279,7 +279,7 @@ export default function SearchAcademiesPage() {
           <button
             onClick={() => navigate('/academies/add')}
             className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-black transition-all active:scale-95"
-            style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#050810' }}
+            style={{ background: 'linear-gradient(135deg,#F59E0B,#FCD34D)', color: '#050810' }}
           >
             <Plus className="w-4 h-4" />
             Add
@@ -366,15 +366,15 @@ export default function SearchAcademiesPage() {
             <button
               onClick={() => fetchAcademies()}
               className="px-5 py-2.5 rounded-xl text-sm font-black"
-              style={{ background: 'rgba(6,182,212,0.12)', color: B.green, border: '1px solid rgba(6,182,212,0.25)' }}>
+              style={{ background: 'rgba(245,158,11,0.12)', color: B.green, border: '1px solid rgba(245,158,11,0.25)' }}>
               Try Again
             </button>
           </div>
         ) : academies.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <div className="w-20 h-20 rounded-full flex items-center justify-center mb-5"
-              style={{ background: 'rgba(0,212,255,0.08)', border: '1px solid rgba(0,212,255,0.15)' }}>
-              <Building2 className="w-9 h-9" style={{ color: 'rgba(0,212,255,0.5)' }} />
+              style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.15)' }}>
+              <Building2 className="w-9 h-9" style={{ color: 'rgba(245,158,11,0.5)' }} />
             </div>
             <p className="text-lg font-black text-white mb-2">
               {search || activeSport !== 'All' ? 'No results found' : 'No academies yet'}
@@ -388,7 +388,7 @@ export default function SearchAcademiesPage() {
             <button
               onClick={() => navigate('/academies/add')}
               className="flex items-center gap-2 px-6 py-3.5 rounded-2xl text-sm font-black transition-all active:scale-95"
-              style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#050810' }}>
+              style={{ background: 'linear-gradient(135deg,#F59E0B,#FCD34D)', color: '#050810' }}>
               <Plus className="w-4 h-4" />
               List Your Academy
             </button>
@@ -417,7 +417,7 @@ export default function SearchAcademiesPage() {
             className="w-full py-3.5 rounded-2xl text-sm font-black flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
             style={{
               background: 'rgba(255,255,255,0.06)',
-              border: '1px solid rgba(6,182,212,0.2)',
+              border: '1px solid rgba(245,158,11,0.2)',
               color: B.green,
             }}
           >
@@ -429,4 +429,5 @@ export default function SearchAcademiesPage() {
     </div>
   );
 }
+
 

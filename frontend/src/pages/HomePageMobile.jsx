@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+﻿import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import MatchifyLogo from '../components/MatchifyLogo';
 import {
@@ -20,7 +20,7 @@ const HOME_M_PARTICLES = Array.from({ length: 35 }, (_, i) => ({
   h: [1,1,1,2,2,3][i % 6],
   x: (i * 37 + 11) % 97,
   y: (i * 53 + 7)  % 99,
-  c: ['#00ffcc','#00d4ff','#ffffff','#a0f0e0','#7df9ff','#06b6d4'][(i * 3) % 6],
+  c: ['#00ffcc','#FCD34D','#ffffff','#a0f0e0','#7df9ff','#F59E0B'][(i * 3) % 6],
   o: ((i * 17) % 55) / 100 + 0.15,
   dur: (i * 7) % 12 + 4,
   delay: (i * 3) % 6,
@@ -30,7 +30,7 @@ const HOME_M_PARTICLES = Array.from({ length: 35 }, (_, i) => ({
 
 // Ambient blobs — 2 only, very subtle
 const NEBULAS = [
-  { x: 75, y:  3, size: 440, color: 'rgba(6,182,212,0.08)', dur: 10, delay: 0 },
+  { x: 75, y:  3, size: 440, color: 'rgba(245,158,11,0.08)', dur: 10, delay: 0 },
   { x: 10, y: 70, size: 400, color: 'rgba(139,92,246,0.06)', dur: 13, delay: 3 },
 ];
 
@@ -43,7 +43,7 @@ const REVIEWS = [
     state: 'Telangana',
     date: 'Jan 2026',
     badge: 'Verified Player',
-    avatarColors: ['#06b6d4', '#0891b2'],
+    avatarColors: ['#F59E0B', '#D97706'],
     avatarText: '#ffffff',
     stars: 5,
     text: 'Registered for the Hyderabad Smash Open through Matchify. My partner and I made it to the semis — the live draw tracker was brilliant. No more WhatsApp chaos to figure out fixtures!',
@@ -82,7 +82,7 @@ const REVIEWS = [
     state: 'Kerala',
     date: 'Mar 2026',
     badge: 'Verified Player',
-    avatarColors: ['#06b6d4', '#0284c7'],
+    avatarColors: ['#F59E0B', '#0284c7'],
     avatarText: '#ffffff',
     stars: 5,
     text: 'Found my doubles partner Sreelakshmi through the partner-finding feature. We entered the Kochi Winter Cup as strangers and ended up winning the Ladies Doubles. Still can\'t believe it!',
@@ -123,8 +123,8 @@ const HomePageMobile = () => {
 
   const benefits = [
     { icon: BoltIcon,        text: 'Instant Registration', color: '#fbbf24', bg: 'rgba(251,191,36,0.1)' },
-    { icon: ShieldCheckIcon, text: 'Secure Payments',      color: '#06b6d4', bg: 'rgba(6,182,212,0.1)' },
-    { icon: TrophyIcon,      text: 'Fair Play System',     color: '#00d4ff', bg: 'rgba(0,212,255,0.1)' },
+    { icon: ShieldCheckIcon, text: 'Secure Payments',      color: '#F59E0B', bg: 'rgba(245,158,11,0.1)' },
+    { icon: TrophyIcon,      text: 'Fair Play System',     color: '#FCD34D', bg: 'rgba(245,158,11,0.1)' },
     { icon: ChartBarIcon,    text: 'Track Performance',    color: '#a855f7', bg: 'rgba(168,85,247,0.1)' },
   ];
 
@@ -183,7 +183,7 @@ const HomePageMobile = () => {
                   paddingLeft: '16px',
                   paddingRight: '16px',
                   fontSize: '14px',
-                  background: 'linear-gradient(135deg, #06b6d4, #0891b2)',
+                  background: 'linear-gradient(135deg, #F59E0B, #D97706)',
                   color: '#ffffff',
                   letterSpacing: '0.01em',
                   whiteSpace: 'nowrap',
@@ -317,7 +317,7 @@ const HomePageMobile = () => {
               className="absolute blur-3xl rounded-full"
               style={{
                 width: '160px', height: '160px',
-                background: 'radial-gradient(circle, rgba(6,182,212,0.12) 0%, transparent 70%)',
+                background: 'radial-gradient(circle, rgba(245,158,11,0.12) 0%, transparent 70%)',
                 top: '50%', left: '50%',
                 transform: 'translate(-50%,-50%)',
                 animation: 'glow 3s ease-in-out infinite',
@@ -384,10 +384,10 @@ const HomePageMobile = () => {
             {/* Avatar stack */}
             <div className="flex -space-x-2.5">
               {[
-                { l: 'A', g: ['#06b6d4','#0891b2'], c: '#ffffff' },
+                { l: 'A', g: ['#F59E0B','#D97706'], c: '#ffffff' },
                 { l: 'K', g: ['#a855f7','#7c3aed'], c: '#fff' },
                 { l: 'R', g: ['#f59e0b','#ea580c'], c: '#fff' },
-                { l: 'D', g: ['#06b6d4','#0284c7'], c: '#fff' },
+                { l: 'D', g: ['#F59E0B','#0284c7'], c: '#fff' },
                 { l: '+', g: ['rgba(255,255,255,0.15)','rgba(255,255,255,0.08)'], c: 'rgba(255,255,255,0.7)' },
               ].map((av, i) => (
                 <div
@@ -498,7 +498,7 @@ const HomePageMobile = () => {
             }}>
             <div className="grid grid-cols-2">
               {[
-                { value: '2,500+', label: 'Players',     grad: 'linear-gradient(135deg, #67e8f9, #06b6d4)' },
+                { value: '2,500+', label: 'Players',     grad: 'linear-gradient(135deg, #67e8f9, #F59E0B)' },
                 { value: '80+',    label: 'Tournaments', grad: 'linear-gradient(135deg, #fde68a, #f59e0b)' },
                 { value: '30+',    label: 'Cities',      grad: 'linear-gradient(135deg, #fdba74, #f97316)' },
                 { value: '₹25L+',  label: 'Prize Pool',  grad: 'linear-gradient(135deg, #d8b4fe, #a855f7)' },
@@ -554,9 +554,9 @@ const HomePageMobile = () => {
             <div className="grid grid-cols-2 gap-4">
               {[
                 { gradient: 'linear-gradient(135deg,#f59e0b,#ea580c)' },
-                { gradient: 'linear-gradient(135deg,#06b6d4,#0284c7)' },
+                { gradient: 'linear-gradient(135deg,#F59E0B,#0284c7)' },
                 { gradient: 'linear-gradient(135deg,#a855f7,#7c3aed)' },
-                { gradient: 'linear-gradient(135deg,#06b6d4,#0891b2)' },
+                { gradient: 'linear-gradient(135deg,#F59E0B,#D97706)' },
               ].map((scheme, i) => {
                 const f = features[i];
                 return (
@@ -644,13 +644,13 @@ const HomePageMobile = () => {
             AUTHENTIC REVIEWS
         ══════════════════════════════════════════════════════════════ */}
         <div className="rounded-2xl p-5 mb-6 relative overflow-hidden"
-          style={{ background: 'rgba(13,26,42,0.85)', border: '1px solid rgba(6,182,212,0.2)', backdropFilter: 'blur(10px)', animation: 'fadeIn 0.8s ease-out 1.4s both' }}>
+          style={{ background: 'rgba(13,26,42,0.85)', border: '1px solid rgba(245,158,11,0.2)', backdropFilter: 'blur(10px)', animation: 'fadeIn 0.8s ease-out 1.4s both' }}>
           <div className="absolute top-0 right-0 w-40 h-40 rounded-full blur-3xl opacity-10"
-            style={{ background: 'radial-gradient(circle, rgba(6,182,212,0.8), transparent)' }} />
+            style={{ background: 'radial-gradient(circle, rgba(245,158,11,0.8), transparent)' }} />
 
           <div className="text-center mb-5 relative z-10">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold mb-3"
-              style={{ background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.2)', color: '#22d3ee' }}>
+              style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)', color: '#FCD34D' }}>
               💬 Players &amp; Organisers Say
             </div>
             <h2 className="text-xl font-black text-white">Real Stories</h2>
@@ -809,3 +809,4 @@ const HomePageMobile = () => {
 };
 
 export default HomePageMobile;
+

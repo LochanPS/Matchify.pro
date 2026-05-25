@@ -394,7 +394,7 @@ const MatchScoringPage = () => {
 
       {/* ── Sticky Header ─────────────────────────────────────────────────── */}
       <div className="sticky top-0 z-20 px-4 py-3 flex items-center justify-between"
-        style={{ background: 'rgba(7,7,26,0.95)', borderBottom: `1px solid rgba(6,182,212,0.15)`, backdropFilter: 'blur(20px)' }}>
+        style={{ background: 'rgba(7,7,26,0.95)', borderBottom: `1px solid rgba(245,158,11,0.15)`, backdropFilter: 'blur(20px)' }}>
         <button onClick={handleBack} className="flex items-center gap-1.5 text-sm font-bold"
           style={{ color: 'rgba(255,255,255,0.55)' }}>
           <ArrowLeft className="w-4 h-4" /> Back
@@ -411,7 +411,7 @@ const MatchScoringPage = () => {
             ) : (
               <button onClick={handleResumeTimer} disabled={saving}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all disabled:opacity-50"
-                style={{ background: 'rgba(6,182,212,0.12)', border: '1px solid rgba(6,182,212,0.3)', color: B.green }}>
+                style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.3)', color: B.green }}>
                 <Play className="w-3.5 h-3.5" /> Resume
               </button>
             )}
@@ -504,7 +504,7 @@ const MatchScoringPage = () => {
                 return (
                   <div key={idx} className="px-3 py-1.5 rounded-xl text-center min-w-[72px] transition-all"
                     style={isCurrent
-                      ? { background: 'rgba(6,182,212,0.1)', border: `1.5px solid rgba(6,182,212,0.5)` }
+                      ? { background: 'rgba(245,158,11,0.1)', border: `1.5px solid rgba(245,158,11,0.5)` }
                       : { background: 'rgba(255,255,255,0.04)', border: `1px solid ${B.border}` }}>
                     <div className="text-xs font-bold mb-0.5"
                       style={{ color: isCurrent ? B.green : 'rgba(255,255,255,0.4)' }}>Set {idx + 1}</div>
@@ -524,7 +524,7 @@ const MatchScoringPage = () => {
             <div className="text-center">
               <div className="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center text-3xl font-black mb-2"
                 style={p1Sets > p2Sets
-                  ? { background: 'rgba(6,182,212,0.15)', border: '1.5px solid rgba(245,158,11,0.4)', color: B.green }
+                  ? { background: 'rgba(245,158,11,0.15)', border: '1.5px solid rgba(245,158,11,0.4)', color: B.green }
                   : { background: 'rgba(255,255,255,0.05)', border: `1px solid ${B.border}`, color: 'rgba(255,255,255,0.7)' }}>
                 {p1Sets}
               </div>
@@ -600,7 +600,7 @@ const MatchScoringPage = () => {
         {/* Match completed */}
         {isCompleted && (
           <div className="rounded-2xl p-6 text-center"
-            style={{ background: 'rgba(6,182,212,0.06)', border: '1px solid rgba(6,182,212,0.2)' }}>
+            style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.2)' }}>
             <Trophy className="w-10 h-10 mx-auto mb-3" style={{ color: B.amber }} />
             <h3 className="text-lg font-black text-white mb-1">Match Completed</h3>
             <p className="text-sm" style={{ color: 'rgba(255,255,255,0.65)' }}>
@@ -615,7 +615,7 @@ const MatchScoringPage = () => {
 
       {/* ── START MATCH sticky bottom ─────────────────────────────────────── */}
       {canStart && (
-        <div className="fixed bottom-0 left-0 right-0 p-4" style={{ background: 'rgba(7,7,26,0.97)', borderTop: `1px solid rgba(6,182,212,0.15)` }}>
+        <div className="fixed bottom-0 left-0 right-0 p-4" style={{ background: 'rgba(7,7,26,0.97)', borderTop: `1px solid rgba(245,158,11,0.15)` }}>
           <div className="max-w-lg mx-auto">
             <button onClick={handleStartMatch} disabled={saving}
               className="w-full py-4 rounded-2xl font-black text-base transition-all disabled:opacity-50 flex items-center justify-center gap-2"
@@ -664,7 +664,7 @@ const MatchScoringPage = () => {
               <>
                 <div className="px-5 pt-6 pb-4 text-center">
                   <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3"
-                    style={{ background: 'rgba(6,182,212,0.15)', border: '1px solid rgba(245,158,11,0.35)' }}>
+                    style={{ background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.35)' }}>
                     <Trophy className="w-7 h-7" style={{ color: B.green }} />
                   </div>
                   <h2 className="text-lg font-black text-white mb-1">Set {completedSetData.setNumber} Complete!</h2>
@@ -770,5 +770,6 @@ const MatchTimerDisplay = ({ timer, isPaused }) => {
 };
 
 export default MatchScoringPage;
+
 
 

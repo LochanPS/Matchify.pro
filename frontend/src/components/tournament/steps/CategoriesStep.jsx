@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { PlusIcon, TrashIcon, PencilIcon } from '@heroicons/react/24/outline';
 import { AlertTriangle, X, CheckCircle } from 'lucide-react';
 import CategoryForm from '../CategoryForm';
@@ -60,7 +60,7 @@ const CategoriesStep = ({ formData, updateFormData, onNext, onPrev }) => {
         <h2 
           className="text-lg font-black mb-2"
           style={{
-            background: 'linear-gradient(135deg, #0891b2, #06b6d4)',
+            background: 'linear-gradient(135deg, #D97706, #F59E0B)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text'
@@ -299,3 +299,4 @@ const CategoriesStep = ({ formData, updateFormData, onNext, onPrev }) => {
 };
 
 export default CategoriesStep;
+

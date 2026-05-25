@@ -1,4 +1,4 @@
-import { CheckCircleIcon } from '@heroicons/react/24/solid';
+﻿import { CheckCircleIcon } from '@heroicons/react/24/solid';
 import { CheckCheck } from 'lucide-react';
 import { getGenderLabel } from '../../utils/genderLabel';
 
@@ -30,8 +30,8 @@ export default function CategorySelector({ categories, selectedCategories, onSel
 
         let borderColor, bgColor;
         if (isAlreadyRegistered) {
-          borderColor = 'rgba(6,182,212,0.35)';
-          bgColor = 'rgba(6,182,212,0.06)';
+          borderColor = 'rgba(245,158,11,0.35)';
+          bgColor = 'rgba(245,158,11,0.06)';
         } else if (isSelected) {
           borderColor = '#a855f7';
           bgColor = 'rgba(168,85,247,0.1)';
@@ -55,7 +55,7 @@ export default function CategorySelector({ categories, selectedCategories, onSel
             {/* Checkbox */}
             <div className="flex items-center flex-shrink-0 mt-0.5">
               {isAlreadyRegistered ? (
-                <CheckCheck className="h-5 w-5" style={{ color: '#22d3ee' }} />
+                <CheckCheck className="h-5 w-5" style={{ color: '#FCD34D' }} />
               ) : isSelected ? (
                 <CheckCircleIcon className="h-5 w-5" style={{ color: '#a855f7' }} />
               ) : (
@@ -79,7 +79,7 @@ export default function CategorySelector({ categories, selectedCategories, onSel
                 <div className="flex-shrink-0">
                   {isAlreadyRegistered ? (
                     <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-black"
-                      style={{ background: 'rgba(6,182,212,0.15)', color: '#22d3ee', border: '1px solid rgba(6,182,212,0.3)' }}>
+                      style={{ background: 'rgba(245,158,11,0.15)', color: '#FCD34D', border: '1px solid rgba(245,158,11,0.3)' }}>
                       <CheckCheck className="w-3 h-3" /> Registered
                     </span>
                   ) : (
@@ -92,17 +92,17 @@ export default function CategorySelector({ categories, selectedCategories, onSel
               <div className="mt-2 flex items-center gap-2 flex-wrap">
                 <span className="px-2 py-0.5 rounded-full text-xs font-bold"
                   style={{
-                    background: category.format === 'doubles' ? 'rgba(168,85,247,0.15)' : 'rgba(0,212,255,0.12)',
-                    color: category.format === 'doubles' ? '#c084fc' : '#00d4ff',
-                    border: `1px solid ${category.format === 'doubles' ? 'rgba(168,85,247,0.3)' : 'rgba(0,212,255,0.25)'}`,
+                    background: category.format === 'doubles' ? 'rgba(168,85,247,0.15)' : 'rgba(245,158,11,0.12)',
+                    color: category.format === 'doubles' ? '#c084fc' : '#FCD34D',
+                    border: `1px solid ${category.format === 'doubles' ? 'rgba(168,85,247,0.3)' : 'rgba(245,158,11,0.25)'}`,
                   }}>
                   {category.format}
                 </span>
                 <span className="px-2 py-0.5 rounded-full text-xs font-bold"
                   style={{
-                    background: category.gender === 'women' ? 'rgba(236,72,153,0.12)' : category.gender === 'mixed' ? 'rgba(6,182,212,0.1)' : 'rgba(0,212,255,0.1)',
-                    color: category.gender === 'women' ? '#f472b6' : category.gender === 'mixed' ? '#22d3ee' : '#00d4ff',
-                    border: `1px solid ${category.gender === 'women' ? 'rgba(236,72,153,0.25)' : category.gender === 'mixed' ? 'rgba(6,182,212,0.2)' : 'rgba(0,212,255,0.2)'}`,
+                    background: category.gender === 'women' ? 'rgba(236,72,153,0.12)' : category.gender === 'mixed' ? 'rgba(245,158,11,0.1)' : 'rgba(245,158,11,0.1)',
+                    color: category.gender === 'women' ? '#f472b6' : category.gender === 'mixed' ? '#FCD34D' : '#FCD34D',
+                    border: `1px solid ${category.gender === 'women' ? 'rgba(236,72,153,0.25)' : category.gender === 'mixed' ? 'rgba(245,158,11,0.2)' : 'rgba(245,158,11,0.2)'}`,
                   }}>
                   {getGenderLabel(category.gender)}
                 </span>
@@ -133,3 +133,4 @@ export default function CategorySelector({ categories, selectedCategories, onSel
     </div>
   );
 }
+

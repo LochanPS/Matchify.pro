@@ -65,7 +65,7 @@ export default function OrganizerProfilePage() {
           <Link
             to="/dashboard"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-medium text-white transition-all"
-            style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)', color: '#050810', fontWeight: 700 }}
+            style={{ background: 'linear-gradient(135deg,#D97706,#F59E0B)', color: '#050810', fontWeight: 700 }}
           >
             <ArrowLeftIcon className="w-5 h-5" />
             Back to Dashboard
@@ -165,7 +165,7 @@ export default function OrganizerProfilePage() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <div className="rounded-2xl p-6 border transition-all" style={{ background: B.card, borderColor: B.border }}>
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl shadow-lg mb-4"
-              style={{ background: 'linear-gradient(135deg,#00b4d8,#00d4ff)' }}>
+              style={{ background: 'linear-gradient(135deg,#00b4d8,#FCD34D)' }}>
               <TrophyIcon className="w-6 h-6 text-white" />
             </div>
             <p className="text-3xl font-bold text-white">{profile.stats.tournamentsOrganized}</p>
@@ -183,7 +183,7 @@ export default function OrganizerProfilePage() {
 
           <div className="rounded-2xl p-6 border transition-all" style={{ background: B.card, borderColor: B.border }}>
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl shadow-lg mb-4"
-              style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)' }}>
+              style={{ background: 'linear-gradient(135deg,#D97706,#F59E0B)' }}>
               <CurrencyRupeeIcon className="w-6 h-6 text-white" />
             </div>
             <p className="text-3xl font-bold text-white">₹{profile.stats.totalRevenue}</p>
@@ -273,7 +273,7 @@ export default function OrganizerProfilePage() {
           <div className="rounded-2xl p-6 border" style={{ background: B.card, borderColor: B.border }}>
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-                style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)' }}>
+                style={{ background: 'linear-gradient(135deg,#D97706,#F59E0B)' }}>
                 <BanknotesIcon className="w-5 h-5 text-white" />
               </div>
               <h3 className="text-lg font-bold text-white">Financial Overview</h3>
@@ -300,7 +300,7 @@ export default function OrganizerProfilePage() {
 
               {isOwnProfile && profile.organizerProfile?.savedUpiId && (
                 <div className="rounded-xl p-4 border"
-                  style={{ background: 'rgba(0,212,255,0.06)', borderColor: 'rgba(0,212,255,0.25)' }}>
+                  style={{ background: 'rgba(245,158,11,0.06)', borderColor: 'rgba(245,158,11,0.25)' }}>
                   <p className="text-sm font-medium mb-2" style={{ color: B.cyan }}>Saved Payment Details</p>
                   <div className="space-y-2">
                     <div>
@@ -331,7 +331,7 @@ export default function OrganizerProfilePage() {
                 style={{ background: 'rgba(0,0,0,0.2)', borderColor: 'rgba(255,255,255,0.06)' }}
               >
                 <div className="w-12 h-12 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform"
-                  style={{ background: 'linear-gradient(135deg,#00b4d8,#00d4ff)' }}>
+                  style={{ background: 'linear-gradient(135deg,#00b4d8,#FCD34D)' }}>
                   <TrophyIcon className="w-6 h-6 text-white" />
                 </div>
                 <div>
@@ -346,7 +346,7 @@ export default function OrganizerProfilePage() {
                 style={{ background: 'rgba(0,0,0,0.2)', borderColor: 'rgba(255,255,255,0.06)' }}
               >
                 <div className="w-12 h-12 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform"
-                  style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)' }}>
+                  style={{ background: 'linear-gradient(135deg,#D97706,#F59E0B)' }}>
                   <CalendarIcon className="w-6 h-6 text-white" />
                 </div>
                 <div>
@@ -376,4 +376,5 @@ export default function OrganizerProfilePage() {
     </div>
   );
 }
+
 

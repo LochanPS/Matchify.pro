@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { EyeIcon, EyeSlashIcon, LockClosedIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
@@ -333,7 +333,7 @@ const LoginPageMobile = () => {
           {[
             { value: '1000+', label: 'Players', color: '#FCD34D', bg: 'rgba(245,158,11,0.1)', border: 'rgba(245,158,11,0.25)' },
             { value: '50+', label: 'Tournaments', color: '#C4B5FD', bg: 'rgba(139,92,246,0.1)', border: 'rgba(139,92,246,0.25)' },
-            { value: '25+', label: 'Cities', color: '#67E8F9', bg: 'rgba(6,182,212,0.1)', border: 'rgba(6,182,212,0.25)' },
+            { value: '25+', label: 'Cities', color: '#67E8F9', bg: 'rgba(245,158,11,0.1)', border: 'rgba(245,158,11,0.25)' },
           ].map(({ value, label, color, bg, border }) => (
             <div key={label} style={{ background: bg, border: `1px solid ${border}`, borderRadius: 14, padding: '14px 8px', textAlign: 'center' }}>
               <p style={{ fontSize: 22, fontWeight: 900, color, margin: 0, lineHeight: 1.1 }}>{value}</p>
@@ -352,3 +352,4 @@ const LoginPageMobile = () => {
 };
 
 export default LoginPageMobile;
+

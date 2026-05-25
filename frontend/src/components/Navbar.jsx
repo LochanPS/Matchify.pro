@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+﻿import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import NotificationBell from './NotificationBell';
@@ -140,7 +140,7 @@ const Navbar = () => {
   if (user?.isAdmin) {
     return (
       <header className="sticky top-0 z-50 backdrop-blur-lg border-b shadow-lg shadow-black/40"
-        style={{ background: 'rgba(7,7,26,0.96)', borderColor: 'rgba(6,182,212,0.1)' }}>
+        style={{ background: 'rgba(7,7,26,0.96)', borderColor: 'rgba(245,158,11,0.1)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-8">
@@ -426,8 +426,8 @@ const Navbar = () => {
               {/* ── Quick Match ── */}
               <button onClick={() => { navigate('/quick-match'); setShowMobileMenu(false); }}
                 className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition-all"
-                style={{ background: 'rgba(0,212,255,0.08)', border: '1px solid rgba(0,212,255,0.25)', color: '#00d4ff' }}>
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(0,212,255,0.15)' }}>
+                style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.25)', color: '#FCD34D' }}>
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(245,158,11,0.15)' }}>
                   <Swords className="w-4 h-4" />
                 </div>
                 Start a Match
@@ -464,7 +464,7 @@ const Navbar = () => {
                       <Mail className="w-4 h-4 flex-shrink-0 text-purple-400" />
                       <span className="flex-1 text-sm font-semibold text-purple-200 truncate">matchify.pro@gmail.com</span>
                       <button onClick={handleCopyEmail} className="p-1 rounded-lg transition-colors"
-                        style={{ color: emailCopied ? '#22d3ee' : '#a855f7' }} title="Copy email">
+                        style={{ color: emailCopied ? '#FCD34D' : '#a855f7' }} title="Copy email">
                         {emailCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                       </button>
                     </div>
@@ -532,9 +532,9 @@ const MobileNavItem = ({ to, children, onClick, icon, color, active }) => {
   const palette = {
     blue:   { bg: 'rgba(59,130,246,0.1)',  border: 'rgba(59,130,246,0.2)',  activeBg: 'rgba(59,130,246,0.18)',  text: '#60a5fa',  iconBg: 'rgba(59,130,246,0.2)' },
     orange: { bg: 'rgba(245,158,11,0.1)',  border: 'rgba(245,158,11,0.2)',  activeBg: 'rgba(245,158,11,0.18)',  text: '#fbbf24',  iconBg: 'rgba(245,158,11,0.2)' },
-    cyan:   { bg: 'rgba(6,182,212,0.1)',   border: 'rgba(6,182,212,0.2)',   activeBg: 'rgba(6,182,212,0.18)',   text: '#22d3ee',  iconBg: 'rgba(6,182,212,0.2)' },
+    cyan:   { bg: 'rgba(245,158,11,0.1)',   border: 'rgba(245,158,11,0.2)',   activeBg: 'rgba(245,158,11,0.18)',   text: '#FCD34D',  iconBg: 'rgba(245,158,11,0.2)' },
     purple: { bg: 'rgba(168,85,247,0.1)',  border: 'rgba(168,85,247,0.2)',  activeBg: 'rgba(168,85,247,0.2)',   text: '#c4b5fd',  iconBg: 'rgba(168,85,247,0.25)' },
-    green:  { bg: 'rgba(6,182,212,0.1)',    border: 'rgba(6,182,212,0.2)',    activeBg: 'rgba(6,182,212,0.18)',    text: '#22d3ee',  iconBg: 'rgba(6,182,212,0.2)' },
+    green:  { bg: 'rgba(245,158,11,0.1)',    border: 'rgba(245,158,11,0.2)',    activeBg: 'rgba(245,158,11,0.18)',    text: '#FCD34D',  iconBg: 'rgba(245,158,11,0.2)' },
   };
   const s = palette[color] || palette.blue;
   return (
@@ -551,3 +551,4 @@ const MobileNavItem = ({ to, children, onClick, icon, color, active }) => {
 };
 
 export default Navbar;
+

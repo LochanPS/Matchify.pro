@@ -53,16 +53,16 @@ const NotificationsPage = () => {
 
   const getNotificationColor = (type) => {
     const colors = {
-      REGISTRATION_CONFIRMED: { bg: 'linear-gradient(135deg, rgba(6,182,212,0.15), rgba(6,182,212,0.1))', border: 'rgba(6,182,212,0.35)', shadow: 'rgba(6,182,212,0.2)' },
+      REGISTRATION_CONFIRMED: { bg: 'linear-gradient(135deg, rgba(245,158,11,0.15), rgba(245,158,11,0.1))', border: 'rgba(245,158,11,0.35)', shadow: 'rgba(245,158,11,0.2)' },
       REGISTRATION_REJECTED: { bg: 'linear-gradient(135deg, rgba(239,68,68,0.2), rgba(220,38,38,0.15))', border: 'rgba(239,68,68,0.4)', shadow: 'rgba(239,68,68,0.3)' },
       REGISTRATION_PENDING: { bg: 'linear-gradient(135deg, rgba(245,158,11,0.2), rgba(251,146,60,0.15))', border: 'rgba(245,158,11,0.4)', shadow: 'rgba(245,158,11,0.3)' },
       PAYMENT_VERIFICATION_REQUIRED: { bg: 'linear-gradient(135deg, rgba(59,130,246,0.2), rgba(37,99,235,0.15))', border: 'rgba(59,130,246,0.4)', shadow: 'rgba(59,130,246,0.3)' },
       PARTNER_INVITATION: { bg: 'linear-gradient(135deg, rgba(168,85,247,0.2), rgba(139,92,246,0.15))', border: 'rgba(168,85,247,0.4)', shadow: 'rgba(168,85,247,0.3)' },
-      PARTNER_ACCEPTED: { bg: 'linear-gradient(135deg, rgba(6,182,212,0.15), rgba(6,182,212,0.1))', border: 'rgba(6,182,212,0.35)', shadow: 'rgba(6,182,212,0.2)' },
-      DRAW_PUBLISHED: { bg: 'linear-gradient(135deg, rgba(6,182,212,0.2), rgba(14,165,233,0.15))', border: 'rgba(6,182,212,0.4)', shadow: 'rgba(6,182,212,0.3)' },
+      PARTNER_ACCEPTED: { bg: 'linear-gradient(135deg, rgba(245,158,11,0.15), rgba(245,158,11,0.1))', border: 'rgba(245,158,11,0.35)', shadow: 'rgba(245,158,11,0.2)' },
+      DRAW_PUBLISHED: { bg: 'linear-gradient(135deg, rgba(245,158,11,0.2), rgba(14,165,233,0.15))', border: 'rgba(245,158,11,0.4)', shadow: 'rgba(245,158,11,0.3)' },
       MATCH_ASSIGNED: { bg: 'linear-gradient(135deg, rgba(59,130,246,0.2), rgba(37,99,235,0.15))', border: 'rgba(59,130,246,0.4)', shadow: 'rgba(59,130,246,0.3)' },
       MATCH_STARTING_SOON: { bg: 'linear-gradient(135deg, rgba(59,130,246,0.2), rgba(37,99,235,0.15))', border: 'rgba(59,130,246,0.4)', shadow: 'rgba(59,130,246,0.3)' },
-      MATCH_COMPLETED: { bg: 'linear-gradient(135deg, rgba(6,182,212,0.15), rgba(6,182,212,0.1))', border: 'rgba(6,182,212,0.35)', shadow: 'rgba(6,182,212,0.2)' },
+      MATCH_COMPLETED: { bg: 'linear-gradient(135deg, rgba(245,158,11,0.15), rgba(245,158,11,0.1))', border: 'rgba(245,158,11,0.35)', shadow: 'rgba(245,158,11,0.2)' },
       MATCH_WON: { bg: 'linear-gradient(135deg, rgba(245,158,11,0.2), rgba(251,146,60,0.15))', border: 'rgba(245,158,11,0.4)', shadow: 'rgba(245,158,11,0.3)' },
       MATCH_LOST: { bg: 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(79,70,229,0.1))', border: 'rgba(99,102,241,0.35)', shadow: 'rgba(99,102,241,0.2)' },
       POINTS_AWARDED: { bg: 'linear-gradient(135deg, rgba(245,158,11,0.2), rgba(251,146,60,0.15))', border: 'rgba(245,158,11,0.4)', shadow: 'rgba(245,158,11,0.3)' },
@@ -105,7 +105,7 @@ const NotificationsPage = () => {
     <div className="min-h-screen relative overflow-hidden" style={{ background: '#050810' }}>
       {/* Ambient Blobs */}
       <div className="fixed top-0 bottom-0 pointer-events-none overflow-hidden" style={{ left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: "480px" }}>
-        <div style={{ position: 'absolute', width: '440px', height: '440px', top: '-140px', right: '-120px', background: 'radial-gradient(circle, rgba(6,182,212,0.09) 0%, transparent 70%)', filter: 'blur(80px)', borderRadius: '50%' }} />
+        <div style={{ position: 'absolute', width: '440px', height: '440px', top: '-140px', right: '-120px', background: 'radial-gradient(circle, rgba(245,158,11,0.09) 0%, transparent 70%)', filter: 'blur(80px)', borderRadius: '50%' }} />
         <div style={{ position: 'absolute', width: '400px', height: '400px', bottom: '5%', left: '-120px', background: 'radial-gradient(circle, rgba(139,92,246,0.07) 0%, transparent 70%)', filter: 'blur(80px)', borderRadius: '50%' }} />
       </div>
 
@@ -163,12 +163,12 @@ const NotificationsPage = () => {
               className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
               style={{ background: 'rgba(255,255,255,0.05)' }}
             />
-            <ArrowLeft className="w-5 h-5 relative z-10" style={{ color: '#06b6d4' }} />
+            <ArrowLeft className="w-5 h-5 relative z-10" style={{ color: '#F59E0B' }} />
             <div className="relative">
               <div 
                 className="absolute inset-0 blur-lg opacity-60"
                 style={{ 
-                  background: 'radial-gradient(circle, rgba(6,182,212,0.6) 0%, transparent 70%)',
+                  background: 'radial-gradient(circle, rgba(245,158,11,0.6) 0%, transparent 70%)',
                   animation: 'glow 3s ease-in-out infinite'
                 }}
               />
@@ -180,7 +180,7 @@ const NotificationsPage = () => {
           <h1 
             className="text-lg font-bold"
             style={{ 
-              background: 'linear-gradient(135deg, #ffffff, #06b6d4)',
+              background: 'linear-gradient(135deg, #ffffff, #F59E0B)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text'
@@ -194,9 +194,9 @@ const NotificationsPage = () => {
             <div 
               className="px-3 py-1 rounded-full text-xs font-bold"
               style={{ 
-                background: 'linear-gradient(135deg, #06b6d4, #00d4ff)',
+                background: 'linear-gradient(135deg, #F59E0B, #FCD34D)',
                 color: '#050810',
-                boxShadow: '0 2px 8px rgba(6,182,212,0.4)'
+                boxShadow: '0 2px 8px rgba(245,158,11,0.4)'
               }}
             >
               {notifications.filter(n => !n.read).length}
@@ -216,15 +216,15 @@ const NotificationsPage = () => {
               onClick={markAllAsRead}
               className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold text-sm transition-all relative overflow-hidden group"
               style={{
-                background: 'linear-gradient(135deg, rgba(6,182,212,0.2), rgba(6,182,212,0.15))',
-                border: '2px solid rgba(6,182,212,0.4)',
-                color: '#06b6d4',
-                boxShadow: '0 4px 15px rgba(6,182,212,0.2)'
+                background: 'linear-gradient(135deg, rgba(245,158,11,0.2), rgba(245,158,11,0.15))',
+                border: '2px solid rgba(245,158,11,0.4)',
+                color: '#F59E0B',
+                boxShadow: '0 4px 15px rgba(245,158,11,0.2)'
               }}
             >
               <div
                 className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-                style={{ background: 'rgba(6,182,212,0.1)' }}
+                style={{ background: 'rgba(245,158,11,0.1)' }}
               />
               <CheckCheck className="w-4 h-4 relative z-10" />
               <span className="relative z-10">Mark All Read</span>
@@ -237,10 +237,10 @@ const NotificationsPage = () => {
           <div 
             className="rounded-2xl p-12 text-center relative overflow-hidden"
             style={{
-              background: 'linear-gradient(135deg, rgba(6,182,212,0.15) 0%, rgba(99,102,241,0.15) 100%)',
-              border: '2px solid rgba(6,182,212,0.3)',
+              background: 'linear-gradient(135deg, rgba(245,158,11,0.15) 0%, rgba(99,102,241,0.15) 100%)',
+              border: '2px solid rgba(245,158,11,0.3)',
               backdropFilter: 'blur(20px)',
-              boxShadow: '0 8px 32px rgba(6,182,212,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
+              boxShadow: '0 8px 32px rgba(245,158,11,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
               animation: 'scaleIn 0.8s ease-out'
             }}
           >
@@ -314,7 +314,7 @@ const NotificationsPage = () => {
                     <div 
                       className="absolute top-0 right-0 w-24 h-24 rounded-full blur-2xl opacity-40"
                       style={{ 
-                        background: 'radial-gradient(circle, rgba(6,182,212,0.8), transparent)',
+                        background: 'radial-gradient(circle, rgba(245,158,11,0.8), transparent)',
                         animation: 'glow 3s ease-in-out infinite'
                       }}
                     />
@@ -348,8 +348,8 @@ const NotificationsPage = () => {
                           <div
                             className="w-2 h-2 rounded-full flex-shrink-0 mt-1"
                             style={{
-                              background: '#06b6d4',
-                              boxShadow: '0 0 10px rgba(6,182,212,0.8)'
+                              background: '#F59E0B',
+                              boxShadow: '0 0 10px rgba(245,158,11,0.8)'
                             }}
                           />
                         )}
@@ -386,9 +386,9 @@ const NotificationsPage = () => {
                                   }}
                                   className="w-full py-2.5 rounded-xl text-xs font-black flex items-center justify-center gap-2 transition-all active:scale-[0.97] mt-1"
                                   style={{
-                                    background: 'linear-gradient(135deg, #06b6d4 0%, #0099bb 100%)',
+                                    background: 'linear-gradient(135deg, #F59E0B 0%, #0099bb 100%)',
                                     color: '#000',
-                                    boxShadow: '0 4px 14px rgba(6,182,212,0.4)',
+                                    boxShadow: '0 4px 14px rgba(245,158,11,0.4)',
                                   }}>
                                   ▶ Configure &amp; Start Match
                                 </button>
@@ -407,7 +407,7 @@ const NotificationsPage = () => {
                         <div className="flex items-center gap-2 text-xs">
                           <span 
                             className="font-semibold"
-                            style={{ color: '#06b6d4' }}
+                            style={{ color: '#F59E0B' }}
                           >
                             {formatDistanceToNow(new Date(notification.createdAt), {
                               addSuffix: true,
@@ -438,3 +438,4 @@ const NotificationsPage = () => {
 };
 
 export default NotificationsPage;
+

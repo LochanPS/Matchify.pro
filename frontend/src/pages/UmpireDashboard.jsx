@@ -135,13 +135,13 @@ export default function UmpireDashboard() {
       {/* Background orbs */}
       <div className="fixed top-0 bottom-0 pointer-events-none overflow-hidden" style={{ left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: "480px" }}>
         <div className="absolute top-1/4 left-1/4 w-80 h-80 rounded-full blur-3xl opacity-[0.07]" style={{ background: '#a855f7' }} />
-        <div className="absolute bottom-1/4 right-1/4 w-72 h-72 rounded-full blur-3xl opacity-[0.05]" style={{ background: '#06b6d4' }} />
+        <div className="absolute bottom-1/4 right-1/4 w-72 h-72 rounded-full blur-3xl opacity-[0.05]" style={{ background: '#F59E0B' }} />
       </div>
       {/* Hero Header */}
       <div className="relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #050810 0%, #0d0a1f 50%, #050810 100%)' }}>
         <div className="absolute inset-0">
           <div className="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl opacity-[0.12]" style={{ background: '#a855f7' }} />
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 rounded-full blur-3xl opacity-[0.08]" style={{ background: '#00d4ff' }} />
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 rounded-full blur-3xl opacity-[0.08]" style={{ background: '#FCD34D' }} />
         </div>
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -833,3 +833,4 @@ export default function UmpireDashboard() {
     </div>
   );
 }
+

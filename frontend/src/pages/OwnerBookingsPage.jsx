@@ -199,7 +199,7 @@ function BookingCard({ booking, onConfirm, onReject, actioning }) {
                       onClick={() => onConfirm(booking.id)}
                       disabled={actioning === booking.id}
                       className="flex-1 py-3.5 rounded-xl text-sm font-black flex items-center justify-center gap-1.5"
-                      style={{ background: `linear-gradient(135deg, ${B.green}, #0891b2)`, color: '#000' }}
+                      style={{ background: `linear-gradient(135deg, ${B.green}, #D97706)`, color: '#000' }}
                     >
                       <CheckCircle size={16} />
                       {actioning === booking.id ? 'Confirming…' : 'Confirm ₹' + booking.amount + ' Received'}
@@ -330,7 +330,7 @@ export default function OwnerBookingsPage() {
       <div className="px-4 space-y-3">
         {loading ? (
           <div className="flex justify-center py-12">
-            <div style={{ width: 36, height: 36, borderRadius: '50%', border: '3px solid rgba(0,212,255,0.15)', borderTopColor: B.cyan, animation: 'spin 0.7s linear infinite' }} />
+            <div style={{ width: 36, height: 36, borderRadius: '50%', border: '3px solid rgba(245,158,11,0.15)', borderTopColor: B.cyan, animation: 'spin 0.7s linear infinite' }} />
             <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
           </div>
         ) : bookings.length === 0 ? (
@@ -356,4 +356,5 @@ export default function OwnerBookingsPage() {
     </div>
   );
 }
+
 

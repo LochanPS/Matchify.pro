@@ -337,7 +337,7 @@ export default function CourtBookingPage() {
               <p className="text-sm font-black text-white mb-3">Available Slots</p>
               {loadingSlots ? (
                 <div className="flex justify-center py-8">
-                  <div style={{ width: 28, height: 28, borderRadius: '50%', border: '3px solid rgba(0,212,255,0.15)', borderTopColor: B.cyan, animation: 'spin 0.7s linear infinite' }} />
+                  <div style={{ width: 28, height: 28, borderRadius: '50%', border: '3px solid rgba(245,158,11,0.15)', borderTopColor: B.cyan, animation: 'spin 0.7s linear infinite' }} />
                   <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
                 </div>
               ) : slots.length === 0 ? (
@@ -504,7 +504,7 @@ export default function CourtBookingPage() {
               disabled={!screenshot || submitting}
               className="w-full py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-2"
               style={{
-                background: screenshot && !submitting ? `linear-gradient(135deg, ${B.green}, #0891b2)` : B.card2,
+                background: screenshot && !submitting ? `linear-gradient(135deg, ${B.green}, #D97706)` : B.card2,
                 color: screenshot && !submitting ? '#000' : B.muted
               }}
             >
@@ -521,4 +521,5 @@ export default function CourtBookingPage() {
     </div>
   );
 }
+
 

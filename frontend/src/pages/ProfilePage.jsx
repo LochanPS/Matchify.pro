@@ -333,7 +333,7 @@ export default function ProfilePage() {
     <div className="min-h-screen relative overflow-hidden" style={{ background: '#050810' }}>
       {/* Ambient Blobs */}
       <div className="fixed top-0 bottom-0 pointer-events-none overflow-hidden" style={{ left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: "480px" }}>
-        <div style={{ position: 'absolute', width: '440px', height: '440px', top: '-140px', right: '-120px', background: 'radial-gradient(circle, rgba(6,182,212,0.09) 0%, transparent 70%)', filter: 'blur(80px)', borderRadius: '50%' }} />
+        <div style={{ position: 'absolute', width: '440px', height: '440px', top: '-140px', right: '-120px', background: 'radial-gradient(circle, rgba(245,158,11,0.09) 0%, transparent 70%)', filter: 'blur(80px)', borderRadius: '50%' }} />
         <div style={{ position: 'absolute', width: '400px', height: '400px', bottom: '5%', left: '-120px', background: 'radial-gradient(circle, rgba(139,92,246,0.07) 0%, transparent 70%)', filter: 'blur(80px)', borderRadius: '50%' }} />
       </div>
 
@@ -374,8 +374,8 @@ export default function ProfilePage() {
         className="sticky top-0 z-50 backdrop-blur-md border-b relative"
         style={{ 
           background: 'linear-gradient(135deg, rgba(7,7,26,0.95), rgba(13,26,42,0.95))', 
-          borderColor: 'rgba(6,182,212,0.3)',
-          boxShadow: '0 4px 20px rgba(6,182,212,0.1)',
+          borderColor: 'rgba(245,158,11,0.3)',
+          boxShadow: '0 4px 20px rgba(245,158,11,0.1)',
           animation: 'slideDown 0.5s ease-out'
         }}
       >
@@ -389,7 +389,7 @@ export default function ProfilePage() {
               className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
               style={{ background: 'rgba(255,255,255,0.05)' }}
             />
-            <ArrowLeftIcon className="w-5 h-5 relative z-10" style={{ color: '#06b6d4' }} />
+            <ArrowLeftIcon className="w-5 h-5 relative z-10" style={{ color: '#F59E0B' }} />
             <span className="text-sm font-semibold relative z-10" style={{ color: 'rgba(255,255,255,0.6)' }}>Back</span>
           </button>
 
@@ -397,7 +397,7 @@ export default function ProfilePage() {
           <h1 
             className="text-lg font-bold"
             style={{ 
-              background: 'linear-gradient(135deg, #ffffff, #06b6d4)',
+              background: 'linear-gradient(135deg, #ffffff, #F59E0B)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text'
@@ -431,10 +431,10 @@ export default function ProfilePage() {
           <div
             className="mb-6 p-4 rounded-xl flex items-center gap-3 relative overflow-hidden"
             style={{
-              color: '#06b6d4',
-              background: 'linear-gradient(135deg, rgba(6,182,212,0.2), rgba(5,150,105,0.15))',
-              border: '2px solid rgba(6,182,212,0.4)',
-              boxShadow: '0 4px 15px rgba(6,182,212,0.2)',
+              color: '#F59E0B',
+              background: 'linear-gradient(135deg, rgba(245,158,11,0.2), rgba(5,150,105,0.15))',
+              border: '2px solid rgba(245,158,11,0.4)',
+              boxShadow: '0 4px 15px rgba(245,158,11,0.2)',
               animation: 'slideUp 0.5s ease-out'
             }}
           >
@@ -472,7 +472,7 @@ export default function ProfilePage() {
                 style={{ 
                   background: profile?.profilePhoto 
                     ? 'transparent' 
-                    : 'linear-gradient(135deg,#06b6d4,#00d4ff)',
+                    : 'linear-gradient(135deg,#F59E0B,#FCD34D)',
                   color: '#050810',
                   boxShadow: '0 8px 25px rgba(168,85,247,0.5), 0 0 40px rgba(168,85,247,0.3), inset 0 2px 0 rgba(255,255,255,0.3)',
                   border: '4px solid rgba(168,85,247,0.5)',
@@ -556,10 +556,10 @@ export default function ProfilePage() {
         <div 
           className="rounded-2xl p-5 mb-6 relative overflow-hidden"
           style={{
-            background: 'linear-gradient(135deg, rgba(6,182,212,0.15) 0%, rgba(99,102,241,0.15) 100%)',
-            border: '2px solid rgba(6,182,212,0.3)',
+            background: 'linear-gradient(135deg, rgba(245,158,11,0.15) 0%, rgba(99,102,241,0.15) 100%)',
+            border: '2px solid rgba(245,158,11,0.3)',
             backdropFilter: 'blur(20px)',
-            boxShadow: '0 8px 32px rgba(6,182,212,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
+            boxShadow: '0 8px 32px rgba(245,158,11,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
             animation: 'fadeIn 0.8s ease-out 0.3s both'
           }}
         >
@@ -567,7 +567,7 @@ export default function ProfilePage() {
           <div 
             className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl opacity-30"
             style={{ 
-              background: 'radial-gradient(circle, rgba(6,182,212,0.6), transparent)',
+              background: 'radial-gradient(circle, rgba(245,158,11,0.6), transparent)',
               animation: 'glow 4s ease-in-out infinite'
             }}
           />
@@ -584,12 +584,12 @@ export default function ProfilePage() {
             <h2 
               className="text-2xl font-black mb-3 text-center"
               style={{ 
-                background: 'linear-gradient(135deg, #ffffff, #06b6d4)',
+                background: 'linear-gradient(135deg, #ffffff, #F59E0B)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
                 textShadow: 'none',
-                filter: 'drop-shadow(0 2px 10px rgba(6,182,212,0.3))'
+                filter: 'drop-shadow(0 2px 10px rgba(245,158,11,0.3))'
               }}
             >
               {profile?.name || 'No Name Set'}
@@ -600,9 +600,9 @@ export default function ProfilePage() {
               <div 
                 className="p-4 rounded-xl relative overflow-hidden"
                 style={{ 
-                  background: 'linear-gradient(135deg, rgba(6,182,212,0.25), rgba(6,182,212,0.2))',
-                  border: '2px solid rgba(6,182,212,0.5)',
-                  boxShadow: '0 4px 15px rgba(6,182,212,0.4), inset 0 1px 0 rgba(255,255,255,0.2)'
+                  background: 'linear-gradient(135deg, rgba(245,158,11,0.25), rgba(245,158,11,0.2))',
+                  border: '2px solid rgba(245,158,11,0.5)',
+                  boxShadow: '0 4px 15px rgba(245,158,11,0.4), inset 0 1px 0 rgba(255,255,255,0.2)'
                 }}
               >
                 <div 
@@ -619,8 +619,8 @@ export default function ProfilePage() {
                     <p 
                       className="text-2xl font-mono font-black tracking-wider"
                       style={{ 
-                        color: '#06b6d4',
-                        textShadow: '0 0 20px rgba(6,182,212,0.6)'
+                        color: '#F59E0B',
+                        textShadow: '0 0 20px rgba(245,158,11,0.6)'
                       }}
                     >
                       {profile?.matchifyCode || 'Loading...'}
@@ -638,8 +638,8 @@ export default function ProfilePage() {
                       }}
                       className="p-3 rounded-lg transition-all hover:scale-110"
                       style={{ 
-                        background: 'rgba(6,182,212,0.3)',
-                        border: '1px solid rgba(6,182,212,0.6)'
+                        background: 'rgba(245,158,11,0.3)',
+                        border: '1px solid rgba(245,158,11,0.6)'
                       }}
                       title="Copy Matchify ID"
                     >
@@ -720,9 +720,9 @@ export default function ProfilePage() {
                     disabled={saving}
                     className="flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl font-bold text-sm transition-all relative overflow-hidden group disabled:opacity-50"
                     style={{ 
-                      background: 'linear-gradient(135deg, #06b6d4, #00d4ff)',
+                      background: 'linear-gradient(135deg, #F59E0B, #FCD34D)',
                       color: '#050810',
-                      boxShadow: '0 4px 15px rgba(6,182,212,0.4), inset 0 1px 0 rgba(255,255,255,0.2)'
+                      boxShadow: '0 4px 15px rgba(245,158,11,0.4), inset 0 1px 0 rgba(255,255,255,0.2)'
                     }}
                   >
                     <div 
@@ -761,8 +761,8 @@ export default function ProfilePage() {
             style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
           >
             <div className="flex items-center gap-3 mb-5 relative z-10">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'rgba(0,212,255,0.15)' }}>
-                <User className="w-5 h-5" style={{ color: '#00d4ff' }} />
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'rgba(245,158,11,0.15)' }}>
+                <User className="w-5 h-5" style={{ color: '#FCD34D' }} />
               </div>
               <h2 className="text-base font-black text-white">Edit Profile Information</h2>
             </div>
@@ -836,7 +836,7 @@ export default function ProfilePage() {
 
                 {/* City Suggestions Dropdown */}
                 {showCitySuggestions && citySuggestions.length > 0 && (
-                  <div className="absolute z-50 w-full mt-1 rounded-xl shadow-2xl overflow-hidden" style={{ background: '#0d1025', border: '1px solid rgba(6,182,212,0.25)' }}>
+                  <div className="absolute z-50 w-full mt-1 rounded-xl shadow-2xl overflow-hidden" style={{ background: '#0d1025', border: '1px solid rgba(245,158,11,0.25)' }}>
                     {citySuggestions.map((item, index) => (
                       <div
                         key={index}
@@ -846,7 +846,7 @@ export default function ProfilePage() {
                         }}
                         className="px-4 py-3 cursor-pointer transition-colors"
                         style={{ borderBottom: index < citySuggestions.length - 1 ? '1px solid rgba(255,255,255,0.06)' : 'none' }}
-                        onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(6,182,212,0.08)'}
+                        onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(245,158,11,0.08)'}
                         onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                       >
                         <div className="text-white font-medium text-sm">{item.city}</div>
@@ -950,3 +950,4 @@ export default function ProfilePage() {
     </div>
   );
 }
+

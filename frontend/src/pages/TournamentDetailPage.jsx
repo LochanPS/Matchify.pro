@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import { tournamentAPI } from '../api/tournament';
 import { useAuth } from '../contexts/AuthContext';
@@ -487,7 +487,7 @@ const TournamentDetailPage = () => {
 
   const getStatusStyle = (status) => {
     const styles = {
-      published: { bg: 'bg-green-100', text: 'text-green-700', label: 'Open for Registration', inlineBg: 'rgba(6,182,212,0.15)', inlineColor: '#06b6d4', inlineBorder: 'rgba(6,182,212,0.3)' },
+      published: { bg: 'bg-green-100', text: 'text-green-700', label: 'Open for Registration', inlineBg: 'rgba(245,158,11,0.15)', inlineColor: '#F59E0B', inlineBorder: 'rgba(245,158,11,0.3)' },
       ongoing:   { bg: 'bg-blue-100',  text: 'text-blue-700',  label: 'Ongoing',               inlineBg: 'rgba(59,130,246,0.15)', inlineColor: '#60a5fa', inlineBorder: 'rgba(59,130,246,0.3)' },
       completed: { bg: 'bg-gray-100',  text: 'text-gray-700',  label: 'Completed',             inlineBg: 'rgba(255,255,255,0.08)', inlineColor: 'rgba(255,255,255,0.6)', inlineBorder: 'rgba(255,255,255,0.15)' },
       draft:     { bg: 'bg-amber-100', text: 'text-amber-700', label: 'Draft',                 inlineBg: 'rgba(251,191,36,0.15)', inlineColor: '#fbbf24', inlineBorder: 'rgba(251,191,36,0.3)' },
@@ -511,7 +511,7 @@ const TournamentDetailPage = () => {
           <button
             onClick={() => navigate('/tournaments')}
             className="px-6 py-3 rounded-xl font-bold transition-all text-sm"
-            style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#050810', boxShadow: '0 4px 15px rgba(6,182,212,0.3)' }}
+            style={{ background: 'linear-gradient(135deg,#F59E0B,#FCD34D)', color: '#050810', boxShadow: '0 4px 15px rgba(245,158,11,0.3)' }}
           >
             Back to Tournaments
           </button>
@@ -527,8 +527,8 @@ const TournamentDetailPage = () => {
       {/* Background orbs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-80 h-80 rounded-full blur-3xl opacity-[0.06]" style={{ background: '#a855f7' }} />
-        <div className="absolute bottom-1/4 right-1/4 w-72 h-72 rounded-full blur-3xl opacity-[0.05]" style={{ background: '#06b6d4' }} />
-        <div className="absolute top-3/4 left-3/4 w-64 h-64 rounded-full blur-3xl opacity-[0.04]" style={{ background: '#00d4ff' }} />
+        <div className="absolute bottom-1/4 right-1/4 w-72 h-72 rounded-full blur-3xl opacity-[0.05]" style={{ background: '#F59E0B' }} />
+        <div className="absolute top-3/4 left-3/4 w-64 h-64 rounded-full blur-3xl opacity-[0.04]" style={{ background: '#FCD34D' }} />
       </div>
 
       {/* ── HERO SECTION ── Cinematic poster + info */}
@@ -626,7 +626,7 @@ const TournamentDetailPage = () => {
                   className="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider"
                   style={{
                     background: statusStyle.bg.includes('green') || statusStyle.bg.includes('emerald')
-                      ? 'linear-gradient(135deg,#06b6d4,#06b6d4)'
+                      ? 'linear-gradient(135deg,#F59E0B,#F59E0B)'
                       : statusStyle.bg.includes('blue')
                       ? 'linear-gradient(135deg,#1d4ed8,#3b82f6)'
                       : 'linear-gradient(135deg,#b45309,#d97706)',
@@ -653,11 +653,11 @@ const TournamentDetailPage = () => {
               {/* Quick info row */}
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
                 <span className="flex items-center gap-1.5 text-sm font-medium" style={{ color: 'rgba(255,255,255,0.8)' }}>
-                  <MapPinIcon className="h-4 w-4 flex-shrink-0" style={{ color: '#06b6d4' }} />
+                  <MapPinIcon className="h-4 w-4 flex-shrink-0" style={{ color: '#F59E0B' }} />
                   {tournament.city}, {tournament.state}
                 </span>
                 <span className="flex items-center gap-1.5 text-sm font-medium" style={{ color: 'rgba(255,255,255,0.8)' }}>
-                  <CalendarIcon className="h-4 w-4 flex-shrink-0" style={{ color: '#00d4ff' }} />
+                  <CalendarIcon className="h-4 w-4 flex-shrink-0" style={{ color: '#FCD34D' }} />
                   {formatDate(tournament.startDate)}
                 </span>
               </div>
@@ -675,7 +675,7 @@ const TournamentDetailPage = () => {
                 onClick={() => navigate('/dashboard')}
                 className="flex items-center gap-1.5 text-sm font-medium transition-colors"
                 style={{ color: 'rgba(255,255,255,0.6)' }}
-                onMouseEnter={e => e.currentTarget.style.color = '#06b6d4'}
+                onMouseEnter={e => e.currentTarget.style.color = '#F59E0B'}
                 onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.6)'}
               >
                 <ArrowLeftIcon className="h-4 w-4" />
@@ -703,11 +703,11 @@ const TournamentDetailPage = () => {
             <h1 className="text-2xl font-black text-white leading-tight mb-3">{tournament.name}</h1>
             <div className="flex flex-wrap gap-4">
               <span className="flex items-center gap-1.5 text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>
-                <MapPinIcon className="h-4 w-4" style={{ color: '#06b6d4' }} />
+                <MapPinIcon className="h-4 w-4" style={{ color: '#F59E0B' }} />
                 {tournament.venue}, {tournament.city}
               </span>
               <span className="flex items-center gap-1.5 text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>
-                <CalendarIcon className="h-4 w-4" style={{ color: '#00d4ff' }} />
+                <CalendarIcon className="h-4 w-4" style={{ color: '#FCD34D' }} />
                 {formatDate(tournament.startDate)}
               </span>
             </div>
@@ -717,7 +717,7 @@ const TournamentDetailPage = () => {
         {/* ── QUICK-STAT PILLS — prize / entry / reg deadline ── */}
         <div
           className="px-4 py-3 flex items-center gap-2 overflow-x-auto"
-          style={{ background: 'rgba(7,7,26,0.95)', borderBottom: '1px solid rgba(6,182,212,0.12)' }}
+          style={{ background: 'rgba(7,7,26,0.95)', borderBottom: '1px solid rgba(245,158,11,0.12)' }}
         >
           {tournament.prizePool && (
             <div
@@ -730,7 +730,7 @@ const TournamentDetailPage = () => {
           {tournament.categories && tournament.categories.length > 0 && (
             <div
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold flex-shrink-0"
-              style={{ background: 'linear-gradient(135deg,rgba(6,182,212,0.12),rgba(6,182,212,0.08))', border: '1px solid rgba(6,182,212,0.3)', color: '#06b6d4' }}
+              style={{ background: 'linear-gradient(135deg,rgba(245,158,11,0.12),rgba(245,158,11,0.08))', border: '1px solid rgba(245,158,11,0.3)', color: '#F59E0B' }}
             >
               🏸 {tournament.categories.length} {tournament.categories.length === 1 ? 'Category' : 'Categories'}
             </div>
@@ -738,7 +738,7 @@ const TournamentDetailPage = () => {
           {tournament.registrationCloseDate && (
             <div
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold flex-shrink-0"
-              style={{ background: 'linear-gradient(135deg,rgba(0,212,255,0.12),rgba(6,182,212,0.08))', border: '1px solid rgba(0,212,255,0.3)', color: '#00d4ff' }}
+              style={{ background: 'linear-gradient(135deg,rgba(245,158,11,0.12),rgba(245,158,11,0.08))', border: '1px solid rgba(245,158,11,0.3)', color: '#FCD34D' }}
             >
               ⏰ Reg ends {formatDate(tournament.registrationCloseDate)}
             </div>
@@ -809,8 +809,8 @@ const TournamentDetailPage = () => {
               <h2 className="text-base font-bold text-white mb-3">Tournament Details</h2>
               <div className="grid grid-cols-1 gap-4">
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(6,182,212,0.12)', border: '1px solid rgba(6,182,212,0.25)' }}>
-                    <MapPinIcon className="h-5 w-5" style={{ color: '#06b6d4' }} />
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.25)' }}>
+                    <MapPinIcon className="h-5 w-5" style={{ color: '#F59E0B' }} />
                   </div>
                   <div className="min-w-0">
                     <p className="font-bold text-white text-sm">Venue</p>
@@ -846,7 +846,7 @@ const TournamentDetailPage = () => {
                 {/* Shuttle Information */}
                 {(tournament.shuttleType || tournament.shuttleBrand) && (
                   <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(6,182,212,0.12)', border: '1px solid rgba(6,182,212,0.25)' }}>
+                    <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.25)' }}>
                       <span className="text-xl">🏸</span>
                     </div>
                     <div className="min-w-0">
@@ -921,14 +921,14 @@ const TournamentDetailPage = () => {
                             {category.name}
                           </h3>
                           <div className="flex flex-wrap gap-1.5 mb-2">
-                            <span className="px-2 py-0.5 rounded-full text-xs font-medium border" style={{ background: 'rgba(6,182,212,0.12)', color: '#06b6d4', borderColor: 'rgba(6,182,212,0.3)' }}>
+                            <span className="px-2 py-0.5 rounded-full text-xs font-medium border" style={{ background: 'rgba(245,158,11,0.12)', color: '#F59E0B', borderColor: 'rgba(245,158,11,0.3)' }}>
                               {category.format}
                             </span>
                             <span className="px-2 py-0.5 rounded-full text-xs font-medium border" style={{ background: 'rgba(59,130,246,0.12)', color: '#60a5fa', borderColor: 'rgba(59,130,246,0.3)' }}>
                               {getGenderLabel(category.gender)}
                             </span>
                             {category.ageGroup && (
-                              <span className="px-2 py-0.5 rounded-full text-xs font-medium border" style={{ background: 'rgba(0,212,255,0.12)', color: '#00d4ff', borderColor: 'rgba(0,212,255,0.3)' }}>
+                              <span className="px-2 py-0.5 rounded-full text-xs font-medium border" style={{ background: 'rgba(245,158,11,0.12)', color: '#FCD34D', borderColor: 'rgba(245,158,11,0.3)' }}>
                                 {category.ageGroup}
                               </span>
                             )}
@@ -946,9 +946,9 @@ const TournamentDetailPage = () => {
                               <div className="flex items-center gap-1">
                                 <span className="px-2 py-0.5 rounded-lg text-xs font-bold border"
                                   style={{
-                                    background: formatInfo.color === 'amber' ? 'rgba(251,191,36,0.12)' : formatInfo.color === 'purple' ? 'rgba(168,85,247,0.12)' : 'rgba(6,182,212,0.12)',
-                                    color: formatInfo.color === 'amber' ? '#fbbf24' : formatInfo.color === 'purple' ? '#a855f7' : '#06b6d4',
-                                    borderColor: formatInfo.color === 'amber' ? 'rgba(251,191,36,0.3)' : formatInfo.color === 'purple' ? 'rgba(168,85,247,0.3)' : 'rgba(6,182,212,0.3)',
+                                    background: formatInfo.color === 'amber' ? 'rgba(251,191,36,0.12)' : formatInfo.color === 'purple' ? 'rgba(168,85,247,0.12)' : 'rgba(245,158,11,0.12)',
+                                    color: formatInfo.color === 'amber' ? '#fbbf24' : formatInfo.color === 'purple' ? '#a855f7' : '#F59E0B',
+                                    borderColor: formatInfo.color === 'amber' ? 'rgba(251,191,36,0.3)' : formatInfo.color === 'purple' ? 'rgba(168,85,247,0.3)' : 'rgba(245,158,11,0.3)',
                                   }}>
                                   {formatInfo.icon} {formatInfo.label}
                                 </span>
@@ -969,7 +969,7 @@ const TournamentDetailPage = () => {
                               </div>
                               <div className="flex flex-wrap gap-2 text-xs">
                                 {category.prizeWinner && (
-                                  <span className="font-medium" style={{ color: '#06b6d4' }}>🥇 ₹{category.prizeWinner}</span>
+                                  <span className="font-medium" style={{ color: '#F59E0B' }}>🥇 ₹{category.prizeWinner}</span>
                                 )}
                                 {category.prizeRunnerUp && (
                                   <span className="font-medium" style={{ color: '#60a5fa' }}>🥈 ₹{category.prizeRunnerUp}</span>
@@ -1001,7 +1001,7 @@ const TournamentDetailPage = () => {
                               {category.registrationCount || 0}/{category.maxParticipants} spots filled
                             </span>
                             <span className="text-xs font-bold"
-                              style={{ color: (category.maxParticipants - (category.registrationCount || 0)) <= 5 ? '#ef4444' : '#06b6d4' }}>
+                              style={{ color: (category.maxParticipants - (category.registrationCount || 0)) <= 5 ? '#ef4444' : '#F59E0B' }}>
                               {Math.max(0, category.maxParticipants - (category.registrationCount || 0))} left
                             </span>
                           </div>
@@ -1011,7 +1011,7 @@ const TournamentDetailPage = () => {
                                 width: `${Math.min(100, ((category.registrationCount || 0) / category.maxParticipants) * 100)}%`,
                                 background: ((category.registrationCount || 0) / category.maxParticipants) > 0.8
                                   ? 'linear-gradient(90deg,#ef4444,#dc2626)'
-                                  : 'linear-gradient(90deg,#06b6d4,#06b6d4)'
+                                  : 'linear-gradient(90deg,#F59E0B,#F59E0B)'
                               }} />
                           </div>
                         </div>
@@ -1035,7 +1035,7 @@ const TournamentDetailPage = () => {
           <div className="space-y-4">
             {/* Register Button - Show for published tournaments */}
             {tournament.status === 'published' && (
-              <div className="rounded-xl p-4 text-white border" style={{ background: 'linear-gradient(135deg,rgba(6,182,212,0.15),rgba(6,182,212,0.1))', borderColor: 'rgba(6,182,212,0.3)', boxShadow: '0 4px 20px rgba(6,182,212,0.1)' }}>
+              <div className="rounded-xl p-4 text-white border" style={{ background: 'linear-gradient(135deg,rgba(245,158,11,0.15),rgba(245,158,11,0.1))', borderColor: 'rgba(245,158,11,0.3)', boxShadow: '0 4px 20px rgba(245,158,11,0.1)' }}>
                 <h3 className="font-bold text-base mb-1">Ready to Compete?</h3>
                 <p className="text-xs mb-3" style={{ color: 'rgba(255,255,255,0.65)' }}>
                   Registration closes on {formatDate(tournament.registrationCloseDate)}
@@ -1044,7 +1044,7 @@ const TournamentDetailPage = () => {
                   <button
                     onClick={() => navigate(`/tournaments/${id}/register`)}
                     className="w-full px-5 py-3 rounded-xl font-bold text-base transition-all hover:scale-105"
-                    style={{ background: 'linear-gradient(135deg,#06b6d4,#06b6d4)', color: '#050810' }}
+                    style={{ background: 'linear-gradient(135deg,#F59E0B,#F59E0B)', color: '#050810' }}
                   >
                     Register Now
                   </button>
@@ -1052,7 +1052,7 @@ const TournamentDetailPage = () => {
                   <button
                     onClick={() => setShowLoginModal(true)}
                     className="w-full px-5 py-3 rounded-xl font-bold text-base transition-all hover:scale-105"
-                    style={{ background: 'linear-gradient(135deg,#06b6d4,#06b6d4)', color: '#050810' }}
+                    style={{ background: 'linear-gradient(135deg,#F59E0B,#F59E0B)', color: '#050810' }}
                   >
                     Register Now
                   </button>
@@ -1087,7 +1087,7 @@ const TournamentDetailPage = () => {
                         href={`tel:${phone}`}
                         onClick={e => e.stopPropagation()}
                         className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-black transition-all active:scale-95"
-                        style={{ background: 'rgba(6,182,212,0.12)', border: '1px solid rgba(6,182,212,0.3)', color: '#06b6d4' }}
+                        style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.3)', color: '#F59E0B' }}
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.5 19.79 19.79 0 0 1 1.61 4.9 2 2 0 0 1 3.6 2.69h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 10.31a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.73 17.92z"/></svg>
                         Call
@@ -1158,13 +1158,13 @@ const TournamentDetailPage = () => {
                 <div
                   className="flex items-center justify-between p-4 rounded-xl transition-all hover:scale-[1.02]"
                   style={{
-                    background: 'linear-gradient(135deg, rgba(6,182,212,0.2) 0%, rgba(6,182,212,0.12) 100%)',
-                    border: '2px solid rgba(6,182,212,0.3)',
-                    boxShadow: '0 4px 15px rgba(6,182,212,0.15)'
+                    background: 'linear-gradient(135deg, rgba(245,158,11,0.2) 0%, rgba(245,158,11,0.12) 100%)',
+                    border: '2px solid rgba(245,158,11,0.3)',
+                    boxShadow: '0 4px 15px rgba(245,158,11,0.15)'
                   }}
                 >
                   <span className="text-white/90 font-bold text-base">Zone</span>
-                  <span className="font-black text-xl" style={{ color: '#06b6d4' }}>
+                  <span className="font-black text-xl" style={{ color: '#F59E0B' }}>
                     {tournament.zone}
                   </span>
                 </div>
@@ -1182,17 +1182,17 @@ const TournamentDetailPage = () => {
                   }}
                   className="w-full mt-4 flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl font-black text-base transition-all hover:scale-[1.02] relative overflow-hidden group"
                   style={{
-                    background: 'linear-gradient(135deg, rgba(6,182,212,0.2) 0%, rgba(6,182,212,0.15) 100%)',
-                    border: '2px solid rgba(6,182,212,0.5)',
-                    color: '#06b6d4',
-                    boxShadow: '0 4px 15px rgba(6,182,212,0.3)'
+                    background: 'linear-gradient(135deg, rgba(245,158,11,0.2) 0%, rgba(245,158,11,0.15) 100%)',
+                    border: '2px solid rgba(245,158,11,0.5)',
+                    color: '#F59E0B',
+                    boxShadow: '0 4px 15px rgba(245,158,11,0.3)'
                   }}
                 >
                   <GitBranch className="w-5 h-5" />
                   <span>View Draws</span>
                   <div
                     className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                    style={{ background: 'radial-gradient(circle at center, rgba(6,182,212,0.2), transparent)' }}
+                    style={{ background: 'radial-gradient(circle at center, rgba(245,158,11,0.2), transparent)' }}
                   />
                 </button>
               )}
@@ -1234,7 +1234,7 @@ const TournamentDetailPage = () => {
                         onClick={() => setShowPublishConfirmModal(true)}
                         disabled={publishing || tournament.categories?.length === 0}
                         className="w-full px-5 py-3.5 rounded-xl font-black text-base transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                        style={{ background: 'linear-gradient(135deg,#06b6d4,#06b6d4)', color: '#050810' }}
+                        style={{ background: 'linear-gradient(135deg,#F59E0B,#F59E0B)', color: '#050810' }}
                       >
                         {publishing ? 'Publishing...' : '🚀 Publish Tournament'}
                       </button>
@@ -1249,17 +1249,17 @@ const TournamentDetailPage = () => {
                     onClick={() => navigate(`/tournaments/${id}/edit`)}
                     className="w-full flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl font-black text-base transition-all hover:scale-[1.02] relative overflow-hidden group"
                     style={{
-                      background: 'linear-gradient(135deg, rgba(6,182,212,0.2) 0%, rgba(6,182,212,0.15) 100%)',
-                      border: '2px solid rgba(6,182,212,0.5)',
-                      color: '#06b6d4',
-                      boxShadow: '0 4px 15px rgba(6,182,212,0.3)'
+                      background: 'linear-gradient(135deg, rgba(245,158,11,0.2) 0%, rgba(245,158,11,0.15) 100%)',
+                      border: '2px solid rgba(245,158,11,0.5)',
+                      color: '#F59E0B',
+                      boxShadow: '0 4px 15px rgba(245,158,11,0.3)'
                     }}
                   >
                     <Edit className="w-5 h-5" />
                     <span>Edit Tournament</span>
                     <div 
                       className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                      style={{ background: 'radial-gradient(circle at center, rgba(6,182,212,0.2), transparent)' }}
+                      style={{ background: 'radial-gradient(circle at center, rgba(245,158,11,0.2), transparent)' }}
                     />
                   </button>
 
@@ -1268,17 +1268,17 @@ const TournamentDetailPage = () => {
                     onClick={() => navigate(`/tournaments/${id}/draws`)}
                     className="w-full flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl font-black text-base transition-all hover:scale-[1.02] relative overflow-hidden group"
                     style={{
-                      background: 'linear-gradient(135deg, rgba(6,182,212,0.2) 0%, rgba(6,182,212,0.15) 100%)',
-                      border: '2px solid rgba(6,182,212,0.5)',
-                      color: '#06b6d4',
-                      boxShadow: '0 4px 15px rgba(6,182,212,0.3)'
+                      background: 'linear-gradient(135deg, rgba(245,158,11,0.2) 0%, rgba(245,158,11,0.15) 100%)',
+                      border: '2px solid rgba(245,158,11,0.5)',
+                      color: '#F59E0B',
+                      boxShadow: '0 4px 15px rgba(245,158,11,0.3)'
                     }}
                   >
                     <GitBranch className="w-5 h-5" />
                     <span>View Draws</span>
                     <div
                       className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                      style={{ background: 'radial-gradient(circle at center, rgba(6,182,212,0.2), transparent)' }}
+                      style={{ background: 'radial-gradient(circle at center, rgba(245,158,11,0.2), transparent)' }}
                     />
                   </button>
 
@@ -1306,17 +1306,17 @@ const TournamentDetailPage = () => {
                     onClick={() => navigate(`/organizer/tournaments/${id}`)}
                     className="w-full flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl font-black text-base transition-all hover:scale-[1.02] relative overflow-hidden group"
                     style={{
-                      background: 'linear-gradient(135deg, rgba(6,182,212,0.2) 0%, rgba(6,182,212,0.15) 100%)',
-                      border: '2px solid rgba(6,182,212,0.5)',
-                      color: '#06b6d4',
-                      boxShadow: '0 4px 15px rgba(6,182,212,0.3)'
+                      background: 'linear-gradient(135deg, rgba(245,158,11,0.2) 0%, rgba(245,158,11,0.15) 100%)',
+                      border: '2px solid rgba(245,158,11,0.5)',
+                      color: '#F59E0B',
+                      boxShadow: '0 4px 15px rgba(245,158,11,0.3)'
                     }}
                   >
                     <Eye className="w-5 h-5" />
                     <span>View Registrations</span>
                     <div 
                       className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                      style={{ background: 'radial-gradient(circle at center, rgba(6,182,212,0.2), transparent)' }}
+                      style={{ background: 'radial-gradient(circle at center, rgba(245,158,11,0.2), transparent)' }}
                     />
                   </button>
 
@@ -1325,17 +1325,17 @@ const TournamentDetailPage = () => {
                     onClick={openUmpireModal}
                     className="w-full flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl font-black text-base transition-all hover:scale-[1.02] relative overflow-hidden group"
                     style={{
-                      background: 'linear-gradient(135deg, rgba(6,182,212,0.2) 0%, rgba(6,182,212,0.15) 100%)',
-                      border: '2px solid rgba(6,182,212,0.5)',
-                      color: '#06b6d4',
-                      boxShadow: '0 4px 15px rgba(6,182,212,0.3)'
+                      background: 'linear-gradient(135deg, rgba(245,158,11,0.2) 0%, rgba(245,158,11,0.15) 100%)',
+                      border: '2px solid rgba(245,158,11,0.5)',
+                      color: '#F59E0B',
+                      boxShadow: '0 4px 15px rgba(245,158,11,0.3)'
                     }}
                   >
                     <Users className="w-5 h-5" />
                     <span>Add Umpire</span>
                     <div 
                       className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                      style={{ background: 'radial-gradient(circle at center, rgba(6,182,212,0.2), transparent)' }}
+                      style={{ background: 'radial-gradient(circle at center, rgba(245,158,11,0.2), transparent)' }}
                     />
                   </button>
 
@@ -1364,16 +1364,16 @@ const TournamentDetailPage = () => {
 
             {/* Admin Actions - Compact */}
             {isAdmin() && (
-              <div className="rounded-xl p-4 border" style={{ background: 'rgba(6,182,212,0.06)', borderColor: 'rgba(6,182,212,0.2)' }}>
+              <div className="rounded-xl p-4 border" style={{ background: 'rgba(245,158,11,0.06)', borderColor: 'rgba(245,158,11,0.2)' }}>
                 <div className="flex items-center gap-2 mb-3">
-                  <SparklesIcon className="h-4 w-4" style={{ color: '#06b6d4' }} />
+                  <SparklesIcon className="h-4 w-4" style={{ color: '#F59E0B' }} />
                   <h3 className="font-bold text-white text-sm">Admin Actions</h3>
                 </div>
                 <div className="space-y-2">
                   <button
                     onClick={() => setShowQuickAddModal(true)}
                     className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-bold text-sm transition-all"
-                    style={{ background: 'linear-gradient(135deg,#06b6d4,#06b6d4)', color: '#050810' }}
+                    style={{ background: 'linear-gradient(135deg,#F59E0B,#F59E0B)', color: '#050810' }}
                   >
                     <UserPlusIcon className="h-4 w-4" />
                     Quick Add Player
@@ -1472,22 +1472,22 @@ const TournamentDetailPage = () => {
 
             {/* Header */}
             <div className="px-5 py-4 flex items-center gap-3"
-              style={{ background: 'linear-gradient(135deg,rgba(6,182,212,0.12),rgba(6,182,212,0.06))', borderBottom: '1px solid rgba(6,182,212,0.15)' }}>
+              style={{ background: 'linear-gradient(135deg,rgba(245,158,11,0.12),rgba(245,158,11,0.06))', borderBottom: '1px solid rgba(245,158,11,0.15)' }}>
               <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                style={{ background: 'rgba(6,182,212,0.2)', border: '1px solid rgba(6,182,212,0.35)' }}>
-                <Users className="h-5 w-5" style={{ color: '#06b6d4' }} />
+                style={{ background: 'rgba(245,158,11,0.2)', border: '1px solid rgba(245,158,11,0.35)' }}>
+                <Users className="h-5 w-5" style={{ color: '#F59E0B' }} />
               </div>
               <div>
                 <h2 className="text-base font-black text-white">Add Umpire</h2>
-                <p className="text-xs" style={{ color: 'rgba(6,182,212,0.7)' }}>Enter umpire's Matchify.pro ID</p>
+                <p className="text-xs" style={{ color: 'rgba(245,158,11,0.7)' }}>Enter umpire's Matchify.pro ID</p>
               </div>
             </div>
 
             <div className="p-5 space-y-3">
               {/* Info */}
               <div className="px-3 py-2.5 rounded-xl text-xs"
-                style={{ background: 'rgba(0,212,255,0.06)', border: '1px solid rgba(0,212,255,0.15)', color: 'rgba(0,212,255,0.8)' }}>
-                Enter Matchify.pro ID: <span className="font-mono font-bold" style={{ color: '#00d4ff' }}>#1</span> or <span className="font-mono font-bold" style={{ color: '#00d4ff' }}>#100</span>
+                style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.15)', color: 'rgba(245,158,11,0.8)' }}>
+                Enter Matchify.pro ID: <span className="font-mono font-bold" style={{ color: '#FCD34D' }}>#1</span> or <span className="font-mono font-bold" style={{ color: '#FCD34D' }}>#100</span>
               </div>
 
               {/* Error */}
@@ -1501,7 +1501,7 @@ const TournamentDetailPage = () => {
               {/* Success */}
               {umpireSuccess && (
                 <div className="px-3 py-2.5 rounded-xl text-xs font-semibold"
-                  style={{ background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.25)', color: '#06b6d4' }}>
+                  style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.25)', color: '#F59E0B' }}>
                   {umpireSuccess}
                 </div>
               )}
@@ -1526,7 +1526,7 @@ const TournamentDetailPage = () => {
                   className="w-full px-4 py-3 rounded-xl text-white font-mono text-base tracking-widest"
                   style={{
                     background: 'rgba(0,0,0,0.3)',
-                    border: '1.5px solid rgba(6,182,212,0.25)',
+                    border: '1.5px solid rgba(245,158,11,0.25)',
                     outline: 'none',
                   }}
                 />
@@ -1539,7 +1539,7 @@ const TournamentDetailPage = () => {
                 className="w-full py-3 rounded-xl font-black text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 style={{
                   background: (!addingUmpire && umpireCode.trim() && umpireCode.trim() !== '#')
-                    ? 'linear-gradient(135deg,#06b6d4,#06b6d4)'
+                    ? 'linear-gradient(135deg,#F59E0B,#F59E0B)'
                     : 'rgba(255,255,255,0.08)',
                   color: (!addingUmpire && umpireCode.trim() && umpireCode.trim() !== '#') ? '#050810' : 'rgba(255,255,255,0.4)',
                 }}
@@ -1560,13 +1560,13 @@ const TournamentDetailPage = () => {
               {/* Umpires list */}
               <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: '12px' }}>
                 <h3 className="text-xs font-black mb-3 flex items-center gap-2" style={{ color: 'rgba(255,255,255,0.6)' }}>
-                  <Users className="w-3.5 h-3.5" style={{ color: '#06b6d4' }} />
+                  <Users className="w-3.5 h-3.5" style={{ color: '#F59E0B' }} />
                   Tournament Umpires ({umpires.length})
                 </h3>
 
                 {loadingUmpires ? (
                   <div className="flex items-center justify-center py-4">
-                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-t-transparent" style={{ borderColor: '#06b6d4 transparent transparent transparent' }} />
+                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-t-transparent" style={{ borderColor: '#F59E0B transparent transparent transparent' }} />
                   </div>
                 ) : umpires.length === 0 ? (
                   <div className="text-center py-4">
@@ -1579,12 +1579,12 @@ const TournamentDetailPage = () => {
                         style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
                         <div className="flex items-center gap-2.5">
                           <div className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm flex-shrink-0"
-                            style={{ background: 'linear-gradient(135deg,#06b6d4,#06b6d4)', color: '#050810' }}>
+                            style={{ background: 'linear-gradient(135deg,#F59E0B,#F59E0B)', color: '#050810' }}>
                             {umpire.name?.charAt(0)?.toUpperCase()}
                           </div>
                           <div>
                             <p className="text-white font-bold text-sm">{umpire.name}</p>
-                            <p className="text-xs font-mono" style={{ color: 'rgba(6,182,212,0.7)' }}>{umpire.umpireCode}</p>
+                            <p className="text-xs font-mono" style={{ color: 'rgba(245,158,11,0.7)' }}>{umpire.umpireCode}</p>
                           </div>
                         </div>
                         <button
@@ -1618,11 +1618,11 @@ const TournamentDetailPage = () => {
       {showLoginModal && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden"
-            style={{ background: 'linear-gradient(180deg, #0f0f2e 0%, #0d1117 100%)', border: '1px solid rgba(6,182,212,0.3)' }}>
-            <div className="p-5 text-white" style={{ background: 'linear-gradient(135deg, rgba(6,182,212,0.2), rgba(6,182,212,0.12))', borderBottom: '1px solid rgba(6,182,212,0.15)' }}>
+            style={{ background: 'linear-gradient(180deg, #0f0f2e 0%, #0d1117 100%)', border: '1px solid rgba(245,158,11,0.3)' }}>
+            <div className="p-5 text-white" style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.2), rgba(245,158,11,0.12))', borderBottom: '1px solid rgba(245,158,11,0.15)' }}>
               <div className="flex items-center justify-center gap-2">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'rgba(6,182,212,0.2)' }}>
-                  <UserIcon className="h-5 w-5" style={{ color: '#06b6d4' }} />
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'rgba(245,158,11,0.2)' }}>
+                  <UserIcon className="h-5 w-5" style={{ color: '#F59E0B' }} />
                 </div>
                 <h2 className="text-lg font-black text-white">Sign In Required</h2>
               </div>
@@ -1635,14 +1635,14 @@ const TournamentDetailPage = () => {
                 <Link
                   to={`/register?redirect=/tournaments/${id}/register`}
                   className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold text-sm transition-all hover:scale-[1.02]"
-                  style={{ background: 'linear-gradient(135deg, #06b6d4, #06b6d4)', color: '#050810' }}
+                  style={{ background: 'linear-gradient(135deg, #F59E0B, #F59E0B)', color: '#050810' }}
                 >
                   Create Account
                 </Link>
                 <Link
                   to={`/login?redirect=/tournaments/${id}/register`}
                   className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold text-sm transition-all"
-                  style={{ border: '1px solid rgba(6,182,212,0.4)', color: '#06b6d4', background: 'rgba(6,182,212,0.08)' }}
+                  style={{ border: '1px solid rgba(245,158,11,0.4)', color: '#F59E0B', background: 'rgba(245,158,11,0.08)' }}
                 >
                   Sign In
                 </Link>
@@ -1666,8 +1666,8 @@ const TournamentDetailPage = () => {
       {showPublishConfirmModal && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden"
-            style={{ background: 'linear-gradient(180deg, #0f0f2e 0%, #0d1117 100%)', border: '1px solid rgba(6,182,212,0.3)' }}>
-            <div className="p-5" style={{ background: 'linear-gradient(135deg, #06b6d4, #06b6d4)' }}>
+            style={{ background: 'linear-gradient(180deg, #0f0f2e 0%, #0d1117 100%)', border: '1px solid rgba(245,158,11,0.3)' }}>
+            <div className="p-5" style={{ background: 'linear-gradient(135deg, #F59E0B, #F59E0B)' }}>
               <div className="flex items-center justify-center gap-2">
                 <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
                   <SparklesIcon className="h-5 w-5 text-white" />
@@ -1679,8 +1679,8 @@ const TournamentDetailPage = () => {
               <p className="text-sm mb-3 text-center" style={{ color: 'rgba(255,255,255,0.7)' }}>
                 You are about to publish <span className="font-black text-white">"{tournament?.name}"</span>.
               </p>
-              <div className="rounded-xl p-3 mb-5" style={{ background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.25)' }}>
-                <p className="text-xs text-center" style={{ color: '#06b6d4' }}>
+              <div className="rounded-xl p-3 mb-5" style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.25)' }}>
+                <p className="text-xs text-center" style={{ color: '#F59E0B' }}>
                   Once published, your tournament will be visible to all players and they can start registering.
                 </p>
               </div>
@@ -1692,7 +1692,7 @@ const TournamentDetailPage = () => {
                 </button>
                 <button onClick={handlePublish} disabled={publishing}
                   className="flex-1 px-4 py-2.5 text-white rounded-xl font-bold text-sm disabled:opacity-50 flex items-center justify-center gap-1.5 transition-all hover:scale-[1.02]"
-                  style={{ background: 'linear-gradient(135deg, #06b6d4, #06b6d4)', color: '#050810' }}>
+                  style={{ background: 'linear-gradient(135deg, #F59E0B, #F59E0B)', color: '#050810' }}>
                   {publishing ? (
                     <><Spinner size="xs" /><span style={{ color: '#050810' }}>Publishing...</span></>
                   ) : <span style={{ color: '#050810' }}>🚀 Publish Now</span>}
@@ -1707,8 +1707,8 @@ const TournamentDetailPage = () => {
       {publishResultModal && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden"
-            style={{ background: 'linear-gradient(180deg, #0f0f2e 0%, #0d1117 100%)', border: `1px solid ${publishResultModal.type === 'success' ? 'rgba(6,182,212,0.3)' : 'rgba(239,68,68,0.3)'}` }}>
-            <div className="p-5" style={{ background: publishResultModal.type === 'success' ? 'linear-gradient(135deg, #06b6d4, #06b6d4)' : 'linear-gradient(135deg, #ef4444, #dc2626)' }}>
+            style={{ background: 'linear-gradient(180deg, #0f0f2e 0%, #0d1117 100%)', border: `1px solid ${publishResultModal.type === 'success' ? 'rgba(245,158,11,0.3)' : 'rgba(239,68,68,0.3)'}` }}>
+            <div className="p-5" style={{ background: publishResultModal.type === 'success' ? 'linear-gradient(135deg, #F59E0B, #F59E0B)' : 'linear-gradient(135deg, #ef4444, #dc2626)' }}>
               <div className="flex items-center justify-center gap-2">
                 <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
                   {publishResultModal.type === 'success' ? <TrophyIcon className="h-5 w-5 text-white" /> : <ExclamationTriangleIcon className="h-5 w-5 text-white" />}
@@ -1721,9 +1721,9 @@ const TournamentDetailPage = () => {
               <button onClick={() => setPublishResultModal(null)}
                 className="w-full px-5 py-3 rounded-xl font-black text-base transition-all hover:scale-[1.02]"
                 style={{
-                  background: publishResultModal.type === 'success' ? 'linear-gradient(135deg, #06b6d4, #06b6d4)' : 'linear-gradient(135deg, #ef4444, #dc2626)',
+                  background: publishResultModal.type === 'success' ? 'linear-gradient(135deg, #F59E0B, #F59E0B)' : 'linear-gradient(135deg, #ef4444, #dc2626)',
                   color: publishResultModal.type === 'success' ? '#050810' : 'white',
-                  boxShadow: publishResultModal.type === 'success' ? '0 4px 15px rgba(6,182,212,0.3)' : '0 4px 15px rgba(239,68,68,0.3)'
+                  boxShadow: publishResultModal.type === 'success' ? '0 4px 15px rgba(245,158,11,0.3)' : '0 4px 15px rgba(239,68,68,0.3)'
                 }}>
                 {publishResultModal.type === 'success' ? 'Awesome!' : 'Got it'}
               </button>
@@ -1736,8 +1736,8 @@ const TournamentDetailPage = () => {
       {deleteResultModal && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden"
-            style={{ background: 'linear-gradient(180deg, #0f0f2e 0%, #0d1117 100%)', border: `1px solid ${deleteResultModal.type === 'success' ? 'rgba(6,182,212,0.3)' : 'rgba(239,68,68,0.3)'}` }}>
-            <div className="p-5" style={{ background: deleteResultModal.type === 'success' ? 'linear-gradient(135deg, #06b6d4, #06b6d4)' : 'linear-gradient(135deg, #ef4444, #dc2626)' }}>
+            style={{ background: 'linear-gradient(180deg, #0f0f2e 0%, #0d1117 100%)', border: `1px solid ${deleteResultModal.type === 'success' ? 'rgba(245,158,11,0.3)' : 'rgba(239,68,68,0.3)'}` }}>
+            <div className="p-5" style={{ background: deleteResultModal.type === 'success' ? 'linear-gradient(135deg, #F59E0B, #F59E0B)' : 'linear-gradient(135deg, #ef4444, #dc2626)' }}>
               <div className="flex items-center justify-center gap-2">
                 <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
                   {deleteResultModal.type === 'success' ? <SparklesIcon className="h-5 w-5 text-white" /> : <ExclamationTriangleIcon className="h-5 w-5 text-white" />}
@@ -1756,9 +1756,9 @@ const TournamentDetailPage = () => {
                 onClick={() => { if (deleteResultModal.redirectTo) navigate(deleteResultModal.redirectTo); setDeleteResultModal(null); }}
                 className="w-full px-5 py-3 rounded-xl font-black text-base transition-all hover:scale-[1.02]"
                 style={{
-                  background: deleteResultModal.type === 'success' ? 'linear-gradient(135deg, #06b6d4, #06b6d4)' : 'linear-gradient(135deg, #ef4444, #dc2626)',
+                  background: deleteResultModal.type === 'success' ? 'linear-gradient(135deg, #F59E0B, #F59E0B)' : 'linear-gradient(135deg, #ef4444, #dc2626)',
                   color: deleteResultModal.type === 'success' ? '#050810' : 'white',
-                  boxShadow: deleteResultModal.type === 'success' ? '0 4px 15px rgba(6,182,212,0.3)' : '0 4px 15px rgba(239,68,68,0.3)'
+                  boxShadow: deleteResultModal.type === 'success' ? '0 4px 15px rgba(245,158,11,0.3)' : '0 4px 15px rgba(239,68,68,0.3)'
                 }}>
                 {deleteResultModal.type === 'success' ? 'Continue' : 'Got it'}
               </button>
@@ -1771,8 +1771,8 @@ const TournamentDetailPage = () => {
       {showPublishPromptModal && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="rounded-2xl shadow-2xl max-w-md w-full overflow-hidden"
-            style={{ background: 'linear-gradient(180deg, #0f0f2e 0%, #0d1117 100%)', border: '1px solid rgba(6,182,212,0.3)' }}>
-            <div className="p-6" style={{ background: 'linear-gradient(135deg, #06b6d4, #06b6d4)' }}>
+            style={{ background: 'linear-gradient(180deg, #0f0f2e 0%, #0d1117 100%)', border: '1px solid rgba(245,158,11,0.3)' }}>
+            <div className="p-6" style={{ background: 'linear-gradient(135deg, #F59E0B, #F59E0B)' }}>
               <div className="flex items-center justify-center gap-3 mb-2">
                 <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center">
                   <TrophyIcon className="h-7 w-7 text-white" />
@@ -1787,8 +1787,8 @@ const TournamentDetailPage = () => {
               <p className="text-base mb-4 text-center font-bold text-white">
                 Would you like to publish your tournament now?
               </p>
-              <div className="rounded-xl p-4 mb-5" style={{ background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.25)' }}>
-                <p className="text-sm mb-2" style={{ color: '#06b6d4' }}>
+              <div className="rounded-xl p-4 mb-5" style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.25)' }}>
+                <p className="text-sm mb-2" style={{ color: '#F59E0B' }}>
                   <span className="font-bold">✓ Publish Now:</span> Make it visible to all players immediately
                 </p>
                 <p className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>
@@ -1799,7 +1799,7 @@ const TournamentDetailPage = () => {
                 <button
                   onClick={() => { setShowPublishPromptModal(false); setShowPublishConfirmModal(true); }}
                   className="w-full px-5 py-3.5 rounded-xl font-black text-base flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"
-                  style={{ background: 'linear-gradient(135deg, #06b6d4, #06b6d4)', color: '#050810', boxShadow: '0 4px 15px rgba(6,182,212,0.3)' }}>
+                  style={{ background: 'linear-gradient(135deg, #F59E0B, #F59E0B)', color: '#050810', boxShadow: '0 4px 15px rgba(245,158,11,0.3)' }}>
                   <SparklesIcon className="h-5 w-5" />
                   Publish Now
                 </button>
@@ -1819,7 +1819,7 @@ const TournamentDetailPage = () => {
       {showQuickAddModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border" style={{ background: '#0d1025', borderColor: 'rgba(255,255,255,0.1)' }}>
-            <div className="relative p-6 text-white overflow-hidden border-b" style={{ background: 'linear-gradient(135deg,rgba(6,182,212,0.12),rgba(6,182,212,0.06))', borderColor: 'rgba(6,182,212,0.15)' }}>
+            <div className="relative p-6 text-white overflow-hidden border-b" style={{ background: 'linear-gradient(135deg,rgba(245,158,11,0.12),rgba(245,158,11,0.06))', borderColor: 'rgba(245,158,11,0.15)' }}>
               <div className="relative flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
@@ -1840,7 +1840,7 @@ const TournamentDetailPage = () => {
             </div>
             <form onSubmit={handleQuickAddPlayer} className="p-6 space-y-4">
               {quickAddSuccess && (
-                <div className="rounded-xl p-4 text-sm border" style={{ background: 'rgba(6,182,212,0.08)', borderColor: 'rgba(6,182,212,0.25)', color: '#06b6d4' }}>
+                <div className="rounded-xl p-4 text-sm border" style={{ background: 'rgba(245,158,11,0.08)', borderColor: 'rgba(245,158,11,0.25)', color: '#F59E0B' }}>
                   {quickAddSuccess}
                 </div>
               )}
@@ -2004,3 +2004,4 @@ const TournamentDetailPage = () => {
 };
 
 export default TournamentDetailPage;
+

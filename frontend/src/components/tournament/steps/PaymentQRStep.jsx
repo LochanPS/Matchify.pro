@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+﻿import { useState, useRef, useEffect } from 'react';
 import { QrCodeIcon, TrashIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import api from '../../../utils/api';
 
@@ -133,7 +133,7 @@ const PaymentQRStep = ({ formData, updateFormData, updateMultipleFields, onNext,
         <h2 
           className="text-lg font-black mb-2"
           style={{
-            background: 'linear-gradient(135deg, #0891b2, #06b6d4)',
+            background: 'linear-gradient(135deg, #D97706, #F59E0B)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text'
@@ -148,7 +148,7 @@ const PaymentQRStep = ({ formData, updateFormData, updateMultipleFields, onNext,
 
       {/* Saved Details Notice */}
       {!loadingSaved && hasSavedDetails && (
-        <div className="rounded-xl p-3 flex items-start gap-2" style={{ background: 'rgba(6,182,212,0.1)', border: '1.5px solid rgba(6,182,212,0.3)' }}>
+        <div className="rounded-xl p-3 flex items-start gap-2" style={{ background: 'rgba(245,158,11,0.1)', border: '1.5px solid rgba(245,158,11,0.3)' }}>
           <CheckCircleIcon className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
           <div>
             <p className="text-xs font-bold text-emerald-300">Auto-filled!</p>
@@ -233,7 +233,7 @@ const PaymentQRStep = ({ formData, updateFormData, updateMultipleFields, onNext,
           className="w-full px-3 py-2.5 text-sm rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-cyan-500 transition-all"
           style={{
             background: 'rgba(0,0,0,0.3)',
-            border: '1.5px solid rgba(6,182,212,0.3)'
+            border: '1.5px solid rgba(245,158,11,0.3)'
           }}
           placeholder="yourname@upi"
           required
@@ -256,7 +256,7 @@ const PaymentQRStep = ({ formData, updateFormData, updateMultipleFields, onNext,
           className="w-full px-3 py-2.5 text-sm rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-cyan-500 transition-all"
           style={{
             background: 'rgba(0,0,0,0.3)',
-            border: '1.5px solid rgba(6,182,212,0.3)'
+            border: '1.5px solid rgba(245,158,11,0.3)'
           }}
           placeholder="John Doe"
           required
@@ -331,3 +331,4 @@ const PaymentQRStep = ({ formData, updateFormData, updateMultipleFields, onNext,
 };
 
 export default PaymentQRStep;
+

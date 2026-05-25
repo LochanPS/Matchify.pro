@@ -1,4 +1,4 @@
-/**
+﻿/**
  * SupportFooter — global support contact bar shown on every non-admin page.
  * Sits at the bottom of every page; styled to match the dark-neon app theme.
  */
@@ -7,8 +7,8 @@ export default function SupportFooter() {
   return (
     <footer
       style={{
-        borderTop: '1px solid rgba(6,182,212,0.12)',
-        background: 'rgba(6,182,212,0.03)',
+        borderTop: '1px solid rgba(245,158,11,0.12)',
+        background: 'rgba(245,158,11,0.03)',
         backdropFilter: 'blur(8px)',
         padding: '18px 20px',
         textAlign: 'center',
@@ -25,17 +25,17 @@ export default function SupportFooter() {
           marginTop: '5px',
           fontSize: '0.82rem',
           fontWeight: 600,
-          color: '#22d3ee',
+          color: '#FCD34D',
           textDecoration: 'none',
           letterSpacing: '0.02em',
           transition: 'color 0.2s, text-shadow 0.2s',
         }}
         onMouseEnter={e => {
-          e.currentTarget.style.color = '#00d4ff';
-          e.currentTarget.style.textShadow = '0 0 8px rgba(0,212,255,0.6)';
+          e.currentTarget.style.color = '#FCD34D';
+          e.currentTarget.style.textShadow = '0 0 8px rgba(245,158,11,0.6)';
         }}
         onMouseLeave={e => {
-          e.currentTarget.style.color = '#22d3ee';
+          e.currentTarget.style.color = '#FCD34D';
           e.currentTarget.style.textShadow = 'none';
         }}
       >
@@ -44,3 +44,4 @@ export default function SupportFooter() {
     </footer>
   );
 }
+

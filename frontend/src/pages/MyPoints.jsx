@@ -52,15 +52,15 @@ const MyPoints = () => {
   const logs = data?.logs || [];
 
   const stats = [
-    { icon: <TrendingUp className="w-5 h-5" style={{ color: B.green }} />, label: 'Total Points', value: total_points.toFixed ? total_points.toFixed(1) : total_points, color: B.green, accent: 'rgba(6,182,212,0.1)' },
+    { icon: <TrendingUp className="w-5 h-5" style={{ color: B.green }} />, label: 'Total Points', value: total_points.toFixed ? total_points.toFixed(1) : total_points, color: B.green, accent: 'rgba(245,158,11,0.1)' },
     { icon: <Trophy className="w-5 h-5" style={{ color: B.amber }} />, label: 'Global Rank', value: `#${rank}`, color: B.amber, accent: 'rgba(251,191,36,0.1)' },
-    { icon: <Target className="w-5 h-5" style={{ color: B.cyan }} />, label: 'Tournaments', value: tournaments_played, color: B.cyan, accent: 'rgba(0,212,255,0.1)' },
+    { icon: <Target className="w-5 h-5" style={{ color: B.cyan }} />, label: 'Tournaments', value: tournaments_played, color: B.cyan, accent: 'rgba(245,158,11,0.1)' },
     { icon: <Award className="w-5 h-5" style={{ color: B.purple }} />, label: 'Avg Points', value: tournaments_played > 0 ? (total_points / tournaments_played).toFixed(1) : '0.0', color: B.purple, accent: 'rgba(168,85,247,0.1)' },
   ];
 
   const pointsTable = [
-    { label: 'Winner', pts: '+10', color: B.green, accentBg: 'rgba(6,182,212,0.08)' },
-    { label: 'Runner-up', pts: '+8', color: B.cyan, accentBg: 'rgba(0,212,255,0.08)' },
+    { label: 'Winner', pts: '+10', color: B.green, accentBg: 'rgba(245,158,11,0.08)' },
+    { label: 'Runner-up', pts: '+8', color: B.cyan, accentBg: 'rgba(245,158,11,0.08)' },
     { label: 'Semi-finalist', pts: '+6', color: B.purple, accentBg: 'rgba(168,85,247,0.08)' },
     { label: 'Quarter-finalist', pts: '+4', color: B.amber, accentBg: 'rgba(251,191,36,0.08)' },
     { label: 'Participation', pts: '+2', color: 'rgba(255,255,255,0.55)', accentBg: 'rgba(255,255,255,0.04)' },
@@ -84,7 +84,7 @@ const MyPoints = () => {
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
           <div className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg"
-            style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', boxShadow: '0 0 20px rgba(6,182,212,0.25)' }}>
+            style={{ background: 'linear-gradient(135deg,#F59E0B,#FCD34D)', boxShadow: '0 0 20px rgba(245,158,11,0.25)' }}>
             <Award className="w-7 h-7" style={{ color: '#050810' }} />
           </div>
           <div>
@@ -160,4 +160,5 @@ const MyPoints = () => {
 };
 
 export default MyPoints;
+
 

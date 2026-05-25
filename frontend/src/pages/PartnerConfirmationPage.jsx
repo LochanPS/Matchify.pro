@@ -104,7 +104,7 @@ const PartnerConfirmationPage = () => {
           {action === 'accept' ? (
             <>
               <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4"
-                style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', boxShadow: '0 8px 30px rgba(6,182,212,0.3)' }}>
+                style={{ background: 'linear-gradient(135deg,#F59E0B,#FCD34D)', boxShadow: '0 8px 30px rgba(245,158,11,0.3)' }}>
                 <CheckCircle className="w-10 h-10" style={{ color: '#050810' }} />
               </div>
               <h2 className="text-2xl font-bold text-white mb-2">Invitation Accepted!</h2>
@@ -154,7 +154,7 @@ const PartnerConfirmationPage = () => {
           <button
             onClick={() => navigate('/')}
             className="w-full py-3 rounded-xl font-bold text-sm"
-            style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#050810' }}
+            style={{ background: 'linear-gradient(135deg,#F59E0B,#FCD34D)', color: '#050810' }}
           >
             Go to Home
           </button>
@@ -176,7 +176,7 @@ const PartnerConfirmationPage = () => {
         {/* Header Card */}
         <div className="rounded-2xl overflow-hidden" style={{ background: BRAND.cardDark, border: `1px solid ${BRAND.border}` }}>
           <div className="px-6 py-8 text-center"
-            style={{ background: 'linear-gradient(135deg,rgba(0,212,255,0.15),rgba(168,85,247,0.15))' }}>
+            style={{ background: 'linear-gradient(135deg,rgba(245,158,11,0.15),rgba(168,85,247,0.15))' }}>
             <div className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4"
               style={{ background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(8px)' }}>
               <Users className="w-10 h-10 text-white" />
@@ -200,7 +200,7 @@ const PartnerConfirmationPage = () => {
                   />
                 ) : (
                   <div className="h-12 w-12 rounded-xl flex items-center justify-center"
-                    style={{ background: 'linear-gradient(135deg,#00d4ff,#a855f7)' }}>
+                    style={{ background: 'linear-gradient(135deg,#FCD34D,#a855f7)' }}>
                     <span className="text-white font-semibold text-lg">
                       {invitation.player.name.charAt(0)}
                     </span>
@@ -248,7 +248,7 @@ const PartnerConfirmationPage = () => {
 
             {/* Category Info */}
             <div className="rounded-xl p-4 mb-6"
-              style={{ background: 'rgba(0,212,255,0.06)', border: '1px solid rgba(0,212,255,0.2)' }}>
+              style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.2)' }}>
               <h3 className="text-sm font-medium mb-3" style={{ color: 'rgba(255,255,255,0.45)' }}>Category</h3>
               <div className="flex items-center justify-between">
                 <div>
@@ -259,7 +259,7 @@ const PartnerConfirmationPage = () => {
                       {invitation.category.format}
                     </span>
                     <span className="px-2.5 py-1 rounded-lg text-xs font-semibold"
-                      style={{ background: 'rgba(0,212,255,0.15)', color: BRAND.cyan, border: '1px solid rgba(0,212,255,0.3)' }}>
+                      style={{ background: 'rgba(245,158,11,0.15)', color: BRAND.cyan, border: '1px solid rgba(245,158,11,0.3)' }}>
                       {getGenderLabel(invitation.category.gender)}
                     </span>
                   </div>
@@ -299,7 +299,7 @@ const PartnerConfirmationPage = () => {
                 onClick={() => handleConfirm('accept')}
                 disabled={processing}
                 className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#050810', boxShadow: '0 4px 20px rgba(6,182,212,0.3)' }}
+                style={{ background: 'linear-gradient(135deg,#F59E0B,#FCD34D)', color: '#050810', boxShadow: '0 4px 20px rgba(245,158,11,0.3)' }}
               >
                 {processing ? (
                   <Spinner size="md" />
@@ -330,4 +330,5 @@ const PartnerConfirmationPage = () => {
 };
 
 export default PartnerConfirmationPage;
+
 

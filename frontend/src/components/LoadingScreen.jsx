@@ -1,4 +1,4 @@
-import MatchifyLogo from './MatchifyLogo';
+﻿import MatchifyLogo from './MatchifyLogo';
 import Spinner from './Spinner';
 
 /**
@@ -31,7 +31,7 @@ const LoadingScreen = ({ message = 'Loading...' }) => {
           top: '50%', left: '50%',
           transform: 'translate(-50%, -50%)',
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(6,182,212,0.12) 0%, transparent 65%)',
+          background: 'radial-gradient(circle, rgba(245,158,11,0.12) 0%, transparent 65%)',
           filter: 'blur(60px)',
         }} />
         <div style={{
@@ -85,7 +85,7 @@ const LoadingScreen = ({ message = 'Loading...' }) => {
                 key={i}
                 style={{
                   width: '6px', height: '6px', borderRadius: '50%',
-                  background: i === 1 ? '#a855f7' : '#06b6d4',
+                  background: i === 1 ? '#a855f7' : '#F59E0B',
                   animation: `lsDot 1.4s ease-in-out ${i * 0.16}s infinite`,
                 }}
               />
@@ -98,3 +98,4 @@ const LoadingScreen = ({ message = 'Loading...' }) => {
 };
 
 export default LoadingScreen;
+

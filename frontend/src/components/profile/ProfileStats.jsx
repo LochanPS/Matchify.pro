@@ -1,4 +1,4 @@
-import { Trophy, Calendar, Target, TrendingUp, Award } from 'lucide-react';
+﻿import { Trophy, Calendar, Target, TrendingUp, Award } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const RupeeIcon = ({ size = 20 }) => (
@@ -46,8 +46,8 @@ export default function ProfileStats({ stats, user }) {
       label: 'Total Points',
       value: user?.totalPoints ?? 0,
       color: '#67E8F9',
-      bg: 'rgba(6,182,212,0.1)',
-      border: 'rgba(6,182,212,0.2)'
+      bg: 'rgba(245,158,11,0.1)',
+      border: 'rgba(245,158,11,0.2)'
     },
     {
       icon: Calendar,
@@ -134,3 +134,4 @@ export default function ProfileStats({ stats, user }) {
     </div>
   );
 }
+

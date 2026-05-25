@@ -37,9 +37,9 @@ const LiveTournamentDashboard = () => {
     switch (status) {
       case 'ONGOING':
       case 'IN_PROGRESS':
-        return { bg: 'rgba(6,182,212,0.15)', color: '#06b6d4', border: 'rgba(6,182,212,0.3)', icon: Play };
+        return { bg: 'rgba(245,158,11,0.15)', color: '#F59E0B', border: 'rgba(245,158,11,0.3)', icon: Play };
       case 'COMPLETED':
-        return { bg: 'rgba(0,212,255,0.15)', color: '#00d4ff', border: 'rgba(0,212,255,0.3)', icon: CheckCircle };
+        return { bg: 'rgba(245,158,11,0.15)', color: '#FCD34D', border: 'rgba(245,158,11,0.3)', icon: CheckCircle };
       default:
         return { bg: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)', border: 'rgba(255,255,255,0.12)', icon: Clock };
     }
@@ -70,9 +70,9 @@ const LiveTournamentDashboard = () => {
   }
 
   const statCards = [
-    { label: 'Total', value: stats.total, color: '#06b6d4', bg: 'rgba(6,182,212,0.12)', border: 'rgba(6,182,212,0.25)', icon: Trophy },
+    { label: 'Total', value: stats.total, color: '#F59E0B', bg: 'rgba(245,158,11,0.12)', border: 'rgba(245,158,11,0.25)', icon: Trophy },
     { label: 'Ongoing', value: stats.ongoing, color: '#fbbf24', bg: 'rgba(251,191,36,0.12)', border: 'rgba(251,191,36,0.25)', icon: Play },
-    { label: 'Completed', value: stats.completed, color: '#00d4ff', bg: 'rgba(0,212,255,0.12)', border: 'rgba(0,212,255,0.25)', icon: CheckCircle },
+    { label: 'Completed', value: stats.completed, color: '#FCD34D', bg: 'rgba(245,158,11,0.12)', border: 'rgba(245,158,11,0.25)', icon: CheckCircle },
     { label: 'Pending', value: stats.pending, color: 'rgba(255,255,255,0.5)', bg: 'rgba(255,255,255,0.06)', border: 'rgba(255,255,255,0.1)', icon: Clock },
   ];
 
@@ -87,12 +87,12 @@ const LiveTournamentDashboard = () => {
     <div className="min-h-screen relative" style={{ background: 'linear-gradient(180deg,#0a0a1f 0%,#050810 40%,#0d1a2a 70%,#050810 100%)' }}>
       {/* Fixed particles bg */}
       <div className="fixed top-0 bottom-0 pointer-events-none overflow-hidden" style={{ left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: "480px" }}>
-        <div className="absolute top-0 right-0 w-72 h-72 rounded-full blur-3xl opacity-15" style={{ background: 'radial-gradient(circle,rgba(6,182,212,0.4) 0%,transparent 70%)' }} />
-        <div className="absolute bottom-1/3 left-0 w-64 h-64 rounded-full blur-3xl opacity-10" style={{ background: 'radial-gradient(circle,rgba(0,212,255,0.4) 0%,transparent 70%)' }} />
+        <div className="absolute top-0 right-0 w-72 h-72 rounded-full blur-3xl opacity-15" style={{ background: 'radial-gradient(circle,rgba(245,158,11,0.4) 0%,transparent 70%)' }} />
+        <div className="absolute bottom-1/3 left-0 w-64 h-64 rounded-full blur-3xl opacity-10" style={{ background: 'radial-gradient(circle,rgba(245,158,11,0.4) 0%,transparent 70%)' }} />
       </div>
 
       {/* Sticky Header */}
-      <div className="sticky top-0 z-20" style={{ background: 'rgba(7,7,26,0.95)', borderBottom: '1px solid rgba(6,182,212,0.15)', backdropFilter: 'blur(20px)' }}>
+      <div className="sticky top-0 z-20" style={{ background: 'rgba(7,7,26,0.95)', borderBottom: '1px solid rgba(245,158,11,0.15)', backdropFilter: 'blur(20px)' }}>
         <div className="px-4 py-3 flex items-center justify-between">
           <h1 className="text-base font-black text-white">Live Tournament</h1>
           {isLiveConnected && (
@@ -126,7 +126,7 @@ const LiveTournamentDashboard = () => {
               onClick={() => setFilter(key)}
               className="flex-shrink-0 px-3 py-2 rounded-xl text-xs font-bold transition-all"
               style={{
-                background: filter === key ? 'linear-gradient(135deg,#06b6d4,#0891b2)' : 'rgba(255,255,255,0.06)',
+                background: filter === key ? 'linear-gradient(135deg,#F59E0B,#D97706)' : 'rgba(255,255,255,0.06)',
                 color: filter === key ? '#050810' : 'rgba(255,255,255,0.6)',
                 border: filter === key ? 'none' : '1px solid rgba(255,255,255,0.1)',
               }}
@@ -147,7 +147,7 @@ const LiveTournamentDashboard = () => {
               <div
                 key={match.id}
                 className="rounded-2xl overflow-hidden cursor-pointer transition-all hover:scale-[1.01]"
-                style={{ background: 'rgba(255,255,255,0.04)', border: `1px solid ${isLive ? 'rgba(6,182,212,0.25)' : 'rgba(255,255,255,0.08)'}` }}
+                style={{ background: 'rgba(255,255,255,0.04)', border: `1px solid ${isLive ? 'rgba(245,158,11,0.25)' : 'rgba(255,255,255,0.08)'}` }}
                 onClick={() => window.location.href = `/watch/${match.id}`}
               >
                 <div className="p-4">
@@ -177,7 +177,7 @@ const LiveTournamentDashboard = () => {
                     {match.scoreJson && (
                       <div className="flex items-center gap-2">
                         <span className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Score</span>
-                        <span className="text-sm font-black" style={{ color: '#06b6d4' }}>
+                        <span className="text-sm font-black" style={{ color: '#F59E0B' }}>
                           {match.scoreJson.currentScore?.player1 || 0} — {match.scoreJson.currentScore?.player2 || 0}
                         </span>
                         {match.scoreJson.currentSet && (
@@ -192,7 +192,7 @@ const LiveTournamentDashboard = () => {
                     onClick={(e) => { e.stopPropagation(); window.location.href = `/watch/${match.id}`; }}
                     className="w-full mt-3 py-2.5 rounded-xl font-bold text-xs transition-all"
                     style={{
-                      background: isLive ? 'linear-gradient(135deg,#06b6d4,#0891b2)' : 'rgba(255,255,255,0.08)',
+                      background: isLive ? 'linear-gradient(135deg,#F59E0B,#D97706)' : 'rgba(255,255,255,0.08)',
                       color: isLive ? '#050810' : 'rgba(255,255,255,0.7)',
                       border: isLive ? 'none' : '1px solid rgba(255,255,255,0.1)',
                     }}
@@ -219,3 +219,4 @@ const LiveTournamentDashboard = () => {
 };
 
 export default LiveTournamentDashboard;
+

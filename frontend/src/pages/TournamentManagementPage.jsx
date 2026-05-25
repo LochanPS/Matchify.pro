@@ -4,7 +4,7 @@ const MGMT_PARTICLES = Array.from({ length: 18 }, (_, i) => ({
   x: (i * 37 + 11) % 97, y: (i * 53 + 7) % 93,
   o: ((i * 13) % 35) / 100 + 0.15,
   dur: (i * 7) % 8 + 4, delay: (i * 3) % 5,
-  c: ['#06b6d4', '#00d4ff', '#a855f7', '#06b6d4'][i % 4],
+  c: ['#F59E0B', '#FCD34D', '#a855f7', '#F59E0B'][i % 4],
 }));
 
 import { useState, useEffect } from 'react';
@@ -245,9 +245,9 @@ export default function TournamentManagementPage() {
       {/* Animated background */}
       <div className="fixed top-0 bottom-0 pointer-events-none overflow-hidden" style={{ left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: "480px" }}>
         <div className="absolute top-0 right-0 w-80 h-80 rounded-full blur-3xl opacity-15"
-          style={{ background: 'radial-gradient(circle, rgba(6,182,212,0.4) 0%, transparent 70%)' }} />
+          style={{ background: 'radial-gradient(circle, rgba(245,158,11,0.4) 0%, transparent 70%)' }} />
         <div className="absolute bottom-1/4 left-0 w-64 h-64 rounded-full blur-3xl opacity-10"
-          style={{ background: 'radial-gradient(circle, rgba(0,212,255,0.4) 0%, transparent 70%)' }} />
+          style={{ background: 'radial-gradient(circle, rgba(245,158,11,0.4) 0%, transparent 70%)' }} />
         {MGMT_PARTICLES.map((p, i) => (
           <div key={i} className="absolute rounded-full"
             style={{
@@ -267,7 +267,7 @@ export default function TournamentManagementPage() {
       `}</style>
 
       {/* Header */}
-      <div className="relative sticky top-0 z-20" style={{ background: 'rgba(7,7,26,0.95)', borderBottom: '1px solid rgba(6,182,212,0.15)', backdropFilter: 'blur(20px)' }}>
+      <div className="relative sticky top-0 z-20" style={{ background: 'rgba(7,7,26,0.95)', borderBottom: '1px solid rgba(245,158,11,0.15)', backdropFilter: 'blur(20px)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <button
             onClick={() => navigate('/organizer/dashboard')}
@@ -291,12 +291,12 @@ export default function TournamentManagementPage() {
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
-                style={{ background: 'linear-gradient(135deg, #06b6d4, #0891b2)' }}>
+                style={{ background: 'linear-gradient(135deg, #F59E0B, #D97706)' }}>
                 <Users className="w-6 h-6" style={{ color: '#050810' }} />
               </div>
               <div>
                 <h1 className="text-xl font-black text-white">Tournament Registrations</h1>
-                <p className="text-sm font-medium" style={{ color: '#06b6d4' }}>
+                <p className="text-sm font-medium" style={{ color: '#F59E0B' }}>
                   {filteredRegistrations.length} registration{filteredRegistrations.length !== 1 ? 's' : ''}
                 </p>
               </div>
@@ -315,7 +315,7 @@ export default function TournamentManagementPage() {
                 onClick={() => handleExport('csv')}
                 disabled={exporting}
                 className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm disabled:opacity-50 transition-all hover:scale-105"
-                style={{ background: 'linear-gradient(135deg, #06b6d4, #0891b2)', color: '#050810' }}
+                style={{ background: 'linear-gradient(135deg, #F59E0B, #D97706)', color: '#050810' }}
               >
                 <FileSpreadsheet className="h-4 w-4" />
                 Export CSV
@@ -342,13 +342,13 @@ export default function TournamentManagementPage() {
                 background: filter === status
                   ? status === 'cancellation_requested'
                     ? 'linear-gradient(135deg, rgba(249,115,22,0.3), rgba(245,158,11,0.2))'
-                    : 'linear-gradient(135deg, rgba(6,182,212,0.25), rgba(6,182,212,0.15))'
+                    : 'linear-gradient(135deg, rgba(245,158,11,0.25), rgba(245,158,11,0.15))'
                   : 'rgba(255,255,255,0.05)',
                 border: filter === status
-                  ? status === 'cancellation_requested' ? '1px solid rgba(249,115,22,0.5)' : '1px solid rgba(6,182,212,0.4)'
+                  ? status === 'cancellation_requested' ? '1px solid rgba(249,115,22,0.5)' : '1px solid rgba(245,158,11,0.4)'
                   : '1px solid rgba(255,255,255,0.1)',
                 color: filter === status
-                  ? status === 'cancellation_requested' ? '#fb923c' : '#06b6d4'
+                  ? status === 'cancellation_requested' ? '#fb923c' : '#F59E0B'
                   : 'rgba(255,255,255,0.5)',
               }}
             >
@@ -361,12 +361,12 @@ export default function TournamentManagementPage() {
         </div>
 
         {/* Registrations — mobile cards + desktop table */}
-        <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid rgba(6,182,212,0.12)', background: 'rgba(7,7,26,0.7)', backdropFilter: 'blur(20px)' }}>
+        <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid rgba(245,158,11,0.12)', background: 'rgba(7,7,26,0.7)', backdropFilter: 'blur(20px)' }}>
           {filteredRegistrations.length === 0 ? (
             <div className="p-12 text-center">
               <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4"
-                style={{ background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.2)' }}>
-                <Users className="h-10 w-10" style={{ color: '#06b6d4' }} />
+                style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)' }}>
+                <Users className="h-10 w-10" style={{ color: '#F59E0B' }} />
               </div>
               <h3 className="text-xl font-bold text-white mb-2">No registrations found</h3>
               <p style={{ color: 'rgba(255,255,255,0.4)' }}>
@@ -382,7 +382,7 @@ export default function TournamentManagementPage() {
               {filteredRegistrations.map((registration) => {
                 const name = registration.displayName || registration.user?.name || 'Unknown';
                 const isOpen = expandedId === registration.id;
-                const statusColor = registration.status === 'confirmed' ? '#06b6d4'
+                const statusColor = registration.status === 'confirmed' ? '#F59E0B'
                   : registration.status === 'pending' ? '#fbbf24'
                   : registration.status === 'cancellation_requested' ? '#fb923c'
                   : 'rgba(255,255,255,0.4)';
@@ -391,12 +391,12 @@ export default function TournamentManagementPage() {
                     {/* ── Compact row (always visible, tap to expand) ── */}
                     <button
                       className="w-full flex items-center gap-3 px-4 py-3.5 text-left transition-all"
-                      style={{ background: isOpen ? 'rgba(6,182,212,0.03)' : 'transparent' }}
+                      style={{ background: isOpen ? 'rgba(245,158,11,0.03)' : 'transparent' }}
                       onClick={() => setExpandedId(isOpen ? null : registration.id)}
                     >
                       {/* Avatar */}
                       <div className="w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm flex-shrink-0"
-                        style={{ background: 'linear-gradient(135deg,rgba(6,182,212,0.2),rgba(6,182,212,0.1))', border: '1px solid rgba(6,182,212,0.25)', color: '#06b6d4' }}>
+                        style={{ background: 'linear-gradient(135deg,rgba(245,158,11,0.2),rgba(245,158,11,0.1))', border: '1px solid rgba(245,158,11,0.25)', color: '#F59E0B' }}>
                         {name.charAt(0).toUpperCase()}
                       </div>
 
@@ -410,7 +410,7 @@ export default function TournamentManagementPage() {
                           )}
                         </div>
                         <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-xs font-semibold" style={{ color: '#06b6d4' }}>{registration.category?.name}</span>
+                          <span className="text-xs font-semibold" style={{ color: '#F59E0B' }}>{registration.category?.name}</span>
                           <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>·</span>
                           <span className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>{registration.category?.format}</span>
                         </div>
@@ -456,7 +456,7 @@ export default function TournamentManagementPage() {
                             <Users className="w-3.5 h-3.5 flex-shrink-0" style={{ color: 'rgba(255,255,255,0.3)' }} />
                             <span className="text-xs font-semibold" style={{ color: 'rgba(255,255,255,0.55)' }}>
                               Partner: {registration.partner.name}
-                              <span style={{ color: registration.partnerConfirmed ? '#06b6d4' : '#fbbf24' }}>
+                              <span style={{ color: registration.partnerConfirmed ? '#F59E0B' : '#fbbf24' }}>
                                 {registration.partnerConfirmed ? ' ✓ confirmed' : ' (pending)'}
                               </span>
                             </span>
@@ -477,7 +477,7 @@ export default function TournamentManagementPage() {
                             <button
                               onClick={() => setScreenshotModal({ url: getImageUrl(registration.paymentScreenshot), playerName: name, amount: registration.amountTotal })}
                               className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold"
-                              style={{ background: 'rgba(0,212,255,0.1)', border: '1px solid rgba(0,212,255,0.25)', color: '#00d4ff' }}>
+                              style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.25)', color: '#FCD34D' }}>
                               <ZoomIn className="h-3.5 w-3.5" /> Screenshot
                             </button>
                           )}
@@ -494,12 +494,12 @@ export default function TournamentManagementPage() {
                               onClick={() => openCompleteRefundModal(registration)}
                               disabled={actionLoading === registration.id}
                               className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold disabled:opacity-50"
-                              style={{ background: 'rgba(6,182,212,0.1)', border: '1px solid rgba(6,182,212,0.25)', color: '#06b6d4' }}>
+                              style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.25)', color: '#F59E0B' }}>
                               <CreditCard className="h-3.5 w-3.5" /> Complete Refund
                             </button>
                           )}
                           {registration.status === 'cancelled' && registration.refundStatus === 'completed' && (
-                            <span className="flex items-center gap-1 text-xs font-bold" style={{ color: '#06b6d4' }}>
+                            <span className="flex items-center gap-1 text-xs font-bold" style={{ color: '#F59E0B' }}>
                               <CheckCircle className="h-3.5 w-3.5" /> Refund Done
                             </span>
                           )}
@@ -521,22 +521,22 @@ export default function TournamentManagementPage() {
             <div className="hidden md:block overflow-x-auto custom-scrollbar">
               <table className="min-w-full">
                 <thead>
-                  <tr style={{ borderBottom: '1px solid rgba(6,182,212,0.1)', background: 'rgba(6,182,212,0.04)' }}>
+                  <tr style={{ borderBottom: '1px solid rgba(245,158,11,0.1)', background: 'rgba(245,158,11,0.04)' }}>
                     {['Player', 'Category', 'Partner', 'Amount', 'Payment', 'Status', 'Date', 'Actions'].map(h => (
-                      <th key={h} className="px-5 py-3.5 text-left text-xs font-black uppercase tracking-wider" style={{ color: 'rgba(6,182,212,0.7)' }}>{h}</th>
+                      <th key={h} className="px-5 py-3.5 text-left text-xs font-black uppercase tracking-wider" style={{ color: 'rgba(245,158,11,0.7)' }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {filteredRegistrations.map((registration) => (
                     <tr key={registration.id} className="transition-colors" style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}
-                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(6,182,212,0.03)'}
+                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(245,158,11,0.03)'}
                       onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
                     >
                       <td className="px-5 py-4">
                         <div className="flex items-start gap-3">
                           <div className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm flex-shrink-0"
-                            style={{ background: 'rgba(6,182,212,0.15)', color: '#06b6d4' }}>
+                            style={{ background: 'rgba(245,158,11,0.15)', color: '#F59E0B' }}>
                             {(registration.displayName || registration.user?.name || '?').charAt(0).toUpperCase()}
                           </div>
                           <div>
@@ -565,7 +565,7 @@ export default function TournamentManagementPage() {
                             <div className="text-white text-sm">{registration.partner.name}</div>
                             <div className="text-xs">
                               {registration.partnerConfirmed
-                                ? <span className="flex items-center gap-1" style={{ color: '#06b6d4' }}><CheckCircle className="w-3 h-3" /> Confirmed</span>
+                                ? <span className="flex items-center gap-1" style={{ color: '#F59E0B' }}><CheckCircle className="w-3 h-3" /> Confirmed</span>
                                 : <span className="text-amber-400 flex items-center gap-1"><Clock className="w-3 h-3" /> Pending</span>}
                             </div>
                           </div>
@@ -615,7 +615,7 @@ export default function TournamentManagementPage() {
                       <td className="px-5 py-4">
                         <div className="flex flex-col items-center gap-1.5">
                           {registration.status === 'pending' && <span className="text-amber-400 text-xs flex items-center gap-1"><Clock className="h-3.5 w-3.5" />Pending Admin</span>}
-                          {registration.status === 'confirmed' && <span className="text-xs flex items-center gap-1" style={{ color: '#06b6d4' }}><CheckCircle className="h-3.5 w-3.5" />Registered</span>}
+                          {registration.status === 'confirmed' && <span className="text-xs flex items-center gap-1" style={{ color: '#F59E0B' }}><CheckCircle className="h-3.5 w-3.5" />Registered</span>}
                           {registration.status === 'rejected' && <span className="text-red-400 text-xs flex items-center gap-1"><XCircle className="h-3.5 w-3.5" />Rejected</span>}
                           {registration.status === 'cancelled' && !registration.refundStatus && <span className="text-xs italic" style={{ color: 'rgba(255,255,255,0.3)' }}>No actions</span>}
                           {registration.status === 'cancellation_requested' && (
@@ -631,12 +631,12 @@ export default function TournamentManagementPage() {
                           {registration.status === 'cancelled' && registration.refundStatus === 'approved' && (
                             <button onClick={() => openCompleteRefundModal(registration)} disabled={actionLoading === registration.id}
                               className="px-2.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 disabled:opacity-50 transition-all w-full justify-center"
-                              style={{ background: 'rgba(6,182,212,0.12)', border: '1px solid rgba(6,182,212,0.3)', color: '#06b6d4' }}>
+                              style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.3)', color: '#F59E0B' }}>
                               <CreditCard className="h-3.5 w-3.5" /> Refund
                             </button>
                           )}
                           {registration.status === 'cancelled' && registration.refundStatus === 'completed' && (
-                            <span className="text-xs flex items-center gap-1" style={{ color: '#06b6d4' }}><CheckCircle className="h-3.5 w-3.5" />Done</span>
+                            <span className="text-xs flex items-center gap-1" style={{ color: '#F59E0B' }}><CheckCircle className="h-3.5 w-3.5" />Done</span>
                           )}
                           {actionLoading === registration.id && <Spinner size="sm" />}
                         </div>
@@ -656,13 +656,13 @@ export default function TournamentManagementPage() {
       {screenshotModal && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setScreenshotModal(null)}>
           <div className="rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden animate-scale-in"
-            style={{ background: '#0d1117', border: '1px solid rgba(6,182,212,0.2)' }}
+            style={{ background: '#0d1117', border: '1px solid rgba(245,158,11,0.2)' }}
             onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between p-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
               <div>
                 <h3 className="text-base font-black text-white">Payment Screenshot</h3>
                 <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                  From <span style={{ color: '#06b6d4' }}>{screenshotModal.playerName}</span> · ₹{screenshotModal.amount}
+                  From <span style={{ color: '#F59E0B' }}>{screenshotModal.playerName}</span> · ₹{screenshotModal.amount}
                 </p>
               </div>
               <button onClick={() => setScreenshotModal(null)} className="w-9 h-9 rounded-xl flex items-center justify-center transition-all" style={{ background: 'rgba(255,255,255,0.06)' }}>
@@ -758,14 +758,14 @@ export default function TournamentManagementPage() {
               </button>
             </div>
             <div className="p-5 space-y-3 max-h-[60vh] overflow-y-auto custom-scrollbar">
-              <div className="rounded-xl p-4" style={{ background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.2)' }}>
-                <div className="flex items-center gap-2 mb-1" style={{ color: '#06b6d4' }}>
+              <div className="rounded-xl p-4" style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)' }}>
+                <div className="flex items-center gap-2 mb-1" style={{ color: '#F59E0B' }}>
                   <CreditCard className="w-4 h-4" /><span className="text-sm font-bold">Refund Amount</span>
                 </div>
                 <p className="text-2xl font-black text-white">₹{refundQrModal.amount}</p>
               </div>
-              <div className="rounded-xl p-4" style={{ background: 'rgba(0,212,255,0.08)', border: '1px solid rgba(0,212,255,0.2)' }}>
-                <div className="flex items-center gap-2 mb-1" style={{ color: '#00d4ff' }}>
+              <div className="rounded-xl p-4" style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)' }}>
+                <div className="flex items-center gap-2 mb-1" style={{ color: '#FCD34D' }}>
                   <QrCode className="w-4 h-4" /><span className="text-sm font-bold">Player's UPI ID</span>
                 </div>
                 <p className="text-base font-mono text-white">{refundQrModal.upiId || 'Not provided'}</p>
@@ -795,7 +795,7 @@ export default function TournamentManagementPage() {
         <div className="fixed inset-0 flex items-center justify-center z-50 p-4 overflow-y-auto" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}>
           <div className="rounded-2xl shadow-2xl max-w-lg w-full my-8" style={{ background: '#0d1025', border: '1px solid rgba(255,255,255,0.1)' }}>
             {/* Header */}
-            <div className="p-6 text-white rounded-t-2xl" style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)' }}>
+            <div className="p-6 text-white rounded-t-2xl" style={{ background: 'linear-gradient(135deg,#D97706,#F59E0B)' }}>
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.2)' }}>
@@ -821,7 +821,7 @@ export default function TournamentManagementPage() {
             {/* Content */}
             <div className="p-6">
               <div className="mb-6">
-                <div className="rounded-xl p-4 mb-4" style={{ background: 'rgba(0,212,255,0.08)', border: '1px solid rgba(0,212,255,0.2)' }}>
+                <div className="rounded-xl p-4 mb-4" style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)' }}>
                   <p className="mb-2" style={{ color: 'rgba(255,255,255,0.7)' }}>
                     Completing refund for <span className="font-semibold text-white">{completeRefundModal.playerName}</span>
                   </p>
@@ -862,14 +862,14 @@ export default function TournamentManagementPage() {
                     htmlFor="payment-screenshot-input"
                     className="w-full px-4 py-6 rounded-xl flex flex-col items-center justify-center gap-2 transition-all cursor-pointer"
                     style={paymentScreenshot
-                      ? { background: 'rgba(6,182,212,0.08)', border: '2px dashed rgba(6,182,212,0.4)' }
+                      ? { background: 'rgba(245,158,11,0.08)', border: '2px dashed rgba(245,158,11,0.4)' }
                       : { background: 'rgba(255,255,255,0.03)', border: '2px dashed rgba(255,255,255,0.15)' }}
                   >
                     {paymentScreenshot ? (
                       <>
-                        <CheckCircle className="h-10 w-10" style={{ color: '#06b6d4' }} />
-                        <span className="font-medium text-center" style={{ color: '#06b6d4' }}>{paymentScreenshot.name}</span>
-                        <span className="text-sm" style={{ color: 'rgba(6,182,212,0.7)' }}>Click to change</span>
+                        <CheckCircle className="h-10 w-10" style={{ color: '#F59E0B' }} />
+                        <span className="font-medium text-center" style={{ color: '#F59E0B' }}>{paymentScreenshot.name}</span>
+                        <span className="text-sm" style={{ color: 'rgba(245,158,11,0.7)' }}>Click to change</span>
                       </>
                     ) : (
                       <>
@@ -900,7 +900,7 @@ export default function TournamentManagementPage() {
                   onClick={handleCompleteRefund}
                   disabled={actionLoading || !paymentScreenshot}
                   className="flex-1 px-4 py-3 rounded-xl font-semibold transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-                  style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)', color: '#050810' }}
+                  style={{ background: 'linear-gradient(135deg,#D97706,#F59E0B)', color: '#050810' }}
                 >
                   {actionLoading ? (
                     <>
@@ -922,4 +922,5 @@ export default function TournamentManagementPage() {
     </div>
   );
 }
+
 

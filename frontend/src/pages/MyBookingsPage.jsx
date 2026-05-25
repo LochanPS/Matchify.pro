@@ -260,7 +260,7 @@ export default function MyBookingsPage() {
       <div className="px-4 space-y-3">
         {loading ? (
           <div className="flex justify-center py-12">
-            <div style={{ width: 36, height: 36, borderRadius: '50%', border: '3px solid rgba(0,212,255,0.15)', borderTopColor: B.cyan, animation: 'spin 0.7s linear infinite' }} />
+            <div style={{ width: 36, height: 36, borderRadius: '50%', border: '3px solid rgba(245,158,11,0.15)', borderTopColor: B.cyan, animation: 'spin 0.7s linear infinite' }} />
             <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
           </div>
         ) : bookings.length === 0 ? (
@@ -292,4 +292,5 @@ export default function MyBookingsPage() {
     </div>
   );
 }
+
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 
 const DatesStep = ({ formData, updateMultipleFields, onNext, onPrev }) => {
   const updateFormData = (field, value) => {
@@ -74,7 +74,7 @@ const DatesStep = ({ formData, updateMultipleFields, onNext, onPrev }) => {
       <h2 
         className="text-xl font-black mb-5"
         style={{
-          background: 'linear-gradient(135deg, #06b6d4, #34d399)',
+          background: 'linear-gradient(135deg, #F59E0B, #34d399)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
           backgroundClip: 'text'
@@ -133,7 +133,7 @@ const DatesStep = ({ formData, updateMultipleFields, onNext, onPrev }) => {
       </div>
 
       {/* Tournament Period - Emerald theme like screenshot */}
-      <div className="rounded-2xl p-5" style={{ background: 'rgba(6,182,212,0.15)', border: '1.5px solid rgba(6,182,212,0.3)' }}>
+      <div className="rounded-2xl p-5" style={{ background: 'rgba(245,158,11,0.15)', border: '1.5px solid rgba(245,158,11,0.3)' }}>
         <h3 className="font-bold text-emerald-300 mb-4 text-base">Tournament Period</h3>
         
         <div className="space-y-4">
@@ -150,7 +150,7 @@ const DatesStep = ({ formData, updateMultipleFields, onNext, onPrev }) => {
               }`}
               style={{
                 background: 'rgba(0,0,0,0.4)',
-                border: errors.startDate ? '1.5px solid rgba(239,68,68,0.5)' : '1.5px solid rgba(6,182,212,0.4)'
+                border: errors.startDate ? '1.5px solid rgba(239,68,68,0.5)' : '1.5px solid rgba(245,158,11,0.4)'
               }}
             />
             {errors.startDate && (
@@ -171,7 +171,7 @@ const DatesStep = ({ formData, updateMultipleFields, onNext, onPrev }) => {
               }`}
               style={{
                 background: 'rgba(0,0,0,0.4)',
-                border: errors.endDate ? '1.5px solid rgba(239,68,68,0.5)' : '1.5px solid rgba(6,182,212,0.4)'
+                border: errors.endDate ? '1.5px solid rgba(239,68,68,0.5)' : '1.5px solid rgba(245,158,11,0.4)'
               }}
             />
             {errors.endDate && (
@@ -224,3 +224,4 @@ const DatesStep = ({ formData, updateMultipleFields, onNext, onPrev }) => {
 };
 
 export default DatesStep;
+

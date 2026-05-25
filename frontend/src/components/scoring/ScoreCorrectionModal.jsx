@@ -1,4 +1,4 @@
-import { getErrorMessage } from '../../utils/errorMessage';
+﻿import { getErrorMessage } from '../../utils/errorMessage';
 import React, { useState } from 'react';
 import { X, AlertTriangle, CheckCircle } from 'lucide-react';
 import api from '../../utils/api';
@@ -190,7 +190,7 @@ const ScoreCorrectionModal = ({ matchId, currentScore, onClose, onSuccess }) => 
               style={{ ...inputStyle, fontFamily: 'monospace', fontSize: 12, resize: 'vertical', minHeight: 160, lineHeight: 1.6 }}
               rows={12}
               required
-              onFocus={e => e.target.style.borderColor = 'rgba(6,182,212,0.4)'}
+              onFocus={e => e.target.style.borderColor = 'rgba(245,158,11,0.4)'}
               onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
             />
             <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)', marginTop: 4 }}>
@@ -289,3 +289,4 @@ const ScoreCorrectionModal = ({ matchId, currentScore, onClose, onSuccess }) => 
 };
 
 export default ScoreCorrectionModal;
+

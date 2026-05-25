@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { tournamentAPI } from '../api/tournament';
 import { useAuth } from '../contexts/AuthContext';
@@ -161,7 +161,7 @@ const PlayerViewDrawsPage = () => {
           </button>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="p-3 rounded-xl shadow-lg" style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', boxShadow: '0 4px 24px rgba(6,182,212,0.2)' }}>
+              <div className="p-3 rounded-xl shadow-lg" style={{ background: 'linear-gradient(135deg,#F59E0B,#FCD34D)', boxShadow: '0 4px 24px rgba(245,158,11,0.2)' }}>
                 <Eye className="w-6 h-6 text-white" />
               </div>
               <div>
@@ -175,11 +175,11 @@ const PlayerViewDrawsPage = () => {
                 onClick={handleRefresh}
                 disabled={refreshing}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl transition-all disabled:opacity-50"
-                style={{ background: 'rgba(6,182,212,0.1)', border: '1px solid rgba(6,182,212,0.3)' }}
+                style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)' }}
                 title="Refresh bracket data"
               >
-                <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} style={{ color: '#06b6d4' }} />
-                <span className="text-sm font-medium" style={{ color: '#06b6d4' }}>Refresh</span>
+                <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} style={{ color: '#F59E0B' }} />
+                <span className="text-sm font-medium" style={{ color: '#F59E0B' }}>Refresh</span>
               </button>
               {/* Read-only indicator */}
               <div className="flex items-center gap-2 px-4 py-2 bg-blue-500/10 border border-blue-500/30 rounded-xl">
@@ -219,7 +219,7 @@ const PlayerViewDrawsPage = () => {
                       onClick={() => setSelectedCategory(category)}
                       className="w-full text-left px-3 py-2 rounded-lg transition-all"
                       style={selectedCategory?.id === category.id
-                        ? { background: 'rgba(6,182,212,0.1)', border: '1px solid rgba(6,182,212,0.4)', color: '#fff' }
+                        ? { background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.4)', color: '#fff' }
                         : { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.05)', color: '#d1d5db' }}
                     >
                       <div className="font-medium text-sm">{category.name}</div>
@@ -346,7 +346,7 @@ const PlayerViewDrawsPage = () => {
                               <div className="font-medium text-sm text-white truncate">{item.label}</div>
                               <div className="text-xs text-gray-400">{item.subtitle}</div>
                             </div>
-                            <div className="w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: 'rgba(6,182,212,0.15)' }}>
+                            <div className="w-6 h-6 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: 'rgba(245,158,11,0.15)' }}>
                               <span className="text-xs">→</span>
                             </div>
                           </div>
@@ -378,9 +378,9 @@ const PlayerViewDrawsPage = () => {
                         </div>
                       </div>
                       {/* Auto-refresh indicator */}
-                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg" style={{ background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.3)' }}>
-                        <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: '#06b6d4' }}></div>
-                        <span className="text-xs font-medium" style={{ color: '#06b6d4' }}>Auto-updating</span>
+                      <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg" style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.3)' }}>
+                        <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: '#F59E0B' }}></div>
+                        <span className="text-xs font-medium" style={{ color: '#F59E0B' }}>Auto-updating</span>
                       </div>
                     </div>
                   </div>
@@ -432,11 +432,11 @@ const PlayerViewDrawsPage = () => {
       {/* Match Details Modal */}
       {showMatchDetailsModal && selectedMatchDetails && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-3">
-          <div className="rounded-2xl p-4 max-w-lg w-full shadow-2xl max-h-[90vh] overflow-y-auto" style={{ background: '#0d1025', border: '2px solid rgba(0,212,255,0.35)' }}>
+          <div className="rounded-2xl p-4 max-w-lg w-full shadow-2xl max-h-[90vh] overflow-y-auto" style={{ background: '#0d1025', border: '2px solid rgba(245,158,11,0.35)' }}>
             {/* Header */}
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'rgba(0,212,255,0.15)', border: '1px solid rgba(0,212,255,0.3)' }}>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.3)' }}>
                   <span className="text-lg">🏸</span>
                 </div>
                 <div>
@@ -457,11 +457,11 @@ const PlayerViewDrawsPage = () => {
             </div>
 
             {/* Match Score Card */}
-            <div className="rounded-xl p-4 mb-4" style={{ background: 'rgba(0,212,255,0.06)', border: '2px solid rgba(0,212,255,0.2)' }}>
+            <div className="rounded-xl p-4 mb-4" style={{ background: 'rgba(245,158,11,0.06)', border: '2px solid rgba(245,158,11,0.2)' }}>
               {/* Final Score */}
               <div className="text-center mb-4">
-                <p className="text-xs uppercase tracking-widest mb-2 font-semibold" style={{ color: '#00d4ff' }}>Final Score</p>
-                <div className="inline-flex items-center gap-3 px-6 py-3 rounded-xl" style={{ background: 'rgba(7,7,26,0.7)', border: '1px solid rgba(0,212,255,0.15)' }}>
+                <p className="text-xs uppercase tracking-widest mb-2 font-semibold" style={{ color: '#FCD34D' }}>Final Score</p>
+                <div className="inline-flex items-center gap-3 px-6 py-3 rounded-xl" style={{ background: 'rgba(7,7,26,0.7)', border: '1px solid rgba(245,158,11,0.15)' }}>
                   <span className="text-5xl font-black text-white tracking-tight">
                     {selectedMatchDetails.score ? (() => {
                       try {
@@ -498,8 +498,8 @@ const PlayerViewDrawsPage = () => {
                         return (
                           <div key={idx} className="px-3 py-1.5 rounded-lg"
                             style={isP1Winner
-                              ? { border: '2px solid rgba(0,212,255,0.4)', background: 'rgba(0,212,255,0.08)' }
-                              : { border: '2px solid rgba(6,182,212,0.4)', background: 'rgba(6,182,212,0.08)' }}>
+                              ? { border: '2px solid rgba(245,158,11,0.4)', background: 'rgba(245,158,11,0.08)' }
+                              : { border: '2px solid rgba(245,158,11,0.4)', background: 'rgba(245,158,11,0.08)' }}>
                             <span className="text-white font-bold text-sm">{p1Score}-{p2Score}</span>
                           </div>
                         );
@@ -517,19 +517,19 @@ const PlayerViewDrawsPage = () => {
                   return (
                     <div className="rounded-xl p-3 border-2"
                       style={isWinner
-                        ? { borderColor: 'rgba(6,182,212,0.4)', background: 'rgba(6,182,212,0.07)' }
+                        ? { borderColor: 'rgba(245,158,11,0.4)', background: 'rgba(245,158,11,0.07)' }
                         : { borderColor: 'rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)' }}>
                       <div className="flex items-center justify-between gap-2 mb-2">
                         <div className="flex items-center gap-2 min-w-0 flex-1">
                           {isWinner && <span className="flex-shrink-0">👑</span>}
                           <p className="font-bold text-sm leading-snug min-w-0"
-                            style={{ color: isWinner ? '#06b6d4' : '#fff', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
+                            style={{ color: isWinner ? '#F59E0B' : '#fff', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
                             {selectedMatchDetails.bracketMatch?.player1?.name || selectedMatchDetails.player1?.name || 'Player 1'}
                           </p>
                         </div>
                         {isWinner && (
                           <span className="flex-shrink-0 px-2 py-0.5 rounded-full text-xs font-bold"
-                            style={{ background: 'rgba(6,182,212,0.15)', color: '#06b6d4', border: '1px solid rgba(6,182,212,0.3)' }}>
+                            style={{ background: 'rgba(245,158,11,0.15)', color: '#F59E0B', border: '1px solid rgba(245,158,11,0.3)' }}>
                             Winner
                           </span>
                         )}
@@ -546,7 +546,7 @@ const PlayerViewDrawsPage = () => {
                                 return (
                                   <span key={idx} className="px-2 py-0.5 rounded text-xs font-semibold"
                                     style={won
-                                      ? { background: 'rgba(6,182,212,0.12)', color: '#06b6d4', border: '1px solid rgba(6,182,212,0.25)' }
+                                      ? { background: 'rgba(245,158,11,0.12)', color: '#F59E0B', border: '1px solid rgba(245,158,11,0.25)' }
                                       : { background: 'rgba(255,255,255,0.06)', color: '#9ca3af', border: '1px solid rgba(255,255,255,0.1)' }}>
                                     {score}
                                   </span>
@@ -570,19 +570,19 @@ const PlayerViewDrawsPage = () => {
                   return (
                     <div className="rounded-xl p-3 border-2"
                       style={isWinner
-                        ? { borderColor: 'rgba(6,182,212,0.4)', background: 'rgba(6,182,212,0.07)' }
+                        ? { borderColor: 'rgba(245,158,11,0.4)', background: 'rgba(245,158,11,0.07)' }
                         : { borderColor: 'rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)' }}>
                       <div className="flex items-center justify-between gap-2 mb-2">
                         <div className="flex items-center gap-2 min-w-0 flex-1">
                           {isWinner && <span className="flex-shrink-0">👑</span>}
                           <p className="font-bold text-sm leading-snug min-w-0"
-                            style={{ color: isWinner ? '#06b6d4' : '#fff', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
+                            style={{ color: isWinner ? '#F59E0B' : '#fff', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
                             {selectedMatchDetails.bracketMatch?.player2?.name || selectedMatchDetails.player2?.name || 'Player 2'}
                           </p>
                         </div>
                         {isWinner && (
                           <span className="flex-shrink-0 px-2 py-0.5 rounded-full text-xs font-bold"
-                            style={{ background: 'rgba(6,182,212,0.15)', color: '#06b6d4', border: '1px solid rgba(6,182,212,0.3)' }}>
+                            style={{ background: 'rgba(245,158,11,0.15)', color: '#F59E0B', border: '1px solid rgba(245,158,11,0.3)' }}>
                             Winner
                           </span>
                         )}
@@ -599,7 +599,7 @@ const PlayerViewDrawsPage = () => {
                                 return (
                                   <span key={idx} className="px-2 py-0.5 rounded text-xs font-semibold"
                                     style={won
-                                      ? { background: 'rgba(6,182,212,0.12)', color: '#06b6d4', border: '1px solid rgba(6,182,212,0.25)' }
+                                      ? { background: 'rgba(245,158,11,0.12)', color: '#F59E0B', border: '1px solid rgba(245,158,11,0.25)' }
                                       : { background: 'rgba(255,255,255,0.06)', color: '#9ca3af', border: '1px solid rgba(255,255,255,0.1)' }}>
                                     {score}
                                   </span>
@@ -624,7 +624,7 @@ const PlayerViewDrawsPage = () => {
                 <div className="space-y-1">
                   <p className="text-gray-400 text-xs uppercase tracking-wider">Status</p>
                   <div className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: '#06b6d4' }}></span>
+                    <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: '#F59E0B' }}></span>
                     <p className="text-white font-semibold text-sm">Completed</p>
                   </div>
                 </div>
@@ -685,7 +685,7 @@ const PlayerViewDrawsPage = () => {
                 setSelectedMatchDetails(null);
               }}
               className="w-full py-3 rounded-xl font-semibold text-sm transition-all"
-              style={{ background: 'rgba(0,212,255,0.12)', border: '1px solid rgba(0,212,255,0.3)', color: '#00d4ff' }}
+              style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.3)', color: '#FCD34D' }}
             >
               Close
             </button>
@@ -739,9 +739,9 @@ const KnockoutBracket = ({ data, onViewMatchDetails, dbMatches = [] }) => {
           <div key={ri} id={`round-${ri}`} className="flex flex-col min-w-[260px]">
             {/* Round Header */}
             <div className="mb-6 text-center">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl" style={{ background: 'rgba(6,182,212,0.1)', border: '1px solid rgba(6,182,212,0.3)' }}>
-                <Trophy className="w-4 h-4" style={{ color: '#06b6d4' }} />
-                <h4 className="text-sm font-bold uppercase tracking-wider" style={{ color: '#06b6d4' }}>
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl" style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)' }}>
+                <Trophy className="w-4 h-4" style={{ color: '#F59E0B' }} />
+                <h4 className="text-sm font-bold uppercase tracking-wider" style={{ color: '#F59E0B' }}>
                   {getRoundName(ri, data.rounds.length)}
                 </h4>
               </div>
@@ -780,22 +780,22 @@ const KnockoutBracket = ({ data, onViewMatchDetails, dbMatches = [] }) => {
                         <div
                           className="flex items-center justify-between px-3 py-2 rounded-lg transition-all"
                           style={isPlayer1Winner
-                            ? { background: 'rgba(6,182,212,0.12)', border: '2px solid rgba(6,182,212,0.4)' }
+                            ? { background: 'rgba(245,158,11,0.12)', border: '2px solid rgba(245,158,11,0.4)' }
                             : { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.05)' }}
                         >
                           <div className="flex items-center gap-2 flex-1 min-w-0">
                             {isPlayer1Winner && (
-                              <Trophy className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#06b6d4' }} />
+                              <Trophy className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#F59E0B' }} />
                             )}
                             <span
                               className="text-sm font-medium truncate"
-                              style={{ color: isPlayer1Winner ? '#06b6d4' : player1Name === 'TBD' ? '#6b7280' : '#fff', fontStyle: player1Name === 'TBD' && !isPlayer1Winner ? 'italic' : 'normal' }}
+                              style={{ color: isPlayer1Winner ? '#F59E0B' : player1Name === 'TBD' ? '#6b7280' : '#fff', fontStyle: player1Name === 'TBD' && !isPlayer1Winner ? 'italic' : 'normal' }}
                             >
                               {player1Name}
                             </span>
                           </div>
                           {isPlayer1Winner && (
-                            <span className="ml-2 px-1.5 py-0.5 rounded text-xs font-bold" style={{ background: 'rgba(6,182,212,0.2)', color: '#06b6d4' }}>
+                            <span className="ml-2 px-1.5 py-0.5 rounded text-xs font-bold" style={{ background: 'rgba(245,158,11,0.2)', color: '#F59E0B' }}>
                               W
                             </span>
                           )}
@@ -810,22 +810,22 @@ const KnockoutBracket = ({ data, onViewMatchDetails, dbMatches = [] }) => {
                         <div
                           className="flex items-center justify-between px-3 py-2 rounded-lg transition-all"
                           style={isPlayer2Winner
-                            ? { background: 'rgba(6,182,212,0.12)', border: '2px solid rgba(6,182,212,0.4)' }
+                            ? { background: 'rgba(245,158,11,0.12)', border: '2px solid rgba(245,158,11,0.4)' }
                             : { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.05)' }}
                         >
                           <div className="flex items-center gap-2 flex-1 min-w-0">
                             {isPlayer2Winner && (
-                              <Trophy className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#06b6d4' }} />
+                              <Trophy className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#F59E0B' }} />
                             )}
                             <span
                               className="text-sm font-medium truncate"
-                              style={{ color: isPlayer2Winner ? '#06b6d4' : player2Name === 'TBD' ? '#6b7280' : '#fff', fontStyle: player2Name === 'TBD' && !isPlayer2Winner ? 'italic' : 'normal' }}
+                              style={{ color: isPlayer2Winner ? '#F59E0B' : player2Name === 'TBD' ? '#6b7280' : '#fff', fontStyle: player2Name === 'TBD' && !isPlayer2Winner ? 'italic' : 'normal' }}
                             >
                               {player2Name}
                             </span>
                           </div>
                           {isPlayer2Winner && (
-                            <span className="ml-2 px-1.5 py-0.5 rounded text-xs font-bold" style={{ background: 'rgba(6,182,212,0.2)', color: '#06b6d4' }}>
+                            <span className="ml-2 px-1.5 py-0.5 rounded text-xs font-bold" style={{ background: 'rgba(245,158,11,0.2)', color: '#F59E0B' }}>
                               W
                             </span>
                           )}
@@ -856,7 +856,7 @@ const KnockoutBracket = ({ data, onViewMatchDetails, dbMatches = [] }) => {
                               onViewMatchDetails(matchDataToUse, bracketMatchData);
                             }}
                             className="w-full py-2 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all"
-                            style={{ background: 'rgba(0,212,255,0.1)', border: '1px solid rgba(0,212,255,0.3)', color: '#00d4ff' }}
+                            style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)', color: '#FCD34D' }}
                           >
                             <Eye className="w-3.5 h-3.5" />
                             View Score
@@ -924,14 +924,14 @@ const RoundRobinDraw = ({ data, onViewMatchDetails, categoryFormat, dbMatches = 
       {data.groups.map((group, gi) => (
         <div key={gi} id={`group-${gi}`} className="backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden shadow-lg" style={{ background: 'rgba(13,16,37,0.9)' }}>
           {/* Group Header */}
-          <div className="border-b px-6 py-4" style={{ background: 'rgba(0,212,255,0.08)', borderColor: 'rgba(0,212,255,0.2)' }}>
+          <div className="border-b px-6 py-4" style={{ background: 'rgba(245,158,11,0.08)', borderColor: 'rgba(245,158,11,0.2)' }}>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#00a3cc,#00d4ff)', boxShadow: '0 4px 12px rgba(0,212,255,0.3)' }}>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#00a3cc,#FCD34D)', boxShadow: '0 4px 12px rgba(245,158,11,0.3)' }}>
                 <span className="text-xl font-bold" style={{ color: '#050810' }}>{String.fromCharCode(65 + gi)}</span>
               </div>
               <div>
                 <h4 className="text-lg font-bold text-white">Group {String.fromCharCode(65 + gi)}</h4>
-                <p className="text-xs" style={{ color: '#00d4ff' }}>{group.participants?.length || 0} Players</p>
+                <p className="text-xs" style={{ color: '#FCD34D' }}>{group.participants?.length || 0} Players</p>
               </div>
             </div>
           </div>
@@ -976,7 +976,7 @@ const RoundRobinDraw = ({ data, onViewMatchDetails, categoryFormat, dbMatches = 
                               <span className="text-gray-400 font-medium text-xs">{p.played || 0}</span>
                             </td>
                             <td className="py-3 px-2 text-center">
-                              <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg font-bold text-xs" style={{ background: 'rgba(6,182,212,0.15)', color: '#06b6d4' }}>
+                              <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg font-bold text-xs" style={{ background: 'rgba(245,158,11,0.15)', color: '#F59E0B' }}>
                                 {p.wins || 0}
                               </span>
                             </td>
@@ -1033,7 +1033,7 @@ const RoundRobinDraw = ({ data, onViewMatchDetails, categoryFormat, dbMatches = 
                               Match #{match.matchNumber || mi + 1}
                             </span>
                             {isCompleted && (
-                              <span className="px-2 py-0.5 rounded text-xs font-bold" style={{ background: 'rgba(6,182,212,0.15)', color: '#06b6d4' }}>
+                              <span className="px-2 py-0.5 rounded text-xs font-bold" style={{ background: 'rgba(245,158,11,0.15)', color: '#F59E0B' }}>
                                 Completed
                               </span>
                             )}
@@ -1046,19 +1046,19 @@ const RoundRobinDraw = ({ data, onViewMatchDetails, categoryFormat, dbMatches = 
                               <div
                                 className="flex items-center justify-between px-3 py-2 rounded-lg transition-all"
                                 style={isPlayer1Winner
-                                  ? { background: 'rgba(6,182,212,0.12)', border: '2px solid rgba(6,182,212,0.4)' }
+                                  ? { background: 'rgba(245,158,11,0.12)', border: '2px solid rgba(245,158,11,0.4)' }
                                   : { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.05)' }}
                               >
                                 <div className="flex items-center gap-2 flex-1 min-w-0">
                                   {isPlayer1Winner && (
-                                    <Trophy className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#06b6d4' }} />
+                                    <Trophy className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#F59E0B' }} />
                                   )}
-                                  <span className="text-sm font-medium truncate" style={{ color: isPlayer1Winner ? '#06b6d4' : '#fff' }}>
+                                  <span className="text-sm font-medium truncate" style={{ color: isPlayer1Winner ? '#F59E0B' : '#fff' }}>
                                     {match.player1?.name || 'TBD'}
                                   </span>
                                 </div>
                                 {isPlayer1Winner && (
-                                  <span className="ml-2 px-1.5 py-0.5 rounded text-xs font-bold" style={{ background: 'rgba(6,182,212,0.2)', color: '#06b6d4' }}>
+                                  <span className="ml-2 px-1.5 py-0.5 rounded text-xs font-bold" style={{ background: 'rgba(245,158,11,0.2)', color: '#F59E0B' }}>
                                     W
                                   </span>
                                 )}
@@ -1073,19 +1073,19 @@ const RoundRobinDraw = ({ data, onViewMatchDetails, categoryFormat, dbMatches = 
                               <div
                                 className="flex items-center justify-between px-3 py-2 rounded-lg transition-all"
                                 style={isPlayer2Winner
-                                  ? { background: 'rgba(6,182,212,0.12)', border: '2px solid rgba(6,182,212,0.4)' }
+                                  ? { background: 'rgba(245,158,11,0.12)', border: '2px solid rgba(245,158,11,0.4)' }
                                   : { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.05)' }}
                               >
                                 <div className="flex items-center gap-2 flex-1 min-w-0">
                                   {isPlayer2Winner && (
-                                    <Trophy className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#06b6d4' }} />
+                                    <Trophy className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#F59E0B' }} />
                                   )}
-                                  <span className="text-sm font-medium truncate" style={{ color: isPlayer2Winner ? '#06b6d4' : '#fff' }}>
+                                  <span className="text-sm font-medium truncate" style={{ color: isPlayer2Winner ? '#F59E0B' : '#fff' }}>
                                     {match.player2?.name || 'TBD'}
                                   </span>
                                 </div>
                                 {isPlayer2Winner && (
-                                  <span className="ml-2 px-1.5 py-0.5 rounded text-xs font-bold" style={{ background: 'rgba(6,182,212,0.2)', color: '#06b6d4' }}>
+                                  <span className="ml-2 px-1.5 py-0.5 rounded text-xs font-bold" style={{ background: 'rgba(245,158,11,0.2)', color: '#F59E0B' }}>
                                     W
                                   </span>
                                 )}
@@ -1096,13 +1096,13 @@ const RoundRobinDraw = ({ data, onViewMatchDetails, categoryFormat, dbMatches = 
                               <div className="flex items-center justify-between gap-3">
                                 <div className="flex items-center gap-2 flex-1">
                                   {isPlayer1Winner && (
-                                    <Trophy className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#06b6d4' }} />
+                                    <Trophy className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#F59E0B' }} />
                                   )}
-                                  <span className="text-sm font-medium" style={{ color: isPlayer1Winner ? '#06b6d4' : '#fff' }}>
+                                  <span className="text-sm font-medium" style={{ color: isPlayer1Winner ? '#F59E0B' : '#fff' }}>
                                     {match.player1?.name || 'TBD'}
                                   </span>
                                   {isPlayer1Winner && (
-                                    <span className="px-1.5 py-0.5 rounded text-xs font-bold" style={{ background: 'rgba(6,182,212,0.2)', color: '#06b6d4' }}>
+                                    <span className="px-1.5 py-0.5 rounded text-xs font-bold" style={{ background: 'rgba(245,158,11,0.2)', color: '#F59E0B' }}>
                                       W
                                     </span>
                                   )}
@@ -1110,13 +1110,13 @@ const RoundRobinDraw = ({ data, onViewMatchDetails, categoryFormat, dbMatches = 
                                 <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">vs</span>
                                 <div className="flex items-center gap-2 flex-1 justify-end">
                                   {isPlayer2Winner && (
-                                    <Trophy className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#06b6d4' }} />
+                                    <Trophy className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#F59E0B' }} />
                                   )}
-                                  <span className="text-sm font-medium" style={{ color: isPlayer2Winner ? '#06b6d4' : '#fff' }}>
+                                  <span className="text-sm font-medium" style={{ color: isPlayer2Winner ? '#F59E0B' : '#fff' }}>
                                     {match.player2?.name || 'TBD'}
                                   </span>
                                   {isPlayer2Winner && (
-                                    <span className="px-1.5 py-0.5 rounded text-xs font-bold" style={{ background: 'rgba(6,182,212,0.2)', color: '#06b6d4' }}>
+                                    <span className="px-1.5 py-0.5 rounded text-xs font-bold" style={{ background: 'rgba(245,158,11,0.2)', color: '#F59E0B' }}>
                                       W
                                     </span>
                                   )}
@@ -1149,7 +1149,7 @@ const RoundRobinDraw = ({ data, onViewMatchDetails, categoryFormat, dbMatches = 
                                   onViewMatchDetails(matchDataToUse, bracketMatchData);
                                 }}
                                 className="w-full py-2 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all"
-                                style={{ background: 'rgba(0,212,255,0.1)', border: '1px solid rgba(0,212,255,0.3)', color: '#00d4ff' }}
+                                style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)', color: '#FCD34D' }}
                               >
                                 <Eye className="w-3.5 h-3.5" />
                                 View Score
@@ -1199,7 +1199,7 @@ const GroupsKnockoutDraw = ({ data, onViewMatchDetails, categoryFormat, dbMatche
       {/* Group Stage */}
       <div id="group-stage">
         <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-          <span className="px-3 py-1 rounded-lg text-sm" style={{ background: 'rgba(0,212,255,0.12)', color: '#00d4ff' }}>Stage 1</span>
+          <span className="px-3 py-1 rounded-lg text-sm" style={{ background: 'rgba(245,158,11,0.12)', color: '#FCD34D' }}>Stage 1</span>
           Group Stage (Round Robin)
         </h3>
         <RoundRobinDraw data={data} onViewMatchDetails={onViewMatchDetails} categoryFormat={categoryFormat} dbMatches={dbMatches} />
@@ -1218,9 +1218,9 @@ const GroupsKnockoutDraw = ({ data, onViewMatchDetails, categoryFormat, dbMatche
                 <div key={ri} id={`knockout-${ri}`} className="flex flex-col min-w-[260px]">
                   {/* Round Header */}
                   <div className="mb-6 text-center">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl" style={{ background: 'rgba(6,182,212,0.1)', border: '1px solid rgba(6,182,212,0.3)' }}>
-                      <Trophy className="w-4 h-4" style={{ color: '#06b6d4' }} />
-                      <h4 className="text-sm font-bold uppercase tracking-wider" style={{ color: '#06b6d4' }}>
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl" style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)' }}>
+                      <Trophy className="w-4 h-4" style={{ color: '#F59E0B' }} />
+                      <h4 className="text-sm font-bold uppercase tracking-wider" style={{ color: '#F59E0B' }}>
                         {getRoundName(ri, data.knockout.rounds.length)}
                       </h4>
                     </div>
@@ -1259,22 +1259,22 @@ const GroupsKnockoutDraw = ({ data, onViewMatchDetails, categoryFormat, dbMatche
                               <div
                                 className="flex items-center justify-between px-3 py-2 rounded-lg transition-all"
                                 style={isPlayer1Winner
-                                  ? { background: 'rgba(6,182,212,0.12)', border: '2px solid rgba(6,182,212,0.4)' }
+                                  ? { background: 'rgba(245,158,11,0.12)', border: '2px solid rgba(245,158,11,0.4)' }
                                   : { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.05)' }}
                               >
                                 <div className="flex items-center gap-2 flex-1 min-w-0">
                                   {isPlayer1Winner && (
-                                    <Trophy className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#06b6d4' }} />
+                                    <Trophy className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#F59E0B' }} />
                                   )}
                                   <span
                                     className="text-sm font-medium truncate"
-                                    style={{ color: isPlayer1Winner ? '#06b6d4' : player1Name === 'TBD' ? '#6b7280' : '#fff', fontStyle: player1Name === 'TBD' && !isPlayer1Winner ? 'italic' : 'normal' }}
+                                    style={{ color: isPlayer1Winner ? '#F59E0B' : player1Name === 'TBD' ? '#6b7280' : '#fff', fontStyle: player1Name === 'TBD' && !isPlayer1Winner ? 'italic' : 'normal' }}
                                   >
                                     {player1Name}
                                   </span>
                                 </div>
                                 {isPlayer1Winner && (
-                                  <span className="ml-2 px-1.5 py-0.5 rounded text-xs font-bold" style={{ background: 'rgba(6,182,212,0.2)', color: '#06b6d4' }}>
+                                  <span className="ml-2 px-1.5 py-0.5 rounded text-xs font-bold" style={{ background: 'rgba(245,158,11,0.2)', color: '#F59E0B' }}>
                                     W
                                   </span>
                                 )}
@@ -1289,22 +1289,22 @@ const GroupsKnockoutDraw = ({ data, onViewMatchDetails, categoryFormat, dbMatche
                               <div
                                 className="flex items-center justify-between px-3 py-2 rounded-lg transition-all"
                                 style={isPlayer2Winner
-                                  ? { background: 'rgba(6,182,212,0.12)', border: '2px solid rgba(6,182,212,0.4)' }
+                                  ? { background: 'rgba(245,158,11,0.12)', border: '2px solid rgba(245,158,11,0.4)' }
                                   : { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.05)' }}
                               >
                                 <div className="flex items-center gap-2 flex-1 min-w-0">
                                   {isPlayer2Winner && (
-                                    <Trophy className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#06b6d4' }} />
+                                    <Trophy className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#F59E0B' }} />
                                   )}
                                   <span
                                     className="text-sm font-medium truncate"
-                                    style={{ color: isPlayer2Winner ? '#06b6d4' : player2Name === 'TBD' ? '#6b7280' : '#fff', fontStyle: player2Name === 'TBD' && !isPlayer2Winner ? 'italic' : 'normal' }}
+                                    style={{ color: isPlayer2Winner ? '#F59E0B' : player2Name === 'TBD' ? '#6b7280' : '#fff', fontStyle: player2Name === 'TBD' && !isPlayer2Winner ? 'italic' : 'normal' }}
                                   >
                                     {player2Name}
                                   </span>
                                 </div>
                                 {isPlayer2Winner && (
-                                  <span className="ml-2 px-1.5 py-0.5 rounded text-xs font-bold" style={{ background: 'rgba(6,182,212,0.2)', color: '#06b6d4' }}>
+                                  <span className="ml-2 px-1.5 py-0.5 rounded text-xs font-bold" style={{ background: 'rgba(245,158,11,0.2)', color: '#F59E0B' }}>
                                     W
                                   </span>
                                 )}
@@ -1335,7 +1335,7 @@ const GroupsKnockoutDraw = ({ data, onViewMatchDetails, categoryFormat, dbMatche
                                     onViewMatchDetails(matchDataToUse, bracketMatchData);
                                   }}
                                   className="w-full py-2 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all"
-                                  style={{ background: 'rgba(0,212,255,0.1)', border: '1px solid rgba(0,212,255,0.3)', color: '#00d4ff' }}
+                                  style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)', color: '#FCD34D' }}
                                 >
                                   <Eye className="w-3.5 h-3.5" />
                                   View Score
@@ -1399,3 +1399,4 @@ const getDetailedSetScores = (scoreData, playerNumber) => {
 };
 
 export default PlayerViewDrawsPage;
+

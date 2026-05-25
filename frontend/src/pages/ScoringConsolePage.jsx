@@ -1,4 +1,4 @@
-import { getErrorMessage } from '../utils/errorMessage';
+﻿import { getErrorMessage } from '../utils/errorMessage';
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getMatch, startMatch, addPoint, undoLastPoint, pauseTimer, resumeTimer } from '../api/matches';
@@ -189,7 +189,7 @@ const ScoringConsolePage = () => {
         <div className="text-center">
           <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
           <p className="text-gray-400">Match not found</p>
-          <button onClick={() => navigate('/dashboard')} className="mt-4" style={{ color: '#06b6d4' }}>Go Back</button>
+          <button onClick={() => navigate('/dashboard')} className="mt-4" style={{ color: '#F59E0B' }}>Go Back</button>
         </div>
       </div>
     );
@@ -213,7 +213,7 @@ const ScoringConsolePage = () => {
                 <span className="text-sm font-semibold">LIVE</span>
               </div>
             )}
-            <button onClick={fetchMatch} disabled={processing} className="flex items-center gap-2 disabled:text-gray-500" style={{ color: '#06b6d4' }}>
+            <button onClick={fetchMatch} disabled={processing} className="flex items-center gap-2 disabled:text-gray-500" style={{ color: '#F59E0B' }}>
               <RefreshCw className={`w-5 h-5 ${processing ? 'animate-spin' : ''}`} /><span>Refresh</span>
             </button>
           </div>
@@ -232,8 +232,8 @@ const ScoringConsolePage = () => {
             <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Points</p>
             <p className="text-white font-bold">{matchConfig.pointsPerSet}</p>
           </div>
-          <div className="rounded-xl p-3 text-center" style={{ background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.2)' }}>
-            <Clock className="w-4 h-4 mx-auto mb-1" style={{ color: '#22D3EE' }} />
+          <div className="rounded-xl p-3 text-center" style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)' }}>
+            <Clock className="w-4 h-4 mx-auto mb-1" style={{ color: '#FCD34D' }} />
             <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Sets</p>
             <p className="text-white font-bold">{matchConfig.maxSets === 1 ? '1 Set' : `Best of ${matchConfig.maxSets}`}</p>
           </div>
@@ -274,7 +274,7 @@ const ScoringConsolePage = () => {
             <h2 className="text-3xl font-black mb-2" style={{ color: '#FCD34D' }}>🏆 Match Complete! 🏆</h2>
             <p className="text-xl font-bold mb-3 text-white">{winner === 'player1' ? player1Name : player2Name} wins!</p>
             {score?.timer && (
-              <div className="mt-4 pt-4" style={{ borderTop: '1px solid rgba(6,182,212,0.2)' }}>
+              <div className="mt-4 pt-4" style={{ borderTop: '1px solid rgba(245,158,11,0.2)' }}>
                 <p className="text-gray-400 text-sm">Match Duration</p>
                 <p className="text-white font-bold text-lg">
                   {score.timer.totalDurationFormatted || formatMatchDuration(score.timer)}
@@ -333,7 +333,7 @@ const ScoringConsolePage = () => {
                 <div key={score.history.length - index} className="flex items-center justify-between p-3 rounded-lg" style={{ background: 'rgba(255,255,255,0.05)' }}>
                   <div className="flex items-center gap-3">
                     <span className="text-sm font-semibold text-gray-500">#{score.history.length - index}</span>
-                    <span className="font-semibold" style={{ color: point.player === 'player1' ? '#00d4ff' : '#a855f7' }}>{point.player === 'player1' ? player1Name : player2Name}</span>
+                    <span className="font-semibold" style={{ color: point.player === 'player1' ? '#FCD34D' : '#a855f7' }}>{point.player === 'player1' ? player1Name : player2Name}</span>
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-mono text-white">{point.score.player1} - {point.score.player2}</p>
@@ -352,3 +352,4 @@ const ScoringConsolePage = () => {
 };
 
 export default ScoringConsolePage;
+

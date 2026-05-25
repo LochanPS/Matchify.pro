@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+﻿import { useState, useRef } from 'react';
 import { PhotoIcon, XMarkIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline';
 import { AlertTriangle, ImageIcon, X, Image } from 'lucide-react';
 
@@ -79,7 +79,7 @@ const PostersStep = ({ formData, updateFormData, onNext, onPrev }) => {
         <h2 
           className="text-xl font-black mb-1.5"
           style={{
-            background: 'linear-gradient(135deg, #06b6d4, #34d399)',
+            background: 'linear-gradient(135deg, #F59E0B, #34d399)',
             WebkitBackgroundClip: 'text',
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text'
@@ -295,3 +295,4 @@ const PostersStep = ({ formData, updateFormData, onNext, onPrev }) => {
 };
 
 export default PostersStep;
+

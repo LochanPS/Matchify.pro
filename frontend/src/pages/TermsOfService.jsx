@@ -1,11 +1,11 @@
-import { Link } from 'react-router-dom';
+﻿import { Link } from 'react-router-dom';
 import { ArrowLeftIcon, ScaleIcon, ShieldCheckIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
 
 const TermsOfService = () => {
   return (
     <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #0a0a1f 0%, #050810 30%, #0d1a2a 60%, #050810 100%)' }}>
       {/* Header */}
-      <div className="border-b relative" style={{ borderColor: 'rgba(6,182,212,0.3)', background: 'linear-gradient(135deg, rgba(7,7,26,0.95), rgba(13,26,42,0.95))' }}>
+      <div className="border-b relative" style={{ borderColor: 'rgba(245,158,11,0.3)', background: 'linear-gradient(135deg, rgba(7,7,26,0.95), rgba(13,26,42,0.95))' }}>
         <div className="max-w-5xl mx-auto px-4 py-8">
           <Link 
             to="/register" 
@@ -16,7 +16,7 @@ const TermsOfService = () => {
           </Link>
           
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #0891b2, #06b6d4)' }}>
+            <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #D97706, #F59E0B)' }}>
               <ScaleIcon className="w-8 h-8 text-white" />
             </div>
             <div>
@@ -33,10 +33,10 @@ const TermsOfService = () => {
 
       {/* Content */}
       <div className="max-w-5xl mx-auto px-4 py-12">
-        <div className="rounded-2xl border p-8 space-y-8" style={{ background: 'rgba(13,26,42,0.6)', borderColor: 'rgba(6,182,212,0.2)' }}>
+        <div className="rounded-2xl border p-8 space-y-8" style={{ background: 'rgba(13,26,42,0.6)', borderColor: 'rgba(245,158,11,0.2)' }}>
           
           {/* Important Notice */}
-          <div className="rounded-xl p-6" style={{ background: 'linear-gradient(135deg, rgba(6,182,212,0.15), rgba(6,182,212,0.1))', border: '2px solid rgba(6,182,212,0.3)' }}>
+          <div className="rounded-xl p-6" style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.15), rgba(245,158,11,0.1))', border: '2px solid rgba(245,158,11,0.3)' }}>
             <div className="flex items-start gap-3">
               <ShieldCheckIcon className="w-6 h-6 text-emerald-400 flex-shrink-0 mt-1" />
               <div>
@@ -125,7 +125,7 @@ const TermsOfService = () => {
               
               <p className="font-semibold text-white">4.2 Payment Split Structure</p>
               <p>Tournament entry fees are distributed as follows:</p>
-              <ul className="list-disc list-inside space-y-2 ml-4 rounded-lg p-4" style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(6,182,212,0.2)' }}>
+              <ul className="list-disc list-inside space-y-2 ml-4 rounded-lg p-4" style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(245,158,11,0.2)' }}>
                 <li><span className="text-emerald-400 font-semibold">30%</span> - Paid to organizer before tournament starts</li>
                 <li><span className="text-cyan-400 font-semibold">67%</span> - Paid to organizer after tournament completion</li>
                 <li><span className="text-purple-400 font-semibold">3%</span> - Platform service fee retained by Matchify.pro</li>
@@ -366,7 +366,7 @@ const TermsOfService = () => {
             <div className="text-gray-300 space-y-3 leading-relaxed">
               <p>If you have questions about these Terms of Service, please contact us:</p>
               
-              <div className="rounded-xl p-6" style={{ background: 'linear-gradient(135deg, rgba(6,182,212,0.15), rgba(6,182,212,0.1))', border: '2px solid rgba(6,182,212,0.3)' }}>
+              <div className="rounded-xl p-6" style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.15), rgba(245,158,11,0.1))', border: '2px solid rgba(245,158,11,0.3)' }}>
                 <p className="font-semibold text-white mb-3">📧 Contact Information:</p>
                 <ul className="space-y-2 text-sm">
                   <li><strong>Email:</strong> <a href="mailto:support@matchify.pro" className="text-emerald-400 underline">support@matchify.pro</a></li>
@@ -395,7 +395,7 @@ const TermsOfService = () => {
           <Link 
             to="/register" 
             className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all"
-            style={{ background: 'linear-gradient(135deg, #0891b2, #06b6d4)', color: '#050810' }}
+            style={{ background: 'linear-gradient(135deg, #D97706, #F59E0B)', color: '#050810' }}
           >
             <ArrowLeftIcon className="w-5 h-5" />
             Back to Registration
@@ -407,3 +407,4 @@ const TermsOfService = () => {
 };
 
 export default TermsOfService;
+

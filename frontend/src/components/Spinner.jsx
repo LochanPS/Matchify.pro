@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Spinner — the universal loading indicator used app-wide.
  *
  * Renders the same dual-ring + glowing center animation as LoadingScreen,
@@ -51,8 +51,8 @@ const Spinner = ({ size = 'md', className = '', style = {} }) => {
       <span style={{
         position: 'absolute', inset: 0, borderRadius: '50%',
         border: `${s.outerB}px solid transparent`,
-        borderTopColor: '#06b6d4',
-        borderRightColor: 'rgba(6,182,212,0.30)',
+        borderTopColor: '#F59E0B',
+        borderRightColor: 'rgba(245,158,11,0.30)',
         animation: '_sp_out 1.1s linear infinite',
       }} />
 
@@ -74,8 +74,8 @@ const Spinner = ({ size = 'md', className = '', style = {} }) => {
         top: dotOff, left: dotOff,
         width: s.dot, height: s.dot,
         borderRadius: '50%',
-        background: 'radial-gradient(circle, #22d3ee, #0891b2)',
-        boxShadow: `0 0 ${s.dot}px rgba(6,182,212,0.85)`,
+        background: 'radial-gradient(circle, #FCD34D, #D97706)',
+        boxShadow: `0 0 ${s.dot}px rgba(245,158,11,0.85)`,
         animation: '_sp_dot 1.6s ease-in-out infinite',
       }} />
     </span>
@@ -83,3 +83,4 @@ const Spinner = ({ size = 'md', className = '', style = {} }) => {
 };
 
 export default Spinner;
+

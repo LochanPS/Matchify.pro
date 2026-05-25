@@ -111,7 +111,7 @@ function AvailabilityEditor({ availability, onSave, saving }) {
         onClick={() => onSave(avail)}
         disabled={saving}
         className="w-full py-3.5 rounded-2xl font-black text-sm"
-        style={{ background: saving ? B.card2 : `linear-gradient(135deg, ${B.green}, #0891b2)`, color: saving ? B.muted : '#000' }}
+        style={{ background: saving ? B.card2 : `linear-gradient(135deg, ${B.green}, #D97706)`, color: saving ? B.muted : '#000' }}
       >
         {saving ? 'Saving…' : 'Save Availability'}
       </button>
@@ -411,7 +411,7 @@ export default function ManageCourtsPage() {
 
         {loading ? (
           <div className="flex justify-center py-12">
-            <div style={{ width: 36, height: 36, borderRadius: '50%', border: '3px solid rgba(0,212,255,0.15)', borderTopColor: B.cyan, animation: 'spin 0.7s linear infinite' }} />
+            <div style={{ width: 36, height: 36, borderRadius: '50%', border: '3px solid rgba(245,158,11,0.15)', borderTopColor: B.cyan, animation: 'spin 0.7s linear infinite' }} />
             <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
           </div>
         ) : courts.length === 0 ? (
@@ -455,4 +455,5 @@ export default function ManageCourtsPage() {
     </div>
   );
 }
+
 

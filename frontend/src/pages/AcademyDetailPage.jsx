@@ -20,34 +20,34 @@ const B = {
 };
 
 const SPORT_META = {
-  Badminton:      { emoji: '🏸', color: '#06b6d4', bg: 'rgba(6,182,212,0.12)',    border: 'rgba(6,182,212,0.25)',   unit: 'Courts' },
-  Tennis:         { emoji: '🎾', color: '#00d4ff', bg: 'rgba(0,212,255,0.12)',    border: 'rgba(0,212,255,0.25)',   unit: 'Courts' },
+  Badminton:      { emoji: '🏸', color: '#F59E0B', bg: 'rgba(245,158,11,0.12)',    border: 'rgba(245,158,11,0.25)',   unit: 'Courts' },
+  Tennis:         { emoji: '🎾', color: '#FCD34D', bg: 'rgba(245,158,11,0.12)',    border: 'rgba(245,158,11,0.25)',   unit: 'Courts' },
   'Table Tennis': { emoji: '🏓', color: '#a855f7', bg: 'rgba(168,85,247,0.12)',   border: 'rgba(168,85,247,0.25)',  unit: 'Tables' },
   Squash:         { emoji: '🎱', color: '#fbbf24', bg: 'rgba(251,191,36,0.12)',   border: 'rgba(251,191,36,0.25)',  unit: 'Courts' },
   Basketball:     { emoji: '🏀', color: '#f97316', bg: 'rgba(249,115,22,0.12)',   border: 'rgba(249,115,22,0.25)',  unit: 'Courts' },
   Volleyball:     { emoji: '🏐', color: '#ec4899', bg: 'rgba(236,72,153,0.12)',   border: 'rgba(236,72,153,0.25)',  unit: 'Courts' },
   Swimming:       { emoji: '🏊', color: '#38bdf8', bg: 'rgba(56,189,248,0.12)',   border: 'rgba(56,189,248,0.25)',  unit: '' },
   Cricket:        { emoji: '🏏', color: '#a3e635', bg: 'rgba(163,230,53,0.12)',   border: 'rgba(163,230,53,0.25)',  unit: '' },
-  Football:       { emoji: '⚽', color: '#22d3ee', bg: 'rgba(52,211,153,0.12)',   border: 'rgba(52,211,153,0.25)',  unit: '' },
+  Football:       { emoji: '⚽', color: '#FCD34D', bg: 'rgba(52,211,153,0.12)',   border: 'rgba(52,211,153,0.25)',  unit: '' },
   Gym:            { emoji: '💪', color: '#fb7185', bg: 'rgba(251,113,133,0.12)',  border: 'rgba(251,113,133,0.25)', unit: '' },
   Yoga:           { emoji: '🧘', color: '#c084fc', bg: 'rgba(192,132,252,0.12)',  border: 'rgba(192,132,252,0.25)', unit: '' },
   Athletics:      { emoji: '🏃', color: '#fdba74', bg: 'rgba(253,186,116,0.12)', border: 'rgba(253,186,116,0.25)', unit: '' },
 };
 
 const SPORT_GRADIENT = {
-  Badminton:      'linear-gradient(135deg,rgba(6,182,212,0.22),rgba(0,212,255,0.1))',
-  Tennis:         'linear-gradient(135deg,rgba(0,212,255,0.22),rgba(168,85,247,0.1))',
-  'Table Tennis': 'linear-gradient(135deg,rgba(168,85,247,0.22),rgba(0,212,255,0.1))',
+  Badminton:      'linear-gradient(135deg,rgba(245,158,11,0.22),rgba(245,158,11,0.1))',
+  Tennis:         'linear-gradient(135deg,rgba(245,158,11,0.22),rgba(168,85,247,0.1))',
+  'Table Tennis': 'linear-gradient(135deg,rgba(168,85,247,0.22),rgba(245,158,11,0.1))',
   Squash:         'linear-gradient(135deg,rgba(251,191,36,0.22),rgba(249,115,22,0.1))',
   Basketball:     'linear-gradient(135deg,rgba(249,115,22,0.22),rgba(251,191,36,0.1))',
   Volleyball:     'linear-gradient(135deg,rgba(236,72,153,0.22),rgba(168,85,247,0.1))',
-  Swimming:       'linear-gradient(135deg,rgba(56,189,248,0.22),rgba(0,212,255,0.1))',
+  Swimming:       'linear-gradient(135deg,rgba(56,189,248,0.22),rgba(245,158,11,0.1))',
   Cricket:        'linear-gradient(135deg,rgba(163,230,53,0.22),rgba(52,211,153,0.1))',
   Football:       'linear-gradient(135deg,rgba(52,211,153,0.22),rgba(163,230,53,0.1))',
   Gym:            'linear-gradient(135deg,rgba(251,113,133,0.22),rgba(168,85,247,0.1))',
   Yoga:           'linear-gradient(135deg,rgba(192,132,252,0.22),rgba(56,189,248,0.1))',
   Athletics:      'linear-gradient(135deg,rgba(253,186,116,0.22),rgba(251,113,133,0.1))',
-  default:        'linear-gradient(135deg,rgba(0,212,255,0.15),rgba(168,85,247,0.1))',
+  default:        'linear-gradient(135deg,rgba(245,158,11,0.15),rgba(168,85,247,0.1))',
 };
 
 const AMENITY_LABELS = {
@@ -136,7 +136,7 @@ export default function AcademyDetailPage() {
         </p>
         <button onClick={() => navigate('/academies')}
           className="px-6 py-3 rounded-xl text-sm font-black"
-          style={{ background: 'rgba(6,182,212,0.12)', color: B.green, border: '1px solid rgba(6,182,212,0.25)' }}>
+          style={{ background: 'rgba(245,158,11,0.12)', color: B.green, border: '1px solid rgba(245,158,11,0.25)' }}>
           Back to Academies
         </button>
       </div>
@@ -230,7 +230,7 @@ export default function AcademyDetailPage() {
                   className="rounded-full transition-all"
                   style={{
                     width: i === lightboxIndex ? 20 : 7, height: 7,
-                    background: i === lightboxIndex ? '#22d3ee' : 'rgba(255,255,255,0.35)',
+                    background: i === lightboxIndex ? '#FCD34D' : 'rgba(255,255,255,0.35)',
                   }} />
               ))}
             </div>
@@ -320,7 +320,7 @@ export default function AcademyDetailPage() {
         {/* Verified badge */}
         {academy.isVerified && (
           <div className="absolute top-4 right-4 flex items-center gap-1.5 px-3 py-1.5 rounded-full"
-            style={{ background: 'rgba(6,182,212,0.92)', backdropFilter: 'blur(6px)' }}>
+            style={{ background: 'rgba(245,158,11,0.92)', backdropFilter: 'blur(6px)' }}>
             <BadgeCheck className="w-3.5 h-3.5" style={{ color: '#050810' }} />
             <span className="text-xs font-black" style={{ color: '#050810' }}>Verified</span>
           </div>
@@ -398,7 +398,7 @@ export default function AcademyDetailPage() {
         <Section title="Location" accent={B.cyan}>
           <div className="flex items-start gap-3">
             <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"
-              style={{ background: 'rgba(0,212,255,0.1)', border: '1px solid rgba(0,212,255,0.2)' }}>
+              style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)' }}>
               <MapPin className="w-4 h-4" style={{ color: B.cyan }} />
             </div>
             <div>
@@ -478,7 +478,7 @@ export default function AcademyDetailPage() {
               {courts.map(court => (
                 <div key={court.id}
                   className="rounded-xl overflow-hidden"
-                  style={{ background: 'rgba(0,212,255,0.05)', border: '1px solid rgba(0,212,255,0.15)' }}>
+                  style={{ background: 'rgba(245,158,11,0.05)', border: '1px solid rgba(245,158,11,0.15)' }}>
                   <div className="p-3 flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-2xl"
                       style={{ background: SPORT_META[court.sport]?.bg || 'rgba(255,255,255,0.06)' }}>
@@ -500,7 +500,7 @@ export default function AcademyDetailPage() {
                         navigate(`/academies/${id}/courts/${court.id}/book`);
                       }}
                       className="w-full py-2.5 rounded-xl text-xs font-black flex items-center justify-center gap-1.5 transition-all active:scale-[0.98]"
-                      style={{ background: 'rgba(0,212,255,0.15)', color: B.cyan, border: '1px solid rgba(0,212,255,0.25)' }}
+                      style={{ background: 'rgba(245,158,11,0.15)', color: B.cyan, border: '1px solid rgba(245,158,11,0.25)' }}
                     >
                       <Calendar className="w-3.5 h-3.5" />
                       Check Availability & Book
@@ -518,13 +518,13 @@ export default function AcademyDetailPage() {
             {academy.phone && (
               <a href={`tel:${academy.phone}`}
                 className="flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all active:scale-[0.98]"
-                style={{ background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.2)' }}>
+                style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)' }}>
                 <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                  style={{ background: 'rgba(6,182,212,0.15)' }}>
+                  style={{ background: 'rgba(245,158,11,0.15)' }}>
                   <Phone className="w-4 h-4" style={{ color: B.green }} />
                 </div>
                 <div className="flex-1">
-                  <p className="text-xs font-bold mb-0.5" style={{ color: 'rgba(6,182,212,0.6)' }}>Phone</p>
+                  <p className="text-xs font-bold mb-0.5" style={{ color: 'rgba(245,158,11,0.6)' }}>Phone</p>
                   <p className="text-sm font-black text-white">{academy.phone}</p>
                 </div>
               </a>
@@ -547,13 +547,13 @@ export default function AcademyDetailPage() {
             {academy.email && (
               <a href={`mailto:${academy.email}`}
                 className="flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all active:scale-[0.98]"
-                style={{ background: 'rgba(0,212,255,0.08)', border: '1px solid rgba(0,212,255,0.2)' }}>
+                style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)' }}>
                 <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                  style={{ background: 'rgba(0,212,255,0.15)' }}>
+                  style={{ background: 'rgba(245,158,11,0.15)' }}>
                   <Mail className="w-4 h-4" style={{ color: B.cyan }} />
                 </div>
                 <div className="flex-1">
-                  <p className="text-xs font-bold mb-0.5" style={{ color: 'rgba(0,212,255,0.6)' }}>Email</p>
+                  <p className="text-xs font-bold mb-0.5" style={{ color: 'rgba(245,158,11,0.6)' }}>Email</p>
                   <p className="text-sm font-black text-white">{academy.email}</p>
                 </div>
               </a>
@@ -597,7 +597,7 @@ export default function AcademyDetailPage() {
         <button
           onClick={() => navigate('/academies/add')}
           className="w-full py-4 rounded-2xl text-sm font-black flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
-          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(6,182,212,0.18)', color: B.green }}>
+          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(245,158,11,0.18)', color: B.green }}>
           <Building2 className="w-4 h-4" />
           Own an academy? List it for ₹300
         </button>
@@ -637,10 +637,10 @@ export default function AcademyDetailPage() {
               onClick={() => navigate(`/academies/${id}/edit`)}
               className="flex-1 py-3.5 rounded-2xl text-sm font-black flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
               style={{
-                background: 'linear-gradient(135deg, rgba(6,182,212,0.22), rgba(34,211,238,0.10))',
-                border: '1px solid rgba(6,182,212,0.45)',
-                color: '#22d3ee',
-                boxShadow: '0 0 20px rgba(6,182,212,0.20)',
+                background: 'linear-gradient(135deg, rgba(245,158,11,0.22), rgba(34,211,238,0.10))',
+                border: '1px solid rgba(245,158,11,0.45)',
+                color: '#FCD34D',
+                boxShadow: '0 0 20px rgba(245,158,11,0.20)',
               }}>
               <Pencil className="w-4 h-4" />
               Edit Academy
@@ -672,4 +672,5 @@ export default function AcademyDetailPage() {
     </div>
   );
 }
+
 

@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { MapPin, Gavel, Hash } from 'lucide-react';
 
 const MatchInfo = ({ match }) => {
@@ -14,7 +14,7 @@ const MatchInfo = ({ match }) => {
       'READY':       { bg: 'rgba(245,158,11,0.12)',  border: 'rgba(245,158,11,0.3)',  color: '#FCD34D', label: 'Ready' },
       'ONGOING':     { bg: 'rgba(16,185,129,0.12)',  border: 'rgba(16,185,129,0.35)', color: '#34D399', label: '● Live' },
       'IN_PROGRESS': { bg: 'rgba(16,185,129,0.12)',  border: 'rgba(16,185,129,0.35)', color: '#34D399', label: '● Live' },
-      'COMPLETED':   { bg: 'rgba(6,182,212,0.1)',    border: 'rgba(6,182,212,0.25)',  color: '#67E8F9', label: 'Completed' },
+      'COMPLETED':   { bg: 'rgba(245,158,11,0.1)',    border: 'rgba(245,158,11,0.25)',  color: '#67E8F9', label: 'Completed' },
       'CANCELLED':   { bg: 'rgba(239,68,68,0.12)',   border: 'rgba(239,68,68,0.3)',   color: '#F87171', label: 'Cancelled' },
     };
     return map[status] || map['PENDING'];
@@ -180,3 +180,4 @@ const MatchInfo = ({ match }) => {
 };
 
 export default MatchInfo;
+

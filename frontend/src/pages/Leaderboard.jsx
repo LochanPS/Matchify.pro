@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import { useAuth } from '../contexts/AuthContext';
@@ -120,7 +120,7 @@ export default function Leaderboard() {
       {/* Dark overlay */}
       <div className="fixed inset-0 pointer-events-none" style={{ background: 'rgba(5,8,16,0.72)', zIndex: 0 }} />
       {/* Static blobs */}
-      <div className="fixed pointer-events-none" style={{ top:'10%', right:'-10%', width:'320px', height:'320px', borderRadius:'50%', background:'radial-gradient(circle, rgba(6,182,212,0.07) 0%, transparent 70%)', zIndex:0 }} />
+      <div className="fixed pointer-events-none" style={{ top:'10%', right:'-10%', width:'320px', height:'320px', borderRadius:'50%', background:'radial-gradient(circle, rgba(245,158,11,0.07) 0%, transparent 70%)', zIndex:0 }} />
       <div className="fixed pointer-events-none" style={{ bottom:'15%', left:'-8%', width:'280px', height:'280px', borderRadius:'50%', background:'radial-gradient(circle, rgba(139,92,246,0.06) 0%, transparent 70%)', zIndex:0 }} />
 
       <div className="relative z-10 max-w-2xl mx-auto px-4 py-6">
@@ -137,7 +137,7 @@ export default function Leaderboard() {
             <h1
               className="text-2xl font-black"
               style={{
-                background: 'linear-gradient(135deg,#06b6d4,#00d4ff,#a855f7)',
+                background: 'linear-gradient(135deg,#F59E0B,#FCD34D,#a855f7)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
@@ -162,7 +162,7 @@ export default function Leaderboard() {
                 className="px-3 py-2 rounded-xl font-bold text-xs transition-all flex-shrink-0"
                 style={
                   scope === key
-                    ? { background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#fff', boxShadow: '0 0 14px rgba(6,182,212,0.25)' }
+                    ? { background: 'linear-gradient(135deg,#F59E0B,#FCD34D)', color: '#fff', boxShadow: '0 0 14px rgba(245,158,11,0.25)' }
                     : { background: 'rgba(255,255,255,0.06)', color: B.sub, border: '1px solid rgba(255,255,255,0.1)' }
                 }
               >
@@ -184,13 +184,13 @@ export default function Leaderboard() {
         {myRanks && (
           <div
             className="mb-4 rounded-xl p-3 border"
-            style={{ background: 'rgba(6,182,212,0.05)', borderColor: 'rgba(6,182,212,0.15)' }}
+            style={{ background: 'rgba(245,158,11,0.05)', borderColor: 'rgba(245,158,11,0.15)' }}
           >
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
                 <div
                   className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
-                  style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)' }}
+                  style={{ background: 'linear-gradient(135deg,#F59E0B,#FCD34D)' }}
                 >
                   {myRanks.profilePhoto ? (
                     <img src={myRanks.profilePhoto} alt={myRanks.name} className="w-full h-full rounded-full object-cover" />
@@ -307,7 +307,7 @@ export default function Leaderboard() {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b" style={{ background: 'rgba(6,182,212,0.07)', borderColor: 'rgba(255,255,255,0.08)' }}>
+                  <tr className="border-b" style={{ background: 'rgba(245,158,11,0.07)', borderColor: 'rgba(255,255,255,0.08)' }}>
                     <th className="px-3 py-3 text-left text-xs font-bold uppercase tracking-wider" style={{ color: B.green }}>Rank</th>
                     <th className="px-3 py-3 text-left text-xs font-bold uppercase tracking-wider" style={{ color: B.green }}>Player</th>
                     <th className="px-3 py-3 text-center text-xs font-bold uppercase tracking-wider" style={{ color: B.green }}>Points</th>
@@ -321,7 +321,7 @@ export default function Leaderboard() {
                       className="border-b transition-all cursor-pointer hover:bg-white/5"
                       style={{
                         borderColor: 'rgba(255,255,255,0.04)',
-                        background: myRanks?.id === player.id ? 'rgba(6,182,212,0.07)' : 'transparent',
+                        background: myRanks?.id === player.id ? 'rgba(245,158,11,0.07)' : 'transparent',
                       }}
                       onClick={() => setSelectedPlayer(player)}
                     >
@@ -335,7 +335,7 @@ export default function Leaderboard() {
                         <div className="flex items-center gap-2.5">
                           <div
                             className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-                            style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', boxShadow: '0 0 0 2px rgba(6,182,212,0.25)' }}
+                            style={{ background: 'linear-gradient(135deg,#F59E0B,#FCD34D)', boxShadow: '0 0 0 2px rgba(245,158,11,0.25)' }}
                           >
                             {player.profilePhoto ? (
                               <img src={player.profilePhoto} alt={player.name} className="w-full h-full rounded-full object-cover" />
@@ -373,7 +373,7 @@ export default function Leaderboard() {
             <button
               onClick={() => setLimit(limit + 50)}
               className="px-8 py-3 rounded-xl font-bold transition-all"
-              style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#050810', boxShadow: '0 0 20px rgba(6,182,212,0.3)' }}
+              style={{ background: 'linear-gradient(135deg,#F59E0B,#FCD34D)', color: '#050810', boxShadow: '0 0 20px rgba(245,158,11,0.3)' }}
             >
               Load More Players
             </button>
@@ -423,13 +423,13 @@ export default function Leaderboard() {
           className="w-full max-w-sm rounded-3xl overflow-hidden"
           style={{
             background: 'linear-gradient(160deg, #0d1025 0%, #050810 100%)',
-            border: '1px solid rgba(6,182,212,0.25)',
-            boxShadow: '0 0 60px rgba(6,182,212,0.12)',
+            border: '1px solid rgba(245,158,11,0.25)',
+            boxShadow: '0 0 60px rgba(245,158,11,0.12)',
           }}
           onClick={e => e.stopPropagation()}
         >
           {/* Green accent bar */}
-          <div className="h-1 w-full" style={{ background: 'linear-gradient(90deg,#06b6d4,#00d4ff)' }} />
+          <div className="h-1 w-full" style={{ background: 'linear-gradient(90deg,#F59E0B,#FCD34D)' }} />
 
           <div className="p-6">
             {/* Photo + name */}
@@ -437,9 +437,9 @@ export default function Leaderboard() {
               <div
                 className="w-24 h-24 rounded-3xl overflow-hidden mb-3 flex items-center justify-center"
                 style={{
-                  background: 'linear-gradient(135deg,#06b6d4,#00d4ff)',
-                  boxShadow: '0 0 32px rgba(6,182,212,0.35)',
-                  border: '2px solid rgba(6,182,212,0.4)',
+                  background: 'linear-gradient(135deg,#F59E0B,#FCD34D)',
+                  boxShadow: '0 0 32px rgba(245,158,11,0.35)',
+                  border: '2px solid rgba(245,158,11,0.4)',
                 }}
               >
                 {selectedPlayer.profilePhoto ? (
@@ -457,7 +457,7 @@ export default function Leaderboard() {
               {/* Rank badge */}
               <div
                 className="mt-2 px-3 py-1 rounded-full text-xs font-black"
-                style={{ background: 'rgba(6,182,212,0.15)', border: '1px solid rgba(6,182,212,0.35)', color: '#06b6d4' }}
+                style={{ background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.35)', color: '#F59E0B' }}
               >
                 #{selectedPlayer.rank} on Leaderboard
               </div>
@@ -469,14 +469,14 @@ export default function Leaderboard() {
               {selectedPlayer.matchifyCode && (
                 <div
                   className="flex items-center gap-3 px-4 py-3 rounded-2xl"
-                  style={{ background: 'rgba(0,212,255,0.08)', border: '1px solid rgba(0,212,255,0.2)' }}
+                  style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)' }}
                 >
                   <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
-                    style={{ background: 'rgba(0,212,255,0.15)' }}>
+                    style={{ background: 'rgba(245,158,11,0.15)' }}>
                     <Star className="w-4 h-4" style={{ color: B.cyan }} />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[10px] font-bold uppercase tracking-wider mb-0.5" style={{ color: 'rgba(0,212,255,0.6)' }}>Matchify ID</p>
+                    <p className="text-[10px] font-bold uppercase tracking-wider mb-0.5" style={{ color: 'rgba(245,158,11,0.6)' }}>Matchify ID</p>
                     <p className="text-sm font-black" style={{ color: B.cyan }}>{selectedPlayer.matchifyCode}</p>
                   </div>
                 </div>
@@ -486,14 +486,14 @@ export default function Leaderboard() {
               {(selectedPlayer.phone || selectedPlayer.email) && (
                 <div
                   className="flex items-center gap-3 px-4 py-3 rounded-2xl"
-                  style={{ background: 'rgba(6,182,212,0.06)', border: '1px solid rgba(6,182,212,0.15)' }}
+                  style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.15)' }}
                 >
                   <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
-                    style={{ background: 'rgba(6,182,212,0.12)' }}>
+                    style={{ background: 'rgba(245,158,11,0.12)' }}>
                     <Globe className="w-4 h-4" style={{ color: B.green }} />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[10px] font-bold uppercase tracking-wider mb-0.5" style={{ color: 'rgba(6,182,212,0.55)' }}>
+                    <p className="text-[10px] font-bold uppercase tracking-wider mb-0.5" style={{ color: 'rgba(245,158,11,0.55)' }}>
                       {selectedPlayer.phone ? 'Phone' : 'Email'}
                     </p>
                     <p className="text-sm font-bold text-white truncate">
@@ -537,3 +537,4 @@ export default function Leaderboard() {
     </>
   );
 }
+

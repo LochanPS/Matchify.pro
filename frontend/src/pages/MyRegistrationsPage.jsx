@@ -158,19 +158,19 @@ export default function MyRegistrationsPage() {
     <div className="min-h-screen" style={{ background: '#050810' }}>
       {/* Background orbs */}
       <div className="fixed top-0 bottom-0 pointer-events-none overflow-hidden" style={{ left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: "480px" }}>
-        <div className="absolute top-1/4 left-1/4 w-80 h-80 rounded-full blur-3xl opacity-[0.06]" style={{ background: '#06b6d4' }} />
+        <div className="absolute top-1/4 left-1/4 w-80 h-80 rounded-full blur-3xl opacity-[0.06]" style={{ background: '#F59E0B' }} />
         <div className="absolute bottom-1/4 right-1/4 w-72 h-72 rounded-full blur-3xl opacity-[0.05]" style={{ background: '#a855f7' }} />
       </div>
 
       {/* Header */}
-      <div className="sticky top-0 z-20 border-b backdrop-blur-xl px-4 py-4" style={{ background: 'rgba(7,7,26,0.95)', borderColor: 'rgba(6,182,212,0.12)' }}>
+      <div className="sticky top-0 z-20 border-b backdrop-blur-xl px-4 py-4" style={{ background: 'rgba(7,7,26,0.95)', borderColor: 'rgba(245,158,11,0.12)' }}>
         <div className="max-w-2xl mx-auto flex items-center gap-4">
           <button onClick={() => navigate('/dashboard')} className="flex items-center gap-1.5">
-            <ArrowLeft className="w-5 h-5" style={{ color: '#06b6d4' }} />
+            <ArrowLeft className="w-5 h-5" style={{ color: '#F59E0B' }} />
             <span className="text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.6)' }}>Back</span>
           </button>
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', boxShadow: '0 0 16px rgba(6,182,212,0.25)' }}>
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg,#F59E0B,#FCD34D)', boxShadow: '0 0 16px rgba(245,158,11,0.25)' }}>
               <Trophy className="w-5 h-5" style={{ color: '#050810' }} />
             </div>
             <div>
@@ -192,7 +192,7 @@ export default function MyRegistrationsPage() {
                 className="flex-1 px-4 py-2.5 text-sm font-bold rounded-xl transition-all"
                 style={
                   filter === tab.key
-                    ? { background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#050810', boxShadow: '0 4px 15px rgba(6,182,212,0.25)' }
+                    ? { background: 'linear-gradient(135deg,#F59E0B,#FCD34D)', color: '#050810', boxShadow: '0 4px 15px rgba(245,158,11,0.25)' }
                     : { color: 'rgba(255,255,255,0.5)', background: 'transparent' }
                 }
               >
@@ -205,15 +205,15 @@ export default function MyRegistrationsPage() {
         {/* Registrations List */}
         {registrations.length === 0 ? (
           <div className="rounded-2xl p-12 text-center border" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}>
-            <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: 'rgba(6,182,212,0.1)', border: '1px solid rgba(6,182,212,0.2)' }}>
-              <Trophy className="w-8 h-8" style={{ color: '#06b6d4' }} />
+            <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)' }}>
+              <Trophy className="w-8 h-8" style={{ color: '#F59E0B' }} />
             </div>
             <h3 className="text-lg font-bold text-white mb-2">No registrations found</h3>
             <p className="text-sm mb-6" style={{ color: 'rgba(255,255,255,0.6)' }}>You haven't registered for any tournaments yet</p>
             <button
               onClick={() => navigate('/tournaments')}
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm"
-              style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#050810' }}
+              style={{ background: 'linear-gradient(135deg,#F59E0B,#FCD34D)', color: '#050810' }}
             >
               Browse Tournaments
               <ArrowRight className="w-4 h-4" />
@@ -231,8 +231,8 @@ export default function MyRegistrationsPage() {
                   className="rounded-2xl p-5 transition-all"
                   style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = 'rgba(6,182,212,0.25)';
-                    e.currentTarget.style.boxShadow = '0 4px 20px rgba(6,182,212,0.08)';
+                    e.currentTarget.style.borderColor = 'rgba(245,158,11,0.25)';
+                    e.currentTarget.style.boxShadow = '0 4px 20px rgba(245,158,11,0.08)';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
@@ -245,7 +245,7 @@ export default function MyRegistrationsPage() {
                       <Link
                         to={`/tournaments/${registration.tournament.id}`}
                         className="text-base font-bold text-white mb-3 block truncate transition-colors"
-                        onMouseEnter={(e) => e.currentTarget.style.color = '#06b6d4'}
+                        onMouseEnter={(e) => e.currentTarget.style.color = '#F59E0B'}
                         onMouseLeave={(e) => e.currentTarget.style.color = '#ffffff'}
                       >
                         {registration.tournament.name}
@@ -269,9 +269,9 @@ export default function MyRegistrationsPage() {
 
                       {/* Category */}
                       <div className="mb-3">
-                        <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl" style={{ background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.2)' }}>
+                        <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl" style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)' }}>
                           <span className="font-bold text-white text-sm">{registration.category.name}</span>
-                          <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: 'rgba(0,212,255,0.12)', color: '#00d4ff', border: '1px solid rgba(0,212,255,0.25)' }}>
+                          <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: 'rgba(245,158,11,0.12)', color: '#FCD34D', border: '1px solid rgba(245,158,11,0.25)' }}>
                             {registration.category.format} • {getGenderLabel(registration.category.gender)}
                           </span>
                         </span>
@@ -295,10 +295,10 @@ export default function MyRegistrationsPage() {
                             </div>
                           )}
                           {!registration.guestPartnerName && registration.partnerConfirmed && registration.partner && (
-                            <div className="flex items-center gap-1.5" style={{ color: '#06b6d4' }}>
+                            <div className="flex items-center gap-1.5" style={{ color: '#F59E0B' }}>
                               <Users className="h-4 w-4" />
                               <span className="text-xs font-semibold">{registration.partner.name}</span>
-                              <span className="ml-1 text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(6,182,212,0.12)', color: '#06b6d4', border: '1px solid rgba(6,182,212,0.25)' }}>Confirmed</span>
+                              <span className="ml-1 text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(245,158,11,0.12)', color: '#F59E0B', border: '1px solid rgba(245,158,11,0.25)' }}>Confirmed</span>
                             </div>
                           )}
                         </div>
@@ -344,7 +344,7 @@ export default function MyRegistrationsPage() {
                         <button
                           onClick={() => setShowRefundDetailsModal(registration)}
                           className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-xl font-bold"
-                          style={{ color: '#06b6d4', background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.25)' }}
+                          style={{ color: '#F59E0B', background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.25)' }}
                         >
                           <Upload className="h-3.5 w-3.5" />
                           Submit Refund Details
@@ -353,7 +353,7 @@ export default function MyRegistrationsPage() {
 
                       {/* Show status for rejected registrations with refund details submitted */}
                       {registration.status === 'rejected' && registration.refundUpiId && (
-                        <div className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-xl" style={{ color: '#06b6d4', background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.25)' }}>
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-xl" style={{ color: '#F59E0B', background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.25)' }}>
                           <CheckCircle className="h-3.5 w-3.5" />
                           Refund Details Submitted
                         </div>
@@ -362,7 +362,7 @@ export default function MyRegistrationsPage() {
                       <button
                         onClick={() => navigate(`/tournaments/${registration.tournament.id}`)}
                         className="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-xl font-bold"
-                        style={{ color: '#06b6d4', background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.25)' }}
+                        style={{ color: '#F59E0B', background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.25)' }}
                       >
                         View Tournament
                         <ArrowRight className="w-3.5 h-3.5" />
@@ -374,7 +374,7 @@ export default function MyRegistrationsPage() {
                   {registration.status === 'cancelled' && registration.refundAmount > 0 && (
                     <div className="mt-3 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
                       <div className="text-xs" style={{ color: 'rgba(255,255,255,0.55)' }}>
-                        Refund: <span className="font-bold" style={{ color: '#06b6d4' }}>₹{registration.refundAmount}</span>
+                        Refund: <span className="font-bold" style={{ color: '#F59E0B' }}>₹{registration.refundAmount}</span>
                         {' • '}
                         Status: <span className="font-bold text-white">{registration.refundStatus}</span>
                       </div>
@@ -476,14 +476,14 @@ export default function MyRegistrationsPage() {
                   onClick={() => qrCodeInputRef.current?.click()}
                   className="w-full px-4 py-4 border-2 border-dashed rounded-xl flex flex-col items-center justify-center gap-2 transition-all"
                   style={cancelForm.qrCode
-                    ? { borderColor: 'rgba(6,182,212,0.4)', background: 'rgba(6,182,212,0.06)' }
+                    ? { borderColor: 'rgba(245,158,11,0.4)', background: 'rgba(245,158,11,0.06)' }
                     : { borderColor: 'rgba(255,255,255,0.15)', background: 'rgba(0,0,0,0.15)' }}
                 >
                   {cancelForm.qrCode ? (
                     <>
-                      <CheckCircle className="h-7 w-7" style={{ color: '#06b6d4' }} />
-                      <span className="text-sm font-medium" style={{ color: '#06b6d4' }}>{cancelForm.qrCode.name}</span>
-                      <span className="text-xs" style={{ color: 'rgba(6,182,212,0.7)' }}>Click to change</span>
+                      <CheckCircle className="h-7 w-7" style={{ color: '#F59E0B' }} />
+                      <span className="text-sm font-medium" style={{ color: '#F59E0B' }}>{cancelForm.qrCode.name}</span>
+                      <span className="text-xs" style={{ color: 'rgba(245,158,11,0.7)' }}>Click to change</span>
                     </>
                   ) : (
                     <>
@@ -524,12 +524,12 @@ export default function MyRegistrationsPage() {
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="rounded-2xl shadow-2xl max-w-md w-full overflow-hidden" style={{ background: '#0d1025', border: '1px solid rgba(255,255,255,0.1)' }}>
             <div className="p-5 flex items-center gap-3" style={{
-              background: resultModal.type === 'success' ? 'rgba(6,182,212,0.08)' : 'rgba(239,68,68,0.1)',
-              borderBottom: `1px solid ${resultModal.type === 'success' ? 'rgba(6,182,212,0.2)' : 'rgba(239,68,68,0.2)'}`,
+              background: resultModal.type === 'success' ? 'rgba(245,158,11,0.08)' : 'rgba(239,68,68,0.1)',
+              borderBottom: `1px solid ${resultModal.type === 'success' ? 'rgba(245,158,11,0.2)' : 'rgba(239,68,68,0.2)'}`,
             }}>
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: resultModal.type === 'success' ? 'rgba(6,182,212,0.15)' : 'rgba(239,68,68,0.15)' }}>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: resultModal.type === 'success' ? 'rgba(245,158,11,0.15)' : 'rgba(239,68,68,0.15)' }}>
                 {resultModal.type === 'success'
-                  ? <Clock className="h-5 w-5" style={{ color: '#06b6d4' }} />
+                  ? <Clock className="h-5 w-5" style={{ color: '#F59E0B' }} />
                   : <X className="h-5 w-5 text-red-400" />}
               </div>
               <h2 className="text-base font-bold text-white">
@@ -555,7 +555,7 @@ export default function MyRegistrationsPage() {
                 onClick={() => setResultModal(null)}
                 className="w-full px-4 py-3 rounded-xl font-semibold text-sm"
                 style={resultModal.type === 'success'
-                  ? { background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', color: '#050810' }
+                  ? { background: 'linear-gradient(135deg,#F59E0B,#FCD34D)', color: '#050810' }
                   : { background: 'linear-gradient(135deg,#ef4444,#dc2626)', color: '#fff' }}
               >
                 Close
@@ -576,3 +576,4 @@ export default function MyRegistrationsPage() {
     </div>
   );
 }
+

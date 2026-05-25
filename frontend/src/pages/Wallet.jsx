@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Wallet as WalletIcon, Download, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
@@ -68,8 +68,8 @@ const Wallet = () => {
       {/* Hero Header */}
       <div className="relative overflow-hidden" style={{ background: 'linear-gradient(135deg,#050810 0%,#0a1a12 50%,#050810 100%)' }}>
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 left-1/4 w-80 h-80 rounded-full blur-3xl opacity-20" style={{ background: '#06b6d4' }}></div>
-          <div className="absolute bottom-0 right-1/4 w-80 h-80 rounded-full blur-3xl opacity-15" style={{ background: '#00d4ff' }}></div>
+          <div className="absolute top-0 left-1/4 w-80 h-80 rounded-full blur-3xl opacity-20" style={{ background: '#F59E0B' }}></div>
+          <div className="absolute bottom-0 right-1/4 w-80 h-80 rounded-full blur-3xl opacity-15" style={{ background: '#FCD34D' }}></div>
         </div>
 
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -84,7 +84,7 @@ const Wallet = () => {
           </button>
 
           <div className="flex items-center gap-4 mb-8">
-            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center shadow-lg" style={{ background: 'linear-gradient(135deg,#06b6d4,#00d4ff)', boxShadow: '0 0 24px rgba(6,182,212,0.3)' }}>
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center shadow-lg" style={{ background: 'linear-gradient(135deg,#F59E0B,#FCD34D)', boxShadow: '0 0 24px rgba(245,158,11,0.3)' }}>
               <WalletIcon className="w-7 h-7 sm:w-8 sm:h-8" style={{ color: '#050810' }} />
             </div>
             <div>
@@ -94,7 +94,7 @@ const Wallet = () => {
           </div>
 
           {/* Balance Card */}
-          <div className="rounded-2xl p-6 sm:p-8 border" style={{ background: 'rgba(6,182,212,0.06)', borderColor: 'rgba(6,182,212,0.2)' }}>
+          <div className="rounded-2xl p-6 sm:p-8 border" style={{ background: 'rgba(245,158,11,0.06)', borderColor: 'rgba(245,158,11,0.2)' }}>
             <p className="text-sm mb-2" style={{ color: 'rgba(255,255,255,0.5)' }}>Available Balance</p>
             <p className="font-black text-white" style={{ fontSize: 'clamp(2rem,8vw,3.5rem)' }}>₹{balance.toFixed(2)}</p>
           </div>
@@ -104,13 +104,13 @@ const Wallet = () => {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-          <div className="rounded-2xl p-5 flex items-center gap-4 border" style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(6,182,212,0.12)' }}>
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(6,182,212,0.12)' }}>
-              <ArrowDownLeft className="w-6 h-6" style={{ color: '#06b6d4' }} />
+          <div className="rounded-2xl p-5 flex items-center gap-4 border" style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(245,158,11,0.12)' }}>
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(245,158,11,0.12)' }}>
+              <ArrowDownLeft className="w-6 h-6" style={{ color: '#F59E0B' }} />
             </div>
             <div>
               <p className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>Total Credits</p>
-              <p className="text-xl sm:text-2xl font-bold" style={{ color: '#06b6d4' }}>+₹{totalCredits.toFixed(2)}</p>
+              <p className="text-xl sm:text-2xl font-bold" style={{ color: '#F59E0B' }}>+₹{totalCredits.toFixed(2)}</p>
             </div>
           </div>
 
@@ -129,8 +129,8 @@ const Wallet = () => {
         <div className="rounded-2xl overflow-hidden border" style={{ background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.08)' }}>
           <div className="p-4 sm:p-6 border-b flex flex-wrap items-center justify-between gap-3" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'rgba(0,212,255,0.15)' }}>
-                <TrendingUp className="w-5 h-5" style={{ color: '#00d4ff' }} />
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'rgba(245,158,11,0.15)' }}>
+                <TrendingUp className="w-5 h-5" style={{ color: '#FCD34D' }} />
               </div>
               <h2 className="text-base sm:text-lg font-bold text-white">Transaction History</h2>
             </div>
@@ -159,3 +159,4 @@ const Wallet = () => {
 };
 
 export default Wallet;
+

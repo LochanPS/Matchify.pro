@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+﻿import { Link } from 'react-router-dom';
 import { formatDateIndian } from '../utils/dateFormat';
 import { MapPin, Calendar } from 'lucide-react';
 
@@ -74,9 +74,9 @@ export default function TournamentHistoryCard({ tournament }) {
               <Link
                 key={cat.id}
                 to={`/organizer/categories/${cat.id}`}
-                style={{ fontSize: 12, fontWeight: 600, color: '#67E8F9', background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.2)', borderRadius: 20, padding: '3px 10px', textDecoration: 'none', transition: 'background 0.15s' }}
-                onMouseEnter={e => e.currentTarget.style.background = 'rgba(6,182,212,0.15)'}
-                onMouseLeave={e => e.currentTarget.style.background = 'rgba(6,182,212,0.08)'}
+                style={{ fontSize: 12, fontWeight: 600, color: '#67E8F9', background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: 20, padding: '3px 10px', textDecoration: 'none', transition: 'background 0.15s' }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(245,158,11,0.15)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'rgba(245,158,11,0.08)'}
               >
                 {cat.name} ({cat.participantCount})
               </Link>
@@ -106,3 +106,4 @@ export default function TournamentHistoryCard({ tournament }) {
     </div>
   );
 }
+

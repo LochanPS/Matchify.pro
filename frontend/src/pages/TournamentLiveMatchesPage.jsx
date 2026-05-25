@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+﻿import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { Radio, Trophy, Clock, Users, Wifi, WifiOff } from 'lucide-react';
@@ -10,8 +10,8 @@ const C = {
   bg:       '#050810',
   card:     'rgba(255,255,255,0.04)',
   border:   'rgba(255,255,255,0.08)',
-  green:    '#06b6d4',
-  cyan:     '#00d4ff',
+  green:    '#F59E0B',
+  cyan:     '#FCD34D',
   red:      '#ff4466',
   gold:     '#ffd700',
   dim:      'rgba(255,255,255,0.45)',
@@ -82,7 +82,7 @@ function MatchCard({ match, isCompleted }) {
   return (
     <div style={{
       background: C.card,
-      border: `1px solid ${isCompleted ? 'rgba(255,215,0,0.15)' : 'rgba(6,182,212,0.2)'}`,
+      border: `1px solid ${isCompleted ? 'rgba(255,215,0,0.15)' : 'rgba(245,158,11,0.2)'}`,
       borderRadius: 20,
       overflow: 'hidden',
       boxShadow: isCompleted ? '0 0 18px rgba(255,215,0,0.06)' : undefined,
@@ -93,7 +93,7 @@ function MatchCard({ match, isCompleted }) {
         height: 3,
         background: isCompleted
           ? 'linear-gradient(90deg,#ffd700,#ffaa00)'
-          : 'linear-gradient(90deg,#06b6d4,#00d4ff)',
+          : 'linear-gradient(90deg,#F59E0B,#FCD34D)',
       }} />
 
       <div style={{ padding: '12px 14px' }}>
@@ -128,8 +128,8 @@ function MatchCard({ match, isCompleted }) {
             {match.category?.name && (
               <span style={{
                 fontSize: 10, color: C.cyan, fontWeight: 600,
-                background: 'rgba(0,212,255,0.08)', padding: '2px 8px',
-                borderRadius: 10, border: '1px solid rgba(0,212,255,0.15)',
+                background: 'rgba(245,158,11,0.08)', padding: '2px 8px',
+                borderRadius: 10, border: '1px solid rgba(245,158,11,0.15)',
               }}>{match.category.name}</span>
             )}
           </div>
@@ -265,9 +265,9 @@ function MatchCard({ match, isCompleted }) {
             <span style={{
               fontSize: 11, fontWeight: 700,
               color: lead > 0 ? C.green : C.cyan,
-              background: lead > 0 ? 'rgba(6,182,212,0.08)' : 'rgba(0,212,255,0.08)',
+              background: lead > 0 ? 'rgba(245,158,11,0.08)' : 'rgba(245,158,11,0.08)',
               padding: '2px 12px', borderRadius: 20,
-              border: `1px solid ${lead > 0 ? 'rgba(6,182,212,0.2)' : 'rgba(0,212,255,0.2)'}`,
+              border: `1px solid ${lead > 0 ? 'rgba(245,158,11,0.2)' : 'rgba(245,158,11,0.2)'}`,
             }}>
               {lead > 0 ? p1Short : p2Short} leads +{Math.abs(lead)}
             </span>
@@ -450,8 +450,8 @@ export default function TournamentLiveMatchesPage() {
           50%      { opacity: 0.4; transform: scale(1.3); }
         }
         @keyframes cardGlow {
-          0%,100% { box-shadow: 0 0 14px rgba(6,182,212,0.05); }
-          50%      { box-shadow: 0 0 22px rgba(6,182,212,0.12); }
+          0%,100% { box-shadow: 0 0 14px rgba(245,158,11,0.05); }
+          50%      { box-shadow: 0 0 22px rgba(245,158,11,0.12); }
         }
       `}</style>
 
@@ -641,3 +641,4 @@ export default function TournamentLiveMatchesPage() {
     </div>
   );
 }
+

@@ -71,7 +71,7 @@ export default function CancellationRequestsPage() {
     if (request.status === 'cancelled') {
       return (
         <span className="px-2.5 py-1 rounded-lg text-xs font-semibold"
-          style={{ background: 'rgba(6,182,212,0.12)', color: BRAND.green, border: '1px solid rgba(6,182,212,0.25)' }}>
+          style={{ background: 'rgba(245,158,11,0.12)', color: BRAND.green, border: '1px solid rgba(245,158,11,0.25)' }}>
           Approved
         </span>
       );
@@ -170,7 +170,7 @@ export default function CancellationRequestsPage() {
                 style={isActive
                   ? status === 'pending'
                     ? { background: 'linear-gradient(135deg,#fbbf24,#f59e0b)', color: '#050810', boxShadow: '0 4px 15px rgba(251,191,36,0.3)' }
-                    : { background: 'linear-gradient(135deg,#00d4ff,#a855f7)', color: '#050810', boxShadow: '0 4px 15px rgba(0,212,255,0.3)' }
+                    : { background: 'linear-gradient(135deg,#FCD34D,#a855f7)', color: '#050810', boxShadow: '0 4px 15px rgba(245,158,11,0.3)' }
                   : { background: BRAND.card, color: 'rgba(255,255,255,0.55)', border: `1px solid ${BRAND.border}` }
                 }
               >
@@ -243,7 +243,7 @@ export default function CancellationRequestsPage() {
                     {getStatusBadge(request)}
                     <button
                       className="p-2 rounded-lg transition-colors"
-                      style={{ background: 'rgba(0,212,255,0.12)', color: BRAND.cyan }}
+                      style={{ background: 'rgba(245,158,11,0.12)', color: BRAND.cyan }}
                       title="View Details"
                     >
                       <Eye className="w-5 h-5" />
@@ -266,4 +266,5 @@ export default function CancellationRequestsPage() {
     </div>
   );
 }
+
 

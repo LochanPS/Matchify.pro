@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 
 // Strip internal placeholder email generated for phone-only users
@@ -153,9 +153,9 @@ const UnifiedDashboardMobile = () => {
     PLAYER: {
       name: 'Player',
       icon: '🏸',
-      color: '#06b6d4',
-      bg: 'rgba(6,182,212,0.12)',
-      border: 'rgba(6,182,212,0.35)'
+      color: '#F59E0B',
+      bg: 'rgba(245,158,11,0.12)',
+      border: 'rgba(245,158,11,0.35)'
     },
     ORGANIZER: {
       name: 'Organizer',
@@ -189,7 +189,7 @@ const UnifiedDashboardMobile = () => {
       {/* ── Copied toast ── */}
       {copied && (
         <div className="fixed top-20 left-1/2 z-[9999] px-4 py-2 rounded-xl text-sm font-bold shadow-xl"
-          style={{ transform: 'translateX(-50%)', background: 'rgba(6,182,212,0.95)', color: '#001c26', pointerEvents: 'none' }}>
+          style={{ transform: 'translateX(-50%)', background: 'rgba(245,158,11,0.95)', color: '#001c26', pointerEvents: 'none' }}>
           ✓ Copied to clipboard!
         </div>
       )}
@@ -206,7 +206,7 @@ const UnifiedDashboardMobile = () => {
 
       {/* ── Ambient tint blobs ── */}
       <div className="fixed top-0 bottom-0 pointer-events-none overflow-hidden" style={{ left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: '480px', zIndex: 1 }}>
-        <div style={{ position: 'absolute', width: '440px', height: '440px', top: '-140px', right: '-120px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(6,182,212,0.13) 0%, transparent 70%)', filter: 'blur(80px)' }} />
+        <div style={{ position: 'absolute', width: '440px', height: '440px', top: '-140px', right: '-120px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(245,158,11,0.13) 0%, transparent 70%)', filter: 'blur(80px)' }} />
         <div style={{ position: 'absolute', width: '400px', height: '400px', bottom: '5%', left: '-120px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(139,92,246,0.10) 0%, transparent 70%)', filter: 'blur(80px)' }} />
       </div>
 
@@ -294,7 +294,7 @@ const UnifiedDashboardMobile = () => {
                     style={{
                       background: 'linear-gradient(135deg, #0e7490, #0369a1)',
                       color: '#ffffff',
-                      boxShadow: '0 0 0 2px #06b6d4, 0 4px 12px rgba(0,0,0,0.4)'
+                      boxShadow: '0 0 0 2px #F59E0B, 0 4px 12px rgba(0,0,0,0.4)'
                     }}
                   >
                     {user?.profilePhoto ? (
@@ -336,9 +336,9 @@ const UnifiedDashboardMobile = () => {
                   >
                     <div
                       className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-                      style={{ background: 'rgba(6,182,212,0.12)', border: '1px solid rgba(6,182,212,0.28)' }}
+                      style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.28)' }}
                     >
-                      <Icon className="w-5 h-5" style={{ color: '#22d3ee' }} />
+                      <Icon className="w-5 h-5" style={{ color: '#FCD34D' }} />
                     </div>
                     <span className="font-bold text-base flex-1">{label}</span>
                     <ArrowRightIcon className="w-4 h-4 flex-shrink-0" style={{ color: 'rgba(255,255,255,0.3)' }} />
@@ -383,19 +383,19 @@ const UnifiedDashboardMobile = () => {
             {/* Tournaments — cyan */}
             <Link to="/tournaments" className="flex flex-col items-center gap-2.5 p-4 rounded-2xl transition-all active:scale-95"
               style={{
-                background: 'linear-gradient(145deg, rgba(6,182,212,0.24) 0%, rgba(6,182,212,0.10) 100%)',
-                border: '1.5px solid rgba(6,182,212,0.58)',
-                boxShadow: '0 4px 22px rgba(6,182,212,0.20), inset 0 1px 0 rgba(255,255,255,0.09)'
+                background: 'linear-gradient(145deg, rgba(245,158,11,0.24) 0%, rgba(245,158,11,0.10) 100%)',
+                border: '1.5px solid rgba(245,158,11,0.58)',
+                boxShadow: '0 4px 22px rgba(245,158,11,0.20), inset 0 1px 0 rgba(255,255,255,0.09)'
               }}>
               <div className="w-12 h-12 rounded-xl flex items-center justify-center"
                 style={{
                   background: 'linear-gradient(135deg, #0e7490 0%, #0284c7 100%)',
-                  border: '1px solid rgba(6,182,212,0.65)',
-                  boxShadow: '0 4px 16px rgba(6,182,212,0.40)'
+                  border: '1px solid rgba(245,158,11,0.65)',
+                  boxShadow: '0 4px 16px rgba(245,158,11,0.40)'
                 }}>
                 <TrophyIcon className="w-6 h-6 text-white" />
               </div>
-              <span className="text-xs font-black text-center" style={{ color: '#67e8f9', textShadow: '0 0 10px rgba(6,182,212,0.65)' }}>Tournaments</span>
+              <span className="text-xs font-black text-center" style={{ color: '#67e8f9', textShadow: '0 0 10px rgba(245,158,11,0.65)' }}>Tournaments</span>
             </Link>
             {/* Leaderboard — amber */}
             <Link to="/leaderboard" className="flex flex-col items-center gap-2.5 p-4 rounded-2xl transition-all active:scale-95"
@@ -438,12 +438,12 @@ const UnifiedDashboardMobile = () => {
         {(matchifyCode || userProfile?.matchifyCode || user?.matchifyCode) && (
           <div className="mb-5 rounded-3xl overflow-hidden relative" style={{
             background: 'linear-gradient(135deg, #060f24 0%, #0b1a42 35%, #11093a 65%, #060f24 100%)',
-            border: '1px solid rgba(6,182,212,0.30)',
-            boxShadow: '0 0 48px rgba(6,182,212,0.14), 0 16px 48px rgba(0,0,0,0.65)',
+            border: '1px solid rgba(245,158,11,0.30)',
+            boxShadow: '0 0 48px rgba(245,158,11,0.14), 0 16px 48px rgba(0,0,0,0.65)',
             animation: 'fadeIn 0.6s ease-out 0.1s both',
           }}>
             {/* aurora glows */}
-            <div style={{ position:'absolute', inset:0, background:'radial-gradient(ellipse at 5% 90%, rgba(6,182,212,0.28) 0%, transparent 55%)' }} />
+            <div style={{ position:'absolute', inset:0, background:'radial-gradient(ellipse at 5% 90%, rgba(245,158,11,0.28) 0%, transparent 55%)' }} />
             <div style={{ position:'absolute', inset:0, background:'radial-gradient(ellipse at 95% 10%, rgba(139,92,246,0.20) 0%, transparent 50%)' }} />
             {/* dot grid texture */}
             <div style={{ position:'absolute', inset:0, opacity:0.25,
@@ -453,15 +453,15 @@ const UnifiedDashboardMobile = () => {
             <div className="relative px-5 py-5 flex items-center justify-between">
               <div>
                 <p style={{ fontSize:'10px', fontWeight:800, letterSpacing:'0.22em',
-                  textTransform:'uppercase', color:'rgba(6,182,212,0.75)', marginBottom:'6px' }}>
+                  textTransform:'uppercase', color:'rgba(245,158,11,0.75)', marginBottom:'6px' }}>
                   Your Matchify ID
                 </p>
                 <p style={{
                   fontSize:'54px', fontWeight:900, fontFamily:'monospace',
                   lineHeight:1, letterSpacing:'-0.02em',
-                  background:'linear-gradient(135deg, #ffffff 0%, #a5f3fc 40%, #22d3ee 100%)',
+                  background:'linear-gradient(135deg, #ffffff 0%, #a5f3fc 40%, #FCD34D 100%)',
                   WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text',
-                  filter:'drop-shadow(0 0 18px rgba(6,182,212,0.55))',
+                  filter:'drop-shadow(0 0 18px rgba(245,158,11,0.55))',
                 }}>
                   {matchifyCode || userProfile?.matchifyCode || user?.matchifyCode}
                 </p>
@@ -475,20 +475,20 @@ const UnifiedDashboardMobile = () => {
                 }}
                 className="flex flex-col items-center gap-1.5 px-4 py-3 rounded-2xl transition-all flex-shrink-0"
                 style={{
-                  background: copied ? 'rgba(34,211,238,0.20)' : 'rgba(6,182,212,0.10)',
-                  border: `1.5px solid ${copied ? 'rgba(34,211,238,0.55)' : 'rgba(6,182,212,0.32)'}`,
+                  background: copied ? 'rgba(34,211,238,0.20)' : 'rgba(245,158,11,0.10)',
+                  border: `1.5px solid ${copied ? 'rgba(34,211,238,0.55)' : 'rgba(245,158,11,0.32)'}`,
                 }}>
                 {copied
-                  ? <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ width:'20px', height:'20px', color:'#22d3ee' }}>
+                  ? <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ width:'20px', height:'20px', color:'#FCD34D' }}>
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                     </svg>
-                  : <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ width:'20px', height:'20px', color:'#22d3ee' }}>
+                  : <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ width:'20px', height:'20px', color:'#FCD34D' }}>
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                         d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                     </svg>
                 }
                 <span style={{ fontSize:'10px', fontWeight:700, letterSpacing:'0.08em',
-                  textTransform:'uppercase', color: copied ? '#22d3ee' : 'rgba(6,182,212,0.65)' }}>
+                  textTransform:'uppercase', color: copied ? '#FCD34D' : 'rgba(245,158,11,0.65)' }}>
                   {copied ? 'Copied!' : 'Copy'}
                 </span>
               </button>
@@ -511,7 +511,7 @@ const UnifiedDashboardMobile = () => {
           <div style={{ height: '100px', position: 'relative', overflow: 'hidden',
             background: 'linear-gradient(135deg, #0a1e3d 0%, #0e1b50 40%, #150d42 70%, #0a1a35 100%)' }}>
             {/* left glow */}
-            <div style={{ position:'absolute', inset:0, background:'radial-gradient(ellipse at 20% 60%, rgba(6,182,212,0.22) 0%, transparent 65%)' }} />
+            <div style={{ position:'absolute', inset:0, background:'radial-gradient(ellipse at 20% 60%, rgba(245,158,11,0.22) 0%, transparent 65%)' }} />
             {/* right glow */}
             <div style={{ position:'absolute', inset:0, background:'radial-gradient(ellipse at 85% 40%, rgba(139,92,246,0.20) 0%, transparent 60%)' }} />
             {/* subtle dot grid */}
@@ -532,7 +532,7 @@ const UnifiedDashboardMobile = () => {
                 className="-mt-14 mb-4 relative flex-shrink-0" style={{ borderRadius:'50%' }}>
                 {/* gradient ring */}
                 <div className="w-[96px] h-[96px] rounded-full p-[3px] relative"
-                  style={{ background:'linear-gradient(135deg, #22d3ee 0%, #a855f7 50%, #22d3ee 100%)' }}>
+                  style={{ background:'linear-gradient(135deg, #FCD34D 0%, #a855f7 50%, #FCD34D 100%)' }}>
                   <div className="w-full h-full rounded-full overflow-hidden flex items-center justify-center font-black text-3xl text-white"
                     style={{ background:'linear-gradient(135deg, #0e7490, #0c4a6e)' }}>
                     {user?.profilePhoto
@@ -542,7 +542,7 @@ const UnifiedDashboardMobile = () => {
                 </div>
                 {/* outer glow */}
                 <div style={{ position:'absolute', inset:'-6px', borderRadius:'50%',
-                  background:'linear-gradient(135deg, rgba(6,182,212,0.25), rgba(139,92,246,0.20))',
+                  background:'linear-gradient(135deg, rgba(245,158,11,0.25), rgba(139,92,246,0.20))',
                   filter:'blur(10px)', zIndex:-1 }} />
               </button>
 
@@ -639,7 +639,7 @@ const UnifiedDashboardMobile = () => {
                 {stats.map((stat, index) => {
                   const tileAccents = [
                     { left: '#F59E0B', bg: 'rgba(245,158,11,0.08)', iconBg: 'rgba(245,158,11,0.15)', iconColor: '#FCD34D', numColor: '#FCD34D' },
-                    { left: '#06B6D4', bg: 'rgba(6,182,212,0.08)',  iconBg: 'rgba(6,182,212,0.15)',  iconColor: '#22D3EE', numColor: '#67E8F9' },
+                    { left: '#F59E0B', bg: 'rgba(245,158,11,0.08)',  iconBg: 'rgba(245,158,11,0.15)',  iconColor: '#FCD34D', numColor: '#67E8F9' },
                     { left: '#10B981', bg: 'rgba(16,185,129,0.08)', iconBg: 'rgba(16,185,129,0.15)', iconColor: '#34D399', numColor: '#6EE7B7' },
                     { left: '#8B5CF6', bg: 'rgba(139,92,246,0.08)', iconBg: 'rgba(139,92,246,0.15)', iconColor: '#A78BFA', numColor: '#C4B5FD' },
                   ][index];
@@ -909,12 +909,12 @@ const UnifiedDashboardMobile = () => {
               <div
                 className="w-10 h-10 rounded-xl flex items-center justify-center"
                 style={{
-                  background: 'linear-gradient(135deg, rgba(6,182,212,0.26), rgba(6,182,212,0.12))',
-                  border: '1.5px solid rgba(6,182,212,0.50)',
-                  boxShadow: '0 2px 10px rgba(6,182,212,0.20)'
+                  background: 'linear-gradient(135deg, rgba(245,158,11,0.26), rgba(245,158,11,0.12))',
+                  border: '1.5px solid rgba(245,158,11,0.50)',
+                  boxShadow: '0 2px 10px rgba(245,158,11,0.20)'
                 }}
               >
-                <UserIcon className="w-5 h-5" style={{ color: '#22d3ee' }} />
+                <UserIcon className="w-5 h-5" style={{ color: '#FCD34D' }} />
               </div>
               <h3 className="text-lg font-black text-white">Profile Information</h3>
             </div>
@@ -1023,8 +1023,8 @@ const UnifiedDashboardMobile = () => {
                   to="/tournaments"
                   className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm"
                   style={{
-                    background: 'rgba(6,182,212,0.09)',
-                    border: '1px solid rgba(6,182,212,0.24)',
+                    background: 'rgba(245,158,11,0.09)',
+                    border: '1px solid rgba(245,158,11,0.24)',
                     color: '#67e8f9',
                   }}
                 >
@@ -1039,17 +1039,17 @@ const UnifiedDashboardMobile = () => {
                     key={reg.id}
                     className="p-4 rounded-xl"
                     style={{
-                      background: 'linear-gradient(135deg, rgba(6,182,212,0.06) 0%, rgba(255,255,255,0.03) 100%)',
-                      border: '1px solid rgba(6,182,212,0.22)',
-                      borderLeft: '3px solid rgba(6,182,212,0.55)'
+                      background: 'linear-gradient(135deg, rgba(245,158,11,0.06) 0%, rgba(255,255,255,0.03) 100%)',
+                      border: '1px solid rgba(245,158,11,0.22)',
+                      borderLeft: '3px solid rgba(245,158,11,0.55)'
                     }}
                   >
                     <div className="flex items-start gap-3">
                       <div
                         className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
                         style={{
-                          background: 'linear-gradient(135deg, rgba(6,182,212,0.20), rgba(6,182,212,0.10))',
-                          border: '1px solid rgba(6,182,212,0.38)'
+                          background: 'linear-gradient(135deg, rgba(245,158,11,0.20), rgba(245,158,11,0.10))',
+                          border: '1px solid rgba(245,158,11,0.38)'
                         }}
                       >
                         <span className="text-xl">🏆</span>
@@ -1075,7 +1075,7 @@ const UnifiedDashboardMobile = () => {
                         }`}
                         style={{
                           background: reg.status === 'confirmed'
-                            ? 'rgba(6,182,212,0.12)'
+                            ? 'rgba(245,158,11,0.12)'
                             : reg.status === 'pending'
                             ? 'rgba(245,158,11,0.1)'
                             : reg.status === 'rejected'
@@ -1083,7 +1083,7 @@ const UnifiedDashboardMobile = () => {
                             : 'rgba(255,255,255,0.06)',
                           border: `1px solid ${
                             reg.status === 'confirmed'
-                              ? 'rgba(6,182,212,0.25)'
+                              ? 'rgba(245,158,11,0.25)'
                               : reg.status === 'pending'
                               ? 'rgba(245,158,11,0.2)'
                               : reg.status === 'rejected'
@@ -1121,16 +1121,16 @@ const UnifiedDashboardMobile = () => {
               to="/tournaments"
               className="flex items-center gap-4 p-4 rounded-xl transition-all relative overflow-hidden active:scale-[0.98]"
               style={{
-                background: 'linear-gradient(135deg, rgba(6,182,212,0.14) 0%, rgba(6,182,212,0.06) 100%)',
-                border: '1.5px solid rgba(6,182,212,0.40)',
-                boxShadow: '0 2px 14px rgba(6,182,212,0.12)'
+                background: 'linear-gradient(135deg, rgba(245,158,11,0.14) 0%, rgba(245,158,11,0.06) 100%)',
+                border: '1.5px solid rgba(245,158,11,0.40)',
+                boxShadow: '0 2px 14px rgba(245,158,11,0.12)'
               }}
             >
               <div
                 className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
                 style={{
                   background: 'linear-gradient(135deg, #0e7490, #0284c7)',
-                  boxShadow: '0 4px 16px rgba(6,182,212,0.38)',
+                  boxShadow: '0 4px 16px rgba(245,158,11,0.38)',
                 }}
               >
                 <TrophyIcon className="w-6 h-6 text-white" />
@@ -1140,8 +1140,8 @@ const UnifiedDashboardMobile = () => {
                 <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.48)' }}>Find your next competition</p>
               </div>
               <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                style={{ background: 'rgba(6,182,212,0.18)', border: '1px solid rgba(6,182,212,0.35)' }}>
-                <ArrowRightIcon className="w-4 h-4" style={{ color: '#22d3ee' }} />
+                style={{ background: 'rgba(245,158,11,0.18)', border: '1px solid rgba(245,158,11,0.35)' }}>
+                <ArrowRightIcon className="w-4 h-4" style={{ color: '#FCD34D' }} />
               </div>
             </Link>
 
@@ -1232,3 +1232,4 @@ const UnifiedDashboardMobile = () => {
 };
 
 export default UnifiedDashboardMobile;
+

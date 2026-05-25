@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import {
@@ -144,7 +144,7 @@ const RegisterPageMobile = () => {
               {[
                 { icon: '🏸', title: 'Player', desc: 'Compete', bg: 'rgba(245,158,11,0.08)', border: 'rgba(245,158,11,0.2)', color: '#FCD34D' },
                 { icon: '📋', title: 'Organizer', desc: 'Host', bg: 'rgba(139,92,246,0.08)', border: 'rgba(139,92,246,0.2)', color: '#C4B5FD' },
-                { icon: '⚖️', title: 'Umpire', desc: 'Officiate', bg: 'rgba(6,182,212,0.08)', border: 'rgba(6,182,212,0.2)', color: '#67E8F9' },
+                { icon: '⚖️', title: 'Umpire', desc: 'Officiate', bg: 'rgba(245,158,11,0.08)', border: 'rgba(245,158,11,0.2)', color: '#67E8F9' },
               ].map(r => (
                 <div key={r.title} style={{ background: r.bg, border: `1px solid ${r.border}`, borderRadius: 12, padding: '10px 6px', textAlign: 'center' }}>
                   <CheckCircleIcon style={{ width: 14, height: 14, color: r.color, margin: '0 auto 4px' }} />
@@ -325,3 +325,4 @@ const RegisterPageMobile = () => {
 };
 
 export default RegisterPageMobile;
+

@@ -2678,7 +2678,10 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
   //        midY      = (topCenter + botCenter)/2  ← exact parent card center ✓
   const CARD_W = 220;
   const CONN_W = 44;
-  const SLOT_H = 260;
+  // SLOT_H = 210: max card (View Details + Change Result) ≈ 202px → 4px cushion each side ✓
+  //   1-button card ≈ 163px → 23.5px each side → 47px inter-card gap (was 97px with 260) ✓
+  //   no-button card ≈ 120px → 45px each side → 90px inter-card gap (was 140px) ✓
+  const SLOT_H = 210;
   const LINE   = 'rgba(34,211,238,0.4)';  // #22d3ee at 40% — visible, not neon
 
   return (
@@ -2715,7 +2718,7 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
             Connector midY == parent card center (mathematically proven).
         ──────────────────────────────────────────────────────────────────── */}
         <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', overflowY: 'visible' }}>
-          <div style={{ minWidth: 'max-content', padding: '16px 16px 28px' }}>
+          <div style={{ minWidth: 'max-content', padding: '12px 12px 20px' }}>
 
             {/* ── Row 1: Round labels ────────────────────────────────────── */}
             <div style={{ display: 'flex', marginBottom: '12px' }}>

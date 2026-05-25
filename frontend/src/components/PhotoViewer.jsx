@@ -86,16 +86,16 @@ export default function PhotoViewer({ isOpen, onClose, photoUrl, userName }) {
           disabled={zoom <= 0.5}
           className="p-3 rounded-full transition-all group disabled:opacity-30 disabled:cursor-not-allowed"
           style={{ 
-            background: 'linear-gradient(135deg, rgba(59,130,246,0.3), rgba(37,99,235,0.2))',
-            border: '2px solid rgba(59,130,246,0.5)',
-            boxShadow: '0 4px 15px rgba(59,130,246,0.3)'
+            background: 'linear-gradient(135deg, rgba(245,158,11,0.3), rgba(37,99,235,0.2))',
+            border: '2px solid rgba(245,158,11,0.5)',
+            boxShadow: '0 4px 15px rgba(245,158,11,0.3)'
           }}
         >
           <div 
             className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-            style={{ background: 'rgba(59,130,246,0.2)' }}
+            style={{ background: 'rgba(245,158,11,0.2)' }}
           />
-          <ZoomOut className="w-6 h-6 text-blue-300 relative z-10" />
+          <ZoomOut className="w-6 h-6 text-amber-300 relative z-10" />
         </button>
         
         <button
@@ -103,27 +103,27 @@ export default function PhotoViewer({ isOpen, onClose, photoUrl, userName }) {
           disabled={zoom >= 3}
           className="p-3 rounded-full transition-all group disabled:opacity-30 disabled:cursor-not-allowed"
           style={{ 
-            background: 'linear-gradient(135deg, rgba(59,130,246,0.3), rgba(37,99,235,0.2))',
-            border: '2px solid rgba(59,130,246,0.5)',
-            boxShadow: '0 4px 15px rgba(59,130,246,0.3)'
+            background: 'linear-gradient(135deg, rgba(245,158,11,0.3), rgba(37,99,235,0.2))',
+            border: '2px solid rgba(245,158,11,0.5)',
+            boxShadow: '0 4px 15px rgba(245,158,11,0.3)'
           }}
         >
           <div 
             className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-            style={{ background: 'rgba(59,130,246,0.2)' }}
+            style={{ background: 'rgba(245,158,11,0.2)' }}
           />
-          <ZoomIn className="w-6 h-6 text-blue-300 relative z-10" />
+          <ZoomIn className="w-6 h-6 text-amber-300 relative z-10" />
         </button>
 
         <div 
           className="px-4 py-3 rounded-full flex items-center justify-center min-w-[80px]"
           style={{ 
-            background: 'linear-gradient(135deg, rgba(59,130,246,0.3), rgba(37,99,235,0.2))',
-            border: '2px solid rgba(59,130,246,0.5)',
-            boxShadow: '0 4px 15px rgba(59,130,246,0.3)'
+            background: 'linear-gradient(135deg, rgba(245,158,11,0.3), rgba(37,99,235,0.2))',
+            border: '2px solid rgba(245,158,11,0.5)',
+            boxShadow: '0 4px 15px rgba(245,158,11,0.3)'
           }}
         >
-          <span className="text-blue-300 font-bold text-sm">{Math.round(zoom * 100)}%</span>
+          <span className="text-amber-300 font-bold text-sm">{Math.round(zoom * 100)}%</span>
         </div>
       </div>
 
@@ -206,4 +206,5 @@ export default function PhotoViewer({ isOpen, onClose, photoUrl, userName }) {
     </div>
   );
 }
+
 

@@ -2670,65 +2670,71 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
   };
 
   // ── Bracket layout constants ────────────────────────────────────────────
-  // CARD_W   : width of each match card column
-  // CONN_W   : width of the connector column between rounds
-  // SLOT_H   : base slot height for round 0 (doubles each round)
-  //            Must be >= max possible card height (~225px). 260px gives ~17px cushion.
-  // Connector math proof (4-player example):
-  //   Round 0 slot=260: match 0 center=130, match 1 center=390, midY=260
-  //   Round 1 slot=520: match 0 center=520/2=260  ✓ perfect alignment
-  const CARD_W  = 200;
-  const CONN_W  = 40;
-  const SLOT_H  = 260;
-  const LINE    = 'rgba(6,182,212,0.55)';
+  // CARD_W : match card column width
+  // CONN_W : connector column width (L-shaped bracket lines)
+  // SLOT_H : base slot height round 0 — doubles each round.
+  //          Must be ≥ max card height (~225px). 260 gives 17.5px cushion each side.
+  // Math:  topCenter = mi×slotH + slotH/2
+  //        midY      = (topCenter + botCenter)/2  ← exact parent card center ✓
+  const CARD_W = 220;
+  const CONN_W = 44;
+  const SLOT_H = 260;
+  const LINE   = 'rgba(34,211,238,0.4)';  // #22d3ee at 40% — visible, not neon
 
   return (
-    <div className="p-3">
-      {/* Bracket card */}
-      <div className="rounded-2xl overflow-hidden" style={{ background: '#111826', border: '1px solid rgba(255,255,255,0.07)' }}>
+    <div style={{ padding: '10px' }}>
+      {/* Outer bracket card */}
+      <div style={{ background: '#0d1625', borderRadius: '18px', border: '1px solid rgba(255,255,255,0.08)', overflow: 'hidden' }}>
 
-        {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3.5" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-          <div className="flex items-center gap-3">
-            <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
-              style={{ background: 'linear-gradient(135deg,#06b6d4,#0891b2)' }}
-            >
+        {/* ── Header ─────────────────────────────────────────────────────── */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'linear-gradient(135deg,#06b6d4,#0e7490)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>
               🏆
             </div>
             <div>
-              <h4 className="font-bold text-white" style={{ fontSize: '15px', lineHeight: 1.2 }}>Knockout Bracket</h4>
-              <p style={{ color: '#94a3b8', fontSize: '12px', marginTop: '2px' }}>
+              <div style={{ fontSize: '15px', fontWeight: 700, color: '#ffffff', lineHeight: 1.2 }}>Knockout Bracket</div>
+              <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
                 {totalRounds} {totalRounds === 1 ? 'Round' : 'Rounds'}
-              </p>
+              </div>
             </div>
           </div>
           {totalRounds > 1 && (
-            <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.32)', fontWeight: 500 }}>swipe →</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'rgba(255,255,255,0.25)', fontSize: '11px', fontWeight: 500 }}>
+              <span>scroll</span>
+              <span>→</span>
+            </div>
           )}
         </div>
 
-        {/* ── Pyramid bracket: horizontally scrollable ─────────────────────────
-            Structure: [labels row] then [slots row with connector columns]
-            Each slot height = SLOT_H × 2^ri → cards stay vertically centered
-            Connector midY = (topCenter + botCenter)/2 = parent card center ✓
-        ─────────────────────────────────────────────────────────────────── */}
-        <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-          <div style={{ minWidth: 'max-content', padding: '16px 16px 24px' }}>
+        {/* ── Scrollable pyramid bracket ──────────────────────────────────────
+            CARD_W=220 + CONN_W=44 = 264px per unit.
+            On 390px phone (~334px available): R1 fully (220px) + 70px R2 peek (32%).
+            On 430px phone (~374px available): R1 fully + 110px peek (50%). ✓
+            SLOT_H doubles each round — cards always vertically centered in slot.
+            Connector midY == parent card center (mathematically proven).
+        ──────────────────────────────────────────────────────────────────── */}
+        <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', overflowY: 'visible' }}>
+          <div style={{ minWidth: 'max-content', padding: '16px 16px 28px' }}>
 
-            {/* Row 1 — Round labels (spacers keep them aligned with slot columns) */}
-            <div style={{ display: 'flex', marginBottom: '10px' }}>
+            {/* ── Row 1: Round labels ────────────────────────────────────── */}
+            <div style={{ display: 'flex', marginBottom: '12px' }}>
               {data.rounds.map((round, ri) => (
                 <React.Fragment key={ri}>
                   <div style={{ width: CARD_W, flexShrink: 0 }}>
-                    <div
-                      className="flex items-center justify-center gap-1.5 rounded-xl"
-                      style={{ padding: '8px 12px', background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.18)' }}
-                    >
+                    <div style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                      padding: '7px 12px', borderRadius: '10px',
+                      background: ri === data.rounds.length - 1 ? 'rgba(6,182,212,0.12)' : 'rgba(255,255,255,0.05)',
+                      border: ri === data.rounds.length - 1 ? '1px solid rgba(6,182,212,0.3)' : '1px solid rgba(255,255,255,0.09)',
+                    }}>
                       {ri === data.rounds.length - 1 && (
-                        <Trophy className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#22d3ee' }} />
+                        <Trophy className="w-3 h-3 flex-shrink-0" style={{ color: '#22d3ee' }} />
                       )}
-                      <span style={{ fontSize: '11px', fontWeight: 700, color: '#22d3ee', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                      <span style={{
+                        fontSize: '11px', fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase',
+                        color: ri === data.rounds.length - 1 ? '#22d3ee' : 'rgba(255,255,255,0.5)',
+                      }}>
                         {getRoundName(ri, data.rounds.length)}
                       </span>
                     </div>
@@ -2738,7 +2744,7 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
               ))}
             </div>
 
-            {/* Row 2 — Match slots + connector columns */}
+            {/* ── Row 2: Match slots + connector columns ──────────────────── */}
             <div style={{ display: 'flex', alignItems: 'flex-start' }}>
               {data.rounds.map((round, ri) => {
                 const slotH = SLOT_H * Math.pow(2, ri);
@@ -2768,123 +2774,107 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                         const isTbd1 = player1Name === 'TBD';
                         const isTbd2 = player2Name === 'TBD';
 
+                        // Card border colour per state
+                        const cardBorder = isLive
+                          ? '1.5px solid rgba(6,182,212,0.55)'
+                          : isCompleted
+                          ? '1px solid rgba(6,182,212,0.22)'
+                          : '1px solid rgba(255,255,255,0.09)';
+
                         return (
-                          /* Slot: fixed height, card floats vertically centered */
-                          <div
-                            key={mi}
-                            style={{ height: slotH, display: 'flex', alignItems: 'center' }}
-                          >
+                          /* Fixed-height slot — card is vertically centered inside */
+                          <div key={mi} style={{ height: slotH, display: 'flex', alignItems: 'center' }}>
                             <div style={{ width: '100%' }}>
-                              {/* Match card */}
+
+                              {/* ── Match card ─────────────────────────────── */}
                               <div
                                 className={isLive ? 'animate-pulse' : ''}
                                 style={{
-                                  background: 'linear-gradient(160deg, #0f1d30 0%, #080e1b 100%)',
-                                  border: isLive
-                                    ? '1.5px solid rgba(6,182,212,0.6)'
-                                    : isCompleted
-                                    ? '1px solid rgba(6,182,212,0.3)'
-                                    : '1px solid rgba(255,255,255,0.1)',
-                                  borderRadius: '14px',
+                                  background: '#07121e',
+                                  border: cardBorder,
+                                  borderRadius: '13px',
                                   overflow: 'hidden',
                                   boxShadow: isLive
-                                    ? '0 0 28px rgba(6,182,212,0.22), 0 4px 16px rgba(0,0,0,0.5)'
-                                    : isCompleted
-                                    ? '0 4px 20px rgba(0,0,0,0.55), 0 0 0 1px rgba(6,182,212,0.1)'
-                                    : '0 2px 14px rgba(0,0,0,0.4)',
+                                    ? '0 0 20px rgba(6,182,212,0.15), 0 4px 12px rgba(0,0,0,0.4)'
+                                    : '0 2px 10px rgba(0,0,0,0.35)',
                                 }}
                               >
-                                {/* Match header */}
-                                <div
-                                  className="flex items-center justify-between px-3 py-2"
-                                  style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}
-                                >
-                                  <span style={{ fontSize: '10px', fontWeight: 600, color: 'rgba(255,255,255,0.28)', letterSpacing: '0.04em' }}>
-                                    #{match.matchNumber || mi + 1}
+                                {/* Card header — match # + status */}
+                                <div style={{
+                                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                                  padding: '7px 12px 6px',
+                                  background: 'rgba(0,0,0,0.2)',
+                                  borderBottom: '1px solid rgba(255,255,255,0.05)',
+                                }}>
+                                  <span style={{ fontSize: '10px', fontWeight: 600, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.03em' }}>
+                                    M{match.matchNumber || mi + 1}
                                   </span>
                                   {isLive && (
-                                    <span
-                                      className="flex items-center gap-1 px-2 py-0.5 rounded-full"
-                                      style={{ background: 'rgba(6,182,212,0.12)', border: '1px solid rgba(6,182,212,0.3)', fontSize: '9px', fontWeight: 700, color: '#67e8f9' }}
-                                    >
-                                      <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: '#22d3ee' }} />
+                                    <span style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '2px 8px', borderRadius: '20px', background: 'rgba(6,182,212,0.15)', border: '1px solid rgba(6,182,212,0.35)', fontSize: '9px', fontWeight: 700, color: '#67e8f9' }}>
+                                      <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#22d3ee', flexShrink: 0 }} />
                                       LIVE
                                     </span>
                                   )}
                                   {isCompleted && !isLive && (
-                                    <span
-                                      className="flex items-center gap-1 px-2 py-0.5 rounded-full"
-                                      style={{ background: 'rgba(74,222,128,0.12)', border: '1px solid rgba(74,222,128,0.28)', fontSize: '9px', fontWeight: 700, color: '#4ade80' }}
-                                    >✓ Done</span>
+                                    <span style={{ display: 'flex', alignItems: 'center', gap: '3px', padding: '2px 7px', borderRadius: '20px', background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.25)', fontSize: '9px', fontWeight: 700, color: '#4ade80' }}>
+                                      ✓ Done
+                                    </span>
                                   )}
                                   {!isCompleted && !isLive && isTbd1 !== isTbd2 && (
-                                    <span style={{ fontSize: '9px', fontWeight: 700, color: '#fbbf24' }}>BYE</span>
+                                    <span style={{ fontSize: '9px', fontWeight: 700, color: '#fbbf24', letterSpacing: '0.04em' }}>BYE</span>
                                   )}
                                 </div>
 
-                                {/* Player rows */}
-                                <div style={{ padding: '10px 10px 8px' }}>
+                                {/* Player rows — left-border accent = winner indicator */}
+                                <div style={{ padding: '8px 0 6px' }}>
+
                                   {/* Player 1 */}
-                                  <div
-                                    className="flex items-center rounded-xl"
-                                    style={{
-                                      padding: '10px 10px',
-                                      marginBottom: '2px',
-                                      background: isPlayer1Winner ? 'rgba(6,182,212,0.17)' : isTbd1 ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.05)',
-                                      border: `1px solid ${isPlayer1Winner ? 'rgba(6,182,212,0.38)' : 'rgba(255,255,255,0.07)'}`,
-                                      borderLeft: isPlayer1Winner ? '3px solid #22d3ee' : '3px solid transparent',
-                                    }}
-                                  >
-                                    <span
-                                      className="truncate flex-1"
-                                      style={{
-                                        fontSize: '12px', lineHeight: 1.35,
-                                        color: isTbd1 ? 'rgba(255,255,255,0.3)' : '#ffffff',
-                                        fontStyle: isTbd1 ? 'italic' : 'normal',
-                                        fontWeight: isPlayer1Winner ? 700 : 600,
-                                      }}
-                                    >{player1Name}</span>
+                                  <div style={{
+                                    display: 'flex', alignItems: 'center',
+                                    padding: '9px 12px 9px 11px',
+                                    background: isPlayer1Winner ? 'rgba(6,182,212,0.1)' : 'transparent',
+                                    borderLeft: isPlayer1Winner ? '3px solid #22d3ee' : '3px solid transparent',
+                                  }}>
+                                    <span style={{
+                                      flex: 1, minWidth: 0,
+                                      fontSize: '13px', fontWeight: isPlayer1Winner ? 700 : 500,
+                                      color: isTbd1 ? 'rgba(255,255,255,0.28)' : '#ffffff',
+                                      fontStyle: isTbd1 ? 'italic' : 'normal',
+                                      whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                                    }}>
+                                      {player1Name}
+                                    </span>
                                     {isPlayer1Winner && (
-                                      <span className="flex-shrink-0 ml-2 flex items-center justify-center rounded-full"
-                                        style={{ width: '20px', height: '20px', background: 'rgba(6,182,212,0.3)', border: '1px solid rgba(6,182,212,0.5)', fontSize: '9px', fontWeight: 800, color: '#ffffff' }}>W</span>
+                                      <span style={{ flexShrink: 0, marginLeft: '8px', width: '18px', height: '18px', borderRadius: '50%', background: '#0e7490', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '8px', fontWeight: 800, color: '#ffffff' }}>W</span>
                                     )}
                                   </div>
 
-                                  {/* VS */}
-                                  <div className="flex items-center gap-2" style={{ margin: '6px 0' }}>
-                                    <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.05)' }} />
-                                    <span style={{ fontSize: '9px', fontWeight: 600, color: 'rgba(255,255,255,0.2)', letterSpacing: '0.1em' }}>VS</span>
-                                    <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.05)' }} />
-                                  </div>
+                                  {/* Divider */}
+                                  <div style={{ height: '1px', background: 'rgba(255,255,255,0.06)', margin: '0 12px' }} />
 
                                   {/* Player 2 */}
-                                  <div
-                                    className="flex items-center rounded-xl"
-                                    style={{
-                                      padding: '10px 10px',
-                                      marginTop: '2px',
-                                      background: isPlayer2Winner ? 'rgba(6,182,212,0.17)' : isTbd2 ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.05)',
-                                      border: `1px solid ${isPlayer2Winner ? 'rgba(6,182,212,0.38)' : 'rgba(255,255,255,0.07)'}`,
-                                      borderLeft: isPlayer2Winner ? '3px solid #22d3ee' : '3px solid transparent',
-                                    }}
-                                  >
-                                    <span
-                                      className="truncate flex-1"
-                                      style={{
-                                        fontSize: '12px', lineHeight: 1.35,
-                                        color: isTbd2 ? 'rgba(255,255,255,0.3)' : '#ffffff',
-                                        fontStyle: isTbd2 ? 'italic' : 'normal',
-                                        fontWeight: isPlayer2Winner ? 700 : 600,
-                                      }}
-                                    >{player2Name}</span>
+                                  <div style={{
+                                    display: 'flex', alignItems: 'center',
+                                    padding: '9px 12px 9px 11px',
+                                    background: isPlayer2Winner ? 'rgba(6,182,212,0.1)' : 'transparent',
+                                    borderLeft: isPlayer2Winner ? '3px solid #22d3ee' : '3px solid transparent',
+                                  }}>
+                                    <span style={{
+                                      flex: 1, minWidth: 0,
+                                      fontSize: '13px', fontWeight: isPlayer2Winner ? 700 : 500,
+                                      color: isTbd2 ? 'rgba(255,255,255,0.28)' : '#ffffff',
+                                      fontStyle: isTbd2 ? 'italic' : 'normal',
+                                      whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                                    }}>
+                                      {player2Name}
+                                    </span>
                                     {isPlayer2Winner && (
-                                      <span className="flex-shrink-0 ml-2 flex items-center justify-center rounded-full"
-                                        style={{ width: '20px', height: '20px', background: 'rgba(6,182,212,0.3)', border: '1px solid rgba(6,182,212,0.5)', fontSize: '9px', fontWeight: 800, color: '#ffffff' }}>W</span>
+                                      <span style={{ flexShrink: 0, marginLeft: '8px', width: '18px', height: '18px', borderRadius: '50%', background: '#0e7490', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '8px', fontWeight: 800, color: '#ffffff' }}>W</span>
                                     )}
                                   </div>
                                 </div>
 
-                                {/* Buttons */}
+                                {/* Action buttons */}
                                 {(isCompleted || (isOrganizer && dbMatch && !isCompleted)) && (
                                   <div style={{ padding: '0 10px 10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                                     {isCompleted && (
@@ -2902,8 +2892,7 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                                               };
                                           onViewMatchDetails(matchDataToUse, bracketMatchData);
                                         }}
-                                        className="w-full flex items-center justify-center gap-1.5 rounded-xl transition-all"
-                                        style={{ padding: '8px 10px', background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.65)', border: '1px solid rgba(255,255,255,0.09)', fontSize: '10px', fontWeight: 600 }}
+                                        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '7px 10px', background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: '10px', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}
                                       >
                                         <Eye className="w-3.5 h-3.5" />
                                         View Details
@@ -2921,11 +2910,10 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                                                 onAssignUmpire(dbMatch, bracketMatchData);
                                               }
                                             }}
-                                            className="w-full flex items-center justify-center gap-1.5 rounded-xl transition-all"
                                             style={
                                               hasUmpire
-                                                ? { padding: '8px 10px', background: 'rgba(6,182,212,0.1)', color: '#67e8f9', border: '1px solid rgba(6,182,212,0.25)', fontSize: '10px', fontWeight: 600 }
-                                                : { padding: '8px 10px', background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.65)', border: '1px solid rgba(255,255,255,0.1)', fontSize: '10px', fontWeight: 600 }
+                                                ? { width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '7px 10px', background: 'rgba(6,182,212,0.1)', color: '#67e8f9', border: '1px solid rgba(6,182,212,0.25)', borderRadius: '10px', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }
+                                                : { width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '7px 10px', background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }
                                             }
                                           >
                                             <Gavel className="w-3.5 h-3.5" />
@@ -2934,8 +2922,7 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                                         ) : (player1.name !== 'TBD' || player2.name !== 'TBD') ? (
                                           <button
                                             onClick={() => handleGiveByeForMatch(dbMatch.id)}
-                                            className="w-full flex items-center justify-center gap-1.5 rounded-xl transition-all"
-                                            style={{ padding: '8px 10px', background: 'rgba(245,158,11,0.08)', color: '#fbbf24', border: '1px solid rgba(245,158,11,0.2)', fontSize: '10px', fontWeight: 600 }}
+                                            style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '7px 10px', background: 'rgba(245,158,11,0.08)', color: '#fbbf24', border: '1px solid rgba(245,158,11,0.2)', borderRadius: '10px', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}
                                           >
                                             <Trophy className="w-3.5 h-3.5" />
                                             Give BYE
@@ -2949,8 +2936,7 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                                           const bracketMatchData = { matchNumber: match.matchNumber, round: ri + 1, player1, player2, currentWinnerId: dbMatch?.winnerId };
                                           onChangeResult(dbMatch, bracketMatchData);
                                         }}
-                                        className="w-full rounded-xl transition-all"
-                                        style={{ padding: '8px 10px', background: 'rgba(245,158,11,0.07)', color: '#fbbf24', border: '1px solid rgba(245,158,11,0.18)', fontSize: '10px', fontWeight: 600 }}
+                                        style={{ width: '100%', padding: '7px 10px', background: 'rgba(245,158,11,0.07)', color: '#fbbf24', border: '1px solid rgba(245,158,11,0.18)', borderRadius: '10px', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}
                                       >
                                         Change Result
                                       </button>
@@ -2958,37 +2944,42 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                                   </div>
                                 )}
                               </div>
+                              {/* ── End match card ──────────────────────────── */}
+
                             </div>
                           </div>
                         );
                       })}
                     </div>
+                    {/* ── End round column ──────────────────────────────────── */}
 
-                    {/* Connector column — L-shaped bracket lines between rounds
-                        topCenter  = mi*slotH + slotH/2
-                        botCenter  = (mi+1)*slotH + slotH/2
-                        midY       = (topCenter+botCenter)/2  ← equals parent card center ✓
-                    */}
+                    {/* ── Connector column: L-shaped bracket lines ────────────
+                        topCenter  = mi×slotH + slotH/2
+                        botCenter  = (mi+1)×slotH + slotH/2
+                        midY       = (topCenter+botCenter)/2  ← = parent center ✓
+                        Lines are 1.5px thick for clean visibility.
+                    ────────────────────────────────────────────────────────── */}
                     {ri < data.rounds.length - 1 && (
                       <div style={{ width: CONN_W, flexShrink: 0, position: 'relative', height: round.matches.length * slotH }}>
                         {round.matches.map((_, mi) => {
                           if (mi % 2 !== 0) return null;
-                          if (!round.matches[mi + 1]) return null; // odd bracket — no pair
+                          if (!round.matches[mi + 1]) return null;  // odd bracket — no pair to connect
 
                           const topCenter = mi * slotH + slotH / 2;
                           const botCenter = (mi + 1) * slotH + slotH / 2;
-                          const midY      = (topCenter + botCenter) / 2; // = parent center ✓
+                          const midY      = (topCenter + botCenter) / 2;  // = parent card center ✓
+                          const spineX    = CONN_W / 2;
 
                           return (
                             <React.Fragment key={mi}>
-                              {/* Left arm — top match → spine */}
-                              <div style={{ position: 'absolute', top: topCenter, left: 0, width: CONN_W / 2, height: 1, background: LINE }} />
-                              {/* Left arm — bottom match → spine */}
-                              <div style={{ position: 'absolute', top: botCenter, left: 0, width: CONN_W / 2, height: 1, background: LINE }} />
-                              {/* Vertical spine */}
-                              <div style={{ position: 'absolute', top: topCenter, left: CONN_W / 2 - 1, width: 1, height: botCenter - topCenter + 1, background: LINE }} />
-                              {/* Right arm — spine midpoint → next round */}
-                              <div style={{ position: 'absolute', top: midY, left: CONN_W / 2, width: CONN_W / 2, height: 1, background: LINE }} />
+                              {/* Top horizontal arm (from top match center → spine) */}
+                              <div style={{ position: 'absolute', top: topCenter - 0.75, left: 0, width: spineX, height: 1.5, background: LINE }} />
+                              {/* Bottom horizontal arm (from bottom match center → spine) */}
+                              <div style={{ position: 'absolute', top: botCenter - 0.75, left: 0, width: spineX, height: 1.5, background: LINE }} />
+                              {/* Vertical spine (connects top and bottom arms) */}
+                              <div style={{ position: 'absolute', top: topCenter, left: spineX - 0.75, width: 1.5, height: botCenter - topCenter, background: LINE }} />
+                              {/* Right arm (from spine midpoint → next round card) */}
+                              <div style={{ position: 'absolute', top: midY - 0.75, left: spineX, width: spineX, height: 1.5, background: LINE }} />
                             </React.Fragment>
                           );
                         })}
@@ -2999,9 +2990,12 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                 );
               })}
             </div>
+            {/* ── End bracket row ─────────────────────────────────────────── */}
 
           </div>
         </div>
+        {/* ── End scroll container ──────────────────────────────────────── */}
+
       </div>
     </div>
   );

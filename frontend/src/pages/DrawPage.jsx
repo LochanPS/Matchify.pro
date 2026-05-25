@@ -2671,48 +2671,68 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
 
   return (
     <div className="p-3">
-      {/* Knockout bracket — same card system as group standings */}
+      {/* Knockout bracket card */}
       <div className="rounded-2xl overflow-hidden" style={{ background: '#111826', border: '1px solid rgba(255,255,255,0.07)' }}>
 
         {/* Header */}
-        <div className="flex items-center gap-3 px-4 py-3.5" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
-            style={{ background: 'linear-gradient(135deg,#06b6d4,#0891b2)' }}>
-            🏆
+        <div className="flex items-center justify-between px-4 py-3.5" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
+              style={{ background: 'linear-gradient(135deg,#06b6d4,#0891b2)' }}>
+              🏆
+            </div>
+            <div>
+              <h4 className="font-bold text-white" style={{ fontSize: '15px', lineHeight: 1.2 }}>Knockout Bracket</h4>
+              <p style={{ color: '#94a3b8', fontSize: '12px', marginTop: '2px' }}>
+                {totalRounds} {totalRounds === 1 ? 'Round' : 'Rounds'}
+              </p>
+            </div>
           </div>
-          <div>
-            <h4 className="font-bold text-white" style={{ fontSize: '15px', lineHeight: 1.2 }}>Knockout Bracket</h4>
-            <p style={{ color: '#94a3b8', fontSize: '12px', marginTop: '2px' }}>
-              {totalRounds} {totalRounds === 1 ? 'Round' : 'Rounds'} · Swipe to see all rounds →
-            </p>
-          </div>
+          {totalRounds > 1 && (
+            <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.28)', fontWeight: 500 }}>swipe →</span>
+          )}
         </div>
 
-        {/* Scrollable Bracket */}
-        <div className="overflow-x-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
-          <div className="flex gap-3 min-w-max p-4">
+        {/* ── Scrollable bracket ─────────────────────────────────────────
+            Round column = 160px → exactly 2 rounds visible on phones ≥ 360px.
+            Gap between rounds = 12px. Scroll is momentum-based (iOS/Android native).
+        ──────────────────────────────────────────────────────────────── */}
+        <div
+          style={{
+            overflowX: 'auto',
+            WebkitOverflowScrolling: 'touch',
+            scrollBehavior: 'smooth',
+          }}
+        >
+          <div className="flex p-4" style={{ gap: '12px', minWidth: 'max-content' }}>
             {data.rounds.map((round, ri) => (
-              <div key={ri} className="flex flex-col" style={{ minWidth: '210px' }}>
-
-                {/* Round label */}
-                <div className="mb-3 text-center">
-                  <span
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg"
-                    style={{ background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.18)' }}
+              <div
+                key={ri}
+                className="flex flex-col flex-shrink-0"
+                style={{ width: '160px' }}
+              >
+                {/* Round label — full width pill */}
+                <div className="mb-3">
+                  <div
+                    className="flex items-center justify-center gap-1.5 py-1.5 rounded-lg w-full"
+                    style={{ background: 'rgba(6,182,212,0.07)', border: '1px solid rgba(6,182,212,0.16)' }}
                   >
-                    {ri === data.rounds.length - 1 && <Trophy className="w-3 h-3" style={{ color: '#22d3ee' }} />}
-                    <span className="text-[11px] font-bold uppercase tracking-wide" style={{ color: '#22d3ee' }}>
+                    {ri === data.rounds.length - 1 && (
+                      <Trophy className="w-3 h-3 flex-shrink-0" style={{ color: '#22d3ee' }} />
+                    )}
+                    <span style={{ fontSize: '10px', fontWeight: 700, color: '#22d3ee', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
                       {getRoundName(ri, data.rounds.length)}
                     </span>
-                  </span>
+                  </div>
                 </div>
 
-                {/* Matches column */}
+                {/* Match cards for this round */}
                 <div
-                  className="flex flex-col justify-around flex-1"
+                  className="flex flex-col flex-1"
                   style={{
-                    gap: '12px',
-                    paddingTop: ri > 0 ? `${Math.pow(2, ri) * 14}px` : 0,
+                    gap: '10px',
+                    // Pyramid offset: later rounds have fewer matches, shifted down to center-align
+                    paddingTop: ri > 0 ? `${Math.pow(2, ri - 1) * 32}px` : '0px',
                   }}
                 >
                   {round.matches.map((match, mi) => {
@@ -2725,9 +2745,9 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                     const player2Name = getPlayerDisplay(player2);
 
                     const isCompleted = dbMatch?.status === 'COMPLETED' || (!dbMatch && match.winner && player1.name !== 'TBD' && player2.name !== 'TBD');
-                    const isLive = dbMatch?.status === 'IN_PROGRESS';
-                    const isReady = dbMatch?.status === 'READY' && player1.name !== 'TBD' && player2.name !== 'TBD';
-                    const hasUmpire = dbMatch?.umpireId;
+                    const isLive     = dbMatch?.status === 'IN_PROGRESS';
+                    const isReady    = dbMatch?.status === 'READY' && player1.name !== 'TBD' && player2.name !== 'TBD';
+                    const hasUmpire  = dbMatch?.umpireId;
 
                     const isPlayer1Winner = dbMatch ? dbMatch.winnerId === player1?.id : match.winner === 1;
                     const isPlayer2Winner = dbMatch ? dbMatch.winnerId === player2?.id : match.winner === 2;
@@ -2735,190 +2755,223 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                     const isTbd1 = player1Name === 'TBD';
                     const isTbd2 = player2Name === 'TBD';
 
+                    // Spacing between matches grows each round (pyramid effect)
+                    const matchSpacingBottom = ri > 0 ? `${Math.pow(2, ri - 1) * 64}px` : '0px';
+
                     return (
                       <div
                         key={mi}
-                        className="relative"
-                        style={{ marginBottom: ri > 0 ? `${Math.pow(2, ri) * 28}px` : 0 }}
+                        style={{ marginBottom: mi < round.matches.length - 1 ? matchSpacingBottom : '0px' }}
                       >
+                        {/* Match card */}
                         <div
                           className={isLive ? 'animate-pulse' : ''}
                           style={{
-                            background: 'rgba(15,22,36,0.85)',
+                            background: '#0d1525',
                             border: isLive
-                              ? '1.5px solid rgba(6,182,212,0.65)'
+                              ? '1.5px solid rgba(6,182,212,0.6)'
                               : isCompleted
-                              ? '1px solid rgba(6,182,212,0.15)'
-                              : '1px solid rgba(255,255,255,0.07)',
-                            borderRadius: '14px',
+                              ? '1px solid rgba(6,182,212,0.2)'
+                              : '1px solid rgba(255,255,255,0.08)',
+                            borderRadius: '12px',
                             overflow: 'hidden',
-                            boxShadow: isLive ? '0 0 12px rgba(6,182,212,0.12)' : 'none',
+                            boxShadow: isLive
+                              ? '0 0 16px rgba(6,182,212,0.1)'
+                              : isCompleted
+                              ? '0 2px 8px rgba(0,0,0,0.3)'
+                              : '0 2px 6px rgba(0,0,0,0.2)',
                           }}
                         >
-                          {/* Match meta bar */}
-                          <div className="px-3 py-1.5 flex items-center justify-between" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                            <span style={{ fontSize: '10px', fontWeight: 600, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.05em' }}>
+                          {/* Match number + status */}
+                          <div
+                            className="flex items-center justify-between px-2.5 py-1.5"
+                            style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}
+                          >
+                            <span style={{ fontSize: '9px', fontWeight: 600, color: 'rgba(255,255,255,0.28)', letterSpacing: '0.04em' }}>
                               #{match.matchNumber || mi + 1}
                             </span>
                             {isLive && (
-                              <span className="flex items-center gap-1 px-2 py-0.5 rounded-full" style={{ background: 'rgba(6,182,212,0.12)', border: '1px solid rgba(6,182,212,0.28)', fontSize: '9px', fontWeight: 700, color: '#67e8f9', letterSpacing: '0.06em' }}>
-                                <span className="w-1.5 h-1.5 rounded-full" style={{ background: '#22d3ee' }} />
+                              <span
+                                className="flex items-center gap-1 px-1.5 py-0.5 rounded-full"
+                                style={{ background: 'rgba(6,182,212,0.12)', border: '1px solid rgba(6,182,212,0.3)', fontSize: '8px', fontWeight: 700, color: '#67e8f9' }}
+                              >
+                                <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: '#22d3ee' }} />
                                 LIVE
                               </span>
                             )}
                             {isCompleted && !isLive && (
-                              <span style={{ fontSize: '10px', fontWeight: 700, color: '#4ade80' }}>✓</span>
+                              <span style={{ fontSize: '9px', fontWeight: 700, color: '#4ade80' }}>✓ Done</span>
                             )}
-                            {!isCompleted && !isLive && (isTbd1) !== (isTbd2) && (
-                              <span className="px-1.5 py-0.5 rounded" style={{ background: 'rgba(245,158,11,0.1)', fontSize: '9px', fontWeight: 700, color: '#fbbf24' }}>BYE</span>
+                            {!isCompleted && !isLive && isTbd1 !== isTbd2 && (
+                              <span style={{ fontSize: '8px', fontWeight: 700, color: '#fbbf24' }}>BYE</span>
                             )}
                           </div>
 
-                          {/* Players */}
-                          <div className="p-2 space-y-1">
-                            {/* Player 1 */}
+                          {/* Player rows */}
+                          <div style={{ padding: '8px 8px 6px' }}>
+                            {/* Player 1 row */}
                             <div
-                              className="flex items-center justify-between px-2.5 py-2 rounded-lg"
-                              style={
-                                isPlayer1Winner
-                                  ? { background: 'rgba(6,182,212,0.1)', borderLeft: '2.5px solid #06b6d4', borderRight: '1px solid rgba(6,182,212,0.15)', borderTop: '1px solid rgba(6,182,212,0.15)', borderBottom: '1px solid rgba(6,182,212,0.15)' }
-                                  : isCompleted
-                                  ? { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }
-                                  : { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }
-                              }
+                              className="flex items-center rounded-lg"
+                              style={{
+                                padding: '7px 8px',
+                                marginBottom: '4px',
+                                background: isPlayer1Winner
+                                  ? 'rgba(6,182,212,0.12)'
+                                  : isTbd1
+                                  ? 'rgba(255,255,255,0.02)'
+                                  : 'rgba(255,255,255,0.04)',
+                                borderLeft: isPlayer1Winner ? '2.5px solid #06b6d4' : '2.5px solid transparent',
+                                borderTop: `1px solid ${isPlayer1Winner ? 'rgba(6,182,212,0.18)' : 'rgba(255,255,255,0.06)'}`,
+                                borderRight: `1px solid ${isPlayer1Winner ? 'rgba(6,182,212,0.18)' : 'rgba(255,255,255,0.06)'}`,
+                                borderBottom: `1px solid ${isPlayer1Winner ? 'rgba(6,182,212,0.18)' : 'rgba(255,255,255,0.06)'}`,
+                              }}
                             >
                               <span
-                                className="text-xs font-semibold truncate flex-1"
+                                className="truncate flex-1 font-semibold"
                                 style={{
-                                  color: isPlayer1Winner
-                                    ? '#f1f5f9'
-                                    : isTbd1
-                                    ? 'rgba(255,255,255,0.18)'
+                                  fontSize: '11px',
+                                  lineHeight: 1.3,
+                                  color: isTbd1
+                                    ? 'rgba(255,255,255,0.2)'
+                                    : isPlayer1Winner
+                                    ? '#ffffff'
                                     : isCompleted
-                                    ? 'rgba(255,255,255,0.38)'
+                                    ? 'rgba(255,255,255,0.58)'  // loser — readable, not invisible
                                     : '#e2e8f0',
                                   fontStyle: isTbd1 ? 'italic' : 'normal',
+                                  fontWeight: isPlayer1Winner ? 700 : 500,
                                 }}
                               >
                                 {player1Name}
                               </span>
                               {isPlayer1Winner && (
-                                <span className="ml-1 flex-shrink-0 text-[10px] font-bold" style={{ color: '#22d3ee' }}>W</span>
+                                <span className="flex-shrink-0 ml-1" style={{ fontSize: '9px', fontWeight: 700, color: '#22d3ee' }}>W</span>
                               )}
                             </div>
 
                             {/* VS divider */}
-                            <div className="text-center py-0.5">
-                              <span style={{ fontSize: '9px', fontWeight: 600, color: 'rgba(255,255,255,0.1)', letterSpacing: '0.1em' }}>VS</span>
+                            <div className="flex items-center gap-1.5 mb-1">
+                              <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.05)' }} />
+                              <span style={{ fontSize: '8px', fontWeight: 600, color: 'rgba(255,255,255,0.18)', letterSpacing: '0.08em' }}>VS</span>
+                              <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.05)' }} />
                             </div>
 
-                            {/* Player 2 */}
+                            {/* Player 2 row */}
                             <div
-                              className="flex items-center justify-between px-2.5 py-2 rounded-lg"
-                              style={
-                                isPlayer2Winner
-                                  ? { background: 'rgba(6,182,212,0.1)', borderLeft: '2.5px solid #06b6d4', borderRight: '1px solid rgba(6,182,212,0.15)', borderTop: '1px solid rgba(6,182,212,0.15)', borderBottom: '1px solid rgba(6,182,212,0.15)' }
-                                  : isCompleted
-                                  ? { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }
-                                  : { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }
-                              }
+                              className="flex items-center rounded-lg"
+                              style={{
+                                padding: '7px 8px',
+                                background: isPlayer2Winner
+                                  ? 'rgba(6,182,212,0.12)'
+                                  : isTbd2
+                                  ? 'rgba(255,255,255,0.02)'
+                                  : 'rgba(255,255,255,0.04)',
+                                borderLeft: isPlayer2Winner ? '2.5px solid #06b6d4' : '2.5px solid transparent',
+                                borderTop: `1px solid ${isPlayer2Winner ? 'rgba(6,182,212,0.18)' : 'rgba(255,255,255,0.06)'}`,
+                                borderRight: `1px solid ${isPlayer2Winner ? 'rgba(6,182,212,0.18)' : 'rgba(255,255,255,0.06)'}`,
+                                borderBottom: `1px solid ${isPlayer2Winner ? 'rgba(6,182,212,0.18)' : 'rgba(255,255,255,0.06)'}`,
+                              }}
                             >
                               <span
-                                className="text-xs font-semibold truncate flex-1"
+                                className="truncate flex-1 font-semibold"
                                 style={{
-                                  color: isPlayer2Winner
-                                    ? '#f1f5f9'
-                                    : isTbd2
-                                    ? 'rgba(255,255,255,0.18)'
+                                  fontSize: '11px',
+                                  lineHeight: 1.3,
+                                  color: isTbd2
+                                    ? 'rgba(255,255,255,0.2)'
+                                    : isPlayer2Winner
+                                    ? '#ffffff'
                                     : isCompleted
-                                    ? 'rgba(255,255,255,0.38)'
+                                    ? 'rgba(255,255,255,0.58)'  // loser — readable, not invisible
                                     : '#e2e8f0',
                                   fontStyle: isTbd2 ? 'italic' : 'normal',
+                                  fontWeight: isPlayer2Winner ? 700 : 500,
                                 }}
                               >
                                 {player2Name}
                               </span>
                               {isPlayer2Winner && (
-                                <span className="ml-1 flex-shrink-0 text-[10px] font-bold" style={{ color: '#22d3ee' }}>W</span>
+                                <span className="flex-shrink-0 ml-1" style={{ fontSize: '9px', fontWeight: 700, color: '#22d3ee' }}>W</span>
                               )}
                             </div>
                           </div>
 
-                          {/* VIEW button — shown to all when completed */}
-                          {isCompleted && (
-                            <div className="px-2 pb-2">
-                              <button
-                                onClick={() => {
-                                  const bracketMatchData = { matchNumber: match.matchNumber, round: ri + 1, player1, player2 };
-                                  const matchDataToUse = dbMatch
-                                    ? { ...dbMatch, score: dbMatch.score ?? dbMatch.scoreJson ?? null }
-                                    : {
-                                        matchNumber: match.matchNumber, status: 'COMPLETED', winner: match.winner,
-                                        winnerId: match.winner === 1 ? player1?.id : player2?.id,
-                                        score: match.scoreJson || match.score || null,
-                                        scoreJson: match.scoreJson || null,
-                                        player1, player2,
-                                      };
-                                  onViewMatchDetails(matchDataToUse, bracketMatchData);
-                                }}
-                                className="w-full py-1.5 rounded-lg flex items-center justify-center gap-1 transition-all"
-                                style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.08)', fontSize: '10px', fontWeight: 600 }}
-                              >
-                                <Eye className="w-3 h-3" />
-                                View Result
-                              </button>
-                            </div>
-                          )}
-
-                          {/* Organizer actions — not completed */}
-                          {isOrganizer && dbMatch && !isCompleted && (
-                            <div className="px-2 pb-2">
-                              {player1.name !== 'TBD' && player2.name !== 'TBD' ? (
+                          {/* Buttons area */}
+                          {(isCompleted || (isOrganizer && dbMatch && !isCompleted)) && (
+                            <div style={{ padding: '0 8px 8px' }}>
+                              {/* VIEW — all users, match completed */}
+                              {isCompleted && (
                                 <button
                                   onClick={() => {
-                                    if (hasUmpire && dbMatch?.umpireId) {
-                                      navigate(`/match/${dbMatch.id}/conduct?umpireId=${dbMatch.umpireId}`);
-                                    } else {
-                                      const bracketMatchData = { matchNumber: match.matchNumber, round: ri + 1, player1, player2 };
-                                      onAssignUmpire(dbMatch, bracketMatchData);
-                                    }
+                                    const bracketMatchData = { matchNumber: match.matchNumber, round: ri + 1, player1, player2 };
+                                    const matchDataToUse = dbMatch
+                                      ? { ...dbMatch, score: dbMatch.score ?? dbMatch.scoreJson ?? null }
+                                      : {
+                                          matchNumber: match.matchNumber, status: 'COMPLETED', winner: match.winner,
+                                          winnerId: match.winner === 1 ? player1?.id : player2?.id,
+                                          score: match.scoreJson || match.score || null,
+                                          scoreJson: match.scoreJson || null,
+                                          player1, player2,
+                                        };
+                                    onViewMatchDetails(matchDataToUse, bracketMatchData);
                                   }}
-                                  className="w-full py-1.5 rounded-lg transition-all flex items-center justify-center gap-1"
-                                  style={
-                                    hasUmpire
-                                      ? { background: 'rgba(6,182,212,0.09)', color: '#67e8f9', border: '1px solid rgba(6,182,212,0.22)', fontSize: '10px', fontWeight: 600 }
-                                      : { background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.55)', border: '1px solid rgba(255,255,255,0.1)', fontSize: '10px', fontWeight: 600 }
-                                  }
+                                  className="w-full flex items-center justify-center gap-1 rounded-lg transition-all"
+                                  style={{ padding: '5px 8px', background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.55)', border: '1px solid rgba(255,255,255,0.08)', fontSize: '9px', fontWeight: 600 }}
                                 >
-                                  <Gavel className="w-3 h-3" />
-                                  {hasUmpire ? '✓ Umpire · Conduct' : 'Assign Umpire'}
+                                  <Eye className="w-3 h-3" />
+                                  View
                                 </button>
-                              ) : (player1.name !== 'TBD' || player2.name !== 'TBD') ? (
-                                <button
-                                  onClick={() => handleGiveByeForMatch(dbMatch.id)}
-                                  className="w-full py-1.5 rounded-lg transition-all flex items-center justify-center gap-1"
-                                  style={{ background: 'rgba(245,158,11,0.08)', color: '#fbbf24', border: '1px solid rgba(245,158,11,0.2)', fontSize: '10px', fontWeight: 600 }}
-                                >
-                                  <Trophy className="w-3 h-3" />
-                                  BYE — {player1.name !== 'TBD' ? player1Name : player2Name}
-                                </button>
-                              ) : null}
-                            </div>
-                          )}
+                              )}
 
-                          {/* Organizer CHANGE — completed */}
-                          {isOrganizer && dbMatch && isCompleted && (
-                            <div className="px-2 pb-2">
-                              <button
-                                onClick={() => {
-                                  const bracketMatchData = { matchNumber: match.matchNumber, round: ri + 1, player1, player2, currentWinnerId: dbMatch?.winnerId };
-                                  onChangeResult(dbMatch, bracketMatchData);
-                                }}
-                                className="w-full py-1.5 rounded-lg transition-all"
-                                style={{ background: 'rgba(245,158,11,0.07)', color: '#fbbf24', border: '1px solid rgba(245,158,11,0.18)', fontSize: '10px', fontWeight: 600 }}
-                              >
-                                Change Result
-                              </button>
+                              {/* ORGANIZER — assign umpire or conduct */}
+                              {isOrganizer && dbMatch && !isCompleted && (
+                                <>
+                                  {player1.name !== 'TBD' && player2.name !== 'TBD' ? (
+                                    <button
+                                      onClick={() => {
+                                        if (hasUmpire && dbMatch?.umpireId) {
+                                          navigate(`/match/${dbMatch.id}/conduct?umpireId=${dbMatch.umpireId}`);
+                                        } else {
+                                          const bracketMatchData = { matchNumber: match.matchNumber, round: ri + 1, player1, player2 };
+                                          onAssignUmpire(dbMatch, bracketMatchData);
+                                        }
+                                      }}
+                                      className="w-full flex items-center justify-center gap-1 rounded-lg transition-all"
+                                      style={
+                                        hasUmpire
+                                          ? { padding: '5px 8px', background: 'rgba(6,182,212,0.09)', color: '#67e8f9', border: '1px solid rgba(6,182,212,0.22)', fontSize: '9px', fontWeight: 600 }
+                                          : { padding: '5px 8px', background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.55)', border: '1px solid rgba(255,255,255,0.1)', fontSize: '9px', fontWeight: 600 }
+                                      }
+                                    >
+                                      <Gavel className="w-3 h-3" />
+                                      {hasUmpire ? '✓ Conduct' : 'Assign Umpire'}
+                                    </button>
+                                  ) : (player1.name !== 'TBD' || player2.name !== 'TBD') ? (
+                                    <button
+                                      onClick={() => handleGiveByeForMatch(dbMatch.id)}
+                                      className="w-full flex items-center justify-center gap-1 rounded-lg transition-all"
+                                      style={{ padding: '5px 8px', background: 'rgba(245,158,11,0.08)', color: '#fbbf24', border: '1px solid rgba(245,158,11,0.2)', fontSize: '9px', fontWeight: 600 }}
+                                    >
+                                      <Trophy className="w-3 h-3" />
+                                      BYE
+                                    </button>
+                                  ) : null}
+                                </>
+                              )}
+
+                              {/* ORGANIZER — change result */}
+                              {isOrganizer && dbMatch && isCompleted && (
+                                <button
+                                  onClick={() => {
+                                    const bracketMatchData = { matchNumber: match.matchNumber, round: ri + 1, player1, player2, currentWinnerId: dbMatch?.winnerId };
+                                    onChangeResult(dbMatch, bracketMatchData);
+                                  }}
+                                  className="w-full rounded-lg transition-all mt-1"
+                                  style={{ padding: '5px 8px', background: 'rgba(245,158,11,0.07)', color: '#fbbf24', border: '1px solid rgba(245,158,11,0.18)', fontSize: '9px', fontWeight: 600 }}
+                                >
+                                  Change
+                                </button>
+                              )}
                             </div>
                           )}
                         </div>
@@ -2930,15 +2983,6 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
             ))}
           </div>
         </div>
-
-        {/* Scroll hint — minimal */}
-        {totalRounds > 1 && (
-          <div className="py-2 text-center" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-            <p style={{ fontSize: '10px', color: 'rgba(255,255,255,0.25)', fontWeight: 500 }}>
-              ← swipe to see all rounds →
-            </p>
-          </div>
-        )}
       </div>
     </div>
   );

@@ -41,7 +41,7 @@ const ConfigStepper = ({ label, sub, value, min, max, step, onChange }) => (
       <button
         onClick={() => onChange(Math.min(max, value + step))}
         className="w-9 h-9 rounded-xl flex items-center justify-center transition-all active:scale-90"
-        style={{ background: 'rgba(0,212,255,0.12)', border: '1px solid rgba(0,212,255,0.25)', color: B.cyan }}
+        style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.25)', color: B.cyan }}
       >
         <Plus className="w-4 h-4" />
       </button>
@@ -524,7 +524,7 @@ const MatchScoringPage = () => {
             <div className="text-center">
               <div className="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center text-3xl font-black mb-2"
                 style={p1Sets > p2Sets
-                  ? { background: 'rgba(6,182,212,0.15)', border: '1.5px solid rgba(6,182,212,0.4)', color: B.green }
+                  ? { background: 'rgba(6,182,212,0.15)', border: '1.5px solid rgba(245,158,11,0.4)', color: B.green }
                   : { background: 'rgba(255,255,255,0.05)', border: `1px solid ${B.border}`, color: 'rgba(255,255,255,0.7)' }}>
                 {p1Sets}
               </div>
@@ -544,7 +544,7 @@ const MatchScoringPage = () => {
             <div className="text-center">
               <div className="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center text-3xl font-black mb-2"
                 style={p2Sets > p1Sets
-                  ? { background: 'rgba(0,212,255,0.15)', border: '1.5px solid rgba(0,212,255,0.4)', color: B.cyan }
+                  ? { background: 'rgba(245,158,11,0.15)', border: '1.5px solid rgba(245,158,11,0.4)', color: B.cyan }
                   : { background: 'rgba(255,255,255,0.05)', border: `1px solid ${B.border}`, color: 'rgba(255,255,255,0.7)' }}>
                 {p2Sets}
               </div>
@@ -565,7 +565,7 @@ const MatchScoringPage = () => {
               <div className="p-3 space-y-2">
                 <button onClick={() => addPoint(1)} disabled={isPaused || !canScore}
                   className="w-full py-5 rounded-xl font-black text-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-                  style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)', color: '#050810', boxShadow: isPaused ? 'none' : '0 4px 16px rgba(6,182,212,0.35)' }}>
+                  style={{ background: 'linear-gradient(135deg,#F59E0B,#D97706)', color: '#050810', boxShadow: isPaused ? 'none' : '0 4px 16px rgba(245,158,11,0.35)' }}>
                   <Plus className="w-6 h-6" /> Point
                 </button>
                 <button onClick={() => removePoint(1)} disabled={isPaused || !canScore}
@@ -584,7 +584,7 @@ const MatchScoringPage = () => {
               <div className="p-3 space-y-2">
                 <button onClick={() => addPoint(2)} disabled={isPaused || !canScore}
                   className="w-full py-5 rounded-xl font-black text-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-                  style={{ background: 'linear-gradient(135deg,#00a3cc,#00d4ff)', color: '#050810', boxShadow: isPaused ? 'none' : '0 4px 16px rgba(0,212,255,0.35)' }}>
+                  style={{ background: 'linear-gradient(135deg,#F59E0B,#D97706)', color: '#050810', boxShadow: isPaused ? 'none' : '0 4px 16px rgba(245,158,11,0.35)' }}>
                   <Plus className="w-6 h-6" /> Point
                 </button>
                 <button onClick={() => removePoint(2)} disabled={isPaused || !canScore}
@@ -619,7 +619,7 @@ const MatchScoringPage = () => {
           <div className="max-w-lg mx-auto">
             <button onClick={handleStartMatch} disabled={saving}
               className="w-full py-4 rounded-2xl font-black text-base transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-              style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)', color: '#050810', boxShadow: '0 4px 20px rgba(6,182,212,0.4)' }}>
+              style={{ background: 'linear-gradient(135deg,#F59E0B,#D97706)', color: '#050810', boxShadow: '0 4px 20px rgba(245,158,11,0.4)' }}>
               {saving
                 ? <><div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#050810 transparent transparent transparent' }} />Starting…</>
                 : <><Play className="w-5 h-5" />START MATCH — {p1Display} vs {p2Display}</>}
@@ -664,7 +664,7 @@ const MatchScoringPage = () => {
               <>
                 <div className="px-5 pt-6 pb-4 text-center">
                   <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3"
-                    style={{ background: 'rgba(6,182,212,0.15)', border: '1px solid rgba(6,182,212,0.35)' }}>
+                    style={{ background: 'rgba(6,182,212,0.15)', border: '1px solid rgba(245,158,11,0.35)' }}>
                     <Trophy className="w-7 h-7" style={{ color: B.green }} />
                   </div>
                   <h2 className="text-lg font-black text-white mb-1">Set {completedSetData.setNumber} Complete!</h2>
@@ -676,7 +676,7 @@ const MatchScoringPage = () => {
                 <div className="px-5 pb-5 space-y-2">
                   <button onClick={handleContinueToNextSet}
                     className="w-full py-3.5 rounded-xl font-black text-sm transition-all flex items-center justify-center gap-2"
-                    style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)', color: '#050810', boxShadow: '0 4px 16px rgba(6,182,212,0.35)' }}>
+                    style={{ background: 'linear-gradient(135deg,#F59E0B,#D97706)', color: '#050810', boxShadow: '0 4px 16px rgba(245,158,11,0.35)' }}>
                     <Play className="w-4 h-4" /> Continue to Set {completedSetData.setNumber + 1}
                   </button>
                   <button onClick={handleEndMatchEarly}
@@ -706,7 +706,7 @@ const MatchScoringPage = () => {
             <div className="p-5 space-y-2.5">
               <button onClick={() => handleEndMatch(match.player1?.id)} disabled={saving}
                 className="w-full py-3.5 rounded-xl font-black text-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-                style={{ background: 'linear-gradient(135deg,#0891b2,#06b6d4)', color: '#050810' }}>
+                style={{ background: 'linear-gradient(135deg,#F59E0B,#D97706)', color: '#050810' }}>
                 <Trophy className="w-4 h-4" /> {p1Display} Wins
               </button>
               <button onClick={() => handleEndMatch(match.player2?.id)} disabled={saving}
@@ -760,7 +760,7 @@ const MatchTimerDisplay = ({ timer, isPaused }) => {
         <span>Started {fmtTime(timer?.startedAt)}</span>
       </div>
       <div className="flex items-center gap-2">
-        <Clock className="w-4 h-4" style={{ color: isPaused ? '#fbbf24' : '#06b6d4' }} />
+        <Clock className="w-4 h-4" style={{ color: isPaused ? '#fbbf24' : '#F59E0B' }} />
         <span className="text-xl font-black font-mono" style={{ color: isPaused ? '#fbbf24' : '#fff' }}>
           {fmt(displayTime)}
         </span>
@@ -770,4 +770,5 @@ const MatchTimerDisplay = ({ timer, isPaused }) => {
 };
 
 export default MatchScoringPage;
+
 

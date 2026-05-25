@@ -15,7 +15,7 @@ import {
 import { StarIcon } from '@heroicons/react/24/solid';
 
 // Dense sparkle field — matches logo background
-const HOME_M_PARTICLES = Array.from({ length: 60 }, (_, i) => ({
+const HOME_M_PARTICLES = Array.from({ length: 35 }, (_, i) => ({
   w: [1,1,1,2,2,3][i % 6],
   h: [1,1,1,2,2,3][i % 6],
   x: (i * 37 + 11) % 97,
@@ -154,30 +154,42 @@ const HomePageMobile = () => {
           }}
         >
           <div className="max-w-md mx-auto px-4 py-2.5 flex items-center justify-between">
-            <Link to="/" className="flex items-center">
+            <Link to="/" className="flex items-center flex-shrink-0">
               <MatchifyLogo size={52} variant="full" />
             </Link>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2.5">
               <Link
                 to="/login"
-                className="px-4 py-2 rounded-lg font-semibold text-sm"
+                className="flex items-center justify-center rounded-lg font-semibold"
                 style={{
-                  background: 'rgba(255,255,255,0.06)',
-                  border: '1px solid rgba(255,255,255,0.12)',
-                  color: '#ffffff',
+                  height: '36px',
+                  paddingLeft: '16px',
+                  paddingRight: '16px',
+                  fontSize: '14px',
+                  background: 'rgba(255,255,255,0.07)',
+                  border: '1px solid rgba(255,255,255,0.15)',
+                  color: 'rgba(255,255,255,0.88)',
+                  letterSpacing: '0.01em',
+                  whiteSpace: 'nowrap',
                 }}
               >
-                Sign in
+                Login
               </Link>
               <Link
                 to="/register"
-                className="px-4 py-2 rounded-lg font-bold text-sm"
+                className="flex items-center justify-center rounded-lg font-bold"
                 style={{
+                  height: '36px',
+                  paddingLeft: '16px',
+                  paddingRight: '16px',
+                  fontSize: '14px',
                   background: 'linear-gradient(135deg, #06b6d4, #0891b2)',
                   color: '#ffffff',
+                  letterSpacing: '0.01em',
+                  whiteSpace: 'nowrap',
                 }}
               >
-                Sign up
+                Sign Up
               </Link>
             </div>
           </div>
@@ -297,7 +309,7 @@ const HomePageMobile = () => {
         {/* ═══════════════════════════════════════════════════════════
             HERO — first screen, must be stunning
         ══════════════════════════════════════════════════════════════ */}
-        <div className="text-center mb-8" style={{ animation: 'fadeIn 0.8s ease-out' }}>
+        <div className="text-center mb-6" style={{ animation: 'fadeIn 0.8s ease-out' }}>
 
           {/* Logo with layered glow */}
           <div className="flex justify-center mb-5 relative" style={{ animation: 'scaleIn 0.6s ease-out' }}>
@@ -359,10 +371,10 @@ const HomePageMobile = () => {
           </h1>
 
           {/* Sub-headline */}
-          <p className="text-sm font-medium px-4 mb-1" style={{ color: 'rgba(255,255,255,0.6)', animation: 'fadeIn 1s ease-out 0.4s both' }}>
-            Join <span className="font-black" style={{ color: '#06b6d4' }}>2,500+</span> players across India
+          <p className="text-sm font-medium px-4 mb-1" style={{ color: 'rgba(255,255,255,0.75)', animation: 'fadeIn 1s ease-out 0.4s both' }}>
+            Join <span className="font-black" style={{ color: '#22d3ee' }}>2,500+</span> players across India
           </p>
-          <p className="text-sm px-6 mb-6" style={{ color: 'rgba(255,255,255,0.45)', animation: 'fadeIn 1s ease-out 0.5s both' }}>
+          <p className="text-sm px-4 mb-6" style={{ color: 'rgba(255,255,255,0.58)', animation: 'fadeIn 1s ease-out 0.5s both' }}>
             Register for tournaments · track progress · compete with the best
           </p>
 

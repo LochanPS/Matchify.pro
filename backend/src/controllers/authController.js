@@ -249,7 +249,7 @@ export const register = async (req, res) => {
     const token = jwt.sign(
       { userId: user.id, email: user.email, roles: userRoles },
       process.env.JWT_SECRET,
-      { expiresIn: '7d' }
+      { expiresIn: process.env.JWT_EXPIRE || '7d' }
     );
 
     res.status(201).json({
@@ -328,7 +328,7 @@ export const login = async (req, res) => {
       const token = jwt.sign(
         { userId: adminId, email: ADMIN_EMAIL, roles: ['ADMIN'], isAdmin: true },
         process.env.JWT_SECRET,
-        { expiresIn: '7d' }
+        { expiresIn: process.env.JWT_EXPIRE || '7d' }
       );
 
       return res.json({
@@ -452,7 +452,7 @@ export const login = async (req, res) => {
     const token = jwt.sign(
       { userId: user.id, email: user.email, roles: userRoles, isAdmin: isAdminUser },
       process.env.JWT_SECRET,
-      { expiresIn: '7d' }
+      { expiresIn: process.env.JWT_EXPIRE || '7d' }
     );
 
     res.json({
@@ -616,7 +616,7 @@ export const addRole = async (req, res) => {
     });
   } catch (error) {
     console.error('Add role error:', error);
-    res.status(500).json({ error: 'Failed to add role', details: error.message });
+    res.status(500).json({ error: 'Failed to add role', ...(process.env.NODE_ENV !== 'production' && { details: error.message }) });
   }
 };
 
@@ -668,6 +668,6 @@ export const getVerificationStatus = async (req, res) => {
     });
   } catch (error) {
     console.error('Get verification status error:', error);
-    res.status(500).json({ error: 'Failed to get verification status', details: error.message });
+    res.status(500).json({ error: 'Failed to get verification status', ...(process.env.NODE_ENV !== 'production' && { details: error.message }) });
   }
 };

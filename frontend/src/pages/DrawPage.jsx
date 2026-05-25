@@ -3345,7 +3345,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                         padding: '9px 8px',
                         gap: '4px',
                         marginBottom: '3px',
-                        minHeight: isDoubles ? '54px' : '44px',
+                        minHeight: isDoubles ? '62px' : '44px',
                         background: pi === 0 ? 'rgba(245,158,11,0.07)' : 'rgba(15,22,36,0.65)',
                         borderLeft: pi === 0 ? '3px solid #F59E0B' : '3px solid transparent',
                       }}
@@ -3376,8 +3376,8 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                         {p.id ? (
                           <>
                             <p
-                              className="truncate font-semibold"
-                              style={{ fontSize: '13px', lineHeight: '1.3', color: '#f8fafc' }}
+                              className="truncate"
+                              style={{ fontSize: '13px', lineHeight: '1.35', color: '#ffffff', fontWeight: 600 }}
                               title={line1}
                             >
                               {line1}
@@ -3385,7 +3385,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                             {line2 && (
                               <p
                                 className="truncate"
-                                style={{ fontSize: '11px', lineHeight: '1.3', color: '#64748b', marginTop: '1px' }}
+                                style={{ fontSize: '13px', lineHeight: '1.35', color: 'rgba(255,255,255,0.72)', fontWeight: 500, marginTop: '2px' }}
                                 title={line2}
                               >
                                 {line2}

@@ -2680,7 +2680,7 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
   const CARD_W  = 200;
   const CONN_W  = 40;
   const SLOT_H  = 260;
-  const LINE    = 'rgba(6,182,212,0.28)';
+  const LINE    = 'rgba(6,182,212,0.55)';
 
   return (
     <div className="p-3">
@@ -2779,17 +2779,19 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                               <div
                                 className={isLive ? 'animate-pulse' : ''}
                                 style={{
-                                  background: '#0d1525',
+                                  background: 'linear-gradient(160deg, #0f1d30 0%, #080e1b 100%)',
                                   border: isLive
-                                    ? '1.5px solid rgba(6,182,212,0.5)'
+                                    ? '1.5px solid rgba(6,182,212,0.6)'
                                     : isCompleted
-                                    ? '1px solid rgba(6,182,212,0.16)'
-                                    : '1px solid rgba(255,255,255,0.08)',
+                                    ? '1px solid rgba(6,182,212,0.3)'
+                                    : '1px solid rgba(255,255,255,0.1)',
                                   borderRadius: '14px',
                                   overflow: 'hidden',
                                   boxShadow: isLive
-                                    ? '0 0 18px rgba(6,182,212,0.07)'
-                                    : '0 2px 10px rgba(0,0,0,0.3)',
+                                    ? '0 0 28px rgba(6,182,212,0.22), 0 4px 16px rgba(0,0,0,0.5)'
+                                    : isCompleted
+                                    ? '0 4px 20px rgba(0,0,0,0.55), 0 0 0 1px rgba(6,182,212,0.1)'
+                                    : '0 2px 14px rgba(0,0,0,0.4)',
                                 }}
                               >
                                 {/* Match header */}
@@ -2810,7 +2812,10 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                                     </span>
                                   )}
                                   {isCompleted && !isLive && (
-                                    <span style={{ fontSize: '10px', fontWeight: 700, color: '#4ade80' }}>✓ Done</span>
+                                    <span
+                                      className="flex items-center gap-1 px-2 py-0.5 rounded-full"
+                                      style={{ background: 'rgba(74,222,128,0.12)', border: '1px solid rgba(74,222,128,0.28)', fontSize: '9px', fontWeight: 700, color: '#4ade80' }}
+                                    >✓ Done</span>
                                   )}
                                   {!isCompleted && !isLive && isTbd1 !== isTbd2 && (
                                     <span style={{ fontSize: '9px', fontWeight: 700, color: '#fbbf24' }}>BYE</span>
@@ -2825,23 +2830,23 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                                     style={{
                                       padding: '10px 10px',
                                       marginBottom: '2px',
-                                      background: isPlayer1Winner ? 'rgba(6,182,212,0.1)' : isTbd1 ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.04)',
-                                      border: `1px solid ${isPlayer1Winner ? 'rgba(6,182,212,0.2)' : 'rgba(255,255,255,0.06)'}`,
-                                      borderLeft: isPlayer1Winner ? '3px solid #06b6d4' : '3px solid transparent',
+                                      background: isPlayer1Winner ? 'rgba(6,182,212,0.17)' : isTbd1 ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.05)',
+                                      border: `1px solid ${isPlayer1Winner ? 'rgba(6,182,212,0.38)' : 'rgba(255,255,255,0.07)'}`,
+                                      borderLeft: isPlayer1Winner ? '3px solid #22d3ee' : '3px solid transparent',
                                     }}
                                   >
                                     <span
                                       className="truncate flex-1"
                                       style={{
                                         fontSize: '12px', lineHeight: 1.35,
-                                        color: isTbd1 ? 'rgba(255,255,255,0.22)' : isPlayer1Winner ? '#ffffff' : isCompleted ? 'rgba(255,255,255,0.68)' : '#e2e8f0',
+                                        color: isTbd1 ? 'rgba(255,255,255,0.3)' : '#ffffff',
                                         fontStyle: isTbd1 ? 'italic' : 'normal',
-                                        fontWeight: isPlayer1Winner ? 700 : 500,
+                                        fontWeight: isPlayer1Winner ? 700 : 600,
                                       }}
                                     >{player1Name}</span>
                                     {isPlayer1Winner && (
                                       <span className="flex-shrink-0 ml-2 flex items-center justify-center rounded-full"
-                                        style={{ width: '18px', height: '18px', background: 'rgba(6,182,212,0.18)', fontSize: '8px', fontWeight: 800, color: '#22d3ee' }}>W</span>
+                                        style={{ width: '20px', height: '20px', background: 'rgba(6,182,212,0.3)', border: '1px solid rgba(6,182,212,0.5)', fontSize: '9px', fontWeight: 800, color: '#ffffff' }}>W</span>
                                     )}
                                   </div>
 
@@ -2858,23 +2863,23 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                                     style={{
                                       padding: '10px 10px',
                                       marginTop: '2px',
-                                      background: isPlayer2Winner ? 'rgba(6,182,212,0.1)' : isTbd2 ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.04)',
-                                      border: `1px solid ${isPlayer2Winner ? 'rgba(6,182,212,0.2)' : 'rgba(255,255,255,0.06)'}`,
-                                      borderLeft: isPlayer2Winner ? '3px solid #06b6d4' : '3px solid transparent',
+                                      background: isPlayer2Winner ? 'rgba(6,182,212,0.17)' : isTbd2 ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.05)',
+                                      border: `1px solid ${isPlayer2Winner ? 'rgba(6,182,212,0.38)' : 'rgba(255,255,255,0.07)'}`,
+                                      borderLeft: isPlayer2Winner ? '3px solid #22d3ee' : '3px solid transparent',
                                     }}
                                   >
                                     <span
                                       className="truncate flex-1"
                                       style={{
                                         fontSize: '12px', lineHeight: 1.35,
-                                        color: isTbd2 ? 'rgba(255,255,255,0.22)' : isPlayer2Winner ? '#ffffff' : isCompleted ? 'rgba(255,255,255,0.68)' : '#e2e8f0',
+                                        color: isTbd2 ? 'rgba(255,255,255,0.3)' : '#ffffff',
                                         fontStyle: isTbd2 ? 'italic' : 'normal',
-                                        fontWeight: isPlayer2Winner ? 700 : 500,
+                                        fontWeight: isPlayer2Winner ? 700 : 600,
                                       }}
                                     >{player2Name}</span>
                                     {isPlayer2Winner && (
                                       <span className="flex-shrink-0 ml-2 flex items-center justify-center rounded-full"
-                                        style={{ width: '18px', height: '18px', background: 'rgba(6,182,212,0.18)', fontSize: '8px', fontWeight: 800, color: '#22d3ee' }}>W</span>
+                                        style={{ width: '20px', height: '20px', background: 'rgba(6,182,212,0.3)', border: '1px solid rgba(6,182,212,0.5)', fontSize: '9px', fontWeight: 800, color: '#ffffff' }}>W</span>
                                     )}
                                   </div>
                                 </div>

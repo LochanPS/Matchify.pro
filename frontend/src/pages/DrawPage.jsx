@@ -55,6 +55,9 @@ const ARRANGE_PARTICLES = Array.from({ length: 18 }, (_, i) => ({
   glow: (i * 17) % 25 + 15,
 }));
 
+// Polling interval for live match updates (ms) — increase to reduce server load
+const MATCH_POLL_INTERVAL_MS = 15000;
+
 // Utility function to display player names with partner names for doubles
 const getPlayerDisplay = (player) => {
   if (!player || !player.name || player.name === 'TBD') return 'TBD';
@@ -93,6 +96,7 @@ const DrawPage = () => {
   const [selectedMatchForUmpire, setSelectedMatchForUmpire] = useState(null);
   const pollIntervalRef = React.useRef(null);
   const activeCategoryIdRef = React.useRef(null); // stable ref for polling closure
+  const fetchInProgressRef = React.useRef(false); // guard against overlapping fetches
   const [tournamentStats, setTournamentStats] = useState({
     totalPlayers: 0,
     confirmedPlayers: 0,
@@ -126,6 +130,9 @@ const DrawPage = () => {
   // ─── Combined draw-page fetch (single round trip, auto-retry once on 500) ───
   const fetchDrawPageFull = async (catId, _retryCount = 0) => {
     if (!tournamentId || !catId) return;
+    // Prevent overlapping fetches — if one is already in-flight, skip
+    if (fetchInProgressRef.current && _retryCount === 0) return;
+    fetchInProgressRef.current = true;
 
     // ── Option A: show cached draw instantly ─────────────────────────────────
     const cached = getDrawCache(tournamentId, catId);
@@ -181,7 +188,14 @@ const DrawPage = () => {
       let bracketData = null;
       if (draw) {
         bracketData = draw.bracketJson;
-        if (typeof bracketData === 'string') bracketData = JSON.parse(bracketData);
+        if (typeof bracketData === 'string') {
+          try {
+            bracketData = JSON.parse(bracketData);
+          } catch (parseErr) {
+            console.error('❌ Failed to parse bracketJson:', parseErr);
+            bracketData = null;
+          }
+        }
         setBracket(bracketData);
       } else {
         if (!cached) setBracket(null);
@@ -222,6 +236,7 @@ const DrawPage = () => {
     } finally {
       setLoading(false);
       setBracketLoading(false);
+      fetchInProgressRef.current = false;
     }
   };
 
@@ -258,8 +273,10 @@ const DrawPage = () => {
   // then this effect fires and fetches draw+matches+stats.
   useEffect(() => {
     if (!tournamentId || !activeCategory?.id || categoryId) return;
+    fetchInProgressRef.current = false; // reset guard on category change
     fetchDrawPageFull(activeCategory.id);
-  }, [activeCategory?.id]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tournamentId, activeCategory?.id, categoryId]);
 
   // Check if round robin stage is complete
   const isRoundRobinComplete = () => {
@@ -323,7 +340,7 @@ const DrawPage = () => {
     // Start polling
     pollIntervalRef.current = setInterval(() => {
       fetchMatchesOnly(activeCategoryIdRef.current);
-    }, 15000);
+    }, MATCH_POLL_INTERVAL_MS);
 
     return () => {
       if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
@@ -348,7 +365,10 @@ const DrawPage = () => {
     api
       .post(`/tournaments/${tournamentId}/categories/${activeCategory.id}/draw/repair-knockout`)
       .then(() => fetchBracket())
-      .catch(() => {}); // silent — never surface errors to user
+      .catch((err) => {
+        // Log for debugging but don't surface to user — repair failure is non-critical
+        console.warn('⚠️ Auto-repair knockout failed (non-critical):', err?.response?.status, err?.message);
+      });
   }, [user?.id, tournament?.organizerId, bracket?.format, activeStage, activeCategory?.id, tournamentId]);
 
   const fetchTournamentData = async () => {
@@ -557,6 +577,11 @@ const DrawPage = () => {
   };
 
   const handleCategoryChange = (category) => {
+    // Clear any open match details modal — stale data from previous category
+    setShowMatchDetailsModal(false);
+    setSelectedMatchDetails(null);
+    // Reset fetch guard so new category fetch isn't blocked
+    fetchInProgressRef.current = false;
     setActiveCategory(category);
     navigate(`/tournaments/${tournamentId}/draws/${category.id}`);
   };
@@ -2074,33 +2099,35 @@ const DrawPage = () => {
                   </div>
                 )}
                 {/* Started At - check both startTime and startedAt */}
-                {(selectedMatchDetails.startTime || selectedMatchDetails.startedAt) && (
-                  <div className="space-y-1">
-                    <p className="text-gray-400 text-xs uppercase tracking-wider">Started At</p>
-                    <p className="text-white font-semibold text-xs">
-                      {new Date(selectedMatchDetails.startTime || selectedMatchDetails.startedAt).toLocaleString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
-                    </p>
-                  </div>
-                )}
+                {(() => {
+                  const raw = selectedMatchDetails.startTime || selectedMatchDetails.startedAt;
+                  if (!raw) return null;
+                  const d = new Date(raw);
+                  if (isNaN(d.getTime())) return null;
+                  return (
+                    <div className="space-y-1">
+                      <p className="text-gray-400 text-xs uppercase tracking-wider">Started At</p>
+                      <p className="text-white font-semibold text-xs">
+                        {d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                  );
+                })()}
                 {/* Ended At - check both endTime and completedAt */}
-                {(selectedMatchDetails.endTime || selectedMatchDetails.completedAt) && (
-                  <div className="space-y-1">
-                    <p className="text-gray-400 text-xs uppercase tracking-wider">Ended At</p>
-                    <p className="text-white font-semibold text-xs">
-                      {new Date(selectedMatchDetails.endTime || selectedMatchDetails.completedAt).toLocaleString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
-                    </p>
-                  </div>
-                )}
+                {(() => {
+                  const raw = selectedMatchDetails.endTime || selectedMatchDetails.completedAt;
+                  if (!raw) return null;
+                  const d = new Date(raw);
+                  if (isNaN(d.getTime())) return null;
+                  return (
+                    <div className="space-y-1">
+                      <p className="text-gray-400 text-xs uppercase tracking-wider">Ended At</p>
+                      <p className="text-white font-semibold text-xs">
+                        {d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                  );
+                })()}
                 {/* Duration - check multiple sources */}
                 {(() => {
                   // Try to get duration from multiple sources
@@ -2123,7 +2150,10 @@ const DrawPage = () => {
                     const startTime = selectedMatchDetails.startTime || selectedMatchDetails.startedAt;
                     const endTime = selectedMatchDetails.endTime || selectedMatchDetails.completedAt;
                     if (startTime && endTime) {
-                      durationSeconds = Math.floor((new Date(endTime) - new Date(startTime)) / 1000);
+                      const s = new Date(startTime), e = new Date(endTime);
+                      if (!isNaN(s.getTime()) && !isNaN(e.getTime()) && e > s) {
+                        durationSeconds = Math.floor((e - s) / 1000);
+                      }
                     }
                   }
                   
@@ -3008,7 +3038,7 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
 const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onChangeResult, onViewMatchDetails, categoryFormat }) => {
   const navigate = useNavigate();
   const [activeGroupIdx, setActiveGroupIdx] = React.useState(null); // null = all hidden, number = show that group's matches
-  if (!data?.groups) return <p className="text-gray-400 text-center p-8">No group data</p>;
+  if (!data?.groups || !Array.isArray(data.groups)) return <p className="text-gray-400 text-center p-8">No group data</p>;
 
   // Find database matches for each group match
   const findDbMatch = (groupMatch, groupIndex) => {
@@ -3077,7 +3107,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
 
             {/* Rows */}
             <div>
-              {group.participants
+              {(group.participants || [])
                 .sort((a, b) => {
                   if ((b.points || 0) !== (a.points || 0)) return (b.points || 0) - (a.points || 0);
                   const aDiff = (a.totalPoints || 0) - (a.totalPointsAgainst || 0);

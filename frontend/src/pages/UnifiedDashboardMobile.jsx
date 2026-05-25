@@ -395,7 +395,7 @@ const UnifiedDashboardMobile = () => {
                 }}>
                 <TrophyIcon className="w-6 h-6 text-white" />
               </div>
-              <span className="text-xs font-black text-center" style={{ color: '#fcd34d', textShadow: '0 0 10px rgba(245,158,11,0.65)' }}>Tournaments</span>
+              <span className="text-xs font-black text-center text-white">Tournaments</span>
             </Link>
             {/* Leaderboard — amber */}
             <Link to="/leaderboard" className="flex flex-col items-center gap-2.5 p-4 rounded-2xl transition-all active:scale-95"
@@ -412,7 +412,7 @@ const UnifiedDashboardMobile = () => {
                 }}>
                 <ChartBarIcon className="w-6 h-6 text-white" />
               </div>
-              <span className="text-xs font-black text-center" style={{ color: '#fcd34d', textShadow: '0 0 10px rgba(245,158,11,0.65)' }}>Leaderboard</span>
+              <span className="text-xs font-black text-center text-white">Leaderboard</span>
             </Link>
             {/* Academies — violet */}
             <Link to="/academies" className="flex flex-col items-center gap-2.5 p-4 rounded-2xl transition-all active:scale-95"
@@ -429,7 +429,7 @@ const UnifiedDashboardMobile = () => {
                 }}>
                 <UserIcon className="w-6 h-6 text-white" />
               </div>
-              <span className="text-xs font-black text-center" style={{ color: '#c4b5fd', textShadow: '0 0 10px rgba(139,92,246,0.65)' }}>Academies</span>
+              <span className="text-xs font-black text-center text-white">Academies</span>
             </Link>
           </div>
         </div>

@@ -21,7 +21,7 @@ const HOME_M_PARTICLES = Array.from({ length: 35 }, (_, i) => ({
   x: (i * 37 + 11) % 97,
   y: (i * 53 + 7)  % 99,
   c: ['#00ffcc','#FCD34D','#ffffff','#a0f0e0','#7df9ff','#F59E0B'][(i * 3) % 6],
-  o: ((i * 17) % 55) / 100 + 0.15,
+  o: ((i * 17) % 50) / 100 + 0.40,
   dur: (i * 7) % 12 + 4,
   delay: (i * 3) % 6,
   glow: (i * 11) % 14 + 4,
@@ -30,8 +30,8 @@ const HOME_M_PARTICLES = Array.from({ length: 35 }, (_, i) => ({
 
 // Ambient blobs — 2 only, very subtle
 const NEBULAS = [
-  { x: 75, y:  3, size: 440, color: 'rgba(245,158,11,0.08)', dur: 10, delay: 0 },
-  { x: 10, y: 70, size: 400, color: 'rgba(139,92,246,0.06)', dur: 13, delay: 3 },
+  { x: 75, y:  3, size: 440, color: 'rgba(245,158,11,0.15)', dur: 10, delay: 0 },
+  { x: 10, y: 70, size: 400, color: 'rgba(139,92,246,0.12)', dur: 13, delay: 3 },
 ];
 
 // Authentic reviews from real-sounding Indian badminton players

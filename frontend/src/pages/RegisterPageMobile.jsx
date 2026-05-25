@@ -147,22 +147,23 @@ const RegisterPageMobile = () => {
             <MatchifyLogo size={44} />
           </Link>
 
-          {/* Sign In Button */}
-          <Link 
+          {/* Login Button */}
+          <Link
             to={redirectUrl ? `/login?redirect=${encodeURIComponent(redirectUrl)}` : '/login'}
-            className="px-4 py-2 rounded-lg font-semibold text-sm transition-all relative overflow-hidden group"
-            style={{ 
-              background: 'linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.05))', 
+            className="flex items-center justify-center rounded-lg font-semibold"
+            style={{
+              height: '36px',
+              paddingLeft: '16px',
+              paddingRight: '16px',
+              fontSize: '14px',
+              background: 'rgba(255,255,255,0.07)',
               border: '1px solid rgba(255,255,255,0.15)',
-              color: '#ffffff',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+              color: 'rgba(255,255,255,0.88)',
+              letterSpacing: '0.01em',
+              whiteSpace: 'nowrap',
             }}
           >
-            <div 
-              className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
-              style={{ background: 'rgba(255,255,255,0.05)' }}
-            />
-            <span className="relative z-10">Sign in</span>
+            Login
           </Link>
         </div>
       </div>

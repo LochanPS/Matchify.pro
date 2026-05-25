@@ -108,20 +108,21 @@ const LoginPageMobile = () => {
           </Link>
 
           {/* Sign Up Button */}
-          <Link 
+          <Link
             to={redirectUrl ? `/register?redirect=${encodeURIComponent(redirectUrl)}` : '/register'}
-            className="px-4 py-2 rounded-lg font-bold text-sm transition-all relative overflow-hidden group"
-            style={{ 
-              background: 'linear-gradient(135deg, #06b6d4, #06b6d4)',
-              color: '#050810',
-              boxShadow: '0 4px 12px rgba(6,182,212,0.4), inset 0 1px 0 rgba(255,255,255,0.3)'
+            className="flex items-center justify-center rounded-lg font-bold"
+            style={{
+              height: '36px',
+              paddingLeft: '16px',
+              paddingRight: '16px',
+              fontSize: '14px',
+              background: 'linear-gradient(135deg, #06b6d4, #0891b2)',
+              color: '#ffffff',
+              letterSpacing: '0.01em',
+              whiteSpace: 'nowrap',
             }}
           >
-            <div 
-              className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity"
-              style={{ background: 'rgba(255,255,255,0.2)' }}
-            />
-            <span className="relative z-10">Sign up</span>
+            Sign Up
           </Link>
         </div>
       </div>

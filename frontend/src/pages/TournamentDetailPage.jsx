@@ -488,7 +488,7 @@ const TournamentDetailPage = () => {
   const getStatusStyle = (status) => {
     const styles = {
       published: { bg: 'bg-green-100', text: 'text-green-700', label: 'Open for Registration', inlineBg: 'rgba(245,158,11,0.15)', inlineColor: '#F59E0B', inlineBorder: 'rgba(245,158,11,0.3)' },
-      ongoing:   { bg: 'bg-blue-100',  text: 'text-blue-700',  label: 'Ongoing',               inlineBg: 'rgba(59,130,246,0.15)', inlineColor: '#60a5fa', inlineBorder: 'rgba(59,130,246,0.3)' },
+      ongoing:   { bg: 'bg-emerald-100', text: 'text-emerald-700', label: 'Ongoing',             inlineBg: 'rgba(16,185,129,0.15)', inlineColor: '#34D399', inlineBorder: 'rgba(16,185,129,0.3)' },
       completed: { bg: 'bg-gray-100',  text: 'text-gray-700',  label: 'Completed',             inlineBg: 'rgba(255,255,255,0.08)', inlineColor: 'rgba(255,255,255,0.6)', inlineBorder: 'rgba(255,255,255,0.15)' },
       draft:     { bg: 'bg-amber-100', text: 'text-amber-700', label: 'Draft',                 inlineBg: 'rgba(251,191,36,0.15)', inlineColor: '#fbbf24', inlineBorder: 'rgba(251,191,36,0.3)' },
       cancelled: { bg: 'bg-red-100',   text: 'text-red-700',   label: 'Cancelled',             inlineBg: 'rgba(239,68,68,0.15)',  inlineColor: '#f87171', inlineBorder: 'rgba(239,68,68,0.3)' },
@@ -627,8 +627,8 @@ const TournamentDetailPage = () => {
                   style={{
                     background: statusStyle.bg.includes('green') || statusStyle.bg.includes('emerald')
                       ? 'linear-gradient(135deg,#F59E0B,#F59E0B)'
-                      : statusStyle.bg.includes('blue')
-                      ? 'linear-gradient(135deg,#1d4ed8,#3b82f6)'
+                      : statusStyle.bg.includes('emerald')
+                      ? 'linear-gradient(135deg,#059669,#10B981)'
                       : 'linear-gradient(135deg,#b45309,#d97706)',
                     color: '#fff',
                     boxShadow: '0 2px 8px rgba(0,0,0,0.4)'
@@ -833,8 +833,8 @@ const TournamentDetailPage = () => {
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 bg-blue-500/20 border border-blue-500/30 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <ClockIcon className="h-5 w-5 text-blue-400" />
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.25)' }}>
+                    <ClockIcon className="h-5 w-5" style={{ color: '#F59E0B' }} />
                   </div>
                   <div className="min-w-0">
                     <p className="font-bold text-white text-sm">Registration Period</p>
@@ -924,7 +924,7 @@ const TournamentDetailPage = () => {
                             <span className="px-2 py-0.5 rounded-full text-xs font-medium border" style={{ background: 'rgba(245,158,11,0.12)', color: '#F59E0B', borderColor: 'rgba(245,158,11,0.3)' }}>
                               {category.format}
                             </span>
-                            <span className="px-2 py-0.5 rounded-full text-xs font-medium border" style={{ background: 'rgba(59,130,246,0.12)', color: '#60a5fa', borderColor: 'rgba(59,130,246,0.3)' }}>
+                            <span className="px-2 py-0.5 rounded-full text-xs font-medium border" style={{ background: 'rgba(139,92,246,0.12)', color: '#C4B5FD', borderColor: 'rgba(139,92,246,0.3)' }}>
                               {getGenderLabel(category.gender)}
                             </span>
                             {category.ageGroup && (
@@ -972,7 +972,7 @@ const TournamentDetailPage = () => {
                                   <span className="font-medium" style={{ color: '#F59E0B' }}>🥇 ₹{category.prizeWinner}</span>
                                 )}
                                 {category.prizeRunnerUp && (
-                                  <span className="font-medium" style={{ color: '#60a5fa' }}>🥈 ₹{category.prizeRunnerUp}</span>
+                                  <span className="font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>🥈 ₹{category.prizeRunnerUp}</span>
                                 )}
                                 {category.prizeSemiFinalist && (
                                   <span className="text-orange-400 font-medium">🥉 ₹{category.prizeSemiFinalist}</span>

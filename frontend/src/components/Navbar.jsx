@@ -109,7 +109,7 @@ const Navbar = () => {
 
   const getRoleColor = (role) => {
     switch (role) {
-      case 'PLAYER':   return { bg: 'bg-blue-500/20',   text: 'text-blue-400',   hover: 'hover:bg-blue-500/30',   dot: 'bg-blue-500' };
+      case 'PLAYER':   return { bg: 'bg-amber-500/20',  text: 'text-amber-400',  hover: 'hover:bg-amber-500/30',  dot: 'bg-amber-500' };
       case 'ORGANIZER':return { bg: 'bg-green-500/20',  text: 'text-green-400',  hover: 'hover:bg-green-500/30',  dot: 'bg-green-500' };
       case 'UMPIRE':   return { bg: 'bg-orange-500/20', text: 'text-orange-400', hover: 'hover:bg-orange-500/30', dot: 'bg-orange-500' };
       case 'ADMIN':    return { bg: 'bg-red-500/20',    text: 'text-red-400',    hover: 'hover:bg-red-500/30',    dot: 'bg-red-500' };
@@ -530,7 +530,7 @@ const MenuLink = ({ to, icon, children, onClick }) => (
 
 const MobileNavItem = ({ to, children, onClick, icon, color, active }) => {
   const palette = {
-    blue:   { bg: 'rgba(59,130,246,0.1)',  border: 'rgba(59,130,246,0.2)',  activeBg: 'rgba(59,130,246,0.18)',  text: '#60a5fa',  iconBg: 'rgba(59,130,246,0.2)' },
+    blue:   { bg: 'rgba(245,158,11,0.1)',  border: 'rgba(245,158,11,0.2)',  activeBg: 'rgba(245,158,11,0.18)',  text: '#FCD34D',  iconBg: 'rgba(245,158,11,0.2)' },
     orange: { bg: 'rgba(245,158,11,0.1)',  border: 'rgba(245,158,11,0.2)',  activeBg: 'rgba(245,158,11,0.18)',  text: '#fbbf24',  iconBg: 'rgba(245,158,11,0.2)' },
     cyan:   { bg: 'rgba(245,158,11,0.1)',   border: 'rgba(245,158,11,0.2)',   activeBg: 'rgba(245,158,11,0.18)',   text: '#FCD34D',  iconBg: 'rgba(245,158,11,0.2)' },
     purple: { bg: 'rgba(168,85,247,0.1)',  border: 'rgba(168,85,247,0.2)',  activeBg: 'rgba(168,85,247,0.2)',   text: '#c4b5fd',  iconBg: 'rgba(168,85,247,0.25)' },

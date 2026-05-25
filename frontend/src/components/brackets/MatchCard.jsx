@@ -82,9 +82,9 @@ const MatchCard = ({ match, onClick }) => {
 
       {/* Match Status Badge */}
       {status === 'IN_PROGRESS' && (
-        <div className="px-3 py-1.5 bg-blue-50 border-t border-blue-200">
-          <p className="text-xs text-blue-700 font-semibold flex items-center gap-1.5">
-            <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+        <div className="px-3 py-1.5 border-t" style={{ background: 'rgba(16,185,129,0.08)', borderColor: 'rgba(16,185,129,0.2)' }}>
+          <p className="text-xs font-semibold flex items-center gap-1.5" style={{ color: '#34D399' }}>
+            <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: '#10B981' }}></span>
             LIVE
           </p>
         </div>

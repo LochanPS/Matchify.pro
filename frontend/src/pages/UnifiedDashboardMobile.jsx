@@ -167,9 +167,9 @@ const UnifiedDashboardMobile = () => {
     UMPIRE: {
       name: 'Umpire',
       icon: '⚖️',
-      color: '#3b82f6',
-      bg: 'rgba(59,130,246,0.12)',
-      border: 'rgba(59,130,246,0.35)'
+      color: '#34D399',
+      bg: 'rgba(16,185,129,0.12)',
+      border: 'rgba(16,185,129,0.35)'
     }
   };
 
@@ -389,13 +389,13 @@ const UnifiedDashboardMobile = () => {
               }}>
               <div className="w-12 h-12 rounded-xl flex items-center justify-center"
                 style={{
-                  background: 'linear-gradient(135deg, #0e7490 0%, #0284c7 100%)',
+                  background: 'linear-gradient(135deg, #b45309 0%, #d97706 100%)',
                   border: '1px solid rgba(245,158,11,0.65)',
                   boxShadow: '0 4px 16px rgba(245,158,11,0.40)'
                 }}>
                 <TrophyIcon className="w-6 h-6 text-white" />
               </div>
-              <span className="text-xs font-black text-center" style={{ color: '#67e8f9', textShadow: '0 0 10px rgba(245,158,11,0.65)' }}>Tournaments</span>
+              <span className="text-xs font-black text-center" style={{ color: '#fcd34d', textShadow: '0 0 10px rgba(245,158,11,0.65)' }}>Tournaments</span>
             </Link>
             {/* Leaderboard — amber */}
             <Link to="/leaderboard" className="flex flex-col items-center gap-2.5 p-4 rounded-2xl transition-all active:scale-95"
@@ -867,11 +867,11 @@ const UnifiedDashboardMobile = () => {
                 borderTop: '1px solid rgba(255,255,255,0.09)',
                 borderRight: '1px solid rgba(255,255,255,0.09)',
                 borderBottom: '1px solid rgba(255,255,255,0.09)',
-                borderLeft: '3px solid #3b82f6'
+                borderLeft: '3px solid #34D399'
               }}>
                 <div className="inline-flex items-center justify-center w-11 h-11 rounded-xl mb-3"
-                  style={{ background: 'rgba(59,130,246,0.14)', border: '1px solid rgba(59,130,246,0.32)' }}>
-                  <FireIcon className="w-6 h-6" style={{ color: '#60a5fa' }} />
+                  style={{ background: 'rgba(16,185,129,0.14)', border: '1px solid rgba(16,185,129,0.32)' }}>
+                  <FireIcon className="w-6 h-6" style={{ color: '#34D399' }} />
                 </div>
                 <p className="text-3xl font-black mb-1 text-white">{user?.matchesUmpired || 0}</p>
                 <p className="text-xs" style={{ color: 'rgba(255,255,255,0.42)' }}>Matches Umpired</p>
@@ -1025,7 +1025,7 @@ const UnifiedDashboardMobile = () => {
                   style={{
                     background: 'rgba(245,158,11,0.09)',
                     border: '1px solid rgba(245,158,11,0.24)',
-                    color: '#67e8f9',
+                    color: '#FCD34D',
                   }}
                 >
                   <TrophyIcon className="w-5 h-5" />
@@ -1057,7 +1057,7 @@ const UnifiedDashboardMobile = () => {
                       <div className="flex-1 min-w-0">
                         <Link
                           to={`/tournaments/${reg.tournament?.id}`}
-                          className="font-bold text-white hover:text-cyan-300 transition-colors block truncate"
+                          className="font-bold text-white transition-colors block truncate" onMouseEnter={e=>e.currentTarget.style.color='#FCD34D'} onMouseLeave={e=>e.currentTarget.style.color='#fff'}
                         >
                           {reg.tournament?.name || 'Tournament'}
                         </Link>

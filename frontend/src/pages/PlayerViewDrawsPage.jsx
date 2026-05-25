@@ -182,9 +182,9 @@ const PlayerViewDrawsPage = () => {
                 <span className="text-sm font-medium" style={{ color: '#F59E0B' }}>Refresh</span>
               </button>
               {/* Read-only indicator */}
-              <div className="flex items-center gap-2 px-4 py-2 bg-blue-500/10 border border-blue-500/30 rounded-xl">
-                <Lock className="w-4 h-4 text-blue-400" />
-                <span className="text-sm text-blue-300 font-medium">View Only</span>
+              <div className="flex items-center gap-2 px-4 py-2 rounded-xl" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <Lock className="w-4 h-4" style={{ color: 'rgba(255,255,255,0.5)' }} />
+                <span className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>View Only</span>
               </div>
             </div>
           </div>
@@ -402,7 +402,7 @@ const PlayerViewDrawsPage = () => {
                         <p className="text-gray-400">{error}</p>
                         <button
                           onClick={() => fetchDraw(selectedCategory.id)}
-                          className="mt-4 px-4 py-2 bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-xl hover:bg-blue-500/30 transition-all"
+                          className="mt-4 px-4 py-2 rounded-xl transition-all" style={{ background: 'rgba(245,158,11,0.1)', color: '#FCD34D', border: '1px solid rgba(245,158,11,0.25)' }}
                         >
                           Try Again
                         </button>
@@ -986,7 +986,7 @@ const RoundRobinDraw = ({ data, onViewMatchDetails, categoryFormat, dbMatches = 
                               </span>
                             </td>
                             <td className="py-3 px-2 text-center">
-                              <span className="inline-flex items-center justify-center min-w-[28px] h-7 px-2 rounded-lg bg-blue-500/20 text-blue-400 font-bold text-xs">
+                              <span className="inline-flex items-center justify-center min-w-[28px] h-7 px-2 rounded-lg font-bold text-xs" style={{ background: 'rgba(245,158,11,0.15)', color: '#FCD34D' }}>
                                 {totalPointsScored}
                               </span>
                             </td>
@@ -1006,7 +1006,7 @@ const RoundRobinDraw = ({ data, onViewMatchDetails, categoryFormat, dbMatches = 
                   <span><span className="font-semibold text-gray-300">P</span> = Played</span>
                   <span><span className="font-semibold text-gray-300">W</span> = Wins</span>
                   <span><span className="font-semibold text-gray-300">L</span> = Losses</span>
-                  <span><span className="font-semibold text-blue-400">TP</span> = Total Points Scored</span>
+                  <span><span className="font-semibold" style={{ color: '#FCD34D' }}>TP</span> = Total Points Scored</span>
                   <span><span className="font-semibold text-amber-400">Pts</span> = Ranking Points</span>
                 </div>
               </div>
@@ -1014,7 +1014,7 @@ const RoundRobinDraw = ({ data, onViewMatchDetails, categoryFormat, dbMatches = 
               {/* Matches */}
               <div>
                 <div className="flex items-center gap-2 mb-4">
-                  <GitBranch className="w-4 h-4 text-blue-400" />
+                  <GitBranch className="w-4 h-4" style={{ color: '#F59E0B' }} />
                   <h5 className="text-sm font-bold text-gray-300 uppercase tracking-wider">Matches</h5>
                 </div>
                 {group.matches && group.matches.length > 0 ? (

@@ -134,7 +134,7 @@ const TournamentsPage = () => {
                 <span className="text-white font-semibold">1000+ Players</span>
               </div>
               <div className="flex items-center gap-2 px-4 py-2 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10">
-                <MapPin className="w-5 h-5 text-blue-400" />
+                <MapPin className="w-5 h-5" style={{ color: '#F59E0B' }} />
                 <span className="text-white font-semibold">Pan India</span>
               </div>
             </div>
@@ -250,9 +250,9 @@ const TournamentsPage = () => {
                       <div className="absolute top-4 right-4">
                         <span className={`px-3 py-1.5 rounded-full text-xs font-bold backdrop-blur-md ${
                           tournament.status === 'published' ? 'bg-green-500/90 text-white' :
-                          tournament.status === 'ongoing' ? 'bg-blue-500/90 text-white' : 'bg-amber-500/90 text-white'
+                          tournament.status === 'ongoing' ? 'bg-amber-500/90 text-white' : 'bg-amber-500/90 text-white'
                         }`}>
-                          {tournament.status === 'published' ? '🟢 Open' : tournament.status === 'ongoing' ? '🔵 Live' : '📝 Draft'}
+                          {tournament.status === 'published' ? '🟢 Open' : tournament.status === 'ongoing' ? '🔴 Live' : '📝 Draft'}
                         </span>
                       </div>
                       <div className="absolute bottom-4 left-4">

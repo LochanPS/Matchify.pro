@@ -498,7 +498,7 @@ const HomePageMobile = () => {
             }}>
             <div className="grid grid-cols-2">
               {[
-                { value: '2,500+', label: 'Players',     grad: 'linear-gradient(135deg, #67e8f9, #F59E0B)' },
+                { value: '2,500+', label: 'Players',     grad: 'linear-gradient(135deg, #FCD34D, #F59E0B)' },
                 { value: '80+',    label: 'Tournaments', grad: 'linear-gradient(135deg, #fde68a, #f59e0b)' },
                 { value: '30+',    label: 'Cities',      grad: 'linear-gradient(135deg, #fdba74, #f97316)' },
                 { value: '₹25L+',  label: 'Prize Pool',  grad: 'linear-gradient(135deg, #d8b4fe, #a855f7)' },

@@ -3285,7 +3285,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
           </div>
 
           {/* Standings */}
-          <div className="px-4 pt-3 pb-2">
+          <div className="px-2 pt-3 pb-2">
             {/* Section label */}
             <div className="flex items-center gap-1.5 mb-2">
               <Trophy className="w-3.5 h-3.5" style={{ color: '#F59E0B' }} />
@@ -3299,11 +3299,11 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                 <span style={{ fontSize: '9px', color: 'rgba(255,255,255,0.35)', fontWeight: 700, letterSpacing: '0.07em' }}>PLAYER</span>
               </div>
               {[
-                { h: 'P',   w: '26px', c: 'rgba(148,163,184,0.7)' },
-                { h: 'W',   w: '26px', c: 'rgba(74,222,128,0.85)' },
-                { h: 'L',   w: '26px', c: 'rgba(248,113,113,0.85)'},
-                { h: 'PTS', w: '32px', c: 'rgba(245,158,11,0.9)'  },
-                { h: 'TP',  w: '32px', c: 'rgba(196,181,253,0.9)' },
+                { h: 'P',   w: '22px', c: 'rgba(148,163,184,0.7)' },
+                { h: 'W',   w: '22px', c: 'rgba(74,222,128,0.85)' },
+                { h: 'L',   w: '22px', c: 'rgba(248,113,113,0.85)'},
+                { h: 'PTS', w: '28px', c: 'rgba(245,158,11,0.9)'  },
+                { h: 'TP',  w: '30px', c: 'rgba(196,181,253,0.9)' },
               ].map(({ h, w, c }) => (
                 <div key={h} style={{ width: w, flexShrink: 0, textAlign: 'center' }}>
                   <span style={{ fontSize: '9px', color: c, fontWeight: 700 }}>{h}</span>
@@ -3404,11 +3404,11 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                           Accent context comes from the column header labels only. */}
                       <div className="flex-shrink-0 flex items-center" style={{ gap: '0px' }}>
                         {[
-                          { val: (p.wins || 0) + (p.losses || 0), w: '26px', color: '#94a3b8' },
-                          { val: p.wins    || 0,                   w: '26px', color: '#ffffff', bold: true },
-                          { val: p.losses  || 0,                   w: '26px', color: '#ffffff', bold: true },
-                          { val: p.points  || 0,                   w: '32px', color: '#ffffff', bold: true },
-                          { val: p.totalPoints || 0,               w: '32px', color: '#ffffff', bold: true },
+                          { val: (p.wins || 0) + (p.losses || 0), w: '22px', color: '#94a3b8' },
+                          { val: p.wins    || 0,                   w: '22px', color: '#ffffff', bold: true },
+                          { val: p.losses  || 0,                   w: '22px', color: '#ffffff', bold: true },
+                          { val: p.points  || 0,                   w: '28px', color: '#ffffff', bold: true },
+                          { val: p.totalPoints || 0,               w: '30px', color: '#ffffff', bold: true },
                         ].map((s, si) => (
                           <div key={si} style={{ width: s.w, flexShrink: 0, textAlign: 'center' }}>
                             <span style={{ fontSize: '13px', fontWeight: s.bold ? 700 : 500, color: s.color, lineHeight: 1 }}>
@@ -3424,7 +3424,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
           </div>
 
           {/* Points System Legend */}
-          <div className="mx-4 mb-3 px-3 py-2.5 rounded-xl" style={{ background: 'rgba(11,16,32,0.6)', border: '1px solid rgba(255,255,255,0.05)' }}>
+          <div className="mx-2 mb-3 px-3 py-2.5 rounded-xl" style={{ background: 'rgba(11,16,32,0.6)', border: '1px solid rgba(255,255,255,0.05)' }}>
             <div className="flex items-center justify-center gap-4 flex-wrap mb-1.5">
               <div className="flex items-center gap-1.5">
                 <span className="w-5 h-5 rounded flex items-center justify-center text-[9px] font-bold"
@@ -3448,7 +3448,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
           </div>
 
           {/* View Matches button */}
-          <div className="px-4 pb-4" style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '12px' }}>
+          <div className="px-2 pb-4" style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '12px' }}>
             <button
               onClick={() => setActiveGroupIdx(gi)}
               className="w-full py-2.5 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all active:scale-95"

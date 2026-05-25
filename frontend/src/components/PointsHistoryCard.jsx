@@ -2,54 +2,57 @@ import React from 'react';
 import { Trophy, Calendar, Award } from 'lucide-react';
 
 const PointsHistoryCard = ({ log }) => {
-  const getReasonBadge = (reason) => {
-    const badges = {
-      'Winner': 'bg-green-100 text-green-800',
-      'Runner-up': 'bg-blue-100 text-blue-800',
-      'Semi-finalist': 'bg-yellow-100 text-yellow-800',
-      'Quarter-finalist': 'bg-orange-100 text-orange-800',
-      'Participation': 'bg-gray-100 text-gray-800'
+  const getReasonStyle = (reason) => {
+    const map = {
+      'Winner':         { bg: 'rgba(245,158,11,0.15)', color: '#FCD34D', border: 'rgba(245,158,11,0.3)' },
+      'Runner-up':      { bg: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)', border: 'rgba(255,255,255,0.15)' },
+      'Semi-finalist':  { bg: 'rgba(251,191,36,0.12)', color: '#fbbf24', border: 'rgba(251,191,36,0.25)' },
+      'Quarter-finalist':{ bg: 'rgba(249,115,22,0.12)', color: '#fb923c', border: 'rgba(249,115,22,0.25)' },
+      'Participation':  { bg: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.5)', border: 'rgba(255,255,255,0.1)' },
     };
-    return badges[reason] || 'bg-purple-100 text-purple-800';
+    return map[reason] || { bg: 'rgba(139,92,246,0.12)', color: '#C4B5FD', border: 'rgba(139,92,246,0.25)' };
   };
 
+  const s = getReasonStyle(log.reason);
+
   return (
-    <div className="bg-white rounded-lg shadow hover:shadow-lg transition p-6 border-l-4 border-blue-500">
-      <div className="flex justify-between items-start mb-4">
-        <div className="flex-1">
-          <h3 className="text-lg font-bold text-gray-900 mb-1">
+    <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderLeft: '3px solid #F59E0B', borderRadius: 14, padding: '20px 18px', transition: 'box-shadow 0.2s' }}
+      onMouseEnter={e => e.currentTarget.style.boxShadow = '0 4px 20px rgba(245,158,11,0.1)'}
+      onMouseLeave={e => e.currentTarget.style.boxShadow = 'none'}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 }}>
+        <div style={{ flex: 1 }}>
+          <h3 style={{ fontSize: 15, fontWeight: 800, color: '#fff', marginBottom: 4 }}>
             {log.tournament_name}
           </h3>
-          <p className="text-sm text-gray-600 mb-2">{log.category_name}</p>
-          
-          <div className="flex items-center space-x-2 text-xs text-gray-500">
-            <Calendar className="w-4 h-4" />
-            <span>{new Date(log.earned_at).toLocaleDateString('en-IN')}</span>
+          <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.45)', marginBottom: 8 }}>{log.category_name}</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Calendar style={{ width: 13, height: 13, color: 'rgba(255,255,255,0.3)' }} />
+            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>{new Date(log.earned_at).toLocaleDateString('en-IN')}</span>
           </div>
         </div>
 
-        <div className="text-right">
-          <p className="text-3xl font-bold text-blue-600">
+        <div style={{ textAlign: 'right' }}>
+          <p style={{ fontSize: 28, fontWeight: 900, color: '#F59E0B', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
             +{log.points.toFixed(1)}
           </p>
-          <p className="text-xs text-gray-500">Points</p>
+          <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginTop: 2 }}>Points</p>
         </div>
       </div>
 
-      <div className="flex items-center justify-between pt-4 border-t">
-        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getReasonBadge(log.reason)}`}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 12, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <span style={{ padding: '4px 12px', borderRadius: 20, fontSize: 11, fontWeight: 700, background: s.bg, color: s.color, border: `1px solid ${s.border}` }}>
           {log.reason}
         </span>
 
         {log.multiplier > 1 && (
-          <span className="text-xs font-semibold text-purple-600">
+          <span style={{ fontSize: 11, fontWeight: 700, color: '#C4B5FD' }}>
             {log.multiplier}x Multiplier
           </span>
         )}
       </div>
 
       {log.description && (
-        <p className="mt-3 text-sm text-gray-600 italic">
+        <p style={{ marginTop: 10, fontSize: 12, color: 'rgba(255,255,255,0.4)', fontStyle: 'italic' }}>
           {log.description}
         </p>
       )}

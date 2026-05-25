@@ -300,8 +300,8 @@ const CategoryForm = ({ initialData, onSave, onCancel }) => {
             <input type="number" value={formData.prizeWinner} onChange={(e) => handleChange('prizeWinner', e.target.value)} min="0" step="1" placeholder="e.g., 5000" className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-amber-500 transition-all" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-blue-400 mb-2">🥈 Runner-up Prize (₹)</label>
-            <input type="number" value={formData.prizeRunnerUp} onChange={(e) => handleChange('prizeRunnerUp', e.target.value)} min="0" step="1" placeholder="e.g., 3000" className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 transition-all" />
+            <label className="block text-sm font-medium mb-2" style={{ color: 'rgba(255,255,255,0.6)' }}>🥈 Runner-up Prize (₹)</label>
+            <input type="number" value={formData.prizeRunnerUp} onChange={(e) => handleChange('prizeRunnerUp', e.target.value)} min="0" step="1" placeholder="e.g., 3000" className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-amber-500 transition-all" />
           </div>
           <div>
             <label className="block text-sm font-medium text-orange-400 mb-2">🥉 Semi-finalist Prize (₹)</label>

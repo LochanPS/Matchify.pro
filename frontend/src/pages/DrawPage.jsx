@@ -2996,18 +2996,18 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
               <span className="text-xs font-bold uppercase tracking-wider" style={{ color: '#94a3b8' }}>Standings</span>
             </div>
 
-            {/* Column headers — widths must match data row exactly */}
+            {/* Column headers — widths MUST match data row stat widths exactly */}
             <div className="flex items-center px-2 mb-1" style={{ gap: '4px' }}>
               <div style={{ width: '28px', flexShrink: 0 }} />
               <div className="flex-1 min-w-0">
                 <span style={{ fontSize: '9px', color: 'rgba(255,255,255,0.35)', fontWeight: 700, letterSpacing: '0.07em' }}>PLAYER</span>
               </div>
               {[
-                { h: 'P',   w: '28px', c: 'rgba(203,213,225,0.6)' },
-                { h: 'W',   w: '28px', c: 'rgba(74,222,128,0.8)'  },
-                { h: 'L',   w: '28px', c: 'rgba(248,113,113,0.8)' },
-                { h: 'PTS', w: '34px', c: 'rgba(34,211,238,0.85)' },
-                { h: 'TP',  w: '34px', c: 'rgba(196,181,253,0.85)'},
+                { h: 'P',   w: '26px', c: 'rgba(148,163,184,0.7)' },
+                { h: 'W',   w: '26px', c: 'rgba(74,222,128,0.85)' },
+                { h: 'L',   w: '26px', c: 'rgba(248,113,113,0.85)'},
+                { h: 'PTS', w: '32px', c: 'rgba(34,211,238,0.9)'  },
+                { h: 'TP',  w: '32px', c: 'rgba(196,181,253,0.9)' },
               ].map(({ h, w, c }) => (
                 <div key={h} style={{ width: w, flexShrink: 0, textAlign: 'center' }}>
                   <span style={{ fontSize: '9px', color: c, fontWeight: 700 }}>{h}</span>
@@ -3025,75 +3025,105 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                   if (bDiff !== aDiff) return bDiff - aDiff;
                   return (b.totalPoints || 0) - (a.totalPoints || 0);
                 })
-                .map((p, pi) => (
-                  <div
-                    key={pi}
-                    className="flex items-center rounded-xl transition-colors"
-                    style={{
-                      padding: '10px 8px',
-                      gap: '4px',
-                      marginBottom: '3px',
-                      minHeight: '52px',
-                      background: pi === 0 ? 'rgba(6,182,212,0.07)' : 'rgba(15,22,36,0.65)',
-                      borderLeft: pi === 0 ? '3px solid #06b6d4' : '3px solid transparent',
-                    }}
-                  >
-                    {/* Rank badge */}
+                .map((p, pi) => {
+                  // ── Name resolution ──────────────────────────────────────
+                  // Doubles data can arrive as:
+                  //   A) p.name = "Alice"  + p.partnerName = "Bob"
+                  //   B) p.name = "Alice / Bob"  (combined string, no partnerName)
+                  // In both cases render two clean stacked lines — no slash wrap.
+                  let line1 = p.name || `Slot ${pi + 1}`;
+                  let line2 = p.partnerName || null;
+                  if (!line2 && line1.includes('/')) {
+                    const parts = line1.split('/').map(s => s.trim()).filter(Boolean);
+                    line1 = parts[0] || line1;
+                    line2 = parts[1] || null;
+                  }
+                  const isDoubles = !!line2;
+
+                  return (
                     <div
-                      className="flex-shrink-0 flex items-center justify-center rounded-md font-bold text-xs"
+                      key={pi}
+                      className="flex rounded-xl transition-colors"
                       style={{
-                        width: '28px', height: '28px', flexShrink: 0,
-                        background:
-                          pi === 0 ? 'rgba(6,182,212,0.18)' :
-                          pi === 1 ? 'rgba(148,163,184,0.1)'  :
-                          pi === 2 ? 'rgba(205,127,50,0.12)'  :
-                          'rgba(255,255,255,0.05)',
-                        color:
-                          pi === 0 ? '#22d3ee' :
-                          pi === 1 ? '#94a3b8'  :
-                          pi === 2 ? '#d97706'  :
-                          'rgba(255,255,255,0.28)',
+                        alignItems: 'center',
+                        padding: '9px 8px',
+                        gap: '4px',
+                        marginBottom: '3px',
+                        minHeight: isDoubles ? '54px' : '44px',
+                        background: pi === 0 ? 'rgba(6,182,212,0.07)' : 'rgba(15,22,36,0.65)',
+                        borderLeft: pi === 0 ? '3px solid #06b6d4' : '3px solid transparent',
                       }}
                     >
-                      {pi + 1}
-                    </div>
+                      {/* Rank badge — fixed 28×28, flex-shrink-0 */}
+                      <div
+                        className="flex-shrink-0 flex items-center justify-center rounded-md font-bold"
+                        style={{
+                          width: '28px', height: '28px',
+                          fontSize: '12px',
+                          background:
+                            pi === 0 ? 'rgba(6,182,212,0.18)' :
+                            pi === 1 ? 'rgba(148,163,184,0.1)'  :
+                            pi === 2 ? 'rgba(205,127,50,0.12)'  :
+                            'rgba(255,255,255,0.05)',
+                          color:
+                            pi === 0 ? '#22d3ee' :
+                            pi === 1 ? '#94a3b8'  :
+                            pi === 2 ? '#d97706'  :
+                            'rgba(255,255,255,0.28)',
+                        }}
+                      >
+                        {pi + 1}
+                      </div>
 
-                    {/* Player Name — singles: one line bold; doubles: stacked with muted partner */}
-                    <div className="flex-1 min-w-0">
-                      {p.id ? (
-                        <>
-                          <p className="font-semibold leading-snug text-sm" style={{ color: '#f1f5f9' }} title={p.name}>
-                            {p.name || `Slot ${pi + 1}`}
-                          </p>
-                          {p.partnerName && (
-                            <p className="text-xs leading-snug" style={{ color: '#64748b' }} title={p.partnerName}>
-                              / {p.partnerName}
+                      {/* Player Name — overflow-hidden + truncate prevents ANY wrapping */}
+                      <div className="flex-1 min-w-0 overflow-hidden">
+                        {p.id ? (
+                          <>
+                            <p
+                              className="truncate font-semibold"
+                              style={{ fontSize: '13px', lineHeight: '1.3', color: '#f8fafc' }}
+                              title={line1}
+                            >
+                              {line1}
                             </p>
-                          )}
-                        </>
-                      ) : (
-                        <p className="text-sm" style={{ color: 'rgba(255,255,255,0.2)', fontStyle: 'italic' }}>
-                          Slot {pi + 1}
-                        </p>
-                      )}
-                    </div>
+                            {line2 && (
+                              <p
+                                className="truncate"
+                                style={{ fontSize: '11px', lineHeight: '1.3', color: '#64748b', marginTop: '1px' }}
+                                title={line2}
+                              >
+                                {line2}
+                              </p>
+                            )}
+                          </>
+                        ) : (
+                          <p className="truncate" style={{ fontSize: '13px', color: 'rgba(255,255,255,0.2)', fontStyle: 'italic' }}>
+                            Slot {pi + 1}
+                          </p>
+                        )}
+                      </div>
 
-                    {/* Stats: P · W · L · PTS · TP — widths match column headers exactly */}
-                    <div className="flex-shrink-0 flex items-center" style={{ gap: '0px' }}>
-                      {[
-                        { val: (p.wins || 0) + (p.losses || 0), color: '#cbd5e1', w: '28px' },
-                        { val: p.wins || 0,                      color: '#4ade80', w: '28px' },
-                        { val: p.losses || 0,                    color: '#f87171', w: '28px' },
-                        { val: p.points || 0,                    color: '#22d3ee', w: '34px', bold: true },
-                        { val: p.totalPoints || 0,               color: '#c4b5fd', w: '34px', bold: true },
-                      ].map((s, si) => (
-                        <div key={si} className="text-center" style={{ width: s.w, flexShrink: 0 }}>
-                          <span style={{ fontSize: '14px', fontWeight: s.bold ? 700 : 600, color: s.color, lineHeight: 1 }}>{s.val}</span>
-                        </div>
-                      ))}
+                      {/* Stats: P · W · L · PTS · TP
+                          Numbers = pure white (#ffffff) for max readability.
+                          Accent context comes from the column header labels only. */}
+                      <div className="flex-shrink-0 flex items-center" style={{ gap: '0px' }}>
+                        {[
+                          { val: (p.wins || 0) + (p.losses || 0), w: '26px', color: '#94a3b8' },
+                          { val: p.wins    || 0,                   w: '26px', color: '#ffffff', bold: true },
+                          { val: p.losses  || 0,                   w: '26px', color: '#ffffff', bold: true },
+                          { val: p.points  || 0,                   w: '32px', color: '#ffffff', bold: true },
+                          { val: p.totalPoints || 0,               w: '32px', color: '#ffffff', bold: true },
+                        ].map((s, si) => (
+                          <div key={si} style={{ width: s.w, flexShrink: 0, textAlign: 'center' }}>
+                            <span style={{ fontSize: '13px', fontWeight: s.bold ? 700 : 500, color: s.color, lineHeight: 1 }}>
+                              {s.val}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
             </div>
           </div>
 

@@ -182,9 +182,9 @@ const CourtsStep = ({ formData, updateMultipleFields, onNext, onPrev }) => {
       )}
 
       {/* Info Box */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <h4 className="font-medium text-blue-900 mb-2">Scheduling Tips:</h4>
-        <ul className="text-sm text-blue-800 space-y-1">
+      <div className="rounded-xl p-4" style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.2)' }}>
+        <h4 className="font-medium mb-2" style={{ color: '#FCD34D' }}>Scheduling Tips:</h4>
+        <ul className="text-sm space-y-1" style={{ color: 'rgba(255,255,255,0.55)' }}>
           <li>• Include time for court setup and player warm-up</li>
           <li>• Consider breaks between matches for court maintenance</li>
           <li>• Singles matches typically take 30-45 minutes</li>
@@ -203,7 +203,7 @@ const CourtsStep = ({ formData, updateMultipleFields, onNext, onPrev }) => {
         </button>
         <button
           onClick={handleNext}
-          className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+          className="px-6 py-3 rounded-xl font-bold transition-all" style={{ background: 'linear-gradient(135deg,#F59E0B,#D97706)', color: '#050810' }}
         >
           Next: Review →
         </button>

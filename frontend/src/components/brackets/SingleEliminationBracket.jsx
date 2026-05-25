@@ -1,7 +1,7 @@
 import React from 'react';
 import MatchCard from './MatchCard';
 
-const CARD_W = 224;
+const CARD_W = 305;
 const CONN_W = 44;
 const SLOT_H = 220;
 const LINE   = 'rgba(245,158,11,0.5)';

@@ -2706,7 +2706,7 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
   //          Must be ≥ max card height (~225px). 260 gives 17.5px cushion each side.
   // Math:  topCenter = mi×slotH + slotH/2
   //        midY      = (topCenter + botCenter)/2  ← exact parent card center ✓
-  const CARD_W = 220;
+  const CARD_W = 305;
   const CONN_W = 44;
   // SLOT_H = 240: card display-only ≈ 123px → 58.5px cushion each side.
   //   Action buttons are absolutely positioned below the card (don't affect slot height).
@@ -2748,7 +2748,7 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
         </div>
 
         {/* ── Scrollable pyramid bracket ──────────────────────────────────────
-            CARD_W=220 + CONN_W=44 = 264px per unit.
+            CARD_W=305 + CONN_W=44 = 349px per unit.
             On 390px phone (~334px available): R1 fully (220px) + 70px R2 peek (32%).
             On 430px phone (~374px available): R1 fully + 110px peek (50%). ✓
             SLOT_H doubles each round — cards always vertically centered in slot.

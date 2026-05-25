@@ -22,7 +22,7 @@ const MatchCard = ({ match, onClick }) => {
     <div
       onClick={() => onClick?.(match)}
       style={{
-        width: '224px',
+        width: '100%',
         background: '#07121e',
         border: cardBorder,
         borderRadius: '13px',

@@ -2669,9 +2669,22 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
     navigate(`/match/${matchId}/conduct`);
   };
 
+  // ── Bracket layout constants ────────────────────────────────────────────
+  // CARD_W   : width of each match card column
+  // CONN_W   : width of the connector column between rounds
+  // SLOT_H   : base slot height for round 0 (doubles each round)
+  //            Must be >= max possible card height (~225px). 260px gives ~17px cushion.
+  // Connector math proof (4-player example):
+  //   Round 0 slot=260: match 0 center=130, match 1 center=390, midY=260
+  //   Round 1 slot=520: match 0 center=520/2=260  ✓ perfect alignment
+  const CARD_W  = 200;
+  const CONN_W  = 40;
+  const SLOT_H  = 260;
+  const LINE    = 'rgba(6,182,212,0.28)';
+
   return (
     <div className="p-3">
-      {/* Knockout bracket card */}
+      {/* Bracket card */}
       <div className="rounded-2xl overflow-hidden" style={{ background: '#111826', border: '1px solid rgba(255,255,255,0.07)' }}>
 
         {/* Header */}
@@ -2695,294 +2708,293 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
           )}
         </div>
 
-        {/* ── Scrollable bracket ──────────────────────────────────────────────
-            Card = 200px, gap = 28px.
-            On 390px phone: available ≈ 390 − 24(outer p-3) − 32(inner p-4) = 334px
-            Round 1 fully: 200px + 28px gap = 228px; Round 2 peek: 334−228 = 106px (53%) ✓
-            Naturally scrolls right for deeper rounds — no cramping.
-        ────────────────────────────────────────────────────────────────────── */}
+        {/* ── Pyramid bracket: horizontally scrollable ─────────────────────────
+            Structure: [labels row] then [slots row with connector columns]
+            Each slot height = SLOT_H × 2^ri → cards stay vertically centered
+            Connector midY = (topCenter + botCenter)/2 = parent card center ✓
+        ─────────────────────────────────────────────────────────────────── */}
         <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-          <div className="flex p-4" style={{ gap: '28px', minWidth: 'max-content', paddingBottom: '20px' }}>
-            {data.rounds.map((round, ri) => (
-              <div
-                key={ri}
-                className="flex flex-col flex-shrink-0"
-                style={{ width: '200px' }}
-              >
-                {/* Round label */}
-                <div className="mb-4">
-                  <div
-                    className="flex items-center justify-center gap-1.5 w-full rounded-xl"
-                    style={{ padding: '9px 12px', background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.18)' }}
-                  >
-                    {ri === data.rounds.length - 1 && (
-                      <Trophy className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#22d3ee' }} />
-                    )}
-                    <span style={{ fontSize: '11px', fontWeight: 700, color: '#22d3ee', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-                      {getRoundName(ri, data.rounds.length)}
-                    </span>
+          <div style={{ minWidth: 'max-content', padding: '16px 16px 24px' }}>
+
+            {/* Row 1 — Round labels (spacers keep them aligned with slot columns) */}
+            <div style={{ display: 'flex', marginBottom: '10px' }}>
+              {data.rounds.map((round, ri) => (
+                <React.Fragment key={ri}>
+                  <div style={{ width: CARD_W, flexShrink: 0 }}>
+                    <div
+                      className="flex items-center justify-center gap-1.5 rounded-xl"
+                      style={{ padding: '8px 12px', background: 'rgba(6,182,212,0.08)', border: '1px solid rgba(6,182,212,0.18)' }}
+                    >
+                      {ri === data.rounds.length - 1 && (
+                        <Trophy className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#22d3ee' }} />
+                      )}
+                      <span style={{ fontSize: '11px', fontWeight: 700, color: '#22d3ee', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                        {getRoundName(ri, data.rounds.length)}
+                      </span>
+                    </div>
                   </div>
-                </div>
+                  {ri < data.rounds.length - 1 && <div style={{ width: CONN_W, flexShrink: 0 }} />}
+                </React.Fragment>
+              ))}
+            </div>
 
-                {/* Match cards for this round */}
-                <div
-                  className="flex flex-col flex-1"
-                  style={{
-                    gap: '14px',
-                    // Pyramid centering: each later round shifts down to align with the center
-                    // of the two matches it came from. Base slot ≈ card height (~130px) + gap (14px).
-                    paddingTop: ri > 0 ? `${Math.pow(2, ri - 1) * 50}px` : '0px',
-                  }}
-                >
-                  {round.matches.map((match, mi) => {
-                    const dbMatch = findMatch(ri, mi);
+            {/* Row 2 — Match slots + connector columns */}
+            <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+              {data.rounds.map((round, ri) => {
+                const slotH = SLOT_H * Math.pow(2, ri);
 
-                    const player1 = dbMatch?.player1 || match.player1 || { name: 'TBD' };
-                    const player2 = dbMatch?.player2 || match.player2 || { name: 'TBD' };
+                return (
+                  <React.Fragment key={ri}>
 
-                    const player1Name = getPlayerDisplay(player1);
-                    const player2Name = getPlayerDisplay(player2);
+                    {/* Round column — one fixed-height slot per match, card centered */}
+                    <div style={{ width: CARD_W, flexShrink: 0 }}>
+                      {round.matches.map((match, mi) => {
+                        const dbMatch = findMatch(ri, mi);
 
-                    const isCompleted = dbMatch?.status === 'COMPLETED' || (!dbMatch && match.winner && player1.name !== 'TBD' && player2.name !== 'TBD');
-                    const isLive     = dbMatch?.status === 'IN_PROGRESS';
-                    const isReady    = dbMatch?.status === 'READY' && player1.name !== 'TBD' && player2.name !== 'TBD';
-                    const hasUmpire  = dbMatch?.umpireId;
+                        const player1 = dbMatch?.player1 || match.player1 || { name: 'TBD' };
+                        const player2 = dbMatch?.player2 || match.player2 || { name: 'TBD' };
 
-                    const isPlayer1Winner = dbMatch ? dbMatch.winnerId === player1?.id : match.winner === 1;
-                    const isPlayer2Winner = dbMatch ? dbMatch.winnerId === player2?.id : match.winner === 2;
+                        const player1Name = getPlayerDisplay(player1);
+                        const player2Name = getPlayerDisplay(player2);
 
-                    const isTbd1 = player1Name === 'TBD';
-                    const isTbd2 = player2Name === 'TBD';
+                        const isCompleted = dbMatch?.status === 'COMPLETED' || (!dbMatch && match.winner && player1.name !== 'TBD' && player2.name !== 'TBD');
+                        const isLive     = dbMatch?.status === 'IN_PROGRESS';
+                        const isReady    = dbMatch?.status === 'READY' && player1.name !== 'TBD' && player2.name !== 'TBD';
+                        const hasUmpire  = dbMatch?.umpireId;
 
-                    // Pyramid vertical spacing: grows each round so matches stay centered
-                    const matchSpacingBottom = ri > 0 ? `${Math.pow(2, ri - 1) * 100}px` : '0px';
+                        const isPlayer1Winner = dbMatch ? dbMatch.winnerId === player1?.id : match.winner === 1;
+                        const isPlayer2Winner = dbMatch ? dbMatch.winnerId === player2?.id : match.winner === 2;
 
-                    return (
-                      <div
-                        key={mi}
-                        style={{ marginBottom: mi < round.matches.length - 1 ? matchSpacingBottom : '0px' }}
-                      >
-                        {/* Match card */}
-                        <div
-                          className={isLive ? 'animate-pulse' : ''}
-                          style={{
-                            background: '#0d1525',
-                            border: isLive
-                              ? '1.5px solid rgba(6,182,212,0.5)'
-                              : isCompleted
-                              ? '1px solid rgba(6,182,212,0.16)'
-                              : '1px solid rgba(255,255,255,0.08)',
-                            borderRadius: '14px',
-                            overflow: 'hidden',
-                            boxShadow: isLive
-                              ? '0 0 18px rgba(6,182,212,0.07)'
-                              : '0 2px 10px rgba(0,0,0,0.3)',
-                          }}
-                        >
-                          {/* Match header: number + status */}
+                        const isTbd1 = player1Name === 'TBD';
+                        const isTbd2 = player2Name === 'TBD';
+
+                        return (
+                          /* Slot: fixed height, card floats vertically centered */
                           <div
-                            className="flex items-center justify-between px-3 py-2"
-                            style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}
+                            key={mi}
+                            style={{ height: slotH, display: 'flex', alignItems: 'center' }}
                           >
-                            <span style={{ fontSize: '10px', fontWeight: 600, color: 'rgba(255,255,255,0.28)', letterSpacing: '0.04em' }}>
-                              #{match.matchNumber || mi + 1}
-                            </span>
-                            {isLive && (
-                              <span
-                                className="flex items-center gap-1 px-2 py-0.5 rounded-full"
-                                style={{ background: 'rgba(6,182,212,0.12)', border: '1px solid rgba(6,182,212,0.3)', fontSize: '9px', fontWeight: 700, color: '#67e8f9' }}
-                              >
-                                <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: '#22d3ee' }} />
-                                LIVE
-                              </span>
-                            )}
-                            {isCompleted && !isLive && (
-                              <span style={{ fontSize: '10px', fontWeight: 700, color: '#4ade80' }}>✓ Done</span>
-                            )}
-                            {!isCompleted && !isLive && isTbd1 !== isTbd2 && (
-                              <span style={{ fontSize: '9px', fontWeight: 700, color: '#fbbf24' }}>BYE</span>
-                            )}
-                          </div>
-
-                          {/* Player rows */}
-                          <div style={{ padding: '10px 10px 8px' }}>
-
-                            {/* Player 1 */}
-                            <div
-                              className="flex items-center rounded-xl"
-                              style={{
-                                padding: '10px 10px',
-                                marginBottom: '2px',
-                                background: isPlayer1Winner
-                                  ? 'rgba(6,182,212,0.1)'
-                                  : isTbd1
-                                  ? 'rgba(255,255,255,0.02)'
-                                  : 'rgba(255,255,255,0.04)',
-                                border: `1px solid ${isPlayer1Winner ? 'rgba(6,182,212,0.2)' : 'rgba(255,255,255,0.06)'}`,
-                                borderLeft: isPlayer1Winner ? '3px solid #06b6d4' : '3px solid transparent',
-                              }}
-                            >
-                              <span
-                                className="truncate flex-1"
+                            <div style={{ width: '100%' }}>
+                              {/* Match card */}
+                              <div
+                                className={isLive ? 'animate-pulse' : ''}
                                 style={{
-                                  fontSize: '12px',
-                                  lineHeight: 1.35,
-                                  color: isTbd1
-                                    ? 'rgba(255,255,255,0.22)'
-                                    : isPlayer1Winner
-                                    ? '#ffffff'
+                                  background: '#0d1525',
+                                  border: isLive
+                                    ? '1.5px solid rgba(6,182,212,0.5)'
                                     : isCompleted
-                                    ? 'rgba(255,255,255,0.68)'
-                                    : '#e2e8f0',
-                                  fontStyle: isTbd1 ? 'italic' : 'normal',
-                                  fontWeight: isPlayer1Winner ? 700 : 500,
+                                    ? '1px solid rgba(6,182,212,0.16)'
+                                    : '1px solid rgba(255,255,255,0.08)',
+                                  borderRadius: '14px',
+                                  overflow: 'hidden',
+                                  boxShadow: isLive
+                                    ? '0 0 18px rgba(6,182,212,0.07)'
+                                    : '0 2px 10px rgba(0,0,0,0.3)',
                                 }}
                               >
-                                {player1Name}
-                              </span>
-                              {isPlayer1Winner && (
-                                <span
-                                  className="flex-shrink-0 ml-2 flex items-center justify-center rounded-full"
-                                  style={{ width: '18px', height: '18px', background: 'rgba(6,182,212,0.18)', fontSize: '8px', fontWeight: 800, color: '#22d3ee' }}
-                                >W</span>
-                              )}
-                            </div>
-
-                            {/* VS divider */}
-                            <div className="flex items-center gap-2" style={{ margin: '6px 0' }}>
-                              <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.05)' }} />
-                              <span style={{ fontSize: '9px', fontWeight: 600, color: 'rgba(255,255,255,0.2)', letterSpacing: '0.1em' }}>VS</span>
-                              <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.05)' }} />
-                            </div>
-
-                            {/* Player 2 */}
-                            <div
-                              className="flex items-center rounded-xl"
-                              style={{
-                                padding: '10px 10px',
-                                marginTop: '2px',
-                                background: isPlayer2Winner
-                                  ? 'rgba(6,182,212,0.1)'
-                                  : isTbd2
-                                  ? 'rgba(255,255,255,0.02)'
-                                  : 'rgba(255,255,255,0.04)',
-                                border: `1px solid ${isPlayer2Winner ? 'rgba(6,182,212,0.2)' : 'rgba(255,255,255,0.06)'}`,
-                                borderLeft: isPlayer2Winner ? '3px solid #06b6d4' : '3px solid transparent',
-                              }}
-                            >
-                              <span
-                                className="truncate flex-1"
-                                style={{
-                                  fontSize: '12px',
-                                  lineHeight: 1.35,
-                                  color: isTbd2
-                                    ? 'rgba(255,255,255,0.22)'
-                                    : isPlayer2Winner
-                                    ? '#ffffff'
-                                    : isCompleted
-                                    ? 'rgba(255,255,255,0.68)'
-                                    : '#e2e8f0',
-                                  fontStyle: isTbd2 ? 'italic' : 'normal',
-                                  fontWeight: isPlayer2Winner ? 700 : 500,
-                                }}
-                              >
-                                {player2Name}
-                              </span>
-                              {isPlayer2Winner && (
-                                <span
-                                  className="flex-shrink-0 ml-2 flex items-center justify-center rounded-full"
-                                  style={{ width: '18px', height: '18px', background: 'rgba(6,182,212,0.18)', fontSize: '8px', fontWeight: 800, color: '#22d3ee' }}
-                                >W</span>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* Buttons */}
-                          {(isCompleted || (isOrganizer && dbMatch && !isCompleted)) && (
-                            <div style={{ padding: '0 10px 10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-
-                              {/* VIEW — all users, match completed */}
-                              {isCompleted && (
-                                <button
-                                  onClick={() => {
-                                    const bracketMatchData = { matchNumber: match.matchNumber, round: ri + 1, player1, player2 };
-                                    const matchDataToUse = dbMatch
-                                      ? { ...dbMatch, score: dbMatch.score ?? dbMatch.scoreJson ?? null }
-                                      : {
-                                          matchNumber: match.matchNumber, status: 'COMPLETED', winner: match.winner,
-                                          winnerId: match.winner === 1 ? player1?.id : player2?.id,
-                                          score: match.scoreJson || match.score || null,
-                                          scoreJson: match.scoreJson || null,
-                                          player1, player2,
-                                        };
-                                    onViewMatchDetails(matchDataToUse, bracketMatchData);
-                                  }}
-                                  className="w-full flex items-center justify-center gap-1.5 rounded-xl transition-all"
-                                  style={{ padding: '8px 10px', background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.65)', border: '1px solid rgba(255,255,255,0.09)', fontSize: '10px', fontWeight: 600 }}
+                                {/* Match header */}
+                                <div
+                                  className="flex items-center justify-between px-3 py-2"
+                                  style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}
                                 >
-                                  <Eye className="w-3.5 h-3.5" />
-                                  View Details
-                                </button>
-                              )}
+                                  <span style={{ fontSize: '10px', fontWeight: 600, color: 'rgba(255,255,255,0.28)', letterSpacing: '0.04em' }}>
+                                    #{match.matchNumber || mi + 1}
+                                  </span>
+                                  {isLive && (
+                                    <span
+                                      className="flex items-center gap-1 px-2 py-0.5 rounded-full"
+                                      style={{ background: 'rgba(6,182,212,0.12)', border: '1px solid rgba(6,182,212,0.3)', fontSize: '9px', fontWeight: 700, color: '#67e8f9' }}
+                                    >
+                                      <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: '#22d3ee' }} />
+                                      LIVE
+                                    </span>
+                                  )}
+                                  {isCompleted && !isLive && (
+                                    <span style={{ fontSize: '10px', fontWeight: 700, color: '#4ade80' }}>✓ Done</span>
+                                  )}
+                                  {!isCompleted && !isLive && isTbd1 !== isTbd2 && (
+                                    <span style={{ fontSize: '9px', fontWeight: 700, color: '#fbbf24' }}>BYE</span>
+                                  )}
+                                </div>
 
-                              {/* ORGANIZER — assign umpire or conduct */}
-                              {isOrganizer && dbMatch && !isCompleted && (
-                                <>
-                                  {player1.name !== 'TBD' && player2.name !== 'TBD' ? (
-                                    <button
-                                      onClick={() => {
-                                        if (hasUmpire && dbMatch?.umpireId) {
-                                          navigate(`/match/${dbMatch.id}/conduct?umpireId=${dbMatch.umpireId}`);
-                                        } else {
-                                          const bracketMatchData = { matchNumber: match.matchNumber, round: ri + 1, player1, player2 };
-                                          onAssignUmpire(dbMatch, bracketMatchData);
-                                        }
+                                {/* Player rows */}
+                                <div style={{ padding: '10px 10px 8px' }}>
+                                  {/* Player 1 */}
+                                  <div
+                                    className="flex items-center rounded-xl"
+                                    style={{
+                                      padding: '10px 10px',
+                                      marginBottom: '2px',
+                                      background: isPlayer1Winner ? 'rgba(6,182,212,0.1)' : isTbd1 ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.04)',
+                                      border: `1px solid ${isPlayer1Winner ? 'rgba(6,182,212,0.2)' : 'rgba(255,255,255,0.06)'}`,
+                                      borderLeft: isPlayer1Winner ? '3px solid #06b6d4' : '3px solid transparent',
+                                    }}
+                                  >
+                                    <span
+                                      className="truncate flex-1"
+                                      style={{
+                                        fontSize: '12px', lineHeight: 1.35,
+                                        color: isTbd1 ? 'rgba(255,255,255,0.22)' : isPlayer1Winner ? '#ffffff' : isCompleted ? 'rgba(255,255,255,0.68)' : '#e2e8f0',
+                                        fontStyle: isTbd1 ? 'italic' : 'normal',
+                                        fontWeight: isPlayer1Winner ? 700 : 500,
                                       }}
-                                      className="w-full flex items-center justify-center gap-1.5 rounded-xl transition-all"
-                                      style={
-                                        hasUmpire
-                                          ? { padding: '8px 10px', background: 'rgba(6,182,212,0.1)', color: '#67e8f9', border: '1px solid rgba(6,182,212,0.25)', fontSize: '10px', fontWeight: 600 }
-                                          : { padding: '8px 10px', background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.65)', border: '1px solid rgba(255,255,255,0.1)', fontSize: '10px', fontWeight: 600 }
-                                      }
-                                    >
-                                      <Gavel className="w-3.5 h-3.5" />
-                                      {hasUmpire ? '✓ Conduct' : 'Assign Umpire'}
-                                    </button>
-                                  ) : (player1.name !== 'TBD' || player2.name !== 'TBD') ? (
-                                    <button
-                                      onClick={() => handleGiveByeForMatch(dbMatch.id)}
-                                      className="w-full flex items-center justify-center gap-1.5 rounded-xl transition-all"
-                                      style={{ padding: '8px 10px', background: 'rgba(245,158,11,0.08)', color: '#fbbf24', border: '1px solid rgba(245,158,11,0.2)', fontSize: '10px', fontWeight: 600 }}
-                                    >
-                                      <Trophy className="w-3.5 h-3.5" />
-                                      Give BYE
-                                    </button>
-                                  ) : null}
-                                </>
-                              )}
+                                    >{player1Name}</span>
+                                    {isPlayer1Winner && (
+                                      <span className="flex-shrink-0 ml-2 flex items-center justify-center rounded-full"
+                                        style={{ width: '18px', height: '18px', background: 'rgba(6,182,212,0.18)', fontSize: '8px', fontWeight: 800, color: '#22d3ee' }}>W</span>
+                                    )}
+                                  </div>
 
-                              {/* ORGANIZER — change result */}
-                              {isOrganizer && dbMatch && isCompleted && (
-                                <button
-                                  onClick={() => {
-                                    const bracketMatchData = { matchNumber: match.matchNumber, round: ri + 1, player1, player2, currentWinnerId: dbMatch?.winnerId };
-                                    onChangeResult(dbMatch, bracketMatchData);
-                                  }}
-                                  className="w-full rounded-xl transition-all"
-                                  style={{ padding: '8px 10px', background: 'rgba(245,158,11,0.07)', color: '#fbbf24', border: '1px solid rgba(245,158,11,0.18)', fontSize: '10px', fontWeight: 600 }}
-                                >
-                                  Change Result
-                                </button>
-                              )}
+                                  {/* VS */}
+                                  <div className="flex items-center gap-2" style={{ margin: '6px 0' }}>
+                                    <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.05)' }} />
+                                    <span style={{ fontSize: '9px', fontWeight: 600, color: 'rgba(255,255,255,0.2)', letterSpacing: '0.1em' }}>VS</span>
+                                    <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.05)' }} />
+                                  </div>
+
+                                  {/* Player 2 */}
+                                  <div
+                                    className="flex items-center rounded-xl"
+                                    style={{
+                                      padding: '10px 10px',
+                                      marginTop: '2px',
+                                      background: isPlayer2Winner ? 'rgba(6,182,212,0.1)' : isTbd2 ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.04)',
+                                      border: `1px solid ${isPlayer2Winner ? 'rgba(6,182,212,0.2)' : 'rgba(255,255,255,0.06)'}`,
+                                      borderLeft: isPlayer2Winner ? '3px solid #06b6d4' : '3px solid transparent',
+                                    }}
+                                  >
+                                    <span
+                                      className="truncate flex-1"
+                                      style={{
+                                        fontSize: '12px', lineHeight: 1.35,
+                                        color: isTbd2 ? 'rgba(255,255,255,0.22)' : isPlayer2Winner ? '#ffffff' : isCompleted ? 'rgba(255,255,255,0.68)' : '#e2e8f0',
+                                        fontStyle: isTbd2 ? 'italic' : 'normal',
+                                        fontWeight: isPlayer2Winner ? 700 : 500,
+                                      }}
+                                    >{player2Name}</span>
+                                    {isPlayer2Winner && (
+                                      <span className="flex-shrink-0 ml-2 flex items-center justify-center rounded-full"
+                                        style={{ width: '18px', height: '18px', background: 'rgba(6,182,212,0.18)', fontSize: '8px', fontWeight: 800, color: '#22d3ee' }}>W</span>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {/* Buttons */}
+                                {(isCompleted || (isOrganizer && dbMatch && !isCompleted)) && (
+                                  <div style={{ padding: '0 10px 10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                    {isCompleted && (
+                                      <button
+                                        onClick={() => {
+                                          const bracketMatchData = { matchNumber: match.matchNumber, round: ri + 1, player1, player2 };
+                                          const matchDataToUse = dbMatch
+                                            ? { ...dbMatch, score: dbMatch.score ?? dbMatch.scoreJson ?? null }
+                                            : {
+                                                matchNumber: match.matchNumber, status: 'COMPLETED', winner: match.winner,
+                                                winnerId: match.winner === 1 ? player1?.id : player2?.id,
+                                                score: match.scoreJson || match.score || null,
+                                                scoreJson: match.scoreJson || null,
+                                                player1, player2,
+                                              };
+                                          onViewMatchDetails(matchDataToUse, bracketMatchData);
+                                        }}
+                                        className="w-full flex items-center justify-center gap-1.5 rounded-xl transition-all"
+                                        style={{ padding: '8px 10px', background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.65)', border: '1px solid rgba(255,255,255,0.09)', fontSize: '10px', fontWeight: 600 }}
+                                      >
+                                        <Eye className="w-3.5 h-3.5" />
+                                        View Details
+                                      </button>
+                                    )}
+                                    {isOrganizer && dbMatch && !isCompleted && (
+                                      <>
+                                        {player1.name !== 'TBD' && player2.name !== 'TBD' ? (
+                                          <button
+                                            onClick={() => {
+                                              if (hasUmpire && dbMatch?.umpireId) {
+                                                navigate(`/match/${dbMatch.id}/conduct?umpireId=${dbMatch.umpireId}`);
+                                              } else {
+                                                const bracketMatchData = { matchNumber: match.matchNumber, round: ri + 1, player1, player2 };
+                                                onAssignUmpire(dbMatch, bracketMatchData);
+                                              }
+                                            }}
+                                            className="w-full flex items-center justify-center gap-1.5 rounded-xl transition-all"
+                                            style={
+                                              hasUmpire
+                                                ? { padding: '8px 10px', background: 'rgba(6,182,212,0.1)', color: '#67e8f9', border: '1px solid rgba(6,182,212,0.25)', fontSize: '10px', fontWeight: 600 }
+                                                : { padding: '8px 10px', background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.65)', border: '1px solid rgba(255,255,255,0.1)', fontSize: '10px', fontWeight: 600 }
+                                            }
+                                          >
+                                            <Gavel className="w-3.5 h-3.5" />
+                                            {hasUmpire ? '✓ Conduct' : 'Assign Umpire'}
+                                          </button>
+                                        ) : (player1.name !== 'TBD' || player2.name !== 'TBD') ? (
+                                          <button
+                                            onClick={() => handleGiveByeForMatch(dbMatch.id)}
+                                            className="w-full flex items-center justify-center gap-1.5 rounded-xl transition-all"
+                                            style={{ padding: '8px 10px', background: 'rgba(245,158,11,0.08)', color: '#fbbf24', border: '1px solid rgba(245,158,11,0.2)', fontSize: '10px', fontWeight: 600 }}
+                                          >
+                                            <Trophy className="w-3.5 h-3.5" />
+                                            Give BYE
+                                          </button>
+                                        ) : null}
+                                      </>
+                                    )}
+                                    {isOrganizer && dbMatch && isCompleted && (
+                                      <button
+                                        onClick={() => {
+                                          const bracketMatchData = { matchNumber: match.matchNumber, round: ri + 1, player1, player2, currentWinnerId: dbMatch?.winnerId };
+                                          onChangeResult(dbMatch, bracketMatchData);
+                                        }}
+                                        className="w-full rounded-xl transition-all"
+                                        style={{ padding: '8px 10px', background: 'rgba(245,158,11,0.07)', color: '#fbbf24', border: '1px solid rgba(245,158,11,0.18)', fontSize: '10px', fontWeight: 600 }}
+                                      >
+                                        Change Result
+                                      </button>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
                             </div>
-                          )}
-                        </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Connector column — L-shaped bracket lines between rounds
+                        topCenter  = mi*slotH + slotH/2
+                        botCenter  = (mi+1)*slotH + slotH/2
+                        midY       = (topCenter+botCenter)/2  ← equals parent card center ✓
+                    */}
+                    {ri < data.rounds.length - 1 && (
+                      <div style={{ width: CONN_W, flexShrink: 0, position: 'relative', height: round.matches.length * slotH }}>
+                        {round.matches.map((_, mi) => {
+                          if (mi % 2 !== 0) return null;
+                          if (!round.matches[mi + 1]) return null; // odd bracket — no pair
+
+                          const topCenter = mi * slotH + slotH / 2;
+                          const botCenter = (mi + 1) * slotH + slotH / 2;
+                          const midY      = (topCenter + botCenter) / 2; // = parent center ✓
+
+                          return (
+                            <React.Fragment key={mi}>
+                              {/* Left arm — top match → spine */}
+                              <div style={{ position: 'absolute', top: topCenter, left: 0, width: CONN_W / 2, height: 1, background: LINE }} />
+                              {/* Left arm — bottom match → spine */}
+                              <div style={{ position: 'absolute', top: botCenter, left: 0, width: CONN_W / 2, height: 1, background: LINE }} />
+                              {/* Vertical spine */}
+                              <div style={{ position: 'absolute', top: topCenter, left: CONN_W / 2 - 1, width: 1, height: botCenter - topCenter + 1, background: LINE }} />
+                              {/* Right arm — spine midpoint → next round */}
+                              <div style={{ position: 'absolute', top: midY, left: CONN_W / 2, width: CONN_W / 2, height: 1, background: LINE }} />
+                            </React.Fragment>
+                          );
+                        })}
                       </div>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
+                    )}
+
+                  </React.Fragment>
+                );
+              })}
+            </div>
+
           </div>
         </div>
       </div>

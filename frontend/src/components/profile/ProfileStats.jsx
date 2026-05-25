@@ -1,17 +1,8 @@
 import { Trophy, Calendar, Target, TrendingUp, Award } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
-// Custom Rupee Icon component
-const RupeeIcon = ({ size = 24 }) => (
-  <svg 
-    width={size} 
-    height={size} 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
-    strokeLinejoin="round"
-  >
+const RupeeIcon = ({ size = 20 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M6 3h12M6 8h12M6 13l8.5 8M6 13h3c3.5 0 6-2.5 6-5H6" />
   </svg>
 );
@@ -19,99 +10,125 @@ const RupeeIcon = ({ size = 24 }) => (
 export default function ProfileStats({ stats, user }) {
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short'
-    });
+    return new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
   };
 
-  const statCards = [
+  const totalMatches = (user?.matchesWon || 0) + (user?.matchesLost || 0);
+  const winRate = totalMatches > 0 ? Math.round((user?.matchesWon / totalMatches) * 100) : 0;
+
+  const tiles = [
     {
       icon: Trophy,
       label: 'Tournaments',
-      value: user?.tournamentsPlayed || 0,
-      color: 'bg-amber-500/20 text-amber-400',
-      glow: 'group-hover:shadow-amber-500/20',
+      value: user?.tournamentsPlayed ?? 0,
+      color: '#FCD34D',
+      bg: 'rgba(245,158,11,0.1)',
+      border: 'rgba(245,158,11,0.2)'
     },
     {
       icon: Target,
       label: 'Matches Won',
-      value: user?.matchesWon || 0,
-      color: 'bg-emerald-500/20 text-emerald-400',
-      glow: 'group-hover:shadow-emerald-500/20',
+      value: user?.matchesWon ?? 0,
+      color: '#6EE7B7',
+      bg: 'rgba(16,185,129,0.1)',
+      border: 'rgba(16,185,129,0.2)'
     },
     {
       icon: Award,
       label: 'Matches Lost',
-      value: user?.matchesLost || 0,
-      color: 'bg-red-500/20 text-red-400',
-      glow: 'group-hover:shadow-red-500/20',
+      value: user?.matchesLost ?? 0,
+      color: '#F87171',
+      bg: 'rgba(239,68,68,0.1)',
+      border: 'rgba(239,68,68,0.2)'
     },
     {
       icon: TrendingUp,
       label: 'Total Points',
-      value: user?.totalPoints || 0,
-      color: 'bg-blue-500/20 text-blue-400',
-      glow: 'group-hover:shadow-blue-500/20',
+      value: user?.totalPoints ?? 0,
+      color: '#67E8F9',
+      bg: 'rgba(6,182,212,0.1)',
+      border: 'rgba(6,182,212,0.2)'
     },
     {
       icon: Calendar,
       label: 'Member Since',
       value: formatDate(user?.createdAt),
-      color: 'bg-indigo-500/20 text-indigo-400',
-      glow: 'group-hover:shadow-indigo-500/20',
+      color: '#C4B5FD',
+      bg: 'rgba(139,92,246,0.1)',
+      border: 'rgba(139,92,246,0.2)'
     },
   ];
 
-  // Calculate win rate
-  const totalMatches = (user?.matchesWon || 0) + (user?.matchesLost || 0);
-  const winRate = totalMatches > 0 ? Math.round((user?.matchesWon / totalMatches) * 100) : 0;
-
   return (
-    <div className="space-y-6">
-      {/* Win Rate Highlight */}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      {/* Win Rate highlight */}
       {totalMatches > 0 && (
-        <div className="relative">
-          {/* Halo Effect */}
-          <div className="absolute -inset-1 bg-gradient-to-r from-purple-500/30 via-indigo-500/30 to-purple-500/30 rounded-2xl blur-xl"></div>
-          <div className="relative bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-2xl p-6 text-center border border-white/10">
-            <h3 className="text-lg font-semibold mb-2 text-white/90">Win Rate</h3>
-            <div className="text-5xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent">{winRate}%</div>
-            <p className="text-purple-200 mt-2">Based on {totalMatches} matches played</p>
-          </div>
+        <div style={{
+          background: 'linear-gradient(135deg, rgba(139,92,246,0.18) 0%, rgba(124,58,237,0.12) 100%)',
+          border: '1px solid rgba(139,92,246,0.3)',
+          borderRadius: 16,
+          padding: '20px 24px',
+          textAlign: 'center',
+          boxShadow: '0 0 32px rgba(139,92,246,0.12)'
+        }}>
+          <p style={{ fontSize: 12, fontWeight: 700, color: 'rgba(196,181,253,0.7)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>Win Rate</p>
+          <p style={{ fontSize: 56, fontWeight: 900, lineHeight: 1, background: 'linear-gradient(135deg, #fff 0%, #C4B5FD 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+            {winRate}%
+          </p>
+          <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginTop: 8 }}>
+            Based on {totalMatches} match{totalMatches !== 1 ? 'es' : ''} played
+          </p>
         </div>
       )}
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        {statCards.map((stat, idx) => (
-          <div 
-            key={idx} 
-            className={`group bg-slate-800/50 backdrop-blur-sm border border-white/10 rounded-2xl p-5 hover:border-white/20 hover:shadow-lg ${stat.glow} transition-all duration-300`}
+      {/* Stats grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 12 }}>
+        {tiles.map((tile, idx) => (
+          <div
+            key={idx}
+            style={{
+              background: tile.bg,
+              border: `1px solid ${tile.border}`,
+              borderRadius: 14,
+              padding: '16px 14px',
+              transition: 'transform 0.2s, box-shadow 0.2s'
+            }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = `0 8px 20px ${tile.bg}`; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
           >
-            <div className={`inline-flex p-3 rounded-xl ${stat.color} mb-3`}>
-              <stat.icon size={22} />
+            <div style={{ width: 36, height: 36, borderRadius: 10, background: tile.bg, border: `1px solid ${tile.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 10 }}>
+              <tile.icon style={{ width: 18, height: 18, color: tile.color }} />
             </div>
-            <p className="text-2xl font-bold text-white">{stat.value}</p>
-            <p className="text-sm text-gray-400">{stat.label}</p>
+            <p style={{ fontSize: 22, fontWeight: 900, color: '#fff', lineHeight: 1.1, marginBottom: 4, fontVariantNumeric: 'tabular-nums' }}>
+              {tile.value}
+            </p>
+            <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', fontWeight: 500 }}>{tile.label}</p>
           </div>
         ))}
       </div>
 
-      {/* Additional Info for New Users */}
+      {/* Empty state */}
       {totalMatches === 0 && (
-        <div className="relative">
-          {/* Halo Effect */}
-          <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-blue-500/20 rounded-2xl blur-xl"></div>
-          <div className="relative bg-slate-800/50 backdrop-blur-sm border border-blue-500/30 rounded-2xl p-6 text-center">
-            <div className="w-16 h-16 mx-auto bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mb-4">
-              <Trophy className="text-white" size={32} />
-            </div>
-            <h3 className="text-lg font-semibold text-white mb-2">Ready to Start Playing?</h3>
-            <p className="text-gray-400">
-              Join your first tournament to start building your badminton profile and earn points!
-            </p>
+        <div style={{
+          background: 'rgba(255,255,255,0.03)',
+          border: '1px solid rgba(255,255,255,0.07)',
+          borderRadius: 16,
+          padding: '32px 24px',
+          textAlign: 'center'
+        }}>
+          <div style={{ width: 60, height: 60, borderRadius: 16, background: 'linear-gradient(135deg, #F59E0B, #D97706)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+            <Trophy style={{ width: 28, height: 28, color: '#0C0900' }} />
           </div>
+          <h3 style={{ fontSize: 16, fontWeight: 700, color: '#fff', marginBottom: 8 }}>Ready to Start Playing?</h3>
+          <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', lineHeight: 1.6, marginBottom: 20 }}>
+            Join your first tournament to build your badminton profile and earn points!
+          </p>
+          <Link
+            to="/tournaments"
+            style={{ display: 'inline-block', padding: '10px 24px', background: 'linear-gradient(135deg, #F59E0B, #D97706)', color: '#0C0900', borderRadius: 12, fontWeight: 700, fontSize: 13, textDecoration: 'none', boxShadow: '0 4px 14px rgba(245,158,11,0.3)' }}
+          >
+            Browse Tournaments →
+          </Link>
         </div>
       )}
     </div>

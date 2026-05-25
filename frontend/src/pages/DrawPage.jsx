@@ -2708,10 +2708,10 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
   //        midY      = (topCenter + botCenter)/2  ← exact parent card center ✓
   const CARD_W = 220;
   const CONN_W = 44;
-  // SLOT_H = 210: max card (View Details + Change Result) ≈ 202px → 4px cushion each side ✓
-  //   1-button card ≈ 163px → 23.5px each side → 47px inter-card gap (was 97px with 260) ✓
-  //   no-button card ≈ 120px → 45px each side → 90px inter-card gap (was 140px) ✓
-  const SLOT_H = 210;
+  // SLOT_H = 240: card display-only ≈ 123px → 58.5px cushion each side.
+  //   Action buttons are absolutely positioned below the card (don't affect slot height).
+  //   Connector lines always hit slot center = card center regardless of organizer/player view.
+  const SLOT_H = 240;
   const LINE   = 'rgba(245,158,11,0.5)';  // gold at 50% — on-brand, visible
 
   return (
@@ -2722,8 +2722,15 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
         {/* ── Header ─────────────────────────────────────────────────────── */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'linear-gradient(135deg,#FCD34D,#D97706)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>
-              🏆
+            <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'linear-gradient(135deg,#FCD34D,#D97706)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#050810" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+                <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+                <path d="M4 22h16" />
+                <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
+                <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
+                <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
+              </svg>
             </div>
             <div>
               <div style={{ fontSize: '15px', fontWeight: 700, color: '#ffffff', lineHeight: 1.2 }}>Knockout Bracket</div>
@@ -2815,11 +2822,14 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                           : '1px solid rgba(255,255,255,0.09)';
 
                         return (
-                          /* Fixed-height slot — card is vertically centered inside */
+                          /* Fixed-height slot — card is vertically centered via alignItems:'center'.
+                             Action buttons are absolutely positioned below the card so they never
+                             affect card height or connector-line math. All cards stay ~123px tall
+                             regardless of role, giving consistent bracket rhythm. */
                           <div key={mi} style={{ height: slotH, display: 'flex', alignItems: 'center' }}>
-                            <div style={{ width: '100%' }}>
+                            <div style={{ width: '100%', position: 'relative' }}>
 
-                              {/* ── Match card ─────────────────────────────── */}
+                              {/* ── Match card (display only — no buttons inside) ── */}
                               <div
                                 className={isLive ? 'animate-pulse' : ''}
                                 style={{
@@ -2906,78 +2916,94 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                                     )}
                                   </div>
                                 </div>
-
-                                {/* Action buttons */}
-                                {(isCompleted || (isOrganizer && dbMatch && !isCompleted)) && (
-                                  <div style={{ padding: '0 10px 10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                    {isCompleted && (
-                                      <button
-                                        onClick={() => {
-                                          const bracketMatchData = { matchNumber: match.matchNumber, round: ri + 1, player1, player2 };
-                                          const matchDataToUse = dbMatch
-                                            ? { ...dbMatch, score: dbMatch.score ?? dbMatch.scoreJson ?? null }
-                                            : {
-                                                matchNumber: match.matchNumber, status: 'COMPLETED', winner: match.winner,
-                                                winnerId: match.winner === 1 ? player1?.id : player2?.id,
-                                                score: match.scoreJson || match.score || null,
-                                                scoreJson: match.scoreJson || null,
-                                                player1, player2,
-                                              };
-                                          onViewMatchDetails(matchDataToUse, bracketMatchData);
-                                        }}
-                                        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '7px 10px', background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: '10px', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}
-                                      >
-                                        <Eye className="w-3.5 h-3.5" />
-                                        View Details
-                                      </button>
-                                    )}
-                                    {isOrganizer && dbMatch && !isCompleted && (
-                                      <>
-                                        {player1.name !== 'TBD' && player2.name !== 'TBD' ? (
-                                          <button
-                                            onClick={() => {
-                                              if (hasUmpire && dbMatch?.umpireId) {
-                                                navigate(`/match/${dbMatch.id}/conduct?umpireId=${dbMatch.umpireId}`);
-                                              } else {
-                                                const bracketMatchData = { matchNumber: match.matchNumber, round: ri + 1, player1, player2 };
-                                                onAssignUmpire(dbMatch, bracketMatchData);
-                                              }
-                                            }}
-                                            style={
-                                              hasUmpire
-                                                ? { width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '7px 10px', background: 'rgba(245,158,11,0.1)', color: '#FCD34D', border: '1px solid rgba(245,158,11,0.25)', borderRadius: '10px', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }
-                                                : { width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '7px 10px', background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }
-                                            }
-                                          >
-                                            <Gavel className="w-3.5 h-3.5" />
-                                            {hasUmpire ? '✓ Conduct' : 'Assign Umpire'}
-                                          </button>
-                                        ) : (player1.name !== 'TBD' || player2.name !== 'TBD') ? (
-                                          <button
-                                            onClick={() => handleGiveByeForMatch(dbMatch.id)}
-                                            style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '7px 10px', background: 'rgba(245,158,11,0.08)', color: '#fbbf24', border: '1px solid rgba(245,158,11,0.2)', borderRadius: '10px', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}
-                                          >
-                                            <Trophy className="w-3.5 h-3.5" />
-                                            Give BYE
-                                          </button>
-                                        ) : null}
-                                      </>
-                                    )}
-                                    {isOrganizer && dbMatch && isCompleted && (
-                                      <button
-                                        onClick={() => {
-                                          const bracketMatchData = { matchNumber: match.matchNumber, round: ri + 1, player1, player2, currentWinnerId: dbMatch?.winnerId };
-                                          onChangeResult(dbMatch, bracketMatchData);
-                                        }}
-                                        style={{ width: '100%', padding: '7px 10px', background: 'rgba(245,158,11,0.07)', color: '#fbbf24', border: '1px solid rgba(245,158,11,0.18)', borderRadius: '10px', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}
-                                      >
-                                        Change Result
-                                      </button>
-                                    )}
-                                  </div>
-                                )}
                               </div>
                               {/* ── End match card ──────────────────────────── */}
+
+                              {/* ── Action buttons — absolutely below card, never affect slot height ── */}
+                              {(isCompleted || (isOrganizer && dbMatch && !isCompleted)) && (
+                                <div style={{
+                                  position: 'absolute', top: '100%', left: 0, right: 0,
+                                  marginTop: '6px',
+                                  display: 'flex',
+                                  /* Completed organizer: 2 buttons → row. All other cases: column */
+                                  flexDirection: (isOrganizer && isCompleted) ? 'row' : 'column',
+                                  gap: '5px',
+                                  zIndex: 2,
+                                }}>
+                                  {isCompleted && (
+                                    <button
+                                      onClick={() => {
+                                        const bracketMatchData = { matchNumber: match.matchNumber, round: ri + 1, player1, player2 };
+                                        const matchDataToUse = dbMatch
+                                          ? { ...dbMatch, score: dbMatch.score ?? dbMatch.scoreJson ?? null }
+                                          : {
+                                              matchNumber: match.matchNumber, status: 'COMPLETED', winner: match.winner,
+                                              winnerId: match.winner === 1 ? player1?.id : player2?.id,
+                                              score: match.scoreJson || match.score || null,
+                                              scoreJson: match.scoreJson || null,
+                                              player1, player2,
+                                            };
+                                        onViewMatchDetails(matchDataToUse, bracketMatchData);
+                                      }}
+                                      style={{
+                                        flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        gap: '5px', padding: '6px 8px',
+                                        background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.6)',
+                                        border: '1px solid rgba(255,255,255,0.09)', borderRadius: '9px',
+                                        fontSize: '10px', fontWeight: 600, cursor: 'pointer',
+                                        whiteSpace: 'nowrap',
+                                      }}
+                                    >
+                                      <Eye className="w-3 h-3 flex-shrink-0" />
+                                      Details
+                                    </button>
+                                  )}
+                                  {isOrganizer && dbMatch && !isCompleted && (
+                                    <>
+                                      {player1.name !== 'TBD' && player2.name !== 'TBD' ? (
+                                        <button
+                                          onClick={() => {
+                                            if (hasUmpire && dbMatch?.umpireId) {
+                                              navigate(`/match/${dbMatch.id}/conduct?umpireId=${dbMatch.umpireId}`);
+                                            } else {
+                                              const bracketMatchData = { matchNumber: match.matchNumber, round: ri + 1, player1, player2 };
+                                              onAssignUmpire(dbMatch, bracketMatchData);
+                                            }
+                                          }}
+                                          style={
+                                            hasUmpire
+                                              ? { flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', padding: '6px 8px', background: 'rgba(245,158,11,0.1)', color: '#FCD34D', border: '1px solid rgba(245,158,11,0.25)', borderRadius: '9px', fontSize: '10px', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }
+                                              : { flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', padding: '6px 8px', background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '9px', fontSize: '10px', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }
+                                          }
+                                        >
+                                          <Gavel className="w-3 h-3 flex-shrink-0" />
+                                          {hasUmpire ? '✓ Conduct' : 'Assign Umpire'}
+                                        </button>
+                                      ) : (player1.name !== 'TBD' || player2.name !== 'TBD') ? (
+                                        <button
+                                          onClick={() => handleGiveByeForMatch(dbMatch.id)}
+                                          style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', padding: '6px 8px', background: 'rgba(245,158,11,0.08)', color: '#fbbf24', border: '1px solid rgba(245,158,11,0.2)', borderRadius: '9px', fontSize: '10px', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}
+                                        >
+                                          <Trophy className="w-3 h-3 flex-shrink-0" />
+                                          Give BYE
+                                        </button>
+                                      ) : null}
+                                    </>
+                                  )}
+                                  {isOrganizer && dbMatch && isCompleted && (
+                                    <button
+                                      onClick={() => {
+                                        const bracketMatchData = { matchNumber: match.matchNumber, round: ri + 1, player1, player2, currentWinnerId: dbMatch?.winnerId };
+                                        onChangeResult(dbMatch, bracketMatchData);
+                                      }}
+                                      style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '6px 8px', background: 'rgba(245,158,11,0.07)', color: '#fbbf24', border: '1px solid rgba(245,158,11,0.18)', borderRadius: '9px', fontSize: '10px', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}
+                                    >
+                                      Change
+                                    </button>
+                                  )}
+                                </div>
+                              )}
+                              {/* ── End action buttons ──────────────────────── */}
 
                             </div>
                           </div>

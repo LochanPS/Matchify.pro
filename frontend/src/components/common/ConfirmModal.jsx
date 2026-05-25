@@ -10,50 +10,64 @@ export default function ConfirmModal({
   confirmText = 'Confirm',
   cancelText = 'Cancel',
   confirmButtonClass = 'bg-gradient-to-r from-red-500 to-rose-600',
-  icon = <ExclamationTriangleIcon className="w-12 h-12 text-red-400" />,
+  icon = <ExclamationTriangleIcon style={{ width: 28, height: 28, color: '#F87171' }} />,
   loading = false
 }) {
   if (!isOpen) return null;
 
   return (
-    <div 
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+    <div
+      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 16 }}
       onClick={onClose}
     >
-      <div 
-        className="bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-white/10"
-        onClick={(e) => e.stopPropagation()}
+      <div
+        style={{ background: 'linear-gradient(145deg, #0C1220, #0A0F1A)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20, maxWidth: 420, width: '100%', overflow: 'hidden', boxShadow: '0 24px 64px rgba(0,0,0,0.5)' }}
+        onClick={e => e.stopPropagation()}
       >
-        <div className="p-6">
-          <div className="text-center mb-6">
-            <div className="w-16 h-16 bg-red-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-red-500/30">
+        <div style={{ padding: 28 }}>
+          {/* Icon + Title */}
+          <div style={{ textAlign: 'center', marginBottom: 24 }}>
+            <div style={{ width: 60, height: 60, borderRadius: 16, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
               {icon}
             </div>
-            <h3 className="text-xl font-bold text-white mb-2">{title}</h3>
-            <p className="text-gray-400">{message}</p>
+            <h3 style={{ fontSize: 19, fontWeight: 800, color: '#fff', marginBottom: 8 }}>{title}</h3>
+            <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', lineHeight: 1.6 }}>{message}</p>
           </div>
 
-          <div className="flex gap-3">
+          {/* Buttons */}
+          <div style={{ display: 'flex', gap: 10 }}>
             <button
               onClick={onClose}
               disabled={loading}
-              className="flex-1 py-3 px-4 bg-white/10 text-white rounded-xl hover:bg-white/20 transition-colors font-medium disabled:opacity-50"
+              style={{
+                flex: 1, padding: '12px 16px',
+                background: 'rgba(255,255,255,0.06)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                color: 'rgba(255,255,255,0.7)',
+                borderRadius: 12, fontSize: 14, fontWeight: 600,
+                cursor: loading ? 'not-allowed' : 'pointer',
+                opacity: loading ? 0.5 : 1, transition: 'all 0.15s'
+              }}
+              onMouseEnter={e => { if (!loading) e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}
             >
               {cancelText}
             </button>
             <button
               onClick={onConfirm}
               disabled={loading}
-              className={`flex-1 py-3 px-4 ${confirmButtonClass} text-white rounded-xl hover:shadow-lg transition-all font-semibold disabled:opacity-50 flex items-center justify-center gap-2`}
+              className={confirmButtonClass}
+              style={{
+                flex: 1, padding: '12px 16px',
+                color: '#fff', borderRadius: 12, border: 'none',
+                fontSize: 14, fontWeight: 700,
+                cursor: loading ? 'not-allowed' : 'pointer',
+                opacity: loading ? 0.6 : 1,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                transition: 'all 0.15s', boxShadow: '0 4px 14px rgba(239,68,68,0.3)'
+              }}
             >
-              {loading ? (
-                <>
-                  <Spinner size="sm" />
-                  Processing...
-                </>
-              ) : (
-                confirmText
-              )}
+              {loading ? (<><Spinner size="sm" /> Processing…</>) : confirmText}
             </button>
           </div>
         </div>

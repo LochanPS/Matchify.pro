@@ -1,85 +1,76 @@
 const TournamentStepper = ({ currentStep, goToStep, completedSteps }) => {
   const steps = [
-    { number: 1, label: 'Basic', icon: '1' },
-    { number: 2, label: 'Dates', icon: '2' },
-    { number: 3, label: 'Posters', icon: '3' },
-    { number: 4, label: 'Categories', icon: '4' },
-    { number: 5, label: 'Payment', icon: '5' },
-    { number: 6, label: 'Agreement', icon: '6' },
-    { number: 7, label: 'Review', icon: '7' },
+    { number: 1, label: 'Basic' },
+    { number: 2, label: 'Dates' },
+    { number: 3, label: 'Posters' },
+    { number: 4, label: 'Categories' },
+    { number: 5, label: 'Payment' },
+    { number: 6, label: 'Agreement' },
+    { number: 7, label: 'Review' },
   ];
 
   return (
-    <div className="overflow-x-auto scrollbar-hide -mx-1">
-      <div className="flex items-center justify-start gap-3 min-w-max px-1 py-1">
-        {steps.map((step, index) => (
-          <div key={step.number} className="flex items-center">
-            {/* Step Button - Matches Screenshot EXACTLY */}
-            <button
-              onClick={() => completedSteps.includes(step.number) && goToStep(step.number)}
-              disabled={!completedSteps.includes(step.number) && currentStep !== step.number}
-              className={`
-                relative flex flex-col items-center justify-center rounded-2xl font-bold
-                transition-all duration-200 px-4 py-3 min-w-[80px]
-                ${currentStep === step.number
-                  ? 'text-white scale-105'
-                  : completedSteps.includes(step.number)
-                  ? 'text-white cursor-pointer hover:scale-105'
-                  : 'text-gray-500 cursor-not-allowed opacity-50'
-                }
-              `}
-              style={{
-                background: currentStep === step.number
-                  ? 'linear-gradient(135deg, #06b6d4, #34d399)' // Emerald green like screenshot
-                  : completedSteps.includes(step.number)
-                  ? 'linear-gradient(135deg, #a855f7, #c084fc)' // Purple like screenshot
-                  : 'rgba(71,85,105,0.4)', // Dark gray like screenshot
-                boxShadow: currentStep === step.number
-                  ? '0 8px 25px rgba(6,182,212,0.5), 0 0 20px rgba(6,182,212,0.3)'
-                  : completedSteps.includes(step.number)
-                  ? '0 6px 20px rgba(168,85,247,0.4)'
-                  : 'none',
-              }}
-            >
-              {/* Step Number/Check - Centered Circle */}
-              <div className="flex items-center justify-center w-8 h-8 rounded-xl mb-1.5"
+    <div style={{ overflowX: 'auto', margin: '0 -4px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px', minWidth: 'max-content' }}>
+        {steps.map((step, index) => {
+          const isActive = currentStep === step.number;
+          const isCompleted = completedSteps.includes(step.number);
+          const isClickable = isCompleted;
+
+          return (
+            <div key={step.number} style={{ display: 'flex', alignItems: 'center' }}>
+              <button
+                onClick={() => isClickable && goToStep(step.number)}
+                disabled={!isClickable && !isActive}
                 style={{
-                  background: currentStep === step.number || completedSteps.includes(step.number)
-                    ? 'rgba(255,255,255,0.25)'
-                    : 'rgba(0,0,0,0.3)'
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                  padding: '10px 14px', minWidth: 72, borderRadius: 14,
+                  border: 'none', cursor: isClickable ? 'pointer' : 'default',
+                  transition: 'all 0.2s ease',
+                  transform: isActive ? 'scale(1.04)' : 'scale(1)',
+                  background: isActive
+                    ? 'linear-gradient(135deg, #F59E0B, #D97706)'
+                    : isCompleted
+                    ? 'linear-gradient(135deg, rgba(139,92,246,0.25), rgba(124,58,237,0.2))'
+                    : 'rgba(255,255,255,0.05)',
+                  boxShadow: isActive ? '0 6px 20px rgba(245,158,11,0.35)' : isCompleted ? '0 4px 12px rgba(139,92,246,0.2)' : 'none',
+                  opacity: (!isClickable && !isActive) ? 0.45 : 1,
                 }}
               >
-                {completedSteps.includes(step.number) ? (
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                ) : (
-                  <span className="text-sm font-black">{step.icon}</span>
-                )}
-              </div>
+                {/* Icon circle */}
+                <div style={{
+                  width: 30, height: 30, borderRadius: 8,
+                  background: isActive ? 'rgba(255,255,255,0.25)' : isCompleted ? 'rgba(139,92,246,0.3)' : 'rgba(0,0,0,0.25)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  marginBottom: 5
+                }}>
+                  {isCompleted ? (
+                    <svg style={{ width: 16, height: 16, color: isActive ? '#0C0900' : '#C4B5FD' }} fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  ) : (
+                    <span style={{ fontSize: 13, fontWeight: 800, color: isActive ? '#0C0900' : 'rgba(255,255,255,0.4)' }}>
+                      {step.number}
+                    </span>
+                  )}
+                </div>
+                <span style={{
+                  fontSize: 11, fontWeight: 700, whiteSpace: 'nowrap',
+                  color: isActive ? '#0C0900' : isCompleted ? '#C4B5FD' : 'rgba(255,255,255,0.4)'
+                }}>
+                  {step.label}
+                </span>
+              </button>
 
-              {/* Step Label */}
-              <span className="text-xs font-bold whitespace-nowrap">
-                {step.label}
-              </span>
-            </button>
-
-            {/* Connector Arrow - Like Screenshot */}
-            {index < steps.length - 1 && (
-              <div className="flex items-center justify-center w-5 h-5 mx-2">
-                <svg 
-                  className="w-4 h-4"
-                  fill="none" 
-                  stroke={completedSteps.includes(step.number) ? '#a855f7' : 'rgba(148,163,184,0.4)'}
-                  strokeWidth="2.5"
-                  viewBox="0 0 24 24"
-                >
+              {/* Connector */}
+              {index < steps.length - 1 && (
+                <svg style={{ width: 14, height: 14, margin: '0 4px', flexShrink: 0 }} fill="none" stroke={isCompleted ? 'rgba(139,92,246,0.5)' : 'rgba(255,255,255,0.12)'} strokeWidth="2.5" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
-              </div>
-            )}
-          </div>
-        ))}
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

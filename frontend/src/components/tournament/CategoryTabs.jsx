@@ -1,13 +1,18 @@
 import React from 'react';
 
 const CategoryTabs = ({ categories, activeCategory, onCategoryChange }) => {
-  if (!categories || categories.length === 0) {
-    return null;
-  }
+  if (!categories || categories.length === 0) return null;
 
   return (
-    <div style={{ borderBottom: '1px solid rgba(6,182,212,0.15)', background: 'rgba(7,7,26,0.8)' }}>
-      <nav className="flex space-x-6 px-4 overflow-x-auto" aria-label="Categories">
+    <div style={{
+      borderBottom: '1px solid rgba(255,255,255,0.07)',
+      background: 'rgba(4,8,16,0.85)',
+      backdropFilter: 'blur(8px)'
+    }}>
+      <nav
+        style={{ display: 'flex', gap: 0, padding: '0 12px', overflowX: 'auto', scrollbarWidth: 'none' }}
+        aria-label="Categories"
+      >
         {categories.map((category) => {
           const isActive = activeCategory?.id === category.id;
 
@@ -15,31 +20,45 @@ const CategoryTabs = ({ categories, activeCategory, onCategoryChange }) => {
             <button
               key={category.id}
               onClick={() => onCategoryChange(category)}
-              className="py-3 px-1 border-b-2 font-semibold text-sm whitespace-nowrap transition-all"
               style={{
-                borderBottomColor: isActive ? '#22d3ee' : 'transparent',
-                color: isActive ? '#22d3ee' : 'rgba(255,255,255,0.5)',
+                padding: '12px 14px',
+                border: 'none',
+                borderBottom: isActive ? '2px solid #F59E0B' : '2px solid transparent',
+                background: 'transparent',
+                color: isActive ? '#FCD34D' : 'rgba(255,255,255,0.45)',
+                fontWeight: isActive ? 700 : 500,
+                fontSize: 13,
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+                transition: 'all 0.2s',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 7,
+                flexShrink: 0
               }}
+              onMouseEnter={e => { if (!isActive) e.currentTarget.style.color = 'rgba(255,255,255,0.7)'; }}
+              onMouseLeave={e => { if (!isActive) e.currentTarget.style.color = 'rgba(255,255,255,0.45)'; }}
             >
-              <span className="flex items-center gap-2">
-                {category.name}
-
-                {category.drawGenerated ? (
-                  <span
-                    className="text-xs px-2 py-0.5 rounded-full font-semibold"
-                    style={{ background: 'rgba(6,182,212,0.12)', color: '#22d3ee', border: '1px solid rgba(6,182,212,0.3)' }}
-                  >
-                    Draw Ready
-                  </span>
-                ) : (
-                  <span
-                    className="text-xs px-2 py-0.5 rounded-full"
-                    style={{ background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.4)', border: '1px solid rgba(255,255,255,0.1)' }}
-                  >
-                    Pending
-                  </span>
-                )}
-              </span>
+              {category.name}
+              {category.drawGenerated ? (
+                <span style={{
+                  fontSize: 10, padding: '2px 7px', borderRadius: 10, fontWeight: 700,
+                  background: isActive ? 'rgba(245,158,11,0.15)' : 'rgba(16,185,129,0.1)',
+                  color: isActive ? '#FCD34D' : '#34D399',
+                  border: isActive ? '1px solid rgba(245,158,11,0.3)' : '1px solid rgba(16,185,129,0.25)'
+                }}>
+                  Draw Ready
+                </span>
+              ) : (
+                <span style={{
+                  fontSize: 10, padding: '2px 7px', borderRadius: 10, fontWeight: 600,
+                  background: 'rgba(255,255,255,0.05)',
+                  color: 'rgba(255,255,255,0.3)',
+                  border: '1px solid rgba(255,255,255,0.08)'
+                }}>
+                  Pending
+                </span>
+              )}
             </button>
           );
         })}

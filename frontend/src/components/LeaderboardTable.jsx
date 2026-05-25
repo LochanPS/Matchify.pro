@@ -1,113 +1,127 @@
 import React from 'react';
-import { Trophy, Medal, Award } from 'lucide-react';
+import { Trophy, Medal, Award, MapPin } from 'lucide-react';
 
 const LeaderboardTable = ({ players, currentUserId }) => {
-  const getRankIcon = (rank) => {
-    if (rank === 1) return <Trophy className="w-6 h-6 text-yellow-500" />;
-    if (rank === 2) return <Medal className="w-6 h-6 text-gray-400" />;
-    if (rank === 3) return <Award className="w-6 h-6 text-orange-600" />;
-    return null;
+  const getRankDisplay = (rank) => {
+    if (rank === 1) return { icon: <Trophy style={{ width: 18, height: 18, color: '#F59E0B' }} />, bg: 'rgba(245,158,11,0.12)', border: 'rgba(245,158,11,0.3)', color: '#FCD34D' };
+    if (rank === 2) return { icon: <Medal style={{ width: 18, height: 18, color: '#9CA3AF' }} />, bg: 'rgba(156,163,175,0.1)', border: 'rgba(156,163,175,0.25)', color: '#D1D5DB' };
+    if (rank === 3) return { icon: <Award style={{ width: 18, height: 18, color: '#F97316' }} />, bg: 'rgba(249,115,22,0.1)', border: 'rgba(249,115,22,0.25)', color: '#FED7AA' };
+    return { icon: null, bg: 'rgba(255,255,255,0.05)', border: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)' };
   };
 
-  const getRankBadge = (rank) => {
-    if (rank === 1) return 'bg-yellow-100 text-yellow-800';
-    if (rank === 2) return 'bg-gray-100 text-gray-800';
-    if (rank === 3) return 'bg-orange-100 text-orange-800';
-    return 'bg-blue-50 text-blue-700';
-  };
+  if (!players || players.length === 0) {
+    return (
+      <div style={{ textAlign: 'center', padding: '48px 16px', color: 'rgba(255,255,255,0.3)', fontSize: 14 }}>
+        No players found in this region
+      </div>
+    );
+  }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full bg-white rounded-lg overflow-hidden">
-        <thead className="bg-blue-600 text-white">
-          <tr>
-            <th className="px-6 py-3 text-left text-sm font-semibold">Rank</th>
-            <th className="px-6 py-3 text-left text-sm font-semibold">Player</th>
-            <th className="px-6 py-3 text-center text-sm font-semibold">Points</th>
-            <th className="px-6 py-3 text-center text-sm font-semibold">Tournaments</th>
-            <th className="px-6 py-3 text-center text-sm font-semibold">Win Rate</th>
-            <th className="px-6 py-3 text-left text-sm font-semibold">Location</th>
+    <div style={{ overflowX: 'auto' }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 560 }}>
+        <thead>
+          <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+            {['Rank', 'Player', 'Points', 'Tournaments', 'Win Rate', 'Location'].map(h => (
+              <th key={h} style={{ padding: '10px 16px', textAlign: h === 'Player' || h === 'Location' ? 'left' : 'center', fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.08em', whiteSpace: 'nowrap' }}>
+                {h}
+              </th>
+            ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-200">
+        <tbody>
           {players.map((player, index) => {
             const rank = index + 1;
             const isCurrentUser = player.id === currentUserId;
-            
+            const rankDisplay = getRankDisplay(rank);
+
             return (
-              <tr 
+              <tr
                 key={player.id}
-                className={`hover:bg-gray-50 transition ${isCurrentUser ? 'bg-blue-50' : ''}`}
+                style={{
+                  borderBottom: '1px solid rgba(255,255,255,0.05)',
+                  background: isCurrentUser ? 'rgba(245,158,11,0.05)' : 'transparent',
+                  transition: 'background 0.15s'
+                }}
+                onMouseEnter={e => { if (!isCurrentUser) e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = isCurrentUser ? 'rgba(245,158,11,0.05)' : 'transparent'; }}
               >
                 {/* Rank */}
-                <td className="px-6 py-4">
-                  <div className="flex items-center space-x-2">
-                    {getRankIcon(rank)}
-                    <span className={`px-3 py-1 rounded-full text-sm font-bold ${getRankBadge(rank)}`}>
+                <td style={{ padding: '14px 16px', whiteSpace: 'nowrap' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    {rankDisplay.icon}
+                    <span style={{
+                      padding: '3px 10px', borderRadius: 20,
+                      background: rankDisplay.bg, border: `1px solid ${rankDisplay.border}`,
+                      color: rankDisplay.color, fontSize: 12, fontWeight: 700
+                    }}>
                       #{rank}
                     </span>
                   </div>
                 </td>
 
-                {/* Player Info */}
-                <td className="px-6 py-4">
-                  <div className="flex items-center space-x-3">
-                    <img 
-                      src={player.photo || `https://ui-avatars.com/api/?name=${player.name}`}
+                {/* Player */}
+                <td style={{ padding: '14px 16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <img
+                      src={player.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(player.name)}&background=111827&color=F59E0B&bold=true`}
                       alt={player.name}
-                      className="w-10 h-10 rounded-full object-cover"
+                      style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover', border: isCurrentUser ? '2px solid rgba(245,158,11,0.5)' : '1px solid rgba(255,255,255,0.1)', flexShrink: 0 }}
                     />
                     <div>
-                      <p className="font-semibold text-gray-900">
+                      <p style={{ fontSize: 13, fontWeight: 700, color: '#fff', display: 'flex', alignItems: 'center', gap: 6 }}>
                         {player.name}
                         {isCurrentUser && (
-                          <span className="ml-2 text-xs bg-blue-600 text-white px-2 py-1 rounded">
+                          <span style={{ fontSize: 10, fontWeight: 700, background: 'rgba(245,158,11,0.15)', color: '#FCD34D', border: '1px solid rgba(245,158,11,0.3)', padding: '1px 7px', borderRadius: 8 }}>
                             You
                           </span>
                         )}
                       </p>
-                      <p className="text-sm text-gray-500">{player.email}</p>
+                      {player.email && <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 1 }}>{player.email}</p>}
                     </div>
                   </div>
                 </td>
 
                 {/* Points */}
-                <td className="px-6 py-4 text-center">
-                  <span className="text-2xl font-bold text-blue-600">
-                    {player.matchify_points.toFixed(1)}
+                <td style={{ padding: '14px 16px', textAlign: 'center' }}>
+                  <span style={{ fontSize: 20, fontWeight: 900, color: rank === 1 ? '#FCD34D' : '#fff', fontVariantNumeric: 'tabular-nums' }}>
+                    {typeof player.matchify_points === 'number' ? player.matchify_points.toFixed(1) : '–'}
                   </span>
                 </td>
 
                 {/* Tournaments */}
-                <td className="px-6 py-4 text-center">
-                  <span className="text-lg font-semibold text-gray-700">
-                    {player.tournaments_played}
+                <td style={{ padding: '14px 16px', textAlign: 'center' }}>
+                  <span style={{ fontSize: 16, fontWeight: 700, color: '#67E8F9', fontVariantNumeric: 'tabular-nums' }}>
+                    {player.tournaments_played ?? '–'}
                   </span>
                 </td>
 
                 {/* Win Rate */}
-                <td className="px-6 py-4 text-center">
-                  <span className="text-lg font-semibold text-green-600">
+                <td style={{ padding: '14px 16px', textAlign: 'center' }}>
+                  <span style={{ fontSize: 15, fontWeight: 700, color: player.win_rate ? '#6EE7B7' : 'rgba(255,255,255,0.3)' }}>
                     {player.win_rate ? `${player.win_rate}%` : 'N/A'}
                   </span>
                 </td>
 
                 {/* Location */}
-                <td className="px-6 py-4">
-                  <p className="text-sm text-gray-700">{player.city}</p>
-                  <p className="text-xs text-gray-500">{player.state}</p>
+                <td style={{ padding: '14px 16px' }}>
+                  {(player.city || player.state) ? (
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 5 }}>
+                      <MapPin style={{ width: 13, height: 13, color: 'rgba(255,255,255,0.3)', marginTop: 2, flexShrink: 0 }} />
+                      <div>
+                        <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.65)', fontWeight: 500 }}>{player.city}</p>
+                        {player.state && <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>{player.state}</p>}
+                      </div>
+                    </div>
+                  ) : (
+                    <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.2)' }}>–</span>
+                  )}
                 </td>
               </tr>
             );
           })}
         </tbody>
       </table>
-
-      {players.length === 0 && (
-        <div className="text-center py-12 text-gray-500">
-          No players found in this region
-        </div>
-      )}
     </div>
   );
 };

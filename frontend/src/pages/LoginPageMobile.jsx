@@ -1,15 +1,13 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { EyeIcon, EyeSlashIcon, PhoneIcon, LockClosedIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
+import { EyeIcon, EyeSlashIcon, LockClosedIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
 import { getErrorMessage } from '../utils/errorMessage';
 import MatchifyLogo from '../components/MatchifyLogo';
 import Spinner from '../components/Spinner';
 
-
-
 const LoginPageMobile = () => {
-  const [loginType, setLoginType] = useState('phone'); // 'phone' or 'email'
+  const [loginType, setLoginType] = useState('phone');
   const [formData, setFormData] = useState({ credential: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -22,7 +20,6 @@ const LoginPageMobile = () => {
 
   const handleChange = (e) => {
     let value = e.target.value;
-    // Phone field: digits only, max 10
     if (e.target.name === 'credential' && loginType === 'phone') {
       value = value.replace(/\D/g, '').slice(0, 10);
     }
@@ -32,7 +29,7 @@ const LoginPageMobile = () => {
 
   const handleLoginTypeChange = (type) => {
     setLoginType(type);
-    setFormData({ credential: '', password: formData.password }); // Clear credential when switching
+    setFormData({ credential: '', password: formData.password });
     setError('');
   };
 
@@ -42,38 +39,27 @@ const LoginPageMobile = () => {
       setError(`${loginType === 'phone' ? 'Phone number' : 'Email'} and password are required`);
       return;
     }
-    
-    // Validate based on login type
     if (loginType === 'phone') {
-      const isValidPhone = /^[0-9]{10}$/.test(formData.credential);
-      if (!isValidPhone) {
+      if (!/^[0-9]{10}$/.test(formData.credential)) {
         setError('Please enter a valid 10-digit phone number');
         return;
       }
     } else {
-      const isValidEmail = formData.credential.includes('@');
-      if (!isValidEmail) {
+      if (!formData.credential.includes('@')) {
         setError('Please enter a valid email address');
         return;
       }
     }
-    
+
     setLoading(true);
     setError('');
-    
     try {
       const user = await login(formData.credential, formData.password);
-      
-      if (redirectUrl) {
-        navigate(redirectUrl);
-        return;
-      }
-      
-      const isAdmin = user.isAdmin || 
-                     (Array.isArray(user.roles) && user.roles.includes('ADMIN')) ||
-                     (typeof user.roles === 'string' && user.roles.includes('ADMIN')) ||
-                     user.currentRole === 'ADMIN';
-      
+      if (redirectUrl) { navigate(redirectUrl); return; }
+      const isAdmin = user.isAdmin ||
+        (Array.isArray(user.roles) && user.roles.includes('ADMIN')) ||
+        (typeof user.roles === 'string' && user.roles.includes('ADMIN')) ||
+        user.currentRole === 'ADMIN';
       if (isAdmin) {
         navigate('/admin-dashboard');
       } else {
@@ -87,39 +73,58 @@ const LoginPageMobile = () => {
     }
   };
 
-  return (
-    <div className="min-h-screen flex flex-col relative overflow-hidden" style={{ 
-      background: '#050810'
-    }}>
-      {/* Sticky Header with Sign In & Sign Up */}
-      <div 
-        className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md border-b"
-        style={{ 
-          background: 'linear-gradient(135deg, rgba(7,7,26,0.95), rgba(13,26,42,0.95))', 
-          borderColor: 'rgba(6,182,212,0.2)',
-          boxShadow: '0 4px 20px rgba(6,182,212,0.1)',
-          animation: 'slideDown 0.5s ease-out'
-        }}
-      >
-        <div className="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
-          {/* Logo */}
-          <Link to="/" className="flex items-center">
-            <MatchifyLogo size={44} />
-          </Link>
+  const inputBase = {
+    background: 'rgba(255,255,255,0.05)',
+    border: '1px solid rgba(255,255,255,0.1)',
+    borderRadius: 12,
+    color: '#fff',
+    fontSize: 15,
+    outline: 'none',
+    width: '100%',
+    transition: 'border-color 0.2s'
+  };
 
-          {/* Sign Up Button */}
+  return (
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#040810', position: 'relative', overflow: 'hidden' }}>
+      <style>{`
+        @keyframes float { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(18px,-18px) scale(1.04)} 66%{transform:translate(-12px,12px) scale(0.97)} }
+        @keyframes fadeIn { 0%{opacity:0;transform:translateY(16px)} 100%{opacity:1;transform:translateY(0)} }
+        @keyframes slideDown { 0%{transform:translateY(-100%);opacity:0} 100%{transform:translateY(0);opacity:1} }
+        @keyframes slideUp { 0%{opacity:0;transform:translateY(24px)} 100%{opacity:1;transform:translateY(0)} }
+        @keyframes shimmer { 0%{background-position:-200% center} 100%{background-position:200% center} }
+        @keyframes scaleIn { 0%{opacity:0;transform:scale(0.88)} 100%{opacity:1;transform:scale(1)} }
+        .login-input:focus { border-color: rgba(245,158,11,0.45) !important; box-shadow: 0 0 0 3px rgba(245,158,11,0.08); }
+        .login-input::placeholder { color: rgba(255,255,255,0.2); }
+      `}</style>
+
+      {/* Ambient orbs */}
+      <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', width: 440, height: 440, top: -160, right: -120, borderRadius: '50%', background: 'radial-gradient(circle, rgba(245,158,11,0.08) 0%, transparent 70%)', filter: 'blur(80px)', animation: 'float 12s ease-in-out infinite' }} />
+        <div style={{ position: 'absolute', width: 400, height: 400, bottom: '5%', left: -120, borderRadius: '50%', background: 'radial-gradient(circle, rgba(139,92,246,0.07) 0%, transparent 70%)', filter: 'blur(80px)', animation: 'float 15s ease-in-out infinite reverse' }} />
+      </div>
+
+      {/* Header */}
+      <div style={{
+        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50,
+        background: 'rgba(4,8,16,0.96)',
+        backdropFilter: 'blur(12px)',
+        borderBottom: '1px solid rgba(255,255,255,0.07)',
+        animation: 'slideDown 0.4s ease-out'
+      }}>
+        <div style={{ maxWidth: 480, margin: '0 auto', padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Link to="/" style={{ display: 'flex', alignItems: 'center' }}>
+            <MatchifyLogo size={42} />
+          </Link>
           <Link
             to={redirectUrl ? `/register?redirect=${encodeURIComponent(redirectUrl)}` : '/register'}
-            className="flex items-center justify-center rounded-lg font-bold"
             style={{
-              height: '36px',
-              paddingLeft: '16px',
-              paddingRight: '16px',
-              fontSize: '14px',
-              background: 'linear-gradient(135deg, #06b6d4, #0891b2)',
-              color: '#ffffff',
-              letterSpacing: '0.01em',
-              whiteSpace: 'nowrap',
+              height: 36, padding: '0 18px',
+              background: 'linear-gradient(135deg, #F59E0B, #D97706)',
+              color: '#0C0900',
+              borderRadius: 10, fontWeight: 700, fontSize: 13,
+              display: 'flex', alignItems: 'center',
+              boxShadow: '0 4px 12px rgba(245,158,11,0.3)',
+              textDecoration: 'none'
             }}
           >
             Sign Up
@@ -127,199 +132,98 @@ const LoginPageMobile = () => {
         </div>
       </div>
 
-      {/* Ambient Background — 2 blobs */}
-      <div className="fixed top-0 bottom-0 pointer-events-none overflow-hidden" style={{ left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: '480px' }}>
-        <div style={{ position: 'absolute', width: '440px', height: '440px', top: '-140px', right: '-120px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(6,182,212,0.09) 0%, transparent 70%)', filter: 'blur(80px)' }} />
-        <div style={{ position: 'absolute', width: '400px', height: '400px', bottom: '5%', left: '-120px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(139,92,246,0.07) 0%, transparent 70%)', filter: 'blur(80px)' }} />
-      </div>
+      {/* Content */}
+      <div style={{ position: 'relative', zIndex: 10, flex: 1, display: 'flex', flexDirection: 'column', maxWidth: 480, margin: '0 auto', width: '100%', padding: '88px 16px 32px' }}>
 
-      {/* Add keyframes for animations */}
-      <style>{`
-        @keyframes float {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          25% { transform: translate(20px, -20px) scale(1.05); }
-          50% { transform: translate(-15px, 15px) scale(0.95); }
-          75% { transform: translate(15px, 10px) scale(1.02); }
-        }
-        @keyframes glow {
-          0%, 100% { opacity: 0.5; filter: brightness(1); }
-          50% { opacity: 1; filter: brightness(1.3); }
-        }
-        @keyframes shimmer {
-          0% { background-position: -200% center; }
-          100% { background-position: 200% center; }
-        }
-        @keyframes slideDown {
-          0% { transform: translateY(-100%); opacity: 0; }
-          100% { transform: translateY(0); opacity: 1; }
-        }
-        @keyframes fadeIn {
-          0% { opacity: 0; transform: translateY(20px); }
-          100% { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes scaleIn {
-          0% { opacity: 0; transform: scale(0.9); }
-          100% { opacity: 1; transform: scale(1); }
-        }
-        @keyframes slideUp {
-          0% { opacity: 0; transform: translateY(30px); }
-          100% { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes pulse {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.05); }
-        }
-      `}</style>
-
-      {/* Mobile-optimized container */}
-      <div className="relative z-10 flex-1 flex flex-col max-w-md mx-auto w-full px-4" style={{ paddingTop: '80px', paddingBottom: '24px' }}>
-        
-        {/* Logo Section with Glow */}
-        <div className="text-center mb-8 mt-4" style={{ animation: 'fadeIn 0.6s ease-out 0.3s both' }}>
-          <div className="flex justify-center mb-3" style={{ animation: 'scaleIn 0.6s ease-out 0.4s both', position: 'relative' }}>
-            {/* Glow behind logo — sized to match logo dimensions */}
-            <div style={{
-              position: 'absolute',
-              top: '50%', left: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: 220, height: 100,
-              background: 'radial-gradient(ellipse, rgba(6,182,212,0.45) 0%, transparent 70%)',
-              filter: 'blur(20px)',
-              animation: 'glow 3s ease-in-out infinite',
-              pointerEvents: 'none',
-            }} />
+        {/* Logo */}
+        <div style={{ textAlign: 'center', marginBottom: 28, animation: 'fadeIn 0.6s ease-out 0.2s both' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', position: 'relative', marginBottom: 10 }}>
+            <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 180, height: 80, background: 'radial-gradient(ellipse, rgba(245,158,11,0.3) 0%, transparent 70%)', filter: 'blur(20px)', animation: 'float 4s ease-in-out infinite', pointerEvents: 'none' }} />
             <div style={{ position: 'relative' }}>
-              <MatchifyLogo size={90} />
+              <MatchifyLogo size={84} />
             </div>
           </div>
-          <p className="text-xs text-gray-300 font-medium">India's Premier Badminton Platform</p>
+          <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', fontWeight: 500 }}>India's Premier Badminton Platform</p>
         </div>
 
-        {/* Main Card with Enhanced Depth */}
-        <div 
-          className="rounded-2xl p-6 mb-6 relative overflow-hidden"
-          style={{
-            background: 'linear-gradient(135deg, rgba(6,182,212,0.12) 0%, rgba(99,102,241,0.12) 100%)',
-            border: '2px solid rgba(6,182,212,0.3)',
-            backdropFilter: 'blur(20px)',
-            boxShadow: '0 8px 32px rgba(6,182,212,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
-            animation: 'slideUp 0.8s ease-out 0.5s both'
-          }}
-        >
-          {/* Animated Background Glow */}
-          <div 
-            className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl opacity-30"
-            style={{ 
-              background: 'radial-gradient(circle, rgba(6,182,212,0.6), transparent)',
-              animation: 'glow 4s ease-in-out infinite'
-            }}
-          />
-          <div 
-            className="absolute bottom-0 left-0 w-32 h-32 rounded-full blur-3xl opacity-30"
-            style={{ 
-              background: 'radial-gradient(circle, rgba(99,102,241,0.6), transparent)',
-              animation: 'glow 4s ease-in-out infinite reverse'
-            }}
-          />
-          
-          <div className="relative z-10">
-            {/* Header */}
-            <div className="text-center mb-6">
-              <div 
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold mb-3 relative overflow-hidden"
-                style={{ 
-                  background: 'linear-gradient(135deg, rgba(6,182,212,0.2), rgba(6,182,212,0.15))', 
-                  border: '2px solid rgba(6,182,212,0.5)', 
-                  color: '#06b6d4',
-                  boxShadow: '0 0 20px rgba(6,182,212,0.3), inset 0 0 20px rgba(6,182,212,0.1)'
-                }}
-              >
-                <div 
-                  className="absolute inset-0 opacity-30"
-                  style={{
-                    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
-                    backgroundSize: '200% 100%',
-                    animation: 'shimmer 3s infinite'
-                  }}
-                />
-                <span className="relative z-10">⚡ Ready to Play?</span>
-              </div>
-              <h1 
-                className="text-4xl font-black mb-2"
-                style={{ 
-                  background: 'linear-gradient(135deg, #ffffff 0%, #06b6d4 50%, #ffffff 100%)',
-                  backgroundSize: '200% auto',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                  animation: 'shimmer 4s linear infinite',
-                  textShadow: 'none',
-                  filter: 'drop-shadow(0 2px 10px rgba(6,182,212,0.3))'
-                }}
-              >
-                Welcome Back
-              </h1>
-              <p className="text-sm text-gray-300 font-medium">Sign in to continue your journey</p>
+        {/* Main Card */}
+        <div style={{
+          background: 'linear-gradient(145deg, rgba(12,18,32,0.95), rgba(10,15,26,0.95))',
+          border: '1px solid rgba(255,255,255,0.09)',
+          borderRadius: 20,
+          padding: 24,
+          marginBottom: 20,
+          backdropFilter: 'blur(20px)',
+          animation: 'slideUp 0.7s ease-out 0.3s both',
+          boxShadow: '0 16px 48px rgba(0,0,0,0.4)'
+        }}>
+          {/* Header */}
+          <div style={{ textAlign: 'center', marginBottom: 24 }}>
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              background: 'rgba(245,158,11,0.1)',
+              border: '1px solid rgba(245,158,11,0.3)',
+              borderRadius: 20, padding: '5px 14px',
+              fontSize: 12, fontWeight: 700, color: '#FCD34D',
+              marginBottom: 12
+            }}>
+              ⚡ Ready to Play?
             </div>
+            <h1 style={{
+              fontSize: 34, fontWeight: 900, lineHeight: 1.1, marginBottom: 6,
+              background: 'linear-gradient(135deg, #ffffff 0%, #FCD34D 50%, #F59E0B 100%)',
+              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text'
+            }}>
+              Welcome Back
+            </h1>
+            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)' }}>Sign in to continue your journey</p>
+          </div>
 
-          {/* Error Message */}
+          {/* Error */}
           {error && (
-            <div 
-              className="mb-5 p-3 rounded-lg text-sm"
-              style={{ 
-                background: 'rgba(239,68,68,0.1)', 
-                border: '1px solid rgba(239,68,68,0.3)', 
-                color: '#f87171' 
-              }}
-            >
+            <div style={{ marginBottom: 18, padding: '10px 14px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 10, fontSize: 13, color: '#F87171' }}>
               ⚠️ {error}
             </div>
           )}
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-5">
-            
-            {/* Login Type Toggle */}
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+            {/* Login type toggle */}
             <div>
-              <label className="block text-sm font-semibold text-white mb-3">
-                Login with
-              </label>
-              <div className="grid grid-cols-2 gap-3 mb-4">
-                <button
-                  type="button"
-                  onClick={() => handleLoginTypeChange('phone')}
-                  className={`py-3 px-4 rounded-xl font-bold text-sm transition-all ${
-                    loginType === 'phone'
-                      ? 'bg-gradient-to-r from-cyan-600 to-cyan-500 text-white shadow-lg shadow-cyan-500/40'
-                      : 'bg-white/5 text-gray-400 hover:bg-white/10'
-                  }`}
-                >
-                  📱 Phone Number
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleLoginTypeChange('email')}
-                  className={`py-3 px-4 rounded-xl font-bold text-sm transition-all ${
-                    loginType === 'email'
-                      ? 'bg-gradient-to-r from-cyan-600 to-cyan-500 text-white shadow-lg shadow-cyan-500/40'
-                      : 'bg-white/5 text-gray-400 hover:bg-white/10'
-                  }`}
-                >
-                  ✉️ Email
-                </button>
+              <p style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 10 }}>Login with</p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                {['phone', 'email'].map(type => (
+                  <button
+                    key={type}
+                    type="button"
+                    onClick={() => handleLoginTypeChange(type)}
+                    style={{
+                      padding: '11px 12px',
+                      borderRadius: 12,
+                      fontWeight: 700, fontSize: 13,
+                      border: 'none',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      background: loginType === type
+                        ? 'linear-gradient(135deg, #F59E0B, #D97706)'
+                        : 'rgba(255,255,255,0.05)',
+                      color: loginType === type ? '#0C0900' : 'rgba(255,255,255,0.45)',
+                      boxShadow: loginType === type ? '0 4px 12px rgba(245,158,11,0.3)' : 'none'
+                    }}
+                  >
+                    {type === 'phone' ? '📱 Phone' : '✉️ Email'}
+                  </button>
+                ))}
               </div>
             </div>
 
-            {/* Phone Number or Email Input */}
+            {/* Credential input */}
             <div>
-              <label className="block text-sm font-semibold text-white mb-2">
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }}>
                 {loginType === 'phone' ? 'Phone Number' : 'Email Address'}
               </label>
               {loginType === 'phone' ? (
-                <div className="flex items-stretch rounded-xl overflow-hidden"
-                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
-                  <span className="flex items-center px-3 text-sm font-bold flex-shrink-0"
-                    style={{ color: '#00e5c8', borderRight: '1px solid rgba(255,255,255,0.12)', background: 'rgba(0,229,200,0.07)' }}>
+                <div style={{ display: 'flex', ...inputBase, padding: 0, overflow: 'hidden' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', padding: '0 12px', fontSize: 13, fontWeight: 700, color: '#FCD34D', borderRight: '1px solid rgba(255,255,255,0.08)', background: 'rgba(245,158,11,0.07)', flexShrink: 0 }}>
                     +91
                   </span>
                   <input
@@ -328,7 +232,8 @@ const LoginPageMobile = () => {
                     inputMode="numeric"
                     required
                     autoComplete="tel"
-                    className="flex-1 px-3 py-3.5 bg-transparent text-white text-sm placeholder-gray-500 outline-none"
+                    className="login-input"
+                    style={{ flex: 1, padding: '13px 12px', background: 'transparent', border: 'none', color: '#fff', fontSize: 15, outline: 'none' }}
                     placeholder="9876543210"
                     value={formData.credential}
                     onChange={handleChange}
@@ -336,15 +241,15 @@ const LoginPageMobile = () => {
                   />
                 </div>
               ) : (
-                <div className="relative">
-                  <EnvelopeIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+                <div style={{ position: 'relative' }}>
+                  <EnvelopeIcon style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', width: 18, height: 18, color: 'rgba(255,255,255,0.3)' }} />
                   <input
                     name="credential"
                     type="email"
                     required
                     autoComplete="email"
-                    className="w-full pl-10 pr-4 py-3.5 rounded-xl text-white text-sm placeholder-gray-500 outline-none"
-                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
+                    className="login-input"
+                    style={{ ...inputBase, padding: '13px 14px 13px 40px' }}
                     placeholder="you@example.com"
                     value={formData.credential}
                     onChange={handleChange}
@@ -355,21 +260,16 @@ const LoginPageMobile = () => {
 
             {/* Password */}
             <div>
-              <label className="block text-sm font-semibold text-white mb-2">
-                Password
-              </label>
-              <div className="relative">
-                <LockClosedIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }}>Password</label>
+              <div style={{ position: 'relative' }}>
+                <LockClosedIcon style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', width: 18, height: 18, color: 'rgba(255,255,255,0.3)' }} />
                 <input
                   name="password"
                   type={showPassword ? 'text' : 'password'}
                   required
                   autoComplete="current-password"
-                  className="w-full pl-10 pr-12 py-3.5 rounded-xl text-white text-sm placeholder-gray-500 outline-none"
-                  style={{ 
-                    background: 'rgba(255,255,255,0.05)', 
-                    border: '1px solid rgba(255,255,255,0.1)' 
-                  }}
+                  className="login-input"
+                  style={{ ...inputBase, padding: '13px 44px 13px 40px' }}
                   placeholder="••••••••"
                   value={formData.password}
                   onChange={handleChange}
@@ -377,116 +277,73 @@ const LoginPageMobile = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                  style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.35)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
                 >
-                  {showPassword ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
+                  {showPassword ? <EyeSlashIcon style={{ width: 18, height: 18 }} /> : <EyeIcon style={{ width: 18, height: 18 }} />}
                 </button>
               </div>
             </div>
 
-            {/* Submit Button with Enhanced Glow */}
+            {/* Submit */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-4 rounded-xl font-bold text-base transition-all disabled:opacity-50 relative overflow-hidden group"
-              style={{ 
-                background: 'linear-gradient(135deg, #06b6d4 0%, #06b6d4 50%, #06b6d4 100%)',
-                backgroundSize: '200% auto',
-                color: '#050810',
-                boxShadow: '0 8px 25px rgba(6,182,212,0.4), 0 0 40px rgba(6,182,212,0.2), inset 0 1px 0 rgba(255,255,255,0.3)',
-                animation: 'shimmer 3s linear infinite, pulse 3s ease-in-out infinite'
+              style={{
+                width: '100%', padding: '14px 16px',
+                background: loading ? 'rgba(245,158,11,0.4)' : 'linear-gradient(135deg, #F59E0B, #D97706)',
+                border: 'none', borderRadius: 14,
+                color: '#0C0900', fontSize: 16, fontWeight: 800,
+                cursor: loading ? 'not-allowed' : 'pointer',
+                boxShadow: loading ? 'none' : '0 8px 24px rgba(245,158,11,0.35)',
+                transition: 'all 0.2s',
+                letterSpacing: '0.02em'
               }}
+              onMouseEnter={e => { if (!loading) e.currentTarget.style.transform = 'translateY(-1px)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}
             >
-              <div 
-                className="absolute inset-0 opacity-0 group-active:opacity-100 transition-opacity duration-200"
-                style={{ background: 'radial-gradient(circle at center, rgba(255,255,255,0.3), transparent)' }}
-              />
               {loading ? (
-                <span className="flex items-center justify-center gap-2 relative z-10">
-                  <Spinner size="md" />
-                  Signing in...
+                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                  <Spinner size="md" /> Signing in…
                 </span>
-              ) : (
-                <span className="flex items-center justify-center gap-2 relative z-10" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }}>
-                  ⚡ Let's Go!
-                </span>
-              )}
+              ) : '⚡ Let\'s Go!'}
             </button>
           </form>
 
-          {/* Sign Up Link */}
-          <div className="mt-6 text-center">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="flex-1 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)' }}/>
-              <span className="text-xs text-gray-400 font-medium">or</span>
-              <div className="flex-1 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)' }}/>
+          {/* Divider + sign up link */}
+          <div style={{ marginTop: 22, textAlign: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
+              <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.07)' }} />
+              <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.25)' }}>or</span>
+              <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.07)' }} />
             </div>
-            <p className="text-sm text-gray-300">
+            <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.45)' }}>
               Don't have an account?{' '}
-              <Link 
+              <Link
                 to={redirectUrl ? `/register?redirect=${encodeURIComponent(redirectUrl)}` : '/register'}
-                className="font-bold"
-                style={{ 
-                  background: 'linear-gradient(135deg, #06b6d4, #06b6d4)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text'
-                }}
+                style={{ fontWeight: 700, color: '#FCD34D', textDecoration: 'none' }}
               >
                 Create one free →
               </Link>
             </p>
           </div>
-          </div>
         </div>
 
-        {/* Stats with Vibrant Colors */}
-        <div className="grid grid-cols-3 gap-3 mb-6" style={{ animation: 'fadeIn 0.8s ease-out 0.8s both' }}>
-          <div 
-            className="p-4 rounded-xl text-center relative overflow-hidden"
-            style={{ 
-              background: 'linear-gradient(135deg, rgba(6,182,212,0.2), rgba(6,182,212,0.15))',
-              border: '2px solid rgba(6,182,212,0.4)',
-              boxShadow: '0 4px 15px rgba(6,182,212,0.3), inset 0 1px 0 rgba(255,255,255,0.1)',
-              animation: 'scaleIn 0.5s ease-out 0.9s both'
-            }}
-          >
-            <p className="text-2xl font-black mb-1" style={{ color: '#06b6d4', textShadow: '0 0 20px rgba(6,182,212,0.5)' }}>1000+</p>
-            <p className="text-xs font-semibold text-white/80">Players</p>
-          </div>
-          <div 
-            className="p-4 rounded-xl text-center relative overflow-hidden"
-            style={{ 
-              background: 'linear-gradient(135deg, rgba(245,158,11,0.2), rgba(251,146,60,0.15))',
-              border: '2px solid rgba(245,158,11,0.4)',
-              boxShadow: '0 4px 15px rgba(245,158,11,0.3), inset 0 1px 0 rgba(255,255,255,0.1)',
-              animation: 'scaleIn 0.5s ease-out 1.0s both'
-            }}
-          >
-            <p className="text-2xl font-black mb-1" style={{ color: '#fbbf24', textShadow: '0 0 20px rgba(245,158,11,0.5)' }}>50+</p>
-            <p className="text-xs font-semibold text-white/80">Tournaments</p>
-          </div>
-          <div 
-            className="p-4 rounded-xl text-center relative overflow-hidden"
-            style={{ 
-              background: 'linear-gradient(135deg, rgba(6,182,212,0.2), rgba(14,165,233,0.15))',
-              border: '2px solid rgba(6,182,212,0.4)',
-              boxShadow: '0 4px 15px rgba(6,182,212,0.3), inset 0 1px 0 rgba(255,255,255,0.1)',
-              animation: 'scaleIn 0.5s ease-out 1.1s both'
-            }}
-          >
-            <p className="text-2xl font-black mb-1" style={{ color: '#22d3ee', textShadow: '0 0 20px rgba(6,182,212,0.5)' }}>25+</p>
-            <p className="text-xs font-semibold text-white/80">Cities</p>
-          </div>
+        {/* Stats */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 24, animation: 'fadeIn 0.8s ease-out 0.6s both' }}>
+          {[
+            { value: '1000+', label: 'Players', color: '#FCD34D', bg: 'rgba(245,158,11,0.1)', border: 'rgba(245,158,11,0.25)' },
+            { value: '50+', label: 'Tournaments', color: '#C4B5FD', bg: 'rgba(139,92,246,0.1)', border: 'rgba(139,92,246,0.25)' },
+            { value: '25+', label: 'Cities', color: '#67E8F9', bg: 'rgba(6,182,212,0.1)', border: 'rgba(6,182,212,0.25)' },
+          ].map(({ value, label, color, bg, border }) => (
+            <div key={label} style={{ background: bg, border: `1px solid ${border}`, borderRadius: 14, padding: '14px 8px', textAlign: 'center' }}>
+              <p style={{ fontSize: 22, fontWeight: 900, color, margin: 0, lineHeight: 1.1 }}>{value}</p>
+              <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginTop: 4, fontWeight: 500 }}>{label}</p>
+            </div>
+          ))}
         </div>
 
         {/* Footer */}
-        <p className="text-center text-xs font-medium mt-auto" style={{ 
-          background: 'linear-gradient(135deg, #ffffff, #06b6d4, #ffffff)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          backgroundClip: 'text'
-        }}>
+        <p style={{ textAlign: 'center', fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.25)', marginTop: 'auto' }}>
           🏆 Where Champions Are Made
         </p>
       </div>

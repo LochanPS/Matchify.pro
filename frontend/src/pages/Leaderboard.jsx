@@ -7,12 +7,12 @@ import LoadingScreen from '../components/LoadingScreen';
 
 
 const B = {
-  bg: '#050810',
-  card: 'rgba(255,255,255,0.04)',
+  bg: '#040810',
+  card: 'rgba(12,18,32,0.95)',
   border: 'rgba(255,255,255,0.08)',
-  green: '#06b6d4',
-  cyan: '#00d4ff',
-  purple: '#a855f7',
+  green: '#F59E0B',
+  cyan: '#FCD34D',
+  purple: '#8B5CF6',
   sub: 'rgba(255,255,255,0.6)',
   dim: 'rgba(255,255,255,0.45)',
 };
@@ -97,8 +97,8 @@ export default function Leaderboard() {
     if (rank === 1) return 'bg-gradient-to-r from-yellow-500 to-amber-600 text-white shadow-lg shadow-yellow-500/50';
     if (rank === 2) return 'bg-gradient-to-r from-gray-400 to-gray-500 text-white shadow-lg shadow-gray-400/50';
     if (rank === 3) return 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-500/50';
-    if (rank <= 10) return 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-md';
-    return 'text-gray-200 border border-gray-600 bg-slate-800';
+    if (rank <= 10) return 'text-white shadow-md';
+    return 'text-gray-400 border border-white/10 bg-white/5';
   };
 
   const needsLogin = (scope === 'city' && !userCity) || (scope === 'state' && !userState);

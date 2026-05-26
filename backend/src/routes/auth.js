@@ -158,7 +158,8 @@ router.post('/register', async (req, res) => {
     
     res.status(500).json({
       error: 'Registration failed',
-      details: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+      details: error.message || 'Internal server error',
+      code: error.code || 'UNKNOWN'
     });
   }
 });
@@ -350,9 +351,9 @@ router.post('/login', async (req, res) => {
     
     res.status(500).json({
       error: 'Login failed',
-      message: process.env.NODE_ENV === 'development' ? error.message : 'An unexpected error occurred. Please try again.',
-      code: 'INTERNAL_SERVER_ERROR',
-      ...(process.env.NODE_ENV === 'development' && { details: error.message })
+      message: error.message || 'An unexpected error occurred. Please try again.',
+      code: error.code || 'INTERNAL_SERVER_ERROR',
+      meta: error.meta || undefined
     });
   }
 });

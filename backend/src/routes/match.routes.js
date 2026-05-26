@@ -1045,135 +1045,165 @@ import { giveBye } from '../controllers/match.controller.js';
 router.post('/:matchId/give-bye', authenticate, giveBye);
 
 // Change match winner (for corrections)
+// Fixes CRIT-4: propagate winner change to parent match (next round) and bracketJson
 router.put('/:matchId/change-winner', authenticate, async (req, res) => {
   try {
     const { matchId } = req.params;
     const { winnerId } = req.body;
     const userId = req.user.userId || req.user.id;
+    const userRoles = req.user.roles || [];
 
     const match = await prisma.match.findUnique({
       where: { id: matchId },
-      include: {
-        tournament: { select: { organizerId: true } }
-      }
+      include: { tournament: { select: { organizerId: true } } }
     });
 
-    if (!match) {
-      return res.status(404).json({ success: false, error: 'Match not found' });
-    }
+    if (!match) return res.status(404).json({ success: false, error: 'Match not found' });
+    if (match.status !== 'COMPLETED') return res.status(400).json({ success: false, error: 'Can only change winner of a completed match' });
 
-    // Only organizer can change results
-    if (match.tournament.organizerId !== userId) {
+    // Organizer or ADMIN can change results
+    const isOrganizer = match.tournament.organizerId === userId;
+    const isAdmin = userRoles.includes('ADMIN');
+    if (!isOrganizer && !isAdmin) {
       return res.status(403).json({ success: false, error: 'Only the organizer can change match results' });
     }
 
-    // Validate winner
     if (winnerId !== match.player1Id && winnerId !== match.player2Id) {
       return res.status(400).json({ success: false, error: 'Winner must be a match participant' });
     }
 
-    // Update match winner
-    await prisma.match.update({
-      where: { id: matchId },
-      data: {
-        winnerId: winnerId,
-        updatedAt: new Date()
-      }
-    });
+    if (winnerId === match.winnerId) {
+      return res.json({ success: true, message: 'Winner unchanged' });
+    }
 
-    // Update Round Robin standings if applicable
+    const oldWinnerId = match.winnerId;
+    const newLoserId = winnerId === match.player1Id ? match.player2Id : match.player1Id;
+    const isGuestId = (id) => !id || id.startsWith('guest-');
+    const isFinal = !match.parentMatchId && match.round === 1 && match.stage !== 'GROUP';
+
+    // 1. Update match winner in DB
+    await prisma.match.update({ where: { id: matchId }, data: { winnerId, updatedAt: new Date() } });
+
+    // 2. For KNOCKOUT: update parent match to swap player slot with new winner
+    if (match.parentMatchId && oldWinnerId) {
+      const parentMatch = await prisma.match.findUnique({ where: { id: match.parentMatchId } });
+      if (parentMatch) {
+        const updateData = {};
+        // Replace old winner with new winner in whichever slot old winner occupied
+        if (parentMatch.player1Id === oldWinnerId) updateData.player1Id = winnerId;
+        else if (parentMatch.player2Id === oldWinnerId) updateData.player2Id = winnerId;
+
+        if (Object.keys(updateData).length > 0) {
+          // If parent match was IN_PROGRESS or COMPLETED, reset it — result is now invalid
+          if (['IN_PROGRESS', 'COMPLETED'].includes(parentMatch.status)) {
+            updateData.status = 'READY';
+            updateData.winnerId = null;
+            updateData.scoreJson = null;
+            updateData.completedAt = null;
+            updateData.startedAt = null;
+          }
+          await prisma.match.update({ where: { id: match.parentMatchId }, data: updateData });
+          console.log(`✅ Updated parent match ${match.parentMatchId}: replaced ${oldWinnerId} → ${winnerId}`);
+        }
+      }
+    }
+
+    // 3. If this was the final, update category winner
+    if (isFinal) {
+      await prisma.category.update({
+        where: { id: match.categoryId },
+        data: {
+          winnerId:   !isGuestId(winnerId)    ? winnerId    : null,
+          runnerUpId: !isGuestId(newLoserId)  ? newLoserId  : null,
+        }
+      });
+      console.log(`✅ Updated category winner to ${winnerId}`);
+    }
+
+    // 4. Update bracketJson (standings for RR, bracket slot for KNOCKOUT)
     try {
       const draw = await prisma.draw.findUnique({
         where: { tournamentId_categoryId: { tournamentId: match.tournamentId, categoryId: match.categoryId } }
       });
-      
+
       if (draw) {
         const bracketJson = typeof draw.bracketJson === 'string' ? JSON.parse(draw.bracketJson) : draw.bracketJson;
-        
+
         if (bracketJson.format === 'ROUND_ROBIN' || bracketJson.format === 'ROUND_ROBIN_KNOCKOUT') {
-          console.log('🔄 Recalculating Round Robin standings after result change...');
-          
-          // Find which group this match belongs to
+          // Recalculate group standings
           let targetGroup = null;
-          for (const group of bracketJson.groups) {
-            const hasPlayer1 = group.participants.some(p => p.id === match.player1Id);
-            const hasPlayer2 = group.participants.some(p => p.id === match.player2Id);
-            if (hasPlayer1 && hasPlayer2) {
-              targetGroup = group;
-              break;
+          for (const group of (bracketJson.groups || [])) {
+            if (group.participants?.some(p => p.id === match.player1Id) &&
+                group.participants?.some(p => p.id === match.player2Id)) {
+              targetGroup = group; break;
             }
           }
-
           if (targetGroup) {
-            // Get all completed matches for this group
             const allMatches = await prisma.match.findMany({
-              where: {
-                tournamentId: match.tournamentId,
-                categoryId: match.categoryId,
-                status: 'COMPLETED'
-              }
+              where: { tournamentId: match.tournamentId, categoryId: match.categoryId, status: 'COMPLETED' }
             });
-
-            // Filter matches that belong to this group
-            const groupMatches = allMatches.filter(m => {
-              const hasP1 = targetGroup.participants.some(p => p.id === m.player1Id);
-              const hasP2 = targetGroup.participants.some(p => p.id === m.player2Id);
-              return hasP1 && hasP2;
-            });
-
-            // Reset all participant stats
-            targetGroup.participants.forEach(p => {
-              p.played = 0;
-              p.wins = 0;
-              p.losses = 0;
-              p.points = 0;
-            });
-
-            // Recalculate standings with updated winner
+            const groupMatches = allMatches.filter(m =>
+              targetGroup.participants.some(p => p.id === m.player1Id) &&
+              targetGroup.participants.some(p => p.id === m.player2Id)
+            );
+            targetGroup.participants.forEach(p => { p.played = 0; p.wins = 0; p.losses = 0; p.points = 0; });
             groupMatches.forEach(m => {
-              const player1 = targetGroup.participants.find(p => p.id === m.player1Id);
-              const player2 = targetGroup.participants.find(p => p.id === m.player2Id);
-
-              if (player1 && player2) {
-                player1.played++;
-                player2.played++;
-
-                if (m.winnerId === m.player1Id) {
-                  player1.wins++;
-                  player1.points += 2; // Win = 2 points
-                  player2.losses++;
-                } else if (m.winnerId === m.player2Id) {
-                  player2.wins++;
-                  player2.points += 2; // Win = 2 points
-                  player1.losses++;
+              const p1 = targetGroup.participants.find(p => p.id === m.player1Id);
+              const p2 = targetGroup.participants.find(p => p.id === m.player2Id);
+              if (!p1 || !p2) return;
+              p1.played++; p2.played++;
+              if (m.winnerId === m.player1Id) { p1.wins++; p1.points += 2; p2.losses++; }
+              else if (m.winnerId === m.player2Id) { p2.wins++; p2.points += 2; p1.losses++; }
+            });
+            targetGroup.participants.sort((a, b) =>
+              b.points !== a.points ? b.points - a.points : b.wins - a.wins
+            );
+            // Update the match result in bracketJson too
+            const mib = targetGroup.matches?.find(m => m.matchNumber === match.matchNumber);
+            if (mib) { mib.winnerId = winnerId; mib.winner = winnerId === match.player1Id ? 1 : 2; }
+          }
+        } else if (bracketJson.format === 'KNOCKOUT' || bracketJson.format === 'single_elimination') {
+          // Update bracket match slot and parent match slot
+          const rounds = bracketJson.knockout?.rounds || bracketJson.rounds;
+          if (Array.isArray(rounds)) {
+            // Find and update this match in bracketJson
+            for (const round of rounds) {
+              const mib = round.matches?.find(m => m.matchNumber === match.matchNumber);
+              if (mib) {
+                mib.winnerId = winnerId;
+                mib.winner = winnerId === match.player1Id ? { id: winnerId } : { id: winnerId };
+                break;
+              }
+            }
+            // Find and update parent match slot in bracketJson
+            if (match.parentMatchId) {
+              const parentMatch = await prisma.match.findUnique({ where: { id: match.parentMatchId } });
+              if (parentMatch) {
+                for (const round of rounds) {
+                  const pmib = round.matches?.find(m => m.matchNumber === parentMatch.matchNumber);
+                  if (pmib) {
+                    const wp = match.winnerPosition || (match.matchNumber % 2 === 1 ? 'player1' : 'player2');
+                    if (pmib[wp]) pmib[wp] = { id: winnerId };
+                    break;
+                  }
                 }
               }
-            });
-
-            // Sort participants by points (descending), then by wins
-            targetGroup.participants.sort((a, b) => {
-              if (b.points !== a.points) return b.points - a.points;
-              return b.wins - a.wins;
-            });
-
-            // Update the draw
-            await prisma.draw.update({
-              where: { tournamentId_categoryId: { tournamentId: match.tournamentId, categoryId: match.categoryId } },
-              data: { bracketJson: JSON.stringify(bracketJson), updatedAt: new Date() }
-            });
-
-            console.log(`✅ Updated standings for ${targetGroup.groupName} after result change`);
+            }
           }
         }
+
+        await prisma.draw.update({
+          where: { tournamentId_categoryId: { tournamentId: match.tournamentId, categoryId: match.categoryId } },
+          data: { bracketJson: JSON.stringify(bracketJson), updatedAt: new Date() }
+        });
+        console.log(`✅ Updated bracketJson after winner correction`);
       }
-    } catch (standingsError) {
-      console.error('❌ Error updating Round Robin standings:', standingsError);
+    } catch (bracketErr) {
+      console.error('❌ Error updating bracket after winner change:', bracketErr);
+      // Non-fatal — DB is already correct, bracketJson display will be wrong until next match completes
     }
 
-    res.json({
-      success: true,
-      message: 'Match result updated successfully'
-    });
+    res.json({ success: true, message: 'Match result updated successfully' });
   } catch (error) {
     console.error('Error changing match winner:', error);
     res.status(500).json({ success: false, error: 'Failed to change match result' });

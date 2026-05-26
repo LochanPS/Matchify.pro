@@ -1,5 +1,5 @@
 ﻿import { getErrorMessage } from '../utils/errorMessage';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import { useAuth } from '../contexts/AuthContext';
@@ -84,6 +84,9 @@ const MatchScoringPage = () => {
     matchConfig: { pointsPerSet: 21, setsToWin: 2, maxSets: 3, extension: true }
   });
 
+  // Debounce ref — auto-save mid-set score 2s after last point (crash protection)
+  const autoSaveTimerRef = useRef(null);
+
   const fetchMatch = useCallback(async () => {
     try {
       setLoading(true);
@@ -120,6 +123,8 @@ const MatchScoringPage = () => {
   }, [matchId]);
 
   useEffect(() => { fetchMatch(); }, [fetchMatch]);
+  // Clear pending auto-save timer on unmount (prevents state update on dead component)
+  useEffect(() => () => { if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current); }, []);
 
   const handleStartMatch = async () => {
     try {
@@ -251,7 +256,10 @@ const MatchScoringPage = () => {
       setShowSetCompleteModal(true);
     } else {
       updateScore(newScore);
-      // No API call mid-set — score is tracked locally until set completes
+      // Debounced auto-save: write to DB 2s after last point (crash/refresh protection).
+      // Set completion triggers an immediate save above — this covers the in-between points.
+      if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+      autoSaveTimerRef.current = setTimeout(() => saveScoreToApi(newScore), 2000);
     }
   };
 

@@ -1,5 +1,5 @@
 ﻿import { useState } from 'react';
-import { useNavigate, Link, useSearchParams } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { EyeIcon, EyeSlashIcon, LockClosedIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
 import { getErrorMessage } from '../utils/errorMessage';
@@ -15,8 +15,10 @@ const LoginPageMobile = () => {
 
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const redirectUrl = searchParams.get('redirect');
+  const successMessage = location.state?.successMessage || null;
 
   const handleChange = (e) => {
     let value = e.target.value;
@@ -178,6 +180,13 @@ const LoginPageMobile = () => {
             </h1>
             <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)' }}>Sign in to continue your journey</p>
           </div>
+
+          {/* Success message (e.g. after password reset) */}
+          {successMessage && (
+            <div style={{ marginBottom: 18, padding: '10px 14px', background: 'rgba(74,222,128,0.08)', border: '1px solid rgba(74,222,128,0.25)', borderRadius: 10, fontSize: 13, color: '#4ade80' }}>
+              ✓ {successMessage}
+            </div>
+          )}
 
           {/* Error */}
           {error && (

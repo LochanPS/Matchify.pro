@@ -23,7 +23,8 @@ const ForgotPasswordPage = () => {
   const [error, setError]                     = useState('');
   const [resendCooldown, setResendCooldown]   = useState(0);
 
-  const otpRefs = useRef([]);
+  const otpRefs      = useRef([]);
+  const isVerifying  = useRef(false); // prevent concurrent OTP verify calls
 
   // Countdown for resend button
   useEffect(() => {
@@ -57,7 +58,7 @@ const ForgotPasswordPage = () => {
     setLoading(true);
     setError('');
     try {
-      await api.post('/auth/forgot-password', { credential });
+      await api.post('/auth/forgot-password', { credential: credential.trim().toLowerCase() });
       setStep(STEP.OTP);
       setOtp(['', '', '', '', '', '']);
       setResendCooldown(60);
@@ -113,10 +114,12 @@ const ForgotPasswordPage = () => {
   };
 
   const verifyOtp = async (otpVal) => {
+    if (isVerifying.current) return; // block concurrent calls
+    isVerifying.current = true;
     setLoading(true);
     setError('');
     try {
-      const { data } = await api.post('/auth/verify-reset-otp', { credential, otp: otpVal });
+      const { data } = await api.post('/auth/verify-reset-otp', { credential: credential.trim().toLowerCase(), otp: otpVal });
       setResetToken(data.resetToken);
       setStep(STEP.PASSWORD);
     } catch (err) {
@@ -125,6 +128,7 @@ const ForgotPasswordPage = () => {
       setTimeout(() => otpRefs.current[0]?.focus(), 100);
     } finally {
       setLoading(false);
+      isVerifying.current = false;
     }
   };
 

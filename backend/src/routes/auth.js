@@ -585,12 +585,14 @@ router.get('/verification-status', async (req, res) => {
 router.post('/forgot-password', async (req, res) => {
   const SUCCESS_MSG = 'If an account exists, an OTP has been sent to the registered email.';
   try {
-    const { credential } = req.body;
-    if (!credential) {
+    const rawCredential = req.body.credential;
+    if (!rawCredential) {
       return res.status(400).json({ error: 'Email or phone number is required.' });
     }
+    const credential = rawCredential.trim();
 
     const isEmail = credential.includes('@');
+    const normalizedEmail = isEmail ? credential.toLowerCase() : null;
     let cleanedPhone = null;
     if (!isEmail) {
       cleanedPhone = credential.replace(/[\s\-\+]/g, '');
@@ -601,7 +603,7 @@ router.post('/forgot-password', async (req, res) => {
     }
 
     const user = await prisma.user.findUnique({
-      where: isEmail ? { email: credential } : { phone: cleanedPhone },
+      where: isEmail ? { email: normalizedEmail } : { phone: cleanedPhone },
       select: { id: true, email: true, name: true }
     });
 
@@ -660,12 +662,15 @@ router.post('/forgot-password', async (req, res) => {
 // POST /auth/verify-reset-otp — verify OTP, return secure reset token
 router.post('/verify-reset-otp', async (req, res) => {
   try {
-    const { credential, otp } = req.body;
-    if (!credential || !otp) {
+    const { otp } = req.body;
+    const rawCredential = req.body.credential;
+    if (!rawCredential || !otp) {
       return res.status(400).json({ error: 'Credential and OTP are required.' });
     }
+    const credential = rawCredential.trim();
 
     const isEmail = credential.includes('@');
+    const normalizedEmail = isEmail ? credential.toLowerCase() : null;
     let cleanedPhone = null;
     if (!isEmail) {
       cleanedPhone = credential.replace(/[\s\-\+]/g, '');
@@ -673,7 +678,7 @@ router.post('/verify-reset-otp', async (req, res) => {
     }
 
     const user = await prisma.user.findUnique({
-      where: isEmail ? { email: credential } : { phone: cleanedPhone },
+      where: isEmail ? { email: normalizedEmail } : { phone: cleanedPhone },
       select: { id: true, passwordResetToken: true, passwordResetExpiry: true }
     });
 

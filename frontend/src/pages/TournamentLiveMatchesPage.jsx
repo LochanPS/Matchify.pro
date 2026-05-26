@@ -245,30 +245,56 @@ function MatchCard({ match, isCompleted }) {
           )}
         </div>
 
-        {/* past sets strip (live) / all-sets recap (completed) */}
+        {/* sets recap — label above score, wraps for 5+ sets */}
         {(() => {
           const setsToShow = isCompleted ? sets : pastSets;
           if (!setsToShow.length) return null;
           return (
-            <div style={{ display: 'flex', gap: 5, justifyContent: 'center', marginBottom: 8 }}>
-              {setsToShow.map((s, i) => {
-                const sp1 = s.player1 ?? s.p1 ?? 0;
-                const sp2 = s.player2 ?? s.p2 ?? 0;
-                const p1Won = sp1 > sp2;
-                return (
-                  <div key={i} style={{
-                    display: 'flex', alignItems: 'center', gap: 3,
-                    background: 'rgba(255,255,255,0.04)',
-                    border: '1px solid rgba(255,255,255,0.07)',
-                    borderRadius: 8, padding: '3px 8px',
-                  }}>
-                    <span style={{ fontSize: 11, fontWeight: 700, color: p1Won ? C.green : 'rgba(255,255,255,0.45)' }}>{sp1}</span>
-                    <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.2)' }}>–</span>
-                    <span style={{ fontSize: 11, fontWeight: 700, color: !p1Won ? C.cyan : 'rgba(255,255,255,0.45)' }}>{sp2}</span>
-                    <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.25)', marginLeft: 2 }}>S{i + 1}</span>
-                  </div>
-                );
-              })}
+            <div style={{ marginBottom: 8 }}>
+              <div style={{
+                display: 'flex', gap: 5,
+                flexWrap: 'wrap', justifyContent: 'center',
+              }}>
+                {setsToShow.map((s, i) => {
+                  const sp1 = s.player1 ?? s.p1 ?? 0;
+                  const sp2 = s.player2 ?? s.p2 ?? 0;
+                  const p1Won = sp1 > sp2;
+                  const tied  = sp1 === sp2;
+                  return (
+                    <div key={i} style={{
+                      display: 'flex', flexDirection: 'column', alignItems: 'center',
+                      background: 'rgba(255,255,255,0.04)',
+                      border: `1px solid ${p1Won && !tied ? 'rgba(245,158,11,0.18)' : !p1Won && !tied ? 'rgba(252,211,77,0.18)' : 'rgba(255,255,255,0.07)'}`,
+                      borderRadius: 9, padding: '5px 11px',
+                      minWidth: 54,
+                    }}>
+                      {/* Set label */}
+                      <span style={{
+                        fontSize: 8, fontWeight: 700,
+                        color: 'rgba(255,255,255,0.3)',
+                        letterSpacing: '0.07em', textTransform: 'uppercase',
+                        marginBottom: 3,
+                      }}>
+                        Set {i + 1}
+                      </span>
+                      {/* Scores */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <span style={{
+                          fontSize: 13, fontWeight: 800, lineHeight: 1,
+                          color: p1Won && !tied ? C.green : 'rgba(255,255,255,0.4)',
+                          fontVariantNumeric: 'tabular-nums',
+                        }}>{sp1}</span>
+                        <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.18)', lineHeight: 1 }}>–</span>
+                        <span style={{
+                          fontSize: 13, fontWeight: 800, lineHeight: 1,
+                          color: !p1Won && !tied ? C.cyan : 'rgba(255,255,255,0.4)',
+                          fontVariantNumeric: 'tabular-nums',
+                        }}>{sp2}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           );
         })()}

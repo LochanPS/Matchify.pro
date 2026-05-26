@@ -1204,6 +1204,64 @@ const endMatch = async (req, res) => {
         console.log('🔍 Calling updateRoundRobinStandings...');
         await updateRoundRobinStandings(match.tournamentId, match.categoryId, matchId);
         console.log(`✅ Round Robin match completed. Standings updated.`);
+
+        // For PURE ROUND_ROBIN: if this is the last GROUP match, close the category
+        // (ROUND_ROBIN_KNOCKOUT hybrid is handled when the KO final completes)
+        if (bracketJson.format === 'ROUND_ROBIN' && match.stage === 'GROUP') {
+          const remainingCount = await prisma.match.count({
+            where: {
+              categoryId: match.categoryId,
+              id: { not: matchId },
+              status: { notIn: ['COMPLETED', 'BYE'] }
+            }
+          });
+
+          if (remainingCount === 0) {
+            // All group matches done — determine winner from final standings
+            const allMatches = await prisma.match.findMany({
+              where: { categoryId: match.categoryId },
+              select: { player1Id: true, player2Id: true, winnerId: true }
+            });
+
+            const isGuestId = (id) => !id || id.startsWith('guest-');
+            const standings = {};
+            allMatches.forEach(m => {
+              [m.player1Id, m.player2Id].forEach(pid => {
+                if (pid && !isGuestId(pid) && !standings[pid]) {
+                  standings[pid] = { id: pid, points: 0, wins: 0 };
+                }
+              });
+              if (m.winnerId && !isGuestId(m.winnerId)) {
+                standings[m.winnerId].points += 2;
+                standings[m.winnerId].wins += 1;
+              }
+            });
+
+            const sorted = Object.values(standings).sort((a, b) =>
+              b.points !== a.points ? b.points - a.points : b.wins - a.wins
+            );
+
+            await prisma.category.update({
+              where: { id: match.categoryId },
+              data: {
+                status: 'completed',
+                winnerId:   sorted[0]?.id || null,
+                runnerUpId: sorted[1]?.id || null,
+              }
+            });
+
+            // Award tournament points
+            try {
+              const tournamentPointsService = await import('../services/tournamentPoints.service.js');
+              await tournamentPointsService.default.awardTournamentPoints(match.tournamentId, match.categoryId);
+              console.log(`✅ Tournament points awarded for RR category ${match.categoryId}`);
+            } catch (pointsError) {
+              console.error('❌ Error awarding RR tournament points:', pointsError);
+            }
+
+            console.log(`✅ Pure Round Robin category ${match.categoryId} completed. Winner: ${sorted[0]?.id}`);
+          }
+        }
       } else {
         console.log('🔍 Not a Round Robin format, skipping standings update');
       }

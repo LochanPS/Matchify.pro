@@ -754,7 +754,10 @@ const endMatchHandler = async (req, res) => {
     // ── 4+5. Mark COMPLETED and advance winner atomically ─────────────────────
     // Both writes in a single transaction so a crash between them can't leave the
     // match completed but the bracket not advanced (or vice versa).
+    // KNOCKOUT final: no parent, round 1, not a GROUP stage match
     const isFinal = !parentMatch && match.round === 1 && match.stage !== 'GROUP';
+    // Pure RR: this is a GROUP stage match
+    const isGroupMatch = match.stage === 'GROUP';
 
     // timeout:30000 — prevents P2028 "Unable to start a transaction in the given time"
     // Default Prisma transaction timeout is 5s which stalls under pool pressure
@@ -773,7 +776,7 @@ const endMatchHandler = async (req, res) => {
         await tx.match.update({ where: { id: parentMatch.id }, data: advanceData });
       }
 
-      // Final match: close category and record winner/runner-up
+      // KNOCKOUT final: close category and record winner/runner-up
       if (isFinal) {
         await tx.category.update({
           where: { id: match.categoryId },
@@ -783,6 +786,53 @@ const endMatchHandler = async (req, res) => {
             runnerUpId: !isGuestId(loserId) ? loserId : null,
           }
         });
+      }
+
+      // PURE ROUND_ROBIN: check if this was the last GROUP match — if so, close category
+      // (ROUND_ROBIN_KNOCKOUT hybrid is excluded: its KNOCKOUT final handles closure via isFinal above)
+      if (isGroupMatch && completed.category?.tournamentFormat === 'ROUND_ROBIN') {
+        const remainingCount = await tx.match.count({
+          where: {
+            categoryId: match.categoryId,
+            id: { not: matchId },
+            status: { notIn: ['COMPLETED', 'BYE'] }
+          }
+        });
+
+        if (remainingCount === 0) {
+          // All group matches done — determine winner from standings
+          const allMatches = await tx.match.findMany({
+            where: { categoryId: match.categoryId },
+            select: { player1Id: true, player2Id: true, winnerId: true }
+          });
+
+          // Build point-based standings (2pts per win)
+          const standings = {};
+          allMatches.forEach(m => {
+            [m.player1Id, m.player2Id].forEach(pid => {
+              if (pid && !isGuestId(pid) && !standings[pid]) {
+                standings[pid] = { id: pid, points: 0, wins: 0 };
+              }
+            });
+            if (m.winnerId && !isGuestId(m.winnerId)) {
+              standings[m.winnerId].points += 2;
+              standings[m.winnerId].wins += 1;
+            }
+          });
+
+          const sorted = Object.values(standings).sort((a, b) =>
+            b.points !== a.points ? b.points - a.points : b.wins - a.wins
+          );
+
+          await tx.category.update({
+            where: { id: match.categoryId },
+            data: {
+              status: 'completed',
+              winnerId:   sorted[0]?.id || null,
+              runnerUpId: sorted[1]?.id || null,
+            }
+          });
+        }
       }
 
       return completed;

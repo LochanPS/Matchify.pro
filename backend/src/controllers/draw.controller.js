@@ -1112,35 +1112,38 @@ const restartDraw = async (req, res) => {
     // Highest round among matches being reset — used to detect winner-advanced slots
     const maxRound = matchesToReset.length > 0 ? Math.max(...matchesToReset.map(m => m.round)) : 1;
 
-    for (const match of matchesToReset) {
-      const updateData = {
-        winnerId: null,
-        scoreJson: null,
-        startedAt: null,
-        completedAt: null,
-        umpireId: null,
-        updatedAt: new Date()
-      };
+    // Batch matches by their reset payload — avoids N sequential round-trips (Vercel 10s timeout)
+    // Group 1: later KNOCKOUT rounds (winner-advanced slots) — null out player slots too
+    const laterKoIds = matchesToReset
+      .filter(m => m.stage === 'KNOCKOUT' && m.round < maxRound)
+      .map(m => m.id);
+    // Group 2: first-round matches with both players present — status READY
+    const readyIds = matchesToReset
+      .filter(m => !(m.stage === 'KNOCKOUT' && m.round < maxRound) && m.player1Id && m.player2Id)
+      .map(m => m.id);
+    // Group 3: everything else — status PENDING
+    const pendingIds = matchesToReset
+      .filter(m => !(m.stage === 'KNOCKOUT' && m.round < maxRound) && !(m.player1Id && m.player2Id))
+      .map(m => m.id);
 
-      // Later KNOCKOUT rounds were filled by winner advancement — null out their player slots
-      const isLaterKnockoutRound = match.stage === 'KNOCKOUT' && match.round < maxRound;
-      if (isLaterKnockoutRound) {
-        updateData.player1Id = null;
-        updateData.player2Id = null;
-        updateData.status = 'PENDING';
-      } else if (match.player1Id && match.player2Id) {
-        updateData.status = 'READY';
-      } else {
-        updateData.status = 'PENDING';
-      }
+    const baseReset = { winnerId: null, scoreJson: null, startedAt: null, completedAt: null, umpireId: null, updatedAt: new Date() };
 
-      await prisma.match.update({
-        where: { id: match.id },
-        data: updateData
-      });
-    }
+    await Promise.all([
+      laterKoIds.length > 0 && prisma.match.updateMany({
+        where: { id: { in: laterKoIds } },
+        data: { ...baseReset, player1Id: null, player2Id: null, status: 'PENDING' }
+      }),
+      readyIds.length > 0 && prisma.match.updateMany({
+        where: { id: { in: readyIds } },
+        data: { ...baseReset, status: 'READY' }
+      }),
+      pendingIds.length > 0 && prisma.match.updateMany({
+        where: { id: { in: pendingIds } },
+        data: { ...baseReset, status: 'PENDING' }
+      }),
+    ].filter(Boolean));
 
-    console.log(`✅ Reset ${matchesToReset.length} matches (koOnly=${koOnly})`);
+    console.log(`✅ Reset ${matchesToReset.length} matches (koOnly=${koOnly}) — ${laterKoIds.length} later-KO, ${readyIds.length} ready, ${pendingIds.length} pending`);
 
     // Reset bracket JSON - clear winners but keep structure
     console.log('🔧 Resetting bracket JSON...');
@@ -1783,48 +1786,46 @@ async function setKnockoutParentRelationships(tournamentId, categoryId) {
   const rounds = [...new Set(allMatches.map(m => m.round))].sort((a, b) => b - a);
   console.log(`   Found ${rounds.length} rounds:`, rounds);
   
-  // For each round (except final), set parent relationships
+  // Collect all parentMatchId + winnerPosition updates, then apply in one batch per round
+  // (avoids N sequential await calls — critical for Vercel 10s function limit)
+  const allUpdates = []; // { id, parentMatchId, winnerPosition }
+
   for (const currentRound of rounds) {
-    if (currentRound === 1) {
-      console.log(`   Skipping Round 1 (Finals) - no parent`);
-      continue; // Skip final (no parent)
-    }
-    
+    if (currentRound === 1) continue; // Final has no parent
+
     const roundMatches = allMatches.filter(m => m.round === currentRound);
-    const parentRound = currentRound - 1;
-    
-    console.log(`   Processing Round ${currentRound} (${roundMatches.length} matches) → Parent Round ${parentRound}`);
-    
-    // Use index-based lookup — matchNumbers are global counters so value-based search
-    // fails for ROUND_ROBIN_KNOCKOUT where KO matches are numbered after group matches.
+    const parentRound  = currentRound - 1;
+
     const parentRoundMatches = allMatches
       .filter(m => m.round === parentRound)
       .sort((a, b) => a.matchNumber - b.matchNumber);
 
     for (let i = 0; i < roundMatches.length; i++) {
-      const match = roundMatches[i];
-
+      const match       = roundMatches[i];
       const parentMatch = parentRoundMatches[Math.floor(i / 2)];
-
       if (parentMatch) {
-        const winnerPosition = i % 2 === 0 ? 'player1' : 'player2';
-
-        await prisma.match.update({
-          where: { id: match.id },
-          data: {
-            parentMatchId: parentMatch.id,
-            winnerPosition: winnerPosition
-          }
+        allUpdates.push({
+          id: match.id,
+          parentMatchId: parentMatch.id,
+          winnerPosition: i % 2 === 0 ? 'player1' : 'player2'
         });
-
-        console.log(`     ✓ Match ${match.matchNumber} → Parent Match ${parentMatch.matchNumber} as ${winnerPosition}`);
-      } else {
-        console.log(`     ⚠️  No parent found for Match ${match.matchNumber} (round ${currentRound} → ${parentRound})`);
       }
     }
   }
-  
-  console.log('✅ Parent relationships set!');
+
+  // Execute all updates in parallel (each update targets a unique PK — no conflicts)
+  if (allUpdates.length > 0) {
+    await Promise.all(
+      allUpdates.map(u =>
+        prisma.match.update({
+          where: { id: u.id },
+          data: { parentMatchId: u.parentMatchId, winnerPosition: u.winnerPosition }
+        })
+      )
+    );
+  }
+
+  console.log(`✅ Parent relationships set! (${allUpdates.length} matches linked)`);
 }
 
 // Helper: Generate knockout bracket
@@ -2539,24 +2540,27 @@ const shuffleAssignedPlayers = async (req, res) => {
         where: { tournamentId, categoryId }
       });
 
+      // Batch create all match records with createMany (avoids N sequential round-trips)
+      const matchRecords = [];
       for (const group of bracketJson.groups) {
         for (const match of group.matches) {
           if (match.player1?.id && match.player2?.id) {
-            await prisma.match.create({
-              data: {
-                tournamentId,
-                categoryId,
-                matchNumber: match.matchNumber,
-                round: 1,
-                player1Id: match.player1.id,
-                player2Id: match.player2.id,
-                player1Seed: match.player1.seed,
-                player2Seed: match.player2.seed,
-                status: 'PENDING'
-              }
+            matchRecords.push({
+              tournamentId,
+              categoryId,
+              matchNumber: match.matchNumber,
+              round: 1,
+              player1Id: match.player1.id,
+              player2Id: match.player2.id,
+              player1Seed: match.player1.seed ?? null,
+              player2Seed: match.player2.seed ?? null,
+              status: 'PENDING'
             });
           }
         }
+      }
+      if (matchRecords.length > 0) {
+        await prisma.match.createMany({ data: matchRecords });
       }
     }
 

@@ -20,6 +20,7 @@ const LiveMatchDetail = () => {
     fetchMatchDetails();
   }, [matchId]);
 
+  // Socket.IO real-time (local dev only) — falls through to polling in production
   useEffect(() => {
     if (!socket || !matchId) return;
     socket.emit('subscribe:match', matchId);
@@ -35,6 +36,18 @@ const LiveMatchDetail = () => {
       socket.off(`match:statusChange:${matchId}`);
     };
   }, [socket, matchId]);
+
+  // Polling fallback — 3s interval when Socket.IO is unavailable (production/Vercel)
+  useEffect(() => {
+    if (isConnected) return; // Socket working — no need to poll
+    const interval = setInterval(async () => {
+      try {
+        const data = await matchService.getLiveMatchDetails(matchId);
+        if (data?.match) setMatch(data.match);
+      } catch (_) {}
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [isConnected, matchId]);
 
   useEffect(() => {
     if (!match?.startedAt) return;

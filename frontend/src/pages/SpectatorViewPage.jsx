@@ -34,6 +34,7 @@ const SpectatorViewPage = () => {
 
   useEffect(() => {
     fetchMatch();
+    // Try Socket.IO (works in local dev only — disabled on Vercel serverless)
     const cleanup = joinMatch(
       matchId,
       (data) => { setScore(data.score); setIsLiveConnected(true); },
@@ -42,6 +43,25 @@ const SpectatorViewPage = () => {
     );
     return () => { cleanup(); leaveMatch(matchId); };
   }, [matchId]);
+
+  // Polling fallback — 3s interval when Socket.IO not connected (production)
+  useEffect(() => {
+    if (isLiveConnected || matchComplete) return;
+    const interval = setInterval(async () => {
+      try {
+        const data = await getMatch(matchId);
+        if (data?.match) {
+          setMatch(data.match);
+          setScore(data.match.scoreJson);
+          if (data.match.status === 'COMPLETED') {
+            setMatchComplete(true);
+            clearInterval(interval);
+          }
+        }
+      } catch (_) {}
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [isLiveConnected, matchComplete, matchId]);
 
   if (loading) {
     return <LoadingScreen message="Loading match..." />;

@@ -41,10 +41,12 @@ const LiveMatches = () => {
 
   useEffect(() => { fetchLiveMatches(); }, [filters]);
 
+  // Poll faster when Socket.IO unavailable (production) — 5s vs 30s
   useEffect(() => {
-    const interval = setInterval(fetchLiveMatches, 30000);
+    const pollMs = isConnected ? 30000 : 5000;
+    const interval = setInterval(fetchLiveMatches, pollMs);
     return () => clearInterval(interval);
-  }, [filters]);
+  }, [filters, isConnected]);
 
   useEffect(() => {
     if (!socket) return;

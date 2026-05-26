@@ -83,7 +83,7 @@ export const isMatchPoint = (score, format = 'best_of_3') => {
 
   // Check if current set is at match point score
   const player1AtMatchPoint = p1Score >= 20 && p1Score >= p2Score;
-  const player2AtMatchPoint = p2Score >= 20 && p2Score >= player1Score;
+  const player2AtMatchPoint = p2Score >= 20 && p2Score >= p1Score;
 
   const isMatchPoint = (player1OneSetAway && player1AtMatchPoint) || (player2OneSetAway && player2AtMatchPoint);
   const player = player1OneSetAway && player1AtMatchPoint ? 'player1' : (player2OneSetAway && player2AtMatchPoint ? 'player2' : null);

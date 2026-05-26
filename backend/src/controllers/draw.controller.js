@@ -2479,11 +2479,11 @@ const shuffleAssignedPlayers = async (req, res) => {
         return res.status(400).json({ success: false, error: 'No players to shuffle' });
       }
 
-      // Simple shuffle - rotate by 1
+      // Fisher-Yates shuffle — truly random (matches KNOCKOUT format shuffle)
       const shuffledPlayers = [...assignedPlayers];
-      if (shuffledPlayers.length > 1) {
-        const first = shuffledPlayers.shift();
-        shuffledPlayers.push(first);
+      for (let i = shuffledPlayers.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffledPlayers[i], shuffledPlayers[j]] = [shuffledPlayers[j], shuffledPlayers[i]];
       }
 
       // Clear all participants first
@@ -2597,9 +2597,11 @@ const arrangeKnockoutMatchups = async (req, res) => {
 
     console.log('🎯 Arranging knockout matchups for', knockoutSlots.length, 'slots');
 
-    // Verify tournament and ownership
+    // Verify tournament ownership (organizer or admin)
     const tournament = await prisma.tournament.findUnique({ where: { id: tournamentId } });
-    if (!tournament || tournament.organizerId !== userId) {
+    const userRoles = req.user.roles || [];
+    const isAdmin = userRoles.includes('ADMIN');
+    if (!tournament || (tournament.organizerId !== userId && !isAdmin)) {
       return res.status(403).json({ success: false, error: 'Unauthorized' });
     }
 

@@ -130,16 +130,17 @@ router.post('/deduct', authenticate, async (req, res) => {
   try {
     const { amount, description, referenceId } = req.body;
 
-    if (!amount || !description) {
+    const parsedAmount = parseFloat(amount);
+    if (!amount || !description || isNaN(parsedAmount) || parsedAmount <= 0) {
       return res.status(400).json({
         success: false,
-        error: 'Amount and description are required',
+        error: 'Valid positive amount and description are required',
       });
     }
 
     const transaction = await walletService.deductAmount(
       req.user.id,
-      parseFloat(amount),
+      parsedAmount,
       description,
       referenceId
     );

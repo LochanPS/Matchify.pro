@@ -299,7 +299,7 @@ router.post('/login', async (req, res) => {
     }
 
     // Generate tokens
-    const accessToken = generateAccessToken(user.id, primaryRole);
+    const accessToken = generateAccessToken(user.id, userRoles);
     const refreshToken = generateRefreshToken(user.id);
 
     // Update refresh token in database

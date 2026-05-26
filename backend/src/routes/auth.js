@@ -494,6 +494,12 @@ router.get('/me', async (req, res) => {
         isActive: true,
         isVerified: true,
         isSuspended: true,
+        birthYear: true,
+        isVerifiedOrganizer: true,
+        isVerifiedPlayer: true,
+        isVerifiedUmpire: true,
+        tournamentsRegistered: true,
+        matchesUmpired: true,
         createdAt: true,
         updatedAt: true
       }
@@ -505,8 +511,14 @@ router.get('/me', async (req, res) => {
       });
     }
 
+    // Strip internal placeholder email (phone-only users)
+    const userResponse = { ...user };
+    if (userResponse.email?.endsWith('@noemail.matchify.internal')) {
+      userResponse.email = null;
+    }
+
     res.json({
-      user
+      user: userResponse
     });
   } catch (error) {
     console.error('Get user error:', error);

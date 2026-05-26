@@ -177,6 +177,24 @@ const createRegistration = async (req, res) => {
           throw Object.assign(new Error(`Already registered for ${category.name}`), { code: 'DUPLICATE_REGISTRATION' });
         }
 
+        // Enforce maxParticipants cap (inside transaction = race-condition safe)
+        if (category.maxParticipants) {
+          const activeCount = await tx.registration.count({
+            where: {
+              categoryId: category.id,
+              status: { notIn: ['rejected', 'cancelled'] },
+              // exclude current user's own existing rejected/cancelled (they're re-registering)
+              ...(existingCheck ? { id: { not: existingCheck.id } } : {})
+            }
+          });
+          if (activeCount >= category.maxParticipants) {
+            throw Object.assign(
+              new Error(`${category.name} is full (${category.maxParticipants} participant limit reached)`),
+              { code: 'CATEGORY_FULL' }
+            );
+          }
+        }
+
         let reg;
         if (existingCheck && (existingCheck.status === 'rejected' || existingCheck.status === 'cancelled')) {
           // UPDATE the existing rejected/cancelled registration
@@ -277,6 +295,9 @@ const createRegistration = async (req, res) => {
     });
     if (error.code === 'DUPLICATE_REGISTRATION') {
       return res.status(400).json({ success: false, error: error.message });
+    }
+    if (error.code === 'CATEGORY_FULL') {
+      return res.status(409).json({ success: false, error: error.message });
     }
     res.status(500).json({
       success: false,
@@ -763,8 +784,24 @@ const createRegistrationWithScreenshot = async (req, res) => {
         willUpdate: existingRejected && (existingRejected.status === 'rejected' || existingRejected.status === 'cancelled')
       });
 
+      // Enforce maxParticipants cap before creating a new registration
+      if (category.maxParticipants && !existingRejected) {
+        const activeCount = await prisma.registration.count({
+          where: {
+            categoryId: category.id,
+            status: { notIn: ['rejected', 'cancelled'] }
+          }
+        });
+        if (activeCount >= category.maxParticipants) {
+          return res.status(409).json({
+            success: false,
+            error: `${category.name} is full (${category.maxParticipants} participant limit reached)`
+          });
+        }
+      }
+
       let registration;
-      
+
       if (existingRejected && (existingRejected.status === 'rejected' || existingRejected.status === 'cancelled')) {
         // UPDATE the existing rejected/cancelled registration
         console.log(`🔄 UPDATING existing ${existingRejected.status} registration ${existingRejected.id}`);

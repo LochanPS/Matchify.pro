@@ -15,6 +15,6 @@
   "env": {
     "VERCEL": "1"
   },
-  "buildCommand": "prisma generate && prisma db push",
+  "buildCommand": "prisma generate",
   "installCommand": "npm install"
 }

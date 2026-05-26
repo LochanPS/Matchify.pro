@@ -92,9 +92,57 @@ import {
 import { initEmailService } from './services/email.service.js';
 import { initializeSocket } from './services/socketService.js';
 import { createServer } from 'http';
+import prisma from './lib/prisma.js';
 
 // Initialize email service
 initEmailService();
+
+// ============================================
+// STARTUP DB MIGRATION — adds columns that may be missing
+// from the live DB when schema was updated without db push.
+// Safe to run on every cold-start: ADD COLUMN IF NOT EXISTS is idempotent.
+// ============================================
+async function runStartupMigrations() {
+  try {
+    const migrations = [
+      // Password reset OTP fields (added in May 2026)
+      `ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "passwordResetToken" TEXT`,
+      `ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "passwordResetExpiry" TIMESTAMP(3)`,
+      // Suspension fields
+      `ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "isSuspended" BOOLEAN NOT NULL DEFAULT false`,
+      `ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "suspendedUntil" TIMESTAMP(3)`,
+      `ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "suspensionReason" TEXT`,
+      // Alternate email
+      `ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "alternateEmail" TEXT`,
+      // Birth year (added later)
+      `ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "birthYear" INTEGER`,
+      // Blue tick verification fields
+      `ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "isVerifiedOrganizer" BOOLEAN NOT NULL DEFAULT false`,
+      `ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "isVerifiedPlayer" BOOLEAN NOT NULL DEFAULT false`,
+      `ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "isVerifiedUmpire" BOOLEAN NOT NULL DEFAULT false`,
+      `ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "tournamentsRegistered" INTEGER NOT NULL DEFAULT 0`,
+      `ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "matchesUmpired" INTEGER NOT NULL DEFAULT 0`,
+    ];
+
+    for (const sql of migrations) {
+      try {
+        await prisma.$executeRawUnsafe(sql);
+      } catch (err) {
+        // Log but don't crash — column may already exist (older postgres) or other non-fatal error
+        if (!err.message?.includes('already exists')) {
+          console.warn(`⚠️ Migration warning: ${err.message?.split('\n')[0]}`);
+        }
+      }
+    }
+    console.log('✅ Startup DB migrations complete');
+  } catch (err) {
+    console.error('❌ Startup migration failed:', err.message);
+    // Non-fatal — app still starts, individual queries may fail
+  }
+}
+
+// Run migrations (fire-and-forget: don't block server startup)
+runStartupMigrations();
 
 const app = express();
 const PORT = process.env.PORT || 5000;

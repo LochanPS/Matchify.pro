@@ -284,6 +284,16 @@ const LoginPageMobile = () => {
               </div>
             </div>
 
+            {/* Forgot password */}
+            <div style={{ textAlign: 'right', marginTop: -8 }}>
+              <Link
+                to="/forgot-password"
+                style={{ fontSize: 13, color: 'rgba(252,211,77,0.8)', fontWeight: 600, textDecoration: 'none' }}
+              >
+                Forgot Password?
+              </Link>
+            </div>
+
             {/* Submit */}
             <button
               type="submit"

@@ -601,4 +601,129 @@ router.get('/verification-status', async (req, res) => {
   }
 });
 
+// POST /auth/forgot-password
+router.post('/forgot-password', async (req, res) => {
+  // Always return 200 regardless — never reveal whether account exists
+  const SUCCESS_MSG = 'If an account exists, a reset link has been sent to the registered email.';
+
+  try {
+    const { credential } = req.body; // email or phone
+    if (!credential) {
+      return res.status(400).json({ error: 'Email or phone number is required.' });
+    }
+
+    const isEmail = credential.includes('@');
+    let cleanedPhone = null;
+    if (!isEmail) {
+      cleanedPhone = credential.replace(/[\s\-\+]/g, '');
+      if (cleanedPhone.length === 12 && cleanedPhone.startsWith('91')) cleanedPhone = cleanedPhone.slice(2);
+      if (!/^[0-9]{10}$/.test(cleanedPhone)) {
+        return res.status(400).json({ error: 'Enter a valid email or 10-digit phone number.' });
+      }
+    }
+
+    const user = await prisma.user.findUnique({
+      where: isEmail ? { email: credential } : { phone: cleanedPhone },
+      select: { id: true, email: true, name: true }
+    });
+
+    // Silent return — don't reveal account existence
+    if (!user) return res.json({ message: SUCCESS_MSG });
+
+    const realEmail = user.email && !user.email.endsWith('@noemail.matchify.internal') ? user.email : null;
+    if (!realEmail) {
+      // Phone-only user, no email on file — still return success silently
+      return res.json({ message: SUCCESS_MSG });
+    }
+
+    // Generate secure token
+    const { randomBytes } = await import('crypto');
+    const rawToken = randomBytes(32).toString('hex');
+    const expiry   = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { passwordResetToken: rawToken, passwordResetExpiry: expiry }
+    });
+
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const resetLink   = `${frontendUrl}/reset-password?token=${rawToken}`;
+    const firstName   = user.name?.split(' ')[0] || 'there';
+
+    const html = `
+      <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;background:#040810;color:#fff;border-radius:16px;overflow:hidden;border:1px solid rgba(245,158,11,0.2);">
+        <div style="background:linear-gradient(135deg,#F59E0B,#D97706);padding:24px 28px;">
+          <h1 style="margin:0;font-size:22px;font-weight:900;color:#0C0900;">Matchify.pro</h1>
+          <p style="margin:4px 0 0;font-size:13px;color:rgba(0,0,0,0.6);">Password Reset Request</p>
+        </div>
+        <div style="padding:28px;">
+          <p style="font-size:15px;margin:0 0 16px;">Hi <strong>${firstName}</strong>,</p>
+          <p style="font-size:14px;color:rgba(255,255,255,0.75);margin:0 0 24px;line-height:1.6;">
+            We received a request to reset your Matchify password. Click the button below to set a new password. This link expires in <strong>1 hour</strong>.
+          </p>
+          <a href="${resetLink}" style="display:inline-block;padding:14px 28px;background:linear-gradient(135deg,#F59E0B,#D97706);color:#0C0900;font-weight:800;font-size:15px;border-radius:12px;text-decoration:none;">
+            Reset My Password →
+          </a>
+          <p style="font-size:12px;color:rgba(255,255,255,0.35);margin:24px 0 0;line-height:1.6;">
+            If you didn't request this, ignore this email — your password won't change.<br>
+            Link expires: ${expiry.toUTCString()}
+          </p>
+        </div>
+      </div>
+    `;
+
+    const { default: emailService } = await import('../services/emailService.js');
+    await emailService.send(realEmail, 'Reset your Matchify password', html, null, true);
+
+    return res.json({ message: SUCCESS_MSG });
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    // Still return 200 — don't expose internal errors
+    return res.json({ message: 'If an account exists, a reset link has been sent to the registered email.' });
+  }
+});
+
+// POST /auth/reset-password
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+
+    if (!token || !newPassword) {
+      return res.status(400).json({ error: 'Token and new password are required.' });
+    }
+    if (newPassword.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters.' });
+    }
+
+    const user = await prisma.user.findFirst({
+      where: {
+        passwordResetToken: token,
+        passwordResetExpiry: { gt: new Date() } // not expired
+      },
+      select: { id: true }
+    });
+
+    if (!user) {
+      return res.status(400).json({ error: 'Reset link is invalid or has expired. Please request a new one.' });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        password: hashedPassword,
+        passwordResetToken: null,
+        passwordResetExpiry: null,
+        refreshToken: null // force re-login on all devices
+      }
+    });
+
+    return res.json({ success: true, message: 'Password reset successfully. Please log in with your new password.' });
+  } catch (error) {
+    console.error('Reset password error:', error);
+    return res.status(500).json({ error: 'Password reset failed. Please try again.' });
+  }
+});
+
 export default router;

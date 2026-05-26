@@ -71,6 +71,8 @@ const CourtBookingPage          = lazy(() => import('./pages/CourtBookingPage'))
 const MyBookingsPage            = lazy(() => import('./pages/MyBookingsPage'))
 const TermsOfService            = lazy(() => import('./pages/TermsOfService'))
 const PrivacyPolicy             = lazy(() => import('./pages/PrivacyPolicy'))
+const ForgotPasswordPage        = lazy(() => import('./pages/ForgotPasswordPage'))
+const ResetPasswordPage         = lazy(() => import('./pages/ResetPasswordPage'))
 // Admin layout & pages
 const AdminLayout               = lazy(() => import('./pages/admin/AdminLayout'))
 const UserManagementPage        = lazy(() => import('./pages/admin/UserManagementPage'))
@@ -249,6 +251,8 @@ function AppContent() {
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/terms" element={<TermsOfService />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/tournaments" element={<TournamentDiscoveryPage />} />

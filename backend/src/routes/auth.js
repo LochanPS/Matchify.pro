@@ -630,16 +630,15 @@ router.post('/forgot-password', async (req, res) => {
     const realEmail = user.email && !user.email.endsWith('@noemail.matchify.internal') ? user.email : null;
     if (!realEmail) return res.json({ message: SUCCESS_MSG });
 
-    // Generate 6-digit OTP
+    // Generate 6-digit OTP — store as "otp:attempts" to track wrong guesses without schema change
     const otp    = String(Math.floor(100000 + Math.random() * 900000));
     const expiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
     await prisma.user.update({
       where: { id: user.id },
       data: {
-        passwordResetToken:    otp,
-        passwordResetExpiry:   expiry,
-        passwordResetAttempts: 0
+        passwordResetToken:  `${otp}:0`,
+        passwordResetExpiry: expiry
       }
     });
 
@@ -702,36 +701,45 @@ router.post('/verify-reset-otp', async (req, res) => {
       return res.status(400).json({ error: 'No OTP request found. Please request a new OTP.' });
     }
 
+    // Token format: "otp:attempts" — no extra DB field needed
+    const [storedOtp, attemptsStr] = user.passwordResetToken.split(':');
+    const attempts = parseInt(attemptsStr || '0', 10);
+
     // Check expiry
     if (new Date() > user.passwordResetExpiry) {
       await prisma.user.update({
         where: { id: user.id },
-        data: { passwordResetToken: null, passwordResetExpiry: null, passwordResetAttempts: 0 }
+        data: { passwordResetToken: null, passwordResetExpiry: null }
       });
       return res.status(400).json({ error: 'OTP has expired. Please request a new one.' });
     }
 
     // Max 3 attempts
-    if (user.passwordResetAttempts >= 3) {
+    if (attempts >= 3) {
       await prisma.user.update({
         where: { id: user.id },
-        data: { passwordResetToken: null, passwordResetExpiry: null, passwordResetAttempts: 0 }
+        data: { passwordResetToken: null, passwordResetExpiry: null }
       });
       return res.status(400).json({ error: 'Too many incorrect attempts. Please request a new OTP.' });
     }
 
     // Verify OTP
-    if (user.passwordResetToken !== otp.trim()) {
-      const newAttempts = user.passwordResetAttempts + 1;
+    if (storedOtp !== otp.trim()) {
+      const newAttempts = attempts + 1;
       await prisma.user.update({
         where: { id: user.id },
-        data: { passwordResetAttempts: newAttempts }
+        data: { passwordResetToken: `${storedOtp}:${newAttempts}` }
       });
       const remaining = 3 - newAttempts;
+      if (remaining <= 0) {
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { passwordResetToken: null, passwordResetExpiry: null }
+        });
+        return res.status(400).json({ error: 'Too many incorrect attempts. Please request a new OTP.' });
+      }
       return res.status(400).json({
-        error: remaining > 0
-          ? `Incorrect OTP. ${remaining} attempt${remaining === 1 ? '' : 's'} remaining.`
-          : 'Too many incorrect attempts. Please request a new OTP.'
+        error: `Incorrect OTP. ${remaining} attempt${remaining === 1 ? '' : 's'} remaining.`
       });
     }
 
@@ -743,9 +751,8 @@ router.post('/verify-reset-otp', async (req, res) => {
     await prisma.user.update({
       where: { id: user.id },
       data: {
-        passwordResetToken:    resetToken,
-        passwordResetExpiry:   resetExpiry,
-        passwordResetAttempts: 0
+        passwordResetToken:  resetToken,
+        passwordResetExpiry: resetExpiry
       }
     });
 

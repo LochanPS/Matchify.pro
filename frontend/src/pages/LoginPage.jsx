@@ -1,6 +1,6 @@
 ﻿import { getErrorMessage } from '../utils/errorMessage';
 import { useState } from 'react';
-import { useNavigate, Link, useSearchParams } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { EyeIcon, EyeSlashIcon, EnvelopeIcon, LockClosedIcon, ArrowRightIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import { Zap, Trophy, Users, MapPin, Ban, AlertTriangle } from 'lucide-react';
@@ -66,8 +66,10 @@ const LoginPage = () => {
 
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const redirectUrl = searchParams.get('redirect');
+  const successMsg = location.state?.successMessage || '';
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -218,6 +220,14 @@ const LoginPage = () => {
               <h2 className="text-2xl sm:text-3xl font-black text-white mb-1">Welcome Back</h2>
               <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>Sign in to continue your journey</p>
             </div>
+
+            {successMsg && (
+              <div className="mb-5 p-3.5 rounded-xl flex items-center gap-2 text-sm"
+                style={{ background: 'rgba(74,222,128,0.08)', border: '1px solid rgba(74,222,128,0.3)', color: '#4ade80' }}>
+                <span className="flex-shrink-0">✅</span>
+                <span>{successMsg}</span>
+              </div>
+            )}
 
             {error && (
               <div className="mb-5 p-3.5 rounded-xl flex items-center gap-2 text-sm"

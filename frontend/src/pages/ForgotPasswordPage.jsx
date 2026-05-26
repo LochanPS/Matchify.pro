@@ -22,6 +22,7 @@ const ForgotPasswordPage = () => {
   const [loading, setLoading]                 = useState(false);
   const [error, setError]                     = useState('');
   const [resendCooldown, setResendCooldown]   = useState(0);
+  const [resetSuccess, setResetSuccess]       = useState(false);
 
   const otpRefs      = useRef([]);
   const isVerifying  = useRef(false); // prevent concurrent OTP verify calls
@@ -148,12 +149,11 @@ const ForgotPasswordPage = () => {
     setLoading(true);
     try {
       await api.post('/auth/reset-password', { token: resetToken, newPassword });
-      navigate('/login', {
-        replace: true,
-        state: { successMessage: 'Password reset successfully! Please log in.' }
-      });
+      setResetSuccess(true);
+      setTimeout(() => navigate('/login', { replace: true, state: { successMessage: 'Password reset successfully! Please log in with your new password.' } }), 2500);
     } catch (err) {
-      setError(err?.response?.data?.error || 'Reset failed. Please try again.');
+      const msg = err?.response?.data?.error || 'Reset failed. Please try again.';
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -180,9 +180,12 @@ const ForgotPasswordPage = () => {
         .fp-input::placeholder { color: rgba(255,255,255,0.2); }
         .otp-box { text-align: center; caret-color: #F59E0B; }
         .otp-box:focus { border-color: #F59E0B !important; box-shadow: 0 0 0 3px rgba(245,158,11,0.15) !important; outline: none; }
-        @keyframes fadeUp { 0%{opacity:0;transform:translateY(18px)} 100%{opacity:1;transform:translateY(0)} }
-        @keyframes shake  { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-5px)} 40%,80%{transform:translateX(5px)} }
-        .shake { animation: shake 0.35s ease; }
+        @keyframes fadeUp    { 0%{opacity:0;transform:translateY(18px)} 100%{opacity:1;transform:translateY(0)} }
+        @keyframes fadeIn    { 0%{opacity:0;transform:translateY(10px)} 100%{opacity:1;transform:translateY(0)} }
+        @keyframes shake     { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-5px)} 40%,80%{transform:translateX(5px)} }
+        @keyframes scaleIn   { 0%{opacity:0;transform:scale(0.85)} 100%{opacity:1;transform:scale(1)} }
+        .shake    { animation: shake 0.35s ease; }
+        .step-anim { animation: fadeIn 0.3s cubic-bezier(0.16,1,0.3,1); }
       `}</style>
 
       {/* Ambient orbs */}
@@ -249,7 +252,7 @@ const ForgotPasswordPage = () => {
 
           {/* ── STEP 0: Enter credential ── */}
           {step === STEP.CREDENTIAL && (
-            <>
+            <div key="step-0" className="step-anim">
               <div style={{ textAlign: 'center', marginBottom: 22 }}>
                 <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)', borderRadius: 20, padding: '5px 14px', fontSize: 12, fontWeight: 700, color: '#FCD34D', marginBottom: 12 }}>
                   🔑 Reset Password
@@ -315,12 +318,12 @@ const ForgotPasswordPage = () => {
                   <Link to="/login" style={{ fontWeight: 700, color: '#FCD34D', textDecoration: 'none' }}>Back to Login</Link>
                 </p>
               </div>
-            </>
+            </div>
           )}
 
           {/* ── STEP 1: Enter OTP ── */}
           {step === STEP.OTP && (
-            <>
+            <div key="step-1" className="step-anim">
               <div style={{ textAlign: 'center', marginBottom: 22 }}>
                 <div style={{ fontSize: 46, marginBottom: 12, lineHeight: 1 }}>📧</div>
                 <h1 style={{ fontSize: 24, fontWeight: 900, color: '#fff', margin: '0 0 10px' }}>Check your email</h1>
@@ -386,12 +389,12 @@ const ForgotPasswordPage = () => {
                   ← Change email / phone
                 </button>
               </div>
-            </>
+            </div>
           )}
 
           {/* ── STEP 2: Set new password ── */}
           {step === STEP.PASSWORD && (
-            <>
+            <div key="step-2" className="step-anim">
               <div style={{ textAlign: 'center', marginBottom: 22 }}>
                 <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.3)', borderRadius: 20, padding: '5px 14px', fontSize: 12, fontWeight: 700, color: '#4ade80', marginBottom: 12 }}>
                   ✓ OTP Verified
@@ -404,13 +407,38 @@ const ForgotPasswordPage = () => {
                 </p>
               </div>
 
-              {error && (
-                <div style={{ marginBottom: 18, padding: '10px 14px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 10, fontSize: 13, color: '#F87171' }}>
-                  ⚠️ {error}
+              {/* Success state */}
+              {resetSuccess && (
+                <div style={{ textAlign: 'center', padding: '12px 0', animation: 'scaleIn 0.35s cubic-bezier(0.16,1,0.3,1)' }}>
+                  <div style={{ fontSize: 52, marginBottom: 16, lineHeight: 1 }}>✅</div>
+                  <h2 style={{ fontSize: 22, fontWeight: 900, color: '#fff', margin: '0 0 10px' }}>Password Reset!</h2>
+                  <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.55)', lineHeight: 1.6, margin: '0 0 6px' }}>
+                    Your password has been updated.
+                  </p>
+                  <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', margin: '0 0 20px' }}>Redirecting to login…</p>
+                  <Link to="/login" replace style={{ display: 'block', padding: '13px 16px', background: 'linear-gradient(135deg, #F59E0B, #D97706)', color: '#0C0900', borderRadius: 12, fontWeight: 800, fontSize: 14, textDecoration: 'none', textAlign: 'center' }}>
+                    Go to Login →
+                  </Link>
                 </div>
               )}
 
-              <form onSubmit={handlePasswordSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+              {!resetSuccess && error && (
+                <div style={{ marginBottom: 18, padding: '10px 14px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 10, fontSize: 13, color: '#F87171' }}>
+                  ⚠️ {error}
+                  {(error.toLowerCase().includes('expired') || error.toLowerCase().includes('invalid') || error.toLowerCase().includes('failed')) && (
+                    <span style={{ display: 'block', marginTop: 8 }}>
+                      <button
+                        type="button"
+                        onClick={() => { setStep(STEP.CREDENTIAL); setOtp(['','','','','','']); setError(''); setResetToken(''); setNewPassword(''); setConfirmPassword(''); }}
+                        style={{ background: 'none', border: 'none', color: '#FCD34D', fontWeight: 700, fontSize: 13, cursor: 'pointer', padding: 0, textDecoration: 'underline' }}>
+                        Request a new OTP →
+                      </button>
+                    </span>
+                  )}
+                </div>
+              )}
+
+              {!resetSuccess && <form onSubmit={handlePasswordSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
                 <div>
                   <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }}>
                     New Password
@@ -466,8 +494,8 @@ const ForgotPasswordPage = () => {
                     ? <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}><Spinner size="md" /> Saving…</span>
                     : 'Save New Password →'}
                 </button>
-              </form>
-            </>
+              </form>}
+            </div>
           )}
 
         </div>

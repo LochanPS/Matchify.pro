@@ -187,7 +187,7 @@ router.post('/login', async (req, res) => {
 
     // Detect if credential is email or phone
     const isEmail = email.includes('@');
-    let cleanedCredential = email;
+    let cleanedCredential = isEmail ? email.trim().toLowerCase() : email;
     if (!isEmail) {
       // Clean phone: remove spaces, dashes, +
       cleanedCredential = email.replace(/[\s\-\+]/g, '');
@@ -204,10 +204,10 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    // Find user by email OR phone
-    let user = await prisma.user.findUnique({
-      where: isEmail ? { email: cleanedCredential } : { phone: cleanedCredential }
-    });
+    // Find user by email (case-insensitive) OR phone
+    let user = isEmail
+      ? await prisma.user.findFirst({ where: { email: { equals: cleanedCredential, mode: 'insensitive' } } })
+      : await prisma.user.findUnique({ where: { phone: cleanedCredential } });
 
     // Fallback: try original (uncleaned) phone format for backward compatibility
     if (!user && isPhone && cleanedCredential !== email) {
@@ -602,10 +602,15 @@ router.post('/forgot-password', async (req, res) => {
       }
     }
 
-    const user = await prisma.user.findUnique({
-      where: isEmail ? { email: normalizedEmail } : { phone: cleanedPhone },
-      select: { id: true, email: true, name: true }
-    });
+    const user = isEmail
+      ? await prisma.user.findFirst({
+          where: { email: { equals: normalizedEmail, mode: 'insensitive' } },
+          select: { id: true, email: true, name: true }
+        })
+      : await prisma.user.findUnique({
+          where: { phone: cleanedPhone },
+          select: { id: true, email: true, name: true }
+        });
 
     if (!user) return res.json({ message: SUCCESS_MSG });
 
@@ -677,10 +682,15 @@ router.post('/verify-reset-otp', async (req, res) => {
       if (cleanedPhone.length === 12 && cleanedPhone.startsWith('91')) cleanedPhone = cleanedPhone.slice(2);
     }
 
-    const user = await prisma.user.findUnique({
-      where: isEmail ? { email: normalizedEmail } : { phone: cleanedPhone },
-      select: { id: true, passwordResetToken: true, passwordResetExpiry: true }
-    });
+    const user = isEmail
+      ? await prisma.user.findFirst({
+          where: { email: { equals: normalizedEmail, mode: 'insensitive' } },
+          select: { id: true, passwordResetToken: true, passwordResetExpiry: true }
+        })
+      : await prisma.user.findUnique({
+          where: { phone: cleanedPhone },
+          select: { id: true, passwordResetToken: true, passwordResetExpiry: true }
+        });
 
     if (!user || !user.passwordResetToken || !user.passwordResetExpiry) {
       return res.status(400).json({ error: 'No OTP request found. Please request a new OTP.' });

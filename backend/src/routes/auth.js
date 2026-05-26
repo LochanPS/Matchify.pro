@@ -674,7 +674,7 @@ router.post('/verify-reset-otp', async (req, res) => {
 
     const user = await prisma.user.findUnique({
       where: isEmail ? { email: credential } : { phone: cleanedPhone },
-      select: { id: true, passwordResetToken: true, passwordResetExpiry: true, passwordResetAttempts: true }
+      select: { id: true, passwordResetToken: true, passwordResetExpiry: true }
     });
 
     if (!user || !user.passwordResetToken || !user.passwordResetExpiry) {

@@ -95,37 +95,19 @@ router.post('/register', async (req, res) => {
     // Clean phone number for storage
     const cleanedPhone = phone ? phone.replace(/[\s\-\+]/g, '').replace(/^91/, '') : null;
 
-    // Check email uniqueness if a REAL email is provided
-    if (email) {
-      const existingUser = await prisma.user.findUnique({ where: { email } });
-      if (existingUser) {
-        return res.status(409).json({ error: 'User with this email already exists' });
-      }
-    }
-
-    // Check phone uniqueness if provided
-    if (cleanedPhone) {
-      const existingPhone = await prisma.user.findUnique({ where: { phone: cleanedPhone } });
-      if (existingPhone) {
-        return res.status(409).json({ error: 'User with this phone number already exists' });
-      }
-    }
-
-    // If no email provided (phone-only registration), generate a unique internal placeholder.
-    // This satisfies the NOT NULL constraint on the email column without requiring a DB migration.
-    // The placeholder is never exposed to users and is never used for login.
+    // If no email provided (phone-only), generate unique internal placeholder
     const finalEmail = email || `phone.${cleanedPhone}.${Date.now()}@noemail.matchify.internal`;
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 12);
-
-    // Generate matchify code
-    const matchifyCode = await generateMatchifyCode();
+    // Run bcrypt + matchifyCode generation in parallel to save time
+    const [hashedPassword, matchifyCode] = await Promise.all([
+      bcrypt.hash(password, 10), // cost 10 — fast enough, still secure
+      generateMatchifyCode()
+    ]);
 
     // Determine initial wallet balance based on roles
     const initialBalance = userRoles.includes('ORGANIZER') ? 25 : 0;
 
-    // Create user
+    // Create user — DB unique constraints handle duplicates (P2002 caught below)
     const user = await prisma.user.create({
       data: {
         email: finalEmail,
@@ -142,11 +124,10 @@ router.post('/register', async (req, res) => {
       }
     });
 
-    // Generate tokens
-    const accessToken = generateAccessToken(user.id, user.roles);
+    // Generate tokens and persist refresh token in one update
+    const accessToken  = generateAccessToken(user.id, user.roles);
     const refreshToken = generateRefreshToken(user.id);
 
-    // Store refresh token in database
     await prisma.user.update({
       where: { id: user.id },
       data: { refreshToken }
@@ -787,7 +768,7 @@ router.post('/reset-password', async (req, res) => {
       return res.status(400).json({ error: 'Reset link is invalid or has expired. Please request a new one.' });
     }
 
-    const hashedPassword = await bcrypt.hash(newPassword, 12);
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     await prisma.user.update({
       where: { id: user.id },

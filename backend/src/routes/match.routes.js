@@ -1205,12 +1205,25 @@ router.get('/tournament/:tournamentId', optionalAuth, async (req, res) => {
       .filter(id => id.startsWith('guest-'))
       .map(id => id.replace('guest-', ''));
 
-    const [users, guestRegs] = await Promise.all([
+    // Collect doubles-category player IDs for partner lookup
+    const doublesPlayerIds = [...new Set(
+      matches
+        .filter(m => { const fmt = m.category?.format?.toLowerCase(); return fmt === 'doubles' || fmt === 'mixed_doubles'; })
+        .flatMap(m => [m.player1Id, m.player2Id].filter(id => id && !id.startsWith('guest-')))
+    )];
+
+    const [users, guestRegs, partnerRegs] = await Promise.all([
       regularIds.length
         ? prisma.user.findMany({ where: { id: { in: regularIds } }, select: { id: true, name: true, email: true } })
         : [],
       guestRegIds.length
         ? prisma.registration.findMany({ where: { id: { in: guestRegIds } }, select: { id: true, guestName: true, guestEmail: true } })
+        : [],
+      doublesPlayerIds.length
+        ? prisma.registration.findMany({
+            where: { userId: { in: doublesPlayerIds }, status: { in: ['confirmed', 'pending'] } },
+            include: { partner: { select: { id: true, name: true } } },
+          })
         : [],
     ]);
 
@@ -1219,10 +1232,25 @@ router.get('/tournament/:tournamentId', optionalAuth, async (req, res) => {
       playerMap[`guest-${r.id}`] = { id: `guest-${r.id}`, name: r.guestName || 'Guest Player', email: r.guestEmail || null };
     });
 
+    // Build partner name map: userId -> partnerName (first confirmed registration wins)
+    const partnerMap = {};
+    for (const r of partnerRegs) {
+      if (!partnerMap[r.userId]) {
+        const pName = r.partner?.name || r.guestPartnerName;
+        if (pName) partnerMap[r.userId] = pName;
+      }
+    }
+
+    const withPartner = (id) => {
+      const p = playerMap[id];
+      if (!p) return null;
+      return partnerMap[id] ? { ...p, partnerName: partnerMap[id] } : p;
+    };
+
     const matchesWithPlayers = matches.map(match => ({
       ...match,
-      player1:      playerMap[match.player1Id]      || null,
-      player2:      playerMap[match.player2Id]      || null,
+      player1:      withPartner(match.player1Id)      || playerMap[match.player1Id]      || null,
+      player2:      withPartner(match.player2Id)      || playerMap[match.player2Id]      || null,
       team1Player1: playerMap[match.team1Player1Id] || null,
       team1Player2: playerMap[match.team1Player2Id] || null,
       team2Player1: playerMap[match.team2Player1Id] || null,

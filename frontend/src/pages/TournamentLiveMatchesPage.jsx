@@ -28,27 +28,24 @@ function timeAgo(iso) {
   return `${Math.floor(diff / 3600)}h ago`;
 }
 
-function getPlayerName(match, side) {
+// Returns { name, partnerName } for each side
+function getPlayerInfo(match, side) {
   if (side === 1) {
-    if (match.player1?.name) return match.player1.name;
-    if (match.team1Player1?.name) {
-      const p2 = match.team1Player2?.name;
-      return p2 ? `${match.team1Player1.name} / ${p2}` : match.team1Player1.name;
-    }
-    return 'TBD';
+    if (match.player1?.name) return { name: match.player1.name, partnerName: match.player1.partnerName || null };
+    if (match.team1Player1?.name) return { name: match.team1Player1.name, partnerName: match.team1Player2?.name || null };
+    return { name: 'TBD', partnerName: null };
   }
-  if (match.player2?.name) return match.player2.name;
-  if (match.team2Player1?.name) {
-    const p2 = match.team2Player2?.name;
-    return p2 ? `${match.team2Player1.name} / ${p2}` : match.team2Player1.name;
-  }
-  return 'TBD';
+  if (match.player2?.name) return { name: match.player2.name, partnerName: match.player2.partnerName || null };
+  if (match.team2Player1?.name) return { name: match.team2Player1.name, partnerName: match.team2Player2?.name || null };
+  return { name: 'TBD', partnerName: null };
 }
 
-/* /* ─── single match card — scoreboard layout ─────────────── */
+/* ─── single match card — scoreboard layout ─────────────── */
 function MatchCard({ match, isCompleted }) {
-  const p1Name = getPlayerName(match, 1);
-  const p2Name = getPlayerName(match, 2);
+  const p1Info = getPlayerInfo(match, 1);
+  const p2Info = getPlayerInfo(match, 2);
+  const p1Name = p1Info.name;
+  const p2Name = p2Info.name;
   const score  = match.scoreData || match.score;
   const sets   = score?.sets || [];
   const currentIdx = isCompleted
@@ -145,90 +142,107 @@ function MatchCard({ match, isCompleted }) {
           </div>
         </div>
 
-        {/* SCOREBOARD: name left | big score centre | name right */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr auto 1fr',
-          alignItems: 'center',
-          gap: 8,
-          marginBottom: 10,
-        }}>
-          {/* P1 */}
-          <div style={{ textAlign: 'right', minWidth: 0 }}>
-            <p style={{
-              fontSize: 14, fontWeight: 800,
-              color: isP1Winner ? C.green : C.white,
-              margin: '0 0 6px', lineHeight: 1.2,
-              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-            }}>
-              {isP1Winner ? '🏆 ' : ''}{p1Name}
-            </p>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 4 }}>
-              {Array.from({ length: setsToWin }).map((_, i) => (
-                <div key={i} style={{
-                  width: 8, height: 8, borderRadius: '50%',
-                  background: i < p1SetWins ? C.green : 'rgba(255,255,255,0.1)',
-                  border: `1.5px solid ${i < p1SetWins ? C.green : 'rgba(255,255,255,0.18)'}`,
-                  boxShadow: i < p1SetWins ? `0 0 5px ${C.green}70` : 'none',
-                }} />
-              ))}
-            </div>
-          </div>
+        {/* SCOREBOARD: vertical rows — full-width name left, big score right */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 0, marginBottom: 10 }}>
 
-          {/* Centre score box */}
-          <div style={{ textAlign: 'center', flexShrink: 0 }}>
+          {/* P1 row */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0' }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{
+                fontSize: 14, fontWeight: 800,
+                color: isP1Winner ? C.green : C.white,
+                margin: 0, lineHeight: 1.25,
+                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+              }}>
+                {isP1Winner ? '🏆 ' : ''}{p1Name}
+              </p>
+              {p1Info.partnerName && (
+                <p style={{
+                  fontSize: 11, fontWeight: 400,
+                  color: 'rgba(255,255,255,0.55)',
+                  margin: '2px 0 0', lineHeight: 1.2,
+                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                }}>
+                  &amp; {p1Info.partnerName}
+                </p>
+              )}
+              <div style={{ display: 'flex', gap: 4, marginTop: 5 }}>
+                {Array.from({ length: setsToWin }).map((_, i) => (
+                  <div key={i} style={{
+                    width: 8, height: 8, borderRadius: '50%',
+                    background: i < p1SetWins ? C.green : 'rgba(255,255,255,0.1)',
+                    border: `1.5px solid ${i < p1SetWins ? C.green : 'rgba(255,255,255,0.18)'}`,
+                    boxShadow: i < p1SetWins ? `0 0 5px ${C.green}70` : 'none',
+                  }} />
+                ))}
+              </div>
+            </div>
             <div style={{
-              display: 'flex', alignItems: 'center',
-              background: 'rgba(0,0,0,0.35)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              borderRadius: 14, padding: '6px 2px',
+              flexShrink: 0, width: 52, textAlign: 'center',
+              fontSize: 38, fontWeight: 900, lineHeight: 1,
+              color: curP1 != null && curP1 > curP2 ? C.green
+                : curP1 != null ? C.white : 'rgba(255,255,255,0.15)',
+              fontVariantNumeric: 'tabular-nums',
             }}>
-              <div style={{
-                width: 50, textAlign: 'center',
-                fontSize: 42, fontWeight: 900, lineHeight: 1,
-                color: curP1 != null && curP1 > curP2 ? C.green
-                  : curP1 != null ? C.white : 'rgba(255,255,255,0.15)',
-              }}>{curP1 != null ? curP1 : '–'}</div>
-              <div style={{
-                fontSize: 20, fontWeight: 300, color: 'rgba(255,255,255,0.2)',
-                userSelect: 'none', lineHeight: 1, padding: '0 2px',
-              }}>:</div>
-              <div style={{
-                width: 50, textAlign: 'center',
-                fontSize: 42, fontWeight: 900, lineHeight: 1,
-                color: curP2 != null && curP2 > curP1 ? C.cyan
-                  : curP2 != null ? C.white : 'rgba(255,255,255,0.15)',
-              }}>{curP2 != null ? curP2 : '–'}</div>
+              {curP1 != null ? curP1 : '–'}
             </div>
-            {!isCompleted && curSet && (
-              <div style={{
-                fontSize: 9, fontWeight: 700, color: C.green,
-                letterSpacing: 0.5, textTransform: 'uppercase', marginTop: 4,
-              }}>▶ SET {currentIdx + 1}</div>
-            )}
           </div>
 
-          {/* P2 */}
-          <div style={{ textAlign: 'left', minWidth: 0 }}>
-            <p style={{
-              fontSize: 14, fontWeight: 800,
-              color: isP2Winner ? C.green : C.white,
-              margin: '0 0 6px', lineHeight: 1.2,
-              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          {/* divider */}
+          <div style={{ height: 1, background: 'rgba(255,255,255,0.06)' }} />
+
+          {/* P2 row */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0' }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{
+                fontSize: 14, fontWeight: 800,
+                color: isP2Winner ? C.green : C.white,
+                margin: 0, lineHeight: 1.25,
+                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+              }}>
+                {p2Name}{isP2Winner ? ' 🏆' : ''}
+              </p>
+              {p2Info.partnerName && (
+                <p style={{
+                  fontSize: 11, fontWeight: 400,
+                  color: 'rgba(255,255,255,0.55)',
+                  margin: '2px 0 0', lineHeight: 1.2,
+                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                }}>
+                  &amp; {p2Info.partnerName}
+                </p>
+              )}
+              <div style={{ display: 'flex', gap: 4, marginTop: 5 }}>
+                {Array.from({ length: setsToWin }).map((_, i) => (
+                  <div key={i} style={{
+                    width: 8, height: 8, borderRadius: '50%',
+                    background: i < p2SetWins ? C.cyan : 'rgba(255,255,255,0.1)',
+                    border: `1.5px solid ${i < p2SetWins ? C.cyan : 'rgba(255,255,255,0.18)'}`,
+                    boxShadow: i < p2SetWins ? `0 0 5px ${C.cyan}70` : 'none',
+                  }} />
+                ))}
+              </div>
+            </div>
+            <div style={{
+              flexShrink: 0, width: 52, textAlign: 'center',
+              fontSize: 38, fontWeight: 900, lineHeight: 1,
+              color: curP2 != null && curP2 > curP1 ? C.cyan
+                : curP2 != null ? C.white : 'rgba(255,255,255,0.15)',
+              fontVariantNumeric: 'tabular-nums',
             }}>
-              {p2Name}{isP2Winner ? ' 🏆' : ''}
-            </p>
-            <div style={{ display: 'flex', justifyContent: 'flex-start', gap: 4 }}>
-              {Array.from({ length: setsToWin }).map((_, i) => (
-                <div key={i} style={{
-                  width: 8, height: 8, borderRadius: '50%',
-                  background: i < p2SetWins ? C.cyan : 'rgba(255,255,255,0.1)',
-                  border: `1.5px solid ${i < p2SetWins ? C.cyan : 'rgba(255,255,255,0.18)'}`,
-                  boxShadow: i < p2SetWins ? `0 0 5px ${C.cyan}70` : 'none',
-                }} />
-              ))}
+              {curP2 != null ? curP2 : '–'}
             </div>
           </div>
+
+          {/* current set indicator (live only) */}
+          {!isCompleted && curSet && (
+            <div style={{ textAlign: 'right', marginTop: 2 }}>
+              <span style={{
+                fontSize: 9, fontWeight: 700, color: C.green,
+                letterSpacing: 0.5, textTransform: 'uppercase',
+              }}>▶ SET {currentIdx + 1}</span>
+            </div>
+          )}
         </div>
 
         {/* past sets strip (live) / all-sets recap (completed) */}

@@ -451,6 +451,11 @@ const startMatchHandler = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Match has already been started' });
     }
 
+    // Guard: cannot start without both players assigned
+    if (!match.player1Id || !match.player2Id) {
+      return res.status(400).json({ success: false, message: 'Cannot start match — both players must be assigned first.' });
+    }
+
     // ── Step 2: build score + fetch both players in parallel (2 queries) ──
     const now = new Date();
     const timer = {

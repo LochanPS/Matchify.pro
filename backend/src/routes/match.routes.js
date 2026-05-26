@@ -13,19 +13,110 @@ router.get('/umpire-matches', authenticate, getUmpireMatches);
 // GET /live — all in-progress matches (must be before /:matchId)
 router.get('/live', authenticate, async (req, res) => {
   try {
+    const { tournamentId, court, categoryId, city, state, format } = req.query;
+
+    const where = { status: 'IN_PROGRESS' };
+    if (tournamentId) where.tournamentId = tournamentId;
+    if (court)        where.courtNumber   = parseInt(court);
+    if (categoryId)   where.categoryId    = categoryId;
+
     const matches = await prisma.match.findMany({
-      where: { status: 'IN_PROGRESS' },
+      where,
       include: {
-        tournament: { select: { id: true, name: true } },
-        category:   { select: { id: true, name: true } },
+        tournament: { select: { id: true, name: true, city: true, state: true } },
+        category:   { select: { id: true, name: true, format: true } },
       },
       orderBy: { updatedAt: 'desc' },
       take: 50,
     });
-    const parsed = matches.map(m => ({
-      ...m,
-      score: m.scoreJson ? (() => { try { return JSON.parse(m.scoreJson); } catch { return null; } })() : null,
-    }));
+
+    // ── Batch-resolve player names ──────────────────────────────────────────
+    const regularPlayerIds  = new Set();
+    const guestRegistrationIds = new Set();
+
+    for (const m of matches) {
+      for (const id of [m.player1Id, m.player2Id]) {
+        if (!id) continue;
+        if (id.startsWith('guest-')) guestRegistrationIds.add(id.replace('guest-', ''));
+        else                          regularPlayerIds.add(id);
+      }
+    }
+
+    const [usersRaw, guestRegsRaw] = await Promise.all([
+      regularPlayerIds.size > 0
+        ? prisma.user.findMany({
+            where: { id: { in: [...regularPlayerIds] } },
+            select: { id: true, name: true },
+          })
+        : [],
+      guestRegistrationIds.size > 0
+        ? prisma.registration.findMany({
+            where: { id: { in: [...guestRegistrationIds] } },
+            select: { id: true, guestName: true },
+          })
+        : [],
+    ]);
+
+    const userMap  = Object.fromEntries(usersRaw.map(u => [u.id, u]));
+    const guestMap = Object.fromEntries(
+      guestRegsRaw.map(r => [`guest-${r.id}`, { id: `guest-${r.id}`, name: r.guestName || 'Guest' }])
+    );
+
+    // ── Partner names for doubles/mixed_doubles ─────────────────────────────
+    const doublesPlayerIds = [];
+    for (const m of matches) {
+      const fmt = m.category?.format?.toLowerCase();
+      if (fmt === 'doubles' || fmt === 'mixed_doubles') {
+        if (m.player1Id && !m.player1Id.startsWith('guest-')) doublesPlayerIds.push(m.player1Id);
+        if (m.player2Id && !m.player2Id.startsWith('guest-')) doublesPlayerIds.push(m.player2Id);
+      }
+    }
+
+    let partnerMap = {};
+    if (doublesPlayerIds.length > 0) {
+      const partnerRegs = await prisma.registration.findMany({
+        where: { userId: { in: [...new Set(doublesPlayerIds)] }, status: { in: ['confirmed', 'pending'] } },
+        include: { partner: { select: { id: true, name: true } } },
+      });
+      for (const r of partnerRegs) {
+        if (!partnerMap[r.userId]) {
+          const pName = r.partner?.name || r.guestPartnerName;
+          if (pName) partnerMap[r.userId] = pName;
+        }
+      }
+    }
+
+    const resolvePlayer = (id) => {
+      if (!id) return null;
+      if (id.startsWith('guest-')) return guestMap[id] || null;
+      const u = userMap[id];
+      if (!u) return null;
+      const partnerName = partnerMap[id];
+      return partnerName ? { ...u, partnerName } : u;
+    };
+
+    // ── Apply remaining filters + shape response ────────────────────────────
+    const parsed = matches
+      .filter(m => {
+        if (city   && m.tournament?.city?.toLowerCase()   !== city.toLowerCase())   return false;
+        if (state  && m.tournament?.state?.toLowerCase()  !== state.toLowerCase())  return false;
+        if (format && m.category?.format?.toLowerCase()   !== format.toLowerCase()) return false;
+        return true;
+      })
+      .map(m => ({
+        id:          m.id,
+        round:       m.round,
+        matchNumber: m.matchNumber,
+        courtNumber: m.courtNumber,
+        status:      m.status,
+        tournament:  m.tournament,
+        category:    m.category,
+        player1:     resolvePlayer(m.player1Id),
+        player2:     resolvePlayer(m.player2Id),
+        score:       m.scoreJson ? (() => { try { return JSON.parse(m.scoreJson); } catch { return null; } })() : null,
+        updatedAt:   m.updatedAt,
+      }));
+
     res.json({ success: true, matches: parsed });
   } catch (error) {
     console.error('Error fetching live matches:', error);

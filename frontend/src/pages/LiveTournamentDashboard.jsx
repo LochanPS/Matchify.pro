@@ -174,17 +174,25 @@ const LiveTournamentDashboard = () => {
                         Court {match.courtNumber}
                       </div>
                     )}
-                    {match.scoreJson && (
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Score</span>
-                        <span className="text-sm font-black" style={{ color: '#F59E0B' }}>
-                          {match.scoreJson.currentScore?.player1 || 0} — {match.scoreJson.currentScore?.player2 || 0}
-                        </span>
-                        {match.scoreJson.currentSet && (
-                          <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>Set {match.scoreJson.currentSet}</span>
-                        )}
-                      </div>
-                    )}
+                    {match.scoreJson && (() => {
+                      const sj = typeof match.scoreJson === 'string' ? (() => { try { return JSON.parse(match.scoreJson); } catch { return null; } })() : match.scoreJson;
+                      if (!sj) return null;
+                      const setIdx = sj.currentSet || 0;
+                      const setData = sj.sets?.[setIdx] || { player1: 0, player2: 0 };
+                      const p1 = sj.currentScore?.player1 ?? setData.player1 ?? 0;
+                      const p2 = sj.currentScore?.player2 ?? setData.player2 ?? 0;
+                      return (
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Score</span>
+                          <span className="text-sm font-black" style={{ color: '#F59E0B' }}>
+                            {p1} — {p2}
+                          </span>
+                          {sj.currentSet != null && (
+                            <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>Set {sj.currentSet + 1}</span>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </div>
 
                   {/* Watch button */}

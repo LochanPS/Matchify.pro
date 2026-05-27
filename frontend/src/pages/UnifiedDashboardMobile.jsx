@@ -40,6 +40,8 @@ const UnifiedDashboardMobile = () => {
   const [publishingId, setPublishingId] = useState(null);
   const [fetchError, setFetchError] = useState('');
   const [copied, setCopied] = useState(false);
+  const [umpireMatches, setUmpireMatches] = useState([]);
+  const [umpireMatchesLoading, setUmpireMatchesLoading] = useState(false);
 
   // Get user roles
   let userRoles = [];
@@ -117,7 +119,22 @@ const UnifiedDashboardMobile = () => {
     if (activeRole === 'ORGANIZER') {
       fetchMyTournaments();
     }
+    if (activeRole === 'UMPIRE') {
+      fetchUmpireMatches();
+    }
   }, [activeRole]);
+
+  const fetchUmpireMatches = async () => {
+    setUmpireMatchesLoading(true);
+    try {
+      const res = await api.get('/matches/umpire-matches');
+      setUmpireMatches(res.data.matches || []);
+    } catch (err) {
+      console.error('Error fetching umpire matches:', err);
+    } finally {
+      setUmpireMatchesLoading(false);
+    }
+  };
 
   const handlePublishTournament = async (tournamentId) => {
     setPublishingId(tournamentId);
@@ -890,6 +907,70 @@ const UnifiedDashboardMobile = () => {
                 <p className="text-3xl font-black mb-1 text-white">{user?.tournamentsUmpired || 0}</p>
                 <p className="text-xs" style={{ color: 'rgba(255,255,255,0.42)' }}>Tournaments</p>
               </div>
+            </div>
+
+            {/* Assigned Matches */}
+            <div className="mt-5">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-sm font-bold text-white">Assigned Matches</p>
+                {umpireMatchesLoading && (
+                  <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>Loading…</span>
+                )}
+              </div>
+              {!umpireMatchesLoading && umpireMatches.length === 0 && (
+                <div className="rounded-xl py-6 text-center" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                  <p className="text-sm" style={{ color: 'rgba(255,255,255,0.35)' }}>No matches assigned yet</p>
+                </div>
+              )}
+              {umpireMatches.map((match) => {
+                const isLive = match.status === 'IN_PROGRESS' || match.status === 'ONGOING';
+                const isDone = match.status === 'COMPLETED';
+                const accentColor = isLive ? '#F59E0B' : isDone ? '#34D399' : 'rgba(255,255,255,0.4)';
+                const isAssigned = match.umpireId;
+                return (
+                  <div
+                    key={match.id}
+                    onClick={() => navigate(`/match/${match.id}/conduct`)}
+                    className="mb-2 rounded-xl p-4 cursor-pointer"
+                    style={{
+                      background: 'rgba(255,255,255,0.04)',
+                      border: `1px solid ${isLive ? 'rgba(245,158,11,0.35)' : 'rgba(255,255,255,0.08)'}`,
+                      boxShadow: isLive ? '0 0 12px rgba(245,158,11,0.1)' : 'none'
+                    }}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-semibold" style={{ color: accentColor }}>
+                        {isLive ? '🟡 LIVE' : isDone ? '✅ Done' : isAssigned ? '⚖️ Assigned' : '🕐 Pending'}
+                      </span>
+                      <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                        {match.tournament?.name} · {match.category?.name}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-bold text-white">{match.player1?.name || 'TBD'}</p>
+                        <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>vs</p>
+                        <p className="text-sm font-bold text-white">{match.player2?.name || 'TBD'}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs mb-1" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                          R{match.round} · M{match.matchNumber}
+                        </p>
+                        <div
+                          className="px-3 py-1.5 rounded-lg text-xs font-bold"
+                          style={{
+                            background: isLive ? 'rgba(245,158,11,0.2)' : 'rgba(255,255,255,0.08)',
+                            color: isLive ? '#F59E0B' : 'rgba(255,255,255,0.6)',
+                            border: isLive ? '1px solid rgba(245,158,11,0.4)' : '1px solid rgba(255,255,255,0.1)'
+                          }}
+                        >
+                          {isLive ? 'Score Now →' : isDone ? 'View Result' : 'Open →'}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}

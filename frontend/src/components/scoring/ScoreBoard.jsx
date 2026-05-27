@@ -4,16 +4,25 @@ import { Trophy, Zap } from 'lucide-react';
 const ScoreBoard = ({ score, player1Name = 'Player 1', player2Name = 'Player 2', matchConfig }) => {
   if (!score) return null;
 
-  const { currentScore, currentServer, sets } = score;
+  const { currentServer, sets } = score;
   const config = matchConfig || score.matchConfig || { pointsPerSet: 21, setsToWin: 2, maxSets: 3 };
   const maxSets = config.maxSets || 3;
   const setsToWin = config.setsToWin || Math.ceil(maxSets / 2);
 
-  const player1Sets = sets?.filter(s => s.winner === 'player1').length || 0;
-  const player2Sets = sets?.filter(s => s.winner === 'player2').length || 0;
+  // Derive current score from sets array — MatchScoringPage writes sets[currentSet].player1/player2
+  // (no top-level currentScore field exists in the live score JSON)
+  const currentSetIdx = score.currentSet || 0;
+  const currentSetData = sets?.[currentSetIdx] || { player1: 0, player2: 0 };
+  const currentScore = score.currentScore || currentSetData; // backward compat if ever added
 
-  const p1Score = currentScore?.player1 || 0;
-  const p2Score = currentScore?.player2 || 0;
+  // Winners are stored as integers (1 or 2) by MatchScoringPage — handle both int and legacy string
+  const isP1Winner = (s) => s.winner === 1 || s.winner === 'player1';
+  const isP2Winner = (s) => s.winner === 2 || s.winner === 'player2';
+  const player1Sets = sets?.filter(isP1Winner).length || 0;
+  const player2Sets = sets?.filter(isP2Winner).length || 0;
+
+  const p1Score = currentScore?.player1 ?? 0;
+  const p2Score = currentScore?.player2 ?? 0;
   const p1Leading = p1Score > p2Score;
   const p2Leading = p2Score > p1Score;
 
@@ -188,12 +197,12 @@ const ScoreBoard = ({ score, player1Name = 'Player 1', player2Name = 'Player 2',
                   Set {set.setNumber}
                 </p>
                 <p style={{ fontSize: 18, fontWeight: 700, color: '#fff', fontVariantNumeric: 'tabular-nums' }}>
-                  <span style={{ color: set.winner === 'player1' ? '#FCD34D' : 'rgba(255,255,255,0.5)' }}>{set.score.player1}</span>
+                  <span style={{ color: isP1Winner(set) ? '#FCD34D' : 'rgba(255,255,255,0.5)' }}>{set.player1 ?? set.score?.player1 ?? 0}</span>
                   <span style={{ color: 'rgba(255,255,255,0.2)', margin: '0 4px' }}>–</span>
-                  <span style={{ color: set.winner === 'player2' ? '#C4B5FD' : 'rgba(255,255,255,0.5)' }}>{set.score.player2}</span>
+                  <span style={{ color: isP2Winner(set) ? '#C4B5FD' : 'rgba(255,255,255,0.5)' }}>{set.player2 ?? set.score?.player2 ?? 0}</span>
                 </p>
                 <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 3 }}>
-                  {set.winner === 'player1' ? '🟡' : '🟣'} {set.winner === 'player1' ? player1Name.split(' ')[0] : player2Name.split(' ')[0]}
+                  {isP1Winner(set) ? '🟡' : '🟣'} {isP1Winner(set) ? player1Name.split(' ')[0] : player2Name.split(' ')[0]}
                 </p>
               </div>
             ))}

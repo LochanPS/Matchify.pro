@@ -105,7 +105,7 @@ const LiveMatchDetail = () => {
       {/* Sticky Header */}
       <div className="sticky top-0 z-20" style={{ background: 'rgba(7,7,26,0.95)', borderBottom: '1px solid rgba(245,158,11,0.15)', backdropFilter: 'blur(20px)' }}>
         <div className="px-4 py-3 flex items-center justify-between gap-3">
-          <button onClick={() => navigate('/live-matches')} className="flex items-center gap-1.5 text-sm font-medium" style={{ color: 'rgba(255,255,255,0.6)' }}>
+          <button onClick={() => navigate('/matches/live')} className="flex items-center gap-1.5 text-sm font-medium" style={{ color: 'rgba(255,255,255,0.6)' }}>
             <ArrowLeft className="w-4 h-4" /> Back
           </button>
 
@@ -183,8 +183,11 @@ const MatchInfo = ({ match, duration }) => {
 };
 
 const Scoreboard = ({ match }) => {
-  const score = match.score || { sets: [], currentScore: { player1: 0, player2: 0 }, currentSet: 1 };
-  const currentScore = score.currentScore || { player1: 0, player2: 0 };
+  const score = match.score || { sets: [], currentSet: 0 };
+  // MatchScoringPage stores score in sets[currentSet].player1/player2 — no top-level currentScore
+  const currentSetIdx = score.currentSet || 0;
+  const currentSetData = score.sets?.[currentSetIdx] || { player1: 0, player2: 0 };
+  const currentScore = score.currentScore || currentSetData;
 
   return (
     <div className="rounded-2xl p-5 relative overflow-hidden" style={{ background: 'linear-gradient(135deg,rgba(245,158,11,0.15),rgba(245,158,11,0.1))', border: '1px solid rgba(245,158,11,0.3)' }}>
@@ -225,9 +228,9 @@ const SetScores = ({ score }) => {
           <div key={i} className="text-center">
             <p className="text-xs mb-1.5" style={{ color: 'rgba(255,255,255,0.4)' }}>Set {i + 1}</p>
             <div className="px-4 py-2 rounded-xl" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)' }}>
-              <div className="text-xl font-black text-white">{set.score?.player1 || 0}</div>
+              <div className="text-xl font-black text-white">{set.player1 ?? set.score?.player1 ?? 0}</div>
               <div className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>—</div>
-              <div className="text-xl font-black text-white">{set.score?.player2 || 0}</div>
+              <div className="text-xl font-black text-white">{set.player2 ?? set.score?.player2 ?? 0}</div>
             </div>
           </div>
         ))}

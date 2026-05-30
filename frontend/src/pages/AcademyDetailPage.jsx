@@ -109,16 +109,78 @@ export default function AcademyDetailPage() {
   // ── share ──────────────────────────────────────────────────────────────────
   const handleShare = async () => {
     const url = window.location.href;
-    const title = academy?.name || 'Academy on Matchify';
-    const text = `Check out ${title} on Matchify.pro!`;
+    const a = academy;
+    const D = '──────────────────────';
+
+    const sportEmojis = { Badminton: '🏸', Tennis: '🎾', 'Table Tennis': '🏓', Squash: '🎱',
+      Basketball: '🏀', Volleyball: '🏐', Swimming: '🏊', Cricket: '🏏',
+      Football: '⚽', Gym: '💪', Yoga: '🧘', Athletics: '🏃' };
+    const sportUnits = { Badminton: 'Courts', Tennis: 'Courts', 'Table Tennis': 'Tables', Squash: 'Courts',
+      Basketball: 'Courts', Volleyball: 'Courts' };
+
+    const lines = [];
+
+    // Header
+    lines.push('🏆 *MATCHIFY.PRO PRESENTS*');
+    lines.push(D);
+    lines.push(`*${a.name}*${a.isVerified ? ' ✅' : ''}`);
+    if (a.type) lines.push(`_${a.type}_`);
+    lines.push(D);
+
+    // Location
+    const locationParts = [a.address, a.city, a.state, a.pincode].filter(Boolean);
+    if (locationParts.length) lines.push(`📍 ${locationParts.join(', ')}`);
+
+    // Hours
+    if (a.openingHours) lines.push(`🕐 ${a.openingHours}`);
+
+    if (locationParts.length || a.openingHours) lines.push(D);
+
+    // Sports & facilities
+    const sports = a.sports || [];
+    if (sports.length) {
+      sports.forEach(sport => {
+        const emoji = sportEmojis[sport] || '🎯';
+        const detail = a.sportDetails?.[sport];
+        const unit = sportUnits[sport];
+        const courtInfo = detail && unit && /^\d+$/.test(String(detail).trim())
+          ? ` — ${detail} ${unit}` : detail ? ` — ${detail}` : '';
+        lines.push(`${emoji} ${sport}${courtInfo}`);
+      });
+      lines.push(D);
+    }
+
+    // Amenities — top 6 only to keep message compact
+    const amenities = a.amenities || [];
+    const amenityLabels = { parking: '🅿️ Parking', changing_room: '🚿 Changing Rooms',
+      water: '💧 Water', cafeteria: '🍽️ Cafeteria', ac: '❄️ AC Courts',
+      shuttle_shop: '🛍️ Shuttle Shop', first_aid: '🩺 First Aid',
+      wifi: '📶 WiFi', spectator: '👥 Spectator Seating', coaching: '🏆 Coaching' };
+    const amenityLine = amenities.slice(0, 6).map(k => amenityLabels[k] || k).join(' · ');
+    if (amenityLine) { lines.push(`✨ ${amenityLine}`); lines.push(D); }
+
+    // Contact
+    if (a.phone)     lines.push(`📞 ${a.phone}`);
+    if (a.email)     lines.push(`✉️ ${a.email}`);
+    if (a.website)   lines.push(`🌐 ${a.website.replace(/^https?:\/\//, '')}`);
+    if (a.instagram) lines.push(`📸 @${a.instagram}`);
+    if (a.phone || a.email || a.website || a.instagram) lines.push(D);
+
+    // Link
+    lines.push(`🔗 ${url}`);
+    lines.push(D);
+    lines.push('🌐 www.matchify.pro');
+
+    const title = `${a.name} — Matchify.pro`;
+    const text = lines.join('\n');
+
     if (navigator.share) {
       try { await navigator.share({ title, text, url }); return; } catch {}
     }
-    try {
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {}
+    // Fallback: WhatsApp
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   if (loading) {

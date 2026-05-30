@@ -120,56 +120,53 @@ export default function AcademyDetailPage() {
 
     const lines = [];
 
-    // Header
-    lines.push('🏆 *MATCHIFY.PRO PRESENTS*');
+    // Header — clearly an academy intro
+    lines.push(`*🏫 SPORTS ACADEMY — MATCHIFY.PRO*`);
     lines.push(D);
-    lines.push(`*${a.name}*${a.isVerified ? ' ✅' : ''}`);
-    if (a.type) lines.push(`_${a.type}_`);
+    lines.push(`*${a.name}*${a.isVerified ? ' ✅ Verified' : ''}`);
+    if (a.type) lines.push(a.type);
     lines.push(D);
 
-    // Location
+    // Location & hours
     const locationParts = [a.address, a.city, a.state, a.pincode].filter(Boolean);
     if (locationParts.length) lines.push(`📍 ${locationParts.join(', ')}`);
-
-    // Hours
-    if (a.openingHours) lines.push(`🕐 ${a.openingHours}`);
-
+    if (a.openingHours) lines.push(`Hours: ${a.openingHours}`);
     if (locationParts.length || a.openingHours) lines.push(D);
 
     // Sports & facilities
     const sports = a.sports || [];
     if (sports.length) {
-      sports.forEach(sport => {
-        const emoji = sportEmojis[sport] || '🎯';
+      const sportLabel = sports.map(sport => {
+        const emoji = sportEmojis[sport] || '';
         const detail = a.sportDetails?.[sport];
         const unit = sportUnits[sport];
         const courtInfo = detail && unit && /^\d+$/.test(String(detail).trim())
-          ? ` — ${detail} ${unit}` : detail ? ` — ${detail}` : '';
-        lines.push(`${emoji} ${sport}${courtInfo}`);
-      });
+          ? ` (${detail} ${unit})` : detail ? ` (${detail})` : '';
+        return `${emoji} ${sport}${courtInfo}`.trim();
+      }).join('\n');
+      lines.push(sportLabel);
       lines.push(D);
     }
 
-    // Amenities — top 6 only to keep message compact
+    // Amenities — plain text, no per-item emojis
     const amenities = a.amenities || [];
-    const amenityLabels = { parking: '🅿️ Parking', changing_room: '🚿 Changing Rooms',
-      water: '💧 Water', cafeteria: '🍽️ Cafeteria', ac: '❄️ AC Courts',
-      shuttle_shop: '🛍️ Shuttle Shop', first_aid: '🩺 First Aid',
-      wifi: '📶 WiFi', spectator: '👥 Spectator Seating', coaching: '🏆 Coaching' };
+    const amenityLabels = { parking: 'Parking', changing_room: 'Changing Rooms',
+      water: 'Water Dispenser', cafeteria: 'Cafeteria', ac: 'AC Courts',
+      shuttle_shop: 'Shuttle Shop', first_aid: 'First Aid',
+      wifi: 'WiFi', spectator: 'Spectator Seating', coaching: 'Coaching Available' };
     const amenityLine = amenities.slice(0, 6).map(k => amenityLabels[k] || k).join(' · ');
-    if (amenityLine) { lines.push(`✨ ${amenityLine}`); lines.push(D); }
+    if (amenityLine) { lines.push(`Facilities: ${amenityLine}`); lines.push(D); }
 
     // Contact
-    if (a.phone)     lines.push(`📞 ${a.phone}`);
-    if (a.email)     lines.push(`✉️ ${a.email}`);
-    if (a.website)   lines.push(`🌐 ${a.website.replace(/^https?:\/\//, '')}`);
-    if (a.instagram) lines.push(`📸 @${a.instagram}`);
+    if (a.phone)     lines.push(`Phone: ${a.phone}`);
+    if (a.email)     lines.push(`Email: ${a.email}`);
+    if (a.website)   lines.push(`Web: ${a.website.replace(/^https?:\/\//, '')}`);
+    if (a.instagram) lines.push(`Instagram: @${a.instagram}`);
     if (a.phone || a.email || a.website || a.instagram) lines.push(D);
 
     // Link
-    lines.push(`🔗 ${url}`);
-    lines.push(D);
-    lines.push('🌐 www.matchify.pro');
+    lines.push(`View academy: ${url}`);
+    lines.push('www.matchify.pro');
 
     const title = `${a.name} — Matchify.pro`;
     const text = lines.join('\n');

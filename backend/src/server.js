@@ -211,54 +211,40 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Compression middleware
 app.use(compression());
 
-// Rate limiting - Prevent brute force attacks
+// express-rate-limit v8: trustProxy removed (use app.set instead), ipKeyGenerator for IPv6
+import { ipKeyGenerator } from 'express-rate-limit';
+app.set('trust proxy', 1); // Trust first proxy (Railway/Vercel)
+
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 1000, // Increased limit for normal operations
+  windowMs: 15 * 60 * 1000,
+  max: 1000,
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
-  // Trust proxy for Vercel deployment
-  trustProxy: true,
-  // Use X-Forwarded-For header for IP tracking
-  keyGenerator: (req) => {
-    return req.headers['x-forwarded-for']?.split(',')[0] || req.ip || 'unknown';
-  },
+  keyGenerator: (req) => ipKeyGenerator(req.headers['x-forwarded-for']?.split(',')[0] || req.ip || '::1'),
 });
 
-// Apply rate limiting to all routes
 app.use(limiter);
 
-// Apply additional security middlewares
 app.use(securityHeaders);
 app.use(sanitizeInput);
 app.use(preventParameterPollution);
 app.use(validateTokenFormat);
 app.use(logSuspiciousActivity);
 
-// More reasonable rate limiting for auth routes
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 20, // Allow 20 attempts per 15 minutes (more reasonable)
+  windowMs: 15 * 60 * 1000,
+  max: 20,
   message: 'Too many login attempts, please try again after 15 minutes.',
   skipSuccessfulRequests: true,
-  // Trust proxy for Vercel deployment
-  trustProxy: true,
-  // Use X-Forwarded-For header for IP tracking
-  keyGenerator: (req) => {
-    return req.headers['x-forwarded-for']?.split(',')[0] || req.ip || 'unknown';
-  },
+  keyGenerator: (req) => ipKeyGenerator(req.headers['x-forwarded-for']?.split(',')[0] || req.ip || '::1'),
 });
 
-// Strict rate limiting for admin routes — prevents brute-force on admin panel
 const adminLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Much stricter than the 1000/15min global limit
+  windowMs: 15 * 60 * 1000,
+  max: 100,
   message: 'Too many admin requests from this IP, please try again later.',
-  trustProxy: true,
-  keyGenerator: (req) => {
-    return req.headers['x-forwarded-for']?.split(',')[0] || req.ip || 'unknown';
-  },
+  keyGenerator: (req) => ipKeyGenerator(req.headers['x-forwarded-for']?.split(',')[0] || req.ip || '::1'),
 });
 
 // Static file serving for uploads

@@ -48,15 +48,15 @@ class NotificationService {
         },
       });
 
-      // 2. Enforce 15-notification limit — delete oldest beyond cap
+      // 2. Enforce 15-notification limit (WELCOME is permanent — never counted or deleted)
       const MAX_NOTIFICATIONS = 15;
-      const allIds = await prisma.notification.findMany({
-        where: { userId },
+      const nonWelcomeIds = await prisma.notification.findMany({
+        where: { userId, type: { not: 'WELCOME' } },
         orderBy: { createdAt: 'desc' },
         select: { id: true },
       });
-      if (allIds.length > MAX_NOTIFICATIONS) {
-        const toDelete = allIds.slice(MAX_NOTIFICATIONS).map(n => n.id);
+      if (nonWelcomeIds.length > MAX_NOTIFICATIONS) {
+        const toDelete = nonWelcomeIds.slice(MAX_NOTIFICATIONS).map(n => n.id);
         await prisma.notification.deleteMany({ where: { id: { in: toDelete } } });
       }
 

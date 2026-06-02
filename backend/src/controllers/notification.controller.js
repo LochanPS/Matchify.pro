@@ -8,7 +8,7 @@ const getNotifications = async (req, res) => {
 
     const notifications = await getUserNotifications(userId, {
       unreadOnly: unreadOnly === 'true',
-      limit: 15, // Hard cap at 15 — oldest are auto-deleted on new notification
+      limit: 15, // 15 non-welcome notifications + 1 permanent welcome = 16 max shown
     });
 
     const unreadCount = notifications.filter((n) => !n.read).length;

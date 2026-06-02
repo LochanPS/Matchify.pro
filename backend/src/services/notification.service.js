@@ -158,20 +158,29 @@ const notifyPartnerDeclined = async ({ registration, partnerName }) => {
 };
 
 // Get user notifications
-const getUserNotifications = async (userId, { unreadOnly = false, limit = 50 } = {}) => {
+const getUserNotifications = async (userId, { unreadOnly = false, limit = 15 } = {}) => {
   try {
-    const where = { userId };
-    if (unreadOnly) {
-      where.read = false;
-    }
+    // Fetch welcome notification separately (always pinned, never excluded)
+    const [welcome, rest] = await Promise.all([
+      prisma.notification.findFirst({
+        where: { userId, type: 'WELCOME' },
+      }),
+      prisma.notification.findMany({
+        where: {
+          userId,
+          type: { not: 'WELCOME' },
+          ...(unreadOnly ? { read: false } : {}),
+        },
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+      }),
+    ]);
 
-    const notifications = await prisma.notification.findMany({
-      where,
-      orderBy: { createdAt: 'desc' },
-      take: limit,
-    });
-
-    return notifications;
+    // Welcome always first, rest follow newest→oldest
+    const result = [];
+    if (welcome) result.push(welcome);
+    result.push(...rest);
+    return result;
   } catch (error) {
     console.error('Get notifications error:', error);
     return [];

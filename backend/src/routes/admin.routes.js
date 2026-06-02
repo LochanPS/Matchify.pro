@@ -458,4 +458,67 @@ router.post('/users/:id/unsuspend', authenticate, requireAdmin, AdminController.
 // Dashboard stats
 router.get('/stats', authenticate, requireAdmin, AdminController.getStats);
 
+// POST /api/admin/send-welcome-all — one-time backfill welcome notification to all existing users
+router.post('/send-welcome-all', authenticate, requireAdmin, async (req, res) => {
+  try {
+    const WELCOME_MESSAGE = `Welcome to Matchify.pro! We're glad to have you here.
+
+Matchify.pro is your all-in-one badminton tournament platform — discover tournaments near you, register with ease, track live scores, and climb the national leaderboard.
+
+Here's what you can do:
+• Find & register for tournaments
+• Track live match scores
+• View your ranking & stats
+• Manage your player profile
+
+━━━━━━━━━━━━━━━━━━━━━━
+
+📱 Join the Matchify WhatsApp Community
+
+Stay ahead with tournament announcements, connect with players across India, and never miss an update. Our community is the best place to find partners, discuss matches, and get notified first.
+
+👉 https://chat.whatsapp.com/HN0UZeXeCMa93IFPfpi9T6
+
+See you on the court!
+— Team Matchify.pro`;
+
+    // Find users who don't already have a WELCOME notification
+    const usersWithWelcome = await prisma.notification.findMany({
+      where: { type: 'WELCOME' },
+      select: { userId: true },
+      distinct: ['userId'],
+    });
+    const alreadyWelcomed = new Set(usersWithWelcome.map(n => n.userId));
+
+    const allUsers = await prisma.user.findMany({
+      where: { isActive: true },
+      select: { id: true },
+    });
+
+    const toNotify = allUsers.filter(u => !alreadyWelcomed.has(u.id));
+
+    // Batch create in chunks of 50
+    let sent = 0;
+    const CHUNK = 50;
+    for (let i = 0; i < toNotify.length; i += CHUNK) {
+      const chunk = toNotify.slice(i, i + CHUNK);
+      await prisma.notification.createMany({
+        data: chunk.map(u => ({
+          userId: u.id,
+          type: 'WELCOME',
+          title: '👋 Welcome to Matchify.pro!',
+          message: WELCOME_MESSAGE,
+        })),
+        skipDuplicates: true,
+      });
+      sent += chunk.length;
+    }
+
+    res.json({ success: true, sent, skipped: alreadyWelcomed.size });
+  } catch (error) {
+    console.error('Send welcome all error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 export default router;

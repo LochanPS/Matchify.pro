@@ -9,6 +9,27 @@ import {
 } from '../utils/jwt.js';
 import { generateMatchifyCode } from '../utils/matchifyCode.js';
 
+const WELCOME_MESSAGE = `Welcome to Matchify.pro! We're glad to have you here.
+
+Matchify.pro is your all-in-one badminton tournament platform — discover tournaments near you, register with ease, track live scores, and climb the national leaderboard.
+
+Here's what you can do:
+• Find & register for tournaments
+• Track live match scores
+• View your ranking & stats
+• Manage your player profile
+
+━━━━━━━━━━━━━━━━━━━━━━
+
+📱 Join the Matchify WhatsApp Community
+
+Stay ahead with tournament announcements, connect with players across India, and never miss an update. Our community is the best place to find partners, discuss matches, and get notified first.
+
+👉 https://chat.whatsapp.com/HN0UZeXeCMa93IFPfpi9T6
+
+See you on the court!
+— Team Matchify.pro`;
+
 const router = express.Router();
 
 // POST /auth/register
@@ -138,6 +159,16 @@ router.post('/register', async (req, res) => {
     if (userWithoutPassword.email?.endsWith('@noemail.matchify.internal')) {
       userWithoutPassword.email = null;
     }
+
+    // Send welcome notification (fire-and-forget — don't block response)
+    prisma.notification.create({
+      data: {
+        userId: user.id,
+        type: 'WELCOME',
+        title: '👋 Welcome to Matchify.pro!',
+        message: WELCOME_MESSAGE,
+      }
+    }).catch(err => console.error('Welcome notification error:', err));
 
     res.status(201).json({
       message: 'User registered successfully',

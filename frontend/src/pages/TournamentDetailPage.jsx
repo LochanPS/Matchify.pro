@@ -867,17 +867,29 @@ const TournamentDetailPage = () => {
               </div>
             </div>
 
-            {/* Categories - Compact */}
-            <div className="rounded-xl p-4 border" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}>
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 bg-gradient-to-br from-amber-400 to-orange-500 rounded-lg flex items-center justify-center">
+            {/* Categories */}
+            <div className="rounded-xl border" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}>
+              <div className="flex items-center gap-2 px-4 pt-4 pb-3">
+                <div className="w-8 h-8 bg-gradient-to-br from-amber-400 to-orange-500 rounded-lg flex items-center justify-center flex-shrink-0">
                   <TrophyIcon className="w-4 h-4 text-white" />
                 </div>
                 <h2 className="text-base font-bold text-white">Categories</h2>
+                <span className="ml-auto text-xs font-medium px-2 py-0.5 rounded-full" style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)' }}>
+                  {tournament.categories?.length || 0}
+                </span>
               </div>
-              
+
               {tournament.categories && tournament.categories.length > 0 ? (
-                <div className="flex gap-3 overflow-x-auto pb-2" style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}>
+                <div
+                  className="flex gap-3 overflow-x-auto"
+                  style={{
+                    scrollSnapType: 'x mandatory',
+                    WebkitOverflowScrolling: 'touch',
+                    paddingLeft: 16,
+                    paddingRight: 16,
+                    paddingBottom: 16,
+                  }}
+                >
                   {tournament.categories.map((category) => {
                     // Parse scoring format for display
                     const getScoringDisplay = () => {
@@ -913,123 +925,106 @@ const TournamentDetailPage = () => {
                     return (
                     <div
                       key={category.id}
-                      className="rounded-xl p-4 border transition-all flex-shrink-0 flex flex-col"
-                      style={{ background: 'rgba(0,0,0,0.2)', borderColor: 'rgba(255,255,255,0.08)', width: '260px', scrollSnapAlign: 'start' }}
+                      className="flex-shrink-0 flex flex-col rounded-2xl overflow-hidden"
+                      style={{
+                        width: '240px',
+                        scrollSnapAlign: 'start',
+                        background: 'linear-gradient(145deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.03) 100%)',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                      }}
                     >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-bold text-white text-sm mb-2 leading-snug">
-                            {category.name}
-                          </h3>
-                          <div className="flex flex-wrap gap-1.5 mb-2">
-                            <span className="px-2 py-0.5 rounded-full text-xs font-medium border" style={{ background: 'rgba(245,158,11,0.12)', color: '#F59E0B', borderColor: 'rgba(245,158,11,0.3)' }}>
-                              {category.format}
-                            </span>
-                            <span className="px-2 py-0.5 rounded-full text-xs font-medium border" style={{ background: 'rgba(139,92,246,0.12)', color: '#C4B5FD', borderColor: 'rgba(139,92,246,0.3)' }}>
-                              {getGenderLabel(category.gender)}
-                            </span>
-                            {category.ageGroup && (
-                              <span className="px-2 py-0.5 rounded-full text-xs font-medium border" style={{ background: 'rgba(245,158,11,0.12)', color: '#FCD34D', borderColor: 'rgba(245,158,11,0.3)' }}>
-                                {category.ageGroup}
-                              </span>
-                            )}
-                            {category.maxParticipants && (
-                              <span className="px-2 py-0.5 rounded-full text-xs font-medium border" style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.6)', borderColor: 'rgba(255,255,255,0.12)' }}>
-                                Max {category.maxParticipants}
-                              </span>
-                            )}
+                      {/* Card top — name + fee */}
+                      <div className="px-4 pt-4 pb-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+                        <h3 className="font-black text-white text-sm leading-snug mb-2">
+                          {category.name}
+                        </h3>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-0.5">
+                            <CurrencyRupeeIcon className="h-4 w-4 text-amber-400" />
+                            <span className="text-lg font-black text-amber-400">{category.entryFee}</span>
                           </div>
-                          
-                          {/* Tournament Format & Scoring Info - Compact */}
-                          <div className="mt-2 pt-2 border-t border-white/10">
-                            <div className="flex flex-wrap gap-2 text-xs">
-                              {/* Tournament Format */}
-                              <div className="flex items-center gap-1">
-                                <span className="px-2 py-0.5 rounded-lg text-xs font-bold border"
-                                  style={{
-                                    background: formatInfo.color === 'amber' ? 'rgba(251,191,36,0.12)' : formatInfo.color === 'purple' ? 'rgba(168,85,247,0.12)' : 'rgba(245,158,11,0.12)',
-                                    color: formatInfo.color === 'amber' ? '#fbbf24' : formatInfo.color === 'purple' ? '#a855f7' : '#F59E0B',
-                                    borderColor: formatInfo.color === 'amber' ? 'rgba(251,191,36,0.3)' : formatInfo.color === 'purple' ? 'rgba(168,85,247,0.3)' : 'rgba(245,158,11,0.3)',
-                                  }}>
-                                  {formatInfo.icon} {formatInfo.label}
-                                </span>
-                              </div>
-                              {/* Scoring Format */}
-                              <div className="flex items-center gap-1" style={{ color: 'rgba(255,255,255,0.45)' }}>
-                                <span className="text-xs">🎯</span>
-                                <span className="text-xs font-medium">{scoring.points} pts × {scoring.sets} {parseInt(scoring.sets) === 1 ? 'set' : 'sets'}</span>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          {(category.prizeWinner || category.prizeRunnerUp || category.prizeSemiFinalist) && (
-                            <div className="mt-2 pt-2 border-t border-white/10">
-                              <div className="flex items-center gap-1 mb-1">
-                                <SparklesIcon className="w-3 h-3 text-amber-400" />
-                                <span className="text-xs font-bold text-amber-400">Cash Prize</span>
-                              </div>
-                              <div className="flex flex-wrap gap-2 text-xs">
-                                {category.prizeWinner && (
-                                  <span className="font-medium" style={{ color: '#F59E0B' }}>🥇 ₹{category.prizeWinner}</span>
-                                )}
-                                {category.prizeRunnerUp && (
-                                  <span className="font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>🥈 ₹{category.prizeRunnerUp}</span>
-                                )}
-                                {category.prizeSemiFinalist && (
-                                  <span className="text-orange-400 font-medium">🥉 ₹{category.prizeSemiFinalist}</span>
-                                )}
-                              </div>
-                              {category.prizeDescription && (
-                                <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.35)' }}>+ {category.prizeDescription}</p>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                        <div className="text-right flex-shrink-0">
-                          <div className="flex items-center gap-0.5 text-xl font-bold text-white">
-                            <CurrencyRupeeIcon className="h-5 w-5" />
-                            {category.entryFee}
-                          </div>
-                          <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.45)' }}>
-                            {category.registrationCount || 0} registered
-                          </p>
+                          <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={{ background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.5)' }}>
+                            {category.registrationCount || 0} joined
+                          </span>
                         </div>
                       </div>
-                      {category.maxParticipants && (
-                        <div className="mt-2">
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>
-                              {category.registrationCount || 0}/{category.maxParticipants} spots filled
+
+                      {/* Card body — tags + format + scoring */}
+                      <div className="px-4 py-3 flex-1 space-y-2">
+                        {/* Type + gender badges */}
+                        <div className="flex flex-wrap gap-1.5">
+                          <span className="px-2 py-0.5 rounded-full text-xs font-semibold" style={{ background: 'rgba(245,158,11,0.15)', color: '#F59E0B' }}>
+                            {category.format}
+                          </span>
+                          <span className="px-2 py-0.5 rounded-full text-xs font-semibold" style={{ background: 'rgba(139,92,246,0.15)', color: '#C4B5FD' }}>
+                            {getGenderLabel(category.gender)}
+                          </span>
+                          {category.ageGroup && (
+                            <span className="px-2 py-0.5 rounded-full text-xs font-semibold" style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.6)' }}>
+                              {category.ageGroup}
                             </span>
-                            <span className="text-xs font-bold"
-                              style={{ color: (category.maxParticipants - (category.registrationCount || 0)) <= 5 ? '#ef4444' : '#F59E0B' }}>
-                              {Math.max(0, category.maxParticipants - (category.registrationCount || 0))} left
-                            </span>
-                          </div>
-                          <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)' }}>
-                            <div className="h-full rounded-full transition-all"
-                              style={{
-                                width: `${Math.min(100, ((category.registrationCount || 0) / category.maxParticipants) * 100)}%`,
-                                background: ((category.registrationCount || 0) / category.maxParticipants) > 0.8
-                                  ? 'linear-gradient(90deg,#ef4444,#dc2626)'
-                                  : 'linear-gradient(90deg,#F59E0B,#F59E0B)'
-                              }} />
-                          </div>
+                          )}
                         </div>
-                      )}
-                      {/* View Draw button */}
-                      <button
-                        onClick={() => navigate(`/tournaments/${id}/draws/${category.id}`)}
-                        className="mt-3 w-full py-2 rounded-lg text-xs font-bold transition-all active:scale-95 flex items-center justify-center gap-1.5"
-                        style={{
-                          background: 'rgba(245,158,11,0.12)',
-                          border: '1px solid rgba(245,158,11,0.3)',
-                          color: '#F59E0B',
-                        }}
-                      >
-                        <TrophyIcon className="w-3.5 h-3.5" />
-                        View Draw
-                      </button>
+
+                        {/* Tournament format */}
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-sm">{formatInfo.icon}</span>
+                          <span className="text-xs font-bold" style={{
+                            color: formatInfo.color === 'amber' ? '#fbbf24' : formatInfo.color === 'purple' ? '#a855f7' : '#10b981'
+                          }}>
+                            {formatInfo.label}
+                          </span>
+                        </div>
+
+                        {/* Scoring */}
+                        <div className="flex items-center gap-1.5" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                          <span className="text-xs">🎯</span>
+                          <span className="text-xs">{scoring.points} pts × {scoring.sets} {parseInt(scoring.sets) === 1 ? 'set' : 'sets'}</span>
+                        </div>
+
+                        {/* Prize */}
+                        {(category.prizeWinner || category.prizeRunnerUp) && (
+                          <div className="flex items-center gap-2 text-xs">
+                            {category.prizeWinner && <span style={{ color: '#F59E0B' }}>🥇 ₹{category.prizeWinner}</span>}
+                            {category.prizeRunnerUp && <span style={{ color: 'rgba(255,255,255,0.55)' }}>🥈 ₹{category.prizeRunnerUp}</span>}
+                          </div>
+                        )}
+
+                        {/* Progress bar */}
+                        {category.maxParticipants && (
+                          <div>
+                            <div className="flex justify-between text-xs mb-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                              <span>{category.registrationCount || 0}/{category.maxParticipants}</span>
+                              <span style={{ color: (category.maxParticipants - (category.registrationCount || 0)) <= 5 ? '#ef4444' : 'rgba(255,255,255,0.4)' }}>
+                                {Math.max(0, category.maxParticipants - (category.registrationCount || 0))} left
+                              </span>
+                            </div>
+                            <div className="h-1 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.08)' }}>
+                              <div className="h-full rounded-full"
+                                style={{
+                                  width: `${Math.min(100, ((category.registrationCount || 0) / category.maxParticipants) * 100)}%`,
+                                  background: ((category.registrationCount || 0) / category.maxParticipants) > 0.8 ? '#ef4444' : '#F59E0B'
+                                }} />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* View Draw button — pinned to bottom */}
+                      <div className="px-4 pb-4">
+                        <button
+                          onClick={() => navigate(`/tournaments/${id}/draws/${category.id}`)}
+                          className="w-full py-2.5 rounded-xl text-xs font-black transition-all active:scale-95 flex items-center justify-center gap-2"
+                          style={{
+                            background: 'linear-gradient(135deg, rgba(245,158,11,0.2), rgba(245,158,11,0.1))',
+                            border: '1px solid rgba(245,158,11,0.4)',
+                            color: '#F59E0B',
+                          }}
+                        >
+                          <TrophyIcon className="w-3.5 h-3.5" />
+                          View Draw
+                        </button>
+                      </div>
                     </div>
                     );
                   })}

@@ -914,11 +914,11 @@ const TournamentDetailPage = () => {
                     <div
                       key={category.id}
                       className="rounded-xl p-4 border transition-all flex-shrink-0 flex flex-col"
-                      style={{ background: 'rgba(0,0,0,0.2)', borderColor: 'rgba(255,255,255,0.08)', width: '220px', scrollSnapAlign: 'start' }}
+                      style={{ background: 'rgba(0,0,0,0.2)', borderColor: 'rgba(255,255,255,0.08)', width: '260px', scrollSnapAlign: 'start' }}
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-bold text-white text-base mb-2 truncate">
+                          <h3 className="font-bold text-white text-sm mb-2 leading-snug">
                             {category.name}
                           </h3>
                           <div className="flex flex-wrap gap-1.5 mb-2">

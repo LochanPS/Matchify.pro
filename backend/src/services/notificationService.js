@@ -48,13 +48,22 @@ class NotificationService {
         },
       });
 
-      // 2. Send email notification (if enabled)
+      // 2. Enforce 15-notification limit — delete oldest beyond cap
+      const MAX_NOTIFICATIONS = 15;
+      const allIds = await prisma.notification.findMany({
+        where: { userId },
+        orderBy: { createdAt: 'desc' },
+        select: { id: true },
+      });
+      if (allIds.length > MAX_NOTIFICATIONS) {
+        const toDelete = allIds.slice(MAX_NOTIFICATIONS).map(n => n.id);
+        await prisma.notification.deleteMany({ where: { id: { in: toDelete } } });
+      }
+
+      // 3. Send email notification (if enabled)
       if (sendEmail && notification.user.email) {
         await this.sendEmailNotification(notification, data);
       }
-
-      // TODO: Emit WebSocket event for real-time notification
-      // this.emitNotification(userId, notification);
 
       return notification;
     } catch (error) {

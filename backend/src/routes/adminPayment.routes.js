@@ -534,18 +534,44 @@ router.get('/monthly-report', authenticate, requireAdmin, async (req, res) => {
 // GET /api/admin/payment/export-csv - Export payment data as CSV
 router.get('/export-csv', authenticate, requireAdmin, async (req, res) => {
   try {
-    const { startDate, endDate, type } = req.query;
-    
-    // Generate CSV content based on parameters
-    let csvContent = 'Date,Time,Type,Player/Organizer,Tournament,Amount,Status,Notes\n';
-    
-    // This would fetch actual data from database
-    // For now, returning sample data
+    const { startDate, endDate } = req.query;
     const today = new Date().toISOString().split('T')[0];
-    csvContent += `${today},10:30,RECEIVED,Rahul Kumar,Bangalore Open,1000,APPROVED,Entry fee\n`;
-    csvContent += `${today},11:15,RECEIVED,Priya Sharma,City Open,800,PENDING,Waiting verification\n`;
-    csvContent += `${today},14:20,PAID_OUT,John Doe,Ace Tournament,300,COMPLETED,30% before tournament\n`;
-    
+
+    const where = {
+      paymentStatus: { in: ['verified', 'submitted', 'rejected'] },
+      ...(startDate || endDate ? {
+        createdAt: {
+          ...(startDate ? { gte: new Date(startDate) } : {}),
+          ...(endDate ? { lte: new Date(endDate + 'T23:59:59Z') } : {}),
+        }
+      } : {})
+    };
+
+    const registrations = await prisma.registration.findMany({
+      where,
+      include: {
+        user: { select: { name: true } },
+        tournament: { select: { name: true } },
+        category: { select: { name: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 2000,
+    });
+
+    let csvContent = 'Date,Time,Type,Player,Tournament,Category,Amount,Status,UTR\n';
+    for (const r of registrations) {
+      const d = new Date(r.createdAt);
+      const dateStr = d.toISOString().split('T')[0];
+      const timeStr = d.toTimeString().substring(0, 5);
+      const player = (r.user?.name || 'Unknown').replace(/,/g, ' ');
+      const tournament = (r.tournament?.name || '').replace(/,/g, ' ');
+      const category = (r.category?.name || '').replace(/,/g, ' ');
+      const amount = r.amountTotal || 0;
+      const status = r.paymentStatus?.toUpperCase() || '';
+      const utr = r.utrId || '';
+      csvContent += `${dateStr},${timeStr},RECEIVED,${player},${tournament},${category},${amount},${status},${utr}\n`;
+    }
+
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader('Content-Disposition', `attachment; filename=payment_export_${today}.csv`);
     res.send(csvContent);

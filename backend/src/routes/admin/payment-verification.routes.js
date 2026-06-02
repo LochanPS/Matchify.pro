@@ -119,24 +119,24 @@ router.post('/:id/approve', authenticate, requireAdmin, async (req, res) => {
       });
     }
 
-    // Update verification status
-    await prisma.paymentVerification.update({
-      where: { id },
-      data: {
-        status: 'approved',
-        verifiedBy: adminId,
-        verifiedAt: new Date()
-      }
-    });
-
-    // Update registration status
-    await prisma.registration.update({
-      where: { id: verification.registrationId },
-      data: {
-        paymentStatus: 'verified',
-        status: 'confirmed'
-      }
-    });
+    // Update verification + registration atomically
+    await prisma.$transaction([
+      prisma.paymentVerification.update({
+        where: { id },
+        data: {
+          status: 'approved',
+          verifiedBy: adminId,
+          verifiedAt: new Date()
+        }
+      }),
+      prisma.registration.update({
+        where: { id: verification.registrationId },
+        data: {
+          paymentStatus: 'verified',
+          status: 'confirmed'
+        }
+      })
+    ]);
 
     // Update tournament payment tracking
     try {

@@ -20,7 +20,7 @@ import { authenticate } from '../middleware/auth.js';
 const router = express.Router();
 
 // Match management
-router.get('/matches/:matchId', getMatchDetails);
+router.get('/matches/:matchId', authenticate, getMatchDetails);
 router.post('/matches/:matchId/assign-umpire', authenticate, assignUmpire);
 router.post('/matches/:matchId/start', authenticate, startMatch);
 router.post('/matches/:matchId/update-score', authenticate, updateScore);
@@ -29,7 +29,7 @@ router.post('/matches/:matchId/reset', authenticate, resetMatch);
 router.post('/matches/:matchId/assign-court', authenticate, assignCourt);
 
 // Tournament matches
-router.get('/tournaments/:tournamentId/categories/:categoryId/matches', getMatches);
-router.get('/tournaments/:tournamentId/umpires', getAvailableUmpires);
+router.get('/tournaments/:tournamentId/categories/:categoryId/matches', authenticate, getMatches);
+router.get('/tournaments/:tournamentId/umpires', authenticate, getAvailableUmpires);
 
 export default router;

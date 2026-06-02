@@ -244,16 +244,17 @@ router.post('/users/:id/login-as', authenticate, requireAdmin, async (req, res) 
     }
 
     // Generate JWT token for the user with admin impersonation flag
+    // Short expiry — impersonation sessions should be brief
     const token = jwt.sign(
-      { 
-        userId: user.id, 
-        email: user.email, 
+      {
+        userId: user.id,
+        email: user.email,
         roles: userRoles,
         isImpersonating: true,
         adminId: adminId
       },
       process.env.JWT_SECRET,
-      { expiresIn: '24h' }
+      { expiresIn: '2h' }
     );
 
     console.log(`🔐 Admin ${req.user.email} logged in as ${user.email}`);

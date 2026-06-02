@@ -155,6 +155,7 @@ router.put('/:matchId/undo', authenticate, async (req, res) => {
       include: { tournament: { select: { organizerId: true } } },
     });
     if (!match) return res.status(404).json({ success: false, error: 'Match not found' });
+    if (match.status === 'COMPLETED') return res.status(400).json({ success: false, error: 'Cannot undo a completed match. Use change-winner to correct the result.' });
 
     const userRoles = req.user.roles || [];
     if (match.umpireId !== userId && match.tournament.organizerId !== userId && !userRoles.includes('ADMIN')) {
@@ -843,7 +844,105 @@ const endMatchHandler = async (req, res) => {
       return completed;
     }, { timeout: 30000 });
 
-    // ── 6. RESPOND TO CLIENT — everything below is non-critical ───────────────
+    // ── 6. Bracket JSON update — awaited before response (Vercel kills after res) ──
+    try {
+      const draw = await prisma.draw.findUnique({
+        where: { tournamentId_categoryId: { tournamentId: match.tournamentId, categoryId: match.categoryId } }
+      });
+      if (draw?.bracketJson) {
+        const bracketJson = typeof draw.bracketJson === 'string' ? JSON.parse(draw.bracketJson) : draw.bracketJson;
+        if (bracketJson && typeof bracketJson === 'object') {
+          const winnerName = winner?.name || 'Winner';
+
+          if (bracketJson.format === 'ROUND_ROBIN' || (bracketJson.format === 'ROUND_ROBIN_KNOCKOUT' && match.stage === 'GROUP')) {
+            let targetGroup = null;
+            for (const group of (bracketJson.groups || [])) {
+              if (group.participants?.some(p => p.id === match.player1Id) &&
+                  group.participants?.some(p => p.id === match.player2Id)) {
+                targetGroup = group; break;
+              }
+            }
+            if (targetGroup) {
+              const allMatches = await prisma.match.findMany({ where: { tournamentId: match.tournamentId, categoryId: match.categoryId, status: 'COMPLETED' } });
+              const groupMatches = allMatches.filter(m => targetGroup.participants.some(p => p.id === m.player1Id) && targetGroup.participants.some(p => p.id === m.player2Id));
+              targetGroup.participants.forEach(p => { p.played = 0; p.wins = 0; p.losses = 0; p.points = 0; p.totalPoints = 0; });
+              groupMatches.forEach(m => {
+                const p1 = targetGroup.participants.find(p => p.id === m.player1Id);
+                const p2 = targetGroup.participants.find(p => p.id === m.player2Id);
+                if (!p1 || !p2) return;
+                p1.played++; p2.played++;
+                if (m.scoreJson) {
+                  try {
+                    const sd = typeof m.scoreJson === 'string' ? JSON.parse(m.scoreJson) : m.scoreJson;
+                    if (sd?.sets && Array.isArray(sd.sets)) {
+                      let t1 = 0, t2 = 0;
+                      sd.sets.forEach(s => { t1 += s.player1 ?? s.p1 ?? s.score1 ?? 0; t2 += s.player2 ?? s.p2 ?? s.score2 ?? 0; });
+                      p1.totalPoints = (p1.totalPoints || 0) + t1;
+                      p2.totalPoints = (p2.totalPoints || 0) + t2;
+                    }
+                  } catch (_) {}
+                }
+                if (m.winnerId === m.player1Id) { p1.wins++; p1.points += 2; p2.losses++; }
+                else if (m.winnerId === m.player2Id) { p2.wins++; p2.points += 2; p1.losses++; }
+              });
+              targetGroup.participants.sort((a, b) => b.points !== a.points ? b.points - a.points : b.wins - a.wins);
+              const mib = targetGroup.matches?.find(m => m.matchNumber === match.matchNumber);
+              if (mib) { mib.status = 'completed'; mib.winner = winnerId === match.player1Id ? 1 : 2; mib.winnerId = winnerId; mib.score = finalScore; }
+              await prisma.draw.update({ where: { tournamentId_categoryId: { tournamentId: match.tournamentId, categoryId: match.categoryId } }, data: { bracketJson: JSON.stringify(bracketJson), updatedAt: new Date() } });
+            }
+          } else if (bracketJson.format === 'KNOCKOUT' || bracketJson.format === 'single_elimination' ||
+                     (bracketJson.format === 'ROUND_ROBIN_KNOCKOUT' && match.stage === 'KNOCKOUT')) {
+            const rounds = bracketJson.knockout?.rounds || bracketJson.rounds;
+            if (Array.isArray(rounds)) {
+              const isHybridKO = bracketJson.format === 'ROUND_ROBIN_KNOCKOUT';
+              if (isHybridKO) {
+                const dbRoundMatches = await prisma.match.findMany({
+                  where: { tournamentId: match.tournamentId, categoryId: match.categoryId, round: match.round, stage: 'KNOCKOUT' },
+                  orderBy: { matchNumber: 'asc' }
+                });
+                const myIndex = dbRoundMatches.findIndex(m => m.id === match.id);
+                if (myIndex !== -1) {
+                  const totalKnockoutRounds = rounds.length;
+                  const bracketRoundIdx = totalKnockoutRounds - match.round;
+                  const bracketRound = rounds[bracketRoundIdx];
+                  const mib = bracketRound?.matches?.[myIndex];
+                  if (mib) { mib.status = 'completed'; mib.winner = { id: winnerId, name: winnerName }; mib.winnerId = winnerId; mib.score = finalScore; }
+                  if (parentMatch) {
+                    const pmib = rounds[bracketRoundIdx + 1]?.matches?.[Math.floor(myIndex / 2)];
+                    if (pmib) {
+                      const wp = match.winnerPosition || fallbackWinnerPos || (myIndex % 2 === 0 ? 'player1' : 'player2');
+                      pmib[wp] = { id: winnerId, name: winnerName };
+                      if (pmib.player1 && pmib.player2) pmib.status = 'ready';
+                    }
+                  }
+                }
+              } else {
+                for (const round of rounds) {
+                  const mib = round.matches?.find(m => m.matchNumber === match.matchNumber);
+                  if (mib) { mib.status = 'completed'; mib.winner = { id: winnerId, name: winnerName }; mib.winnerId = winnerId; mib.score = finalScore; break; }
+                }
+                if (parentMatch) {
+                  for (const round of rounds) {
+                    const pmib = round.matches?.find(m => m.matchNumber === parentMatch.matchNumber);
+                    if (pmib) {
+                      const wp = match.winnerPosition || fallbackWinnerPos || (match.matchNumber % 2 === 1 ? 'player1' : 'player2');
+                      pmib[wp] = { id: winnerId, name: winnerName };
+                      if (pmib.player1 && pmib.player2) pmib.status = 'ready';
+                      break;
+                    }
+                  }
+                }
+              }
+              await prisma.draw.update({ where: { tournamentId_categoryId: { tournamentId: match.tournamentId, categoryId: match.categoryId } }, data: { bracketJson: JSON.stringify(bracketJson), updatedAt: new Date() } });
+            }
+          }
+        }
+      }
+    } catch (bracketErr) {
+      console.error('Bracket JSON update error (non-fatal):', bracketErr);
+    }
+
+    // ── 7. RESPOND TO CLIENT ────────────────────────────────────────────────────
     // Broadcast match completion to live spectators
     broadcastMatchComplete(matchId, winnerId, finalScore);
     broadcastToTournament(match.tournamentId, 'match-ended', {
@@ -863,8 +962,7 @@ const endMatchHandler = async (req, res) => {
       }
     });
 
-    // ── 7. Background: stats + notifications + bracket JSON ───────────────────
-    // Fire-and-forget — client already received success response above
+    // ── 8. Background: stats + notifications (non-critical, fire-and-forget) ────
     const runBackground = async () => {
       const getRoundName = (r) => r === 1 ? 'Final' : r === 2 ? 'Semi Finals' : r === 3 ? 'Quarter Finals' : r === 4 ? 'Round of 16' : `Round ${r}`;
       const roundName = getRoundName(match.round);
@@ -904,122 +1002,6 @@ const endMatchHandler = async (req, res) => {
         await Promise.all(tasks);
       } catch (bgErr) {
         console.error('Background stats/notif error:', bgErr);
-      }
-
-      // Bracket JSON update (standings / advance in stored JSON)
-      try {
-        const draw = await prisma.draw.findUnique({
-          where: { tournamentId_categoryId: { tournamentId: match.tournamentId, categoryId: match.categoryId } }
-        });
-        if (!draw?.bracketJson) return;
-
-        const bracketJson = typeof draw.bracketJson === 'string' ? JSON.parse(draw.bracketJson) : draw.bracketJson;
-        if (!bracketJson || typeof bracketJson !== 'object') return;
-
-        const winnerName = winner?.name || 'Winner';
-
-        if (bracketJson.format === 'ROUND_ROBIN' || (bracketJson.format === 'ROUND_ROBIN_KNOCKOUT' && match.stage === 'GROUP')) {
-          // Find group
-          let targetGroup = null;
-          for (const group of (bracketJson.groups || [])) {
-            if (group.participants?.some(p => p.id === match.player1Id) &&
-                group.participants?.some(p => p.id === match.player2Id)) {
-              targetGroup = group; break;
-            }
-          }
-          if (targetGroup) {
-            const allMatches = await prisma.match.findMany({ where: { tournamentId: match.tournamentId, categoryId: match.categoryId, status: 'COMPLETED' } });
-            const groupMatches = allMatches.filter(m => targetGroup.participants.some(p => p.id === m.player1Id) && targetGroup.participants.some(p => p.id === m.player2Id));
-            targetGroup.participants.forEach(p => { p.played = 0; p.wins = 0; p.losses = 0; p.points = 0; p.totalPoints = 0; });
-            groupMatches.forEach(m => {
-              const p1 = targetGroup.participants.find(p => p.id === m.player1Id);
-              const p2 = targetGroup.participants.find(p => p.id === m.player2Id);
-              if (!p1 || !p2) return;
-              p1.played++; p2.played++;
-              // Accumulate total game points (TP) from scoreJson
-              if (m.scoreJson) {
-                try {
-                  const sd = typeof m.scoreJson === 'string' ? JSON.parse(m.scoreJson) : m.scoreJson;
-                  if (sd?.sets && Array.isArray(sd.sets)) {
-                    let t1 = 0, t2 = 0;
-                    sd.sets.forEach(s => { t1 += s.player1 ?? s.p1 ?? s.score1 ?? 0; t2 += s.player2 ?? s.p2 ?? s.score2 ?? 0; });
-                    p1.totalPoints = (p1.totalPoints || 0) + t1;
-                    p2.totalPoints = (p2.totalPoints || 0) + t2;
-                  }
-                } catch (_) {}
-              }
-              if (m.winnerId === m.player1Id) { p1.wins++; p1.points += 2; p2.losses++; }
-              else if (m.winnerId === m.player2Id) { p2.wins++; p2.points += 2; p1.losses++; }
-            });
-            targetGroup.participants.sort((a, b) => b.points !== a.points ? b.points - a.points : b.wins - a.wins);
-            const mib = targetGroup.matches?.find(m => m.matchNumber === match.matchNumber);
-            if (mib) { mib.status = 'completed'; mib.winner = winnerId === match.player1Id ? 1 : 2; mib.winnerId = winnerId; mib.score = finalScore; }
-            await prisma.draw.update({ where: { tournamentId_categoryId: { tournamentId: match.tournamentId, categoryId: match.categoryId } }, data: { bracketJson: JSON.stringify(bracketJson), updatedAt: new Date() } });
-          }
-        } else if (bracketJson.format === 'KNOCKOUT' || bracketJson.format === 'single_elimination' ||
-                   (bracketJson.format === 'ROUND_ROBIN_KNOCKOUT' && match.stage === 'KNOCKOUT')) {
-          const rounds = bracketJson.knockout?.rounds || bracketJson.rounds;
-          if (!Array.isArray(rounds)) return;
-
-          // For ROUND_ROBIN_KNOCKOUT the bracketJson uses per-round matchNumbers (1, 2, 1…)
-          // but DB matchNumbers are global. Use index-based lookup instead.
-          const isHybridKO = bracketJson.format === 'ROUND_ROBIN_KNOCKOUT';
-
-          if (isHybridKO) {
-            // Find this match's position within its DB round
-            const dbRoundMatches = await prisma.match.findMany({
-              where: { tournamentId: match.tournamentId, categoryId: match.categoryId, round: match.round, stage: 'KNOCKOUT' },
-              orderBy: { matchNumber: 'asc' }
-            });
-            const myIndex = dbRoundMatches.findIndex(m => m.id === match.id);
-            if (myIndex === -1) return;
-
-            const totalKnockoutRounds = rounds.length; // bracketJson rounds length
-            const bracketRoundIdx = totalKnockoutRounds - match.round; // reverse mapping
-            const bracketRound = rounds[bracketRoundIdx];
-            const mib = bracketRound?.matches?.[myIndex];
-            if (mib) {
-              mib.status = 'completed';
-              mib.winner = { id: winnerId, name: winnerName };
-              mib.winnerId = winnerId;
-              mib.score = finalScore;
-            }
-
-            // Advance winner in bracket JSON parent slot
-            if (parentMatch) {
-              const parentBracketRoundIdx = bracketRoundIdx + 1;
-              const parentBracketRound = rounds[parentBracketRoundIdx];
-              const parentPos = Math.floor(myIndex / 2);
-              const pmib = parentBracketRound?.matches?.[parentPos];
-              if (pmib) {
-                const wp = match.winnerPosition || fallbackWinnerPos || (myIndex % 2 === 0 ? 'player1' : 'player2');
-                pmib[wp] = { id: winnerId, name: winnerName };
-                if (pmib.player1 && pmib.player2) pmib.status = 'ready';
-              }
-            }
-          } else {
-            // Pure KNOCKOUT — matchNumbers are per-round, value search works
-            for (const round of rounds) {
-              const mib = round.matches?.find(m => m.matchNumber === match.matchNumber);
-              if (mib) { mib.status = 'completed'; mib.winner = { id: winnerId, name: winnerName }; mib.winnerId = winnerId; mib.score = finalScore; break; }
-            }
-            if (parentMatch) {
-              for (const round of rounds) {
-                const pmib = round.matches?.find(m => m.matchNumber === parentMatch.matchNumber);
-                if (pmib) {
-                  const wp = match.winnerPosition || fallbackWinnerPos || (match.matchNumber % 2 === 1 ? 'player1' : 'player2');
-                  pmib[wp] = { id: winnerId, name: winnerName };
-                  if (pmib.player1 && pmib.player2) pmib.status = 'ready';
-                  break;
-                }
-              }
-            }
-          }
-
-          await prisma.draw.update({ where: { tournamentId_categoryId: { tournamentId: match.tournamentId, categoryId: match.categoryId } }, data: { bracketJson: JSON.stringify(bracketJson), updatedAt: new Date() } });
-        }
-      } catch (bracketErr) {
-        console.error('Background bracket JSON update error:', bracketErr);
       }
 
       // Award tournament points when category final is completed

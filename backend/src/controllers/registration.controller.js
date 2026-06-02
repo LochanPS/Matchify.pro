@@ -784,97 +784,50 @@ const createRegistrationWithScreenshot = async (req, res) => {
         willUpdate: existingRejected && (existingRejected.status === 'rejected' || existingRejected.status === 'cancelled')
       });
 
-      // Enforce maxParticipants cap before creating a new registration
-      if (category.maxParticipants && !existingRejected) {
-        const activeCount = await prisma.registration.count({
-          where: {
-            categoryId: category.id,
-            status: { notIn: ['rejected', 'cancelled'] }
-          }
-        });
-        if (activeCount >= category.maxParticipants) {
-          return res.status(409).json({
-            success: false,
-            error: `${category.name} is full (${category.maxParticipants} participant limit reached)`
-          });
-        }
-      }
-
       let registration;
+      const regData = {
+        partnerId,
+        partnerEmail: !partnerId && categoryPartnerEmail ? categoryPartnerEmail : null,
+        partnerToken,
+        guestPartnerName,
+        amountTotal: category.entryFee,
+        amountWallet: 0,
+        amountRazorpay: 0,
+        paymentScreenshot: screenshotUrl,
+        utrId: utrId || null,
+        paymentStatus: 'submitted',
+        status: 'pending',
+      };
+      const regInclude = {
+        category: true,
+        tournament: { select: { id: true, name: true, startDate: true, endDate: true, organizerId: true } },
+      };
 
       if (existingRejected && (existingRejected.status === 'rejected' || existingRejected.status === 'cancelled')) {
-        // UPDATE the existing rejected/cancelled registration
+        // UPDATE existing — no cap check needed (slot was already counted)
         console.log(`🔄 UPDATING existing ${existingRejected.status} registration ${existingRejected.id}`);
-        
         registration = await prisma.registration.update({
-          where: {
-            id: existingRejected.id,
-          },
-          data: {
-            partnerId,
-            partnerEmail: !partnerId && categoryPartnerEmail ? categoryPartnerEmail : null,
-            partnerToken,
-            guestPartnerName,
-            amountTotal: category.entryFee,
-            amountWallet: 0,
-            amountRazorpay: 0,
-            paymentScreenshot: screenshotUrl,
-            utrId: utrId || null,
-            paymentStatus: 'submitted', // Screenshot submitted, awaiting verification
-            status: 'pending', // Reset to pending
-          },
-          include: {
-            category: true,
-            tournament: {
-              select: {
-                id: true,
-                name: true,
-                startDate: true,
-                endDate: true,
-                organizerId: true,
-              },
-            },
-          },
+          where: { id: existingRejected.id },
+          data: regData,
+          include: regInclude,
         });
-        
-        console.log(`✅ Registration UPDATED to pending:`, {
-          id: registration.id,
-          status: registration.status,
-          paymentStatus: registration.paymentStatus
-        });
+        console.log(`✅ Registration UPDATED to pending: ${registration.id}`);
       } else {
-        // CREATE a new registration
+        // CREATE new — count + create inside transaction to prevent over-registration race
         console.log(`➕ CREATING new registration for category ${category.name}`);
-        
-        registration = await prisma.registration.create({
-          data: {
-            tournamentId,
-            categoryId: category.id,
-            userId,
-            partnerId,
-            partnerEmail: !partnerId && categoryPartnerEmail ? categoryPartnerEmail : null,
-            partnerToken,
-            guestPartnerName,
-            amountTotal: category.entryFee,
-            amountWallet: 0,
-            amountRazorpay: 0,
-            paymentScreenshot: screenshotUrl,
-            utrId: utrId || null,
-            paymentStatus: 'submitted', // Screenshot submitted, awaiting verification
-            status: 'pending', // Pending until organizer confirms
-          },
-          include: {
-            category: true,
-            tournament: {
-              select: {
-                id: true,
-                name: true,
-                startDate: true,
-                endDate: true,
-                organizerId: true,
-              },
-            },
-          },
+        registration = await prisma.$transaction(async (tx) => {
+          if (category.maxParticipants) {
+            const activeCount = await tx.registration.count({
+              where: { categoryId: category.id, status: { notIn: ['rejected', 'cancelled'] } }
+            });
+            if (activeCount >= category.maxParticipants) {
+              throw Object.assign(new Error(`${category.name} is full (${category.maxParticipants} participant limit reached)`), { code: 'CATEGORY_FULL' });
+            }
+          }
+          return tx.registration.create({
+            data: { tournamentId, categoryId: category.id, userId, ...regData },
+            include: regInclude,
+          });
         });
       }
       
@@ -1007,6 +960,9 @@ const createRegistrationWithScreenshot = async (req, res) => {
       },
     });
   } catch (error) {
+    if (error.code === 'CATEGORY_FULL') {
+      return res.status(409).json({ success: false, error: error.message });
+    }
     console.error('Registration with screenshot error:', error);
     res.status(500).json({
       success: false,
@@ -1052,6 +1008,17 @@ const verifyPayment = async (req, res) => {
       });
     }
 
+    // Idempotency guard — skip if already in desired state
+    const alreadyVerified = registration.paymentStatus === 'verified' && registration.status === 'confirmed';
+    const alreadyRejected = registration.paymentStatus === 'rejected' && status === 'rejected';
+    if (alreadyVerified || alreadyRejected) {
+      return res.json({
+        success: true,
+        message: status === 'verified' ? 'Payment already verified' : 'Payment already rejected',
+        registration,
+      });
+    }
+
     // Update registration
     const updatedRegistration = await prisma.registration.update({
       where: { id },
@@ -1061,10 +1028,36 @@ const verifyPayment = async (req, res) => {
       },
     });
 
-    // If payment verified, increment tournament registration count for player verification
+    // Only increment when transitioning to verified (not on repeat calls)
     if (status === 'verified') {
       const { incrementTournamentRegistration } = await import('../services/verification.service.js');
       await incrementTournamentRegistration(registration.userId);
+
+      // Update tournament payment totals so admin dashboard stays accurate
+      try {
+        const tournamentPayment = await prisma.tournamentPayment.findUnique({
+          where: { tournamentId: registration.tournamentId }
+        });
+        if (tournamentPayment) {
+          const PLATFORM_FEE_PERCENT = 3;
+          const amount = registration.amountTotal || 0;
+          const totalCollected = tournamentPayment.totalCollected + amount;
+          const platformFeeAmount = totalCollected * (PLATFORM_FEE_PERCENT / 100);
+          await prisma.tournamentPayment.update({
+            where: { tournamentId: registration.tournamentId },
+            data: {
+              totalCollected,
+              totalRegistrations: { increment: 1 },
+              platformFeeAmount,
+              organizerShare: totalCollected - platformFeeAmount,
+              payout50Percent1: totalCollected * 0.30,
+              payout50Percent2: totalCollected * 0.67,
+            }
+          });
+        }
+      } catch (paymentTrackErr) {
+        console.error('Tournament payment tracking error (non-fatal):', paymentTrackErr);
+      }
     }
 
     // Notify player

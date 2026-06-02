@@ -164,13 +164,18 @@ const confirmPartner = async (req, res) => {
         });
       }
 
-      // Verify email matches (if partner is registered)
+      // Verify email matches — phone-only users have an internal placeholder email,
+      // so also allow match by userId if the invitation was already linked to this user
       const currentUser = await prisma.user.findUnique({
         where: { id: userId },
-        select: { email: true, name: true },
+        select: { email: true, name: true, phone: true },
       });
 
-      if (currentUser.email !== registration.partnerEmail) {
+      const isPlaceholderEmail = currentUser.email?.endsWith('@noemail.matchify.internal');
+      const emailMatches = !isPlaceholderEmail && currentUser.email === registration.partnerEmail;
+      const alreadyLinked = registration.partnerId === userId;
+
+      if (!emailMatches && !alreadyLinked) {
         return res.status(403).json({
           success: false,
           error: 'This invitation was sent to a different email address',

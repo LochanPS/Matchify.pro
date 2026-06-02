@@ -188,32 +188,37 @@ class MatchLifecycleService {
       throw new Error('Winner must be one of the players in the match');
     }
 
-    // Complete match
-    const updatedMatch = await prisma.match.update({
-      where: { id: matchId },
-      data: {
-        winnerId,
-        scoreJson: JSON.stringify(scoreJson),
-        status: 'COMPLETED',
-        completedAt: new Date(),
-        updatedAt: new Date()
+    // Complete match + advance bracket atomically — prevents crash leaving match
+    // COMPLETED but bracket not advanced (critical on Vercel serverless)
+    const updatedMatch = await prisma.$transaction(async (tx) => {
+      const completed = await tx.match.update({
+        where: { id: matchId },
+        data: {
+          winnerId,
+          scoreJson: JSON.stringify(scoreJson),
+          status: 'COMPLETED',
+          completedAt: new Date(),
+          updatedAt: new Date()
+        }
+      });
+
+      console.log(`✅ Match ${matchId} completed. Winner: ${winnerId}`);
+
+      // Trigger progression based on stage
+      if (match.stage === 'KNOCKOUT') {
+        console.log('🔄 Triggering knockout progression...');
+        await MatchGenerator.advanceWinner(
+          match.tournamentId,
+          match.categoryId,
+          match.matchIndex,
+          winnerId
+        );
+      } else if (match.stage === 'GROUP') {
+        console.log('📊 Group match completed. Standings will update automatically.');
       }
-    });
 
-    console.log(`✅ Match ${matchId} completed. Winner: ${winnerId}`);
-
-    // Trigger progression based on stage
-    if (match.stage === 'KNOCKOUT') {
-      console.log('🔄 Triggering knockout progression...');
-      await MatchGenerator.advanceWinner(
-        match.tournamentId,
-        match.categoryId,
-        match.matchIndex,
-        winnerId
-      );
-    } else if (match.stage === 'GROUP') {
-      console.log('📊 Group match completed. Standings will update automatically.');
-    }
+      return completed;
+    }, { timeout: 15000 });
 
     return updatedMatch;
   }

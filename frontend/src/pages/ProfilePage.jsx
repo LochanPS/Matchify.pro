@@ -451,7 +451,7 @@ export default function ProfilePage() {
             border: '2px solid rgba(168,85,247,0.3)',
             backdropFilter: 'blur(20px)',
             boxShadow: '0 8px 32px rgba(168,85,247,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
-            animation: 'fadeIn 0.8s ease-out 0.2s both'
+            animation: 'fadeIn 0.2s ease-out both'
           }}
         >
           {/* Animated Glow */}
@@ -560,7 +560,7 @@ export default function ProfilePage() {
             border: '2px solid rgba(245,158,11,0.3)',
             backdropFilter: 'blur(20px)',
             boxShadow: '0 8px 32px rgba(245,158,11,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
-            animation: 'fadeIn 0.8s ease-out 0.3s both'
+            animation: 'fadeIn 0.2s ease-out both'
           }}
         >
           {/* Animated Background Glow */}

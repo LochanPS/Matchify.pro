@@ -353,7 +353,7 @@ const HomePageMobile = () => {
           </div>
 
           {/* Headline */}
-          <h1 className="text-5xl font-black mb-3 leading-tight" style={{ animation: 'fadeIn 1s ease-out 0.3s both', letterSpacing: '-0.02em' }}>
+          <h1 className="text-5xl font-black mb-3 leading-tight" style={{ animation: 'fadeIn 0.2s ease-out both', letterSpacing: '-0.02em' }}>
             <span className="block text-white">
               Where Champions
             </span>
@@ -372,15 +372,15 @@ const HomePageMobile = () => {
           </h1>
 
           {/* Sub-headline */}
-          <p className="text-sm font-medium px-4 mb-1" style={{ color: 'rgba(255,255,255,0.72)', animation: 'fadeIn 1s ease-out 0.4s both' }}>
+          <p className="text-sm font-medium px-4 mb-1" style={{ color: 'rgba(255,255,255,0.72)', animation: 'fadeIn 0.2s ease-out both' }}>
             Join <span className="font-black" style={{ color: '#FCD34D' }}>2,500+</span> players across India
           </p>
-          <p className="text-sm px-4 mb-6" style={{ color: 'rgba(255,255,255,0.58)', animation: 'fadeIn 1s ease-out 0.5s both' }}>
+          <p className="text-sm px-4 mb-6" style={{ color: 'rgba(255,255,255,0.58)', animation: 'fadeIn 0.2s ease-out both' }}>
             Register for tournaments · track progress · compete with the best
           </p>
 
           {/* Social proof row */}
-          <div className="flex items-center justify-center gap-3 mb-6" style={{ animation: 'slideUp 0.8s ease-out 0.6s both' }}>
+          <div className="flex items-center justify-center gap-3 mb-6" style={{ animation: 'fadeIn 0.2s ease-out both' }}>
             {/* Avatar stack */}
             <div className="flex -space-x-2.5">
               {[
@@ -415,7 +415,7 @@ const HomePageMobile = () => {
 
           {/* CTAs */}
           {user ? (
-            <div className="space-y-3 mb-8" style={{ animation: 'slideUp 0.8s ease-out 0.7s both' }}>
+            <div className="space-y-3 mb-8" style={{ animation: 'fadeIn 0.2s ease-out both' }}>
               <Link
                 to={getDashboardLink()}
                 className="flex items-center justify-center gap-2 w-full py-4 rounded-2xl font-black text-base relative overflow-hidden group"
@@ -445,7 +445,7 @@ const HomePageMobile = () => {
               </div>
             </div>
           ) : (
-            <div className="space-y-3 mb-8" style={{ animation: 'slideUp 0.8s ease-out 0.7s both' }}>
+            <div className="space-y-3 mb-8" style={{ animation: 'fadeIn 0.2s ease-out both' }}>
               <Link
                 to="/register"
                 className="flex items-center justify-center gap-2 w-full py-4 rounded-2xl font-black text-base relative overflow-hidden group"
@@ -480,7 +480,7 @@ const HomePageMobile = () => {
         {/* ═══════════════════════════════════════════════════════════
             STATS
         ══════════════════════════════════════════════════════════════ */}
-        <div className="mb-6" style={{ animation: 'fadeIn 0.8s ease-out 0.8s both' }}>
+        <div className="mb-6" style={{ animation: 'fadeIn 0.2s ease-out both' }}>
           {/* Section header */}
           <div className="text-center mb-5">
             <h2 className="text-2xl font-black text-white mb-1">Our Community</h2>
@@ -538,7 +538,7 @@ const HomePageMobile = () => {
             border: '1px solid rgba(255,255,255,0.10)',
             backdropFilter: 'blur(20px)',
             boxShadow: '0 4px 20px rgba(0,0,0,0.35)',
-            animation: 'fadeIn 0.8s ease-out 1s both',
+            animation: 'fadeIn 0.2s ease-out both',
           }}
         >
 
@@ -583,7 +583,7 @@ const HomePageMobile = () => {
             WHY MATCHIFY
         ══════════════════════════════════════════════════════════════ */}
         <div className="rounded-2xl p-5 mb-6"
-          style={{ background: 'rgba(13,26,42,0.8)', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)', animation: 'fadeIn 0.8s ease-out 1.2s both' }}>
+          style={{ background: 'rgba(13,26,42,0.8)', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)', animation: 'fadeIn 0.2s ease-out both' }}>
           <div className="text-center mb-5">
             <h2 className="text-xl font-black text-white mb-1">
               Why <span style={{ color: '#FCD34D' }}>Matchify.pro</span>?
@@ -607,7 +607,7 @@ const HomePageMobile = () => {
             HOW IT WORKS
         ══════════════════════════════════════════════════════════════ */}
         <div className="rounded-2xl p-5 mb-6"
-          style={{ background: 'rgba(13,26,42,0.8)', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)', animation: 'fadeIn 0.8s ease-out 1.3s both' }}>
+          style={{ background: 'rgba(13,26,42,0.8)', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)', animation: 'fadeIn 0.2s ease-out both' }}>
           <div className="text-center mb-5">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold mb-3"
               style={{ background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.2)', color: '#818cf8' }}>
@@ -644,7 +644,7 @@ const HomePageMobile = () => {
             AUTHENTIC REVIEWS
         ══════════════════════════════════════════════════════════════ */}
         <div className="rounded-2xl p-5 mb-6 relative overflow-hidden"
-          style={{ background: 'rgba(13,26,42,0.85)', border: '1px solid rgba(245,158,11,0.2)', backdropFilter: 'blur(10px)', animation: 'fadeIn 0.8s ease-out 1.4s both' }}>
+          style={{ background: 'rgba(13,26,42,0.85)', border: '1px solid rgba(245,158,11,0.2)', backdropFilter: 'blur(10px)', animation: 'fadeIn 0.2s ease-out both' }}>
           <div className="absolute top-0 right-0 w-40 h-40 rounded-full blur-3xl opacity-10"
             style={{ background: 'radial-gradient(circle, rgba(245,158,11,0.8), transparent)' }} />
 

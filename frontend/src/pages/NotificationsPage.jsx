@@ -210,7 +210,7 @@ const NotificationsPage = () => {
         {notifications.length > 0 && notifications.some(n => !n.read) && (
           <div
             className="flex items-center gap-2 mb-6"
-            style={{ animation: 'fadeIn 0.8s ease-out 0.2s both' }}
+            style={{ animation: 'fadeIn 0.2s ease-out both' }}
           >
             <button
               onClick={markAllAsRead}

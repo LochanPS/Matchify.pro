@@ -138,7 +138,7 @@ const LoginPageMobile = () => {
       <div style={{ position: 'relative', zIndex: 10, flex: 1, display: 'flex', flexDirection: 'column', maxWidth: 480, margin: '0 auto', width: '100%', padding: '88px 16px 32px' }}>
 
         {/* Logo */}
-        <div style={{ textAlign: 'center', marginBottom: 28, animation: 'fadeIn 0.6s ease-out 0.2s both' }}>
+        <div style={{ textAlign: 'center', marginBottom: 28, animation: 'fadeIn 0.2s ease-out both' }}>
           <div style={{ display: 'flex', justifyContent: 'center', position: 'relative', marginBottom: 10 }}>
             <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 180, height: 80, background: 'radial-gradient(ellipse, rgba(245,158,11,0.3) 0%, transparent 70%)', filter: 'blur(20px)', animation: 'float 4s ease-in-out infinite', pointerEvents: 'none' }} />
             <div style={{ position: 'relative' }}>
@@ -156,7 +156,7 @@ const LoginPageMobile = () => {
           padding: 24,
           marginBottom: 20,
           backdropFilter: 'blur(20px)',
-          animation: 'slideUp 0.7s ease-out 0.3s both',
+          animation: 'fadeIn 0.2s ease-out both',
           boxShadow: '0 16px 48px rgba(0,0,0,0.4)'
         }}>
           {/* Header */}
@@ -348,7 +348,7 @@ const LoginPageMobile = () => {
         </div>
 
         {/* Stats */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 24, animation: 'fadeIn 0.8s ease-out 0.6s both' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 24, animation: 'fadeIn 0.2s ease-out both' }}>
           {[
             { value: '1000+', label: 'Players', color: '#FCD34D', bg: 'rgba(245,158,11,0.1)', border: 'rgba(245,158,11,0.25)' },
             { value: '50+', label: 'Tournaments', color: '#C4B5FD', bg: 'rgba(139,92,246,0.1)', border: 'rgba(139,92,246,0.25)' },

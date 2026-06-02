@@ -113,7 +113,7 @@ const RegisterPageMobile = () => {
       <div style={{ position: 'relative', zIndex: 10, maxWidth: 480, margin: '0 auto', padding: '84px 16px 32px' }}>
 
         {/* Logo */}
-        <div style={{ textAlign: 'center', marginBottom: 24, animation: 'fadeIn 0.6s ease-out 0.2s both' }}>
+        <div style={{ textAlign: 'center', marginBottom: 24, animation: 'fadeIn 0.2s ease-out both' }}>
           <div style={{ display: 'flex', justifyContent: 'center', position: 'relative', marginBottom: 10 }}>
             <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 180, height: 80, background: 'radial-gradient(ellipse, rgba(245,158,11,0.3) 0%, transparent 70%)', filter: 'blur(20px)', animation: 'float 4s ease-in-out infinite', pointerEvents: 'none' }} />
             <div style={{ position: 'relative' }}><MatchifyLogo size={80} /></div>
@@ -122,7 +122,7 @@ const RegisterPageMobile = () => {
         </div>
 
         {/* Main Card */}
-        <div style={{ background: 'linear-gradient(145deg, rgba(12,18,32,0.95), rgba(10,15,26,0.95))', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 20, padding: '22px 20px', marginBottom: 18, backdropFilter: 'blur(20px)', animation: 'slideUp 0.7s ease-out 0.3s both', boxShadow: '0 16px 48px rgba(0,0,0,0.4)' }}>
+        <div style={{ background: 'linear-gradient(145deg, rgba(12,18,32,0.95), rgba(10,15,26,0.95))', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 20, padding: '22px 20px', marginBottom: 18, backdropFilter: 'blur(20px)', animation: 'fadeIn 0.2s ease-out both', boxShadow: '0 16px 48px rgba(0,0,0,0.4)' }}>
 
           {/* Header */}
           <div style={{ textAlign: 'center', marginBottom: 22 }}>
@@ -303,7 +303,7 @@ const RegisterPageMobile = () => {
         </div>
 
         {/* Benefits */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 20, animation: 'fadeIn 0.8s ease-out 0.6s both' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 20, animation: 'fadeIn 0.2s ease-out both' }}>
           {[
             { icon: '🎁', title: 'Free to Join', desc: 'No hidden fees', bg: 'rgba(16,185,129,0.08)', border: 'rgba(16,185,129,0.2)' },
             { icon: '🏆', title: 'Track Progress', desc: 'Live stats', bg: 'rgba(245,158,11,0.08)', border: 'rgba(245,158,11,0.2)' },

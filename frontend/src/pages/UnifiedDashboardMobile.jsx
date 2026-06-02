@@ -392,7 +392,7 @@ const UnifiedDashboardMobile = () => {
       <div className="px-4 py-6 max-w-md mx-auto relative z-10">
 
         {/* ── Quick Navigation ── */}
-        <div className="mb-8" style={{ animation: 'fadeIn 0.5s ease-out both' }}>
+        <div className="mb-8" style={{ animation: 'fadeIn 0.2s ease-out both' }}>
           <div className="flex items-center gap-2 mb-4 px-1">
             <span className="text-xs font-black uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.35)', letterSpacing: '0.15em' }}>Quick Access</span>
           </div>
@@ -457,7 +457,7 @@ const UnifiedDashboardMobile = () => {
             background: 'linear-gradient(135deg, #060f24 0%, #0b1a42 35%, #11093a 65%, #060f24 100%)',
             border: '1px solid rgba(245,158,11,0.30)',
             boxShadow: '0 0 48px rgba(245,158,11,0.14), 0 16px 48px rgba(0,0,0,0.65)',
-            animation: 'fadeIn 0.6s ease-out 0.1s both',
+            animation: 'fadeIn 0.2s ease-out both',
           }}>
             {/* aurora glows */}
             <div style={{ position:'absolute', inset:0, background:'radial-gradient(ellipse at 5% 90%, rgba(245,158,11,0.28) 0%, transparent 55%)' }} />
@@ -521,7 +521,7 @@ const UnifiedDashboardMobile = () => {
             backdropFilter: 'blur(28px)',
             WebkitBackdropFilter: 'blur(28px)',
             boxShadow: '0 12px 48px rgba(0,0,0,0.65)',
-            animation: 'fadeIn 0.8s ease-out 0.2s both',
+            animation: 'fadeIn 0.2s ease-out both',
           }}>
 
           {/* ── Banner ── */}
@@ -637,7 +637,7 @@ const UnifiedDashboardMobile = () => {
               background: 'rgba(12,18,32,0.9)',
               border: '1px solid rgba(255,255,255,0.08)',
               boxShadow: '0 4px 28px rgba(0,0,0,0.4)',
-              animation: 'slideUp 0.8s ease-out 0.4s both'
+              animation: 'fadeIn 0.2s ease-out both'
             }}
           >
             <div>
@@ -689,7 +689,7 @@ const UnifiedDashboardMobile = () => {
               background: 'rgba(12,18,32,0.9)',
               border: '1px solid rgba(255,255,255,0.08)',
               boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
-              animation: 'slideUp 0.8s ease-out 0.4s both'
+              animation: 'fadeIn 0.2s ease-out both'
             }}
           >
             <div>
@@ -862,7 +862,7 @@ const UnifiedDashboardMobile = () => {
               background: 'rgba(255,255,255,0.04)',
               border: '1px solid rgba(255,255,255,0.08)',
               boxShadow: '0 4px 24px rgba(0,0,0,0.3)',
-              animation: 'slideUp 0.8s ease-out 0.4s both'
+              animation: 'fadeIn 0.2s ease-out both'
             }}
           >
             <div className="flex items-center gap-3 mb-4">
@@ -982,7 +982,7 @@ const UnifiedDashboardMobile = () => {
             background: 'rgba(255,255,255,0.04)',
             border: '1px solid rgba(255,255,255,0.10)',
             boxShadow: '0 4px 20px rgba(0,0,0,0.32)',
-            animation: 'fadeIn 0.8s ease-out 0.7s both'
+            animation: 'fadeIn 0.2s ease-out both'
           }}
         >
           <div>
@@ -1058,7 +1058,7 @@ const UnifiedDashboardMobile = () => {
             background: 'rgba(255,255,255,0.04)',
             border: '1px solid rgba(255,255,255,0.10)',
             boxShadow: '0 4px 20px rgba(0,0,0,0.32)',
-            animation: 'fadeIn 0.8s ease-out 0.8s both'
+            animation: 'fadeIn 0.2s ease-out both'
           }}
         >
           <div className="p-5 border-b flex items-center justify-between" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
@@ -1190,7 +1190,7 @@ const UnifiedDashboardMobile = () => {
             background: 'rgba(255,255,255,0.04)',
             border: '1px solid rgba(255,255,255,0.10)',
             boxShadow: '0 4px 24px rgba(0,0,0,0.30)',
-            animation: 'fadeIn 0.8s ease-out 0.9s both'
+            animation: 'fadeIn 0.2s ease-out both'
           }}
         >
           <div className="flex items-center gap-2.5 mb-4">

@@ -877,7 +877,7 @@ const TournamentDetailPage = () => {
               </div>
               
               {tournament.categories && tournament.categories.length > 0 ? (
-                <div className="space-y-3">
+                <div className="flex gap-3 overflow-x-auto pb-2" style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}>
                   {tournament.categories.map((category) => {
                     // Parse scoring format for display
                     const getScoringDisplay = () => {
@@ -913,7 +913,8 @@ const TournamentDetailPage = () => {
                     return (
                     <div
                       key={category.id}
-                      className="rounded-xl p-4 border transition-all" style={{ background: 'rgba(0,0,0,0.2)', borderColor: 'rgba(255,255,255,0.08)' }}
+                      className="rounded-xl p-4 border transition-all flex-shrink-0 flex flex-col"
+                      style={{ background: 'rgba(0,0,0,0.2)', borderColor: 'rgba(255,255,255,0.08)', width: '220px', scrollSnapAlign: 'start' }}
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex-1 min-w-0">
@@ -1016,6 +1017,19 @@ const TournamentDetailPage = () => {
                           </div>
                         </div>
                       )}
+                      {/* View Draw button */}
+                      <button
+                        onClick={() => navigate(`/tournaments/${id}/draws/${category.id}`)}
+                        className="mt-3 w-full py-2 rounded-lg text-xs font-bold transition-all active:scale-95 flex items-center justify-center gap-1.5"
+                        style={{
+                          background: 'rgba(245,158,11,0.12)',
+                          border: '1px solid rgba(245,158,11,0.3)',
+                          color: '#F59E0B',
+                        }}
+                      >
+                        <TrophyIcon className="w-3.5 h-3.5" />
+                        View Draw
+                      </button>
                     </div>
                     );
                   })}

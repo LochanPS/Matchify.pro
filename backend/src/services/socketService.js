@@ -1,11 +1,12 @@
 import { Server } from 'socket.io';
+import { getPubClient, getSubClient, isRedisConnected } from './redisService.js';
 
 let io = null;
 
 /**
- * Initialize Socket.IO server
+ * Initialize Socket.IO server with optional Redis adapter
  */
-export function initializeSocket(server) {
+export async function initializeSocket(server) {
   io = new Server(server, {
     cors: {
       origin: function(origin, callback) {
@@ -38,6 +39,17 @@ export function initializeSocket(server) {
       credentials: true
     }
   });
+
+  // Attach Redis adapter if Redis is connected
+  if (isRedisConnected()) {
+    try {
+      const { createAdapter } = await import('@socket.io/redis-adapter');
+      io.adapter(createAdapter(getPubClient(), getSubClient()));
+      console.log('✅ Socket.IO Redis adapter attached');
+    } catch (err) {
+      console.warn('⚠️  Socket.IO Redis adapter failed, using in-memory:', err.message);
+    }
+  }
 
   io.on('connection', (socket) => {
     console.log('Client connected:', socket.id);

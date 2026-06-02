@@ -91,6 +91,7 @@ import {
 // Import services
 import { initEmailService } from './services/email.service.js';
 import { initializeSocket } from './services/socketService.js';
+import { initRedis } from './services/redisService.js';
 import { createServer } from 'http';
 import prisma from './lib/prisma.js';
 
@@ -553,8 +554,9 @@ app.use((err, req, res, next) => {
 if (!process.env.VERCEL) {
   const httpServer = createServer(app);
 
-  // Initialize Socket.IO
-  const io = initializeSocket(httpServer);
+  // Init Redis first, then Socket.IO (Redis adapter needs to be ready)
+  await initRedis();
+  const io = await initializeSocket(httpServer);
   console.log('✅ Socket.IO initialized');
 
   httpServer.listen(PORT, () => {

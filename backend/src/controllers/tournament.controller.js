@@ -3,6 +3,7 @@ import prisma from '../lib/prisma.js';
 import cloudinary from '../config/cloudinary.js';
 import multer from 'multer';
 import notificationService from '../services/notificationService.js';
+import { cacheGet, cacheSet, cacheDel } from '../services/redisService.js';
 import tournamentPointsService from '../services/tournamentPoints.service.js';
 import { PLATFORM_FEE_PERCENT } from '../config/constants.js';
 
@@ -513,33 +514,26 @@ const getTournaments = async (req, res) => {
   }
 };
 
-// GET /api/tournaments/:id - Get single tournament
+// GET /api/tournaments/:id - Get single tournament (cached 30s)
 const getTournament = async (req, res) => {
   try {
     const { id } = req.params;
+    const cacheKey = `tournament:${id}`;
+
+    const cached = await cacheGet(cacheKey);
+    if (cached) {
+      return res.json({ ...cached, cached: true });
+    }
 
     const tournament = await prisma.tournament.findUnique({
       where: { id },
       include: {
         organizer: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            phone: true,
-          },
+          select: { id: true, name: true, email: true, phone: true },
         },
-        posters: {
-          orderBy: { displayOrder: 'asc' },
-        },
-        categories: {
-          orderBy: { createdAt: 'asc' },
-        },
-        _count: {
-          select: {
-            registrations: true,
-          },
-        },
+        posters: { orderBy: { displayOrder: 'asc' } },
+        categories: { orderBy: { createdAt: 'asc' } },
+        _count: { select: { registrations: true } },
       },
     });
 
@@ -547,10 +541,10 @@ const getTournament = async (req, res) => {
       return res.status(404).json({ success: false, error: 'Tournament not found' });
     }
 
-    res.json({
-      success: true,
-      data: tournament,
-    });
+    const result = { success: true, data: tournament };
+    await cacheSet(cacheKey, result, 30); // 30s TTL — short enough to stay fresh
+
+    res.json(result);
   } catch (error) {
     console.error('Get tournament error:', error);
     res.status(500).json({ success: false, error: 'Failed to fetch tournament' });
@@ -625,6 +619,9 @@ const updateTournament = async (req, res) => {
       where: { id },
       data: updateData,
     });
+
+    // Bust tournament cache so next fetch gets fresh data
+    await cacheDel(`tournament:${id}`);
 
     res.json({
       success: true,

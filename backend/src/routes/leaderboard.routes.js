@@ -2,44 +2,36 @@ import express from 'express';
 import tournamentPointsService from '../services/tournamentPoints.service.js';
 import { authenticate } from '../middleware/auth.js';
 import prisma from '../lib/prisma.js';
+import { cacheGet, cacheSet } from '../services/redisService.js';
 
 const router = express.Router();
 
 /**
  * Get leaderboard with geographical filters
  * GET /api/leaderboard?scope=country&city=Mumbai&state=Maharashtra&limit=100
+ * Cached 2 minutes — leaderboard doesn't need to be real-time
  */
 router.get('/', async (req, res) => {
-  console.log('🎯 LEADERBOARD ROUTE HIT!');
-  console.log('Query params:', req.query);
-  
   try {
     const { limit = 100, scope = 'country', city, state } = req.query;
-    
-    console.log('Calling getLeaderboard with:', { limit, scope, city, state });
-    
+    const cacheKey = `leaderboard:${scope}:${city || ''}:${state || ''}:${limit}`;
+
+    const cached = await cacheGet(cacheKey);
+    if (cached) {
+      return res.json({ ...cached, cached: true });
+    }
+
     const leaderboard = await tournamentPointsService.getLeaderboard(
-      parseInt(limit),
-      scope,
-      city,
-      state
+      parseInt(limit), scope, city, state
     );
-    
-    console.log(`✅ Leaderboard fetched: ${leaderboard.length} players`);
-    
-    res.json({
-      success: true,
-      leaderboard,
-      total: leaderboard.length,
-      scope,
-      filters: { city, state }
-    });
+
+    const result = { success: true, leaderboard, total: leaderboard.length, scope, filters: { city, state } };
+    await cacheSet(cacheKey, result, 120); // 2 min TTL
+
+    res.json(result);
   } catch (error) {
     console.error('❌ Get leaderboard error:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to fetch leaderboard'
-    });
+    res.status(500).json({ success: false, error: 'Failed to fetch leaderboard' });
   }
 });
 
@@ -109,6 +101,9 @@ router.get('/player/:userId', async (req, res) => {
  */
 router.get('/platform-stats', async (req, res) => {
   try {
+    const cached = await cacheGet('platform-stats');
+    if (cached) return res.json({ ...cached, cached: true });
+
     const [playerCount, tournamentCount, cityCount] = await Promise.all([
       prisma.user.count({ where: { isActive: true, NOT: { roles: { contains: 'ADMIN' } } } }),
       prisma.tournament.count({ where: { status: { not: 'draft' } } }),
@@ -119,14 +114,12 @@ router.get('/platform-stats', async (req, res) => {
       }),
     ]);
 
-    res.json({
+    const result = {
       success: true,
-      stats: {
-        players: playerCount,
-        tournaments: tournamentCount,
-        cities: cityCount.length,
-      },
-    });
+      stats: { players: playerCount, tournaments: tournamentCount, cities: cityCount.length },
+    };
+    await cacheSet('platform-stats', result, 300); // 5 min TTL
+    res.json(result);
   } catch (error) {
     console.error('Platform stats error:', error);
     res.status(500).json({ success: false, error: 'Failed to fetch stats' });

@@ -215,8 +215,8 @@ export default function AcademyDetailPage() {
   const lbPrev = (e) => { e.stopPropagation(); setLightboxIndex(i => (i - 1 + photos.length) % photos.length); };
   const lbNext = (e) => { e.stopPropagation(); setLightboxIndex(i => (i + 1) % photos.length); };
 
-  // bottom bar height: edit/share row (64px) + book cta (80px if courts)
-  const bottomBarH = 64 + (courts.length > 0 ? 80 : 0);
+  // bottom bar: edit row only shown to owner (64px), + book cta (80px if courts)
+  const bottomBarH = (isOwner ? 64 : 0) + (courts.length > 0 ? 80 : 0);
 
   const Section = ({ title, accent = B.cyan, children }) => (
     <div className="rounded-2xl overflow-hidden"
@@ -311,26 +311,13 @@ export default function AcademyDetailPage() {
             <div className="absolute inset-0 pointer-events-none"
               style={{ background: 'linear-gradient(to bottom, rgba(5,8,16,0.3) 0%, transparent 30%, rgba(5,8,16,0.7) 100%)' }} />
 
-            {/* CENTER "tap to enlarge" overlay — clickable */}
+            {/* Tap anywhere on photo to open lightbox */}
             <button
               onClick={() => openLightbox(photoIndex)}
-              className="absolute inset-0 flex flex-col items-center justify-center gap-2 transition-opacity"
-              style={{ background: 'transparent' }}>
-              <div className="flex flex-col items-center gap-1.5 px-5 py-3 rounded-2xl"
-                style={{
-                  background: 'rgba(0,0,0,0.45)',
-                  backdropFilter: 'blur(8px)',
-                  border: '1px solid rgba(255,255,255,0.18)',
-                }}>
-                <span style={{ fontSize: 26 }}>🔍</span>
-                <span className="text-xs font-black text-white tracking-wide">Tap to view photos</span>
-                {photos.length > 1 && (
-                  <span className="text-xs font-semibold" style={{ color: 'rgba(255,255,255,0.55)' }}>
-                    {photos.length} photos
-                  </span>
-                )}
-              </div>
-            </button>
+              className="absolute inset-0"
+              style={{ background: 'transparent' }}
+              aria-label="View photos"
+            />
 
             {/* Slide arrows */}
             {photos.length > 1 && (
@@ -376,14 +363,28 @@ export default function AcademyDetailPage() {
           <ArrowLeft className="w-5 h-5 text-white" />
         </button>
 
-        {/* Verified badge */}
-        {academy.isVerified && (
-          <div className="absolute top-4 right-4 flex items-center gap-1.5 px-3 py-1.5 rounded-full"
-            style={{ background: 'rgba(245,158,11,0.92)', backdropFilter: 'blur(6px)' }}>
-            <BadgeCheck className="w-3.5 h-3.5" style={{ color: '#050810' }} />
-            <span className="text-xs font-black" style={{ color: '#050810' }}>Verified</span>
-          </div>
-        )}
+        {/* Top-right: Share + Verified */}
+        <div className="absolute top-4 right-4 flex items-center gap-2">
+          <button
+            onClick={e => { e.stopPropagation(); handleShare(); }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-semibold text-sm"
+            style={{
+              background: 'rgba(0,0,0,0.55)',
+              backdropFilter: 'blur(8px)',
+              color: 'rgba(255,255,255,0.9)',
+              border: '1px solid rgba(255,255,255,0.18)',
+            }}>
+            <Share2 className="w-3.5 h-3.5" />
+            Share
+          </button>
+          {academy.isVerified && (
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
+              style={{ background: 'rgba(245,158,11,0.92)', backdropFilter: 'blur(6px)' }}>
+              <BadgeCheck className="w-3.5 h-3.5" style={{ color: '#050810' }} />
+              <span className="text-xs font-black" style={{ color: '#050810' }}>Verified</span>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* ── Name + meta ── */}
@@ -428,30 +429,6 @@ export default function AcademyDetailPage() {
 
       {/* ── Sections ── */}
       <div className="relative z-10 px-4 pt-4 space-y-3">
-
-        {/* Photos grid */}
-        {photos.length > 0 && (
-          <Section title={`Photos (${photos.length})`} accent={B.cyan}>
-            <div className="grid grid-cols-3 gap-1.5">
-              {photos.slice(0, 9).map((url, i) => (
-                <div
-                  key={i}
-                  className="relative overflow-hidden rounded-xl cursor-pointer active:scale-95 transition-transform"
-                  style={{ aspectRatio: '1', background: 'rgba(255,255,255,0.04)' }}
-                  onClick={() => openLightbox(i)}
-                >
-                  <img src={url} alt="" className="w-full h-full object-cover" />
-                  {i === 8 && photos.length > 9 && (
-                    <div className="absolute inset-0 flex items-center justify-center rounded-xl"
-                      style={{ background: 'rgba(0,0,0,0.65)' }}>
-                      <span className="text-base font-black text-white">+{photos.length - 9}</span>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </Section>
-        )}
 
         {/* Location */}
         <Section title="Location" accent={B.cyan}>
@@ -667,34 +644,12 @@ export default function AcademyDetailPage() {
       <div className="fixed bottom-0 left-0 right-0 z-40"
         style={{ background: 'linear-gradient(to top, rgba(5,8,16,0.99) 0%, rgba(5,8,16,0.96) 60%, transparent 100%)' }}>
 
-        {/* Share + Edit row */}
-        <div className="px-4 pt-4 pb-3 flex items-center gap-3">
-          {/* Share — always visible */}
-          <button
-            onClick={handleShare}
-            className="flex-1 py-3.5 rounded-2xl text-sm font-black flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
-            style={{
-              background: copied
-                ? 'linear-gradient(135deg, rgba(34,197,94,0.22), rgba(34,197,94,0.10))'
-                : 'linear-gradient(135deg, rgba(251,191,36,0.18), rgba(249,115,22,0.10))',
-              border: copied
-                ? '1px solid rgba(34,197,94,0.4)'
-                : '1px solid rgba(251,191,36,0.35)',
-              color: copied ? '#4ade80' : '#fbbf24',
-              boxShadow: copied
-                ? '0 0 16px rgba(34,197,94,0.12)'
-                : '0 0 16px rgba(251,191,36,0.10)',
-            }}>
-            {copied
-              ? <><Check className="w-4 h-4" /> Link Copied!</>
-              : <><Share2 className="w-4 h-4" /> Share Academy</>}
-          </button>
-
-          {/* Edit — owner only */}
-          {isOwner && (
+        {/* Edit row — owner only */}
+        {isOwner && (
+          <div className="px-4 pt-4 pb-3">
             <button
               onClick={() => navigate(`/academies/${id}/edit`)}
-              className="flex-1 py-3.5 rounded-2xl text-sm font-black flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+              className="w-full py-3.5 rounded-2xl text-sm font-black flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
               style={{
                 background: 'linear-gradient(135deg, rgba(245,158,11,0.22), rgba(34,211,238,0.10))',
                 border: '1px solid rgba(245,158,11,0.45)',
@@ -704,8 +659,8 @@ export default function AcademyDetailPage() {
               <Pencil className="w-4 h-4" />
               Edit Academy
             </button>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Book CTA */}
         {courts.length > 0 && (

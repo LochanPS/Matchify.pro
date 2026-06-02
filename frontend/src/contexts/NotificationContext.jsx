@@ -118,7 +118,7 @@ export const NotificationProvider = ({ children }) => {
       return;
     }
     fetchUnreadCount();
-    const interval = setInterval(fetchUnreadCount, 90000);
+    const interval = setInterval(fetchUnreadCount, 180000); // 3 min — Socket.IO handles real-time
     return () => clearInterval(interval);
   }, [user]);
 

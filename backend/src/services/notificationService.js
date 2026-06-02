@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import prisma from '../lib/prisma.js';
 import emailService from './emailService.js';
+import { cacheDel } from './redisService.js';
 
 // Notification types enum (for reference)
 const NotificationType = {
@@ -25,6 +26,9 @@ class NotificationService {
    */
   async createNotification({ userId, type, title, message, data = null, sendEmail = true }) {
     try {
+      // Bust unread count cache so bell updates on next poll
+      await cacheDel(`notif:unread:${userId}`);
+
       // 1. Create in-app notification
       const notification = await prisma.notification.create({
         data: {

@@ -32,7 +32,7 @@ const AdminDashboardPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-900 p-4 sm:p-8">
+      <div className="min-h-screen bg-slate-900 p-3 sm:p-6 lg:p-8">
         <div className="animate-pulse">
           <div className="h-8 bg-slate-700 rounded w-1/4 mb-8"></div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -47,7 +47,7 @@ const AdminDashboardPage = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-slate-900 p-4 sm:p-8">
+      <div className="min-h-screen bg-slate-900 p-3 sm:p-6 lg:p-8">
         <div className="bg-red-900/20 border border-red-700 rounded-lg p-4 text-red-400">
           {error}
         </div>
@@ -56,7 +56,7 @@ const AdminDashboardPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 p-4 sm:p-8">
+    <div className="min-h-screen bg-slate-900 p-3 sm:p-6 lg:p-8">
       {/* Back Button */}
       <button
         onClick={() => window.history.back()}
@@ -130,7 +130,7 @@ const AdminDashboardPage = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
         <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-lg">
           <div className="flex items-center justify-between mb-4">
             <span className="text-4xl">👥</span>
@@ -197,7 +197,7 @@ const AdminDashboardPage = () => {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6 mb-6 sm:mb-8">
         <Link to="/admin/payment-verifications" className="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-lg hover:shadow-teal-500/50 transition group">
           <div className="text-4xl mb-4 group-hover:scale-110 transition-transform">💳</div>
           <h3 className="text-xl font-bold text-white mb-2 group-hover:text-teal-400 transition">

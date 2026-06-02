@@ -121,7 +121,7 @@ const UserManagementPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 p-4 sm:p-8">
+    <div className="min-h-screen bg-slate-900 p-3 sm:p-6 lg:p-8">
       {/* Back Button */}
       <button
         onClick={() => navigate(-1)}
@@ -139,9 +139,9 @@ const UserManagementPage = () => {
 
       {/* Filters */}
       <div className="bg-slate-800 border border-slate-700 rounded-xl p-4 mb-6">
-        <form onSubmit={handleSearch} className="flex flex-wrap items-end gap-3">
+        <form onSubmit={handleSearch} className="flex flex-wrap items-end gap-2 sm:gap-3">
           {/* Search */}
-          <div className="flex-1 min-w-[250px]">
+          <div className="flex-1 min-w-[160px]">
             <label className="block text-xs font-medium text-gray-400 mb-1">
               Search
             </label>

@@ -89,13 +89,13 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-slate-900">
       {/* Header */}
-      <div className="bg-slate-800 border-b border-slate-700">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-8">
-              <MatchifyLogo size={40} variant="full" />
+      <div className="bg-slate-800 border-b border-slate-700 sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 sm:gap-6 min-w-0">
+              <MatchifyLogo size={36} variant="full" />
               <div className="flex items-center gap-2">
-                <span className="px-3 py-1 bg-red-600 text-white text-sm font-bold rounded">
+                <span className="px-2 py-0.5 bg-red-600 text-white text-xs font-bold rounded">
                   ADMIN
                 </span>
                 <NotificationBell />
@@ -103,19 +103,19 @@ export default function AdminDashboard() {
             </div>
             <button
               onClick={handleLogout}
-              className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition"
+              className="flex items-center gap-1.5 px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition text-sm flex-shrink-0"
             >
               <LogOut className="w-4 h-4" />
-              Logout
+              <span className="hidden sm:inline">Logout</span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* Top Navigation Tabs */}
+      {/* Top Navigation Tabs — horizontally scrollable on mobile */}
       <div className="bg-slate-800 border-b border-slate-700">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex gap-1">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="flex gap-0 overflow-x-auto scrollbar-hide">
             {[
               { id: 'dashboard', label: 'Dashboard', url: null },
               { id: 'users', label: 'Users', url: '/admin/users' },
@@ -130,13 +130,12 @@ export default function AdminDashboard() {
                   e.preventDefault();
                   e.stopPropagation();
                   if (tab.url) {
-                    console.log(`Navigating to ${tab.url}`);
                     window.location.href = tab.url;
                   } else {
                     setActiveTab(tab.id);
                   }
                 }}
-                className={`px-6 py-4 font-medium transition cursor-pointer ${
+                className={`px-4 py-3 text-sm font-medium transition cursor-pointer whitespace-nowrap flex-shrink-0 ${
                   activeTab === tab.id
                     ? 'text-teal-400 border-b-2 border-teal-400'
                     : 'text-gray-400 hover:text-white'
@@ -150,9 +149,9 @@ export default function AdminDashboard() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
           {/* Total Users */}
           <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
             <div className="flex items-center justify-between mb-4">
@@ -199,7 +198,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Action Buttons */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
           {/* QR Settings */}
           <div className="relative group">
             <div className="absolute -inset-1 bg-gradient-to-r from-teal-500 to-cyan-500 rounded-2xl blur-lg opacity-50 group-hover:opacity-100 transition duration-300"></div>

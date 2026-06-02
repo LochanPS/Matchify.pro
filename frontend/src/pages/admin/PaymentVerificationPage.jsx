@@ -83,16 +83,16 @@ const PaymentVerificationPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 p-6">
+    <div className="min-h-screen bg-slate-900 p-3 sm:p-6">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">Payment Verification</h1>
-        <p className="text-gray-400">Review and approve player payment screenshots</p>
+      <div className="mb-5 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1">Payment Verification</h1>
+        <p className="text-gray-400 text-sm">Review and approve player payment screenshots</p>
       </div>
 
       {/* Stats Cards */}
       {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-6 mb-5 sm:mb-8">
           <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-lg hover:shadow-teal-500/20 transition">
             <div className="flex items-center justify-between">
               <div>
@@ -138,12 +138,12 @@ const PaymentVerificationPage = () => {
       )}
 
       {/* Filters */}
-      <div className="flex gap-4 mb-6">
+      <div className="flex gap-2 mb-5 sm:mb-6">
         {['pending', 'approved', 'rejected'].map((status) => (
           <button
             key={status}
             onClick={() => setFilter(status)}
-            className={`px-6 py-2 rounded-lg font-medium transition ${
+            className={`flex-1 sm:flex-none px-4 sm:px-6 py-2 rounded-lg font-medium transition text-sm ${
               filter === status
                 ? 'bg-teal-600 text-white shadow-lg shadow-teal-500/50'
                 : 'bg-slate-800 text-gray-400 hover:bg-slate-700'
@@ -166,7 +166,7 @@ const PaymentVerificationPage = () => {
               key={verification.id}
               className="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-lg hover:shadow-teal-500/20 transition"
             >
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
                 {/* Payment Screenshot */}
                 <div className="lg:col-span-1">
                   {verification.paymentScreenshot ? (

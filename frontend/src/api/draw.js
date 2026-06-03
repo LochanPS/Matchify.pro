@@ -1,6 +1,6 @@
 import api from '../utils/api';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://matchify-probackend.vercel.app/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://matchify-backend-production-cb58.up.railway.app/api';
 
 export const drawAPI = {
   // Fetch bracket structure for a category

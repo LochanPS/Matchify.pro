@@ -13,7 +13,7 @@ export const useWebSocket = () => {
 
 // Get WebSocket URL from API URL
 const getWebSocketUrl = () => {
-  const apiUrl = import.meta.env.VITE_API_URL || 'https://matchify-probackend.vercel.app/api';
+  const apiUrl = import.meta.env.VITE_API_URL || 'https://matchify-backend-production-cb58.up.railway.app/api';
   // Remove /api suffix for WebSocket connection
   const baseUrl = apiUrl.replace('/api', '');
   return baseUrl;

@@ -26,7 +26,6 @@ const UserManagementPage = () => {
   const [alertModal, setAlertModal] = useState(null);
   const [unsuspendModal, setUnsuspendModal] = useState(null);
   const [loginAsModal, setLoginAsModal] = useState(null);
-  const [loginAsPasscode, setLoginAsPasscode] = useState('');
 
   useEffect(() => {
     console.log('🔄 UserManagement v2.0: Fetching users - WITH ACTION BUTTONS');
@@ -94,29 +93,17 @@ const UserManagementPage = () => {
 
   const handleLoginAs = (user) => {
     setLoginAsModal(user);
-    setLoginAsPasscode('');
   };
 
   const confirmLoginAs = async () => {
-    // Verify passcode
-    if (loginAsPasscode !== 'Pradyu@123(123)') {
-      setAlertModal({ type: 'error', message: 'Invalid passcode' });
-      return;
-    }
-
     try {
       const response = await adminService.loginAsUser(loginAsModal.id);
-      
-      // Store the new token AND user data
       localStorage.setItem('token', response.token);
       localStorage.setItem('user', JSON.stringify(response.user));
-      
-      // Reload the page to apply the new user context
       window.location.href = '/dashboard';
     } catch (err) {
       setAlertModal({ type: 'error', message: err.response?.data?.message || 'Failed to login as user' });
       setLoginAsModal(null);
-      setLoginAsPasscode('');
     }
   };
 
@@ -571,10 +558,7 @@ const UserManagementPage = () => {
                     <h2 className="text-xl font-bold text-white">Login as User</h2>
                   </div>
                   <button
-                    onClick={() => {
-                      setLoginAsModal(null);
-                      setLoginAsPasscode('');
-                    }}
+                    onClick={() => setLoginAsModal(null)}
                     className="p-2 hover:bg-white/10 rounded-lg transition-colors"
                   >
                     <X className="w-5 h-5 text-gray-400" />
@@ -594,31 +578,14 @@ const UserManagementPage = () => {
                   </p>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Admin Passcode *
-                  </label>
-                  <input
-                    type="password"
-                    value={loginAsPasscode}
-                    onChange={(e) => setLoginAsPasscode(e.target.value)}
-                    placeholder="Enter special passcode..."
-                    className="w-full px-4 py-3 bg-slate-700 border border-slate-600 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400"
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter') {
-                        confirmLoginAs();
-                      }
-                    }}
-                  />
+                <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3">
+                  <p className="text-yellow-400 text-xs">⚠️ This action is logged in the audit trail.</p>
                 </div>
               </div>
 
               <div className="p-6 bg-slate-900/50 border-t border-white/10 flex gap-3">
                 <button
-                  onClick={() => {
-                    setLoginAsModal(null);
-                    setLoginAsPasscode('');
-                  }}
+                  onClick={() => setLoginAsModal(null)}
                   className="flex-1 px-4 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl transition-colors font-medium"
                 >
                   Cancel

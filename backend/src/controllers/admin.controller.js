@@ -465,49 +465,41 @@ class AdminController {
         });
       }
 
-      // Handle hardcoded admin
+      // Legacy 'admin' hardcoded ID — look up real admin from DB instead
       if (adminId === 'admin') {
-        console.log('👑 Returning to hardcoded admin');
-        
-        // Generate admin JWT
-        const token = jwt.sign(
-          { userId: 'admin', email: 'ADMIN@gmail.com', roles: ['ADMIN'], isAdmin: true },
-          process.env.JWT_SECRET,
-          { expiresIn: '7d' }
-        );
-
-        // Log the return action
-        try {
-          await AuditLogService.log({
-            adminId: 'admin',
-            action: 'RETURN_FROM_IMPERSONATION',
-            entityType: 'USER',
-            entityId: req.user.userId,
-            details: {
-              returnedFrom: req.user.email,
-              adminType: 'admin'
-            },
-            ipAddress: req.ip,
-            userAgent: req.get('user-agent'),
-          });
-          console.log('📝 Audit log created');
-        } catch (auditError) {
-          console.error('⚠️ Audit log failed (non-critical):', auditError.message);
-        }
-
-        console.log('✅ Returning admin success response');
-        return res.json({
-          success: true,
-          message: 'Returned to admin account',
-          token,
-          user: {
-            id: 'admin',
-            email: 'ADMIN@gmail.com',
-            name: 'Admin',
-            roles: ['ADMIN'],
-            isAdmin: true,
-          },
+        console.log('👑 Legacy admin ID — looking up real admin from DB');
+        const realAdmin = await prisma.user.findFirst({
+          where: { roles: { contains: 'ADMIN' } },
+          select: { id: true, email: true, name: true, roles: true, phone: true, city: true, state: true, profilePhoto: true, walletBalance: true },
         });
+        if (realAdmin) {
+          const token = jwt.sign(
+            { userId: realAdmin.id, email: realAdmin.email, roles: ['ADMIN'] },
+            process.env.JWT_SECRET,
+            { expiresIn: '24h' }
+          );
+          try {
+            await AuditLogService.log({
+              adminId: realAdmin.id,
+              action: 'RETURN_FROM_IMPERSONATION',
+              entityType: 'USER',
+              entityId: req.user.userId,
+              details: { returnedFrom: req.user.email },
+              ipAddress: req.ip,
+              userAgent: req.get('user-agent'),
+            });
+          } catch (auditError) {
+            console.error('⚠️ Audit log failed (non-critical):', auditError.message);
+          }
+          return res.json({
+            success: true,
+            message: 'Returned to admin account',
+            token,
+            user: { ...realAdmin, roles: ['ADMIN'], isAdmin: true },
+          });
+        }
+        // No admin found in DB — fail safely
+        return res.status(404).json({ success: false, message: 'Admin account not found' });
       }
 
       // Get the admin user from database

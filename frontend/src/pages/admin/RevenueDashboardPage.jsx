@@ -492,7 +492,7 @@ const RevenueDashboardPage = () => {
                 disabled={deleting}
               />
               <p className="text-xs text-gray-500 mt-2 bg-slate-950 p-2 rounded border border-slate-700">
-                Password: Pradyu@123(123)(123)
+                Enter admin password to confirm
               </p>
             </div>
 
@@ -583,7 +583,7 @@ const RevenueDashboardPage = () => {
                 autoFocus
               />
               <p className="text-xs text-red-400 mt-2 font-bold bg-black/50 p-2 rounded border border-red-700">
-                Password: Pradyu@123(123)(123)
+                Enter admin password to confirm
               </p>
             </div>
 

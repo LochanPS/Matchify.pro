@@ -22,7 +22,7 @@
 export async function fetchUpload(path, formData, { method = 'POST', timeoutMs = 120000 } = {}) {
   const token = localStorage.getItem('token');
   // Derive base URL the same way api.js does so env config is respected.
-  const baseUrl = import.meta.env.VITE_API_URL || 'https://matchify-probackend.vercel.app/api';
+  const baseUrl = import.meta.env.VITE_API_URL || 'https://matchify-backend-production-cb58.up.railway.app/api';
   const url = `${baseUrl}${path}`;
 
   const controller = new AbortController();

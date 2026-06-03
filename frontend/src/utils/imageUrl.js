@@ -5,7 +5,7 @@
 export const getImageUrl = (url) => {
   if (!url) return null;
   if (url.startsWith('/uploads')) {
-    const baseUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://matchify-probackend.vercel.app';
+    const baseUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://matchify-backend-production-cb58.up.railway.app';
     return `${baseUrl}${url}`;
   }
   return url;

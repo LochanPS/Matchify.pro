@@ -93,9 +93,9 @@ router.post('/:tournamentId/categories/:categoryId/draw/restart', authenticate, 
 // IMPORTANT: This route MUST be before the generic /:id/categories/:categoryId route
 router.put('/:tournamentId/categories/:categoryId/end', authenticate, endCategory);
 
-// Protected routes (require authentication + block admins)
+// Protected routes (require authentication)
+// NOTE: preventAdminAccess removed — admin must be able to create/manage tournaments
 router.use(authenticate);
-router.use(preventAdminAccess);
 
 // POST /api/tournaments - Create tournament (NO KYC REQUIRED)
 router.post('/', createTournament);

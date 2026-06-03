@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Use environment variable with fallback
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://matchify-probackend.vercel.app/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://matchify-backend-production-cb58.up.railway.app/api';
 
 if (import.meta.env.DEV) {
   console.log('🔧 API Base URL:', API_BASE_URL);

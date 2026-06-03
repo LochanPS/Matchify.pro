@@ -1,6 +1,6 @@
 import { io } from 'socket.io-client';
 
-const SOCKET_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://matchify-probackend.vercel.app';
+const SOCKET_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://matchify-backend-production-cb58.up.railway.app';
 
 let socket = null;
 

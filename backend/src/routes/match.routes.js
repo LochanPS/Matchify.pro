@@ -3,6 +3,15 @@ import prisma from '../lib/prisma.js';
 import { authenticate, authorize, optionalAuth } from '../middleware/auth.js';
 import { assignUmpire, getUmpireMatches } from '../controllers/match.controller.js';
 import { broadcastScoreUpdate, broadcastMatchStatus, broadcastMatchComplete, broadcastToTournament } from '../services/socketService.js';
+import { cacheDel } from '../services/redisService.js';
+import { getDrawPageCacheKey } from '../controllers/drawPage.controller.js';
+
+// Invalidate draw cache silently after any score/status change
+async function invalidateDrawCache(match) {
+  if (match?.tournamentId && match?.categoryId) {
+    cacheDel(getDrawPageCacheKey(match.tournamentId, match.categoryId)).catch(() => {});
+  }
+}
 
 const router = express.Router();
 
@@ -183,6 +192,7 @@ router.put('/:matchId/undo', authenticate, async (req, res) => {
     });
 
     broadcastScoreUpdate(matchId, score);
+    invalidateDrawCache(updated);
     res.json({ success: true, message: 'Last point undone', score });
   } catch (error) {
     console.error('Error undoing point:', error);
@@ -392,6 +402,7 @@ router.put('/:matchId/score', authenticate, async (req, res) => {
     });
 
     broadcastScoreUpdate(matchId, score);
+    invalidateDrawCache(updatedMatch);
 
     res.json({ success: true, message: 'Score updated', score, data: updatedMatch });
   } catch (error) {
@@ -945,10 +956,8 @@ const endMatchHandler = async (req, res) => {
     // ── 7. RESPOND TO CLIENT ────────────────────────────────────────────────────
     // Broadcast match completion to live spectators
     broadcastMatchComplete(matchId, winnerId, finalScore);
-    broadcastToTournament(match.tournamentId, 'match-ended', {
-      matchId,
-      winnerId,
-    });
+    broadcastToTournament(match.tournamentId, 'match-ended', { matchId, winnerId });
+    invalidateDrawCache(match); // Draw page cache — viewers see result immediately
 
     res.json({
       success: true,

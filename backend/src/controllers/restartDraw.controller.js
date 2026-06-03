@@ -1,5 +1,6 @@
-import { PrismaClient } from '@prisma/client';
 import prisma from '../lib/prisma.js';
+import { cacheDel } from '../services/redisService.js';
+import { getDrawPageCacheKey } from './drawPage.controller.js';
 
 /**
  * Restart draws - Reset all match data but keep draw structure and player assignments
@@ -117,6 +118,7 @@ export const restartDraw = async (req, res) => {
         });
       }
 
+      await cacheDel(getDrawPageCacheKey(tournamentId, categoryId));
       console.log(`✅ Restarted ${knockoutMatches.length} KNOCKOUT matches for category ${category.name} (group stage preserved)`);
 
       return res.json({
@@ -167,6 +169,7 @@ export const restartDraw = async (req, res) => {
       });
     }
 
+    await cacheDel(getDrawPageCacheKey(tournamentId, categoryId));
     console.log(`✅ Restarted ${matches.length} matches for category ${category.name}`);
     console.log(`   - First round matches: ${firstRoundMatches.length} (players preserved)`);
     console.log(`   - Other matches: ${matches.length - firstRoundMatches.length} (players cleared)`);

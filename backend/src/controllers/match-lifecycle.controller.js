@@ -5,6 +5,23 @@
 
 import MatchLifecycleService from '../services/draw-engine/MatchLifecycleService.js';
 import prisma from '../lib/prisma.js';
+import { cacheDel } from '../services/redisService.js';
+import { getDrawPageCacheKey } from './drawPage.controller.js';
+
+// Invalidate draw page cache after any match change
+async function invalidateDrawCache(matchId) {
+  try {
+    const m = await prisma.match.findUnique({
+      where: { id: matchId },
+      select: { tournamentId: true, categoryId: true }
+    });
+    if (m?.tournamentId && m?.categoryId) {
+      await cacheDel(getDrawPageCacheKey(m.tournamentId, m.categoryId));
+    }
+  } catch (err) {
+    console.warn('Draw cache invalidation failed (non-critical):', err.message);
+  }
+}
 
 /**
  * Assign umpire to a match
@@ -91,6 +108,9 @@ export const updateScore = async (req, res) => {
 
     const match = await MatchLifecycleService.updateScore(matchId, scoreJson, userId);
 
+    // Invalidate draw page cache so viewers see updated score within 10s
+    await invalidateDrawCache(matchId);
+
     res.json({
       success: true,
       message: 'Score updated successfully',
@@ -135,6 +155,9 @@ export const completeMatch = async (req, res) => {
       scoreJson,
       userId
     );
+
+    // Invalidate draw page cache immediately on match completion
+    await invalidateDrawCache(matchId);
 
     res.json({
       success: true,

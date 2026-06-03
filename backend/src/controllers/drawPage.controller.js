@@ -9,10 +9,27 @@
  */
 
 import prisma from '../lib/prisma.js';
+import { cacheGet, cacheSet } from '../services/redisService.js';
+
+// Cache TTL for draw page — 10s is short enough for near-live scores,
+// but collapses 300 concurrent pollers into 1 DB hit per 10s.
+const DRAW_PAGE_TTL = 10;
+
+export const getDrawPageCacheKey = (tournamentId, categoryId) =>
+  `draw:page:${tournamentId}:${categoryId}`;
 
 export const getDrawPage = async (req, res) => {
   try {
     const { tournamentId, categoryId } = req.params;
+
+    // ── Redis cache check ──────────────────────────────────────────────────────
+    // Collapses N concurrent viewers into 1 DB hit per 10s window.
+    const cacheKey = getDrawPageCacheKey(tournamentId, categoryId);
+    const cached = await cacheGet(cacheKey);
+    if (cached) {
+      res.set({ 'Cache-Control': 'public, s-maxage=10, stale-while-revalidate=30' });
+      return res.json(cached);
+    }
 
     // ─── Phase 1: All independent DB queries in parallel ──────────────────────
     const [tournament, categories, draw, matches, registrations] = await Promise.all([
@@ -65,11 +82,10 @@ export const getDrawPage = async (req, res) => {
 
     // No draw yet — return early with just tournament + categories + stats
     if (!draw) {
-      res.set({ 'Cache-Control': 'public, s-maxage=15, stale-while-revalidate=60' });
-      return res.json({
-        success: true,
-        data: { tournament, categories, draw: null, matches: [], stats }
-      });
+      const emptyPayload = { success: true, data: { tournament, categories, draw: null, matches: [], stats } };
+      await cacheSet(cacheKey, emptyPayload, DRAW_PAGE_TTL);
+      res.set({ 'Cache-Control': 'public, s-maxage=10, stale-while-revalidate=30' });
+      return res.json(emptyPayload);
     }
 
     // ─── Phase 2: Player name lookups in parallel ──────────────────────────────
@@ -354,32 +370,30 @@ export const getDrawPage = async (req, res) => {
       }
     }
 
-    // ─── Send response ─────────────────────────────────────────────────────────
-    // Cache at Vercel edge CDN for 15 seconds, stale-while-revalidate for 60s.
-    // Under load (50+ users), only 1 function call per 15s hits the DB —
-    // the rest are served from CDN in <100ms. 15s staleness is acceptable
-    // for live tournament scoring (scores update over minutes, not seconds).
-    res.set({
-      'Cache-Control': 'public, s-maxage=15, stale-while-revalidate=60',
-    });
-
-    res.json({
+    // ─── Build response + cache it ────────────────────────────────────────────
+    const responsePayload = {
       success: true,
       data: {
         tournament,
         categories,
         draw: {
-          id:         draw.id,
-          tournament: draw.tournament,
-          category:   draw.category,
-          format:     draw.format,
-          bracketJson: bracketData,   // parsed + live-updated object (not raw string)
-          createdAt:  draw.createdAt
+          id:          draw.id,
+          tournament:  draw.tournament,
+          category:    draw.category,
+          format:      draw.format,
+          bracketJson: bracketData,
+          createdAt:   draw.createdAt
         },
         matches,
         stats
       }
-    });
+    };
+
+    // Store in Redis — next 10s of requests skip DB entirely
+    await cacheSet(cacheKey, responsePayload, DRAW_PAGE_TTL);
+
+    res.set({ 'Cache-Control': 'public, s-maxage=10, stale-while-revalidate=30' });
+    res.json(responsePayload);
 
   } catch (error) {
     console.error('❌ getDrawPage error:', error);

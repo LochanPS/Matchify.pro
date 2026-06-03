@@ -3,9 +3,9 @@ import { fetchUpload } from '../utils/fetchUpload';
 
 export const tournamentAPI = {
   // Get all tournaments (public)
-  getTournaments: async (params = {}) => {
+  getTournaments: async (params = {}, axiosConfig = {}) => {
     const queryString = new URLSearchParams(params).toString();
-    const response = await api.get(`/tournaments?${queryString}`);
+    const response = await api.get(`/tournaments?${queryString}`, axiosConfig);
     return response.data;
   },
 

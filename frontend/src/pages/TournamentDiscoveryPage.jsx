@@ -47,6 +47,9 @@ export default function TournamentDiscoveryPage() {
   const [fetchTrigger, setFetchTrigger] = useState(0);
 
   // Tab result cache — instant switch, background refresh
+  // Each entry: { tournaments, total, hasMore, cachedAt }
+  // Expires after 60s so newly-published tournaments appear without hard refresh
+  const TAB_CACHE_TTL = 60_000;
   const tabCache = useRef({ upcoming: null, completed: null });
 
   // Fetch tab counts once on mount
@@ -102,13 +105,17 @@ export default function TournamentDiscoveryPage() {
     }
 
     // On tab switch: restore cached results instantly (no spinner) then background-refresh.
+    // Expire cache after TAB_CACHE_TTL so newly-published tournaments appear within 60s.
     const cached = tabCache.current[activeTab];
-    if (cached && cached.tournaments.length > 0) {
+    const cacheValid = cached && cached.tournaments.length > 0 &&
+      (Date.now() - (cached.cachedAt || 0)) < TAB_CACHE_TTL;
+    if (cacheValid) {
       // Show cached data immediately — no loading flash
       setTournaments(cached.tournaments);
       setTotal(cached.total);
       setHasMore(cached.hasMore);
     } else {
+      tabCache.current[activeTab] = null; // Clear expired cache
       setTournaments([]);
       setHasMore(true);
     }
@@ -134,7 +141,8 @@ export default function TournamentDiscoveryPage() {
       if (searchQuery) params.search = searchQuery;
       params.tab = activeTab;
 
-      const response = await tournamentAPI.getTournaments(params);
+      // _noCache bypasses the 120s axios GET cache — tournament list must always be fresh
+      const response = await tournamentAPI.getTournaments(params, { _noCache: true });
       const newTournaments = response.data?.tournaments || [];
       const newTotal = response.data?.pagination?.total || 0;
       const newHasMore = newTournaments.length === 10;
@@ -146,7 +154,7 @@ export default function TournamentDiscoveryPage() {
         // Update cache for this tab (only page-1 results, no filter/search state)
         const noFilters = !searchQuery && !Object.values(filters).some(Boolean);
         if (noFilters) {
-          tabCache.current[activeTab] = { tournaments: newTournaments, total: newTotal, hasMore: newHasMore };
+          tabCache.current[activeTab] = { tournaments: newTournaments, total: newTotal, hasMore: newHasMore, cachedAt: Date.now() };
         }
       } else {
         setTournaments(prev => [...prev, ...newTournaments]);

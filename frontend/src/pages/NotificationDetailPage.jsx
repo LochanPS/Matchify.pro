@@ -300,7 +300,17 @@ const NotificationDetailPage = () => {
 
         {/* Message */}
         <div className="rounded-2xl p-5" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
-          <p className="text-sm leading-relaxed text-white whitespace-pre-wrap">{notification.message}</p>
+          <p className="text-sm leading-relaxed text-white whitespace-pre-wrap">
+            {notification.message.split(/(https?:\/\/[^\s]+)/g).map((part, i) =>
+              /^https?:\/\//.test(part) ? (
+                <a key={i} href={part} target="_blank" rel="noopener noreferrer"
+                  className="underline break-all"
+                  style={{ color: '#25D366' }}>
+                  {part}
+                </a>
+              ) : part
+            )}
+          </p>
         </div>
 
         {/* Additional data cards */}

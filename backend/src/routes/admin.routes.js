@@ -458,63 +458,91 @@ router.post('/users/:id/unsuspend', authenticate, requireAdmin, AdminController.
 // Dashboard stats
 router.get('/stats', authenticate, requireAdmin, AdminController.getStats);
 
-// POST /api/admin/send-welcome-all — one-time backfill welcome notification to all existing users
+// POST /api/admin/send-welcome-all — backfill/update welcome notification for all users
+// Pass { force: true } in body to overwrite existing welcome messages
 router.post('/send-welcome-all', authenticate, requireAdmin, async (req, res) => {
   try {
-    const WELCOME_MESSAGE = `Welcome to Matchify.pro! We're glad to have you here.
+    const force = req.body?.force === true;
 
-Matchify.pro is your all-in-one badminton tournament platform — discover tournaments near you, register with ease, track live scores, and climb the national leaderboard.
+    const WELCOME_MESSAGE = `🏸 You're in!
 
-Here's what you can do:
-• Find & register for tournaments
-• Track live match scores
-• View your ranking & stats
-• Manage your player profile
+Find tournaments near you, register in seconds, track live scores & climb the national leaderboard.
 
-━━━━━━━━━━━━━━━━━━━━━━
+📱 Join our WhatsApp community — get alerts, find partners & never miss a tournament:
+https://chat.whatsapp.com/HN0UZeXeCMa93IFPfpi9T6
 
-📱 Join the Matchify WhatsApp Community
-
-Stay ahead with tournament announcements, connect with players across India, and never miss an update. Our community is the best place to find partners, discuss matches, and get notified first.
-
-👉 https://chat.whatsapp.com/HN0UZeXeCMa93IFPfpi9T6
-
-See you on the court!
+See you on the court! 🏆
 — Team Matchify.pro`;
-
-    // Find users who don't already have a WELCOME notification
-    const usersWithWelcome = await prisma.notification.findMany({
-      where: { type: 'WELCOME' },
-      select: { userId: true },
-      distinct: ['userId'],
-    });
-    const alreadyWelcomed = new Set(usersWithWelcome.map(n => n.userId));
 
     const allUsers = await prisma.user.findMany({
       where: { isActive: true },
       select: { id: true },
     });
 
-    const toNotify = allUsers.filter(u => !alreadyWelcomed.has(u.id));
-
-    // Batch create in chunks of 50
     let sent = 0;
-    const CHUNK = 50;
-    for (let i = 0; i < toNotify.length; i += CHUNK) {
-      const chunk = toNotify.slice(i, i + CHUNK);
-      await prisma.notification.createMany({
-        data: chunk.map(u => ({
-          userId: u.id,
-          type: 'WELCOME',
+    let updated = 0;
+
+    if (force) {
+      // Update ALL existing WELCOME notifications to new message
+      const updateResult = await prisma.notification.updateMany({
+        where: { type: 'WELCOME' },
+        data: {
           title: '👋 Welcome to Matchify.pro!',
           message: WELCOME_MESSAGE,
-        })),
-        skipDuplicates: true,
+        },
       });
-      sent += chunk.length;
+      updated = updateResult.count;
+
+      // Also create for any users who somehow have none
+      const usersWithWelcome = await prisma.notification.findMany({
+        where: { type: 'WELCOME' },
+        select: { userId: true },
+        distinct: ['userId'],
+      });
+      const alreadyWelcomed = new Set(usersWithWelcome.map(n => n.userId));
+      const toCreate = allUsers.filter(u => !alreadyWelcomed.has(u.id));
+
+      const CHUNK = 50;
+      for (let i = 0; i < toCreate.length; i += CHUNK) {
+        const chunk = toCreate.slice(i, i + CHUNK);
+        await prisma.notification.createMany({
+          data: chunk.map(u => ({
+            userId: u.id,
+            type: 'WELCOME',
+            title: '👋 Welcome to Matchify.pro!',
+            message: WELCOME_MESSAGE,
+          })),
+          skipDuplicates: true,
+        });
+        sent += chunk.length;
+      }
+    } else {
+      // Only send to users without a WELCOME notification
+      const usersWithWelcome = await prisma.notification.findMany({
+        where: { type: 'WELCOME' },
+        select: { userId: true },
+        distinct: ['userId'],
+      });
+      const alreadyWelcomed = new Set(usersWithWelcome.map(n => n.userId));
+      const toNotify = allUsers.filter(u => !alreadyWelcomed.has(u.id));
+
+      const CHUNK = 50;
+      for (let i = 0; i < toNotify.length; i += CHUNK) {
+        const chunk = toNotify.slice(i, i + CHUNK);
+        await prisma.notification.createMany({
+          data: chunk.map(u => ({
+            userId: u.id,
+            type: 'WELCOME',
+            title: '👋 Welcome to Matchify.pro!',
+            message: WELCOME_MESSAGE,
+          })),
+          skipDuplicates: true,
+        });
+        sent += chunk.length;
+      }
     }
 
-    res.json({ success: true, sent, skipped: alreadyWelcomed.size });
+    res.json({ success: true, sent, updated, total: allUsers.length });
   } catch (error) {
     console.error('Send welcome all error:', error);
     res.status(500).json({ success: false, error: error.message });

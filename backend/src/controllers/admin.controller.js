@@ -970,82 +970,54 @@ class AdminController {
         totalTournaments,
         totalRegistrations,
         totalMatches,
-        totalRevenue,
-        usersByRole,
         tournamentsByStatus,
         recentRegistrations,
       ] = await Promise.all([
-        // Total users
         prisma.user.count({ where: dateFilter }),
-
-        // Total tournaments
         prisma.tournament.count({ where: dateFilter }),
-
-        // Total registrations
         prisma.registration.count({
-          where: {
-            ...dateFilter,
-            status: 'CONFIRMED',
-          },
+          where: { ...dateFilter, status: { in: ['confirmed', 'CONFIRMED'] } },
         }),
-
-        // Total matches
         prisma.match.count({ where: dateFilter }),
-
-        // Total revenue
-        prisma.walletTransaction.aggregate({
-          where: {
-            ...dateFilter,
-            type: 'DEBIT',
-            status: 'COMPLETED',
-          },
-          _sum: {
-            amount: true,
-          },
-        }),
-
-        // Users by role
-        prisma.user.groupBy({
-          by: ['role'],
-          where: dateFilter,
-          _count: true,
-        }),
-
-        // Tournaments by status
         prisma.tournament.groupBy({
           by: ['status'],
           where: dateFilter,
           _count: true,
         }),
-
-        // Recent registrations (last 10)
         prisma.registration.findMany({
-          where: {
-            ...dateFilter,
-            status: 'CONFIRMED',
-          },
+          where: { ...dateFilter, status: { in: ['confirmed', 'CONFIRMED'] } },
           include: {
-            user: {
-              select: {
-                name: true,
-                email: true,
-              },
-            },
-            tournament: {
-              select: {
-                name: true,
-              },
-            },
-            category: {
-              select: {
-                name: true,
-              },
-            },
+            user: { select: { name: true, email: true } },
+            tournament: { select: { name: true } },
+            category: { select: { name: true } },
           },
           orderBy: { createdAt: 'desc' },
           take: 10,
         }),
       ]);
+
+      // Derive role counts from roles string field
+      const allUsers = await prisma.user.findMany({ select: { roles: true } });
+      const usersByRole = { PLAYER: 0, ORGANIZER: 0, UMPIRE: 0, ADMIN: 0 };
+      for (const u of allUsers) {
+        const parts = (u.roles || '').split(',');
+        for (const r of parts) {
+          const role = r.trim();
+          if (usersByRole[role] !== undefined) usersByRole[role]++;
+        }
+      }
+
+      // Revenue from tournament registrations (amountTotal of confirmed)
+      const revenueAgg = await prisma.registration.aggregate({
+        where: { status: { in: ['confirmed', 'CONFIRMED'] } },
+        _sum: { amountTotal: true },
+      });
+      const totalRevenue = revenueAgg._sum.amountTotal || 0;
+
+      const tournamentsByStatusMap = tournamentsByStatus.reduce((acc, item) => {
+        acc[item.status] = item._count._all ?? item._count;
+        return acc;
+      }, {});
 
       res.json({
         success: true,
@@ -1054,15 +1026,9 @@ class AdminController {
           totalTournaments,
           totalRegistrations,
           totalMatches,
-          totalRevenue: totalRevenue._sum.amount || 0,
-          usersByRole: usersByRole.reduce((acc, item) => {
-            acc[item.role] = item._count;
-            return acc;
-          }, {}),
-          tournamentsByStatus: tournamentsByStatus.reduce((acc, item) => {
-            acc[item.status] = item._count;
-            return acc;
-          }, {}),
+          totalRevenue,
+          usersByRole,
+          tournamentsByStatus: tournamentsByStatusMap,
           recentActivity: recentRegistrations,
         },
       });

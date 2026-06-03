@@ -68,7 +68,7 @@ class DrawEngine {
     const groups = [];
     for (let groupIndex = 0; groupIndex < numberOfGroups; groupIndex++) {
       const groupSize = groupSizes[groupIndex] || 0;
-      const groupName = String.fromCharCode(65 + groupIndex); // A, B, C...
+      const groupName = this._groupIndexToName(groupIndex); // A-Z, then AA, AB...
       
       // Generate empty matches for this group
       const groupMatches = this._generateEmptyRoundRobinMatches(
@@ -327,6 +327,19 @@ class DrawEngine {
 
 
 
+
+  /**
+   * Convert group index to letter name: 0→A, 25→Z, 26→AA, 27→AB, 51→AZ, 52→BA ...
+   */
+  _groupIndexToName(index) {
+    let name = '';
+    let i = index;
+    do {
+      name = String.fromCharCode(65 + (i % 26)) + name;
+      i = Math.floor(i / 26) - 1;
+    } while (i >= 0);
+    return name;
+  }
 
   /**
    * Calculate equal group sizes

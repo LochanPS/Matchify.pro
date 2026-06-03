@@ -1813,10 +1813,12 @@ async function setKnockoutParentRelationships(tournamentId, categoryId) {
     }
   }
 
-  // Execute all updates in parallel (each update targets a unique PK — no conflicts)
-  if (allUpdates.length > 0) {
+  // Execute updates in chunks of 10 to avoid overwhelming the DB connection pool
+  // (100-player knockout = 126 updates; concurrent >10 saturates pool_limit=10)
+  const CHUNK = 10;
+  for (let i = 0; i < allUpdates.length; i += CHUNK) {
     await Promise.all(
-      allUpdates.map(u =>
+      allUpdates.slice(i, i + CHUNK).map(u =>
         prisma.match.update({
           where: { id: u.id },
           data: { parentMatchId: u.parentMatchId, winnerPosition: u.winnerPosition }
@@ -1913,8 +1915,8 @@ function generateRoundRobinBracket(size, numberOfGroups, customGroupSizes = null
     const matches = generateGroupMatches(participants, g, globalMatchNumber);
     globalMatchNumber += matches.length;
     
-    groups.push({ 
-      groupName: String.fromCharCode(65 + g), 
+    groups.push({
+      groupName: groupIndexToName(g),
       participants,
       matches,
       totalMatches: matches.length
@@ -1930,11 +1932,22 @@ function generateRoundRobinBracket(size, numberOfGroups, customGroupSizes = null
   };
 }
 
+// Convert group index to letter name: 0→A, 25→Z, 26→AA, 27→AB...
+function groupIndexToName(index) {
+  let name = '';
+  let i = index;
+  do {
+    name = String.fromCharCode(65 + (i % 26)) + name;
+    i = Math.floor(i / 26) - 1;
+  } while (i >= 0);
+  return name;
+}
+
 // Helper: Generate all matches for a group (everyone plays everyone)
 function generateGroupMatches(participants, groupIndex, startingMatchNumber = 1) {
   const matches = [];
   let matchNumber = startingMatchNumber;
-  const groupName = String.fromCharCode(65 + groupIndex);
+  const groupName = groupIndexToName(groupIndex);
   
   for (let i = 0; i < participants.length; i++) {
     for (let j = i + 1; j < participants.length; j++) {

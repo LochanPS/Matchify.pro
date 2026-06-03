@@ -51,14 +51,14 @@ const NotificationsPage = () => {
     return icons[type] || '🔔';
   };
 
-  // Alternating color scheme: odd index = amber, even index = purple
+  // Alternating color scheme: even index = amber, odd index = teal (both Matchify brand colors)
   const getNotificationColor = (type, index) => {
     if (index % 2 === 0) {
-      // Amber / gold
-      return { bg: 'linear-gradient(135deg, rgba(245,158,11,0.13), rgba(217,119,6,0.08))', border: 'rgba(245,158,11,0.35)', shadow: 'rgba(245,158,11,0.18)' };
+      // Amber / gold — Matchify primary
+      return { bg: 'linear-gradient(135deg, rgba(245,158,11,0.11), rgba(217,119,6,0.07))', border: 'rgba(245,158,11,0.30)', shadow: 'rgba(245,158,11,0.14)' };
     } else {
-      // Purple
-      return { bg: 'linear-gradient(135deg, rgba(168,85,247,0.13), rgba(139,92,246,0.08))', border: 'rgba(168,85,247,0.35)', shadow: 'rgba(168,85,247,0.18)' };
+      // Teal / cyan — Matchify secondary (used in button gradients)
+      return { bg: 'linear-gradient(135deg, rgba(0,153,187,0.11), rgba(0,120,150,0.07))', border: 'rgba(0,153,187,0.30)', shadow: 'rgba(0,153,187,0.14)' };
     }
   };
 

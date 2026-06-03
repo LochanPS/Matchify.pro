@@ -299,18 +299,37 @@ const NotificationDetailPage = () => {
         </div>
 
         {/* Message */}
-        <div className="rounded-2xl p-5" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+        <div className="rounded-2xl p-5 space-y-4" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+          {/* Text — URLs stripped out, rendered separately below */}
           <p className="text-sm leading-relaxed text-white whitespace-pre-wrap">
-            {notification.message.split(/(https?:\/\/[^\s]+)/g).map((part, i) =>
-              /^https?:\/\//.test(part) ? (
-                <a key={i} href={part} target="_blank" rel="noopener noreferrer"
-                  className="underline break-all"
-                  style={{ color: '#25D366' }}>
-                  {part}
-                </a>
-              ) : part
-            )}
+            {(notification.message || '').replace(/https?:\/\/[^\s]+/g, '').trimEnd()}
           </p>
+
+          {/* Render each URL as a styled button */}
+          {(notification.message || '').match(/https?:\/\/[^\s]+/g)?.map((url, i) => {
+            const isWhatsApp = url.includes('chat.whatsapp.com');
+            return (
+              <a
+                key={i}
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl font-black text-sm transition-all active:scale-[0.98]"
+                style={{
+                  background: isWhatsApp
+                    ? 'linear-gradient(135deg, #25D366, #128C7E)'
+                    : 'linear-gradient(135deg, #F59E0B, #FCD34D)',
+                  color: '#fff',
+                  boxShadow: isWhatsApp
+                    ? '0 4px 16px rgba(37,211,102,0.4)'
+                    : '0 4px 16px rgba(245,158,11,0.4)',
+                  textDecoration: 'none',
+                }}
+              >
+                {isWhatsApp ? '💬 Join WhatsApp Community' : '🔗 Open Link'}
+              </a>
+            );
+          })}
         </div>
 
         {/* Additional data cards */}

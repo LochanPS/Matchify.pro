@@ -396,9 +396,18 @@ const NotificationsPage = () => {
                             </div>
                           );
                         }
+                        // Strip URLs and truncate for clean list preview
+                        const cleanPreview = (notification.message || '')
+                          .replace(/https?:\/\/[^\s]+/g, '')
+                          .replace(/\n{2,}/g, ' ')
+                          .replace(/\n/g, ' ')
+                          .trim();
+                        const truncated = cleanPreview.length > 90
+                          ? cleanPreview.slice(0, 90).trimEnd() + '…'
+                          : cleanPreview;
                         return (
-                          <p className="text-sm mb-3 leading-relaxed whitespace-pre-line" style={{ color: 'rgba(255,255,255,0.65)' }}>
-                            {notification.message}
+                          <p className="text-sm mb-3 leading-relaxed" style={{ color: 'rgba(255,255,255,0.65)' }}>
+                            {truncated}
                           </p>
                         );
                       })()}

@@ -466,11 +466,14 @@ router.post('/send-welcome-all', authenticate, requireAdmin, async (req, res) =>
 
     const WELCOME_MESSAGE = `👋 Welcome to Matchify.pro!
 
-Thank you for joining India's largest badminton community.
+Thank you for joining India's largest badminton platform. Your support means the world to us! 🏸
 
-This is your notification hub — tournament results, admin updates & live match alerts, all in one place.
+This notification section keeps you updated on everything:
+• Player — your tournament results & registration updates
+• Organiser — payment verifications & tournament activity
+• Umpire — match assignments & court alerts
 
-🏸 Join our WhatsApp community:
+📱 Join India's largest badminton WhatsApp community — find partners, get tournament alerts & stay ahead:
 https://chat.whatsapp.com/HN0UZeXeCMa93IFPfpi9T6?s=cl&p=a&ilr=2&amv=2`;
 
     const allUsers = await prisma.user.findMany({

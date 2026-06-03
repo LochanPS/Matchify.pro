@@ -1,5 +1,6 @@
 import { verifyAccessToken } from '../utils/jwt.js';
 import prisma from '../lib/prisma.js';
+import { cacheGet, cacheSet } from '../services/redisService.js';
 
 // ── P2024 retry helper ─────────────────────────────────────────────────────
 // Prisma P2024 = connection pool exhausted (Vercel serverless with connection_limit=1
@@ -43,10 +44,20 @@ const authenticate = async (req, res, next) => {
     // Verify token
     const decoded = verifyAccessToken(token);
 
-    // Get user from database (retry once on P2024 connection pool exhaustion)
-    const user = await _withDbRetry(() => prisma.user.findUnique({
-      where: { id: decoded.userId }
-    }));
+    // Try Redis cache first — saves a DB round-trip on every authenticated request.
+    // TTL = 60s: suspension/deactivation changes propagate within 1 minute.
+    const cacheKey = `auth:user:${decoded.userId}`;
+    let user = await cacheGet(cacheKey);
+
+    if (!user) {
+      // Cache miss — fetch from DB and store in Redis
+      user = await _withDbRetry(() => prisma.user.findUnique({
+        where: { id: decoded.userId }
+      }));
+      if (user) {
+        await cacheSet(cacheKey, user, 60);
+      }
+    }
 
     if (!user) {
       return res.status(401).json({

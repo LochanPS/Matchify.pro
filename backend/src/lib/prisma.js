@@ -20,20 +20,19 @@ function buildDatasourceUrl() {
   if (!url) return url;
   try {
     const parsed = new URL(url);
-    // FORCE-OVERRIDE these parameters regardless of what DATABASE_URL contains.
-    // The DATABASE_URL on Vercel often has connection_limit=1&pool_timeout=10
-    // baked in. pool_timeout=10 is far too short for concurrent serverless
-    // requests — each Lambda container fights for the single DB connection and
-    // times out after only 10 seconds. We raise it to 30 so requests survive
-    // brief contention spikes. connection_limit=2 allows a small burst without
-    // overwhelming the Supabase PgBouncer pool.
-    parsed.searchParams.set('connection_limit', '2');
+
+    // Railway = persistent Node.js process — can hold more DB connections.
+    // Vercel = serverless — each invocation needs only 1-2 connections.
+    // Supabase PgBouncer pooler handles the actual pool on their side.
+    const isServerless = !!process.env.VERCEL;
+    const connectionLimit = isServerless ? '2' : '10';
+
+    parsed.searchParams.set('connection_limit', connectionLimit);
     parsed.searchParams.set('pool_timeout', '30');
     parsed.searchParams.set('pgbouncer', 'true');
     parsed.searchParams.set('connect_timeout', '30');
     return parsed.toString();
   } catch {
-    // URL parsing failed — return as-is and let Prisma surface the error
     return url;
   }
 }

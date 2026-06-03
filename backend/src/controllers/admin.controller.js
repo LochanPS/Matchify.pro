@@ -1,6 +1,7 @@
 import prisma from '../lib/prisma.js';
 import AuditLogService from '../services/auditLog.service.js';
 import jwt from 'jsonwebtoken';
+import { cacheDel } from '../services/redisService.js';
 
 class AdminController {
   /**
@@ -249,6 +250,9 @@ class AdminController {
         },
       });
 
+      // Invalidate auth cache so suspension takes effect immediately
+      await cacheDel(`auth:user:${id}`);
+
       // Log the action
       await AuditLogService.log({
         adminId,
@@ -311,6 +315,9 @@ class AdminController {
           isSuspended: false
         },
       });
+
+      // Invalidate auth cache so unsuspension takes effect immediately
+      await cacheDel(`auth:user:${id}`);
 
       // Log the action
       await AuditLogService.log({

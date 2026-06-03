@@ -100,6 +100,9 @@ export const restartDraw = async (req, res) => {
         bracketJson.knockout.rounds.forEach((round, roundIdx) => {
           round.matches.forEach(match => {
             match.winner = null;
+            match.score = null;
+            match.scoreJson = null;
+            match.status = 'PENDING';
             if (roundIdx > 0) {
               // Later rounds: players come from match winners — clear them
               match.player1 = null;
@@ -178,6 +181,15 @@ export const restartDraw = async (req, res) => {
             participant.losses = 0;
             participant.points = 0;
           });
+          // Also clear match scores stored inside group matches
+          if (group.matches) {
+            group.matches.forEach(match => {
+              match.winner = null;
+              match.score = null;
+              match.scoreJson = null;
+              match.status = 'PENDING';
+            });
+          }
         });
 
         await prisma.draw.update({

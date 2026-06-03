@@ -61,7 +61,9 @@ export default function TournamentDiscoveryPage() {
           upcoming: upRes.data?.pagination?.total || 0,
           completed: comRes.data?.pagination?.total || 0,
         });
-      } catch (_) {}
+      } catch (err) {
+        console.error('Tab counts failed to load:', err?.message);
+      }
     };
     fetchCounts();
   }, []);

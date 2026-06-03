@@ -168,7 +168,9 @@ export default function TournamentRegistrationPage() {
     try {
       const res = await getPublicPaymentSettings();
       setPaymentSettings(res.data);
-    } catch {}
+    } catch (err) {
+      console.error('Payment settings failed to load:', err?.message);
+    }
   };
 
   const fetchTournamentData = async () => {

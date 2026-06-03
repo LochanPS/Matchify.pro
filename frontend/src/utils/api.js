@@ -166,7 +166,7 @@ api.interceptors.response.use(
 
 const _GET_CACHE = new Map(); // cacheKey → { data, ts }
 const _IN_FLIGHT = new Map(); // cacheKey → Promise  (deduplication)
-const _CACHE_TTL = 30_000;   // 30 seconds
+const _CACHE_TTL = 120_000;  // 2 minutes — long enough to feel instant when navigating back
 
 const _origGet    = api.get.bind(api);
 const _origPost   = api.post.bind(api);

@@ -51,24 +51,15 @@ const NotificationsPage = () => {
     return icons[type] || '🔔';
   };
 
-  const getNotificationColor = (type) => {
-    const colors = {
-      REGISTRATION_CONFIRMED: { bg: 'linear-gradient(135deg, rgba(245,158,11,0.15), rgba(245,158,11,0.1))', border: 'rgba(245,158,11,0.35)', shadow: 'rgba(245,158,11,0.2)' },
-      REGISTRATION_REJECTED: { bg: 'linear-gradient(135deg, rgba(239,68,68,0.2), rgba(220,38,38,0.15))', border: 'rgba(239,68,68,0.4)', shadow: 'rgba(239,68,68,0.3)' },
-      REGISTRATION_PENDING: { bg: 'linear-gradient(135deg, rgba(245,158,11,0.2), rgba(251,146,60,0.15))', border: 'rgba(245,158,11,0.4)', shadow: 'rgba(245,158,11,0.3)' },
-      PAYMENT_VERIFICATION_REQUIRED: { bg: 'linear-gradient(135deg, rgba(245,158,11,0.18), rgba(217,119,6,0.12))', border: 'rgba(245,158,11,0.4)', shadow: 'rgba(245,158,11,0.25)' },
-      PARTNER_INVITATION: { bg: 'linear-gradient(135deg, rgba(168,85,247,0.2), rgba(139,92,246,0.15))', border: 'rgba(168,85,247,0.4)', shadow: 'rgba(168,85,247,0.3)' },
-      PARTNER_ACCEPTED: { bg: 'linear-gradient(135deg, rgba(245,158,11,0.15), rgba(245,158,11,0.1))', border: 'rgba(245,158,11,0.35)', shadow: 'rgba(245,158,11,0.2)' },
-      DRAW_PUBLISHED: { bg: 'linear-gradient(135deg, rgba(245,158,11,0.2), rgba(14,165,233,0.15))', border: 'rgba(245,158,11,0.4)', shadow: 'rgba(245,158,11,0.3)' },
-      MATCH_ASSIGNED: { bg: 'linear-gradient(135deg, rgba(16,185,129,0.18), rgba(5,150,105,0.12))', border: 'rgba(16,185,129,0.4)', shadow: 'rgba(16,185,129,0.25)' },
-      MATCH_STARTING_SOON: { bg: 'linear-gradient(135deg, rgba(16,185,129,0.18), rgba(5,150,105,0.12))', border: 'rgba(16,185,129,0.4)', shadow: 'rgba(16,185,129,0.25)' },
-      MATCH_COMPLETED: { bg: 'linear-gradient(135deg, rgba(245,158,11,0.15), rgba(245,158,11,0.1))', border: 'rgba(245,158,11,0.35)', shadow: 'rgba(245,158,11,0.2)' },
-      MATCH_WON: { bg: 'linear-gradient(135deg, rgba(245,158,11,0.2), rgba(251,146,60,0.15))', border: 'rgba(245,158,11,0.4)', shadow: 'rgba(245,158,11,0.3)' },
-      MATCH_LOST: { bg: 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(79,70,229,0.1))', border: 'rgba(99,102,241,0.35)', shadow: 'rgba(99,102,241,0.2)' },
-      POINTS_AWARDED: { bg: 'linear-gradient(135deg, rgba(245,158,11,0.2), rgba(251,146,60,0.15))', border: 'rgba(245,158,11,0.4)', shadow: 'rgba(245,158,11,0.3)' },
-      TOURNAMENT_REMINDER: { bg: 'linear-gradient(135deg, rgba(168,85,247,0.2), rgba(139,92,246,0.15))', border: 'rgba(168,85,247,0.4)', shadow: 'rgba(168,85,247,0.3)' },
-    };
-    return colors[type] || { bg: 'linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03))', border: 'rgba(255,255,255,0.1)', shadow: 'rgba(0,0,0,0.2)' };
+  // Alternating color scheme: odd index = amber, even index = purple
+  const getNotificationColor = (type, index) => {
+    if (index % 2 === 0) {
+      // Amber / gold
+      return { bg: 'linear-gradient(135deg, rgba(245,158,11,0.13), rgba(217,119,6,0.08))', border: 'rgba(245,158,11,0.35)', shadow: 'rgba(245,158,11,0.18)' };
+    } else {
+      // Purple
+      return { bg: 'linear-gradient(135deg, rgba(168,85,247,0.13), rgba(139,92,246,0.08))', border: 'rgba(168,85,247,0.35)', shadow: 'rgba(168,85,247,0.18)' };
+    }
   };
 
   // Smart preview: for MATCH_ASSIGNED/STARTING_SOON parse data for player names;
@@ -284,7 +275,7 @@ const NotificationsPage = () => {
         ) : (
           <div className="space-y-3">
             {notifications.map((notification, index) => {
-              const colorScheme = getNotificationColor(notification.type);
+              const colorScheme = getNotificationColor(notification.type, index);
               
               return (
                 <div
@@ -405,10 +396,33 @@ const NotificationsPage = () => {
                         const truncated = cleanPreview.length > 90
                           ? cleanPreview.slice(0, 90).trimEnd() + '…'
                           : cleanPreview;
+
+                        // Extract WhatsApp URL if present
+                        const waMatch = (notification.message || '').match(/https?:\/\/chat\.whatsapp\.com\/[^\s]+/);
+
                         return (
-                          <p className="text-sm mb-3 leading-relaxed" style={{ color: 'rgba(255,255,255,0.65)' }}>
-                            {truncated}
-                          </p>
+                          <div>
+                            <p className="text-sm mb-3 leading-relaxed" style={{ color: 'rgba(255,255,255,0.65)' }}>
+                              {truncated}
+                            </p>
+                            {waMatch && (
+                              <a
+                                href={waMatch[0]}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={e => e.stopPropagation()}
+                                className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl font-black text-xs mb-2 transition-all active:scale-[0.98]"
+                                style={{
+                                  background: 'linear-gradient(135deg, #25D366, #128C7E)',
+                                  color: '#fff',
+                                  boxShadow: '0 3px 12px rgba(37,211,102,0.35)',
+                                  textDecoration: 'none',
+                                }}
+                              >
+                                💬 Join WhatsApp Community
+                              </a>
+                            )}
+                          </div>
                         );
                       })()}
 

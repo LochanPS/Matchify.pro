@@ -181,9 +181,9 @@ router.put('/:matchId/undo', authenticate, async (req, res) => {
 
     if (currentSet?.points?.length > 0) {
       const lastPoint = currentSet.points.pop();
-      // Reverse the score
-      if (lastPoint?.scorer === 'player1') currentSet.player1Score = Math.max(0, (currentSet.player1Score || 0) - 1);
-      if (lastPoint?.scorer === 'player2') currentSet.player2Score = Math.max(0, (currentSet.player2Score || 0) - 1);
+      // Reverse the score — use player1/player2 matching the score object structure
+      if (lastPoint?.scorer === 'player1') currentSet.player1 = Math.max(0, (currentSet.player1 || 0) - 1);
+      if (lastPoint?.scorer === 'player2') currentSet.player2 = Math.max(0, (currentSet.player2 || 0) - 1);
     }
 
     const updated = await prisma.match.update({

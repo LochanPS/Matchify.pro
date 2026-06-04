@@ -148,4 +148,88 @@ router.get('/:id/umpires', getTournamentUmpires);
 router.post('/:id/umpires', addUmpireByCode);
 router.delete('/:id/umpires/:umpireId', removeUmpire);
 
+// DELETE /api/tournaments/:tournamentId/categories/:categoryId/registrations/:registrationId/remove
+// Admin or organiser only — removes player from tournament + clears their match slots
+router.delete('/:tournamentId/categories/:categoryId/registrations/:registrationId/remove', authenticate, async (req, res) => {
+  try {
+    const { tournamentId, categoryId, registrationId } = req.params;
+    const userId = req.user.id || req.user.userId;
+    const userRoles = req.user.roles || [req.user.role];
+    const isAdmin = userRoles.includes('ADMIN');
+
+    // Verify tournament exists
+    const tournament = await prisma.tournament.findUnique({ where: { id: tournamentId } });
+    if (!tournament) {
+      return res.status(404).json({ success: false, error: 'Tournament not found' });
+    }
+
+    // Only admin or organiser of this tournament can remove players
+    const isOrganiser = tournament.organizerId === userId;
+    if (!isAdmin && !isOrganiser) {
+      return res.status(403).json({ success: false, error: 'Only admin or tournament organiser can remove players' });
+    }
+
+    // Find the registration
+    const registration = await prisma.registration.findUnique({
+      where: { id: registrationId },
+      include: { user: { select: { id: true, name: true } } }
+    });
+    if (!registration) {
+      return res.status(404).json({ success: false, error: 'Registration not found' });
+    }
+    if (registration.tournamentId !== tournamentId || registration.categoryId !== categoryId) {
+      return res.status(400).json({ success: false, error: 'Registration does not belong to this tournament/category' });
+    }
+
+    const playerIdToRemove = registration.userId || `guest-${registration.id}`;
+    const amountPaid = registration.amountTotal || 0;
+    const playerName = registration.guestName || registration.user?.name || 'Unknown';
+
+    // Clear player from all matches in this category (set slot to null — organiser handles reassignment)
+    await prisma.match.updateMany({
+      where: { tournamentId, categoryId, player1Id: playerIdToRemove },
+      data: { player1Id: null, status: 'PENDING', winnerId: null }
+    });
+    await prisma.match.updateMany({
+      where: { tournamentId, categoryId, player2Id: playerIdToRemove },
+      data: { player2Id: null, status: 'PENDING', winnerId: null }
+    });
+    // Also clear team slots for doubles
+    await prisma.match.updateMany({
+      where: { tournamentId, categoryId, team1Player1Id: playerIdToRemove },
+      data: { team1Player1Id: null }
+    });
+    await prisma.match.updateMany({
+      where: { tournamentId, categoryId, team1Player2Id: playerIdToRemove },
+      data: { team1Player2Id: null }
+    });
+    await prisma.match.updateMany({
+      where: { tournamentId, categoryId, team2Player1Id: playerIdToRemove },
+      data: { team2Player1Id: null }
+    });
+    await prisma.match.updateMany({
+      where: { tournamentId, categoryId, team2Player2Id: playerIdToRemove },
+      data: { team2Player2Id: null }
+    });
+
+    // Delete the registration — this auto-reduces revenue stats since revenue is computed from registrations
+    await prisma.registration.delete({ where: { id: registrationId } });
+
+    // Invalidate draw page cache so UI updates immediately
+    const { cacheDel } = await import('../services/redisService.js');
+    const { getDrawPageCacheKey } = await import('../controllers/drawPage.controller.js');
+    await cacheDel(getDrawPageCacheKey(tournamentId, categoryId)).catch(() => {});
+
+    res.json({
+      success: true,
+      message: `${playerName} removed from tournament`,
+      removedRegistrationId: registrationId,
+      amountDeducted: amountPaid
+    });
+  } catch (error) {
+    console.error('Remove player error:', error);
+    res.status(500).json({ success: false, error: 'Failed to remove player' });
+  }
+});
+
 export default router;

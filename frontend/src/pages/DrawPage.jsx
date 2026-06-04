@@ -127,6 +127,10 @@ const DrawPage = () => {
   const [showPlayersModal, setShowPlayersModal] = useState(false);
   const [registeredPlayers, setRegisteredPlayers] = useState([]);
 
+  // Remove player
+  const [removePlayerConfirm, setRemovePlayerConfirm] = useState(null); // registration object to confirm
+  const [removingPlayer, setRemovingPlayer] = useState(false);
+
   // ─── Combined draw-page fetch (single round trip, auto-retry once on 500) ───
   const fetchDrawPageFull = async (catId, _retryCount = 0) => {
     if (!tournamentId || !catId) return;
@@ -963,7 +967,39 @@ const DrawPage = () => {
   }
 
   const isOrganizer = user?.id === tournament?.organizerId;
+  const isAdminUser = user?.isAdmin === true;
+  const canManagePlayers = isOrganizer || isAdminUser;
   const drawNotGenerated = !bracket && activeCategory;
+
+  const handleRemovePlayer = async () => {
+    if (!removePlayerConfirm) return;
+    setRemovingPlayer(true);
+    try {
+      await api.delete(
+        `/tournaments/${tournamentId}/categories/${activeCategory.id}/registrations/${removePlayerConfirm.id}/remove`
+      );
+      // Refresh player list
+      const response = await api.get(
+        `/tournaments/${tournamentId}/categories/${activeCategory.id}/registrations`,
+        { _noCache: true }
+      );
+      const updated = response.data.registrations || [];
+      setRegisteredPlayers(updated);
+      setTournamentStats(prev => ({
+        ...prev,
+        totalPlayers: updated.length,
+        confirmedPlayers: updated.filter(r => r.status === 'confirmed').length
+      }));
+      setRemovePlayerConfirm(null);
+      // Refresh draw data so bracket reflects the removal
+      fetchDrawPageFull(activeCategory.id);
+    } catch (err) {
+      console.error('Remove player failed:', err);
+      alert(err.response?.data?.error || 'Failed to remove player. Please try again.');
+    } finally {
+      setRemovingPlayer(false);
+    }
+  };
   
   // Check if category is completed (ended)
   const isCategoryCompleted = activeCategory?.status === 'completed';
@@ -1412,6 +1448,20 @@ const DrawPage = () => {
                             </div>
                           </div>
                         </div>
+                        {/* Remove Player — admin + organiser only */}
+                        {canManagePlayers && (
+                          <button
+                            onClick={() => setRemovePlayerConfirm(registration)}
+                            className="mt-3 w-full py-1.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5"
+                            style={{
+                              background: 'rgba(239,68,68,0.12)',
+                              border: '1px solid rgba(239,68,68,0.3)',
+                              color: '#f87171'
+                            }}
+                          >
+                            🗑 Remove Player
+                          </button>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -1537,6 +1587,56 @@ const DrawPage = () => {
           onSave={createDraw}
           saving={generating}
         />
+      )}
+
+      {/* Remove Player Confirmation Modal */}
+      {removePlayerConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)' }}>
+          <div className="w-full max-w-sm rounded-2xl overflow-hidden" style={{ background: '#0f1729', border: '1.5px solid rgba(239,68,68,0.4)' }}>
+            <div className="p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0" style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)' }}>
+                  🗑
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-white">Remove Player</h3>
+                  <p className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>This cannot be undone</p>
+                </div>
+              </div>
+              <div className="rounded-xl p-4 mb-5" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)' }}>
+                <p className="text-sm text-white font-bold">
+                  {removePlayerConfirm.displayName || removePlayerConfirm.user?.name || removePlayerConfirm.guestName || 'Unknown'}
+                </p>
+                {removePlayerConfirm.amountTotal > 0 && (
+                  <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                    ₹{removePlayerConfirm.amountTotal} entry fee will be deducted from revenue
+                  </p>
+                )}
+                <p className="text-xs mt-2" style={{ color: '#f87171' }}>
+                  Player will be removed from the tournament and all match slots cleared.
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setRemovePlayerConfirm(null)}
+                  disabled={removingPlayer}
+                  className="flex-1 py-3 rounded-xl font-bold text-sm"
+                  style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.1)' }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleRemovePlayer}
+                  disabled={removingPlayer}
+                  className="flex-1 py-3 rounded-xl font-black text-sm"
+                  style={{ background: 'linear-gradient(135deg,#ef4444,#dc2626)', color: '#fff', boxShadow: '0 4px 15px rgba(239,68,68,0.4)', opacity: removingPlayer ? 0.7 : 1 }}
+                >
+                  {removingPlayer ? 'Removing...' : 'Yes, Remove'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Delete Draw Confirmation Modal */}

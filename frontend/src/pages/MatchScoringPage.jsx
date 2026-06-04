@@ -237,6 +237,12 @@ const MatchScoringPage = () => {
       const matchWon = setsWon.p1Sets >= setsToWin || setsWon.p2Sets >= setsToWin;
 
       updateScore(newScore);
+      // Cancel any pending debounce — set-completion save below is the authoritative write.
+      // Without this, a stale debounce fires 2s later and overwrites the correct score.
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current);
+        autoSaveTimerRef.current = null;
+      }
       // Save to API on set completion (not per-point) — reduces API calls from ~50/set to 1/set
       saveScoreToApi(newScore);
 

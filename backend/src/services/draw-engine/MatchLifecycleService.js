@@ -416,46 +416,35 @@ class MatchLifecycleService {
    * Get player details (handles both users and guests)
    */
   async _getPlayerDetails(playerIds) {
+    if (!playerIds || playerIds.length === 0) return [];
+
+    // Split into guest and real-user IDs
+    const guestIds = playerIds.filter(id => id.startsWith('guest-'));
+    const userIds  = playerIds.filter(id => !id.startsWith('guest-'));
+
+    // Batch fetch both in parallel — eliminates N sequential DB round-trips
+    const [registrations, users] = await Promise.all([
+      guestIds.length > 0
+        ? prisma.registration.findMany({
+            where: { id: { in: guestIds.map(id => id.replace('guest-', '')) } },
+            select: { id: true, guestName: true, guestEmail: true }
+          })
+        : Promise.resolve([]),
+      userIds.length > 0
+        ? prisma.user.findMany({
+            where: { id: { in: userIds } },
+            select: { id: true, name: true, email: true }
+          })
+        : Promise.resolve([])
+    ]);
+
     const players = [];
-
-    for (const playerId of playerIds) {
-      if (playerId.startsWith('guest-')) {
-        const registrationId = playerId.replace('guest-', '');
-        const registration = await prisma.registration.findUnique({
-          where: { id: registrationId },
-          select: {
-            id: true,
-            guestName: true,
-            guestEmail: true
-          }
-        });
-
-        if (registration) {
-          players.push({
-            id: playerId,
-            name: registration.guestName || 'Guest',
-            email: registration.guestEmail,
-            isGuest: true
-          });
-        }
-      } else {
-        const user = await prisma.user.findUnique({
-          where: { id: playerId },
-          select: {
-            id: true,
-            name: true,
-            email: true
-          }
-        });
-
-        if (user) {
-          players.push({
-            ...user,
-            isGuest: false
-          });
-        }
-      }
-    }
+    registrations.forEach(reg => {
+      players.push({ id: `guest-${reg.id}`, name: reg.guestName || 'Guest', email: reg.guestEmail, isGuest: true });
+    });
+    users.forEach(user => {
+      players.push({ ...user, isGuest: false });
+    });
 
     return players;
   }

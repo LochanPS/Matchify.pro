@@ -2058,8 +2058,17 @@ const bulkAssignAllPlayers = async (req, res) => {
       orderBy: { createdAt: 'asc' }
     });
 
-    // Parse bracket
-    let bracketJson = typeof draw.bracketJson === 'string' ? JSON.parse(draw.bracketJson) : draw.bracketJson;
+    // Parse bracket — wrap in try-catch: corrupted JSON must not crash the endpoint
+    let bracketJson;
+    try {
+      bracketJson = typeof draw.bracketJson === 'string' ? JSON.parse(draw.bracketJson) : draw.bracketJson;
+    } catch (parseErr) {
+      console.error('❌ bracketJson parse failed — corrupted draw data:', parseErr.message);
+      return res.status(500).json({ success: false, error: 'Draw data is corrupted. Please delete and regenerate the draw.' });
+    }
+    if (!bracketJson || typeof bracketJson !== 'object') {
+      return res.status(500).json({ success: false, error: 'Draw data is invalid. Please regenerate the draw.' });
+    }
 
     if (bracketJson.format === 'KNOCKOUT' && bracketJson.rounds) {
       // STEP 1: Clear ALL rounds in bracket JSON (remove stale data)
@@ -2084,13 +2093,16 @@ const bulkAssignAllPlayers = async (req, res) => {
 
       // STEP 2: Now assign players to first round
       const firstRound = bracketJson.rounds[0];
+      if (!firstRound || !Array.isArray(firstRound.matches)) {
+        return res.status(400).json({ success: false, error: 'Bracket has no rounds. Please regenerate the draw.' });
+      }
       const assignments = [];
       let playerIndex = 0;
 
       // NEW LOGIC: Fill VERTICALLY column by column (left to right)
       // rounds[0] is the leftmost column (Quarter Finals, Semi Finals, etc.)
       const dbRoundNumber = bracketJson.rounds.length;
-      
+
       // Create array of all slots in vertical order
       const verticalSlots = [];
       firstRound.matches.forEach((match, matchIdx) => {

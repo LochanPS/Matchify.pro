@@ -581,11 +581,19 @@ const DrawPage = () => {
   };
 
   const handleCategoryChange = (category) => {
+    if (category.id === activeCategory?.id) return; // Already on this category
     // Clear any open match details modal — stale data from previous category
     setShowMatchDetailsModal(false);
     setSelectedMatchDetails(null);
     // Reset fetch guard so new category fetch isn't blocked
     fetchInProgressRef.current = false;
+    // Clear draw data immediately — prevents old category's bracket showing
+    // while new category's data is loading. Cache will repopulate instantly if available.
+    const cached = getDrawCache(tournamentId, category.id);
+    if (!cached) {
+      setBracket(null);
+      setMatches([]);
+    }
     setActiveCategory(category);
     navigate(`/tournaments/${tournamentId}/draws/${category.id}`);
   };

@@ -51,6 +51,7 @@ const ViewDrawsPage = () => {
   useEffect(() => {
     try {
       if (selectedCategory) {
+        setDraw(null); // Clear previous category's draw immediately before fetch
         fetchDraw(selectedCategory.id);
       }
     } catch (err) {

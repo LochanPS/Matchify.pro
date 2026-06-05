@@ -3,7 +3,7 @@
  * Key: draw_<tournamentId>_<categoryId>
  * TTL: 30 minutes (stale after that, user gets fresh spinner)
  */
-const TTL_MS = 30 * 60 * 1000; // 30 minutes
+const TTL_MS = 2 * 60 * 1000; // 2 minutes — live tournament scores change frequently
 
 export function getDrawCache(tournamentId, categoryId) {
   try {

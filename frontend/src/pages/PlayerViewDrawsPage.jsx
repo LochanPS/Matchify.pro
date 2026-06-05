@@ -44,6 +44,12 @@ const PlayerViewDrawsPage = () => {
 
   useEffect(() => {
     if (selectedCategory) {
+      // Clear previous category's draw if no cache — prevents stale draw showing
+      const cached = getDrawCache(id, selectedCategory.id);
+      if (!cached) {
+        setDraw(null);
+        setCategoryMatches([]);
+      }
       fetchDraw(selectedCategory.id);
 
       // Poll every 60 seconds (draw doesn't change that often)

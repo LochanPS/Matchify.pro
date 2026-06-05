@@ -1,8 +1,9 @@
 // Matchify.pro - Premier Badminton Tournament Platform
-// Version: 1.0.6 - Chunk error boundary, lazy-loaded routes
-// Last Updated: May 19, 2026
-import { lazy, Suspense, Component, useEffect } from 'react'
+// Version: 1.0.7 - Splash screen on first load
+// Last Updated: Jun 2026
+import { lazy, Suspense, Component, useEffect, useState } from 'react'
 import api from './utils/api'
+import SplashScreen from './components/SplashScreen'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import AnimatedBackground from './components/AnimatedBackground'
 import LoadingScreen from './components/LoadingScreen'
@@ -575,7 +576,24 @@ function AppContent() {
 }
 
 function App() {
+  // Show splash screen once per browser session — not on every navigation
+  const [showSplash, setShowSplash] = useState(() => {
+    try {
+      const seen = sessionStorage.getItem('_splashSeen');
+      return !seen; // true = show splash, false = skip
+    } catch {
+      return true;
+    }
+  });
+
+  const handleSplashComplete = () => {
+    try { sessionStorage.setItem('_splashSeen', '1'); } catch {}
+    setShowSplash(false);
+  };
+
   return (
+    <>
+      {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
     <AuthProvider>
       <NotificationProvider>
         <Toaster
@@ -607,6 +625,7 @@ function App() {
         </WebSocketProvider>
       </NotificationProvider>
     </AuthProvider>
+    </>
   );
 }
 

@@ -2,8 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 
 /**
  * SplashScreen — shows once per browser session on first app load.
- * Progress 0→100 over 5-6 seconds tied to real load events + smooth animation.
- * Fades out when complete, then unmounts so it never interferes with the app.
+ * Progress 0→100 over 5-6 seconds. Fades out when complete.
  */
 const SplashScreen = ({ onComplete }) => {
   const [progress, setProgress] = useState(0);
@@ -14,29 +13,23 @@ const SplashScreen = ({ onComplete }) => {
   const completedRef = useRef(false);
 
   useEffect(() => {
-    const MIN_DURATION = 5200;  // minimum 5.2s
-    const MAX_DURATION = 6500;  // cap at 6.5s
+    const MIN_DURATION = 5300;  // 5.3s minimum
+    const MAX_DURATION = 6500;  // 6.5s hard cap
 
-    // Progress curve: fast start, slow middle (feels loading-heavy), fast finish
-    // Mimics real app loading profile
+    // Progress curve — fast start, slow middle, fast finish (professional feel)
     const getTargetProgress = (elapsed) => {
       const ratio = Math.min(elapsed / MIN_DURATION, 1);
-      // Ease-in-out-quad with slight pause in middle (60-80% zone)
-      if (ratio < 0.3)  return ratio * 3 * 35;            // 0→35% in first 30% of time
-      if (ratio < 0.55) return 35 + (ratio - 0.3) * 4 * 20; // 35→55% (slow zone)
-      if (ratio < 0.75) return 55 + (ratio - 0.55) * 5 * 16; // 55→71% (medium)
-      if (ratio < 0.92) return 71 + (ratio - 0.75) * 5.9 * 17; // 71→88%
-      return 88 + (ratio - 0.92) * 12.5 * 12; // 88→100%
+      if (ratio < 0.30) return ratio * 3 * 35;                        // 0→35%
+      if (ratio < 0.55) return 35 + (ratio - 0.30) * 4 * 20;         // 35→55%
+      if (ratio < 0.75) return 55 + (ratio - 0.55) * 5 * 16;         // 55→71%
+      if (ratio < 0.92) return 71 + (ratio - 0.75) * 5.9 * 17;       // 71→88%
+      return 88 + (ratio - 0.92) * 12.5 * 12;                        // 88→100%
     };
 
-    // Real load events boost progress instantly (feels responsive)
     const boostOnEvent = (target) => {
-      if (progressRef.current < target) {
-        progressRef.current = target;
-      }
+      if (progressRef.current < target) progressRef.current = target;
     };
 
-    // Listen for real load milestones
     const onDOMReady = () => boostOnEvent(25);
     const onLoad     = () => boostOnEvent(75);
     if (document.readyState === 'loading') {
@@ -50,45 +43,29 @@ const SplashScreen = ({ onComplete }) => {
       boostOnEvent(75);
     }
 
-    // RAF loop — smooth animation tied to time
+    const finish = () => {
+      completedRef.current = true;
+      setProgress(100);
+      setTimeout(() => {
+        setFadeOut(true);
+        setTimeout(() => onComplete(), 650);
+      }, 350);
+    };
+
     const animate = () => {
       if (completedRef.current) return;
       const elapsed = Date.now() - startTimeRef.current;
+
+      if (elapsed >= MAX_DURATION) { finish(); return; }
+
       const timeBased = getTargetProgress(elapsed);
-
-      // Take max of time-based and event-boosted progress
-      const target = Math.max(timeBased, progressRef.current);
-      const clamped = Math.min(target, 100);
-
-      // Smooth interpolation toward target (feels silky)
-      const current = progressRef.current;
-      const smoothed = current + (clamped - current) * 0.08;
-      const rounded = Math.round(smoothed * 10) / 10;
+      const target    = Math.min(Math.max(timeBased, progressRef.current), 100);
+      const smoothed  = progressRef.current + (target - progressRef.current) * 0.07;
 
       progressRef.current = smoothed;
-      setProgress(rounded);
+      setProgress(smoothed);
 
-      if (elapsed >= MIN_DURATION && smoothed >= 99.5) {
-        // Complete
-        completedRef.current = true;
-        setProgress(100);
-        setTimeout(() => {
-          setFadeOut(true);
-          setTimeout(() => onComplete(), 600); // wait for fade-out animation
-        }, 300);
-        return;
-      }
-
-      // Hard cap — never exceed MAX_DURATION
-      if (elapsed >= MAX_DURATION) {
-        completedRef.current = true;
-        setProgress(100);
-        setTimeout(() => {
-          setFadeOut(true);
-          setTimeout(() => onComplete(), 600);
-        }, 300);
-        return;
-      }
+      if (elapsed >= MIN_DURATION && smoothed >= 99.5) { finish(); return; }
 
       rafRef.current = requestAnimationFrame(animate);
     };
@@ -110,21 +87,18 @@ const SplashScreen = ({ onComplete }) => {
         position: 'fixed',
         inset: 0,
         zIndex: 99999,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
         background: '#050810',
-        opacity: fadeOut ? 0 : 1,
-        transition: fadeOut ? 'opacity 0.6s ease-out' : 'none',
-        pointerEvents: fadeOut ? 'none' : 'all',
         overflow: 'hidden',
+        opacity: fadeOut ? 0 : 1,
+        transition: fadeOut ? 'opacity 0.65s ease-out' : 'none',
+        pointerEvents: fadeOut ? 'none' : 'all',
       }}
     >
-      {/* Background image */}
+      {/* ── Background image — cover full screen ── */}
       <img
         src="/splash.png"
         alt=""
+        draggable={false}
         style={{
           position: 'absolute',
           inset: 0,
@@ -135,56 +109,67 @@ const SplashScreen = ({ onComplete }) => {
           userSelect: 'none',
           pointerEvents: 'none',
         }}
-        draggable={false}
       />
 
-      {/* Progress bar — bottom of screen */}
+      {/* ── Dark gradient overlay — covers baked-in static "65%" bar in image ── */}
+      {/* Gradient starts transparent at 60% height, fades to solid #050810 at bottom */}
+      <div
+        style={{
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          bottom: 0,
+          height: '28%',
+          background: 'linear-gradient(to bottom, transparent 0%, #050810 55%)',
+          pointerEvents: 'none',
+        }}
+      />
+
+      {/* ── Animated progress bar — sits above the gradient ── */}
       <div
         style={{
           position: 'absolute',
           bottom: '10%',
           left: '50%',
           transform: 'translateX(-50%)',
-          width: '72%',
-          maxWidth: 320,
+          width: 'min(72%, 300px)',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          gap: 10,
+          gap: 9,
         }}
       >
-        {/* Track */}
+        {/* Bar track */}
         <div
           style={{
             width: '100%',
             height: 6,
             borderRadius: 999,
-            background: 'rgba(255,255,255,0.12)',
+            background: 'rgba(255,255,255,0.1)',
             overflow: 'hidden',
-            boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.4)',
           }}
         >
-          {/* Fill */}
+          {/* Bar fill */}
           <div
             style={{
               height: '100%',
               width: `${displayProgress}%`,
               borderRadius: 999,
-              background: 'linear-gradient(90deg, #F59E0B, #FCD34D)',
-              boxShadow: '0 0 14px rgba(245,158,11,0.9), 0 0 6px rgba(252,211,77,0.6)',
-              transition: 'width 0.08s linear',
+              background: 'linear-gradient(90deg, #F59E0B 0%, #FCD34D 100%)',
+              boxShadow: '0 0 12px rgba(245,158,11,0.85), 0 0 4px rgba(252,211,77,0.5)',
+              transition: 'width 0.06s linear',
             }}
           />
         </div>
 
-        {/* Percentage text */}
+        {/* Label */}
         <span
           style={{
-            color: 'rgba(255,255,255,0.55)',
+            color: 'rgba(255,255,255,0.5)',
             fontSize: 11,
             fontWeight: 600,
-            letterSpacing: '0.18em',
-            fontFamily: 'system-ui, sans-serif',
+            letterSpacing: '0.16em',
+            fontFamily: 'system-ui, -apple-system, sans-serif',
             userSelect: 'none',
           }}
         >

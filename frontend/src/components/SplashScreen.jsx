@@ -17,10 +17,15 @@ const SplashScreen = ({ onComplete, duration = 5300 }) => {
   const startTimeRef = useRef(Date.now());
   const rafRef = useRef(null);
   const completedRef = useRef(false);
+  // Ref so onComplete is always current without restarting the effect
+  const onCompleteRef = useRef(onComplete);
+  const durationRef = useRef(duration);
+  useEffect(() => { onCompleteRef.current = onComplete; }, [onComplete]);
 
   useEffect(() => {
-    const MIN_DURATION = duration;
-    const MAX_DURATION = duration + 1200;
+    // Run once on mount — use refs so parent re-renders don't restart animation
+    const MIN_DURATION = durationRef.current;
+    const MAX_DURATION = durationRef.current + 1200;
 
     // Progress curve — fast start, slow middle, fast finish (professional feel)
     const getTargetProgress = (elapsed) => {
@@ -54,7 +59,7 @@ const SplashScreen = ({ onComplete, duration = 5300 }) => {
       setProgress(100);
       setTimeout(() => {
         setFadeOut(true);
-        setTimeout(() => onComplete(), 650);
+        setTimeout(() => onCompleteRef.current?.(), 650);
       }, 350);
     };
 
@@ -83,7 +88,7 @@ const SplashScreen = ({ onComplete, duration = 5300 }) => {
       document.removeEventListener('DOMContentLoaded', onDOMReady);
       window.removeEventListener('load', onLoad);
     };
-  }, [onComplete]);
+  }, []); // Run once on mount — onComplete + duration accessed via refs
 
   const displayProgress = Math.min(Math.round(progress), 100);
 

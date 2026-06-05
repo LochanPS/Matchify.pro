@@ -8,7 +8,7 @@ import {
 import { getErrorMessage } from '../utils/errorMessage';
 import MatchifyLogo from '../components/MatchifyLogo';
 import Spinner from '../components/Spinner';
-import SplashScreen from '../components/SplashScreen';
+import { usePageTransition } from "../contexts/TransitionContext";
 
 const RegisterPageMobile = () => {
   const [formData, setFormData] = useState({ name: '', phone: '', email: '', password: '', confirmPassword: '' });
@@ -18,8 +18,7 @@ const RegisterPageMobile = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
-  const [showTransition, setShowTransition] = useState(false);
-  const [pendingNav, setPendingNav] = useState(null);
+  const { triggerTransition } = usePageTransition();
 
   const { register } = useAuth();
   const navigate = useNavigate();
@@ -55,9 +54,7 @@ const RegisterPageMobile = () => {
       if (!dataToSend.email) delete dataToSend.email;
       if (!dataToSend.phone) delete dataToSend.phone;
       await register(dataToSend);
-      const dest = redirectUrl || '/dashboard?role=PLAYER';
-      setPendingNav(dest);
-      setShowTransition(true);
+      triggerTransition(redirectUrl || '/dashboard?role=PLAYER');
     } catch (err) {
       if (err?.response?.status === 409) { setConflictError(true); setError(''); }
       else setError(getErrorMessage(err, 'Registration failed. Please try again.'));
@@ -81,13 +78,6 @@ const RegisterPageMobile = () => {
   };
 
   return (
-    <>
-    {showTransition && (
-      <SplashScreen
-        duration={2000}
-        onComplete={() => { setShowTransition(false); navigate(pendingNav); }}
-      />
-    )}
     <div style={{ minHeight: '100vh', background: '#040810', position: 'relative', overflow: 'hidden' }}>
       <style>{`
         @keyframes float{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(16px,-16px) scale(1.03)}66%{transform:translate(-12px,12px) scale(0.97)}}
@@ -332,7 +322,6 @@ const RegisterPageMobile = () => {
         </p>
       </div>
     </div>
-    </>
   );
 };
 

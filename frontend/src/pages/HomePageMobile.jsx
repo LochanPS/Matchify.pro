@@ -1,7 +1,6 @@
-﻿import { Link, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+﻿import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import SplashScreen from '../components/SplashScreen';
+import { usePageTransition } from "../contexts/TransitionContext";
 import MatchifyLogo from '../components/MatchifyLogo';
 import {
   TrophyIcon,
@@ -94,14 +93,11 @@ const REVIEWS = [
 
 const HomePageMobile = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
-  const [showTransition, setShowTransition] = useState(false);
-  const [pendingNav, setPendingNav] = useState(null);
+  const { triggerTransition } = usePageTransition();
 
   const handleDashboardClick = (e) => {
     e.preventDefault();
-    setPendingNav(getDashboardLink());
-    setShowTransition(true);
+    triggerTransition(getDashboardLink());
   };
 
   const getDashboardLink = () => {
@@ -140,13 +136,6 @@ const HomePageMobile = () => {
   ];
 
   return (
-    <>
-    {showTransition && (
-      <SplashScreen
-        duration={2000}
-        onComplete={() => { setShowTransition(false); navigate(pendingNav); }}
-      />
-    )}
     <div className="min-h-screen relative overflow-hidden"
       style={{
         background: '#050810',
@@ -845,7 +834,6 @@ const HomePageMobile = () => {
 
       </div>
     </div>
-    </>
   );
 };
 

@@ -10,6 +10,7 @@ import LoadingScreen from './components/LoadingScreen'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { NotificationProvider } from './contexts/NotificationContext'
 import { WebSocketProvider } from './contexts/WebSocketContext'
+import { TransitionProvider } from './contexts/TransitionContext'
 import { Toaster } from 'react-hot-toast'
 import Navbar from './components/Navbar'
 import ScrollToTop from './components/ScrollToTop'
@@ -621,7 +622,9 @@ function App() {
           }}
         />
         <WebSocketProvider>
-          <AppContent />
+          <TransitionProvider>
+            <AppContent />
+          </TransitionProvider>
         </WebSocketProvider>
       </NotificationProvider>
     </AuthProvider>

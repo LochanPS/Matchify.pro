@@ -105,7 +105,7 @@ const SplashScreen = ({ onComplete, duration = 5300 }) => {
         pointerEvents: fadeOut ? 'none' : 'all',
       }}
     >
-      {/* ── Background image — cover full screen ── */}
+      {/* ── Background image — cover full screen, enhanced via CSS ── */}
       <img
         src="/splash.png"
         alt=""
@@ -119,11 +119,12 @@ const SplashScreen = ({ onComplete, duration = 5300 }) => {
           objectPosition: 'center top',
           userSelect: 'none',
           pointerEvents: 'none',
+          // Brighten + boost contrast + saturate to match app's vivid theme
+          filter: 'brightness(1.35) contrast(1.12) saturate(1.25)',
         }}
       />
 
-      {/* ── Dark gradient overlay — covers baked-in static "65%" bar in image ── */}
-      {/* Gradient starts transparent at 60% height, fades to solid #050810 at bottom */}
+      {/* ── Bottom gradient — covers baked-in static bar, lightened so less dark ── */}
       <div
         style={{
           position: 'absolute',
@@ -131,7 +132,7 @@ const SplashScreen = ({ onComplete, duration = 5300 }) => {
           right: 0,
           bottom: 0,
           height: '28%',
-          background: 'linear-gradient(to bottom, transparent 0%, #050810 55%)',
+          background: 'linear-gradient(to bottom, transparent 0%, rgba(5,8,16,0.92) 55%)',
           pointerEvents: 'none',
         }}
       />
@@ -151,13 +152,15 @@ const SplashScreen = ({ onComplete, duration = 5300 }) => {
         }}
       >
         {/* Bar track */}
+        {/* Bar track */}
         <div
           style={{
             width: '100%',
-            height: 6,
+            height: 7,
             borderRadius: 999,
-            background: 'rgba(255,255,255,0.1)',
+            background: 'rgba(255,255,255,0.15)',
             overflow: 'hidden',
+            boxShadow: '0 0 0 1px rgba(255,255,255,0.06)',
           }}
         >
           {/* Bar fill */}
@@ -167,21 +170,22 @@ const SplashScreen = ({ onComplete, duration = 5300 }) => {
               width: `${displayProgress}%`,
               borderRadius: 999,
               background: 'linear-gradient(90deg, #F59E0B 0%, #FCD34D 100%)',
-              boxShadow: '0 0 12px rgba(245,158,11,0.85), 0 0 4px rgba(252,211,77,0.5)',
+              boxShadow: '0 0 16px rgba(245,158,11,1), 0 0 6px rgba(252,211,77,0.7)',
               transition: 'width 0.06s linear',
             }}
           />
         </div>
 
-        {/* Label */}
+        {/* Label — brighter, clearer */}
         <span
           style={{
-            color: 'rgba(255,255,255,0.5)',
-            fontSize: 11,
-            fontWeight: 600,
-            letterSpacing: '0.16em',
+            color: 'rgba(255,255,255,0.75)',
+            fontSize: 12,
+            fontWeight: 700,
+            letterSpacing: '0.18em',
             fontFamily: 'system-ui, -apple-system, sans-serif',
             userSelect: 'none',
+            textShadow: '0 1px 4px rgba(0,0,0,0.8)',
           }}
         >
           LOADING... {displayProgress}%

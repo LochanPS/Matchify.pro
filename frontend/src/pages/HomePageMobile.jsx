@@ -1,5 +1,7 @@
-﻿import { Link } from 'react-router-dom';
+﻿import { Link, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import SplashScreen from '../components/SplashScreen';
 import MatchifyLogo from '../components/MatchifyLogo';
 import {
   TrophyIcon,
@@ -92,6 +94,15 @@ const REVIEWS = [
 
 const HomePageMobile = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const [showTransition, setShowTransition] = useState(false);
+  const [pendingNav, setPendingNav] = useState(null);
+
+  const handleDashboardClick = (e) => {
+    e.preventDefault();
+    setPendingNav(getDashboardLink());
+    setShowTransition(true);
+  };
 
   const getDashboardLink = () => {
     if (!user) return '/login';
@@ -129,6 +140,13 @@ const HomePageMobile = () => {
   ];
 
   return (
+    <>
+    {showTransition && (
+      <SplashScreen
+        duration={2000}
+        onComplete={() => { setShowTransition(false); navigate(pendingNav); }}
+      />
+    )}
     <div className="min-h-screen relative overflow-hidden"
       style={{
         background: '#050810',
@@ -416,14 +434,16 @@ const HomePageMobile = () => {
           {/* CTAs */}
           {user ? (
             <div className="space-y-3 mb-8" style={{ animation: 'fadeIn 0.2s ease-out both' }}>
-              <Link
-                to={getDashboardLink()}
+              <button
+                onClick={handleDashboardClick}
                 className="flex items-center justify-center gap-2 w-full py-4 rounded-2xl font-black text-base relative overflow-hidden group"
                 style={{
                   background: 'linear-gradient(135deg, #F59E0B, #D97706)',
                   color: '#0C0900',
                   boxShadow: '0 6px 24px rgba(245,158,11,0.4)',
                   letterSpacing: '0.01em',
+                  border: 'none',
+                  cursor: 'pointer',
                 }}
               >
                 <div className="absolute inset-0 opacity-0 group-active:opacity-100 transition-opacity"
@@ -431,7 +451,7 @@ const HomePageMobile = () => {
                 <PlayIcon className="w-5 h-5 relative z-10" />
                 <span className="relative z-10">Go to Dashboard</span>
                 <ArrowRightIcon className="w-5 h-5 relative z-10" />
-              </Link>
+              </button>
               <div className="flex items-center gap-3 px-4 py-3.5 rounded-2xl"
                 style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.09)' }}>
                 <div className="w-10 h-10 rounded-xl flex items-center justify-center font-black text-base flex-shrink-0"
@@ -750,21 +770,41 @@ const HomePageMobile = () => {
               Join India's fastest-growing badminton community
             </p>
             <div className="space-y-3">
-              <Link
-                to={user ? getDashboardLink() : '/register'}
-                className="flex items-center justify-center gap-2 w-full py-4 rounded-2xl font-black text-base relative overflow-hidden group"
-                style={{
-                  background: 'linear-gradient(135deg, #F59E0B, #D97706)',
-                  color: '#0C0900',
-                  boxShadow: '0 6px 24px rgba(245,158,11,0.45)',
-                  letterSpacing: '0.01em',
-                }}
-              >
-                <div className="absolute inset-0 opacity-0 group-active:opacity-100 transition-opacity"
-                  style={{ background: 'radial-gradient(circle at center, rgba(255,255,255,0.3), transparent)' }} />
-                <span className="relative z-10">{user ? 'Go to Dashboard' : 'Create Free Account'}</span>
-                <ArrowRightIcon className="w-5 h-5 relative z-10" />
-              </Link>
+              {user ? (
+                <button
+                  onClick={handleDashboardClick}
+                  className="flex items-center justify-center gap-2 w-full py-4 rounded-2xl font-black text-base relative overflow-hidden group"
+                  style={{
+                    background: 'linear-gradient(135deg, #F59E0B, #D97706)',
+                    color: '#0C0900',
+                    boxShadow: '0 6px 24px rgba(245,158,11,0.45)',
+                    letterSpacing: '0.01em',
+                    border: 'none',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <div className="absolute inset-0 opacity-0 group-active:opacity-100 transition-opacity"
+                    style={{ background: 'radial-gradient(circle at center, rgba(255,255,255,0.3), transparent)' }} />
+                  <span className="relative z-10">Go to Dashboard</span>
+                  <ArrowRightIcon className="w-5 h-5 relative z-10" />
+                </button>
+              ) : (
+                <Link
+                  to="/register"
+                  className="flex items-center justify-center gap-2 w-full py-4 rounded-2xl font-black text-base relative overflow-hidden group"
+                  style={{
+                    background: 'linear-gradient(135deg, #F59E0B, #D97706)',
+                    color: '#0C0900',
+                    boxShadow: '0 6px 24px rgba(245,158,11,0.45)',
+                    letterSpacing: '0.01em',
+                  }}
+                >
+                  <div className="absolute inset-0 opacity-0 group-active:opacity-100 transition-opacity"
+                    style={{ background: 'radial-gradient(circle at center, rgba(255,255,255,0.3), transparent)' }} />
+                  <span className="relative z-10">Create Free Account</span>
+                  <ArrowRightIcon className="w-5 h-5 relative z-10" />
+                </Link>
+              )}
               <Link
                 to="/tournaments"
                 className="flex items-center justify-center gap-2 w-full py-4 rounded-2xl font-semibold text-base"
@@ -805,6 +845,7 @@ const HomePageMobile = () => {
 
       </div>
     </div>
+    </>
   );
 };
 

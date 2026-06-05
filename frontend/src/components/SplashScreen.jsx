@@ -1,10 +1,16 @@
 import { useEffect, useState, useRef } from 'react';
 
 /**
- * SplashScreen — shows once per browser session on first app load.
- * Progress 0→100 over 5-6 seconds. Fades out when complete.
+ * SplashScreen — full-screen loader with progress bar.
+ * Used for:
+ *  - First app load (duration ~5-6s)
+ *  - Login / Register / Home→Dashboard transitions (duration ~2s)
+ *
+ * Props:
+ *  onComplete  — called when animation finishes
+ *  duration    — total ms (default 5300 = first load; pass 2000 for transitions)
  */
-const SplashScreen = ({ onComplete }) => {
+const SplashScreen = ({ onComplete, duration = 5300 }) => {
   const [progress, setProgress] = useState(0);
   const [fadeOut, setFadeOut] = useState(false);
   const progressRef = useRef(0);
@@ -13,8 +19,8 @@ const SplashScreen = ({ onComplete }) => {
   const completedRef = useRef(false);
 
   useEffect(() => {
-    const MIN_DURATION = 5300;  // 5.3s minimum
-    const MAX_DURATION = 6500;  // 6.5s hard cap
+    const MIN_DURATION = duration;
+    const MAX_DURATION = duration + 1200;
 
     // Progress curve — fast start, slow middle, fast finish (professional feel)
     const getTargetProgress = (elapsed) => {

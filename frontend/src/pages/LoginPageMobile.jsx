@@ -1,10 +1,11 @@
-﻿import { useState } from 'react';
+﻿import { useState, useCallback } from 'react';
 import { useNavigate, Link, useSearchParams, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { EyeIcon, EyeSlashIcon, LockClosedIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
 import { getErrorMessage } from '../utils/errorMessage';
 import MatchifyLogo from '../components/MatchifyLogo';
 import Spinner from '../components/Spinner';
+import SplashScreen from '../components/SplashScreen';
 
 const LoginPageMobile = () => {
   const [loginType, setLoginType] = useState('phone');
@@ -12,6 +13,8 @@ const LoginPageMobile = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showTransition, setShowTransition] = useState(false);
+  const [pendingNav, setPendingNav] = useState(null);
 
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -57,17 +60,20 @@ const LoginPageMobile = () => {
     setError('');
     try {
       const user = await login(formData.credential, formData.password);
-      if (redirectUrl) { navigate(redirectUrl); return; }
-      const isAdmin = user.isAdmin ||
-        (Array.isArray(user.roles) && user.roles.includes('ADMIN')) ||
-        (typeof user.roles === 'string' && user.roles.includes('ADMIN')) ||
-        user.currentRole === 'ADMIN';
-      if (isAdmin) {
-        navigate('/admin-dashboard');
-      } else {
-        const primary = Array.isArray(user.roles) ? user.roles[0] : (user.currentRole || user.role || 'PLAYER');
-        navigate(`/dashboard?role=${primary}`);
+      // Determine destination
+      let dest = redirectUrl;
+      if (!dest) {
+        const isAdmin = user.isAdmin ||
+          (Array.isArray(user.roles) && user.roles.includes('ADMIN')) ||
+          (typeof user.roles === 'string' && user.roles.includes('ADMIN')) ||
+          user.currentRole === 'ADMIN';
+        dest = isAdmin
+          ? '/admin-dashboard'
+          : `/dashboard?role=${Array.isArray(user.roles) ? user.roles[0] : (user.currentRole || user.role || 'PLAYER')}`;
       }
+      // Show transition splash before navigating
+      setPendingNav(dest);
+      setShowTransition(true);
     } catch (err) {
       setError(getErrorMessage(err, 'Login failed. Please try again.'));
     } finally {
@@ -87,6 +93,13 @@ const LoginPageMobile = () => {
   };
 
   return (
+    <>
+    {showTransition && (
+      <SplashScreen
+        duration={2000}
+        onComplete={() => { setShowTransition(false); navigate(pendingNav); }}
+      />
+    )}
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#040810', position: 'relative', overflow: 'hidden' }}>
       <style>{`
         @keyframes float { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(18px,-18px) scale(1.04)} 66%{transform:translate(-12px,12px) scale(0.97)} }
@@ -367,6 +380,7 @@ const LoginPageMobile = () => {
         </p>
       </div>
     </div>
+    </>
   );
 };
 

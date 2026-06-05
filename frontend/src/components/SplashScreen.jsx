@@ -105,7 +105,7 @@ const SplashScreen = ({ onComplete, duration = 5300 }) => {
         pointerEvents: fadeOut ? 'none' : 'all',
       }}
     >
-      {/* ── Background image — cover full screen, enhanced via CSS ── */}
+      {/* ── Background image — contain so full image always visible on any phone ── */}
       <img
         src="/splash.png"
         alt=""
@@ -115,27 +115,53 @@ const SplashScreen = ({ onComplete, duration = 5300 }) => {
           inset: 0,
           width: '100%',
           height: '100%',
-          objectFit: 'cover',
-          objectPosition: 'center top',
+          objectFit: 'contain',
+          objectPosition: 'center center',
           userSelect: 'none',
           pointerEvents: 'none',
-          // Brighten + boost contrast + saturate to match app's vivid theme
-          filter: 'brightness(1.35) contrast(1.12) saturate(1.25)',
+          filter: 'brightness(1.3) contrast(1.1) saturate(1.2)',
         }}
       />
 
-      {/* ── Bottom gradient — covers baked-in static bar, lightened so less dark ── */}
+      {/* ── Ambient glow behind M badge (center of screen) — professional pulse ── */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -68%)',
+          width: 200,
+          height: 200,
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(245,158,11,0.18) 0%, transparent 70%)',
+          animation: 'splashPulse 2s ease-in-out infinite',
+          pointerEvents: 'none',
+        }}
+      />
+
+      {/* ── Bottom gradient — hides baked-in static bar ── */}
       <div
         style={{
           position: 'absolute',
           left: 0,
           right: 0,
           bottom: 0,
-          height: '28%',
-          background: 'linear-gradient(to bottom, transparent 0%, rgba(5,8,16,0.92) 55%)',
+          height: '30%',
+          background: 'linear-gradient(to bottom, transparent 0%, #050810 60%)',
           pointerEvents: 'none',
         }}
       />
+
+      <style>{`
+        @keyframes splashPulse {
+          0%, 100% { transform: translate(-50%, -68%) scale(1); opacity: 0.7; }
+          50%       { transform: translate(-50%, -68%) scale(1.3); opacity: 1; }
+        }
+        @keyframes splashShimmer {
+          0%   { background-position: -200% center; }
+          100% { background-position:  200% center; }
+        }
+      `}</style>
 
       {/* ── Animated progress bar — sits above the gradient ── */}
       <div
@@ -163,14 +189,16 @@ const SplashScreen = ({ onComplete, duration = 5300 }) => {
             boxShadow: '0 0 0 1px rgba(255,255,255,0.06)',
           }}
         >
-          {/* Bar fill */}
+          {/* Bar fill with shimmer */}
           <div
             style={{
               height: '100%',
               width: `${displayProgress}%`,
               borderRadius: 999,
-              background: 'linear-gradient(90deg, #F59E0B 0%, #FCD34D 100%)',
-              boxShadow: '0 0 16px rgba(245,158,11,1), 0 0 6px rgba(252,211,77,0.7)',
+              background: 'linear-gradient(90deg, #F59E0B 0%, #FCD34D 50%, #F59E0B 100%)',
+              backgroundSize: '200% 100%',
+              animation: 'splashShimmer 1.4s linear infinite',
+              boxShadow: '0 0 16px rgba(245,158,11,0.95), 0 0 6px rgba(252,211,77,0.6)',
               transition: 'width 0.06s linear',
             }}
           />

@@ -105,7 +105,7 @@ const SplashScreen = ({ onComplete, duration = 5300 }) => {
         pointerEvents: fadeOut ? 'none' : 'all',
       }}
     >
-      {/* ── Background image — contain so full image always visible on any phone ── */}
+      {/* ── Background image — cover so it fills every screen size consistently ── */}
       <img
         src="/splash.png"
         alt=""
@@ -115,7 +115,7 @@ const SplashScreen = ({ onComplete, duration = 5300 }) => {
           inset: 0,
           width: '100%',
           height: '100%',
-          objectFit: 'contain',
+          objectFit: 'cover',
           objectPosition: 'center center',
           userSelect: 'none',
           pointerEvents: 'none',
@@ -123,15 +123,15 @@ const SplashScreen = ({ onComplete, duration = 5300 }) => {
         }}
       />
 
-      {/* ── Ambient glow behind M badge (center of screen) — professional pulse ── */}
+      {/* ── Ambient glow behind M badge — vw-based so it scales on any phone ── */}
       <div
         style={{
           position: 'absolute',
           top: '50%',
           left: '50%',
           transform: 'translate(-50%, -68%)',
-          width: 200,
-          height: 200,
+          width: 'min(55vw, 240px)',
+          height: 'min(55vw, 240px)',
           borderRadius: '50%',
           background: 'radial-gradient(circle, rgba(245,158,11,0.18) 0%, transparent 70%)',
           animation: 'splashPulse 2s ease-in-out infinite',

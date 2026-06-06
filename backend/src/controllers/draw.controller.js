@@ -663,10 +663,11 @@ const getDraw = async (req, res) => {
           console.log(`   - ${p.name}: ${p.points}pts (${p.wins}W-${p.losses}L, ${p.played}P, TP:${p.totalPoints || 0})`);
         });
         
-        // Sort participants by points (descending), then by wins
+        // Sort participants by points (descending), then by totalPoints (descending), then by wins
         if (group.participants && Array.isArray(group.participants)) {
           group.participants.sort((a, b) => {
             if (b.points !== a.points) return b.points - a.points;
+            if ((b.totalPoints || 0) !== (a.totalPoints || 0)) return (b.totalPoints || 0) - (a.totalPoints || 0);
             return b.wins - a.wins;
           });
         }
@@ -849,16 +850,17 @@ const getDraw = async (req, res) => {
             console.log(`   - ${p.name}: ${p.points}pts (${p.wins}W-${p.losses}L, ${p.played}P, TP:${p.totalPoints || 0})`);
           });
           
-          // Sort participants by points (descending), then by wins
+          // Sort participants by points (descending), then by totalPoints (descending), then by wins
           if (group.participants && Array.isArray(group.participants)) {
             group.participants.sort((a, b) => {
               if (b.points !== a.points) return b.points - a.points;
+              if ((b.totalPoints || 0) !== (a.totalPoints || 0)) return (b.totalPoints || 0) - (a.totalPoints || 0);
               return b.wins - a.wins;
             });
           }
         });
       }
-      
+
       // Update knockout stage in mixed format
       if (bracketData.knockout) {
         bracketData.knockout.rounds.forEach((round, roundIndex) => {

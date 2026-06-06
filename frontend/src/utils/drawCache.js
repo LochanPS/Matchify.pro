@@ -31,3 +31,11 @@ export function setDrawCache(tournamentId, categoryId, data) {
     // localStorage full or unavailable — silently ignore
   }
 }
+
+export function clearDrawCache(tournamentId, categoryId) {
+  try {
+    localStorage.removeItem(`draw_${CACHE_VERSION}_${tournamentId}_${categoryId}`);
+  } catch {
+    // silently ignore
+  }
+}

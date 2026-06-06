@@ -1,5 +1,5 @@
 ﻿import { getErrorMessage } from '../utils/errorMessage';
-import { getDrawCache, setDrawCache } from '../utils/drawCache';
+import { getDrawCache, setDrawCache, clearDrawCache } from '../utils/drawCache';
 /**
  * DrawPage - Tournament Bracket Display
  * 
@@ -1178,7 +1178,12 @@ const DrawPage = () => {
                     {/* Row 2: Arrange KO & End Category */}
                     {bracket?.format === 'ROUND_ROBIN_KNOCKOUT' && (
                       <button
-                        onClick={() => setShowArrangeMatchupsModal(true)}
+                        onClick={async () => {
+                          // Always clear cache and fetch fresh standings before opening
+                          clearDrawCache(tournamentId, activeCategory?.id);
+                          await fetchDrawPageFull(activeCategory?.id);
+                          setShowArrangeMatchupsModal(true);
+                        }}
                         disabled={isCategoryCompleted}
                         title={isCategoryCompleted ? 'Category has ended - draw is locked' : 'Arrange knockout stage matchups'}
                         className={`px-4 py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm ${
@@ -5267,14 +5272,14 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
             group: groupLetter, rank: rank + 1, points: s.points
           }));
       } else {
-        // Sort participants by points → diff → totalPoints before slicing
+        // Sort participants by points → totalPoints → diff before slicing
         [...(group.participants || [])]
           .sort((a, b) => {
             if ((b.points || 0) !== (a.points || 0)) return (b.points || 0) - (a.points || 0);
+            if ((b.totalPoints || 0) !== (a.totalPoints || 0)) return (b.totalPoints || 0) - (a.totalPoints || 0);
             const aDiff = (a.totalPoints || 0) - (a.totalPointsAgainst || 0);
             const bDiff = (b.totalPoints || 0) - (b.totalPointsAgainst || 0);
-            if (bDiff !== aDiff) return bDiff - aDiff;
-            return (b.totalPoints || 0) - (a.totalPoints || 0);
+            return bDiff - aDiff;
           })
           .slice(0, advanceCount)
           .forEach((p, i) => {

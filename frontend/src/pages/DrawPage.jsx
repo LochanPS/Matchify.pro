@@ -353,7 +353,7 @@ const DrawPage = () => {
 
   // Silent auto-repair: for ROUND_ROBIN_KNOCKOUT, when organizer views the knockout
   // stage, silently call repair-knockout once so winner propagation is up-to-date.
-  const autoRepairDoneRef = React.useRef(false);
+  const autoRepairDoneRef = React.useRef(null); // stores last repaired categoryId
   useEffect(() => {
     const organizer = user?.id && tournament?.organizerId && user.id === tournament.organizerId;
     if (
@@ -362,10 +362,10 @@ const DrawPage = () => {
       activeStage !== 'knockout' ||
       !activeCategory?.id ||
       !tournamentId ||
-      autoRepairDoneRef.current
+      autoRepairDoneRef.current === activeCategory.id  // already repaired this category
     ) return;
 
-    autoRepairDoneRef.current = true;
+    autoRepairDoneRef.current = activeCategory.id;
     api
       .post(`/tournaments/${tournamentId}/categories/${activeCategory.id}/draw/repair-knockout`)
       .then(() => fetchBracket())
@@ -849,9 +849,8 @@ const DrawPage = () => {
       setShowChangeResultModal(false);
       setSelectedMatchForChange(null);
       
-      // Refresh bracket to show updated standings
-      await fetchBracket();
-      await fetchTournamentStats();
+      // Full refresh — updates bracket, matches, tournament status, category status
+      await fetchDrawPageFull(activeCategory.id);
       
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
@@ -1856,11 +1855,11 @@ const DrawPage = () => {
                       selectedPlayerIds: selectedPlayersForKnockout
                     });
                     
-                    await fetchBracket();
-                    
+                    await fetchDrawPageFull(activeCategory.id);
+
                     setSuccess('Knockout stage created! Players have been assigned.');
                     setShowSelectPlayersModal(false);
-                    
+
                     // Auto-switch to Knockout tab
                     setActiveStage('knockout');
                     
@@ -5262,13 +5261,23 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
             group: groupLetter, rank: rank + 1, points: s.points
           }));
       } else {
-        (group.participants || []).slice(0, advanceCount).forEach((p, i) => {
-          if (p?.id) players.push({
-            id: p.id, name: p.name,
-            partnerName: p.partnerName || null,
-            group: groupLetter, rank: i + 1, points: p.points || 0
+        // Sort participants by points → diff → totalPoints before slicing
+        [...(group.participants || [])]
+          .sort((a, b) => {
+            if ((b.points || 0) !== (a.points || 0)) return (b.points || 0) - (a.points || 0);
+            const aDiff = (a.totalPoints || 0) - (a.totalPointsAgainst || 0);
+            const bDiff = (b.totalPoints || 0) - (b.totalPointsAgainst || 0);
+            if (bDiff !== aDiff) return bDiff - aDiff;
+            return (b.totalPoints || 0) - (a.totalPoints || 0);
+          })
+          .slice(0, advanceCount)
+          .forEach((p, i) => {
+            if (p?.id) players.push({
+              id: p.id, name: p.name,
+              partnerName: p.partnerName || null,
+              group: groupLetter, rank: i + 1, points: p.points || 0
+            });
           });
-        });
       }
     });
 

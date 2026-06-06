@@ -1432,7 +1432,7 @@ const assignUmpire = async (req, res) => {
           // Search knockout rounds for this matchNumber
           const rounds = bracket.knockout?.rounds || bracket.rounds || [];
           for (const round of rounds) {
-            const bm = (round.matches || []).find(m => m.matchNumber === match.matchNumber);
+            const bm = (round.matches || []).find(m => m.matchNumber === match.matchNumber && (round.round === match.round || round.roundNumber === match.round));
             if (bm) {
               if (!p1Name && bm.player1?.name && bm.player1.name !== 'TBD' && bm.player1.name !== 'TBA') p1Name = bm.player1.name;
               if (!p2Name && bm.player2?.name && bm.player2.name !== 'TBD' && bm.player2.name !== 'TBA') p2Name = bm.player2.name;

@@ -663,12 +663,14 @@ const getDraw = async (req, res) => {
           console.log(`   - ${p.name}: ${p.points}pts (${p.wins}W-${p.losses}L, ${p.played}P, TP:${p.totalPoints || 0})`);
         });
         
-        // Sort participants by points (descending), then by totalPoints (descending), then by wins
+        // Sort: points DESC → point-diff DESC → totalPoints DESC (matches updateRoundRobinStandings)
         if (group.participants && Array.isArray(group.participants)) {
           group.participants.sort((a, b) => {
             if (b.points !== a.points) return b.points - a.points;
-            if ((b.totalPoints || 0) !== (a.totalPoints || 0)) return (b.totalPoints || 0) - (a.totalPoints || 0);
-            return b.wins - a.wins;
+            const aDiff = (a.totalPoints || 0) - (a.totalPointsAgainst || 0);
+            const bDiff = (b.totalPoints || 0) - (b.totalPointsAgainst || 0);
+            if (bDiff !== aDiff) return bDiff - aDiff;
+            return (b.totalPoints || 0) - (a.totalPoints || 0);
           });
         }
       });
@@ -850,12 +852,14 @@ const getDraw = async (req, res) => {
             console.log(`   - ${p.name}: ${p.points}pts (${p.wins}W-${p.losses}L, ${p.played}P, TP:${p.totalPoints || 0})`);
           });
           
-          // Sort participants by points (descending), then by totalPoints (descending), then by wins
+          // Sort: points DESC → point-diff DESC → totalPoints DESC (matches updateRoundRobinStandings)
           if (group.participants && Array.isArray(group.participants)) {
             group.participants.sort((a, b) => {
               if (b.points !== a.points) return b.points - a.points;
-              if ((b.totalPoints || 0) !== (a.totalPoints || 0)) return (b.totalPoints || 0) - (a.totalPoints || 0);
-              return b.wins - a.wins;
+              const aDiff = (a.totalPoints || 0) - (a.totalPointsAgainst || 0);
+              const bDiff = (b.totalPoints || 0) - (b.totalPointsAgainst || 0);
+              if (bDiff !== aDiff) return bDiff - aDiff;
+              return (b.totalPoints || 0) - (a.totalPoints || 0);
             });
           }
         });
@@ -1188,7 +1192,7 @@ const restartDraw = async (req, res) => {
         bracketJson.groups.forEach(group => {
           if (group.participants && Array.isArray(group.participants)) {
             group.participants.forEach(p => {
-              p.played = 0; p.wins = 0; p.losses = 0; p.points = 0;
+              p.played = 0; p.wins = 0; p.losses = 0; p.points = 0; p.totalPoints = 0; p.totalPointsAgainst = 0;
             });
           }
           if (group.matches && Array.isArray(group.matches)) {
@@ -2269,6 +2273,7 @@ const bulkAssignAllPlayers = async (req, res) => {
               categoryId,
               matchNumber: match.matchNumber,
               round: 1,
+              stage: 'GROUP',
               player1Id: match.player1.id,
               player2Id: match.player2.id,
               player1Seed: match.player1.seed,
@@ -3078,9 +3083,9 @@ const continueToKnockout = async (req, res) => {
           player2Id: null,
           status: 'PENDING',
           winnerId: null,
-          score: null,
-          startTime: null,
-          endTime: null,
+          scoreJson: null,
+          startedAt: null,
+          completedAt: null,
           umpireId: null
         }
       });

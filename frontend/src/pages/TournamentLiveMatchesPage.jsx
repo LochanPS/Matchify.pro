@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { Radio, Trophy, Clock, Users, Wifi, WifiOff, RefreshCw } from 'lucide-react';
 import { getTournamentAllMatches } from '../api/matches';
-import api from '../utils/api';
 import { useWebSocket } from '../contexts/WebSocketContext';
 
 /* ─── colour tokens ─────────────────────────────────────────── */
@@ -473,17 +472,13 @@ export default function TournamentLiveMatchesPage() {
     });
   }, [socket, liveMatches]);
 
-  /* manual refresh — bypasses cache, force-sets latest data */
+  /* manual refresh — always cache-busted via getTournamentAllMatches */
   const handleManualRefresh = async () => {
     if (refreshing) return;
     setRefreshing(true);
     try {
-      // Timestamp param busts browser/proxy cache — no custom headers (CORS safe)
-      const res = await api.get(`/matches/tournament/${id}?_t=${Date.now()}`, {
-        _skipLogout: true,
-        timeout: 15000,
-      });
-      const all = res.data?.matches || [];
+      const res = await getTournamentAllMatches(id);
+      const all = res.matches || [];
       setLiveMatches(all.filter(m => m.status === 'IN_PROGRESS'));
       setDoneMatches(all.filter(m => m.status === 'COMPLETED'));
       setLastRefresh(new Date());

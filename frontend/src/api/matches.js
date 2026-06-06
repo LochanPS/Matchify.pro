@@ -14,10 +14,9 @@ export const getTournamentMatches = async (tournamentId, filters = {}) => {
 };
 
 // Single call — fetch ALL match statuses at once, filter client-side.
-// Previously two separate requests (IN_PROGRESS + COMPLETED) = 2 DB queries per poll.
-// Now 1 request = 1 DB query per poll. Halves connection pressure under load.
+// Always cache-busted with timestamp — live scores + player names must never be stale.
 export const getTournamentAllMatches = async (tournamentId) => {
-  const response = await api.get(`/matches/tournament/${tournamentId}`, { _skipLogout: true, timeout: 30000 });
+  const response = await api.get(`/matches/tournament/${tournamentId}?_t=${Date.now()}`, { _skipLogout: true, timeout: 30000 });
   return response.data;
 };
 

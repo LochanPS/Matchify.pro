@@ -345,11 +345,41 @@ class MatchLifecycleService {
     const playerIds = [match.player1Id, match.player2Id].filter(Boolean);
     const players = await this._getPlayerDetails(playerIds);
 
+    // Fetch partner names for doubles (from Registration table)
+    const partnerMap = {};
+    if (playerIds.length > 0) {
+      const regularIds = playerIds.filter(id => !id.startsWith('guest-'));
+      const guestRegIds = playerIds.filter(id => id.startsWith('guest-')).map(id => id.replace('guest-', ''));
+      const regs = await prisma.registration.findMany({
+        where: {
+          OR: [
+            ...(regularIds.length > 0 ? [{ userId: { in: regularIds }, tournamentId: match.tournamentId, categoryId: match.categoryId }] : []),
+            ...(guestRegIds.length > 0 ? [{ id: { in: guestRegIds } }] : [])
+          ]
+        },
+        select: {
+          id: true, userId: true,
+          guestPartnerName: true,
+          partner: { select: { id: true, name: true } }
+        }
+      });
+      regs.forEach(reg => {
+        const partnerName = reg.partner?.name || reg.guestPartnerName || null;
+        if (reg.userId && partnerName) partnerMap[reg.userId] = partnerName;
+        if (reg.id && partnerName) partnerMap[`guest-${reg.id}`] = partnerName;
+      });
+    }
+
+    const attachPartner = (player) => {
+      if (!player) return null;
+      return { ...player, partnerName: partnerMap[player.id] || null };
+    };
+
     return {
       ...match,
-      player1: players.find(p => p.id === match.player1Id) || null,
-      player2: players.find(p => p.id === match.player2Id) || null,
-      winner: match.winnerId ? players.find(p => p.id === match.winnerId) : null,
+      player1: attachPartner(players.find(p => p.id === match.player1Id) || null),
+      player2: attachPartner(players.find(p => p.id === match.player2Id) || null),
+      winner: match.winnerId ? attachPartner(players.find(p => p.id === match.winnerId) || null) : null,
       scoreJson: match.scoreJson ? JSON.parse(match.scoreJson) : null
     };
   }

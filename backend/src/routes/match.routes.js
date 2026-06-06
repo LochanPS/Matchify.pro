@@ -255,27 +255,32 @@ router.get('/:matchId', authenticate, async (req, res) => {
     let team2Player1 = null;
     let team2Player2 = null;
 
-    // Helper function to get player data (handles both real users and guest players)
+    // Helper function to get player data with partner name for doubles
     const getPlayerData = async (playerId) => {
       if (!playerId) return null;
-      
-      // Check if it's a guest player (ID starts with "guest-")
+
       if (playerId.startsWith('guest-')) {
         const registrationId = playerId.replace('guest-', '');
         const registration = await prisma.registration.findUnique({
           where: { id: registrationId },
-          select: { 
-            id: true, 
-            guestName: true, 
+          select: {
+            id: true,
+            guestName: true,
             guestEmail: true,
-            userId: true
+            guestPartnerName: true,
+            userId: true,
+            user: { select: { name: true } },
+            partner: { select: { name: true } }
           }
         });
-        
+
         if (registration) {
+          const baseName = registration.user?.name || registration.guestName || 'Guest Player';
+          const partnerName = registration.partner?.name || registration.guestPartnerName || null;
           return {
             id: playerId,
-            name: registration.guestName || 'Guest Player',
+            name: baseName,
+            partnerName,
             email: registration.guestEmail || null,
             profilePhoto: null,
             isGuest: true
@@ -283,12 +288,25 @@ router.get('/:matchId', authenticate, async (req, res) => {
         }
         return null;
       }
-      
-      // Regular user
-      return await prisma.user.findUnique({
-        where: { id: playerId },
-        select: { id: true, name: true, email: true, profilePhoto: true }
-      });
+
+      // Regular user — also look up their registration for partner name (doubles)
+      const [user, reg] = await Promise.all([
+        prisma.user.findUnique({
+          where: { id: playerId },
+          select: { id: true, name: true, email: true, profilePhoto: true }
+        }),
+        prisma.registration.findFirst({
+          where: { userId: playerId, tournamentId: match.tournamentId, categoryId: match.categoryId },
+          select: {
+            guestPartnerName: true,
+            partner: { select: { name: true } }
+          }
+        })
+      ]);
+
+      if (!user) return null;
+      const partnerName = reg?.partner?.name || reg?.guestPartnerName || null;
+      return { ...user, partnerName };
     };
 
     // Fetch all player data in parallel — was sequential (up to 6 round trips)

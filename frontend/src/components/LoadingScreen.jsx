@@ -18,16 +18,15 @@ const LoadingScreen = ({ message = 'Loading...' }) => {
         backgroundSize: 'cover',
         backgroundPosition: 'center top',
         backgroundRepeat: 'no-repeat',
-        backgroundAttachment: 'fixed',
       }}
     >
       {/* Dark overlay */}
       <div className="absolute inset-0" style={{ background: 'rgba(5,8,16,0.72)' }} />
 
-      {/* Ambient glows */}
+      {/* Ambient glows — use vw/vh so they scale on any screen */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div style={{
-          position: 'absolute', width: '480px', height: '480px',
+          position: 'absolute', width: '70vw', height: '70vw', maxWidth: '480px', maxHeight: '480px',
           top: '50%', left: '50%',
           transform: 'translate(-50%, -50%)',
           borderRadius: '50%',
@@ -35,7 +34,7 @@ const LoadingScreen = ({ message = 'Loading...' }) => {
           filter: 'blur(60px)',
         }} />
         <div style={{
-          position: 'absolute', width: '320px', height: '320px',
+          position: 'absolute', width: '50vw', height: '50vw', maxWidth: '320px', maxHeight: '320px',
           top: '60%', left: '55%',
           transform: 'translate(-50%, -50%)',
           borderRadius: '50%',

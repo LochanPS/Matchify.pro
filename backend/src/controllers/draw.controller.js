@@ -496,12 +496,9 @@ const getDraw = async (req, res) => {
 
         if (group.matches && Array.isArray(group.matches)) {
           group.matches.forEach((match, matchIndex) => {
-            // Find the corresponding match in database by match number
-            // Round robin matches are stored with unique match numbers
-            const dbMatch = matches.find(m =>
-              m.stage === 'GROUP' &&
-              m.matchNumber === match.matchNumber
-            );
+            // Find corresponding DB match — try with stage filter first, fall back for old null-stage data
+            let dbMatch = matches.find(m => m.stage === 'GROUP' && m.matchNumber === match.matchNumber);
+            if (!dbMatch) dbMatch = matches.find(m => m.matchNumber === match.matchNumber);
 
             if (dbMatch) {
               // Update player names
@@ -690,10 +687,9 @@ const getDraw = async (req, res) => {
 
           if (group.matches && Array.isArray(group.matches)) {
             group.matches.forEach((match, matchIndex) => {
-              const dbMatch = matches.find(m =>
-                m.stage === 'GROUP' &&
-                m.matchNumber === match.matchNumber
-              );
+              // Try stage filter first, fall back for old null-stage data
+              let dbMatch = matches.find(m => m.stage === 'GROUP' && m.matchNumber === match.matchNumber);
+              if (!dbMatch) dbMatch = matches.find(m => m.matchNumber === match.matchNumber);
 
               if (dbMatch) {
                 if (dbMatch.player1Id && playerMap[dbMatch.player1Id]) {
@@ -721,7 +717,7 @@ const getDraw = async (req, res) => {
 
                 match.status = dbMatch.status;
                 match.completed = dbMatch.status === 'COMPLETED';
-                
+
                 // Include full match data for viewing details
                 match.dbMatch = {
                   id: dbMatch.id,

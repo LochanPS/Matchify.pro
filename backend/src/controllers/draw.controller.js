@@ -867,12 +867,15 @@ const getDraw = async (req, res) => {
 
       // Update knockout stage in mixed format
       if (bracketData.knockout) {
+        // KO matches start after all GROUP matches in matchNumber sequence (for null-stage fallback)
+        const totalGroupMatchNums = bracketData.groups?.reduce((s, g) => s + (g.matches?.length || 0), 0) || 0;
+
         bracketData.knockout.rounds.forEach((round, roundIndex) => {
           // Use index-based lookup instead of matchNumber-based, because KO matches created
           // by assignPlayersToDraw use global matchNumbers (not per-round 1-based).
           const dbRound = bracketData.knockout.rounds.length - roundIndex;
           const roundDbMatches = matches
-            .filter(m => m.stage === 'KNOCKOUT' && m.round === dbRound)
+            .filter(m => m.round === dbRound && (m.stage === 'KNOCKOUT' || (m.stage === null && m.matchNumber > totalGroupMatchNums)))
             .sort((a, b) => a.matchNumber - b.matchNumber);
 
           round.matches.forEach((match, matchIndex) => {

@@ -632,14 +632,14 @@ const giveBye = async (req, res) => {
       const updateData = match.winnerPosition === 'player1'
         ? { player1Id: winnerId }
         : { player2Id: winnerId };
-      
+
       // Check if parent match now has both players
       const parentMatch = await prisma.match.findUnique({
         where: { id: match.parentMatchId }
       });
 
       if (parentMatch) {
-        const bothPlayersReady = 
+        const bothPlayersReady =
           (match.winnerPosition === 'player1' && parentMatch.player2Id) ||
           (match.winnerPosition === 'player2' && parentMatch.player1Id);
 
@@ -647,12 +647,37 @@ const giveBye = async (req, res) => {
           updateData.status = 'READY';
         }
       }
-      
+
       await prisma.match.update({
         where: { id: match.parentMatchId },
         data: updateData
       });
       console.log(`Winner ${winnerId} advanced to next round via bye${updateData.status === 'READY' ? ' (match now READY)' : ' (waiting for opponent)'}`);
+    } else if (!match.parentMatchId && match.stage === 'KNOCKOUT' && match.round > 1) {
+      // Fallback advancement for bye: parentMatchId not set — use bracket math
+      const nextRound = match.round - 1;
+      const nextMatchNumber = Math.ceil(match.matchNumber / 2);
+      const winnerPos = match.matchNumber % 2 === 1 ? 'player1' : 'player2';
+
+      const parentMatch = await prisma.match.findFirst({
+        where: {
+          tournamentId: match.tournamentId,
+          categoryId:   match.categoryId,
+          round:        nextRound,
+          matchNumber:  nextMatchNumber,
+          stage:        'KNOCKOUT'
+        }
+      });
+
+      if (parentMatch) {
+        const updateData = winnerPos === 'player1'
+          ? { player1Id: winnerId }
+          : { player2Id: winnerId };
+        const bothPlayersReady = winnerPos === 'player1' ? !!parentMatch.player2Id : !!parentMatch.player1Id;
+        if (bothPlayersReady) updateData.status = 'READY';
+        await prisma.match.update({ where: { id: parentMatch.id }, data: updateData });
+        console.log(`Bye winner ${winnerId} advanced via fallback to round ${nextRound} match ${nextMatchNumber}`);
+      }
     }
 
     res.json({

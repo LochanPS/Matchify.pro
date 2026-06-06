@@ -1,7 +1,7 @@
 ﻿import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
-import { Radio, Trophy, Clock, Users, Wifi, WifiOff } from 'lucide-react';
+import { Radio, Trophy, Clock, Users, Wifi, WifiOff, RefreshCw } from 'lucide-react';
 import { getTournamentAllMatches } from '../api/matches';
 import { useWebSocket } from '../contexts/WebSocketContext';
 
@@ -376,6 +376,7 @@ export default function TournamentLiveMatchesPage() {
   const [liveMatches, setLiveMatches]   = useState([]);
   const [doneMatches, setDoneMatches]   = useState([]);
   const [loading, setLoading]           = useState(true);
+  const [refreshing, setRefreshing]     = useState(false);
   const [error, setError]               = useState('');
   const [lastRefresh, setLastRefresh]   = useState(null);
 
@@ -471,6 +472,14 @@ export default function TournamentLiveMatchesPage() {
     });
   }, [socket, liveMatches]);
 
+  /* manual refresh — spins icon only, no full-screen loading */
+  const handleManualRefresh = async () => {
+    if (refreshing || isFetchingRef.current) return;
+    setRefreshing(true);
+    await fetchAll(false);
+    setRefreshing(false);
+  };
+
   /* poll every 5s — uses ref so interval never restarts */
   useEffect(() => {
     const t = setInterval(() => {
@@ -492,6 +501,10 @@ export default function TournamentLiveMatchesPage() {
         @keyframes cardGlow {
           0%,100% { box-shadow: 0 0 14px rgba(245,158,11,0.05); }
           50%      { box-shadow: 0 0 22px rgba(245,158,11,0.12); }
+        }
+        @keyframes spinRefresh {
+          from { transform: rotate(0deg); }
+          to   { transform: rotate(360deg); }
         }
       `}</style>
 
@@ -520,11 +533,33 @@ export default function TournamentLiveMatchesPage() {
             </div>
           </div>
 
-          {/* connection indicator */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          {/* connection indicator + refresh button */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             {isConnected
               ? <Wifi size={14} color={C.green} />
               : <WifiOff size={14} color={C.dim} />}
+            <button
+              onClick={handleManualRefresh}
+              disabled={refreshing}
+              style={{
+                background: 'rgba(255,255,255,0.06)',
+                border: '1px solid rgba(255,255,255,0.10)',
+                borderRadius: 10,
+                padding: '6px 8px',
+                cursor: refreshing ? 'default' : 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                transition: 'background 0.2s',
+              }}
+            >
+              <RefreshCw
+                size={15}
+                color={refreshing ? C.green : C.sub}
+                style={{
+                  transition: 'transform 0.3s',
+                  animation: refreshing ? 'spinRefresh 0.7s linear infinite' : 'none',
+                }}
+              />
+            </button>
           </div>
         </div>
 

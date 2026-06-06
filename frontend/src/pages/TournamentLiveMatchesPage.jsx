@@ -472,12 +472,23 @@ export default function TournamentLiveMatchesPage() {
     });
   }, [socket, liveMatches]);
 
-  /* manual refresh — spins icon only, no full-screen loading */
+  /* manual refresh — bypasses all guards, force-sets latest data */
   const handleManualRefresh = async () => {
-    if (refreshing || isFetchingRef.current) return;
+    if (refreshing) return;
     setRefreshing(true);
-    await fetchAll(false);
-    setRefreshing(false);
+    try {
+      const res = await getTournamentAllMatches(id);
+      const all = res.matches || [];
+      setLiveMatches(all.filter(m => m.status === 'IN_PROGRESS'));
+      setDoneMatches(all.filter(m => m.status === 'COMPLETED'));
+      setLastRefresh(new Date());
+      hasDataRef.current = true;
+      setError('');
+    } catch {
+      // silently ignore — don't disrupt UI on manual refresh fail
+    } finally {
+      setRefreshing(false);
+    }
   };
 
   /* poll every 5s — uses ref so interval never restarts */

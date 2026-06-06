@@ -665,14 +665,14 @@ const getDraw = async (req, res) => {
           console.log(`   - ${p.name}: ${p.points}pts (${p.wins}W-${p.losses}L, ${p.played}P, TP:${p.totalPoints || 0})`);
         });
         
-        // Sort: points DESC → point-diff DESC → totalPoints DESC (matches updateRoundRobinStandings)
+        // Sort: points DESC → totalPoints DESC → point-diff DESC
         if (group.participants && Array.isArray(group.participants)) {
           group.participants.sort((a, b) => {
             if (b.points !== a.points) return b.points - a.points;
+            if ((b.totalPoints || 0) !== (a.totalPoints || 0)) return (b.totalPoints || 0) - (a.totalPoints || 0);
             const aDiff = (a.totalPoints || 0) - (a.totalPointsAgainst || 0);
             const bDiff = (b.totalPoints || 0) - (b.totalPointsAgainst || 0);
-            if (bDiff !== aDiff) return bDiff - aDiff;
-            return (b.totalPoints || 0) - (a.totalPoints || 0);
+            return bDiff - aDiff;
           });
         }
       });
@@ -858,14 +858,14 @@ const getDraw = async (req, res) => {
             console.log(`   - ${p.name}: ${p.points}pts (${p.wins}W-${p.losses}L, ${p.played}P, TP:${p.totalPoints || 0})`);
           });
           
-          // Sort: points DESC → point-diff DESC → totalPoints DESC (matches updateRoundRobinStandings)
+          // Sort: points DESC → totalPoints DESC → point-diff DESC
           if (group.participants && Array.isArray(group.participants)) {
             group.participants.sort((a, b) => {
               if (b.points !== a.points) return b.points - a.points;
+              if ((b.totalPoints || 0) !== (a.totalPoints || 0)) return (b.totalPoints || 0) - (a.totalPoints || 0);
               const aDiff = (a.totalPoints || 0) - (a.totalPointsAgainst || 0);
               const bDiff = (b.totalPoints || 0) - (b.totalPointsAgainst || 0);
-              if (bDiff !== aDiff) return bDiff - aDiff;
-              return (b.totalPoints || 0) - (a.totalPoints || 0);
+              return bDiff - aDiff;
             });
           }
         });

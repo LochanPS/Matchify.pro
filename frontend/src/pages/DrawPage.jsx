@@ -3432,10 +3432,10 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
               {(group.participants || [])
                 .sort((a, b) => {
                   if ((b.points || 0) !== (a.points || 0)) return (b.points || 0) - (a.points || 0);
+                  if ((b.totalPoints || 0) !== (a.totalPoints || 0)) return (b.totalPoints || 0) - (a.totalPoints || 0);
                   const aDiff = (a.totalPoints || 0) - (a.totalPointsAgainst || 0);
                   const bDiff = (b.totalPoints || 0) - (b.totalPointsAgainst || 0);
-                  if (bDiff !== aDiff) return bDiff - aDiff;
-                  return (b.totalPoints || 0) - (a.totalPoints || 0);
+                  return bDiff - aDiff;
                 })
                 .map((p, pi) => {
                   // ── Name resolution ──────────────────────────────────────

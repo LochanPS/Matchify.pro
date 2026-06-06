@@ -971,7 +971,10 @@ const RoundRobinDraw = ({ data, onViewMatchDetails, categoryFormat, dbMatches = 
                         }))
                         .sort((a, b) => {
                           if ((b.points || 0) !== (a.points || 0)) return (b.points || 0) - (a.points || 0);
-                          return (b._tp || 0) - (a._tp || 0);
+                          if ((b._tp || 0) !== (a._tp || 0)) return (b._tp || 0) - (a._tp || 0);
+                          const aDiff = (a.totalPoints || 0) - (a.totalPointsAgainst || 0);
+                          const bDiff = (b.totalPoints || 0) - (b.totalPointsAgainst || 0);
+                          return bDiff - aDiff;
                         })
                         .map((p, pi) => {
                         const totalPointsScored = p._tp;

@@ -5251,7 +5251,10 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
       if (standings.length > 0) {
         standings
           .filter(s => s.playerId)
-          .sort((a, b) => b.points - a.points)
+          .sort((a, b) => {
+            if ((b.points || 0) !== (a.points || 0)) return (b.points || 0) - (a.points || 0);
+            return (b.totalPoints || 0) - (a.totalPoints || 0);
+          })
           .slice(0, advanceCount)
           .forEach((s, rank) => players.push({
             id: s.playerId, name: s.playerName,

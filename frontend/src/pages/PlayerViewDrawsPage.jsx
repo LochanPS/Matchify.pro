@@ -964,7 +964,12 @@ const RoundRobinDraw = ({ data, onViewMatchDetails, categoryFormat, dbMatches = 
                       </tr>
                     </thead>
                     <tbody>
-                      {group.participants.map((p, pi) => {
+                      {[...group.participants]
+                        .sort((a, b) => {
+                          if ((b.points || 0) !== (a.points || 0)) return (b.points || 0) - (a.points || 0);
+                          return (b.totalPoints || 0) - (a.totalPoints || 0);
+                        })
+                        .map((p, pi) => {
                         // Use totalPoints from backend if available, otherwise calculate from matches
                         const totalPointsScored = p.totalPoints ?? calculateTotalPointsScored(p.id, group.matches || []);
                         

@@ -239,13 +239,13 @@ export const getDrawPage = async (req, res) => {
         else if (m.winnerId === m.player2Id) { p2.wins++; p2.points += 2; p1.losses++; }
       });
 
-      // Sort: match points DESC → total points scored DESC → points diff DESC
+      // Sort: match points DESC → net point diff DESC → total points FOR DESC
       group.participants.sort((a, b) => {
         if (b.points !== a.points) return b.points - a.points;
-        if ((b.totalPoints || 0) !== (a.totalPoints || 0)) return (b.totalPoints || 0) - (a.totalPoints || 0);
         const aDiff = (a.totalPoints || 0) - (a.totalPointsAgainst || 0);
         const bDiff = (b.totalPoints || 0) - (b.totalPointsAgainst || 0);
-        return bDiff - aDiff;
+        if (bDiff !== aDiff) return bDiff - aDiff;
+        return (b.totalPoints || 0) - (a.totalPoints || 0);
       });
     };
 

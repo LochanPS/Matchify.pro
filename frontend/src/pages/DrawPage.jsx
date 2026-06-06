@@ -3437,12 +3437,15 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
               {(group.participants || [])
                 .sort((a, b) => {
                   if ((b.points || 0) !== (a.points || 0)) return (b.points || 0) - (a.points || 0);
-                  if ((b.totalPoints || 0) !== (a.totalPoints || 0)) return (b.totalPoints || 0) - (a.totalPoints || 0);
                   const aDiff = (a.totalPoints || 0) - (a.totalPointsAgainst || 0);
                   const bDiff = (b.totalPoints || 0) - (b.totalPointsAgainst || 0);
-                  return bDiff - aDiff;
+                  if (bDiff !== aDiff) return bDiff - aDiff;
+                  return (b.totalPoints || 0) - (a.totalPoints || 0);
                 })
                 .map((p, pi) => {
+                  const tpDiff = (p.totalPoints || 0) - (p.totalPointsAgainst || 0);
+                  const tpVal  = tpDiff > 0 ? `+${tpDiff}` : `${tpDiff}`;
+                  const tpColor = tpDiff > 0 ? '#4ade80' : tpDiff < 0 ? '#f87171' : '#94a3b8';
                   // ── Name resolution ──────────────────────────────────────
                   // Doubles data can arrive as:
                   //   A) p.name = "Alice"  + p.partnerName = "Bob"
@@ -3529,7 +3532,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                           { val: p.wins    || 0,                   w: '22px', color: '#ffffff', bold: true },
                           { val: p.losses  || 0,                   w: '22px', color: '#ffffff', bold: true },
                           { val: p.points  || 0,                   w: '28px', color: '#ffffff', bold: true },
-                          { val: p.totalPoints || 0,               w: '30px', color: '#ffffff', bold: true },
+                          { val: tpVal,                            w: '30px', color: tpColor,   bold: true },
                         ].map((s, si) => (
                           <div key={si} style={{ width: s.w, flexShrink: 0, textAlign: 'center' }}>
                             <span style={{ fontSize: '13px', fontWeight: s.bold ? 700 : 500, color: s.color, lineHeight: 1 }}>
@@ -5272,14 +5275,14 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
             group: groupLetter, rank: rank + 1, points: s.points
           }));
       } else {
-        // Sort participants by points → totalPoints → diff before slicing
+        // Sort participants by points → diff → totalPoints before slicing
         [...(group.participants || [])]
           .sort((a, b) => {
             if ((b.points || 0) !== (a.points || 0)) return (b.points || 0) - (a.points || 0);
-            if ((b.totalPoints || 0) !== (a.totalPoints || 0)) return (b.totalPoints || 0) - (a.totalPoints || 0);
             const aDiff = (a.totalPoints || 0) - (a.totalPointsAgainst || 0);
             const bDiff = (b.totalPoints || 0) - (b.totalPointsAgainst || 0);
-            return bDiff - aDiff;
+            if (bDiff !== aDiff) return bDiff - aDiff;
+            return (b.totalPoints || 0) - (a.totalPoints || 0);
           })
           .slice(0, advanceCount)
           .forEach((p, i) => {

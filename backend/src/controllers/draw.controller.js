@@ -665,14 +665,14 @@ const getDraw = async (req, res) => {
           console.log(`   - ${p.name}: ${p.points}pts (${p.wins}W-${p.losses}L, ${p.played}P, TP:${p.totalPoints || 0})`);
         });
         
-        // Sort: points DESC → totalPoints DESC → point-diff DESC
+        // Sort: points DESC → net point diff DESC → total points FOR DESC
         if (group.participants && Array.isArray(group.participants)) {
           group.participants.sort((a, b) => {
             if (b.points !== a.points) return b.points - a.points;
-            if ((b.totalPoints || 0) !== (a.totalPoints || 0)) return (b.totalPoints || 0) - (a.totalPoints || 0);
             const aDiff = (a.totalPoints || 0) - (a.totalPointsAgainst || 0);
             const bDiff = (b.totalPoints || 0) - (b.totalPointsAgainst || 0);
-            return bDiff - aDiff;
+            if (bDiff !== aDiff) return bDiff - aDiff;
+            return (b.totalPoints || 0) - (a.totalPoints || 0);
           });
         }
       });
@@ -858,14 +858,14 @@ const getDraw = async (req, res) => {
             console.log(`   - ${p.name}: ${p.points}pts (${p.wins}W-${p.losses}L, ${p.played}P, TP:${p.totalPoints || 0})`);
           });
           
-          // Sort: points DESC → totalPoints DESC → point-diff DESC
+          // Sort: points DESC → net point diff DESC → total points FOR DESC
           if (group.participants && Array.isArray(group.participants)) {
             group.participants.sort((a, b) => {
               if (b.points !== a.points) return b.points - a.points;
-              if ((b.totalPoints || 0) !== (a.totalPoints || 0)) return (b.totalPoints || 0) - (a.totalPoints || 0);
               const aDiff = (a.totalPoints || 0) - (a.totalPointsAgainst || 0);
               const bDiff = (b.totalPoints || 0) - (b.totalPointsAgainst || 0);
-              return bDiff - aDiff;
+              if (bDiff !== aDiff) return bDiff - aDiff;
+              return (b.totalPoints || 0) - (a.totalPoints || 0);
             });
           }
         });

@@ -886,42 +886,52 @@ const RoundRobinDraw = ({ data, onViewMatchDetails, categoryFormat, dbMatches = 
   if (!data?.groups) return <p className="text-gray-400 text-center">No group data</p>;
   const findDbMatch = (matchNum) => dbMatches.find(m => m.matchNumber === matchNum) || null;
 
-  // Helper function to calculate total points scored by a player across all matches
-  const calculateTotalPointsScored = (playerId, groupMatches) => {
-    let totalPoints = 0;
-    
+  // Helper: net point diff (scored - conceded) for a player across all group matches
+  const calculatePointDiff = (playerId, groupMatches) => {
+    let scored = 0;
+    let conceded = 0;
+
     groupMatches.forEach(match => {
-      // Handle both scoreJson and score fields for compatibility
       const scoreData = match.dbMatch?.scoreJson || match.dbMatch?.score;
       if (!scoreData) return;
-      
       try {
         const parsedScore = typeof scoreData === 'string' ? JSON.parse(scoreData) : scoreData;
-        
         if (!parsedScore?.sets || !Array.isArray(parsedScore.sets)) return;
-        
-        // Check if this player is in this match
         const isPlayer1 = match.player1?.id === playerId;
         const isPlayer2 = match.player2?.id === playerId;
-        
         if (!isPlayer1 && !isPlayer2) return;
-        
-        // Sum up all points scored by this player in all sets
         parsedScore.sets.forEach(set => {
           const p1Score = set.player1Score !== undefined ? set.player1Score : set.player1;
           const p2Score = set.player2Score !== undefined ? set.player2Score : set.player2;
-          
-          if (isPlayer1 && p1Score !== undefined) {
-            totalPoints += p1Score;
-          } else if (isPlayer2 && p2Score !== undefined) {
-            totalPoints += p2Score;
-          }
+          if (isPlayer1) { scored += p1Score || 0; conceded += p2Score || 0; }
+          else           { scored += p2Score || 0; conceded += p1Score || 0; }
         });
-      } catch (error) {
-        console.error('Error calculating points for player:', error);
-      }
+      } catch (e) { /* ignore parse errors */ }
     });
-    
+
+    return scored - conceded;
+  };
+
+  // Helper: total points scored (kept for any legacy usage)
+  const calculateTotalPointsScored = (playerId, groupMatches) => {
+    let totalPoints = 0;
+    groupMatches.forEach(match => {
+      const scoreData = match.dbMatch?.scoreJson || match.dbMatch?.score;
+      if (!scoreData) return;
+      try {
+        const parsedScore = typeof scoreData === 'string' ? JSON.parse(scoreData) : scoreData;
+        if (!parsedScore?.sets || !Array.isArray(parsedScore.sets)) return;
+        const isPlayer1 = match.player1?.id === playerId;
+        const isPlayer2 = match.player2?.id === playerId;
+        if (!isPlayer1 && !isPlayer2) return;
+        parsedScore.sets.forEach(set => {
+          const p1Score = set.player1Score !== undefined ? set.player1Score : set.player1;
+          const p2Score = set.player2Score !== undefined ? set.player2Score : set.player2;
+          if (isPlayer1 && p1Score !== undefined) totalPoints += p1Score;
+          else if (isPlayer2 && p2Score !== undefined) totalPoints += p2Score;
+        });
+      } catch (error) { console.error('Error calculating points for player:', error); }
+    });
     return totalPoints;
   };
 
@@ -967,17 +977,19 @@ const RoundRobinDraw = ({ data, onViewMatchDetails, categoryFormat, dbMatches = 
                       {[...group.participants]
                         .map(p => ({
                           ...p,
-                          _tp: p.totalPoints ?? calculateTotalPointsScored(p.id, group.matches || []),
+                          _diff: (p.totalPoints != null && p.totalPointsAgainst != null)
+                            ? (p.totalPoints - p.totalPointsAgainst)
+                            : calculatePointDiff(p.id, group.matches || []),
                         }))
                         .sort((a, b) => {
                           if ((b.points || 0) !== (a.points || 0)) return (b.points || 0) - (a.points || 0);
-                          if ((b._tp || 0) !== (a._tp || 0)) return (b._tp || 0) - (a._tp || 0);
-                          const aDiff = (a.totalPoints || 0) - (a.totalPointsAgainst || 0);
-                          const bDiff = (b.totalPoints || 0) - (b.totalPointsAgainst || 0);
-                          return bDiff - aDiff;
+                          if (b._diff !== a._diff) return b._diff - a._diff;
+                          return (b.totalPoints || 0) - (a.totalPoints || 0);
                         })
                         .map((p, pi) => {
-                        const totalPointsScored = p._tp;
+                        const tpDiff  = p._diff;
+                        const tpVal   = tpDiff > 0 ? `+${tpDiff}` : `${tpDiff}`;
+                        const tpColor = tpDiff > 0 ? '#4ade80' : tpDiff < 0 ? '#f87171' : '#94a3b8';
                         
                         return (
                           <tr key={pi} className="border-b border-white/5 hover:bg-slate-800/30 transition-colors">
@@ -1003,8 +1015,8 @@ const RoundRobinDraw = ({ data, onViewMatchDetails, categoryFormat, dbMatches = 
                               </span>
                             </td>
                             <td className="py-3 px-2 text-center">
-                              <span className="inline-flex items-center justify-center min-w-[28px] h-7 px-2 rounded-lg font-bold text-xs" style={{ background: 'rgba(245,158,11,0.15)', color: '#FCD34D' }}>
-                                {totalPointsScored}
+                              <span className="inline-flex items-center justify-center min-w-[28px] h-7 px-2 rounded-lg font-bold text-xs" style={{ background: tpDiff > 0 ? 'rgba(74,222,128,0.12)' : tpDiff < 0 ? 'rgba(248,113,113,0.12)' : 'rgba(148,163,184,0.12)', color: tpColor }}>
+                                {tpVal}
                               </span>
                             </td>
                             <td className="py-3 px-2 text-center">

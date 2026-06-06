@@ -478,9 +478,8 @@ export default function TournamentLiveMatchesPage() {
     if (refreshing) return;
     setRefreshing(true);
     try {
-      // Add timestamp to bust any browser/proxy cache
+      // Timestamp param busts browser/proxy cache — no custom headers (CORS safe)
       const res = await api.get(`/matches/tournament/${id}?_t=${Date.now()}`, {
-        headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' },
         _skipLogout: true,
         timeout: 15000,
       });

@@ -1429,14 +1429,26 @@ const assignUmpire = async (req, res) => {
         });
         if (draw?.bracketJson) {
           const bracket = typeof draw.bracketJson === 'string' ? JSON.parse(draw.bracketJson) : draw.bracketJson;
-          // Search knockout rounds for this matchNumber
+          // rounds[0] = first played round (highest db round number)
+          // rounds[length-1] = finals (db round = 1)
+          // mapping: roundIndex = rounds.length - match.round
           const rounds = bracket.knockout?.rounds || bracket.rounds || [];
-          for (const round of rounds) {
-            const bm = (round.matches || []).find(m => m.matchNumber === match.matchNumber && (round.round === match.round || round.roundNumber === match.round));
+          if (rounds.length > 0) {
+            const roundIndex = rounds.length - match.round;
+            const bracketRound = rounds[Math.max(0, Math.min(roundIndex, rounds.length - 1))];
+            const bracketMatches = bracketRound?.matches || [];
+            // Within the round, find position of this match among all knockout DB matches for this round
+            // sorted by matchNumber — same order bracketJson was created
+            const siblingMatches = await prisma.match.findMany({
+              where: { tournamentId: match.tournamentId, categoryId: match.categoryId, stage: 'KNOCKOUT', round: match.round },
+              select: { id: true },
+              orderBy: { matchNumber: 'asc' }
+            });
+            const matchPosInRound = siblingMatches.findIndex(m => m.id === match.id);
+            const bm = bracketMatches[matchPosInRound >= 0 ? matchPosInRound : 0];
             if (bm) {
               if (!p1Name && bm.player1?.name && bm.player1.name !== 'TBD' && bm.player1.name !== 'TBA') p1Name = bm.player1.name;
               if (!p2Name && bm.player2?.name && bm.player2.name !== 'TBD' && bm.player2.name !== 'TBA') p2Name = bm.player2.name;
-              break;
             }
           }
         }

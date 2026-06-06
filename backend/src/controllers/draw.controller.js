@@ -2293,6 +2293,32 @@ const bulkAssignAllPlayers = async (req, res) => {
         }
       }
 
+      // For ROUND_ROBIN_KNOCKOUT also re-create knockout stage placeholder matches
+      if (bracketJson.format === 'ROUND_ROBIN_KNOCKOUT' && bracketJson.knockout?.rounds) {
+        let knockoutMatchNum = bracketJson.groups.reduce((sum, g) => sum + g.matches.length, 1);
+        const totalKnockoutRounds = bracketJson.knockout.rounds.length;
+
+        for (let roundIdx = 0; roundIdx < bracketJson.knockout.rounds.length; roundIdx++) {
+          const round = bracketJson.knockout.rounds[roundIdx];
+          const reverseRoundNumber = totalKnockoutRounds - roundIdx;
+
+          for (const match of round.matches) {
+            matchRecords.push({
+              tournamentId,
+              categoryId,
+              matchNumber: knockoutMatchNum++,
+              round: reverseRoundNumber,
+              stage: 'KNOCKOUT',
+              player1Id: null,
+              player2Id: null,
+              player1Seed: null,
+              player2Seed: null,
+              status: 'PENDING'
+            });
+          }
+        }
+      }
+
       await prisma.$transaction(async (tx) => {
         await tx.match.deleteMany({ where: { tournamentId, categoryId } });
         if (matchRecords.length > 0) {
@@ -2307,8 +2333,8 @@ const bulkAssignAllPlayers = async (req, res) => {
       data: { bracketJson: JSON.stringify(bracketJson), updatedAt: new Date() }
     });
 
-    // Set parent relationships for KNOCKOUT format
-    if (bracketJson.format === 'KNOCKOUT') {
+    // Set parent relationships for KNOCKOUT and ROUND_ROBIN_KNOCKOUT formats
+    if (bracketJson.format === 'KNOCKOUT' || bracketJson.format === 'ROUND_ROBIN_KNOCKOUT') {
       await setKnockoutParentRelationships(tournamentId, categoryId);
     }
 

@@ -3355,18 +3355,24 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
 
   // Find database matches for each group match
   const findDbMatch = (groupMatch, groupIndex) => {
-    if (!matches || !Array.isArray(matches)) {
-      return null;
+    if (!matches || !Array.isArray(matches)) return null;
+
+    // 1. Best: stage=GROUP + matchNumber (avoids KO match collision)
+    let found = matches.find(m => m.stage === 'GROUP' && m.matchNumber === groupMatch.matchNumber);
+
+    // 2. Fallback: player IDs (handles null-stage old data without matchNumber collision)
+    if (!found && groupMatch.player1?.id && groupMatch.player2?.id) {
+      found = matches.find(m =>
+        (m.player1Id === groupMatch.player1.id && m.player2Id === groupMatch.player2.id) ||
+        (m.player1Id === groupMatch.player2.id && m.player2Id === groupMatch.player1.id)
+      );
     }
-    
-    // CRITICAL FIX: Match by matchNumber instead of player IDs
-    // Player IDs in bracket JSON might not sync perfectly with DB after updates
-    // matchNumber is the stable, unique identifier
-    const found = matches.find(m => m.matchNumber === groupMatch.matchNumber);
-    
+
+    // 3. Last resort: matchNumber only, skip confirmed KO matches
     if (!found) {
-    } else {
+      found = matches.find(m => m.matchNumber === groupMatch.matchNumber && m.stage !== 'KNOCKOUT');
     }
+
     return found;
   };
 

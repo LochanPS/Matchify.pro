@@ -3072,11 +3072,16 @@ const continueToKnockout = async (req, res) => {
     });
 
     // Update database Match records for knockout stage
+    // Include null-stage matches for backwards compatibility (created before stage field was added)
+    const totalGroupMatchNums = bracketJson.groups?.reduce((s, g) => s + (g.matches?.length || 0), 0) || 0;
     const knockoutMatches = await prisma.match.findMany({
       where: {
         tournamentId,
         categoryId,
-        stage: 'KNOCKOUT'
+        OR: [
+          { stage: 'KNOCKOUT' },
+          { stage: null, matchNumber: { gt: totalGroupMatchNums } }
+        ]
       },
       orderBy: { matchNumber: 'asc' }
     });

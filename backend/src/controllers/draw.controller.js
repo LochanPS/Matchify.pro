@@ -496,9 +496,14 @@ const getDraw = async (req, res) => {
 
         if (group.matches && Array.isArray(group.matches)) {
           group.matches.forEach((match, matchIndex) => {
-            // Find corresponding DB match — try with stage filter first, fall back for old null-stage data
+            // Find corresponding DB match — stage+matchNumber first, then player IDs (null-stage fallback)
             let dbMatch = matches.find(m => m.stage === 'GROUP' && m.matchNumber === match.matchNumber);
-            if (!dbMatch) dbMatch = matches.find(m => m.matchNumber === match.matchNumber);
+            if (!dbMatch && match.player1?.id && match.player2?.id) {
+              dbMatch = matches.find(m =>
+                (m.player1Id === match.player1.id && m.player2Id === match.player2.id) ||
+                (m.player1Id === match.player2.id && m.player2Id === match.player1.id)
+              );
+            }
 
             if (dbMatch) {
               // Update player names
@@ -687,9 +692,14 @@ const getDraw = async (req, res) => {
 
           if (group.matches && Array.isArray(group.matches)) {
             group.matches.forEach((match, matchIndex) => {
-              // Try stage filter first, fall back for old null-stage data
+              // Find corresponding DB match — stage+matchNumber first, then player IDs (null-stage fallback)
               let dbMatch = matches.find(m => m.stage === 'GROUP' && m.matchNumber === match.matchNumber);
-              if (!dbMatch) dbMatch = matches.find(m => m.matchNumber === match.matchNumber);
+              if (!dbMatch && match.player1?.id && match.player2?.id) {
+                dbMatch = matches.find(m =>
+                  (m.player1Id === match.player1.id && m.player2Id === match.player2.id) ||
+                  (m.player1Id === match.player2.id && m.player2Id === match.player1.id)
+                );
+              }
 
               if (dbMatch) {
                 if (dbMatch.player1Id && playerMap[dbMatch.player1Id]) {

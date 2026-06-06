@@ -1415,10 +1415,33 @@ const assignUmpire = async (req, res) => {
       }
     };
 
-    const [p1Name, p2Name] = await Promise.all([
+    let [p1Name, p2Name] = await Promise.all([
       resolvePlayerName(match.player1Id),
       resolvePlayerName(match.player2Id)
     ]);
+
+    // If DB player IDs are null (knockout match not yet advanced), fall back to bracketJson
+    if (!p1Name || !p2Name) {
+      try {
+        const draw = await prisma.draw.findUnique({
+          where: { tournamentId_categoryId: { tournamentId: match.tournamentId, categoryId: match.categoryId } },
+          select: { bracketJson: true }
+        });
+        if (draw?.bracketJson) {
+          const bracket = typeof draw.bracketJson === 'string' ? JSON.parse(draw.bracketJson) : draw.bracketJson;
+          // Search knockout rounds for this matchNumber
+          const rounds = bracket.knockout?.rounds || bracket.rounds || [];
+          for (const round of rounds) {
+            const bm = (round.matches || []).find(m => m.matchNumber === match.matchNumber);
+            if (bm) {
+              if (!p1Name && bm.player1?.name && bm.player1.name !== 'TBD' && bm.player1.name !== 'TBA') p1Name = bm.player1.name;
+              if (!p2Name && bm.player2?.name && bm.player2.name !== 'TBD' && bm.player2.name !== 'TBA') p2Name = bm.player2.name;
+              break;
+            }
+          }
+        }
+      } catch (_) {}
+    }
 
     const updatedMatch = await prisma.match.update({
       where: { id: matchId },

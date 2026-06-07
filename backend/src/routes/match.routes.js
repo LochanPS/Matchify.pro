@@ -789,8 +789,9 @@ const endMatchHandler = async (req, res) => {
     // ── 4+5. Mark COMPLETED and advance winner atomically ─────────────────────
     // Both writes in a single transaction so a crash between them can't leave the
     // match completed but the bracket not advanced (or vice versa).
-    // KNOCKOUT final: no parent, round 1, not a GROUP stage match
-    const isFinal = !parentMatch && match.round === 1 && match.stage !== 'GROUP';
+    // KNOCKOUT final: no parent, round 1, explicitly KNOCKOUT stage
+    // stage !== 'GROUP' is WRONG — null-stage GROUP matches satisfy it too (null !== 'GROUP')
+    const isFinal = !parentMatch && match.round === 1 && match.stage === 'KNOCKOUT';
     // Pure RR: this is a GROUP stage match
     const isGroupMatch = match.stage === 'GROUP';
 
@@ -1093,7 +1094,8 @@ router.put('/:matchId/change-winner', authenticate, async (req, res) => {
     const oldWinnerId = match.winnerId;
     const newLoserId = winnerId === match.player1Id ? match.player2Id : match.player1Id;
     const isGuestId = (id) => !id || id.startsWith('guest-');
-    const isFinal = !match.parentMatchId && match.round === 1 && match.stage !== 'GROUP';
+    // Must be explicitly KNOCKOUT — null-stage GROUP matches have null != 'GROUP' = true (wrong)
+    const isFinal = !match.parentMatchId && match.round === 1 && match.stage === 'KNOCKOUT';
 
     // 1. Update match winner in DB
     await prisma.match.update({ where: { id: matchId }, data: { winnerId, updatedAt: new Date() } });

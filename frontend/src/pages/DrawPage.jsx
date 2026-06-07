@@ -1146,35 +1146,25 @@ const DrawPage = () => {
                     {(bracket?.format === 'KNOCKOUT' || bracket?.format === 'ROUND_ROBIN' || bracket?.format === 'ROUND_ROBIN_KNOCKOUT') && (
                       <button
                         onClick={openAssignModal}
-                        disabled={isCategoryCompleted}
-                        title={isCategoryCompleted ? 'Category has ended - draw is locked' : 'Assign players to draw'}
-                        className={`px-4 py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm ${
-                          isCategoryCompleted
-                            ? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50'
-                            : 'btn-brand'
-                        }`}
+                        title="Assign players to draw"
+                        className="px-4 py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm btn-brand"
                       >
                         <UserPlus className="w-5 h-5" />
                         Assign Players
                       </button>
                     )}
-                    
+
                     {(bracket?.format === 'ROUND_ROBIN' || bracket?.format === 'ROUND_ROBIN_KNOCKOUT') && !hasPlayedMatches && (
                       <button
                         onClick={() => setShowConfigModal(true)}
-                        disabled={isCategoryCompleted}
-                        title={isCategoryCompleted ? 'Category has ended - draw is locked' : 'Edit group sizes and configuration'}
-                        className={`px-4 py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm ${
-                          isCategoryCompleted
-                            ? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50'
-                            : 'btn-brand'
-                        }`}
+                        title="Edit group sizes and configuration"
+                        className="px-4 py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm btn-brand"
                       >
                         <Layers className="w-5 h-5" />
                         Edit Groups
                       </button>
                     )}
-                    
+
                     {/* Row 2: Arrange KO & End Category */}
                     {bracket?.format === 'ROUND_ROBIN_KNOCKOUT' && (
                       <button
@@ -1184,48 +1174,34 @@ const DrawPage = () => {
                           await fetchDrawPageFull(activeCategory?.id);
                           setShowArrangeMatchupsModal(true);
                         }}
-                        disabled={isCategoryCompleted}
-                        title={isCategoryCompleted ? 'Category has ended - draw is locked' : 'Arrange knockout stage matchups'}
-                        className={`px-4 py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm ${
-                          isCategoryCompleted
-                            ? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50'
-                            : 'btn-brand'
-                        }`}
+                        title="Arrange knockout stage matchups"
+                        className="px-4 py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm btn-brand"
                       >
                         <Settings className="w-5 h-5" />
                         Arrange KO
                       </button>
                     )}
-                    
-                    {!isCategoryCompleted && (
-                      <button
-                        onClick={() => setShowEndTournamentModal(true)}
-                        className="px-4 py-3 btn-brand rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm"
-                        title="Mark this category as complete"
-                      >
-                        <Trophy className="w-5 h-5" />
-                        End Category
-                      </button>
-                    )}
-                    
+
+                    <button
+                      onClick={() => setShowEndTournamentModal(true)}
+                      className="px-4 py-3 btn-brand rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm"
+                      title="Mark this category as complete"
+                    >
+                      <Trophy className="w-5 h-5" />
+                      End Category
+                    </button>
+
                     {/* Row 3: Restart & Delete */}
                     <button
-                      onClick={() => !isCategoryCompleted && setShowRestartModal(true)}
-                      disabled={isCategoryCompleted}
+                      onClick={() => setShowRestartModal(true)}
                       title={
-                        isCategoryCompleted
-                          ? 'Category has ended - draw is locked'
-                          : bracket?.format === 'ROUND_ROBIN_KNOCKOUT' && activeStage === 'knockout'
-                            ? 'Restart knockout stage only (group results preserved)'
-                            : bracket?.format === 'ROUND_ROBIN_KNOCKOUT' && activeStage === 'roundrobin'
-                              ? 'Restart entire draw (groups + knockout)'
-                              : 'Restart all matches'
+                        bracket?.format === 'ROUND_ROBIN_KNOCKOUT' && activeStage === 'knockout'
+                          ? 'Restart knockout stage only (group results preserved)'
+                          : bracket?.format === 'ROUND_ROBIN_KNOCKOUT' && activeStage === 'roundrobin'
+                            ? 'Restart entire draw (groups + knockout)'
+                            : 'Restart all matches'
                       }
-                      className={`px-4 py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm ${
-                        isCategoryCompleted
-                          ? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50'
-                          : 'bg-gradient-to-r from-gray-600 to-gray-700 text-white shadow-gray-500/30 hover:shadow-gray-500/50 hover:scale-105'
-                      }`}
+                      className="px-4 py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm bg-gradient-to-r from-gray-600 to-gray-700 text-white shadow-gray-500/30 hover:shadow-gray-500/50 hover:scale-105"
                     >
                       <Zap className="w-5 h-5" />
                       {bracket?.format === 'ROUND_ROBIN_KNOCKOUT'
@@ -1234,14 +1210,9 @@ const DrawPage = () => {
                     </button>
 
                     <button
-                      onClick={() => !isCategoryCompleted && setShowDeleteModal(true)}
-                      disabled={isCategoryCompleted}
-                      title={isCategoryCompleted ? 'Category has ended - draw is locked' : 'Delete Draw'}
-                      className={`px-4 py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm ${
-                        isCategoryCompleted
-                          ? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-50'
-                          : 'bg-gradient-to-r from-red-500 to-rose-600 text-white shadow-red-500/30 hover:shadow-red-500/50 hover:scale-105'
-                      }`}
+                      onClick={() => setShowDeleteModal(true)}
+                      title="Delete Draw"
+                      className="px-4 py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm bg-gradient-to-r from-red-500 to-rose-600 text-white shadow-red-500/30 hover:shadow-red-500/50 hover:scale-105"
                     >
                       <Trash2 className="w-5 h-5" />
                       Delete

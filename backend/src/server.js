@@ -564,4 +564,24 @@ if (!process.env.VERCEL) {
   });
 }
 
+// ============================================
+// DATA CLEANUP — runs on startup + every 24h
+// Deletes notifications older than 60 days
+// ============================================
+const runCleanup = async () => {
+  try {
+    const cutoff = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000); // 60 days ago
+    const { count } = await prisma.notification.deleteMany({
+      where: { createdAt: { lt: cutoff } }
+    });
+    if (count > 0) console.log(`🧹 Cleanup: deleted ${count} notifications older than 60 days`);
+  } catch (err) {
+    console.error('⚠️ Cleanup job failed:', err.message);
+  }
+};
+
+// Run once on startup, then every 24 hours
+runCleanup();
+setInterval(runCleanup, 24 * 60 * 60 * 1000);
+
 export default app;

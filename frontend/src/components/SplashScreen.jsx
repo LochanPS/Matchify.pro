@@ -105,7 +105,8 @@ const SplashScreen = ({ onComplete, duration = 5300 }) => {
         pointerEvents: fadeOut ? 'none' : 'all',
       }}
     >
-      {/* ── Background image — cover so it fills every screen size consistently ── */}
+      {/* ── Background image — contain keeps all text visible on every screen.
+           Background #050810 matches image edges so no visible bars. ── */}
       <img
         src="/splash.png"
         alt=""
@@ -115,7 +116,7 @@ const SplashScreen = ({ onComplete, duration = 5300 }) => {
           inset: 0,
           width: '100%',
           height: '100%',
-          objectFit: 'cover',
+          objectFit: 'contain',
           objectPosition: 'center center',
           userSelect: 'none',
           pointerEvents: 'none',

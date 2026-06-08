@@ -577,18 +577,18 @@ function AppContent() {
 }
 
 function App() {
-  // Show splash screen once per browser session — not on every navigation
+  // Show splash screen only on first-ever app open — never again after that
   const [showSplash, setShowSplash] = useState(() => {
     try {
-      const seen = sessionStorage.getItem('_splashSeen');
-      return !seen; // true = show splash, false = skip
+      const seen = localStorage.getItem('_splashSeen');
+      return !seen; // true = show splash (first visit), false = skip
     } catch {
       return true;
     }
   });
 
   const handleSplashComplete = () => {
-    try { sessionStorage.setItem('_splashSeen', '1'); } catch {}
+    try { localStorage.setItem('_splashSeen', '1'); } catch {}
     setShowSplash(false);
   };
 

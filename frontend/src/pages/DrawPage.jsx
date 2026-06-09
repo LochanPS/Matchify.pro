@@ -1526,6 +1526,230 @@ const DrawPage = () => {
         </div>
       )}
 
+      {/* ── Smart Guide — Organizer only, not shown when category already completed ── */}
+      {isOrganizer && activeCategory && !isCategoryCompleted && (() => {
+        const fmt = bracket?.format;
+        const groupMatches = matches.filter(m => m.stage === 'GROUP');
+        const knockoutMatches = matches.filter(m => m.stage === 'KNOCKOUT');
+        const allGroupDone = groupMatches.length > 0 && groupMatches.every(m => m.status === 'COMPLETED');
+        const allMatchesDone = matches.length > 0 && matches.every(m => m.status === 'COMPLETED');
+        const hasKOMatches = knockoutMatches.length > 0;
+
+        let steps = [];
+        let currentStep = 0;
+        let bannerIcon = '📋';
+        let bannerText = '';
+        let bannerSubtext = '';
+        let bannerColor = 'amber';
+        let bannerButton = null;
+
+        if (!bracket) {
+          steps = fmt === 'ROUND_ROBIN_KNOCKOUT'
+            ? ['Create Draw', 'Group Stage', 'Knockout Stage', 'End Category']
+            : fmt === 'ROUND_ROBIN'
+              ? ['Create Draw', 'Play Matches', 'End Category']
+              : ['Create Draw', 'Assign Players', 'Play Matches', 'End Category'];
+          currentStep = 0;
+          bannerIcon = '📋';
+          bannerText = 'Create the draw to get started';
+          bannerSubtext = 'Choose format, group sizes, and generate the bracket.';
+          bannerColor = 'amber';
+          bannerButton = { label: 'Create Draw', action: () => setShowConfigModal(true) };
+        } else if (fmt === 'KNOCKOUT') {
+          steps = ['Create Draw', 'Assign Players', 'Play Matches', 'End Category'];
+          const playersAssigned = matches.some(m => m.player1Id || m.player2Id);
+          if (!playersAssigned) {
+            currentStep = 1;
+            bannerIcon = '👥';
+            bannerText = 'Assign players to bracket slots';
+            bannerSubtext = 'Use "Assign Players" to place registered players into the draw.';
+            bannerColor = 'amber';
+            bannerButton = { label: 'Assign Players', action: openAssignModal };
+          } else if (!hasPlayedMatches) {
+            currentStep = 2;
+            bannerIcon = '🎯';
+            bannerText = 'Players assigned — ready to play!';
+            bannerSubtext = 'Umpires can now start scoring. Share the tournament link with them.';
+            bannerColor = 'blue';
+          } else if (!allMatchesDone) {
+            const done = matches.filter(m => m.status === 'COMPLETED').length;
+            currentStep = 2;
+            bannerIcon = '⚡';
+            bannerText = `${done} / ${matches.length} matches completed`;
+            bannerSubtext = 'Tournament in progress. Track results in Live Matches.';
+            bannerColor = 'blue';
+          } else {
+            currentStep = 3;
+            bannerIcon = '🏆';
+            bannerText = 'All matches done — end the category!';
+            bannerSubtext = 'Click "End Category" to finalize results and award ranking points.';
+            bannerColor = 'green';
+            bannerButton = { label: 'End Category', action: () => setShowEndTournamentModal(true) };
+          }
+        } else if (fmt === 'ROUND_ROBIN') {
+          steps = ['Create Draw', 'Play Matches', 'End Category'];
+          if (!hasPlayedMatches) {
+            currentStep = 1;
+            bannerIcon = '🎯';
+            bannerText = 'Draw ready — start playing matches!';
+            bannerSubtext = 'Umpires can begin scoring round robin matches.';
+            bannerColor = 'blue';
+          } else if (!allMatchesDone) {
+            const done = matches.filter(m => m.status === 'COMPLETED').length;
+            currentStep = 1;
+            bannerIcon = '⚡';
+            bannerText = `${done} / ${matches.length} matches completed`;
+            bannerSubtext = 'Round robin in progress. Complete all matches to finish.';
+            bannerColor = 'blue';
+          } else {
+            currentStep = 2;
+            bannerIcon = '🏆';
+            bannerText = 'All matches done — end the category!';
+            bannerSubtext = 'Click "End Category" to finalize results and award ranking points.';
+            bannerColor = 'green';
+            bannerButton = { label: 'End Category', action: () => setShowEndTournamentModal(true) };
+          }
+        } else if (fmt === 'ROUND_ROBIN_KNOCKOUT') {
+          steps = ['Create Draw', 'Group Stage', 'Knockout Stage', 'End Category'];
+          if (!allGroupDone) {
+            const done = groupMatches.filter(m => m.status === 'COMPLETED').length;
+            currentStep = 1;
+            bannerIcon = groupMatches.length === 0 ? '🎯' : '⚡';
+            bannerText = groupMatches.length === 0
+              ? 'Draw ready — start group stage!'
+              : `Group stage: ${done} / ${groupMatches.length} matches done`;
+            bannerSubtext = groupMatches.length === 0
+              ? 'Umpires can begin scoring group matches.'
+              : 'Complete all group matches to advance to knockout stage.';
+            bannerColor = 'blue';
+          } else if (allGroupDone && !hasKOMatches) {
+            currentStep = 1;
+            bannerIcon = '🔀';
+            bannerText = 'Group stage done — set up knockout!';
+            bannerSubtext = 'Click "Arrange KO" to seed top players into the knockout bracket.';
+            bannerColor = 'amber';
+            bannerButton = {
+              label: 'Arrange KO',
+              action: async () => {
+                clearDrawCache(tournamentId, activeCategory?.id);
+                await fetchDrawPageFull(activeCategory?.id);
+                setShowArrangeMatchupsModal(true);
+              }
+            };
+          } else if (hasKOMatches && !allMatchesDone) {
+            const done = knockoutMatches.filter(m => m.status === 'COMPLETED').length;
+            currentStep = 2;
+            bannerIcon = '⚡';
+            bannerText = `Knockout: ${done} / ${knockoutMatches.length} matches done`;
+            bannerSubtext = 'Finals in progress! Check Live Matches for updates.';
+            bannerColor = 'blue';
+          } else if (allMatchesDone) {
+            currentStep = 3;
+            bannerIcon = '🏆';
+            bannerText = 'All matches done — end the category!';
+            bannerSubtext = 'Click "End Category" to finalize results and award ranking points.';
+            bannerColor = 'green';
+            bannerButton = { label: 'End Category', action: () => setShowEndTournamentModal(true) };
+          }
+        }
+
+        if (!steps.length) return null;
+
+        const colorMap = {
+          amber: {
+            bg: 'rgba(245,158,11,0.08)', border: 'rgba(245,158,11,0.28)',
+            text: '#F59E0B', subtext: 'rgba(245,158,11,0.65)',
+            btn: 'linear-gradient(135deg,#F59E0B,#FCD34D)', btnTxt: '#07071a',
+          },
+          green: {
+            bg: 'rgba(34,197,94,0.08)', border: 'rgba(34,197,94,0.3)',
+            text: '#4ade80', subtext: 'rgba(134,239,172,0.65)',
+            btn: 'linear-gradient(135deg,#22c55e,#16a34a)', btnTxt: '#fff',
+          },
+          blue: {
+            bg: 'rgba(96,165,250,0.08)', border: 'rgba(96,165,250,0.25)',
+            text: '#60a5fa', subtext: 'rgba(147,197,253,0.65)',
+            btn: 'linear-gradient(135deg,#3b82f6,#2563eb)', btnTxt: '#fff',
+          },
+        };
+        const c = colorMap[bannerColor] || colorMap.amber;
+
+        return (
+          <div className="max-w-2xl mx-auto px-3 mt-3">
+            {/* Progress Stepper */}
+            <div className="flex items-start mb-3 overflow-x-auto pb-0.5" style={{ scrollbarWidth: 'none' }}>
+              {steps.map((step, i) => (
+                <React.Fragment key={i}>
+                  <div className="flex flex-col items-center gap-1 flex-shrink-0" style={{ minWidth: 56 }}>
+                    <div
+                      className="w-6 h-6 rounded-full flex items-center justify-center font-black transition-all"
+                      style={{
+                        fontSize: 10,
+                        background: i < currentStep
+                          ? '#22c55e'
+                          : i === currentStep
+                            ? c.btn
+                            : 'rgba(255,255,255,0.07)',
+                        color: i < currentStep ? '#fff' : i === currentStep ? c.btnTxt : 'rgba(255,255,255,0.3)',
+                        border: i === currentStep ? `2px solid ${c.text}` : '2px solid transparent',
+                        boxShadow: i === currentStep ? `0 0 8px ${c.text}66` : 'none',
+                      }}
+                    >
+                      {i < currentStep ? '✓' : i + 1}
+                    </div>
+                    <span
+                      className="text-center leading-tight"
+                      style={{
+                        fontSize: 9,
+                        maxWidth: 52,
+                        fontWeight: i === currentStep ? 700 : 400,
+                        color: i === currentStep ? c.text : i < currentStep ? '#4ade80' : 'rgba(255,255,255,0.28)',
+                      }}
+                    >
+                      {step}
+                    </span>
+                  </div>
+                  {i < steps.length - 1 && (
+                    <div
+                      className="flex-1 h-px mx-1 mt-3 flex-shrink-0"
+                      style={{
+                        background: i < currentStep ? '#22c55e' : 'rgba(255,255,255,0.1)',
+                        minWidth: 12,
+                      }}
+                    />
+                  )}
+                </React.Fragment>
+              ))}
+            </div>
+
+            {/* What to do next — banner */}
+            {bannerText && (
+              <div
+                className="rounded-xl p-3 flex items-center gap-3"
+                style={{ background: c.bg, border: `1px solid ${c.border}` }}
+              >
+                <span className="text-lg flex-shrink-0">{bannerIcon}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-black leading-tight" style={{ color: c.text }}>{bannerText}</p>
+                  {bannerSubtext && (
+                    <p className="text-xs mt-0.5 leading-tight" style={{ color: c.subtext }}>{bannerSubtext}</p>
+                  )}
+                </div>
+                {bannerButton && (
+                  <button
+                    onClick={bannerButton.action}
+                    className="flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-black transition-all active:scale-95"
+                    style={{ background: c.btn, color: c.btnTxt, boxShadow: `0 4px 12px ${c.text}44`, whiteSpace: 'nowrap' }}
+                  >
+                    {bannerButton.label}
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })()}
+
       {/* Content */}
       <div className="max-w-2xl mx-auto px-3 py-4">
         {bracketLoading ? (

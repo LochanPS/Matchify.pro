@@ -123,6 +123,11 @@ async function runStartupMigrations() {
       `ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "isVerifiedUmpire" BOOLEAN NOT NULL DEFAULT false`,
       `ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "tournamentsRegistered" INTEGER NOT NULL DEFAULT 0`,
       `ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "matchesUmpired" INTEGER NOT NULL DEFAULT 0`,
+      // Umpire queue ordering on Match (added Jun 2026 — queueOrder)
+      // CRITICAL: prisma generate regenerated client expecting this column;
+      // without it ALL match.findMany() queries throw "column does not exist".
+      `ALTER TABLE "Match" ADD COLUMN IF NOT EXISTS "queueOrder" INTEGER`,
+      `CREATE INDEX IF NOT EXISTS "Match_queueOrder_idx" ON "Match"("queueOrder")`,
     ];
 
     for (const sql of migrations) {
@@ -142,8 +147,9 @@ async function runStartupMigrations() {
   }
 }
 
-// Run migrations (fire-and-forget: don't block server startup)
-runStartupMigrations();
+// Run migrations BEFORE server starts — blocking is intentional.
+// Column must exist before any request hits Prisma.
+await runStartupMigrations();
 
 const app = express();
 const PORT = process.env.PORT || 5000;

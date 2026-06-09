@@ -382,6 +382,8 @@ export default function TournamentLiveMatchesPage() {
   const [refreshing, setRefreshing]     = useState(false);
   const [error, setError]               = useState('');
   const [lastRefresh, setLastRefresh]   = useState(null);
+  // Category chip filter — only used in global (unfiltered) view
+  const [chipCategory, setChipCategory] = useState(null); // null = All
 
   // Ref so socket effects don't need liveMatches as dependency
   const liveMatchesRef = useRef([]);
@@ -515,7 +517,22 @@ export default function TournamentLiveMatchesPage() {
     return () => clearInterval(t);
   }, []); // empty deps — starts once, never restarts
 
-  const activeList = tab === 'live' ? liveMatches : doneMatches;
+  // All matches combined for chip category derivation
+  const allLoaded = [...liveMatches, ...doneMatches];
+  // Unique categories from all loaded matches — for chip row in global view
+  const availableCategories = !filterCategoryId
+    ? [...new Map(
+        allLoaded
+          .filter(m => m.category?.id && m.category?.name)
+          .map(m => [m.category.id, m.category])
+      ).values()]
+    : [];
+
+  const baseList = tab === 'live' ? liveMatches : doneMatches;
+  // Apply chip filter only in global view (filterCategoryId already narrows per-category view)
+  const activeList = (!filterCategoryId && chipCategory)
+    ? baseList.filter(m => m.category?.id === chipCategory)
+    : baseList;
 
   return (
     <div style={{ minHeight: '100vh', background: C.bg, paddingBottom: 40 }}>
@@ -658,6 +675,73 @@ export default function TournamentLiveMatchesPage() {
             </button>
           ))}
         </div>
+
+        {/* Category chips — only shown in global (unfiltered) view */}
+        {!filterCategoryId && availableCategories.length > 1 && (
+          <div style={{
+            display: 'flex', gap: 6, marginTop: 10,
+            overflowX: 'auto', paddingBottom: 2,
+            scrollbarWidth: 'none',
+          }}>
+            <style>{`.chips-scroll::-webkit-scrollbar{display:none}`}</style>
+            {/* "All" chip */}
+            <button
+              onClick={() => setChipCategory(null)}
+              style={{
+                flexShrink: 0,
+                display: 'flex', alignItems: 'center', gap: 5,
+                padding: '4px 10px',
+                borderRadius: 20,
+                border: `1px solid ${chipCategory === null ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.15)'}`,
+                background: chipCategory === null ? 'rgba(255,255,255,0.12)' : 'transparent',
+                color: chipCategory === null ? C.white : C.dim,
+                fontSize: 11, fontWeight: 700,
+                cursor: 'pointer', whiteSpace: 'nowrap',
+              }}
+            >
+              All
+              {baseList.length > 0 && (
+                <span style={{
+                  fontSize: 10, fontWeight: 800,
+                  background: chipCategory === null ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.08)',
+                  padding: '0px 5px', borderRadius: 8,
+                }}>{baseList.length}</span>
+              )}
+            </button>
+            {availableCategories.map(cat => {
+              const isActive = chipCategory === cat.id;
+              const catCount = baseList.filter(m => m.category?.id === cat.id).length;
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => setChipCategory(isActive ? null : cat.id)}
+                  style={{
+                    flexShrink: 0,
+                    display: 'flex', alignItems: 'center', gap: 5,
+                    padding: '4px 10px',
+                    borderRadius: 20,
+                    border: `1px solid ${isActive ? 'rgba(245,158,11,0.6)' : 'rgba(245,158,11,0.2)'}`,
+                    background: isActive ? 'rgba(245,158,11,0.18)' : 'rgba(245,158,11,0.05)',
+                    color: isActive ? '#F59E0B' : 'rgba(245,158,11,0.65)',
+                    fontSize: 11, fontWeight: 700,
+                    cursor: 'pointer', whiteSpace: 'nowrap',
+                    transition: 'all 0.15s',
+                  }}
+                >
+                  {cat.name}
+                  {catCount > 0 && (
+                    <span style={{
+                      fontSize: 10, fontWeight: 800,
+                      background: isActive ? 'rgba(245,158,11,0.3)' : 'rgba(245,158,11,0.12)',
+                      color: isActive ? '#F59E0B' : 'rgba(245,158,11,0.5)',
+                      padding: '0px 5px', borderRadius: 8,
+                    }}>{catCount}</span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* body */}

@@ -1145,8 +1145,8 @@ const DrawPage = () => {
               <div className="grid grid-cols-2 gap-2 w-full md:max-w-xs">
                 {bracket && (
                   <>
-                    {/* Row 1: Assign Players & Edit Groups */}
-                    {(bracket?.format === 'KNOCKOUT' || bracket?.format === 'ROUND_ROBIN' || bracket?.format === 'ROUND_ROBIN_KNOCKOUT') && (
+                    {/* ── Assign Players: hide once category is completed ── */}
+                    {!isCategoryCompleted && (
                       <button
                         onClick={openAssignModal}
                         title="Assign players to draw"
@@ -1157,6 +1157,7 @@ const DrawPage = () => {
                       </button>
                     )}
 
+                    {/* ── Edit Groups: only before any match is played ── */}
                     {(bracket?.format === 'ROUND_ROBIN' || bracket?.format === 'ROUND_ROBIN_KNOCKOUT') && !hasPlayedMatches && (
                       <button
                         onClick={() => setShowConfigModal(true)}
@@ -1168,11 +1169,10 @@ const DrawPage = () => {
                       </button>
                     )}
 
-                    {/* Row 2: Arrange KO & End Category */}
-                    {bracket?.format === 'ROUND_ROBIN_KNOCKOUT' && (
+                    {/* ── Arrange KO: only after group stage is fully complete ── */}
+                    {bracket?.format === 'ROUND_ROBIN_KNOCKOUT' && isRoundRobinComplete() && !isCategoryCompleted && (
                       <button
                         onClick={async () => {
-                          // Always clear cache and fetch fresh standings before opening
                           clearDrawCache(tournamentId, activeCategory?.id);
                           await fetchDrawPageFull(activeCategory?.id);
                           setShowArrangeMatchupsModal(true);
@@ -1185,16 +1185,19 @@ const DrawPage = () => {
                       </button>
                     )}
 
-                    <button
-                      onClick={() => setShowEndTournamentModal(true)}
-                      className="px-4 py-3 btn-brand rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm"
-                      title="Mark this category as complete"
-                    >
-                      <Trophy className="w-5 h-5" />
-                      End Category
-                    </button>
+                    {/* ── End Category: hide once already completed ── */}
+                    {!isCategoryCompleted && (
+                      <button
+                        onClick={() => setShowEndTournamentModal(true)}
+                        className="px-4 py-3 btn-brand rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm"
+                        title="Mark this category as complete"
+                      >
+                        <Trophy className="w-5 h-5" />
+                        End Category
+                      </button>
+                    )}
 
-                    {/* Manage Umpires — always visible, add/remove umpires without leaving page */}
+                    {/* ── Manage Umpires: always visible (add umpires at any stage) ── */}
                     <button
                       onClick={() => setShowManageUmpiresModal(true)}
                       title="Add or remove umpires for this tournament"
@@ -1205,7 +1208,7 @@ const DrawPage = () => {
                       {tournamentUmpires.length > 0 ? `Umpires (${tournamentUmpires.length})` : 'Add Umpires'}
                     </button>
 
-                    {/* Umpire Queues — bulk assign matches to umpires in order */}
+                    {/* ── Umpire Queues: only when umpires exist ── */}
                     {tournamentUmpires.length > 0 && (
                       <button
                         onClick={() => setShowUmpireQueueModal(true)}
@@ -1218,32 +1221,37 @@ const DrawPage = () => {
                       </button>
                     )}
 
-                    {/* Row 3: Restart & Delete */}
-                    <button
-                      onClick={() => setShowRestartModal(true)}
-                      title={
-                        bracket?.format === 'ROUND_ROBIN_KNOCKOUT' && activeStage === 'knockout'
-                          ? 'Restart knockout stage only (group results preserved)'
-                          : bracket?.format === 'ROUND_ROBIN_KNOCKOUT' && activeStage === 'roundrobin'
-                            ? 'Restart entire draw (groups + knockout)'
-                            : 'Restart all matches'
-                      }
-                      className="px-4 py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm bg-gradient-to-r from-gray-600 to-gray-700 text-white shadow-gray-500/30 hover:shadow-gray-500/50 hover:scale-105"
-                    >
-                      <Zap className="w-5 h-5" />
-                      {bracket?.format === 'ROUND_ROBIN_KNOCKOUT'
-                        ? activeStage === 'knockout' ? 'Restart KO' : 'Restart All'
-                        : 'Restart'}
-                    </button>
+                    {/* ── Restart: only when matches have been played (nothing to restart otherwise) ── */}
+                    {hasPlayedMatches && !isCategoryCompleted && (
+                      <button
+                        onClick={() => setShowRestartModal(true)}
+                        title={
+                          bracket?.format === 'ROUND_ROBIN_KNOCKOUT' && activeStage === 'knockout'
+                            ? 'Restart knockout stage only (group results preserved)'
+                            : bracket?.format === 'ROUND_ROBIN_KNOCKOUT' && activeStage === 'roundrobin'
+                              ? 'Restart entire draw (groups + knockout)'
+                              : 'Restart all matches'
+                        }
+                        className="px-4 py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm bg-gradient-to-r from-gray-600 to-gray-700 text-white shadow-gray-500/30 hover:shadow-gray-500/50 hover:scale-105"
+                      >
+                        <Zap className="w-5 h-5" />
+                        {bracket?.format === 'ROUND_ROBIN_KNOCKOUT'
+                          ? activeStage === 'knockout' ? 'Restart KO' : 'Restart All'
+                          : 'Restart'}
+                      </button>
+                    )}
 
-                    <button
-                      onClick={() => setShowDeleteModal(true)}
-                      title="Delete Draw"
-                      className="px-4 py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm bg-gradient-to-r from-red-500 to-rose-600 text-white shadow-red-500/30 hover:shadow-red-500/50 hover:scale-105"
-                    >
-                      <Trash2 className="w-5 h-5" />
-                      Delete
-                    </button>
+                    {/* ── Delete: only before any match is played — too dangerous after ── */}
+                    {!hasPlayedMatches && (
+                      <button
+                        onClick={() => setShowDeleteModal(true)}
+                        title="Delete Draw"
+                        className="px-4 py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm bg-gradient-to-r from-red-500 to-rose-600 text-white shadow-red-500/30 hover:shadow-red-500/50 hover:scale-105"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                        Delete
+                      </button>
+                    )}
                   </>
                 )}
                 {!bracket && !isCategoryCompleted && (
@@ -1280,13 +1288,6 @@ const DrawPage = () => {
             </div>
           )}
           
-          {/* Warning message when draw is locked due to played matches */}
-          {hasPlayedMatches && !isCategoryCompleted && isOrganizer && (
-            <div className="mt-4 px-4 py-3 bg-amber-500/10 border border-amber-500/30 rounded-xl flex items-center gap-3">
-              <span className="text-amber-400">🔒</span>
-              <span className="text-amber-300 text-sm">Draw is locked because matches have been played. You cannot delete or edit the draw.</span>
-            </div>
-          )}
         </div>
       </div>
 

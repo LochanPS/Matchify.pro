@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import safeStorage from '../utils/safeStorage';
 import { Shield, LogOut, ArrowLeft, AlertTriangle, X } from 'lucide-react';
 import api from '../utils/api';
 import { useAuth } from '../contexts/AuthContext';
@@ -15,8 +16,8 @@ const ImpersonationBanner = () => {
 
   useEffect(() => {
     // Check if currently impersonating by decoding the JWT token
-    const token = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
+    const token = safeStorage.getItem('token');
+    const storedUser = safeStorage.getItem('user');
     
     
     if (token && storedUser) {
@@ -48,8 +49,8 @@ const ImpersonationBanner = () => {
       if (response.data.success) {
         
         // Update token and user in localStorage
-        localStorage.setItem('token', response.data.token);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
+        safeStorage.setItem('token', response.data.token);
+        safeStorage.setItem('user', JSON.stringify(response.data.user));
         
         
         // Update AuthContext

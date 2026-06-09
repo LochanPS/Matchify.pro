@@ -2,49 +2,63 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+
+    <!-- ── Viewport ─────────────────────────────────────────────────────────── -->
+    <!-- viewport-fit=cover: fills iPhone X+ notch area                         -->
+    <!-- user-scalable=yes + maximum-scale=5: allows accessibility zoom          -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover" />
+
+    <!-- ── PWA / Add to Home Screen ──────────────────────────────────────────── -->
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <!-- valid values: default | black | black-translucent -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Matchify" />
+
+    <!-- ── Icons ─────────────────────────────────────────────────────────────── -->
     <link rel="icon" type="image/png" href="/logo.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
-    
-    <!-- Mobile Web App Capable -->
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="MATCHIFY.PRO">
-    
-    <!-- Prevent zoom on input focus (iOS) -->
-    <meta name="format-detection" content="telephone=no">
-    
-    <!-- Theme colors for mobile browsers -->
-    <meta name="theme-color" content="#07071a">
-    <meta name="msapplication-navbutton-color" content="#07071a">
-    <meta name="apple-mobile-web-app-status-bar-style" content="#07071a">
-    <title>🎾 Matchify.pro - India's Premier Badminton Tournament Platform v1.0.3</title>
-    <meta name="description" content="Join India's largest badminton tournament platform. Register for tournaments, track your progress, and compete with players across the country. Now with Matchify ID system!" />
+    <!-- Apple touch icon — used when user adds to iPhone home screen            -->
+    <link rel="apple-touch-icon" href="/logo.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="/logo.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/logo.png" />
+
+    <!-- ── Theme colours ─────────────────────────────────────────────────────── -->
+    <meta name="theme-color" content="#07071a" />
+    <meta name="msapplication-navbutton-color" content="#07071a" />
+
+    <!-- ── Misc ──────────────────────────────────────────────────────────────── -->
+    <meta name="format-detection" content="telephone=no" />
+
+    <!-- ── SEO ───────────────────────────────────────────────────────────────── -->
+    <title>🎾 Matchify.pro - India's Premier Badminton Tournament Platform</title>
+    <meta name="description" content="Join India's largest badminton tournament platform. Register for tournaments, track your progress, and compete with players across the country." />
     <meta name="keywords" content="badminton, tournament, India, sports, competition, matches" />
-    
-    <!-- Open Graph / Facebook -->
+
+    <!-- Open Graph -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://matchify.vercel.app/" />
+    <meta property="og:url" content="https://matchify.pro/" />
     <meta property="og:title" content="🎾 Matchify - India's Premier Badminton Tournament Platform" />
     <meta property="og:description" content="Join India's largest badminton tournament platform. Register for tournaments, track your progress, and compete with players across the country." />
     <meta property="og:image" content="/matchify-og.png" />
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://matchify.vercel.app/" />
+    <meta property="twitter:url" content="https://matchify.pro/" />
     <meta property="twitter:title" content="🎾 Matchify - India's Premier Badminton Tournament Platform" />
-    <meta property="twitter:description" content="Join India's largest badminton tournament platform. Register for tournaments, track your progress, and compete with players across the country." />
+    <meta property="twitter:description" content="Join India's largest badminton tournament platform." />
     <meta property="twitter:image" content="/matchify-og.png" />
 
-    <!-- Preconnect to external domains -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    
-    <!-- Razorpay Checkout Script -->
-    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <!-- ── Fonts ──────────────────────────────────────────────────────────────── -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+    <!-- ── Razorpay ───────────────────────────────────────────────────────────── -->
+    <!-- async: does NOT block page render. If Razorpay CDN is slow (common on   -->
+    <!-- Indian mobile networks), app loads normally and Razorpay is ready when   -->
+    <!-- the user actually taps Pay — no blank white screen on iPhone.            -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js" async></script>
   </head>
   <body>
     <div id="root"></div>

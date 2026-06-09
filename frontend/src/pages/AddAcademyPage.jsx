@@ -87,7 +87,7 @@ const INDIAN_CITIES = [
 // ── helpers ──────────────────────────────────────────────────────────────────
 const loadDraft = () => {
   try {
-    const s = localStorage.getItem(DRAFT_KEY);
+    const s = safeStorage.getItem(DRAFT_KEY);
     return s ? JSON.parse(s) : null;
   } catch { return null; }
 };
@@ -209,7 +209,7 @@ export default function AddAcademyPage() {
 
   // Auto-save (debounced 1.5s) — saves form + current step
   const saveDraft = useCallback(() => {
-    localStorage.setItem(DRAFT_KEY, JSON.stringify({ form, step, savedAt: new Date().toISOString() }));
+    safeStorage.setItem(DRAFT_KEY, JSON.stringify({ form, step, savedAt: new Date().toISOString() }));
     setLastSaved(new Date());
   }, [form, step]);
 
@@ -223,7 +223,7 @@ export default function AddAcademyPage() {
     return () => clearTimeout(t);
   }, [form, step, saveDraft]);
 
-  const clearDraft = () => { localStorage.removeItem(DRAFT_KEY); setLastSaved(null); };
+  const clearDraft = () => { safeStorage.removeItem(DRAFT_KEY); setLastSaved(null); };
 
   // Field handlers
   const set = (key, val) => {

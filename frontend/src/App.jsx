@@ -191,7 +191,7 @@ function AppContent() {
   // Check if impersonating
   const isImpersonating = () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = safeStorage.getItem('token');
       if (token) {
         const payload = JSON.parse(atob(token.split('.')[1]));
         return !!payload.isImpersonating;
@@ -580,7 +580,7 @@ function App() {
   // Show splash screen only on first-ever app open — never again after that
   const [showSplash, setShowSplash] = useState(() => {
     try {
-      const seen = localStorage.getItem('_splashSeen');
+      const seen = safeStorage.getItem('_splashSeen');
       return !seen; // true = show splash (first visit), false = skip
     } catch {
       return true;
@@ -588,7 +588,7 @@ function App() {
   });
 
   const handleSplashComplete = () => {
-    try { localStorage.setItem('_splashSeen', '1'); } catch {}
+    try { safeStorage.setItem('_splashSeen', '1'); } catch {}
     setShowSplash(false);
   };
 

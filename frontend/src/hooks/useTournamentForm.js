@@ -5,7 +5,7 @@ const DRAFT_STORAGE_KEY = 'matchify_tournament_drafts';
 // Get all drafts from localStorage
 export const getTournamentDrafts = () => {
   try {
-    const drafts = localStorage.getItem(DRAFT_STORAGE_KEY);
+    const drafts = safeStorage.getItem(DRAFT_STORAGE_KEY);
     return drafts ? JSON.parse(drafts) : [];
   } catch {
     return [];
@@ -24,7 +24,7 @@ export const saveTournamentDraft = (draft) => {
       drafts.push({ ...draft, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
     }
     
-    localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(drafts));
+    safeStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(drafts));
     return true;
   } catch {
     return false;
@@ -36,7 +36,7 @@ export const deleteTournamentDraft = (draftId) => {
   try {
     const drafts = getTournamentDrafts();
     const filtered = drafts.filter(d => d.id !== draftId);
-    localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(filtered));
+    safeStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(filtered));
     return true;
   } catch {
     return false;

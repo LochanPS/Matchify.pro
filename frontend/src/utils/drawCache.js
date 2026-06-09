@@ -8,11 +8,11 @@ const CACHE_VERSION = 'v2';
 
 export function getDrawCache(tournamentId, categoryId) {
   try {
-    const raw = localStorage.getItem(`draw_${CACHE_VERSION}_${tournamentId}_${categoryId}`);
+    const raw = safeStorage.getItem(`draw_${CACHE_VERSION}_${tournamentId}_${categoryId}`);
     if (!raw) return null;
     const { data, ts } = JSON.parse(raw);
     if (Date.now() - ts > TTL_MS) {
-      localStorage.removeItem(`draw_${CACHE_VERSION}_${tournamentId}_${categoryId}`);
+      safeStorage.removeItem(`draw_${CACHE_VERSION}_${tournamentId}_${categoryId}`);
       return null;
     }
     return data;
@@ -23,7 +23,7 @@ export function getDrawCache(tournamentId, categoryId) {
 
 export function setDrawCache(tournamentId, categoryId, data) {
   try {
-    localStorage.setItem(
+    safeStorage.setItem(
       `draw_${CACHE_VERSION}_${tournamentId}_${categoryId}`,
       JSON.stringify({ data, ts: Date.now() })
     );
@@ -34,7 +34,7 @@ export function setDrawCache(tournamentId, categoryId, data) {
 
 export function clearDrawCache(tournamentId, categoryId) {
   try {
-    localStorage.removeItem(`draw_${CACHE_VERSION}_${tournamentId}_${categoryId}`);
+    safeStorage.removeItem(`draw_${CACHE_VERSION}_${tournamentId}_${categoryId}`);
   } catch {
     // silently ignore
   }

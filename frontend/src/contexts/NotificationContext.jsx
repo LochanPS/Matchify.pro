@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import safeStorage from '../utils/safeStorage';
 import api from '../utils/api';
 import { useAuth } from './AuthContext';
 
@@ -38,7 +39,7 @@ export const NotificationProvider = ({ children }) => {
   // Fetch unread count
   const fetchUnreadCount = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = safeStorage.getItem('token');
       if (!token) return;
       
       const response = await api.get('/notifications/unread-count', { _skipLogout: true });

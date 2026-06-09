@@ -20,7 +20,7 @@
  * @throws error with .response = { status, data } for compatibility with getErrorMessage()
  */
 export async function fetchUpload(path, formData, { method = 'POST', timeoutMs = 120000 } = {}) {
-  const token = localStorage.getItem('token');
+  const token = safeStorage.getItem('token');
   // Derive base URL the same way api.js does so env config is respected.
   const baseUrl = import.meta.env.VITE_API_URL || 'https://matchify-backend-production-cb58.up.railway.app/api';
   const url = `${baseUrl}${path}`;

@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import safeStorage from '../utils/safeStorage';
 import api from '../utils/api';
 
 const AuthContext = createContext(null);
@@ -19,8 +20,8 @@ export const AuthProvider = ({ children }) => {
   const fetchUserProfile = async () => {
     try {
       // Skip profile fetch for admin users
-      const token = localStorage.getItem('token');
-      const storedUser = localStorage.getItem('user');
+      const token = safeStorage.getItem('token');
+      const storedUser = safeStorage.getItem('user');
       
       if (token && storedUser) {
         let payload, user;
@@ -29,9 +30,9 @@ export const AuthProvider = ({ children }) => {
           user = JSON.parse(storedUser);
         } catch {
           // Malformed token/user in localStorage — clear and re-login
-          localStorage.removeItem('token');
-          localStorage.removeItem('refreshToken');
-          localStorage.removeItem('user');
+          safeStorage.removeItem('token');
+          safeStorage.removeItem('refreshToken');
+          safeStorage.removeItem('user');
           return null;
         }
         
@@ -45,7 +46,7 @@ export const AuthProvider = ({ children }) => {
       if (response.data.user) {
         const freshUser = response.data.user;
         setUser(freshUser);
-        localStorage.setItem('user', JSON.stringify(freshUser));
+        safeStorage.setItem('user', JSON.stringify(freshUser));
         
         // Check if profile photo is missing - MANDATORY
         if (!freshUser.profilePhoto) {
@@ -67,8 +68,8 @@ export const AuthProvider = ({ children }) => {
       
       // If token is invalid, clear storage
       if (error.response?.status === 401) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+        safeStorage.removeItem('token');
+        safeStorage.removeItem('user');
         setUser(null);
       }
       return null;
@@ -77,8 +78,8 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     // Check if user is logged in on mount
-    const token = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
+    const token = safeStorage.getItem('token');
+    const storedUser = safeStorage.getItem('user');
     
     if (token && storedUser) {
       try {
@@ -115,7 +116,7 @@ export const AuthProvider = ({ children }) => {
         }
         
         if (needsUpdate) {
-          localStorage.setItem('user', JSON.stringify(parsedUser));
+          safeStorage.setItem('user', JSON.stringify(parsedUser));
         }
         
         setUser(parsedUser);
@@ -136,8 +137,8 @@ export const AuthProvider = ({ children }) => {
         });
       } catch (error) {
         console.error('Error parsing stored user:', error);
-        localStorage.removeItem('user');
-        localStorage.removeItem('token');
+        safeStorage.removeItem('user');
+        safeStorage.removeItem('token');
         setLoading(false);
       }
     } else {
@@ -173,9 +174,9 @@ export const AuthProvider = ({ children }) => {
         userData.currentRole = userData.roles && userData.roles[0] ? userData.roles[0] : 'PLAYER';
       }
 
-      localStorage.setItem('token', authToken);
-      if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
-      localStorage.setItem('user', JSON.stringify(userData));
+      safeStorage.setItem('token', authToken);
+      if (refreshToken) safeStorage.setItem('refreshToken', refreshToken);
+      safeStorage.setItem('user', JSON.stringify(userData));
       
       setUser(userData);
       
@@ -217,9 +218,9 @@ export const AuthProvider = ({ children }) => {
         newUser.currentRole = newUser.roles && newUser.roles[0] ? newUser.roles[0] : 'PLAYER';
       }
 
-      localStorage.setItem('token', authToken);
-      if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
-      localStorage.setItem('user', JSON.stringify(newUser));
+      safeStorage.setItem('token', authToken);
+      if (refreshToken) safeStorage.setItem('refreshToken', refreshToken);
+      safeStorage.setItem('user', JSON.stringify(newUser));
       setUser(newUser);
       
       // Check if profile photo is missing - MANDATORY
@@ -241,16 +242,16 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       // Invalidate refresh token in DB so stolen tokens can't be reused
-      const refreshToken = localStorage.getItem('refreshToken');
+      const refreshToken = safeStorage.getItem('refreshToken');
       if (refreshToken) {
         await api.post('/auth/logout', { refreshToken }).catch(() => {});
       }
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
-      localStorage.removeItem('token');
-      localStorage.removeItem('refreshToken');
-      localStorage.removeItem('user');
+      safeStorage.removeItem('token');
+      safeStorage.removeItem('refreshToken');
+      safeStorage.removeItem('user');
       setUser(null);
       setShowProfileCompletion(false);
     }
@@ -258,7 +259,7 @@ export const AuthProvider = ({ children }) => {
 
   const updateUser = (updatedUser) => {
     setUser(updatedUser);
-    localStorage.setItem('user', JSON.stringify(updatedUser));
+    safeStorage.setItem('user', JSON.stringify(updatedUser));
     
     // Hide profile photo modal if photo is now uploaded
     if (updatedUser.profilePhoto) {
@@ -275,7 +276,7 @@ export const AuthProvider = ({ children }) => {
     if (user) {
       const updatedUser = { ...user, currentRole: newRole };
       setUser(updatedUser);
-      localStorage.setItem('user', JSON.stringify(updatedUser));
+      safeStorage.setItem('user', JSON.stringify(updatedUser));
     }
   };
 
@@ -293,7 +294,7 @@ export const AuthProvider = ({ children }) => {
 
   const completeProfile = (updatedUser) => {
     setUser(updatedUser);
-    localStorage.setItem('user', JSON.stringify(updatedUser));
+    safeStorage.setItem('user', JSON.stringify(updatedUser));
     setShowProfileCompletion(false);
   };
 

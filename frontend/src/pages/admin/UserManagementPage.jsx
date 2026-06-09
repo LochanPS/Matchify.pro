@@ -1,4 +1,5 @@
 import { getErrorMessage } from '../../utils/errorMessage';
+import safeStorage from '../../utils/safeStorage';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AlertTriangle, CheckCircle, X, UserX, UserCheck, ArrowLeft } from 'lucide-react';
@@ -98,8 +99,8 @@ const UserManagementPage = () => {
   const confirmLoginAs = async () => {
     try {
       const response = await adminService.loginAsUser(loginAsModal.id);
-      localStorage.setItem('token', response.token);
-      localStorage.setItem('user', JSON.stringify(response.user));
+      safeStorage.setItem('token', response.token);
+      safeStorage.setItem('user', JSON.stringify(response.user));
       window.location.href = '/dashboard';
     } catch (err) {
       setAlertModal({ type: 'error', message: err.response?.data?.message || 'Failed to login as user' });

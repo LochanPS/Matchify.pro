@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import safeStorage from '../../utils/safeStorage';
 import { X, Wallet } from 'lucide-react';
 import api from '../../utils/api';
 
@@ -50,7 +51,7 @@ const TopUpModal = ({ onClose, onSuccess }) => {
         return;
       }
 
-      const token = localStorage.getItem('token');
+      const token = safeStorage.getItem('token');
 
       // Create Razorpay order
       const orderRes = await api.post('/wallet/topup', { amount: topUpAmount });
@@ -84,8 +85,8 @@ const TopUpModal = ({ onClose, onSuccess }) => {
           }
         },
         prefill: {
-          name: localStorage.getItem('userName') || '',
-          email: localStorage.getItem('userEmail') || '',
+          name: safeStorage.getItem('userName') || '',
+          email: safeStorage.getItem('userEmail') || '',
         },
         theme: {
           color: '#7c3aed'

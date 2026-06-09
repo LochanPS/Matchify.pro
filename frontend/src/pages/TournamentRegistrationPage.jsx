@@ -125,7 +125,7 @@ export default function TournamentRegistrationPage() {
     fetchPaymentSettings();
     // Restore draft if fresh (< 24h old)
     try {
-      const draft = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null');
+      const draft = JSON.parse(safeStorage.getItem(DRAFT_KEY) || 'null');
       if (draft && Array.isArray(draft.selectedCategories) && draft.selectedCategories.length > 0) {
         const ageMs = Date.now() - (draft.timestamp || 0);
         if (ageMs < 24 * 60 * 60 * 1000) {
@@ -148,7 +148,7 @@ export default function TournamentRegistrationPage() {
   // ── Draft helpers ────────────────────────────────────────────────────────
   const saveDraft = useCallback(() => {
     try {
-      localStorage.setItem(DRAFT_KEY, JSON.stringify({
+      safeStorage.setItem(DRAFT_KEY, JSON.stringify({
         selectedCategories,
         partnerCodes,
         partnerInfo,
@@ -160,7 +160,7 @@ export default function TournamentRegistrationPage() {
   }, [selectedCategories, partnerCodes, partnerInfo, partnerMode, partnerNames, DRAFT_KEY]);
 
   const clearDraft = () => {
-    try { localStorage.removeItem(DRAFT_KEY); } catch {}
+    try { safeStorage.removeItem(DRAFT_KEY); } catch {}
   };
 
   // ── Data fetching ────────────────────────────────────────────────────────

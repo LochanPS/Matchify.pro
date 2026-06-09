@@ -1145,31 +1145,31 @@ const DrawPage = () => {
               <div className="grid grid-cols-2 gap-2 w-full md:max-w-xs">
                 {bracket && (
                   <>
-                    {/* ── Assign Players: hide once category is completed ── */}
-                    {!isCategoryCompleted && (
-                      <button
-                        onClick={openAssignModal}
-                        title="Assign players to draw"
-                        className="px-4 py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm btn-brand"
-                      >
-                        <UserPlus className="w-5 h-5" />
-                        Assign Players
-                      </button>
-                    )}
+                    {/* ── AMBER PRIMARY: Assign Players — always show when bracket exists ── */}
+                    <button
+                      onClick={openAssignModal}
+                      title="Assign players to draw"
+                      className="px-4 py-3 rounded-xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 font-bold text-sm"
+                      style={{ background: 'linear-gradient(135deg,#F59E0B,#FCD34D)', color: '#07071a', boxShadow: '0 4px 15px rgba(245,158,11,0.25)' }}
+                    >
+                      <UserPlus className="w-4 h-4" />
+                      Assign Players
+                    </button>
 
-                    {/* ── Edit Groups: only before any match is played ── */}
+                    {/* ── AMBER PRIMARY: Edit Groups — only before any match is played ── */}
                     {(bracket?.format === 'ROUND_ROBIN' || bracket?.format === 'ROUND_ROBIN_KNOCKOUT') && !hasPlayedMatches && (
                       <button
                         onClick={() => setShowConfigModal(true)}
                         title="Edit group sizes and configuration"
-                        className="px-4 py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm btn-brand"
+                        className="px-4 py-3 rounded-xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 font-bold text-sm"
+                        style={{ background: 'linear-gradient(135deg,#F59E0B,#FCD34D)', color: '#07071a', boxShadow: '0 4px 15px rgba(245,158,11,0.25)' }}
                       >
-                        <Layers className="w-5 h-5" />
+                        <Layers className="w-4 h-4" />
                         Edit Groups
                       </button>
                     )}
 
-                    {/* ── Arrange KO: only after group stage is fully complete ── */}
+                    {/* ── AMBER PRIMARY: Arrange KO — only after group stage fully complete ── */}
                     {bracket?.format === 'ROUND_ROBIN_KNOCKOUT' && isRoundRobinComplete() && !isCategoryCompleted && (
                       <button
                         onClick={async () => {
@@ -1178,51 +1178,53 @@ const DrawPage = () => {
                           setShowArrangeMatchupsModal(true);
                         }}
                         title="Arrange knockout stage matchups"
-                        className="px-4 py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm btn-brand"
+                        className="px-4 py-3 rounded-xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 font-bold text-sm"
+                        style={{ background: 'linear-gradient(135deg,#F59E0B,#FCD34D)', color: '#07071a', boxShadow: '0 4px 15px rgba(245,158,11,0.25)' }}
                       >
-                        <Settings className="w-5 h-5" />
+                        <Settings className="w-4 h-4" />
                         Arrange KO
                       </button>
                     )}
 
-                    {/* ── End Category: hide once already completed ── */}
+                    {/* ── AMBER PRIMARY: End Category — hide once already completed ── */}
                     {!isCategoryCompleted && (
                       <button
                         onClick={() => setShowEndTournamentModal(true)}
-                        className="px-4 py-3 btn-brand rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm"
                         title="Mark this category as complete"
+                        className="px-4 py-3 rounded-xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 font-bold text-sm"
+                        style={{ background: 'linear-gradient(135deg,#F59E0B,#FCD34D)', color: '#07071a', boxShadow: '0 4px 15px rgba(245,158,11,0.25)' }}
                       >
-                        <Trophy className="w-5 h-5" />
+                        <Trophy className="w-4 h-4" />
                         End Category
                       </button>
                     )}
 
-                    {/* ── Manage Umpires: always visible (add umpires at any stage) ── */}
+                    {/* ── PURPLE ACCENT: Manage Umpires — always visible ── */}
                     <button
                       onClick={() => setShowManageUmpiresModal(true)}
                       title="Add or remove umpires for this tournament"
-                      className="px-4 py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm"
-                      style={{ background: 'linear-gradient(135deg,rgba(96,165,250,0.15),rgba(59,130,246,0.1))', border: '1.5px solid rgba(96,165,250,0.3)', color: '#60a5fa' }}
+                      className="px-4 py-3 rounded-xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 font-bold text-sm"
+                      style={{ background: 'linear-gradient(135deg,rgba(168,85,247,0.18),rgba(139,92,246,0.12))', border: '1.5px solid rgba(168,85,247,0.35)', color: '#c084fc', boxShadow: '0 4px 12px rgba(168,85,247,0.15)' }}
                     >
-                      <Users className="w-5 h-5" />
+                      <Users className="w-4 h-4" />
                       {tournamentUmpires.length > 0 ? `Umpires (${tournamentUmpires.length})` : 'Add Umpires'}
                     </button>
 
-                    {/* ── Umpire Queues: only when umpires exist ── */}
+                    {/* ── PURPLE ACCENT: Umpire Queues — when umpires exist ── */}
                     {tournamentUmpires.length > 0 && (
                       <button
                         onClick={() => setShowUmpireQueueModal(true)}
                         title="Bulk assign matches to umpires in sequential order"
-                        className="px-4 py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm"
-                        style={{ background: 'linear-gradient(135deg,rgba(96,165,250,0.18),rgba(59,130,246,0.12))', border: '1.5px solid rgba(96,165,250,0.35)', color: '#60a5fa' }}
+                        className="px-4 py-3 rounded-xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 font-bold text-sm"
+                        style={{ background: 'linear-gradient(135deg,rgba(168,85,247,0.18),rgba(139,92,246,0.12))', border: '1.5px solid rgba(168,85,247,0.35)', color: '#c084fc', boxShadow: '0 4px 12px rgba(168,85,247,0.15)' }}
                       >
-                        <ListOrdered className="w-5 h-5" />
+                        <ListOrdered className="w-4 h-4" />
                         Umpire Queues
                       </button>
                     )}
 
-                    {/* ── Restart: only when matches have been played (nothing to restart otherwise) ── */}
-                    {hasPlayedMatches && !isCategoryCompleted && (
+                    {/* ── NEUTRAL: Restart — only when matches have been played ── */}
+                    {hasPlayedMatches && (
                       <button
                         onClick={() => setShowRestartModal(true)}
                         title={
@@ -1232,24 +1234,26 @@ const DrawPage = () => {
                               ? 'Restart entire draw (groups + knockout)'
                               : 'Restart all matches'
                         }
-                        className="px-4 py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm bg-gradient-to-r from-gray-600 to-gray-700 text-white shadow-gray-500/30 hover:shadow-gray-500/50 hover:scale-105"
+                        className="px-4 py-3 rounded-xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 font-bold text-sm"
+                        style={{ background: 'rgba(255,255,255,0.06)', border: '1.5px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.6)' }}
                       >
-                        <Zap className="w-5 h-5" />
+                        <Zap className="w-4 h-4" />
                         {bracket?.format === 'ROUND_ROBIN_KNOCKOUT'
                           ? activeStage === 'knockout' ? 'Restart KO' : 'Restart All'
                           : 'Restart'}
                       </button>
                     )}
 
-                    {/* ── Delete: only before any match is played — too dangerous after ── */}
+                    {/* ── RED: Delete — only before any match is played ── */}
                     {!hasPlayedMatches && (
                       <button
                         onClick={() => setShowDeleteModal(true)}
                         title="Delete Draw"
-                        className="px-4 py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm bg-gradient-to-r from-red-500 to-rose-600 text-white shadow-red-500/30 hover:shadow-red-500/50 hover:scale-105"
+                        className="px-4 py-3 rounded-xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 font-bold text-sm"
+                        style={{ background: 'linear-gradient(135deg,rgba(239,68,68,0.18),rgba(220,38,38,0.12))', border: '1.5px solid rgba(239,68,68,0.35)', color: '#f87171', boxShadow: '0 4px 12px rgba(239,68,68,0.12)' }}
                       >
-                        <Trash2 className="w-5 h-5" />
-                        Delete
+                        <Trash2 className="w-4 h-4" />
+                        Delete Draw
                       </button>
                     )}
                   </>

@@ -393,6 +393,9 @@ export default function TournamentLiveMatchesPage() {
   // Prevent overlapping requests — if a fetch is in-flight, skip new poll ticks
   // Without this, a 30s timeout means up to 10 concurrent requests pile up
   const isFetchingRef = useRef(false);
+  // Track consecutive failures — only show error after 3 in a row (~9s with 3s poll)
+  // Prevents error flash during Railway deployment restarts (~30-60s downtime)
+  const failCountRef = useRef(0);
 
   const fetchAll = useCallback(async (showSpinner = false) => {
     if (isFetchingRef.current) return; // drop concurrent poll
@@ -410,10 +413,14 @@ export default function TournamentLiveMatchesPage() {
       diffAndUpdate(setDoneMatches, filtered.filter(m => m.status === 'COMPLETED'));
       setLastRefresh(new Date());
       hasDataRef.current = true;
-      setError(prev => prev ? '' : prev);
+      failCountRef.current = 0;
+      setError(prev => prev ? '' : prev); // clear error on success
     } catch {
-      // Show error only on initial load; suppress background poll failures
-      if (!hasDataRef.current) setError('Failed to load matches — retrying…');
+      failCountRef.current += 1;
+      // Only show error after 3 consecutive failures — hides transient restart blips
+      if (failCountRef.current >= 3) {
+        setError('Failed to load matches — retrying…');
+      }
     } finally {
       isFetchingRef.current = false;
       if (showSpinner) setLoading(false);
@@ -500,11 +507,11 @@ export default function TournamentLiveMatchesPage() {
     }
   };
 
-  /* poll every 5s — uses ref so interval never restarts */
+  /* poll every 3s — uses ref so interval never restarts */
   useEffect(() => {
     const t = setInterval(() => {
       fetchAllRef.current?.(false);
-    }, 5000);
+    }, 3000);
     return () => clearInterval(t);
   }, []); // empty deps — starts once, never restarts
 

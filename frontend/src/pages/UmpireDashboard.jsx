@@ -32,6 +32,7 @@ export default function UmpireDashboard() {
   const [playerCode, setPlayerCode] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [showLevelInfo, setShowLevelInfo] = useState(false);
+  const [copiedCode, setCopiedCode] = useState(null); // 'umpire' | 'player' | null
   const [stats, setStats] = useState({
     totalMatches: 0,
     completedMatches: 0,
@@ -124,6 +125,12 @@ export default function UmpireDashboard() {
     ? Math.round((stats.historicalMatches / (daysActive / 30)) * 10) / 10
     : 0;
 
+  const copyCode = (code, type) => {
+    navigator.clipboard.writeText(code).catch(() => {});
+    setCopiedCode(type);
+    setTimeout(() => setCopiedCode(null), 1800);
+  };
+
   if (loading) {
     return <LoadingScreen message="Loading dashboard..." />;
   }
@@ -168,37 +175,35 @@ export default function UmpireDashboard() {
                 </div>
                 <p className="text-white/60">Welcome back, {user?.name}!</p>
                 <p className="text-white/40 text-sm mt-1">{user?.email}</p>
-                {/* Player Code & Umpire Code - Show for all users */}
+                {/* Quick-reference codes in header */}
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {playerCode && (
-                    <div className="inline-flex items-center gap-2 px-4 py-2 border rounded-xl">
-                      <span className="text-emerald-400/80 text-sm">Player Code:</span>
-                      <span className="text-emerald-400 font-mono font-bold text-lg tracking-wider">{playerCode}</span>
-                      <button
-                        onClick={() => navigator.clipboard.writeText(playerCode)}
-                        className="p-1.5 hover:bg-emerald-500/20 rounded-lg transition-colors ml-1"
-                        title="Copy player code"
-                      >
-                        <svg className="w-4 h-4 text-emerald-400/60 hover:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                        </svg>
-                      </button>
-                    </div>
-                  )}
                   {umpireCode && (
-                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/20 border border-amber-500/30 rounded-xl">
-                      <span className="text-amber-400/80 text-sm">Umpire Code:</span>
-                      <span className="text-amber-400 font-mono font-bold text-lg tracking-wider">{umpireCode}</span>
-                      <button
-                        onClick={() => navigator.clipboard.writeText(umpireCode)}
-                        className="p-1.5 hover:bg-amber-500/20 rounded-lg transition-colors ml-1"
-                        title="Copy umpire code"
-                      >
-                        <svg className="w-4 h-4 text-amber-400/60 hover:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                        </svg>
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => copyCode(umpireCode, 'umpire-header')}
+                      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all active:scale-95"
+                      style={{ background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.35)' }}
+                      title="Copy umpire code"
+                    >
+                      <span className="text-amber-400/70 text-xs">⚖️ Umpire:</span>
+                      <span className="text-amber-300 font-mono font-bold text-sm tracking-widest">{umpireCode}</span>
+                      <span className="text-xs" style={{ color: copiedCode === 'umpire-header' ? '#4ade80' : 'rgba(245,158,11,0.5)' }}>
+                        {copiedCode === 'umpire-header' ? '✓' : '⎘'}
+                      </span>
+                    </button>
+                  )}
+                  {playerCode && (
+                    <button
+                      onClick={() => copyCode(playerCode, 'player-header')}
+                      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all active:scale-95"
+                      style={{ background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.25)' }}
+                      title="Copy player code"
+                    >
+                      <span className="text-emerald-400/70 text-xs">🎾 Player:</span>
+                      <span className="text-emerald-300 font-mono font-bold text-sm tracking-widest">{playerCode}</span>
+                      <span className="text-xs" style={{ color: copiedCode === 'player-header' ? '#4ade80' : 'rgba(52,211,153,0.4)' }}>
+                        {copiedCode === 'player-header' ? '✓' : '⎘'}
+                      </span>
+                    </button>
                   )}
                 </div>
               </div>
@@ -208,6 +213,78 @@ export default function UmpireDashboard() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 -mt-8">
+
+        {/* ── UMPIRE ID CARD — the most important thing on this page ── */}
+        {umpireCode && (
+          <div
+            className="mb-6 rounded-2xl overflow-hidden"
+            style={{
+              background: 'linear-gradient(135deg, rgba(245,158,11,0.12) 0%, rgba(253,211,77,0.06) 50%, rgba(245,158,11,0.10) 100%)',
+              border: '1.5px solid rgba(245,158,11,0.35)',
+              boxShadow: '0 8px 32px rgba(245,158,11,0.12)',
+            }}
+          >
+            {/* Top label strip */}
+            <div className="px-5 pt-4 pb-0 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-base">⚖️</span>
+                <span className="text-xs font-black tracking-widest uppercase" style={{ color: 'rgba(245,158,11,0.7)' }}>
+                  Your Umpire Code
+                </span>
+              </div>
+              {stats.isVerifiedUmpire && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold" style={{ background: 'rgba(34,197,94,0.15)', color: '#4ade80', border: '1px solid rgba(34,197,94,0.3)' }}>
+                  ✓ Verified
+                </span>
+              )}
+            </div>
+
+            {/* Big code display */}
+            <div className="px-5 py-3 flex items-center gap-4">
+              <span
+                className="font-black tracking-[0.18em] select-all"
+                style={{
+                  fontSize: 'clamp(28px, 8vw, 44px)',
+                  color: '#F59E0B',
+                  textShadow: '0 0 30px rgba(245,158,11,0.5)',
+                  letterSpacing: '0.18em',
+                  fontFamily: 'monospace',
+                }}
+              >
+                {umpireCode}
+              </span>
+            </div>
+
+            {/* Explanation + copy button */}
+            <div className="px-5 pb-4 flex items-end justify-between gap-3">
+              <p className="text-xs leading-relaxed flex-1" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                Share this code with tournament organizers. They enter it to add you as an umpire to their tournament. Keep it handy on match day.
+              </p>
+              <button
+                onClick={() => copyCode(umpireCode, 'umpire-main')}
+                className="flex-shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-xl font-black text-sm transition-all active:scale-95"
+                style={{
+                  background: copiedCode === 'umpire-main'
+                    ? 'linear-gradient(135deg,#22c55e,#16a34a)'
+                    : 'linear-gradient(135deg,#F59E0B,#FCD34D)',
+                  color: '#07071a',
+                  boxShadow: copiedCode === 'umpire-main'
+                    ? '0 4px 15px rgba(34,197,94,0.4)'
+                    : '0 4px 15px rgba(245,158,11,0.4)',
+                  minWidth: 110,
+                  justifyContent: 'center',
+                }}
+              >
+                {copiedCode === 'umpire-main' ? (
+                  <><span>✓</span> Copied!</>
+                ) : (
+                  <><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg> Copy Code</>
+                )}
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Historical Stats Banner */}
         {stats.historicalMatches > 0 && (
           <div className="mb-8 bg-gradient-to-r from-purple-900/50 via-indigo-900/50 to-purple-900/50 backdrop-blur-sm border border-purple-500/30 rounded-2xl p-6">

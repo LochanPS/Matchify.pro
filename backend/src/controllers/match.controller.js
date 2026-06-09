@@ -704,6 +704,7 @@ export {
   endMatch,
   getUmpireMatches,
   assignUmpire,
+  saveUmpireQueue,
   createMatch,
   undoPoint,
   setMatchConfig,
@@ -1336,7 +1337,7 @@ const getUmpireMatches = async (req, res) => {
         tournament: { select: { id: true, name: true } },
         category:   { select: { id: true, name: true } }
       },
-      orderBy: [{ status: 'asc' }, { round: 'asc' }, { matchNumber: 'asc' }]
+      orderBy: [{ queueOrder: 'asc' }, { status: 'asc' }, { round: 'asc' }, { matchNumber: 'asc' }]
     });
 
     // Batch player lookups — one query, not N
@@ -1868,5 +1869,106 @@ const resumeMatchTimer = async (req, res) => {
   } catch (error) {
     console.error('Resume timer error:', error);
     res.status(500).json({ success: false, error: 'Failed to resume timer' });
+  }
+};
+
+/**
+ * Save umpire match queue (bulk assign + ordering)
+ * PUT /api/matches/tournament/:tournamentId/umpire-queue
+ * Body: { umpireId: string, matchIds: string[] }  — matchIds ordered by desired play sequence
+ */
+const saveUmpireQueue = async (req, res) => {
+  try {
+    const { tournamentId } = req.params;
+    const { umpireId, matchIds } = req.body;
+    const userId = req.user.userId || req.user.id;
+
+    // ── Validate inputs ──────────────────────────────────────────────────────
+    if (!umpireId || !Array.isArray(matchIds)) {
+      return res.status(400).json({ success: false, error: 'umpireId and matchIds array required' });
+    }
+
+    // ── Verify organizer owns this tournament ────────────────────────────────
+    const tournament = await prisma.tournament.findUnique({
+      where: { id: tournamentId },
+      select: { id: true, name: true, organizerId: true }
+    });
+    if (!tournament) return res.status(404).json({ success: false, error: 'Tournament not found' });
+    if (tournament.organizerId !== userId) {
+      return res.status(403).json({ success: false, error: 'Only organizer can assign umpire queues' });
+    }
+
+    // ── Verify umpire is registered for this tournament ──────────────────────
+    const tournamentUmpire = await prisma.tournamentUmpire.findUnique({
+      where: { tournamentId_umpireId: { tournamentId, umpireId } }
+    });
+    if (!tournamentUmpire) {
+      return res.status(400).json({ success: false, error: 'Umpire is not registered for this tournament' });
+    }
+
+    // ── Get umpire details for notification ─────────────────────────────────
+    const umpire = await prisma.user.findUnique({
+      where: { id: umpireId },
+      select: { id: true, name: true, email: true }
+    });
+    if (!umpire) return res.status(404).json({ success: false, error: 'Umpire not found' });
+
+    // ── Verify all matchIds belong to this tournament ────────────────────────
+    if (matchIds.length > 0) {
+      const matchCount = await prisma.match.count({
+        where: { id: { in: matchIds }, tournamentId }
+      });
+      if (matchCount !== matchIds.length) {
+        return res.status(400).json({ success: false, error: 'Some matches do not belong to this tournament' });
+      }
+    }
+
+    // ── Transaction: clear old queue → set new queue atomically ─────────────
+    await prisma.$transaction(async (tx) => {
+      // Clear queueOrder for all matches currently queued to this umpire in this tournament
+      await tx.match.updateMany({
+        where: { tournamentId, umpireId, queueOrder: { not: null } },
+        data: { queueOrder: null }
+      });
+
+      // Assign umpireId + queueOrder (1-based) for each match in new queue
+      for (let i = 0; i < matchIds.length; i++) {
+        await tx.match.update({
+          where: { id: matchIds[i] },
+          data: { umpireId, queueOrder: i + 1 }
+        });
+      }
+    });
+
+    // ── Send ONE notification to umpire (not one per match) ──────────────────
+    if (matchIds.length > 0) {
+      try {
+        const notificationService = await import('../services/notificationService.js');
+        await notificationService.default.createNotification({
+          userId: umpireId,
+          type: 'MATCH_ASSIGNED',
+          title: '⚖️ Match Queue Assigned',
+          message: `You have been assigned ${matchIds.length} match${matchIds.length > 1 ? 'es' : ''} in ${tournament.name}. Open your dashboard to see your queue.`,
+          data: {
+            tournamentId,
+            tournamentName: tournament.name,
+            matchCount: matchIds.length,
+            isQueue: true
+          },
+          sendEmail: false
+        });
+      } catch (notifError) {
+        // Notification failure must NOT fail the queue save
+        console.error('⚠️ Queue notification failed (non-fatal):', notifError.message);
+      }
+    }
+
+    res.json({
+      success: true,
+      message: `Queue of ${matchIds.length} match${matchIds.length > 1 ? 'es' : ''} saved for ${umpire.name}`
+    });
+  } catch (error) {
+    console.error('Save umpire queue error:', error);
+    res.status(500).json({ success: false, error: 'Failed to save umpire queue' });
   }
 };

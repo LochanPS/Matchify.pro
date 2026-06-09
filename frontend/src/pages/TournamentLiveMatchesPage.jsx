@@ -1,5 +1,5 @@
 ﻿import { useState, useEffect, useRef, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { Radio, Trophy, Clock, Users, Wifi, WifiOff, RefreshCw } from 'lucide-react';
 import { getTournamentAllMatches } from '../api/matches';
@@ -370,6 +370,9 @@ function diffAndUpdate(setter, newItems) {
 export default function TournamentLiveMatchesPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const filterCategoryId   = searchParams.get('categoryId') || null;
+  const filterCategoryName = searchParams.get('categoryName') || null;
   const { socket, isConnected } = useWebSocket();
 
   const [tab, setTab]                   = useState('live');
@@ -400,8 +403,11 @@ export default function TournamentLiveMatchesPage() {
       // Halves DB queries vs two separate live/completed calls.
       const res = await getTournamentAllMatches(id);
       const all = res.matches || [];
-      diffAndUpdate(setLiveMatches, all.filter(m => m.status === 'IN_PROGRESS'));
-      diffAndUpdate(setDoneMatches, all.filter(m => m.status === 'COMPLETED'));
+      const filtered = filterCategoryId
+        ? all.filter(m => m.categoryId === filterCategoryId)
+        : all;
+      diffAndUpdate(setLiveMatches, filtered.filter(m => m.status === 'IN_PROGRESS'));
+      diffAndUpdate(setDoneMatches, filtered.filter(m => m.status === 'COMPLETED'));
       setLastRefresh(new Date());
       hasDataRef.current = true;
       setError(prev => prev ? '' : prev);
@@ -412,7 +418,7 @@ export default function TournamentLiveMatchesPage() {
       isFetchingRef.current = false;
       if (showSpinner) setLoading(false);
     }
-  }, [id]);
+  }, [id, filterCategoryId]);
 
   // Keep ref in sync with latest fetchAll
   useEffect(() => { fetchAllRef.current = fetchAll; }, [fetchAll]);
@@ -479,8 +485,11 @@ export default function TournamentLiveMatchesPage() {
     try {
       const res = await getTournamentAllMatches(id);
       const all = res.matches || [];
-      setLiveMatches(all.filter(m => m.status === 'IN_PROGRESS'));
-      setDoneMatches(all.filter(m => m.status === 'COMPLETED'));
+      const filtered = filterCategoryId
+        ? all.filter(m => m.categoryId === filterCategoryId)
+        : all;
+      setLiveMatches(filtered.filter(m => m.status === 'IN_PROGRESS'));
+      setDoneMatches(filtered.filter(m => m.status === 'COMPLETED'));
       setLastRefresh(new Date());
       hasDataRef.current = true;
       setError('');
@@ -542,6 +551,20 @@ export default function TournamentLiveMatchesPage() {
                 Live Matches
               </h1>
             </div>
+            {filterCategoryName && (
+              <div style={{
+                display: 'inline-flex', alignItems: 'center',
+                marginTop: 4,
+                background: 'rgba(245,158,11,0.12)',
+                border: '1px solid rgba(245,158,11,0.3)',
+                borderRadius: 20,
+                padding: '2px 10px',
+              }}>
+                <span style={{ fontSize: 11, fontWeight: 700, color: '#F59E0B' }}>
+                  {filterCategoryName}
+                </span>
+              </div>
+            )}
           </div>
 
           {/* connection indicator + refresh button */}

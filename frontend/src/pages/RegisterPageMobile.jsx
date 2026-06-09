@@ -130,7 +130,7 @@ const RegisterPageMobile = () => {
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)', borderRadius: 20, padding: '5px 14px', fontSize: 12, fontWeight: 700, color: '#FCD34D', marginBottom: 12 }}>
               ✨ Join the Champions!
             </div>
-            <h1 style={{ fontSize: 30, fontWeight: 900, lineHeight: 1.1, marginBottom: 6, background: 'linear-gradient(135deg, #ffffff 0%, #FCD34D 50%, #F59E0B 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+            <h1 style={{ fontSize: 30, fontWeight: 900, lineHeight: 1.1, marginBottom: 6, color: '#ffffff' }}>
               Create Account
             </h1>
             <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>Start your badminton journey</p>

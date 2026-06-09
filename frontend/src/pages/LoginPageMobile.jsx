@@ -177,10 +177,9 @@ const LoginPageMobile = () => {
             </div>
             <h1 style={{
               fontSize: 34, fontWeight: 900, lineHeight: 1.1, marginBottom: 6,
-              background: 'linear-gradient(135deg, #ffffff 0%, #FCD34D 50%, #F59E0B 100%)',
-              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text'
+              color: '#ffffff',
             }}>
-              Welcome Back
+              Welcome <span style={{ color: '#FCD34D' }}>Back</span>
             </h1>
             <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)' }}>Sign in to continue your journey</p>
           </div>

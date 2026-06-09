@@ -21,7 +21,7 @@ import {
   UserPlusIcon,
   ShareIcon,
 } from '@heroicons/react/24/outline';
-import { Edit, Users, Eye, Layers, GitBranch } from 'lucide-react';
+import { Edit, Users, Eye, Layers, GitBranch, Radio } from 'lucide-react';
 import { shareTournament as doShareTournament } from '../utils/tournamentShare';
 import LoadingScreen from '../components/LoadingScreen';
 import Spinner from '../components/Spinner';
@@ -1010,8 +1010,8 @@ const TournamentDetailPage = () => {
                         )}
                       </div>
 
-                      {/* View Draw button — pinned to bottom */}
-                      <div className="px-4 pb-4">
+                      {/* View Draw + Live Matches buttons — pinned to bottom */}
+                      <div className="px-4 pb-4" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                         <button
                           onClick={() => navigate(`/tournaments/${id}/draws/${category.id}`)}
                           className="w-full py-2.5 rounded-xl text-xs font-black transition-all active:scale-95 flex items-center justify-center gap-2"
@@ -1023,6 +1023,18 @@ const TournamentDetailPage = () => {
                         >
                           <TrophyIcon className="w-3.5 h-3.5" />
                           View Draw
+                        </button>
+                        <button
+                          onClick={() => navigate(`/tournaments/${id}/live?categoryId=${category.id}&categoryName=${encodeURIComponent(category.name)}`)}
+                          className="w-full py-2.5 rounded-xl text-xs font-black transition-all active:scale-95 flex items-center justify-center gap-2"
+                          style={{
+                            background: 'linear-gradient(135deg, rgba(255,68,102,0.18), rgba(255,68,102,0.08))',
+                            border: '1px solid rgba(255,68,102,0.35)',
+                            color: '#ff4466',
+                          }}
+                        >
+                          <Radio className="w-3.5 h-3.5" />
+                          Live Matches
                         </button>
                       </div>
                     </div>

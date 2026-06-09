@@ -1,7 +1,7 @@
 import express from 'express';
 import prisma from '../lib/prisma.js';
 import { authenticate, authorize, optionalAuth } from '../middleware/auth.js';
-import { assignUmpire, getUmpireMatches } from '../controllers/match.controller.js';
+import { assignUmpire, getUmpireMatches, saveUmpireQueue } from '../controllers/match.controller.js';
 import { broadcastScoreUpdate, broadcastMatchStatus, broadcastMatchComplete, broadcastToTournament } from '../services/socketService.js';
 import { cacheDel } from '../services/redisService.js';
 import { getDrawPageCacheKey } from '../controllers/drawPage.controller.js';
@@ -18,6 +18,11 @@ const router = express.Router();
 // Get matches assigned to the currently authenticated umpire
 // MUST be before /:matchId so 'umpire-matches' is not treated as a matchId
 router.get('/umpire-matches', authenticate, getUmpireMatches);
+
+// Bulk assign + order matches to one umpire (organizer only)
+// PUT /api/matches/tournament/:tournamentId/umpire-queue
+// MUST be before /:matchId so 'tournament' is not treated as a matchId
+router.put('/tournament/:tournamentId/umpire-queue', authenticate, saveUmpireQueue);
 
 // GET /live — all in-progress matches (must be before /:matchId)
 router.get('/live', authenticate, async (req, res) => {

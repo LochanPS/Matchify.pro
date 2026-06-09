@@ -528,6 +528,114 @@ export default function UmpireDashboard() {
           </div>
         </div>
 
+        {/* ── YOUR QUEUE ────────────────────────────────────────────────────── */}
+        {(() => {
+          // Matches assigned to this umpire with a queueOrder set, sorted by position
+          const queueMatches = matches
+            .filter(m => m.umpireId === user?.id && m.queueOrder != null)
+            .sort((a, b) => (a.queueOrder || 0) - (b.queueOrder || 0));
+
+          if (queueMatches.length === 0) return null;
+
+          // Next = first match that isn't COMPLETED yet
+          const nextMatch = queueMatches.find(m => m.status !== 'COMPLETED');
+          const upcoming  = queueMatches.filter(m => m !== nextMatch && m.status !== 'COMPLETED');
+          const done      = queueMatches.filter(m => m.status === 'COMPLETED');
+
+          const conductLink = (m) =>
+            m.status === 'IN_PROGRESS'
+              ? `/match/${m.id}/score`
+              : `/match/${m.id}/conduct?umpireId=${m.umpireId}`;
+
+          const playerLabel = (m) => {
+            const p1 = m.player1?.name || 'TBD';
+            const p2 = m.player2?.name || 'TBD';
+            return `${p1} vs ${p2}`;
+          };
+
+          return (
+            <div className="rounded-2xl overflow-hidden mb-8"
+              style={{ background: 'rgba(96,165,250,0.06)', border: '1.5px solid rgba(96,165,250,0.25)' }}>
+
+              {/* Header */}
+              <div className="p-5 flex items-center gap-3"
+                style={{ borderBottom: '1px solid rgba(96,165,250,0.15)' }}>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+                  style={{ background: 'rgba(96,165,250,0.2)' }}>
+                  <span className="text-lg">📋</span>
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-white">Your Queue</h3>
+                  <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                    {queueMatches.length} match{queueMatches.length !== 1 ? 'es' : ''} assigned in order
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-5 space-y-4">
+                {/* NEXT MATCH */}
+                {nextMatch ? (
+                  <div className="rounded-xl p-4"
+                    style={{ background: 'rgba(96,165,250,0.1)', border: '1.5px solid rgba(96,165,250,0.35)' }}>
+                    <p className="text-[10px] font-black mb-2" style={{ color: '#93c5fd', letterSpacing: '0.1em' }}>
+                      ▶ NEXT MATCH
+                    </p>
+                    <p className="text-white font-black text-base mb-0.5">{playerLabel(nextMatch)}</p>
+                    <p className="text-xs mb-3" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                      M{nextMatch.matchNumber} · {nextMatch.tournament?.name} · {nextMatch.category?.name}
+                    </p>
+                    <Link to={conductLink(nextMatch)}
+                      className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-black transition-all hover:scale-[1.02]"
+                      style={{ background: 'rgba(96,165,250,0.25)', color: '#60a5fa', border: '1.5px solid rgba(96,165,250,0.5)' }}>
+                      <PlayIcon className="w-4 h-4" />
+                      {nextMatch.status === 'IN_PROGRESS' ? 'Continue Match' : 'Start Match'}
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="rounded-xl p-4 text-center"
+                    style={{ background: 'rgba(74,222,128,0.08)', border: '1px solid rgba(74,222,128,0.2)' }}>
+                    <p className="text-sm font-bold" style={{ color: '#4ade80' }}>✓ All queued matches completed!</p>
+                  </div>
+                )}
+
+                {/* COMING UP */}
+                {upcoming.length > 0 && (
+                  <div>
+                    <p className="text-[10px] font-black mb-2" style={{ color: 'rgba(255,255,255,0.4)', letterSpacing: '0.1em' }}>
+                      COMING UP
+                    </p>
+                    <div className="space-y-2">
+                      {upcoming.map((m, i) => (
+                        <div key={m.id}
+                          className="flex items-center gap-3 rounded-xl px-3 py-2.5"
+                          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                          <span className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-black flex-shrink-0"
+                            style={{ background: 'rgba(96,165,250,0.2)', color: '#93c5fd' }}>
+                            {(nextMatch ? 1 : 0) + i + 1}
+                          </span>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-semibold text-white truncate">{playerLabel(m)}</p>
+                            <p className="text-[10px] truncate" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                              M{m.matchNumber} · {m.category?.name}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* COMPLETED in queue */}
+                {done.length > 0 && (
+                  <p className="text-xs text-center" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                    {done.length} match{done.length !== 1 ? 'es' : ''} completed
+                  </p>
+                )}
+              </div>
+            </div>
+          );
+        })()}
+
         {/* Today's Matches */}
         <div className="rounded-2xl overflow-hidden mb-8 border" style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' }}>
           <div className="p-6 border-b border-white/10 flex items-center gap-3">

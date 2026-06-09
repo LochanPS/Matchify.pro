@@ -26,7 +26,8 @@ import api from '../utils/api';
 import SingleEliminationBracket from '../components/brackets/SingleEliminationBracket';
 import { useAuth } from '../contexts/AuthContext';
 import { ArrowLeftIcon, TrophyIcon } from '@heroicons/react/24/outline';
-import { Loader, Zap, Layers, X, Plus, Settings, Users, CheckCircle, AlertTriangle, Trash2, UserPlus, Gavel, AlertCircle, Play, Trophy, Clock, Eye, Edit, ArrowLeft } from 'lucide-react';
+import { Loader, Zap, Layers, X, Plus, Settings, Users, CheckCircle, AlertTriangle, Trash2, UserPlus, Gavel, AlertCircle, Play, Trophy, Clock, Eye, Edit, ArrowLeft, ChevronUp, ChevronDown, ListOrdered } from 'lucide-react';
+import { getTournamentAllMatches } from '../api/matches';
 import Spinner from '../components/Spinner';
 
 // Pre-generated particle data — deterministic, never re-randomized on render
@@ -94,6 +95,8 @@ const DrawPage = () => {
   const [umpiresError, setUmpiresError] = useState(null);
   const [showUmpireModal, setShowUmpireModal] = useState(false);
   const [selectedMatchForUmpire, setSelectedMatchForUmpire] = useState(null);
+  const [showUmpireQueueModal, setShowUmpireQueueModal] = useState(false);
+  const [showManageUmpiresModal, setShowManageUmpiresModal] = useState(false);
   const pollIntervalRef = React.useRef(null);
   const activeCategoryIdRef = React.useRef(null); // stable ref for polling closure
   const fetchInProgressRef = React.useRef(false); // guard against overlapping fetches
@@ -804,9 +807,9 @@ const DrawPage = () => {
     try {
       await api.put(`/matches/${matchId}/umpire`, { umpireId });
 
-      // Optimistic patch — just update umpireId in local matches state.
-      // No full refetch needed; umpire assignment doesn't change bracket structure.
-      setMatches(prev => prev.map(m => m.id === matchId ? { ...m, umpireId } : m));
+      // Optimistic patch — store umpireId + full umpire object so name shows on card.
+      const umpireObj = tournamentUmpires.find(u => u.id === umpireId);
+      setMatches(prev => prev.map(m => m.id === matchId ? { ...m, umpireId, umpire: umpireObj || { id: umpireId } } : m));
 
       setSuccess('Umpire assigned successfully!');
       setShowUmpireModal(false);
@@ -1190,6 +1193,30 @@ const DrawPage = () => {
                       <Trophy className="w-5 h-5" />
                       End Category
                     </button>
+
+                    {/* Manage Umpires — always visible, add/remove umpires without leaving page */}
+                    <button
+                      onClick={() => setShowManageUmpiresModal(true)}
+                      title="Add or remove umpires for this tournament"
+                      className="px-4 py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm"
+                      style={{ background: 'linear-gradient(135deg,rgba(96,165,250,0.15),rgba(59,130,246,0.1))', border: '1.5px solid rgba(96,165,250,0.3)', color: '#60a5fa' }}
+                    >
+                      <Users className="w-5 h-5" />
+                      {tournamentUmpires.length > 0 ? `Umpires (${tournamentUmpires.length})` : 'Add Umpires'}
+                    </button>
+
+                    {/* Umpire Queues — bulk assign matches to umpires in order */}
+                    {tournamentUmpires.length > 0 && (
+                      <button
+                        onClick={() => setShowUmpireQueueModal(true)}
+                        title="Bulk assign matches to umpires in sequential order"
+                        className="px-4 py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm"
+                        style={{ background: 'linear-gradient(135deg,rgba(96,165,250,0.18),rgba(59,130,246,0.12))', border: '1.5px solid rgba(96,165,250,0.35)', color: '#60a5fa' }}
+                      >
+                        <ListOrdered className="w-5 h-5" />
+                        Umpire Queues
+                      </button>
+                    )}
 
                     {/* Row 3: Restart & Delete */}
                     <button
@@ -1886,6 +1913,15 @@ const DrawPage = () => {
         />
       )}
 
+      {/* Umpire Queue Modal — bulk assign matches to umpires in sequential order */}
+      {showUmpireQueueModal && (
+        <UmpireQueueModal
+          tournamentId={tournamentId}
+          umpires={tournamentUmpires}
+          onClose={() => setShowUmpireQueueModal(false)}
+        />
+      )}
+
       {/* Assign Umpire Modal */}
       {showUmpireModal && selectedMatchForUmpire && (
         <AssignUmpireModal
@@ -1894,11 +1930,23 @@ const DrawPage = () => {
           loadingUmpires={loadingUmpires}
           umpiresError={umpiresError}
           onRetryUmpires={loadUmpires}
+          tournamentId={tournamentId}
+          onUmpireAdded={(newUmpire) => setTournamentUmpires(prev => [...prev, newUmpire])}
           onClose={() => {
             setShowUmpireModal(false);
             setSelectedMatchForUmpire(null);
           }}
           onAssign={assignUmpireToMatch}
+        />
+      )}
+
+      {/* Manage Umpires Modal */}
+      {showManageUmpiresModal && (
+        <ManageUmpiresModal
+          tournamentId={tournamentId}
+          umpires={tournamentUmpires}
+          onUmpiresChange={(updated) => setTournamentUmpires(updated)}
+          onClose={() => setShowManageUmpiresModal(false)}
         />
       )}
 
@@ -3131,6 +3179,13 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                                   )}
                                 </div>
 
+                                {/* Umpire assigned label — persistent, always visible once assigned */}
+                                {hasUmpire && dbMatch?.umpire?.name && (
+                                  <div style={{ padding: '4px 12px', background: 'rgba(96,165,250,0.08)', borderBottom: '1px solid rgba(96,165,250,0.12)', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                                    <span style={{ fontSize: '9px', fontWeight: 700, color: '#60a5fa', letterSpacing: '0.04em' }}>🎤 Umpire: {dbMatch.umpire.name}</span>
+                                  </div>
+                                )}
+
                                 {/* Player rows — left-border accent = winner indicator */}
                                 <div style={{ padding: '8px 0 6px' }}>
 
@@ -3632,6 +3687,13 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                           )}
                         </div>
                       </div>
+
+                      {/* Umpire assigned label — persistent, always visible once assigned */}
+                      {hasUmpire && dbMatch?.umpire?.name && (
+                        <div style={{ padding: '4px 12px', background: 'rgba(96,165,250,0.08)', borderBottom: '1px solid rgba(96,165,250,0.12)', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                          <span style={{ fontSize: '9px', fontWeight: 700, color: '#60a5fa', letterSpacing: '0.04em' }}>🎤 Umpire: {dbMatch.umpire.name}</span>
+                        </div>
+                      )}
 
                       {/* Players */}
                       {(() => {
@@ -5031,7 +5093,7 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
 };
 
 // Assign Umpire Modal
-const AssignUmpireModal = ({ match, umpires, loadingUmpires, umpiresError, onRetryUmpires, onClose, onAssign }) => {
+const AssignUmpireModal = ({ match, umpires, loadingUmpires, umpiresError, onRetryUmpires, onClose, onAssign, tournamentId, onUmpireAdded }) => {
   const navigate = useNavigate();
   const [selectedUmpire, setSelectedUmpire] = useState(match?.umpireId || null);
   const [assigning, setAssigning] = useState(false);
@@ -5109,11 +5171,10 @@ const AssignUmpireModal = ({ match, umpires, loadingUmpires, umpiresError, onRet
               </button>
             </div>
           ) : umpires.length === 0 ? (
-            <div className="text-center py-8">
-              <Gavel className="w-10 h-10 mx-auto mb-3" style={{ color: 'rgba(255,255,255,0.2)' }} />
-              <p className="text-sm font-bold text-white mb-1">No umpires added</p>
-              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Add umpires from tournament settings first</p>
-            </div>
+            <InlineAddUmpire
+              tournamentId={tournamentId}
+              onUmpireAdded={onUmpireAdded}
+            />
           ) : (
             <div className="space-y-2 max-h-56 overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
               {umpires.map((umpire) => {
@@ -5581,5 +5642,475 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
   );
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
+// UmpireQueueModal
+// Organizer picks umpire → adds matches in play order → saves queue.
+// Calls PUT /api/matches/tournament/:tournamentId/umpire-queue (no new API).
+// ─────────────────────────────────────────────────────────────────────────────
+const UmpireQueueModal = ({ tournamentId, umpires, onClose }) => {
+  const [allMatches, setAllMatches] = useState([]);
+  const [loadingMatches, setLoadingMatches] = useState(true);
+  const [selectedUmpireId, setSelectedUmpireId] = useState(umpires[0]?.id || null);
+  const [queues, setQueues] = useState({}); // { [umpireId]: string[] }
+  const [saving, setSaving] = useState(false);
+  const [saveMsg, setSaveMsg] = useState(null); // { type:'success'|'error', text:string }
 
+  useEffect(() => {
+    (async () => {
+      try {
+        const data = await getTournamentAllMatches(tournamentId);
+        const matches = data.matches || [];
+        setAllMatches(matches);
+        // Pre-populate from existing queueOrder in DB
+        const initial = {};
+        umpires.forEach(u => {
+          const assigned = matches
+            .filter(m => m.umpireId === u.id && m.queueOrder != null)
+            .sort((a, b) => (a.queueOrder || 0) - (b.queueOrder || 0));
+          initial[u.id] = assigned.map(m => m.id);
+        });
+        setQueues(initial);
+      } catch (err) {
+        console.error('UmpireQueueModal load error:', err);
+      } finally {
+        setLoadingMatches(false);
+      }
+    })();
+  }, [tournamentId]);
+
+  const currentQueue = queues[selectedUmpireId] || [];
+  const allQueuedIds = new Set(Object.values(queues).flat());
+  const available = allMatches.filter(m => m.status !== 'COMPLETED' && !allQueuedIds.has(m.id));
+
+  const addToQueue   = (id) => setQueues(p => ({ ...p, [selectedUmpireId]: [...(p[selectedUmpireId] || []), id] }));
+  const removeFromQueue = (id) => setQueues(p => ({ ...p, [selectedUmpireId]: (p[selectedUmpireId] || []).filter(x => x !== id) }));
+
+  const moveUp = (i) => {
+    if (i === 0) return;
+    const q = [...currentQueue]; [q[i - 1], q[i]] = [q[i], q[i - 1]];
+    setQueues(p => ({ ...p, [selectedUmpireId]: q }));
+  };
+  const moveDown = (i) => {
+    if (i === currentQueue.length - 1) return;
+    const q = [...currentQueue]; [q[i], q[i + 1]] = [q[i + 1], q[i]];
+    setQueues(p => ({ ...p, [selectedUmpireId]: q }));
+  };
+
+  const getMatchLabel = (matchId) => {
+    const m = allMatches.find(x => x.id === matchId);
+    if (!m) return `Match …${matchId.slice(-4)}`;
+    const p1 = m.player1?.name || 'TBD';
+    const p2 = m.player2?.name || 'TBD';
+    const cat = m.category?.name ? ` [${m.category.name}]` : '';
+    return `M${m.matchNumber} · ${p1} vs ${p2}${cat}`;
+  };
+
+  const saveQueue = async () => {
+    if (!selectedUmpireId) return;
+    setSaving(true); setSaveMsg(null);
+    try {
+      await api.put(`/matches/tournament/${tournamentId}/umpire-queue`, {
+        umpireId: selectedUmpireId,
+        matchIds: currentQueue
+      });
+      setSaveMsg({ type: 'success', text: `Saved — ${currentQueue.length} match${currentQueue.length !== 1 ? 'es' : ''} queued` });
+      setTimeout(() => setSaveMsg(null), 4000);
+    } catch (err) {
+      setSaveMsg({ type: 'error', text: err.response?.data?.error || 'Failed to save queue' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const selectedUmpire = umpires.find(u => u.id === selectedUmpireId);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3"
+      style={{ background: 'rgba(0,0,0,0.78)', backdropFilter: 'blur(8px)' }}>
+      <div className="w-full max-w-lg rounded-2xl overflow-hidden flex flex-col"
+        style={{ background: '#0a0f1e', border: '1.5px solid rgba(96,165,250,0.3)', maxHeight: '90vh' }}>
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4"
+          style={{ background: 'rgba(96,165,250,0.08)', borderBottom: '1px solid rgba(96,165,250,0.18)' }}>
+          <div className="flex items-center gap-3">
+            <ListOrdered className="w-5 h-5" style={{ color: '#60a5fa' }} />
+            <div>
+              <h2 className="text-base font-black text-white">Umpire Queues</h2>
+              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Assign matches in play order per umpire</p>
+            </div>
+          </div>
+          <button onClick={onClose}
+            className="w-8 h-8 rounded-full flex items-center justify-center transition-all hover:bg-white/10">
+            <X className="w-4 h-4 text-white" />
+          </button>
+        </div>
+
+        {/* Umpire selector tabs */}
+        <div className="flex gap-2 px-4 pt-3 pb-2 flex-wrap"
+          style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+          {umpires.map(u => {
+            const qLen = (queues[u.id] || []).length;
+            return (
+              <button key={u.id} onClick={() => setSelectedUmpireId(u.id)}
+                className="px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5"
+                style={selectedUmpireId === u.id
+                  ? { background: 'rgba(96,165,250,0.2)', border: '1.5px solid rgba(96,165,250,0.5)', color: '#60a5fa' }
+                  : { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.55)' }}>
+                {u.name}
+                {qLen > 0 && (
+                  <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black"
+                    style={{ background: 'rgba(96,165,250,0.3)', color: '#93c5fd' }}>{qLen}</span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Body */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {loadingMatches ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader className="w-6 h-6 animate-spin" style={{ color: '#60a5fa' }} />
+            </div>
+          ) : (
+            <>
+              {/* Queue for selected umpire */}
+              <div>
+                <p className="text-xs font-black mb-2"
+                  style={{ color: 'rgba(255,255,255,0.5)', letterSpacing: '0.08em' }}>
+                  {selectedUmpire?.name?.toUpperCase()}'S QUEUE ({currentQueue.length})
+                </p>
+                {currentQueue.length === 0 ? (
+                  <div className="rounded-xl py-6 text-center text-xs"
+                    style={{ background: 'rgba(255,255,255,0.03)', border: '1px dashed rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.35)' }}>
+                    Empty — tap matches below to add
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {currentQueue.map((matchId, index) => (
+                      <div key={matchId}
+                        className="flex items-center gap-2 rounded-xl px-3 py-2.5"
+                        style={{ background: 'rgba(96,165,250,0.07)', border: '1px solid rgba(96,165,250,0.2)' }}>
+                        <span className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black flex-shrink-0"
+                          style={{ background: 'rgba(96,165,250,0.25)', color: '#93c5fd' }}>{index + 1}</span>
+                        <span className="flex-1 text-xs font-semibold text-white truncate">{getMatchLabel(matchId)}</span>
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          <button onClick={() => moveUp(index)} disabled={index === 0}
+                            className="w-6 h-6 rounded flex items-center justify-center disabled:opacity-30"
+                            style={{ background: 'rgba(255,255,255,0.07)' }}>
+                            <ChevronUp className="w-3.5 h-3.5 text-white" />
+                          </button>
+                          <button onClick={() => moveDown(index)} disabled={index === currentQueue.length - 1}
+                            className="w-6 h-6 rounded flex items-center justify-center disabled:opacity-30"
+                            style={{ background: 'rgba(255,255,255,0.07)' }}>
+                            <ChevronDown className="w-3.5 h-3.5 text-white" />
+                          </button>
+                          <button onClick={() => removeFromQueue(matchId)}
+                            className="w-6 h-6 rounded flex items-center justify-center hover:bg-red-500/20"
+                            style={{ background: 'rgba(255,255,255,0.07)' }}>
+                            <X className="w-3 h-3" style={{ color: '#f87171' }} />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Available matches */}
+              <div>
+                <p className="text-xs font-black mb-2"
+                  style={{ color: 'rgba(255,255,255,0.5)', letterSpacing: '0.08em' }}>
+                  AVAILABLE MATCHES ({available.length})
+                </p>
+                {available.length === 0 ? (
+                  <div className="rounded-xl py-4 text-center text-xs"
+                    style={{ background: 'rgba(255,255,255,0.03)', border: '1px dashed rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.3)' }}>
+                    All matches assigned
+                  </div>
+                ) : (
+                  <div className="space-y-1.5">
+                    {available.map(m => {
+                      const p1 = m.player1?.name || 'TBD';
+                      const p2 = m.player2?.name || 'TBD';
+                      const cat = m.category?.name ? ` [${m.category.name}]` : '';
+                      return (
+                        <button key={m.id} onClick={() => addToQueue(m.id)}
+                          className="w-full flex items-center gap-2 rounded-xl px-3 py-2 text-left transition-all hover:scale-[1.01]"
+                          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                          <Plus className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#60a5fa' }} />
+                          <span className="flex-1 text-xs font-semibold truncate" style={{ color: 'rgba(255,255,255,0.8)' }}>
+                            M{m.matchNumber} · {p1} vs {p2}{cat}
+                          </span>
+                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded"
+                            style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.35)' }}>
+                            {m.status}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Save feedback */}
+        {saveMsg && (
+          <div className="mx-4 mb-2 px-3 py-2 rounded-lg text-xs font-bold"
+            style={saveMsg.type === 'success'
+              ? { background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.25)', color: '#4ade80' }
+              : { background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.25)', color: '#f87171' }}>
+            {saveMsg.text}
+          </div>
+        )}
+
+        {/* Footer */}
+        <div className="flex gap-2 p-4" style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+          <button onClick={onClose}
+            className="flex-1 py-2.5 rounded-xl text-xs font-black transition-all"
+            style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.1)' }}>
+            Close
+          </button>
+          <button onClick={saveQueue} disabled={saving || !selectedUmpireId}
+            className="flex-1 py-2.5 rounded-xl text-xs font-black transition-all disabled:opacity-50"
+            style={{ background: 'rgba(96,165,250,0.2)', color: '#60a5fa', border: '1.5px solid rgba(96,165,250,0.4)' }}>
+            {saving ? 'Saving...' : `Save ${selectedUmpire?.name?.split(' ')[0] || ''}'s Queue`}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// InlineAddUmpire
+// Shown inside AssignUmpireModal when no umpires exist yet.
+// Lets organizer add an umpire by code without leaving the modal.
+// ─────────────────────────────────────────────────────────────────────────────
+const InlineAddUmpire = ({ tournamentId, onUmpireAdded }) => {
+  const [code, setCode] = useState('');
+  const [adding, setAdding] = useState(false);
+  const [msg, setMsg] = useState(null); // { type:'success'|'error', text }
+
+  const handleAdd = async () => {
+    const trimmed = code.trim();
+    if (!trimmed || trimmed === '#') return;
+    setAdding(true);
+    setMsg(null);
+    try {
+      const res = await tournamentAPI.addUmpireByCode(tournamentId, trimmed);
+      const newUmpire = res.umpire;
+      setMsg({ type: 'success', text: `${newUmpire.name} added!` });
+      setCode('');
+      onUmpireAdded?.(newUmpire);
+    } catch (err) {
+      setMsg({ type: 'error', text: err.response?.data?.error || 'Failed to add umpire' });
+    } finally {
+      setAdding(false);
+    }
+  };
+
+  return (
+    <div className="py-4 space-y-3">
+      <div className="text-center mb-2">
+        <Gavel className="w-8 h-8 mx-auto mb-2" style={{ color: 'rgba(255,255,255,0.2)' }} />
+        <p className="text-sm font-black text-white">No umpires added yet</p>
+        <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>
+          Enter an umpire's Matchify.pro ID to add them
+        </p>
+      </div>
+
+      {/* Code hint */}
+      <div className="px-3 py-2 rounded-xl text-xs"
+        style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.15)', color: 'rgba(245,158,11,0.8)' }}>
+        Umpire shares their code: <span className="font-mono font-black" style={{ color: '#FCD34D' }}>#42</span> or <span className="font-mono font-black" style={{ color: '#FCD34D' }}>#100</span>
+      </div>
+
+      {/* Input + button */}
+      <div className="flex gap-2">
+        <input
+          type="text"
+          value={code}
+          onChange={e => setCode(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && handleAdd()}
+          placeholder="#ID or code"
+          className="flex-1 px-3 py-2.5 rounded-xl text-sm font-bold outline-none"
+          style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff' }}
+        />
+        <button
+          onClick={handleAdd}
+          disabled={adding || !code.trim() || code.trim() === '#'}
+          className="px-4 py-2.5 rounded-xl text-xs font-black transition-all disabled:opacity-40"
+          style={{ background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.35)', color: '#FCD34D' }}>
+          {adding ? <Loader className="w-4 h-4 animate-spin" /> : 'Add'}
+        </button>
+      </div>
+
+      {/* Feedback */}
+      {msg && (
+        <p className="text-xs font-bold px-1"
+          style={{ color: msg.type === 'success' ? '#4ade80' : '#f87171' }}>
+          {msg.text}
+        </p>
+      )}
+    </div>
+  );
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ManageUmpiresModal
+// Full umpire management — view, add, remove — without leaving DrawPage.
+// ─────────────────────────────────────────────────────────────────────────────
+const ManageUmpiresModal = ({ tournamentId, umpires, onUmpiresChange, onClose }) => {
+  const [code, setCode] = useState('');
+  const [adding, setAdding] = useState(false);
+  const [removing, setRemoving] = useState(null); // umpireId being removed
+  const [msg, setMsg] = useState(null); // { type:'success'|'error', text }
+
+  const handleAdd = async () => {
+    const trimmed = code.trim();
+    if (!trimmed || trimmed === '#') return;
+    setAdding(true);
+    setMsg(null);
+    try {
+      const res = await tournamentAPI.addUmpireByCode(tournamentId, trimmed);
+      const newUmpire = res.umpire;
+      onUmpiresChange([...umpires, newUmpire]);
+      setCode('');
+      setMsg({ type: 'success', text: `${newUmpire.name} added successfully` });
+      setTimeout(() => setMsg(null), 3000);
+    } catch (err) {
+      setMsg({ type: 'error', text: err.response?.data?.error || 'Failed to add umpire' });
+    } finally {
+      setAdding(false);
+    }
+  };
+
+  const handleRemove = async (umpireId) => {
+    setRemoving(umpireId);
+    setMsg(null);
+    try {
+      await tournamentAPI.removeUmpire(tournamentId, umpireId);
+      onUmpiresChange(umpires.filter(u => u.id !== umpireId));
+    } catch (err) {
+      setMsg({ type: 'error', text: err.response?.data?.error || 'Failed to remove umpire' });
+    } finally {
+      setRemoving(null);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3"
+      style={{ background: 'rgba(0,0,0,0.78)', backdropFilter: 'blur(8px)' }}>
+      <div className="w-full max-w-sm rounded-2xl overflow-hidden flex flex-col"
+        style={{ background: '#0a0f1e', border: '1.5px solid rgba(96,165,250,0.3)', maxHeight: '85vh' }}>
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4"
+          style={{ background: 'rgba(96,165,250,0.08)', borderBottom: '1px solid rgba(96,165,250,0.18)' }}>
+          <div className="flex items-center gap-3">
+            <Users className="w-5 h-5" style={{ color: '#60a5fa' }} />
+            <div>
+              <h2 className="text-base font-black text-white">Manage Umpires</h2>
+              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Add or remove umpires for this tournament</p>
+            </div>
+          </div>
+          <button onClick={onClose}
+            className="w-8 h-8 rounded-full flex items-center justify-center transition-all hover:bg-white/10">
+            <X className="w-4 h-4 text-white" />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+
+          {/* Add umpire */}
+          <div className="space-y-2">
+            <p className="text-xs font-black" style={{ color: 'rgba(255,255,255,0.5)', letterSpacing: '0.08em' }}>
+              ADD UMPIRE
+            </p>
+            <div className="px-3 py-2 rounded-xl text-xs"
+              style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.15)', color: 'rgba(245,158,11,0.8)' }}>
+              Ask umpire to share their Matchify.pro ID (e.g. <span className="font-mono font-black" style={{ color: '#FCD34D' }}>#42</span>). Found on their profile/dashboard.
+            </div>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={code}
+                onChange={e => setCode(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleAdd()}
+                placeholder="#ID or code"
+                className="flex-1 px-3 py-2.5 rounded-xl text-sm font-bold outline-none"
+                style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff' }}
+              />
+              <button
+                onClick={handleAdd}
+                disabled={adding || !code.trim() || code.trim() === '#'}
+                className="px-4 py-2.5 rounded-xl text-xs font-black transition-all disabled:opacity-40 flex items-center gap-1.5"
+                style={{ background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.35)', color: '#FCD34D' }}>
+                {adding ? <Loader className="w-4 h-4 animate-spin" /> : <><Plus className="w-3.5 h-3.5" />Add</>}
+              </button>
+            </div>
+            {msg && (
+              <p className="text-xs font-bold px-1"
+                style={{ color: msg.type === 'success' ? '#4ade80' : '#f87171' }}>
+                {msg.text}
+              </p>
+            )}
+          </div>
+
+          {/* Current umpires */}
+          <div className="space-y-2">
+            <p className="text-xs font-black" style={{ color: 'rgba(255,255,255,0.5)', letterSpacing: '0.08em' }}>
+              CURRENT UMPIRES ({umpires.length})
+            </p>
+            {umpires.length === 0 ? (
+              <div className="rounded-xl py-6 text-center text-xs"
+                style={{ background: 'rgba(255,255,255,0.03)', border: '1px dashed rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.3)' }}>
+                No umpires added yet
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {umpires.map(u => (
+                  <div key={u.id}
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl"
+                    style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                    <div className="w-8 h-8 rounded-xl flex items-center justify-center font-black text-sm flex-shrink-0"
+                      style={{ background: 'rgba(96,165,250,0.15)', color: '#60a5fa' }}>
+                      {u.name?.charAt(0)?.toUpperCase() || 'U'}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-white truncate">{u.name}</p>
+                      <p className="text-xs truncate" style={{ color: 'rgba(255,255,255,0.4)' }}>{u.email}</p>
+                    </div>
+                    <button
+                      onClick={() => handleRemove(u.id)}
+                      disabled={removing === u.id}
+                      className="w-7 h-7 rounded-lg flex items-center justify-center transition-all disabled:opacity-40 hover:bg-red-500/20 flex-shrink-0"
+                      style={{ background: 'rgba(255,255,255,0.06)' }}>
+                      {removing === u.id
+                        ? <Loader className="w-3.5 h-3.5 animate-spin" style={{ color: '#f87171' }} />
+                        : <X className="w-3.5 h-3.5" style={{ color: '#f87171' }} />}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="p-4" style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+          <button onClick={onClose}
+            className="w-full py-2.5 rounded-xl text-sm font-black transition-all"
+            style={{ background: 'rgba(96,165,250,0.1)', color: '#60a5fa', border: '1px solid rgba(96,165,250,0.25)' }}>
+            Done
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 

@@ -51,7 +51,8 @@ export const getDrawPage = async (req, res) => {
       }),
       prisma.match.findMany({
         where: { tournamentId, categoryId },
-        orderBy: [{ round: 'desc' }, { matchNumber: 'asc' }]
+        orderBy: [{ round: 'desc' }, { matchNumber: 'asc' }],
+        include: { umpire: { select: { id: true, name: true } } }
       }),
       prisma.registration.findMany({
         where:  { tournamentId, categoryId },

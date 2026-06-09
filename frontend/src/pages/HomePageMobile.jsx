@@ -367,11 +367,8 @@ const HomePageMobile = () => {
             <span
               className="block mt-1"
               style={{
-                background: 'linear-gradient(135deg, #FCD34D 0%, #F59E0B 55%, #FBBF24 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-                filter: 'drop-shadow(0 0 20px rgba(245,158,11,0.5))',
+                color: '#FCD34D',
+                textShadow: '0 0 24px rgba(245,158,11,0.55)',
               }}
             >
               Are Made
@@ -521,10 +518,7 @@ const HomePageMobile = () => {
                   <p className="font-black mb-2 leading-none"
                     style={{
                       fontSize: '38px',
-                      background: s.grad,
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                      backgroundClip: 'text',
+                      color: '#FCD34D',
                     }}>
                     {s.value}
                   </p>

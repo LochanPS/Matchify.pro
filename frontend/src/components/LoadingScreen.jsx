@@ -2,15 +2,11 @@ import MatchifyLogo from './MatchifyLogo';
 import Spinner from './Spinner';
 
 /**
- * Full-page loading screen — Matchify dark-gradient theme.
- * No external image dependency: pure CSS gradient always renders instantly
- * on any device, any connection speed, PWA or browser.
- *
- * Usage:
- *   if (loading) return <LoadingScreen message="Loading tournament..." />;
+ * Full-page loading screen — galaxy background with Matchify branding.
+ * bg-galaxy.png fills the screen (objectFit: cover), ambient glows + stars
+ * overlay it for depth. No black bars, no white flash.
  */
 
-// Detect PWA standalone so safe-area padding only applies when needed.
 const _isPWA = () => {
   try {
     return (
@@ -27,46 +23,57 @@ const LoadingScreen = ({ message = 'Loading...' }) => {
     <div
       className="fixed inset-0 flex flex-col items-center justify-center z-50"
       style={{
-        /* Rich gradient — renders immediately, no image load required */
-        background: 'radial-gradient(ellipse 120% 100% at 50% 0%, #0d1433 0%, #07071a 45%, #050810 100%)',
-        /* Only in PWA: notch area not handled by browser chrome */
+        background: '#050810',
+        overflow: 'hidden',
         paddingTop:    inPWA ? 'env(safe-area-inset-top, 0px)'    : undefined,
         paddingBottom: inPWA ? 'env(safe-area-inset-bottom, 0px)' : undefined,
       }}
     >
-      {/* ── Star field — pure CSS, no images ───────────────────────────────── */}
-      <StarField />
+      {/* ── Galaxy background image — cover fills every screen size ─────────── */}
+      <img
+        src="/bg-galaxy.png"
+        alt=""
+        draggable={false}
+        style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          objectPosition: 'center center',
+          pointerEvents: 'none',
+          userSelect: 'none',
+          opacity: 0.85,
+        }}
+      />
 
       {/* ── Ambient glows ───────────────────────────────────────────────────── */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {/* Amber glow — centre */}
         <div style={{
           position: 'absolute',
           width: '80vw', height: '80vw', maxWidth: '520px', maxHeight: '520px',
           top: '38%', left: '50%',
           transform: 'translate(-50%, -50%)',
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(245,158,11,0.18) 0%, transparent 65%)',
+          background: 'radial-gradient(circle, rgba(245,158,11,0.15) 0%, transparent 65%)',
           filter: 'blur(70px)',
         }} />
-        {/* Purple glow — bottom-right */}
         <div style={{
           position: 'absolute',
           width: '60vw', height: '60vw', maxWidth: '360px', maxHeight: '360px',
           top: '65%', left: '65%',
           transform: 'translate(-50%, -50%)',
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(139,92,246,0.14) 0%, transparent 65%)',
+          background: 'radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 65%)',
           filter: 'blur(55px)',
         }} />
-        {/* Cyan glow — top-left */}
         <div style={{
           position: 'absolute',
           width: '50vw', height: '50vw', maxWidth: '280px', maxHeight: '280px',
           top: '15%', left: '20%',
           transform: 'translate(-50%, -50%)',
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(6,182,212,0.10) 0%, transparent 65%)',
+          background: 'radial-gradient(circle, rgba(6,182,212,0.08) 0%, transparent 65%)',
           filter: 'blur(45px)',
         }} />
       </div>
@@ -82,20 +89,17 @@ const LoadingScreen = ({ message = 'Loading...' }) => {
         className="relative z-10 flex flex-col items-center gap-8"
         style={{ animation: 'lsFadeUp 0.45s ease-out both' }}
       >
-        {/* Logo */}
         <div style={{ animation: 'lsPulse 2.5s ease-in-out infinite' }}>
           <MatchifyLogo size={56} variant="icon" />
         </div>
 
-        {/* Spinner */}
         <Spinner size="xl" />
 
-        {/* Message + bouncing dots */}
         <div className="flex flex-col items-center gap-3">
           <p style={{
             fontSize: '14px', fontWeight: 700, letterSpacing: '0.05em',
-            color: 'rgba(255,255,255,0.72)',
-            textShadow: '0 1px 8px rgba(0,0,0,0.6)',
+            color: 'rgba(255,255,255,0.85)',
+            textShadow: '0 1px 8px rgba(0,0,0,0.8)',
           }}>
             {message}
           </p>
@@ -113,37 +117,5 @@ const LoadingScreen = ({ message = 'Loading...' }) => {
     </div>
   );
 };
-
-/* ── Tiny inline star field — 30 CSS-drawn dots, no images ─────────────────── */
-const STARS = Array.from({ length: 30 }, (_, i) => ({
-  x: ((i * 37 + 11) % 97),
-  y: ((i * 53 + 7)  % 99),
-  r: [1, 1, 1, 1.5, 2][ i % 5 ],
-  o: 0.25 + ((i * 17) % 55) / 100,
-  dur: 3 + (i % 5),
-  del: (i % 6) * 0.5,
-}));
-
-function StarField() {
-  return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden">
-      <style>{`
-        @keyframes lsStar { 0%,100%{opacity:var(--so)} 50%{opacity:calc(var(--so)*2.2)} }
-      `}</style>
-      {STARS.map((s, i) => (
-        <div key={i} style={{
-          position: 'absolute',
-          left: `${s.x}%`, top: `${s.y}%`,
-          width: s.r * 2, height: s.r * 2,
-          borderRadius: '50%',
-          background: i % 7 === 0 ? '#FCD34D' : i % 5 === 0 ? '#a5f3fc' : '#ffffff',
-          '--so': s.o,
-          opacity: s.o,
-          animation: `lsStar ${s.dur}s ease-in-out ${s.del}s infinite`,
-        }} />
-      ))}
-    </div>
-  );
-}
 
 export default LoadingScreen;

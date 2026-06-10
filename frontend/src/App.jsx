@@ -581,18 +581,19 @@ function AppContent() {
 }
 
 function App() {
-  // Show splash screen only on first-ever app open — never again after that
+  // Show splash screen on every fresh app open (session-based).
+  // sessionStorage clears when the PWA/tab is closed — so every cold open
+  // shows the branded splash. Navigating between routes does NOT re-show it.
   const [showSplash, setShowSplash] = useState(() => {
     try {
-      const seen = safeStorage.getItem('_splashSeen');
-      return !seen; // true = show splash (first visit), false = skip
+      return !sessionStorage.getItem('_splashSeen');
     } catch {
       return true;
     }
   });
 
   const handleSplashComplete = () => {
-    try { safeStorage.setItem('_splashSeen', '1'); } catch {}
+    try { sessionStorage.setItem('_splashSeen', '1'); } catch {}
     setShowSplash(false);
   };
 

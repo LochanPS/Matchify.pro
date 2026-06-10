@@ -13,11 +13,16 @@ const LoadingScreen = ({ message = 'Loading...' }) => {
     <div
       className="fixed inset-0 flex flex-col items-center justify-center z-50"
       style={{
+        /* inset-0 = top/right/bottom/left: 0 → always fills exact visible viewport
+           regardless of phone size, orientation, or toolbar state */
         background: '#050810',
         backgroundImage: 'url(/bg-galaxy.png)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center top',
+        backgroundSize: 'cover',           /* fills whole viewport, crops if needed */
+        backgroundPosition: 'center center', /* always centred on any aspect ratio */
         backgroundRepeat: 'no-repeat',
+        /* Respect notch/safe-area on iPhones with Dynamic Island */
+        paddingTop: 'env(safe-area-inset-top, 0px)',
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
       }}
     >
       {/* Dark overlay */}

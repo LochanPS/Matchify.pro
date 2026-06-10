@@ -62,6 +62,9 @@
     font-size: clamp(15px, 4.27vw, 17px);
     background-color: var(--bg-base);
     scroll-behavior: smooth;
+    /* Fill available height — fixes iOS Safari where 100vh > visible area */
+    height: 100%;
+    height: -webkit-fill-available;
   }
 
   body {
@@ -72,6 +75,22 @@
     color: var(--text-primary);
     text-rendering: optimizeLegibility;
     line-height: 1.6;
+    /* Full viewport height — mobile-safe */
+    min-height: 100vh;
+    min-height: 100dvh; /* dynamic: adjusts when iOS/Android toolbar shows/hides */
+    min-height: -webkit-fill-available;
+    /* Prevent horizontal overflow on any phone width */
+    overflow-x: hidden;
+    width: 100%;
+  }
+
+  /* React root must fill the body */
+  #root {
+    min-height: 100vh;
+    min-height: 100dvh;
+    min-height: -webkit-fill-available;
+    width: 100%;
+    overflow-x: hidden;
   }
 
   /* Headings */
@@ -382,6 +401,27 @@
 
 /* ── Utilities ───────────────────────────────────────────────────────────── */
 @layer utilities {
+
+  /* ── Viewport height — CRITICAL for mobile consistency ──────────────────
+     Tailwind's min-h-screen / h-screen both resolve to 100vh.
+     On iOS Safari the visible area shrinks when the toolbar shows, but 100vh
+     stays fixed at the taller value → bottom of page hidden under toolbar.
+     On Android Chrome same issue with the omnibar.
+     dvh (dynamic viewport height) recalculates live as toolbars appear/hide.
+     -webkit-fill-available is the iOS 12–14 fallback before dvh landed.
+     ─────────────────────────────────────────────────────────────────────── */
+  .min-h-screen {
+    min-height: 100vh;          /* non-mobile fallback */
+    min-height: 100dvh;         /* dynamic: shrinks/grows with toolbar */
+    min-height: -webkit-fill-available; /* iOS ≤ 14 */
+  }
+
+  .h-screen {
+    height: 100vh;
+    height: 100dvh;
+    height: -webkit-fill-available;
+  }
+
   /* Responsive text */
   .text-responsive-xs   { font-size: clamp(0.625rem, 2vw,  0.75rem);  }
   .text-responsive-sm   { font-size: clamp(0.75rem,  2.5vw, 0.875rem); }

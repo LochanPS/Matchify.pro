@@ -93,6 +93,38 @@
     overflow-x: hidden;
   }
 
+  /* ── PWA standalone safe-area — fixes ALL pages at once ─────────────────
+     In browser mode: URL bar sits above content, so the notch/status bar is
+     already handled by the browser chrome. safe-area-inset-top = 0.
+
+     In PWA standalone mode: no URL bar. Content renders from the very top of
+     the physical screen. Without this padding, the notch / Dynamic Island /
+     status bar overlaps the first ~44-60px of EVERY page.
+
+     display-mode: standalone activates both for Chrome PWA (Android) and
+     iOS Add to Home Screen. The env() values are 0 in non-standalone mode
+     so this is a no-op in the browser — safe to apply unconditionally.
+  ─────────────────────────────────────────────────────────────────────── */
+  @media (display-mode: standalone) {
+    #root {
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      padding-left: env(safe-area-inset-left, 0px);
+      padding-right: env(safe-area-inset-right, 0px);
+    }
+  }
+
+  /* iOS fallback: apple-mobile-web-app-capable triggers standalone-like mode
+     but doesn't always match display-mode: standalone media query on older iOS */
+  @supports (-webkit-touch-callout: none) {
+    #root {
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      padding-left: env(safe-area-inset-left, 0px);
+      padding-right: env(safe-area-inset-right, 0px);
+    }
+  }
+
   /* Headings */
   h1 { @apply text-2xl font-bold tracking-tight; }
   h2 { @apply text-xl font-bold tracking-tight; }

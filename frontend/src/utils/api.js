@@ -54,7 +54,11 @@ const RETRY_STATUS = new Set([500, 502, 503, 504]);
 // Vercel serverless cold starts can take 10-30s to boot.
 // 4 total attempts with 8s gaps = up to ~100s total — enough for cold-start.
 const MAX_AUTO_RETRIES = 3;
-const RETRY_DELAY_MS = 8000;
+const RETRY_DELAY_MS   = 8000; // GETs: long gap gives cold server time to boot
+const AUTH_RETRY_DELAY = 3000; // Auth POSTs: shorter delay — user waiting at login
+
+// Auth POST endpoints safe to retry (idempotent: same credentials = same result)
+const AUTH_RETRY_URLS = ['/auth/login', '/auth/register', '/auth/forgot-password'];
 
 function sleep(ms) {
   return new Promise(r => setTimeout(r, ms));
@@ -64,25 +68,29 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const config = error.config || {};
-    const isGet = (config.method || '').toLowerCase() === 'get';
+    const method = (config.method || '').toLowerCase();
+    const isGet = method === 'get';
+    // Auth POSTs are safe to retry: same credentials = same result
+    const isAuthPost = method === 'post' &&
+      AUTH_RETRY_URLS.some(p => config.url?.includes(p));
     const retryCount = config._retryCount || 0;
 
     // â”€â”€ Auto-retry GET requests on 5xx / network errors â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     // Transparent: calling code never sees transient cold-start failures.
     const isRetryable =
-      isGet &&
+      (isGet || isAuthPost) &&
       retryCount < MAX_AUTO_RETRIES &&
-      !config._noRetry && // opt-out flag
+      !config._noRetry &&
       (
         RETRY_STATUS.has(error.response?.status) ||
         error.code === 'ECONNABORTED' ||
         error.code === 'ERR_NETWORK' ||
-        !error.response // pure network error
+        !error.response
       );
 
     if (isRetryable) {
       config._retryCount = retryCount + 1;
-      await sleep(RETRY_DELAY_MS);
+      await sleep(isAuthPost ? AUTH_RETRY_DELAY : RETRY_DELAY_MS);
       return api(config);
     }
 

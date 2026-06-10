@@ -8,7 +8,22 @@ import Spinner from './Spinner';
  * Usage:
  *   if (loading) return <LoadingScreen message="Loading tournament..." />;
  */
+// Detect PWA standalone — avoids adding safe-area padding in browser mode
+// where the browser chrome already handles the notch/status-bar area.
+const _isPWA = () => {
+  try {
+    return (
+      window.navigator.standalone === true ||
+      window.matchMedia('(display-mode: standalone)').matches
+    );
+  } catch { return false; }
+};
+
 const LoadingScreen = ({ message = 'Loading...' }) => {
+  // Only apply safe-area insets in standalone PWA mode. In browser mode the
+  // browser chrome handles the notch, so extra padding makes content too low.
+  const inPWA = _isPWA();
+
   return (
     <div
       className="fixed inset-0 flex flex-col items-center justify-center z-50"
@@ -20,9 +35,9 @@ const LoadingScreen = ({ message = 'Loading...' }) => {
         backgroundSize: 'cover',           /* fills whole viewport, crops if needed */
         backgroundPosition: 'center center', /* always centred on any aspect ratio */
         backgroundRepeat: 'no-repeat',
-        /* Respect notch/safe-area on iPhones with Dynamic Island */
-        paddingTop: 'env(safe-area-inset-top, 0px)',
-        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+        /* Only in PWA: no browser chrome to handle notch, so we pad manually */
+        paddingTop: inPWA ? 'env(safe-area-inset-top, 0px)' : undefined,
+        paddingBottom: inPWA ? 'env(safe-area-inset-bottom, 0px)' : undefined,
       }}
     >
       {/* Dark overlay */}

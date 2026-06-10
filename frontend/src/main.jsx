@@ -4,6 +4,20 @@ import { BrowserRouter } from 'react-router-dom'
 import App from './App.jsx'
 import './index.css'
 
+// ── Detect true PWA standalone mode before first paint ───────────────────────
+// navigator.standalone (iOS-only) = true when launched from Home Screen.
+// display-mode: standalone catches Android Chrome PWA + modern iOS 13+.
+// Sets .pwa-standalone on <html> so CSS safe-area rules apply only in PWA —
+// never in regular browser tabs where browser chrome already handles safe areas.
+;(function detectPWA() {
+  try {
+    const isStandalone =
+      window.navigator.standalone === true ||
+      window.matchMedia('(display-mode: standalone)').matches;
+    if (isStandalone) document.documentElement.classList.add('pwa-standalone');
+  } catch {}
+})();
+
 
 // Auto-reload when Vite can't load a chunk (happens after new deployment
 // changes chunk filenames — old cached index.js references stale hashes).

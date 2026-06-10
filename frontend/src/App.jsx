@@ -239,8 +239,10 @@ function AppContent() {
   const warmupRef = useRef(false);
 
   useEffect(() => {
-    const isPWA = typeof window !== 'undefined' &&
-      window.matchMedia('(display-mode: standalone)').matches;
+    const isPWA = typeof window !== 'undefined' && (
+      window.navigator.standalone === true ||
+      window.matchMedia('(display-mode: standalone)').matches
+    );
 
     let dotTimer = null;
     let alive = true;

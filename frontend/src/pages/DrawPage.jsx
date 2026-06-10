@@ -232,7 +232,10 @@ const DrawPage = () => {
         setBracket(null);
         setError(null);
       } else if (err.code === 'ERR_NETWORK' || !err.response) {
-        setError('Connection issue — please check your internet and try again.');
+        const isOnline = typeof navigator !== 'undefined' ? navigator.onLine : true;
+        setError(isOnline
+          ? 'Server is temporarily unavailable. Please wait a moment and try again.'
+          : 'No internet connection. Please check your network.');
       } else if (status === 500) {
         const detail = err.response?.data?.details;
         setError(detail ? `Server error: ${detail}` : 'Server error — please try refreshing the page.');

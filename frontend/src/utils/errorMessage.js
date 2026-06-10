@@ -37,10 +37,16 @@ export function getErrorMessage(err, fallback = 'Something went wrong. Please tr
   // Axios/network error — translate raw technical messages to human language
   if (err?.message && typeof err.message === 'string') {
     const msg = err.message;
-    if (msg === 'Network Error' || msg.toLowerCase().includes('network'))
-      return 'Connection issue — please check your internet and try again.';
+    if (msg === 'Network Error' || msg.toLowerCase().includes('network')) {
+      // navigator.onLine = false → actual internet issue
+      // navigator.onLine = true  → server is down / starting up (cold start)
+      if (typeof navigator !== 'undefined' && !navigator.onLine) {
+        return 'No internet connection. Please check your network.';
+      }
+      return 'Server is temporarily unavailable. Please wait a moment and try again.';
+    }
     if (msg.includes('timeout') || msg.includes('timed out') || err.isTimeout)
-      return 'Server took too long to respond. Please try again.';
+      return 'Server is taking longer than usual to respond. Please try again.';
     if (msg.includes('ECONNREFUSED') || msg.includes('ECONNABORTED'))
       return 'Could not reach the server. Please try again shortly.';
     return msg;

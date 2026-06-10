@@ -51,8 +51,10 @@ function doLogout() {
 // almost always succeeds. Only GET is retried â€” POST/PUT/DELETE are not
 // idempotent and are handled explicitly per handler where needed.
 const RETRY_STATUS = new Set([500, 502, 503, 504]);
-const MAX_AUTO_RETRIES = 2;
-const RETRY_DELAY_MS = 1500;
+// Vercel serverless cold starts can take 10-30s to boot.
+// 4 total attempts with 8s gaps = up to ~100s total — enough for cold-start.
+const MAX_AUTO_RETRIES = 3;
+const RETRY_DELAY_MS = 8000;
 
 function sleep(ms) {
   return new Promise(r => setTimeout(r, ms));

@@ -3,12 +3,25 @@ import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import App from './App.jsx'
 import './index.css'
-import { WebSocketProvider } from './contexts/WebSocketContext'
+
 
 // Auto-reload when Vite can't load a chunk (happens after new deployment
 // changes chunk filenames — old cached index.js references stale hashes).
-window.addEventListener('vite:preloadError', () => {
-  window.location.reload();
+// Anti-loop: only reload once every 15s so we don't get stuck in an
+// infinite reload cycle on devices that aggressively cache the old shell.
+window.addEventListener('vite:preloadError', (event) => {
+  event.preventDefault();
+  try {
+    const RELOAD_KEY = '_matchify_chunk_reload';
+    const last = parseInt(sessionStorage.getItem(RELOAD_KEY) || '0', 10);
+    if (Date.now() - last > 15000) {
+      sessionStorage.setItem(RELOAD_KEY, String(Date.now()));
+      window.location.reload();
+    }
+    // else: already tried in last 15s — let ErrorBoundary handle it
+  } catch {
+    window.location.reload();
+  }
 });
 
 // ── Top-level Error Boundary ──────────────────────────────────────────────────
@@ -82,9 +95,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           v7_relativeSplatPath: true
         }}
       >
-        <WebSocketProvider>
-          <App />
-        </WebSocketProvider>
+        <App />
       </BrowserRouter>
     </ErrorBoundary>
   </React.StrictMode>,

@@ -1,8 +1,9 @@
 // Matchify.pro - Premier Badminton Tournament Platform
-// Version: 1.0.7 - Splash screen on first load
+// Version: 1.0.8 - PWA cold-start resilience
 // Last Updated: Jun 2026
-import { lazy, Suspense, Component, useEffect, useState } from 'react'
+import { lazy, Suspense, Component, useEffect, useState, useRef } from 'react'
 import api from './utils/api'
+import safeStorage from './utils/safeStorage'
 import SplashScreen from './components/SplashScreen'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import AnimatedBackground from './components/AnimatedBackground'
@@ -171,21 +172,129 @@ function PageLoader() {
   return <LoadingScreen message="Loading..." />;
 }
 
+// ── Server Starting Up overlay ──────────────────────────────────────────────
+// Shown only in PWA standalone mode when the backend is cold-starting.
+// Disappears automatically once the server responds. Never blocks the UI for
+// users in a browser tab (they are usually hitting a warm server already).
+function ServerStartingOverlay({ visible, dots }) {
+  if (!visible) return null;
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 9999,
+      background: 'rgba(7,7,26,0.92)',
+      backdropFilter: 'blur(6px)',
+      display: 'flex', flexDirection: 'column',
+      alignItems: 'center', justifyContent: 'center',
+      gap: 20,
+      paddingTop: 'env(safe-area-inset-top, 0px)',
+      animation: 'sso_fadeIn 0.3s ease-out both',
+    }}>
+      <style>{`
+        @keyframes sso_fadeIn { from { opacity:0 } to { opacity:1 } }
+        @keyframes sso_spin { to { transform: rotate(360deg) } }
+        @keyframes sso_dot { 0%,80%,100%{opacity:0.3;transform:scale(0.6)} 40%{opacity:1;transform:scale(1)} }
+      `}</style>
+      {/* Spinner */}
+      <div style={{
+        width: 48, height: 48, borderRadius: '50%',
+        border: '3px solid rgba(245,158,11,0.2)',
+        borderTopColor: '#F59E0B',
+        animation: 'sso_spin 0.9s linear infinite',
+      }} />
+      {/* Text */}
+      <div style={{ textAlign: 'center', padding: '0 32px' }}>
+        <p style={{ color: '#F59E0B', fontWeight: 800, fontSize: 17, margin: '0 0 6px', fontFamily: 'Inter, sans-serif' }}>
+          Server is starting up
+        </p>
+        <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: 13, margin: 0, lineHeight: 1.5, fontFamily: 'Inter, sans-serif' }}>
+          Usually takes 10-30 seconds{dots}
+        </p>
+      </div>
+      {/* Bouncing dots */}
+      <div style={{ display: 'flex', gap: 6 }}>
+        {[0,1,2].map(i => (
+          <div key={i} style={{
+            width: 7, height: 7, borderRadius: '50%',
+            background: i === 1 ? '#a855f7' : '#F59E0B',
+            animation: `sso_dot 1.4s ease-in-out ${i * 0.18}s infinite`,
+          }} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // Inner component that can access AuthContext
 function AppContent() {
   const { user, showProfileCompletion, showProfilePhotoModal, setShowProfilePhotoModal, completeProfile } = useAuth();
   const location = useLocation();
 
-  // ── Option D: Keepwarm ping ──────────────────────────────────────────────
-  // Ping /api/health every 8 minutes to prevent Vercel cold starts.
-  // Silent — no error shown, no retry, no auth needed.
+  // ── Server warm-up + PWA cold-start overlay ─────────────────────────────
+  // On PWA standalone open, the backend (Vercel serverless) may be cold.
+  // We ping it immediately with a generous timeout. While waiting, show a
+  // "Server is starting up" overlay so users don't see "connection error"
+  // pages. Once the server responds, overlay disappears and app is usable.
+  const [serverStarting, setServerStarting] = useState(false);
+  const [dotsCount, setDotsCount] = useState(0);
+  const warmupRef = useRef(false);
+
   useEffect(() => {
-    const ping = () =>
-      api.get('/health', { _skipLogout: true, _noRetry: true, timeout: 5000 })
-        .catch(() => {}); // always silent
-    ping(); // warm up immediately on app load
-    const t = setInterval(ping, 8 * 60 * 1000);
-    return () => clearInterval(t);
+    const isPWA = typeof window !== 'undefined' &&
+      window.matchMedia('(display-mode: standalone)').matches;
+
+    let dotTimer = null;
+    let alive = true;
+
+    const animateDots = () => {
+      dotTimer = setInterval(() => {
+        setDotsCount(c => (c + 1) % 4);
+      }, 600);
+    };
+
+    const warmUp = async () => {
+      if (warmupRef.current) return;
+      warmupRef.current = true;
+
+      // Quick 3s probe first — if server is already warm, no overlay shown
+      try {
+        await api.get('/health', { _skipLogout: true, _noRetry: true, timeout: 3000 });
+        return; // warm — done
+      } catch {
+        // Cold or slow — only show overlay in PWA standalone
+        if (!alive) return;
+        if (isPWA) {
+          setServerStarting(true);
+          animateDots();
+        }
+      }
+
+      // Keep probing until server responds (up to ~90s total)
+      for (let i = 0; i < 9 && alive; i++) {
+        await new Promise(r => setTimeout(r, 10000));
+        try {
+          await api.get('/health', { _skipLogout: true, _noRetry: true, timeout: 15000 });
+          if (alive) setServerStarting(false);
+          break;
+        } catch {
+          // still starting — keep overlay
+        }
+      }
+      // After 90s, hide overlay anyway (let user see whatever error the page shows)
+      if (alive) setServerStarting(false);
+    };
+
+    warmUp();
+
+    // Keep-warm ping every 7 minutes after initial warm-up
+    const keepWarmTimer = setInterval(() => {
+      api.get('/health', { _skipLogout: true, _noRetry: true, timeout: 5000 }).catch(() => {});
+    }, 7 * 60 * 1000);
+
+    return () => {
+      alive = false;
+      clearInterval(keepWarmTimer);
+      if (dotTimer) clearInterval(dotTimer);
+    };
   }, []);
   
   // Check if impersonating
@@ -218,8 +327,12 @@ function AppContent() {
                        location.pathname === '/admin' ||
                        user?.isAdmin;
 
+  const dots = '.'.repeat(dotsCount);
+
   return (
     <div className="min-h-screen" style={{ background: '#161730' }}>
+      {/* PWA cold-start overlay — only shows in standalone mode while backend warms up */}
+      <ServerStartingOverlay visible={serverStarting} dots={dots} />
       {/* Global animated background — stars + glowing orbs + floating balloons, fixed behind every page */}
       <AnimatedBackground fullWidth={isAdminRoute} />
       <ScrollToTop />

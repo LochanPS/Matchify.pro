@@ -105,8 +105,8 @@ const SplashScreen = ({ onComplete, duration = 5300 }) => {
         pointerEvents: fadeOut ? 'none' : 'all',
       }}
     >
-      {/* ── Background image — contain keeps all text visible on every screen.
-           Background #050810 matches image edges so no visible bars. ── */}
+      {/* ── Background image — cover fills the full screen on every device.
+           Centre anchor keeps the M logo + text always visible. ── */}
       <img
         src="/splash.png"
         alt=""
@@ -116,7 +116,7 @@ const SplashScreen = ({ onComplete, duration = 5300 }) => {
           inset: 0,
           width: '100%',
           height: '100%',
-          objectFit: 'contain',
+          objectFit: 'cover',
           objectPosition: 'center center',
           userSelect: 'none',
           pointerEvents: 'none',

@@ -97,26 +97,12 @@ const SplashScreen = ({ onComplete, duration = 5300 }) => {
         }}
       />
 
-      {/* ── Cover layers — fully hide the static bar/text baked into the image ── */}
-      {/* Top feather: smooth fade into the cover */}
+      {/* ── Cover layer — hides ALL static UI baked into the image (spinner/bar/text/dots) ── */}
+      {/* Gradient fades image out from 48% → fully opaque at 64%, then solid to bottom */}
       <div style={{
         position: 'absolute', left: 0, right: 0,
-        top: '51%', height: '4%',
-        background: 'linear-gradient(to bottom, transparent, #050d1a)',
-        pointerEvents: 'none',
-      }} />
-      {/* Solid opaque block: covers static "Creating..." text + bar + dots + % */}
-      <div style={{
-        position: 'absolute', left: 0, right: 0,
-        top: '55%', height: '12%',
-        background: '#050d1a',
-        pointerEvents: 'none',
-      }} />
-      {/* Bottom feather: smooth fade back out */}
-      <div style={{
-        position: 'absolute', left: 0, right: 0,
-        top: '67%', height: '4%',
-        background: 'linear-gradient(to bottom, #050d1a, transparent)',
+        top: '48%', bottom: 0,
+        background: 'linear-gradient(to bottom, transparent 0%, #050d1a 32%, #050d1a 100%)',
         pointerEvents: 'none',
       }} />
 
@@ -134,10 +120,10 @@ const SplashScreen = ({ onComplete, duration = 5300 }) => {
         }
       `}</style>
 
-      {/* ── Dynamic loading UI — centered in the covered zone (55–67%) ── */}
+      {/* ── Dynamic loading UI — sits in the solid covered zone ── */}
       <div style={{
         position: 'absolute', left: 0, right: 0,
-        top: '55%',
+        top: '62%',
         display: 'flex', flexDirection: 'column',
         alignItems: 'center', gap: 8,
         padding: '0 32px',

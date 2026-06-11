@@ -1,6 +1,7 @@
 ﻿import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import MatchifyLogo from '../components/MatchifyLogo';
+import PWAInstallButton from '../components/PWAInstallButton';
 import {
   TrophyIcon, UserGroupIcon, ChartBarIcon,
   ArrowRightIcon, ShieldCheckIcon,
@@ -347,6 +348,11 @@ function HomePage() {
               </p>
             </div>
           )}
+
+          {/* PWA install prompt */}
+          <div className="hp-fade d4" style={{ marginBottom: 8, maxWidth: 400, width: '100%' }}>
+            <PWAInstallButton />
+          </div>
 
           {/* Social proof */}
           <div className="hp-fade d5 flex items-center justify-center gap-4 mb-10">

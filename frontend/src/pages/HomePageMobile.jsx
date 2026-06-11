@@ -1,5 +1,6 @@
 ﻿import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import PWAInstallButton from '../components/PWAInstallButton';
 import { usePageTransition } from "../contexts/TransitionContext";
 import MatchifyLogo from '../components/MatchifyLogo';
 import {
@@ -481,6 +482,11 @@ const HomePageMobile = () => {
               </Link>
             </div>
           )}
+
+          {/* PWA install prompt */}
+          <div style={{ marginBottom: 8 }}>
+            <PWAInstallButton />
+          </div>
         </div>
 
         {/* ═══════════════════════════════════════════════════════════

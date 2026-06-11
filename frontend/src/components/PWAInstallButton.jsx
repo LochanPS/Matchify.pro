@@ -201,7 +201,8 @@ const AndroidModal = ({ onClose }) => (
 const PWAInstallButton = ({ fullWidth = true }) => {
   const [prompt, setPrompt]       = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [installed, setInstalled] = useState(false);
+  // Initialize from current state — prevents 1-frame flash on already-installed users
+  const [installed, setInstalled] = useState(() => isInStandalone());
 
   useEffect(() => {
     if (isInStandalone()) { setInstalled(true); return; }
@@ -300,7 +301,7 @@ const PWAInstallButton = ({ fullWidth = true }) => {
           fontSize: 11, color: 'rgba(255,255,255,0.25)',
           fontFamily: 'system-ui,-apple-system,sans-serif',
         }}>
-          Works on iPhone & Android · No app store needed
+          iPhone & Android · No app store · No download required
         </p>
       </div>
 

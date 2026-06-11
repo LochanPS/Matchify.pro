@@ -1,11 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
 
-/**
- * SplashScreen — full-screen branded loader.
- * Background: splash.png (new design image) fills the screen via objectFit:cover.
- * A gradient overlay hides the static progress bar baked into the image.
- * Dynamic animated bar + percentage + spinner renders on top at the same position.
- */
 const SplashScreen = ({ onComplete, duration = 5300 }) => {
   const [progress, setProgress]   = useState(0);
   const [fadeOut, setFadeOut]     = useState(false);
@@ -83,7 +77,7 @@ const SplashScreen = ({ onComplete, duration = 5300 }) => {
       transition: fadeOut ? 'opacity 0.65s ease-out' : 'none',
       pointerEvents: fadeOut ? 'none' : 'all',
     }}>
-      {/* ── Background image — fills entire screen ── */}
+      {/* ── Background image — full screen, anchored top ── */}
       <img
         src="/splash.png"
         alt=""
@@ -97,12 +91,28 @@ const SplashScreen = ({ onComplete, duration = 5300 }) => {
         }}
       />
 
-      {/* ── Cover layer — hides ALL static UI baked into the image (spinner/bar/text/dots) ── */}
-      {/* Gradient fades image out from 48% → fully opaque at 64%, then solid to bottom */}
+      {/* ── Cover ONLY the static loading elements zone (55–68%) ──
+          Three-layer system keeps top (logo/title) and bottom (court/icons) visible.
+          Layer 1: fade in  — transparent → solid  (52% – 56%)
+          Layer 2: solid    — fully opaque          (56% – 68%)
+          Layer 3: fade out — solid → transparent  (68% – 72%)
+      ── */}
       <div style={{
         position: 'absolute', left: 0, right: 0,
-        top: '48%', bottom: 0,
-        background: 'linear-gradient(to bottom, transparent 0%, #050d1a 32%, #050d1a 100%)',
+        top: '52%', height: '4%',
+        background: 'linear-gradient(to bottom, transparent, #050d1a)',
+        pointerEvents: 'none',
+      }} />
+      <div style={{
+        position: 'absolute', left: 0, right: 0,
+        top: '56%', height: '13%',
+        background: '#050d1a',
+        pointerEvents: 'none',
+      }} />
+      <div style={{
+        position: 'absolute', left: 0, right: 0,
+        top: '69%', height: '4%',
+        background: 'linear-gradient(to bottom, #050d1a, transparent)',
         pointerEvents: 'none',
       }} />
 
@@ -115,24 +125,24 @@ const SplashScreen = ({ onComplete, duration = 5300 }) => {
           to { transform: rotate(360deg); }
         }
         @keyframes splashDot {
-          0%,80%,100% { transform: scale(0.6); opacity: 0.35; }
-          40%          { transform: scale(1);   opacity: 1;    }
+          0%,80%,100% { transform: scale(0.6); opacity: 0.3; }
+          40%          { transform: scale(1);   opacity: 1;   }
         }
       `}</style>
 
-      {/* ── Dynamic loading UI — sits in the solid covered zone ── */}
+      {/* ── Dynamic loading UI — inside the solid covered zone ── */}
       <div style={{
         position: 'absolute', left: 0, right: 0,
-        top: '62%',
+        top: '57%',
         display: 'flex', flexDirection: 'column',
         alignItems: 'center', gap: 8,
-        padding: '0 32px',
+        padding: '0 28px',
       }}>
 
-        {/* Spinner + loading text */}
+        {/* Row 1: spinner + text — matches image style exactly */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{
-            width: 18, height: 18, borderRadius: '50%',
+            width: 20, height: 20, borderRadius: '50%',
             border: '2.5px solid rgba(0,180,255,0.2)',
             borderTopColor: '#00b4ff',
             animation: 'splashSpin 0.8s linear infinite',
@@ -140,26 +150,26 @@ const SplashScreen = ({ onComplete, duration = 5300 }) => {
           }} />
           <span style={{
             fontSize: 15, fontWeight: 600,
-            color: 'rgba(255,255,255,0.88)',
+            color: 'rgba(255,255,255,0.9)',
             fontFamily: 'system-ui, -apple-system, sans-serif',
-            letterSpacing: '0.02em',
+            letterSpacing: '0.01em',
           }}>
-            Loading <span style={{ color: '#00b4ff' }}>Matchify.pro</span>...
+            Creating Tournament <span style={{ color: '#00b4ff' }}>Draws...</span>
           </span>
         </div>
 
-        {/* Animated three dots */}
+        {/* Row 2: three dots */}
         <div style={{ display: 'flex', gap: 7, alignItems: 'center' }}>
           {[0, 1, 2].map(i => (
             <div key={i} style={{
               width: 7, height: 7, borderRadius: '50%',
-              background: i === 1 ? '#00b4ff' : 'rgba(0,180,255,0.45)',
+              background: i === 1 ? '#00b4ff' : 'rgba(0,180,255,0.35)',
               animation: `splashDot 1.3s ease-in-out ${i * 0.2}s infinite`,
             }} />
           ))}
         </div>
 
-        {/* Progress bar row — bar + shuttlecock + % */}
+        {/* Row 3: progress bar + shuttlecock + % — exactly like image */}
         <div style={{
           width: '100%', maxWidth: 340,
           display: 'flex', alignItems: 'center', gap: 10,
@@ -167,9 +177,8 @@ const SplashScreen = ({ onComplete, duration = 5300 }) => {
           {/* Bar track */}
           <div style={{
             flex: 1, height: 8, borderRadius: 999,
-            background: 'rgba(255,255,255,0.1)',
+            background: 'rgba(255,255,255,0.08)',
             overflow: 'hidden',
-            boxShadow: '0 0 0 1px rgba(0,180,255,0.12)',
           }}>
             <div style={{
               height: '100%',
@@ -178,12 +187,12 @@ const SplashScreen = ({ onComplete, duration = 5300 }) => {
               background: 'linear-gradient(90deg, #0055ee 0%, #00b4ff 55%, #0055ee 100%)',
               backgroundSize: '200% 100%',
               animation: 'splashShimmer 1.4s linear infinite',
-              boxShadow: '0 0 14px rgba(0,180,255,0.95), 0 0 5px rgba(0,180,255,0.6)',
+              boxShadow: '0 0 12px rgba(0,180,255,0.9)',
               transition: 'width 0.06s linear',
             }} />
           </div>
 
-          {/* Shuttlecock SVG */}
+          {/* Shuttlecock */}
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
             <circle cx="12" cy="18" r="3" fill="#00b4ff" opacity="0.95"/>
             <path d="M12 15 L7 4 M12 15 L12 4 M12 15 L17 4"
@@ -192,13 +201,12 @@ const SplashScreen = ({ onComplete, duration = 5300 }) => {
               stroke="#00b4ff" strokeWidth="1.2" fill="none" opacity="0.6"/>
           </svg>
 
-          {/* Live percentage */}
+          {/* Percentage */}
           <span style={{
             fontSize: 14, fontWeight: 700,
-            color: '#00b4ff',
+            color: 'rgba(255,255,255,0.9)',
             fontFamily: 'system-ui, -apple-system, sans-serif',
             minWidth: 38, textAlign: 'right',
-            textShadow: '0 0 10px rgba(0,180,255,0.7)',
           }}>
             {pct}%
           </span>

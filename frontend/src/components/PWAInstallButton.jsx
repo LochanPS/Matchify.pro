@@ -198,16 +198,16 @@ const AndroidModal = ({ onClose }) => (
 );
 
 // ── Main component ────────────────────────────────────────────────────────────
+// Only shown on Android Chrome when beforeinstallprompt fires.
+// iOS does not support programmatic PWA install — button hidden on iPhone/iPad.
 const PWAInstallButton = ({ fullWidth = true }) => {
   const [prompt, setPrompt]       = useState(null);
-  const [showModal, setShowModal] = useState(false);
-  // Initialize from current state — prevents 1-frame flash on already-installed users
   const [installed, setInstalled] = useState(() => isInStandalone());
 
   useEffect(() => {
-    if (isInStandalone()) { setInstalled(true); return; }
+    if (isInStandalone() || isIOS()) return;
 
-    const onPrompt   = (e) => { e.preventDefault(); setPrompt(e); };
+    const onPrompt    = (e) => { e.preventDefault(); setPrompt(e); };
     const onInstalled = () => { setInstalled(true); setPrompt(null); };
 
     window.addEventListener('beforeinstallprompt', onPrompt);
@@ -218,99 +218,84 @@ const PWAInstallButton = ({ fullWidth = true }) => {
     };
   }, []);
 
-  if (installed) return null;
+  // Hide on iOS (no API), already installed, or prompt not yet available
+  if (isIOS() || installed || !prompt) return null;
 
   const handleClick = async () => {
-    if (prompt) {
-      // Android Chrome — native install dialog
-      prompt.prompt();
-      const { outcome } = await prompt.userChoice;
-      if (outcome === 'accepted') setInstalled(true);
-    } else {
-      // iOS or Android without prompt — show instructions
-      setShowModal(true);
-    }
+    prompt.prompt();
+    const { outcome } = await prompt.userChoice;
+    if (outcome === 'accepted') setInstalled(true);
   };
 
   return (
-    <>
-      <div style={{ width: fullWidth ? '100%' : 'auto' }}>
-        {/* Divider */}
-        <div style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          gap: 8, marginBottom: 10,
-        }}>
-          <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.08)' }} />
-          <span style={{
-            fontSize: 11, color: 'rgba(255,255,255,0.32)',
-            fontFamily: 'system-ui,-apple-system,sans-serif',
-            letterSpacing: '0.06em', textTransform: 'uppercase',
-          }}>
-            install the app
-          </span>
-          <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.08)' }} />
-        </div>
-
-        {/* Button */}
-        <button
-          onClick={handleClick}
-          style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            gap: 10,
-            width: fullWidth ? '100%' : 'auto',
-            padding: '13px 20px',
-            borderRadius: 16,
-            border: '1px solid rgba(0,180,255,0.3)',
-            background: 'rgba(0,180,255,0.08)',
-            color: 'rgba(255,255,255,0.9)',
-            fontSize: 14,
-            fontWeight: 600,
-            cursor: 'pointer',
-            fontFamily: 'system-ui,-apple-system,sans-serif',
-            letterSpacing: '0.01em',
-            outline: 'none',
-            WebkitTapHighlightColor: 'transparent',
-          }}
-          onMouseEnter={e => {
-            e.currentTarget.style.background = 'rgba(0,180,255,0.14)';
-            e.currentTarget.style.borderColor = 'rgba(0,180,255,0.5)';
-          }}
-          onMouseLeave={e => {
-            e.currentTarget.style.background = 'rgba(0,180,255,0.08)';
-            e.currentTarget.style.borderColor = 'rgba(0,180,255,0.3)';
-          }}
-        >
-          <span style={{ color: '#00b4ff', display: 'flex', alignItems: 'center' }}>
-            <DownloadIcon />
-          </span>
-          <span>
-            Install <span style={{ color: '#00b4ff' }}>Matchify.pro</span> App
-          </span>
-          <span style={{
-            fontSize: 10, padding: '2px 8px', borderRadius: 999,
-            background: 'rgba(0,180,255,0.15)',
-            color: 'rgba(0,180,255,0.9)',
-            fontWeight: 700, letterSpacing: '0.04em', flexShrink: 0,
-          }}>
-            FREE
-          </span>
-        </button>
-
-        <p style={{
-          textAlign: 'center', marginTop: 7,
-          fontSize: 11, color: 'rgba(255,255,255,0.25)',
+    <div style={{ width: fullWidth ? '100%' : 'auto' }}>
+      {/* Divider */}
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        gap: 8, marginBottom: 10,
+      }}>
+        <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.08)' }} />
+        <span style={{
+          fontSize: 11, color: 'rgba(255,255,255,0.32)',
           fontFamily: 'system-ui,-apple-system,sans-serif',
+          letterSpacing: '0.06em', textTransform: 'uppercase',
         }}>
-          iPhone & Android · No app store · No download required
-        </p>
+          install the app
+        </span>
+        <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.08)' }} />
       </div>
 
-      {showModal && (
-        isIOS()
-          ? <IOSModal onClose={() => setShowModal(false)} />
-          : <AndroidModal onClose={() => setShowModal(false)} />
-      )}
-    </>
+      {/* Button */}
+      <button
+        onClick={handleClick}
+        style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          gap: 10,
+          width: fullWidth ? '100%' : 'auto',
+          padding: '13px 20px',
+          borderRadius: 16,
+          border: '1px solid rgba(0,180,255,0.3)',
+          background: 'rgba(0,180,255,0.08)',
+          color: 'rgba(255,255,255,0.9)',
+          fontSize: 14, fontWeight: 600, cursor: 'pointer',
+          fontFamily: 'system-ui,-apple-system,sans-serif',
+          letterSpacing: '0.01em',
+          outline: 'none',
+          WebkitTapHighlightColor: 'transparent',
+        }}
+        onMouseEnter={e => {
+          e.currentTarget.style.background = 'rgba(0,180,255,0.14)';
+          e.currentTarget.style.borderColor = 'rgba(0,180,255,0.5)';
+        }}
+        onMouseLeave={e => {
+          e.currentTarget.style.background = 'rgba(0,180,255,0.08)';
+          e.currentTarget.style.borderColor = 'rgba(0,180,255,0.3)';
+        }}
+      >
+        <span style={{ color: '#00b4ff', display: 'flex', alignItems: 'center' }}>
+          <DownloadIcon />
+        </span>
+        <span>
+          Install <span style={{ color: '#00b4ff' }}>Matchify.pro</span> App
+        </span>
+        <span style={{
+          fontSize: 10, padding: '2px 8px', borderRadius: 999,
+          background: 'rgba(0,180,255,0.15)',
+          color: 'rgba(0,180,255,0.9)',
+          fontWeight: 700, letterSpacing: '0.04em', flexShrink: 0,
+        }}>
+          FREE
+        </span>
+      </button>
+
+      <p style={{
+        textAlign: 'center', marginTop: 7,
+        fontSize: 11, color: 'rgba(255,255,255,0.25)',
+        fontFamily: 'system-ui,-apple-system,sans-serif',
+      }}>
+        No app store needed · Installs in one tap
+      </p>
+    </div>
   );
 };
 

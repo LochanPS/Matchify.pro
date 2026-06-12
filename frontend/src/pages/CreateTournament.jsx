@@ -96,7 +96,21 @@ const CreateTournament = () => {
         endDate: formData.endDate ? new Date(formData.endDate).toISOString() : formData.endDate,
       };
 
-      const createResponse = await tournamentAPI.createTournament(tournamentData);
+      // Retry up to 3 times — Railway cold starts can take 15-30s
+      let createResponse;
+      let lastCreateError;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          if (attempt > 0) await new Promise(r => setTimeout(r, 3000));
+          createResponse = await tournamentAPI.createTournament(tournamentData);
+          break;
+        } catch (err) {
+          lastCreateError = err;
+          const status = err?.response?.status;
+          if (status && status < 500) break; // don't retry 4xx
+        }
+      }
+      if (!createResponse) throw lastCreateError;
       const tournamentId = createResponse.tournament.id;
 
       if (formData.posters.length > 0) {

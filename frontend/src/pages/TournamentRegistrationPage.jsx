@@ -1,4 +1,5 @@
 ﻿import { getErrorMessage } from '../utils/errorMessage';
+import { getImageUrl } from '../utils/imageUrl';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -389,10 +390,13 @@ export default function TournamentRegistrationPage() {
     );
   }
 
-  const upiId = paymentSettings?.upiId?.trim() || '';
+  // Tournament-specific payment info takes priority over platform defaults
+  const upiId = (tournament?.upiId?.trim() || paymentSettings?.upiId?.trim() || '');
   const total = calculateTotal();
-  const accountHolder = paymentSettings?.accountHolder || 'Matchify.pro';
-  const qrUrl = paymentSettings?.qrCodeUrl || null;
+  const accountHolder = tournament?.accountHolderName || paymentSettings?.accountHolder || 'Matchify.pro';
+  const qrUrl = tournament?.paymentQRUrl
+    ? getImageUrl(tournament.paymentQRUrl)
+    : (paymentSettings?.qrCodeUrl || null);
 
   // ── Render: main ─────────────────────────────────────────────────────────
   return (

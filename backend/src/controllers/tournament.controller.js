@@ -756,7 +756,7 @@ const deleteTournament = async (req, res) => {
 const uploadPosters = async (req, res) => {
   try {
     const { id } = req.params;
-    const userId = req.user.id;
+    const userId = req.user.id || req.user.userId;
 
     // Validate UUID format
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -889,7 +889,7 @@ const uploadPosters = async (req, res) => {
 const deletePoster = async (req, res) => {
   try {
     const { id, posterId } = req.params;
-    const userId = req.user.id;
+    const userId = req.user.id || req.user.userId;
 
     const tournament = await prisma.tournament.findUnique({ where: { id } });
     if (!tournament) return res.status(404).json({ success: false, error: 'Tournament not found' });
@@ -1233,7 +1233,7 @@ const deleteCategory = async (req, res) => {
 const uploadPaymentQR = async (req, res) => {
   try {
     const { id } = req.params;
-    const userId = req.user.id;
+    const userId = req.user.id || req.user.userId;
 
     // Check if tournament exists and user is the organizer
     const tournament = await prisma.tournament.findUnique({

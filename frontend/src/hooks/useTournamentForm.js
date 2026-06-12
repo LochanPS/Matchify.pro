@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import safeStorage from '../utils/safeStorage';
 
 const DRAFT_STORAGE_KEY = 'matchify_tournament_drafts';
 
@@ -17,13 +18,13 @@ export const saveTournamentDraft = (draft) => {
   try {
     const drafts = getTournamentDrafts();
     const existingIndex = drafts.findIndex(d => d.id === draft.id);
-    
+
     if (existingIndex >= 0) {
       drafts[existingIndex] = { ...draft, updatedAt: new Date().toISOString() };
     } else {
       drafts.push({ ...draft, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
     }
-    
+
     safeStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(drafts));
     return true;
   } catch {
@@ -43,15 +44,29 @@ export const deleteTournamentDraft = (draftId) => {
   }
 };
 
+// Get most recently updated draft (for auto-resume)
+export const getMostRecentDraft = () => {
+  try {
+    const drafts = getTournamentDrafts();
+    if (!drafts.length) return null;
+    return drafts.sort((a, b) =>
+      new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0)
+    )[0];
+  } catch {
+    return null;
+  }
+};
+
 // Generate unique draft ID
 const generateDraftId = () => {
   return 'draft_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 };
 
 export const useTournamentForm = (existingDraftId = null) => {
-  const [draftId, setDraftId] = useState(existingDraftId || generateDraftId());
+  const [draftId, setDraftId] = useState(() => existingDraftId || generateDraftId());
   const [currentStep, setCurrentStep] = useState(1);
   const [completedSteps, setCompletedSteps] = useState([]);
+  const [draftResumed, setDraftResumed] = useState(false);
   const [formData, setFormData] = useState({
     // Step 1: Basic Info
     name: '',
@@ -95,19 +110,28 @@ export const useTournamentForm = (existingDraftId = null) => {
     matchDuration: 45,
   });
 
-  // Load existing draft on mount
+  // Load draft on mount — explicit ID takes priority, then auto-resume most recent
   useEffect(() => {
-    if (existingDraftId) {
+    const idToLoad = existingDraftId;
+    let draft = null;
+
+    if (idToLoad) {
       const drafts = getTournamentDrafts();
-      const draft = drafts.find(d => d.id === existingDraftId);
-      if (draft) {
-        setFormData(draft.formData);
-        setCurrentStep(draft.currentStep || 1);
-        setCompletedSteps(draft.completedSteps || []);
-        setDraftId(draft.id);
-      }
+      draft = drafts.find(d => d.id === idToLoad);
+    } else {
+      // Auto-resume most recent draft if no ID in URL
+      draft = getMostRecentDraft();
     }
-  }, [existingDraftId]);
+
+    if (draft) {
+      setFormData(prev => ({ ...prev, ...draft.formData }));
+      setCurrentStep(draft.currentStep || 1);
+      setCompletedSteps(draft.completedSteps || []);
+      setDraftId(draft.id);
+      setDraftResumed(true);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Auto-save draft when form data changes (debounced)
   const saveDraft = useCallback(() => {
@@ -175,6 +199,7 @@ export const useTournamentForm = (existingDraftId = null) => {
     currentStep,
     completedSteps,
     formData,
+    draftResumed,
     updateFormData,
     updateMultipleFields,
     nextStep,

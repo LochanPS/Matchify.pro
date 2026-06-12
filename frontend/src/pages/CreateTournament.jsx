@@ -36,6 +36,7 @@ const CreateTournament = () => {
     currentStep,
     completedSteps,
     formData,
+    draftResumed,
     updateFormData,
     updateMultipleFields,
     nextStep,
@@ -45,6 +46,8 @@ const CreateTournament = () => {
     saveDraft,
     clearDraft,
   } = useTournamentForm(draftIdFromUrl);
+
+  const [showResumeBanner, setShowResumeBanner] = useState(true);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
@@ -380,6 +383,36 @@ const CreateTournament = () => {
       </div>
 
       <div className="relative max-w-7xl mx-auto px-4 py-4">
+
+        {/* Draft resumed banner */}
+        {draftResumed && showResumeBanner && (
+          <div
+            className="mb-4 rounded-2xl p-4 flex items-center justify-between gap-3"
+            style={{
+              background: 'rgba(245,158,11,0.08)',
+              border: '1px solid rgba(245,158,11,0.3)',
+            }}
+          >
+            <div className="flex items-center gap-2">
+              <Save className="w-4 h-4 flex-shrink-0" style={{ color: '#F59E0B' }} />
+              <p className="text-sm font-semibold" style={{ color: '#F59E0B' }}>
+                Draft restored — continuing from where you left off
+              </p>
+            </div>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <button
+                onClick={() => { clearDraft(); window.location.reload(); }}
+                className="text-xs font-bold px-3 py-1.5 rounded-lg"
+                style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)' }}
+              >
+                Start fresh
+              </button>
+              <button onClick={() => setShowResumeBanner(false)} style={{ color: 'rgba(255,255,255,0.3)' }}>
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Error Message - Shows actual validation errors */}
         {error && (

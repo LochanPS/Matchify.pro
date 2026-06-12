@@ -227,6 +227,8 @@ const createTournament = async (req, res) => {
           startDate: startDate,                    // Store as string
           endDate: endDate,                        // Store as string
           status: 'draft', // Will be published later
+          shuttleType: req.body.shuttleType || null,
+          shuttleBrand: req.body.shuttleBrand || null,
           contactPhone: contactPhone?.trim() || null,
           whatsappNumber: whatsappNumber?.trim() || null,
           // Use Matchify payment QR code
@@ -555,7 +557,7 @@ const getTournament = async (req, res) => {
 const updateTournament = async (req, res) => {
   try {
     const { id } = req.params;
-    const userId = req.user.id;
+    const userId = req.user.id || req.user.userId;
 
     // Check if tournament exists and user is the organizer
     const tournament = await prisma.tournament.findUnique({

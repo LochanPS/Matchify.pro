@@ -317,11 +317,25 @@ const TournamentDetailPage = () => {
 
   const handlePublish = async () => {
     setShowPublishConfirmModal(false);
-    
+
     try {
       setPublishing(true);
-      const response = await api.put(`/tournaments/${id}`, { status: 'published' });
-      
+      let response;
+      let lastError;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          if (attempt > 0) await new Promise(r => setTimeout(r, 3000));
+          response = await api.put(`/tournaments/${id}`, { status: 'published' });
+          break;
+        } catch (err) {
+          lastError = err;
+          const status = err?.response?.status;
+          if (status && status < 500) break; // 4xx won't change on retry
+        }
+      }
+
+      if (!response) throw lastError;
+
       if (response.data.success) {
         setTournament({ ...tournament, status: 'published' });
         setPublishResultModal({
@@ -338,10 +352,11 @@ const TournamentDetailPage = () => {
       }
     } catch (err) {
       console.error('Error publishing tournament:', err);
+      const backendMsg = err?.response?.data?.error || err?.response?.data?.errors?.join(', ');
       setPublishResultModal({
         type: 'error',
         title: 'Publication Failed',
-        message: 'Failed to publish tournament. Please check your connection and try again.'
+        message: backendMsg || (err?.isTimeout ? 'Server took too long. Please try again.' : 'Failed to publish tournament. Please check your connection and try again.')
       });
     } finally {
       setPublishing(false);

@@ -90,10 +90,10 @@ const CreateTournament = () => {
         shuttleBrand: formData.shuttleBrand || null,
         contactPhone: formData.contactPhone?.trim() || null,
         whatsappNumber: formData.whatsappNumber?.trim() || null,
-        registrationOpenDate: formData.registrationOpenDate,
-        registrationCloseDate: formData.registrationCloseDate,
-        startDate: formData.startDate,
-        endDate: formData.endDate,
+        registrationOpenDate: formData.registrationOpenDate ? new Date(formData.registrationOpenDate).toISOString() : formData.registrationOpenDate,
+        registrationCloseDate: formData.registrationCloseDate ? new Date(formData.registrationCloseDate).toISOString() : formData.registrationCloseDate,
+        startDate: formData.startDate ? new Date(formData.startDate).toISOString() : formData.startDate,
+        endDate: formData.endDate ? new Date(formData.endDate).toISOString() : formData.endDate,
       };
 
       const createResponse = await tournamentAPI.createTournament(tournamentData);

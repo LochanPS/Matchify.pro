@@ -226,7 +226,15 @@ const EditTournament = () => {
     setSaving(true);
     setError(null);
     try {
-      await tournamentAPI.updateTournament(id, dateData);
+      const toISO = (v) => (v ? new Date(v).toISOString() : v);
+      const isoDateData = {
+        ...dateData,
+        registrationOpenDate: toISO(dateData.registrationOpenDate),
+        registrationCloseDate: toISO(dateData.registrationCloseDate),
+        startDate: toISO(dateData.startDate),
+        endDate: toISO(dateData.endDate),
+      };
+      await tournamentAPI.updateTournament(id, isoDateData);
       showMsg('success', 'Dates updated!');
       fetchTournament();
     } catch (err) {

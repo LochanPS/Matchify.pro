@@ -94,10 +94,11 @@ api.interceptors.response.use(
         error.code === 'ERR_NETWORK' ||
         !error.response
       );
+    // isSafePost uses AUTH_RETRY_DELAY (3s) — user is waiting at the form, 8s is too long
 
     if (isRetryable) {
       config._retryCount = retryCount + 1;
-      await sleep(isAuthPost ? AUTH_RETRY_DELAY : RETRY_DELAY_MS);
+      await sleep((isAuthPost || isSafePost) ? AUTH_RETRY_DELAY : RETRY_DELAY_MS);
       return api(config);
     }
 

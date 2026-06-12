@@ -141,9 +141,10 @@ export const useTournamentForm = (existingDraftId = null) => {
         id: draftId,
         formData: {
           ...formData,
-          // Don't save file objects, only previews for display
-          posters: formData.posters.map(p => ({ preview: p.preview, isPrimary: p.isPrimary })),
-          paymentQR: formData.paymentQR ? { preview: formData.paymentQR.preview } : null,
+          // Blob URLs expire on page reload — strip files/previews entirely.
+          // User will need to re-upload on resume (all other fields are preserved).
+          posters: [],
+          paymentQR: null,
         },
         currentStep,
         completedSteps,

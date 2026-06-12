@@ -163,27 +163,27 @@ const CreateTournament = () => {
       });
     } catch (err) {
       console.error('Error creating tournament:', err);
-      
-      // Extract detailed error messages from backend
-      let errorMessage = 'Failed to create tournament. Please try again.';
-      
+      console.error('Response data:', err?.response?.data);
+      console.error('Status:', err?.response?.status);
+      console.error('Is timeout:', err?.isTimeout);
+
+      let errorMessage;
       if (err?.response?.data) {
         const data = err.response.data;
-        
-        // Backend returns validation errors in 'errors' array
         if (data.errors && Array.isArray(data.errors)) {
           errorMessage = data.errors.join('\n');
-        } 
-        // Single error message
-        else if (data.error) {
+        } else if (data.error) {
           errorMessage = data.error;
-        }
-        // Message field
-        else if (data.message) {
+        } else if (data.message) {
           errorMessage = data.message;
         }
       }
-      
+      if (!errorMessage) {
+        errorMessage = err?.isTimeout
+          ? 'Server took too long to respond. Please try again in a moment.'
+          : 'Failed to create tournament. Please try again.';
+      }
+
       setError(errorMessage);
       setIsSubmitting(false);
     }

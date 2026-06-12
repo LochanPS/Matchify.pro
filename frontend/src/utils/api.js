@@ -10,7 +10,7 @@ if (import.meta.env.DEV) {
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 25000, // 25s â€” cold-start headroom (Vercel serverless ~10-15s + Prisma connect)
+  timeout: 45000, // 45s — Railway cold starts can exceed 30s
   headers: {
     'Content-Type': 'application/json',
   },
@@ -58,7 +58,11 @@ const RETRY_DELAY_MS   = 8000; // GETs: long gap gives cold server time to boot
 const AUTH_RETRY_DELAY = 3000; // Auth POSTs: shorter delay — user waiting at login
 
 // Auth POST endpoints safe to retry (idempotent: same credentials = same result)
+// Tournament create is safe to retry — if first attempt timed out before reaching
+// the server, no record was created; if server created but response was lost,
+// the duplicate is caught by DB constraints and returns 409/400 (not retried).
 const AUTH_RETRY_URLS = ['/auth/login', '/auth/register', '/auth/forgot-password'];
+const SAFE_POST_RETRY_URLS = ['/tournaments'];
 
 function sleep(ms) {
   return new Promise(r => setTimeout(r, ms));
@@ -73,12 +77,15 @@ api.interceptors.response.use(
     // Auth POSTs are safe to retry: same credentials = same result
     const isAuthPost = method === 'post' &&
       AUTH_RETRY_URLS.some(p => config.url?.includes(p));
+    // Tournament create safe to retry on cold-start network/timeout errors only
+    const isSafePost = method === 'post' &&
+      SAFE_POST_RETRY_URLS.some(p => config.url?.endsWith(p) || config.url?.includes(p + '?'));
     const retryCount = config._retryCount || 0;
 
-    // â”€â”€ Auto-retry GET requests on 5xx / network errors â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // Auto-retry GET + safe POSTs on 5xx / network errors
     // Transparent: calling code never sees transient cold-start failures.
     const isRetryable =
-      (isGet || isAuthPost) &&
+      (isGet || isAuthPost || isSafePost) &&
       retryCount < MAX_AUTO_RETRIES &&
       !config._noRetry &&
       (

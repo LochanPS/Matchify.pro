@@ -1,3 +1,5 @@
+import safeStorage from './safeStorage';
+
 /**
  * fetchUpload — multipart file upload via native fetch (NOT axios).
  *

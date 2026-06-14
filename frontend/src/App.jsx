@@ -14,6 +14,8 @@ import { WebSocketProvider } from './contexts/WebSocketContext'
 import { TransitionProvider } from './contexts/TransitionContext'
 import { Toaster } from 'react-hot-toast'
 import Navbar from './components/Navbar'
+import BottomNav from './components/BottomNav/BottomNav'
+import { isBottomNavVisible, BOTTOM_NAV_HEIGHT } from './components/BottomNav/navConfig'
 import ScrollToTop from './components/ScrollToTop'
 import ProfileCompletionModal from './components/ProfileCompletionModal'
 import MandatoryProfilePhotoModal from './components/MandatoryProfilePhotoModal'
@@ -222,6 +224,10 @@ function AppContent() {
                        location.pathname === '/admin' ||
                        user?.isAdmin;
 
+  // Whether the bottom nav bar is visible on this screen — used to add
+  // matching bottom padding so page content is never hidden behind the bar.
+  const showBottomNav = isBottomNavVisible(location.pathname, user);
+
   return (
     <div className="min-h-screen" style={{ background: '#161730' }}>
       {/* Global animated background — stars + glowing orbs + floating balloons, fixed behind every page */}
@@ -231,12 +237,12 @@ function AppContent() {
       <div className={isImpersonating() ? 'pt-[60px]' : ''}> {/* Add padding only when impersonating */}
         {shouldShowNavbar && <Navbar />}
       </div>
-      
+
       {/* Profile Photo Modal — skippable, re-prompts on next login */}
       {showProfilePhotoModal && user && !user.isAdmin && (
         <MandatoryProfilePhotoModal isOpen={showProfilePhotoModal} onSkip={() => setShowProfilePhotoModal(false)} />
       )}
-      
+
       {/* Profile Completion Modal - shows when user has incomplete profile */}
       {showProfileCompletion && user && (
         <ProfileCompletionModal
@@ -244,12 +250,17 @@ function AppContent() {
           onComplete={completeProfile}
         />
       )}
-      
+
       {/* Page content — constrained to 480px on tablets/wide screens so the
           app looks identical on every phone. On phones ≤480px this wrapper
           is just 100% width — zero visual change for mobile users.
-          Admin dashboard excluded (it has its own full-width sidebar layout). */}
-      <div style={!isAdminRoute ? { maxWidth: '480px', margin: '0 auto', position: 'relative' } : {}}>
+          Admin dashboard excluded (it has its own full-width sidebar layout).
+          Bottom padding added when bottom nav is visible so content is never
+          hidden behind the fixed bar (height + device safe-area). */}
+      <div style={{
+        ...(!isAdminRoute ? { maxWidth: '480px', margin: '0 auto', position: 'relative' } : {}),
+        ...(showBottomNav ? { paddingBottom: `calc(${BOTTOM_NAV_HEIGHT}px + env(safe-area-inset-bottom, 0px))` } : {}),
+      }}>
       <ChunkErrorBoundary>
       <Suspense fallback={<PageLoader />}>
       <Routes>
@@ -576,6 +587,11 @@ function AppContent() {
       </ChunkErrorBoundary>
         {!isAdminRoute && <SupportFooter />}
       </div>{/* end page-width constraint */}
+
+      {/* ── Persistent bottom navigation bar ──────────────────────────────────
+          Mounted once at root level — never remounted on route change.
+          Renders null on its own when the current screen should not show it. */}
+      <BottomNav />
     </div>
   );
 }

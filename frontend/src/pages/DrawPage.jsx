@@ -125,6 +125,7 @@ const DrawPage = () => {
   // Match details modal
   const [showMatchDetailsModal, setShowMatchDetailsModal] = useState(false);
   const [selectedMatchDetails, setSelectedMatchDetails] = useState(null);
+  const [showActionsSheet, setShowActionsSheet] = useState(false);
   
   // Players list modal
   const [showPlayersModal, setShowPlayersModal] = useState(false);
@@ -1145,132 +1146,21 @@ const DrawPage = () => {
             </div>
 
             {isOrganizer && (
-              <div className="grid grid-cols-2 gap-2 w-full md:max-w-xs">
-                {bracket && (
-                  <>
-                    {/* ── AMBER PRIMARY: Assign Players — always show when bracket exists ── */}
-                    <button
-                      onClick={openAssignModal}
-                      title="Assign players to draw"
-                      className="px-4 py-3 rounded-xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 font-bold text-sm"
-                      style={{ background: 'linear-gradient(135deg,#F59E0B,#FCD34D)', color: '#07071a', boxShadow: '0 4px 15px rgba(245,158,11,0.25)' }}
-                    >
-                      <UserPlus className="w-4 h-4" />
-                      Assign Players
-                    </button>
-
-                    {/* ── AMBER PRIMARY: Edit Groups — only before any match is played ── */}
-                    {(bracket?.format === 'ROUND_ROBIN' || bracket?.format === 'ROUND_ROBIN_KNOCKOUT') && !hasPlayedMatches && (
-                      <button
-                        onClick={() => setShowConfigModal(true)}
-                        title="Edit group sizes and configuration"
-                        className="px-4 py-3 rounded-xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 font-bold text-sm"
-                        style={{ background: 'linear-gradient(135deg,#F59E0B,#FCD34D)', color: '#07071a', boxShadow: '0 4px 15px rgba(245,158,11,0.25)' }}
-                      >
-                        <Layers className="w-4 h-4" />
-                        Edit Groups
-                      </button>
-                    )}
-
-                    {/* ── AMBER PRIMARY: Arrange KO — only after group stage fully complete ── */}
-                    {bracket?.format === 'ROUND_ROBIN_KNOCKOUT' && isRoundRobinComplete() && !isCategoryCompleted && (
-                      <button
-                        onClick={async () => {
-                          clearDrawCache(tournamentId, activeCategory?.id);
-                          await fetchDrawPageFull(activeCategory?.id);
-                          setShowArrangeMatchupsModal(true);
-                        }}
-                        title="Arrange knockout stage matchups"
-                        className="px-4 py-3 rounded-xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 font-bold text-sm"
-                        style={{ background: 'linear-gradient(135deg,#F59E0B,#FCD34D)', color: '#07071a', boxShadow: '0 4px 15px rgba(245,158,11,0.25)' }}
-                      >
-                        <Settings className="w-4 h-4" />
-                        Arrange KO
-                      </button>
-                    )}
-
-                    {/* ── AMBER PRIMARY: End Category — hide once already completed ── */}
-                    {!isCategoryCompleted && (
-                      <button
-                        onClick={() => setShowEndTournamentModal(true)}
-                        title="Mark this category as complete"
-                        className="px-4 py-3 rounded-xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 font-bold text-sm"
-                        style={{ background: 'linear-gradient(135deg,#F59E0B,#FCD34D)', color: '#07071a', boxShadow: '0 4px 15px rgba(245,158,11,0.25)' }}
-                      >
-                        <Trophy className="w-4 h-4" />
-                        End Category
-                      </button>
-                    )}
-
-                    {/* ── PURPLE ACCENT: Manage Umpires — always visible ── */}
-                    <button
-                      onClick={() => setShowManageUmpiresModal(true)}
-                      title="Add or remove umpires for this tournament"
-                      className="px-4 py-3 rounded-xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 font-bold text-sm"
-                      style={{ background: 'linear-gradient(135deg,rgba(168,85,247,0.18),rgba(139,92,246,0.12))', border: '1.5px solid rgba(168,85,247,0.35)', color: '#c084fc', boxShadow: '0 4px 12px rgba(168,85,247,0.15)' }}
-                    >
-                      <Users className="w-4 h-4" />
-                      {tournamentUmpires.length > 0 ? `Umpires (${tournamentUmpires.length})` : 'Add Umpires'}
-                    </button>
-
-                    {/* ── PURPLE ACCENT: Umpire Queues — when umpires exist ── */}
-                    {tournamentUmpires.length > 0 && (
-                      <button
-                        onClick={() => setShowUmpireQueueModal(true)}
-                        title="Bulk assign matches to umpires in sequential order"
-                        className="px-4 py-3 rounded-xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 font-bold text-sm"
-                        style={{ background: 'linear-gradient(135deg,rgba(168,85,247,0.18),rgba(139,92,246,0.12))', border: '1.5px solid rgba(168,85,247,0.35)', color: '#c084fc', boxShadow: '0 4px 12px rgba(168,85,247,0.15)' }}
-                      >
-                        <ListOrdered className="w-4 h-4" />
-                        Umpire Queues
-                      </button>
-                    )}
-
-                    {/* ── NEUTRAL: Restart — only when matches have been played ── */}
-                    {hasPlayedMatches && (
-                      <button
-                        onClick={() => setShowRestartModal(true)}
-                        title={
-                          bracket?.format === 'ROUND_ROBIN_KNOCKOUT' && activeStage === 'knockout'
-                            ? 'Restart knockout stage only (group results preserved)'
-                            : bracket?.format === 'ROUND_ROBIN_KNOCKOUT' && activeStage === 'roundrobin'
-                              ? 'Restart entire draw (groups + knockout)'
-                              : 'Restart all matches'
-                        }
-                        className="px-4 py-3 rounded-xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 font-bold text-sm"
-                        style={{ background: 'rgba(255,255,255,0.06)', border: '1.5px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.6)' }}
-                      >
-                        <Zap className="w-4 h-4" />
-                        {bracket?.format === 'ROUND_ROBIN_KNOCKOUT'
-                          ? activeStage === 'knockout' ? 'Restart KO' : 'Restart All'
-                          : 'Restart'}
-                      </button>
-                    )}
-
-                    {/* ── RED: Delete — only before any match is played ── */}
-                    {!hasPlayedMatches && (
-                      <button
-                        onClick={() => setShowDeleteModal(true)}
-                        title="Delete Draw"
-                        className="px-4 py-3 rounded-xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 font-bold text-sm"
-                        style={{ background: 'linear-gradient(135deg,rgba(239,68,68,0.18),rgba(220,38,38,0.12))', border: '1.5px solid rgba(239,68,68,0.35)', color: '#f87171', boxShadow: '0 4px 12px rgba(239,68,68,0.12)' }}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                        Delete Draw
-                      </button>
-                    )}
-                  </>
-                )}
-                {!bracket && !isCategoryCompleted && (
-                  <button
-                    onClick={() => setShowConfigModal(true)}
-                    className="col-span-2 px-4 py-3 btn-brand rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm"
-                  >
-                    <Plus className="w-5 h-5" />
-                    Create Draw
-                  </button>
-                )}
-              </div>
+              <button
+                onClick={() => setShowActionsSheet(true)}
+                style={{
+                  width: 44, height: 44, borderRadius: '50%', flexShrink: 0,
+                  background: 'rgba(255,255,255,0.07)',
+                  border: '1.5px solid rgba(255,255,255,0.14)',
+                  color: '#fff', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
+                  WebkitTapHighlightColor: 'transparent',
+                }}
+                title="Manage draw"
+              >
+                <Settings className="w-5 h-5" />
+              </button>
             )}
           </div>
           
@@ -1534,8 +1424,169 @@ const DrawPage = () => {
         </div>
       )}
 
-      {/* ── Smart Guide — Organizer only, not shown when category already completed ── */}
-      {isOrganizer && activeCategory && !isCategoryCompleted && (() => {
+      {/* ── Draw Actions Bottom Sheet ── */}
+      {showActionsSheet && isOrganizer && (
+        <div
+          onClick={() => setShowActionsSheet(false)}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 9000,
+            background: 'rgba(0,0,0,0.65)',
+            display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              width: '100%', maxWidth: 480,
+              background: '#0d1117',
+              borderRadius: '20px 20px 0 0',
+              border: '1px solid rgba(255,255,255,0.09)',
+              boxShadow: '0 -8px 40px rgba(0,0,0,0.7)',
+              paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 16px)',
+              maxHeight: '80vh',
+              overflowY: 'auto',
+            }}
+          >
+            {/* Handle */}
+            <div style={{ padding: '14px 0 8px', display: 'flex', justifyContent: 'center' }}>
+              <div style={{ width: 36, height: 4, borderRadius: 999, background: 'rgba(255,255,255,0.18)' }} />
+            </div>
+
+            <p style={{ textAlign: 'center', fontWeight: 700, fontSize: 13, color: 'rgba(255,255,255,0.4)', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 8 }}>
+              Draw Options
+            </p>
+
+            <div style={{ padding: '0 12px 4px' }}>
+              {/* ── PRIMARY ACTIONS ── */}
+              {[
+                {
+                  icon: <Plus style={{ width: 18, height: 18 }} />,
+                  label: bracket ? 'Edit Draw Config' : 'Create Draw',
+                  sub: bracket ? 'Change format or group settings' : 'Set up bracket for this category',
+                  disabled: isCategoryCompleted,
+                  action: () => { setShowActionsSheet(false); setShowConfigModal(true); },
+                },
+                {
+                  icon: <UserPlus style={{ width: 18, height: 18 }} />,
+                  label: 'Assign Players',
+                  sub: 'Place registered players into bracket slots',
+                  disabled: !bracket || isCategoryCompleted,
+                  action: () => { setShowActionsSheet(false); openAssignModal(); },
+                },
+                ...(bracket?.format === 'ROUND_ROBIN_KNOCKOUT' ? [{
+                  icon: <Settings style={{ width: 18, height: 18 }} />,
+                  label: 'Arrange KO Stage',
+                  sub: 'Seed top group players into the knockout bracket',
+                  disabled: isCategoryCompleted,
+                  action: async () => {
+                    setShowActionsSheet(false);
+                    clearDrawCache(tournamentId, activeCategory?.id);
+                    await fetchDrawPageFull(activeCategory?.id);
+                    setShowArrangeMatchupsModal(true);
+                  },
+                }] : []),
+                {
+                  icon: <Users style={{ width: 18, height: 18 }} />,
+                  label: tournamentUmpires.length > 0 ? `Manage Umpires (${tournamentUmpires.length})` : 'Add Umpires',
+                  sub: 'Add or remove umpires for this tournament',
+                  disabled: false,
+                  action: () => { setShowActionsSheet(false); setShowManageUmpiresModal(true); },
+                  accent: 'purple',
+                },
+                {
+                  icon: <ListOrdered style={{ width: 18, height: 18 }} />,
+                  label: 'Assign Matches',
+                  sub: 'Assign matches to umpires for scoring',
+                  disabled: tournamentUmpires.length === 0 || isCategoryCompleted,
+                  action: () => { setShowActionsSheet(false); setShowUmpireQueueModal(true); },
+                  accent: 'purple',
+                },
+                {
+                  icon: <Trophy style={{ width: 18, height: 18 }} />,
+                  label: 'End Category',
+                  sub: 'Finalize results and award ranking points',
+                  disabled: !bracket || isCategoryCompleted,
+                  action: () => { setShowActionsSheet(false); setShowEndTournamentModal(true); },
+                },
+              ].map((item, idx) => (
+                <button
+                  key={idx}
+                  onClick={item.disabled ? undefined : item.action}
+                  style={{
+                    width: '100%', display: 'flex', alignItems: 'center', gap: 14,
+                    padding: '13px 14px', borderRadius: 14, marginBottom: 6,
+                    background: item.disabled ? 'rgba(255,255,255,0.02)' : item.accent === 'purple' ? 'rgba(168,85,247,0.08)' : 'rgba(255,255,255,0.05)',
+                    border: item.accent === 'purple' ? '1px solid rgba(168,85,247,0.2)' : '1px solid rgba(255,255,255,0.07)',
+                    cursor: item.disabled ? 'not-allowed' : 'pointer',
+                    opacity: item.disabled ? 0.38 : 1,
+                    textAlign: 'left',
+                    WebkitTapHighlightColor: 'transparent',
+                    transition: 'opacity 0.15s',
+                  }}
+                >
+                  <span style={{ color: item.disabled ? 'rgba(255,255,255,0.3)' : item.accent === 'purple' ? '#c084fc' : '#F59E0B', flexShrink: 0 }}>
+                    {item.icon}
+                  </span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontWeight: 700, fontSize: 14, color: item.disabled ? 'rgba(255,255,255,0.3)' : item.accent === 'purple' ? '#c084fc' : '#fff', margin: 0, lineHeight: 1.3 }}>
+                      {item.label}
+                    </p>
+                    <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', margin: '2px 0 0', lineHeight: 1.3 }}>
+                      {item.sub}
+                    </p>
+                  </div>
+                </button>
+              ))}
+
+              {/* ── DIVIDER ── */}
+              <div style={{ height: 1, background: 'rgba(255,255,255,0.07)', margin: '8px 0' }} />
+
+              {/* ── DESTRUCTIVE ACTIONS ── */}
+              {hasPlayedMatches && (
+                <button
+                  onClick={() => { setShowActionsSheet(false); setShowRestartModal(true); }}
+                  style={{
+                    width: '100%', display: 'flex', alignItems: 'center', gap: 14,
+                    padding: '13px 14px', borderRadius: 14, marginBottom: 6,
+                    background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)',
+                    cursor: 'pointer', textAlign: 'left', WebkitTapHighlightColor: 'transparent',
+                  }}
+                >
+                  <Zap style={{ width: 18, height: 18, color: 'rgba(255,255,255,0.45)', flexShrink: 0 }} />
+                  <div style={{ flex: 1 }}>
+                    <p style={{ fontWeight: 700, fontSize: 14, color: 'rgba(255,255,255,0.55)', margin: 0 }}>
+                      {bracket?.format === 'ROUND_ROBIN_KNOCKOUT'
+                        ? (activeStage === 'knockout' ? 'Restart KO Stage' : 'Restart All Matches')
+                        : 'Restart Matches'}
+                    </p>
+                    <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.28)', margin: '2px 0 0' }}>Reset scores and replay matches</p>
+                  </div>
+                </button>
+              )}
+              {!hasPlayedMatches && bracket && (
+                <button
+                  onClick={() => { setShowActionsSheet(false); setShowDeleteModal(true); }}
+                  style={{
+                    width: '100%', display: 'flex', alignItems: 'center', gap: 14,
+                    padding: '13px 14px', borderRadius: 14, marginBottom: 6,
+                    background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.2)',
+                    cursor: 'pointer', textAlign: 'left', WebkitTapHighlightColor: 'transparent',
+                  }}
+                >
+                  <Trash2 style={{ width: 18, height: 18, color: '#f87171', flexShrink: 0 }} />
+                  <div style={{ flex: 1 }}>
+                    <p style={{ fontWeight: 700, fontSize: 14, color: '#f87171', margin: 0 }}>Delete Draw</p>
+                    <p style={{ fontSize: 11, color: 'rgba(248,113,113,0.5)', margin: '2px 0 0' }}>Remove bracket and all slot assignments</p>
+                  </div>
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Smart Guide — REMOVED (replaced by actions sheet) ── */}
+      {false && isOrganizer && activeCategory && !isCategoryCompleted && (() => {
         const fmt = bracket?.format;
         const groupMatches = matches.filter(m => m.stage === 'GROUP');
         const knockoutMatches = matches.filter(m => m.stage === 'KNOCKOUT');

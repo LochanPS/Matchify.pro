@@ -1940,7 +1940,40 @@ const saveUmpireQueue = async (req, res) => {
       }
     });
 
-    // ── Send ONE notification to umpire (not one per match) ──────────────────
+    // ── Fetch full match details for rich notification ────────────────────────
+    let matchSummaries = [];
+    if (matchIds.length > 0) {
+      try {
+        const assignedMatches = await prisma.match.findMany({
+          where: { id: { in: matchIds } },
+          include: { category: { select: { name: true } } },
+          orderBy: { queueOrder: 'asc' }
+        });
+        const pidSet = new Set();
+        for (const m of assignedMatches) {
+          if (m.player1Id && !m.player1Id.startsWith('guest-')) pidSet.add(m.player1Id);
+          if (m.player2Id && !m.player2Id.startsWith('guest-')) pidSet.add(m.player2Id);
+        }
+        const pList = pidSet.size > 0
+          ? await prisma.user.findMany({ where: { id: { in: [...pidSet] } }, select: { id: true, name: true } })
+          : [];
+        const pMap = Object.fromEntries(pList.map(p => [p.id, p]));
+        matchSummaries = assignedMatches.map(m => ({
+          id: m.id,
+          queueOrder: m.queueOrder,
+          round: m.round,
+          matchNumber: m.matchNumber,
+          status: m.status,
+          categoryName: m.category?.name || '',
+          player1Name: (m.player1Id ? pMap[m.player1Id]?.name : null) || 'TBD',
+          player2Name: (m.player2Id ? pMap[m.player2Id]?.name : null) || 'TBD',
+        }));
+      } catch (detailErr) {
+        console.error('⚠️ Match detail fetch failed (non-fatal):', detailErr.message);
+      }
+    }
+
+    // ── Send notification to umpire with full match list ──────────────────────
     if (matchIds.length > 0) {
       try {
         const notificationService = await import('../services/notificationService.js');
@@ -1948,17 +1981,35 @@ const saveUmpireQueue = async (req, res) => {
           userId: umpireId,
           type: 'MATCH_ASSIGNED',
           title: '⚖️ Match Queue Assigned',
-          message: `You have been assigned ${matchIds.length} match${matchIds.length > 1 ? 'es' : ''} in ${tournament.name}. Open your dashboard to see your queue.`,
+          message: `You have been assigned ${matchIds.length} match${matchIds.length > 1 ? 'es' : ''} in ${tournament.name}. Tap each match below to configure and start scoring.`,
           data: {
             tournamentId,
             tournamentName: tournament.name,
             matchCount: matchIds.length,
-            isQueue: true
+            umpireName: umpire.name,
+            isQueue: true,
+            matches: matchSummaries,
+          },
+          sendEmail: false
+        });
+
+        // ── Send organizer a simple confirmation ──────────────────────────────
+        await notificationService.default.createNotification({
+          userId: tournament.organizerId,
+          type: 'MATCH_ASSIGNED',
+          title: '✅ Queue Saved',
+          message: `${matchIds.length} match${matchIds.length > 1 ? 'es' : ''} assigned to ${umpire.name} in ${tournament.name}.`,
+          data: {
+            tournamentId,
+            tournamentName: tournament.name,
+            umpireId,
+            umpireName: umpire.name,
+            matchCount: matchIds.length,
+            isOrganizerConfirmation: true,
           },
           sendEmail: false
         });
       } catch (notifError) {
-        // Notification failure must NOT fail the queue save
         console.error('⚠️ Queue notification failed (non-fatal):', notifError.message);
       }
     }

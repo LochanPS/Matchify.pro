@@ -1680,97 +1680,94 @@ const DrawPage = () => {
 
         if (!steps.length) return null;
 
-        const colorMap = {
-          amber: {
-            bg: 'rgba(245,158,11,0.08)', border: 'rgba(245,158,11,0.28)',
-            text: '#F59E0B', subtext: 'rgba(245,158,11,0.65)',
-            btn: 'linear-gradient(135deg,#F59E0B,#FCD34D)', btnTxt: '#07071a',
-          },
-          green: {
-            bg: 'rgba(34,197,94,0.08)', border: 'rgba(34,197,94,0.3)',
-            text: '#4ade80', subtext: 'rgba(134,239,172,0.65)',
-            btn: 'linear-gradient(135deg,#22c55e,#16a34a)', btnTxt: '#fff',
-          },
-          blue: {
-            bg: 'rgba(96,165,250,0.08)', border: 'rgba(96,165,250,0.25)',
-            text: '#60a5fa', subtext: 'rgba(147,197,253,0.65)',
-            btn: 'linear-gradient(135deg,#3b82f6,#2563eb)', btnTxt: '#fff',
-          },
-        };
-        const c = colorMap[bannerColor] || colorMap.amber;
+        // Action for each step index — clicking the step fires this
+        const stepActions = (() => {
+          if (!bracket) return [() => setShowConfigModal(true)];
+          if (fmt === 'ROUND_ROBIN_KNOCKOUT') {
+            return [
+              null,
+              openAssignModal,
+              null, // Group Stage — play matches below
+              async () => {
+                clearDrawCache(tournamentId, activeCategory?.id);
+                await fetchDrawPageFull(activeCategory?.id);
+                setShowArrangeMatchupsModal(true);
+              },
+              () => setShowEndTournamentModal(true),
+            ];
+          }
+          // KNOCKOUT or ROUND_ROBIN
+          return [
+            null,
+            openAssignModal,
+            null, // Play Matches
+            () => setShowEndTournamentModal(true),
+          ];
+        })();
+
+        const activeColor = bannerColor === 'green' ? '#22c55e'
+          : bannerColor === 'blue' ? '#60a5fa'
+          : '#F59E0B';
+        const activeBg = bannerColor === 'green' ? 'linear-gradient(135deg,#22c55e,#16a34a)'
+          : bannerColor === 'blue' ? 'linear-gradient(135deg,#3b82f6,#2563eb)'
+          : 'linear-gradient(135deg,#F59E0B,#FCD34D)';
+        const activeTxt = bannerColor === 'green' ? '#fff'
+          : bannerColor === 'blue' ? '#fff'
+          : '#07071a';
 
         return (
           <div className="max-w-2xl mx-auto px-3 mt-3">
-            {/* Progress Stepper */}
-            <div className="flex items-start mb-3 overflow-x-auto pb-0.5" style={{ scrollbarWidth: 'none' }}>
-              {steps.map((step, i) => (
-                <React.Fragment key={i}>
-                  <div className="flex flex-col items-center gap-1 flex-shrink-0" style={{ minWidth: 56 }}>
-                    <div
-                      className="w-6 h-6 rounded-full flex items-center justify-center font-black transition-all"
+            {/* Progress Stepper — each step is clickable */}
+            <div className="flex items-start mb-2 overflow-x-auto pb-0.5" style={{ scrollbarWidth: 'none' }}>
+              {steps.map((step, i) => {
+                const action = stepActions[i];
+                return (
+                  <React.Fragment key={i}>
+                    <button
+                      onClick={action || undefined}
+                      className="flex flex-col items-center gap-1 flex-shrink-0"
                       style={{
-                        fontSize: 10,
-                        background: i < currentStep
-                          ? '#22c55e'
-                          : i === currentStep
-                            ? c.btn
-                            : 'rgba(255,255,255,0.07)',
-                        color: i < currentStep ? '#fff' : i === currentStep ? c.btnTxt : 'rgba(255,255,255,0.3)',
-                        border: i === currentStep ? `2px solid ${c.text}` : '2px solid transparent',
-                        boxShadow: i === currentStep ? `0 0 8px ${c.text}66` : 'none',
+                        minWidth: 56, background: 'none', border: 'none', padding: 0,
+                        cursor: action ? 'pointer' : 'default',
+                        WebkitTapHighlightColor: 'transparent',
                       }}
                     >
-                      {i < currentStep ? '✓' : i + 1}
-                    </div>
-                    <span
-                      className="text-center leading-tight"
-                      style={{
-                        fontSize: 9,
-                        maxWidth: 52,
-                        fontWeight: i === currentStep ? 700 : 400,
-                        color: i === currentStep ? c.text : i < currentStep ? '#4ade80' : 'rgba(255,255,255,0.28)',
-                      }}
-                    >
-                      {step}
-                    </span>
-                  </div>
-                  {i < steps.length - 1 && (
-                    <div
-                      className="flex-1 h-px mx-1 mt-3 flex-shrink-0"
-                      style={{
-                        background: i < currentStep ? '#22c55e' : 'rgba(255,255,255,0.1)',
-                        minWidth: 12,
-                      }}
-                    />
-                  )}
-                </React.Fragment>
-              ))}
+                      <div
+                        className="w-6 h-6 rounded-full flex items-center justify-center font-black transition-all"
+                        style={{
+                          fontSize: 10,
+                          background: i < currentStep ? '#22c55e' : i === currentStep ? activeBg : 'rgba(255,255,255,0.07)',
+                          color: i < currentStep ? '#fff' : i === currentStep ? activeTxt : 'rgba(255,255,255,0.3)',
+                          border: i === currentStep ? `2px solid ${activeColor}` : '2px solid transparent',
+                          boxShadow: i === currentStep ? `0 0 8px ${activeColor}66` : 'none',
+                          transition: 'transform 0.1s',
+                        }}
+                      >
+                        {i < currentStep ? '✓' : i + 1}
+                      </div>
+                      <span
+                        className="text-center leading-tight"
+                        style={{
+                          fontSize: 9, maxWidth: 52,
+                          fontWeight: i === currentStep ? 700 : 400,
+                          color: i === currentStep ? activeColor : i < currentStep ? '#4ade80' : 'rgba(255,255,255,0.28)',
+                          textDecoration: action && i !== currentStep ? 'underline dotted' : 'none',
+                          textUnderlineOffset: 2,
+                        }}
+                      >
+                        {step}
+                      </span>
+                    </button>
+                    {i < steps.length - 1 && (
+                      <div
+                        className="flex-1 h-px mx-1 mt-3 flex-shrink-0"
+                        style={{ background: i < currentStep ? '#22c55e' : 'rgba(255,255,255,0.1)', minWidth: 12 }}
+                      />
+                    )}
+                  </React.Fragment>
+                );
+              })}
             </div>
-
-            {/* What to do next — banner */}
-            {bannerText && (
-              <div
-                className="rounded-xl p-3 flex items-center gap-3"
-                style={{ background: c.bg, border: `1px solid ${c.border}` }}
-              >
-                <span className="text-lg flex-shrink-0">{bannerIcon}</span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-black leading-tight" style={{ color: c.text }}>{bannerText}</p>
-                  {bannerSubtext && (
-                    <p className="text-xs mt-0.5 leading-tight" style={{ color: c.subtext }}>{bannerSubtext}</p>
-                  )}
-                </div>
-                {bannerButton && (
-                  <button
-                    onClick={bannerButton.action}
-                    className="flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-black transition-all active:scale-95"
-                    style={{ background: c.btn, color: c.btnTxt, boxShadow: `0 4px 12px ${c.text}44`, whiteSpace: 'nowrap' }}
-                  >
-                    {bannerButton.label}
-                  </button>
-                )}
-              </div>
-            )}
           </div>
         );
       })()}

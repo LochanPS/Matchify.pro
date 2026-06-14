@@ -6344,7 +6344,7 @@ const ManageUmpiresModal = ({ tournamentId, umpires, onUmpiresChange, onClose })
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5">
                         <p className="text-sm font-bold text-white truncate">{u.name}</p>
-                        {u.id && <span className="text-xs font-mono font-black flex-shrink-0" style={{ color: '#FCD34D' }}>#{u.id}</span>}
+                        {u.umpireCode && <span className="text-xs font-mono font-black flex-shrink-0" style={{ color: '#FCD34D' }}>{u.umpireCode}</span>}
                       </div>
                       <p className="text-xs truncate" style={{ color: 'rgba(255,255,255,0.4)' }}>{u.email}</p>
                     </div>

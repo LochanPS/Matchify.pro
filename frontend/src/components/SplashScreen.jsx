@@ -22,6 +22,28 @@ const SplashScreen = ({ onComplete, duration: _duration = 5300 }) => {
   const onCompleteRef         = useRef(onComplete);
   useEffect(() => { onCompleteRef.current = onComplete; }, [onComplete]);
 
+  // Lock body scroll for entire splash duration (iOS momentum scroll fix)
+  useEffect(() => {
+    const prev = {
+      overflow: document.body.style.overflow,
+      position: document.body.style.position,
+      width:    document.body.style.width,
+      top:      document.body.style.top,
+    };
+    const scrollY = window.scrollY;
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.width    = '100%';
+    document.body.style.top      = `-${scrollY}px`;
+    return () => {
+      document.body.style.overflow = prev.overflow;
+      document.body.style.position = prev.position;
+      document.body.style.width    = prev.width;
+      document.body.style.top      = prev.top;
+      window.scrollTo(0, scrollY);
+    };
+  }, []);
+
   useEffect(() => {
     let phaseIndex  = 0;
     let phaseStart  = performance.now();
@@ -76,68 +98,85 @@ const SplashScreen = ({ onComplete, duration: _duration = 5300 }) => {
       opacity: fadeOut ? 0 : 1,
       transition: fadeOut ? 'opacity 0.6s ease-out' : 'none',
       pointerEvents: fadeOut ? 'none' : 'all',
+      touchAction: 'none',
+      display: 'flex', alignItems: 'stretch', justifyContent: 'center',
     }}>
 
-      {/* ── Full-screen background image — untouched ── */}
-      <img
-        src="/splash.png"
-        alt=""
-        draggable={false}
-        style={{
-          position: 'absolute', inset: 0,
-          width: '100%', height: '100%',
-          objectFit: 'cover',
-          objectPosition: 'center top',
-          userSelect: 'none', pointerEvents: 'none',
-        }}
-      />
-
-      {/* ── Progress bar — sits just below "India's #1 Badminton Platform" ── */}
-      <style>{`
-        @keyframes goldShimmer {
-          0%   { background-position: -200% center; }
-          100% { background-position:  200% center; }
-        }
-      `}</style>
-
+      {/* ── 480px-constrained column — same width as all app content ── */}
+      {/* This makes splash look identical on every phone size and on laptops */}
       <div style={{
-        position: 'absolute',
-        left: '50%', transform: 'translateX(-50%)',
-        top: '76%',
-        width: '68%', maxWidth: 300,
+        position: 'relative',
+        width: '100%', maxWidth: '480px',
+        flex: '0 0 auto',
+        overflow: 'hidden',
       }}>
-        {/* Track */}
+
+        {/* Background image — contain so it NEVER crops on any phone size.    */}
+        {/* Dark bg (#050810) fills any side gaps invisibly. With contain,     */}
+        {/* the image always fills the full height on portrait phones so       */}
+        {/* top:% values map consistently to the same image position.          */}
+        <img
+          src="/splash.png"
+          alt=""
+          draggable={false}
+          style={{
+            position: 'absolute', inset: 0,
+            width: '100%', height: '100%',
+            objectFit: 'contain',
+            objectPosition: 'center top',
+            userSelect: 'none', pointerEvents: 'none',
+          }}
+        />
+
+        {/* ── Progress bar ──────────────────────────────────────────────────── */}
+        {/* 70% = dark gap between "India's #1 Badminton Platform" and icons.  */}
+        {/* With contain, this % always maps to same position in the image.    */}
+        <style>{`
+          @keyframes goldShimmer {
+            0%   { background-position: -200% center; }
+            100% { background-position:  200% center; }
+          }
+        `}</style>
+
         <div style={{
-          width: '100%', height: 5, borderRadius: 999,
-          background: 'rgba(255,255,255,0.12)',
-          overflow: 'hidden',
-          boxShadow: '0 0 0 1px rgba(255,255,255,0.06)',
+          position: 'absolute',
+          left: '50%', transform: 'translateX(-50%)',
+          top: '68%',
+          width: '60%',
         }}>
-          {/* Fill */}
+          {/* Track */}
           <div style={{
-            height: '100%',
-            width: `${pct}%`,
-            borderRadius: 999,
-            background: 'linear-gradient(90deg, #b45309 0%, #f59e0b 45%, #fcd34d 70%, #f59e0b 100%)',
-            backgroundSize: '200% 100%',
-            animation: 'goldShimmer 1.6s linear infinite',
-            boxShadow: '0 0 10px rgba(245,158,11,0.85)',
-            transition: 'width 0.08s linear',
-          }} />
+            width: '100%', height: 5, borderRadius: 999,
+            background: 'rgba(255,255,255,0.12)',
+            overflow: 'hidden',
+            boxShadow: '0 0 0 1px rgba(255,255,255,0.06)',
+          }}>
+            {/* Fill */}
+            <div style={{
+              height: '100%',
+              width: `${pct}%`,
+              borderRadius: 999,
+              background: 'linear-gradient(90deg, #b45309 0%, #f59e0b 45%, #fcd34d 70%, #f59e0b 100%)',
+              backgroundSize: '200% 100%',
+              animation: 'goldShimmer 1.6s linear infinite',
+              boxShadow: '0 0 10px rgba(245,158,11,0.85)',
+              transition: 'width 0.08s linear',
+            }} />
+          </div>
+
+          {/* Percentage — small, right-aligned, golden */}
+          <div style={{
+            textAlign: 'right', marginTop: 6,
+            fontSize: 11, fontWeight: 700,
+            color: 'rgba(251,191,36,0.75)',
+            fontFamily: 'system-ui,-apple-system,sans-serif',
+            letterSpacing: '0.04em',
+          }}>
+            {Math.round(pct)}%
+          </div>
         </div>
 
-        {/* Percentage — small, right-aligned, golden */}
-        <div style={{
-          textAlign: 'right', marginTop: 6,
-          fontSize: 11, fontWeight: 700,
-          color: 'rgba(251,191,36,0.75)',
-          fontFamily: 'system-ui,-apple-system,sans-serif',
-          letterSpacing: '0.04em',
-        }}>
-          {Math.round(pct)}%
-        </div>
       </div>
-
     </div>
   );
 };

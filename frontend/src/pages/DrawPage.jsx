@@ -1541,7 +1541,8 @@ const DrawPage = () => {
         const knockoutMatches = matches.filter(m => m.stage === 'KNOCKOUT');
         const allGroupDone = groupMatches.length > 0 && groupMatches.every(m => m.status === 'COMPLETED');
         const allMatchesDone = matches.length > 0 && matches.every(m => m.status === 'COMPLETED');
-        const hasKOMatches = knockoutMatches.length > 0;
+        // KO matches are created at draw time with no players — only count as "arranged" when player IDs present
+        const hasKOPlayersAssigned = knockoutMatches.some(m => m.player1Id || m.player2Id);
 
         let steps = [];
         let currentStep = 0;
@@ -1553,9 +1554,9 @@ const DrawPage = () => {
 
         if (!bracket) {
           steps = fmt === 'ROUND_ROBIN_KNOCKOUT'
-            ? ['Create Draw', 'Group Stage', 'Knockout Stage', 'End Category']
+            ? ['Create Draw', 'Assign Players', 'Group Stage', 'Knockout Stage', 'End Category']
             : fmt === 'ROUND_ROBIN'
-              ? ['Create Draw', 'Play Matches', 'End Category']
+              ? ['Create Draw', 'Assign Players', 'Play Matches', 'End Category']
               : ['Create Draw', 'Assign Players', 'Play Matches', 'End Category'];
           currentStep = 0;
           bannerIcon = '📋';
@@ -1595,22 +1596,30 @@ const DrawPage = () => {
             bannerButton = { label: 'End Category', action: () => setShowEndTournamentModal(true) };
           }
         } else if (fmt === 'ROUND_ROBIN') {
-          steps = ['Create Draw', 'Play Matches', 'End Category'];
-          if (!hasPlayedMatches) {
+          steps = ['Create Draw', 'Assign Players', 'Play Matches', 'End Category'];
+          const playersAssigned = matches.some(m => m.player1Id || m.player2Id);
+          if (!playersAssigned) {
             currentStep = 1;
+            bannerIcon = '👥';
+            bannerText = 'Assign players to group slots';
+            bannerSubtext = 'Use "Assign Players" to place registered players into the groups.';
+            bannerColor = 'amber';
+            bannerButton = { label: 'Assign Players', action: openAssignModal };
+          } else if (!hasPlayedMatches) {
+            currentStep = 2;
             bannerIcon = '🎯';
-            bannerText = 'Draw ready — start playing matches!';
+            bannerText = 'Players assigned — start playing matches!';
             bannerSubtext = 'Umpires can begin scoring round robin matches.';
             bannerColor = 'blue';
           } else if (!allMatchesDone) {
             const done = matches.filter(m => m.status === 'COMPLETED').length;
-            currentStep = 1;
+            currentStep = 2;
             bannerIcon = '⚡';
             bannerText = `${done} / ${matches.length} matches completed`;
             bannerSubtext = 'Round robin in progress. Complete all matches to finish.';
             bannerColor = 'blue';
           } else {
-            currentStep = 2;
+            currentStep = 3;
             bannerIcon = '🏆';
             bannerText = 'All matches done — end the category!';
             bannerSubtext = 'Click "End Category" to finalize results and award ranking points.';
@@ -1618,20 +1627,28 @@ const DrawPage = () => {
             bannerButton = { label: 'End Category', action: () => setShowEndTournamentModal(true) };
           }
         } else if (fmt === 'ROUND_ROBIN_KNOCKOUT') {
-          steps = ['Create Draw', 'Group Stage', 'Knockout Stage', 'End Category'];
-          if (!allGroupDone) {
-            const done = groupMatches.filter(m => m.status === 'COMPLETED').length;
+          steps = ['Create Draw', 'Assign Players', 'Group Stage', 'Knockout Stage', 'End Category'];
+          const groupPlayersAssigned = groupMatches.some(m => m.player1Id || m.player2Id);
+          if (!groupPlayersAssigned) {
             currentStep = 1;
-            bannerIcon = groupMatches.length === 0 ? '🎯' : '⚡';
-            bannerText = groupMatches.length === 0
-              ? 'Draw ready — start group stage!'
+            bannerIcon = '👥';
+            bannerText = 'Assign players to group slots';
+            bannerSubtext = 'Use "Assign Players" to place registered players into the groups.';
+            bannerColor = 'amber';
+            bannerButton = { label: 'Assign Players', action: openAssignModal };
+          } else if (!allGroupDone) {
+            const done = groupMatches.filter(m => m.status === 'COMPLETED').length;
+            currentStep = 2;
+            bannerIcon = done === 0 ? '🎯' : '⚡';
+            bannerText = done === 0
+              ? 'Players assigned — start group stage!'
               : `Group stage: ${done} / ${groupMatches.length} matches done`;
-            bannerSubtext = groupMatches.length === 0
+            bannerSubtext = done === 0
               ? 'Umpires can begin scoring group matches.'
               : 'Complete all group matches to advance to knockout stage.';
             bannerColor = 'blue';
-          } else if (allGroupDone && !hasKOMatches) {
-            currentStep = 1;
+          } else if (allGroupDone && !hasKOPlayersAssigned) {
+            currentStep = 2;
             bannerIcon = '🔀';
             bannerText = 'Group stage done — set up knockout!';
             bannerSubtext = 'Click "Arrange KO" to seed top players into the knockout bracket.';
@@ -1644,15 +1661,15 @@ const DrawPage = () => {
                 setShowArrangeMatchupsModal(true);
               }
             };
-          } else if (hasKOMatches && !allMatchesDone) {
+          } else if (hasKOPlayersAssigned && !allMatchesDone) {
             const done = knockoutMatches.filter(m => m.status === 'COMPLETED').length;
-            currentStep = 2;
+            currentStep = 3;
             bannerIcon = '⚡';
             bannerText = `Knockout: ${done} / ${knockoutMatches.length} matches done`;
             bannerSubtext = 'Finals in progress! Check Live Matches for updates.';
             bannerColor = 'blue';
           } else if (allMatchesDone) {
-            currentStep = 3;
+            currentStep = 4;
             bannerIcon = '🏆';
             bannerText = 'All matches done — end the category!';
             bannerSubtext = 'Click "End Category" to finalize results and award ranking points.';

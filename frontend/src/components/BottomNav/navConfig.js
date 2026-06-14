@@ -10,6 +10,7 @@ export const NAV_ITEMS = [
     icon: Trophy,
     path: '/tournaments',
     matchPaths: ['/tournaments', '/leaderboard'],
+    requiresAuth: false,
   },
   {
     id: 'dashboard',
@@ -17,6 +18,7 @@ export const NAV_ITEMS = [
     icon: LayoutDashboard,
     path: '/dashboard',
     matchPaths: ['/dashboard', '/organizer'],
+    requiresAuth: true,
   },
   {
     id: 'academies',
@@ -24,6 +26,7 @@ export const NAV_ITEMS = [
     icon: GraduationCap,
     path: '/academies',
     matchPaths: ['/academies'],
+    requiresAuth: false,
   },
   {
     id: 'profile',
@@ -31,33 +34,28 @@ export const NAV_ITEMS = [
     icon: User,
     path: '/profile',
     matchPaths: ['/profile', '/registrations', '/my-points', '/notifications', '/my-bookings'],
+    requiresAuth: true,
   },
 ];
 
-// ── Paths where the bottom nav is hidden ──────────────────────────────────────
-// Full-screen experiences, auth screens, admin panel.
-// Prefix match: any pathname that starts with one of these is hidden.
-const HIDDEN_PREFIXES = [
-  '/login',
-  '/register',
-  '/forgot-password',
-  '/reset-password',
-  '/terms',
-  '/privacy',
-  '/admin-dashboard',
-  '/admin/',
-  '/scoring/',
-  '/umpire/scoring/',
-  '/watch/',
-  '/quick-match',
-  '/partner/confirm/',
-];
+// ── Allowlist: nav shows ONLY on these exact main pages ───────────────────────
+// Anything not in this set (detail pages, draws, scoring, auth, admin) gets no nav.
+const NAV_PAGES = new Set([
+  '/',
+  '/tournaments',
+  '/leaderboard',
+  '/dashboard',
+  '/academies',
+  '/profile',
+  '/registrations',
+  '/my-points',
+  '/notifications',
+  '/my-bookings',
+]);
 
-// Also hides when pathname ends with /score (active umpire/organiser scoring screen)
 export function isBottomNavVisible(pathname, user) {
-  if (!user || user.isAdmin) return false;
-  if (pathname.endsWith('/score')) return false;
-  return !HIDDEN_PREFIXES.some((p) => pathname === p || pathname.startsWith(p));
+  if (user?.isAdmin) return false;
+  return NAV_PAGES.has(pathname);
 }
 
 // Height of the nav bar in px (without safe-area). Import this wherever

@@ -179,7 +179,7 @@ const Navbar = () => {
         borderColor: 'rgba(255,255,255,0.08)',
         boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
       }}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+      <div style={{ maxWidth: '480px', margin: '0 auto', padding: '0 16px' }}>
         <div className="flex items-center justify-between h-16">
 
           {/* Logo + desktop nav */}

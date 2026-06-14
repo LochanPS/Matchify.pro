@@ -1,4 +1,4 @@
-import { useTransition } from 'react';
+import { useTransition, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { NAV_ITEMS, isBottomNavVisible, BOTTOM_NAV_HEIGHT } from './navConfig';
@@ -7,34 +7,94 @@ export default function BottomNav() {
   const { user } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false);
 
-  // startTransition tells React: "keep the current page visible while the
-  // next page's JS chunk loads — don't show the Suspense fallback."
-  // This is what makes tab switching feel instant instead of flashing a
-  // full-page loader on every first visit.
   const [, startTransition] = useTransition();
 
   if (!isBottomNavVisible(location.pathname, user)) return null;
 
-  const handleNav = (path) => {
+  const handleNav = (item) => {
+    // Auth-required tab tapped by guest → show prompt
+    if (!user && item.requiresAuth) {
+      setShowAuthPrompt(true);
+      return;
+    }
     // Already on this tab — no-op
-    if (location.pathname === path || location.pathname.startsWith(path + '?')) return;
+    if (location.pathname === item.path || location.pathname.startsWith(item.path + '?')) return;
     startTransition(() => {
-      navigate(path);
+      navigate(item.path);
     });
   };
 
   return (
+    <>
+    {/* Auth prompt modal for guest users */}
+    {showAuthPrompt && (
+      <div
+        onClick={() => setShowAuthPrompt(false)}
+        style={{
+          position: 'fixed', inset: 0, zIndex: 9999,
+          background: 'rgba(0,0,0,0.65)',
+          display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+          paddingBottom: `calc(${BOTTOM_NAV_HEIGHT}px + env(safe-area-inset-bottom, 0px) + 12px)`,
+        }}
+      >
+        <div
+          onClick={e => e.stopPropagation()}
+          style={{
+            width: '100%', maxWidth: '480px',
+            background: '#0d1117',
+            border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: '20px 20px 0 0',
+            padding: '28px 24px 24px',
+            boxShadow: '0 -8px 40px rgba(0,0,0,0.7)',
+          }}
+        >
+          <div style={{ width: 36, height: 4, borderRadius: 999, background: 'rgba(255,255,255,0.2)', margin: '0 auto 20px' }} />
+          <p style={{ textAlign: 'center', color: '#fff', fontWeight: 700, fontSize: 18, margin: '0 0 6px' }}>
+            Sign in to continue
+          </p>
+          <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.5)', fontSize: 13, margin: '0 0 24px' }}>
+            Create an account or log in to access this feature
+          </p>
+          <button
+            onClick={() => { setShowAuthPrompt(false); navigate('/login'); }}
+            style={{
+              width: '100%', padding: '14px', borderRadius: 12, border: 'none',
+              background: 'linear-gradient(135deg, #D97706, #F59E0B)',
+              color: '#000', fontWeight: 700, fontSize: 15, cursor: 'pointer',
+              marginBottom: 10,
+            }}
+          >
+            Log In
+          </button>
+          <button
+            onClick={() => { setShowAuthPrompt(false); navigate('/register'); }}
+            style={{
+              width: '100%', padding: '14px', borderRadius: 12,
+              border: '1px solid rgba(245,158,11,0.4)',
+              background: 'transparent',
+              color: '#F59E0B', fontWeight: 600, fontSize: 15, cursor: 'pointer',
+            }}
+          >
+            Sign Up
+          </button>
+        </div>
+      </div>
+    )}
+
     <nav
       aria-label="Main navigation"
       style={{
         position: 'fixed',
         bottom: 0,
         left: '50%',
-        transform: 'translateX(-50%)',
         width: '100%',
         maxWidth: '480px',
-        zIndex: 200,
+        zIndex: 1000,
+        WebkitTransform: 'translateX(-50%) translateZ(0)',
+        transform: 'translateX(-50%) translateZ(0)',
+        willChange: 'transform',
         background: 'rgba(4, 8, 16, 0.97)',
         backdropFilter: 'blur(24px)',
         WebkitBackdropFilter: 'blur(24px)',
@@ -53,7 +113,7 @@ export default function BottomNav() {
           return (
             <button
               key={item.id}
-              onClick={() => handleNav(item.path)}
+              onClick={() => handleNav(item)}
               aria-label={item.label}
               aria-current={isActive ? 'page' : undefined}
               style={{
@@ -119,13 +179,10 @@ export default function BottomNav() {
               {/* Label */}
               <span
                 style={{
-                  fontSize: '10px',
+                  fontSize: '9px',
                   fontWeight: isActive ? 700 : 500,
-                  letterSpacing: '0.015em',
+                  letterSpacing: '0.01em',
                   lineHeight: 1,
-                  maxWidth: '60px',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
                   whiteSpace: 'nowrap',
                   fontFamily: 'inherit',
                 }}
@@ -137,5 +194,6 @@ export default function BottomNav() {
         })}
       </div>
     </nav>
+    </>
   );
 }

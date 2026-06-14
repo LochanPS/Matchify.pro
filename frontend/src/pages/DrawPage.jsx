@@ -1144,128 +1144,134 @@ const DrawPage = () => {
               </div>
             </div>
 
-            {isOrganizer && (() => {
-              const fmt = bracket?.format;
-              const playersAssigned = !!bracket && matches.some(m => m.player1Id || m.player2Id);
-              const rrComplete = isRoundRobinComplete();
-              const koPlayersAssigned = matches.filter(m => m.stage === 'KNOCKOUT').some(m => m.player1Id || m.player2Id);
+            {isOrganizer && (
+              <div className="grid grid-cols-2 gap-2 w-full md:max-w-xs">
+                {bracket && (
+                  <>
+                    {/* ── AMBER PRIMARY: Assign Players — always show when bracket exists ── */}
+                    <button
+                      onClick={openAssignModal}
+                      title="Assign players to draw"
+                      className="px-4 py-3 rounded-xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 font-bold text-sm"
+                      style={{ background: 'linear-gradient(135deg,#F59E0B,#FCD34D)', color: '#07071a', boxShadow: '0 4px 15px rgba(245,158,11,0.25)' }}
+                    >
+                      <UserPlus className="w-4 h-4" />
+                      Assign Players
+                    </button>
 
-              const steps = fmt === 'ROUND_ROBIN_KNOCKOUT'
-                ? [
-                    { label: 'Create Draw',    done: !!bracket,            onClick: !bracket && !isCategoryCompleted ? () => setShowConfigModal(true) : null },
-                    { label: 'Assign Players', done: playersAssigned,      onClick: bracket ? openAssignModal : null },
-                    { label: 'Group Stage',    done: rrComplete,           onClick: null },
-                    { label: 'Arrange KO',     done: koPlayersAssigned,    onClick: bracket && rrComplete && !isCategoryCompleted ? async () => { clearDrawCache(tournamentId, activeCategory?.id); await fetchDrawPageFull(activeCategory?.id); setShowArrangeMatchupsModal(true); } : null },
-                    { label: 'Assign Matches', done: isCategoryCompleted,  onClick: tournamentUmpires.length > 0 ? () => setShowUmpireQueueModal(true) : null },
-                    { label: 'End Category',   done: isCategoryCompleted,  onClick: bracket && !isCategoryCompleted ? () => setShowEndTournamentModal(true) : null },
-                  ]
-                : [
-                    { label: 'Create Draw',    done: !!bracket,            onClick: !bracket && !isCategoryCompleted ? () => setShowConfigModal(true) : null },
-                    { label: 'Assign Players', done: playersAssigned,      onClick: bracket ? openAssignModal : null },
-                    { label: 'Assign Matches', done: isCategoryCompleted,  onClick: tournamentUmpires.length > 0 ? () => setShowUmpireQueueModal(true) : null },
-                    { label: 'End Category',   done: isCategoryCompleted,  onClick: bracket && !isCategoryCompleted ? () => setShowEndTournamentModal(true) : null },
-                  ];
-
-              const currentIdx = steps.findIndex(s => !s.done);
-
-              return (
-                <div style={{ width: '100%', marginTop: 12 }}>
-                  {/* Sequential step strip */}
-                  <div style={{
-                    display: 'flex', alignItems: 'center', overflowX: 'auto',
-                    paddingBottom: 4, msOverflowStyle: 'none', scrollbarWidth: 'none',
-                  }}>
-                    {steps.map((step, i) => {
-                      const isDone = step.done;
-                      const isCurrent = !isDone && i === currentIdx;
-                      return (
-                        <React.Fragment key={step.label}>
-                          {i > 0 && (
-                            <span aria-hidden style={{ color: 'rgba(255,255,255,0.18)', fontSize: 11, flexShrink: 0, padding: '0 2px' }}>→</span>
-                          )}
-                          <button
-                            onClick={step.onClick || undefined}
-                            style={{
-                              flexShrink: 0,
-                              padding: '5px 9px',
-                              borderRadius: 999,
-                              border: isDone ? 'none' : isCurrent ? 'none' : '1px solid rgba(255,255,255,0.10)',
-                              background: isDone ? 'rgba(255,255,255,0.05)' : isCurrent ? 'linear-gradient(135deg,#F59E0B,#FCD34D)' : 'transparent',
-                              color: isDone ? 'rgba(255,255,255,0.28)' : isCurrent ? '#07071a' : 'rgba(255,255,255,0.28)',
-                              fontSize: 10,
-                              fontWeight: isCurrent ? 700 : 600,
-                              cursor: step.onClick ? 'pointer' : 'default',
-                              display: 'flex', alignItems: 'center', gap: 3,
-                              whiteSpace: 'nowrap',
-                              userSelect: 'none',
-                              WebkitTapHighlightColor: 'transparent',
-                              transition: 'all 0.15s',
-                            }}
-                          >
-                            {isDone && <span style={{ fontSize: 9 }}>✓</span>}
-                            {step.label}
-                          </button>
-                        </React.Fragment>
-                      );
-                    })}
-                  </div>
-
-                  {/* Utility buttons: Umpires, Delete, Restart */}
-                  <div style={{ display: 'flex', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
-                    {bracket && (
+                    {/* ── AMBER PRIMARY: Edit Groups — only before any match is played ── */}
+                    {(bracket?.format === 'ROUND_ROBIN' || bracket?.format === 'ROUND_ROBIN_KNOCKOUT') && !hasPlayedMatches && (
                       <button
-                        onClick={() => setShowManageUmpiresModal(true)}
-                        style={{
-                          padding: '5px 11px', borderRadius: 999,
-                          border: '1.5px solid rgba(168,85,247,0.35)',
-                          background: 'rgba(168,85,247,0.10)',
-                          color: '#c084fc', fontSize: 10, fontWeight: 600,
-                          cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4,
-                          whiteSpace: 'nowrap', WebkitTapHighlightColor: 'transparent',
-                        }}
+                        onClick={() => setShowConfigModal(true)}
+                        title="Edit group sizes and configuration"
+                        className="px-4 py-3 rounded-xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 font-bold text-sm"
+                        style={{ background: 'linear-gradient(135deg,#F59E0B,#FCD34D)', color: '#07071a', boxShadow: '0 4px 15px rgba(245,158,11,0.25)' }}
                       >
-                        <Users style={{ width: 11, height: 11 }} />
-                        {tournamentUmpires.length > 0 ? `Umpires (${tournamentUmpires.length})` : 'Add Umpires'}
+                        <Layers className="w-4 h-4" />
+                        Edit Groups
                       </button>
                     )}
-                    {bracket && !hasPlayedMatches && (
+
+                    {/* ── AMBER PRIMARY: Arrange KO — only after group stage fully complete ── */}
+                    {bracket?.format === 'ROUND_ROBIN_KNOCKOUT' && isRoundRobinComplete() && !isCategoryCompleted && (
                       <button
-                        onClick={() => setShowDeleteModal(true)}
-                        style={{
-                          padding: '5px 11px', borderRadius: 999,
-                          border: '1.5px solid rgba(239,68,68,0.30)',
-                          background: 'rgba(239,68,68,0.08)',
-                          color: '#f87171', fontSize: 10, fontWeight: 600,
-                          cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4,
-                          whiteSpace: 'nowrap', WebkitTapHighlightColor: 'transparent',
+                        onClick={async () => {
+                          clearDrawCache(tournamentId, activeCategory?.id);
+                          await fetchDrawPageFull(activeCategory?.id);
+                          setShowArrangeMatchupsModal(true);
                         }}
+                        title="Arrange knockout stage matchups"
+                        className="px-4 py-3 rounded-xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 font-bold text-sm"
+                        style={{ background: 'linear-gradient(135deg,#F59E0B,#FCD34D)', color: '#07071a', boxShadow: '0 4px 15px rgba(245,158,11,0.25)' }}
                       >
-                        <Trash2 style={{ width: 11, height: 11 }} />
-                        Delete Draw
+                        <Settings className="w-4 h-4" />
+                        Arrange KO
                       </button>
                     )}
-                    {bracket && hasPlayedMatches && (
+
+                    {/* ── AMBER PRIMARY: End Category — hide once already completed ── */}
+                    {!isCategoryCompleted && (
+                      <button
+                        onClick={() => setShowEndTournamentModal(true)}
+                        title="Mark this category as complete"
+                        className="px-4 py-3 rounded-xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 font-bold text-sm"
+                        style={{ background: 'linear-gradient(135deg,#F59E0B,#FCD34D)', color: '#07071a', boxShadow: '0 4px 15px rgba(245,158,11,0.25)' }}
+                      >
+                        <Trophy className="w-4 h-4" />
+                        End Category
+                      </button>
+                    )}
+
+                    {/* ── PURPLE ACCENT: Manage Umpires — always visible ── */}
+                    <button
+                      onClick={() => setShowManageUmpiresModal(true)}
+                      title="Add or remove umpires for this tournament"
+                      className="px-4 py-3 rounded-xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 font-bold text-sm"
+                      style={{ background: 'linear-gradient(135deg,rgba(168,85,247,0.18),rgba(139,92,246,0.12))', border: '1.5px solid rgba(168,85,247,0.35)', color: '#c084fc', boxShadow: '0 4px 12px rgba(168,85,247,0.15)' }}
+                    >
+                      <Users className="w-4 h-4" />
+                      {tournamentUmpires.length > 0 ? `Umpires (${tournamentUmpires.length})` : 'Add Umpires'}
+                    </button>
+
+                    {/* ── PURPLE ACCENT: Umpire Queues — when umpires exist ── */}
+                    {tournamentUmpires.length > 0 && (
+                      <button
+                        onClick={() => setShowUmpireQueueModal(true)}
+                        title="Bulk assign matches to umpires in sequential order"
+                        className="px-4 py-3 rounded-xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 font-bold text-sm"
+                        style={{ background: 'linear-gradient(135deg,rgba(168,85,247,0.18),rgba(139,92,246,0.12))', border: '1.5px solid rgba(168,85,247,0.35)', color: '#c084fc', boxShadow: '0 4px 12px rgba(168,85,247,0.15)' }}
+                      >
+                        <ListOrdered className="w-4 h-4" />
+                        Umpire Queues
+                      </button>
+                    )}
+
+                    {/* ── NEUTRAL: Restart — only when matches have been played ── */}
+                    {hasPlayedMatches && (
                       <button
                         onClick={() => setShowRestartModal(true)}
-                        style={{
-                          padding: '5px 11px', borderRadius: 999,
-                          border: '1.5px solid rgba(255,255,255,0.10)',
-                          background: 'rgba(255,255,255,0.04)',
-                          color: 'rgba(255,255,255,0.45)', fontSize: 10, fontWeight: 600,
-                          cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4,
-                          whiteSpace: 'nowrap', WebkitTapHighlightColor: 'transparent',
-                        }}
+                        title={
+                          bracket?.format === 'ROUND_ROBIN_KNOCKOUT' && activeStage === 'knockout'
+                            ? 'Restart knockout stage only (group results preserved)'
+                            : bracket?.format === 'ROUND_ROBIN_KNOCKOUT' && activeStage === 'roundrobin'
+                              ? 'Restart entire draw (groups + knockout)'
+                              : 'Restart all matches'
+                        }
+                        className="px-4 py-3 rounded-xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 font-bold text-sm"
+                        style={{ background: 'rgba(255,255,255,0.06)', border: '1.5px solid rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.6)' }}
                       >
-                        <Zap style={{ width: 11, height: 11 }} />
-                        {fmt === 'ROUND_ROBIN_KNOCKOUT'
-                          ? (activeStage === 'knockout' ? 'Restart KO' : 'Restart All')
+                        <Zap className="w-4 h-4" />
+                        {bracket?.format === 'ROUND_ROBIN_KNOCKOUT'
+                          ? activeStage === 'knockout' ? 'Restart KO' : 'Restart All'
                           : 'Restart'}
                       </button>
                     )}
-                  </div>
-                </div>
-              );
-            })()}
+
+                    {/* ── RED: Delete — only before any match is played ── */}
+                    {!hasPlayedMatches && (
+                      <button
+                        onClick={() => setShowDeleteModal(true)}
+                        title="Delete Draw"
+                        className="px-4 py-3 rounded-xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 font-bold text-sm"
+                        style={{ background: 'linear-gradient(135deg,rgba(239,68,68,0.18),rgba(220,38,38,0.12))', border: '1.5px solid rgba(239,68,68,0.35)', color: '#f87171', boxShadow: '0 4px 12px rgba(239,68,68,0.12)' }}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        Delete Draw
+                      </button>
+                    )}
+                  </>
+                )}
+                {!bracket && !isCategoryCompleted && (
+                  <button
+                    onClick={() => setShowConfigModal(true)}
+                    className="col-span-2 px-4 py-3 btn-brand rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 font-bold text-sm"
+                  >
+                    <Plus className="w-5 h-5" />
+                    Create Draw
+                  </button>
+                )}
+              </div>
+            )}
           </div>
           
           {/* Banner: Tournament Completed — only when organizer explicitly ended tournament */}

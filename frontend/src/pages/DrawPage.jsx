@@ -1879,25 +1879,25 @@ const DrawPage = () => {
         const stepInfo = {
           create: {
             title: 'Step 1 — Create Draw',
-            desc: 'Generate the bracket for this category. Select the format (Knockout, Round Robin, or Round Robin + Knockout), set the number of groups and group sizes, then create the draw. The bracket structure is fixed once players are assigned.',
+            desc: 'Choose the format, configure group sizes, and generate the bracket. Required before any other step.',
             btnLabel: 'Create Draw',
             action: () => { setActiveStepPopup(null); setShowConfigModal(true); },
           },
           assign: {
             title: 'Step 2 — Assign Players',
-            desc: 'Place all registered players into the bracket slots or group positions. Only players who have registered and paid for this category will appear. Players can be re-assigned any time before their first match begins.',
+            desc: 'Place registered players into bracket or group slots. Can be re-done before any match starts.',
             btnLabel: 'Assign Players',
             action: () => { setActiveStepPopup(null); openAssignModal(); },
           },
           groupstage: {
             title: 'Step 3 — Group Stage',
-            desc: 'Umpires score all group matches on court. Each player plays against every other player in their group. Rankings are determined by wins, losses, and points. All group matches must be completed before you can proceed to the Knockout stage.',
+            desc: 'Umpires score all group matches on court. Complete every group match before moving to Arrange KO.',
             btnLabel: null,
             action: null,
           },
           arrangeko: {
             title: 'Step 4 — Arrange KO Stage',
-            desc: 'Once all group stage matches are finished, seed the top-ranked players from each group into the knockout bracket. You choose how many players advance from each group. The bracket is set up and matches are generated automatically.',
+            desc: 'Seed top players from each group into the knockout bracket. All group matches must be finished first.',
             btnLabel: 'Arrange KO',
             action: async () => {
               setActiveStepPopup(null);
@@ -1908,7 +1908,7 @@ const DrawPage = () => {
           },
           assignmatches: {
             title: fmt === 'ROUND_ROBIN_KNOCKOUT' ? 'Step 5 — Assign Matches' : 'Step 3 — Assign Matches',
-            desc: 'Distribute matches to umpires so each umpire knows exactly which matches they are responsible for scoring. Add umpires to the tournament first using the ⚙ settings button, then use this to assign specific matches to each umpire.',
+            desc: 'Assign matches to umpires for scoring. Add umpires via ⚙ settings first, then distribute matches here.',
             btnLabel: tournamentUmpires.length > 0 ? 'Assign Matches' : 'Add Umpires First',
             action: () => {
               setActiveStepPopup(null);
@@ -1918,7 +1918,7 @@ const DrawPage = () => {
           },
           endcategory: {
             title: fmt === 'ROUND_ROBIN_KNOCKOUT' ? 'Step 6 — End Category' : 'Step 4 — End Category',
-            desc: 'Mark this category as complete once every match has been scored. This finalizes all results, calculates and awards ranking points to all players, and permanently locks the draw. This action cannot be reversed.',
+            desc: 'Finalize results, award ranking points, and lock the draw. This cannot be undone.',
             btnLabel: 'End Category',
             action: () => { setActiveStepPopup(null); setShowEndTournamentModal(true); },
           },

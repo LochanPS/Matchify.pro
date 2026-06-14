@@ -222,8 +222,9 @@ const NotificationDetailPage = () => {
   const navigate = useNavigate();
   const { notifications, markAsRead } = useNotifications();
   const [notification, setNotification] = useState(null);
-  // Live match statuses for queue notifications (umpire side)
-  const [liveStatuses, setLiveStatuses] = useState({});
+  // Resolved match list for queue notifications (may come from embedded data or API fetch)
+  const [queueMatches, setQueueMatches] = useState(null); // null = not yet resolved
+  const [loadingQueue, setLoadingQueue] = useState(false);
 
   useEffect(() => {
     const found = notifications.find(n => n.id === id);
@@ -233,21 +234,46 @@ const NotificationDetailPage = () => {
     }
   }, [id, notifications]);
 
-  // Fetch live match statuses when a queue notification is opened
+  // When a queue notification loads, resolve its match list with live statuses
   useEffect(() => {
     if (!notification) return;
     const d = notification.data ? JSON.parse(notification.data) : {};
-    if (notification.type === 'MATCH_ASSIGNED' && d.isQueue && Array.isArray(d.matches) && d.matches.length > 0) {
-      api.get('/matches/umpire-matches')
-        .then(res => {
-          if (res.data?.matches) {
-            const map = {};
-            for (const m of res.data.matches) map[m.id] = m.status;
-            setLiveStatuses(map);
-          }
-        })
-        .catch(() => {});
-    }
+    if (notification.type !== 'MATCH_ASSIGNED' || !d.isQueue) return;
+
+    setLoadingQueue(true);
+    api.get('/matches/umpire-matches')
+      .then(res => {
+        const apiMatches = res.data?.matches || [];
+
+        // If backend embedded match summaries, merge with live statuses from API
+        if (Array.isArray(d.matches) && d.matches.length > 0) {
+          const statusMap = {};
+          for (const m of apiMatches) statusMap[m.id] = m.status;
+          setQueueMatches(d.matches.map(m => ({ ...m, status: statusMap[m.id] || m.status })));
+        } else {
+          // Old notification — no embedded matches. Filter API matches by tournamentId + queueOrder.
+          const filtered = apiMatches
+            .filter(m => m.tournamentId === d.tournamentId && m.queueOrder != null)
+            .sort((a, b) => (a.queueOrder || 0) - (b.queueOrder || 0))
+            .map(m => ({
+              id: m.id,
+              queueOrder: m.queueOrder,
+              round: m.round,
+              matchNumber: m.matchNumber,
+              status: m.status,
+              categoryName: m.category?.name || '',
+              player1Name: m.player1?.name || 'TBD',
+              player2Name: m.player2?.name || 'TBD',
+            }));
+          setQueueMatches(filtered.length > 0 ? filtered : []);
+        }
+      })
+      .catch(() => {
+        // If API fails, fall back to embedded matches if available
+        const d2 = notification.data ? JSON.parse(notification.data) : {};
+        setQueueMatches(Array.isArray(d2.matches) ? d2.matches : []);
+      })
+      .finally(() => setLoadingQueue(false));
   }, [notification]);
 
   const getNotificationIcon = (type) => {
@@ -351,6 +377,7 @@ const NotificationDetailPage = () => {
 
   const isQueueNotif = notification.type === 'MATCH_ASSIGNED' && data.isQueue === true;
   const isOrgConfirm = notification.type === 'MATCH_ASSIGNED' && data.isOrganizerConfirmation === true;
+  const resolvedMatches = queueMatches || [];
 
   return (
     <div className="min-h-screen relative" style={{ background: BG }}>
@@ -417,9 +444,20 @@ const NotificationDetailPage = () => {
         {/* ══════════════════════════════════════════════════
             QUEUE NOTIFICATION — umpire sees all match cards
             ══════════════════════════════════════════════════ */}
-        {isQueueNotif && Array.isArray(data.matches) && data.matches.length > 0 && (() => {
-          const completedCount = data.matches.filter(m => (liveStatuses[m.id] || m.status) === 'COMPLETED').length;
-          const remaining = data.matches.length - completedCount;
+        {isQueueNotif && (() => {
+          if (loadingQueue) {
+            return (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '24px 0' }}>
+                <Spinner size="sm" />
+                <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)' }}>Loading your matches…</span>
+              </div>
+            );
+          }
+
+          const matches = resolvedMatches;
+          const total = matches.length;
+          const completedCount = matches.filter(m => m.status === 'COMPLETED').length;
+          const remaining = total - completedCount;
 
           return (
             <>
@@ -435,7 +473,8 @@ const NotificationDetailPage = () => {
                       {data.tournamentName}
                     </span>
                   )}
-                  You have been assigned <strong style={{ color: '#fff' }}>{data.matches.length} match{data.matches.length !== 1 ? 'es' : ''}</strong>.
+                  You have been assigned{' '}
+                  <strong style={{ color: '#fff' }}>{data.matchCount || total} match{(data.matchCount || total) !== 1 ? 'es' : ''}</strong>.
                   {completedCount > 0
                     ? ` ${completedCount} completed, ${remaining} remaining.`
                     : ' Tap Configure & Start on each match below to begin scoring.'}
@@ -443,31 +482,34 @@ const NotificationDetailPage = () => {
               </div>
 
               {/* Progress dots */}
-              {data.matches.length > 1 && (
+              {total > 1 && (
                 <div style={{ display: 'flex', gap: 5, justifyContent: 'center', flexWrap: 'wrap' }}>
-                  {data.matches.map((m, i) => {
-                    const s = liveStatuses[m.id] || m.status;
-                    const done = s === 'COMPLETED';
-                    const live = s === 'IN_PROGRESS' || s === 'LIVE';
+                  {matches.map((m, i) => {
+                    const done = m.status === 'COMPLETED';
+                    const live = m.status === 'IN_PROGRESS' || m.status === 'LIVE';
                     return (
                       <div key={m.id} style={{
                         width: 8, height: 8, borderRadius: '50%',
                         background: done ? '#4ade80' : live ? '#F59E0B' : 'rgba(255,255,255,0.18)',
-                        transition: 'background 0.3s',
-                      }} title={`Match ${i + 1}`} />
+                      }} />
                     );
                   })}
                 </div>
               )}
 
               {/* Match cards */}
-              {data.matches.map((match, i) => (
+              {total === 0 && (
+                <p style={{ textAlign: 'center', fontSize: 13, color: 'rgba(255,255,255,0.35)', padding: '16px 0' }}>
+                  No matches found for this queue.
+                </p>
+              )}
+              {matches.map((match, i) => (
                 <MatchCard
                   key={match.id}
                   match={match}
                   index={i}
-                  total={data.matches.length}
-                  liveStatus={liveStatuses[match.id]}
+                  total={total}
+                  liveStatus={null}
                   onStart={(matchId) => navigate(`/match/${matchId}/score`)}
                 />
               ))}

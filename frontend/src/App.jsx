@@ -193,6 +193,22 @@ function AppContent() {
     const t = setInterval(() => { if (alive) ping(); }, 7 * 60 * 1000);
     return () => { alive = false; clearInterval(t); };
   }, []);
+
+  // ── Prefetch bottom-nav tab chunks ───────────────────────────────────────
+  // The 4 main tabs are lazy-loaded. Without prefetching, the first tap on
+  // each tab fetches its JS chunk → full-page loading flash. Prefetching
+  // 1.5s after mount means chunks are already in cache by the time the user
+  // taps, so navigation feels instant. Errors are silently swallowed — this
+  // is a progressive enhancement, not critical path.
+  useEffect(() => {
+    const t = setTimeout(() => {
+      import('./pages/TournamentDiscoveryPage').catch(() => {});
+      import('./pages/UnifiedDashboardMobile').catch(() => {});
+      import('./pages/SearchAcademiesPage').catch(() => {});
+      import('./pages/ProfilePage').catch(() => {});
+    }, 1500);
+    return () => clearTimeout(t);
+  }, []);
   
   // Check if impersonating
   const isImpersonating = () => {

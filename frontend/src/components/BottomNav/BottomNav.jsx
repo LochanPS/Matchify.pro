@@ -1,12 +1,28 @@
-import { Link, useLocation } from 'react-router-dom';
+import { useTransition } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { NAV_ITEMS, isBottomNavVisible, BOTTOM_NAV_HEIGHT } from './navConfig';
 
 export default function BottomNav() {
   const { user } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
+
+  // startTransition tells React: "keep the current page visible while the
+  // next page's JS chunk loads — don't show the Suspense fallback."
+  // This is what makes tab switching feel instant instead of flashing a
+  // full-page loader on every first visit.
+  const [, startTransition] = useTransition();
 
   if (!isBottomNavVisible(location.pathname, user)) return null;
+
+  const handleNav = (path) => {
+    // Already on this tab — no-op
+    if (location.pathname === path || location.pathname.startsWith(path + '?')) return;
+    startTransition(() => {
+      navigate(path);
+    });
+  };
 
   return (
     <nav
@@ -19,23 +35,15 @@ export default function BottomNav() {
         width: '100%',
         maxWidth: '480px',
         zIndex: 200,
-        // Frosted dark glass
         background: 'rgba(4, 8, 16, 0.97)',
         backdropFilter: 'blur(24px)',
         WebkitBackdropFilter: 'blur(24px)',
-        // Separation from content
         borderTop: '1px solid rgba(255,255,255,0.07)',
         boxShadow: '0 -8px 40px rgba(0,0,0,0.65), 0 -1px 0 rgba(245,158,11,0.06)',
-        // Respect device safe area (gesture bar on Android/iOS)
         paddingBottom: 'env(safe-area-inset-bottom, 0px)',
       }}
     >
-      <div
-        style={{
-          display: 'flex',
-          height: `${BOTTOM_NAV_HEIGHT}px`,
-        }}
-      >
+      <div style={{ display: 'flex', height: `${BOTTOM_NAV_HEIGHT}px` }}>
         {NAV_ITEMS.map((item) => {
           const isActive = item.matchPaths.some(
             (p) => location.pathname === p || location.pathname.startsWith(p)
@@ -43,9 +51,9 @@ export default function BottomNav() {
           const Icon = item.icon;
 
           return (
-            <Link
+            <button
               key={item.id}
-              to={item.path}
+              onClick={() => handleNav(item.path)}
               aria-label={item.label}
               aria-current={isActive ? 'page' : undefined}
               style={{
@@ -55,18 +63,19 @@ export default function BottomNav() {
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '3px',
-                textDecoration: 'none',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
                 color: isActive ? '#F59E0B' : 'rgba(255,255,255,0.38)',
                 position: 'relative',
                 padding: '6px 4px 4px',
                 transition: 'color 0.16s ease',
-                // Disable the blue flash on mobile tap
                 WebkitTapHighlightColor: 'transparent',
                 outline: 'none',
                 userSelect: 'none',
               }}
             >
-              {/* ── Active indicator line at top ── */}
+              {/* Active indicator line */}
               <span
                 aria-hidden="true"
                 style={{
@@ -83,7 +92,7 @@ export default function BottomNav() {
                 }}
               />
 
-              {/* ── Icon with active pill ── */}
+              {/* Icon pill */}
               <div
                 style={{
                   display: 'flex',
@@ -102,13 +111,12 @@ export default function BottomNav() {
                   strokeWidth={isActive ? 2.4 : 1.75}
                   style={{
                     transition: 'stroke-width 0.16s ease',
-                    // Subtle glow on active icon
                     filter: isActive ? 'drop-shadow(0 0 6px rgba(245,158,11,0.5))' : 'none',
                   }}
                 />
               </div>
 
-              {/* ── Label ── */}
+              {/* Label */}
               <span
                 style={{
                   fontSize: '10px',
@@ -124,7 +132,7 @@ export default function BottomNav() {
               >
                 {item.label}
               </span>
-            </Link>
+            </button>
           );
         })}
       </div>

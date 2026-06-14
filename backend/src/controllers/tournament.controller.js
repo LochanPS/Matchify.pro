@@ -873,12 +873,14 @@ const uploadPosters = async (req, res) => {
       orderBy: { displayOrder: 'asc' },
     });
 
+    await cacheDel(`tournament:${id}`);
+
     res.status(201).json({
       success: true,
       message: `${createdPosters.length} poster(s) uploaded successfully`,
       posters: createdPosters,
     });
-   
+
   } catch (error) {
     console.error('Upload posters error:', error);
     res.status(500).json({ success: false, error: 'Failed to upload posters' });
@@ -904,6 +906,8 @@ const deletePoster = async (req, res) => {
     }
 
     await prisma.tournamentPoster.delete({ where: { id: posterId } });
+
+    await cacheDel(`tournament:${id}`);
 
     res.json({ success: true, message: 'Poster deleted successfully' });
   } catch (error) {
@@ -1340,6 +1344,8 @@ const uploadPaymentQR = async (req, res) => {
         accountHolderName: accountHolderName || null,
       },
     });
+
+    await cacheDel(`tournament:${id}`);
 
     res.status(201).json({
       success: true,

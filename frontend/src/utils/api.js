@@ -242,5 +242,10 @@ api.put    = (...args) => { _clearGetCache(); return _origPut(...args); };
 api.delete = (...args) => { _clearGetCache(); return _origDelete(...args); };
 if (_origPatch) api.patch = (...args) => { _clearGetCache(); return _origPatch(...args); };
 
+// Exported so fetchUpload callers (native fetch, not axios) can bust the GET
+// cache after a file-upload mutation — otherwise stale tournament data is
+// returned on the next getTournament() call.
+export const clearGetCache = _clearGetCache;
+
 export default api;
 

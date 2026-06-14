@@ -1,4 +1,4 @@
-import api from '../utils/api'; // 20s timeout + auth interceptor on every call
+import api, { clearGetCache } from '../utils/api'; // 20s timeout + auth interceptor on every call
 import { fetchUpload } from '../utils/fetchUpload';
 
 export const tournamentAPI = {
@@ -38,7 +38,9 @@ export const tournamentAPI = {
   uploadPosters: async (id, files) => {
     const formData = new FormData();
     files.forEach((file) => formData.append('posters', file));
-    return fetchUpload(`/tournaments/${id}/posters`, formData);
+    const result = await fetchUpload(`/tournaments/${id}/posters`, formData);
+    clearGetCache(); // fetchUpload bypasses axios, so we bust the GET cache manually
+    return result;
   },
 
   // Category endpoints
@@ -77,7 +79,9 @@ export const tournamentAPI = {
     formData.append('paymentQR', file);
     if (upiId) formData.append('upiId', upiId);
     if (accountHolderName) formData.append('accountHolderName', accountHolderName);
-    return fetchUpload(`/tournaments/${tournamentId}/payment-qr`, formData);
+    const result = await fetchUpload(`/tournaments/${tournamentId}/payment-qr`, formData);
+    clearGetCache(); // fetchUpload bypasses axios, so we bust the GET cache manually
+    return result;
   },
 
   // Delete a poster (organizer only)

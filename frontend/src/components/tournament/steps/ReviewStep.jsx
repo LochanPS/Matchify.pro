@@ -1,8 +1,28 @@
-﻿import { CheckCircleIcon, PencilIcon } from '@heroicons/react/24/outline';
+﻿import { useEffect, useState } from 'react';
+import { CheckCircleIcon, PencilIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { formatDateIndian } from '../../../utils/dateFormat';
 import { getGenderLabel } from '../../../utils/genderLabel';
+import api from '../../../utils/api';
 
 const ReviewStep = ({ formData, goToStep, onPrev, onSubmit, isSubmitting }) => {
+  const [staleDates, setStaleDates] = useState(false);
+
+  useEffect(() => {
+    // Pre-warm Railway server the moment user reaches Review step.
+    // User may have spent 5–10 min filling the form; server could have gone cold again.
+    // This fires immediately so it's warm by the time they click Submit.
+    api.get('/tournaments?limit=1&_noCache=true').catch(() => {});
+
+    // Check if registration open date has become stale (past) since the form was filled.
+    // Common when a draft is resumed days later.
+    if (formData.registrationOpenDate) {
+      const regOpen = new Date(formData.registrationOpenDate);
+      if (!isNaN(regOpen) && regOpen < new Date()) {
+        setStaleDates(true);
+      }
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const formatDate = (dateString) => {
     if (!dateString) return 'Not set';
     return formatDateIndian(dateString);
@@ -242,6 +262,17 @@ const ReviewStep = ({ formData, goToStep, onPrev, onSubmit, isSubmitting }) => {
           </p>
         )}
       </div>
+
+      {/* Stale date warning */}
+      {staleDates && (
+        <div className="rounded-xl p-3 flex items-start gap-2" style={{ background: 'rgba(239,68,68,0.1)', border: '1.5px solid rgba(239,68,68,0.4)' }}>
+          <ExclamationTriangleIcon className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
+          <div>
+            <p className="text-xs font-bold text-red-400">Registration open date is in the past</p>
+            <p className="text-xs text-red-300/80 mt-0.5">Go back to <button onClick={() => goToStep(2)} className="underline font-bold">Step 2 — Dates</button> and update before submitting.</p>
+          </div>
+        </div>
+      )}
 
       {/* Important Notice */}
       <div className="rounded-xl p-3" style={{ background: 'rgba(245,158,11,0.1)', border: '1.5px solid rgba(245,158,11,0.3)' }}>

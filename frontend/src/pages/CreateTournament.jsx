@@ -78,10 +78,26 @@ const CreateTournament = () => {
     nextStep();
   };
 
+  // Extract a human-readable message from any thrown error (axios or fetch-based).
+  const extractError = (err) => {
+    if (err?.response?.data) {
+      const d = err.response.data;
+      if (d.errors && Array.isArray(d.errors)) return d.errors.join('\n');
+      if (d.error) return d.error;
+      if (d.message) return d.message;
+    }
+    if (err?.isTimeout) return 'Server took too long to respond. Please try again in a moment.';
+    if (err?.message && !err.message.includes('Network Error')) return err.message;
+    return null;
+  };
+
   const handleSubmit = async () => {
     setIsSubmitting(true);
     setError(null);
 
+    // ── Step 1: Create tournament record ─────────────────────────────────────
+    // This is the only truly critical step. If it fails, nothing was saved.
+    let tournamentId = null;
     try {
       const tournamentData = {
         name: formData.name,
@@ -104,18 +120,35 @@ const CreateTournament = () => {
         startDate: formData.startDate ? new Date(formData.startDate).toISOString() : formData.startDate,
         endDate: formData.endDate ? new Date(formData.endDate).toISOString() : formData.endDate,
       };
-
-      // Interceptor in api.js handles cold-start retries automatically (3× with 3s gap)
+      // api.js interceptor auto-retries this 3× on cold-start 5xx / network errors
       const createResponse = await tournamentAPI.createTournament(tournamentData);
-      const tournamentId = createResponse.tournament.id;
+      tournamentId = createResponse.tournament.id;
+    } catch (err) {
+      console.error('Tournament creation failed:', err);
+      setError(extractError(err) || 'Failed to create tournament. Please try again.');
+      setIsSubmitting(false);
+      return;
+    }
 
+    // ── Step 2: Upload posters (non-critical) ────────────────────────────────
+    // Failure here does NOT block — tournament already exists; organizer can add
+    // posters later from the edit page.
+    try {
       if (formData.posters.length > 0) {
         const posterFiles = formData.posters.filter(p => p.file).map(p => p.file);
         if (posterFiles.length > 0) {
           await tournamentAPI.uploadPosters(tournamentId, posterFiles);
         }
       }
+    } catch (err) {
+      console.warn('Poster upload failed (non-critical, continuing):', err);
+    }
 
+    // ── Step 3: Create categories ────────────────────────────────────────────
+    // Critical — but if it fails the tournament still exists; we navigate and
+    // surface a warning so the organizer can add categories manually.
+    let categoryWarning = null;
+    try {
       if (formData.categories && formData.categories.length > 0) {
         for (const category of formData.categories) {
           await tournamentAPI.createCategory(tournamentId, {
@@ -133,7 +166,14 @@ const CreateTournament = () => {
           });
         }
       }
+    } catch (err) {
+      console.error('Category creation failed:', err);
+      categoryWarning = extractError(err) || 'Some categories could not be saved — please add them from the tournament settings.';
+    }
 
+    // ── Step 4: Upload payment QR / UPI info (non-critical) ──────────────────
+    // Tournament is created. QR can always be uploaded later from edit page.
+    try {
       if (formData.paymentQR?.file) {
         await tournamentAPI.uploadPaymentQR(
           tournamentId,
@@ -147,42 +187,20 @@ const CreateTournament = () => {
           accountHolderName: formData.accountHolderName,
         });
       }
-
-      clearDraft();
-
-      // Show success modal with publish option instead of navigating immediately
-      navigate(`/tournaments/${tournamentId}`, {
-        state: { 
-          showPublishPrompt: true,
-          message: 'Tournament created successfully!',
-        }
-      });
     } catch (err) {
-      console.error('Error creating tournament:', err);
-      console.error('Response data:', err?.response?.data);
-      console.error('Status:', err?.response?.status);
-      console.error('Is timeout:', err?.isTimeout);
-
-      let errorMessage;
-      if (err?.response?.data) {
-        const data = err.response.data;
-        if (data.errors && Array.isArray(data.errors)) {
-          errorMessage = data.errors.join('\n');
-        } else if (data.error) {
-          errorMessage = data.error;
-        } else if (data.message) {
-          errorMessage = data.message;
-        }
-      }
-      if (!errorMessage) {
-        errorMessage = err?.isTimeout
-          ? 'Server took too long to respond. Please try again in a moment.'
-          : 'Failed to create tournament. Please try again.';
-      }
-
-      setError(errorMessage);
-      setIsSubmitting(false);
+      console.warn('Payment QR/info upload failed (non-critical, continuing):', err);
     }
+
+    // ── Done — navigate to tournament ────────────────────────────────────────
+    clearDraft();
+    navigate(`/tournaments/${tournamentId}`, {
+      state: {
+        showPublishPrompt: !categoryWarning,
+        message: categoryWarning
+          ? `Tournament created! ⚠️ ${categoryWarning}`
+          : 'Tournament created successfully!',
+      }
+    });
   };
 
   const handleSaveAndExit = () => {

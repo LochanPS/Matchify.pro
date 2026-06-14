@@ -1,15 +1,24 @@
 import { Link, useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import MatchifyLogo from '../MatchifyLogo';
+import { getPaymentVerificationStats } from '../../api/payment';
 
 const Sidebar = ({ onClose, isMobile = false }) => {
   const location = useLocation();
+  const [pendingPayments, setPendingPayments] = useState(0);
+
+  useEffect(() => {
+    getPaymentVerificationStats()
+      .then(data => setPendingPayments(data?.pendingVerifications ?? data?.pending ?? 0))
+      .catch(() => {});
+  }, []);
 
   const menuItems = [
     { path: '/admin-dashboard', icon: '📊', label: 'Dashboard' },
     {
       section: 'PAYMENTS',
       items: [
-        { path: '/admin/payment-verifications', icon: '💳', label: 'Payment Verification' },
+        { path: '/admin/payment-verifications', icon: '💳', label: 'Payment Verification', badge: pendingPayments },
         { path: '/admin/refund-requests', icon: '💸', label: 'Refund Requests' },
         { path: '/admin/tournament-payments', icon: '🏆', label: 'Tournament Payments' },
         { path: '/admin/organizer-payouts', icon: '💰', label: 'Organizer Payouts' },
@@ -80,7 +89,25 @@ const Sidebar = ({ onClose, isMobile = false }) => {
                         }`}
                       >
                         <span className="text-base leading-none">{sub.icon}</span>
-                        <span className="font-medium">{sub.label}</span>
+                        <span className="font-medium flex-1">{sub.label}</span>
+                        {sub.badge > 0 && (
+                          <span style={{
+                            minWidth: 20, height: 20,
+                            padding: '0 6px',
+                            borderRadius: 999,
+                            background: '#ef4444',
+                            color: '#fff',
+                            fontSize: 11,
+                            fontWeight: 700,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            lineHeight: 1,
+                            flexShrink: 0,
+                          }}>
+                            {sub.badge > 99 ? '99+' : sub.badge}
+                          </span>
+                        )}
                       </Link>
                     </li>
                   ))}

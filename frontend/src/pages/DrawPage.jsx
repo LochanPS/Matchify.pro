@@ -6221,11 +6221,12 @@ const ManageUmpiresModal = ({ tournamentId, umpires, onUmpiresChange, onClose })
 
   const handleAdd = async () => {
     const trimmed = code.trim();
-    if (!trimmed || trimmed === '#') return;
+    if (!trimmed) return;
     setAdding(true);
     setMsg(null);
     try {
-      const res = await tournamentAPI.addUmpireByCode(tournamentId, trimmed);
+      // UI shows permanent # prefix — user types number only, prepend # for API
+      const res = await tournamentAPI.addUmpireByCode(tournamentId, `#${trimmed}`);
       const newUmpire = res.umpire;
       onUmpiresChange([...umpires, newUmpire]);
       setCode('');

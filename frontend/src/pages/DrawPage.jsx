@@ -126,6 +126,7 @@ const DrawPage = () => {
   const [showMatchDetailsModal, setShowMatchDetailsModal] = useState(false);
   const [selectedMatchDetails, setSelectedMatchDetails] = useState(null);
   const [showActionsSheet, setShowActionsSheet] = useState(false);
+  const [selectedAction, setSelectedAction] = useState(null);
   
   // Players list modal
   const [showPlayersModal, setShowPlayersModal] = useState(false);
@@ -1425,9 +1426,181 @@ const DrawPage = () => {
       )}
 
       {/* ── Draw Actions Bottom Sheet ── */}
-      {showActionsSheet && isOrganizer && (
+      {showActionsSheet && isOrganizer && (() => {
+        const fmt = bracket?.format;
+        const isRRKO = fmt === 'ROUND_ROBIN_KNOCKOUT';
+        const isRR = fmt === 'ROUND_ROBIN';
+
+        const allItems = [
+          {
+            id: 'create',
+            icon: <Plus style={{ width: 20, height: 20 }} />,
+            label: bracket ? 'Edit Draw Config' : 'Create Draw',
+            detail: bracket
+              ? 'Change the bracket format, group sizes, or other draw configuration. Note: editing after players are assigned may reset slots.'
+              : 'Choose the bracket format (Knockout, Round Robin, or hybrid), set group sizes, and generate the draw structure. This is the first step.',
+            buttonLabel: bracket ? 'Edit Config' : 'Create Draw',
+            accent: 'gold',
+            disabled: isCategoryCompleted,
+            action: () => { setShowActionsSheet(false); setSelectedAction(null); setShowConfigModal(true); },
+          },
+          {
+            id: 'assign',
+            icon: <UserPlus style={{ width: 20, height: 20 }} />,
+            label: 'Assign Players',
+            detail: 'Place registered players into bracket slots. All players who registered for this category will be listed. You can re-assign at any time before matches begin.',
+            buttonLabel: 'Assign Players',
+            accent: 'gold',
+            disabled: !bracket || isCategoryCompleted,
+            action: () => { setShowActionsSheet(false); setSelectedAction(null); openAssignModal(); },
+          },
+          ...(isRRKO ? [{
+            id: 'arrangeko',
+            icon: <Settings style={{ width: 20, height: 20 }} />,
+            label: 'Arrange KO Stage',
+            detail: 'After all group stage matches are completed, use this to seed the top players from each group into the knockout bracket. Make sure every group match is finished before arranging the KO stage.',
+            buttonLabel: 'Arrange KO',
+            accent: 'gold',
+            disabled: isCategoryCompleted,
+            action: async () => {
+              setShowActionsSheet(false); setSelectedAction(null);
+              clearDrawCache(tournamentId, activeCategory?.id);
+              await fetchDrawPageFull(activeCategory?.id);
+              setShowArrangeMatchupsModal(true);
+            },
+          }] : []),
+          {
+            id: 'umpires',
+            icon: <Users style={{ width: 20, height: 20 }} />,
+            label: tournamentUmpires.length > 0 ? `Manage Umpires (${tournamentUmpires.length})` : 'Add Umpires',
+            detail: 'Add umpires to this tournament by entering their Matchify.pro ID (e.g. #42). Once added, you can assign them to specific matches for live court-side scoring.',
+            buttonLabel: 'Manage Umpires',
+            accent: 'purple',
+            disabled: false,
+            action: () => { setShowActionsSheet(false); setSelectedAction(null); setShowManageUmpiresModal(true); },
+          },
+          {
+            id: 'assignmatches',
+            icon: <ListOrdered style={{ width: 20, height: 20 }} />,
+            label: 'Assign Matches',
+            detail: 'Distribute matches to your umpires so each umpire knows exactly which matches they are responsible for scoring. Umpires must be added first before you can assign matches.',
+            buttonLabel: 'Assign Matches',
+            accent: 'purple',
+            disabled: tournamentUmpires.length === 0 || isCategoryCompleted,
+            disabledReason: tournamentUmpires.length === 0 ? 'Add umpires first before assigning matches.' : undefined,
+            action: () => { setShowActionsSheet(false); setSelectedAction(null); setShowUmpireQueueModal(true); },
+          },
+          {
+            id: 'endcategory',
+            icon: <Trophy style={{ width: 20, height: 20 }} />,
+            label: isCategoryCompleted ? 'Category Ended' : 'End Category',
+            detail: 'Once all matches in this category are completed, end the category to finalize results, award ranking points to players, and lock the draw. This action cannot be undone.',
+            buttonLabel: 'End Category',
+            accent: 'gold',
+            disabled: !bracket || isCategoryCompleted,
+            action: () => { setShowActionsSheet(false); setSelectedAction(null); setShowEndTournamentModal(true); },
+          },
+        ];
+
+        const destructiveItems = [
+          ...(hasPlayedMatches ? [{
+            id: 'restart',
+            icon: <Zap style={{ width: 20, height: 20 }} />,
+            label: isRRKO
+              ? (activeStage === 'knockout' ? 'Restart KO Stage' : 'Restart All Matches')
+              : 'Restart Matches',
+            detail: 'Reset all match scores and start the draw over. All recorded results will be cleared. Only use this if you need to completely redo the matches from scratch.',
+            buttonLabel: 'Restart',
+            accent: 'neutral',
+            disabled: false,
+            action: () => { setShowActionsSheet(false); setSelectedAction(null); setShowRestartModal(true); },
+          }] : []),
+          ...(!hasPlayedMatches && bracket ? [{
+            id: 'delete',
+            icon: <Trash2 style={{ width: 20, height: 20 }} />,
+            label: 'Delete Draw',
+            detail: 'Permanently delete the bracket and all player slot assignments. This can only be done before any matches have been played. This action cannot be undone.',
+            buttonLabel: 'Delete Draw',
+            accent: 'red',
+            disabled: false,
+            action: () => { setShowActionsSheet(false); setSelectedAction(null); setShowDeleteModal(true); },
+          }] : []),
+        ];
+
+        const accentColor = (a) => a === 'purple' ? '#c084fc' : a === 'red' ? '#f87171' : a === 'neutral' ? 'rgba(255,255,255,0.5)' : '#F59E0B';
+        const accentBg = (a) => a === 'purple' ? 'rgba(168,85,247,0.08)' : a === 'red' ? 'rgba(239,68,68,0.07)' : a === 'neutral' ? 'rgba(255,255,255,0.04)' : 'rgba(245,158,11,0.06)';
+        const accentBorder = (a) => a === 'purple' ? 'rgba(168,85,247,0.2)' : a === 'red' ? 'rgba(239,68,68,0.2)' : a === 'neutral' ? 'rgba(255,255,255,0.08)' : 'rgba(245,158,11,0.15)';
+
+        const renderItem = (item) => {
+          const isExpanded = selectedAction === item.id;
+          const color = accentColor(item.accent);
+          return (
+            <div key={item.id} style={{ marginBottom: 6 }}>
+              <button
+                onClick={() => !item.disabled && setSelectedAction(isExpanded ? null : item.id)}
+                style={{
+                  width: '100%', display: 'flex', alignItems: 'center', gap: 14,
+                  padding: '13px 14px',
+                  borderRadius: isExpanded ? '14px 14px 0 0' : 14,
+                  background: isExpanded ? accentBg(item.accent) : 'rgba(255,255,255,0.04)',
+                  border: `1px solid ${isExpanded ? accentBorder(item.accent) : 'rgba(255,255,255,0.07)'}`,
+                  borderBottom: isExpanded ? 'none' : undefined,
+                  cursor: item.disabled ? 'not-allowed' : 'pointer',
+                  opacity: item.disabled ? 0.38 : 1,
+                  textAlign: 'left',
+                  WebkitTapHighlightColor: 'transparent',
+                  transition: 'background 0.15s, border-color 0.15s',
+                }}
+              >
+                <span style={{ color: item.disabled ? 'rgba(255,255,255,0.25)' : color, flexShrink: 0 }}>
+                  {item.icon}
+                </span>
+                <span style={{ flex: 1, fontWeight: 700, fontSize: 14, color: item.disabled ? 'rgba(255,255,255,0.28)' : '#fff', textAlign: 'left' }}>
+                  {item.label}
+                </span>
+                <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.3)', transform: isExpanded ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', flexShrink: 0 }}>
+                  ›
+                </span>
+              </button>
+              {isExpanded && (
+                <div style={{
+                  background: accentBg(item.accent),
+                  border: `1px solid ${accentBorder(item.accent)}`,
+                  borderTop: 'none',
+                  borderRadius: '0 0 14px 14px',
+                  padding: '12px 14px 14px',
+                }}>
+                  <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)', lineHeight: 1.5, margin: '0 0 12px' }}>
+                    {item.detail}
+                    {item.disabledReason && <span style={{ display: 'block', marginTop: 6, color: '#f87171', fontWeight: 600 }}>{item.disabledReason}</span>}
+                  </p>
+                  <button
+                    onClick={item.disabled ? undefined : item.action}
+                    disabled={item.disabled}
+                    style={{
+                      padding: '10px 20px', borderRadius: 10, border: 'none',
+                      background: item.disabled ? 'rgba(255,255,255,0.06)'
+                        : item.accent === 'red' ? 'linear-gradient(135deg,#ef4444,#dc2626)'
+                        : item.accent === 'purple' ? 'linear-gradient(135deg,#a855f7,#7c3aed)'
+                        : item.accent === 'neutral' ? 'rgba(255,255,255,0.12)'
+                        : 'linear-gradient(135deg,#F59E0B,#FCD34D)',
+                      color: item.disabled ? 'rgba(255,255,255,0.3)'
+                        : (item.accent === 'gold' ? '#07071a' : '#fff'),
+                      fontWeight: 700, fontSize: 13, cursor: item.disabled ? 'not-allowed' : 'pointer',
+                      WebkitTapHighlightColor: 'transparent',
+                    }}
+                  >
+                    {item.buttonLabel}
+                  </button>
+                </div>
+              )}
+            </div>
+          );
+        };
+
+        return (
         <div
-          onClick={() => setShowActionsSheet(false)}
+          onClick={() => { setShowActionsSheet(false); setSelectedAction(null); }}
           style={{
             position: 'fixed', inset: 0, zIndex: 9000,
             background: 'rgba(0,0,0,0.65)',
@@ -1457,166 +1630,23 @@ const DrawPage = () => {
             </p>
 
             <div style={{ padding: '0 12px 4px' }}>
-              {/* ── PRIMARY ACTIONS ── */}
-              {[
-                {
-                  icon: <Plus style={{ width: 18, height: 18 }} />,
-                  label: bracket ? 'Edit Draw Config' : 'Create Draw',
-                  sub: bracket ? 'Change format or group settings' : 'Set up bracket for this category',
-                  disabled: isCategoryCompleted,
-                  action: () => { setShowActionsSheet(false); setShowConfigModal(true); },
-                },
-                {
-                  icon: <UserPlus style={{ width: 18, height: 18 }} />,
-                  label: 'Assign Players',
-                  sub: 'Place registered players into bracket slots',
-                  disabled: !bracket || isCategoryCompleted,
-                  action: () => { setShowActionsSheet(false); openAssignModal(); },
-                },
-                ...(bracket?.format === 'ROUND_ROBIN_KNOCKOUT' ? [{
-                  icon: <Settings style={{ width: 18, height: 18 }} />,
-                  label: 'Arrange KO Stage',
-                  sub: 'Seed top group players into the knockout bracket',
-                  disabled: isCategoryCompleted,
-                  action: async () => {
-                    setShowActionsSheet(false);
-                    clearDrawCache(tournamentId, activeCategory?.id);
-                    await fetchDrawPageFull(activeCategory?.id);
-                    setShowArrangeMatchupsModal(true);
-                  },
-                }] : []),
-                {
-                  icon: <Users style={{ width: 18, height: 18 }} />,
-                  label: tournamentUmpires.length > 0 ? `Manage Umpires (${tournamentUmpires.length})` : 'Add Umpires',
-                  sub: 'Add or remove umpires for this tournament',
-                  disabled: false,
-                  action: () => { setShowActionsSheet(false); setShowManageUmpiresModal(true); },
-                  accent: 'purple',
-                },
-                {
-                  icon: <ListOrdered style={{ width: 18, height: 18 }} />,
-                  label: 'Assign Matches',
-                  sub: 'Assign matches to umpires for scoring',
-                  disabled: tournamentUmpires.length === 0 || isCategoryCompleted,
-                  action: () => { setShowActionsSheet(false); setShowUmpireQueueModal(true); },
-                  accent: 'purple',
-                },
-                {
-                  icon: <Trophy style={{ width: 18, height: 18 }} />,
-                  label: 'End Category',
-                  sub: 'Finalize results and award ranking points',
-                  disabled: !bracket || isCategoryCompleted,
-                  action: () => { setShowActionsSheet(false); setShowEndTournamentModal(true); },
-                },
-              ].map((item, idx) => (
-                <button
-                  key={idx}
-                  onClick={item.disabled ? undefined : item.action}
-                  style={{
-                    width: '100%', display: 'flex', alignItems: 'center', gap: 14,
-                    padding: '13px 14px', borderRadius: 14, marginBottom: 6,
-                    background: item.disabled ? 'rgba(255,255,255,0.02)' : item.accent === 'purple' ? 'rgba(168,85,247,0.08)' : 'rgba(255,255,255,0.05)',
-                    border: item.accent === 'purple' ? '1px solid rgba(168,85,247,0.2)' : '1px solid rgba(255,255,255,0.07)',
-                    cursor: item.disabled ? 'not-allowed' : 'pointer',
-                    opacity: item.disabled ? 0.38 : 1,
-                    textAlign: 'left',
-                    WebkitTapHighlightColor: 'transparent',
-                    transition: 'opacity 0.15s',
-                  }}
-                >
-                  <span style={{ color: item.disabled ? 'rgba(255,255,255,0.3)' : item.accent === 'purple' ? '#c084fc' : '#F59E0B', flexShrink: 0 }}>
-                    {item.icon}
-                  </span>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ fontWeight: 700, fontSize: 14, color: item.disabled ? 'rgba(255,255,255,0.3)' : item.accent === 'purple' ? '#c084fc' : '#fff', margin: 0, lineHeight: 1.3 }}>
-                      {item.label}
-                    </p>
-                    <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', margin: '2px 0 0', lineHeight: 1.3 }}>
-                      {item.sub}
-                    </p>
-                  </div>
-                </button>
-              ))}
-
-              {/* ── DIVIDER ── */}
-              <div style={{ height: 1, background: 'rgba(255,255,255,0.07)', margin: '8px 0' }} />
-
-              {/* ── DESTRUCTIVE ACTIONS ── */}
-              {hasPlayedMatches && (
-                <button
-                  onClick={() => { setShowActionsSheet(false); setShowRestartModal(true); }}
-                  style={{
-                    width: '100%', display: 'flex', alignItems: 'center', gap: 14,
-                    padding: '13px 14px', borderRadius: 14, marginBottom: 6,
-                    background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)',
-                    cursor: 'pointer', textAlign: 'left', WebkitTapHighlightColor: 'transparent',
-                  }}
-                >
-                  <Zap style={{ width: 18, height: 18, color: 'rgba(255,255,255,0.45)', flexShrink: 0 }} />
-                  <div style={{ flex: 1 }}>
-                    <p style={{ fontWeight: 700, fontSize: 14, color: 'rgba(255,255,255,0.55)', margin: 0 }}>
-                      {bracket?.format === 'ROUND_ROBIN_KNOCKOUT'
-                        ? (activeStage === 'knockout' ? 'Restart KO Stage' : 'Restart All Matches')
-                        : 'Restart Matches'}
-                    </p>
-                    <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.28)', margin: '2px 0 0' }}>Reset scores and replay matches</p>
-                  </div>
-                </button>
-              )}
-              {!hasPlayedMatches && bracket && (
-                <button
-                  onClick={() => { setShowActionsSheet(false); setShowDeleteModal(true); }}
-                  style={{
-                    width: '100%', display: 'flex', alignItems: 'center', gap: 14,
-                    padding: '13px 14px', borderRadius: 14, marginBottom: 6,
-                    background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.2)',
-                    cursor: 'pointer', textAlign: 'left', WebkitTapHighlightColor: 'transparent',
-                  }}
-                >
-                  <Trash2 style={{ width: 18, height: 18, color: '#f87171', flexShrink: 0 }} />
-                  <div style={{ flex: 1 }}>
-                    <p style={{ fontWeight: 700, fontSize: 14, color: '#f87171', margin: 0 }}>Delete Draw</p>
-                    <p style={{ fontSize: 11, color: 'rgba(248,113,113,0.5)', margin: '2px 0 0' }}>Remove bracket and all slot assignments</p>
-                  </div>
-                </button>
+              {allItems.map(renderItem)}
+              {destructiveItems.length > 0 && (
+                <>
+                  <div style={{ height: 1, background: 'rgba(255,255,255,0.07)', margin: '8px 0' }} />
+                  {destructiveItems.map(renderItem)}
+                </>
               )}
             </div>
           </div>
         </div>
-      )}
+        );
+      })()}
 
-      {/* ── Smart Guide — REMOVED (replaced by actions sheet) ── */}
-      {false && isOrganizer && activeCategory && !isCategoryCompleted && (() => {
+      {false && (() => {
+        // tombstone — delete entire block below on next cleanup
         const fmt = bracket?.format;
-        const groupMatches = matches.filter(m => m.stage === 'GROUP');
-        const knockoutMatches = matches.filter(m => m.stage === 'KNOCKOUT');
-        const allGroupDone = groupMatches.length > 0 && groupMatches.every(m => m.status === 'COMPLETED');
-        const allMatchesDone = matches.length > 0 && matches.every(m => m.status === 'COMPLETED');
-        // KO matches are created at draw time with no players — only count as "arranged" when player IDs present
-        const hasKOPlayersAssigned = knockoutMatches.some(m => m.player1Id || m.player2Id);
-
-        let steps = [];
-        let currentStep = 0;
-        let bannerIcon = '📋';
-        let bannerText = '';
-        let bannerSubtext = '';
-        let bannerColor = 'amber';
-        let bannerButton = null;
-
         if (!bracket) {
-          steps = fmt === 'ROUND_ROBIN_KNOCKOUT'
-            ? ['Create Draw', 'Assign Players', 'Group Stage', 'Knockout Stage', 'End Category']
-            : fmt === 'ROUND_ROBIN'
-              ? ['Create Draw', 'Assign Players', 'Play Matches', 'End Category']
-              : ['Create Draw', 'Assign Players', 'Play Matches', 'End Category'];
-          currentStep = 0;
-          bannerIcon = '📋';
-          bannerText = 'Create the draw to get started';
-          bannerSubtext = 'Choose format, group sizes, and generate the bracket.';
-          bannerColor = 'amber';
-          bannerButton = { label: 'Create Draw', action: () => setShowConfigModal(true) };
-        } else if (fmt === 'KNOCKOUT') {
-          steps = ['Create Draw', 'Assign Players', 'Play Matches', 'End Category'];
           const playersAssigned = matches.some(m => m.player1Id || m.player2Id);
           if (!playersAssigned) {
             currentStep = 1;

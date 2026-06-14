@@ -2460,6 +2460,7 @@ const DrawPage = () => {
           tournamentId={tournamentId}
           umpires={tournamentUmpires}
           onClose={() => setShowUmpireQueueModal(false)}
+          onUmpireAdded={(u) => setTournamentUmpires(prev => [...prev, u])}
         />
       )}
 
@@ -6188,13 +6189,18 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
 // Organizer picks umpire → adds matches in play order → saves queue.
 // Calls PUT /api/matches/tournament/:tournamentId/umpire-queue (no new API).
 // ─────────────────────────────────────────────────────────────────────────────
-const UmpireQueueModal = ({ tournamentId, umpires, onClose }) => {
+const UmpireQueueModal = ({ tournamentId, umpires: initialUmpires, onClose, onUmpireAdded }) => {
   const [allMatches, setAllMatches] = useState([]);
   const [loadingMatches, setLoadingMatches] = useState(true);
-  const [selectedUmpireId, setSelectedUmpireId] = useState(umpires[0]?.id || null);
+  const [localUmpires, setLocalUmpires] = useState(initialUmpires);
+  const [selectedUmpireId, setSelectedUmpireId] = useState(initialUmpires[0]?.id || null);
   const [queues, setQueues] = useState({}); // { [umpireId]: string[] }
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState(null); // { type:'success'|'error', text:string }
+  const [showAddUmpire, setShowAddUmpire] = useState(false);
+  const [addCode, setAddCode] = useState('');
+  const [addingUmpire, setAddingUmpire] = useState(false);
+  const [addUmpireErr, setAddUmpireErr] = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -6204,7 +6210,7 @@ const UmpireQueueModal = ({ tournamentId, umpires, onClose }) => {
         setAllMatches(matches);
         // Pre-populate from existing queueOrder in DB
         const initial = {};
-        umpires.forEach(u => {
+        initialUmpires.forEach(u => {
           const assigned = matches
             .filter(m => m.umpireId === u.id && m.queueOrder != null)
             .sort((a, b) => (a.queueOrder || 0) - (b.queueOrder || 0));
@@ -6263,7 +6269,27 @@ const UmpireQueueModal = ({ tournamentId, umpires, onClose }) => {
     }
   };
 
-  const selectedUmpire = umpires.find(u => u.id === selectedUmpireId);
+  const selectedUmpire = localUmpires.find(u => u.id === selectedUmpireId);
+
+  const handleAddUmpire = async () => {
+    const trimmed = addCode.trim().replace(/^#+/, '');
+    if (!trimmed) return;
+    setAddingUmpire(true); setAddUmpireErr(null);
+    try {
+      const res = await tournamentAPI.addUmpireByCode(tournamentId, `#${trimmed}`);
+      const newUmpire = res.umpire || res;
+      setLocalUmpires(prev => [...prev, newUmpire]);
+      setQueues(p => ({ ...p, [newUmpire.id]: [] }));
+      setSelectedUmpireId(newUmpire.id);
+      setAddCode('');
+      setShowAddUmpire(false);
+      onUmpireAdded?.(newUmpire);
+    } catch (err) {
+      setAddUmpireErr(err.response?.data?.error || 'Umpire not found');
+    } finally {
+      setAddingUmpire(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3"
@@ -6287,25 +6313,86 @@ const UmpireQueueModal = ({ tournamentId, umpires, onClose }) => {
           </button>
         </div>
 
-        {/* Umpire selector tabs */}
-        <div className="flex gap-2 px-4 pt-3 pb-2 flex-wrap"
-          style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-          {umpires.map(u => {
-            const qLen = (queues[u.id] || []).length;
-            return (
-              <button key={u.id} onClick={() => setSelectedUmpireId(u.id)}
-                className="px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5"
-                style={selectedUmpireId === u.id
-                  ? { background: 'rgba(96,165,250,0.2)', border: '1.5px solid rgba(96,165,250,0.5)', color: '#60a5fa' }
-                  : { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.55)' }}>
-                {u.name}
-                {qLen > 0 && (
-                  <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black"
-                    style={{ background: 'rgba(96,165,250,0.3)', color: '#93c5fd' }}>{qLen}</span>
-                )}
-              </button>
-            );
-          })}
+        {/* Umpire selector tabs + Add Umpire */}
+        <div className="px-4 pt-3 pb-2" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+          <div className="flex gap-2 flex-wrap items-center">
+            {localUmpires.map(u => {
+              const qLen = (queues[u.id] || []).length;
+              return (
+                <button key={u.id} onClick={() => { setSelectedUmpireId(u.id); setShowAddUmpire(false); }}
+                  className="px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5"
+                  style={selectedUmpireId === u.id
+                    ? { background: 'rgba(96,165,250,0.2)', border: '1.5px solid rgba(96,165,250,0.5)', color: '#60a5fa' }
+                    : { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.55)' }}>
+                  {u.name}
+                  {qLen > 0 && (
+                    <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black"
+                      style={{ background: 'rgba(96,165,250,0.3)', color: '#93c5fd' }}>{qLen}</span>
+                  )}
+                </button>
+              );
+            })}
+            {/* Add Umpire toggle */}
+            <button
+              onClick={() => { setShowAddUmpire(v => !v); setAddCode(''); setAddUmpireErr(null); }}
+              style={{
+                padding: '5px 10px', borderRadius: 8,
+                background: showAddUmpire ? 'rgba(245,158,11,0.15)' : 'rgba(255,255,255,0.04)',
+                border: showAddUmpire ? '1.5px solid rgba(245,158,11,0.4)' : '1px dashed rgba(255,255,255,0.2)',
+                color: showAddUmpire ? '#F59E0B' : 'rgba(255,255,255,0.4)',
+                fontSize: 11, fontWeight: 700, cursor: 'pointer',
+                display: 'flex', alignItems: 'center', gap: 4,
+                WebkitTapHighlightColor: 'transparent',
+              }}
+            >
+              <Plus style={{ width: 12, height: 12 }} />
+              Add Umpire
+            </button>
+          </div>
+
+          {/* Inline add umpire form */}
+          {showAddUmpire && (
+            <div style={{ marginTop: 10 }}>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <div style={{
+                  flex: 1, display: 'flex', alignItems: 'center',
+                  background: 'rgba(255,255,255,0.06)',
+                  border: '1px solid rgba(255,255,255,0.15)',
+                  borderRadius: 10, overflow: 'hidden',
+                }}>
+                  <span style={{ padding: '0 6px 0 12px', color: '#FCD34D', fontWeight: 900, fontSize: 14, userSelect: 'none' }}>#</span>
+                  <input
+                    value={addCode}
+                    onChange={e => { setAddCode(e.target.value.replace(/^#+/, '')); setAddUmpireErr(null); }}
+                    onKeyDown={e => e.key === 'Enter' && handleAddUmpire()}
+                    placeholder="Umpire ID or code"
+                    autoFocus
+                    style={{
+                      flex: 1, background: 'none', border: 'none', outline: 'none',
+                      color: '#fff', fontSize: 13, padding: '9px 12px 9px 0',
+                    }}
+                  />
+                </div>
+                <button
+                  onClick={handleAddUmpire}
+                  disabled={addingUmpire || !addCode.trim()}
+                  style={{
+                    padding: '9px 16px', borderRadius: 10, border: 'none',
+                    background: addCode.trim() ? 'linear-gradient(135deg,#F59E0B,#FCD34D)' : 'rgba(255,255,255,0.07)',
+                    color: addCode.trim() ? '#07071a' : 'rgba(255,255,255,0.3)',
+                    fontWeight: 700, fontSize: 13, cursor: addCode.trim() ? 'pointer' : 'not-allowed',
+                    WebkitTapHighlightColor: 'transparent',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {addingUmpire ? '…' : 'Add'}
+                </button>
+              </div>
+              {addUmpireErr && (
+                <p style={{ marginTop: 6, fontSize: 12, color: '#f87171', fontWeight: 600 }}>{addUmpireErr}</p>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Body */}

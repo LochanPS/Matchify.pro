@@ -445,7 +445,7 @@ const NotificationDetailPage = () => {
             QUEUE NOTIFICATION — umpire sees all match cards
             ══════════════════════════════════════════════════ */}
         {isQueueNotif && (() => {
-          if (loadingQueue) {
+          if (loadingQueue || queueMatches === null) {
             return (
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '24px 0' }}>
                 <Spinner size="sm" />

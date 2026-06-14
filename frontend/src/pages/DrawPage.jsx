@@ -1148,21 +1148,44 @@ const DrawPage = () => {
             </div>
 
             {isOrganizer && (
-              <button
-                onClick={() => setShowActionsSheet(true)}
-                style={{
-                  width: 44, height: 44, borderRadius: '50%', flexShrink: 0,
-                  background: 'rgba(255,255,255,0.07)',
-                  border: '1.5px solid rgba(255,255,255,0.14)',
-                  color: '#fff', cursor: 'pointer',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
-                  WebkitTapHighlightColor: 'transparent',
-                }}
-                title="Manage draw"
-              >
-                <Settings className="w-5 h-5" />
-              </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+                {/* Assign Matches — prominent button */}
+                <button
+                  onClick={() => setShowUmpireQueueModal(true)}
+                  style={{
+                    height: 44, padding: '0 16px', borderRadius: 22, flexShrink: 0,
+                    background: 'linear-gradient(135deg,#F59E0B,#FCD34D)',
+                    border: 'none', color: '#07071a',
+                    fontWeight: 800, fontSize: 13,
+                    cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', gap: 7,
+                    boxShadow: '0 4px 16px rgba(245,158,11,0.35)',
+                    WebkitTapHighlightColor: 'transparent',
+                    whiteSpace: 'nowrap',
+                  }}
+                  title="Assign matches to umpires"
+                >
+                  <ListOrdered className="w-4 h-4" />
+                  Assign Matches
+                </button>
+
+                {/* Settings gear */}
+                <button
+                  onClick={() => setShowActionsSheet(true)}
+                  style={{
+                    width: 44, height: 44, borderRadius: '50%', flexShrink: 0,
+                    background: 'rgba(255,255,255,0.07)',
+                    border: '1.5px solid rgba(255,255,255,0.14)',
+                    color: '#fff', cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
+                    WebkitTapHighlightColor: 'transparent',
+                  }}
+                  title="Manage draw"
+                >
+                  <Settings className="w-5 h-5" />
+                </button>
+              </div>
             )}
           </div>
           

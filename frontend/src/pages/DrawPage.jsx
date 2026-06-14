@@ -6264,7 +6264,7 @@ const ManageUmpiresModal = ({ tournamentId, umpires, onUmpiresChange, onClose })
             <Users className="w-5 h-5" style={{ color: '#60a5fa' }} />
             <div>
               <h2 className="text-base font-black text-white">Manage Umpires</h2>
-              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Add or remove umpires for this tournament</p>
+              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Umpires added here are assigned to the <span style={{color:'#60a5fa',fontWeight:700}}>entire tournament</span></p>
             </div>
           </div>
           <button onClick={onClose}
@@ -6285,18 +6285,28 @@ const ManageUmpiresModal = ({ tournamentId, umpires, onUmpiresChange, onClose })
               Ask umpire to share their Matchify.pro ID (e.g. <span className="font-mono font-black" style={{ color: '#FCD34D' }}>#42</span>). Found on their profile/dashboard.
             </div>
             <div className="flex gap-2">
-              <input
-                type="text"
-                value={code}
-                onChange={e => setCode(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && handleAdd()}
-                placeholder="#ID or code"
-                className="flex-1 px-3 py-2.5 rounded-xl text-sm font-bold outline-none"
-                style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff' }}
-              />
+              {/* # prefix + input field */}
+              <div className="flex-1 flex items-center rounded-xl overflow-hidden"
+                style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.18)' }}>
+                <span className="pl-3 pr-1 text-sm font-black select-none"
+                  style={{ color: '#FCD34D' }}>#</span>
+                <input
+                  type="text"
+                  value={code}
+                  onChange={e => {
+                    // strip any leading # the user might type
+                    const v = e.target.value.replace(/^#+/, '');
+                    setCode(v);
+                  }}
+                  onKeyDown={e => e.key === 'Enter' && handleAdd()}
+                  placeholder="ID or umpire code"
+                  className="flex-1 pr-3 py-2.5 text-sm font-bold outline-none bg-transparent"
+                  style={{ color: '#fff' }}
+                />
+              </div>
               <button
                 onClick={handleAdd}
-                disabled={adding || !code.trim() || code.trim() === '#'}
+                disabled={adding || !code.trim()}
                 className="px-4 py-2.5 rounded-xl text-xs font-black transition-all disabled:opacity-40 flex items-center gap-1.5"
                 style={{ background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.35)', color: '#FCD34D' }}>
                 {adding ? <Loader className="w-4 h-4 animate-spin" /> : <><Plus className="w-3.5 h-3.5" />Add</>}
@@ -6331,7 +6341,10 @@ const ManageUmpiresModal = ({ tournamentId, umpires, onUmpiresChange, onClose })
                       {u.name?.charAt(0)?.toUpperCase() || 'U'}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-white truncate">{u.name}</p>
+                      <div className="flex items-center gap-1.5">
+                        <p className="text-sm font-bold text-white truncate">{u.name}</p>
+                        {u.id && <span className="text-xs font-mono font-black flex-shrink-0" style={{ color: '#FCD34D' }}>#{u.id}</span>}
+                      </div>
                       <p className="text-xs truncate" style={{ color: 'rgba(255,255,255,0.4)' }}>{u.email}</p>
                     </div>
                     <button

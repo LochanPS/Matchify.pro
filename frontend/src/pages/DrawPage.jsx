@@ -1857,67 +1857,48 @@ const DrawPage = () => {
       {/* ── Step Strip (organiser only, above stage tabs) ── */}
       {isOrganizer && activeCategory && (() => {
         const fmt = bracket?.format;
-        const groupMatches = matches.filter(m => m.stage === 'GROUP');
-        const knockoutMatches = matches.filter(m => m.stage === 'KNOCKOUT');
-        const playersAssigned = matches.some(m => m.player1Id || m.player2Id);
-        const allGroupDone = groupMatches.length > 0 && groupMatches.every(m => m.status === 'COMPLETED');
-        const allMatchesDone = matches.length > 0 && matches.every(m => m.status === 'COMPLETED');
-        const koPlayersAssigned = knockoutMatches.some(m => m.player1Id || m.player2Id);
 
-        // Build steps for this format
+        // Steps — no state tracking, all identical styling
         const steps = fmt === 'ROUND_ROBIN_KNOCKOUT'
           ? [
-              { id: 'create',       label: 'Create Draw',    done: !!bracket },
-              { id: 'assign',       label: 'Assign Players', done: playersAssigned },
-              { id: 'groupstage',   label: 'Group Stage',    done: allGroupDone },
-              { id: 'arrangeko',    label: 'Arrange KO',     done: koPlayersAssigned },
-              { id: 'assignmatches',label: 'Assign Matches', done: false },
-              { id: 'endcategory',  label: 'End Category',   done: isCategoryCompleted },
-            ]
-          : fmt === 'ROUND_ROBIN'
-          ? [
-              { id: 'create',       label: 'Create Draw',    done: !!bracket },
-              { id: 'assign',       label: 'Assign Players', done: playersAssigned },
-              { id: 'assignmatches',label: 'Assign Matches', done: false },
-              { id: 'endcategory',  label: 'End Category',   done: isCategoryCompleted },
+              { id: 'create',        label: 'Create Draw'    },
+              { id: 'assign',        label: 'Assign Players' },
+              { id: 'groupstage',    label: 'Group Stage'    },
+              { id: 'arrangeko',     label: 'Arrange KO'     },
+              { id: 'assignmatches', label: 'Assign Matches' },
+              { id: 'endcategory',   label: 'End Category'   },
             ]
           : [
-              { id: 'create',       label: 'Create Draw',    done: !!bracket },
-              { id: 'assign',       label: 'Assign Players', done: playersAssigned },
-              { id: 'assignmatches',label: 'Assign Matches', done: false },
-              { id: 'endcategory',  label: 'End Category',   done: isCategoryCompleted },
+              { id: 'create',        label: 'Create Draw'    },
+              { id: 'assign',        label: 'Assign Players' },
+              { id: 'assignmatches', label: 'Assign Matches' },
+              { id: 'endcategory',   label: 'End Category'   },
             ];
 
-        const currentIdx = steps.findIndex(s => !s.done);
-
-        // Instruction content per step id
+        // Instruction box content per step — accurate descriptions
         const stepInfo = {
           create: {
-            title: 'Create Draw',
-            desc: 'Set up the bracket for this category. Choose the format (Knockout, Round Robin, or hybrid), configure group sizes, and generate the draw structure. This is required before any other steps.',
+            title: 'Step 1 — Create Draw',
+            desc: 'Generate the bracket for this category. Select the format (Knockout, Round Robin, or Round Robin + Knockout), set the number of groups and group sizes, then create the draw. The bracket structure is fixed once players are assigned.',
             btnLabel: 'Create Draw',
-            btnDisabled: isCategoryCompleted,
             action: () => { setActiveStepPopup(null); setShowConfigModal(true); },
           },
           assign: {
-            title: 'Assign Players',
-            desc: 'Place all registered players into their bracket or group slots. Players who signed up for this category will appear in the list. You can re-assign players any time before matches begin.',
+            title: 'Step 2 — Assign Players',
+            desc: 'Place all registered players into the bracket slots or group positions. Only players who have registered and paid for this category will appear. Players can be re-assigned any time before their first match begins.',
             btnLabel: 'Assign Players',
-            btnDisabled: !bracket || isCategoryCompleted,
             action: () => { setActiveStepPopup(null); openAssignModal(); },
           },
           groupstage: {
-            title: 'Group Stage',
-            desc: 'All group matches are now ready to be played. Umpires score each match on court. Once every group match is completed, you can move on to arranging the Knockout stage.',
+            title: 'Step 3 — Group Stage',
+            desc: 'Umpires score all group matches on court. Each player plays against every other player in their group. Rankings are determined by wins, losses, and points. All group matches must be completed before you can proceed to the Knockout stage.',
             btnLabel: null,
-            btnDisabled: true,
             action: null,
           },
           arrangeko: {
-            title: 'Arrange KO Stage',
-            desc: 'Group stage must be fully completed before this step. Once done, use Arrange KO to seed the top players from each group into the knockout bracket in the correct order.',
+            title: 'Step 4 — Arrange KO Stage',
+            desc: 'Once all group stage matches are finished, seed the top-ranked players from each group into the knockout bracket. You choose how many players advance from each group. The bracket is set up and matches are generated automatically.',
             btnLabel: 'Arrange KO',
-            btnDisabled: !allGroupDone || isCategoryCompleted,
             action: async () => {
               setActiveStepPopup(null);
               clearDrawCache(tournamentId, activeCategory?.id);
@@ -1926,10 +1907,9 @@ const DrawPage = () => {
             },
           },
           assignmatches: {
-            title: 'Assign Matches',
-            desc: 'Assign matches to umpires so they know which matches to score. First add umpires to the tournament using the settings button above, then come here to distribute matches.',
+            title: fmt === 'ROUND_ROBIN_KNOCKOUT' ? 'Step 5 — Assign Matches' : 'Step 3 — Assign Matches',
+            desc: 'Distribute matches to umpires so each umpire knows exactly which matches they are responsible for scoring. Add umpires to the tournament first using the ⚙ settings button, then use this to assign specific matches to each umpire.',
             btnLabel: tournamentUmpires.length > 0 ? 'Assign Matches' : 'Add Umpires First',
-            btnDisabled: isCategoryCompleted,
             action: () => {
               setActiveStepPopup(null);
               if (tournamentUmpires.length > 0) setShowUmpireQueueModal(true);
@@ -1937,10 +1917,9 @@ const DrawPage = () => {
             },
           },
           endcategory: {
-            title: 'End Category',
-            desc: 'Once all matches are completed, end the category to finalize results, award ranking points to all players, and lock the draw. This action is permanent and cannot be undone.',
+            title: fmt === 'ROUND_ROBIN_KNOCKOUT' ? 'Step 6 — End Category' : 'Step 4 — End Category',
+            desc: 'Mark this category as complete once every match has been scored. This finalizes all results, calculates and awards ranking points to all players, and permanently locks the draw. This action cannot be reversed.',
             btnLabel: 'End Category',
-            btnDisabled: !bracket || isCategoryCompleted,
             action: () => { setActiveStepPopup(null); setShowEndTournamentModal(true); },
           },
         };
@@ -1949,53 +1928,58 @@ const DrawPage = () => {
 
         return (
           <div className="max-w-2xl mx-auto px-3 mt-3 mb-1">
-            {/* Strip */}
+            {/* Strip — all steps uniform, no state tracking */}
             <div style={{
-              display: 'flex', alignItems: 'center',
+              display: 'flex', alignItems: 'flex-start',
               background: 'rgba(255,255,255,0.04)',
               border: '1px solid rgba(255,255,255,0.08)',
-              borderRadius: 14, padding: '10px 12px',
-              overflowX: 'auto', gap: 0,
+              borderRadius: 14, padding: '12px 14px',
+              overflowX: 'auto',
               scrollbarWidth: 'none', msOverflowStyle: 'none',
+              gap: 0,
             }}>
               {steps.map((step, i) => {
-                const isDone = step.done;
-                const isCurrent = !isDone && i === currentIdx;
                 const isActive = activeStepPopup === step.id;
                 return (
                   <React.Fragment key={step.id}>
                     {i > 0 && (
-                      <div style={{
-                        flex: '1 0 8px', height: 2, minWidth: 8,
-                        background: isDone ? '#22c55e' : 'rgba(255,255,255,0.1)',
-                        margin: '0 2px',
-                      }} />
+                      <span style={{
+                        color: 'rgba(255,255,255,0.25)',
+                        fontSize: 14, fontWeight: 400,
+                        flexShrink: 0, alignSelf: 'flex-start',
+                        marginTop: 6, padding: '0 4px',
+                        lineHeight: 1,
+                      }}>→</span>
                     )}
                     <button
                       onClick={() => setActiveStepPopup(isActive ? null : step.id)}
                       style={{
                         flexShrink: 0, background: 'none', border: 'none',
                         padding: 0, cursor: 'pointer',
-                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5,
                         WebkitTapHighlightColor: 'transparent',
+                        minWidth: 52,
                       }}
                     >
                       <div style={{
-                        width: 26, height: 26, borderRadius: '50%',
+                        width: 28, height: 28, borderRadius: '50%',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: 10, fontWeight: 800,
-                        background: isDone ? '#22c55e' : isCurrent ? 'linear-gradient(135deg,#F59E0B,#FCD34D)' : 'rgba(255,255,255,0.08)',
-                        color: isDone ? '#fff' : isCurrent ? '#07071a' : 'rgba(255,255,255,0.35)',
-                        border: isActive ? '2px solid #F59E0B' : isCurrent ? '2px solid #F59E0B' : '2px solid transparent',
-                        boxShadow: isActive ? '0 0 0 3px rgba(245,158,11,0.2)' : isCurrent ? '0 0 8px rgba(245,158,11,0.4)' : 'none',
+                        fontSize: 11, fontWeight: 800,
+                        background: isActive
+                          ? 'linear-gradient(135deg,#F59E0B,#FCD34D)'
+                          : 'rgba(255,255,255,0.10)',
+                        color: isActive ? '#07071a' : 'rgba(255,255,255,0.7)',
+                        border: isActive ? '2px solid #F59E0B' : '2px solid rgba(255,255,255,0.12)',
+                        boxShadow: isActive ? '0 0 0 3px rgba(245,158,11,0.18)' : 'none',
                         transition: 'all 0.15s',
                       }}>
-                        {isDone ? '✓' : i + 1}
+                        {i + 1}
                       </div>
                       <span style={{
-                        fontSize: 8, fontWeight: isCurrent ? 700 : 500,
-                        color: isDone ? '#4ade80' : isCurrent ? '#F59E0B' : 'rgba(255,255,255,0.35)',
-                        whiteSpace: 'nowrap', maxWidth: 52, textAlign: 'center', lineHeight: 1.2,
+                        fontSize: 8.5, fontWeight: 600,
+                        color: isActive ? '#F59E0B' : 'rgba(255,255,255,0.55)',
+                        whiteSpace: 'nowrap', textAlign: 'center', lineHeight: 1.2,
+                        transition: 'color 0.15s',
                       }}>
                         {step.label}
                       </span>

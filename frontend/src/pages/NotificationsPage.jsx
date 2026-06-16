@@ -493,39 +493,68 @@ const NotificationsPage = () => {
                       {(() => {
                         const preview = getPreview(notification);
                         if (preview) {
-                          let matchId = null;
-                          try { matchId = notification.data ? JSON.parse(notification.data).matchId : null; } catch {}
+                          let matchId = null, p1Name = null, p2Name = null, matchStatus = null;
+                          try {
+                            const d = notification.data ? JSON.parse(notification.data) : {};
+                            matchId = d.matchId || null;
+                            p1Name = d.player1Name || null;
+                            p2Name = d.player2Name || null;
+                            matchStatus = d.matchStatus || null;
+                          } catch {}
+                          const p1parts = (p1Name || 'TBD').split(' / ');
+                          const p2parts = (p2Name || 'TBD').split(' / ');
+                          const isMatchLive = matchStatus === 'IN_PROGRESS' || matchStatus === 'LIVE';
+                          const isMatchDone = matchStatus === 'COMPLETED';
                           return (
-                            <div className="mb-2 space-y-1">
+                            <div className="mb-2">
                               {preview.matchInfo && (
-                                <p className="text-xs font-semibold" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                                <p className="text-xs font-semibold mb-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
                                   {preview.matchInfo}
                                 </p>
                               )}
-                              <p className="text-sm font-black text-white leading-snug">
-                                {preview.players}
-                              </p>
+                              {/* VS grid layout — same as queue cards */}
+                              <div style={{ display: 'grid', gridTemplateColumns: '1fr 34px 1fr', alignItems: 'center', gap: 4, marginBottom: 8 }}>
+                                <div>
+                                  {p1parts.length === 2
+                                    ? <><div style={{ fontSize: 12, fontWeight: 800, color: '#fff', lineHeight: 1.3 }}>{p1parts[0]}</div><div style={{ fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.5)', lineHeight: 1.3 }}>& {p1parts[1]}</div></>
+                                    : <span style={{ fontSize: 12, fontWeight: 700, color: p1Name ? '#fff' : 'rgba(255,255,255,0.3)' }}>{p1Name || 'TBD'}</span>
+                                  }
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                  <span style={{ fontSize: 8, fontWeight: 800, color: 'rgba(245,158,11,0.65)', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: 3, padding: '2px 4px', letterSpacing: '0.08em' }}>VS</span>
+                                </div>
+                                <div style={{ textAlign: 'right' }}>
+                                  {p2parts.length === 2
+                                    ? <><div style={{ fontSize: 12, fontWeight: 800, color: '#fff', lineHeight: 1.3 }}>{p2parts[0]}</div><div style={{ fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.5)', lineHeight: 1.3 }}>& {p2parts[1]}</div></>
+                                    : <span style={{ fontSize: 12, fontWeight: 700, color: p2Name ? '#fff' : 'rgba(255,255,255,0.3)' }}>{p2Name || 'TBD'}</span>
+                                  }
+                                </div>
+                              </div>
                               {preview.tournament && (
                                 <p className="text-xs mb-2" style={{ color: 'rgba(255,255,255,0.45)' }}>
                                   {preview.tournament}
                                 </p>
                               )}
-                              {/* Configure & Start Match CTA */}
+                              {/* CTA — same style as queue cards */}
                               {matchId && (
-                                <button
-                                  onClick={e => {
-                                    e.stopPropagation();
-                                    if (!notification.read) markAsRead(notification.id);
-                                    navigate(`/match/${matchId}/score`);
-                                  }}
-                                  className="w-full py-2.5 rounded-xl text-xs font-black flex items-center justify-center gap-2 transition-all active:scale-[0.97] mt-1"
-                                  style={{
-                                    background: 'linear-gradient(135deg, #F59E0B 0%, #0099bb 100%)',
-                                    color: '#000',
-                                    boxShadow: '0 4px 14px rgba(245,158,11,0.4)',
-                                  }}>
-                                  ▶ Configure &amp; Start Match
-                                </button>
+                                isMatchDone ? (
+                                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, padding: '7px 0', background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.22)', borderRadius: 8 }}>
+                                    <CheckCircle style={{ width: 13, height: 13, color: '#4ade80' }} />
+                                    <span style={{ fontSize: 11, fontWeight: 800, color: '#4ade80' }}>Match Completed</span>
+                                  </div>
+                                ) : (
+                                  <button
+                                    onClick={e => {
+                                      e.stopPropagation();
+                                      if (!notification.read) markAsRead(notification.id);
+                                      navigate(`/match/${matchId}/score`);
+                                    }}
+                                    style={{ width: '100%', padding: '8px 0', borderRadius: 8, background: isMatchLive ? 'rgba(245,158,11,0.18)' : 'rgba(99,102,241,0.15)', border: isMatchLive ? '1.5px solid rgba(245,158,11,0.4)' : '1.5px solid rgba(99,102,241,0.35)', color: isMatchLive ? '#FCD34D' : '#a5b4fc', fontSize: 11, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, cursor: 'pointer' }}
+                                  >
+                                    <Play style={{ width: 11, height: 11 }} />
+                                    {isMatchLive ? 'Resume Match' : 'Configure & Start Match'}
+                                  </button>
+                                )
                               )}
                             </div>
                           );

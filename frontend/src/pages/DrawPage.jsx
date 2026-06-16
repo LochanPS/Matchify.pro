@@ -3207,15 +3207,15 @@ const DrawDisplay = ({
     />;
   }
   // Default: Pure knockout (horizontal left-to-right layout)
-  return <KnockoutDisplay 
-    data={bracket} 
-    matches={matches} 
-    user={user} 
-    isOrganizer={isOrganizer} 
+  return <KnockoutDisplay
+    data={bracket}
+    matches={matches}
+    user={user}
+    isOrganizer={isOrganizer}
     onAssignUmpire={onAssignUmpire}
     onViewMatchDetails={onViewMatchDetails}
     onChangeResult={onChangeResult}
-    categoryFormat={activeCategory?.format}
+    categoryFormat={activeCategory?.tournamentFormat}
   />;
 };
 
@@ -3533,12 +3533,19 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
   };
 
   // Find match record by round and position within that round
-  // Handles both staged (stage='KNOCKOUT') and legacy (stage=null) matches
+  // For hybrid (ROUND_ROBIN_KNOCKOUT): only accept stage='KNOCKOUT' to prevent
+  // null-stage group matches from bleeding into the knockout bracket display.
+  // For pure KNOCKOUT: also accept stage=null (legacy matches before stage field).
   const findMatch = (displayIdx, matchIdx) => {
     if (!matches || !Array.isArray(matches)) return null;
     const dbRound = totalRounds - displayIdx;
+    const isHybrid = categoryFormat === 'ROUND_ROBIN_KNOCKOUT';
     const roundMatches = matches
-      .filter(m => m.round === dbRound && (m.stage === 'KNOCKOUT' || m.stage == null))
+      .filter(m => {
+        if (m.round !== dbRound) return false;
+        if (isHybrid) return m.stage === 'KNOCKOUT';
+        return m.stage === 'KNOCKOUT' || m.stage == null;
+      })
       .sort((a, b) => a.matchNumber - b.matchNumber);
     return roundMatches[matchIdx];
   };
@@ -4478,7 +4485,7 @@ const GroupsKnockoutDisplay = ({
                 isOrganizer={isOrganizer}
                 onAssignUmpire={onAssignUmpire}
                 onViewMatchDetails={onViewMatchDetails}
-                categoryFormat={activeCategory?.format}
+                categoryFormat={activeCategory?.tournamentFormat}
               />
             </>
           )}

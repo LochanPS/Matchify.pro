@@ -154,6 +154,7 @@ const CreateTournament = () => {
           await tournamentAPI.createCategory(tournamentId, {
             name: category.name,
             format: category.format,
+            tournamentFormat: category.tournamentFormat || 'KNOCKOUT',
             gender: category.gender,
             ageGroup: category.ageGroup || null,
             entryFee: parseFloat(category.entryFee),

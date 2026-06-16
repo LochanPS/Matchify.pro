@@ -6219,7 +6219,7 @@ const UmpireQueueModal = ({ tournamentId, umpires: initialUmpires, onClose, onUm
         const initial = {};
         initialUmpires.forEach(u => {
           const assigned = matches
-            .filter(m => m.umpireId === u.id && m.queueOrder != null)
+            .filter(m => m.umpireId === u.id && m.queueOrder != null && m.status !== 'COMPLETED')
             .sort((a, b) => (a.queueOrder || 0) - (b.queueOrder || 0));
           initial[u.id] = assigned.map(m => m.id);
         });
@@ -6250,13 +6250,24 @@ const UmpireQueueModal = ({ tournamentId, umpires: initialUmpires, onClose, onUm
     setQueues(p => ({ ...p, [selectedUmpireId]: q }));
   };
 
-  const getMatchLabel = (matchId) => {
+  const getMatchInfo = (matchId) => {
     const m = allMatches.find(x => x.id === matchId);
-    if (!m) return `Match …${matchId.slice(-4)}`;
-    const p1 = m.player1?.name || 'TBD';
-    const p2 = m.player2?.name || 'TBD';
-    const cat = m.category?.name ? ` [${m.category.name}]` : '';
-    return `M${m.matchNumber} · ${p1} vs ${p2}${cat}`;
+    if (!m) return { matchNumber: '?', p1: 'TBD', p2: 'TBD', cat: '' };
+    // Singles: player1Id / player2Id (with optional partnerName for doubles registered as pair)
+    let p1 = m.player1?.name || null;
+    if (p1 && m.player1?.partnerName) p1 += ` / ${m.player1.partnerName}`;
+    let p2 = m.player2?.name || null;
+    if (p2 && m.player2?.partnerName) p2 += ` / ${m.player2.partnerName}`;
+    // Team slots (doubles with team1Player1Id etc.)
+    if (!p1 && (m.team1Player1 || m.team1Player2)) {
+      const n1 = m.team1Player1?.name; const n2 = m.team1Player2?.name;
+      p1 = n1 && n2 ? `${n1} / ${n2}` : n1 || n2 || null;
+    }
+    if (!p2 && (m.team2Player1 || m.team2Player2)) {
+      const n1 = m.team2Player1?.name; const n2 = m.team2Player2?.name;
+      p2 = n1 && n2 ? `${n1} / ${n2}` : n1 || n2 || null;
+    }
+    return { matchNumber: m.matchNumber, p1: p1 || 'TBD', p2: p2 || 'TBD', cat: m.category?.name || '' };
   };
 
   const saveQueue = async () => {
@@ -6423,32 +6434,56 @@ const UmpireQueueModal = ({ tournamentId, umpires: initialUmpires, onClose, onUm
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    {currentQueue.map((matchId, index) => (
-                      <div key={matchId}
-                        className="flex items-center gap-2 rounded-xl px-3 py-2.5"
-                        style={{ background: 'rgba(96,165,250,0.07)', border: '1px solid rgba(96,165,250,0.2)' }}>
-                        <span className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black flex-shrink-0"
-                          style={{ background: 'rgba(96,165,250,0.25)', color: '#93c5fd' }}>{index + 1}</span>
-                        <span className="flex-1 text-xs font-semibold text-white truncate">{getMatchLabel(matchId)}</span>
-                        <div className="flex items-center gap-1 flex-shrink-0">
-                          <button onClick={() => moveUp(index)} disabled={index === 0}
-                            className="w-6 h-6 rounded flex items-center justify-center disabled:opacity-30"
-                            style={{ background: 'rgba(255,255,255,0.07)' }}>
-                            <ChevronUp className="w-3.5 h-3.5 text-white" />
-                          </button>
-                          <button onClick={() => moveDown(index)} disabled={index === currentQueue.length - 1}
-                            className="w-6 h-6 rounded flex items-center justify-center disabled:opacity-30"
-                            style={{ background: 'rgba(255,255,255,0.07)' }}>
-                            <ChevronDown className="w-3.5 h-3.5 text-white" />
-                          </button>
-                          <button onClick={() => removeFromQueue(matchId)}
-                            className="w-6 h-6 rounded flex items-center justify-center hover:bg-red-500/20"
-                            style={{ background: 'rgba(255,255,255,0.07)' }}>
-                            <X className="w-3 h-3" style={{ color: '#f87171' }} />
-                          </button>
+                    {currentQueue.filter(matchId => {
+                      const m = allMatches.find(x => x.id === matchId);
+                      return !m || m.status !== 'COMPLETED';
+                    }).map((matchId, index) => {
+                      const info = getMatchInfo(matchId);
+                      const p1parts = info.p1.split(' / ');
+                      const p2parts = info.p2.split(' / ');
+                      return (
+                        <div key={matchId}
+                          className="flex items-center gap-2 rounded-xl px-3 py-2.5"
+                          style={{ background: 'rgba(96,165,250,0.07)', border: '1px solid rgba(96,165,250,0.2)' }}>
+                          <span className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black flex-shrink-0"
+                            style={{ background: 'rgba(96,165,250,0.25)', color: '#93c5fd' }}>{index + 1}</span>
+                          {/* Match info - multi-line */}
+                          <div className="flex-1 min-w-0">
+                            <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.38)', fontWeight: 700, letterSpacing: '0.04em', marginBottom: 3 }}>
+                              M{info.matchNumber}{info.cat ? ` · ${info.cat}` : ''}
+                            </div>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: 3 }}>
+                              <div>
+                                <div style={{ fontSize: 11, fontWeight: 800, color: '#fff', lineHeight: 1.2 }}>{p1parts[0]}</div>
+                                {p1parts[1] && <div style={{ fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.45)', lineHeight: 1.2 }}>/ {p1parts[1]}</div>}
+                              </div>
+                              <span style={{ fontSize: 8, fontWeight: 800, color: 'rgba(245,158,11,0.6)', padding: '1px 4px', background: 'rgba(245,158,11,0.08)', borderRadius: 3 }}>vs</span>
+                              <div style={{ textAlign: 'right' }}>
+                                <div style={{ fontSize: 11, fontWeight: 800, color: '#fff', lineHeight: 1.2 }}>{p2parts[0]}</div>
+                                {p2parts[1] && <div style={{ fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.45)', lineHeight: 1.2 }}>/ {p2parts[1]}</div>}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1 flex-shrink-0">
+                            <button onClick={() => moveUp(index)} disabled={index === 0}
+                              className="w-6 h-6 rounded flex items-center justify-center disabled:opacity-30"
+                              style={{ background: 'rgba(255,255,255,0.07)' }}>
+                              <ChevronUp className="w-3.5 h-3.5 text-white" />
+                            </button>
+                            <button onClick={() => moveDown(index)} disabled={index === currentQueue.length - 1}
+                              className="w-6 h-6 rounded flex items-center justify-center disabled:opacity-30"
+                              style={{ background: 'rgba(255,255,255,0.07)' }}>
+                              <ChevronDown className="w-3.5 h-3.5 text-white" />
+                            </button>
+                            <button onClick={() => removeFromQueue(matchId)}
+                              className="w-6 h-6 rounded flex items-center justify-center hover:bg-red-500/20"
+                              style={{ background: 'rgba(255,255,255,0.07)' }}>
+                              <X className="w-3 h-3" style={{ color: '#f87171' }} />
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>
@@ -6467,18 +6502,31 @@ const UmpireQueueModal = ({ tournamentId, umpires: initialUmpires, onClose, onUm
                 ) : (
                   <div className="space-y-1.5">
                     {available.map(m => {
-                      const p1 = m.player1?.name || 'TBD';
-                      const p2 = m.player2?.name || 'TBD';
-                      const cat = m.category?.name ? ` [${m.category.name}]` : '';
+                      const info = getMatchInfo(m.id);
+                      const p1parts = info.p1.split(' / ');
+                      const p2parts = info.p2.split(' / ');
                       return (
                         <button key={m.id} onClick={() => addToQueue(m.id)}
-                          className="w-full flex items-center gap-2 rounded-xl px-3 py-2 text-left transition-all hover:scale-[1.01]"
+                          className="w-full flex items-center gap-2 rounded-xl px-3 py-2.5 text-left transition-all hover:scale-[1.01]"
                           style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
                           <Plus className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#60a5fa' }} />
-                          <span className="flex-1 text-xs font-semibold truncate" style={{ color: 'rgba(255,255,255,0.8)' }}>
-                            M{m.matchNumber} · {p1} vs {p2}{cat}
-                          </span>
-                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded"
+                          <div className="flex-1 min-w-0">
+                            <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.38)', fontWeight: 700, marginBottom: 3 }}>
+                              M{info.matchNumber}{info.cat ? ` · ${info.cat}` : ''}
+                            </div>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: 3 }}>
+                              <div>
+                                <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,0.9)', lineHeight: 1.2 }}>{p1parts[0]}</div>
+                                {p1parts[1] && <div style={{ fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.4)', lineHeight: 1.2 }}>/ {p1parts[1]}</div>}
+                              </div>
+                              <span style={{ fontSize: 8, fontWeight: 800, color: 'rgba(245,158,11,0.6)', padding: '1px 4px', background: 'rgba(245,158,11,0.08)', borderRadius: 3 }}>vs</span>
+                              <div style={{ textAlign: 'right' }}>
+                                <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,0.9)', lineHeight: 1.2 }}>{p2parts[0]}</div>
+                                {p2parts[1] && <div style={{ fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.4)', lineHeight: 1.2 }}>/ {p2parts[1]}</div>}
+                              </div>
+                            </div>
+                          </div>
+                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded flex-shrink-0"
                             style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.35)' }}>
                             {m.status}
                           </span>

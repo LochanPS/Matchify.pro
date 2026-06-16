@@ -422,10 +422,10 @@ const NotificationDetailPage = () => {
       {/* Sticky header */}
       <div className="sticky top-0 z-20" style={{ background: 'rgba(5,8,16,0.82)', borderBottom: `1px solid ${typeColor.border}`, backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)' }}>
         <div className="px-4 py-3 flex items-center gap-3">
-          <button onClick={() => navigate('/notifications')}
+          <button onClick={() => navigate(-1)}
             className="flex items-center gap-1.5 text-sm font-medium transition-colors"
             style={{ color: 'rgba(255,255,255,0.6)' }}>
-            <ArrowLeft className="w-4 h-4" /> Back to Notifications
+            <ArrowLeft className="w-4 h-4" /> Back
           </button>
         </div>
       </div>

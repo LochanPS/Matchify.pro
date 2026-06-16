@@ -1539,11 +1539,11 @@ const DrawPage = () => {
             disabled: false,
             action: () => { setShowActionsSheet(false); setSelectedAction(null); setShowRestartModal(true); },
           }] : []),
-          ...(!hasPlayedMatches && bracket ? [{
+          ...(bracket ? [{
             id: 'delete',
             icon: <Trash2 style={{ width: 20, height: 20 }} />,
             label: 'Delete Draw',
-            detail: 'Permanently delete the bracket and all player slot assignments. This can only be done before any matches have been played. This action cannot be undone.',
+            detail: 'Permanently delete the bracket, all match results and player slot assignments for this category. This action cannot be undone.',
             buttonLabel: 'Delete Draw',
             accent: 'red',
             disabled: false,

@@ -245,11 +245,20 @@ const NotificationDetailPage = () => {
       .then(res => {
         const apiMatches = res.data?.matches || [];
 
-        // If backend embedded match summaries, merge with live statuses from API
+        // If backend embedded match summaries, merge live status + live names from API
         if (Array.isArray(d.matches) && d.matches.length > 0) {
-          const statusMap = {};
-          for (const m of apiMatches) statusMap[m.id] = m.status;
-          setQueueMatches(d.matches.map(m => ({ ...m, status: statusMap[m.id] || m.status })));
+          const liveMap = {};
+          for (const m of apiMatches) liveMap[m.id] = m;
+          setQueueMatches(d.matches.map(m => {
+            const live = liveMap[m.id];
+            return {
+              ...m,
+              status: (live?.status) || m.status,
+              // Override stored names with live API names (fixes stale TBD from before guest-name fix)
+              player1Name: live?.player1?.name || m.player1Name || 'TBD',
+              player2Name: live?.player2?.name || m.player2Name || 'TBD',
+            };
+          }));
         } else {
           // Old notification — no embedded matches. Filter API matches by tournamentId + queueOrder.
           const filtered = apiMatches

@@ -1083,21 +1083,12 @@ const restartDraw = async (req, res) => {
       });
     }
 
-    // Check if any matches are currently IN_PROGRESS
-    const inProgressMatches = await prisma.match.findMany({
-      where: {
-        tournamentId,
-        categoryId,
-        status: 'IN_PROGRESS'
-      }
+    // Force-terminate any IN_PROGRESS matches before resetting
+    // (organizer restart overrides live matches — no need to block)
+    await prisma.match.updateMany({
+      where: { tournamentId, categoryId, status: 'IN_PROGRESS' },
+      data: { status: 'PENDING', startedAt: null }
     });
-
-    if (inProgressMatches.length > 0) {
-      return res.status(400).json({
-        success: false,
-        error: 'Cannot restart draw while matches are in progress. Please complete or cancel ongoing matches first.'
-      });
-    }
 
     // Get the draw
     const draw = await prisma.draw.findUnique({

@@ -133,6 +133,11 @@ const EditTournament = () => {
   const [deletingPosterId, setDeletingPosterId] = useState(null);
   const [uploadingPosters, setUploadingPosters] = useState(false);
 
+  // Delete tournament
+  const [showDeleteTournamentModal, setShowDeleteTournamentModal] = useState(false);
+  const [deleteReason, setDeleteReason] = useState('');
+  const [deletingTournament, setDeletingTournament] = useState(false);
+
   useEffect(() => {
     fetchTournament();
   }, [id]);
@@ -353,6 +358,22 @@ const EditTournament = () => {
       showMsg('error', getErrorMessage(err, 'Failed to delete poster'));
     } finally {
       setDeletingPosterId(null);
+    }
+  };
+
+  const handleDeleteTournament = async () => {
+    const hasRegistrations = (tournament?.registrations?.length ?? tournament?._count?.registrations ?? 0) > 0;
+    if (hasRegistrations && !deleteReason.trim()) {
+      showMsg('error', 'Please provide a reason — participants will be notified.');
+      return;
+    }
+    setDeletingTournament(true);
+    try {
+      await tournamentAPI.deleteTournament(id, deleteReason.trim());
+      navigate('/organizer/tournaments', { replace: true });
+    } catch (err) {
+      showMsg('error', getErrorMessage(err, 'Failed to delete tournament'));
+      setDeletingTournament(false);
     }
   };
 
@@ -827,8 +848,92 @@ const EditTournament = () => {
             </div>
           </div>
 
+          {/* ── Danger Zone ───────────────────────────────────────────────── */}
+          <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(239,68,68,0.04)', border: '1px solid rgba(239,68,68,0.2)' }}>
+            <div className="px-4 py-3 flex items-center gap-3" style={{ borderBottom: '1px solid rgba(239,68,68,0.15)' }}>
+              <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.3)' }}>
+                <Trash2 className="w-4 h-4" style={{ color: '#ef4444' }} />
+              </div>
+              <h2 className="text-sm font-black text-white">Danger Zone</h2>
+            </div>
+            <div className="p-4">
+              <p className="text-xs mb-4" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                Permanently delete this tournament and all its data. Registered participants will be notified.
+              </p>
+              <button
+                onClick={() => { setShowDeleteTournamentModal(true); setDeleteReason(''); }}
+                className="w-full py-3.5 rounded-xl font-black text-sm flex items-center justify-center gap-2 transition-all"
+                style={{ background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.35)', color: '#ef4444' }}
+              >
+                <Trash2 className="w-4 h-4" />
+                Delete Tournament
+              </button>
+            </div>
+          </div>
+
         </div>
       </div>
+
+      {/* ── Delete Tournament Modal ────────────────────────────────────────── */}
+      {showDeleteTournamentModal && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center" style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}>
+          <div className="w-full rounded-t-3xl p-6 pb-10 space-y-4" style={{ background: '#0b1020', border: '1px solid rgba(239,68,68,0.25)', maxWidth: 480 }}>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)' }}>
+                <Trash2 className="w-5 h-5" style={{ color: '#ef4444' }} />
+              </div>
+              <div>
+                <h3 className="text-base font-black text-white">Delete Tournament?</h3>
+                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>This cannot be undone</p>
+              </div>
+            </div>
+
+            <div className="rounded-xl p-3" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)' }}>
+              <p className="text-xs font-semibold" style={{ color: '#f87171' }}>
+                ⚠️ All draws, matches, registrations, and data for <span className="font-black text-white">{tournament?.name}</span> will be permanently deleted.
+              </p>
+            </div>
+
+            {((tournament?.registrations?.length ?? 0) > 0 || (tournament?._count?.registrations ?? 0) > 0) && (
+              <div>
+                <label className="block text-xs font-black mb-1.5" style={{ color: 'rgba(255,255,255,0.6)' }}>
+                  Reason for cancellation <span style={{ color: '#ef4444' }}>*</span>
+                </label>
+                <textarea
+                  value={deleteReason}
+                  onChange={e => setDeleteReason(e.target.value)}
+                  placeholder="e.g., Venue unavailable, rescheduled..."
+                  rows={3}
+                  className="w-full px-3 py-2.5 rounded-xl text-white text-sm resize-none"
+                  style={{ background: 'rgba(0,0,0,0.35)', border: '1px solid rgba(255,255,255,0.12)', outline: 'none' }}
+                />
+                <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.35)' }}>Participants will be notified with this reason.</p>
+              </div>
+            )}
+
+            <div className="flex gap-3 pt-2">
+              <button
+                onClick={() => setShowDeleteTournamentModal(false)}
+                className="flex-1 py-3.5 rounded-xl font-black text-sm"
+                style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.7)' }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteTournament}
+                disabled={deletingTournament}
+                className="flex-1 py-3.5 rounded-xl font-black text-sm flex items-center justify-center gap-2 disabled:opacity-50"
+                style={{ background: 'linear-gradient(135deg,#dc2626,#b91c1c)', color: '#fff' }}
+              >
+                {deletingTournament
+                  ? <div className="w-4 h-4 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: '#fff transparent transparent transparent' }} />
+                  : <Trash2 className="w-4 h-4" />}
+                {deletingTournament ? 'Deleting…' : 'Delete Forever'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

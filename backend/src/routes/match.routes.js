@@ -998,7 +998,7 @@ const endMatchHandler = async (req, res) => {
     // ── 8. Background: stats + notifications (non-critical, fire-and-forget) ────
     const runBackground = async () => {
       const getRoundName = (r, stage) => {
-        if (stage === 'GROUP') return `Round ${r}`;
+        if (stage === 'GROUP') return 'Round Robin';
         return r === 1 ? 'Final' : r === 2 ? 'Semi Finals' : r === 3 ? 'Quarter Finals' : r === 4 ? 'Round of 16' : `Round ${r}`;
       };
       const roundName = getRoundName(match.round, match.stage);

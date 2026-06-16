@@ -53,9 +53,19 @@ const NotificationsPage = () => {
 
   const getNotificationColor = (type, isUnread) => {
     if (isUnread) {
-      return { bg: 'rgba(15,20,40,0.72)', border: 'rgba(245,158,11,0.28)', shadow: 'rgba(0,0,0,0.25)' };
+      return {
+        bg: 'rgba(15,20,42,0.78)',
+        border: 'rgba(245,158,11,0.45)',
+        shadow: '0 2px 20px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.08)',
+        accentLeft: true,
+      };
     }
-    return { bg: 'rgba(10,14,30,0.62)', border: 'rgba(255,255,255,0.08)', shadow: 'rgba(0,0,0,0.2)' };
+    return {
+      bg: 'rgba(10,14,30,0.68)',
+      border: 'rgba(255,255,255,0.14)',
+      shadow: '0 2px 14px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.06)',
+      accentLeft: false,
+    };
   };
 
   // Smart preview: for MATCH_ASSIGNED/STARTING_SOON parse data for player names;
@@ -296,10 +306,11 @@ const NotificationsPage = () => {
                   style={{
                     background: colorScheme.bg,
                     border: `1px solid ${colorScheme.border}`,
-                    boxShadow: `0 2px 16px ${colorScheme.shadow}`,
+                    boxShadow: colorScheme.shadow,
                     backdropFilter: 'blur(18px)',
                     WebkitBackdropFilter: 'blur(18px)',
                     animation: `slideUp 0.4s ease-out ${index * 0.05}s both`,
+                    borderLeft: colorScheme.accentLeft ? '3px solid rgba(245,158,11,0.7)' : `1px solid ${colorScheme.border}`,
                   }}
                 >
 

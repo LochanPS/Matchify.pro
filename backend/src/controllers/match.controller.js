@@ -1340,23 +1340,48 @@ const getUmpireMatches = async (req, res) => {
       orderBy: [{ queueOrder: 'asc' }, { status: 'asc' }, { round: 'asc' }, { matchNumber: 'asc' }]
     });
 
-    // Batch player lookups — one query, not N
+    // Batch player lookups — collect singles + all doubles team slot IDs in one pass
     const playerIds = new Set();
+    const GUEST_PREFIX = 'guest-';
+    const addId = (id) => { if (id && !id.startsWith(GUEST_PREFIX)) playerIds.add(id); };
     for (const m of matches) {
-      if (m.player1Id && !m.player1Id.startsWith('guest-')) playerIds.add(m.player1Id);
-      if (m.player2Id && !m.player2Id.startsWith('guest-')) playerIds.add(m.player2Id);
+      addId(m.player1Id); addId(m.player2Id);
+      addId(m.team1Player1Id); addId(m.team1Player2Id);
+      addId(m.team2Player1Id); addId(m.team2Player2Id);
     }
     const players = playerIds.size > 0
       ? await prisma.user.findMany({ where: { id: { in: [...playerIds] } }, select: { id: true, name: true } })
       : [];
     const playerMap = Object.fromEntries(players.map(p => [p.id, p]));
 
-    const matchesWithPlayers = matches.map(m => ({
-      ...m,
-      player1: (m.player1Id ? playerMap[m.player1Id] : null) || { name: 'TBD' },
-      player2: (m.player2Id ? playerMap[m.player2Id] : null) || { name: 'TBD' },
-      score:   m.scoreJson ? JSON.parse(m.scoreJson) : null
-    }));
+    const resolveName = (id) => (id ? (playerMap[id]?.name || null) : null);
+    const buildTeamName = (id1, id2) => {
+      const n1 = resolveName(id1);
+      const n2 = resolveName(id2);
+      if (n1 && n2) return `${n1} & ${n2}`;
+      if (n1) return n1;
+      if (n2) return n2;
+      return null;
+    };
+
+    const matchesWithPlayers = matches.map(m => {
+      // Doubles match: team slots populated
+      const isDoubles = m.team1Player1Id || m.team1Player2Id || m.team2Player1Id || m.team2Player2Id;
+      let p1Name, p2Name;
+      if (isDoubles) {
+        p1Name = buildTeamName(m.team1Player1Id, m.team1Player2Id) || 'TBD';
+        p2Name = buildTeamName(m.team2Player1Id, m.team2Player2Id) || 'TBD';
+      } else {
+        p1Name = resolveName(m.player1Id) || 'TBD';
+        p2Name = resolveName(m.player2Id) || 'TBD';
+      }
+      return {
+        ...m,
+        player1: { name: p1Name },
+        player2: { name: p2Name },
+        score: m.scoreJson ? JSON.parse(m.scoreJson) : null,
+      };
+    });
 
     res.json({ success: true, matches: matchesWithPlayers });
   } catch (error) {
@@ -1946,28 +1971,45 @@ const saveUmpireQueue = async (req, res) => {
       try {
         const assignedMatches = await prisma.match.findMany({
           where: { id: { in: matchIds } },
-          include: { category: { select: { name: true } } },
+          select: {
+            id: true, queueOrder: true, round: true, matchNumber: true, status: true,
+            player1Id: true, player2Id: true,
+            team1Player1Id: true, team1Player2Id: true,
+            team2Player1Id: true, team2Player2Id: true,
+            category: { select: { name: true } },
+          },
           orderBy: { queueOrder: 'asc' }
         });
         const pidSet = new Set();
+        const addPid = (id) => { if (id && !id.startsWith('guest-')) pidSet.add(id); };
         for (const m of assignedMatches) {
-          if (m.player1Id && !m.player1Id.startsWith('guest-')) pidSet.add(m.player1Id);
-          if (m.player2Id && !m.player2Id.startsWith('guest-')) pidSet.add(m.player2Id);
+          addPid(m.player1Id); addPid(m.player2Id);
+          addPid(m.team1Player1Id); addPid(m.team1Player2Id);
+          addPid(m.team2Player1Id); addPid(m.team2Player2Id);
         }
         const pList = pidSet.size > 0
           ? await prisma.user.findMany({ where: { id: { in: [...pidSet] } }, select: { id: true, name: true } })
           : [];
         const pMap = Object.fromEntries(pList.map(p => [p.id, p]));
-        matchSummaries = assignedMatches.map(m => ({
-          id: m.id,
-          queueOrder: m.queueOrder,
-          round: m.round,
-          matchNumber: m.matchNumber,
-          status: m.status,
-          categoryName: m.category?.name || '',
-          player1Name: (m.player1Id ? pMap[m.player1Id]?.name : null) || 'TBD',
-          player2Name: (m.player2Id ? pMap[m.player2Id]?.name : null) || 'TBD',
-        }));
+        const resolvePName = (id) => (id ? (pMap[id]?.name || null) : null);
+        const buildPTeam = (id1, id2) => {
+          const n1 = resolvePName(id1); const n2 = resolvePName(id2);
+          if (n1 && n2) return `${n1} & ${n2}`;
+          return n1 || n2 || null;
+        };
+        matchSummaries = assignedMatches.map(m => {
+          const isDoubles = m.team1Player1Id || m.team1Player2Id || m.team2Player1Id || m.team2Player2Id;
+          return {
+            id: m.id,
+            queueOrder: m.queueOrder,
+            round: m.round,
+            matchNumber: m.matchNumber,
+            status: m.status,
+            categoryName: m.category?.name || '',
+            player1Name: isDoubles ? (buildPTeam(m.team1Player1Id, m.team1Player2Id) || 'TBD') : (resolvePName(m.player1Id) || 'TBD'),
+            player2Name: isDoubles ? (buildPTeam(m.team2Player1Id, m.team2Player2Id) || 'TBD') : (resolvePName(m.player2Id) || 'TBD'),
+          };
+        });
       } catch (detailErr) {
         console.error('⚠️ Match detail fetch failed (non-fatal):', detailErr.message);
       }

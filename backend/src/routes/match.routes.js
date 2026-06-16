@@ -997,8 +997,11 @@ const endMatchHandler = async (req, res) => {
 
     // ── 8. Background: stats + notifications (non-critical, fire-and-forget) ────
     const runBackground = async () => {
-      const getRoundName = (r) => r === 1 ? 'Final' : r === 2 ? 'Semi Finals' : r === 3 ? 'Quarter Finals' : r === 4 ? 'Round of 16' : `Round ${r}`;
-      const roundName = getRoundName(match.round);
+      const getRoundName = (r, stage) => {
+        if (stage === 'GROUP') return `Round ${r}`;
+        return r === 1 ? 'Final' : r === 2 ? 'Semi Finals' : r === 3 ? 'Quarter Finals' : r === 4 ? 'Round of 16' : `Round ${r}`;
+      };
+      const roundName = getRoundName(match.round, match.stage);
       const notifData = JSON.stringify({ matchId: match.id, tournamentId: match.tournamentId, categoryId: match.categoryId, round: match.round, roundName });
 
       try {

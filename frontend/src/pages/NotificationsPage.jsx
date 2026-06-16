@@ -1,10 +1,11 @@
-﻿import React, { useEffect } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCheck, ChevronRight, ArrowLeft } from 'lucide-react';
+import { CheckCheck, ChevronRight, ArrowLeft, CheckCircle, Play } from 'lucide-react';
 import { useNotifications } from '../contexts/NotificationContext';
 import { formatDistanceToNow, format } from 'date-fns';
 import MatchifyLogo from '../components/MatchifyLogo';
 import Spinner from '../components/Spinner';
+import api from '../utils/api';
 
 // Pre-generated particle data — deterministic, no Math.random in render
 
@@ -19,9 +20,25 @@ const NotificationsPage = () => {
     markAllAsRead,
   } = useNotifications();
 
+  const [liveMatchMap, setLiveMatchMap] = useState({});
+
   useEffect(() => {
     fetchNotifications();
   }, []);
+
+  // Fetch live match data once queue notifications are loaded
+  useEffect(() => {
+    if (!notifications?.length) return;
+    const hasQueue = notifications.some(n => {
+      try { const d = JSON.parse(n.data || '{}'); return n.type === 'MATCH_ASSIGNED' && d.isQueue; } catch { return false; }
+    });
+    if (!hasQueue) return;
+    api.get('/matches/umpire-matches').then(res => {
+      const map = {};
+      for (const m of (res.data?.matches || [])) map[m.id] = m;
+      setLiveMatchMap(map);
+    }).catch(() => {});
+  }, [notifications]);
 
   const getNotificationIcon = (type) => {
     const icons = {
@@ -297,6 +314,136 @@ const NotificationsPage = () => {
           <div className="space-y-3">
             {notifications.map((notification, index) => {
               const colorScheme = getNotificationColor(notification.type, !notification.read);
+
+              // Detect queue notification — render expanded inline match cards
+              let parsedData = {};
+              try { parsedData = JSON.parse(notification.data || '{}'); } catch {}
+              const isQueueNotif = notification.type === 'MATCH_ASSIGNED' && parsedData.isQueue === true;
+
+              if (isQueueNotif) {
+                const storedMatches = Array.isArray(parsedData.matches) ? parsedData.matches : [];
+                const resolvedMatches = storedMatches.map(m => {
+                  const live = liveMatchMap[m.id];
+                  return {
+                    ...m,
+                    status: live?.status || m.status,
+                    player1Name: live?.player1?.name || m.player1Name || 'TBD',
+                    player2Name: live?.player2?.name || m.player2Name || 'TBD',
+                  };
+                });
+                const completed = resolvedMatches.filter(m => m.status === 'COMPLETED').length;
+                const total = resolvedMatches.length;
+
+                return (
+                  <div
+                    key={notification.id}
+                    className="rounded-2xl overflow-hidden"
+                    style={{
+                      background: colorScheme.bg,
+                      border: `1px solid ${colorScheme.border}`,
+                      boxShadow: colorScheme.shadow,
+                      backdropFilter: 'blur(18px)',
+                      WebkitBackdropFilter: 'blur(18px)',
+                      animation: `slideUp 0.4s ease-out ${index * 0.05}s both`,
+                      borderLeft: colorScheme.accentLeft ? '3px solid rgba(245,158,11,0.7)' : `1px solid ${colorScheme.border}`,
+                    }}
+                  >
+                    {/* Queue card header */}
+                    <div style={{ padding: '12px 14px 10px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}
+                      onClick={() => { if (!notification.read) markAsRead(notification.id); }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <div style={{ width: 38, height: 38, borderRadius: 10, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>⚖️</div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <span style={{ fontSize: 14, fontWeight: 800, color: '#fff' }}>{notification.title}</span>
+                            {!notification.read && <div style={{ width: 7, height: 7, borderRadius: '50%', background: '#F59E0B', flexShrink: 0 }} />}
+                          </div>
+                          <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>
+                            {parsedData.tournamentName || ''} · {completed}/{total} done
+                          </span>
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6 }}>
+                        <span style={{ fontSize: 10, fontWeight: 600, color: '#F59E0B' }}>
+                          {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
+                        </span>
+                        <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: 10 }}>•</span>
+                        <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)' }}>
+                          {format(new Date(notification.createdAt), 'MMM dd, h:mm a')}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Inline match cards */}
+                    <div style={{ padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      {resolvedMatches.map((m, mi) => {
+                        const isCompleted = m.status === 'COMPLETED';
+                        const isLive = m.status === 'IN_PROGRESS' || m.status === 'LIVE';
+                        const p1parts = (m.player1Name || 'TBD').split(' / ');
+                        const p2parts = (m.player2Name || 'TBD').split(' / ');
+                        return (
+                          <div key={m.id || mi} style={{
+                            background: isCompleted ? 'rgba(34,197,94,0.06)' : isLive ? 'rgba(245,158,11,0.07)' : 'rgba(255,255,255,0.04)',
+                            border: isCompleted ? '1px solid rgba(34,197,94,0.22)' : isLive ? '1px solid rgba(245,158,11,0.28)' : '1px solid rgba(255,255,255,0.08)',
+                            borderRadius: 12, overflow: 'hidden',
+                          }}>
+                            {/* Match header */}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '5px 10px', borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(255,255,255,0.02)' }}>
+                              <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.38)', fontWeight: 600 }}>
+                                Match {mi + 1} of {total} · Rnd {m.round} #{m.matchNumber}
+                              </span>
+                              {m.categoryName ? <span style={{ fontSize: 10, color: 'rgba(168,85,246,0.85)', fontWeight: 700 }}>{m.categoryName}</span> : null}
+                            </div>
+                            {/* Players */}
+                            <div style={{ padding: '8px 10px' }}>
+                              <div style={{ display: 'grid', gridTemplateColumns: '1fr 34px 1fr', alignItems: 'center', gap: 4, marginBottom: 7 }}>
+                                <div>
+                                  {p1parts.length === 2
+                                    ? <><div style={{ fontSize: 12, fontWeight: 800, color: '#fff', lineHeight: 1.3 }}>{p1parts[0]}</div><div style={{ fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.5)', lineHeight: 1.3 }}>& {p1parts[1]}</div></>
+                                    : <span style={{ fontSize: 12, fontWeight: 700, color: m.player1Name ? '#fff' : 'rgba(255,255,255,0.3)' }}>{m.player1Name || 'TBD'}</span>
+                                  }
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                                  <span style={{ fontSize: 8, fontWeight: 800, color: 'rgba(245,158,11,0.65)', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: 3, padding: '2px 4px', letterSpacing: '0.08em' }}>VS</span>
+                                </div>
+                                <div style={{ textAlign: 'right' }}>
+                                  {p2parts.length === 2
+                                    ? <><div style={{ fontSize: 12, fontWeight: 800, color: '#fff', lineHeight: 1.3 }}>{p2parts[0]}</div><div style={{ fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.5)', lineHeight: 1.3 }}>& {p2parts[1]}</div></>
+                                    : <span style={{ fontSize: 12, fontWeight: 700, color: m.player2Name ? '#fff' : 'rgba(255,255,255,0.3)' }}>{m.player2Name || 'TBD'}</span>
+                                  }
+                                </div>
+                              </div>
+                              {/* CTA */}
+                              {isCompleted ? (
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, padding: '7px 0', background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.22)', borderRadius: 8 }}>
+                                  <CheckCircle style={{ width: 13, height: 13, color: '#4ade80' }} />
+                                  <span style={{ fontSize: 11, fontWeight: 800, color: '#4ade80' }}>Match Completed</span>
+                                </div>
+                              ) : (
+                                <button
+                                  onClick={e => {
+                                    e.stopPropagation();
+                                    if (!notification.read) markAsRead(notification.id);
+                                    navigate(`/match/${m.id}/score`);
+                                  }}
+                                  style={{ width: '100%', padding: '8px 0', borderRadius: 8, background: isLive ? 'rgba(245,158,11,0.18)' : 'rgba(99,102,241,0.15)', border: isLive ? '1.5px solid rgba(245,158,11,0.4)' : '1.5px solid rgba(99,102,241,0.35)', color: isLive ? '#FCD34D' : '#a5b4fc', fontSize: 11, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, cursor: 'pointer' }}
+                                >
+                                  <Play style={{ width: 11, height: 11 }} />
+                                  {isLive ? 'Resume Match' : 'Configure & Start Match'}
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                      {resolvedMatches.length === 0 && (
+                        <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', textAlign: 'center', padding: '8px 0' }}>Loading matches…</p>
+                      )}
+                    </div>
+                  </div>
+                );
+              }
 
               return (
                 <div

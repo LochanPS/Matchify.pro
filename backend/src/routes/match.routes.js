@@ -714,7 +714,10 @@ const endMatchHandler = async (req, res) => {
     // ── 1. Fetch match ─────────────────────────────────────────────────────────
     const match = await prisma.match.findUnique({
       where: { id: matchId },
-      include: { tournament: { select: { organizerId: true } } }
+      include: {
+        tournament: { select: { organizerId: true } },
+        category: { select: { tournamentFormat: true } },
+      }
     });
     if (!match) return res.status(404).json({ success: false, error: 'Match not found' });
 
@@ -997,11 +1000,14 @@ const endMatchHandler = async (req, res) => {
 
     // ── 8. Background: stats + notifications (non-critical, fire-and-forget) ────
     const runBackground = async () => {
-      const getRoundName = (r, stage) => {
+      const getRoundName = (r, stage, categoryFormat) => {
         if (stage === 'GROUP') return 'Round Robin';
+        if (stage === 'KNOCKOUT') return r === 1 ? 'Final' : r === 2 ? 'Semi Finals' : r === 3 ? 'Quarter Finals' : r === 4 ? 'Round of 16' : `Round ${r}`;
+        // stage is null (legacy draw) — use category format as fallback
+        if (categoryFormat === 'ROUND_ROBIN') return 'Round Robin';
         return r === 1 ? 'Final' : r === 2 ? 'Semi Finals' : r === 3 ? 'Quarter Finals' : r === 4 ? 'Round of 16' : `Round ${r}`;
       };
-      const roundName = getRoundName(match.round, match.stage);
+      const roundName = getRoundName(match.round, match.stage, match.category?.tournamentFormat);
       const notifData = JSON.stringify({ matchId: match.id, tournamentId: match.tournamentId, categoryId: match.categoryId, round: match.round, roundName });
 
       try {

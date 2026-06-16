@@ -215,7 +215,7 @@ const MatchCard = ({ match, index, total, liveStatus, onStart }) => {
   );
 };
 
-const BG = 'linear-gradient(180deg,#0a0a1f 0%,#050810 50%,#0a0a1f 100%)';
+const BG = '#050810';
 
 const NotificationDetailPage = () => {
   const { id } = useParams();
@@ -381,8 +381,21 @@ const NotificationDetailPage = () => {
 
   return (
     <div className="min-h-screen relative" style={{ background: BG }}>
-      {/* Bg glows + particles */}
-      <div className="fixed top-0 bottom-0 pointer-events-none overflow-hidden" style={{ left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: '480px' }}>
+      {/* Galaxy background */}
+      <div className="fixed inset-0 pointer-events-none" style={{
+        backgroundImage: 'url(/bg-notifications.png)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center top',
+        backgroundRepeat: 'no-repeat',
+        opacity: 0.5,
+        zIndex: 0,
+      }} />
+      <div className="fixed inset-0 pointer-events-none" style={{
+        background: 'linear-gradient(180deg, rgba(5,8,16,0.6) 0%, rgba(5,8,16,0.78) 60%, rgba(5,8,16,0.92) 100%)',
+        zIndex: 1,
+      }} />
+      {/* Particles */}
+      <div className="fixed top-0 bottom-0 pointer-events-none overflow-hidden" style={{ left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: '480px', zIndex: 2 }}>
         <div className="absolute top-0 right-0 w-64 h-64 rounded-full blur-3xl opacity-15"
           style={{ background: `radial-gradient(circle,${typeColor.accent}50 0%,transparent 70%)` }} />
         <div className="absolute bottom-1/3 left-0 w-56 h-56 rounded-full blur-3xl opacity-10"
@@ -398,7 +411,7 @@ const NotificationDetailPage = () => {
       <style>{`@keyframes detailStar{0%,100%{transform:scale(1);opacity:inherit}50%{transform:scale(2);opacity:0.6}}`}</style>
 
       {/* Sticky header */}
-      <div className="sticky top-0 z-20" style={{ background: 'rgba(7,7,26,0.95)', borderBottom: `1px solid ${typeColor.border}`, backdropFilter: 'blur(20px)' }}>
+      <div className="sticky top-0 z-20" style={{ background: 'rgba(5,8,16,0.82)', borderBottom: `1px solid ${typeColor.border}`, backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)' }}>
         <div className="px-4 py-3 flex items-center gap-3">
           <button onClick={() => navigate('/notifications')}
             className="flex items-center gap-1.5 text-sm font-medium transition-colors"
@@ -408,7 +421,7 @@ const NotificationDetailPage = () => {
         </div>
       </div>
 
-      <div className="relative px-4 py-5 space-y-4">
+      <div className="relative px-4 py-5 space-y-4" style={{ zIndex: 10 }}>
 
         {/* ── Notification header card (always shown) ── */}
         <div className="rounded-2xl overflow-hidden" style={{ background: typeColor.bg, border: `1.5px solid ${typeColor.border}` }}>

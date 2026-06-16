@@ -54,11 +54,9 @@ const NotificationsPage = () => {
   // Alternating color scheme: even index = amber, odd index = teal (both Matchify brand colors)
   const getNotificationColor = (type, index) => {
     if (index % 2 === 0) {
-      // Amber / gold — Matchify primary
-      return { bg: 'linear-gradient(135deg, rgba(245,158,11,0.11), rgba(217,119,6,0.07))', border: 'rgba(245,158,11,0.30)', shadow: 'rgba(245,158,11,0.14)' };
+      return { bg: 'linear-gradient(135deg, rgba(245,158,11,0.13), rgba(217,119,6,0.08))', border: 'rgba(245,158,11,0.32)', shadow: 'rgba(245,158,11,0.18)', glass: 'rgba(245,158,11,0.05)' };
     } else {
-      // Teal / cyan — Matchify secondary (used in button gradients)
-      return { bg: 'linear-gradient(135deg, rgba(0,153,187,0.11), rgba(0,120,150,0.07))', border: 'rgba(0,153,187,0.30)', shadow: 'rgba(0,153,187,0.14)' };
+      return { bg: 'linear-gradient(135deg, rgba(0,153,187,0.13), rgba(0,120,150,0.08))', border: 'rgba(0,153,187,0.32)', shadow: 'rgba(0,153,187,0.18)', glass: 'rgba(0,153,187,0.05)' };
     }
   };
 
@@ -94,8 +92,22 @@ const NotificationsPage = () => {
 
   return (
     <div className="min-h-screen relative overflow-hidden" style={{ background: '#050810' }}>
+      {/* Galaxy background image */}
+      <div className="fixed inset-0 pointer-events-none" style={{
+        backgroundImage: 'url(/bg-notifications.png)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center top',
+        backgroundRepeat: 'no-repeat',
+        opacity: 0.55,
+        zIndex: 0,
+      }} />
+      {/* Dark overlay for readability */}
+      <div className="fixed inset-0 pointer-events-none" style={{
+        background: 'linear-gradient(180deg, rgba(5,8,16,0.55) 0%, rgba(5,8,16,0.72) 60%, rgba(5,8,16,0.88) 100%)',
+        zIndex: 1,
+      }} />
       {/* Ambient Blobs */}
-      <div className="fixed top-0 bottom-0 pointer-events-none overflow-hidden" style={{ left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: "480px" }}>
+      <div className="fixed top-0 bottom-0 pointer-events-none overflow-hidden" style={{ left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: "480px", zIndex: 2 }}>
         <div style={{ position: 'absolute', width: '440px', height: '440px', top: '-140px', right: '-120px', background: 'radial-gradient(circle, rgba(245,158,11,0.09) 0%, transparent 70%)', filter: 'blur(80px)', borderRadius: '50%' }} />
         <div style={{ position: 'absolute', width: '400px', height: '400px', bottom: '5%', left: '-120px', background: 'radial-gradient(circle, rgba(139,92,246,0.07) 0%, transparent 70%)', filter: 'blur(80px)', borderRadius: '50%' }} />
       </div>
@@ -135,12 +147,13 @@ const NotificationsPage = () => {
       `}</style>
 
       {/* Sticky Header */}
-      <div 
+      <div
         className="sticky top-0 z-50 backdrop-blur-md border-b relative"
         style={{
-          background: 'rgba(7,7,26,0.95)',
-          borderColor: 'rgba(255,255,255,0.08)',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
+          background: 'rgba(5,8,16,0.82)',
+          borderColor: 'rgba(255,255,255,0.1)',
+          boxShadow: '0 4px 24px rgba(0,0,0,0.5)',
+          backdropFilter: 'blur(24px)',
           animation: 'slideDown 0.5s ease-out'
         }}
       >
@@ -196,7 +209,7 @@ const NotificationsPage = () => {
         </div>
       </div>
 
-      <div className="relative max-w-md mx-auto px-4 py-6">
+      <div className="relative max-w-md mx-auto px-4 py-6" style={{ zIndex: 10 }}>
         {/* Action Buttons */}
         {notifications.length > 0 && notifications.some(n => !n.read) && (
           <div
@@ -284,9 +297,11 @@ const NotificationsPage = () => {
                   className="rounded-2xl p-4 relative overflow-hidden cursor-pointer transition-all duration-200 hover:scale-[1.02]"
                   style={{
                     background: colorScheme.bg,
-                    border: `2px solid ${colorScheme.border}`,
-                    boxShadow: `0 4px 15px ${colorScheme.shadow}, inset 0 1px 0 rgba(255,255,255,0.1)`,
-                    animation: `slideUp 0.5s ease-out ${index * 0.1}s both`
+                    border: `1.5px solid ${colorScheme.border}`,
+                    boxShadow: `0 4px 24px ${colorScheme.shadow}, inset 0 1px 0 rgba(255,255,255,0.08)`,
+                    backdropFilter: 'blur(16px)',
+                    WebkitBackdropFilter: 'blur(16px)',
+                    animation: `slideUp 0.5s ease-out ${index * 0.08}s both`
                   }}
                 >
                   {/* Shimmer Effect */}

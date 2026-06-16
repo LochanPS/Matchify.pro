@@ -51,13 +51,11 @@ const NotificationsPage = () => {
     return icons[type] || '🔔';
   };
 
-  // Alternating color scheme: even index = amber, odd index = teal (both Matchify brand colors)
-  const getNotificationColor = (type, index) => {
-    if (index % 2 === 0) {
-      return { bg: 'linear-gradient(135deg, rgba(245,158,11,0.13), rgba(217,119,6,0.08))', border: 'rgba(245,158,11,0.32)', shadow: 'rgba(245,158,11,0.18)', glass: 'rgba(245,158,11,0.05)' };
-    } else {
-      return { bg: 'linear-gradient(135deg, rgba(0,153,187,0.13), rgba(0,120,150,0.08))', border: 'rgba(0,153,187,0.32)', shadow: 'rgba(0,153,187,0.18)', glass: 'rgba(0,153,187,0.05)' };
+  const getNotificationColor = (type, isUnread) => {
+    if (isUnread) {
+      return { bg: 'rgba(15,20,40,0.72)', border: 'rgba(245,158,11,0.28)', shadow: 'rgba(0,0,0,0.25)' };
     }
+    return { bg: 'rgba(10,14,30,0.62)', border: 'rgba(255,255,255,0.08)', shadow: 'rgba(0,0,0,0.2)' };
   };
 
   // Smart preview: for MATCH_ASSIGNED/STARTING_SOON parse data for player names;
@@ -288,59 +286,34 @@ const NotificationsPage = () => {
         ) : (
           <div className="space-y-3">
             {notifications.map((notification, index) => {
-              const colorScheme = getNotificationColor(notification.type, index);
-              
+              const colorScheme = getNotificationColor(notification.type, !notification.read);
+
               return (
                 <div
                   key={notification.id}
                   onClick={() => handleNotificationClick(notification)}
-                  className="rounded-2xl p-4 relative overflow-hidden cursor-pointer transition-all duration-200 hover:scale-[1.02]"
+                  className="rounded-2xl p-4 relative overflow-hidden cursor-pointer transition-all duration-150"
                   style={{
                     background: colorScheme.bg,
-                    border: `1.5px solid ${colorScheme.border}`,
-                    boxShadow: `0 4px 24px ${colorScheme.shadow}, inset 0 1px 0 rgba(255,255,255,0.08)`,
-                    backdropFilter: 'blur(16px)',
-                    WebkitBackdropFilter: 'blur(16px)',
-                    animation: `slideUp 0.5s ease-out ${index * 0.08}s both`
+                    border: `1px solid ${colorScheme.border}`,
+                    boxShadow: `0 2px 16px ${colorScheme.shadow}`,
+                    backdropFilter: 'blur(18px)',
+                    WebkitBackdropFilter: 'blur(18px)',
+                    animation: `slideUp 0.4s ease-out ${index * 0.05}s both`,
                   }}
                 >
-                  {/* Shimmer Effect */}
-                  <div 
-                    className="absolute inset-0 opacity-20"
-                    style={{
-                      background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
-                      backgroundSize: '200% 100%',
-                      animation: 'shimmer 4s infinite',
-                      animationDelay: `${index * 0.5}s`
-                    }}
-                  />
-
-                  {/* Unread Indicator Glow */}
-                  {!notification.read && (
-                    <div 
-                      className="absolute top-0 right-0 w-24 h-24 rounded-full blur-2xl opacity-40"
-                      style={{ 
-                        background: 'radial-gradient(circle, rgba(245,158,11,0.8), transparent)',
-                        animation: 'glow 3s ease-in-out infinite'
-                      }}
-                    />
-                  )}
 
                   <div className="flex items-start gap-3 relative z-10">
                     {/* Icon */}
                     <div className="flex-shrink-0">
-                      <div 
-                        className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl relative"
-                        style={{ 
-                          background: `${colorScheme.bg}`,
-                          border: `2px solid ${colorScheme.border}`,
-                          boxShadow: `0 4px 12px ${colorScheme.shadow}`,
-                          filter: 'brightness(1.2)'
+                      <div
+                        className="w-11 h-11 rounded-xl flex items-center justify-center text-xl"
+                        style={{
+                          background: 'rgba(255,255,255,0.06)',
+                          border: '1px solid rgba(255,255,255,0.1)',
                         }}
                       >
-                        <span style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }}>
-                          {getNotificationIcon(notification.type)}
-                        </span>
+                        {getNotificationIcon(notification.type)}
                       </div>
                     </div>
 
@@ -352,11 +325,8 @@ const NotificationsPage = () => {
                         </h3>
                         {!notification.read && (
                           <div
-                            className="w-2 h-2 rounded-full flex-shrink-0 mt-1"
-                            style={{
-                              background: '#F59E0B',
-                              boxShadow: '0 0 10px rgba(245,158,11,0.8)'
-                            }}
+                            className="w-2 h-2 rounded-full flex-shrink-0 mt-1.5"
+                            style={{ background: '#F59E0B', flexShrink: 0 }}
                           />
                         )}
                       </div>

@@ -156,14 +156,41 @@ const MatchCard = ({ match, index, total, liveStatus, onStart }) => {
 
         {/* Players vs players */}
         <div style={{ padding: '10px 12px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-            <span style={{ flex: 1, fontSize: 13, fontWeight: 700, color: '#fff' }}>{match.player1Name}</span>
-            <span style={{
-              fontSize: 9, fontWeight: 800, color: 'rgba(245,158,11,0.65)',
-              background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)',
-              borderRadius: 4, padding: '2px 6px', letterSpacing: '0.1em', flexShrink: 0,
-            }}>VS</span>
-            <span style={{ flex: 1, fontSize: 13, fontWeight: 700, color: '#fff', textAlign: 'right' }}>{match.player2Name}</span>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 36px 1fr', alignItems: 'center', gap: 4, marginBottom: 10 }}>
+            {/* Team 1 */}
+            <div style={{ textAlign: 'left' }}>
+              {(() => {
+                const parts = (match.player1Name || 'TBD').split(' / ');
+                if (parts.length === 2) return (
+                  <>
+                    <div style={{ fontSize: 12, fontWeight: 800, color: '#fff', lineHeight: 1.35 }}>{parts[0]}</div>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,0.55)', lineHeight: 1.35 }}>& {parts[1]}</div>
+                  </>
+                );
+                return <span style={{ fontSize: 13, fontWeight: 700, color: match.player1Name ? '#fff' : 'rgba(255,255,255,0.3)' }}>{match.player1Name || 'TBD'}</span>;
+              })()}
+            </div>
+            {/* VS badge */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{
+                fontSize: 9, fontWeight: 800, color: 'rgba(245,158,11,0.7)',
+                background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)',
+                borderRadius: 4, padding: '3px 5px', letterSpacing: '0.1em',
+              }}>VS</span>
+            </div>
+            {/* Team 2 */}
+            <div style={{ textAlign: 'right' }}>
+              {(() => {
+                const parts = (match.player2Name || 'TBD').split(' / ');
+                if (parts.length === 2) return (
+                  <>
+                    <div style={{ fontSize: 12, fontWeight: 800, color: '#fff', lineHeight: 1.35 }}>{parts[0]}</div>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,0.55)', lineHeight: 1.35 }}>& {parts[1]}</div>
+                  </>
+                );
+                return <span style={{ fontSize: 13, fontWeight: 700, color: match.player2Name ? '#fff' : 'rgba(255,255,255,0.3)' }}>{match.player2Name || 'TBD'}</span>;
+              })()}
+            </div>
           </div>
 
           {/* CTA area */}

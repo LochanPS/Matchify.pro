@@ -1340,19 +1340,34 @@ const getUmpireMatches = async (req, res) => {
       orderBy: [{ queueOrder: 'asc' }, { status: 'asc' }, { round: 'asc' }, { matchNumber: 'asc' }]
     });
 
-    // Batch player lookups — collect singles + all doubles team slot IDs in one pass
+    // Batch player lookups — collect regular + guest IDs separately
     const playerIds = new Set();
-    const GUEST_PREFIX = 'guest-';
-    const addId = (id) => { if (id && !id.startsWith(GUEST_PREFIX)) playerIds.add(id); };
+    const guestIds = new Set();
+    const addId = (id) => {
+      if (!id) return;
+      if (id.startsWith('guest-')) guestIds.add(id);
+      else playerIds.add(id);
+    };
     for (const m of matches) {
       addId(m.player1Id); addId(m.player2Id);
       addId(m.team1Player1Id); addId(m.team1Player2Id);
       addId(m.team2Player1Id); addId(m.team2Player2Id);
     }
-    const players = playerIds.size > 0
-      ? await prisma.user.findMany({ where: { id: { in: [...playerIds] } }, select: { id: true, name: true } })
-      : [];
-    const playerMap = Object.fromEntries(players.map(p => [p.id, p]));
+    const [players, guestRegs] = await Promise.all([
+      playerIds.size > 0
+        ? prisma.user.findMany({ where: { id: { in: [...playerIds] } }, select: { id: true, name: true } })
+        : [],
+      guestIds.size > 0
+        ? prisma.registration.findMany({
+            where: { id: { in: [...guestIds].map(id => id.replace('guest-', '')) } },
+            select: { id: true, guestName: true }
+          })
+        : [],
+    ]);
+    const playerMap = Object.fromEntries([
+      ...players.map(p => [p.id, p]),
+      ...guestRegs.map(r => [`guest-${r.id}`, { id: `guest-${r.id}`, name: r.guestName || 'Guest' }]),
+    ]);
 
     const resolveName = (id) => (id ? (playerMap[id]?.name || null) : null);
     const buildTeamName = (id1, id2) => {
@@ -1981,16 +1996,32 @@ const saveUmpireQueue = async (req, res) => {
           orderBy: { queueOrder: 'asc' }
         });
         const pidSet = new Set();
-        const addPid = (id) => { if (id && !id.startsWith('guest-')) pidSet.add(id); };
+        const guestPidSet = new Set();
+        const addPid = (id) => {
+          if (!id) return;
+          if (id.startsWith('guest-')) guestPidSet.add(id);
+          else pidSet.add(id);
+        };
         for (const m of assignedMatches) {
           addPid(m.player1Id); addPid(m.player2Id);
           addPid(m.team1Player1Id); addPid(m.team1Player2Id);
           addPid(m.team2Player1Id); addPid(m.team2Player2Id);
         }
-        const pList = pidSet.size > 0
-          ? await prisma.user.findMany({ where: { id: { in: [...pidSet] } }, select: { id: true, name: true } })
-          : [];
-        const pMap = Object.fromEntries(pList.map(p => [p.id, p]));
+        const [pList, guestPList] = await Promise.all([
+          pidSet.size > 0
+            ? prisma.user.findMany({ where: { id: { in: [...pidSet] } }, select: { id: true, name: true } })
+            : [],
+          guestPidSet.size > 0
+            ? prisma.registration.findMany({
+                where: { id: { in: [...guestPidSet].map(id => id.replace('guest-', '')) } },
+                select: { id: true, guestName: true }
+              })
+            : [],
+        ]);
+        const pMap = Object.fromEntries([
+          ...pList.map(p => [p.id, p]),
+          ...guestPList.map(r => [`guest-${r.id}`, { id: `guest-${r.id}`, name: r.guestName || 'Guest' }]),
+        ]);
         const resolvePName = (id) => (id ? (pMap[id]?.name || null) : null);
         const buildPTeam = (id1, id2) => {
           const n1 = resolvePName(id1); const n2 = resolvePName(id2);

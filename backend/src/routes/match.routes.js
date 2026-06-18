@@ -1000,14 +1000,27 @@ const endMatchHandler = async (req, res) => {
 
     // ── 8. Background: stats + notifications (non-critical, fire-and-forget) ────
     const runBackground = async () => {
-      const getRoundName = (r, stage, categoryFormat) => {
+      // Fetch the Draw record — its format field is the authoritative source
+      // (match.stage may be null for old draws, category.tournamentFormat may be wrong default)
+      let drawFormat = null;
+      try {
+        const draw = await prisma.draw.findFirst({
+          where: { tournamentId: match.tournamentId, categoryId: match.categoryId },
+          select: { format: true }
+        });
+        drawFormat = draw?.format || null;
+      } catch (_) {}
+
+      const getRoundName = (r, stage, drawFmt, categoryFormat) => {
         if (stage === 'GROUP') return 'Round Robin';
         if (stage === 'KNOCKOUT') return r === 1 ? 'Final' : r === 2 ? 'Semi Finals' : r === 3 ? 'Quarter Finals' : r === 4 ? 'Round of 16' : `Round ${r}`;
-        // stage is null (legacy draw) — use category format as fallback
+        // stage is null — use draw.format (authoritative) then category format as last resort
+        if (drawFmt === 'ROUND_ROBIN') return 'Round Robin';
+        if (drawFmt === 'ROUND_ROBIN_KNOCKOUT' && stage !== 'KNOCKOUT') return 'Round Robin';
         if (categoryFormat === 'ROUND_ROBIN') return 'Round Robin';
         return r === 1 ? 'Final' : r === 2 ? 'Semi Finals' : r === 3 ? 'Quarter Finals' : r === 4 ? 'Round of 16' : `Round ${r}`;
       };
-      const roundName = getRoundName(match.round, match.stage, match.category?.tournamentFormat);
+      const roundName = getRoundName(match.round, match.stage, drawFormat, match.category?.tournamentFormat);
       const notifData = JSON.stringify({ matchId: match.id, tournamentId: match.tournamentId, categoryId: match.categoryId, round: match.round, roundName });
 
       try {

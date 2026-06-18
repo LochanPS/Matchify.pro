@@ -225,8 +225,8 @@ export const getDrawPage = async (req, res) => {
             if (sd?.sets && Array.isArray(sd.sets)) {
               let t1 = 0, t2 = 0;
               sd.sets.forEach(s => {
-                t1 += s.player1 ?? s.p1 ?? s.score1 ?? 0;
-                t2 += s.player2 ?? s.p2 ?? s.score2 ?? 0;
+                t1 += s.player1 ?? s.p1 ?? s.score1 ?? s.score?.player1 ?? 0;
+                t2 += s.player2 ?? s.p2 ?? s.score2 ?? s.score?.player2 ?? 0;
               });
               p1.totalPoints = (p1.totalPoints || 0) + t1;
               p2.totalPoints = (p2.totalPoints || 0) + t2;

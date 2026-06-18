@@ -561,10 +561,11 @@ const getDraw = async (req, res) => {
             p.wins = 0;
             p.losses = 0;
             p.points = 0;
-            p.totalPoints = 0; // TP = Total Points Scored in matches
+            p.totalPoints = 0;
+            p.totalPointsAgainst = 0;
           });
         }
-        
+
         // Get all completed matches for this group
         // Try multiple strategies to find matches
         console.log(`🔍 Recalculating standings for group ${groupIndex}...`);
@@ -625,46 +626,46 @@ const getDraw = async (req, res) => {
                   let player2TotalPoints = 0;
                   
                   scoreData.sets.forEach(set => {
-                    // Support multiple scoreJson formats: player1/player2, p1/p2, score1/score2
-                    const p1Score = set.player1 ?? set.p1 ?? set.score1 ?? 0;
-                    const p2Score = set.player2 ?? set.p2 ?? set.score2 ?? 0;
-                    
+                    const p1Score = set.player1 ?? set.p1 ?? set.score1 ?? set.score?.player1 ?? 0;
+                    const p2Score = set.player2 ?? set.p2 ?? set.score2 ?? set.score?.player2 ?? 0;
                     player1TotalPoints += p1Score;
                     player2TotalPoints += p2Score;
                   });
-                  
+
                   player1.totalPoints = (player1.totalPoints || 0) + player1TotalPoints;
                   player2.totalPoints = (player2.totalPoints || 0) + player2TotalPoints;
-                  
-                  console.log(`   ${player1.name} scored ${player1TotalPoints} points (total: ${player1.totalPoints})`);
-                  console.log(`   ${player2.name} scored ${player2TotalPoints} points (total: ${player2.totalPoints})`);
+                  player1.totalPointsAgainst = (player1.totalPointsAgainst || 0) + player2TotalPoints;
+                  player2.totalPointsAgainst = (player2.totalPointsAgainst || 0) + player1TotalPoints;
+
+                  console.log(`   ${player1.name} scored ${player1TotalPoints} pts (total: ${player1.totalPoints}, against: ${player1.totalPointsAgainst})`);
+                  console.log(`   ${player2.name} scored ${player2TotalPoints} pts (total: ${player2.totalPoints}, against: ${player2.totalPointsAgainst})`);
                 }
               } catch (parseError) {
                 console.error(`   Error parsing scoreJson for match ${m.matchNumber}:`, parseError);
               }
             }
-            
+
             // Calculate wins/losses and ranking points
             if (m.winnerId === m.player1Id) {
               player1.wins++;
-              player1.points += 2; // Win = 2 points
+              player1.points += 2;
               player2.losses++;
               console.log(`   ${player1.name} wins! Now has ${player1.points} ranking points`);
             } else if (m.winnerId === m.player2Id) {
               player2.wins++;
-              player2.points += 2; // Win = 2 points
+              player2.points += 2;
               player1.losses++;
               console.log(`   ${player2.name} wins! Now has ${player2.points} ranking points`);
             }
           }
         });
-        
+
         // Log final standings
         console.log(`   Final standings for group ${groupIndex}:`);
         group.participants.forEach(p => {
-          console.log(`   - ${p.name}: ${p.points}pts (${p.wins}W-${p.losses}L, ${p.played}P, TP:${p.totalPoints || 0})`);
+          console.log(`   - ${p.name}: ${p.points}pts (${p.wins}W-${p.losses}L, TP:${p.totalPoints || 0}, TPA:${p.totalPointsAgainst || 0})`);
         });
-        
+
         // Sort: points DESC → net point diff DESC → total points FOR DESC
         if (group.participants && Array.isArray(group.participants)) {
           group.participants.sort((a, b) => {
@@ -754,10 +755,11 @@ const getDraw = async (req, res) => {
               p.wins = 0;
               p.losses = 0;
               p.points = 0;
-              p.totalPoints = 0; // TP = Total Points Scored in matches
+              p.totalPoints = 0;
+              p.totalPointsAgainst = 0;
             });
           }
-          
+
           // Get all completed matches for this group
           // Try multiple strategies to find matches
           console.log(`🔍 Recalculating standings for group ${groupIndex} (ROUND_ROBIN_KNOCKOUT)...`);
@@ -816,46 +818,46 @@ const getDraw = async (req, res) => {
                   if (scoreData && scoreData.sets && Array.isArray(scoreData.sets)) {
                     let player1TotalPoints = 0;
                     let player2TotalPoints = 0;
-                    
+
                     scoreData.sets.forEach(set => {
-                      // Support multiple scoreJson formats: player1/player2, p1/p2, score1/score2
-                      const p1Score = set.player1 ?? set.p1 ?? set.score1 ?? 0;
-                      const p2Score = set.player2 ?? set.p2 ?? set.score2 ?? 0;
-                      
+                      const p1Score = set.player1 ?? set.p1 ?? set.score1 ?? set.score?.player1 ?? 0;
+                      const p2Score = set.player2 ?? set.p2 ?? set.score2 ?? set.score?.player2 ?? 0;
                       player1TotalPoints += p1Score;
                       player2TotalPoints += p2Score;
                     });
-                    
+
                     player1.totalPoints = (player1.totalPoints || 0) + player1TotalPoints;
                     player2.totalPoints = (player2.totalPoints || 0) + player2TotalPoints;
-                    
-                    console.log(`   ${player1.name} scored ${player1TotalPoints} points (total: ${player1.totalPoints})`);
-                    console.log(`   ${player2.name} scored ${player2TotalPoints} points (total: ${player2.totalPoints})`);
+                    player1.totalPointsAgainst = (player1.totalPointsAgainst || 0) + player2TotalPoints;
+                    player2.totalPointsAgainst = (player2.totalPointsAgainst || 0) + player1TotalPoints;
+
+                    console.log(`   ${player1.name} scored ${player1TotalPoints} pts (total: ${player1.totalPoints}, against: ${player1.totalPointsAgainst})`);
+                    console.log(`   ${player2.name} scored ${player2TotalPoints} pts (total: ${player2.totalPoints}, against: ${player2.totalPointsAgainst})`);
                   }
                 } catch (parseError) {
                   console.error(`   Error parsing scoreJson for match ${m.matchNumber}:`, parseError);
                 }
               }
-              
+
               // Calculate wins/losses and ranking points
               if (m.winnerId === m.player1Id) {
                 player1.wins++;
-                player1.points += 2; // Win = 2 points
+                player1.points += 2;
                 player2.losses++;
                 console.log(`   ${player1.name} wins! Now has ${player1.points} ranking points`);
               } else if (m.winnerId === m.player2Id) {
                 player2.wins++;
-                player2.points += 2; // Win = 2 points
+                player2.points += 2;
                 player1.losses++;
                 console.log(`   ${player2.name} wins! Now has ${player2.points} ranking points`);
               }
             }
           });
-          
+
           // Log final standings
           console.log(`   Final standings for group ${groupIndex}:`);
           group.participants.forEach(p => {
-            console.log(`   - ${p.name}: ${p.points}pts (${p.wins}W-${p.losses}L, ${p.played}P, TP:${p.totalPoints || 0})`);
+            console.log(`   - ${p.name}: ${p.points}pts (${p.wins}W-${p.losses}L, TP:${p.totalPoints || 0}, TPA:${p.totalPointsAgainst || 0})`);
           });
           
           // Sort: points DESC → net point diff DESC → total points FOR DESC

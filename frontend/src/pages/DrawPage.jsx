@@ -312,18 +312,19 @@ const DrawPage = () => {
   };
 
   // Handle refresh parameter from URL (when returning from match completion)
-  // Page was hard-reloaded via window.location.href so initial fetch already has fresh data.
-  // Just clear the param and show a brief success message — no re-fetch needed.
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
     const shouldRefresh = urlParams.get('refresh');
 
     if (shouldRefresh === 'true') {
-      // Clear ?refresh=true from URL
+      // Bust frontend localStorage cache so stale standings never show
+      if (tournamentId && activeCategory?.id) {
+        clearDrawCache(tournamentId, activeCategory.id);
+      }
       const newSearch = location.search.replace(/[?&]refresh=true/, '').replace(/^&/, '?');
       window.history.replaceState({}, '', location.pathname + (newSearch || ''));
     }
-  }, [location.search]);
+  }, [location.search, tournamentId, activeCategory?.id]);
 
   // Lightweight match-only refresh — used by polling and after local actions
   const fetchMatchesOnly = React.useCallback(async (catId) => {
@@ -5891,6 +5892,30 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
         if (p2) pos[mi * 2 + 1] = p2;
       });
     }
+
+    // Auto-seed if no existing placement: standard cross-group seeding
+    // Seeds built rank-first (rank-1s then rank-2s), then placed 1 vs last, 2 vs second-last
+    // Result: A1 vs B2 (Match 1), B1 vs A2 (Match 2) — avoids same-group R1 matchup
+    const hasExistingDraw = pos.some(p => p !== null);
+    if (!hasExistingDraw && players.length > 0) {
+      const byRank = {};
+      players.forEach(p => {
+        if (!byRank[p.rank]) byRank[p.rank] = [];
+        byRank[p.rank].push(p);
+      });
+      const seeds = [];
+      const maxRank = Math.max(...players.map(p => p.rank));
+      for (let r = 1; r <= maxRank; r++) {
+        (byRank[r] || []).sort((a, b) => a.group.localeCompare(b.group)).forEach(p => seeds.push(p));
+      }
+      // Standard bracket: seed1 vs seedN, seed2 vs seedN-1, ...
+      let lo = 0, hi = seeds.length - 1, pi = 0;
+      while (lo <= hi && pi < pos.length) {
+        pos[pi++] = seeds[lo++];
+        if (lo <= hi && pi < pos.length) pos[pi++] = seeds[hi--];
+      }
+    }
+
     setPositions(pos);
   }, [bracket]);
 

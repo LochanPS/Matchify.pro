@@ -942,49 +942,49 @@ const TournamentDetailPage = () => {
                       key={category.id}
                       className="flex-shrink-0 flex flex-col rounded-2xl overflow-hidden"
                       style={{
-                        width: '240px',
+                        width: '300px',
                         scrollSnapAlign: 'start',
                         background: 'linear-gradient(145deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.03) 100%)',
                         border: '1px solid rgba(255,255,255,0.1)',
                       }}
                     >
                       {/* Card top — name + fee */}
-                      <div className="px-4 pt-4 pb-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-                        <h3 className="font-black text-white text-sm leading-snug mb-2">
+                      <div className="px-5 pt-5 pb-3" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+                        <h3 className="font-black text-white text-base leading-snug mb-2.5">
                           {category.name}
                         </h3>
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-0.5">
-                            <CurrencyRupeeIcon className="h-4 w-4 text-amber-400" />
-                            <span className="text-lg font-black text-amber-400">{category.entryFee}</span>
+                            <CurrencyRupeeIcon className="h-5 w-5 text-amber-400" />
+                            <span className="text-xl font-black text-amber-400">{category.entryFee}</span>
                           </div>
-                          <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={{ background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.5)' }}>
+                          <span className="text-xs font-medium px-2.5 py-1 rounded-full" style={{ background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.5)' }}>
                             {category.registrationCount || 0} joined
                           </span>
                         </div>
                       </div>
 
                       {/* Card body — tags + format + scoring */}
-                      <div className="px-4 py-3 flex-1 space-y-2">
+                      <div className="px-5 py-4 flex-1 space-y-3">
                         {/* Type + gender badges */}
-                        <div className="flex flex-wrap gap-1.5">
-                          <span className="px-2 py-0.5 rounded-full text-xs font-semibold" style={{ background: 'rgba(245,158,11,0.15)', color: '#F59E0B' }}>
+                        <div className="flex flex-wrap gap-2">
+                          <span className="px-2.5 py-1 rounded-full text-xs font-semibold" style={{ background: 'rgba(245,158,11,0.15)', color: '#F59E0B' }}>
                             {category.format}
                           </span>
-                          <span className="px-2 py-0.5 rounded-full text-xs font-semibold" style={{ background: 'rgba(139,92,246,0.15)', color: '#C4B5FD' }}>
+                          <span className="px-2.5 py-1 rounded-full text-xs font-semibold" style={{ background: 'rgba(139,92,246,0.15)', color: '#C4B5FD' }}>
                             {getGenderLabel(category.gender)}
                           </span>
                           {category.ageGroup && (
-                            <span className="px-2 py-0.5 rounded-full text-xs font-semibold" style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.6)' }}>
+                            <span className="px-2.5 py-1 rounded-full text-xs font-semibold" style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.6)' }}>
                               {category.ageGroup}
                             </span>
                           )}
                         </div>
 
                         {/* Tournament format */}
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-sm">{formatInfo.icon}</span>
-                          <span className="text-xs font-bold" style={{
+                        <div className="flex items-center gap-2">
+                          <span className="text-base">{formatInfo.icon}</span>
+                          <span className="text-sm font-bold" style={{
                             color: formatInfo.color === 'amber' ? '#fbbf24' : formatInfo.color === 'purple' ? '#a855f7' : '#10b981'
                           }}>
                             {formatInfo.label}
@@ -992,14 +992,14 @@ const TournamentDetailPage = () => {
                         </div>
 
                         {/* Scoring */}
-                        <div className="flex items-center gap-1.5" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                          <span className="text-xs">🎯</span>
-                          <span className="text-xs">{scoring.points} pts × {scoring.sets} {parseInt(scoring.sets) === 1 ? 'set' : 'sets'}</span>
+                        <div className="flex items-center gap-2" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                          <span className="text-sm">🎯</span>
+                          <span className="text-sm">{scoring.points} pts × {scoring.sets} {parseInt(scoring.sets) === 1 ? 'set' : 'sets'}</span>
                         </div>
 
                         {/* Prize */}
                         {(category.prizeWinner || category.prizeRunnerUp) && (
-                          <div className="flex items-center gap-2 text-xs">
+                          <div className="flex items-center gap-3 text-sm">
                             {category.prizeWinner && <span style={{ color: '#F59E0B' }}>🥇 ₹{category.prizeWinner}</span>}
                             {category.prizeRunnerUp && <span style={{ color: 'rgba(255,255,255,0.55)' }}>🥈 ₹{category.prizeRunnerUp}</span>}
                           </div>
@@ -1026,29 +1026,29 @@ const TournamentDetailPage = () => {
                       </div>
 
                       {/* View Draw + Live Matches buttons — pinned to bottom */}
-                      <div className="px-4 pb-4" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      <div className="px-5 pb-5" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                         <button
                           onClick={() => navigate(`/tournaments/${id}/draws/${category.id}`)}
-                          className="w-full py-2.5 rounded-xl text-xs font-black transition-all active:scale-95 flex items-center justify-center gap-2"
+                          className="w-full py-3 rounded-xl text-sm font-black transition-all active:scale-95 flex items-center justify-center gap-2"
                           style={{
                             background: 'linear-gradient(135deg, rgba(245,158,11,0.2), rgba(245,158,11,0.1))',
                             border: '1px solid rgba(245,158,11,0.4)',
                             color: '#F59E0B',
                           }}
                         >
-                          <TrophyIcon className="w-3.5 h-3.5" />
+                          <TrophyIcon className="w-4 h-4" />
                           View Draw
                         </button>
                         <button
                           onClick={() => navigate(`/tournaments/${id}/live?categoryId=${category.id}&categoryName=${encodeURIComponent(category.name)}`)}
-                          className="w-full py-2.5 rounded-xl text-xs font-black transition-all active:scale-95 flex items-center justify-center gap-2"
+                          className="w-full py-3 rounded-xl text-sm font-black transition-all active:scale-95 flex items-center justify-center gap-2"
                           style={{
                             background: 'linear-gradient(135deg, rgba(255,68,102,0.18), rgba(255,68,102,0.08))',
                             border: '1px solid rgba(255,68,102,0.35)',
                             color: '#ff4466',
                           }}
                         >
-                          <Radio className="w-3.5 h-3.5" />
+                          <Radio className="w-4 h-4" />
                           Live Matches
                         </button>
                       </div>

@@ -1761,11 +1761,12 @@ const DrawPage = () => {
                     <React.Fragment key={step.id}>
                       {i > 0 && (
                         <span style={{
-                          color: '#3b82f6',
-                          fontSize: 14, fontWeight: 600,
+                          color: '#93c5fd',
+                          fontSize: 16, fontWeight: 700,
                           flexShrink: 0, alignSelf: 'center',
                           padding: '0 4px',
                           lineHeight: 1,
+                          textShadow: '0 0 6px rgba(147,197,253,0.6)',
                         }}>→</span>
                       )}
                       <button

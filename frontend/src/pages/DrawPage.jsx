@@ -1706,8 +1706,12 @@ const DrawPage = () => {
           groupstage: {
             title: 'Step 3 — Group Stage',
             desc: 'Umpires score all group matches on court. Complete every group match before moving to Arrange KO.',
-            btnLabel: null,
-            action: null,
+            btnLabel: tournamentUmpires.length > 0 ? 'Assign Matches' : 'Add Umpires First',
+            action: () => {
+              setActiveStepPopup(null);
+              if (tournamentUmpires.length > 0) setShowUmpireQueueModal(true);
+              else setShowManageUmpiresModal(true);
+            },
           },
           arrangeko: {
             title: 'Step 4 — Arrange KO Stage',

@@ -1742,11 +1742,12 @@ const DrawPage = () => {
 
         return (
           <div className="max-w-2xl mx-auto px-3 mt-3 mb-1">
-            {/* Strip — same look on every format/category: big blue-glow circles, arrows, click-for-options hint */}
+            {/* Strip — same look on every format/category: blue-glow circles, arrows, click-for-options hint.
+                Sized compact (38px circles) so all steps + arrows scroll smoothly in one row on mobile. */}
             <div style={{
               background: 'rgba(15,23,42,0.55)',
               border: '1px solid rgba(59,130,246,0.25)',
-              borderRadius: 20, padding: '18px 16px 14px',
+              borderRadius: 16, padding: '12px 12px 9px',
             }}>
               <div style={{
                 display: 'flex', alignItems: 'flex-start',
@@ -1761,9 +1762,9 @@ const DrawPage = () => {
                       {i > 0 && (
                         <span style={{
                           color: '#3b82f6',
-                          fontSize: 18, fontWeight: 600,
+                          fontSize: 14, fontWeight: 600,
                           flexShrink: 0, alignSelf: 'center',
-                          padding: '0 8px',
+                          padding: '0 4px',
                           lineHeight: 1,
                         }}>→</span>
                       )}
@@ -1772,25 +1773,25 @@ const DrawPage = () => {
                         style={{
                           flexShrink: 0, background: 'none', border: 'none',
                           padding: 0, cursor: 'pointer',
-                          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
+                          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
                           WebkitTapHighlightColor: 'transparent',
-                          minWidth: 64,
+                          minWidth: 48,
                         }}
                       >
                         <div style={{
-                          width: 52, height: 52, borderRadius: '50%',
+                          width: 38, height: 38, borderRadius: '50%',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          fontSize: 20, fontWeight: 800,
+                          fontSize: 14, fontWeight: 800,
                           background: 'rgba(15,23,42,0.85)',
                           color: '#ffffff',
-                          border: isActive ? '2.5px solid #60a5fa' : '2px solid #3b82f6',
-                          boxShadow: isActive ? '0 0 18px rgba(96,165,250,0.65)' : '0 0 12px rgba(59,130,246,0.45)',
+                          border: isActive ? '2px solid #60a5fa' : '1.5px solid #3b82f6',
+                          boxShadow: isActive ? '0 0 12px rgba(96,165,250,0.65)' : '0 0 8px rgba(59,130,246,0.45)',
                           transition: 'all 0.15s',
                         }}>
                           {i + 1}
                         </div>
                         <span style={{
-                          fontSize: 13, fontWeight: 600,
+                          fontSize: 10.5, fontWeight: 600,
                           color: '#ffffff',
                           whiteSpace: 'nowrap', textAlign: 'center', lineHeight: 1.2,
                         }}>
@@ -1803,9 +1804,9 @@ const DrawPage = () => {
               </div>
 
               {/* Hint */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 14 }}>
-                <MousePointerClick size={14} color="#60a5fa" />
-                <span style={{ fontSize: 13, fontWeight: 500, color: '#60a5fa' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, marginTop: 9 }}>
+                <MousePointerClick size={11} color="#60a5fa" />
+                <span style={{ fontSize: 11, fontWeight: 500, color: '#60a5fa' }}>
                   Click on any step to view options
                 </span>
               </div>

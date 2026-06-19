@@ -910,7 +910,15 @@ const DrawPage = () => {
 
   if (loading && !tournament) {
     return (
-      <div className="min-h-screen relative overflow-hidden" style={{ background: 'linear-gradient(180deg, #0a0a1f 0%, #050810 30%, #0d1a2a 60%, #050810 100%)' }}>
+      <div className="min-h-screen relative overflow-hidden" style={{
+        background: '#050810',
+        backgroundImage: 'url(/bg-galaxy.png)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center top',
+        backgroundRepeat: 'no-repeat',
+        backgroundAttachment: 'fixed',
+      }}>
+        <div className="fixed inset-0 pointer-events-none" style={{ background: 'rgba(5,8,16,0.72)', zIndex: 0 }} />
         <style>{`
           @keyframes draw-float {
             0%, 100% { transform: translate(0, 0) scale(1); }
@@ -1025,63 +1033,16 @@ const DrawPage = () => {
   const hasPlayedMatches = matches.some(m => m.status === 'COMPLETED' || m.status === 'IN_PROGRESS');
 
   return (
-    <div className="min-h-screen relative overflow-hidden" style={{ 
-      background: 'linear-gradient(180deg, #0a0a1f 0%, #050810 30%, #0d1a2a 60%, #050810 100%)' 
+    <div className="min-h-screen relative overflow-hidden" style={{
+      background: '#050810',
+      backgroundImage: 'url(/bg-galaxy.png)',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center top',
+      backgroundRepeat: 'no-repeat',
+      backgroundAttachment: 'fixed',
     }}>
-      {/* Animated Background Elements */}
-      <div className="fixed top-0 bottom-0 pointer-events-none overflow-hidden" style={{ left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: "480px" }}>
-        {/* Large Gradient Orbs */}
-        <div 
-          className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl opacity-30 animate-pulse"
-          style={{ 
-            background: 'radial-gradient(circle, rgba(245,158,11,0.4) 0%, rgba(245,158,11,0.2) 40%, transparent 70%)',
-            animation: 'float 8s ease-in-out infinite'
-          }}
-        />
-        <div 
-          className="absolute top-1/4 left-0 w-80 h-80 rounded-full blur-3xl opacity-25 animate-pulse"
-          style={{ 
-            background: 'radial-gradient(circle, rgba(20,184,166,0.4) 0%, rgba(13,148,136,0.2) 40%, transparent 70%)',
-            animation: 'float 10s ease-in-out infinite reverse',
-            animationDelay: '2s'
-          }}
-        />
-        <div 
-          className="absolute bottom-1/4 right-1/4 w-72 h-72 rounded-full blur-3xl opacity-20 animate-pulse"
-          style={{ 
-            background: 'radial-gradient(circle, rgba(245,158,11,0.4) 0%, rgba(14,165,233,0.2) 40%, transparent 70%)',
-            animation: 'float 12s ease-in-out infinite',
-            animationDelay: '4s'
-          }}
-        />
-        <div 
-          className="absolute top-1/2 right-1/3 w-64 h-64 rounded-full blur-3xl opacity-15 animate-pulse"
-          style={{ 
-            background: 'radial-gradient(circle, rgba(245,158,11,0.4) 0%, rgba(5,150,105,0.2) 40%, transparent 70%)',
-            animation: 'float 9s ease-in-out infinite reverse',
-            animationDelay: '1s'
-          }}
-        />
-        
-        {/* Floating Particles */}
-        {DRAW_BG_PARTICLES.map((p, i) => (
-          <div
-            key={i}
-            className="absolute rounded-full"
-            style={{
-              width: `${p.w}px`,
-              height: `${p.h}px`,
-              left: `${p.x}%`,
-              top: `${p.y}%`,
-              background: p.c,
-              opacity: p.o,
-              animation: `float ${p.dur}s ease-in-out infinite`,
-              animationDelay: `${p.delay}s`,
-              boxShadow: `0 0 ${p.glow}px ${p.c}`,
-            }}
-          />
-        ))}
-      </div>
+      {/* Dark overlay — same app-wide background as every other page */}
+      <div className="fixed inset-0 pointer-events-none" style={{ background: 'rgba(5,8,16,0.72)', zIndex: 0 }} />
 
       {/* Add keyframes for animations */}
       <style>{`

@@ -1432,6 +1432,16 @@ const assignUmpire = async (req, res) => {
       return res.status(403).json({ success: false, error: 'Only organizer can assign umpires' });
     }
 
+    // KO matches stay locked until organizer arranges them (player1Id/player2Id get
+    // set only by arrangeKnockoutMatchups/continueToKnockout, which themselves gate
+    // on round robin completion). Block umpire assignment before that point.
+    if (match.stage === 'KNOCKOUT' && (!match.player1Id || !match.player2Id)) {
+      return res.status(400).json({
+        success: false,
+        error: 'This knockout match has not been arranged yet. Complete round robin and arrange the KO bracket first.'
+      });
+    }
+
     // Get umpire details
     const umpire = await prisma.user.findUnique({
       where: { id: umpireId },
@@ -1960,6 +1970,18 @@ const saveUmpireQueue = async (req, res) => {
       });
       if (matchCount !== matchIds.length) {
         return res.status(400).json({ success: false, error: 'Some matches do not belong to this tournament' });
+      }
+
+      // KO matches stay locked until organizer arranges them (player IDs set only
+      // by arrangeKnockoutMatchups/continueToKnockout, gated on RR completion).
+      const unarrangedKo = await prisma.match.count({
+        where: { id: { in: matchIds }, tournamentId, stage: 'KNOCKOUT', OR: [{ player1Id: null }, { player2Id: null }] }
+      });
+      if (unarrangedKo > 0) {
+        return res.status(400).json({
+          success: false,
+          error: `${unarrangedKo} knockout match(es) in this queue have not been arranged yet. Complete round robin and arrange the KO bracket first.`
+        });
       }
     }
 

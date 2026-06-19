@@ -3208,6 +3208,8 @@ const DrawDisplay = ({
     />;
   }
   // Default: Pure knockout (horizontal left-to-right layout)
+  // Reached only when format is neither 'ROUND_ROBIN' nor 'ROUND_ROBIN_KNOCKOUT' above —
+  // structurally guaranteed pure knockout, so isHybrid is always false here.
   return <KnockoutDisplay
     data={bracket}
     matches={matches}
@@ -3216,7 +3218,7 @@ const DrawDisplay = ({
     onAssignUmpire={onAssignUmpire}
     onViewMatchDetails={onViewMatchDetails}
     onChangeResult={onChangeResult}
-    categoryFormat={activeCategory?.tournamentFormat}
+    isHybrid={false}
   />;
 };
 
@@ -3518,7 +3520,7 @@ const ZoomableBracket = ({ children, bracketWidth, bracketHeight }) => {
 
 // Knockout Display - CONTAINED HORIZONTAL PYRAMID
 // All rounds fit on screen at once; user pinches to zoom into any match.
-const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onViewMatchDetails, onChangeResult, categoryFormat }) => {
+const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onViewMatchDetails, onChangeResult, isHybrid = false }) => {
   const navigate = useNavigate(); // Fix: each top-level component needs its own hook
 
   if (!data?.rounds) return <p className="text-gray-400 text-center p-8">No bracket data</p>;
@@ -3537,10 +3539,18 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
   // For hybrid (ROUND_ROBIN_KNOCKOUT): only accept stage='KNOCKOUT' to prevent
   // null-stage group matches from bleeding into the knockout bracket display.
   // For pure KNOCKOUT: also accept stage=null (legacy matches before stage field).
+  //
+  // isHybrid comes from the caller, which already knows this structurally — the
+  // GroupsKnockoutDisplay dispatcher above branches on bracket.format (reliable,
+  // sourced from the Draw row) before ever reaching this component. It must NOT be
+  // re-derived from categoryFormat (= category.tournamentFormat): that field defaults
+  // to 'KNOCKOUT' for categories created before it was reliably sent, which made this
+  // function wrongly accept null-stage GROUP matches as knockout matches — letting a
+  // completed round robin match (also round=1, also null-stage) get picked up and
+  // displayed as the Knockout Final's data.
   const findMatch = (displayIdx, matchIdx) => {
     if (!matches || !Array.isArray(matches)) return null;
     const dbRound = totalRounds - displayIdx;
-    const isHybrid = categoryFormat === 'ROUND_ROBIN_KNOCKOUT';
     const roundMatches = matches
       .filter(m => {
         if (m.round !== dbRound) return false;
@@ -4486,7 +4496,8 @@ const GroupsKnockoutDisplay = ({
                 isOrganizer={isOrganizer}
                 onAssignUmpire={onAssignUmpire}
                 onViewMatchDetails={onViewMatchDetails}
-                categoryFormat={activeCategory?.tournamentFormat}
+                onChangeResult={onChangeResult}
+                isHybrid={true}
               />
             </>
           )}

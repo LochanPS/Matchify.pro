@@ -2680,26 +2680,6 @@ const arrangeKnockoutMatchups = async (req, res) => {
       return res.status(400).json({ success: false, error: 'This feature is only for Round Robin + Knockout format' });
     }
 
-    // GATE: every GROUP stage match must be COMPLETED before KO can be arranged.
-    // Without this, organizer could seed the KO bracket off partial standings,
-    // letting umpires get assigned/start KO matches before round robin finishes.
-    // Legacy draws store stage as NULL instead of 'GROUP' — Prisma's `stage: { not: 'KNOCKOUT' }`
-    // would silently exclude those NULL rows (SQL <> never matches NULL), so match
-    // both explicitly via OR rather than relying on a single not-equals filter.
-    const incompleteGroupCount = await prisma.match.count({
-      where: {
-        tournamentId, categoryId,
-        status: { not: 'COMPLETED' },
-        OR: [{ stage: 'GROUP' }, { stage: null }]
-      }
-    });
-    if (incompleteGroupCount > 0) {
-      return res.status(400).json({
-        success: false,
-        error: `Cannot arrange knockout stage — ${incompleteGroupCount} round robin match(es) still incomplete. Finish all group matches first.`
-      });
-    }
-
     // STEP 1: Create knockout bracket structure if it doesn't exist
     // knockoutSlots is an array of matches, each with player1 and player2
     // So total players = knockoutSlots.length * 2
@@ -2981,22 +2961,6 @@ const continueToKnockout = async (req, res) => {
 
     if (bracketJson.format !== 'ROUND_ROBIN_KNOCKOUT') {
       return res.status(400).json({ success: false, error: 'This feature is only for Round Robin + Knockout format' });
-    }
-
-    // GATE: round robin must be fully completed before knockout stage can be seeded.
-    // Match both 'GROUP' and legacy NULL stage — Prisma's not-equals never matches NULL in SQL.
-    const incompleteGroupCount = await prisma.match.count({
-      where: {
-        tournamentId, categoryId,
-        status: { not: 'COMPLETED' },
-        OR: [{ stage: 'GROUP' }, { stage: null }]
-      }
-    });
-    if (incompleteGroupCount > 0) {
-      return res.status(400).json({
-        success: false,
-        error: `Cannot continue to knockout — ${incompleteGroupCount} round robin match(es) still incomplete. Finish all group matches first.`
-      });
     }
 
     // Validate knockout draw size

@@ -1782,17 +1782,19 @@ const DrawPage = () => {
                           width: 38, height: 38, borderRadius: '50%',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                           fontSize: 14, fontWeight: 800,
-                          background: 'rgba(15,23,42,0.85)',
+                          background: isActive
+                            ? 'linear-gradient(135deg, rgba(96,165,250,0.35), rgba(37,99,235,0.3))'
+                            : 'rgba(15,23,42,0.85)',
                           color: '#ffffff',
-                          border: isActive ? '2px solid #60a5fa' : '1.5px solid #3b82f6',
-                          boxShadow: isActive ? '0 0 12px rgba(96,165,250,0.65)' : '0 0 8px rgba(59,130,246,0.45)',
+                          border: isActive ? '2.5px solid #93c5fd' : '1.5px solid rgba(96,165,250,0.7)',
+                          boxShadow: isActive ? '0 0 16px rgba(147,197,253,0.85)' : '0 0 6px rgba(59,130,246,0.35)',
                           transition: 'all 0.15s',
                         }}>
                           {i + 1}
                         </div>
                         <span style={{
-                          fontSize: 10.5, fontWeight: 600,
-                          color: '#ffffff',
+                          fontSize: 10.5, fontWeight: isActive ? 700 : 600,
+                          color: isActive ? '#93c5fd' : 'rgba(255,255,255,0.85)',
                           whiteSpace: 'nowrap', textAlign: 'center', lineHeight: 1.2,
                         }}>
                           {step.label}

@@ -274,8 +274,10 @@ class MatchService {
       }
     });
 
-    // If there's a parent match, advance the winner
-    if (match.parentMatchId && match.winnerPosition) {
+    // STAGE ISOLATION GUARD: only a KNOCKOUT match may ever advance a winner into
+    // another match's slot — mirrors the same guard in match.routes.js endMatchHandler.
+    // This function is not currently wired to any route, but must stay safe if it ever is.
+    if (match.parentMatchId && match.winnerPosition && match.stage === 'KNOCKOUT') {
       const updateData = {};
       if (match.winnerPosition === 'player1') {
         updateData.player1Id = winnerId;

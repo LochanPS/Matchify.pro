@@ -726,6 +726,23 @@ const endMatchHandler = async (req, res) => {
       return res.status(403).json({ success: false, error: 'Not authorized to end this match' });
     }
 
+    // Draw format, fetched once up front — needed to correctly classify legacy
+    // null-stage matches (see isKnockoutMatch below) without an extra round-trip later.
+    const drawForStageCheck = await prisma.draw.findUnique({
+      where: { tournamentId_categoryId: { tournamentId: match.tournamentId, categoryId: match.categoryId } },
+      select: { format: true }
+    });
+    const drawFormat = drawForStageCheck?.format || null;
+
+    // STAGE ISOLATION: is this match actually a KNOCKOUT match, trustworthy enough to
+    // advance a winner into another match's slot? Explicit stage='KNOCKOUT' always counts.
+    // A null stage ONLY counts when the draw is genuinely pure KNOCKOUT (true legacy data) —
+    // never for ROUND_ROBIN/ROUND_ROBIN_KNOCKOUT, where null-stage rows are round robin
+    // matches, not knockout ones. stage='GROUP' is never knockout, full stop.
+    const isKnockoutMatch =
+      match.stage === 'KNOCKOUT' ||
+      (match.stage === null && drawFormat === 'KNOCKOUT');
+
     // ── 2. Compute duration ────────────────────────────────────────────────────
     if (finalScore.timer?.startedAt) {
       const totalPausedTime = finalScore.timer.totalPausedTime || 0;
@@ -812,7 +829,12 @@ const endMatchHandler = async (req, res) => {
         include: { tournament: true, category: true }
       });
 
-      if (parentMatch) {
+      // STAGE ISOLATION GUARD: only a KNOCKOUT match completion may ever advance a winner
+      // into another match's slot. Without this, a stray/incorrect parentMatchId on a
+      // GROUP-stage match (e.g. from a parent-linking bug) could let an RR match completion
+      // silently mutate a KNOCKOUT bracket match's player slots — exactly the class of bug
+      // this guard exists to make structurally impossible, regardless of upstream data state.
+      if (parentMatch && isKnockoutMatch) {
         const winnerPos   = match.winnerPosition || fallbackWinnerPos || (match.matchNumber % 2 === 1 ? 'player1' : 'player2');
         const advanceData = winnerPos === 'player1' ? { player1Id: winnerId } : { player2Id: winnerId };
         const bothReady   = winnerPos === 'player1' ? !!parentMatch.player2Id : !!parentMatch.player1Id;

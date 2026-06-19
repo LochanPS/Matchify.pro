@@ -1768,16 +1768,27 @@ const createConfiguredDraw = async (req, res) => {
 // Helper: Set parent match relationships for knockout winner advancement
 async function setKnockoutParentRelationships(tournamentId, categoryId) {
   console.log('🔗 Setting parent match relationships for knockout...');
-  
+
+  // ROOT-CAUSE FIX: the `stage: null` fallback below exists only for legacy *pure
+  // KNOCKOUT* draws that predate the stage field. For ROUND_ROBIN_KNOCKOUT, null-stage
+  // rows are round robin matches, not knockout ones — including them here would assign
+  // a knockout parentMatchId onto an RR match, which later lets that RR match's
+  // completion mutate the KO bracket (see endMatchHandler's isKnockoutMatch guard).
+  // So the null fallback is only safe for true pure-KNOCKOUT draws.
+  const draw = await prisma.draw.findUnique({
+    where: { tournamentId_categoryId: { tournamentId, categoryId } },
+    select: { format: true }
+  });
+  const isPureKnockout = draw?.format === 'KNOCKOUT';
+
   // Get all knockout matches sorted by round
   const allMatches = await prisma.match.findMany({
     where: {
       tournamentId,
       categoryId,
-      OR: [
-        { stage: 'KNOCKOUT' },
-        { stage: null } // For pure KNOCKOUT format without stage field
-      ]
+      OR: isPureKnockout
+        ? [{ stage: 'KNOCKOUT' }, { stage: null }]
+        : [{ stage: 'KNOCKOUT' }]
     },
     orderBy: [
       { round: 'desc' },

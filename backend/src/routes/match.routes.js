@@ -1523,4 +1523,5 @@ router.put('/:matchId/config', authenticate, async (req, res) => {
   }
 });
 
+export { endMatchHandler };
 export default router;

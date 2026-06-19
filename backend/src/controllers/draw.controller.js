@@ -3251,5 +3251,6 @@ export {
   shuffleAssignedPlayers,
   arrangeKnockoutMatchups,
   continueToKnockout,
-  repairKnockoutRelationships
+  repairKnockoutRelationships,
+  setKnockoutParentRelationships
 };

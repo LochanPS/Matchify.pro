@@ -26,7 +26,7 @@ import api from '../utils/api';
 import SingleEliminationBracket from '../components/brackets/SingleEliminationBracket';
 import { useAuth } from '../contexts/AuthContext';
 import { ArrowLeftIcon, TrophyIcon } from '@heroicons/react/24/outline';
-import { Loader, Zap, Layers, X, Plus, Settings, Users, CheckCircle, AlertTriangle, Trash2, UserPlus, Gavel, AlertCircle, Play, Trophy, Clock, Eye, Edit, ArrowLeft, ChevronUp, ChevronDown, ListOrdered } from 'lucide-react';
+import { Loader, Zap, Layers, X, Plus, Settings, Users, CheckCircle, AlertTriangle, Trash2, UserPlus, Gavel, AlertCircle, Play, Trophy, Clock, Eye, Edit, ArrowLeft, ChevronUp, ChevronDown, ListOrdered, MousePointerClick } from 'lucide-react';
 import { getTournamentAllMatches } from '../api/matches';
 import Spinner from '../components/Spinner';
 
@@ -1668,216 +1668,6 @@ const DrawPage = () => {
         );
       })()}
 
-      {false && (() => {
-        // tombstone — delete entire block below on next cleanup
-        const fmt = bracket?.format;
-        if (!bracket) {
-          const playersAssigned = matches.some(m => m.player1Id || m.player2Id);
-          if (!playersAssigned) {
-            currentStep = 1;
-            bannerIcon = '👥';
-            bannerText = 'Assign players to bracket slots';
-            bannerSubtext = 'Use "Assign Players" to place registered players into the draw.';
-            bannerColor = 'amber';
-            bannerButton = { label: 'Assign Players', action: openAssignModal };
-          } else if (!hasPlayedMatches) {
-            currentStep = 2;
-            bannerIcon = '🎯';
-            bannerText = 'Players assigned — ready to play!';
-            bannerSubtext = 'Umpires can now start scoring. Share the tournament link with them.';
-            bannerColor = 'blue';
-          } else if (!allMatchesDone) {
-            const done = matches.filter(m => m.status === 'COMPLETED').length;
-            currentStep = 2;
-            bannerIcon = '⚡';
-            bannerText = `${done} / ${matches.length} matches completed`;
-            bannerSubtext = 'Tournament in progress. Track results in Live Matches.';
-            bannerColor = 'blue';
-          } else {
-            currentStep = 3;
-            bannerIcon = '🏆';
-            bannerText = 'All matches done — end the category!';
-            bannerSubtext = 'Click "End Category" to finalize results and award ranking points.';
-            bannerColor = 'green';
-            bannerButton = { label: 'End Category', action: () => setShowEndTournamentModal(true) };
-          }
-        } else if (fmt === 'ROUND_ROBIN') {
-          steps = ['Create Draw', 'Assign Players', 'Play Matches', 'End Category'];
-          const playersAssigned = matches.some(m => m.player1Id || m.player2Id);
-          if (!playersAssigned) {
-            currentStep = 1;
-            bannerIcon = '👥';
-            bannerText = 'Assign players to group slots';
-            bannerSubtext = 'Use "Assign Players" to place registered players into the groups.';
-            bannerColor = 'amber';
-            bannerButton = { label: 'Assign Players', action: openAssignModal };
-          } else if (!hasPlayedMatches) {
-            currentStep = 2;
-            bannerIcon = '🎯';
-            bannerText = 'Players assigned — start playing matches!';
-            bannerSubtext = 'Umpires can begin scoring round robin matches.';
-            bannerColor = 'blue';
-          } else if (!allMatchesDone) {
-            const done = matches.filter(m => m.status === 'COMPLETED').length;
-            currentStep = 2;
-            bannerIcon = '⚡';
-            bannerText = `${done} / ${matches.length} matches completed`;
-            bannerSubtext = 'Round robin in progress. Complete all matches to finish.';
-            bannerColor = 'blue';
-          } else {
-            currentStep = 3;
-            bannerIcon = '🏆';
-            bannerText = 'All matches done — end the category!';
-            bannerSubtext = 'Click "End Category" to finalize results and award ranking points.';
-            bannerColor = 'green';
-            bannerButton = { label: 'End Category', action: () => setShowEndTournamentModal(true) };
-          }
-        } else if (fmt === 'ROUND_ROBIN_KNOCKOUT') {
-          steps = ['Create Draw', 'Assign Players', 'Group Stage', 'Knockout Stage', 'End Category'];
-          const groupPlayersAssigned = groupMatches.some(m => m.player1Id || m.player2Id);
-          if (!groupPlayersAssigned) {
-            currentStep = 1;
-            bannerIcon = '👥';
-            bannerText = 'Assign players to group slots';
-            bannerSubtext = 'Use "Assign Players" to place registered players into the groups.';
-            bannerColor = 'amber';
-            bannerButton = { label: 'Assign Players', action: openAssignModal };
-          } else if (!allGroupDone) {
-            const done = groupMatches.filter(m => m.status === 'COMPLETED').length;
-            currentStep = 2;
-            bannerIcon = done === 0 ? '🎯' : '⚡';
-            bannerText = done === 0
-              ? 'Players assigned — start group stage!'
-              : `Group stage: ${done} / ${groupMatches.length} matches done`;
-            bannerSubtext = done === 0
-              ? 'Umpires can begin scoring group matches.'
-              : 'Complete all group matches to advance to knockout stage.';
-            bannerColor = 'blue';
-          } else if (allGroupDone && !hasKOPlayersAssigned) {
-            currentStep = 2;
-            bannerIcon = '🔀';
-            bannerText = 'Group stage done — set up knockout!';
-            bannerSubtext = 'Click "Arrange KO" to seed top players into the knockout bracket.';
-            bannerColor = 'amber';
-            bannerButton = {
-              label: 'Arrange KO',
-              action: async () => {
-                clearDrawCache(tournamentId, activeCategory?.id);
-                await fetchDrawPageFull(activeCategory?.id);
-                setShowArrangeMatchupsModal(true);
-              }
-            };
-          } else if (hasKOPlayersAssigned && !allMatchesDone) {
-            const done = knockoutMatches.filter(m => m.status === 'COMPLETED').length;
-            currentStep = 3;
-            bannerIcon = '⚡';
-            bannerText = `Knockout: ${done} / ${knockoutMatches.length} matches done`;
-            bannerSubtext = 'Finals in progress! Check Live Matches for updates.';
-            bannerColor = 'blue';
-          } else if (allMatchesDone) {
-            currentStep = 4;
-            bannerIcon = '🏆';
-            bannerText = 'All matches done — end the category!';
-            bannerSubtext = 'Click "End Category" to finalize results and award ranking points.';
-            bannerColor = 'green';
-            bannerButton = { label: 'End Category', action: () => setShowEndTournamentModal(true) };
-          }
-        }
-
-        if (!steps.length) return null;
-
-        // Action for each step index — clicking the step fires this
-        const stepActions = (() => {
-          if (!bracket) return [() => setShowConfigModal(true)];
-          if (fmt === 'ROUND_ROBIN_KNOCKOUT') {
-            return [
-              null,
-              openAssignModal,
-              null, // Group Stage — play matches below
-              async () => {
-                clearDrawCache(tournamentId, activeCategory?.id);
-                await fetchDrawPageFull(activeCategory?.id);
-                setShowArrangeMatchupsModal(true);
-              },
-              () => setShowEndTournamentModal(true),
-            ];
-          }
-          // KNOCKOUT or ROUND_ROBIN
-          return [
-            null,
-            openAssignModal,
-            null, // Play Matches
-            () => setShowEndTournamentModal(true),
-          ];
-        })();
-
-        const activeColor = bannerColor === 'green' ? '#22c55e'
-          : bannerColor === 'blue' ? '#60a5fa'
-          : '#F59E0B';
-        const activeBg = bannerColor === 'green' ? 'linear-gradient(135deg,#22c55e,#16a34a)'
-          : bannerColor === 'blue' ? 'linear-gradient(135deg,#3b82f6,#2563eb)'
-          : 'linear-gradient(135deg,#F59E0B,#FCD34D)';
-        const activeTxt = bannerColor === 'green' ? '#fff'
-          : bannerColor === 'blue' ? '#fff'
-          : '#07071a';
-
-        return (
-          <div className="max-w-2xl mx-auto px-3 mt-3">
-            {/* Progress Stepper — each step is clickable */}
-            <div className="flex items-start mb-2 overflow-x-auto pb-0.5" style={{ scrollbarWidth: 'none' }}>
-              {steps.map((step, i) => {
-                const action = stepActions[i];
-                return (
-                  <React.Fragment key={i}>
-                    <button
-                      onClick={action || undefined}
-                      className="flex flex-col items-center gap-1 flex-shrink-0"
-                      style={{
-                        minWidth: 56, background: 'none', border: 'none', padding: 0,
-                        cursor: action ? 'pointer' : 'default',
-                        WebkitTapHighlightColor: 'transparent',
-                      }}
-                    >
-                      <div
-                        className="w-6 h-6 rounded-full flex items-center justify-center font-black transition-all"
-                        style={{
-                          fontSize: 10,
-                          background: i < currentStep ? '#22c55e' : i === currentStep ? activeBg : 'rgba(255,255,255,0.07)',
-                          color: i < currentStep ? '#fff' : i === currentStep ? activeTxt : 'rgba(255,255,255,0.3)',
-                          border: i === currentStep ? `2px solid ${activeColor}` : '2px solid transparent',
-                          boxShadow: i === currentStep ? `0 0 8px ${activeColor}66` : 'none',
-                          transition: 'transform 0.1s',
-                        }}
-                      >
-                        {i < currentStep ? '✓' : i + 1}
-                      </div>
-                      <span
-                        className="text-center leading-tight"
-                        style={{
-                          fontSize: 9, maxWidth: 52,
-                          fontWeight: i === currentStep ? 700 : 400,
-                          color: i === currentStep ? activeColor : i < currentStep ? '#4ade80' : 'rgba(255,255,255,0.28)',
-                          textDecoration: action && i !== currentStep ? 'underline dotted' : 'none',
-                          textUnderlineOffset: 2,
-                        }}
-                      >
-                        {step}
-                      </span>
-                    </button>
-                    {i < steps.length - 1 && (
-                      <div
-                        className="flex-1 h-px mx-1 mt-3 flex-shrink-0"
-                        style={{ background: i < currentStep ? '#22c55e' : 'rgba(255,255,255,0.1)', minWidth: 12 }}
-                      />
-                    )}
-                  </React.Fragment>
-                );
-              })}
-            </div>
-          </div>
-        );
-      })()}
-
       {/* ── Step Strip (organiser only, above stage tabs) ── */}
       {isOrganizer && activeCategory && (() => {
         const fmt = bracket?.format;
@@ -1952,65 +1742,73 @@ const DrawPage = () => {
 
         return (
           <div className="max-w-2xl mx-auto px-3 mt-3 mb-1">
-            {/* Strip — all steps uniform, no state tracking */}
+            {/* Strip — same look on every format/category: big blue-glow circles, arrows, click-for-options hint */}
             <div style={{
-              display: 'flex', alignItems: 'flex-start',
-              background: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.08)',
-              borderRadius: 14, padding: '12px 14px',
-              overflowX: 'auto',
-              scrollbarWidth: 'none', msOverflowStyle: 'none',
-              gap: 0,
+              background: 'rgba(15,23,42,0.55)',
+              border: '1px solid rgba(59,130,246,0.25)',
+              borderRadius: 20, padding: '18px 16px 14px',
             }}>
-              {steps.map((step, i) => {
-                const isActive = activeStepPopup === step.id;
-                return (
-                  <React.Fragment key={step.id}>
-                    {i > 0 && (
-                      <span style={{
-                        color: 'rgba(255,255,255,0.25)',
-                        fontSize: 14, fontWeight: 400,
-                        flexShrink: 0, alignSelf: 'flex-start',
-                        marginTop: 6, padding: '0 4px',
-                        lineHeight: 1,
-                      }}>→</span>
-                    )}
-                    <button
-                      onClick={() => setActiveStepPopup(isActive ? null : step.id)}
-                      style={{
-                        flexShrink: 0, background: 'none', border: 'none',
-                        padding: 0, cursor: 'pointer',
-                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5,
-                        WebkitTapHighlightColor: 'transparent',
-                        minWidth: 52,
-                      }}
-                    >
-                      <div style={{
-                        width: 28, height: 28, borderRadius: '50%',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: 11, fontWeight: 800,
-                        background: isActive
-                          ? 'linear-gradient(135deg,#F59E0B,#FCD34D)'
-                          : 'rgba(255,255,255,0.10)',
-                        color: isActive ? '#07071a' : 'rgba(255,255,255,0.7)',
-                        border: isActive ? '2px solid #F59E0B' : '2px solid rgba(255,255,255,0.12)',
-                        boxShadow: isActive ? '0 0 0 3px rgba(245,158,11,0.18)' : 'none',
-                        transition: 'all 0.15s',
-                      }}>
-                        {i + 1}
-                      </div>
-                      <span style={{
-                        fontSize: 8.5, fontWeight: 600,
-                        color: isActive ? '#F59E0B' : 'rgba(255,255,255,0.55)',
-                        whiteSpace: 'nowrap', textAlign: 'center', lineHeight: 1.2,
-                        transition: 'color 0.15s',
-                      }}>
-                        {step.label}
-                      </span>
-                    </button>
-                  </React.Fragment>
-                );
-              })}
+              <div style={{
+                display: 'flex', alignItems: 'flex-start',
+                overflowX: 'auto',
+                scrollbarWidth: 'none', msOverflowStyle: 'none',
+                gap: 0,
+              }}>
+                {steps.map((step, i) => {
+                  const isActive = activeStepPopup === step.id;
+                  return (
+                    <React.Fragment key={step.id}>
+                      {i > 0 && (
+                        <span style={{
+                          color: '#3b82f6',
+                          fontSize: 18, fontWeight: 600,
+                          flexShrink: 0, alignSelf: 'center',
+                          padding: '0 8px',
+                          lineHeight: 1,
+                        }}>→</span>
+                      )}
+                      <button
+                        onClick={() => setActiveStepPopup(isActive ? null : step.id)}
+                        style={{
+                          flexShrink: 0, background: 'none', border: 'none',
+                          padding: 0, cursor: 'pointer',
+                          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
+                          WebkitTapHighlightColor: 'transparent',
+                          minWidth: 64,
+                        }}
+                      >
+                        <div style={{
+                          width: 52, height: 52, borderRadius: '50%',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontSize: 20, fontWeight: 800,
+                          background: 'rgba(15,23,42,0.85)',
+                          color: '#ffffff',
+                          border: isActive ? '2.5px solid #60a5fa' : '2px solid #3b82f6',
+                          boxShadow: isActive ? '0 0 18px rgba(96,165,250,0.65)' : '0 0 12px rgba(59,130,246,0.45)',
+                          transition: 'all 0.15s',
+                        }}>
+                          {i + 1}
+                        </div>
+                        <span style={{
+                          fontSize: 13, fontWeight: 600,
+                          color: '#ffffff',
+                          whiteSpace: 'nowrap', textAlign: 'center', lineHeight: 1.2,
+                        }}>
+                          {step.label}
+                        </span>
+                      </button>
+                    </React.Fragment>
+                  );
+                })}
+              </div>
+
+              {/* Hint */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 14 }}>
+                <MousePointerClick size={14} color="#60a5fa" />
+                <span style={{ fontSize: 13, fontWeight: 500, color: '#60a5fa' }}>
+                  Click on any step to view options
+                </span>
+              </div>
             </div>
 
             {/* Instruction popup box */}
@@ -2018,7 +1816,7 @@ const DrawPage = () => {
               <div style={{
                 marginTop: 8,
                 background: 'rgba(13,17,27,0.97)',
-                border: '1px solid rgba(245,158,11,0.25)',
+                border: '1px solid rgba(59,130,246,0.25)',
                 borderRadius: 14,
                 padding: '16px',
                 boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
@@ -2038,7 +1836,7 @@ const DrawPage = () => {
                 >
                   ×
                 </button>
-                <p style={{ fontSize: 12, fontWeight: 800, color: '#F59E0B', margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <p style={{ fontSize: 12, fontWeight: 800, color: '#60a5fa', margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                   {popup.title}
                 </p>
                 <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.65)', lineHeight: 1.55, margin: '0 0 14px' }}>
@@ -2052,8 +1850,8 @@ const DrawPage = () => {
                       padding: '9px 18px', borderRadius: 10, border: 'none',
                       background: popup.btnDisabled
                         ? 'rgba(255,255,255,0.07)'
-                        : 'linear-gradient(135deg,#F59E0B,#FCD34D)',
-                      color: popup.btnDisabled ? 'rgba(255,255,255,0.3)' : '#07071a',
+                        : 'linear-gradient(135deg,#3b82f6,#2563eb)',
+                      color: popup.btnDisabled ? 'rgba(255,255,255,0.3)' : '#ffffff',
                       fontWeight: 700, fontSize: 13,
                       cursor: popup.btnDisabled ? 'not-allowed' : 'pointer',
                       WebkitTapHighlightColor: 'transparent',

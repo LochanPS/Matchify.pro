@@ -116,7 +116,7 @@ const SplashScreen = ({ onComplete, duration: _duration = 5300 }) => {
         {/* the image always fills the full height on portrait phones so       */}
         {/* top:% values map consistently to the same image position.          */}
         <img
-          src="/splash.png"
+          src="/splash.jpg"
           alt=""
           draggable={false}
           style={{

@@ -99,84 +99,77 @@ const SplashScreen = ({ onComplete, duration: _duration = 5300 }) => {
       transition: fadeOut ? 'opacity 0.6s ease-out' : 'none',
       pointerEvents: fadeOut ? 'none' : 'all',
       touchAction: 'none',
-      display: 'flex', alignItems: 'stretch', justifyContent: 'center',
     }}>
 
-      {/* ── 480px-constrained column — same width as all app content ── */}
-      {/* This makes splash look identical on every phone size and on laptops */}
+      {/* Background image — cover so it ALWAYS fills the full screen edge to   */}
+      {/* edge on every phone, any width/height ratio. No 480px cap, no         */}
+      {/* contain-mode gaps — cover crops slightly on outlier aspect ratios     */}
+      {/* instead of ever leaving a visible bar.                               */}
+      <img
+        src="/splash.jpg"
+        alt=""
+        draggable={false}
+        style={{
+          position: 'absolute', inset: 0,
+          width: '100%', height: '100%',
+          objectFit: 'cover',
+          objectPosition: 'center center',
+          userSelect: 'none', pointerEvents: 'none',
+        }}
+      />
+
+      {/* ── Progress bar ──────────────────────────────────────────────────── */}
+      {/* 69.25% = measured midpoint of the dark gap between "India's #1       */}
+      {/* Badminton Platform" (ends ~y1014) and the icon row (starts ~y1206)  */}
+      {/* in the 740x1600 source image. Image aspect ratio (0.4625) is nearly */}
+      {/* identical to typical phone viewports, so cover crops minimally and  */}
+      {/* this percentage of full-bleed viewport height still lands in that  */}
+      {/* same gap on real devices.                                          */}
+      <style>{`
+        @keyframes goldShimmer {
+          0%   { background-position: -200% center; }
+          100% { background-position:  200% center; }
+        }
+      `}</style>
+
       <div style={{
-        position: 'relative',
-        width: '100%', maxWidth: '480px',
-        flex: '0 0 auto',
-        overflow: 'hidden',
+        position: 'absolute',
+        left: '50%', transform: 'translateX(-50%)',
+        top: '69.25%',
+        width: '60%', maxWidth: 288,
       }}>
-
-        {/* Background image — contain so it NEVER crops on any phone size.    */}
-        {/* Dark bg (#050810) fills any side gaps invisibly. With contain,     */}
-        {/* the image always fills the full height on portrait phones so       */}
-        {/* top:% values map consistently to the same image position.          */}
-        <img
-          src="/splash.jpg"
-          alt=""
-          draggable={false}
-          style={{
-            position: 'absolute', inset: 0,
-            width: '100%', height: '100%',
-            objectFit: 'contain',
-            objectPosition: 'center top',
-            userSelect: 'none', pointerEvents: 'none',
-          }}
-        />
-
-        {/* ── Progress bar ──────────────────────────────────────────────────── */}
-        {/* 70% = dark gap between "India's #1 Badminton Platform" and icons.  */}
-        {/* With contain, this % always maps to same position in the image.    */}
-        <style>{`
-          @keyframes goldShimmer {
-            0%   { background-position: -200% center; }
-            100% { background-position:  200% center; }
-          }
-        `}</style>
-
+        {/* Track */}
         <div style={{
-          position: 'absolute',
-          left: '50%', transform: 'translateX(-50%)',
-          top: '68%',
-          width: '60%',
+          width: '100%', height: 5, borderRadius: 999,
+          background: 'rgba(255,255,255,0.12)',
+          overflow: 'hidden',
+          boxShadow: '0 0 0 1px rgba(255,255,255,0.06)',
         }}>
-          {/* Track */}
+          {/* Fill */}
           <div style={{
-            width: '100%', height: 5, borderRadius: 999,
-            background: 'rgba(255,255,255,0.12)',
-            overflow: 'hidden',
-            boxShadow: '0 0 0 1px rgba(255,255,255,0.06)',
-          }}>
-            {/* Fill */}
-            <div style={{
-              height: '100%',
-              width: `${pct}%`,
-              borderRadius: 999,
-              background: 'linear-gradient(90deg, #b45309 0%, #f59e0b 45%, #fcd34d 70%, #f59e0b 100%)',
-              backgroundSize: '200% 100%',
-              animation: 'goldShimmer 1.6s linear infinite',
-              boxShadow: '0 0 10px rgba(245,158,11,0.85)',
-              transition: 'width 0.08s linear',
-            }} />
-          </div>
-
-          {/* Percentage — small, right-aligned, golden */}
-          <div style={{
-            textAlign: 'right', marginTop: 6,
-            fontSize: 11, fontWeight: 700,
-            color: 'rgba(251,191,36,0.75)',
-            fontFamily: 'system-ui,-apple-system,sans-serif',
-            letterSpacing: '0.04em',
-          }}>
-            {Math.round(pct)}%
-          </div>
+            height: '100%',
+            width: `${pct}%`,
+            borderRadius: 999,
+            background: 'linear-gradient(90deg, #b45309 0%, #f59e0b 45%, #fcd34d 70%, #f59e0b 100%)',
+            backgroundSize: '200% 100%',
+            animation: 'goldShimmer 1.6s linear infinite',
+            boxShadow: '0 0 10px rgba(245,158,11,0.85)',
+            transition: 'width 0.08s linear',
+          }} />
         </div>
 
+        {/* Percentage — small, right-aligned, golden */}
+        <div style={{
+          textAlign: 'right', marginTop: 6,
+          fontSize: 11, fontWeight: 700,
+          color: 'rgba(251,191,36,0.75)',
+          fontFamily: 'system-ui,-apple-system,sans-serif',
+          letterSpacing: '0.04em',
+        }}>
+          {Math.round(pct)}%
+        </div>
       </div>
+
     </div>
   );
 };

@@ -1726,12 +1726,12 @@ const DrawPage = () => {
                     <React.Fragment key={step.id}>
                       {i > 0 && (
                         <span style={{
-                          color: '#93c5fd',
-                          fontSize: 16, fontWeight: 700,
+                          color: '#bfdbfe',
+                          fontSize: 17, fontWeight: 800,
                           flexShrink: 0, alignSelf: 'center',
                           padding: '0 4px',
                           lineHeight: 1,
-                          textShadow: '0 0 6px rgba(147,197,253,0.6)',
+                          textShadow: '0 0 10px rgba(191,219,254,0.95)',
                         }}>→</span>
                       )}
                       <button
@@ -1749,11 +1749,11 @@ const DrawPage = () => {
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                           fontSize: 14, fontWeight: 800,
                           background: isActive
-                            ? 'linear-gradient(135deg, rgba(147,197,253,0.55), rgba(59,130,246,0.5))'
-                            : 'linear-gradient(135deg, rgba(59,130,246,0.65), rgba(37,99,235,0.55))',
+                            ? 'linear-gradient(135deg, #93c5fd, #3b82f6)'
+                            : 'linear-gradient(135deg, #3b82f6, #2563eb)',
                           color: '#ffffff',
-                          border: isActive ? '2.5px solid #dbeafe' : '2px solid #93c5fd',
-                          boxShadow: isActive ? '0 0 18px rgba(219,234,254,0.9)' : '0 0 12px rgba(147,197,253,0.75)',
+                          border: isActive ? '2.5px solid #eff6ff' : '2px solid #bfdbfe',
+                          boxShadow: isActive ? '0 0 22px rgba(219,234,254,1)' : '0 0 16px rgba(147,197,253,0.95)',
                           transition: 'all 0.15s',
                         }}>
                           {i + 1}

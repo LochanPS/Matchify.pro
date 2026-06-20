@@ -1,10 +1,12 @@
-import MatchifyLogo from './MatchifyLogo';
-import Spinner from './Spinner';
-
 /**
  * Full-page loading screen — galaxy background with Matchify branding.
  * bg-galaxy.png fills the screen (objectFit: cover), ambient glows + stars
  * overlay it for depth. No black bars, no white flash.
+ *
+ * Visually unified with SplashScreen.jsx (same background family, same
+ * shield icon, same gold accent) without repeating its one-time baked-in
+ * marketing text/icon row — this shows on every page load, so it stays
+ * lightweight: shield icon, indeterminate gold shimmer bar, message, dots.
  */
 
 const _isPWA = () => {
@@ -82,6 +84,7 @@ const LoadingScreen = ({ message = 'Loading...' }) => {
         @keyframes lsPulse  { 0%,100%{opacity:.6;transform:scale(1)}  50%{opacity:1;transform:scale(1.07)} }
         @keyframes lsFadeUp { 0%{opacity:0;transform:translateY(14px)} 100%{opacity:1;transform:translateY(0)} }
         @keyframes lsDot    { 0%,80%,100%{transform:scale(0);opacity:.3} 40%{transform:scale(1);opacity:1} }
+        @keyframes lsShimmer { 0%{background-position:-200% center} 100%{background-position:200% center} }
       `}</style>
 
       {/* ── Content ─────────────────────────────────────────────────────────── */}
@@ -89,11 +92,29 @@ const LoadingScreen = ({ message = 'Loading...' }) => {
         className="relative z-10 flex flex-col items-center gap-8"
         style={{ animation: 'lsFadeUp 0.45s ease-out both' }}
       >
-        <div style={{ animation: 'lsPulse 2.5s ease-in-out infinite' }}>
-          <MatchifyLogo size={56} variant="icon" />
-        </div>
+        {/* Shield icon — same /app-icon.png used as the app's icon everywhere else */}
+        <img
+          src="/app-icon.png"
+          alt=""
+          draggable={false}
+          style={{
+            width: 64, height: 64, objectFit: 'contain',
+            animation: 'lsPulse 2.5s ease-in-out infinite',
+            filter: 'drop-shadow(0 0 14px rgba(34,211,238,0.45))',
+          }}
+        />
 
-        <Spinner size="xl" />
+        {/* Indeterminate gold shimmer — same accent as SplashScreen's progress bar,
+            no percentage since this is a short, unbounded loading state */}
+        <div style={{ width: 140, height: 5, borderRadius: 999, background: 'rgba(255,255,255,0.12)', overflow: 'hidden', boxShadow: '0 0 0 1px rgba(255,255,255,0.06)' }}>
+          <div style={{
+            height: '100%', width: '100%', borderRadius: 999,
+            background: 'linear-gradient(90deg, #b45309 0%, #f59e0b 45%, #fcd34d 70%, #f59e0b 100%)',
+            backgroundSize: '200% 100%',
+            animation: 'lsShimmer 1.6s linear infinite',
+            boxShadow: '0 0 10px rgba(245,158,11,0.85)',
+          }} />
+        </div>
 
         <div className="flex flex-col items-center gap-3">
           <p style={{

@@ -394,9 +394,10 @@ export default function TournamentRegistrationPage() {
   const upiId = (tournament?.upiId?.trim() || paymentSettings?.upiId?.trim() || '');
   const total = calculateTotal();
   const accountHolder = tournament?.accountHolderName || paymentSettings?.accountHolder || 'Matchify.pro';
-  const qrUrl = tournament?.paymentQRUrl
-    ? getImageUrl(tournament.paymentQRUrl)
-    : (paymentSettings?.qrCodeUrl || null);
+  // QR must always be the platform-wide one admin configures, not the organizer's own —
+  // fall back to the organizer's QR only if admin hasn't set a platform QR at all.
+  const qrUrl = paymentSettings?.qrCodeUrl
+    || (tournament?.paymentQRUrl ? getImageUrl(tournament.paymentQRUrl) : null);
 
   // ── Render: main ─────────────────────────────────────────────────────────
   return (

@@ -1726,12 +1726,11 @@ const DrawPage = () => {
                     <React.Fragment key={step.id}>
                       {i > 0 && (
                         <span style={{
-                          color: '#bfdbfe',
-                          fontSize: 17, fontWeight: 800,
+                          color: '#ffffff',
+                          fontSize: 17, fontWeight: 500,
                           flexShrink: 0, alignSelf: 'center',
                           padding: '0 4px',
                           lineHeight: 1,
-                          textShadow: '0 0 10px rgba(191,219,254,0.95)',
                         }}>→</span>
                       )}
                       <button
@@ -1749,20 +1748,18 @@ const DrawPage = () => {
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                           fontSize: 14, fontWeight: 800,
                           background: isActive
-                            ? 'linear-gradient(135deg, #bfdbfe, #3b82f6)'
-                            : 'linear-gradient(135deg, #60a5fa, #2563eb)',
-                          border: isActive ? '2.5px solid #ffffff' : '2px solid #bfdbfe',
-                          boxShadow: isActive ? '0 0 24px rgba(219,234,254,1)' : '0 0 18px rgba(96,165,250,1)',
+                            ? 'linear-gradient(135deg, #60a5fa, #3b82f6)'
+                            : 'linear-gradient(135deg, #3b82f6, #2563eb)',
+                          border: '2px solid #ffffff',
+                          boxShadow: isActive ? '0 0 18px rgba(96,165,250,0.7)' : '0 0 12px rgba(59,130,246,0.45)',
                           transition: 'all 0.15s',
                           color: '#ffffff',
-                          textShadow: '0 0 6px rgba(59,130,246,0.9), 0 0 2px rgba(59,130,246,0.9)',
                         }}>
                           {i + 1}
                         </div>
                         <span style={{
                           fontSize: 10.5, fontWeight: 700,
                           color: '#ffffff',
-                          textShadow: '0 0 6px rgba(59,130,246,0.85)',
                           whiteSpace: 'nowrap', textAlign: 'center', lineHeight: 1.2,
                         }}>
                           {step.label}

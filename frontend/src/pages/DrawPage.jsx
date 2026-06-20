@@ -1751,16 +1751,18 @@ const DrawPage = () => {
                           background: isActive
                             ? 'linear-gradient(135deg, #bfdbfe, #3b82f6)'
                             : 'linear-gradient(135deg, #60a5fa, #2563eb)',
-                          color: '#ffffff',
                           border: isActive ? '2.5px solid #ffffff' : '2px solid #bfdbfe',
                           boxShadow: isActive ? '0 0 24px rgba(219,234,254,1)' : '0 0 18px rgba(96,165,250,1)',
                           transition: 'all 0.15s',
+                          color: '#ffffff',
+                          textShadow: '0 0 6px rgba(59,130,246,0.9), 0 0 2px rgba(59,130,246,0.9)',
                         }}>
                           {i + 1}
                         </div>
                         <span style={{
                           fontSize: 10.5, fontWeight: 700,
                           color: '#ffffff',
+                          textShadow: '0 0 6px rgba(59,130,246,0.85)',
                           whiteSpace: 'nowrap', textAlign: 'center', lineHeight: 1.2,
                         }}>
                           {step.label}

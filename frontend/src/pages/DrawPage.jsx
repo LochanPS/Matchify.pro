@@ -1749,11 +1749,11 @@ const DrawPage = () => {
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                           fontSize: 14, fontWeight: 800,
                           background: isActive
-                            ? 'linear-gradient(135deg, #93c5fd, #3b82f6)'
-                            : 'linear-gradient(135deg, #3b82f6, #2563eb)',
+                            ? 'linear-gradient(135deg, #bfdbfe, #3b82f6)'
+                            : 'linear-gradient(135deg, #60a5fa, #2563eb)',
                           color: '#ffffff',
-                          border: isActive ? '2.5px solid #eff6ff' : '2px solid #bfdbfe',
-                          boxShadow: isActive ? '0 0 22px rgba(219,234,254,1)' : '0 0 16px rgba(147,197,253,0.95)',
+                          border: isActive ? '2.5px solid #ffffff' : '2px solid #bfdbfe',
+                          boxShadow: isActive ? '0 0 24px rgba(219,234,254,1)' : '0 0 18px rgba(96,165,250,1)',
                           transition: 'all 0.15s',
                         }}>
                           {i + 1}
@@ -1773,8 +1773,8 @@ const DrawPage = () => {
 
               {/* Hint */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, marginTop: 9 }}>
-                <MousePointerClick size={11} color="#93c5fd" />
-                <span style={{ fontSize: 11, fontWeight: 600, color: '#93c5fd' }}>
+                <MousePointerClick size={11} color="#bfdbfe" />
+                <span style={{ fontSize: 11, fontWeight: 600, color: '#bfdbfe' }}>
                   Click on any step to view options
                 </span>
               </div>

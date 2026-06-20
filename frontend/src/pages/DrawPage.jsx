@@ -1750,17 +1750,17 @@ const DrawPage = () => {
                           fontSize: 14, fontWeight: 800,
                           background: isActive
                             ? 'linear-gradient(135deg, rgba(96,165,250,0.35), rgba(37,99,235,0.3))'
-                            : 'rgba(15,23,42,0.85)',
+                            : 'rgba(30,58,138,0.45)',
                           color: '#ffffff',
-                          border: isActive ? '2.5px solid #93c5fd' : '1.5px solid rgba(96,165,250,0.7)',
-                          boxShadow: isActive ? '0 0 16px rgba(147,197,253,0.85)' : '0 0 6px rgba(59,130,246,0.35)',
+                          border: isActive ? '2.5px solid #93c5fd' : '2px solid #60a5fa',
+                          boxShadow: isActive ? '0 0 16px rgba(147,197,253,0.85)' : '0 0 10px rgba(96,165,250,0.6)',
                           transition: 'all 0.15s',
                         }}>
                           {i + 1}
                         </div>
                         <span style={{
                           fontSize: 10.5, fontWeight: isActive ? 700 : 600,
-                          color: isActive ? '#93c5fd' : 'rgba(255,255,255,0.85)',
+                          color: isActive ? '#93c5fd' : '#e2e8f0',
                           whiteSpace: 'nowrap', textAlign: 'center', lineHeight: 1.2,
                         }}>
                           {step.label}
@@ -1773,8 +1773,8 @@ const DrawPage = () => {
 
               {/* Hint */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, marginTop: 9 }}>
-                <MousePointerClick size={11} color="#60a5fa" />
-                <span style={{ fontSize: 11, fontWeight: 500, color: '#60a5fa' }}>
+                <MousePointerClick size={11} color="#93c5fd" />
+                <span style={{ fontSize: 11, fontWeight: 600, color: '#93c5fd' }}>
                   Click on any step to view options
                 </span>
               </div>

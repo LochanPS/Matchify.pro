@@ -1707,66 +1707,82 @@ const DrawPage = () => {
 
         return (
           <div className="max-w-2xl mx-auto px-3 mt-3 mb-1">
-            {/* Strip — same look on every format/category: blue-glow circles, arrows, click-for-options hint.
-                Sized compact (38px circles) so all steps + arrows scroll smoothly in one row on mobile. */}
-            <div style={{
-              background: 'rgba(8,12,24,0.92)',
-              border: '1px solid rgba(59,130,246,0.3)',
-              borderRadius: 16, padding: '12px 12px 9px',
-            }}>
-              <div style={{
-                display: 'flex', alignItems: 'flex-start',
-                overflowX: 'auto',
-                scrollbarWidth: 'none', msOverflowStyle: 'none',
-                gap: 0,
-              }}>
+            {/* Premium glassmorphism stepper — ONE styling source (injected CSS below).
+                Responsive: circles + labels scale at <=768px, labels wrap (never truncate),
+                steps wrap to a second row instead of overflowing horizontally. */}
+            <style>{`
+              .dp-stepper-card {
+                background: rgba(5,15,35,0.75);
+                border: 1px solid rgba(255,255,255,0.15);
+                border-radius: 20px;
+                padding: 26px 18px 20px;
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+                box-shadow: 0 8px 32px rgba(0,0,0,0.45);
+              }
+              .dp-stepper {
+                display: flex; align-items: flex-start; justify-content: center;
+                flex-wrap: wrap; gap: 8px 10px;
+              }
+              .dp-step {
+                display: flex; flex-direction: column; align-items: center; gap: 10px;
+                background: none; border: none; padding: 0; cursor: pointer;
+                -webkit-tap-highlight-color: transparent;
+                flex: 0 0 auto; max-width: 96px;
+              }
+              .dp-circle {
+                width: 54px; height: 54px; border-radius: 50%;
+                display: flex; align-items: center; justify-content: center;
+                font-size: 20px; font-weight: 800; color: #ffffff;
+                background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+                border: 3px solid #ffffff;
+                box-shadow: 0 0 15px rgba(255,255,255,0.7), 0 0 30px rgba(37,99,235,0.8);
+                text-shadow: 0 0 6px rgba(255,255,255,0.6);
+                transition: transform 0.15s, box-shadow 0.15s;
+              }
+              .dp-step.active .dp-circle {
+                background: linear-gradient(180deg, #93c5fd 0%, #3b82f6 100%);
+                box-shadow: 0 0 20px rgba(255,255,255,0.9), 0 0 38px rgba(96,165,250,0.95);
+                transform: scale(1.06);
+              }
+              .dp-label {
+                color: #ffffff; font-weight: 800; font-size: 16px;
+                text-align: center; line-height: 1.25; white-space: normal;
+              }
+              .dp-arrow {
+                color: #ffffff; font-size: 26px; font-weight: 700;
+                flex: 0 0 auto; align-self: flex-start; margin-top: 14px;
+                line-height: 1; user-select: none;
+              }
+              .dp-hint {
+                display: flex; align-items: center; justify-content: center; gap: 6px;
+                margin-top: 16px;
+              }
+              .dp-hint span { font-size: 12.5px; font-weight: 600; color: rgba(255,255,255,0.75); }
+              @media (max-width: 768px) {
+                .dp-stepper-card { padding: 20px 12px 16px; }
+                .dp-stepper { gap: 6px 4px; }
+                .dp-step { max-width: 82px; gap: 8px; }
+                .dp-circle { width: 48px; height: 48px; font-size: 18px; }
+                .dp-label { font-size: 14px; }
+                .dp-arrow { font-size: 20px; margin-top: 13px; }
+              }
+            `}</style>
+
+            <div className="dp-stepper-card">
+              <div className="dp-stepper">
                 {steps.map((step, i) => {
                   const isActive = activeStepPopup === step.id;
                   return (
                     <React.Fragment key={step.id}>
-                      {i > 0 && (
-                        <span style={{
-                          color: '#ffffff',
-                          fontSize: 17, fontWeight: 500,
-                          flexShrink: 0, alignSelf: 'center',
-                          padding: '0 4px',
-                          lineHeight: 1,
-                        }}>→</span>
-                      )}
+                      {i > 0 && <span className="dp-arrow">→</span>}
                       <button
+                        type="button"
+                        className={`dp-step${isActive ? ' active' : ''}`}
                         onClick={() => setActiveStepPopup(isActive ? null : step.id)}
-                        style={{
-                          flexShrink: 0, background: 'none', border: 'none',
-                          padding: 0, cursor: 'pointer',
-                          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
-                          WebkitTapHighlightColor: 'transparent',
-                          minWidth: 48,
-                        }}
                       >
-                        <div style={{
-                          width: 44, height: 44, borderRadius: '50%',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          fontSize: 16, fontWeight: 800,
-                          background: isActive
-                            ? 'linear-gradient(135deg, #93c5fd, #3b82f6)'
-                            : 'linear-gradient(135deg, #60a5fa, #2563eb)',
-                          color: '#ffffff',
-                          textShadow: '0 0 4px rgba(255,255,255,0.85)',
-                          border: '3px solid #ffffff',
-                          boxShadow: isActive
-                            ? '0 0 20px rgba(255,255,255,0.85), 0 0 30px rgba(96,165,250,0.9)'
-                            : '0 0 18px rgba(255,255,255,0.7), 0 0 28px rgba(59,130,246,0.85)',
-                          transition: 'all 0.15s',
-                        }}>
-                          {i + 1}
-                        </div>
-                        <span style={{
-                          fontSize: 11, fontWeight: 800,
-                          color: '#ffffff',
-                          whiteSpace: 'nowrap', textAlign: 'center', lineHeight: 1.2,
-                        }}>
-                          {step.label}
-                        </span>
+                        <span className="dp-circle">{i + 1}</span>
+                        <span className="dp-label">{step.label}</span>
                       </button>
                     </React.Fragment>
                   );
@@ -1774,11 +1790,9 @@ const DrawPage = () => {
               </div>
 
               {/* Hint */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, marginTop: 9 }}>
-                <MousePointerClick size={11} color="#bfdbfe" />
-                <span style={{ fontSize: 11, fontWeight: 600, color: '#bfdbfe' }}>
-                  Click on any step to view options
-                </span>
+              <div className="dp-hint">
+                <MousePointerClick size={13} color="rgba(255,255,255,0.75)" />
+                <span>Click on any step to view options</span>
               </div>
             </div>
 

@@ -1,5 +1,4 @@
 ﻿import { getErrorMessage } from '../utils/errorMessage';
-import { getImageUrl } from '../utils/imageUrl';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -390,14 +389,12 @@ export default function TournamentRegistrationPage() {
     );
   }
 
-  // Tournament-specific payment info takes priority over platform defaults
-  const upiId = (tournament?.upiId?.trim() || paymentSettings?.upiId?.trim() || '');
+  // Payment always routes to the admin/platform account — never the organizer's.
+  // Only admin-configured platform details are shown; no organizer fallback.
+  const upiId = (paymentSettings?.upiId?.trim() || '');
   const total = calculateTotal();
-  const accountHolder = tournament?.accountHolderName || paymentSettings?.accountHolder || 'Matchify.pro';
-  // QR must always be the platform-wide one admin configures, not the organizer's own —
-  // fall back to the organizer's QR only if admin hasn't set a platform QR at all.
-  const qrUrl = paymentSettings?.qrCodeUrl
-    || (tournament?.paymentQRUrl ? getImageUrl(tournament.paymentQRUrl) : null);
+  const accountHolder = paymentSettings?.accountHolder || 'Matchify.pro';
+  const qrUrl = paymentSettings?.qrCodeUrl || null;
 
   // ── Render: main ─────────────────────────────────────────────────────────
   return (

@@ -1710,8 +1710,8 @@ const DrawPage = () => {
             {/* Strip — same look on every format/category: blue-glow circles, arrows, click-for-options hint.
                 Sized compact (38px circles) so all steps + arrows scroll smoothly in one row on mobile. */}
             <div style={{
-              background: 'rgba(15,23,42,0.55)',
-              border: '1px solid rgba(59,130,246,0.25)',
+              background: 'rgba(8,12,24,0.92)',
+              border: '1px solid rgba(59,130,246,0.3)',
               borderRadius: 16, padding: '12px 12px 9px',
             }}>
               <div style={{
@@ -1751,8 +1751,11 @@ const DrawPage = () => {
                             ? 'linear-gradient(135deg, #60a5fa, #3b82f6)'
                             : 'linear-gradient(135deg, #3b82f6, #2563eb)',
                           color: '#ffffff',
-                          border: '2px solid #ffffff',
-                          boxShadow: isActive ? '0 0 18px rgba(96,165,250,0.7)' : '0 0 12px rgba(59,130,246,0.45)',
+                          textShadow: '0 0 8px rgba(255,255,255,0.7)',
+                          border: '2.5px solid #ffffff',
+                          boxShadow: isActive
+                            ? '0 0 16px rgba(255,255,255,0.6), 0 0 22px rgba(96,165,250,0.75)'
+                            : '0 0 14px rgba(255,255,255,0.5), 0 0 20px rgba(59,130,246,0.65)',
                           transition: 'all 0.15s',
                         }}>
                           {i + 1}
@@ -1760,6 +1763,7 @@ const DrawPage = () => {
                         <span style={{
                           fontSize: 10.5, fontWeight: 700,
                           color: '#ffffff',
+                          textShadow: '0 0 8px rgba(255,255,255,0.55)',
                           whiteSpace: 'nowrap', textAlign: 'center', lineHeight: 1.2,
                         }}>
                           {step.label}

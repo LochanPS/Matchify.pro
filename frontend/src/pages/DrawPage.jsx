@@ -1721,6 +1721,7 @@ const DrawPage = () => {
                 box-shadow: 0 8px 32px rgba(0,0,0,0.45);
               }
               .dp-stepper {
+                display: flex; justify-content: safe center;
                 overflow-x: auto; overflow-y: hidden;
                 scrollbar-width: none; -ms-overflow-style: none;
                 scroll-snap-type: x proximity;
@@ -1729,7 +1730,7 @@ const DrawPage = () => {
               .dp-stepper::-webkit-scrollbar { display: none; }
               .dp-stepper-track {
                 display: flex; align-items: flex-start; flex-wrap: nowrap;
-                gap: 10px 16px; width: max-content; margin: 0 auto; padding: 2px;
+                gap: 10px 16px; width: max-content; padding: 2px;
               }
               .dp-step {
                 display: flex; flex-direction: column; align-items: center; gap: 10px;

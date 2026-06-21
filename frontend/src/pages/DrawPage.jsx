@@ -1721,14 +1721,21 @@ const DrawPage = () => {
                 box-shadow: 0 8px 32px rgba(0,0,0,0.45);
               }
               .dp-stepper {
-                display: flex; align-items: flex-start; justify-content: center;
-                flex-wrap: wrap; gap: 8px 10px;
+                overflow-x: auto; overflow-y: hidden;
+                scrollbar-width: none; -ms-overflow-style: none;
+                scroll-snap-type: x proximity;
+                -webkit-overflow-scrolling: touch;
+              }
+              .dp-stepper::-webkit-scrollbar { display: none; }
+              .dp-stepper-track {
+                display: flex; align-items: flex-start; flex-wrap: nowrap;
+                gap: 10px 16px; width: max-content; margin: 0 auto; padding: 2px;
               }
               .dp-step {
                 display: flex; flex-direction: column; align-items: center; gap: 10px;
                 background: none; border: none; padding: 0; cursor: pointer;
                 -webkit-tap-highlight-color: transparent;
-                flex: 0 0 auto; max-width: 96px;
+                flex: 0 0 auto; width: 88px; scroll-snap-align: center;
               }
               .dp-circle {
                 width: 54px; height: 54px; border-radius: 50%;
@@ -1761,8 +1768,8 @@ const DrawPage = () => {
               .dp-hint span { font-size: 12.5px; font-weight: 600; color: rgba(255,255,255,0.75); }
               @media (max-width: 768px) {
                 .dp-stepper-card { padding: 20px 12px 16px; }
-                .dp-stepper { gap: 6px 4px; }
-                .dp-step { max-width: 82px; gap: 8px; }
+                .dp-stepper-track { gap: 8px 8px; }
+                .dp-step { width: 74px; gap: 8px; }
                 .dp-circle { width: 48px; height: 48px; font-size: 18px; }
                 .dp-label { font-size: 14px; }
                 .dp-arrow { font-size: 20px; margin-top: 13px; }
@@ -1771,6 +1778,7 @@ const DrawPage = () => {
 
             <div className="dp-stepper-card">
               <div className="dp-stepper">
+                <div className="dp-stepper-track">
                 {steps.map((step, i) => {
                   const isActive = activeStepPopup === step.id;
                   return (
@@ -1787,6 +1795,7 @@ const DrawPage = () => {
                     </React.Fragment>
                   );
                 })}
+                </div>
               </div>
 
               {/* Hint */}

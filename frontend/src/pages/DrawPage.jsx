@@ -1744,26 +1744,25 @@ const DrawPage = () => {
                         }}
                       >
                         <div style={{
-                          width: 38, height: 38, borderRadius: '50%',
+                          width: 44, height: 44, borderRadius: '50%',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          fontSize: 14, fontWeight: 800,
+                          fontSize: 16, fontWeight: 800,
                           background: isActive
-                            ? 'linear-gradient(135deg, #60a5fa, #3b82f6)'
-                            : 'linear-gradient(135deg, #3b82f6, #2563eb)',
+                            ? 'linear-gradient(135deg, #93c5fd, #3b82f6)'
+                            : 'linear-gradient(135deg, #60a5fa, #2563eb)',
                           color: '#ffffff',
-                          textShadow: '0 0 8px rgba(255,255,255,0.7)',
-                          border: '2.5px solid #ffffff',
+                          textShadow: '0 0 4px rgba(255,255,255,0.85)',
+                          border: '3px solid #ffffff',
                           boxShadow: isActive
-                            ? '0 0 16px rgba(255,255,255,0.6), 0 0 22px rgba(96,165,250,0.75)'
-                            : '0 0 14px rgba(255,255,255,0.5), 0 0 20px rgba(59,130,246,0.65)',
+                            ? '0 0 20px rgba(255,255,255,0.85), 0 0 30px rgba(96,165,250,0.9)'
+                            : '0 0 18px rgba(255,255,255,0.7), 0 0 28px rgba(59,130,246,0.85)',
                           transition: 'all 0.15s',
                         }}>
                           {i + 1}
                         </div>
                         <span style={{
-                          fontSize: 10.5, fontWeight: 700,
+                          fontSize: 11, fontWeight: 800,
                           color: '#ffffff',
-                          textShadow: '0 0 8px rgba(255,255,255,0.55)',
                           whiteSpace: 'nowrap', textAlign: 'center', lineHeight: 1.2,
                         }}>
                           {step.label}

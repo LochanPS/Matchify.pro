@@ -1715,7 +1715,7 @@ const DrawPage = () => {
                 background: rgba(5,15,35,0.75);
                 border: 1px solid rgba(255,255,255,0.15);
                 border-radius: 20px;
-                padding: 26px 18px 20px;
+                padding: 20px 16px 16px;
                 backdrop-filter: blur(10px);
                 -webkit-backdrop-filter: blur(10px);
                 box-shadow: 0 8px 32px rgba(0,0,0,0.45);
@@ -1736,12 +1736,12 @@ const DrawPage = () => {
                 display: flex; flex-direction: column; align-items: center; gap: 10px;
                 background: none; border: none; padding: 0; cursor: pointer;
                 -webkit-tap-highlight-color: transparent;
-                flex: 0 0 auto; width: 88px; scroll-snap-align: center;
+                flex: 0 0 auto; width: 78px; scroll-snap-align: center;
               }
               .dp-circle {
-                width: 54px; height: 54px; border-radius: 50%;
+                width: 46px; height: 46px; border-radius: 50%;
                 display: flex; align-items: center; justify-content: center;
-                font-size: 20px; font-weight: 800; color: #ffffff;
+                font-size: 17px; font-weight: 800; color: #ffffff;
                 background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
                 border: 3px solid #ffffff;
                 box-shadow: 0 0 15px rgba(255,255,255,0.7), 0 0 30px rgba(37,99,235,0.8);
@@ -1754,12 +1754,12 @@ const DrawPage = () => {
                 transform: scale(1.06);
               }
               .dp-label {
-                color: #ffffff; font-weight: 800; font-size: 16px;
+                color: #ffffff; font-weight: 800; font-size: 14px;
                 text-align: center; line-height: 1.25; white-space: normal;
               }
               .dp-arrow {
-                color: #ffffff; font-size: 26px; font-weight: 700;
-                flex: 0 0 auto; align-self: flex-start; margin-top: 14px;
+                color: #ffffff; font-size: 22px; font-weight: 700;
+                flex: 0 0 auto; align-self: flex-start; margin-top: 11px;
                 line-height: 1; user-select: none;
               }
               .dp-hint {
@@ -1768,12 +1768,12 @@ const DrawPage = () => {
               }
               .dp-hint span { font-size: 12.5px; font-weight: 600; color: rgba(255,255,255,0.75); }
               @media (max-width: 768px) {
-                .dp-stepper-card { padding: 20px 12px 16px; }
+                .dp-stepper-card { padding: 16px 10px 14px; }
                 .dp-stepper-track { gap: 8px 8px; }
-                .dp-step { width: 74px; gap: 8px; }
-                .dp-circle { width: 48px; height: 48px; font-size: 18px; }
-                .dp-label { font-size: 14px; }
-                .dp-arrow { font-size: 20px; margin-top: 13px; }
+                .dp-step { width: 68px; gap: 8px; }
+                .dp-circle { width: 42px; height: 42px; font-size: 16px; }
+                .dp-label { font-size: 13px; }
+                .dp-arrow { font-size: 18px; margin-top: 10px; }
               }
             `}</style>
 

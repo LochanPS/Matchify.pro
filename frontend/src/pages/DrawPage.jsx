@@ -828,14 +828,63 @@ const DrawPage = () => {
     }
   };
 
-  // Change match result
-  const [showChangeResultModal, setShowChangeResultModal] = useState(false);
-  const [selectedMatchForChange, setSelectedMatchForChange] = useState(null);
-  const [changingResult, setChangingResult] = useState(false);
+  // ── Edit Result / Complete Match modal ─────────────────────────────────────
+  // One modal serves both: a COMPLETED match opens in 'edit' mode (change score +
+  // winner, KO re-propagates on the backend); a not-yet-played match opens in
+  // 'complete' mode (type the score + winner, mark it done without umpiring).
+  const [showResultModal, setShowResultModal] = useState(false);
+  const [resultMode, setResultMode] = useState('edit'); // 'edit' | 'complete'
+  const [resultMatch, setResultMatch] = useState(null); // { id, p1Id, p2Id, p1Name, p2Name, stage }
+  const [resultSets, setResultSets] = useState([{ player1: 0, player2: 0 }]);
+  const [resultWinnerId, setResultWinnerId] = useState(null);
+  const [resultWinnerManual, setResultWinnerManual] = useState(false);
+  const [savingResult, setSavingResult] = useState(false);
 
-  const onChangeResult = (matchData, bracketMatch) => {
-    setSelectedMatchForChange({ ...matchData, bracketMatch });
-    setShowChangeResultModal(true);
+  // Parse a stored score (string or object) into an editable sets array
+  const parseSetsFromScore = (score) => {
+    try {
+      const s = typeof score === 'string' ? JSON.parse(score) : score;
+      if (s && Array.isArray(s.sets) && s.sets.length) {
+        return s.sets.map(set => ({
+          player1: Number(set.player1 ?? set.p1 ?? set.score1 ?? 0) || 0,
+          player2: Number(set.player2 ?? set.p2 ?? set.score2 ?? 0) || 0,
+        }));
+      }
+    } catch (_) { /* fall through */ }
+    return [{ player1: 0, player2: 0 }];
+  };
+
+  // Winner = whoever wins more sets; null if tied/empty
+  const deriveWinnerId = (sets, p1Id, p2Id) => {
+    let w1 = 0, w2 = 0;
+    sets.forEach(s => {
+      if (s.player1 > s.player2) w1++;
+      else if (s.player2 > s.player1) w2++;
+    });
+    if (w1 > w2) return p1Id;
+    if (w2 > w1) return p2Id;
+    return null;
+  };
+
+  const onChangeResult = (dbMatch, bracketMatch) => {
+    const p1 = bracketMatch?.player1;
+    const p2 = bracketMatch?.player2;
+    const p1Id = dbMatch?.player1Id || p1?.id || null;
+    const p2Id = dbMatch?.player2Id || p2?.id || null;
+    const mode = dbMatch?.status === 'COMPLETED' ? 'edit' : 'complete';
+    const sets = mode === 'edit'
+      ? parseSetsFromScore(dbMatch?.scoreJson ?? dbMatch?.score)
+      : [{ player1: 0, player2: 0 }];
+    setResultMatch({
+      id: dbMatch?.id, p1Id, p2Id,
+      p1Name: getPlayerDisplay(p1), p2Name: getPlayerDisplay(p2),
+      stage: dbMatch?.stage,
+    });
+    setResultSets(sets);
+    setResultWinnerManual(false);
+    setResultWinnerId(mode === 'edit' ? (dbMatch?.winnerId || deriveWinnerId(sets, p1Id, p2Id)) : deriveWinnerId(sets, p1Id, p2Id));
+    setResultMode(mode);
+    setShowResultModal(true);
   };
 
   const onViewMatchDetails = (matchData, bracketMatch) => {
@@ -843,31 +892,54 @@ const DrawPage = () => {
     setShowMatchDetailsModal(true);
   };
 
-  const changeMatchResult = async (newWinnerId) => {
-    if (!selectedMatchForChange) return;
-    
-    setChangingResult(true);
+  const updateResultSet = (idx, field, value) => {
+    const v = Math.max(0, Math.min(99, parseInt(value, 10) || 0));
+    setResultSets(prev => {
+      const next = prev.map((s, i) => (i === idx ? { ...s, [field]: v } : s));
+      if (!resultWinnerManual && resultMatch) {
+        setResultWinnerId(deriveWinnerId(next, resultMatch.p1Id, resultMatch.p2Id));
+      }
+      return next;
+    });
+  };
+
+  const addResultSet = () => setResultSets(prev => (prev.length < 5 ? [...prev, { player1: 0, player2: 0 }] : prev));
+  const removeResultSet = (idx) => setResultSets(prev => (prev.length > 1 ? prev.filter((_, i) => i !== idx) : prev));
+  const pickResultWinner = (id) => { setResultWinnerManual(true); setResultWinnerId(id); };
+
+  const saveResult = async () => {
+    if (!resultMatch?.id) return;
+    const { id, p1Id, p2Id } = resultMatch;
+    if (!resultWinnerId) { setError('Select the winner of the match.'); return; }
+    if (resultWinnerId !== p1Id && resultWinnerId !== p2Id) { setError('Winner must be one of the two players.'); return; }
+    const cleanSets = resultSets.filter(s => (Number(s.player1) + Number(s.player2)) > 0);
+    if (cleanSets.length === 0) { setError('Enter at least one set score.'); return; }
+
+    setSavingResult(true);
     setError(null);
-    
     try {
-      // Call API to change the match winner
-      await api.put(`/matches/${selectedMatchForChange.id}/change-winner`, {
-        winnerId: newWinnerId
-      });
-      
-      setSuccess('Match result updated successfully!');
-      setShowChangeResultModal(false);
-      setSelectedMatchForChange(null);
-      
-      // Full refresh — updates bracket, matches, tournament status, category status
+      const scorePayload = {
+        sets: cleanSets,
+        matchConfig: { pointsPerSet: 21, setsToWin: Math.ceil(cleanSets.length / 2) || 1, maxSets: cleanSets.length, extension: true },
+      };
+      if (resultMode === 'edit') {
+        // Score + winner; backend re-propagates the knockout bracket if the winner changed.
+        await api.put(`/matches/${id}/change-winner`, { winnerId: resultWinnerId, scoreJson: scorePayload });
+      } else {
+        // Manual completion of an unplayed match — reuses the standard end-match path.
+        await api.post(`/matches/${id}/complete`, { winnerId: resultWinnerId, finalScore: scorePayload });
+      }
+      setSuccess(resultMode === 'edit' ? 'Result updated successfully!' : 'Match completed successfully!');
+      setShowResultModal(false);
+      setResultMatch(null);
+      // Full refresh — updates bracket, matches, standings, tournament/category status
       await fetchDrawPageFull(activeCategory.id);
-      
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
-      console.error('Error changing match result:', err);
-      setError(getErrorMessage(err, 'Failed to change match result'));
+      console.error('Error saving match result:', err);
+      setError(getErrorMessage(err, 'Failed to save match result'));
     } finally {
-      setChangingResult(false);
+      setSavingResult(false);
     }
   };
 
@@ -2286,90 +2358,80 @@ const DrawPage = () => {
         />
       )}
 
-      {/* Change Match Result Modal */}
-      {showChangeResultModal && selectedMatchForChange && (
+      {/* Edit Result / Complete Match Modal */}
+      {showResultModal && resultMatch && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="rounded-3xl p-8 max-w-md w-full shadow-2xl" style={{ background: '#0d1025', border: '2px solid rgba(251,191,36,0.4)' }}>
-            {/* Icon */}
-            <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg" style={{ background: 'linear-gradient(135deg,#fbbf24,#f59e0b)' }}>
-              <span className="text-4xl">🔄</span>
-            </div>
-
-            {/* Title */}
-            <h2 className="text-2xl font-bold text-center mb-2 text-white">
-              Change Match Result
+          <div className="rounded-3xl p-6 max-w-md w-full shadow-2xl max-h-[92vh] overflow-y-auto" style={{ background: '#0d1025', border: '2px solid rgba(59,130,246,0.4)' }}>
+            <h2 className="text-xl font-bold text-center mb-1 text-white">
+              {resultMode === 'edit' ? 'Edit Result' : 'Complete Match'}
             </h2>
-            <p className="text-gray-400 text-center mb-6 text-sm">
-              Select the new winner for this match
+            <p className="text-gray-400 text-center mb-5 text-xs">
+              {resultMode === 'edit' ? 'Edit the set scores and the winner.' : 'Enter the final score and pick the winner.'}
             </p>
 
-            {/* Current Winner */}
-            <div className="rounded-xl p-4 mb-6" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
-              <p className="text-gray-400 text-xs mb-2">Current Winner</p>
-              <p className="text-white font-semibold">
-                {selectedMatchForChange.winnerId === selectedMatchForChange.bracketMatch.player1?.id 
-                  ? getPlayerDisplay(selectedMatchForChange.bracketMatch.player1)
-                  : getPlayerDisplay(selectedMatchForChange.bracketMatch.player2)}
-              </p>
-            </div>
-
-            {/* Player Selection */}
-            <div className="space-y-3 mb-6">
-              <button
-                onClick={() => changeMatchResult(selectedMatchForChange.bracketMatch.player1?.id)}
-                disabled={changingResult}
-                className={`w-full p-4 rounded-xl border-2 transition-all text-left ${
-                  selectedMatchForChange.winnerId === selectedMatchForChange.bracketMatch.player1?.id
-                    ? 'border-[rgba(245,158,11,0.5)] bg-[rgba(245,158,11,0.08)]'
-                    : 'border-white/10 bg-white/[0.03] hover:border-[rgba(251,191,36,0.4)] hover:bg-[rgba(251,191,36,0.06)]'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-white font-semibold">{getPlayerDisplay(selectedMatchForChange.bracketMatch.player1)}</span>
-                  {selectedMatchForChange.winnerId === selectedMatchForChange.bracketMatch.player1?.id && (
-                    <span className="text-sm icon-green">✓ Current</span>
-                  )}
-                </div>
-              </button>
-
-              <button
-                onClick={() => changeMatchResult(selectedMatchForChange.bracketMatch.player2?.id)}
-                disabled={changingResult}
-                className={`w-full p-4 rounded-xl border-2 transition-all text-left ${
-                  selectedMatchForChange.winnerId === selectedMatchForChange.bracketMatch.player2?.id
-                    ? 'border-[rgba(245,158,11,0.5)] bg-[rgba(245,158,11,0.08)]'
-                    : 'border-white/10 bg-white/[0.03] hover:border-[rgba(251,191,36,0.4)] hover:bg-[rgba(251,191,36,0.06)]'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-white font-semibold">{getPlayerDisplay(selectedMatchForChange.bracketMatch.player2)}</span>
-                  {selectedMatchForChange.winnerId === selectedMatchForChange.bracketMatch.player2?.id && (
-                    <span className="text-sm icon-green">✓ Current</span>
-                  )}
-                </div>
-              </button>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex gap-3">
-              <button
-                onClick={() => {
-                  setShowChangeResultModal(false);
-                  setSelectedMatchForChange(null);
-                }}
-                disabled={changingResult}
-                className="flex-1 py-3 rounded-xl font-semibold transition-all" style={{ background: 'rgba(255,255,255,0.06)', color: 'white' }}
-              >
-                Cancel
-              </button>
-            </div>
-
-            {changingResult && (
-              <div className="mt-4 flex items-center justify-center gap-2 text-amber-400">
-                <Spinner size="md" />
-                <span className="text-sm">Updating result...</span>
+            {/* Knockout re-propagation warning */}
+            {resultMode === 'edit' && resultMatch.stage === 'KNOCKOUT' && (
+              <div className="rounded-lg p-3 mb-4 text-[11px] leading-snug" style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.3)', color: '#fcd34d' }}>
+                ⚠️ Changing the winner of a knockout match resets any later matches that depend on it — you'll need to re-enter those results.
               </div>
             )}
+
+            {/* Player names */}
+            <div className="flex items-center justify-between mb-2 px-1 gap-2">
+              <span className="text-white text-sm font-bold flex-1 truncate text-left">{resultMatch.p1Name}</span>
+              <span className="text-gray-500 text-xs font-bold flex-shrink-0">vs</span>
+              <span className="text-white text-sm font-bold flex-1 truncate text-right">{resultMatch.p2Name}</span>
+            </div>
+
+            {/* Set score inputs */}
+            <div className="space-y-2 mb-2">
+              {resultSets.map((set, idx) => (
+                <div key={idx} className="flex items-center gap-2">
+                  <span className="text-gray-500 text-[10px] font-bold w-9 flex-shrink-0">Set {idx + 1}</span>
+                  <input type="number" min="0" max="99" inputMode="numeric" value={set.player1}
+                    onChange={(e) => updateResultSet(idx, 'player1', e.target.value)}
+                    className="flex-1 min-w-0 text-center py-2 rounded-lg text-white font-bold"
+                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)' }} />
+                  <span className="text-gray-600 text-xs flex-shrink-0">–</span>
+                  <input type="number" min="0" max="99" inputMode="numeric" value={set.player2}
+                    onChange={(e) => updateResultSet(idx, 'player2', e.target.value)}
+                    className="flex-1 min-w-0 text-center py-2 rounded-lg text-white font-bold"
+                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)' }} />
+                  {resultSets.length > 1 && (
+                    <button onClick={() => removeResultSet(idx)} className="text-gray-500 px-1 flex-shrink-0" style={{ fontSize: 18, lineHeight: 1 }}>×</button>
+                  )}
+                </div>
+              ))}
+            </div>
+            {resultSets.length < 5 && (
+              <button onClick={addResultSet} className="text-xs font-semibold mb-4" style={{ color: '#60a5fa' }}>+ Add set</button>
+            )}
+
+            {/* Winner pick (pre-filled from the score, override by tapping) */}
+            <p className="text-gray-400 text-xs mb-2 mt-3">Winner</p>
+            <div className="grid grid-cols-2 gap-2 mb-5">
+              {[{ id: resultMatch.p1Id, name: resultMatch.p1Name }, { id: resultMatch.p2Id, name: resultMatch.p2Name }].map((pl, i) => (
+                <button key={pl.id || i} onClick={() => pickResultWinner(pl.id)} disabled={!pl.id}
+                  className="p-3 rounded-xl border-2 transition-all text-sm font-bold truncate"
+                  style={resultWinnerId && resultWinnerId === pl.id
+                    ? { borderColor: '#3b82f6', background: 'rgba(59,130,246,0.15)', color: '#fff' }
+                    : { borderColor: 'rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.03)', color: 'rgba(255,255,255,0.8)' }}>
+                  {pl.name}{resultWinnerId && resultWinnerId === pl.id ? ' ✓' : ''}
+                </button>
+              ))}
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-3">
+              <button onClick={() => { setShowResultModal(false); setResultMatch(null); }} disabled={savingResult}
+                className="flex-1 py-3 rounded-xl font-semibold transition-all" style={{ background: 'rgba(255,255,255,0.06)', color: 'white' }}>
+                Cancel
+              </button>
+              <button onClick={saveResult} disabled={savingResult}
+                className="flex-1 py-3 rounded-xl font-bold transition-all" style={{ background: 'linear-gradient(135deg,#3b82f6,#2563eb)', color: 'white', opacity: savingResult ? 0.6 : 1 }}>
+                {savingResult ? 'Saving…' : (resultMode === 'edit' ? 'Save Result' : 'Complete Match')}
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -3632,6 +3694,7 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                                   {isOrganizer && dbMatch && !isCompleted && (
                                     <>
                                       {player1.name !== 'TBD' && player2.name !== 'TBD' ? (
+                                        <>
                                         <button
                                           onClick={() => {
                                             if (hasUmpire && dbMatch?.umpireId) {
@@ -3650,6 +3713,17 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                                           <Gavel className="w-3 h-3 flex-shrink-0" />
                                           {hasUmpire ? '✓ Conduct' : 'Assign Umpire'}
                                         </button>
+                                        <button
+                                          onClick={() => {
+                                            const bracketMatchData = { matchNumber: match.matchNumber, round: ri + 1, player1, player2 };
+                                            onChangeResult(dbMatch, bracketMatchData);
+                                          }}
+                                          style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', padding: '6px 8px', background: 'rgba(59,130,246,0.12)', color: '#93c5fd', border: '1px solid rgba(59,130,246,0.3)', borderRadius: '9px', fontSize: '10px', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}
+                                        >
+                                          <Trophy className="w-3 h-3 flex-shrink-0" />
+                                          Complete
+                                        </button>
+                                        </>
                                       ) : (player1.name !== 'TBD' || player2.name !== 'TBD') ? (
                                         <button
                                           onClick={() => handleGiveByeForMatch(dbMatch.id)}
@@ -3669,7 +3743,7 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                                       }}
                                       style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '6px 8px', background: 'rgba(245,158,11,0.07)', color: '#fbbf24', border: '1px solid rgba(245,158,11,0.18)', borderRadius: '9px', fontSize: '10px', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}
                                     >
-                                      Change
+                                      Edit Result
                                     </button>
                                   )}
                                 </div>
@@ -4138,7 +4212,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                               className="py-2.5 px-4 rounded-lg text-xs font-black transition-all"
                               style={{ background: 'rgba(245,158,11,0.1)', color: '#fbbf24', border: '1px solid rgba(245,158,11,0.25)' }}
                             >
-                              CHANGE
+                              EDIT RESULT
                             </button>
                           )}
                         </div>
@@ -4146,7 +4220,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
 
                       {/* Organizer pre-completion actions */}
                       {isOrganizer && hasPlayers && !isCompleted && (
-                        <div className="px-2.5 pb-2.5">
+                        <div className="px-2.5 pb-2.5 flex gap-2">
                           <button
                             onClick={() => {
                               if (hasUmpire && dbMatch?.umpireId) {
@@ -4156,7 +4230,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                                 onAssignUmpire(dbMatch, bracketMatchData);
                               }
                             }}
-                            className="w-full py-2.5 rounded-lg transition-all flex items-center justify-center gap-2 text-xs font-black border-2"
+                            className="flex-1 py-2.5 rounded-lg transition-all flex items-center justify-center gap-2 text-xs font-black border-2"
                             style={
                               hasUmpire
                                 ? { background: 'rgba(245,158,11,0.1)', color: '#FCD34D', borderColor: 'rgba(245,158,11,0.28)' }
@@ -4165,6 +4239,17 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                           >
                             <Gavel className="w-4 h-4" />
                             {hasUmpire ? '✓ CONDUCT' : 'ASSIGN'}
+                          </button>
+                          <button
+                            onClick={() => {
+                              const bracketMatchData = { matchNumber: match.matchNumber, round: 1, player1: match.player1, player2: match.player2, groupName: group.groupName };
+                              onChangeResult(dbMatch, bracketMatchData);
+                            }}
+                            className="flex-1 py-2.5 rounded-lg transition-all flex items-center justify-center gap-2 text-xs font-black border-2"
+                            style={{ background: 'rgba(59,130,246,0.12)', color: '#93c5fd', borderColor: 'rgba(59,130,246,0.3)' }}
+                          >
+                            <Trophy className="w-4 h-4" />
+                            COMPLETE
                           </button>
                         </div>
                       )}

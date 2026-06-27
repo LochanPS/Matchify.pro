@@ -1115,7 +1115,7 @@ router.post('/:matchId/give-bye', authenticate, giveBye);
 router.put('/:matchId/change-winner', authenticate, async (req, res) => {
   try {
     const { matchId } = req.params;
-    const { winnerId } = req.body;
+    const { winnerId, scoreJson } = req.body;
     const userId = req.user.userId || req.user.id;
     const userRoles = req.user.roles || [];
 
@@ -1138,54 +1138,99 @@ router.put('/:matchId/change-winner', authenticate, async (req, res) => {
       return res.status(400).json({ success: false, error: 'Winner must be a match participant' });
     }
 
-    if (winnerId === match.winnerId) {
-      return res.json({ success: true, message: 'Winner unchanged' });
-    }
-
     const oldWinnerId = match.winnerId;
     const newLoserId = winnerId === match.player1Id ? match.player2Id : match.player1Id;
     const isGuestId = (id) => !id || id.startsWith('guest-');
     // Must be explicitly KNOCKOUT — null-stage GROUP matches have null != 'GROUP' = true (wrong)
     const isFinal = !match.parentMatchId && match.round === 1 && match.stage === 'KNOCKOUT';
 
-    // 1. Update match winner in DB
-    await prisma.match.update({ where: { id: matchId }, data: { winnerId, updatedAt: new Date() } });
+    const winnerChanged = winnerId !== oldWinnerId;
+    const hasScore = scoreJson != null && (typeof scoreJson === 'object' ? Array.isArray(scoreJson.sets) : true);
+    const scoreToSave = hasScore
+      ? (typeof scoreJson === 'string' ? scoreJson : JSON.stringify(scoreJson))
+      : undefined;
 
-    // 2. For KNOCKOUT: update parent match to swap player slot with new winner
-    if (match.parentMatchId && oldWinnerId) {
-      const parentMatch = await prisma.match.findUnique({ where: { id: match.parentMatchId } });
-      if (parentMatch) {
-        const updateData = {};
-        // Replace old winner with new winner in whichever slot old winner occupied
-        if (parentMatch.player1Id === oldWinnerId) updateData.player1Id = winnerId;
-        else if (parentMatch.player2Id === oldWinnerId) updateData.player2Id = winnerId;
+    // Nothing to change — winner same AND no new score supplied.
+    if (!winnerChanged && !hasScore) {
+      return res.json({ success: true, message: 'No changes' });
+    }
 
-        if (Object.keys(updateData).length > 0) {
-          // If parent match was IN_PROGRESS or COMPLETED, reset it — result is now invalid
-          if (['IN_PROGRESS', 'COMPLETED'].includes(parentMatch.status)) {
-            updateData.status = 'READY';
-            updateData.winnerId = null;
-            updateData.scoreJson = null;
-            updateData.completedAt = null;
-            updateData.startedAt = null;
+    // Tracks whether the KNOCKOUT final gets cleared during cascade (an early-round
+    // winner change can invalidate the final) so we also clear the category winner.
+    let finalWasReset = false;
+
+    // Core writes wrapped in a transaction so the bracket can never end up half-updated.
+    await prisma.$transaction(async (tx) => {
+      // 1. Update this match's winner (+ score if provided)
+      await tx.match.update({
+        where: { id: matchId },
+        data: { winnerId, ...(scoreToSave !== undefined ? { scoreJson: scoreToSave } : {}), updatedAt: new Date() }
+      });
+
+      // 2. KNOCKOUT + winner actually changed → re-propagate up the bracket.
+      //    Promote the new winner into the next match; if any later match was already
+      //    decided, its result is now invalid → reset it and clear its advanced player
+      //    from the round above, repeating all the way to the final (final = round 1).
+      if (match.stage === 'KNOCKOUT' && winnerChanged && oldWinnerId) {
+        let childMatch = match;    // match whose winner feeds the parent
+        let promote = winnerId;    // player to place into the parent slot (null = clear it)
+        let remove  = oldWinnerId; // player to remove from the parent slot
+        let guard = 0;
+        while (childMatch.parentMatchId && guard++ < 64) {
+          const parent = await tx.match.findUnique({ where: { id: childMatch.parentMatchId } });
+          if (!parent) break;
+
+          // Which parent slot did childMatch feed? Prefer winnerPosition; fall back to
+          // whichever slot currently holds the player we need to remove.
+          let slot = childMatch.winnerPosition;
+          if (slot !== 'player1' && slot !== 'player2') {
+            slot = parent.player1Id === remove ? 'player1'
+                 : parent.player2Id === remove ? 'player2' : null;
           }
-          await prisma.match.update({ where: { id: match.parentMatchId }, data: updateData });
-          console.log(`✅ Updated parent match ${match.parentMatchId}: replaced ${oldWinnerId} → ${winnerId}`);
+          if (!slot) break; // can't locate the feed slot — stop
+
+          const slotField  = slot === 'player1' ? 'player1Id' : 'player2Id';
+          const otherField = slot === 'player1' ? 'player2Id' : 'player1Id';
+          const data = { [slotField]: promote };
+
+          const parentDecided = !!parent.winnerId || ['IN_PROGRESS', 'COMPLETED'].includes(parent.status);
+          if (parentDecided) {
+            // Parent result invalid → reset it; its old winner must be cleared from the round above.
+            const parentOldWinner = parent.winnerId;
+            data.winnerId = null; data.scoreJson = null; data.completedAt = null; data.startedAt = null;
+            data.status = (promote && parent[otherField]) ? 'READY' : 'PENDING';
+            await tx.match.update({ where: { id: parent.id }, data });
+            if (parent.round === 1 && parent.stage === 'KNOCKOUT') finalWasReset = true;
+            // Move up: now we only CLEAR the parent's old winner (nothing decided to promote yet).
+            childMatch = parent;
+            remove  = parentOldWinner;
+            promote = null;
+            if (!remove) break; // parent had not advanced anyone → done
+          } else {
+            // Parent not yet decided — just placed/cleared the slot.
+            data.status = (promote && parent[otherField]) ? 'READY' : 'PENDING';
+            await tx.match.update({ where: { id: parent.id }, data });
+            break;
+          }
         }
       }
-    }
 
-    // 3. If this was the final, update category winner
-    if (isFinal) {
-      await prisma.category.update({
-        where: { id: match.categoryId },
-        data: {
-          winnerId:   !isGuestId(winnerId)    ? winnerId    : null,
-          runnerUpId: !isGuestId(newLoserId)  ? newLoserId  : null,
-        }
-      });
-      console.log(`✅ Updated category winner to ${winnerId}`);
-    }
+      // 3. Category winner: set if THIS match is the final; clear if cascade reset the final.
+      if (isFinal) {
+        await tx.category.update({
+          where: { id: match.categoryId },
+          data: {
+            winnerId:   !isGuestId(winnerId)   ? winnerId   : null,
+            runnerUpId: !isGuestId(newLoserId) ? newLoserId : null,
+          }
+        });
+      } else if (finalWasReset) {
+        await tx.category.update({
+          where: { id: match.categoryId },
+          data: { winnerId: null, runnerUpId: null }
+        });
+      }
+    }, { timeout: 30000 });
 
     // 4. Update bracketJson (standings for RR, bracket slot for KNOCKOUT)
     try {

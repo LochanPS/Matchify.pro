@@ -5731,7 +5731,18 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
   useEffect(() => {
     if (!bracket?.groups) return;
     const advanceCount = bracket.advanceFromGroup || 1;
-    const players = [];
+    // allPlayers = everyone who played the round robin (fully available to place).
+    // seedPlayers = top-N per group, used only for the default auto-seeding/size.
+    const allPlayers = [];
+    const seedPlayers = [];
+
+    const sortByStanding = (a, b) => {
+      if ((b.points || 0) !== (a.points || 0)) return (b.points || 0) - (a.points || 0);
+      const aDiff = (a.totalPoints || 0) - (a.totalPointsAgainst || 0);
+      const bDiff = (b.totalPoints || 0) - (b.totalPointsAgainst || 0);
+      if (bDiff !== aDiff) return bDiff - aDiff;
+      return (b.totalPoints || 0) - (a.totalPoints || 0);
+    };
 
     bracket.groups.forEach((group, groupIndex) => {
       const groupLetter = String.fromCharCode(65 + groupIndex);
@@ -5739,68 +5750,63 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
       if (standings.length > 0) {
         standings
           .filter(s => s.playerId)
-          .sort((a, b) => {
-            if ((b.points || 0) !== (a.points || 0)) return (b.points || 0) - (a.points || 0);
-            const aDiff = (a.totalPoints || 0) - (a.totalPointsAgainst || 0);
-            const bDiff = (b.totalPoints || 0) - (b.totalPointsAgainst || 0);
-            if (bDiff !== aDiff) return bDiff - aDiff;
-            return (b.totalPoints || 0) - (a.totalPoints || 0);
-          })
-          .slice(0, advanceCount)
-          .forEach((s, rank) => players.push({
-            id: s.playerId, name: s.playerName,
-            partnerName: s.partnerName || null,
-            group: groupLetter, rank: rank + 1, points: s.points
-          }));
+          .sort(sortByStanding)
+          .forEach((s, rank) => {
+            const player = {
+              id: s.playerId, name: s.playerName,
+              partnerName: s.partnerName || null,
+              group: groupLetter, rank: rank + 1, points: s.points
+            };
+            allPlayers.push(player);
+            if (rank < advanceCount) seedPlayers.push(player);
+          });
       } else {
-        // Sort participants by points → diff → totalPoints before slicing
+        // Sort participants by points → diff → totalPoints
         [...(group.participants || [])]
-          .sort((a, b) => {
-            if ((b.points || 0) !== (a.points || 0)) return (b.points || 0) - (a.points || 0);
-            const aDiff = (a.totalPoints || 0) - (a.totalPointsAgainst || 0);
-            const bDiff = (b.totalPoints || 0) - (b.totalPointsAgainst || 0);
-            if (bDiff !== aDiff) return bDiff - aDiff;
-            return (b.totalPoints || 0) - (a.totalPoints || 0);
-          })
-          .slice(0, advanceCount)
+          .sort(sortByStanding)
           .forEach((p, i) => {
-            if (p?.id) players.push({
+            if (!p?.id) return;
+            const player = {
               id: p.id, name: p.name,
               partnerName: p.partnerName || null,
               group: groupLetter, rank: i + 1, points: p.points || 0
-            });
+            };
+            allPlayers.push(player);
+            if (i < advanceCount) seedPlayers.push(player);
           });
       }
     });
 
-    setAdvancingPlayers(players);
+    setAdvancingPlayers(allPlayers);
 
-    const defaultSize = nextPow2(players.length);
+    // Default bracket size follows the qualifiers so the normal flow is unchanged;
+    // the extra (non-qualifying) players simply wait in the pool until placed.
+    const defaultSize = nextPow2((seedPlayers.length || allPlayers.length) || 1);
     setBracketSize(defaultSize);
 
     // Build positions array, restoring existing KO draw if already seeded
     const pos = Array(defaultSize).fill(null);
     if (bracket.knockout?.rounds?.[0]?.matches) {
       bracket.knockout.rounds[0].matches.forEach((match, mi) => {
-        const p1 = players.find(p => p.id === match.player1?.id);
-        const p2 = players.find(p => p.id === match.player2?.id);
+        const p1 = allPlayers.find(p => p.id === match.player1?.id);
+        const p2 = allPlayers.find(p => p.id === match.player2?.id);
         if (p1) pos[mi * 2] = p1;
         if (p2) pos[mi * 2 + 1] = p2;
       });
     }
 
-    // Auto-seed if no existing placement: standard cross-group seeding
+    // Auto-seed if no existing placement: standard cross-group seeding of qualifiers.
     // Seeds built rank-first (rank-1s then rank-2s), then placed 1 vs last, 2 vs second-last
     // Result: A1 vs B2 (Match 1), B1 vs A2 (Match 2) — avoids same-group R1 matchup
     const hasExistingDraw = pos.some(p => p !== null);
-    if (!hasExistingDraw && players.length > 0) {
+    if (!hasExistingDraw && seedPlayers.length > 0) {
       const byRank = {};
-      players.forEach(p => {
+      seedPlayers.forEach(p => {
         if (!byRank[p.rank]) byRank[p.rank] = [];
         byRank[p.rank].push(p);
       });
       const seeds = [];
-      const maxRank = Math.max(...players.map(p => p.rank));
+      const maxRank = Math.max(...seedPlayers.map(p => p.rank));
       for (let r = 1; r <= maxRank; r++) {
         (byRank[r] || []).sort((a, b) => a.group.localeCompare(b.group)).forEach(p => seeds.push(p));
       }
@@ -5952,7 +5958,7 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
           <div>
             <h3 className="text-[10px] font-black icon-green mb-2 uppercase tracking-wider flex items-center gap-1.5">
               <Trophy className="w-3 h-3" />
-              Qualifying Players ({advancingPlayers.length})
+              Round Robin Players ({advancingPlayers.length})
               {poolPlayers.length > 0 && (
                 <span className="ml-1 text-[9px] font-normal" style={{ color: 'rgba(255,255,255,0.4)' }}>
                   — {poolPlayers.length} not yet placed

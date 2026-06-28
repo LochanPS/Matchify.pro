@@ -3876,6 +3876,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                   { h: 'W',   w: '22px', c: 'rgba(74,222,128,0.85)' },
                   { h: 'L',   w: '22px', c: 'rgba(248,113,113,0.85)'},
                   { h: 'PTS', w: '28px', c: 'rgba(245,158,11,0.9)'  },
+                  { h: 'PD',  w: '32px', c: 'rgba(96,165,250,0.9)'  },
                   { h: 'TP',  w: '30px', c: 'rgba(196,181,253,0.9)' },
                 ].map(({ h, w, c }) => (
                   <div key={h} style={{ width: w, flexShrink: 0, textAlign: 'center' }}>
@@ -3896,9 +3897,11 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                   return (b.totalPoints || 0) - (a.totalPoints || 0);
                 })
                 .map((p, pi) => {
-                  const tpDiff = (p.totalPoints || 0) - (p.totalPointsAgainst || 0);
-                  const tpVal  = tpDiff > 0 ? `+${tpDiff}` : `${tpDiff}`;
-                  const tpColor = tpDiff > 0 ? '#4ade80' : tpDiff < 0 ? '#f87171' : '#94a3b8';
+                  // PD = point difference (for − against); TP = total points scored (raw)
+                  const pdDiff = (p.totalPoints || 0) - (p.totalPointsAgainst || 0);
+                  const pdVal  = pdDiff > 0 ? `+${pdDiff}` : `${pdDiff}`;
+                  const pdColor = pdDiff > 0 ? '#4ade80' : pdDiff < 0 ? '#f87171' : '#94a3b8';
+                  const tpTotal = p.totalPoints || 0;
                   // ── Name resolution ──────────────────────────────────────
                   // Doubles data can arrive as:
                   //   A) p.name = "Alice"  + p.partnerName = "Bob"
@@ -3985,7 +3988,8 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                           { val: p.wins    || 0,                   w: '22px', color: '#ffffff', bold: true },
                           { val: p.losses  || 0,                   w: '22px', color: '#ffffff', bold: true },
                           { val: p.points  || 0,                   w: '28px', color: '#ffffff', bold: true },
-                          { val: tpVal,                            w: '30px', color: tpColor,   bold: true },
+                          { val: pdVal,                            w: '32px', color: pdColor,   bold: true },
+                          { val: tpTotal,                          w: '30px', color: '#c4b5fd', bold: true },
                         ].map((s, si) => (
                           <div key={si} style={{ width: s.w, flexShrink: 0, textAlign: 'center' }}>
                             <span style={{ fontSize: '13px', fontWeight: s.bold ? 700 : 500, color: s.color, lineHeight: 1 }}>
@@ -4020,7 +4024,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
               </div>
             </div>
             <p style={{ fontSize: '9px', color: 'rgba(255,255,255,0.22)', textAlign: 'center' }}>
-              P = Played · W = Won · L = Lost · PTS = Points · TP = Total Points
+              P = Played · W = Won · L = Lost · PTS = Points · PD = Point Difference · TP = Total Points
             </p>
           </div>
 
@@ -5737,6 +5741,9 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
           .filter(s => s.playerId)
           .sort((a, b) => {
             if ((b.points || 0) !== (a.points || 0)) return (b.points || 0) - (a.points || 0);
+            const aDiff = (a.totalPoints || 0) - (a.totalPointsAgainst || 0);
+            const bDiff = (b.totalPoints || 0) - (b.totalPointsAgainst || 0);
+            if (bDiff !== aDiff) return bDiff - aDiff;
             return (b.totalPoints || 0) - (a.totalPoints || 0);
           })
           .slice(0, advanceCount)

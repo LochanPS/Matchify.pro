@@ -869,26 +869,43 @@ const endMatchHandler = async (req, res) => {
           // All group matches done — determine winner from standings
           const allMatches = await tx.match.findMany({
             where: { categoryId: match.categoryId },
-            select: { player1Id: true, player2Id: true, winnerId: true }
+            select: { player1Id: true, player2Id: true, winnerId: true, scoreJson: true }
           });
 
-          // Build point-based standings (2pts per win)
+          // Build standings: 2pts per win, plus points-for/against for tiebreaks
           const standings = {};
+          const ensure = (pid) => {
+            if (pid && !isGuestId(pid) && !standings[pid]) {
+              standings[pid] = { id: pid, points: 0, wins: 0, totalPoints: 0, totalPointsAgainst: 0 };
+            }
+          };
           allMatches.forEach(m => {
-            [m.player1Id, m.player2Id].forEach(pid => {
-              if (pid && !isGuestId(pid) && !standings[pid]) {
-                standings[pid] = { id: pid, points: 0, wins: 0 };
-              }
-            });
-            if (m.winnerId && !isGuestId(m.winnerId)) {
+            ensure(m.player1Id); ensure(m.player2Id);
+            if (m.scoreJson) {
+              try {
+                const sd = typeof m.scoreJson === 'string' ? JSON.parse(m.scoreJson) : m.scoreJson;
+                if (sd?.sets && Array.isArray(sd.sets)) {
+                  let t1 = 0, t2 = 0;
+                  sd.sets.forEach(s => { t1 += s.player1 ?? s.p1 ?? s.score1 ?? 0; t2 += s.player2 ?? s.p2 ?? s.score2 ?? 0; });
+                  if (standings[m.player1Id]) { standings[m.player1Id].totalPoints += t1; standings[m.player1Id].totalPointsAgainst += t2; }
+                  if (standings[m.player2Id]) { standings[m.player2Id].totalPoints += t2; standings[m.player2Id].totalPointsAgainst += t1; }
+                }
+              } catch (_) { /* ignore malformed score */ }
+            }
+            if (m.winnerId && !isGuestId(m.winnerId) && standings[m.winnerId]) {
               standings[m.winnerId].points += 2;
               standings[m.winnerId].wins += 1;
             }
           });
 
-          const sorted = Object.values(standings).sort((a, b) =>
-            b.points !== a.points ? b.points - a.points : b.wins - a.wins
-          );
+          // Rank: PTS → PD (point difference) → TP (total points scored)
+          const sorted = Object.values(standings).sort((a, b) => {
+            if (b.points !== a.points) return b.points - a.points;
+            const aDiff = a.totalPoints - a.totalPointsAgainst;
+            const bDiff = b.totalPoints - b.totalPointsAgainst;
+            if (bDiff !== aDiff) return bDiff - aDiff;
+            return b.totalPoints - a.totalPoints;
+          });
 
           await tx.category.update({
             where: { id: match.categoryId },
@@ -947,7 +964,13 @@ const endMatchHandler = async (req, res) => {
                 if (m.winnerId === m.player1Id) { p1.wins++; p1.points += 2; p2.losses++; }
                 else if (m.winnerId === m.player2Id) { p2.wins++; p2.points += 2; p1.losses++; }
               });
-              targetGroup.participants.sort((a, b) => b.points !== a.points ? b.points - a.points : b.wins - a.wins);
+              targetGroup.participants.sort((a, b) => {
+                if (b.points !== a.points) return b.points - a.points;
+                const aDiff = (a.totalPoints || 0) - (a.totalPointsAgainst || 0);
+                const bDiff = (b.totalPoints || 0) - (b.totalPointsAgainst || 0);
+                if (bDiff !== aDiff) return bDiff - aDiff;
+                return (b.totalPoints || 0) - (a.totalPoints || 0);
+              });
               const mib = targetGroup.matches?.find(m => m.matchNumber === match.matchNumber);
               if (mib) { mib.status = 'completed'; mib.winner = winnerId === match.player1Id ? 1 : 2; mib.winnerId = winnerId; mib.score = finalScore; }
               await prisma.draw.update({ where: { tournamentId_categoryId: { tournamentId: match.tournamentId, categoryId: match.categoryId } }, data: { bracketJson: JSON.stringify(bracketJson), updatedAt: new Date() } });
@@ -1258,18 +1281,33 @@ router.put('/:matchId/change-winner', authenticate, async (req, res) => {
               targetGroup.participants.some(p => p.id === m.player1Id) &&
               targetGroup.participants.some(p => p.id === m.player2Id)
             );
-            targetGroup.participants.forEach(p => { p.played = 0; p.wins = 0; p.losses = 0; p.points = 0; });
+            targetGroup.participants.forEach(p => { p.played = 0; p.wins = 0; p.losses = 0; p.points = 0; p.totalPoints = 0; p.totalPointsAgainst = 0; });
             groupMatches.forEach(m => {
               const p1 = targetGroup.participants.find(p => p.id === m.player1Id);
               const p2 = targetGroup.participants.find(p => p.id === m.player2Id);
               if (!p1 || !p2) return;
               p1.played++; p2.played++;
+              if (m.scoreJson) {
+                try {
+                  const sd = typeof m.scoreJson === 'string' ? JSON.parse(m.scoreJson) : m.scoreJson;
+                  if (sd?.sets && Array.isArray(sd.sets)) {
+                    let t1 = 0, t2 = 0;
+                    sd.sets.forEach(s => { t1 += s.player1 ?? s.p1 ?? s.score1 ?? 0; t2 += s.player2 ?? s.p2 ?? s.score2 ?? 0; });
+                    p1.totalPoints += t1; p1.totalPointsAgainst += t2;
+                    p2.totalPoints += t2; p2.totalPointsAgainst += t1;
+                  }
+                } catch (_) { /* ignore malformed score */ }
+              }
               if (m.winnerId === m.player1Id) { p1.wins++; p1.points += 2; p2.losses++; }
               else if (m.winnerId === m.player2Id) { p2.wins++; p2.points += 2; p1.losses++; }
             });
-            targetGroup.participants.sort((a, b) =>
-              b.points !== a.points ? b.points - a.points : b.wins - a.wins
-            );
+            targetGroup.participants.sort((a, b) => {
+              if (b.points !== a.points) return b.points - a.points;
+              const aDiff = (a.totalPoints || 0) - (a.totalPointsAgainst || 0);
+              const bDiff = (b.totalPoints || 0) - (b.totalPointsAgainst || 0);
+              if (bDiff !== aDiff) return bDiff - aDiff;
+              return (b.totalPoints || 0) - (a.totalPoints || 0);
+            });
             // Update the match result in bracketJson too
             const mib = targetGroup.matches?.find(m => m.matchNumber === match.matchNumber);
             if (mib) { mib.winnerId = winnerId; mib.winner = winnerId === match.player1Id ? 1 : 2; }

@@ -1616,7 +1616,7 @@ const assignPlayersToDraw = async (req, res) => {
 const createConfiguredDraw = async (req, res) => {
   try {
     const userId = req.user.userId || req.user.id;
-    const { tournamentId, categoryId, format, bracketSize, numberOfGroups, playersPerGroup, advanceFromGroup, customGroupSizes } = req.body;
+    const { tournamentId, categoryId, format, bracketSize, numberOfGroups, playersPerGroup, advanceFromGroup, customGroupSizes, customAdvanceCounts } = req.body;
 
     // Check if category is completed
     if (await checkCategoryNotCompleted(categoryId, res)) {
@@ -1644,10 +1644,18 @@ const createConfiguredDraw = async (req, res) => {
 
     if (format === 'KNOCKOUT') {
       bracketJson = generateKnockoutBracket(size);
-    } else if (format === 'ROUND_ROBIN') {
-      bracketJson = generateRoundRobinBracket(size, numberOfGroups || 1, customGroupSizes);
-    } else if (format === 'ROUND_ROBIN_KNOCKOUT') {
-      bracketJson = generateGroupsKnockoutBracket(size, numberOfGroups || 4, advanceFromGroup || 2, customGroupSizes);
+    } else if (format === 'ROUND_ROBIN' || format === 'ROUND_ROBIN_KNOCKOUT') {
+      // Use EXACTLY the number of pools the organizer chose — never silently default.
+      const groups = parseInt(numberOfGroups);
+      if (!groups || groups < 1) {
+        return res.status(400).json({ success: false, error: 'Number of groups is required and must be at least 1' });
+      }
+      if (format === 'ROUND_ROBIN') {
+        bracketJson = generateRoundRobinBracket(size, groups, customGroupSizes);
+      } else {
+        const advance = parseInt(advanceFromGroup) || 1;
+        bracketJson = generateGroupsKnockoutBracket(size, groups, advance, customGroupSizes, customAdvanceCounts);
+      }
     } else {
       bracketJson = generateKnockoutBracket(size);
     }
@@ -1894,20 +1902,12 @@ function generateRoundRobinBracket(size, numberOfGroups, customGroupSizes = null
     groupSizes = customGroupSizes;
     console.log('Using custom group sizes:', groupSizes);
   } else {
-    // Default: equal distribution
-    const playersPerGroup = Math.ceil(size / numberOfGroups);
-    groupSizes = Array(numberOfGroups).fill(playersPerGroup);
-    
-    // Adjust last groups if needed to match exact size
-    let totalAssigned = playersPerGroup * numberOfGroups;
-    let groupIndex = numberOfGroups - 1;
-    while (totalAssigned > size && groupIndex >= 0) {
-      if (groupSizes[groupIndex] > 2) { // Minimum 2 players per group
-        groupSizes[groupIndex]--;
-        totalAssigned--;
-      }
-      groupIndex--;
-    }
+    // Even distribution: every pool gets the base size, and the remainder is given
+    // one extra each to the FIRST pools. Works for ANY player/pool count.
+    //   13 / 3 → [5,4,4]   14 / 3 → [5,5,4]   19 / 3 → [7,6,6]   40 / 20 → [2×20]
+    const base = Math.floor(size / numberOfGroups);
+    const remainder = size % numberOfGroups;
+    groupSizes = Array.from({ length: numberOfGroups }, (_, i) => base + (i < remainder ? 1 : 0));
   }
 
   // Generate groups with specified sizes
@@ -1988,10 +1988,15 @@ function generateGroupMatches(participants, groupIndex, startingMatchNumber = 1)
 }
 
 // Helper: Generate groups + knockout bracket
-function generateGroupsKnockoutBracket(size, numberOfGroups, advanceFromGroup, customGroupSizes = null) {
+function generateGroupsKnockoutBracket(size, numberOfGroups, advanceFromGroup, customGroupSizes = null, customAdvanceCounts = null) {
   const groupData = generateRoundRobinBracket(size, numberOfGroups, customGroupSizes);
-  const knockoutSize = numberOfGroups * advanceFromGroup;
-  
+
+  // Total qualifiers = sum of per-pool custom counts (if given) else uniform count × pools.
+  const hasCustomAdvance = Array.isArray(customAdvanceCounts) && customAdvanceCounts.length === numberOfGroups;
+  const knockoutSize = hasCustomAdvance
+    ? customAdvanceCounts.reduce((a, b) => a + (Number(b) || 0), 0)
+    : numberOfGroups * advanceFromGroup;
+
   // Generate EMPTY knockout bracket (no placeholder names)
   const knockoutData = generateEmptyKnockoutBracket(knockoutSize);
 
@@ -2000,6 +2005,7 @@ function generateGroupsKnockoutBracket(size, numberOfGroups, advanceFromGroup, c
     bracketSize: size,
     numberOfGroups,
     advanceFromGroup,
+    customAdvanceCounts: hasCustomAdvance ? customAdvanceCounts : null,
     customGroupSizes: customGroupSizes || null,
     groups: groupData.groups,
     knockout: knockoutData

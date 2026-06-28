@@ -4399,10 +4399,12 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
     bracketSize: existingDraw?.bracketSize || 0, // Start at 0
     numberOfGroups: existingDraw?.numberOfGroups || 0, // Start at 0
     advanceFromGroup: existingDraw?.advanceFromGroup || 2,
-    customGroupSizes: existingDraw?.customGroupSizes || null // Array like [5, 4] for custom sizes
+    customGroupSizes: existingDraw?.customGroupSizes || null, // Array like [5, 4] for custom sizes
+    customAdvanceCounts: existingDraw?.customAdvanceCounts || null // Array like [3, 2] for per-pool qualifiers
   });
 
   const [useCustomGroupSizes, setUseCustomGroupSizes] = useState(!!existingDraw?.customGroupSizes);
+  const [useCustomAdvance, setUseCustomAdvance] = useState(!!existingDraw?.customAdvanceCounts);
   const [alertMessage, setAlertMessage] = useState(null);
 
   const formatOptions = [
@@ -4434,7 +4436,30 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
         return;
       }
     }
-    onSave(config);
+
+    // Validate qualifiers per pool for Round Robin + Knockout
+    if (config.format === 'ROUND_ROBIN_KNOCKOUT') {
+      if (useCustomAdvance && config.customAdvanceCounts) {
+        if (config.customAdvanceCounts.length !== config.numberOfGroups) {
+          setAlertMessage('Please set qualifiers for every pool');
+          return;
+        }
+        if (config.customAdvanceCounts.some(c => !c || c < 1)) {
+          setAlertMessage('Each pool must qualify at least 1');
+          return;
+        }
+      } else if (!config.advanceFromGroup || config.advanceFromGroup < 1) {
+        setAlertMessage('Qualifiers per pool must be at least 1');
+        return;
+      }
+    }
+
+    // Send a clean config: only include custom arrays when their toggle is on.
+    onSave({
+      ...config,
+      customGroupSizes: useCustomGroupSizes ? config.customGroupSizes : null,
+      customAdvanceCounts: (config.format === 'ROUND_ROBIN_KNOCKOUT' && useCustomAdvance) ? config.customAdvanceCounts : null,
+    });
   };
 
   return (
@@ -4518,13 +4543,16 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
                   <input
                     type="number"
                     min="0"
-                    max="16"
+                    max={config.bracketSize || 128}
                     value={config.numberOfGroups}
                     onChange={(e) => {
                       const value = e.target.value === '' ? 0 : parseInt(e.target.value);
-                      const groups = isNaN(value) ? 0 : Math.max(0, Math.min(16, value));
-                      setConfig({ ...config, numberOfGroups: groups, customGroupSizes: null });
+                      // No fixed cap — supports any number of pools (limited only by player count).
+                      const ceiling = config.bracketSize || 128;
+                      const groups = isNaN(value) ? 0 : Math.max(0, Math.min(ceiling, value));
+                      setConfig({ ...config, numberOfGroups: groups, customGroupSizes: null, customAdvanceCounts: null });
                       setUseCustomGroupSizes(false);
+                      setUseCustomAdvance(false);
                     }}
                     className="w-full px-4 py-4 rounded-xl text-white text-2xl font-bold focus:outline-none transition-all" style={{ background: 'rgba(255,255,255,0.06)', border: '2px solid rgba(245,158,11,0.25)' }}
                     placeholder="0"
@@ -4600,25 +4628,83 @@ const DrawConfigModal = ({ category, existingDraw, onClose, onSave, saving }) =>
                 <div>
                   <label className="block text-sm font-semibold text-gray-200 mb-3 flex items-center gap-2">
                     <TrophyIcon className="w-4 h-4 icon-green" />
-                    Players Advancing from Each Group
+                    Qualifiers per Pool
                   </label>
-                  <div className="grid grid-cols-4 gap-3">
-                    {[1, 2, 3, 4].map((num) => {
-                      return (
-                        <button
-                          key={num}
-                          onClick={() => setConfig({ ...config, advanceFromGroup: num })}
-                          className={`py-4 rounded-xl font-bold transition-all border-2 ${
-                            config.advanceFromGroup === num
-                              ? 'tab-active border-transparent'
-                              : 'bg-slate-700 text-gray-400 border-white/10 hover:border-emerald-500/30'
-                          }`}
-                        >
-                          Top {num}
-                        </button>
-                      );
-                    })}
+                  {/* Uniform qualify count — any number the organizer wants */}
+                  <div className="relative">
+                    <input
+                      type="number"
+                      min="1"
+                      max={config.bracketSize || 128}
+                      value={config.advanceFromGroup}
+                      disabled={useCustomAdvance}
+                      onChange={(e) => {
+                        const value = e.target.value === '' ? 0 : parseInt(e.target.value);
+                        setConfig({ ...config, advanceFromGroup: isNaN(value) ? 0 : Math.max(0, value) });
+                      }}
+                      className="w-full px-4 py-4 rounded-xl text-white text-2xl font-bold focus:outline-none transition-all disabled:opacity-40"
+                      style={{ background: 'rgba(255,255,255,0.06)', border: '2px solid rgba(245,158,11,0.25)' }}
+                      placeholder="2"
+                    />
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 icon-green text-sm font-medium">
+                      per pool
+                    </div>
                   </div>
+
+                  {/* Custom per-pool qualifiers toggle */}
+                  {config.numberOfGroups > 0 && (
+                    <button
+                      onClick={() => {
+                        setUseCustomAdvance(!useCustomAdvance);
+                        if (!useCustomAdvance) {
+                          const counts = Array(config.numberOfGroups).fill(config.advanceFromGroup || 1);
+                          setConfig({ ...config, customAdvanceCounts: counts });
+                        } else {
+                          setConfig({ ...config, customAdvanceCounts: null });
+                        }
+                      }}
+                      className={`mt-3 w-full px-4 py-3 rounded-xl transition-all font-semibold ${
+                        useCustomAdvance
+                          ? 'tab-active'
+                          : 'bg-slate-700/50 text-gray-300 hover:bg-slate-700 border-2 border-white/10'
+                      }`}
+                    >
+                      {useCustomAdvance ? '✓ Custom per Pool' : 'Custom qualifiers per pool'}
+                    </button>
+                  )}
+
+                  {/* Per-pool qualifier inputs */}
+                  {useCustomAdvance && (
+                    <div className="mt-4 space-y-3 p-4 bg-emerald-500/10 border-2 border-emerald-500/30 rounded-xl">
+                      {config.customAdvanceCounts?.map((cnt, idx) => (
+                        <div key={idx} className="flex items-center gap-3">
+                          <div className="w-20 h-12 rounded-lg flex items-center justify-center font-bold shadow-lg" style={{ background: 'linear-gradient(135deg,#F59E0B,#FCD34D)', color: '#050810' }}>
+                            Pool {String.fromCharCode(65 + idx)}
+                          </div>
+                          <input
+                            type="number"
+                            min="1"
+                            value={cnt}
+                            onChange={(e) => {
+                              const newCounts = [...config.customAdvanceCounts];
+                              const value = parseInt(e.target.value);
+                              newCounts[idx] = isNaN(value) ? 0 : Math.max(0, value);
+                              setConfig({ ...config, customAdvanceCounts: newCounts });
+                            }}
+                            className="flex-1 px-4 py-3 rounded-xl text-white text-xl font-bold focus:outline-none transition-all" style={{ background: 'rgba(255,255,255,0.06)', border: '2px solid rgba(245,158,11,0.25)' }}
+                            placeholder="1"
+                          />
+                          <span className="text-xs text-gray-400 w-14">qualify</span>
+                        </div>
+                      ))}
+                      <div className="flex items-center justify-between p-3 rounded-lg bg-emerald-500/20 border-2 border-emerald-500/40">
+                        <span className="text-sm font-medium text-white">Total qualifiers:</span>
+                        <span className="text-lg font-bold" style={{ color: '#F59E0B' }}>
+                          {config.customAdvanceCounts?.reduce((a, b) => a + (Number(b) || 0), 0)}
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </>
@@ -5319,11 +5405,12 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
             {(bracket?.format === 'ROUND_ROBIN' || bracket?.format === 'ROUND_ROBIN_KNOCKOUT') && bracket.groups ? (
               <div className="space-y-2">
                 {bracket.groups.map((group, groupIndex) => {
+                  // Use each pool's REAL size (e.g. 7/6/6) so members map to the correct
+                  // pool — not equal chunks, which mis-grouped uneven splits.
+                  const groupStart = bracket.groups.slice(0, groupIndex).reduce((acc, g) => acc + (g.participants?.length || 0), 0);
+                  const groupEnd = groupStart + (group.participants?.length || 0);
                   const groupSlots = slots.filter(s => {
                     const slotIndex = s.slot - 1;
-                    const playersPerGroup = Math.ceil(bracket.bracketSize / bracket.numberOfGroups);
-                    const groupStart = groupIndex * playersPerGroup;
-                    const groupEnd = groupStart + playersPerGroup;
                     return slotIndex >= groupStart && slotIndex < groupEnd;
                   });
                   

@@ -109,7 +109,16 @@ const UnifiedDashboardMobile = () => {
   const fetchMyTournaments = async () => {
     try {
       const res = await api.get('/tournaments?myTournaments=true&limit=20');
-      setMyTournaments(res.data.tournaments || []);
+      const list = res.data.tournaments || [];
+      // Surface drafts first so the organizer always sees unpublished tournaments
+      // (they need to publish them); then newest-created next.
+      list.sort((a, b) => {
+        const aDraft = a.status === 'draft' ? 0 : 1;
+        const bDraft = b.status === 'draft' ? 0 : 1;
+        if (aDraft !== bDraft) return aDraft - bDraft;
+        return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+      });
+      setMyTournaments(list);
     } catch (err) {
       console.error('Error fetching my tournaments:', err);
     }

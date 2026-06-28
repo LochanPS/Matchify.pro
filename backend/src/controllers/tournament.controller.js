@@ -422,7 +422,14 @@ const getTournaments = async (req, res) => {
     const orderBy = {};
     const validSortFields = ['startDate', 'endDate', 'createdAt', 'name', 'city'];
     const sortField = validSortFields.includes(sortBy) ? sortBy : 'startDate';
-    orderBy[sortField] = sortOrder === 'desc' ? 'desc' : 'asc';
+    // Default order by tab: Completed = most recent on top (desc); Upcoming = soonest
+    // on top (asc). An explicit ?sortOrder from the client always takes priority.
+    let effectiveOrder = sortOrder === 'desc' ? 'desc' : 'asc';
+    if (!req.query.sortOrder) {
+      if (tab === 'completed') effectiveOrder = 'desc';
+      else if (tab === 'upcoming') effectiveOrder = 'asc';
+    }
+    orderBy[sortField] = effectiveOrder;
 
     // Fetch tournaments with related data
     const [tournaments, total] = await Promise.all([

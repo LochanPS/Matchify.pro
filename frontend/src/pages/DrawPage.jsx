@@ -5715,7 +5715,7 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
   const [bracketSize, setBracketSize] = useState(null);
   const [pickedPlayer, setPickedPlayer] = useState(null); // player currently "in hand"
 
-  const nextPow2 = (n) => { let p = 4; while (p < n) p *= 2; return p; };
+  const nextPow2 = (n) => { let p = 2; while (p < n) p *= 2; return p; };
 
   // Rebuild positions array when organiser changes bracket size
   const handleBracketSizeChange = (newSize) => {
@@ -5730,11 +5730,10 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
 
   useEffect(() => {
     if (!bracket?.groups) return;
-    const advanceCount = bracket.advanceFromGroup || 1;
-    // allPlayers = everyone who played the round robin (fully available to place).
-    // seedPlayers = top-N per group, used only for the default auto-seeding/size.
+    // allPlayers = everyone who played the round robin in this category. The organiser
+    // places them manually — NO auto-fill. Each carries full display info: name,
+    // partner name, team name, pool and seed/rank number.
     const allPlayers = [];
-    const seedPlayers = [];
 
     const sortByStanding = (a, b) => {
       if ((b.points || 0) !== (a.points || 0)) return (b.points || 0) - (a.points || 0);
@@ -5752,13 +5751,12 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
           .filter(s => s.playerId)
           .sort(sortByStanding)
           .forEach((s, rank) => {
-            const player = {
+            allPlayers.push({
               id: s.playerId, name: s.playerName,
               partnerName: s.partnerName || null,
+              teamName: s.teamName || null,
               group: groupLetter, rank: rank + 1, points: s.points
-            };
-            allPlayers.push(player);
-            if (rank < advanceCount) seedPlayers.push(player);
+            });
           });
       } else {
         // Sort participants by points → diff → totalPoints
@@ -5766,59 +5764,41 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
           .sort(sortByStanding)
           .forEach((p, i) => {
             if (!p?.id) return;
-            const player = {
+            allPlayers.push({
               id: p.id, name: p.name,
               partnerName: p.partnerName || null,
+              teamName: p.teamName || null,
               group: groupLetter, rank: i + 1, points: p.points || 0
-            };
-            allPlayers.push(player);
-            if (i < advanceCount) seedPlayers.push(player);
+            });
           });
       }
     });
 
     setAdvancingPlayers(allPlayers);
 
-    // Default bracket size follows the qualifiers so the normal flow is unchanged;
-    // the extra (non-qualifying) players simply wait in the pool until placed.
-    const defaultSize = nextPow2((seedPlayers.length || allPlayers.length) || 1);
-    setBracketSize(defaultSize);
-
-    // Build positions array, restoring existing KO draw if already seeded
-    const pos = Array(defaultSize).fill(null);
-    if (bracket.knockout?.rounds?.[0]?.matches) {
-      bracket.knockout.rounds[0].matches.forEach((match, mi) => {
+    // If a knockout draw already exists, restore the organiser's EXACT placement and size.
+    const existingFirstRound = bracket.knockout?.rounds?.[0]?.matches;
+    if (existingFirstRound && existingFirstRound.length > 0) {
+      const size = existingFirstRound.length * 2;
+      const pos = Array(size).fill(null);
+      existingFirstRound.forEach((match, mi) => {
         const p1 = allPlayers.find(p => p.id === match.player1?.id);
         const p2 = allPlayers.find(p => p.id === match.player2?.id);
         if (p1) pos[mi * 2] = p1;
         if (p2) pos[mi * 2 + 1] = p2;
       });
-    }
-
-    // Auto-seed if no existing placement: standard cross-group seeding of qualifiers.
-    // Seeds built rank-first (rank-1s then rank-2s), then placed 1 vs last, 2 vs second-last
-    // Result: A1 vs B2 (Match 1), B1 vs A2 (Match 2) — avoids same-group R1 matchup
-    const hasExistingDraw = pos.some(p => p !== null);
-    if (!hasExistingDraw && seedPlayers.length > 0) {
-      const byRank = {};
-      seedPlayers.forEach(p => {
-        if (!byRank[p.rank]) byRank[p.rank] = [];
-        byRank[p.rank].push(p);
-      });
-      const seeds = [];
-      const maxRank = Math.max(...seedPlayers.map(p => p.rank));
-      for (let r = 1; r <= maxRank; r++) {
-        (byRank[r] || []).sort((a, b) => a.group.localeCompare(b.group)).forEach(p => seeds.push(p));
-      }
-      // Standard bracket: seed1 vs seedN, seed2 vs seedN-1, ...
-      let lo = 0, hi = seeds.length - 1, pi = 0;
-      while (lo <= hi && pi < pos.length) {
-        pos[pi++] = seeds[lo++];
-        if (lo <= hi && pi < pos.length) pos[pi++] = seeds[hi--];
+      if (pos.some(p => p !== null)) {
+        setBracketSize(size);
+        setPositions(pos);
+        return;
       }
     }
 
-    setPositions(pos);
+    // No existing draw → start EMPTY. Organiser picks the size (Round of 2…128) and
+    // places every player by hand. Default to the smallest bracket that holds everyone.
+    const defaultSize = nextPow2(allPlayers.length || 2);
+    setBracketSize(defaultSize);
+    setPositions(Array(defaultSize).fill(null));
   }, [bracket]);
 
   // Tap a position slot
@@ -5865,7 +5845,7 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
       // If only p2 set (organiser placed in bottom of pair), treat as p1 (BYE logic needs p1)
       if (!p1 && p2) { p1 = p2; p2 = null; }
       if (!p1) {
-        alert(`Match slot ${i / 2 + 1} has no player. Every bracket position pair must have at least one player.`);
+        alert(`Match ${i / 2 + 1} is empty. Place at least one player in every match, or pick a smaller knockout size.`);
         return;
       }
       slots.push({ matchNumber: i / 2 + 1, player1: p1, player2: p2 });
@@ -5901,7 +5881,7 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
                 Arrange Knockout Draw
               </h2>
               <p className="text-gray-400 text-[10px] leading-tight mt-0.5">
-                Tap a player → tap a bracket position to place them. Empty positions = BYE.
+                Pick the size, then tap a player → tap a slot to place them. A player with no opponent gets a BYE (auto-advances).
               </p>
             </div>
             <button onClick={onClose} className="text-gray-400 hover:text-white p-1.5 hover:bg-emerald-500/20 rounded-lg transition-all hover:scale-110">
@@ -5912,22 +5892,21 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
 
         <div className="p-3 space-y-3">
 
-          {/* Bracket Size Selector */}
+          {/* Bracket Size Selector — single button that opens a dropdown (Round of 2 … 128) */}
           {bracketSize && (
             <div className="p-2 rounded-xl" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
               <div className="flex items-center justify-between flex-wrap gap-2">
-                <div className="flex gap-2 flex-wrap">
-                  {[4, 8, 16, 32].filter(s => s >= advancingPlayers.length || s === 4).map(s => (
-                    <button key={s} onClick={() => handleBracketSizeChange(s)}
-                      className="px-3 py-1 rounded-lg text-[10px] font-bold transition-all"
-                      style={{
-                        background: bracketSize === s ? 'rgba(245,158,11,0.15)' : 'rgba(255,255,255,0.05)',
-                        border: `1px solid ${bracketSize === s ? 'rgba(245,158,11,0.5)' : 'rgba(255,255,255,0.12)'}`,
-                        color: bracketSize === s ? '#F59E0B' : 'rgba(255,255,255,0.5)'
-                      }}>
-                      Round of {s}
-                    </button>
-                  ))}
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-bold" style={{ color: 'rgba(255,255,255,0.5)' }}>Knockout size</span>
+                  <select
+                    value={bracketSize}
+                    onChange={(e) => handleBracketSizeChange(Number(e.target.value))}
+                    className="px-3 py-1.5 rounded-lg text-[11px] font-bold cursor-pointer outline-none"
+                    style={{ background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.5)', color: '#F59E0B', appearance: 'auto' }}>
+                    {[2, 4, 8, 16, 32, 64, 128].map(s => (
+                      <option key={s} value={s} style={{ background: '#0d1025', color: '#fff' }}>Round of {s}</option>
+                    ))}
+                  </select>
                 </div>
                 <span className="text-[9px]" style={{ color: 'rgba(255,255,255,0.35)' }}>
                   {filledCount}/{bracketSize} placed · {byeCount > 0 ? `${byeCount} BYE${byeCount > 1 ? 's' : ''}` : 'no byes'}
@@ -5990,11 +5969,16 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
                     <div className="text-[10px] font-bold text-white leading-tight">
                       {player.name}{player.partnerName ? ` / ${player.partnerName}` : ''}
                     </div>
+                    {player.teamName && (
+                      <div className="text-[8px] font-semibold leading-tight mt-0.5" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                        {player.teamName}
+                      </div>
+                    )}
                     <div className="text-[8px] flex items-center gap-1 mt-0.5">
                       <span className="px-1 rounded font-bold" style={{ background: 'rgba(245,158,11,0.15)', color: '#F59E0B' }}>
                         Pool {player.group}
                       </span>
-                      <span style={{ color: 'rgba(255,255,255,0.5)' }}>#{player.rank}</span>
+                      <span style={{ color: 'rgba(255,255,255,0.5)' }}>Seed #{player.rank}</span>
                       {isPlaced && <span style={{ color: 'rgba(245,158,11,0.6)' }}>✓</span>}
                     </div>
                   </button>

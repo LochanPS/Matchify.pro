@@ -159,7 +159,7 @@ const TournamentDetailPage = () => {
   const [showAdminDeleteModal, setShowAdminDeleteModal] = useState(false);
   const [adminDeleting, setAdminDeleting] = useState(false);
 
-  // Quick Add Player state (Admin only)
+  // Quick Add Player state (admin or this tournament's organizer)
   const [showQuickAddModal, setShowQuickAddModal] = useState(false);
   const [quickAddData, setQuickAddData] = useState({
     name: '',
@@ -426,7 +426,8 @@ const TournamentDetailPage = () => {
 
     try {
       setQuickAddLoading(true);
-      const response = await api.post(`/admin/tournaments/${id}/quick-add-player`, quickAddData);
+      // Unified route: authorized for a platform admin OR this tournament's organizer.
+      const response = await api.post(`/tournaments/${id}/quick-add-player`, quickAddData);
       
       if (response.data.success) {
         const displayName = selectedCategory?.format === 'doubles'
@@ -1425,6 +1426,26 @@ const TournamentDetailPage = () => {
                 </div>
               </div>
             )}
+
+            {/* Organizer Action — Quick Add Player (only the organizer who OWNS this
+                tournament; admins already have it in Admin Actions above). Same flow:
+                creates a confirmed player whose entry fee is added to revenue + payout. */}
+            {!isAdmin() && user && tournament && user.id === tournament.organizerId && (
+              <div className="rounded-xl p-4 border" style={{ background: 'rgba(245,158,11,0.06)', borderColor: 'rgba(245,158,11,0.2)' }}>
+                <div className="flex items-center gap-2 mb-3">
+                  <SparklesIcon className="h-4 w-4" style={{ color: '#F59E0B' }} />
+                  <h3 className="font-bold text-white text-sm">Organizer Actions</h3>
+                </div>
+                <button
+                  onClick={() => setShowQuickAddModal(true)}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-bold text-sm transition-all"
+                  style={{ background: 'linear-gradient(135deg,#F59E0B,#F59E0B)', color: '#050810' }}
+                >
+                  <UserPlusIcon className="h-4 w-4" />
+                  Quick Add Player
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -1851,7 +1872,7 @@ const TournamentDetailPage = () => {
         </div>
       )}
 
-      {/* Quick Add Player Modal (Admin Only) */}
+      {/* Quick Add Player Modal (admin or this tournament's organizer) */}
       {showQuickAddModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border" style={{ background: '#0d1025', borderColor: 'rgba(255,255,255,0.1)' }}>

@@ -8,7 +8,7 @@ export const quickAddPlayer = async (req, res) => {
   try {
     const { tournamentId } = req.params;
     const { name, player2Name, categoryId } = req.body;
-    const adminId = req.user.id;
+    const userId = req.user.userId || req.user.id;
 
     console.log('🎯 Quick Add Player Request:', { tournamentId, name, player2Name, categoryId });
 
@@ -32,6 +32,18 @@ export const quickAddPlayer = async (req, res) => {
       return res.status(404).json({
         success: false,
         error: 'Tournament not found'
+      });
+    }
+
+    // Authorization: a platform admin OR the organizer who owns THIS tournament.
+    // (Organizers can only add players to their own tournaments — never anyone else's.)
+    const userRoles = req.user.roles || (req.user.role ? [req.user.role] : []);
+    const isAdmin = userRoles.includes('ADMIN');
+    const isOwner = tournament.organizerId === userId;
+    if (!isAdmin && !isOwner) {
+      return res.status(403).json({
+        success: false,
+        error: "Only an admin or this tournament's organizer can add players"
       });
     }
 
@@ -80,7 +92,7 @@ export const quickAddPlayer = async (req, res) => {
           status: 'confirmed',
           paymentStatus: 'quick_added',
           isQuickAdded: true,
-          quickAddedBy: adminId
+          quickAddedBy: userId
         },
         include: {
           category: {

@@ -25,13 +25,15 @@ import {
 import { getMatches, createMatch, assignUmpire } from '../controllers/match.controller.js';
 import { restartDraw } from '../controllers/restartDraw.controller.js';
 import { quickAddPlayer } from '../controllers/quickAdd.controller.js';
-import { authenticate, preventAdminAccess } from '../middleware/auth.js';
+import { authenticate, preventAdminAccess, optionalAuth } from '../middleware/auth.js';
 
 const router = express.Router();
 
 // Public routes
-router.get('/', getTournaments); // Get all tournaments (with filters)
-router.get('/:id', getTournament); // Get single tournament
+// optionalAuth populates req.user when a token is present (without requiring it) so the
+// owner can see their own drafts via myTournaments, while the public never sees drafts.
+router.get('/', optionalAuth, getTournaments); // Get all tournaments (with filters)
+router.get('/:id', optionalAuth, getTournament); // Get single tournament
 router.get('/:id/categories', getCategories); // Get tournament categories (public)
 router.get('/:tournamentId/categories/:categoryId/registrations', authenticate, getCategoryRegistrations); // Get category registrations
 

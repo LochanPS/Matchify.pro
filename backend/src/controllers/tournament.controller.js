@@ -382,6 +382,23 @@ const getTournaments = async (req, res) => {
       baseFilters.privacy = privacy;
     }
 
+    // ── SECURITY: drafts are visible ONLY to the authenticated organizer who owns
+    // them (a valid `myTournaments=true` request). For EVERY other request — public
+    // discovery, any other user, or myTournaments without a valid session — drafts
+    // must never appear. Strip any draft inclusion and default to published.
+    const ownerId = req.user?.id || req.user?.userId;
+    const isOwnerListing = myTournaments === 'true' && ownerId && baseFilters.organizerId === ownerId;
+    if (!isOwnerListing) {
+      if (!baseFilters.status) {
+        baseFilters.status = 'published';
+      } else if (typeof baseFilters.status === 'string') {
+        if (baseFilters.status === 'draft') baseFilters.status = 'published';
+      } else if (baseFilters.status && Array.isArray(baseFilters.status.in)) {
+        const allowed = baseFilters.status.in.filter(s => s !== 'draft');
+        baseFilters.status = { in: allowed.length ? allowed : ['published'] };
+      }
+    }
+
     // Search by name, description, venue, or city (case-insensitive)
     if (search) {
       where = {
@@ -522,8 +539,16 @@ const getTournament = async (req, res) => {
     const { id } = req.params;
     const cacheKey = `tournament:${id}`;
 
+    // A draft tournament is visible only to its organizer or an admin.
+    const uid = req.user?.id || req.user?.userId;
+    const isAdmin = (req.user?.roles || []).includes('ADMIN');
+    const canViewDraft = (t) => !!uid && (t.organizerId === uid || isAdmin);
+
     const cached = await cacheGet(cacheKey);
     if (cached) {
+      if (cached.data?.status === 'draft' && !canViewDraft(cached.data)) {
+        return res.status(404).json({ success: false, error: 'Tournament not found' });
+      }
       return res.json({ ...cached, cached: true });
     }
 
@@ -540,6 +565,10 @@ const getTournament = async (req, res) => {
     });
 
     if (!tournament) {
+      return res.status(404).json({ success: false, error: 'Tournament not found' });
+    }
+
+    if (tournament.status === 'draft' && !canViewDraft(tournament)) {
       return res.status(404).json({ success: false, error: 'Tournament not found' });
     }
 

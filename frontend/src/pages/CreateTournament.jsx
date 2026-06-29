@@ -50,6 +50,7 @@ const CreateTournament = () => {
   const [showResumeBanner, setShowResumeBanner] = useState(true);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitMode, setSubmitMode] = useState(null); // 'draft' | 'publish' — which CTA is running
   const [error, setError] = useState(null);
   const [showExitModal, setShowExitModal] = useState(false);
 
@@ -91,7 +92,8 @@ const CreateTournament = () => {
     return null;
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (publishNow = false) => {
+    setSubmitMode(publishNow ? 'publish' : 'draft');
     setIsSubmitting(true);
     setError(null);
 
@@ -127,6 +129,7 @@ const CreateTournament = () => {
       console.error('Tournament creation failed:', err);
       setError(extractError(err) || 'Failed to create tournament. Please try again.');
       setIsSubmitting(false);
+      setSubmitMode(null);
       return;
     }
 
@@ -192,14 +195,37 @@ const CreateTournament = () => {
       console.warn('Payment QR/info upload failed (non-critical, continuing):', err);
     }
 
+    // ── Step 5: Publish now (only if the organizer chose "Publish Now") ───────
+    // Otherwise the tournament stays a draft (saved, private, publishable later).
+    let publishWarning = null;
+    let didPublish = false;
+    const hasCategories = formData.categories && formData.categories.length > 0;
+    if (publishNow) {
+      if (!hasCategories || categoryWarning) {
+        publishWarning = 'Add at least one category before publishing — saved as draft for now.';
+      } else {
+        try {
+          await tournamentAPI.updateTournament(tournamentId, { status: 'published' });
+          didPublish = true;
+        } catch (err) {
+          console.error('Publish failed (non-critical):', err);
+          publishWarning = 'Created, but publishing failed — saved as draft. You can publish it later.';
+        }
+      }
+    }
+
     // ── Done — navigate to tournament ────────────────────────────────────────
     clearDraft();
+    const warn = categoryWarning || publishWarning;
     navigate(`/tournaments/${tournamentId}`, {
       state: {
-        showPublishPrompt: !categoryWarning,
-        message: categoryWarning
-          ? `Tournament created! ⚠️ ${categoryWarning}`
-          : 'Tournament created successfully!',
+        // Organizer already made an explicit Draft/Publish choice — no publish nag.
+        showPublishPrompt: false,
+        message: didPublish
+          ? 'Tournament published successfully! 🎉'
+          : warn
+            ? `Tournament saved as draft! ⚠️ ${warn}`
+            : 'Tournament saved as draft!',
       }
     });
   };
@@ -279,6 +305,7 @@ const CreateTournament = () => {
             onPrev={prevStep}
             onSubmit={handleSubmit}
             isSubmitting={isSubmitting}
+            submitMode={submitMode}
           />
         );
       default:

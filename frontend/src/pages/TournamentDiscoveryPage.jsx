@@ -1,5 +1,6 @@
 ﻿import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import useSEO from '../utils/useSEO';
 import {
   MagnifyingGlassIcon,
   FunnelIcon,
@@ -23,6 +24,11 @@ import Spinner from '../components/Spinner';
 
 
 export default function TournamentDiscoveryPage() {
+  useSEO({
+    title: 'Badminton Tournaments in India',
+    description: 'Browse and register for upcoming and completed badminton tournaments across India on Matchify.pro. Find events near you and compete.',
+    path: '/tournaments',
+  });
   const navigate = useNavigate();
   const [tournaments, setTournaments] = useState([]);
   const [loading, setLoading] = useState(true);

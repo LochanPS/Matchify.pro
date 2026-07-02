@@ -1,5 +1,6 @@
 ﻿import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import useSEO from '../utils/useSEO';
 import PWAInstallButton from '../components/PWAInstallButton';
 import { usePageTransition } from "../contexts/TransitionContext";
 import MatchifyLogo from '../components/MatchifyLogo';
@@ -93,6 +94,7 @@ const REVIEWS = [
 ];
 
 const HomePageMobile = () => {
+  useSEO({ path: '/' });
   const { user } = useAuth();
   const { triggerTransition } = usePageTransition();
 

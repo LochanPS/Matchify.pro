@@ -1,5 +1,6 @@
 ﻿import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
+import useSEO from '../utils/useSEO';
 import { tournamentAPI } from '../api/tournament';
 import { useAuth } from '../contexts/AuthContext';
 import { formatDateLongIndian, formatDateTimeIndian } from '../utils/dateFormat';
@@ -135,6 +136,13 @@ const TournamentDetailPage = () => {
   const [tournament, setTournament] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  useSEO({
+    title: tournament?.name || 'Tournament',
+    description: tournament
+      ? `${tournament.name}${tournament.city ? ` in ${tournament.city}${tournament.state ? ', ' + tournament.state : ''}` : ''} — register, view draws and follow live matches on Matchify.pro.`
+      : undefined,
+    path: `/tournaments/${id}`,
+  });
   const [selectedPoster, setSelectedPoster] = useState(0);
   const [showPosterModal, setShowPosterModal] = useState(false);
   const [publishing, setPublishing] = useState(false);

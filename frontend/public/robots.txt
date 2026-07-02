@@ -1,0 +1,18 @@
+# Matchify.pro — allow crawling of public content, keep private/app areas out of the index.
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /admin-dashboard
+Disallow: /dashboard
+Disallow: /player-dashboard
+Disallow: /organizer/dashboard
+Disallow: /umpire/dashboard
+Disallow: /profile
+Disallow: /notifications
+Disallow: /registrations
+Disallow: /my-bookings
+Disallow: /my-points
+Disallow: /reset-password
+Disallow: /forgot-password
+
+Sitemap: https://matchify.pro/sitemap.xml

@@ -3201,173 +3201,103 @@ const getCompleteMatchScore = (scoreData) => {
 // Wraps the full bracket. On mount, scales it down so all rounds fit on screen.
 // User pinches to zoom in, single-finger drags to pan when zoomed in.
 // All click handlers on buttons inside work correctly at any zoom level.
+// Readable scroll + zoom viewport. Cards render at a legible size; the user SCROLLS
+// (native, both axes) to navigate — so even a Round of 512 stays readable instead of
+// being shrunk to fit. Zoom: buttons (＋ − Fit 100%), Ctrl/⌘+wheel on desktop, and
+// two-finger pinch on mobile (one-finger = native scroll).
 const ZoomableBracket = ({ children, bracketWidth, bracketHeight }) => {
   const outerRef = React.useRef(null);
-  const innerRef = React.useRef(null);
-  const [outerHeight, setOuterHeight] = React.useState(300);
+  const [scale, setScale] = React.useState(1);
+  const MIN = 0.08, MAX = 2.5;
+  const clamp = (s) => Math.max(MIN, Math.min(MAX, s));
 
-  // All gesture state in a ref — no re-renders during pan/zoom for 60fps performance
-  const g = React.useRef({
-    scale: 1, tx: 0, ty: 0, minScale: 1,
-    lastDist: 0, lastMx: 0, lastMy: 0,
-    lastPx: 0, lastPy: 0,
-    isPinch: false, isPan: false,
-  });
+  // Default = readable full size (100%). The user scrolls to move around large draws.
+  React.useEffect(() => { setScale(1); }, [bracketWidth, bracketHeight]);
 
-  const apply = React.useCallback(() => {
-    if (!innerRef.current) return;
-    const { scale, tx, ty } = g.current;
-    innerRef.current.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
-  }, []);
-
-  const clampTranslate = React.useCallback((newScale) => {
-    const outer = outerRef.current;
-    if (!outer) return;
-    const cw = outer.offsetWidth;
-    const ch = outer.offsetHeight;
-    const minTx = Math.min(0, cw - bracketWidth * newScale);
-    const minTy = Math.min(0, ch - bracketHeight * newScale);
-    g.current.tx = Math.max(minTx, Math.min(0, g.current.tx));
-    g.current.ty = Math.max(minTy, Math.min(0, g.current.ty));
+  const fit = React.useCallback(() => {
+    const o = outerRef.current;
+    if (!o || !bracketWidth || !bracketHeight) return;
+    setScale(clamp(Math.min(1, Math.min(o.clientWidth / bracketWidth, o.clientHeight / bracketHeight))));
   }, [bracketWidth, bracketHeight]);
 
+  const zoomIn  = () => setScale(s => clamp(+(s + 0.15).toFixed(2)));
+  const zoomOut = () => setScale(s => clamp(+(s - 0.15).toFixed(2)));
+  const reset   = () => setScale(1);
+
+  // Desktop: Ctrl/⌘ + wheel = zoom; plain wheel = native scroll.
   React.useEffect(() => {
-    const outer = outerRef.current;
-    if (!outer || !bracketWidth || !bracketHeight) return;
+    const o = outerRef.current;
+    if (!o) return;
+    const onWheel = (e) => {
+      if (!e.ctrlKey && !e.metaKey) return;
+      e.preventDefault();
+      setScale(s => clamp(+(s - Math.sign(e.deltaY) * 0.12).toFixed(2)));
+    };
+    o.addEventListener('wheel', onWheel, { passive: false });
+    return () => o.removeEventListener('wheel', onWheel);
+  }, []);
 
-    const cw = outer.offsetWidth;
-    const minScale = Math.min(cw / bracketWidth, 1);
-    g.current.scale = minScale;
-    g.current.minScale = minScale;
-    g.current.tx = 0;
-    g.current.ty = 0;
-    setOuterHeight(Math.ceil(bracketHeight * minScale));
-    apply();
-
-    const getTouchDist = (t1, t2) =>
-      Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
-
-    const onTouchStart = (e) => {
-      if (e.touches.length === 2) {
-        g.current.isPinch = true;
-        g.current.isPan = false;
-        g.current.lastDist = getTouchDist(e.touches[0], e.touches[1]);
-        g.current.lastMx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-        g.current.lastMy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-      } else if (e.touches.length === 1) {
-        g.current.isPan = true;
-        g.current.lastPx = e.touches[0].clientX;
-        g.current.lastPy = e.touches[0].clientY;
+  // Mobile: two-finger pinch = zoom; one finger = native scroll.
+  React.useEffect(() => {
+    const o = outerRef.current;
+    if (!o) return;
+    let lastDist = 0, pinching = false;
+    const dist = (a, b) => Math.hypot(b.clientX - a.clientX, b.clientY - a.clientY);
+    const ts = (e) => { if (e.touches.length === 2) { pinching = true; lastDist = dist(e.touches[0], e.touches[1]); } };
+    const tm = (e) => {
+      if (pinching && e.touches.length === 2) {
+        e.preventDefault();
+        const d = dist(e.touches[0], e.touches[1]);
+        if (lastDist) setScale(s => clamp(s * (d / lastDist)));
+        lastDist = d;
       }
     };
+    const te = (e) => { if (e.touches.length < 2) { pinching = false; lastDist = 0; } };
+    o.addEventListener('touchstart', ts, { passive: true });
+    o.addEventListener('touchmove', tm, { passive: false });
+    o.addEventListener('touchend', te, { passive: true });
+    return () => { o.removeEventListener('touchstart', ts); o.removeEventListener('touchmove', tm); o.removeEventListener('touchend', te); };
+  }, []);
 
-    const onTouchMove = (e) => {
-      if (g.current.isPinch && e.touches.length === 2) {
-        e.preventDefault();
-        const d = getTouchDist(e.touches[0], e.touches[1]);
-        const mx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-        const my = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-        const rect = outer.getBoundingClientRect();
-        const ratio = d / g.current.lastDist;
-        const newScale = Math.max(g.current.minScale, Math.min(2.5, g.current.scale * ratio));
-        const sc = newScale / g.current.scale;
-        const ox = mx - rect.left;
-        const oy = my - rect.top;
-        // Zoom toward pinch midpoint + simultaneous pan
-        g.current.tx = ox - sc * (ox - g.current.tx) + (mx - g.current.lastMx);
-        g.current.ty = oy - sc * (oy - g.current.ty) + (my - g.current.lastMy);
-        g.current.scale = newScale;
-        g.current.lastDist = d;
-        g.current.lastMx = mx;
-        g.current.lastMy = my;
-        clampTranslate(newScale);
-        apply();
-      } else if (g.current.isPan && e.touches.length === 1 && g.current.scale > g.current.minScale + 0.01) {
-        e.preventDefault();
-        const dx = e.touches[0].clientX - g.current.lastPx;
-        const dy = e.touches[0].clientY - g.current.lastPy;
-        g.current.tx += dx;
-        g.current.ty += dy;
-        g.current.lastPx = e.touches[0].clientX;
-        g.current.lastPy = e.touches[0].clientY;
-        clampTranslate(g.current.scale);
-        apply();
-      }
-    };
-
-    const onTouchEnd = (e) => {
-      if (e.touches.length < 2) g.current.isPinch = false;
-      if (e.touches.length === 0) g.current.isPan = false;
-    };
-
-    outer.addEventListener('touchstart', onTouchStart, { passive: true });
-    outer.addEventListener('touchmove', onTouchMove, { passive: false });
-    outer.addEventListener('touchend', onTouchEnd, { passive: true });
-
-    return () => {
-      outer.removeEventListener('touchstart', onTouchStart);
-      outer.removeEventListener('touchmove', onTouchMove);
-      outer.removeEventListener('touchend', onTouchEnd);
-    };
-  }, [bracketWidth, bracketHeight, apply, clampTranslate]);
-
-  const handleReset = () => {
-    g.current.scale = g.current.minScale;
-    g.current.tx = 0;
-    g.current.ty = 0;
-    apply();
+  const btn = {
+    padding: '4px 10px', borderRadius: '8px',
+    background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)',
+    color: 'rgba(255,255,255,0.7)', fontSize: '13px', fontWeight: 700, cursor: 'pointer', lineHeight: 1,
   };
 
   return (
     <div>
-      {/* Clipping viewport — height = bracket height at fit-to-screen scale */}
+      {/* Zoom controls */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px' }}>
+        <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', marginRight: 'auto', fontWeight: 500 }}>
+          Scroll to move · pinch / Ctrl+scroll to zoom
+        </span>
+        <button onClick={zoomOut} style={btn} aria-label="Zoom out">−</button>
+        <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.55)', minWidth: '38px', textAlign: 'center', fontWeight: 700 }}>{Math.round(scale * 100)}%</span>
+        <button onClick={zoomIn} style={btn} aria-label="Zoom in">＋</button>
+        <button onClick={fit} style={btn}>Fit</button>
+        <button onClick={reset} style={btn}>100%</button>
+      </div>
+
+      {/* Scroll viewport — native scroll on both axes keeps large draws readable */}
       <div
         ref={outerRef}
         style={{
           width: '100%',
-          height: outerHeight,
-          overflow: 'hidden',
+          height: `min(78vh, ${Math.max(360, bracketHeight)}px)`,
+          overflow: 'auto',
           position: 'relative',
-          touchAction: 'none',  // hand all touch to JS; handles pinch + pan
+          touchAction: 'pan-x pan-y',
+          WebkitOverflowScrolling: 'touch',
+          background: 'rgba(255,255,255,0.015)',
         }}
       >
-        {/* Bracket content — transform-origin top-left for correct pinch math */}
-        <div
-          ref={innerRef}
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            transformOrigin: '0 0',
-            willChange: 'transform',
-            userSelect: 'none',
-            WebkitUserSelect: 'none',
-          }}
-        >
-          {children}
+        {/* Sizer reserves the scaled footprint so scrollbars match the zoom level */}
+        <div style={{ width: bracketWidth * scale, height: bracketHeight * scale }}>
+          <div style={{ width: bracketWidth, height: bracketHeight, transformOrigin: '0 0', transform: `scale(${scale})` }}>
+            {children}
+          </div>
         </div>
-      </div>
-
-      {/* Hint strip below bracket */}
-      <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '6px 14px 10px',
-      }}>
-        <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.22)', fontWeight: 500 }}>
-          Pinch to zoom · drag to pan
-        </span>
-        <button
-          onClick={handleReset}
-          style={{
-            padding: '3px 12px', borderRadius: '8px',
-            background: 'rgba(255,255,255,0.05)',
-            border: '1px solid rgba(255,255,255,0.1)',
-            color: 'rgba(255,255,255,0.38)', fontSize: '10px', fontWeight: 600,
-            cursor: 'pointer', letterSpacing: '0.04em',
-          }}
-        >
-          Reset
-        </button>
       </div>
     </div>
   );
@@ -3377,6 +3307,8 @@ const ZoomableBracket = ({ children, bracketWidth, bracketHeight }) => {
 // All rounds fit on screen at once; user pinches to zoom into any match.
 const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onViewMatchDetails, onChangeResult, isHybrid = false }) => {
   const navigate = useNavigate(); // Fix: each top-level component needs its own hook
+  const [koQuery, setKoQuery] = React.useState('');     // "find me in the draw" search text
+  const [koHighlight, setKoHighlight] = React.useState(null); // first-round match index to highlight
 
   if (!data?.rounds) return <p className="text-gray-400 text-center p-8">No bracket data</p>;
 
@@ -3441,6 +3373,26 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
   const totalBracketHeight = 74 + (data.rounds[0]?.matches?.length || 1) * SLOT_H;
   const LINE   = 'rgba(245,158,11,0.5)';  // gold at 50% — on-brand, visible
 
+  // ── "Find me in the draw": first-round players → scroll to + highlight their match ──
+  const firstRoundPlayers = [];
+  (data.rounds[0]?.matches || []).forEach((match, mi) => {
+    const dbm = findMatch(0, mi);
+    [dbm?.player1 || match.player1, dbm?.player2 || match.player2].forEach((p) => {
+      const nm = p ? getPlayerDisplay(p) : null;
+      if (nm && nm !== 'TBD') firstRoundPlayers.push({ name: nm, mi });
+    });
+  });
+  const koSearchMatches = koQuery.trim()
+    ? firstRoundPlayers.filter(p => p.name.toLowerCase().includes(koQuery.trim().toLowerCase())).slice(0, 8)
+    : [];
+  const jumpToPlayer = (mi) => {
+    setKoQuery('');
+    const el = document.getElementById(`ko-cell-${mi}`);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+    setKoHighlight(mi);
+    setTimeout(() => setKoHighlight(null), 3200);
+  };
+
   return (
     <div style={{ padding: '10px' }}>
       {/* Outer bracket card */}
@@ -3470,6 +3422,42 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'rgba(255,255,255,0.25)', fontSize: '11px', fontWeight: 500 }}>
               <span>scroll</span>
               <span>→</span>
+            </div>
+          )}
+        </div>
+
+        {/* ── Find me in the draw ─────────────────────────────────────────── */}
+        <div style={{ position: 'relative', padding: '10px 16px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+          <input
+            value={koQuery}
+            onChange={(e) => setKoQuery(e.target.value)}
+            placeholder="🔍 Enter your name to jump to your spot in the draw"
+            style={{
+              width: '100%', padding: '9px 12px', borderRadius: '10px',
+              background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(245,158,11,0.3)',
+              color: '#fff', fontSize: '13px', outline: 'none', boxSizing: 'border-box',
+            }}
+          />
+          {koSearchMatches.length > 0 && (
+            <div style={{
+              position: 'absolute', left: '16px', right: '16px', top: 'calc(100% - 2px)', zIndex: 30,
+              background: '#0d1625', border: '1px solid rgba(245,158,11,0.3)', borderRadius: '10px',
+              overflow: 'hidden', boxShadow: '0 10px 28px rgba(0,0,0,0.55)', maxHeight: '260px', overflowY: 'auto',
+            }}>
+              {koSearchMatches.map((p, i) => (
+                <button
+                  key={`${p.mi}-${i}`}
+                  onClick={() => jumpToPlayer(p.mi)}
+                  style={{
+                    display: 'block', width: '100%', textAlign: 'left', padding: '10px 12px',
+                    background: 'transparent', border: 'none', borderBottom: '1px solid rgba(255,255,255,0.05)',
+                    color: '#fff', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
+                  }}
+                >
+                  {p.name}
+                  <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', fontWeight: 500 }}> · Match {p.mi + 1}</span>
+                </button>
+              ))}
             </div>
           )}
         </div>
@@ -3552,8 +3540,15 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                              Action buttons are absolutely positioned below the card so they never
                              affect card height or connector-line math. All cards stay ~123px tall
                              regardless of role, giving consistent bracket rhythm. */
-                          <div key={mi} style={{ height: slotH, display: 'flex', alignItems: 'center' }}>
-                            <div style={{ width: '100%', position: 'relative' }}>
+                          <div key={mi}
+                            id={ri === 0 ? `ko-cell-${mi}` : undefined}
+                            style={{ height: slotH, display: 'flex', alignItems: 'center', scrollMargin: '32px' }}>
+                            <div style={{
+                              width: '100%', position: 'relative', borderRadius: '15px',
+                              boxShadow: (ri === 0 && koHighlight === mi)
+                                ? '0 0 0 3px #FCD34D, 0 0 26px rgba(252,211,77,0.55)' : 'none',
+                              transition: 'box-shadow 0.3s ease',
+                            }}>
 
                               {/* ── Match card (display only — no buttons inside) ── */}
                               <div

@@ -156,6 +156,7 @@ model Tournament {
   startDate             String             // Store as string to avoid timezone conversion
   endDate               String             // Store as string to avoid timezone conversion
   format                String
+  sport                 String             @default("Badminton") // racket sport: Badminton, Tennis, Table Tennis, Pickleball, Squash, Padel…
   privacy               String             @default("public")
   status                String             @default("draft")
   totalCourts           Int?

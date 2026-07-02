@@ -1,6 +1,7 @@
 ﻿import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import useSEO from '../utils/useSEO';
+import { sportEmoji, sportLabel } from '../config/sports';
 import { tournamentAPI } from '../api/tournament';
 import { useAuth } from '../contexts/AuthContext';
 import { formatDateLongIndian, formatDateTimeIndian } from '../utils/dateFormat';
@@ -725,6 +726,12 @@ const TournamentDetailPage = () => {
               </span>
             </div>
             <h1 className="text-2xl font-black text-white leading-tight mb-3">{tournament.name}</h1>
+            {tournament.sport && (
+              <span className="inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full mb-3"
+                style={{ background: 'rgba(245,158,11,0.14)', border: '1px solid rgba(245,158,11,0.35)', color: '#FCD34D' }}>
+                {sportEmoji(tournament.sport)} {sportLabel(tournament.sport)}
+              </span>
+            )}
             <div className="flex flex-wrap gap-4">
               <span className="flex items-center gap-1.5 text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>
                 <MapPinIcon className="h-4 w-4" style={{ color: '#F59E0B' }} />

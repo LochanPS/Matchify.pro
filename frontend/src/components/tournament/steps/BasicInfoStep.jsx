@@ -1,4 +1,5 @@
 ﻿import { useState, useRef, useEffect } from 'react';
+import { SPORTS } from '../../../config/sports';
 
 // Indian States
 const INDIAN_STATES = [
@@ -196,6 +197,24 @@ const BasicInfoStep = ({ formData, updateFormData, onNext }) => {
             ⚠️ Need {20 - formData.description.length} more characters
           </p>
         )}
+      </div>
+
+      {/* Sport */}
+      <div>
+        <label className="block text-xs font-bold text-purple-400 mb-1.5">Sport</label>
+        <select
+          value={formData.sport || 'Badminton'}
+          onChange={(e) => updateFormData('sport', e.target.value)}
+          className="w-full px-3 py-2.5 text-sm rounded-xl text-white focus:ring-2 focus:ring-purple-500 transition-all"
+          style={{
+            background: 'rgba(0,0,0,0.3)',
+            border: '1.5px solid rgba(168,85,247,0.3)'
+          }}
+        >
+          {SPORTS.map((s) => (
+            <option key={s.id} value={s.id}>{s.emoji} {s.label}</option>
+          ))}
+        </select>
       </div>
 
       {/* Format & Privacy */}

@@ -125,6 +125,7 @@ const createTournament = async (req, res) => {
       zone,
       country = 'India',
       format, // singles, doubles, both
+      sport = 'Badminton', // racket sport (Badminton, Tennis, Table Tennis, Pickleball, Squash, Padel…)
       privacy = 'public',
       contactPhone,
       whatsappNumber,
@@ -221,6 +222,7 @@ const createTournament = async (req, res) => {
           zone,
           country,
           format,
+          sport,
           privacy,
           registrationOpenDate: registrationOpenDate,  // Store as string
           registrationCloseDate: registrationCloseDate, // Store as string
@@ -292,10 +294,13 @@ const getTournaments = async (req, res) => {
       
       // Format filter
       format,
-      
+
+      // Sport filter (Badminton, Tennis, Table Tennis, …)
+      sport,
+
       // Privacy filter
       privacy,
-      
+
       // Search
       search,
       
@@ -375,6 +380,11 @@ const getTournaments = async (req, res) => {
     // Format filter
     if (format) {
       baseFilters.format = format;
+    }
+
+    // Sport filter
+    if (sport) {
+      baseFilters.sport = sport;
     }
 
     // Privacy filter
@@ -621,6 +631,7 @@ const updateTournament = async (req, res) => {
       pincode,
       zone,
       format,
+      sport,
       privacy,
       status,
       registrationOpenDate,
@@ -642,6 +653,7 @@ const updateTournament = async (req, res) => {
     if (pincode !== undefined) updateData.pincode = pincode.trim();
     if (zone !== undefined) updateData.zone = zone;
     if (format !== undefined) updateData.format = format;
+    if (sport !== undefined) updateData.sport = sport;
     if (privacy !== undefined) updateData.privacy = privacy;
     if (status !== undefined) updateData.status = status;
     if (contactPhone !== undefined) updateData.contactPhone = contactPhone?.trim() || null;

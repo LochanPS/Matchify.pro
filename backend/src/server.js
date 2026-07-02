@@ -128,6 +128,9 @@ async function runStartupMigrations() {
       // without it ALL match.findMany() queries throw "column does not exist".
       `ALTER TABLE "Match" ADD COLUMN IF NOT EXISTS "queueOrder" INTEGER`,
       `CREATE INDEX IF NOT EXISTS "Match_queueOrder_idx" ON "Match"("queueOrder")`,
+      // Multi-sport support (added Jun 2026 — sport). Existing tournaments → Badminton.
+      `ALTER TABLE "Tournament" ADD COLUMN IF NOT EXISTS "sport" TEXT NOT NULL DEFAULT 'Badminton'`,
+      `CREATE INDEX IF NOT EXISTS "Tournament_sport_idx" ON "Tournament"("sport")`,
     ];
 
     for (const sql of migrations) {

@@ -72,6 +72,7 @@ export const useTournamentForm = (existingDraftId = null) => {
     name: '',
     description: '',
     type: 'OPEN',
+    sport: 'Badminton',
     format: 'both',
     privacy: 'public',
     city: '',

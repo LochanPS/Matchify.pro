@@ -112,6 +112,7 @@ const CreateTournament = () => {
         zone: formData.zone,
         country: formData.country,
         format: formData.format,
+        sport: formData.sport || 'Badminton',
         privacy: formData.privacy,
         shuttleType: formData.shuttleType || null,
         shuttleBrand: formData.shuttleBrand || null,

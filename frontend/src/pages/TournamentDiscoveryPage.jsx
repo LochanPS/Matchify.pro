@@ -1,6 +1,7 @@
 ﻿import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useSEO from '../utils/useSEO';
+import { SPORTS, sportEmoji, sportLabel } from '../config/sports';
 import {
   MagnifyingGlassIcon,
   FunnelIcon,
@@ -46,6 +47,7 @@ export default function TournamentDiscoveryPage() {
     zone: '',
     status: '',
     format: '',
+    sport: '',
     startDate: '',
     endDate: ''
   });
@@ -194,7 +196,7 @@ export default function TournamentDiscoveryPage() {
   };
 
   const clearFilters = () => {
-    setFilters({ city: '', state: '', zone: '', status: '', format: '', startDate: '', endDate: '' });
+    setFilters({ city: '', state: '', zone: '', status: '', format: '', sport: '', startDate: '', endDate: '' });
     setSearchQuery('');
   };
 
@@ -495,6 +497,28 @@ export default function TournamentDiscoveryPage() {
           </button>
         </div>
 
+        {/* Sport filter chips */}
+        <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '8px', marginBottom: '4px' }}>
+          {[{ id: '', emoji: '', label: 'All Sports' }, ...SPORTS].map((s) => {
+            const active = (filters.sport || '') === s.id;
+            return (
+              <button
+                key={s.id || 'all'}
+                onClick={() => handleFilterChange('sport', s.id)}
+                style={{
+                  flexShrink: 0, padding: '6px 12px', borderRadius: '999px', fontSize: '12px', fontWeight: 700,
+                  cursor: 'pointer', whiteSpace: 'nowrap',
+                  background: active ? 'rgba(245,158,11,0.18)' : 'rgba(255,255,255,0.05)',
+                  border: `1px solid ${active ? 'rgba(245,158,11,0.5)' : 'rgba(255,255,255,0.1)'}`,
+                  color: active ? '#FCD34D' : 'rgba(255,255,255,0.6)',
+                }}
+              >
+                {s.emoji ? `${s.emoji} ` : ''}{s.label}
+              </button>
+            );
+          })}
+        </div>
+
         {/* Results Count - Compact */}
         {!loading && (
           <div className="flex items-center justify-between mb-3">
@@ -742,6 +766,13 @@ function TournamentCard({ tournament, navigate, index }) {
           style={{ letterSpacing: '-0.01em' }}>
           {tournament.name}
         </h3>
+
+        {/* Sport */}
+        {tournament.sport && (
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.55)' }}>
+            {sportEmoji(tournament.sport)} {sportLabel(tournament.sport)}
+          </span>
+        )}
 
         {/* Date only */}
         <div className="flex items-center gap-1.5 text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>

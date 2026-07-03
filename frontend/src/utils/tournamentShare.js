@@ -91,10 +91,11 @@ export function buildShareMessage(tournament) {
   if (timeStr)   lines.push(`⏰ ${timeStr}`);
   div();
 
-  // Categories — each a clear block (name + its tap-to-open link), blank line between.
+  // Categories — each a clear block (name + its tap-to-open link), with the
+  // divider line between every category so each stands on its own on mobile.
   if (catBlocks.length) {
     catBlocks.forEach(({ title, url: catUrl }, i) => {
-      if (i > 0) lines.push('');
+      if (i > 0) div();
       lines.push(title);
       lines.push(catUrl);
     });

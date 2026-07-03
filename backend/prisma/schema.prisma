@@ -143,6 +143,7 @@ model Tournament {
   id                    String             @id @default(uuid())
   organizerId           String
   name                  String
+  slug                  String?            @unique // readable share URL, e.g. "vras-djs"
   description           String
   venue                 String
   address               String
@@ -219,6 +220,7 @@ model Category {
   id                String         @id @default(uuid())
   tournamentId      String
   name              String
+  slug              String?        // readable share URL, e.g. "mixed-doubles" (unique per tournament)
   format            String
   ageGroup          String?
   gender            String

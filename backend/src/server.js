@@ -131,6 +131,10 @@ async function runStartupMigrations() {
       // Multi-sport support (added Jun 2026 — sport). Existing tournaments → Badminton.
       `ALTER TABLE "Tournament" ADD COLUMN IF NOT EXISTS "sport" TEXT NOT NULL DEFAULT 'Badminton'`,
       `CREATE INDEX IF NOT EXISTS "Tournament_sport_idx" ON "Tournament"("sport")`,
+      // Readable share-URL slugs (added Jun 2026). Backfilled below.
+      `ALTER TABLE "Tournament" ADD COLUMN IF NOT EXISTS "slug" TEXT`,
+      `CREATE UNIQUE INDEX IF NOT EXISTS "Tournament_slug_key" ON "Tournament"("slug")`,
+      `ALTER TABLE "Category" ADD COLUMN IF NOT EXISTS "slug" TEXT`,
     ];
 
     for (const sql of migrations) {
@@ -144,6 +148,10 @@ async function runStartupMigrations() {
       }
     }
     console.log('✅ Startup DB migrations complete');
+
+    // Backfill readable slugs for any tournaments/categories created before slugs existed.
+    const { backfillSlugs } = await import('./utils/slug.js');
+    await backfillSlugs();
   } catch (err) {
     console.error('❌ Startup migration failed:', err.message);
     // Non-fatal — app still starts, individual queries may fail

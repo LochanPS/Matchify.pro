@@ -21,6 +21,7 @@ import {
   getCategoryRegistrations,
   endTournament,
   endCategory,
+  resolveTournamentSlug,
 } from '../controllers/tournament.controller.js';
 import { getMatches, createMatch, assignUmpire } from '../controllers/match.controller.js';
 import { restartDraw } from '../controllers/restartDraw.controller.js';
@@ -33,6 +34,8 @@ const router = express.Router();
 // optionalAuth populates req.user when a token is present (without requiring it) so the
 // owner can see their own drafts via myTournaments, while the public never sees drafts.
 router.get('/', optionalAuth, getTournaments); // Get all tournaments (with filters)
+// Slug resolver for short /t/:slug share links — must be before /:id (distinct 2-segment path).
+router.get('/resolve/:tSlug', resolveTournamentSlug);
 router.get('/:id', optionalAuth, getTournament); // Get single tournament
 router.get('/:id/categories', getCategories); // Get tournament categories (public)
 router.get('/:tournamentId/categories/:categoryId/registrations', authenticate, getCategoryRegistrations); // Get category registrations

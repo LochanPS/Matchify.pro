@@ -53,6 +53,7 @@ const MyPoints                  = lazy(() => import('./pages/MyPoints'))
 const ScoringConsolePage        = lazy(() => import('./pages/ScoringConsolePage'))
 const MatchListPage             = lazy(() => import('./pages/MatchListPage'))
 const SpectatorViewPage         = lazy(() => import('./pages/SpectatorViewPage'))
+const ShareRedirect             = lazy(() => import('./pages/ShareRedirect'))
 const ConductMatchPage          = lazy(() => import('./pages/ConductMatchPage'))
 const QuickMatchPage            = lazy(() => import('./pages/QuickMatchPage'))
 const LiveTournamentDashboard   = lazy(() => import('./pages/LiveTournamentDashboard'))
@@ -282,6 +283,9 @@ function AppContent() {
       <Routes>
             {/* Public routes */}
           <Route path="/" element={<HomePage />} />
+          {/* Short share links: /t/:slug and /t/:slug/:categorySlug → resolve + open real page */}
+          <Route path="/t/:tSlug" element={<ShareRedirect />} />
+          <Route path="/t/:tSlug/:cSlug" element={<ShareRedirect />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />

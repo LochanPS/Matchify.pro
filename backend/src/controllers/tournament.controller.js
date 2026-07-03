@@ -6,6 +6,7 @@ import notificationService from '../services/notificationService.js';
 import { cacheGet, cacheSet, cacheDel } from '../services/redisService.js';
 import tournamentPointsService from '../services/tournamentPoints.service.js';
 import { PLATFORM_FEE_PERCENT } from '../config/constants.js';
+import { generateUniqueTournamentSlug, generateUniqueCategorySlug } from '../utils/slug.js';
 
 // Configure multer for memory storage
 // fileSize limit: 4 MB per file — stays under Vercel's 4.5 MB serverless body limit.
@@ -206,6 +207,9 @@ const createTournament = async (req, res) => {
       where: { isActive: true }
     });
 
+    // Readable share-URL slug generated from the name (e.g. "vras-djs").
+    const slug = await generateUniqueTournamentSlug(name.trim());
+
     // Create tournament (FREE - no credits deducted)
     const result = await prisma.$transaction(async (tx) => {
       // Create tournament with Matchify QR code
@@ -213,6 +217,7 @@ const createTournament = async (req, res) => {
         data: {
           organizerId: userId,
           name: name.trim(),
+          slug,
           description: description.trim(),
           venue: venue.trim(),
           address: address.trim(),
@@ -463,6 +468,7 @@ const getTournaments = async (req, res) => {
           categories: {
             select: {
               id: true,
+              slug: true,
               name: true,
               format: true,
               gender: true,
@@ -596,6 +602,24 @@ const getTournament = async (req, res) => {
   } catch (error) {
     console.error('Get tournament error:', error);
     res.status(500).json({ success: false, error: 'Failed to fetch tournament' });
+  }
+};
+
+// GET /api/tournaments/resolve/:tSlug - map a readable slug (or id) to real IDs.
+// Powers the short /t/:slug share links (public — the real pages still enforce
+// their own privacy, e.g. drafts stay blocked for non-owners).
+const resolveTournamentSlug = async (req, res) => {
+  try {
+    const { tSlug } = req.params;
+    const t = await prisma.tournament.findFirst({
+      where: { OR: [{ slug: tSlug }, { id: tSlug }] },
+      select: { id: true, slug: true, categories: { select: { id: true, slug: true } } },
+    });
+    if (!t) return res.status(404).json({ success: false, error: 'Tournament not found' });
+    res.json({ success: true, id: t.id, categories: t.categories });
+  } catch (error) {
+    console.error('Resolve tournament slug error:', error);
+    res.status(500).json({ success: false, error: 'Failed to resolve tournament' });
   }
 };
 
@@ -1034,11 +1058,15 @@ const createCategory = async (req, res) => {
     // Get tournament format from request (default to KNOCKOUT)
     const tournamentFormat = req.body.tournamentFormat || 'KNOCKOUT';
 
+    // Readable share-URL slug, unique within this tournament (e.g. "mixed-doubles").
+    const slug = await generateUniqueCategorySlug(id, name.trim());
+
     // Create category
     const category = await prisma.category.create({
       data: {
         tournamentId: id,
         name: name.trim(),
+        slug,
         format,
         ageGroup: ageGroup || null,
         gender: normalizedGender,
@@ -1773,6 +1801,7 @@ export {
   createTournament,
   getTournaments,
   getTournament,
+  resolveTournamentSlug,
   updateTournament,
   deleteTournament,
   uploadPosters,

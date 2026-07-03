@@ -25,7 +25,10 @@ function formatPrize(n) {
 
 /** Build slim WhatsApp message */
 export function buildShareMessage(tournament) {
-  const url = `${SHARE_BASE}/tournaments/${tournament.id}`;
+  // Short, readable share links via the /t/ resolver. Uses the slug when present
+  // (e.g. /t/vras-djs); falls back to the id, which the resolver also accepts.
+  const tRef = tournament.slug || tournament.id;
+  const url = `${SHARE_BASE}/t/${tRef}`;
   const cats = tournament.categories || [];
   const catEmoji = sportEmoji(tournament.sport);
 
@@ -48,7 +51,7 @@ export function buildShareMessage(tournament) {
       : '';
     return {
       title: `${catEmoji} ${c.name}${fee}`,
-      url: `${SHARE_BASE}/tournaments/${tournament.id}/draws/${c.id}`,
+      url: `${SHARE_BASE}/t/${tRef}/${c.slug || c.id}`,
     };
   });
 

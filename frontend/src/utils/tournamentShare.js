@@ -76,7 +76,7 @@ export function buildShareMessage(tournament) {
   const lines = [];
 
   // Header
-  lines.push('🎾 *MATCHIFY.PRO PRESENTS*');
+  lines.push('🏆 *MATCHIFY.PRO PRESENTS*');
   lines.push(D);
   lines.push(`*${tournament.name}*`);
   lines.push(D);

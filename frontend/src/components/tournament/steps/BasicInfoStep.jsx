@@ -199,22 +199,30 @@ const BasicInfoStep = ({ formData, updateFormData, onNext }) => {
         )}
       </div>
 
-      {/* Sport */}
+      {/* Sport — clear chip selector so the sport is chosen deliberately */}
       <div>
         <label className="block text-xs font-bold text-purple-400 mb-1.5">Sport</label>
-        <select
-          value={formData.sport || 'Badminton'}
-          onChange={(e) => updateFormData('sport', e.target.value)}
-          className="w-full px-3 py-2.5 text-sm rounded-xl text-white focus:ring-2 focus:ring-purple-500 transition-all"
-          style={{
-            background: 'rgba(0,0,0,0.3)',
-            border: '1.5px solid rgba(168,85,247,0.3)'
-          }}
-        >
-          {SPORTS.map((s) => (
-            <option key={s.id} value={s.id}>{s.emoji} {s.label}</option>
-          ))}
-        </select>
+        <div className="grid grid-cols-3 gap-2">
+          {SPORTS.map((s) => {
+            const active = (formData.sport || 'Badminton') === s.id;
+            return (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => updateFormData('sport', s.id)}
+                className="flex flex-col items-center justify-center gap-0.5 py-2.5 rounded-xl text-xs font-bold transition-all"
+                style={{
+                  background: active ? 'rgba(168,85,247,0.22)' : 'rgba(0,0,0,0.3)',
+                  border: `1.5px solid ${active ? 'rgba(168,85,247,0.75)' : 'rgba(168,85,247,0.22)'}`,
+                  color: active ? '#ffffff' : 'rgba(255,255,255,0.6)',
+                }}
+              >
+                <span style={{ fontSize: '18px', lineHeight: 1 }}>{s.emoji}</span>
+                <span>{s.label}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Format & Privacy */}

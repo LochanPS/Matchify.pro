@@ -3259,24 +3259,28 @@ const ZoomableBracket = ({ children, bracketWidth, bracketHeight }) => {
     return () => { o.removeEventListener('touchstart', ts); o.removeEventListener('touchmove', tm); o.removeEventListener('touchend', te); };
   }, []);
 
-  const btn = {
-    padding: '4px 10px', borderRadius: '8px',
-    background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)',
-    color: 'rgba(255,255,255,0.7)', fontSize: '13px', fontWeight: 700, cursor: 'pointer', lineHeight: 1,
+  // Compact, identical on every phone: a [ − | 100% | + ] segmented control (tap the
+  // % to reset) plus a single Fit button. Native scroll moves the bracket.
+  const segBtn = {
+    width: '34px', height: '30px', border: 'none', background: 'transparent',
+    color: 'rgba(255,255,255,0.85)', fontSize: '17px', fontWeight: 700, cursor: 'pointer',
+    lineHeight: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
   };
 
   return (
     <div>
-      {/* Zoom controls */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px' }}>
-        <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', marginRight: 'auto', fontWeight: 500 }}>
-          Scroll to move · pinch / Ctrl+scroll to zoom
-        </span>
-        <button onClick={zoomOut} style={btn} aria-label="Zoom out">−</button>
-        <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.55)', minWidth: '38px', textAlign: 'center', fontWeight: 700 }}>{Math.round(scale * 100)}%</span>
-        <button onClick={zoomIn} style={btn} aria-label="Zoom in">＋</button>
-        <button onClick={fit} style={btn}>Fit</button>
-        <button onClick={reset} style={btn}>100%</button>
+      {/* Zoom controls — one clean row, right-aligned */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px', padding: '8px 12px' }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '10px', overflow: 'hidden' }}>
+          <button onClick={zoomOut} style={segBtn} aria-label="Zoom out">−</button>
+          <button onClick={reset} title="Reset zoom" style={{ ...segBtn, width: '50px', fontSize: '12px', color: 'rgba(255,255,255,0.6)', borderLeft: '1px solid rgba(255,255,255,0.1)', borderRight: '1px solid rgba(255,255,255,0.1)' }}>
+            {Math.round(scale * 100)}%
+          </button>
+          <button onClick={zoomIn} style={segBtn} aria-label="Zoom in">＋</button>
+        </div>
+        <button onClick={fit} style={{ height: '30px', padding: '0 14px', borderRadius: '10px', background: 'rgba(245,158,11,0.14)', border: '1px solid rgba(245,158,11,0.4)', color: '#FCD34D', fontSize: '12px', fontWeight: 700, cursor: 'pointer', flexShrink: 0 }}>
+          Fit
+        </button>
       </div>
 
       {/* Scroll viewport — native scroll on both axes keeps large draws readable */}

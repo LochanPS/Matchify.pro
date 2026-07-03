@@ -23,8 +23,6 @@ function formatPrize(n) {
   return Number(n).toLocaleString('en-IN');
 }
 
-const D = '──────────────────────';
-
 /** Build slim WhatsApp message */
 export function buildShareMessage(tournament) {
   const url = `${SHARE_BASE}/tournaments/${tournament.id}`;
@@ -73,46 +71,45 @@ export function buildShareMessage(tournament) {
     tournament.contactPhone || tournament.whatsappNumber || tournament.organizer?.phone;
   const contactName = tournament.organizer?.name || tournament.organizer?.username || '';
 
+  // Sections separated by a single blank line (clean on mobile — no heavy dividers).
   const lines = [];
+  const gap = () => lines.push('');
 
-  // Header
+  // Header + name
   lines.push('🏆 *MATCHIFY.PRO PRESENTS*');
-  lines.push(D);
   lines.push(`*${tournament.name}*`);
-  lines.push(D);
+  gap();
 
-  // Venue / Date / Time — compact, no blank lines
+  // Venue / Date / Time
   if (venueStr)  lines.push(`📍 ${venueStr}`);
   lines.push(`📅 ${dateStr} (${dayStr})`);
   if (timeStr)   lines.push(`⏰ ${timeStr}`);
-  lines.push(D);
 
-  // Categories — name on one line, its direct draw link on the next.
+  // Categories — name, then its tap-to-open draw link.
   if (catBlocks.length) {
+    gap();
     catBlocks.forEach(({ title, url: catUrl }) => {
       lines.push(title);
       lines.push(catUrl);
     });
-    lines.push(D);
   }
 
   // Awards
   if (awardsLines.length) {
-    lines.push('🏆 Awards:');
+    gap();
+    lines.push('🏆 *Awards*');
     awardsLines.forEach(l => lines.push(l));
-    lines.push(D);
   }
 
-  // Contact — single line
+  // Contact
   if (contactName || contactPhone) {
-    const parts = [contactName, contactPhone].filter(Boolean).join(' · ');
-    lines.push(`📞 ${parts}`);
-    lines.push(D);
+    gap();
+    lines.push(`📞 ${[contactName, contactPhone].filter(Boolean).join(' · ')}`);
   }
 
-  // Link
+  // Tournament link
+  gap();
   lines.push(`🔗 ${url}`);
-  lines.push(D);
   lines.push('🌐 www.matchify.pro');
 
   const text = lines.join('\n');

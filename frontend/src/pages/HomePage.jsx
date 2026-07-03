@@ -296,7 +296,7 @@ function HomePage() {
           <div className="hp-fade d1 flex justify-center mb-5">
             <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-black tracking-wider uppercase"
               style={{ background:'rgba(245,158,11,.08)', border:'1px solid rgba(245,158,11,.22)', color:'#F59E0B' }}>
-              🏸 India's #1 Badminton Platform
+              🏸 India's #1 Sports Platform
             </span>
           </div>
 
@@ -304,7 +304,7 @@ function HomePage() {
           <div className="hp-fade d2 text-center mb-4">
             <h1 className="font-black leading-[1.05] tracking-tight" style={{ fontSize:'clamp(2rem,7vw,2.9rem)' }}>
               Run professional<br />
-              <span className="hp-shim">badminton tournaments</span><br />
+              <span className="hp-shim">sports tournaments</span><br />
               in minutes.
             </h1>
           </div>
@@ -808,7 +808,7 @@ function HomePage() {
             </span>
           </div>
           <p className="text-xs text-center" style={{ color:'rgba(255,255,255,.35)' }}>
-            Built with ❤️ for the Indian Badminton Community
+            Built with ❤️ for the Indian Sports Community
           </p>
           <div className="rounded-2xl px-5 py-4 border text-center w-full"
             style={{ background:'rgba(245,158,11,.03)', borderColor:'rgba(245,158,11,.1)' }}>

@@ -308,7 +308,7 @@ const UserLedgerPage = () => {
                         <p className="text-gray-400 max-w-md">
                           {search ? 
                             `No users found matching "${search}". Try adjusting your search terms.` :
-                            'No users have made tournament payments yet. Payment history will appear here once users start registering for badminton tournaments.'
+                            'No users have made tournament payments yet. Payment history will appear here once users start registering for tournaments.'
                           }
                         </p>
                       </div>

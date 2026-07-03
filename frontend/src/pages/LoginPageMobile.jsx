@@ -149,7 +149,7 @@ const LoginPageMobile = () => {
               <MatchifyLogo size={84} />
             </div>
           </div>
-          <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', fontWeight: 500 }}>India's Premier Badminton Platform</p>
+          <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', fontWeight: 500 }}>India's Premier Sports Platform</p>
         </div>
 
         {/* Main Card */}

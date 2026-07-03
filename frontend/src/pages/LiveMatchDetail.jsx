@@ -74,9 +74,9 @@ const LiveMatchDetail = () => {
 
   const handleShare = async () => {
     const url = window.location.href;
-    const text = `Watch live badminton match!\n${match.tournament?.name || 'Tournament'} - ${match.category?.name || 'Category'}`;
+    const text = `Watch live match!\n${match.tournament?.name || 'Tournament'} - ${match.category?.name || 'Category'}`;
     if (navigator.share) {
-      try { await navigator.share({ title: 'Live Badminton Match', text, url }); } catch {}
+      try { await navigator.share({ title: 'Live Match', text, url }); } catch {}
     } else {
       navigator.clipboard.writeText(`${text}\n${url}`);
       setShareModal(true);

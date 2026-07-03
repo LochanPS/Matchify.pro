@@ -119,7 +119,7 @@ const RegisterPageMobile = () => {
             <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 180, height: 80, background: 'radial-gradient(ellipse, rgba(245,158,11,0.3) 0%, transparent 70%)', filter: 'blur(20px)', animation: 'float 4s ease-in-out infinite', pointerEvents: 'none' }} />
             <div style={{ position: 'relative' }}><MatchifyLogo size={80} /></div>
           </div>
-          <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', fontWeight: 500 }}>India's Premier Badminton Platform</p>
+          <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)', fontWeight: 500 }}>India's Premier Sports Platform</p>
         </div>
 
         {/* Main Card */}
@@ -133,7 +133,7 @@ const RegisterPageMobile = () => {
             <h1 style={{ fontSize: 30, fontWeight: 900, lineHeight: 1.1, marginBottom: 6, color: '#ffffff' }}>
               Create Account
             </h1>
-            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>Start your badminton journey</p>
+            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>Start your sports journey</p>
           </div>
 
           {/* Roles */}
@@ -318,7 +318,7 @@ const RegisterPageMobile = () => {
         </div>
 
         <p style={{ textAlign: 'center', fontSize: 11, color: 'rgba(255,255,255,0.2)', fontWeight: 500 }}>
-          By signing up, you join India's fastest growing badminton community
+          By signing up, you join India's fastest growing sports community
         </p>
       </div>
     </div>

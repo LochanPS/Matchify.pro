@@ -1,7 +1,7 @@
 {
   "name": "Matchify",
   "short_name": "Matchify",
-  "description": "India's Premier Badminton Tournament Platform",
+  "description": "India's Premier Sports Tournament Platform",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

@@ -121,7 +121,7 @@ const TournamentsPage = () => {
             </h1>
 
             <p className="text-xl max-w-2xl mx-auto mb-8" style={{ color: 'rgba(255,255,255,0.55)' }}>
-              Find and register for badminton tournaments near you
+              Find and register for sports tournaments near you
             </p>
 
             <div className="flex flex-wrap justify-center gap-6 mb-8">

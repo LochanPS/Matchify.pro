@@ -121,7 +121,7 @@ export default function ProfileStats({ stats, user }) {
           </div>
           <h3 style={{ fontSize: 16, fontWeight: 700, color: '#fff', marginBottom: 8 }}>Ready to Start Playing?</h3>
           <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.45)', lineHeight: 1.6, marginBottom: 20 }}>
-            Join your first tournament to build your badminton profile and earn points!
+            Join your first tournament to build your sports profile and earn points!
           </p>
           <Link
             to="/tournaments"

@@ -26,8 +26,8 @@ import Spinner from '../components/Spinner';
 
 export default function TournamentDiscoveryPage() {
   useSEO({
-    title: 'Badminton Tournaments in India',
-    description: 'Browse and register for upcoming and completed badminton tournaments across India on Matchify.pro. Find events near you and compete.',
+    title: 'Sports Tournaments in India',
+    description: 'Browse and register for upcoming and completed sports tournaments across India on Matchify.pro — badminton, tennis, table tennis and more. Find events near you and compete.',
     path: '/tournaments',
   });
   const navigate = useNavigate();
@@ -254,7 +254,7 @@ export default function TournamentDiscoveryPage() {
               Discover Tournaments
             </h1>
             <p className="text-xs sm:text-sm text-white/70 max-w-2xl mx-auto font-medium mb-3">
-              Find and register for badminton tournaments near you
+              Find and register for sports tournaments near you
             </p>
 
             {/* Quick Action Buttons */}

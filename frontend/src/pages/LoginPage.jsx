@@ -150,7 +150,7 @@ const LoginPage = () => {
           <h1 className="text-5xl font-black mb-3" style={{ letterSpacing: '-0.02em' }}>
             <span style={{ color: '#D97706', textShadow: '0 0 15px rgba(245,158,11,0.3)' }}>matchify.pro</span>
           </h1>
-          <p className="text-base mb-8" style={{ color: 'rgba(255,255,255,0.5)' }}>India's Premier Badminton Platform</p>
+          <p className="text-base mb-8" style={{ color: 'rgba(255,255,255,0.5)' }}>India's Premier Sports Platform</p>
 
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-10 text-sm font-medium"
             style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.25)', color: '#F59E0B' }}>
@@ -198,7 +198,7 @@ const LoginPage = () => {
           <div className="lg:hidden text-center mb-8">
             <Link to="/" className="inline-flex flex-col items-center gap-2">
               <MatchifyLogo size={80} variant="full" />
-              <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>India's Premier Badminton Platform</span>
+              <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>India's Premier Sports Platform</span>
             </Link>
           </div>
 

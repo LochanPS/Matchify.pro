@@ -98,7 +98,7 @@ const ResetPasswordPage = () => {
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}>
             <MatchifyLogo size={72} />
           </div>
-          <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', fontWeight: 500 }}>India's Premier Badminton Platform</p>
+          <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', fontWeight: 500 }}>India's Premier Sports Platform</p>
         </div>
 
         <div style={{ background: 'linear-gradient(145deg, rgba(12,18,32,0.95), rgba(10,15,26,0.95))', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 20, padding: 24, backdropFilter: 'blur(20px)', boxShadow: '0 16px 48px rgba(0,0,0,0.4)' }}>

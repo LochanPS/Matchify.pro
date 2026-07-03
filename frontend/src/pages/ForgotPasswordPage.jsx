@@ -214,7 +214,7 @@ const ForgotPasswordPage = () => {
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}>
             <MatchifyLogo size={68} />
           </div>
-          <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', fontWeight: 500 }}>India's Premier Badminton Platform</p>
+          <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', fontWeight: 500 }}>India's Premier Sports Platform</p>
         </div>
 
         {/* Step indicator */}

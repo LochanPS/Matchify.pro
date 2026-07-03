@@ -357,7 +357,7 @@ const HomePageMobile = () => {
                 className="w-2 h-2 rounded-full flex-shrink-0"
                 style={{ background: '#F59E0B', animation: 'livePulse 1.4s ease-in-out infinite' }}
               />
-              <span className="relative z-10 tracking-wide">India's #1 Badminton Platform</span>
+              <span className="relative z-10 tracking-wide">India's #1 Sports Platform</span>
               <FireIcon className="w-3.5 h-3.5 relative z-10" style={{ color: '#FBBF24', animation: 'pulse 2s ease-in-out infinite' }} />
             </div>
           </div>
@@ -758,7 +758,7 @@ const HomePageMobile = () => {
               Ready to Compete?
             </h2>
             <p className="text-sm mb-6" style={{ color: 'rgba(255,255,255,0.6)' }}>
-              Join India's fastest-growing badminton community
+              Join India's fastest-growing sports community
             </p>
             <div className="space-y-3">
               {user ? (
@@ -831,7 +831,7 @@ const HomePageMobile = () => {
             <Link to="/terms" className="hover:text-white transition-colors">Terms</Link>
           </div>
           <p className="text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>© 2026 Matchify.pro · All rights reserved</p>
-          <p className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>🏆 Built with ❤️ for Indian Badminton</p>
+          <p className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>🏆 Built with ❤️ for Indian Sports</p>
         </div>
 
       </div>

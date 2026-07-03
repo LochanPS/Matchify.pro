@@ -58,7 +58,7 @@ const TermsOfService = () => {
                 By accessing and using Matchify.pro, you accept and agree to be bound by these Terms of Service. If you do not agree to these Terms, please do not use our Platform.
               </p>
               <p>
-                Matchify.pro is operated by P S Lochan and provides badminton tournament management services including tournament creation, player registration, match scheduling, scoring, and payment facilitation.
+                Matchify.pro is operated by P S Lochan and provides sports tournament management services including tournament creation, player registration, match scheduling, scoring, and payment facilitation.
               </p>
             </div>
           </section>

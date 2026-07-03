@@ -195,7 +195,7 @@ const RegisterPage = () => {
             <span style={{ color:'#ffffff', textShadow:'0 0 25px rgba(255,255,255,0.3)' }}>matchify</span>
             <span style={{ color:'#F59E0B', textShadow:'0 0 25px rgba(245,158,11,0.5)' }}>.pro</span>
           </h1>
-          <p className="text-sm mb-6" style={{ color:'rgba(255,255,255,0.45)' }}>India's fastest growing badminton community</p>
+          <p className="text-sm mb-6" style={{ color:'rgba(255,255,255,0.45)' }}>India's fastest growing sports community</p>
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8 text-xs font-bold" style={{ background:'rgba(245,158,11,0.08)', border:'1px solid rgba(245,158,11,0.2)', color:'#F59E0B' }}>
             <Rocket className="w-3.5 h-3.5" /> Start Your Journey Today!
           </div>
@@ -237,7 +237,7 @@ const RegisterPage = () => {
                 <span style={{ color:'#ffffff', textShadow:'0 0 20px rgba(255,255,255,0.3)' }}>matchify</span>
                 <span style={{ color:'#F59E0B', textShadow:'0 0 20px rgba(245,158,11,0.5)' }}>.pro</span>
               </span>
-              <span className="text-xs" style={{ color:'rgba(255,255,255,0.35)' }}>India's Premier Badminton Platform</span>
+              <span className="text-xs" style={{ color:'rgba(255,255,255,0.35)' }}>India's Premier Sports Platform</span>
             </Link>
           </div>
 
@@ -254,7 +254,7 @@ const RegisterPage = () => {
               <SparklesIcon className="w-3.5 h-3.5" /> Join the Champions!
             </div>
             <h2 className="text-2xl sm:text-3xl font-black text-white mb-1">Create Account</h2>
-            <p className="text-sm" style={{ color:'rgba(255,255,255,0.4)' }}>Start your badminton journey today</p>
+            <p className="text-sm" style={{ color:'rgba(255,255,255,0.4)' }}>Start your sports journey today</p>
           </div>
 
           {conflictError && (
@@ -739,7 +739,7 @@ const TermsContent = () => (
       <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
         <p className="text-red-300 font-semibold mb-2">⚠️ BY PARTICIPATING, YOU ACKNOWLEDGE:</p>
         <ul className="list-disc pl-6 space-y-2 text-sm">
-          <li>Badminton involves physical activity and risk of injury</li>
+          <li>The sport involves physical activity and risk of injury</li>
           <li>You participate entirely at your own risk</li>
           <li>Matchify.pro is NOT liable for injuries, accidents, or health issues</li>
           <li>You release Matchify.pro from all claims related to injuries</li>
@@ -753,7 +753,7 @@ const TermsContent = () => (
       <div className="rounded-lg p-4" style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)' }}>
         <p className="font-semibold mb-2" style={{ color: '#F59E0B' }}>✓ GAME OF SKILL</p>
         <ul className="list-disc pl-6 space-y-2 text-sm">
-          <li>Badminton is a <strong>game of SKILL</strong>, not chance</li>
+          <li>The sport is a <strong>game of SKILL</strong>, not chance</li>
           <li>This platform does NOT involve gambling</li>
           <li>Prize money (if any) is provided by Organizers from their own funds</li>
           <li>Entry fees are for tournament costs, NOT pooled for prizes</li>

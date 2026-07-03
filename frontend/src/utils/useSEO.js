@@ -9,9 +9,9 @@ import { useEffect } from 'react';
 // Omit a field to fall back to the site default.
 
 const SITE = 'https://matchify.pro';
-const DEFAULT_TITLE = "Matchify.pro — India's Premier Badminton Tournament Platform";
+const DEFAULT_TITLE = "Matchify.pro — India's Premier Sports Tournament Platform";
 const DEFAULT_DESC =
-  "Join India's largest badminton tournament platform. Register for tournaments, track your progress, view live draws, and compete with players across the country.";
+  "Join India's largest sports tournament platform. Register for tournaments, track your progress, view live draws, and compete with players across the country.";
 
 function upsertMeta(key, keyVal, content) {
   if (!content) return;

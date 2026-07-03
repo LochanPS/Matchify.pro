@@ -2,6 +2,10 @@
  * Tournament WhatsApp share utility
  * Used by TournamentDiscoveryPage and TournamentDetailPage
  */
+import { sportEmoji } from '../config/sports';
+
+// Always share the LIVE site — never a localhost/preview origin.
+const SHARE_BASE = 'https://matchify.pro';
 
 /** Convert "08:30" → "8:30 AM" */
 function formatTime(timeStr) {
@@ -23,8 +27,9 @@ const D = '──────────────────────';
 
 /** Build slim WhatsApp message */
 export function buildShareMessage(tournament) {
-  const url = `${window.location.origin}/tournaments/${tournament.id}`;
+  const url = `${SHARE_BASE}/tournaments/${tournament.id}`;
   const cats = tournament.categories || [];
+  const catEmoji = sportEmoji(tournament.sport);
 
   // Date
   const startDate = new Date(tournament.startDate);
@@ -37,13 +42,16 @@ export function buildShareMessage(tournament) {
   // Venue
   const venueStr = [tournament.venue, tournament.city].filter(Boolean).join(', ');
 
-  // Categories — doubles → "Per Team"
-  const catLines = cats.map(c => {
+  // Categories — each with its own direct link to that category's draws.
+  const catBlocks = cats.map(c => {
     const isDoubles = /double/i.test(c.name);
     const fee = c.entryFee != null
       ? ` — ₹${formatPrize(c.entryFee)}${isDoubles ? ' Per Team' : ''}`
       : '';
-    return `🏸 ${c.name}${fee}`;
+    return {
+      title: `${catEmoji} ${c.name}${fee}`,
+      url: `${SHARE_BASE}/tournaments/${tournament.id}/draws/${c.id}`,
+    };
   });
 
   // Awards — use prizeDescription text first, else numeric
@@ -79,9 +87,12 @@ export function buildShareMessage(tournament) {
   if (timeStr)   lines.push(`⏰ ${timeStr}`);
   lines.push(D);
 
-  // Categories
-  if (catLines.length) {
-    catLines.forEach(l => lines.push(l));
+  // Categories — name on one line, its direct draw link on the next.
+  if (catBlocks.length) {
+    catBlocks.forEach(({ title, url: catUrl }) => {
+      lines.push(title);
+      lines.push(catUrl);
+    });
     lines.push(D);
   }
 

@@ -5,7 +5,8 @@
 import { sportEmoji } from '../config/sports';
 
 // Always share the LIVE site — never a localhost/preview origin.
-const SHARE_BASE = 'https://matchify.pro';
+const SHARE_BASE = 'https://matchify.pro';   // full link used for the Web Share API `url` field
+const DISPLAY_BASE = 'matchify.pro';         // clean text shown in the message (WhatsApp still linkifies it)
 
 /** Convert "08:30" → "8:30 AM" */
 function formatTime(timeStr) {
@@ -28,7 +29,8 @@ export function buildShareMessage(tournament) {
   // Short, readable share links via the /t/ resolver. Uses the slug when present
   // (e.g. /t/vras-djs); falls back to the id, which the resolver also accepts.
   const tRef = tournament.slug || tournament.id;
-  const url = `${SHARE_BASE}/t/${tRef}`;
+  const url = `${SHARE_BASE}/t/${tRef}`;        // full https link (returned for Web Share API)
+  const urlText = `${DISPLAY_BASE}/t/${tRef}`;  // clean, no-protocol link shown in the message
   const cats = tournament.categories || [];
   const catEmoji = sportEmoji(tournament.sport);
 
@@ -51,7 +53,7 @@ export function buildShareMessage(tournament) {
       : '';
     return {
       title: `${catEmoji} ${c.name}${fee}`,
-      url: `${SHARE_BASE}/t/${tRef}/${c.slug || c.id}`,
+      url: `${DISPLAY_BASE}/t/${tRef}/${c.slug || c.id}`,
     };
   });
 
@@ -91,15 +93,16 @@ export function buildShareMessage(tournament) {
   if (timeStr)   lines.push(`⏰ ${timeStr}`);
   div();
 
-  // Categories — each a clear block (name + its tap-to-open link), with the
-  // divider line between every category so each stands on its own on mobile.
+  // Categories — each wrapped in divider lines: name, divider, link, divider.
+  // This gives every category its own boxed block and keeps the link visually
+  // separated on its own line.
   if (catBlocks.length) {
-    catBlocks.forEach(({ title, url: catUrl }, i) => {
-      if (i > 0) div();
+    catBlocks.forEach(({ title, url: catUrl }) => {
       lines.push(title);
+      div();
       lines.push(catUrl);
+      div();
     });
-    div();
   }
 
   // Awards
@@ -116,8 +119,8 @@ export function buildShareMessage(tournament) {
   }
 
   // Tournament link
-  lines.push(`🔗 ${url}`);
-  lines.push('🌐 www.matchify.pro');
+  lines.push(`🔗 ${urlText}`);
+  lines.push('🌐 matchify.pro');
 
   const text = lines.join('\n');
 

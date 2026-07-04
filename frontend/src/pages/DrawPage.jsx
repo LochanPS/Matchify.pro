@@ -5241,11 +5241,25 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
 
   // Singles vs doubles + knockout vs round-robin drive all the labels/layout.
   const isRR = bracket?.format === 'ROUND_ROBIN' || bracket?.format === 'ROUND_ROBIN_KNOCKOUT';
-  const isDoubles = /double/i.test(activeCategory?.format || '') || /double/i.test(activeCategory?.name || '') || (players || []).some(p => p.partnerName);
+  const isDoubles = /double/i.test(activeCategory?.format || '') || /double/i.test(activeCategory?.name || '') || (players || []).some(p => p.partnerName || (p.name || '').includes('/'));
   const unit = isDoubles ? 'Pairs' : 'Players';       // buttons
   const unitLower = isDoubles ? 'pairs' : 'players';   // status / footer
 
   const displayedPlayers = players || [];              // top strip (seed order)
+
+  // Split a pair into two stacked lines. Data arrives either as name + partnerName,
+  // or as a single "Name1 / Name2" string — handle both so the partner sits UNDER
+  // the player's name instead of on the same line.
+  const pairLines = (name, partnerName) => {
+    let l1 = (name || '').trim();
+    let l2 = partnerName || null;
+    if (!l2 && l1.includes('/')) {
+      const parts = l1.split('/').map(s => s.trim()).filter(Boolean);
+      l1 = parts[0] || l1;
+      l2 = parts[1] || null;
+    }
+    return [l1, l2];
+  };
 
   // Knockout matches (pairs of slots) → two-column odd/even (all matches shown).
   const koMatches = Array.from({ length: Math.ceil(slots.length / 2) }, (_, mi) => ({
@@ -5283,10 +5297,12 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
         className="min-w-0 flex items-start gap-1"
         style={{ cursor: slotObj && !slotObj.locked ? 'pointer' : 'default' }}>
         <span className="flex items-center justify-center font-bold text-[8px] flex-shrink-0" style={{ width: '15px', height: '15px', borderRadius: '4px', background: 'linear-gradient(135deg,#a855f7,#FCD34D)', color: '#050810' }}>{seedOf(a.playerId) ?? '#'}</span>
+        {(() => { const [l1, l2] = pairLines(a.playerName, a.partnerName); return (
         <span className="min-w-0 flex-1">
-          <span className="block text-white text-[9px] leading-tight truncate">{a.playerName}</span>
-          {isDoubles && <span className="block text-[8px] leading-tight truncate" style={{ color: 'rgba(255,255,255,0.5)' }}>{a.partnerName || '-'}</span>}
+          <span className="block text-white text-[9px] leading-tight truncate">{l1}</span>
+          {isDoubles && <span className="block text-[8px] leading-tight truncate" style={{ color: 'rgba(255,255,255,0.5)' }}>{l2 || '-'}</span>}
         </span>
+        ); })()}
       </div>
     );
   };
@@ -5376,8 +5392,8 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                       <div className="flex items-center gap-2">
                         <div className="flex items-center justify-center font-bold text-[10px] flex-shrink-0" style={{ width: '20px', height: '20px', borderRadius: '6px', background: 'linear-gradient(135deg,#a855f7,#FCD34D)', color: '#050810' }}>{player.seed}</div>
                         <div className="min-w-0 flex-1">
-                          <p className="text-white font-medium text-[10px] leading-tight truncate">{player.name}</p>
-                          {isDoubles && <p className="text-[9px] leading-tight truncate" style={{ color: assigned ? '#34d399' : 'rgba(255,255,255,0.5)' }}>{player.partnerName || '—'}</p>}
+                          <p className="text-white font-medium text-[10px] leading-tight truncate">{pairLines(player.name, player.partnerName)[0]}</p>
+                          {isDoubles && <p className="text-[9px] leading-tight truncate" style={{ color: assigned ? '#34d399' : 'rgba(255,255,255,0.5)' }}>{pairLines(player.name, player.partnerName)[1] || '-'}</p>}
                         </div>
                         {assigned && <CheckCircle className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#34d399' }} />}
                       </div>
@@ -5440,8 +5456,8 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                               <span className="text-[10px] flex-shrink-0" style={{ color: a ? '#8696a0' : '#6b7280', width: '12px' }}>{slot.slot}</span>
                               {a ? (
                                 <span className="min-w-0 flex-1">
-                                  <span className="block text-white text-[10px] leading-tight truncate">{a.playerName}</span>
-                                  {isDoubles && <span className="block text-[8px] leading-tight truncate" style={{ color: '#8696a0' }}>{a.partnerName || '-'}</span>}
+                                  <span className="block text-white text-[10px] leading-tight truncate">{pairLines(a.playerName, a.partnerName)[0]}</span>
+                                  {isDoubles && <span className="block text-[8px] leading-tight truncate" style={{ color: '#8696a0' }}>{pairLines(a.playerName, a.partnerName)[1] || '-'}</span>}
                                 </span>
                               ) : (
                                 <span className="text-[10px] flex-1" style={{ color: canAccept ? '#FCD34D' : '#6b7280' }}>{canAccept ? 'Tap here' : 'Empty'}</span>

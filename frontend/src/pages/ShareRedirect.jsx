@@ -19,6 +19,9 @@ export default function ShareRedirect() {
         if (!id) { navigate('/tournaments', { replace: true }); return; }
         // Reserved word: /t/:slug/live opens the tournament's live matches page.
         if (cSlug === 'live') { navigate(`/tournaments/${id}/live`, { replace: true }); return; }
+        // Reserved word: /t/:slug/register → registration (protected route sends
+        // logged-out users to login/sign up, then back here after auth).
+        if (cSlug === 'register') { navigate(`/tournaments/${id}/register`, { replace: true }); return; }
         // Reserved word: /t/:slug/location opens the venue in Google Maps (external).
         if (cSlug === 'location') {
           if (latitude != null && longitude != null) {

@@ -31,7 +31,6 @@ export function buildShareMessage(tournament) {
   const url = `${SHARE_BASE}/t/${tRef}`;        // full https link (returned for Web Share API)
   const urlText = `${DISPLAY_BASE}/t/${tRef}`;  // clean, no-protocol link shown in the message
   const cats = tournament.categories || [];
-  const catEmoji = sportEmoji(tournament.sport);
 
   // Date
   const startDate = new Date(tournament.startDate);
@@ -93,11 +92,15 @@ export function buildShareMessage(tournament) {
   }
   div();
 
-  // Categories — plain list of names + fees, one line each.
+  // Categories — plain list of names + fees, one line each — then the Register
+  // link right below (the main call to action).
   if (catBlocks.length) {
     catBlocks.forEach(({ title }) => lines.push(title));
-    div();
   }
+  lines.push('');
+  lines.push('Register');
+  lines.push(`${DISPLAY_BASE}/t/${tRef}/register`);
+  div();
 
   // Awards (if the organizer set prizes).
   if (awardsLines.length) {

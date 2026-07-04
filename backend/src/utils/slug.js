@@ -30,7 +30,7 @@ export async function generateUniqueTournamentSlug(name, excludeId = null) {
 
 // Words reserved for special short-link routes (e.g. /t/:slug/live) — a category
 // slug must never equal one of these, or the short link would be ambiguous.
-const RESERVED_SLUGS = new Set(['live', 'location', 'map']);
+const RESERVED_SLUGS = new Set(['live', 'location', 'map', 'register']);
 
 // Category slug, unique WITHIN its tournament.
 export async function generateUniqueCategorySlug(tournamentId, name, excludeId = null) {

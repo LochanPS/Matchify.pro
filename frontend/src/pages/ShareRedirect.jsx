@@ -32,7 +32,8 @@ export default function ShareRedirect() {
           const cat = (categories || []).find((c) => c.slug === cSlug || c.id === cSlug);
           if (cat) { navigate(`/tournaments/${id}/draws/${cat.id}`, { replace: true }); return; }
         }
-        navigate(`/tournaments/${id}`, { replace: true });
+        // Bare /t/:slug → the draws list (single share link opens all draws).
+        navigate(`/tournaments/${id}/draws`, { replace: true });
       } catch {
         if (active) navigate('/tournaments', { replace: true });
       }

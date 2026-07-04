@@ -5292,7 +5292,7 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
   };
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 px-1 py-2">
       {/* Animated Background for Modal */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div 
@@ -5343,7 +5343,7 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-3" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div className="flex-1 overflow-y-auto px-2 py-3" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {/* Add All / Shuffle / status row */}
           <div className="grid gap-2" style={{ gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr) auto' }}>
             <button onClick={handleAddAllPlayers} disabled={!canAddAll} className="flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl disabled:opacity-50" style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.4)' }}>
@@ -5466,7 +5466,7 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                     <p className="text-[8px] mb-1.5" style={{ color: '#8696a0' }}>{col.sub}</p>
                     <div className="space-y-2">
                       {col.list.map((m) => (
-                        <div key={m.mi} className="rounded-xl p-2" style={{ background: 'rgba(255,255,255,0.03)', border: (m.slot1?.locked || m.slot2?.locked) ? '1px solid rgba(251,191,36,0.3)' : '1px solid rgba(255,255,255,0.1)' }}>
+                        <div key={m.mi} className="rounded-xl p-1.5" style={{ background: 'rgba(255,255,255,0.03)', border: (m.slot1?.locked || m.slot2?.locked) ? '1px solid rgba(251,191,36,0.3)' : '1px solid rgba(255,255,255,0.1)' }}>
                           <span className="inline-block text-[9px] mb-1.5" style={{ color: '#c4b5fd', background: 'rgba(168,85,247,0.12)', padding: '1px 6px', borderRadius: '5px' }}>Match {m.matchNum}</span>
                           <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) auto minmax(0,1fr)', alignItems: 'center', gap: '4px' }}>
                             {MatchSlot({ slotObj: m.slot1 })}

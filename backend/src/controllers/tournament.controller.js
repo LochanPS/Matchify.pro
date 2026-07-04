@@ -1095,18 +1095,9 @@ const createCategory = async (req, res) => {
       },
     });
 
-    // Auto-generate empty draw based on tournament format
-    const bracketSize = maxParticipants ? parseInt(maxParticipants) : 4;
-    const drawData = generateEmptyDraw(tournamentFormat, bracketSize);
-    
-    await prisma.draw.create({
-      data: {
-        tournamentId: id,
-        categoryId: category.id,
-        format: tournamentFormat,
-        bracketJson: JSON.stringify(drawData)
-      }
-    });
+    // No auto-draw: a new category starts with NO draw so the page shows the
+    // "Create Draw" button. The organizer creates the bracket explicitly via the
+    // Create Draw step (getDrawPage returns draw:null until then).
 
     res.status(201).json({
       success: true,

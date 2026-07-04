@@ -3262,7 +3262,12 @@ const ZoomableBracket = ({ children, bracketWidth, bracketHeight }) => {
       if (pinching && e.touches.length === 2) {
         e.preventDefault();
         const d = dist(e.touches[0], e.touches[1]);
-        if (lastDist) setScale(s => clamp(s * (d / lastDist)));
+        if (lastDist) {
+          // Cap how much a single finger move can change the zoom so a fast pinch
+          // can't rocket straight to the 250% max — it now grows/shrinks gradually.
+          const ratio = Math.max(0.9, Math.min(1.1, d / lastDist));
+          setScale(s => clamp(+(s * ratio).toFixed(3)));
+        }
         lastDist = d;
       }
     };

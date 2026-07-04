@@ -5274,18 +5274,19 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
         </div>
       );
     }
+    // Assigned — no × button (matches the reference); tap the slot to remove.
+    // Names wrap fully instead of truncating so long names show completely.
     return (
-      <div className="min-w-0 flex items-center gap-1.5">
-        <span className="flex items-center justify-center font-bold text-[9px] flex-shrink-0" style={{ width: '18px', height: '18px', borderRadius: '5px', background: 'linear-gradient(135deg,#a855f7,#FCD34D)', color: '#050810' }}>{seedOf(a.playerId) ?? '•'}</span>
+      <div
+        onClick={() => slotObj && !slotObj.locked && handleRemoveAssignment(slotObj.slot)}
+        title="Tap to remove"
+        className="min-w-0 flex items-start gap-1.5"
+        style={{ cursor: slotObj && !slotObj.locked ? 'pointer' : 'default' }}>
+        <span className="flex items-center justify-center font-bold text-[9px] flex-shrink-0" style={{ width: '18px', height: '18px', borderRadius: '5px', background: 'linear-gradient(135deg,#a855f7,#FCD34D)', color: '#050810' }}>{seedOf(a.playerId) ?? '#'}</span>
         <span className="min-w-0 flex-1">
           <span className="block text-white text-[11px] leading-tight truncate">{a.playerName}</span>
-          {isDoubles && <span className="block text-[9px] leading-tight truncate" style={{ color: 'rgba(255,255,255,0.5)' }}>{a.partnerName || '—'}</span>}
+          {isDoubles && <span className="block text-[9px] leading-tight truncate" style={{ color: 'rgba(255,255,255,0.5)' }}>{a.partnerName || '-'}</span>}
         </span>
-        {slotObj && !slotObj.locked && (
-          <button onClick={(e) => { e.stopPropagation(); handleRemoveAssignment(slotObj.slot); }} className="flex-shrink-0">
-            <X className="w-3 h-3 text-red-400" />
-          </button>
-        )}
       </div>
     );
   };
@@ -5344,16 +5345,16 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
 
         <div className="flex-1 overflow-y-auto p-3" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {/* Add All / Shuffle / status row */}
-          <div className="grid gap-2" style={{ gridTemplateColumns: '1fr 1fr auto' }}>
-            <button onClick={handleAddAllPlayers} disabled={!canAddAll} className="flex items-center justify-center gap-1.5 px-2 py-2.5 rounded-xl disabled:opacity-50" style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.4)' }}>
-              <Users className="w-4 h-4 flex-shrink-0" style={{ color: '#FCD34D' }} /><span className="text-xs font-semibold truncate" style={{ color: '#FCD34D' }}>Add All {unit}</span>
+          <div className="grid gap-2" style={{ gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr) auto' }}>
+            <button onClick={handleAddAllPlayers} disabled={!canAddAll} className="flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl disabled:opacity-50" style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.4)' }}>
+              <Users className="w-4 h-4 flex-shrink-0" style={{ color: '#FCD34D' }} /><span className="text-[11px] font-semibold leading-tight text-center" style={{ color: '#FCD34D' }}>Add All {unit}</span>
             </button>
-            <button onClick={handleShuffleAllPlayers} disabled={!canShuffle} className="flex items-center justify-center gap-1.5 px-2 py-2.5 rounded-xl disabled:opacity-50" style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.4)' }}>
-              <Zap className="w-4 h-4 flex-shrink-0" style={{ color: '#34d399' }} /><span className="text-xs font-semibold truncate" style={{ color: '#34d399' }}>Shuffle All {unit}</span>
+            <button onClick={handleShuffleAllPlayers} disabled={!canShuffle} className="flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl disabled:opacity-50" style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.4)' }}>
+              <Zap className="w-4 h-4 flex-shrink-0" style={{ color: '#34d399' }} /><span className="text-[11px] font-semibold leading-tight text-center" style={{ color: '#34d399' }}>Shuffle All {unit}</span>
             </button>
-            <div className="flex items-center gap-1.5 px-2.5 rounded-xl" style={{ border: '1px solid rgba(255,255,255,0.12)' }}>
+            <div className="flex items-center gap-1 px-2 rounded-xl flex-shrink-0" style={{ border: '1px solid rgba(255,255,255,0.12)' }}>
               <CheckCircle className="w-4 h-4 flex-shrink-0" style={{ color: '#34d399' }} />
-              <span className="leading-tight"><span className="block text-[11px] font-semibold text-white">{assignedCount} / {slots.length}</span><span className="block text-[8px]" style={{ color: '#8696a0' }}>{unitLower} assigned</span></span>
+              <span className="leading-tight"><span className="block text-[11px] font-semibold text-white">{assignedCount}/{slots.length}</span><span className="block text-[8px]" style={{ color: '#8696a0' }}>{unitLower} assigned</span></span>
             </div>
           </div>
           {/* Registered players — 2-row strip, scrolls left/right */}

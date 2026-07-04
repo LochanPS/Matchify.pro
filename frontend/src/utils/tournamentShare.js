@@ -98,16 +98,14 @@ export function buildShareMessage(tournament) {
   if (timeStr)   lines.push(`⏰ ${timeStr}`);
   div();
 
-  // Categories — each wrapped in divider lines: name, divider, link, divider.
-  // This gives every category its own boxed block and keeps the link visually
-  // separated on its own line.
+  // Categories — a clean, simple list of names + fees (no per-category URL).
+  // The single tournament link at the bottom opens all the draws. This keeps
+  // the message uncrowded.
   if (catBlocks.length) {
-    catBlocks.forEach(({ title, url: catUrl }) => {
+    catBlocks.forEach(({ title }) => {
       lines.push(title);
-      div();
-      lines.push(catUrl);
-      div();
     });
+    div();
   }
 
   // Live matches — one tap opens real-time scores & results for all categories.

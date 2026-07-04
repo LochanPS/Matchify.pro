@@ -4991,6 +4991,12 @@ const CompactSlotCard = ({ slot, assigned, canAccept, onSlotClick, onRemove, pla
 const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSave, saving, tournamentId, activeCategory, setBracket, setSuccess, setError, setShowAssignModal }) => {
   const [assignments, setAssignments] = useState({});  // { slot: { playerId, playerName } }
   const [selectedPlayer, setSelectedPlayer] = useState(null);  // Currently selected player
+  // Photo-layout controls
+  const [playerQuery, setPlayerQuery] = useState('');        // Search filter for the players strip
+  const [showSearch, setShowSearch] = useState(false);       // toggle the search input
+  const [sortAsc, setSortAsc] = useState(true);              // Sort players by number asc/desc
+  const [showUnassignedOnly, setShowUnassignedOnly] = useState(false); // Filter unassigned
+  const [visibleMatches, setVisibleMatches] = useState(10);  // Load More pagination
   const [dragOverSlot, setDragOverSlot] = useState(null);  // Slot being dragged over
 
   // Get total rounds for round mapping
@@ -5233,6 +5239,58 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
   const canAddAll = unassignedPlayersCount > 0 && availableSlotsCount > 0;
   const canShuffle = assignedCount > 1 && slots.some(s => !s.locked && getAssignedPlayer(s.slot));
 
+  // Players shown in the top strip — search / filter-unassigned / sort-by-number.
+  const displayedPlayers = (() => {
+    let list = players || [];
+    if (playerQuery.trim()) list = list.filter(p => (p.name || '').toLowerCase().includes(playerQuery.trim().toLowerCase()));
+    if (showUnassignedOnly) list = list.filter(p => !isPlayerAssigned(p.id));
+    return [...list].sort((a, b) => sortAsc ? (a.seed || 0) - (b.seed || 0) : (b.seed || 0) - (a.seed || 0));
+  })();
+
+  // Knockout matches (pairs of slots) for the two-column odd/even layout.
+  const koMatches = Array.from({ length: Math.ceil(slots.length / 2) }, (_, mi) => ({
+    mi, matchNum: mi + 1, slot1: slots[mi * 2], slot2: slots[mi * 2 + 1],
+  }));
+  const shownKoMatches = koMatches.slice(0, visibleMatches);
+  const leftMatches = shownKoMatches.filter(m => m.matchNum % 2 === 1);   // 1, 3, 5…
+  const rightMatches = shownKoMatches.filter(m => m.matchNum % 2 === 0);  // 2, 4, 6…
+  const matchesCreated = koMatches.filter(m => getAssignedPlayer(m.slot1?.slot) && getAssignedPlayer(m.slot2?.slot)).length;
+  const seedOf = (pid) => (players.find(p => p.id === pid)?.seed);
+  const firstName = (n) => (n || '').split(' ')[0] || '';
+  const restName = (n) => (n || '').split(' ').slice(1).join(' ');
+
+  // Renders a player inside a match slot: number badge + name (+ initials), or TBD.
+  const MatchSlot = ({ slotObj, label }) => {
+    const a = slotObj ? getAssignedPlayer(slotObj.slot) : null;
+    const canAccept = selectedPlayer && slotObj && !a && !slotObj.locked;
+    if (!a) {
+      return (
+        <div onClick={() => canAccept && handleSlotClick(slotObj)}
+          className="min-w-0 flex items-center gap-1"
+          style={{ cursor: canAccept ? 'pointer' : 'default', opacity: canAccept ? 1 : 0.7 }}>
+          <span className="flex items-center justify-center flex-shrink-0" style={{ width: '16px', height: '16px', borderRadius: '4px', border: '1px dashed rgba(255,255,255,0.25)' }}>
+            <Users className="w-2.5 h-2.5" style={{ color: '#6b7280' }} />
+          </span>
+          <span className="text-[10px] leading-tight" style={{ color: canAccept ? '#FCD34D' : '#6b7280' }}>{canAccept ? 'Tap here' : 'TBD'}</span>
+        </div>
+      );
+    }
+    return (
+      <div className="min-w-0 flex items-center gap-1">
+        <span className="flex items-center justify-center font-bold text-[8px] flex-shrink-0" style={{ width: '16px', height: '16px', borderRadius: '4px', background: 'linear-gradient(135deg,#a855f7,#FCD34D)', color: '#050810' }}>{seedOf(a.playerId) ?? '•'}</span>
+        <span className="min-w-0">
+          <span className="block text-white text-[11px] leading-tight truncate">{firstName(a.playerName)}</span>
+          {restName(a.playerName) && <span className="block text-[9px] leading-tight truncate" style={{ color: 'rgba(255,255,255,0.5)' }}>({restName(a.playerName)})</span>}
+        </span>
+        {slotObj && !slotObj.locked && (
+          <button onClick={(e) => { e.stopPropagation(); handleRemoveAssignment(slotObj.slot); }} className="flex-shrink-0 ml-auto">
+            <X className="w-3 h-3 text-red-400" />
+          </button>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       {/* Animated Background for Modal */}
@@ -5272,119 +5330,58 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
       </div>
 
       <div className="relative backdrop-blur-xl rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl" style={{ background: '#0d1025', border: '1px solid rgba(245,158,11,0.2)' }}>
-        <div className="p-4 border-b border-white/10">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-emerald-500/20 rounded-xl flex items-center justify-center">
-                <UserPlus className="w-5 h-5 icon-green" />
-              </div>
-              <div>
-                <h2 className="text-base font-bold text-white">Assign Players to Draw</h2>
-                <p className="text-gray-400 text-xs">Click a player, then click a slot to assign</p>
-              </div>
-            </div>
-            <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-lg transition-colors">
-              <X className="w-4 h-4 text-gray-400" />
-            </button>
+        <div className="p-4 border-b border-white/10 flex items-center gap-3">
+          <button onClick={onClose} className="p-1 hover:bg-white/10 rounded-lg transition-colors flex-shrink-0">
+            <ArrowLeft className="w-5 h-5" style={{ color: '#FCD34D' }} />
+          </button>
+          <div className="flex-1 min-w-0">
+            <h2 className="text-base font-bold text-white leading-tight">Assign Players to Draw</h2>
+            <p className="text-gray-400 text-xs">Assign players into the knockout draw</p>
           </div>
-          
-          {/* Bulk Action Buttons */}
-          <div className="mt-3 flex gap-2">
-            <button
-              onClick={handleAddAllPlayers}
-              disabled={!canAddAll}
-              className="flex items-center gap-1.5 px-3 py-2 btn-brand rounded-lg transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed text-xs"
-              title={canAddAll ? `Add ${Math.min(unassignedPlayersCount, availableSlotsCount)} unassigned players to available slots` : 'No unassigned players or available slots'}
-            >
-              <Users className="w-3.5 h-3.5" />
-              Add All Players
-              {canAddAll && (
-                <span className="px-1.5 py-0.5 bg-white/20 rounded-full text-[10px]">
-                  +{Math.min(unassignedPlayersCount, availableSlotsCount)}
-                </span>
-              )}
-            </button>
-            
-            <button
-              onClick={handleShuffleAllPlayers}
-              disabled={!canShuffle}
-              className="flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-teal-500 to-emerald-600 text-white rounded-lg hover:shadow-lg hover:shadow-teal-500/25 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed text-xs"
-              title={canShuffle ? 'Randomly redistribute all assigned players (locked matches unchanged)' : 'Need at least 2 assigned players to shuffle'}
-            >
-              <Zap className="w-3.5 h-3.5" />
-              Shuffle All Players
-            </button>
-          </div>
-          
-          {selectedPlayer && (
-            <div className="mt-2 px-3 py-2 bg-emerald-500/20 border border-emerald-500/30 rounded-lg flex items-center justify-between">
-              <span className="text-[#F59E0B] text-xs">
-                Selected: <span className="font-semibold text-white">{selectedPlayer.name}</span> — Click a slot to assign
-              </span>
-              <button 
-                onClick={() => setSelectedPlayer(null)}
-                className="text-xs icon-green hover:opacity-80"
-              >
-                Cancel
-              </button>
-            </div>
-          )}
+          <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-lg transition-colors flex-shrink-0">
+            <X className="w-4 h-4 text-gray-400" />
+          </button>
         </div>
 
-        <div className="flex-1 overflow-hidden flex">
-          {/* Players List - 35% width */}
-          <div className="w-[35%] border-r border-white/10 p-2 overflow-y-auto scroll-smooth scrollbar-thin">
-            <h3 className="text-[10px] font-semibold text-gray-400 mb-2 uppercase tracking-wider">
-              Registered Players ({players.length})
-            </h3>
+        <div className="flex-1 overflow-y-auto p-3" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {/* REGISTERED PLAYERS — horizontal scroll strip (2 rows), search / filter / sort */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+                Registered Players
+                <span className="px-1.5 py-0.5 rounded-full text-[10px]" style={{ background: 'rgba(245,158,11,0.15)', color: '#FCD34D' }}>{players.length}</span>
+              </span>
+              <div className="flex gap-1.5">
+                <button onClick={() => setShowSearch(s => !s)} className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px]" style={{ background: showSearch ? 'rgba(245,158,11,0.15)' : 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: showSearch ? '#FCD34D' : 'rgba(255,255,255,0.7)' }}><Search className="w-3 h-3" />Search</button>
+                <button onClick={() => setShowUnassignedOnly(v => !v)} className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px]" style={{ background: showUnassignedOnly ? 'rgba(245,158,11,0.15)' : 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: showUnassignedOnly ? '#FCD34D' : 'rgba(255,255,255,0.7)' }}><Filter className="w-3 h-3" />Filter</button>
+                <button onClick={() => setSortAsc(v => !v)} className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px]" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.7)' }}>Sort {sortAsc ? '↑' : '↓'}</button>
+              </div>
+            </div>
+            {showSearch && (
+              <input value={playerQuery} onChange={e => setPlayerQuery(e.target.value)} placeholder="Search players…"
+                className="w-full mb-2 px-3 py-2 text-xs rounded-lg text-white" style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(245,158,11,0.3)' }} />
+            )}
             {loading ? (
-              <div className="flex items-center justify-center py-8">
-                <Spinner size="md" />
-              </div>
-            ) : players.length === 0 ? (
-              <div className="text-center py-8">
-                <Users className="w-8 h-8 text-gray-600 mx-auto mb-2" />
-                <p className="text-gray-500 text-[10px]">No registered players</p>
-              </div>
+              <div className="flex items-center justify-center py-6"><Spinner size="md" /></div>
+            ) : displayedPlayers.length === 0 ? (
+              <div className="text-center py-6"><p className="text-gray-500 text-xs">No players</p></div>
             ) : (
-              <div className="space-y-1">
-                {players.map((player) => {
+              <div style={{ display: 'grid', gridTemplateRows: 'repeat(2, auto)', gridAutoFlow: 'column', gap: '8px', overflowX: 'auto', paddingBottom: '6px' }}>
+                {displayedPlayers.map((player) => {
                   const assigned = isPlayerAssigned(player.id);
                   const isSelected = selectedPlayer?.id === player.id;
                   return (
-                    <div
-                      key={player.id}
-                      onClick={() => handleSelectPlayer(player)}
-                      className={`p-1.5 rounded-lg cursor-pointer transition-all ${
-                        isSelected
-                          ? 'bg-emerald-500/30 border border-emerald-500 shadow-lg shadow-emerald-500/20'
-                          : assigned
-                            ? 'bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20'
-                            : 'bg-slate-700/50 border border-transparent hover:bg-slate-700 hover:shadow-lg hover:shadow-emerald-500/10'
-                      }`}
-                    >
-                      <div className="flex items-center gap-1.5">
-                        <div className="w-5 h-5 rounded flex items-center justify-center font-bold text-[10px] flex-shrink-0"
-                          style={{
-                            background: isSelected ? 'linear-gradient(135deg,#F59E0B,#FCD34D)' : assigned ? 'linear-gradient(135deg,#F59E0B,#a855f7)' : 'linear-gradient(135deg,#a855f7,#FCD34D)',
-                            color: '#050810',
-                            boxShadow: isSelected ? '0 0 0 2px #F59E0B' : undefined
-                          }}>
-                          {player.seed}
+                    <div key={player.id} onClick={() => handleSelectPlayer(player)} className="cursor-pointer transition-all"
+                      style={{ minWidth: '128px', padding: '8px 10px', borderRadius: '10px',
+                        background: isSelected ? 'rgba(245,158,11,0.2)' : assigned ? 'rgba(16,185,129,0.08)' : 'rgba(255,255,255,0.04)',
+                        border: isSelected ? '1.5px solid #F59E0B' : assigned ? '1px solid rgba(16,185,129,0.3)' : '1px solid rgba(255,255,255,0.1)' }}>
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center justify-center font-bold text-[10px] flex-shrink-0" style={{ width: '20px', height: '20px', borderRadius: '6px', background: 'linear-gradient(135deg,#a855f7,#FCD34D)', color: '#050810' }}>{player.seed}</div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-white font-medium text-xs leading-tight truncate">{firstName(player.name)}</p>
+                          <p className="text-[10px] leading-tight truncate" style={{ color: assigned ? '#34d399' : 'rgba(255,255,255,0.45)' }}>{restName(player.name) || (player.partnerName ? '& ' + player.partnerName : ' ')}</p>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-white font-medium text-[11px] leading-tight">{player.name}</p>
-                          {player.partnerName && (
-                            <p className="text-[#F59E0B] text-[9px] leading-tight">& {player.partnerName}</p>
-                          )}
-                        </div>
-                        {isSelected ? (
-                          <div className="w-3 h-3 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0">
-                            <div className="w-1 h-1 bg-white rounded-full"></div>
-                          </div>
-                        ) : assigned ? (
-                          <CheckCircle className="w-3 h-3 icon-green flex-shrink-0" />
-                        ) : null}
+                        {assigned && <CheckCircle className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#34d399' }} />}
                       </div>
                     </div>
                   );
@@ -5393,13 +5390,31 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
             )}
           </div>
 
-          {/* Slots Grid - 65% width */}
-          <div className="flex-1 p-2 overflow-y-auto scroll-smooth scrollbar-thin">
+          {/* Add Multiple Players / Shuffle All Players + selection line */}
+          <div>
+            <div className="grid grid-cols-2 gap-2">
+              <button onClick={handleAddAllPlayers} disabled={!canAddAll} className="px-3 py-2.5 rounded-xl text-left disabled:opacity-50" style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.4)' }}>
+                <div className="flex items-center gap-1.5"><Plus className="w-4 h-4" style={{ color: '#FCD34D' }} /><span className="text-xs font-semibold" style={{ color: '#FCD34D' }}>Add Multiple Players</span></div>
+                <p className="text-[10px] mt-0.5" style={{ color: 'rgba(245,158,11,0.7)' }}>Select and add many players</p>
+              </button>
+              <button onClick={handleShuffleAllPlayers} disabled={!canShuffle} className="px-3 py-2.5 rounded-xl text-left disabled:opacity-50" style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.4)' }}>
+                <div className="flex items-center gap-1.5"><Zap className="w-4 h-4" style={{ color: '#34d399' }} /><span className="text-xs font-semibold" style={{ color: '#34d399' }}>Shuffle All Players</span></div>
+                <p className="text-[10px] mt-0.5" style={{ color: 'rgba(16,185,129,0.7)' }}>Randomize player order</p>
+              </button>
+            </div>
+            <div className="flex items-center justify-between mt-2 px-3 py-2 rounded-lg" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <span className="text-[11px] flex items-center gap-1.5" style={{ color: '#34d399' }}><CheckCircle className="w-3.5 h-3.5" />{players.length} players</span>
+              <button onClick={() => setSelectedPlayer(null)} className="text-[11px]" style={{ color: '#f0999b' }}>Clear Selection</button>
+            </div>
+          </div>
+
+          {/* ASSIGN TO DRAW SLOTS */}
+          <div>
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
                 {bracket?.format === 'ROUND_ROBIN' || bracket?.format === 'ROUND_ROBIN_KNOCKOUT' 
                   ? `Pools (${bracket.groups?.length || 0})` 
-                  : `Draw Slots (${slots.length})`}
+                  : `Assign to Draw Slots (${slots.length})`}
               </h3>
               {assignedCount > 0 && (
                 <button
@@ -5521,91 +5536,53 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                 })}
               </div>
             ) : (
-              /* KNOCKOUT: Match-based view — single column, P1 vs P2 in one row */
-              <div className="grid grid-cols-1 gap-2">
-                {/* Group slots into pairs (matches) */}
-                {Array.from({ length: Math.ceil(slots.length / 2) }, (_, matchIndex) => {
-                  const slot1 = slots[matchIndex * 2];
-                  const slot2 = slots[matchIndex * 2 + 1];
-                  const matchNum = matchIndex + 1;
-                  const isMatchLocked = slot1?.locked || slot2?.locked;
-                
-                return (
-                  <div key={matchIndex} className={`bg-slate-700/30 rounded-xl border overflow-hidden ${
-                    isMatchLocked ? 'border-amber-500/30 bg-amber-500/5' : 'border-white/10'
-                  }`}>
-                    {/* Match Header - Compact */}
-                    <div className="px-3 py-1.5 border-b border-white/10 flex items-center gap-2"
-                      style={isMatchLocked
-                        ? { background: 'linear-gradient(to right,rgba(251,191,36,0.15),rgba(249,115,22,0.15))' }
-                        : { background: 'rgba(245,158,11,0.08)' }}>
-                      <span className="w-5 h-5 rounded flex items-center justify-center text-xs font-bold"
-                        style={isMatchLocked
-                          ? { background: 'rgba(251,191,36,0.2)', color: '#fbbf24' }
-                          : { background: 'rgba(245,158,11,0.15)', color: '#FCD34D' }}>
-                        {matchNum}
-                      </span>
-                      <span className="font-semibold text-xs"
-                        style={{ color: isMatchLocked ? '#fbbf24' : '#FCD34D' }}>
-                        Match {matchNum}
-                      </span>
-                      {isMatchLocked && (
-                        <span className="ml-auto px-1.5 py-0.5 bg-amber-500/20 text-amber-400 text-[10px] font-bold rounded">
-                          🔒 LOCKED
-                        </span>
-                      )}
+              /* KNOCKOUT — two columns: odd matches left, even matches right */
+              <div>
+                <div className="grid grid-cols-2 gap-2">
+                  {[{ title: 'LEFT COLUMN', sub: 'Matches 1, 3, 5…', list: leftMatches },
+                    { title: 'RIGHT COLUMN', sub: 'Matches 2, 4, 6…', list: rightMatches }].map((col, ci) => (
+                    <div key={ci}>
+                      <div className="mb-1.5">
+                        <p className="text-[9px] font-bold" style={{ color: '#a855f7' }}>{col.title}</p>
+                        <p className="text-[8px]" style={{ color: 'rgba(255,255,255,0.4)' }}>{col.sub}</p>
+                      </div>
+                      <div className="space-y-2">
+                        {col.list.map((m) => {
+                          const locked = m.slot1?.locked || m.slot2?.locked;
+                          const filled = getAssignedPlayer(m.slot1?.slot) && getAssignedPlayer(m.slot2?.slot);
+                          return (
+                            <div key={m.mi} className="rounded-xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.03)', border: locked ? '1px solid rgba(251,191,36,0.3)' : '1px solid rgba(255,255,255,0.1)' }}>
+                              <div className="px-2.5 py-1.5 flex items-center justify-between" style={{ background: 'rgba(245,158,11,0.08)', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+                                <span className="text-[10px] font-semibold" style={{ color: '#FCD34D' }}>Match {m.matchNum}</span>
+                                <span className="text-[9px]" style={{ color: locked ? '#fbbf24' : filled ? '#34d399' : '#FCD34D' }}>{locked ? 'Locked' : filled ? 'Ready' : 'Pending'}</span>
+                              </div>
+                              <div className="p-2" style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) auto minmax(0,1fr)', alignItems: 'center', gap: '6px' }}>
+                                {MatchSlot({ slotObj: m.slot1 })}
+                                <span className="text-[9px] font-bold" style={{ color: 'rgba(255,255,255,0.35)' }}>VS</span>
+                                {MatchSlot({ slotObj: m.slot2 })}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
-                    
-                    {/* Players Container — P1 vs P2 in one straight line */}
-                    <div className="p-2" style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) auto minmax(0,1fr)', alignItems: 'center', gap: '8px' }}>
-                      {/* Player 1 Slot */}
-                      {slot1 ? (
-                        <CompactSlotCard
-                          slot={slot1}
-                          assigned={getAssignedPlayer(slot1.slot)}
-                          canAccept={selectedPlayer && !getAssignedPlayer(slot1.slot) && !slot1.locked}
-                          onSlotClick={() => selectedPlayer && !getAssignedPlayer(slot1.slot) && !slot1.locked && handleSlotClick(slot1)}
-                          onRemove={() => !slot1.locked && handleRemoveAssignment(slot1.slot)}
-                          playerLabel="P1"
-                          locked={slot1.locked}
-                          onDragStart={handleDragStart}
-                          onDragOver={handleDragOver}
-                          onDrop={handleDrop}
-                          isDragOver={dragOverSlot === slot1.slot}
-                        />
-                      ) : <div />}
-
-                      {/* VS — center */}
-                      <span className="text-[10px] font-bold px-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>VS</span>
-
-                      {/* Player 2 Slot */}
-                      {slot2 ? (
-                        <CompactSlotCard
-                          slot={slot2}
-                          assigned={getAssignedPlayer(slot2.slot)}
-                          canAccept={selectedPlayer && !getAssignedPlayer(slot2.slot) && !slot2.locked}
-                          onSlotClick={() => selectedPlayer && !getAssignedPlayer(slot2.slot) && !slot2.locked && handleSlotClick(slot2)}
-                          onRemove={() => !slot2.locked && handleRemoveAssignment(slot2.slot)}
-                          playerLabel="P2"
-                          locked={slot2.locked}
-                          onDragStart={handleDragStart}
-                          onDragOver={handleDragOver}
-                          onDrop={handleDrop}
-                          isDragOver={dragOverSlot === slot2.slot}
-                        />
-                      ) : <div />}
-                    </div>
-                  </div>
-                );
-              })}
+                  ))}
+                </div>
+                {koMatches.length > visibleMatches && (
+                  <button onClick={() => setVisibleMatches(v => v + 10)} className="w-full mt-3 py-2.5 rounded-xl text-center" style={{ border: '1px dashed rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.7)' }}>
+                    <span className="text-[11px] font-semibold">Load More Matches ⌄</span>
+                    <span className="block text-[9px]" style={{ color: 'rgba(255,255,255,0.4)' }}>Showing first {Math.min(visibleMatches, koMatches.length)} of {koMatches.length} — load more to view all</span>
+                  </button>
+                )}
               </div>
             )}
           </div>
         </div>
 
         <div className="p-4 border-t border-white/10 flex items-center justify-between">
-          <div className="text-xs text-gray-400">
-            {assignedCount} of {slots.length} slots assigned
+          <div className="text-xs text-gray-400 leading-tight">
+            {assignedCount} of {players.length} players assigned<br />
+            {matchesCreated} matches created
           </div>
           <div className="flex gap-2">
             <button 

@@ -3,9 +3,19 @@ import { useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { isBottomNavVisible, BOTTOM_NAV_HEIGHT } from './BottomNav/navConfig';
 
-// Floating "Join our WhatsApp group" button — bottom-right on every page.
+// Floating "Join our WhatsApp group" button.
 // Tapping opens the group in WhatsApp (hands off to the app on mobile).
 const WHATSAPP_GROUP_URL = 'https://chat.whatsapp.com/Bg6PsCwiHtZJjYQqykRgot';
+
+// Show ONLY on the main pages — home, tournaments, leaderboard, dashboard,
+// academies. Never on detail/draw/scoring/profile/auth/admin pages.
+const WHATSAPP_PAGES = new Set([
+  '/',
+  '/tournaments',
+  '/leaderboard',
+  '/dashboard',
+  '/academies',
+]);
 
 export default function FloatingWhatsApp() {
   const location = useLocation();
@@ -17,6 +27,9 @@ export default function FloatingWhatsApp() {
     const t = setTimeout(() => setShowLabel(false), 5000);
     return () => clearTimeout(t);
   }, []);
+
+  // Only render on the main pages.
+  if (!WHATSAPP_PAGES.has(location.pathname)) return null;
 
   // Sit above the bottom nav when it's on screen, else near the bottom edge.
   const navVisible = isBottomNavVisible(location.pathname, user);

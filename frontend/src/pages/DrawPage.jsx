@@ -6154,7 +6154,16 @@ const UmpireQueueModal = ({ tournamentId, umpires: initialUmpires, onClose, onUm
 
   const currentQueue = queues[selectedUmpireId] || [];
   const allQueuedIds = new Set(Object.values(queues).flat());
-  const available = allMatches.filter(m => m.status !== 'COMPLETED' && !allQueuedIds.has(m.id));
+  // A match is assignable only when BOTH sides have a real player. Works for
+  // singles (player1/player2) and doubles/team slots (team1…/team2…). This hides
+  // future "TBD vs TBD" and bye matches so the list shows only real, playable
+  // matches with proper names — across every category and format.
+  const bothPlayersReady = (m) => {
+    const side1 = m.player1?.name || m.team1Player1?.name || m.team1Player2?.name;
+    const side2 = m.player2?.name || m.team2Player1?.name || m.team2Player2?.name;
+    return !!side1 && !!side2;
+  };
+  const available = allMatches.filter(m => m.status !== 'COMPLETED' && !allQueuedIds.has(m.id) && bothPlayersReady(m));
 
   const addToQueue   = (id) => setQueues(p => ({ ...p, [selectedUmpireId]: [...(p[selectedUmpireId] || []), id] }));
   const removeFromQueue = (id) => setQueues(p => ({ ...p, [selectedUmpireId]: (p[selectedUmpireId] || []).filter(x => x !== id) }));

@@ -5292,7 +5292,7 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
   };
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 px-1 py-2">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-stretch justify-center z-50 p-1">
       {/* Animated Background for Modal */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div 
@@ -5329,7 +5329,7 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
         ))}
       </div>
 
-      <div className="relative backdrop-blur-xl rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl" style={{ background: '#0d1025', border: '1px solid rgba(245,158,11,0.2)' }}>
+      <div className="relative backdrop-blur-xl rounded-2xl max-w-4xl w-full h-full overflow-hidden flex flex-col shadow-2xl" style={{ background: '#0d1025', border: '1px solid rgba(245,158,11,0.2)' }}>
         <div className="p-4 border-b border-white/10 flex items-center gap-3">
           <button onClick={onClose} className="p-1 hover:bg-white/10 rounded-lg transition-colors flex-shrink-0">
             <ArrowLeft className="w-5 h-5" style={{ color: '#FCD34D' }} />

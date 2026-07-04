@@ -5468,9 +5468,9 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                       {col.list.map((m) => (
                         <div key={m.mi} className="rounded-xl p-2" style={{ background: 'rgba(255,255,255,0.03)', border: (m.slot1?.locked || m.slot2?.locked) ? '1px solid rgba(251,191,36,0.3)' : '1px solid rgba(255,255,255,0.1)' }}>
                           <span className="inline-block text-[9px] mb-1.5" style={{ color: '#c4b5fd', background: 'rgba(168,85,247,0.12)', padding: '1px 6px', borderRadius: '5px' }}>Match {m.matchNum}</span>
-                          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) auto minmax(0,1fr)', alignItems: 'center', gap: '5px' }}>
+                          <div>
                             {MatchSlot({ slotObj: m.slot1 })}
-                            <span className="text-[9px] font-bold" style={{ color: 'rgba(255,255,255,0.35)' }}>vs</span>
+                            <div className="text-[9px] font-bold text-center" style={{ color: 'rgba(255,255,255,0.35)', margin: '4px 0' }}>vs</div>
                             {MatchSlot({ slotObj: m.slot2 })}
                           </div>
                         </div>

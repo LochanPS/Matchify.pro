@@ -3855,7 +3855,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
   };
 
   return (
-    <div className="p-3 space-y-4">
+    <div className="px-1 py-3 space-y-4">
       {data.groups.map((group, gi) => (
         <div key={gi} className="rounded-2xl overflow-hidden" style={{ background: '#111826', border: '1px solid rgba(255,255,255,0.07)' }}>
 
@@ -3876,7 +3876,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
           </div>
 
           {/* Standings */}
-          <div className="px-2 pt-3 pb-2">
+          <div className="px-1 pt-3 pb-2">
             {/* Section label */}
             <div className="flex items-center gap-1.5 mb-2">
               <Trophy className="w-3.5 h-3.5" style={{ color: '#F59E0B' }} />
@@ -3884,20 +3884,20 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
             </div>
 
             {/* Column headers — stat labels wrapped in gap:0 container to match data cell layout exactly */}
-            <div className="flex items-center px-2 mb-1" style={{ gap: '4px' }}>
-              <div style={{ width: '28px', flexShrink: 0 }} />
+            <div className="flex items-center px-1 mb-1" style={{ gap: '3px' }}>
+              <div style={{ width: '26px', flexShrink: 0 }} />
               <div className="flex-1 min-w-0">
                 <span style={{ fontSize: '9px', color: 'rgba(255,255,255,0.35)', fontWeight: 700, letterSpacing: '0.07em' }}>PLAYER</span>
               </div>
               {/* gap:0 here — mirrors data cell container which also has gap:0 */}
               <div className="flex-shrink-0 flex items-center" style={{ gap: '0px' }}>
                 {[
-                  { h: 'P',   w: '22px', c: 'rgba(148,163,184,0.7)' },
-                  { h: 'W',   w: '22px', c: 'rgba(74,222,128,0.85)' },
-                  { h: 'L',   w: '22px', c: 'rgba(248,113,113,0.85)'},
-                  { h: 'PTS', w: '28px', c: 'rgba(245,158,11,0.9)'  },
-                  { h: 'PD',  w: '32px', c: 'rgba(96,165,250,0.9)'  },
-                  { h: 'TP',  w: '30px', c: 'rgba(196,181,253,0.9)' },
+                  { h: 'P',   w: '18px', c: 'rgba(148,163,184,0.7)' },
+                  { h: 'W',   w: '18px', c: 'rgba(74,222,128,0.85)' },
+                  { h: 'L',   w: '18px', c: 'rgba(248,113,113,0.85)'},
+                  { h: 'PTS', w: '24px', c: 'rgba(245,158,11,0.9)'  },
+                  { h: 'PD',  w: '26px', c: 'rgba(96,165,250,0.9)'  },
+                  { h: 'TP',  w: '24px', c: 'rgba(196,181,253,0.9)' },
                 ].map(({ h, w, c }) => (
                   <div key={h} style={{ width: w, flexShrink: 0, textAlign: 'center' }}>
                     <span style={{ fontSize: '9px', color: c, fontWeight: 700 }}>{h}</span>
@@ -3942,8 +3942,8 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                       className="flex rounded-xl transition-colors"
                       style={{
                         alignItems: 'center',
-                        padding: '9px 8px',
-                        gap: '4px',
+                        padding: '9px 4px',
+                        gap: '3px',
                         marginBottom: '3px',
                         minHeight: isDoubles ? '62px' : '44px',
                         background: pi === 0 ? 'rgba(245,158,11,0.07)' : 'rgba(15,22,36,0.65)',
@@ -3954,7 +3954,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                       <div
                         className="flex-shrink-0 flex items-center justify-center rounded-md font-bold"
                         style={{
-                          width: '28px', height: '28px',
+                          width: '26px', height: '26px',
                           fontSize: '12px',
                           background:
                             pi === 0 ? 'rgba(245,158,11,0.18)' :
@@ -4004,12 +4004,12 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                           Accent context comes from the column header labels only. */}
                       <div className="flex-shrink-0 flex items-center" style={{ gap: '0px' }}>
                         {[
-                          { val: (p.wins || 0) + (p.losses || 0), w: '22px', color: '#94a3b8' },
-                          { val: p.wins    || 0,                   w: '22px', color: '#ffffff', bold: true },
-                          { val: p.losses  || 0,                   w: '22px', color: '#ffffff', bold: true },
-                          { val: p.points  || 0,                   w: '28px', color: '#ffffff', bold: true },
-                          { val: pdVal,                            w: '32px', color: pdColor,   bold: true },
-                          { val: tpTotal,                          w: '30px', color: '#c4b5fd', bold: true },
+                          { val: (p.wins || 0) + (p.losses || 0), w: '18px', color: '#94a3b8' },
+                          { val: p.wins    || 0,                   w: '18px', color: '#ffffff', bold: true },
+                          { val: p.losses  || 0,                   w: '18px', color: '#ffffff', bold: true },
+                          { val: p.points  || 0,                   w: '24px', color: '#ffffff', bold: true },
+                          { val: pdVal,                            w: '26px', color: pdColor,   bold: true },
+                          { val: tpTotal,                          w: '24px', color: '#c4b5fd', bold: true },
                         ].map((s, si) => (
                           <div key={si} style={{ width: s.w, flexShrink: 0, textAlign: 'center' }}>
                             <span style={{ fontSize: '13px', fontWeight: s.bold ? 700 : 500, color: s.color, lineHeight: 1 }}>

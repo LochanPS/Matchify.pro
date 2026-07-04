@@ -1,5 +1,6 @@
 ﻿import { getErrorMessage } from '../utils/errorMessage';
 import LoadingScreen from '../components/LoadingScreen';
+import LocationPicker from '../components/LocationPicker';
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { tournamentAPI } from '../api/tournament';
@@ -103,6 +104,9 @@ const EditTournament = () => {
     city: '',
     state: '',
     pincode: '',
+    latitude: null,
+    longitude: null,
+    locationName: '',
     zone: '',
     format: '',
     privacy: '',
@@ -175,6 +179,9 @@ const EditTournament = () => {
         city: t.city || '',
         state: t.state || '',
         pincode: t.pincode || '',
+        latitude: t.latitude ?? null,
+        longitude: t.longitude ?? null,
+        locationName: t.locationName || '',
         zone: t.zone || '',
         format: t.format || '',
         privacy: t.privacy || 'public',
@@ -507,6 +514,15 @@ const EditTournament = () => {
                   onChange={e => setInfoData(p => ({ ...p, address: e.target.value }))}
                   className="w-full px-3 py-3 rounded-xl text-white text-sm" style={inputStyle} />
               </div>
+              {/* Venue location on map (optional) */}
+              <LocationPicker
+                latitude={infoData.latitude}
+                longitude={infoData.longitude}
+                locationName={infoData.locationName}
+                onChange={({ latitude, longitude, locationName }) =>
+                  setInfoData(p => ({ ...p, latitude, longitude, locationName }))
+                }
+              />
               {/* City + State */}
               <div className="grid grid-cols-2 gap-3">
                 <div>

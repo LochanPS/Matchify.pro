@@ -849,6 +849,18 @@ const TournamentDetailPage = () => {
                     <p className="text-xs truncate" style={{ color: 'rgba(255,255,255,0.4)' }}>
                       {tournament.address}, {tournament.city}, {tournament.state} - {tournament.pincode}
                     </p>
+                    {tournament.latitude != null && tournament.longitude != null && (
+                      <a
+                        href={`https://www.google.com/maps/search/?api=1&query=${tournament.latitude},${tournament.longitude}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 mt-2 px-3 py-1.5 rounded-lg text-xs font-bold"
+                        style={{ background: 'rgba(66,133,244,0.15)', border: '1px solid rgba(66,133,244,0.4)', color: '#8ab4f8' }}
+                      >
+                        <MapPinIcon className="h-3.5 w-3.5" />
+                        Open in Google Maps
+                      </a>
+                    )}
                   </div>
                 </div>
 

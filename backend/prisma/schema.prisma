@@ -152,6 +152,9 @@ model Tournament {
   pincode               String
   zone                  String
   country               String             @default("India")
+  latitude              Float?             // venue map pin — set via the location picker
+  longitude             Float?             // venue map pin — set via the location picker
+  locationName          String?            // human label for the pin (e.g. searched place name)
   registrationOpenDate  String             // Store as string to avoid timezone conversion
   registrationCloseDate String             // Store as string to avoid timezone conversion
   startDate             String             // Store as string to avoid timezone conversion

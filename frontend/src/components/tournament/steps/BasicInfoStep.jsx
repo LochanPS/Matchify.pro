@@ -1,5 +1,6 @@
 ﻿import { useState, useRef, useEffect } from 'react';
 import { SPORTS } from '../../../config/sports';
+import LocationPicker from '../../LocationPicker';
 
 // Indian States
 const INDIAN_STATES = [
@@ -301,6 +302,18 @@ const BasicInfoStep = ({ formData, updateFormData, onNext }) => {
         />
         {errors.address && <p className="mt-1 text-xs text-red-400">{errors.address}</p>}
       </div>
+
+      {/* Venue location on map (optional) — free OpenStreetMap picker → lat/lng */}
+      <LocationPicker
+        latitude={formData.latitude}
+        longitude={formData.longitude}
+        locationName={formData.locationName}
+        onChange={({ latitude, longitude, locationName }) => {
+          updateFormData('latitude', latitude);
+          updateFormData('longitude', longitude);
+          updateFormData('locationName', locationName);
+        }}
+      />
 
       {/* City, State, Pincode */}
       <div className="grid grid-cols-3 gap-2">

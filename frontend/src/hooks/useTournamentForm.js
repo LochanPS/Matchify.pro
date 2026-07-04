@@ -82,6 +82,9 @@ export const useTournamentForm = (existingDraftId = null) => {
     venue: '',
     address: '',
     pincode: '',
+    latitude: null,       // venue map pin (optional)
+    longitude: null,      // venue map pin (optional)
+    locationName: '',     // label for the pin
     shuttleType: '',
     shuttleBrand: '',
     contactPhone: '',

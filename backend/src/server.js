@@ -135,6 +135,10 @@ async function runStartupMigrations() {
       `ALTER TABLE "Tournament" ADD COLUMN IF NOT EXISTS "slug" TEXT`,
       `CREATE UNIQUE INDEX IF NOT EXISTS "Tournament_slug_key" ON "Tournament"("slug")`,
       `ALTER TABLE "Category" ADD COLUMN IF NOT EXISTS "slug" TEXT`,
+      // Venue map location (added Jul 2026) — optional lat/lng pin + label.
+      `ALTER TABLE "Tournament" ADD COLUMN IF NOT EXISTS "latitude" DOUBLE PRECISION`,
+      `ALTER TABLE "Tournament" ADD COLUMN IF NOT EXISTS "longitude" DOUBLE PRECISION`,
+      `ALTER TABLE "Tournament" ADD COLUMN IF NOT EXISTS "locationName" TEXT`,
     ];
 
     for (const sql of migrations) {

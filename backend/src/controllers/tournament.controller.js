@@ -125,6 +125,9 @@ const createTournament = async (req, res) => {
       pincode,
       zone,
       country = 'India',
+      latitude,
+      longitude,
+      locationName,
       format, // singles, doubles, both
       sport = 'Badminton', // racket sport (Badminton, Tennis, Table Tennis, Pickleball, Squash, Padel…)
       privacy = 'public',
@@ -226,6 +229,10 @@ const createTournament = async (req, res) => {
           pincode: pincode.trim(),
           zone,
           country,
+          // Venue map pin (optional) — coerce to Float, ignore blanks/invalid.
+          latitude: Number.isFinite(Number(latitude)) && latitude !== '' && latitude != null ? Number(latitude) : null,
+          longitude: Number.isFinite(Number(longitude)) && longitude !== '' && longitude != null ? Number(longitude) : null,
+          locationName: locationName?.trim() || null,
           format,
           sport,
           privacy,
@@ -654,6 +661,9 @@ const updateTournament = async (req, res) => {
       state,
       pincode,
       zone,
+      latitude,
+      longitude,
+      locationName,
       format,
       sport,
       privacy,
@@ -676,6 +686,10 @@ const updateTournament = async (req, res) => {
     if (state !== undefined) updateData.state = state.trim();
     if (pincode !== undefined) updateData.pincode = pincode.trim();
     if (zone !== undefined) updateData.zone = zone;
+    // Venue map pin — allow clearing (null) or updating; coerce to Float.
+    if (latitude !== undefined) updateData.latitude = (latitude === '' || latitude === null) ? null : Number(latitude);
+    if (longitude !== undefined) updateData.longitude = (longitude === '' || longitude === null) ? null : Number(longitude);
+    if (locationName !== undefined) updateData.locationName = locationName?.trim() || null;
     if (format !== undefined) updateData.format = format;
     if (sport !== undefined) updateData.sport = sport;
     if (privacy !== undefined) updateData.privacy = privacy;

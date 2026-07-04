@@ -16,6 +16,7 @@ import { Toaster } from 'react-hot-toast'
 import Navbar from './components/Navbar'
 import BottomNav from './components/BottomNav/BottomNav'
 import { isBottomNavVisible, BOTTOM_NAV_HEIGHT } from './components/BottomNav/navConfig'
+import FloatingWhatsApp from './components/FloatingWhatsApp'
 import ScrollToTop from './components/ScrollToTop'
 import ProfileCompletionModal from './components/ProfileCompletionModal'
 import MandatoryProfilePhotoModal from './components/MandatoryProfilePhotoModal'
@@ -612,6 +613,9 @@ function AppContent() {
           Mounted once at root level — never remounted on route change.
           Renders null on its own when the current screen should not show it. */}
       <BottomNav />
+
+      {/* Floating "Join our WhatsApp group" button — bottom-right, every page */}
+      <FloatingWhatsApp />
     </div>
   );
 }

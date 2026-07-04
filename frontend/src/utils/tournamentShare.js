@@ -89,10 +89,10 @@ export function buildShareMessage(tournament) {
 
   // Venue / Date / Time
   if (venueStr)  lines.push(`📍 ${venueStr}`);
-  // Google Maps link (only when the organizer pinned the venue on the map).
-  // maps.google.com/?q=lat,lng opens a pin at the exact spot; WhatsApp linkifies it.
+  // Short, clean maps link (only when the organizer pinned the venue) — matches
+  // the category/live link style. /t/<slug>/location redirects to Google Maps.
   if (tournament.latitude != null && tournament.longitude != null) {
-    lines.push(`🗺️ maps.google.com/?q=${tournament.latitude},${tournament.longitude}`);
+    lines.push(`🗺️ ${DISPLAY_BASE}/t/${tRef}/location`);
   }
   lines.push(`📅 ${dateStr} (${dayStr})`);
   if (timeStr)   lines.push(`⏰ ${timeStr}`);

@@ -2,9 +2,9 @@ import { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 
-// Short share links: /t/:tSlug, /t/:tSlug/:cSlug, and /t/:tSlug/live
-// Resolves the readable slug to the real tournament (category / live page) and
-// opens it. Nothing else in the app changes — this is a thin entry point.
+// Short share links: /t/:tSlug, /t/:tSlug/:cSlug, /t/:tSlug/live, /t/:tSlug/location
+// Resolves the readable slug to the real tournament (category / live page / Google
+// Maps) and opens it. Nothing else in the app changes — this is a thin entry point.
 export default function ShareRedirect() {
   const { tSlug, cSlug } = useParams();
   const navigate = useNavigate();
@@ -14,11 +14,20 @@ export default function ShareRedirect() {
     (async () => {
       try {
         const res = await api.get(`/tournaments/resolve/${encodeURIComponent(tSlug)}`);
-        const { id, categories } = res.data || {};
+        const { id, categories, latitude, longitude } = res.data || {};
         if (!active) return;
         if (!id) { navigate('/tournaments', { replace: true }); return; }
         // Reserved word: /t/:slug/live opens the tournament's live matches page.
         if (cSlug === 'live') { navigate(`/tournaments/${id}/live`, { replace: true }); return; }
+        // Reserved word: /t/:slug/location opens the venue in Google Maps (external).
+        if (cSlug === 'location') {
+          if (latitude != null && longitude != null) {
+            window.location.replace(`https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`);
+          } else {
+            navigate(`/tournaments/${id}`, { replace: true });
+          }
+          return;
+        }
         if (cSlug) {
           const cat = (categories || []).find((c) => c.slug === cSlug || c.id === cSlug);
           if (cat) { navigate(`/tournaments/${id}/draws/${cat.id}`, { replace: true }); return; }

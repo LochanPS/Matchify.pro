@@ -620,10 +620,10 @@ const resolveTournamentSlug = async (req, res) => {
     const { tSlug } = req.params;
     const t = await prisma.tournament.findFirst({
       where: { OR: [{ slug: tSlug }, { id: tSlug }] },
-      select: { id: true, slug: true, categories: { select: { id: true, slug: true } } },
+      select: { id: true, slug: true, latitude: true, longitude: true, categories: { select: { id: true, slug: true } } },
     });
     if (!t) return res.status(404).json({ success: false, error: 'Tournament not found' });
-    res.json({ success: true, id: t.id, categories: t.categories });
+    res.json({ success: true, id: t.id, latitude: t.latitude, longitude: t.longitude, categories: t.categories });
   } catch (error) {
     console.error('Resolve tournament slug error:', error);
     res.status(500).json({ success: false, error: 'Failed to resolve tournament' });

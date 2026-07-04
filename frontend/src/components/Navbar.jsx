@@ -185,7 +185,9 @@ const Navbar = () => {
           {/* Logo + desktop nav */}
           <div className="flex items-center gap-6 sm:gap-8">
             <Link to="/" className="hover:opacity-90 transition-opacity flex-shrink-0 ml-2">
-              <MatchifyLogo size={64} onPurple />
+              {/* Smaller logo when logged out so the Login/Sign Up buttons fit on
+                  one line, matching the home page header exactly. */}
+              <MatchifyLogo size={user ? 64 : 52} onPurple />
             </Link>
             <nav className="hidden md:flex items-center gap-1">
               <NavLink to="/tournaments" active={isActiveLink('/tournaments')}><Trophy className="w-4 h-4" />Tournaments</NavLink>
@@ -289,16 +291,26 @@ const Navbar = () => {
                 </button>
               </>
             ) : (
-              <div className="flex items-center gap-2.5">
+              // Auth buttons — identical to the home page header so every page
+              // looks the same: fixed height, nowrap, no squeezing/wrapping.
+              <div className="flex items-center gap-2.5 flex-shrink-0">
                 <Link to="/login"
-                  className="px-4 py-2 text-sm font-medium transition-all rounded-xl"
-                  style={{ color: 'rgba(255,255,255,0.75)', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}>
-                  Sign in
+                  className="flex items-center justify-center rounded-lg font-semibold"
+                  style={{
+                    height: '36px', paddingLeft: '16px', paddingRight: '16px', fontSize: '14px',
+                    background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)',
+                    color: 'rgba(255,255,255,0.88)', letterSpacing: '0.01em', whiteSpace: 'nowrap',
+                  }}>
+                  Login
                 </Link>
                 <Link to="/register"
-                  className="px-5 py-2.5 rounded-xl transition-all text-sm font-bold"
-                  style={{ background: 'linear-gradient(135deg, #F59E0B, #D97706)', color: '#0C0900', boxShadow: '0 4px 16px rgba(245,158,11,0.3)' }}>
-                  Get Started
+                  className="flex items-center justify-center rounded-lg font-bold"
+                  style={{
+                    height: '36px', paddingLeft: '16px', paddingRight: '16px', fontSize: '14px',
+                    background: 'linear-gradient(135deg, #F59E0B, #D97706)', color: '#ffffff',
+                    letterSpacing: '0.01em', whiteSpace: 'nowrap',
+                  }}>
+                  Sign Up
                 </Link>
               </div>
             )}

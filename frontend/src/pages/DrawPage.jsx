@@ -5272,37 +5272,37 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
 
   // One player/pair inside a match slot: number badge + name (+ partner for doubles),
   // or "TBD" (and a second "TBD" line for doubles) when empty.
+  // A full-width player row inside a stacked match card: number badge + name
+  // (+ partner underneath for doubles) + a small remove ×, or TBD when empty.
   const MatchSlot = ({ slotObj }) => {
     const a = slotObj ? getAssignedPlayer(slotObj.slot) : null;
     const canAccept = selectedPlayer && slotObj && !a && !slotObj.locked;
     if (!a) {
       return (
-        <div onClick={() => canAccept && handleSlotClick(slotObj)} className="min-w-0 flex items-start gap-1" style={{ cursor: canAccept ? 'pointer' : 'default' }}>
-          <span className="flex items-center justify-center flex-shrink-0" style={{ width: '15px', height: '15px', borderRadius: '4px', border: '1px dashed rgba(255,255,255,0.25)' }}>
-            <Users style={{ width: '9px', height: '9px', color: '#6b7280' }} />
+        <div onClick={() => canAccept && handleSlotClick(slotObj)} className="min-w-0 flex items-center gap-2" style={{ cursor: canAccept ? 'pointer' : 'default' }}>
+          <span className="flex items-center justify-center flex-shrink-0" style={{ width: '20px', height: '20px', borderRadius: '5px', border: '1px dashed rgba(255,255,255,0.25)' }}>
+            <Users style={{ width: '11px', height: '11px', color: '#6b7280' }} />
           </span>
           <span className="min-w-0">
-            <span className="block text-[9px] leading-tight" style={{ color: canAccept ? '#FCD34D' : '#6b7280' }}>{canAccept ? 'Tap' : 'TBD'}</span>
-            {isDoubles && <span className="block text-[8px] leading-tight" style={{ color: '#6b7280' }}>TBD</span>}
+            <span className="block text-[11px] leading-tight" style={{ color: canAccept ? '#FCD34D' : '#6b7280' }}>{canAccept ? 'Tap here' : 'TBD'}</span>
+            {isDoubles && <span className="block text-[9px] leading-tight" style={{ color: '#6b7280' }}>TBD</span>}
           </span>
         </div>
       );
     }
-    // Assigned — no × button (matches the reference); tap the slot to remove.
-    // Small font so the full name (+ partner) fits in the side-by-side columns.
+    const [l1, l2] = pairLines(a.playerName, a.partnerName);
     return (
-      <div
-        onClick={() => slotObj && !slotObj.locked && handleRemoveAssignment(slotObj.slot)}
-        title="Tap to remove"
-        className="min-w-0 flex items-start gap-1"
-        style={{ cursor: slotObj && !slotObj.locked ? 'pointer' : 'default' }}>
-        <span className="flex items-center justify-center font-bold text-[8px] flex-shrink-0" style={{ width: '15px', height: '15px', borderRadius: '4px', background: 'linear-gradient(135deg,#a855f7,#FCD34D)', color: '#050810' }}>{seedOf(a.playerId) ?? '#'}</span>
-        {(() => { const [l1, l2] = pairLines(a.playerName, a.partnerName); return (
+      <div className="min-w-0 flex items-center gap-2">
+        <span className="flex items-center justify-center font-bold text-[10px] flex-shrink-0" style={{ width: '20px', height: '20px', borderRadius: '5px', background: 'linear-gradient(135deg,#a855f7,#FCD34D)', color: '#050810' }}>{seedOf(a.playerId) ?? '#'}</span>
         <span className="min-w-0 flex-1">
-          <span className="block text-white text-[9px] leading-tight truncate">{l1}</span>
-          {isDoubles && <span className="block text-[8px] leading-tight truncate" style={{ color: 'rgba(255,255,255,0.5)' }}>{l2 || '-'}</span>}
+          <span className="block text-white text-[11px] leading-tight truncate" style={{ fontWeight: 500 }}>{l1}</span>
+          {isDoubles && <span className="block text-[9px] leading-tight truncate" style={{ color: 'rgba(255,255,255,0.6)' }}>{l2 || '-'}</span>}
         </span>
-        ); })()}
+        {slotObj && !slotObj.locked && (
+          <button onClick={(e) => { e.stopPropagation(); handleRemoveAssignment(slotObj.slot); }} title="Remove" className="flex-shrink-0 p-1 rounded-lg" style={{ background: 'rgba(239,68,68,0.12)' }}>
+            <X className="w-3.5 h-3.5 text-red-400" />
+          </button>
+        )}
       </div>
     );
   };
@@ -5484,9 +5484,9 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                       {col.list.map((m) => (
                         <div key={m.mi} className="rounded-xl p-1.5" style={{ background: 'rgba(255,255,255,0.03)', border: (m.slot1?.locked || m.slot2?.locked) ? '1px solid rgba(251,191,36,0.3)' : '1px solid rgba(255,255,255,0.1)' }}>
                           <span className="inline-block text-[9px] mb-1.5" style={{ color: '#c4b5fd', background: 'rgba(168,85,247,0.12)', padding: '1px 6px', borderRadius: '5px' }}>Match {m.matchNum}</span>
-                          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) auto minmax(0,1fr)', alignItems: 'center', gap: '4px' }}>
+                          <div>
                             {MatchSlot({ slotObj: m.slot1 })}
-                            <span className="text-[8px] font-bold flex-shrink-0" style={{ color: 'rgba(255,255,255,0.35)' }}>vs</span>
+                            <div className="text-[9px] font-bold text-center" style={{ color: 'rgba(255,255,255,0.35)', margin: '5px 0' }}>vs</div>
                             {MatchSlot({ slotObj: m.slot2 })}
                           </div>
                         </div>

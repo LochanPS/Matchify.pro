@@ -3211,8 +3211,22 @@ const ZoomableBracket = ({ children, bracketWidth, bracketHeight }) => {
   const MIN = 0.08, MAX = 2.5;
   const clamp = (s) => Math.max(MIN, Math.min(MAX, s));
 
-  // Default = readable full size (100%). The user scrolls to move around large draws.
-  React.useEffect(() => { setScale(1); }, [bracketWidth, bracketHeight]);
+  // Auto-fit to the screen width on load (and whenever the bracket size changes)
+  // so the whole bracket is visible at a readable size instead of opening zoomed-in.
+  // A 0.3 floor keeps very large draws (e.g. round of 512) legible — the user scrolls
+  // those. The −/＋/Fit controls still let anyone zoom in afterwards.
+  React.useEffect(() => {
+    const o = outerRef.current;
+    if (!o || !bracketWidth) return;
+    const apply = () => {
+      const w = o.clientWidth;
+      if (!w) return;
+      setScale(clamp(Math.max(0.3, Math.min(1, w / bracketWidth))));
+    };
+    apply();
+    const raf = requestAnimationFrame(apply);
+    return () => cancelAnimationFrame(raf);
+  }, [bracketWidth, bracketHeight]);
 
   const fit = React.useCallback(() => {
     const o = outerRef.current;
@@ -3364,7 +3378,7 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
   //          Must be ≥ max card height (~225px). 260 gives 17.5px cushion each side.
   // Math:  topCenter = mi×slotH + slotH/2
   //        midY      = (topCenter + botCenter)/2  ← exact parent card center ✓
-  const CARD_W = 305;
+  const CARD_W = 280;
   const CONN_W = 44;
   // SLOT_H = 240: card display-only ≈ 123px → 58.5px cushion each side.
   //   Action buttons are absolutely positioned below the card (don't affect slot height).
@@ -3435,7 +3449,7 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
           <input
             value={koQuery}
             onChange={(e) => setKoQuery(e.target.value)}
-            placeholder="🔍 Enter your name to jump to your spot in the draw"
+            placeholder="🔍 Search your name in the draw"
             style={{
               width: '100%', padding: '9px 12px', borderRadius: '10px',
               background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(245,158,11,0.3)',
@@ -3615,7 +3629,8 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                                       fontSize: '13px', fontWeight: isPlayer1Winner ? 700 : 500,
                                       color: isTbd1 ? 'rgba(255,255,255,0.28)' : '#ffffff',
                                       fontStyle: isTbd1 ? 'italic' : 'normal',
-                                      whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                                      lineHeight: 1.25, overflow: 'hidden', wordBreak: 'break-word',
+                                      display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 2,
                                     }}>
                                       {player1Name}
                                     </span>
@@ -3639,7 +3654,8 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                                       fontSize: '13px', fontWeight: isPlayer2Winner ? 700 : 500,
                                       color: isTbd2 ? 'rgba(255,255,255,0.28)' : '#ffffff',
                                       fontStyle: isTbd2 ? 'italic' : 'normal',
-                                      whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                                      lineHeight: 1.25, overflow: 'hidden', wordBreak: 'break-word',
+                                      display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 2,
                                     }}>
                                       {player2Name}
                                     </span>

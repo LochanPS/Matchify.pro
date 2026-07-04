@@ -5263,29 +5263,29 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
     const canAccept = selectedPlayer && slotObj && !a && !slotObj.locked;
     if (!a) {
       return (
-        <div onClick={() => canAccept && handleSlotClick(slotObj)} className="min-w-0 flex items-center gap-1.5" style={{ cursor: canAccept ? 'pointer' : 'default' }}>
-          <span className="flex items-center justify-center flex-shrink-0" style={{ width: '18px', height: '18px', borderRadius: '5px', border: '1px dashed rgba(255,255,255,0.25)' }}>
-            <Users className="w-3 h-3" style={{ color: '#6b7280' }} />
+        <div onClick={() => canAccept && handleSlotClick(slotObj)} className="min-w-0 flex items-start gap-1" style={{ cursor: canAccept ? 'pointer' : 'default' }}>
+          <span className="flex items-center justify-center flex-shrink-0" style={{ width: '15px', height: '15px', borderRadius: '4px', border: '1px dashed rgba(255,255,255,0.25)' }}>
+            <Users style={{ width: '9px', height: '9px', color: '#6b7280' }} />
           </span>
           <span className="min-w-0">
-            <span className="block text-[10px] leading-tight" style={{ color: canAccept ? '#FCD34D' : '#6b7280' }}>{canAccept ? 'Tap here' : 'TBD'}</span>
-            {isDoubles && <span className="block text-[9px] leading-tight" style={{ color: '#6b7280' }}>TBD</span>}
+            <span className="block text-[9px] leading-tight" style={{ color: canAccept ? '#FCD34D' : '#6b7280' }}>{canAccept ? 'Tap' : 'TBD'}</span>
+            {isDoubles && <span className="block text-[8px] leading-tight" style={{ color: '#6b7280' }}>TBD</span>}
           </span>
         </div>
       );
     }
     // Assigned — no × button (matches the reference); tap the slot to remove.
-    // Names wrap fully instead of truncating so long names show completely.
+    // Small font so the full name (+ partner) fits in the side-by-side columns.
     return (
       <div
         onClick={() => slotObj && !slotObj.locked && handleRemoveAssignment(slotObj.slot)}
         title="Tap to remove"
-        className="min-w-0 flex items-start gap-1.5"
+        className="min-w-0 flex items-start gap-1"
         style={{ cursor: slotObj && !slotObj.locked ? 'pointer' : 'default' }}>
-        <span className="flex items-center justify-center font-bold text-[9px] flex-shrink-0" style={{ width: '18px', height: '18px', borderRadius: '5px', background: 'linear-gradient(135deg,#a855f7,#FCD34D)', color: '#050810' }}>{seedOf(a.playerId) ?? '#'}</span>
+        <span className="flex items-center justify-center font-bold text-[8px] flex-shrink-0" style={{ width: '15px', height: '15px', borderRadius: '4px', background: 'linear-gradient(135deg,#a855f7,#FCD34D)', color: '#050810' }}>{seedOf(a.playerId) ?? '#'}</span>
         <span className="min-w-0 flex-1">
-          <span className="block text-white text-[11px] leading-tight truncate">{a.playerName}</span>
-          {isDoubles && <span className="block text-[9px] leading-tight truncate" style={{ color: 'rgba(255,255,255,0.5)' }}>{a.partnerName || '-'}</span>}
+          <span className="block text-white text-[9px] leading-tight truncate">{a.playerName}</span>
+          {isDoubles && <span className="block text-[8px] leading-tight truncate" style={{ color: 'rgba(255,255,255,0.5)' }}>{a.partnerName || '-'}</span>}
         </span>
       </div>
     );
@@ -5347,10 +5347,10 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
           {/* Add All / Shuffle / status row */}
           <div className="grid gap-2" style={{ gridTemplateColumns: 'minmax(0,1fr) minmax(0,1fr) auto' }}>
             <button onClick={handleAddAllPlayers} disabled={!canAddAll} className="flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl disabled:opacity-50" style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.4)' }}>
-              <Users className="w-4 h-4 flex-shrink-0" style={{ color: '#FCD34D' }} /><span className="text-[11px] font-semibold leading-tight text-center" style={{ color: '#FCD34D' }}>Add All {unit}</span>
+              <Users className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#FCD34D' }} /><span className="text-[10px] font-semibold whitespace-nowrap" style={{ color: '#FCD34D' }}>Add All {unit}</span>
             </button>
             <button onClick={handleShuffleAllPlayers} disabled={!canShuffle} className="flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl disabled:opacity-50" style={{ background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.4)' }}>
-              <Zap className="w-4 h-4 flex-shrink-0" style={{ color: '#34d399' }} /><span className="text-[11px] font-semibold leading-tight text-center" style={{ color: '#34d399' }}>Shuffle All {unit}</span>
+              <Zap className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#34d399' }} /><span className="text-[10px] font-semibold whitespace-nowrap" style={{ color: '#34d399' }}>Shuffle All {unit}</span>
             </button>
             <div className="flex items-center gap-1 px-2 rounded-xl flex-shrink-0" style={{ border: '1px solid rgba(255,255,255,0.12)' }}>
               <CheckCircle className="w-4 h-4 flex-shrink-0" style={{ color: '#34d399' }} />
@@ -5370,13 +5370,13 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                   const isSelected = selectedPlayer?.id === player.id;
                   return (
                     <div key={player.id} onClick={() => handleSelectPlayer(player)} className="cursor-pointer transition-all"
-                      style={{ minWidth: '128px', padding: '8px 10px', borderRadius: '10px',
+                      style={{ minWidth: '165px', padding: '7px 9px', borderRadius: '10px',
                         background: isSelected ? 'rgba(245,158,11,0.2)' : assigned ? 'rgba(16,185,129,0.08)' : 'rgba(255,255,255,0.04)',
                         border: isSelected ? '1.5px solid #F59E0B' : assigned ? '1px solid rgba(16,185,129,0.3)' : '1px solid rgba(255,255,255,0.1)' }}>
                       <div className="flex items-center gap-2">
                         <div className="flex items-center justify-center font-bold text-[10px] flex-shrink-0" style={{ width: '20px', height: '20px', borderRadius: '6px', background: 'linear-gradient(135deg,#a855f7,#FCD34D)', color: '#050810' }}>{player.seed}</div>
                         <div className="min-w-0 flex-1">
-                          <p className="text-white font-medium text-[11px] leading-tight truncate">{player.name}</p>
+                          <p className="text-white font-medium text-[10px] leading-tight truncate">{player.name}</p>
                           {isDoubles && <p className="text-[9px] leading-tight truncate" style={{ color: assigned ? '#34d399' : 'rgba(255,255,255,0.5)' }}>{player.partnerName || '—'}</p>}
                         </div>
                         {assigned && <CheckCircle className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#34d399' }} />}
@@ -5468,9 +5468,9 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                       {col.list.map((m) => (
                         <div key={m.mi} className="rounded-xl p-2" style={{ background: 'rgba(255,255,255,0.03)', border: (m.slot1?.locked || m.slot2?.locked) ? '1px solid rgba(251,191,36,0.3)' : '1px solid rgba(255,255,255,0.1)' }}>
                           <span className="inline-block text-[9px] mb-1.5" style={{ color: '#c4b5fd', background: 'rgba(168,85,247,0.12)', padding: '1px 6px', borderRadius: '5px' }}>Match {m.matchNum}</span>
-                          <div>
+                          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) auto minmax(0,1fr)', alignItems: 'center', gap: '4px' }}>
                             {MatchSlot({ slotObj: m.slot1 })}
-                            <div className="text-[9px] font-bold text-center" style={{ color: 'rgba(255,255,255,0.35)', margin: '4px 0' }}>vs</div>
+                            <span className="text-[8px] font-bold flex-shrink-0" style={{ color: 'rgba(255,255,255,0.35)' }}>vs</span>
                             {MatchSlot({ slotObj: m.slot2 })}
                           </div>
                         </div>

@@ -28,9 +28,14 @@ export async function generateUniqueTournamentSlug(name, excludeId = null) {
   }
 }
 
+// Words reserved for special short-link routes (e.g. /t/:slug/live) — a category
+// slug must never equal one of these, or the short link would be ambiguous.
+const RESERVED_SLUGS = new Set(['live']);
+
 // Category slug, unique WITHIN its tournament.
 export async function generateUniqueCategorySlug(tournamentId, name, excludeId = null) {
-  const base = slugify(name);
+  let base = slugify(name);
+  if (RESERVED_SLUGS.has(base)) base = `${base}-draws`;
   let slug = base;
   let n = 1;
   // eslint-disable-next-line no-constant-condition

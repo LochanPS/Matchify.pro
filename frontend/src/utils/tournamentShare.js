@@ -105,6 +105,12 @@ export function buildShareMessage(tournament) {
     });
   }
 
+  // Live matches — one tap opens real-time scores & results for all categories.
+  lines.push('🔴 Live Scores & Results');
+  div();
+  lines.push(`${DISPLAY_BASE}/t/${tRef}/live`);
+  div();
+
   // Awards
   if (awardsLines.length) {
     lines.push('🏆 *Awards*');

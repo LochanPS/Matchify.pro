@@ -3402,7 +3402,7 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
     const dbm = findMatch(0, mi);
     [dbm?.player1 || match.player1, dbm?.player2 || match.player2].forEach((p) => {
       const nm = p ? getPlayerDisplay(p) : null;
-      if (nm && nm !== 'TBD') firstRoundPlayers.push({ name: nm, mi });
+      if (nm && nm !== 'TBD' && p?.id && !/^slot\s*\d+$/i.test(nm.trim())) firstRoundPlayers.push({ name: nm, mi });
     });
   });
   const koSearchMatches = koQuery.trim()
@@ -3540,16 +3540,23 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                         const player1Name = getPlayerDisplay(player1);
                         const player2Name = getPlayerDisplay(player2);
 
-                        const isCompleted = dbMatch?.status === 'COMPLETED' || (!dbMatch && match.winner && player1.name !== 'TBD' && player2.name !== 'TBD');
+                        // An empty/unfilled slot = no real player id, "TBD", or a "Slot N"
+                        // placeholder from bracket generation. Treat all three as empty so
+                        // BYE detection, winner badges and buttons behave correctly.
+                        const isEmptySlot = (pl, nm) => !pl?.id || nm === 'TBD' || /^slot\s*\d+$/i.test((nm || '').trim());
+                        const isTbd1 = isEmptySlot(player1, player1Name);
+                        const isTbd2 = isEmptySlot(player2, player2Name);
+                        const p1Display = isTbd1 ? 'TBD' : player1Name;
+                        const p2Display = isTbd2 ? 'TBD' : player2Name;
+
+                        const isCompleted = dbMatch?.status === 'COMPLETED' || (!dbMatch && match.winner && !isTbd1 && !isTbd2);
                         const isLive     = dbMatch?.status === 'IN_PROGRESS';
-                        const isReady    = dbMatch?.status === 'READY' && player1.name !== 'TBD' && player2.name !== 'TBD';
+                        const isReady    = dbMatch?.status === 'READY' && !isTbd1 && !isTbd2;
                         const hasUmpire  = dbMatch?.umpireId;
 
-                        const isPlayer1Winner = dbMatch ? dbMatch.winnerId === player1?.id : match.winner === 1;
-                        const isPlayer2Winner = dbMatch ? dbMatch.winnerId === player2?.id : match.winner === 2;
-
-                        const isTbd1 = player1Name === 'TBD';
-                        const isTbd2 = player2Name === 'TBD';
+                        // Winner badge only for a REAL player — avoids null===null marking an empty slot as winner.
+                        const isPlayer1Winner = !isTbd1 && (dbMatch ? dbMatch.winnerId === player1?.id : match.winner === 1);
+                        const isPlayer2Winner = !isTbd2 && (dbMatch ? dbMatch.winnerId === player2?.id : match.winner === 2);
 
                         // Card border colour per state
                         const cardBorder = isLive
@@ -3637,7 +3644,7 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                                       lineHeight: 1.25, overflow: 'hidden', wordBreak: 'break-word',
                                       display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 2,
                                     }}>
-                                      {player1Name}
+                                      {p1Display}
                                     </span>
                                     {isPlayer1Winner && (
                                       <span style={{ flexShrink: 0, marginLeft: '8px', width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(245,158,11,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '8px', fontWeight: 800, color: '#050810' }}>W</span>
@@ -3662,7 +3669,7 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                                       lineHeight: 1.25, overflow: 'hidden', wordBreak: 'break-word',
                                       display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 2,
                                     }}>
-                                      {player2Name}
+                                      {p2Display}
                                     </span>
                                     {isPlayer2Winner && (
                                       <span style={{ flexShrink: 0, marginLeft: '8px', width: '18px', height: '18px', borderRadius: '50%', background: 'rgba(245,158,11,0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '8px', fontWeight: 800, color: '#050810' }}>W</span>
@@ -3713,7 +3720,7 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                                   )}
                                   {isOrganizer && dbMatch && !isCompleted && (
                                     <>
-                                      {player1.name !== 'TBD' && player2.name !== 'TBD' ? (
+                                      {!isTbd1 && !isTbd2 ? (
                                         <>
                                         <button
                                           onClick={() => {
@@ -3744,7 +3751,7 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                                           Complete
                                         </button>
                                         </>
-                                      ) : (player1.name !== 'TBD' || player2.name !== 'TBD') ? (
+                                      ) : (!isTbd1 || !isTbd2) ? (
                                         <button
                                           onClick={() => handleGiveByeForMatch(dbMatch.id)}
                                           style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', padding: '6px 8px', background: 'rgba(245,158,11,0.08)', color: '#fbbf24', border: '1px solid rgba(245,158,11,0.2)', borderRadius: '9px', fontSize: '10px', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}

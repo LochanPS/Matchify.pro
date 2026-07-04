@@ -2,7 +2,6 @@
  * Tournament WhatsApp share utility
  * Used by TournamentDiscoveryPage and TournamentDetailPage
  */
-import { sportEmoji } from '../config/sports';
 
 // Always share the LIVE site — never a localhost/preview origin.
 const SHARE_BASE = 'https://matchify.pro';   // full link used for the Web Share API `url` field
@@ -45,16 +44,11 @@ export function buildShareMessage(tournament) {
   // Venue
   const venueStr = [tournament.venue, tournament.city].filter(Boolean).join(', ');
 
-  // Categories — each with its own direct link to that category's draws.
+  // Categories — plain "name — ₹fee", one clean line each (no icon, no "Per Team"
+  // suffix that pushed the line to wrap on mobile).
   const catBlocks = cats.map(c => {
-    const isDoubles = /double/i.test(c.name);
-    const fee = c.entryFee != null
-      ? ` — ₹${formatPrize(c.entryFee)}${isDoubles ? ' Per Team' : ''}`
-      : '';
-    return {
-      title: `${catEmoji} ${c.name}${fee}`,
-      url: `${DISPLAY_BASE}/t/${tRef}/${c.slug || c.id}`,
-    };
+    const fee = c.entryFee != null ? ` — ₹${formatPrize(c.entryFee)}` : '';
+    return { title: `${c.name}${fee}` };
   });
 
   // Awards — use prizeDescription text first, else numeric
@@ -66,9 +60,9 @@ export function buildShareMessage(tournament) {
     const w = cats.reduce((s, c) => s + (c.prizeWinner || 0), 0);
     const r = cats.reduce((s, c) => s + (c.prizeRunnerUp || 0), 0);
     const s = cats.reduce((s, c) => s + (c.prizeSemiFinalist || 0), 0);
-    if (w > 0) awardsLines.push(`🥇 Winner: ₹${formatPrize(w)}`);
-    if (r > 0) awardsLines.push(`🥈 Runner up: ₹${formatPrize(r)}`);
-    if (s > 0) awardsLines.push(`🥉 Semi Finalist: ₹${formatPrize(s)}`);
+    if (w > 0) awardsLines.push(`Winner: ₹${formatPrize(w)}`);
+    if (r > 0) awardsLines.push(`Runner up: ₹${formatPrize(r)}`);
+    if (s > 0) awardsLines.push(`Semi Finalist: ₹${formatPrize(s)}`);
   }
 
   // Contact
@@ -76,56 +70,55 @@ export function buildShareMessage(tournament) {
     tournament.contactPhone || tournament.whatsappNumber || tournament.organizer?.phone;
   const contactName = tournament.organizer?.name || tournament.organizer?.username || '';
 
-  // Clean section divider between the main blocks; a blank line between categories
-  // so each "name + link" is its own clear block (readable on mobile).
+  // Plain, icon-free layout — clean and simple on mobile. Dividers separate the
+  // main sections; each link sits under a clear text label.
   const lines = [];
   const D = '━━━━━━━━━━━━━';
   const div = () => lines.push(D);
 
-  // Header + name
-  lines.push('🏆 *MATCHIFY.PRO PRESENTS*');
+  // Header — brand line, blank line, then the tournament name on its own.
+  lines.push('*MATCHIFY.PRO PRESENTS*');
+  lines.push('');
   lines.push(`*${tournament.name}*`);
   div();
 
-  // Venue / Date / Time — kept together; the long (wrapping) maps link goes last
-  // so it doesn't split the venue and date on a phone.
-  if (venueStr)  lines.push(`📍 ${venueStr}`);
-  lines.push(`📅 ${dateStr} (${dayStr})`);
-  if (timeStr)   lines.push(`⏰ ${timeStr}`);
-  // Short maps link (only when the organizer pinned the venue) → Google Maps.
+  // Venue / date, then the map link under a label.
+  if (venueStr)  lines.push(venueStr);
+  lines.push(`${dateStr} (${dayStr})`);
+  if (timeStr)   lines.push(timeStr);
   if (tournament.latitude != null && tournament.longitude != null) {
-    lines.push(`🗺️ ${DISPLAY_BASE}/t/${tRef}/location`);
+    lines.push('');
+    lines.push('Location');
+    lines.push(`${DISPLAY_BASE}/t/${tRef}/location`);
   }
   div();
 
-  // Categories — a clean, simple list of names + fees (no per-category URL).
-  // The single tournament link at the bottom opens all the draws. This keeps
-  // the message uncrowded.
+  // Categories — plain list of names + fees, one line each.
   if (catBlocks.length) {
-    catBlocks.forEach(({ title }) => {
-      lines.push(title);
-    });
+    catBlocks.forEach(({ title }) => lines.push(title));
     div();
   }
 
-  // Live matches — label and link kept together (no divider between them).
-  lines.push('🔴 Live scores');
-  lines.push(`${DISPLAY_BASE}/t/${tRef}/live`);
-  div();
-
-  // Awards
+  // Awards (if the organizer set prizes).
   if (awardsLines.length) {
-    lines.push('🏆 *Awards*');
+    lines.push('*Awards*');
     awardsLines.forEach(l => lines.push(l));
     div();
   }
 
-  // Contact + links — grouped at the bottom without extra dividers.
+  // Live scores, then the tournament (draws) link right below it — each labelled.
+  lines.push('Live scores');
+  lines.push(`${DISPLAY_BASE}/t/${tRef}/live`);
+  lines.push('');
+  lines.push('Draws');
+  lines.push(urlText);
+  div();
+
+  // Contact + website.
   if (contactName || contactPhone) {
-    lines.push(`📞 ${[contactName, contactPhone].filter(Boolean).join(' · ')}`);
+    lines.push([contactName, contactPhone].filter(Boolean).join(' · '));
   }
-  lines.push(`🔗 ${urlText}`);
-  lines.push('🌐 matchify.pro');
+  lines.push('matchify.pro');
 
   const text = lines.join('\n');
 

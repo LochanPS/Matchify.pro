@@ -87,15 +87,15 @@ export function buildShareMessage(tournament) {
   lines.push(`*${tournament.name}*`);
   div();
 
-  // Venue / Date / Time
+  // Venue / Date / Time — kept together; the long (wrapping) maps link goes last
+  // so it doesn't split the venue and date on a phone.
   if (venueStr)  lines.push(`📍 ${venueStr}`);
-  // Short, clean maps link (only when the organizer pinned the venue) — matches
-  // the category/live link style. /t/<slug>/location redirects to Google Maps.
+  lines.push(`📅 ${dateStr} (${dayStr})`);
+  if (timeStr)   lines.push(`⏰ ${timeStr}`);
+  // Short maps link (only when the organizer pinned the venue) → Google Maps.
   if (tournament.latitude != null && tournament.longitude != null) {
     lines.push(`🗺️ ${DISPLAY_BASE}/t/${tRef}/location`);
   }
-  lines.push(`📅 ${dateStr} (${dayStr})`);
-  if (timeStr)   lines.push(`⏰ ${timeStr}`);
   div();
 
   // Categories — a clean, simple list of names + fees (no per-category URL).
@@ -108,9 +108,8 @@ export function buildShareMessage(tournament) {
     div();
   }
 
-  // Live matches — one tap opens real-time scores & results for all categories.
-  lines.push('🔴 Live Scores & Results');
-  div();
+  // Live matches — label and link kept together (no divider between them).
+  lines.push('🔴 Live scores');
   lines.push(`${DISPLAY_BASE}/t/${tRef}/live`);
   div();
 
@@ -121,13 +120,10 @@ export function buildShareMessage(tournament) {
     div();
   }
 
-  // Contact
+  // Contact + links — grouped at the bottom without extra dividers.
   if (contactName || contactPhone) {
     lines.push(`📞 ${[contactName, contactPhone].filter(Boolean).join(' · ')}`);
-    div();
   }
-
-  // Tournament link
   lines.push(`🔗 ${urlText}`);
   lines.push('🌐 matchify.pro');
 

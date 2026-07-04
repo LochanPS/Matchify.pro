@@ -5521,8 +5521,8 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                 })}
               </div>
             ) : (
-              /* KNOCKOUT: Match-based view (existing code) */
-              <div className="grid grid-cols-2 gap-3">
+              /* KNOCKOUT: Match-based view — single column, P1 vs P2 in one row */
+              <div className="grid grid-cols-1 gap-2">
                 {/* Group slots into pairs (matches) */}
                 {Array.from({ length: Math.ceil(slots.length / 2) }, (_, matchIndex) => {
                   const slot1 = slots[matchIndex * 2];
@@ -5556,11 +5556,11 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                       )}
                     </div>
                     
-                    {/* Players Container - Compact */}
-                    <div className="p-2 space-y-1">
+                    {/* Players Container — P1 vs P2 in one straight line */}
+                    <div className="p-2" style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) auto minmax(0,1fr)', alignItems: 'center', gap: '8px' }}>
                       {/* Player 1 Slot */}
-                      {slot1 && (
-                        <CompactSlotCard 
+                      {slot1 ? (
+                        <CompactSlotCard
                           slot={slot1}
                           assigned={getAssignedPlayer(slot1.slot)}
                           canAccept={selectedPlayer && !getAssignedPlayer(slot1.slot) && !slot1.locked}
@@ -5573,18 +5573,14 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                           onDrop={handleDrop}
                           isDragOver={dragOverSlot === slot1.slot}
                         />
-                      )}
-                      
-                      {/* VS Divider - Minimal */}
-                      <div className="flex items-center gap-1 px-1">
-                        <div className="flex-1 h-px bg-white/10"></div>
-                        <span className="text-[10px] text-gray-600 font-bold">VS</span>
-                        <div className="flex-1 h-px bg-white/10"></div>
-                      </div>
-                      
+                      ) : <div />}
+
+                      {/* VS — center */}
+                      <span className="text-[10px] font-bold px-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>VS</span>
+
                       {/* Player 2 Slot */}
-                      {slot2 && (
-                        <CompactSlotCard 
+                      {slot2 ? (
+                        <CompactSlotCard
                           slot={slot2}
                           assigned={getAssignedPlayer(slot2.slot)}
                           canAccept={selectedPlayer && !getAssignedPlayer(slot2.slot) && !slot2.locked}
@@ -5597,7 +5593,7 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
                           onDrop={handleDrop}
                           isDragOver={dragOverSlot === slot2.slot}
                         />
-                      )}
+                      ) : <div />}
                     </div>
                   </div>
                 );

@@ -361,24 +361,21 @@ router.put('/:matchId/score', authenticate, async (req, res) => {
     const userRoles = req.user.roles || [];
     const userId = req.user.userId || req.user.id;
 
-    // ── Auth: role check first (fast), then assignment check for umpires ──
-    const canScore = userRoles.some(r => ['UMPIRE', 'ADMIN', 'ORGANIZER'].includes(r));
-    if (!canScore) {
-      return res.status(403).json({ success: false, message: 'Not authorized to update match scores' });
+    // ── Auth: caller must be the assigned umpire, THIS tournament's organizer, or an admin.
+    // A plain role check is not enough — every user holds the ORGANIZER/UMPIRE role, so we
+    // must scope to this match's tournament/assignment (mirrors start/pause/resume/end/change-winner).
+    const authMatch = await prisma.match.findUnique({
+      where: { id: matchId },
+      select: { umpireId: true, tournament: { select: { organizerId: true } } }
+    });
+    if (!authMatch) {
+      return res.status(404).json({ success: false, message: 'Match not found' });
     }
-
-    // For umpires: verify assigned to this specific match (admins/organisers skip)
-    if (userRoles.includes('UMPIRE') && !userRoles.includes('ADMIN') && !userRoles.includes('ORGANIZER')) {
-      const matchAssignment = await prisma.match.findUnique({
-        where: { id: matchId },
-        select: { umpireId: true }
-      });
-      if (!matchAssignment) {
-        return res.status(404).json({ success: false, message: 'Match not found' });
-      }
-      if (matchAssignment.umpireId !== userId) {
-        return res.status(403).json({ success: false, message: 'Not authorized: not assigned as umpire for this match' });
-      }
+    const isAdmin = userRoles.includes('ADMIN');
+    const isOrganizer = authMatch.tournament?.organizerId === userId;
+    const isAssignedUmpire = authMatch.umpireId === userId;
+    if (!isAdmin && !isOrganizer && !isAssignedUmpire) {
+      return res.status(403).json({ success: false, message: 'Not authorized to update this match score' });
     }
 
     // ── Point-by-point mode: { player: 'player1'|'player2' } ─────────────

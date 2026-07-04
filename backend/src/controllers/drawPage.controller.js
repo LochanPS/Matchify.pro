@@ -23,12 +23,18 @@ export const getDrawPage = async (req, res) => {
     const { tournamentId, categoryId } = req.params;
 
     // ── Redis cache check ──────────────────────────────────────────────────────
-    // Collapses N concurrent viewers into 1 DB hit per 10s window.
+    // Collapses N concurrent viewers into 1 DB hit per 10s window. BUT when the
+    // client explicitly asks for fresh data (Cache-Control / Pragma: no-cache —
+    // which the app sends right after every action), skip the cache so state
+    // changes (e.g. a new BYE) render immediately instead of after the 10s window.
+    const wantsFresh = /no-cache/i.test(req.headers['cache-control'] || '') || /no-cache/i.test(req.headers['pragma'] || '');
     const cacheKey = getDrawPageCacheKey(tournamentId, categoryId);
-    const cached = await cacheGet(cacheKey);
-    if (cached) {
-      res.set({ 'Cache-Control': 'public, s-maxage=10, stale-while-revalidate=30' });
-      return res.json(cached);
+    if (!wantsFresh) {
+      const cached = await cacheGet(cacheKey);
+      if (cached) {
+        res.set({ 'Cache-Control': 'public, s-maxage=10, stale-while-revalidate=30' });
+        return res.json(cached);
+      }
     }
 
     // ─── Phase 1: All independent DB queries in parallel ──────────────────────

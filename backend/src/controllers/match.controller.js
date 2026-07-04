@@ -680,6 +680,14 @@ const giveBye = async (req, res) => {
       }
     }
 
+    // Invalidate the draw-page cache so the new BYE state shows immediately
+    // (the organiser's own refetch already bypasses the cache; this is for other viewers).
+    try {
+      const { cacheDel } = await import('../services/redisService.js');
+      const { getDrawPageCacheKey } = await import('./drawPage.controller.js');
+      await cacheDel(getDrawPageCacheKey(match.tournamentId, match.categoryId));
+    } catch { /* non-fatal */ }
+
     res.json({
       success: true,
       message: isFinal ? 'Finals completed with bye! Category winner recorded.' : 'Bye given successfully',

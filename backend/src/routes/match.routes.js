@@ -895,13 +895,13 @@ const endMatchHandler = async (req, res) => {
             }
           });
 
-          // Rank: PTS → PD (point difference) → TP (total points scored)
+          // Rank: PTS → TP (total points scored) → PD (point difference)
           const sorted = Object.values(standings).sort((a, b) => {
             if (b.points !== a.points) return b.points - a.points;
+            if (b.totalPoints !== a.totalPoints) return b.totalPoints - a.totalPoints;
             const aDiff = a.totalPoints - a.totalPointsAgainst;
             const bDiff = b.totalPoints - b.totalPointsAgainst;
-            if (bDiff !== aDiff) return bDiff - aDiff;
-            return b.totalPoints - a.totalPoints;
+            return bDiff - aDiff;
           });
 
           await tx.category.update({
@@ -963,10 +963,11 @@ const endMatchHandler = async (req, res) => {
               });
               targetGroup.participants.sort((a, b) => {
                 if (b.points !== a.points) return b.points - a.points;
+                const aTp = a.totalPoints || 0, bTp = b.totalPoints || 0;
+                if (bTp !== aTp) return bTp - aTp;
                 const aDiff = (a.totalPoints || 0) - (a.totalPointsAgainst || 0);
                 const bDiff = (b.totalPoints || 0) - (b.totalPointsAgainst || 0);
-                if (bDiff !== aDiff) return bDiff - aDiff;
-                return (b.totalPoints || 0) - (a.totalPoints || 0);
+                return bDiff - aDiff;
               });
               const mib = targetGroup.matches?.find(m => m.matchNumber === match.matchNumber);
               if (mib) { mib.status = 'completed'; mib.winner = winnerId === match.player1Id ? 1 : 2; mib.winnerId = winnerId; mib.score = finalScore; }
@@ -1300,10 +1301,11 @@ router.put('/:matchId/change-winner', authenticate, async (req, res) => {
             });
             targetGroup.participants.sort((a, b) => {
               if (b.points !== a.points) return b.points - a.points;
+              const aTp = a.totalPoints || 0, bTp = b.totalPoints || 0;
+              if (bTp !== aTp) return bTp - aTp;
               const aDiff = (a.totalPoints || 0) - (a.totalPointsAgainst || 0);
               const bDiff = (b.totalPoints || 0) - (b.totalPointsAgainst || 0);
-              if (bDiff !== aDiff) return bDiff - aDiff;
-              return (b.totalPoints || 0) - (a.totalPoints || 0);
+              return bDiff - aDiff;
             });
             // Update the match result in bracketJson too
             const mib = targetGroup.matches?.find(m => m.matchNumber === match.matchNumber);

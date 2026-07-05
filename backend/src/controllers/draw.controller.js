@@ -3,6 +3,19 @@ import seedingService from '../services/seeding.service.js';
 import bracketService from '../services/bracket.service.js';
 import matchService from '../services/match.service.js';
 
+// Invalidate the cached draw-page payload so the very next read returns fresh
+// data instead of a stale pre-mutation bracket. Mirrors what giveBye does.
+// Non-critical: a cache miss just means the DB is queried — never block on it.
+const invalidateDrawPageCache = async (tournamentId, categoryId) => {
+  try {
+    const { cacheDel } = await import('../services/redisService.js');
+    const { getDrawPageCacheKey } = await import('./drawPage.controller.js');
+    await cacheDel(getDrawPageCacheKey(tournamentId, categoryId));
+  } catch (e) {
+    console.warn('⚠️ Draw-page cache invalidation failed (non-critical):', e?.message);
+  }
+};
+
 /**
  * Helper function to get player name from registration
  * Handles both user registrations and guest registrations
@@ -2934,6 +2947,9 @@ const arrangeKnockoutMatchups = async (req, res) => {
     // No need to re-set on re-arrange (bracket structure doesn't change, only players do).
     console.log('✅ Knockout draw arranged successfully!');
 
+    // Bust the cached draw page so the arranged bracket shows immediately.
+    await invalidateDrawPageCache(tournamentId, categoryId);
+
     res.json({
       success: true,
       message: 'Knockout matchups arranged successfully'
@@ -3169,6 +3185,9 @@ const continueToKnockout = async (req, res) => {
 
     console.log('✅ Knockout stage created successfully!');
 
+    // Bust the cached draw page so the new knockout stage shows immediately.
+    await invalidateDrawPageCache(tournamentId, categoryId);
+
     res.json({
       success: true,
       message: `Knockout stage created with ${knockoutDrawSize} players!`,
@@ -3233,6 +3252,10 @@ const repairKnockoutRelationships = async (req, res) => {
       await prisma.match.update({ where: { id: parentMatch.id }, data: updateData });
       advancedCount++;
     }
+
+    // Only bust the cache when the bracket actually changed — the frontend
+    // auto-calls this on every knockout-stage view, so avoid needless busts.
+    if (advancedCount > 0) await invalidateDrawPageCache(tournamentId, categoryId);
 
     res.json({
       success: true,

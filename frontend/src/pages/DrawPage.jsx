@@ -138,10 +138,14 @@ const DrawPage = () => {
   const [removingPlayer, setRemovingPlayer] = useState(false);
 
   // ─── Combined draw-page fetch (single round trip, auto-retry once on 500) ───
-  const fetchDrawPageFull = async (catId, _retryCount = 0) => {
+  const fetchDrawPageFull = async (catId, _retryCount = 0, force = false) => {
     if (!tournamentId || !catId) return;
-    // Prevent overlapping fetches — if one is already in-flight, skip
-    if (fetchInProgressRef.current && _retryCount === 0) return;
+    // Prevent overlapping fetches — if one is already in-flight, skip. BUT a
+    // user-triggered refresh after a mutation (arrange KO, give bye, end
+    // category, restart…) passes force=true so the refresh can NEVER silently
+    // no-op just because a background poll happened to be running. That skip
+    // was the cause of "I did the action but the screen didn't update".
+    if (fetchInProgressRef.current && _retryCount === 0 && !force) return;
     fetchInProgressRef.current = true;
 
     // Draws change constantly during a live tournament — NEVER seed the view
@@ -615,7 +619,7 @@ const DrawPage = () => {
       });
 
       // Refresh everything with fresh data
-      await fetchDrawPageFull(activeCategory.id);
+      await fetchDrawPageFull(activeCategory.id, 0, true);
 
       const isHybrid = bracket?.format === 'ROUND_ROBIN_KNOCKOUT';
       setSuccess(
@@ -652,7 +656,7 @@ const DrawPage = () => {
       // Use full draw-page refresh so tournament/categories/matches/stats all update correctly.
       // fetchBracket uses getDraw which has matchNumber-based KO lookup and can miss
       // globally-numbered KO matches created by assignPlayersToDraw.
-      await fetchDrawPageFull(activeCategory.id);
+      await fetchDrawPageFull(activeCategory.id, 0, true);
 
 
       // Auto-switch to Knockout tab
@@ -688,7 +692,7 @@ const DrawPage = () => {
       setShowEndTournamentModal(false);
 
       // Refresh everything (bracket + matches + stats + tournament/categories)
-      await fetchDrawPageFull(activeCategory.id);
+      await fetchDrawPageFull(activeCategory.id, 0, true);
 
       setTimeout(() => setSuccess(null), 5000);
     } catch (err) {
@@ -904,7 +908,7 @@ const DrawPage = () => {
       setShowResultModal(false);
       setResultMatch(null);
       // Full refresh — updates bracket, matches, standings, tournament/category status
-      await fetchDrawPageFull(activeCategory.id);
+      await fetchDrawPageFull(activeCategory.id, 0, true);
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       console.error('Error saving match result:', err);
@@ -1494,7 +1498,7 @@ const DrawPage = () => {
             action: async () => {
               setShowActionsSheet(false); setSelectedAction(null);
               clearDrawCache(tournamentId, activeCategory?.id);
-              await fetchDrawPageFull(activeCategory?.id);
+              await fetchDrawPageFull(activeCategory?.id, 0, true);
               setShowArrangeMatchupsModal(true);
             },
           }] : []),
@@ -1724,7 +1728,7 @@ const DrawPage = () => {
             action: async () => {
               setActiveStepPopup(null);
               clearDrawCache(tournamentId, activeCategory?.id);
-              await fetchDrawPageFull(activeCategory?.id);
+              await fetchDrawPageFull(activeCategory?.id, 0, true);
               setShowArrangeMatchupsModal(true);
             },
           },
@@ -2083,7 +2087,7 @@ const DrawPage = () => {
                   try {
                     const response = await api.post(`/tournaments/${tournamentId}/categories/${activeCategory.id}/draw/continue-to-knockout`);
 
-                    await fetchDrawPageFull(activeCategory.id);
+                    await fetchDrawPageFull(activeCategory.id, 0, true);
                     
                     setSuccess(response.data.message || 'Knockout stage started successfully!');
                     setShowContinueKnockoutModal(false);
@@ -2236,7 +2240,7 @@ const DrawPage = () => {
                       selectedPlayerIds: selectedPlayersForKnockout
                     });
                     
-                    await fetchDrawPageFull(activeCategory.id);
+                    await fetchDrawPageFull(activeCategory.id, 0, true);
 
                     setSuccess('Knockout stage created! Players have been assigned.');
                     setShowSelectPlayersModal(false);

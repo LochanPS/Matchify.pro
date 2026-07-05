@@ -3353,6 +3353,14 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
     return roundMatches[matchIdx];
   };
 
+  // Pick whichever source has a REAL player (an id). The live match poll
+  // (getMatches) can momentarily return a {name:'TBD'} placeholder (no id) for
+  // a knockout slot; a plain `dbMatch.player1 || match.player1` would then pick
+  // that placeholder over the bracket's real, arranged name and the slot would
+  // blank on every poll. Preferring the entry with an id makes a real name
+  // always win, so an arranged knockout never disappears.
+  const pickPlayer = (a, b) => (a?.id ? a : (b?.id ? b : (a || b || null)));
+
   // Navigate to conduct page for BYE matches (no umpire needed)
   const handleGiveByeForMatch = (matchId) => {
     navigate(`/match/${matchId}/conduct`);
@@ -3382,7 +3390,7 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
   const firstRoundPlayers = [];
   (data.rounds[0]?.matches || []).forEach((match, mi) => {
     const dbm = findMatch(0, mi);
-    [dbm?.player1 || match.player1, dbm?.player2 || match.player2].forEach((p) => {
+    [pickPlayer(dbm?.player1, match.player1), pickPlayer(dbm?.player2, match.player2)].forEach((p) => {
       const nm = p ? getPlayerDisplay(p) : null;
       if (nm && nm !== 'TBD' && p?.id && !/^slot\s*\d+$/i.test(nm.trim())) firstRoundPlayers.push({ name: nm, mi });
     });
@@ -3516,8 +3524,8 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                       {round.matches.map((match, mi) => {
                         const dbMatch = findMatch(ri, mi);
 
-                        const player1 = dbMatch?.player1 || match.player1 || { name: 'TBD' };
-                        const player2 = dbMatch?.player2 || match.player2 || { name: 'TBD' };
+                        const player1 = pickPlayer(dbMatch?.player1, match.player1) || { name: 'TBD' };
+                        const player2 = pickPlayer(dbMatch?.player2, match.player2) || { name: 'TBD' };
 
                         const player1Name = getPlayerDisplay(player1);
                         const player2Name = getPlayerDisplay(player2);

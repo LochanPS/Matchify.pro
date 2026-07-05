@@ -6148,6 +6148,27 @@ const UmpireQueueModal = ({ tournamentId, umpires: initialUmpires, onClose, onUm
     return Array.from(groups.entries()); // [ [catName, matches[]], ... ]
   })();
 
+  // Within a round-robin category, split matches by their group (A, B, C…) so
+  // each group is clearly separated. Returns null for knockout-only categories
+  // (no groupName) → they stay a flat list. Knockout-stage matches inside a RR
+  // category are collected under a trailing "Knockout" section.
+  const subGroupsFor = (catMatches) => {
+    if (!catMatches.some(m => m.groupName)) return null;
+    const map = new Map();
+    catMatches.forEach(m => {
+      const key = m.groupName
+        ? (/^group/i.test(m.groupName) ? m.groupName : `Group ${m.groupName}`)
+        : 'Knockout';
+      if (!map.has(key)) map.set(key, []);
+      map.get(key).push(m);
+    });
+    return Array.from(map.entries()).sort((a, b) => {
+      if (a[0] === 'Knockout') return 1;
+      if (b[0] === 'Knockout') return -1;
+      return a[0].localeCompare(b[0], undefined, { numeric: true });
+    });
+  };
+
   const addToQueue   = (id) => setQueues(p => ({ ...p, [selectedUmpireId]: [...(p[selectedUmpireId] || []), id] }));
   const removeFromQueue = (id) => setQueues(p => ({ ...p, [selectedUmpireId]: (p[selectedUmpireId] || []).filter(x => x !== id) }));
 
@@ -6180,6 +6201,41 @@ const UmpireQueueModal = ({ tournamentId, umpires: initialUmpires, onClose, onUm
       p2 = n1 && n2 ? `${n1} / ${n2}` : n1 || n2 || null;
     }
     return { matchNumber: m.matchNumber, p1: p1 || 'TBD', p2: p2 || 'TBD', cat: m.category?.name || '' };
+  };
+
+  // Single source of truth for an available-match card — used by both the flat
+  // (knockout) list and the per-group (round-robin) list so styling stays identical.
+  const renderAvailableMatch = (m) => {
+    const info = getMatchInfo(m.id);
+    const p1parts = info.p1.split(' / ');
+    const p2parts = info.p2.split(' / ');
+    return (
+      <button key={m.id} onClick={() => addToQueue(m.id)}
+        className="w-full flex items-center gap-2 rounded-xl px-3 py-2.5 text-left transition-all hover:scale-[1.01]"
+        style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+        <Plus className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#60a5fa' }} />
+        <div className="flex-1 min-w-0">
+          <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.38)', fontWeight: 700, marginBottom: 3 }}>
+            M{info.matchNumber}
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: 3 }}>
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,0.9)', lineHeight: 1.2 }}>{p1parts[0]}</div>
+              {p1parts[1] && <div style={{ fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.4)', lineHeight: 1.2 }}>/ {p1parts[1]}</div>}
+            </div>
+            <span style={{ fontSize: 8, fontWeight: 800, color: 'rgba(245,158,11,0.6)', padding: '1px 4px', background: 'rgba(245,158,11,0.08)', borderRadius: 3 }}>vs</span>
+            <div style={{ textAlign: 'right' }}>
+              <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,0.9)', lineHeight: 1.2 }}>{p2parts[0]}</div>
+              {p2parts[1] && <div style={{ fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.4)', lineHeight: 1.2 }}>/ {p2parts[1]}</div>}
+            </div>
+          </div>
+        </div>
+        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded flex-shrink-0"
+          style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.35)' }}>
+          {m.status}
+        </span>
+      </button>
+    );
   };
 
   const saveQueue = async () => {
@@ -6413,50 +6469,41 @@ const UmpireQueueModal = ({ tournamentId, umpires: initialUmpires, onClose, onUm
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    {availableByCategory.map(([catName, catMatches]) => (
-                      <div key={catName}>
-                        {/* Category header — clear separator between categories */}
-                        <div className="flex items-center gap-2 mb-1.5">
-                          <span style={{ fontSize: 11, fontWeight: 900, color: '#FCD34D', letterSpacing: '0.03em' }}>{catName}</span>
-                          <span style={{ fontSize: 9, fontWeight: 800, color: '#FCD34D', background: 'rgba(245,158,11,0.14)', padding: '1px 7px', borderRadius: 10 }}>{catMatches.length}</span>
-                          <div style={{ flex: 1, height: 1, background: 'rgba(245,158,11,0.2)' }} />
-                        </div>
-                        <div className="space-y-1.5">
-                          {catMatches.map(m => {
-                            const info = getMatchInfo(m.id);
-                            const p1parts = info.p1.split(' / ');
-                            const p2parts = info.p2.split(' / ');
-                            return (
-                              <button key={m.id} onClick={() => addToQueue(m.id)}
-                                className="w-full flex items-center gap-2 rounded-xl px-3 py-2.5 text-left transition-all hover:scale-[1.01]"
-                                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                                <Plus className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#60a5fa' }} />
-                                <div className="flex-1 min-w-0">
-                                  <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.38)', fontWeight: 700, marginBottom: 3 }}>
-                                    M{info.matchNumber}
+                    {availableByCategory.map(([catName, catMatches]) => {
+                      const subGroups = subGroupsFor(catMatches);
+                      return (
+                        <div key={catName}>
+                          {/* Category header — clear separator between categories */}
+                          <div className="flex items-center gap-2 mb-1.5">
+                            <span style={{ fontSize: 11, fontWeight: 900, color: '#FCD34D', letterSpacing: '0.03em' }}>{catName}</span>
+                            <span style={{ fontSize: 9, fontWeight: 800, color: '#FCD34D', background: 'rgba(245,158,11,0.14)', padding: '1px 7px', borderRadius: 10 }}>{catMatches.length}</span>
+                            <div style={{ flex: 1, height: 1, background: 'rgba(245,158,11,0.2)' }} />
+                          </div>
+                          {subGroups ? (
+                            /* Round-robin — split by group (A, B, C…) with clear sub-headers */
+                            <div className="space-y-2.5">
+                              {subGroups.map(([groupLabel, groupMatches]) => (
+                                <div key={groupLabel}>
+                                  <div className="flex items-center gap-2 mb-1" style={{ paddingLeft: 2 }}>
+                                    <span style={{ fontSize: 10, fontWeight: 900, color: '#c4b5fd', letterSpacing: '0.03em' }}>{groupLabel}</span>
+                                    <span style={{ fontSize: 8, fontWeight: 800, color: '#c4b5fd', background: 'rgba(168,85,247,0.16)', padding: '1px 6px', borderRadius: 10 }}>{groupMatches.length}</span>
+                                    <div style={{ flex: 1, height: 1, background: 'rgba(168,85,247,0.18)' }} />
                                   </div>
-                                  <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: 3 }}>
-                                    <div>
-                                      <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,0.9)', lineHeight: 1.2 }}>{p1parts[0]}</div>
-                                      {p1parts[1] && <div style={{ fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.4)', lineHeight: 1.2 }}>/ {p1parts[1]}</div>}
-                                    </div>
-                                    <span style={{ fontSize: 8, fontWeight: 800, color: 'rgba(245,158,11,0.6)', padding: '1px 4px', background: 'rgba(245,158,11,0.08)', borderRadius: 3 }}>vs</span>
-                                    <div style={{ textAlign: 'right' }}>
-                                      <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,0.9)', lineHeight: 1.2 }}>{p2parts[0]}</div>
-                                      {p2parts[1] && <div style={{ fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.4)', lineHeight: 1.2 }}>/ {p2parts[1]}</div>}
-                                    </div>
+                                  <div className="space-y-1.5">
+                                    {groupMatches.map(renderAvailableMatch)}
                                   </div>
                                 </div>
-                                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded flex-shrink-0"
-                                  style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.35)' }}>
-                                  {m.status}
-                                </span>
-                              </button>
-                            );
-                          })}
+                              ))}
+                            </div>
+                          ) : (
+                            /* Knockout-only category — flat list */
+                            <div className="space-y-1.5">
+                              {catMatches.map(renderAvailableMatch)}
+                            </div>
+                          )}
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>

@@ -356,7 +356,11 @@ const DrawPage = () => {
     autoRepairDoneRef.current = activeCategory.id;
     api
       .post(`/tournaments/${tournamentId}/categories/${activeCategory.id}/draw/repair-knockout`)
-      .then(() => fetchBracket())
+      // Refresh via the draw-page endpoint (getDrawPage) — NOT fetchBracket.
+      // fetchBracket uses getDraw, which has no ROUND_ROBIN_KNOCKOUT name-
+      // resolution branch, so it would blank the knockout bracket that the
+      // initial load rendered correctly. force=true so a live poll can't skip it.
+      .then(() => fetchDrawPageFull(activeCategory.id, 0, true))
       .catch((err) => {
         // Log for debugging but don't surface to user — repair failure is non-critical
         console.warn('⚠️ Auto-repair knockout failed (non-critical):', err?.response?.status, err?.message);
@@ -765,7 +769,9 @@ const DrawPage = () => {
           player2Id: bracketMatch.player2?.id
         });
         matchRecord = response.data.match;
-        fetchBracket();
+        // Use the reliable draw-page refresh (same reason as the auto-repair
+        // effect — fetchBracket/getDraw can blank a ROUND_ROBIN_KNOCKOUT bracket).
+        fetchDrawPageFull(activeCategory.id, 0, true);
       } catch (err) {
         console.error('Error creating match:', err);
         setError(getErrorMessage(err, 'Failed to create match. Please try again.'));

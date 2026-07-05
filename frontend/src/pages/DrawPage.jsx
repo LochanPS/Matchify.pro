@@ -2305,6 +2305,7 @@ const DrawPage = () => {
       {showUmpireModal && selectedMatchForUmpire && (
         <AssignUmpireModal
           match={selectedMatchForUmpire}
+          category={activeCategory}
           umpires={tournamentUmpires}
           loadingUmpires={loadingUmpires}
           umpiresError={umpiresError}
@@ -5516,7 +5517,7 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
 };
 
 // Assign Umpire Modal
-const AssignUmpireModal = ({ match, umpires, loadingUmpires, umpiresError, onRetryUmpires, onClose, onAssign, tournamentId, onUmpireAdded }) => {
+const AssignUmpireModal = ({ match, category, umpires, loadingUmpires, umpiresError, onRetryUmpires, onClose, onAssign, tournamentId, onUmpireAdded }) => {
   const navigate = useNavigate();
   const [selectedUmpire, setSelectedUmpire] = useState(match?.umpireId || null);
   const [assigning, setAssigning] = useState(false);
@@ -5564,6 +5565,22 @@ const AssignUmpireModal = ({ match, umpires, loadingUmpires, umpiresError, onRet
                 <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>
                   Match {match?.matchNumber} • {getPlayerDisplay(match?.player1)} vs {getPlayerDisplay(match?.player2)}
                 </p>
+                {/* Category + group differentiation — which category, and (for
+                    round-robin) which group this match belongs to. */}
+                {(category?.name || match?.groupName) && (
+                  <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                    {category?.name && (
+                      <span style={{ fontSize: 9, fontWeight: 800, color: '#FCD34D', background: 'rgba(245,158,11,0.14)', padding: '2px 8px', borderRadius: 8, letterSpacing: '0.02em' }}>
+                        {category.name}
+                      </span>
+                    )}
+                    {match?.groupName && (
+                      <span style={{ fontSize: 9, fontWeight: 800, color: '#c4b5fd', background: 'rgba(168,85,247,0.16)', padding: '2px 8px', borderRadius: 8, letterSpacing: '0.02em' }}>
+                        {/^group/i.test(match.groupName) ? match.groupName : `Group ${match.groupName}`}
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
             <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-xl flex-shrink-0 transition-all"

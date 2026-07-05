@@ -269,14 +269,15 @@ function AppContent() {
         />
       )}
 
-      {/* Page content — constrained to 480px on tablets/wide screens so the
-          app looks identical on every phone. On phones ≤480px this wrapper
-          is just 100% width — zero visual change for mobile users.
+      {/* Page content — full width on every screen size so the app covers the
+          page end to end consistently on phones, tablets and desktops (no
+          centered narrow column with side gaps on wider screens). On phones
+          this is identical to before (was already 100% width ≤480px).
           Admin dashboard excluded (it has its own full-width sidebar layout).
           Bottom padding added when bottom nav is visible so content is never
           hidden behind the fixed bar (height + device safe-area). */}
       <div style={{
-        ...(!isAdminRoute ? { maxWidth: '480px', margin: '0 auto', position: 'relative' } : {}),
+        ...(!isAdminRoute ? { width: '100%', position: 'relative' } : {}),
         ...(showBottomNav ? { paddingBottom: `calc(${BOTTOM_NAV_HEIGHT}px + env(safe-area-inset-bottom, 0px))` } : {}),
       }}>
       <ChunkErrorBoundary>

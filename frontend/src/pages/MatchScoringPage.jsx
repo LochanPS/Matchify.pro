@@ -490,7 +490,7 @@ const MatchScoringPage = () => {
       </div>
 
       {/* ── Body ──────────────────────────────────────────────────────────── */}
-      <div className="max-w-lg mx-auto px-4 pt-5 pb-28">
+      <div className="w-full px-4 pt-5 pb-28">
 
         {/* Match info */}
         <div className="text-center mb-4">
@@ -689,7 +689,7 @@ const MatchScoringPage = () => {
       {/* ── START MATCH sticky bottom ─────────────────────────────────────── */}
       {canStart && (
         <div className="fixed bottom-0 left-0 right-0 p-4" style={{ background: 'rgba(7,7,26,0.97)', borderTop: `1px solid rgba(245,158,11,0.15)` }}>
-          <div className="max-w-lg mx-auto">
+          <div className="w-full">
             <button onClick={handleStartMatch} disabled={saving}
               className="w-full py-4 rounded-2xl font-black text-base transition-all disabled:opacity-50 flex items-center justify-center gap-2"
               style={{ background: 'linear-gradient(135deg,#F59E0B,#D97706)', color: '#050810', boxShadow: '0 4px 20px rgba(245,158,11,0.4)' }}>

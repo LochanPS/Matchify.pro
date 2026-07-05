@@ -409,12 +409,25 @@ const MatchScoringPage = () => {
   const canStart = match.status === 'PENDING' || match.status === 'SCHEDULED' || match.status === 'READY';
   const canScore = !isCompleted && !isPaused;
 
-  const p1Display = match.player1
-    ? (match.player1.partnerName ? `${match.player1.name} & ${match.player1.partnerName}` : match.player1.name)
-    : 'Player 1';
-  const p2Display = match.player2
-    ? (match.player2.partnerName ? `${match.player2.name} & ${match.player2.partnerName}` : match.player2.name)
-    : 'Player 2';
+  // Split a player/pair into two display lines so doubles partners always show
+  // fully instead of being truncated. Handles both data shapes: separate
+  // name + partnerName, and a single combined "Name1 / Name2" string.
+  const pairLines = (player, fallback) => {
+    if (!player) return [fallback, null];
+    let l1 = (player.name || fallback || '').trim();
+    let l2 = player.partnerName ? String(player.partnerName).trim() : null;
+    if (!l2 && l1.includes('/')) {
+      const parts = l1.split('/').map(s => s.trim()).filter(Boolean);
+      l1 = parts[0] || l1;
+      l2 = parts[1] || null;
+    }
+    return [l1, l2];
+  };
+  const [p1l1, p1l2] = pairLines(match.player1, 'Player 1');
+  const [p2l1, p2l2] = pairLines(match.player2, 'Player 2');
+  // Full single-string names for the winner modal / end-match / start button.
+  const p1Display = p1l2 ? `${p1l1} / ${p1l2}` : p1l1;
+  const p2Display = p2l2 ? `${p2l1} / ${p2l2}` : p2l1;
 
   const setsToWin = Math.ceil(maxSets / 2);
 
@@ -423,8 +436,8 @@ const MatchScoringPage = () => {
   // their avatar, name, live score and sets-won. Each side's Point/Undo stays
   // wired to `.num`, so scoring always hits the correct real player.
   const pdata = {
-    1: { num: 1, name: p1Display, obj: match.player1, sets: p1Sets, score: currentSet.player1 },
-    2: { num: 2, name: p2Display, obj: match.player2, sets: p2Sets, score: currentSet.player2 },
+    1: { num: 1, l1: p1l1, l2: p1l2, obj: match.player1, sets: p1Sets, score: currentSet.player1 },
+    2: { num: 2, l1: p2l1, l2: p2l2, obj: match.player2, sets: p2Sets, score: currentSet.player2 },
   };
   const left = swapped ? pdata[2] : pdata[1];
   const right = swapped ? pdata[1] : pdata[2];
@@ -563,7 +576,8 @@ const MatchScoringPage = () => {
             {/* Left player */}
             <div className="rounded-2xl px-2 py-4 text-center" style={{ background: 'rgba(255,255,255,0.02)', border: `1px solid ${B.border}` }}>
               {sideAvatar(left)}
-              <p className="text-sm font-black text-white leading-tight mt-2 px-1" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{left.name}</p>
+              <p className="text-sm font-black text-white leading-tight mt-2 px-0.5" style={{ wordBreak: 'break-word' }}>{left.l1}</p>
+              {left.l2 && <p className="text-xs font-bold leading-tight mt-0.5 px-0.5" style={{ color: '#67e8f9', wordBreak: 'break-word' }}>/ {left.l2}</p>}
               <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.5)' }}>Sets Won</p>
               <div className="mx-auto mt-1.5 w-12 py-1 rounded-lg text-base font-black"
                 style={left.sets > right.sets
@@ -584,7 +598,8 @@ const MatchScoringPage = () => {
             {/* Right player */}
             <div className="rounded-2xl px-2 py-4 text-center" style={{ background: 'rgba(255,255,255,0.02)', border: `1px solid ${B.border}` }}>
               {sideAvatar(right)}
-              <p className="text-sm font-black text-white leading-tight mt-2 px-1" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{right.name}</p>
+              <p className="text-sm font-black text-white leading-tight mt-2 px-0.5" style={{ wordBreak: 'break-word' }}>{right.l1}</p>
+              {right.l2 && <p className="text-xs font-bold leading-tight mt-0.5 px-0.5" style={{ color: '#67e8f9', wordBreak: 'break-word' }}>/ {right.l2}</p>}
               <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.5)' }}>Sets Won</p>
               <div className="mx-auto mt-1.5 w-12 py-1 rounded-lg text-base font-black"
                 style={right.sets > left.sets
@@ -616,7 +631,8 @@ const MatchScoringPage = () => {
             {/* Left player controls */}
             <div className="rounded-2xl overflow-hidden" style={{ background: B.card, border: `1px solid ${B.border}`, opacity: isPaused ? 0.45 : 1 }}>
               <div className="px-3 pt-3 pb-2 text-center border-b" style={{ borderColor: B.border }}>
-                <p className="text-xs font-black text-white truncate">{left.name}</p>
+                <p className="text-xs font-black text-white leading-tight" style={{ wordBreak: 'break-word' }}>{left.l1}</p>
+                {left.l2 && <p className="text-[11px] font-bold leading-tight" style={{ color: '#67e8f9', wordBreak: 'break-word' }}>/ {left.l2}</p>}
               </div>
               <div className="p-3 space-y-2">
                 <button onClick={() => addPoint(left.num)} disabled={isPaused || !canScore}
@@ -635,7 +651,8 @@ const MatchScoringPage = () => {
             {/* Right player controls */}
             <div className="rounded-2xl overflow-hidden" style={{ background: B.card, border: `1px solid ${B.border}`, opacity: isPaused ? 0.45 : 1 }}>
               <div className="px-3 pt-3 pb-2 text-center border-b" style={{ borderColor: B.border }}>
-                <p className="text-xs font-black text-white truncate">{right.name}</p>
+                <p className="text-xs font-black text-white leading-tight" style={{ wordBreak: 'break-word' }}>{right.l1}</p>
+                {right.l2 && <p className="text-[11px] font-bold leading-tight" style={{ color: '#67e8f9', wordBreak: 'break-word' }}>/ {right.l2}</p>}
               </div>
               <div className="p-3 space-y-2">
                 <button onClick={() => addPoint(right.num)} disabled={isPaused || !canScore}

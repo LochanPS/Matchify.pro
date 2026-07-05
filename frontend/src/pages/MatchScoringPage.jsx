@@ -5,7 +5,7 @@ import api from '../utils/api';
 import { useAuth } from '../contexts/AuthContext';
 import {
   Play, Pause, Trophy, Plus, Minus,
-  AlertTriangle, X, Clock, Calendar, ArrowLeft
+  AlertTriangle, X, Clock, Calendar, ArrowLeft, ArrowLeftRight, User
 } from 'lucide-react';
 import { pauseTimer, resumeTimer } from '../api/matches';
 import SlideToConfirm from '../components/SlideToConfirm';
@@ -70,6 +70,7 @@ const MatchScoringPage = () => {
   const [showEndModal, setShowEndModal] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [timerData, setTimerData] = useState(null);
+  const [swapped, setSwapped] = useState(false); // visual side-swap (left↔right); persisted in score JSON
 
   const [showSetCompleteModal, setShowSetCompleteModal] = useState(false);
   const [completedSetData, setCompletedSetData] = useState(null);
@@ -105,6 +106,7 @@ const MatchScoringPage = () => {
         setScore(matchData.score);
         setTimerData(matchData.score.timer);
         setIsPaused(matchData.score.timer?.isPaused || false);
+        setSwapped(!!matchData.score.swapped);
       } else if (matchData.scoreJson) {
         const parsed = typeof matchData.scoreJson === 'string'
           ? JSON.parse(matchData.scoreJson)
@@ -113,6 +115,7 @@ const MatchScoringPage = () => {
           setScore(parsed);
           setTimerData(parsed.timer);
           setIsPaused(parsed.timer?.isPaused || false);
+          setSwapped(!!parsed.swapped);
         }
       }
     } catch (err) {
@@ -281,6 +284,18 @@ const MatchScoringPage = () => {
     // No API call on undo — only set completion triggers save
   };
 
+  // Swap which player is shown on the left vs right. Purely visual — the
+  // underlying player1/player2 identities (and all scores/stats mapped to them)
+  // never change, so points still land on the correct player after swapping.
+  // Persisted into the score JSON so the sides survive a page refresh.
+  const toggleSwap = () => {
+    const next = !swapped;
+    setSwapped(next);
+    const ns = { ...score, swapped: next };
+    updateScore(ns);
+    saveScoreToApi(ns);
+  };
+
   const handlePauseTimer = async () => {
     try { setSaving(true); const d = await pauseTimer(matchId); setTimerData(d.timer); setIsPaused(true); }
     catch (err) { setError(getErrorMessage(err, 'Failed to pause')); }
@@ -403,6 +418,29 @@ const MatchScoringPage = () => {
 
   const setsToWin = Math.ceil(maxSets / 2);
 
+  // Map physical left/right sides to underlying players. When `swapped`, the
+  // left column renders player 2 and the right renders player 1 — including
+  // their avatar, name, live score and sets-won. Each side's Point/Undo stays
+  // wired to `.num`, so scoring always hits the correct real player.
+  const pdata = {
+    1: { num: 1, name: p1Display, obj: match.player1, sets: p1Sets, score: currentSet.player1 },
+    2: { num: 2, name: p2Display, obj: match.player2, sets: p2Sets, score: currentSet.player2 },
+  };
+  const left = swapped ? pdata[2] : pdata[1];
+  const right = swapped ? pdata[1] : pdata[2];
+
+  const sideAvatar = (p) => (
+    p?.obj?.profilePhoto ? (
+      <img src={p.obj.profilePhoto} alt="" className="w-14 h-14 rounded-full object-cover mx-auto"
+        style={{ border: '2px solid rgba(34,211,238,0.4)' }} />
+    ) : (
+      <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto"
+        style={{ background: 'linear-gradient(135deg,rgba(34,211,238,0.28),rgba(45,212,191,0.16))', border: '1px solid rgba(34,211,238,0.4)' }}>
+        <User className="w-7 h-7" style={{ color: '#67e8f9' }} />
+      </div>
+    )
+  );
+
   return (
     <div className="min-h-screen" style={{ background: B.bg }}>
 
@@ -509,80 +547,84 @@ const MatchScoringPage = () => {
         )}
 
         {/* ── Scoreboard ──────────────────────────────────────────────────── */}
-        <div className="rounded-2xl overflow-hidden mb-4" style={{ background: B.card, border: `1px solid ${B.border}` }}>
-          {/* Set tabs */}
-          {score.sets?.length > 0 && (
-            <div className="flex justify-center gap-2 px-4 pt-4">
-              {score.sets.map((set, idx) => {
-                const isCurrent = idx === score.currentSet;
-                return (
-                  <div key={idx} className="px-3 py-1.5 rounded-xl text-center min-w-[72px] transition-all"
-                    style={isCurrent
-                      ? { background: 'rgba(245,158,11,0.1)', border: `1.5px solid rgba(245,158,11,0.5)` }
-                      : { background: 'rgba(255,255,255,0.04)', border: `1px solid ${B.border}` }}>
-                    <div className="text-xs font-bold mb-0.5"
-                      style={{ color: isCurrent ? B.green : 'rgba(255,255,255,0.4)' }}>Set {idx + 1}</div>
-                    <div className="text-sm font-black"
-                      style={{ color: isCurrent ? '#fff' : 'rgba(255,255,255,0.55)' }}>
-                      {set.player1} - {set.player2}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+        <div className="rounded-2xl overflow-hidden mb-4 px-4 py-5" style={{ background: B.card, border: `1px solid ${B.border}` }}>
 
-          {/* Main score */}
-          <div className="grid grid-cols-3 gap-2 items-center px-4 py-5">
-            {/* P1 sets won */}
-            <div className="text-center">
-              <div className="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center text-3xl font-black mb-2"
-                style={p1Sets > p2Sets
-                  ? { background: 'rgba(245,158,11,0.15)', border: '1.5px solid rgba(245,158,11,0.4)', color: B.green }
-                  : { background: 'rgba(255,255,255,0.05)', border: `1px solid ${B.border}`, color: 'rgba(255,255,255,0.7)' }}>
-                {p1Sets}
+          {/* Current-set badge */}
+          <div className="mx-auto mb-6 px-6 py-2.5 rounded-2xl text-center" style={{ maxWidth: '210px', background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.35)' }}>
+            <div className="text-sm font-black" style={{ color: B.green }}>Set {score.currentSet + 1}</div>
+            <div className="text-2xl font-black text-white leading-tight my-0.5">
+              {left.score} <span style={{ color: 'rgba(255,255,255,0.35)' }}>–</span> {right.score}
+            </div>
+            <div className="text-xs font-semibold" style={{ color: 'rgba(255,255,255,0.45)' }}>Best of {maxSets} Set{maxSets !== 1 ? 's' : ''}</div>
+          </div>
+
+          {/* Players + live score */}
+          <div className="grid items-start gap-2" style={{ gridTemplateColumns: '1fr auto 1fr' }}>
+            {/* Left player */}
+            <div className="rounded-2xl px-2 py-4 text-center" style={{ background: 'rgba(255,255,255,0.02)', border: `1px solid ${B.border}` }}>
+              {sideAvatar(left)}
+              <p className="text-sm font-black text-white leading-tight mt-2 px-1" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{left.name}</p>
+              <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.5)' }}>Sets Won</p>
+              <div className="mx-auto mt-1.5 w-12 py-1 rounded-lg text-base font-black"
+                style={left.sets > right.sets
+                  ? { background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.4)', color: B.green }
+                  : { background: 'rgba(255,255,255,0.05)', border: `1px solid ${B.border}`, color: '#fff' }}>
+                {left.sets}
               </div>
-              <p className="text-xs font-black text-white leading-tight" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p1Display}</p>
-              <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.6)' }}>Sets Won</p>
             </div>
 
             {/* Live score */}
-            <div className="text-center">
-              <div className="text-5xl font-black text-white">
-                {currentSet.player1}<span className="text-2xl font-bold mx-1" style={{ color: 'rgba(255,255,255,0.3)' }}>-</span>{currentSet.player2}
+            <div className="text-center px-1 pt-5">
+              <div className="font-black text-white leading-none" style={{ fontSize: '2.75rem' }}>
+                {left.score}<span className="align-middle" style={{ fontSize: '2rem', color: 'rgba(255,255,255,0.3)', margin: '0 6px' }}>-</span>{right.score}
               </div>
-              <p className="text-xs font-black mt-1" style={{ color: B.cyan }}>Set {score.currentSet + 1}</p>
+              <p className="text-sm font-black mt-2" style={{ color: B.green }}>Set {score.currentSet + 1}</p>
             </div>
 
-            {/* P2 sets won */}
-            <div className="text-center">
-              <div className="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center text-3xl font-black mb-2"
-                style={p2Sets > p1Sets
-                  ? { background: 'rgba(245,158,11,0.15)', border: '1.5px solid rgba(245,158,11,0.4)', color: B.cyan }
-                  : { background: 'rgba(255,255,255,0.05)', border: `1px solid ${B.border}`, color: 'rgba(255,255,255,0.7)' }}>
-                {p2Sets}
+            {/* Right player */}
+            <div className="rounded-2xl px-2 py-4 text-center" style={{ background: 'rgba(255,255,255,0.02)', border: `1px solid ${B.border}` }}>
+              {sideAvatar(right)}
+              <p className="text-sm font-black text-white leading-tight mt-2 px-1" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{right.name}</p>
+              <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.5)' }}>Sets Won</p>
+              <div className="mx-auto mt-1.5 w-12 py-1 rounded-lg text-base font-black"
+                style={right.sets > left.sets
+                  ? { background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.4)', color: B.green }
+                  : { background: 'rgba(255,255,255,0.05)', border: `1px solid ${B.border}`, color: '#fff' }}>
+                {right.sets}
               </div>
-              <p className="text-xs font-black text-white leading-tight" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p2Display}</p>
-              <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.6)' }}>Sets Won</p>
             </div>
           </div>
+
+          {/* Swap players */}
+          {!isCompleted && (
+            <div className="text-center mt-5">
+              <button onClick={toggleSwap} disabled={saving}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all active:scale-95 disabled:opacity-50"
+                style={{ background: 'rgba(255,255,255,0.04)', border: `1px solid ${B.border}`, color: '#fff' }}>
+                <ArrowLeftRight className="w-4 h-4" style={{ color: 'rgba(255,255,255,0.7)' }} /> Swap Players
+              </button>
+              <p className="text-xs mt-2 leading-snug" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                Swap players' sides.<br />Scores and stats will update accordingly.
+              </p>
+            </div>
+          )}
         </div>
 
         {/* ── Scoring Controls ─────────────────────────────────────────────── */}
         {!isCompleted && (
           <div className="grid grid-cols-2 gap-3">
-            {/* Player 1 */}
+            {/* Left player controls */}
             <div className="rounded-2xl overflow-hidden" style={{ background: B.card, border: `1px solid ${B.border}`, opacity: isPaused ? 0.45 : 1 }}>
               <div className="px-3 pt-3 pb-2 text-center border-b" style={{ borderColor: B.border }}>
-                <p className="text-xs font-black text-white truncate">{p1Display}</p>
+                <p className="text-xs font-black text-white truncate">{left.name}</p>
               </div>
               <div className="p-3 space-y-2">
-                <button onClick={() => addPoint(1)} disabled={isPaused || !canScore}
+                <button onClick={() => addPoint(left.num)} disabled={isPaused || !canScore}
                   className="w-full py-5 rounded-xl font-black text-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                   style={{ background: 'linear-gradient(135deg,#F59E0B,#D97706)', color: '#050810', boxShadow: isPaused ? 'none' : '0 4px 16px rgba(245,158,11,0.35)' }}>
                   <Plus className="w-6 h-6" /> Point
                 </button>
-                <button onClick={() => removePoint(1)} disabled={isPaused || !canScore}
+                <button onClick={() => removePoint(left.num)} disabled={isPaused || !canScore}
                   className="w-full py-2.5 rounded-xl text-sm font-bold transition-all disabled:opacity-50 flex items-center justify-center gap-1.5"
                   style={{ background: 'rgba(255,255,255,0.05)', border: `1px solid ${B.border}`, color: 'rgba(255,255,255,0.55)' }}>
                   <Minus className="w-4 h-4" /> Undo
@@ -590,18 +632,18 @@ const MatchScoringPage = () => {
               </div>
             </div>
 
-            {/* Player 2 */}
+            {/* Right player controls */}
             <div className="rounded-2xl overflow-hidden" style={{ background: B.card, border: `1px solid ${B.border}`, opacity: isPaused ? 0.45 : 1 }}>
               <div className="px-3 pt-3 pb-2 text-center border-b" style={{ borderColor: B.border }}>
-                <p className="text-xs font-black text-white truncate">{p2Display}</p>
+                <p className="text-xs font-black text-white truncate">{right.name}</p>
               </div>
               <div className="p-3 space-y-2">
-                <button onClick={() => addPoint(2)} disabled={isPaused || !canScore}
+                <button onClick={() => addPoint(right.num)} disabled={isPaused || !canScore}
                   className="w-full py-5 rounded-xl font-black text-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                   style={{ background: 'linear-gradient(135deg,#F59E0B,#D97706)', color: '#050810', boxShadow: isPaused ? 'none' : '0 4px 16px rgba(245,158,11,0.35)' }}>
                   <Plus className="w-6 h-6" /> Point
                 </button>
-                <button onClick={() => removePoint(2)} disabled={isPaused || !canScore}
+                <button onClick={() => removePoint(right.num)} disabled={isPaused || !canScore}
                   className="w-full py-2.5 rounded-xl text-sm font-bold transition-all disabled:opacity-50 flex items-center justify-center gap-1.5"
                   style={{ background: 'rgba(255,255,255,0.05)', border: `1px solid ${B.border}`, color: 'rgba(255,255,255,0.55)' }}>
                   <Minus className="w-4 h-4" /> Undo

@@ -3340,7 +3340,7 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
   // function wrongly accept null-stage GROUP matches as knockout matches — letting a
   // completed round robin match (also round=1, also null-stage) get picked up and
   // displayed as the Knockout Final's data.
-  const findMatch = (displayIdx, matchIdx) => {
+  const findMatch = (displayIdx, matchIdx, bracketMatch) => {
     if (!matches || !Array.isArray(matches)) return null;
     const dbRound = totalRounds - displayIdx;
     const roundMatches = matches
@@ -3350,6 +3350,26 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
         return m.stage === 'KNOCKOUT' || m.stage == null;
       })
       .sort((a, b) => a.matchNumber - b.matchNumber);
+
+    // Prefer binding this bracket slot to the DB match by its ACTUAL players.
+    // Position/matchNumber indexing is fragile — several backend paths create
+    // knockout records with different (global vs per-round) numbering, which can
+    // leave the slot bound to a stale/duplicate PENDING record while the umpire
+    // completed the real one. Player-based binding resolves to the exact record
+    // regardless, so a completed match always shows completed and its winner
+    // advances. Falls back to index for TBD slots (no players yet, e.g. Final).
+    const pid = (m, k) => m?.[k]?.id ?? m?.[`${k}Id`];
+    const p1 = bracketMatch?.player1?.id;
+    const p2 = bracketMatch?.player2?.id;
+    if (p1 || p2) {
+      const byPlayers = roundMatches.find(m => {
+        const a = pid(m, 'player1'), b = pid(m, 'player2');
+        return (p1 && p2)
+          ? ((a === p1 && b === p2) || (a === p2 && b === p1))
+          : ((p1 && (a === p1 || b === p1)) || (p2 && (a === p2 || b === p2)));
+      });
+      if (byPlayers) return byPlayers;
+    }
     return roundMatches[matchIdx];
   };
 
@@ -3389,7 +3409,7 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
   // ── "Find me in the draw": first-round players → scroll to + highlight their match ──
   const firstRoundPlayers = [];
   (data.rounds[0]?.matches || []).forEach((match, mi) => {
-    const dbm = findMatch(0, mi);
+    const dbm = findMatch(0, mi, match);
     [pickPlayer(dbm?.player1, match.player1), pickPlayer(dbm?.player2, match.player2)].forEach((p) => {
       const nm = p ? getPlayerDisplay(p) : null;
       if (nm && nm !== 'TBD' && p?.id && !/^slot\s*\d+$/i.test(nm.trim())) firstRoundPlayers.push({ name: nm, mi });
@@ -3522,7 +3542,7 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                     {/* Round column — one fixed-height slot per match, card centered */}
                     <div style={{ width: CARD_W, flexShrink: 0 }}>
                       {round.matches.map((match, mi) => {
-                        const dbMatch = findMatch(ri, mi);
+                        const dbMatch = findMatch(ri, mi, match);
 
                         const player1 = pickPlayer(dbMatch?.player1, match.player1) || { name: 'TBD' };
                         const player2 = pickPlayer(dbMatch?.player2, match.player2) || { name: 'TBD' };

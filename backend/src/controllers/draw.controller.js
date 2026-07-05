@@ -2809,6 +2809,18 @@ const arrangeKnockoutMatchups = async (req, res) => {
 
     console.log(`📊 Found ${knockoutMatches.length} existing knockout match records in database`);
 
+    // STEP 5b: Canonical set guard — if the number of existing KNOCKOUT records
+    // doesn't match the bracket structure, there are stale/duplicate records
+    // (different creation paths use different numbering). That desyncs the
+    // bracket from the real matches, so a completed match can bind to the wrong
+    // record. Wipe and recreate cleanly. Safe here: arrange resets KO anyway.
+    const expectedKOCount = bracketJson.knockout.rounds.reduce((sum, r) => sum + (r.matches?.length || 0), 0);
+    if (knockoutMatches.length !== expectedKOCount) {
+      console.log(`🧹 KO record count ${knockoutMatches.length} ≠ expected ${expectedKOCount} — deleting stale/duplicate knockout records and recreating cleanly`);
+      await prisma.match.deleteMany({ where: { tournamentId, categoryId, stage: 'KNOCKOUT' } });
+      knockoutMatches = [];
+    }
+
     // STEP 6: Create knockout matches in database if they don't exist
     if (knockoutMatches.length === 0) {
       console.log('🔨 Creating knockout match records in database...');

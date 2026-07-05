@@ -197,6 +197,12 @@ function _makeCacheKey(url, config) {
   return url + '|' + (config?.params ? JSON.stringify(config.params) : '');
 }
 
+// Endpoints whose data changes constantly during a live tournament (draws,
+// brackets, matches, scoring, live scores, standings, umpire queue) must ALWAYS
+// hit the network — never a cached copy. The GET cache only exists to make
+// navigation between the tournament/dashboard/list pages feel instant.
+const _NEVER_CACHE_RE = /(\/match(es)?(\/|$|\?)|\/draw|\/bracket|\/score|\/live(\/|$|\?)|\/standings|\/umpire|\/registrations)/i;
+
 function _clearGetCache() {
   _GET_CACHE.clear();
   _IN_FLIGHT.clear();
@@ -204,8 +210,9 @@ function _clearGetCache() {
 
 // Wrapped GET: cache hit â†’ zero network; in-flight duplicate â†’ same Promise; else â†’ network + cache
 api.get = (url, config = {}) => {
-  // Honour explicit opt-outs (DrawPage polling, real-time endpoints)
-  if (config._noCache || config.headers?.['Cache-Control'] === 'no-cache') {
+  // Honour explicit opt-outs (DrawPage polling, real-time endpoints) and always
+  // bypass for volatile draw/match/scoring endpoints so they never serve stale data.
+  if (config._noCache || config.headers?.['Cache-Control'] === 'no-cache' || _NEVER_CACHE_RE.test(url)) {
     return _origGet(url, config);
   }
 

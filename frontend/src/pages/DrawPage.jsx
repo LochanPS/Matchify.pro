@@ -1,5 +1,5 @@
 ﻿import { getErrorMessage } from '../utils/errorMessage';
-import { getDrawCache, setDrawCache, clearDrawCache } from '../utils/drawCache';
+import { clearDrawCache } from '../utils/drawCache';
 /**
  * DrawPage - Tournament Bracket Display
  * 
@@ -144,24 +144,11 @@ const DrawPage = () => {
     if (fetchInProgressRef.current && _retryCount === 0) return;
     fetchInProgressRef.current = true;
 
-    // ── Option A: show cached draw instantly ─────────────────────────────────
-    const cached = getDrawCache(tournamentId, catId);
-    if (cached) {
-      // Apply cached data immediately — 0ms perceived load
-      if (cached.tournament) setTournament(cached.tournament);
-      if (cached.categories) setCategories(cached.categories);
-      if (cached.matches)    setMatches(cached.matches);
-      if (cached.stats)      setTournamentStats(cached.stats);
-      if (cached.activeCategory) setActiveCategory(cached.activeCategory);
-      setBracket(cached.bracket ?? null);
-      setLoading(false);
-      setBracketLoading(false);
-      // Fall through — fetch fresh in background without showing spinner
-    } else {
-      setLoading(true);
-      setBracketLoading(true);
-    }
-
+    // Draws change constantly during a live tournament — NEVER seed the view
+    // from a local cache. Always show a spinner and load THIS category's fresh
+    // data, so a previously-viewed category's draw can never linger on screen.
+    setLoading(true);
+    setBracketLoading(true);
     setError(null);
 
     try {
@@ -171,7 +158,7 @@ const DrawPage = () => {
       );
 
       if (!response.data.success) {
-        if (!cached) setBracket(null);
+        setBracket(null);
         return;
       }
 
@@ -208,23 +195,10 @@ const DrawPage = () => {
         }
         setBracket(bracketData);
       } else {
-        if (!cached) setBracket(null);
+        setBracket(null);
       }
 
-      // Save fresh data to cache for next visit
-      setDrawCache(tournamentId, catId, {
-        tournament: t,
-        categories: cats || [],
-        matches: fetchedMatches || [],
-        stats,
-        bracket: bracketData,
-        activeCategory: active || null,
-      });
-
     } catch (err) {
-      // If user is already seeing cached data, suppress the error silently
-      if (cached) return;
-
       const status = err.response?.status;
       // Auto-retry once on 500 (Vercel cold start / transient DB issue) after 2s
       if (status === 500 && _retryCount === 0) {
@@ -597,13 +571,10 @@ const DrawPage = () => {
     setSelectedMatchDetails(null);
     // Reset fetch guard so new category fetch isn't blocked
     fetchInProgressRef.current = false;
-    // Clear draw data immediately — prevents old category's bracket showing
-    // while new category's data is loading. Cache will repopulate instantly if available.
-    const cached = getDrawCache(tournamentId, category.id);
-    if (!cached) {
-      setBracket(null);
-      setMatches([]);
-    }
+    // Always clear the previous category's draw immediately so it can never
+    // render under the newly selected category while fresh data loads.
+    setBracket(null);
+    setMatches([]);
     setActiveCategory(category);
     navigate(`/tournaments/${tournamentId}/draws/${category.id}`);
   };

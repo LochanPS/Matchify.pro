@@ -1041,13 +1041,14 @@ async function updateRoundRobinStandings(tournamentId, categoryId, matchId) {
       }
     });
 
-    // Sort: match points DESC → net point diff DESC → total points FOR DESC
+    // Sort: match points DESC → total points FOR (TP) DESC → net point diff (PD) DESC
     targetGroup.participants.sort((a, b) => {
       if (b.points !== a.points) return b.points - a.points;
+      const aTp = a.totalPoints || 0, bTp = b.totalPoints || 0;
+      if (bTp !== aTp) return bTp - aTp;
       const aDiff = (a.totalPoints || 0) - (a.totalPointsAgainst || 0);
       const bDiff = (b.totalPoints || 0) - (b.totalPointsAgainst || 0);
-      if (bDiff !== aDiff) return bDiff - aDiff;
-      return (b.totalPoints || 0) - (a.totalPoints || 0);
+      return bDiff - aDiff;
     });
 
     // Update the draw

@@ -982,9 +982,10 @@ const RoundRobinDraw = ({ data, onViewMatchDetails, categoryFormat, dbMatches = 
                             : calculatePointDiff(p.id, group.matches || []),
                         }))
                         .sort((a, b) => {
+                          // Rank: PTS (match points) → TP (total points scored) → PD (point difference)
                           if ((b.points || 0) !== (a.points || 0)) return (b.points || 0) - (a.points || 0);
-                          if (b._diff !== a._diff) return b._diff - a._diff;
-                          return (b.totalPoints || 0) - (a.totalPoints || 0);
+                          if ((b.totalPoints || 0) !== (a.totalPoints || 0)) return (b.totalPoints || 0) - (a.totalPoints || 0);
+                          return b._diff - a._diff;
                         })
                         .map((p, pi) => {
                         const tpDiff  = p._diff;

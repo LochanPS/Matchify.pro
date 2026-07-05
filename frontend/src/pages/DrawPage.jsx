@@ -3875,8 +3875,8 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                   { h: 'W',   w: '18px', c: 'rgba(74,222,128,0.85)' },
                   { h: 'L',   w: '18px', c: 'rgba(248,113,113,0.85)'},
                   { h: 'PTS', w: '24px', c: 'rgba(245,158,11,0.9)'  },
-                  { h: 'PD',  w: '26px', c: 'rgba(96,165,250,0.9)'  },
                   { h: 'TP',  w: '24px', c: 'rgba(196,181,253,0.9)' },
+                  { h: 'PD',  w: '26px', c: 'rgba(96,165,250,0.9)'  },
                 ].map(({ h, w, c }) => (
                   <div key={h} style={{ width: w, flexShrink: 0, textAlign: 'center' }}>
                     <span style={{ fontSize: '9px', color: c, fontWeight: 700 }}>{h}</span>
@@ -3889,11 +3889,13 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
             <div>
               {(group.participants || [])
                 .sort((a, b) => {
+                  // Rank: PTS (match points) → TP (total points scored) → PD (point difference)
                   if ((b.points || 0) !== (a.points || 0)) return (b.points || 0) - (a.points || 0);
+                  const aTp = a.totalPoints || 0, bTp = b.totalPoints || 0;
+                  if (bTp !== aTp) return bTp - aTp;
                   const aDiff = (a.totalPoints || 0) - (a.totalPointsAgainst || 0);
                   const bDiff = (b.totalPoints || 0) - (b.totalPointsAgainst || 0);
-                  if (bDiff !== aDiff) return bDiff - aDiff;
-                  return (b.totalPoints || 0) - (a.totalPoints || 0);
+                  return bDiff - aDiff;
                 })
                 .map((p, pi) => {
                   // PD = point difference (for − against); TP = total points scored (raw)
@@ -3987,8 +3989,8 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                           { val: p.wins    || 0,                   w: '18px', color: '#ffffff', bold: true },
                           { val: p.losses  || 0,                   w: '18px', color: '#ffffff', bold: true },
                           { val: p.points  || 0,                   w: '24px', color: '#ffffff', bold: true },
-                          { val: pdVal,                            w: '26px', color: pdColor,   bold: true },
                           { val: tpTotal,                          w: '24px', color: '#c4b5fd', bold: true },
+                          { val: pdVal,                            w: '26px', color: pdColor,   bold: true },
                         ].map((s, si) => (
                           <div key={si} style={{ width: s.w, flexShrink: 0, textAlign: 'center' }}>
                             <span style={{ fontSize: '13px', fontWeight: s.bold ? 700 : 500, color: s.color, lineHeight: 1 }}>
@@ -4023,7 +4025,7 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
               </div>
             </div>
             <p style={{ fontSize: '9px', color: 'rgba(255,255,255,0.22)', textAlign: 'center' }}>
-              P = Played · W = Won · L = Lost · PTS = Points · PD = Point Difference · TP = Total Points
+              P = Played · W = Won · L = Lost · PTS = Points · TP = Total Points · PD = Point Difference
             </p>
           </div>
 
@@ -5733,11 +5735,13 @@ const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
     const allPlayers = [];
 
     const sortByStanding = (a, b) => {
+      // Rank: PTS (match points) → TP (total points scored) → PD (point difference)
       if ((b.points || 0) !== (a.points || 0)) return (b.points || 0) - (a.points || 0);
+      const aTp = a.totalPoints || 0, bTp = b.totalPoints || 0;
+      if (bTp !== aTp) return bTp - aTp;
       const aDiff = (a.totalPoints || 0) - (a.totalPointsAgainst || 0);
       const bDiff = (b.totalPoints || 0) - (b.totalPointsAgainst || 0);
-      if (bDiff !== aDiff) return bDiff - aDiff;
-      return (b.totalPoints || 0) - (a.totalPoints || 0);
+      return bDiff - aDiff;
     };
 
     bracket.groups.forEach((group, groupIndex) => {

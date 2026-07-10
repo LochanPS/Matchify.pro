@@ -42,6 +42,7 @@ const UnifiedDashboardMobile = () => {
   const [copied, setCopied] = useState(false);
   const [umpireMatches, setUmpireMatches] = useState([]);
   const [umpireMatchesLoading, setUmpireMatchesLoading] = useState(false);
+  const [dashStats, setDashStats] = useState(null); // live-computed player/organizer/umpire stats
 
   // Get user roles
   let userRoles = [];
@@ -88,15 +89,19 @@ const UnifiedDashboardMobile = () => {
 
   const fetchDashboardData = async () => {
     try {
-      const [profileRes, regRes] = await Promise.all([
+      const [profileRes, regRes, statsRes] = await Promise.all([
         api.get('/auth/me'),
-        api.get('/registrations/my')
+        api.get('/registrations/my'),
+        // Always fresh — reflects wins/matches the moment they complete
+        api.get('/users/me/dashboard-stats', { _noCache: true }).catch(() => null),
       ]);
 
       if (profileRes.data.user) {
         setUserProfile(profileRes.data.user);
         setMatchifyCode(profileRes.data.user.matchifyCode);
       }
+
+      if (statsRes?.data?.stats) setDashStats(statsRes.data.stats);
 
       setRegistrations(regRes.data.registrations || []);
     } catch (error) {
@@ -164,14 +169,18 @@ const UnifiedDashboardMobile = () => {
     setShowMenu(false);
   };
 
-  const winRate = (user?.matchesWon || 0) + (user?.matchesLost || 0) > 0
-    ? Math.round((user?.matchesWon / ((user?.matchesWon || 0) + (user?.matchesLost || 0))) * 100)
-    : 0;
+  // Prefer live-computed stats; fall back to stored user fields until they load.
+  const p = dashStats?.player;
+  const winRate = p
+    ? p.winRate
+    : ((user?.matchesWon || 0) + (user?.matchesLost || 0) > 0
+        ? Math.round((user?.matchesWon / ((user?.matchesWon || 0) + (user?.matchesLost || 0))) * 100)
+        : 0);
 
   const stats = [
-    { label: 'Total Points', value: user?.totalPoints || 0, icon: SparklesIcon },
-    { label: 'Tournaments', value: user?.tournamentsPlayed || 0, icon: TrophyIcon },
-    { label: 'Matches Won', value: user?.matchesWon || 0, icon: FireIcon },
+    { label: 'Total Points', value: p?.totalPoints ?? user?.totalPoints ?? 0, icon: SparklesIcon },
+    { label: 'Tournaments', value: p?.tournamentsPlayed ?? user?.tournamentsPlayed ?? 0, icon: TrophyIcon },
+    { label: 'Matches Won', value: p?.matchesWon ?? user?.matchesWon ?? 0, icon: FireIcon },
     { label: 'Win Rate', value: `${winRate}%`, icon: BoltIcon },
   ];
 
@@ -726,7 +735,7 @@ const UnifiedDashboardMobile = () => {
                   >
                     <TrophyIcon className="w-6 h-6" style={{ color: '#a78bfa' }} />
                   </div>
-                  <p className="text-3xl font-black mb-1 text-white">{user?.tournamentsOrganized || 0}</p>
+                  <p className="text-3xl font-black mb-1 text-white">{dashStats?.organizer?.tournamentsOrganized ?? user?.tournamentsOrganized ?? 0}</p>
                   <p className="text-xs" style={{ color: 'rgba(255,255,255,0.42)' }}>Tournaments Organized</p>
                 </div>
 
@@ -746,7 +755,7 @@ const UnifiedDashboardMobile = () => {
                   >
                     <UserIcon className="w-6 h-6" style={{ color: '#818cf8' }} />
                   </div>
-                  <p className="text-3xl font-black mb-1 text-white">{user?.totalParticipants || 0}</p>
+                  <p className="text-3xl font-black mb-1 text-white">{dashStats?.organizer?.totalParticipants ?? user?.totalParticipants ?? 0}</p>
                   <p className="text-xs" style={{ color: 'rgba(255,255,255,0.42)' }}>Total Participants</p>
                 </div>
               </div>
@@ -899,7 +908,7 @@ const UnifiedDashboardMobile = () => {
                   style={{ background: 'rgba(16,185,129,0.14)', border: '1px solid rgba(16,185,129,0.32)' }}>
                   <FireIcon className="w-6 h-6" style={{ color: '#34D399' }} />
                 </div>
-                <p className="text-3xl font-black mb-1 text-white">{user?.matchesUmpired || 0}</p>
+                <p className="text-3xl font-black mb-1 text-white">{dashStats?.umpire?.matchesUmpired ?? user?.matchesUmpired ?? 0}</p>
                 <p className="text-xs" style={{ color: 'rgba(255,255,255,0.42)' }}>Matches Umpired</p>
               </div>
               <div className="p-4 rounded-xl" style={{
@@ -913,7 +922,7 @@ const UnifiedDashboardMobile = () => {
                   style={{ background: 'rgba(99,102,241,0.14)', border: '1px solid rgba(99,102,241,0.32)' }}>
                   <TrophyIcon className="w-6 h-6" style={{ color: '#818cf8' }} />
                 </div>
-                <p className="text-3xl font-black mb-1 text-white">{user?.tournamentsUmpired || 0}</p>
+                <p className="text-3xl font-black mb-1 text-white">{dashStats?.umpire?.tournamentsUmpired ?? user?.tournamentsUmpired ?? 0}</p>
                 <p className="text-xs" style={{ color: 'rgba(255,255,255,0.42)' }}>Tournaments</p>
               </div>
             </div>

@@ -1072,10 +1072,14 @@ const endMatchHandler = async (req, res) => {
         // Stats + umpire lookup + notifications all in parallel
         const tasks = [];
 
-        // Player stats
-        if (!isGuestId(winnerId) && !isGuestId(loserId) && player1 && player2) {
+        // Player stats — credit each registered side independently. A registered
+        // winner earns matchesWon even when the opponent is a guest (and vice
+        // versa); only the guest side is skipped (guests have no account).
+        if (!isGuestId(winnerId)) {
           tasks.push(prisma.user.update({ where: { id: winnerId }, data: { matchesWon: { increment: 1 } } }));
-          tasks.push(prisma.user.update({ where: { id: loserId },  data: { matchesLost: { increment: 1 } } }));
+        }
+        if (!isGuestId(loserId)) {
+          tasks.push(prisma.user.update({ where: { id: loserId }, data: { matchesLost: { increment: 1 } } }));
         }
 
         // Notifications

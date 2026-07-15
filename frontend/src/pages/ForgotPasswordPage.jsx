@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import api from '../utils/api';
+import { getErrorMessage } from '../utils/errorMessage';
 import MatchifyLogo from '../components/MatchifyLogo';
 import Spinner from '../components/Spinner';
 
@@ -64,7 +65,7 @@ const ForgotPasswordPage = () => {
       setOtp(['', '', '', '', '', '']);
       setResendCooldown(60);
     } catch (err) {
-      setError(err?.response?.data?.error || 'Something went wrong. Please try again.');
+      setError(getErrorMessage(err, 'Something went wrong. Please try again.'));
     } finally {
       setLoading(false);
     }
@@ -124,7 +125,7 @@ const ForgotPasswordPage = () => {
       setResetToken(data.resetToken);
       setStep(STEP.PASSWORD);
     } catch (err) {
-      setError(err?.response?.data?.error || 'Incorrect OTP. Please try again.');
+      setError(getErrorMessage(err, 'Incorrect OTP. Please try again.'));
       setOtp(['', '', '', '', '', '']);
       setTimeout(() => otpRefs.current[0]?.focus(), 100);
     } finally {
@@ -152,7 +153,7 @@ const ForgotPasswordPage = () => {
       setResetSuccess(true);
       setTimeout(() => navigate('/login', { replace: true, state: { successMessage: 'Password reset successfully! Please log in with your new password.' } }), 2500);
     } catch (err) {
-      const msg = err?.response?.data?.error || 'Reset failed. Please try again.';
+      const msg = getErrorMessage(err, 'Reset failed. Please try again.');
       setError(msg);
     } finally {
       setLoading(false);

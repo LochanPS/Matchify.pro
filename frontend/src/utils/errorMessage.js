@@ -34,22 +34,33 @@ export function getErrorMessage(err, fallback = 'Something went wrong. Please tr
     if (typeof data === 'string') return data;
   }
 
-  // Axios/network error — translate raw technical messages to human language
+  // Axios/network error — translate raw technical messages to human language.
+  // Note: navigator.onLine is only trustworthy when FALSE. On iOS Safari it is
+  // often stuck at `true` even with no connectivity, so we never claim the
+  // server is fine based on onLine — an online-looking network error is phrased
+  // to cover both a connectivity drop AND the server being unreachable.
   if (err?.message && typeof err.message === 'string') {
     const msg = err.message;
-    if (msg === 'Network Error' || msg.toLowerCase().includes('network')) {
-      // navigator.onLine = false → actual internet issue
-      // navigator.onLine = true  → server is down / starting up (cold start)
-      if (typeof navigator !== 'undefined' && !navigator.onLine) {
-        return 'No internet connection. Please check your network.';
-      }
-      return 'Server is temporarily unavailable. Please wait a moment and try again.';
+    const isOffline = typeof navigator !== 'undefined' && navigator.onLine === false;
+
+    // Timeout — request started but the server didn't answer in time (cold start)
+    if (msg.includes('timeout') || msg.includes('timed out') || err.isTimeout || err.code === 'ECONNABORTED') {
+      if (isOffline) return 'No internet connection. Please check your network and try again.';
+      return 'The server is taking longer than usual to respond — it may be waking up. Please try again in a moment.';
     }
-    if (msg.includes('timeout') || msg.includes('timed out') || err.isTimeout)
-      return 'Server is taking longer than usual to respond. Please try again.';
-    if (msg.includes('ECONNREFUSED') || msg.includes('ECONNABORTED'))
-      return 'Could not reach the server. Please try again shortly.';
+
+    // Could not reach the server at all (network error / CORS / DNS / offline)
+    if (msg === 'Network Error' || msg.toLowerCase().includes('network') || msg.includes('ECONNREFUSED') || err.code === 'ERR_NETWORK') {
+      if (isOffline) return 'No internet connection. Please check your network and try again.';
+      // Can't tell connectivity vs server from the browser — name both, honestly.
+      return "Couldn't reach Matchify — please check your internet connection and try again.";
+    }
     return msg;
+  }
+
+  // No message and no response at all — treat as a connection failure, not a vague error
+  if (!err?.response) {
+    return "Couldn't reach Matchify — please check your internet connection and try again.";
   }
 
   return fallback;

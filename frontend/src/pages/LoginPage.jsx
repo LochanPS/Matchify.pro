@@ -1,6 +1,7 @@
 ﻿import { getErrorMessage } from '../utils/errorMessage';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link, useSearchParams, useLocation } from 'react-router-dom';
+import api from '../utils/api';
 import { useAuth } from '../contexts/AuthContext';
 import { EyeIcon, EyeSlashIcon, EnvelopeIcon, LockClosedIcon, ArrowRightIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import { Zap, Trophy, Users, MapPin, Ban, AlertTriangle } from 'lucide-react';
@@ -70,6 +71,13 @@ const LoginPage = () => {
   const [searchParams] = useSearchParams();
   const redirectUrl = searchParams.get('redirect');
   const successMsg = location.state?.successMessage || '';
+
+  // Warm up the backend the moment the login screen opens, so a Railway cold
+  // start finishes while the user is still typing — avoids the "couldn't reach
+  // server" failure on the first real login. Fire-and-forget; errors ignored.
+  useEffect(() => {
+    api.get('/health', { _noCache: true, _noRetry: true, timeout: 20000 }).catch(() => {});
+  }, []);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });

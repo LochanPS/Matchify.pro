@@ -1,5 +1,6 @@
-﻿import { useState } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
+import api from '../utils/api';
 import { useAuth } from '../contexts/AuthContext';
 import {
   EyeIcon,
@@ -88,6 +89,12 @@ const RegisterPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const redirectUrl = searchParams.get('redirect');
+
+  // Warm up the backend on mount so a Railway cold start finishes while the
+  // user fills the form — avoids first-submit "couldn't reach server" failures.
+  useEffect(() => {
+    api.get('/health', { _noCache: true, _noRetry: true, timeout: 20000 }).catch(() => {});
+  }, []);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });

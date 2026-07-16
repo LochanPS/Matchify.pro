@@ -10,6 +10,7 @@ import {
 import { pauseTimer, resumeTimer } from '../api/matches';
 import SlideToConfirm from '../components/SlideToConfirm';
 import LoadingScreen from '../components/LoadingScreen';
+import { defaultTennisConfig, newTennisState, deriveTennisState, pointLabel, tennisSetSummary } from '../utils/tennisScoring';
 
 const B = {
   bg: '#040810',
@@ -49,6 +50,24 @@ const ConfigStepper = ({ label, sub, value, min, max, step, onChange }) => (
   </div>
 );
 
+// On/off row for boolean settings (No-Ad, match tiebreak…)
+const ToggleRow = ({ label, sub, value, onChange }) => (
+  <div className="flex items-center justify-between py-2.5">
+    <div>
+      <p className="text-sm font-bold text-white">{label}</p>
+      {sub && <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.35)' }}>{sub}</p>}
+    </div>
+    <button
+      onClick={() => onChange(!value)}
+      className="relative rounded-full transition-all flex-shrink-0"
+      style={{ width: 46, height: 26, background: value ? 'rgba(245,158,11,0.9)' : 'rgba(255,255,255,0.12)' }}
+    >
+      <span className="absolute rounded-full bg-white transition-all"
+        style={{ width: 20, height: 20, top: 3, left: value ? 23 : 3 }} />
+    </button>
+  </div>
+);
+
 const parseScoringFormat = (fmt) => {
   if (!fmt) return { points: 21, sets: 3 };
   const nxm = fmt.match(/(\d+)x(\d+)/);
@@ -79,6 +98,20 @@ const MatchScoringPage = () => {
   const [pointsPerSet, setPointsPerSet] = useState(21);
   const [maxSets, setMaxSets] = useState(3);
 
+  // Tennis-specific config (organizer/umpire configurable before start)
+  const [tGamesPerSet, setTGamesPerSet] = useState(6);
+  const [tTiebreakTo, setTTiebreakTo] = useState(7);
+  const [tNoAd, setTNoAd] = useState(false);
+  const [tMatchTiebreak, setTMatchTiebreak] = useState(false);
+  const isTennis = /tennis/i.test(match?.tournament?.sport || '');
+  const buildTennisConfig = () => defaultTennisConfig({
+    sets: maxSets,
+    gamesPerSet: tGamesPerSet,
+    tiebreakTo: tTiebreakTo,
+    noAd: tNoAd,
+    matchTiebreak: tMatchTiebreak,
+  });
+
   const [score, setScore] = useState({
     sets: [{ player1: 0, player2: 0 }],
     currentSet: 0,
@@ -100,6 +133,10 @@ const MatchScoringPage = () => {
         const cfg = parseScoringFormat(matchData.category.scoringFormat);
         setPointsPerSet(cfg.points);
         setMaxSets(cfg.sets);
+        // For tennis, the "points" slot of the format is games-per-set (e.g. 6x3).
+        if (/tennis/i.test(matchData?.tournament?.sport || '')) {
+          setTGamesPerSet(cfg.points || 6);
+        }
       }
 
       if (matchData.score && matchData.score.sets) {
@@ -146,6 +183,22 @@ const MatchScoringPage = () => {
       const response = await api.post(`/matches/${matchId}/start`, {}, { timeout: 45000 });
       const matchData = response.data.match;
       setMatch(matchData);
+
+      // Tennis: seed a tennis-shaped score (point log + derived state), ignoring
+      // any default badminton score the backend created.
+      if (isTennis) {
+        const tcfg = buildTennisConfig();
+        const seeded = newTennisState(tcfg);
+        setScore({
+          sport: 'Tennis', matchConfig: tcfg, points: [],
+          sets: seeded.sets, currentSet: seeded.currentSet, game: seeded.game,
+          inTiebreak: seeded.inTiebreak, status: seeded.status, matchWinner: seeded.matchWinner,
+          timer: matchData?.score?.timer, swapped: false,
+        });
+        setTimerData(matchData?.score?.timer);
+        return;
+      }
+
       if (matchData?.score) {
         // Always inject our configured values into matchConfig so addPoint uses
         // the correct pointsPerSet/maxSets even if the backend response omits them
@@ -207,9 +260,52 @@ const MatchScoringPage = () => {
     }
   };
 
+  // ── Tennis: point log is the source of truth; state is derived by replay ──
+  const addTennisPoint = (player) => {
+    const points = [...(score.points || []), player];
+    const cfg = score.matchConfig || buildTennisConfig();
+    const d = deriveTennisState(cfg, points);
+    const newScore = {
+      ...score, sport: 'Tennis', matchConfig: cfg, points,
+      sets: d.sets, currentSet: d.currentSet, game: d.game,
+      inTiebreak: d.inTiebreak, status: d.status, matchWinner: d.matchWinner,
+    };
+    updateScore(newScore);
+    if (autoSaveTimerRef.current) { clearTimeout(autoSaveTimerRef.current); autoSaveTimerRef.current = null; }
+    if (d.status === 'completed') {
+      saveScoreToApi(newScore);
+      const matchWinnerId = d.matchWinner === 1 ? match.player1?.id : match.player2?.id;
+      if (!matchWinnerId) { setError('Cannot determine winner — player data missing. End match manually.'); setShowEndModal(true); return; }
+      setCompletedSetData({
+        isMatchComplete: true, matchWinnerId,
+        matchWinnerName: d.matchWinner === 1 ? p1Display : p2Display,
+        score: tennisSetSummary(d),
+      });
+      setShowSetCompleteModal(true);
+    } else {
+      autoSaveTimerRef.current = setTimeout(() => saveScoreToApi(newScore), 1500);
+    }
+  };
+
+  // Tennis Undo — removes the LAST point played (whoever won it) and re-derives.
+  const removeTennisPoint = () => {
+    if (!score.points || score.points.length === 0) return;
+    const points = score.points.slice(0, -1);
+    const cfg = score.matchConfig || buildTennisConfig();
+    const d = deriveTennisState(cfg, points);
+    const newScore = {
+      ...score, points, sets: d.sets, currentSet: d.currentSet, game: d.game,
+      inTiebreak: d.inTiebreak, status: d.status, matchWinner: d.matchWinner,
+    };
+    updateScore(newScore);
+    if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+    autoSaveTimerRef.current = setTimeout(() => saveScoreToApi(newScore), 1500);
+  };
+
   const addPoint = (player) => {
     if (isPaused) return;
     if (showSetCompleteModal) return;
+    if (isTennis) { addTennisPoint(player); return; }
     const newScore = { ...score };
     const idx = newScore.currentSet;
     const currentSet = { ...newScore.sets[idx] };
@@ -274,6 +370,7 @@ const MatchScoringPage = () => {
 
   const removePoint = (player) => {
     if (isPaused) return;
+    if (isTennis) { removeTennisPoint(); return; }
     const newScore = { ...score };
     const idx = newScore.currentSet;
     const currentSet = { ...newScore.sets[idx] };
@@ -402,8 +499,16 @@ const MatchScoringPage = () => {
     );
   }
 
-  const { p1Sets, p2Sets } = getSetsWon();
+  // Sets won. Tennis counts set winners directly; other sports use the points engine.
+  const tennisSetsWon = () => {
+    let a = 0, b = 0;
+    (score.sets || []).forEach(s => { if (s.winner === 1) a++; else if (s.winner === 2) b++; });
+    return { p1Sets: a, p2Sets: b };
+  };
+  const { p1Sets, p2Sets } = isTennis ? tennisSetsWon() : getSetsWon();
   const currentSet = score.sets?.[score.currentSet] || { player1: 0, player2: 0 };
+  const tGame = score.game || { p1: 0, p2: 0 };
+  const tInTiebreak = !!score.inTiebreak;
   const isInProgress = match.status === 'IN_PROGRESS';
   const isCompleted = match.status === 'COMPLETED';
   const canStart = match.status === 'PENDING' || match.status === 'SCHEDULED' || match.status === 'READY';
@@ -436,8 +541,8 @@ const MatchScoringPage = () => {
   // their avatar, name, live score and sets-won. Each side's Point/Undo stays
   // wired to `.num`, so scoring always hits the correct real player.
   const pdata = {
-    1: { num: 1, l1: p1l1, l2: p1l2, obj: match.player1, sets: p1Sets, score: currentSet.player1 },
-    2: { num: 2, l1: p2l1, l2: p2l2, obj: match.player2, sets: p2Sets, score: currentSet.player2 },
+    1: { num: 1, l1: p1l1, l2: p1l2, obj: match.player1, sets: p1Sets, score: currentSet.player1, gpt: tGame.p1 },
+    2: { num: 2, l1: p2l1, l2: p2l2, obj: match.player2, sets: p2Sets, score: currentSet.player2, gpt: tGame.p2 },
   };
   const left = swapped ? pdata[2] : pdata[1];
   const right = swapped ? pdata[1] : pdata[2];
@@ -537,38 +642,62 @@ const MatchScoringPage = () => {
         {/* ── Match Config (shown before start) ───────────────────────────── */}
         {canStart && (
           <div className="rounded-2xl p-4 mb-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
-            <p className="text-xs font-black mb-2" style={{ color: B.cyan }}>MATCH SETTINGS</p>
-            <ConfigStepper
-              label="Points per set"
-              value={pointsPerSet}
-              min={5}
-              max={50}
-              step={1}
-              onChange={setPointsPerSet}
-            />
-            <div className="h-px" style={{ background: 'rgba(255,255,255,0.06)' }} />
-            <ConfigStepper
-              label="Number of sets"
-              sub={`First to win ${setsToWin} set${setsToWin !== 1 ? 's' : ''}`}
-              value={maxSets}
-              min={1}
-              max={9}
-              step={2}
-              onChange={setMaxSets}
-            />
+            <p className="text-xs font-black mb-2" style={{ color: B.cyan }}>{isTennis ? 'TENNIS SETTINGS' : 'MATCH SETTINGS'}</p>
+            {isTennis ? (
+              <>
+                <ConfigStepper label="Number of sets" sub={`Best of ${maxSets} — first to ${setsToWin}`} value={maxSets} min={1} max={7} step={2} onChange={setMaxSets} />
+                <div className="h-px" style={{ background: 'rgba(255,255,255,0.06)' }} />
+                <ConfigStepper label="Games per set" sub="First to this many games, win by 2" value={tGamesPerSet} min={1} max={9} step={1} onChange={setTGamesPerSet} />
+                <div className="h-px" style={{ background: 'rgba(255,255,255,0.06)' }} />
+                <ConfigStepper label="Tiebreak points" sub={`Race to this at ${tGamesPerSet}–${tGamesPerSet}, win by 2`} value={tTiebreakTo} min={5} max={15} step={1} onChange={setTTiebreakTo} />
+                <div className="h-px" style={{ background: 'rgba(255,255,255,0.06)' }} />
+                <ToggleRow label="No-Ad scoring" sub="Sudden-death point at deuce" value={tNoAd} onChange={setTNoAd} />
+                <div className="h-px" style={{ background: 'rgba(255,255,255,0.06)' }} />
+                <ToggleRow label="Match-tiebreak decider" sub="Final set is a 10-point tiebreak" value={tMatchTiebreak} onChange={setTMatchTiebreak} />
+              </>
+            ) : (
+              <>
+                <ConfigStepper
+                  label="Points per set"
+                  value={pointsPerSet}
+                  min={5}
+                  max={50}
+                  step={1}
+                  onChange={setPointsPerSet}
+                />
+                <div className="h-px" style={{ background: 'rgba(255,255,255,0.06)' }} />
+                <ConfigStepper
+                  label="Number of sets"
+                  sub={`First to win ${setsToWin} set${setsToWin !== 1 ? 's' : ''}`}
+                  value={maxSets}
+                  min={1}
+                  max={9}
+                  step={2}
+                  onChange={setMaxSets}
+                />
+              </>
+            )}
           </div>
         )}
 
         {/* ── Scoreboard ──────────────────────────────────────────────────── */}
         <div className="rounded-2xl overflow-hidden mb-4 px-4 py-5" style={{ background: B.card, border: `1px solid ${B.border}` }}>
 
-          {/* Current-set badge */}
-          <div className="mx-auto mb-6 px-6 py-2.5 rounded-2xl text-center" style={{ maxWidth: '210px', background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.35)' }}>
-            <div className="text-sm font-black" style={{ color: B.green }}>Set {score.currentSet + 1}</div>
+          {/* Current-set badge (badminton: set points · tennis: games in set) */}
+          <div className="mx-auto mb-6 px-6 py-2.5 rounded-2xl text-center" style={{ maxWidth: '260px', background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.35)' }}>
+            <div className="text-sm font-black" style={{ color: B.green }}>
+              {isTennis && tInTiebreak ? 'Tiebreak' : `Set ${score.currentSet + 1}`}
+            </div>
             <div className="text-2xl font-black text-white leading-tight my-0.5">
               {left.score} <span style={{ color: 'rgba(255,255,255,0.35)' }}>–</span> {right.score}
+              {isTennis && <span className="text-xs font-bold ml-1.5" style={{ color: 'rgba(255,255,255,0.4)' }}>games</span>}
             </div>
-            <div className="text-xs font-semibold" style={{ color: 'rgba(255,255,255,0.45)' }}>Best of {maxSets} Set{maxSets !== 1 ? 's' : ''}</div>
+            <div className="text-xs font-semibold" style={{ color: 'rgba(255,255,255,0.45)' }}>
+              Best of {maxSets} Set{maxSets !== 1 ? 's' : ''}{isTennis && tNoAd ? ' · No-Ad' : ''}
+            </div>
+            {isTennis && (score.sets || []).some(s => s.winner) && (
+              <div className="text-[11px] font-bold mt-1" style={{ color: '#67e8f9' }}>{tennisSetSummary(score)}</div>
+            )}
           </div>
 
           {/* Players + live score */}
@@ -587,12 +716,16 @@ const MatchScoringPage = () => {
               </div>
             </div>
 
-            {/* Live score */}
+            {/* Live score — tennis shows the current game (15/30/40/Ad or tiebreak pts) */}
             <div className="text-center px-1 pt-5">
               <div className="font-black text-white leading-none" style={{ fontSize: '2.75rem' }}>
-                {left.score}<span className="align-middle" style={{ fontSize: '2rem', color: 'rgba(255,255,255,0.3)', margin: '0 6px' }}>-</span>{right.score}
+                {isTennis
+                  ? <>{pointLabel(left.gpt, right.gpt, tInTiebreak)}<span className="align-middle" style={{ fontSize: '2rem', color: 'rgba(255,255,255,0.3)', margin: '0 6px' }}>-</span>{pointLabel(right.gpt, left.gpt, tInTiebreak)}</>
+                  : <>{left.score}<span className="align-middle" style={{ fontSize: '2rem', color: 'rgba(255,255,255,0.3)', margin: '0 6px' }}>-</span>{right.score}</>}
               </div>
-              <p className="text-sm font-black mt-2" style={{ color: B.green }}>Set {score.currentSet + 1}</p>
+              <p className="text-sm font-black mt-2" style={{ color: B.green }}>
+                {isTennis ? (tInTiebreak ? 'Tiebreak' : 'Game') : `Set ${score.currentSet + 1}`}
+              </p>
             </div>
 
             {/* Right player */}
@@ -698,7 +831,9 @@ const MatchScoringPage = () => {
                 : <><Play className="w-5 h-5" />START MATCH — {p1Display} vs {p2Display}</>}
             </button>
             <p className="text-center text-xs mt-2" style={{ color: 'rgba(255,255,255,0.55)' }}>
-              {pointsPerSet} pts · Best of {maxSets}
+              {isTennis
+                ? `Tennis · Best of ${maxSets} · games to ${tGamesPerSet}${tNoAd ? ' · No-Ad' : ''}`
+                : `${pointsPerSet} pts · Best of ${maxSets}`}
             </p>
           </div>
         </div>
@@ -719,7 +854,7 @@ const MatchScoringPage = () => {
                   <h2 className="text-xl font-black text-white mb-1">🎉 Match Complete!</h2>
                   <p className="text-sm mb-2" style={{ color: 'rgba(255,255,255,0.5)' }}>Winner</p>
                   <p className="text-2xl font-black mb-1" style={{ color: B.amber }}>{completedSetData.matchWinnerName}</p>
-                  <p className="text-base font-bold text-white">Set {completedSetData.setNumber}: {completedSetData.score}</p>
+                  <p className="text-base font-bold text-white">{completedSetData.setNumber ? `Set ${completedSetData.setNumber}: ` : 'Final: '}{completedSetData.score}</p>
                 </div>
                 <div className="px-5 pb-5">
                   <SlideToConfirm

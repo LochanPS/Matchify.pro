@@ -156,13 +156,15 @@ class MatchService {
         tournament: {
           select: {
             name: true,
-            startDate: true
+            startDate: true,
+            sport: true
           }
         },
         category: {
           select: {
             name: true,
-            format: true
+            format: true,
+            scoringFormat: true
           }
         },
         parentMatch: true,

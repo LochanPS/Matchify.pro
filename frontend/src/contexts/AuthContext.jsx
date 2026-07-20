@@ -4,10 +4,12 @@ import api from '../utils/api';
 
 const AuthContext = createContext(null);
 
-// Check if profile is complete (has required fields)
+// Check if profile is complete (has required fields).
+// Phone is intentionally NOT required — users can sign up with just an email,
+// so we only mandate city, state and gender here.
 const isProfileComplete = (user) => {
   if (!user) return true; // No user, no need to show modal
-  return !!(user.phone && user.city && user.state && user.gender);
+  return !!(user.city && user.state && user.gender);
 };
 
 export const AuthProvider = ({ children }) => {

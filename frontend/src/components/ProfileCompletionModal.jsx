@@ -384,7 +384,6 @@ const INDIAN_CITIES = Object.keys(CITY_STATE_MAP).sort();
 
 export default function ProfileCompletionModal({ user, onComplete }) {
   const [formData, setFormData] = useState({
-    phone: user?.phone || '',
     city: user?.city || '',
     state: user?.state || '',
     gender: user?.gender || '',
@@ -468,14 +467,16 @@ export default function ProfileCompletionModal({ user, onComplete }) {
   // City handlers
   const handleCityInputChange = (value) => {
     setCityInput(value);
-    handleChange('city', value);
     setError('');
-    
-    // Check if the typed city matches exactly (case-insensitive) and auto-fill state
-    const matchedCity = Object.keys(CITY_STATE_MAP).find(
-      city => city.toLowerCase() === value.toLowerCase()
+
+    // Selection-only: the city counts as chosen ONLY when it exactly matches a
+    // known city (typed exactly or picked from the dropdown). Anything else
+    // leaves formData.city empty, so wrong/misspelt places can't be submitted.
+    const matchedCity = INDIAN_CITIES.find(
+      city => city.toLowerCase() === value.trim().toLowerCase()
     );
-    if (matchedCity) {
+    handleChange('city', matchedCity || '');
+    if (matchedCity && CITY_STATE_MAP[matchedCity]) {
       const state = CITY_STATE_MAP[matchedCity];
       setStateInput(state);
       handleChange('state', state);
@@ -513,17 +514,13 @@ export default function ProfileCompletionModal({ user, onComplete }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Validation
-    if (!formData.phone || formData.phone.length < 10) {
-      setError('Please enter a valid phone number');
-      return;
-    }
-    if (!formData.city.trim()) {
-      setError('Please enter your city');
+    // Validation — city & state must be real entries picked from the list.
+    if (!formData.city || !INDIAN_CITIES.includes(formData.city)) {
+      setError('Please select your city from the list');
       return;
     }
     if (!formData.state || !INDIAN_STATES.includes(formData.state)) {
-      setError('Please select a valid state from the suggestions');
+      setError('Please select your state from the list');
       return;
     }
     if (!formData.gender) {
@@ -588,42 +585,27 @@ export default function ProfileCompletionModal({ user, onComplete }) {
             </div>
           )}
 
-          {/* Phone */}
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Phone Number <span className="text-red-400">*</span>
-            </label>
-            <div className="flex">
-              <span className="inline-flex items-center px-4 bg-slate-700/50 border border-white/10 border-r-0 rounded-l-xl text-gray-400 font-medium">
-                +91
-              </span>
-              <input
-                type="tel"
-                value={formData.phone}
-                onChange={(e) => handleChange('phone', e.target.value.replace(/\D/g, '').slice(0, 10))}
-                placeholder="9876543210"
-                className="flex-1 px-4 py-3 bg-slate-700/50 border border-white/10 rounded-r-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
-                required
-              />
-            </div>
-          </div>
-
           {/* City - Searchable Autocomplete */}
           <div className="relative">
             <label className="block text-sm font-medium text-gray-300 mb-2">
               City <span className="text-red-400">*</span>
             </label>
-            <input
-              ref={cityInputRef}
-              type="text"
-              value={cityInput}
-              onChange={(e) => handleCityInputChange(e.target.value)}
-              onFocus={() => cityInput.trim() && setShowCitySuggestions(filteredCities.length > 0)}
-              placeholder="Type to search city..."
-              className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
-              autoComplete="off"
-            />
-            
+            <div className="relative">
+              <input
+                ref={cityInputRef}
+                type="text"
+                value={cityInput}
+                onChange={(e) => handleCityInputChange(e.target.value)}
+                onFocus={() => cityInput.trim() && setShowCitySuggestions(filteredCities.length > 0)}
+                placeholder="Search your city..."
+                className={`w-full px-4 py-3 bg-slate-700/50 border rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all ${formData.city ? 'border-emerald-500/50' : 'border-white/10'}`}
+                autoComplete="off"
+              />
+              {formData.city && (
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-emerald-400">✓</span>
+              )}
+            </div>
+
             {/* City Suggestions Dropdown */}
             {showCitySuggestions && filteredCities.length > 0 && (
               <div 
@@ -646,7 +628,7 @@ export default function ProfileCompletionModal({ user, onComplete }) {
               </div>
             )}
             <p className="mt-2 text-xs text-gray-500">
-              Type to see suggestions or enter your city name
+              Search and select your city from the list
             </p>
           </div>
 

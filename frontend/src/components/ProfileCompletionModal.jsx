@@ -405,6 +405,14 @@ export default function ProfileCompletionModal({ user, onComplete }) {
   const stateInputRef = useRef(null);
   const stateSuggestionsRef = useRef(null);
 
+  // Warm the backend the moment this modal opens. It often appears right after
+  // opening the app with a stored session — so "Save & Continue" would be the
+  // FIRST hit on a sleeping Railway server. This ping wakes it while the user
+  // fills the form, so the save doesn't fail with "couldn't reach the server".
+  useEffect(() => {
+    api.get('/health', { _noCache: true, _noRetry: true, timeout: 20000 }).catch(() => {});
+  }, []);
+
   // Filter cities based on input
   useEffect(() => {
     if (cityInput.trim()) {

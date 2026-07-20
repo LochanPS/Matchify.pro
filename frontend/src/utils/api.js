@@ -63,6 +63,10 @@ const AUTH_RETRY_DELAY = 3000; // Auth POSTs: shorter delay — user waiting at 
 // the duplicate is caught by DB constraints and returns 409/400 (not retried).
 const AUTH_RETRY_URLS = ['/auth/login', '/auth/register', '/auth/forgot-password'];
 const SAFE_POST_RETRY_URLS = ['/tournaments'];
+// Idempotent PUTs safe to retry on a cold-start network/timeout (setting the
+// same fields twice is harmless). Profile completion is the first backend hit
+// after opening the app with a stored session, so it must survive a cold start.
+const SAFE_PUT_RETRY_URLS = ['/profile'];
 
 function sleep(ms) {
   return new Promise(r => setTimeout(r, ms));
@@ -80,12 +84,15 @@ api.interceptors.response.use(
     // Tournament create safe to retry on cold-start network/timeout errors only
     const isSafePost = method === 'post' &&
       SAFE_POST_RETRY_URLS.some(p => config.url?.endsWith(p) || config.url?.includes(p + '?'));
+    // Idempotent PUTs (e.g. profile completion) safe to retry on cold start
+    const isSafePut = method === 'put' &&
+      SAFE_PUT_RETRY_URLS.some(p => config.url?.includes(p));
     const retryCount = config._retryCount || 0;
 
-    // Auto-retry GET + safe POSTs on 5xx / network errors
+    // Auto-retry GET + safe POSTs/PUTs on 5xx / network errors
     // Transparent: calling code never sees transient cold-start failures.
     const isRetryable =
-      (isGet || isAuthPost || isSafePost) &&
+      (isGet || isAuthPost || isSafePost || isSafePut) &&
       retryCount < MAX_AUTO_RETRIES &&
       !config._noRetry &&
       (
@@ -94,11 +101,11 @@ api.interceptors.response.use(
         error.code === 'ERR_NETWORK' ||
         !error.response
       );
-    // isSafePost uses AUTH_RETRY_DELAY (3s) — user is waiting at the form, 8s is too long
+    // isSafePost/isSafePut use AUTH_RETRY_DELAY (3s) — user is waiting at the form
 
     if (isRetryable) {
       config._retryCount = retryCount + 1;
-      await sleep((isAuthPost || isSafePost) ? AUTH_RETRY_DELAY : RETRY_DELAY_MS);
+      await sleep((isAuthPost || isSafePost || isSafePut) ? AUTH_RETRY_DELAY : RETRY_DELAY_MS);
       return api(config);
     }
 

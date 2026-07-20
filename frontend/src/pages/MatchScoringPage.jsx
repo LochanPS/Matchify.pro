@@ -134,8 +134,11 @@ const MatchScoringPage = () => {
         setPointsPerSet(cfg.points);
         setMaxSets(cfg.sets);
         // For tennis, the "points" slot of the format is games-per-set (e.g. 6x3).
+        // A tennis category can still inherit the badminton default "21x3" — 21
+        // games per set is nonsensical for tennis, so clamp to the standard 6.
         if (/tennis/i.test(matchData?.tournament?.sport || '')) {
-          setTGamesPerSet(cfg.points || 6);
+          const g = cfg.points;
+          setTGamesPerSet(g >= 1 && g <= 9 ? g : 6);
         }
       }
 

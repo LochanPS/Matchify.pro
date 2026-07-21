@@ -103,7 +103,12 @@ const MatchScoringPage = () => {
   const [tTiebreakTo, setTTiebreakTo] = useState(7);
   const [tNoAd, setTNoAd] = useState(false);
   const [tMatchTiebreak, setTMatchTiebreak] = useState(false);
-  const isTennis = /tennis/i.test(match?.tournament?.sport || '');
+  const sportName = match?.tournament?.sport || '';
+  const isTennis = /tennis/i.test(sportName);
+  const isPickleball = /pickle/i.test(sportName);
+  const isBadminton = /badmin/i.test(sportName) || (!isTennis && !isPickleball); // point engine default
+  // Pickleball calls them "games"; badminton/others use "set". (Tennis has its own labels.)
+  const pointUnit = isPickleball ? 'Game' : 'Set';
   const buildTennisConfig = () => defaultTennisConfig({
     sets: maxSets,
     gamesPerSet: tGamesPerSet,
@@ -130,13 +135,21 @@ const MatchScoringPage = () => {
 
       // Pre-fill config from category scoring format
       if (matchData?.category?.scoringFormat) {
-        const cfg = parseScoringFormat(matchData.category.scoringFormat);
-        setPointsPerSet(cfg.points);
+        const fmt = matchData.category.scoringFormat;
+        const cfg = parseScoringFormat(fmt);
+        const sp = matchData?.tournament?.sport || '';
         setMaxSets(cfg.sets);
-        // For tennis, the "points" slot of the format is games-per-set (e.g. 6x3).
-        // A tennis category can still inherit the badminton default "21x3" — 21
-        // games per set is nonsensical for tennis, so clamp to the standard 6.
-        if (/tennis/i.test(matchData?.tournament?.sport || '')) {
+        // Pickleball is a point sport like badminton, but standard is 11 (not 21).
+        // A pickleball category can still inherit the badminton default "21x3" —
+        // fall back to 11 in that case (explicit non-default formats are kept).
+        if (/pickle/i.test(sp) && fmt === '21x3') {
+          setPointsPerSet(11);
+        } else {
+          setPointsPerSet(cfg.points);
+        }
+        // For tennis, the "points" slot is games-per-set (e.g. 6x3). A tennis
+        // category can still inherit "21x3" — 21 games is nonsensical, clamp to 6.
+        if (/tennis/i.test(sp)) {
           const g = cfg.points;
           setTGamesPerSet(g >= 1 && g <= 9 ? g : 6);
         }
@@ -322,10 +335,13 @@ const MatchScoringPage = () => {
     const pts = cfg.pointsPerSet;
     const p1 = currentSet.player1, p2 = currentSet.player2;
 
+    // Badminton caps a deuce at 30 (its 29–29 rule). Pickleball has no cap —
+    // pure win-by-2 — so only apply the hard cap for badminton.
+    const cap = isBadminton ? 30 : Infinity;
     let setWon = false, winner = null;
     if (extension) {
-      if ((p1 >= pts && p1 - p2 >= 2) || p1 >= 30) { setWon = true; winner = 1; }
-      else if ((p2 >= pts && p2 - p1 >= 2) || p2 >= 30) { setWon = true; winner = 2; }
+      if ((p1 >= pts && p1 - p2 >= 2) || p1 >= cap) { setWon = true; winner = 1; }
+      else if ((p2 >= pts && p2 - p1 >= 2) || p2 >= cap) { setWon = true; winner = 2; }
     } else {
       if (p1 >= pts) { setWon = true; winner = 1; }
       else if (p2 >= pts) { setWon = true; winner = 2; }
@@ -441,9 +457,10 @@ const MatchScoringPage = () => {
       if (set.winner === 1) p1Sets++;
       else if (set.winner === 2) p2Sets++;
       else {
+        const cap = isBadminton ? 30 : Infinity; // pickleball: no deuce cap
         if (extension) {
-          if ((set.player1 >= pts && set.player1 - set.player2 >= 2) || set.player1 >= 30) p1Sets++;
-          if ((set.player2 >= pts && set.player2 - set.player1 >= 2) || set.player2 >= 30) p2Sets++;
+          if ((set.player1 >= pts && set.player1 - set.player2 >= 2) || set.player1 >= cap) p1Sets++;
+          if ((set.player2 >= pts && set.player2 - set.player1 >= 2) || set.player2 >= cap) p2Sets++;
         } else {
           if (set.player1 >= pts) p1Sets++;
           if (set.player2 >= pts) p2Sets++;
@@ -661,7 +678,7 @@ const MatchScoringPage = () => {
             ) : (
               <>
                 <ConfigStepper
-                  label="Points per set"
+                  label={`Points per ${pointUnit.toLowerCase()}`}
                   value={pointsPerSet}
                   min={5}
                   max={50}
@@ -670,8 +687,8 @@ const MatchScoringPage = () => {
                 />
                 <div className="h-px" style={{ background: 'rgba(255,255,255,0.06)' }} />
                 <ConfigStepper
-                  label="Number of sets"
-                  sub={`First to win ${setsToWin} set${setsToWin !== 1 ? 's' : ''}`}
+                  label={`Number of ${pointUnit.toLowerCase()}s`}
+                  sub={`First to win ${setsToWin} ${pointUnit.toLowerCase()}${setsToWin !== 1 ? 's' : ''}`}
                   value={maxSets}
                   min={1}
                   max={9}
@@ -689,14 +706,14 @@ const MatchScoringPage = () => {
           {/* Current-set badge (badminton: set points · tennis: games in set) */}
           <div className="mx-auto mb-6 px-6 py-2.5 rounded-2xl text-center" style={{ maxWidth: '260px', background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.35)' }}>
             <div className="text-sm font-black" style={{ color: B.green }}>
-              {isTennis && tInTiebreak ? 'Tiebreak' : `Set ${score.currentSet + 1}`}
+              {isTennis && tInTiebreak ? 'Tiebreak' : `${pointUnit} ${score.currentSet + 1}`}
             </div>
             <div className="text-2xl font-black text-white leading-tight my-0.5">
               {left.score} <span style={{ color: 'rgba(255,255,255,0.35)' }}>–</span> {right.score}
               {isTennis && <span className="text-xs font-bold ml-1.5" style={{ color: 'rgba(255,255,255,0.4)' }}>games</span>}
             </div>
             <div className="text-xs font-semibold" style={{ color: 'rgba(255,255,255,0.45)' }}>
-              Best of {maxSets} Set{maxSets !== 1 ? 's' : ''}{isTennis && tNoAd ? ' · No-Ad' : ''}
+              Best of {maxSets} {pointUnit}{maxSets !== 1 ? 's' : ''}{isTennis && tNoAd ? ' · No-Ad' : ''}
             </div>
             {isTennis && (score.sets || []).some(s => s.winner) && (
               <div className="text-[11px] font-bold mt-1" style={{ color: '#67e8f9' }}>{tennisSetSummary(score)}</div>
@@ -710,7 +727,7 @@ const MatchScoringPage = () => {
               {sideAvatar(left)}
               <p className="text-sm font-black text-white leading-tight mt-2 px-0.5" style={{ wordBreak: 'break-word' }}>{left.l1}</p>
               {left.l2 && <p className="text-xs font-bold leading-tight mt-0.5 px-0.5" style={{ color: '#67e8f9', wordBreak: 'break-word' }}>/ {left.l2}</p>}
-              <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.5)' }}>Sets Won</p>
+              <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.5)' }}>{pointUnit}s Won</p>
               <div className="mx-auto mt-1.5 w-12 py-1 rounded-lg text-base font-black"
                 style={left.sets > right.sets
                   ? { background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.4)', color: B.green }
@@ -727,7 +744,7 @@ const MatchScoringPage = () => {
                   : <>{left.score}<span className="align-middle" style={{ fontSize: '2rem', color: 'rgba(255,255,255,0.3)', margin: '0 6px' }}>-</span>{right.score}</>}
               </div>
               <p className="text-sm font-black mt-2" style={{ color: B.green }}>
-                {isTennis ? (tInTiebreak ? 'Tiebreak' : 'Game') : `Set ${score.currentSet + 1}`}
+                {isTennis ? (tInTiebreak ? 'Tiebreak' : 'Game') : `${pointUnit} ${score.currentSet + 1}`}
               </p>
             </div>
 
@@ -736,7 +753,7 @@ const MatchScoringPage = () => {
               {sideAvatar(right)}
               <p className="text-sm font-black text-white leading-tight mt-2 px-0.5" style={{ wordBreak: 'break-word' }}>{right.l1}</p>
               {right.l2 && <p className="text-xs font-bold leading-tight mt-0.5 px-0.5" style={{ color: '#67e8f9', wordBreak: 'break-word' }}>/ {right.l2}</p>}
-              <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.5)' }}>Sets Won</p>
+              <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.5)' }}>{pointUnit}s Won</p>
               <div className="mx-auto mt-1.5 w-12 py-1 rounded-lg text-base font-black"
                 style={right.sets > left.sets
                   ? { background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.4)', color: B.green }
@@ -878,9 +895,9 @@ const MatchScoringPage = () => {
                     style={{ background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.35)' }}>
                     <Trophy className="w-7 h-7" style={{ color: B.green }} />
                   </div>
-                  <h2 className="text-lg font-black text-white mb-1">Set {completedSetData.setNumber} Complete!</h2>
+                  <h2 className="text-lg font-black text-white mb-1">{pointUnit} {completedSetData.setNumber} Complete!</h2>
                   <p className="text-sm mb-1" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                    <span className="font-bold" style={{ color: B.green }}>{completedSetData.winner}</span> wins the set
+                    <span className="font-bold" style={{ color: B.green }}>{completedSetData.winner}</span> wins the {pointUnit.toLowerCase()}
                   </p>
                   <p className="text-xl font-black text-white">{completedSetData.score}</p>
                 </div>
@@ -888,7 +905,7 @@ const MatchScoringPage = () => {
                   <button onClick={handleContinueToNextSet}
                     className="w-full py-3.5 rounded-xl font-black text-sm transition-all flex items-center justify-center gap-2"
                     style={{ background: 'linear-gradient(135deg,#F59E0B,#D97706)', color: '#050810', boxShadow: '0 4px 16px rgba(245,158,11,0.35)' }}>
-                    <Play className="w-4 h-4" /> Continue to Set {completedSetData.setNumber + 1}
+                    <Play className="w-4 h-4" /> Continue to {pointUnit} {completedSetData.setNumber + 1}
                   </button>
                   <button onClick={handleEndMatchEarly}
                     className="w-full py-3 rounded-xl text-sm font-bold transition-all"
@@ -896,7 +913,7 @@ const MatchScoringPage = () => {
                     End Match Here
                   </button>
                   <p className="text-center text-xs" style={{ color: 'rgba(255,255,255,0.55)' }}>
-                    {score.matchConfig?.maxSets === 1 ? '1 set' : `Best of ${score.matchConfig?.maxSets || maxSets} sets`}
+                    {score.matchConfig?.maxSets === 1 ? `1 ${pointUnit.toLowerCase()}` : `Best of ${score.matchConfig?.maxSets || maxSets} ${pointUnit.toLowerCase()}s`}
                   </p>
                 </div>
               </>

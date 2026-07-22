@@ -289,6 +289,9 @@ model Registration {
   guestPhone         String?    // Phone for guest registrations
   guestGender        String?    // Gender for guest registrations
   guestPartnerName   String?    // Doubles partner name when partner has no Matchify ID
+  // Team-sport registrations (e.g. basketball): the participant is a team, not a player.
+  teamName           String?    // Team name (required for team sports)
+  roster             Json?      // Roster: [{ name, jerseyNumber?, isSub? }] — 5+ players for basketball
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
   partnerToken       String?

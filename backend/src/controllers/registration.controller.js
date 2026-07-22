@@ -554,6 +554,9 @@ const createRegistrationWithScreenshot = async (req, res) => {
     const parsedCategoryIds = JSON.parse(categoryIds);
     const parsedPartnerEmails = JSON.parse(partnerEmails || '{}');
     const parsedPartnerNames = JSON.parse(partnerNames || '{}');
+    // Team-sport registrations send a team name + roster per category.
+    const parsedTeamNames = JSON.parse(req.body.teamNames || '{}');   // { [catId]: "Team name" }
+    const parsedRosters = JSON.parse(req.body.rosters || '{}');       // { [catId]: [{ name, jerseyNumber?, isSub? }] }
 
     // Validation
     if (!tournamentId || !parsedCategoryIds || parsedCategoryIds.length === 0) {
@@ -578,6 +581,21 @@ const createRegistrationWithScreenshot = async (req, res) => {
 
     if (!tournament) {
       return res.status(404).json({ success: false, error: 'Tournament not found' });
+    }
+
+    // Team sports register a TEAM (name + roster ≥5), not an individual/pair.
+    // Validate every category up front so nothing is created if any is invalid.
+    const TEAM_SPORTS = ['Basketball']; // Football to follow
+    const isTeamSport = TEAM_SPORTS.includes(tournament.sport);
+    if (isTeamSport) {
+      for (const catId of parsedCategoryIds) {
+        const tName = (parsedTeamNames[catId] || '').trim();
+        const players = Array.isArray(parsedRosters[catId])
+          ? parsedRosters[catId].filter(p => (p?.name || '').trim())
+          : [];
+        if (!tName) return res.status(400).json({ success: false, error: 'Team name is required to register a team.' });
+        if (players.length < 5) return res.status(400).json({ success: false, error: 'A team needs at least 5 players in the roster.' });
+      }
     }
 
     // Check if registration is open
@@ -790,6 +808,9 @@ const createRegistrationWithScreenshot = async (req, res) => {
         partnerEmail: !partnerId && categoryPartnerEmail ? categoryPartnerEmail : null,
         partnerToken,
         guestPartnerName,
+        // Team-sport registrations carry the team name + roster.
+        teamName: isTeamSport ? (parsedTeamNames[category.id] || '').trim() : null,
+        roster: isTeamSport ? (parsedRosters[category.id] || null) : null,
         amountTotal: category.entryFee,
         amountWallet: 0,
         amountRazorpay: 0,

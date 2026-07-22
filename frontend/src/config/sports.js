@@ -7,13 +7,18 @@
 //   doubles        — whether the sport supports doubles categories.
 //   ballTerm       — sport-appropriate word ("shuttle" / "ball") for neutral copy.
 
+// scoringModel is the AUTHORITATIVE way a sport is scored — routing MUST use
+// this (via getSport by exact id), never substring checks like /tennis/ which
+// wrongly match "Table Tennis". model: 'points' (rally: race to N, win by 2)
+// or 'tennis' (15/30/40, games, sets, tiebreak). For 'points': unit label,
+// pointsToWin, bestOf, and cap (badminton's 30 deuce cap; null = pure win-by-2).
 export const SPORTS = [
-  { id: 'Badminton',    label: 'Badminton',    emoji: '🏸', defaultScoring: '21x3', doubles: true,  ballTerm: 'shuttle' },
-  { id: 'Tennis',       label: 'Tennis',       emoji: '🎾', defaultScoring: '6x3',  doubles: true,  ballTerm: 'ball' },
-  { id: 'Table Tennis', label: 'Table Tennis', emoji: '🏓', defaultScoring: '11x5', doubles: true,  ballTerm: 'ball' },
-  { id: 'Pickleball',   label: 'Pickleball',   emoji: '🥒', defaultScoring: '11x3', doubles: true,  ballTerm: 'ball' },
-  { id: 'Squash',       label: 'Squash',       emoji: '🎾', defaultScoring: '11x5', doubles: false, ballTerm: 'ball' },
-  { id: 'Padel',        label: 'Padel',        emoji: '🎾', defaultScoring: '6x3',  doubles: true,  ballTerm: 'ball' },
+  { id: 'Badminton',    label: 'Badminton',    emoji: '🏸', defaultScoring: '21x3', doubles: true,  ballTerm: 'shuttle', scoringModel: { model: 'points', unit: 'Set',  pointsToWin: 21, bestOf: 3, cap: 30 } },
+  { id: 'Tennis',       label: 'Tennis',       emoji: '🎾', defaultScoring: '6x3',  doubles: true,  ballTerm: 'ball',    scoringModel: { model: 'tennis' } },
+  { id: 'Table Tennis', label: 'Table Tennis', emoji: '🏓', defaultScoring: '11x5', doubles: true,  ballTerm: 'ball',    scoringModel: { model: 'points', unit: 'Game', pointsToWin: 11, bestOf: 5, cap: null } },
+  { id: 'Pickleball',   label: 'Pickleball',   emoji: '🥒', defaultScoring: '11x3', doubles: true,  ballTerm: 'ball',    scoringModel: { model: 'points', unit: 'Game', pointsToWin: 11, bestOf: 3, cap: null } },
+  { id: 'Squash',       label: 'Squash',       emoji: '🎾', defaultScoring: '11x5', doubles: false, ballTerm: 'ball',    scoringModel: { model: 'points', unit: 'Game', pointsToWin: 11, bestOf: 5, cap: null } },
+  { id: 'Padel',        label: 'Padel',        emoji: '🎾', defaultScoring: '6x3',  doubles: true,  ballTerm: 'ball',    scoringModel: { model: 'tennis' } },
 ];
 
 export const DEFAULT_SPORT = 'Badminton';

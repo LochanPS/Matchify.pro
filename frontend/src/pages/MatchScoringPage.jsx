@@ -11,6 +11,7 @@ import { pauseTimer, resumeTimer } from '../api/matches';
 import SlideToConfirm from '../components/SlideToConfirm';
 import LoadingScreen from '../components/LoadingScreen';
 import { defaultTennisConfig, newTennisState, deriveTennisState, pointLabel, tennisSetSummary } from '../utils/tennisScoring';
+import { getSport } from '../config/sports';
 
 const B = {
   bg: '#040810',
@@ -104,11 +105,14 @@ const MatchScoringPage = () => {
   const [tNoAd, setTNoAd] = useState(false);
   const [tMatchTiebreak, setTMatchTiebreak] = useState(false);
   const sportName = match?.tournament?.sport || '';
-  const isTennis = /tennis/i.test(sportName);
-  const isPickleball = /pickle/i.test(sportName);
-  const isBadminton = /badmin/i.test(sportName) || (!isTennis && !isPickleball); // point engine default
-  // Pickleball calls them "games"; badminton/others use "set". (Tennis has its own labels.)
-  const pointUnit = isPickleball ? 'Game' : 'Set';
+  // Route by the registry's authoritative scoring model (exact id lookup) — NOT
+  // substring regex, which wrongly made "Table Tennis" match /tennis/ and left
+  // Padel on the point engine. model 'tennis' = 15/30/40 (Tennis, Padel);
+  // 'points' = rally race-to-N win-by-2 (Badminton, Pickleball, Table Tennis, Squash).
+  const scoreModel = getSport(sportName).scoringModel || { model: 'points', unit: 'Set', pointsToWin: 21, bestOf: 3, cap: 30 };
+  const isTennis = scoreModel.model === 'tennis';
+  const pointUnit = scoreModel.unit || 'Set';        // "Set" (badminton) or "Game" (pickleball/TT/squash)
+  const pointCap = scoreModel.cap ?? Infinity;       // badminton 30 deuce cap; null → pure win-by-2
   const buildTennisConfig = () => defaultTennisConfig({
     sets: maxSets,
     gamesPerSet: tGamesPerSet,
@@ -137,21 +141,18 @@ const MatchScoringPage = () => {
       if (matchData?.category?.scoringFormat) {
         const fmt = matchData.category.scoringFormat;
         const cfg = parseScoringFormat(fmt);
-        const sp = matchData?.tournament?.sport || '';
-        setMaxSets(cfg.sets);
-        // Pickleball is a point sport like badminton, but standard is 11 (not 21).
-        // A pickleball category can still inherit the badminton default "21x3" —
-        // fall back to 11 in that case (explicit non-default formats are kept).
-        if (/pickle/i.test(sp) && fmt === '21x3') {
-          setPointsPerSet(11);
-        } else {
-          setPointsPerSet(cfg.points);
-        }
-        // For tennis, the "points" slot is games-per-set (e.g. 6x3). A tennis
-        // category can still inherit "21x3" — 21 games is nonsensical, clamp to 6.
-        if (/tennis/i.test(sp)) {
+        const sm = getSport(matchData?.tournament?.sport || '').scoringModel || {};
+        // "21x3" is the generic badminton default a category inherits when the
+        // organizer didn't set a sport-specific format — fall back to the sport's
+        // own standard in that case; an explicit format is always respected.
+        const inherited = fmt === '21x3';
+        setMaxSets(inherited && sm.bestOf ? sm.bestOf : cfg.sets);
+        if (sm.model === 'tennis') {
+          // The "points" slot is games-per-set; 21 games is nonsensical → clamp to 6.
           const g = cfg.points;
           setTGamesPerSet(g >= 1 && g <= 9 ? g : 6);
+        } else {
+          setPointsPerSet(inherited && sm.pointsToWin ? sm.pointsToWin : cfg.points);
         }
       }
 
@@ -337,7 +338,7 @@ const MatchScoringPage = () => {
 
     // Badminton caps a deuce at 30 (its 29–29 rule). Pickleball has no cap —
     // pure win-by-2 — so only apply the hard cap for badminton.
-    const cap = isBadminton ? 30 : Infinity;
+    const cap = pointCap; // badminton 30 deuce cap; other point sports have none
     let setWon = false, winner = null;
     if (extension) {
       if ((p1 >= pts && p1 - p2 >= 2) || p1 >= cap) { setWon = true; winner = 1; }
@@ -457,7 +458,7 @@ const MatchScoringPage = () => {
       if (set.winner === 1) p1Sets++;
       else if (set.winner === 2) p2Sets++;
       else {
-        const cap = isBadminton ? 30 : Infinity; // pickleball: no deuce cap
+        const cap = pointCap; // badminton 30 deuce cap; other point sports have none
         if (extension) {
           if ((set.player1 >= pts && set.player1 - set.player2 >= 2) || set.player1 >= cap) p1Sets++;
           if ((set.player2 >= pts && set.player2 - set.player1 >= 2) || set.player2 >= cap) p2Sets++;

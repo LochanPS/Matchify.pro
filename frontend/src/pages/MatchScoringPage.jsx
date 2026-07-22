@@ -11,7 +11,7 @@ import { pauseTimer, resumeTimer } from '../api/matches';
 import SlideToConfirm from '../components/SlideToConfirm';
 import LoadingScreen from '../components/LoadingScreen';
 import { defaultTennisConfig, newTennisState, deriveTennisState, pointLabel, tennisSetSummary } from '../utils/tennisScoring';
-import { getSport } from '../config/sports';
+import { getScoringModel, getPointEngine } from '../sports/registry';
 
 const B = {
   bg: '#040810',
@@ -105,14 +105,15 @@ const MatchScoringPage = () => {
   const [tNoAd, setTNoAd] = useState(false);
   const [tMatchTiebreak, setTMatchTiebreak] = useState(false);
   const sportName = match?.tournament?.sport || '';
-  // Route by the registry's authoritative scoring model (exact id lookup) — NOT
-  // substring regex, which wrongly made "Table Tennis" match /tennis/ and left
-  // Padel on the point engine. model 'tennis' = 15/30/40 (Tennis, Padel);
-  // 'points' = rally race-to-N win-by-2 (Badminton, Pickleball, Table Tennis, Squash).
-  const scoreModel = getSport(sportName).scoringModel || { model: 'points', unit: 'Set', pointsToWin: 21, bestOf: 3, cap: 30 };
+  // The registry (exact id lookup) picks the isolated scoring engine for this
+  // sport — no sport-specific logic lives here. 'tennis' → own tennis engine;
+  // 'points' → the sport's own rally engine (badminton/pickleball/TT/squash),
+  // each of which OWNS its rules, so no sport can affect another.
+  const scoreModel = getScoringModel(sportName);
   const isTennis = scoreModel.model === 'tennis';
-  const pointUnit = scoreModel.unit || 'Set';        // "Set" (badminton) or "Game" (pickleball/TT/squash)
-  const pointCap = scoreModel.cap ?? Infinity;       // badminton 30 deuce cap; null → pure win-by-2
+  const pointEngine = getPointEngine(sportName);      // the sport's own engine (badminton fallback for tennis, unused there)
+  const pointUnit = pointEngine.unit;                 // "Set" (badminton) or "Game" (pickleball/TT/squash)
+  const pointCap = pointEngine.defaults.cap;          // per-sport deuce cap (badminton 30; others none)
   const buildTennisConfig = () => defaultTennisConfig({
     sets: maxSets,
     gamesPerSet: tGamesPerSet,
@@ -141,18 +142,20 @@ const MatchScoringPage = () => {
       if (matchData?.category?.scoringFormat) {
         const fmt = matchData.category.scoringFormat;
         const cfg = parseScoringFormat(fmt);
-        const sm = getSport(matchData?.tournament?.sport || '').scoringModel || {};
+        const sp = matchData?.tournament?.sport || '';
+        const model = getScoringModel(sp);
+        const eng = getPointEngine(sp).defaults;
         // "21x3" is the generic badminton default a category inherits when the
         // organizer didn't set a sport-specific format — fall back to the sport's
         // own standard in that case; an explicit format is always respected.
         const inherited = fmt === '21x3';
-        setMaxSets(inherited && sm.bestOf ? sm.bestOf : cfg.sets);
-        if (sm.model === 'tennis') {
+        setMaxSets(inherited ? eng.bestOf : cfg.sets);
+        if (model.model === 'tennis') {
           // The "points" slot is games-per-set; 21 games is nonsensical → clamp to 6.
           const g = cfg.points;
           setTGamesPerSet(g >= 1 && g <= 9 ? g : 6);
         } else {
-          setPointsPerSet(inherited && sm.pointsToWin ? sm.pointsToWin : cfg.points);
+          setPointsPerSet(inherited ? eng.pointsToWin : cfg.points);
         }
       }
 
@@ -336,17 +339,14 @@ const MatchScoringPage = () => {
     const pts = cfg.pointsPerSet;
     const p1 = currentSet.player1, p2 = currentSet.player2;
 
-    // Badminton caps a deuce at 30 (its 29–29 rule). Pickleball has no cap —
-    // pure win-by-2 — so only apply the hard cap for badminton.
-    const cap = pointCap; // badminton 30 deuce cap; other point sports have none
+    // Delegate the win rule to THIS sport's own engine (win-by-2 + the sport's
+    // own cap). The engine is the single owner of the sport's rules — this
+    // screen holds none. (extension:false = a rare first-to-N mode, kept here.)
     let setWon = false, winner = null;
-    if (extension) {
-      if ((p1 >= pts && p1 - p2 >= 2) || p1 >= cap) { setWon = true; winner = 1; }
-      else if ((p2 >= pts && p2 - p1 >= 2) || p2 >= cap) { setWon = true; winner = 2; }
-    } else {
-      if (p1 >= pts) { setWon = true; winner = 1; }
-      else if (p2 >= pts) { setWon = true; winner = 2; }
-    }
+    const w = extension
+      ? pointEngine.setWinner(p1, p2, { pointsPerSet: pts, cap: pointCap })
+      : (p1 >= pts ? 1 : p2 >= pts ? 2 : 0);
+    if (w) { setWon = true; winner = w; }
 
     if (setWon) {
       currentSet.winner = winner;
@@ -450,25 +450,11 @@ const MatchScoringPage = () => {
   };
 
   const getSetsWonFromScore = (scoreObj) => {
-    const cfg = scoreObj.matchConfig || { pointsPerSet: 21, extension: true };
-    const { pointsPerSet: pts, extension } = cfg;
-    let p1Sets = 0, p2Sets = 0;
     if (!scoreObj.sets?.length) return { p1Sets: 0, p2Sets: 0 };
-    scoreObj.sets.forEach(set => {
-      if (set.winner === 1) p1Sets++;
-      else if (set.winner === 2) p2Sets++;
-      else {
-        const cap = pointCap; // badminton 30 deuce cap; other point sports have none
-        if (extension) {
-          if ((set.player1 >= pts && set.player1 - set.player2 >= 2) || set.player1 >= cap) p1Sets++;
-          if ((set.player2 >= pts && set.player2 - set.player1 >= 2) || set.player2 >= cap) p2Sets++;
-        } else {
-          if (set.player1 >= pts) p1Sets++;
-          if (set.player2 >= pts) p2Sets++;
-        }
-      }
-    });
-    return { p1Sets, p2Sets };
+    const cfg = scoreObj.matchConfig || { pointsPerSet: 21 };
+    // The sport's own engine counts completed sets/games won (win-by-2 + cap).
+    const { p1, p2 } = pointEngine.setsWon(scoreObj.sets, { pointsPerSet: cfg.pointsPerSet, cap: pointCap });
+    return { p1Sets: p1, p2Sets: p2 };
   };
 
   const getSetsWon = () => { try { return getSetsWonFromScore(score); } catch { return { p1Sets: 0, p2Sets: 0 }; } };

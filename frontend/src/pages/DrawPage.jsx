@@ -1,6 +1,7 @@
 ﻿import { getErrorMessage } from '../utils/errorMessage';
 import { clearDrawCache } from '../utils/drawCache';
 import { derive as deriveBasketball, periodLabel as basketballPeriodLabel } from '../sports/basketball';
+import { isTeamSport } from '../config/sports';
 
 // A stored score is either set-based (badminton/tennis/…) or event-based
 // (basketball's running total). Totals for event scores come from the sport's
@@ -1965,6 +1966,7 @@ const DrawPage = () => {
         ) : (
           <div className="backdrop-blur-sm rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
             <DrawDisplay 
+              sport={tournament?.sport}
               bracket={bracket} 
               matches={matches} 
               user={user} 
@@ -3026,6 +3028,7 @@ const DrawPage = () => {
 
 // Draw Display Component - handles all formats
 const DrawDisplay = ({ 
+  sport,
   bracket, 
   matches, 
   user, 
@@ -3049,6 +3052,7 @@ const DrawDisplay = ({
 
   if (format === 'ROUND_ROBIN') {
     return <RoundRobinDisplay 
+      sport={sport}
       data={bracket} 
       matches={matches} 
       user={user} 
@@ -3886,7 +3890,10 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
 };
 
 // Round Robin Display with Match Schedule
-const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onChangeResult, onViewMatchDetails, categoryFormat }) => {
+const RoundRobinDisplay = ({ sport, data, matches, user, isOrganizer, onAssignUmpire, onChangeResult, onViewMatchDetails, categoryFormat }) => {
+  // Team sports use the FIBA standings layout (points for and against as
+  // separate columns) and are ranked server-side by the FIBA tie-breaks.
+  const isTeamStandings = isTeamSport(sport);
   const navigate = useNavigate();
   const [activeGroupIdx, setActiveGroupIdx] = React.useState(null); // null = all hidden, number = show that group's matches
   if (!data?.groups || !Array.isArray(data.groups)) return <p className="text-gray-400 text-center p-8">No group data</p>;
@@ -3956,7 +3963,12 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                   { h: 'W',   w: '18px', c: 'rgba(74,222,128,0.85)' },
                   { h: 'L',   w: '18px', c: 'rgba(248,113,113,0.85)'},
                   { h: 'PTS', w: '24px', c: 'rgba(245,158,11,0.9)'  },
-                  { h: 'TP',  w: '24px', c: 'rgba(196,181,253,0.9)' },
+                  // Team sports show points FOR and AGAINST as separate columns,
+                  // which is how a basketball standings table is always read.
+                  ...(isTeamStandings
+                    ? [{ h: 'PF', w: '26px', c: 'rgba(196,181,253,0.9)' },
+                       { h: 'PA', w: '26px', c: 'rgba(196,181,253,0.7)' }]
+                    : [{ h: 'TP', w: '24px', c: 'rgba(196,181,253,0.9)' }]),
                   { h: 'PD',  w: '26px', c: 'rgba(96,165,250,0.9)'  },
                 ].map(({ h, w, c }) => (
                   <div key={h} style={{ width: w, flexShrink: 0, textAlign: 'center' }}>
@@ -3968,16 +3980,22 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
 
             {/* Rows */}
             <div>
-              {(group.participants || [])
-                .sort((a, b) => {
-                  // Rank: PTS (match points) → TP (total points scored) → PD (point difference)
-                  if ((b.points || 0) !== (a.points || 0)) return (b.points || 0) - (a.points || 0);
-                  const aTp = a.totalPoints || 0, bTp = b.totalPoints || 0;
-                  if (bTp !== aTp) return bTp - aTp;
-                  const aDiff = (a.totalPoints || 0) - (a.totalPointsAgainst || 0);
-                  const bDiff = (b.totalPoints || 0) - (b.totalPointsAgainst || 0);
-                  return bDiff - aDiff;
-                })
+              {(isTeamStandings
+                  // Team sports are already ranked by the backend using the
+                  // FIBA rules, where head-to-head results outrank overall
+                  // difference. Re-sorting here with the racket comparator
+                  // would silently undo that, so the server order is kept.
+                  ? [...(group.participants || [])]
+                  : [...(group.participants || [])].sort((a, b) => {
+                      // Rank: PTS (match points) → TP (total points scored) → PD (point difference)
+                      if ((b.points || 0) !== (a.points || 0)) return (b.points || 0) - (a.points || 0);
+                      const aTp = a.totalPoints || 0, bTp = b.totalPoints || 0;
+                      if (bTp !== aTp) return bTp - aTp;
+                      const aDiff = (a.totalPoints || 0) - (a.totalPointsAgainst || 0);
+                      const bDiff = (b.totalPoints || 0) - (b.totalPointsAgainst || 0);
+                      return bDiff - aDiff;
+                    })
+                )
                 .map((p, pi) => {
                   // PD = point difference (for − against); TP = total points scored (raw)
                   const pdDiff = (p.totalPoints || 0) - (p.totalPointsAgainst || 0);
@@ -4070,7 +4088,11 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
                           { val: p.wins    || 0,                   w: '18px', color: '#ffffff', bold: true },
                           { val: p.losses  || 0,                   w: '18px', color: '#ffffff', bold: true },
                           { val: p.points  || 0,                   w: '24px', color: '#ffffff', bold: true },
-                          { val: tpTotal,                          w: '24px', color: '#c4b5fd', bold: true },
+                          // Must mirror the header: PF + PA for team sports, TP otherwise.
+                          ...(isTeamStandings
+                            ? [{ val: tpTotal,                w: '26px', color: '#c4b5fd', bold: true },
+                               { val: p.totalPointsAgainst || 0, w: '26px', color: '#a5a0c9', bold: true }]
+                            : [{ val: tpTotal,                w: '24px', color: '#c4b5fd', bold: true }]),
                           { val: pdVal,                            w: '26px', color: pdColor,   bold: true },
                         ].map((s, si) => (
                           <div key={si} style={{ width: s.w, flexShrink: 0, textAlign: 'center' }}>
@@ -4106,7 +4128,9 @@ const RoundRobinDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, o
               </div>
             </div>
             <p style={{ fontSize: '9px', color: 'rgba(255,255,255,0.22)', textAlign: 'center' }}>
-              P = Played · W = Won · L = Lost · PTS = Points · TP = Total Points · PD = Point Difference
+              {isTeamStandings
+                ? 'P = Played · W = Won · L = Lost · PTS = Points (2 win, 1 loss) · PF = Points For · PA = Points Against · PD = Point Difference'
+                : 'P = Played · W = Won · L = Lost · PTS = Points · TP = Total Points · PD = Point Difference'}
             </p>
           </div>
 
@@ -4415,6 +4439,7 @@ const GroupsKnockoutDisplay = ({
       {activeStage === 'roundrobin' && (
         <div>
           <RoundRobinDisplay 
+            sport={sport}
             data={data} 
             matches={matches} 
             user={user} 

@@ -2,6 +2,7 @@ import prisma from '../lib/prisma.js';
 import seedingService from '../services/seeding.service.js';
 import bracketService from '../services/bracket.service.js';
 import matchService from '../services/match.service.js';
+import { recalcGroupStandings } from '../services/standings.service.js';
 
 // Invalidate the cached draw-page payload so the very next read returns fresh
 // data instead of a stale pre-mutation bracket. Mirrors what giveBye does.
@@ -272,7 +273,8 @@ const getDraw = async (req, res) => {
         tournament: {
           select: {
             name: true,
-            startDate: true
+            startDate: true,
+            sport: true   // standings scheme + tie-breaks are sport-specific
           }
         },
         category: {
@@ -635,80 +637,11 @@ const getDraw = async (req, res) => {
         
         console.log(`   Final: Using ${groupMatches.length} completed matches for standings`);
         
-        // Calculate standings from completed matches
-        groupMatches.forEach(m => {
-          const player1 = group.participants.find(p => p.id === m.player1Id);
-          const player2 = group.participants.find(p => p.id === m.player2Id);
-          
-          console.log(`   Match ${m.matchNumber}: ${m.player1Id} vs ${m.player2Id}, winner: ${m.winnerId}`);
-          console.log(`   Found player1: ${!!player1}, Found player2: ${!!player2}`);
-          
-          if (player1 && player2) {
-            player1.played++;
-            player2.played++;
-            
-            // Calculate TP (Total Points Scored) from scoreJson
-            if (m.scoreJson) {
-              try {
-                const scoreData = typeof m.scoreJson === 'string' ? JSON.parse(m.scoreJson) : m.scoreJson;
-                console.log(`   Score data:`, scoreData);
-                
-                if (scoreData && scoreData.sets && Array.isArray(scoreData.sets)) {
-                  let player1TotalPoints = 0;
-                  let player2TotalPoints = 0;
-                  
-                  scoreData.sets.forEach(set => {
-                    const p1Score = set.player1 ?? set.p1 ?? set.score1 ?? set.score?.player1 ?? 0;
-                    const p2Score = set.player2 ?? set.p2 ?? set.score2 ?? set.score?.player2 ?? 0;
-                    player1TotalPoints += p1Score;
-                    player2TotalPoints += p2Score;
-                  });
-
-                  player1.totalPoints = (player1.totalPoints || 0) + player1TotalPoints;
-                  player2.totalPoints = (player2.totalPoints || 0) + player2TotalPoints;
-                  player1.totalPointsAgainst = (player1.totalPointsAgainst || 0) + player2TotalPoints;
-                  player2.totalPointsAgainst = (player2.totalPointsAgainst || 0) + player1TotalPoints;
-
-                  console.log(`   ${player1.name} scored ${player1TotalPoints} pts (total: ${player1.totalPoints}, against: ${player1.totalPointsAgainst})`);
-                  console.log(`   ${player2.name} scored ${player2TotalPoints} pts (total: ${player2.totalPoints}, against: ${player2.totalPointsAgainst})`);
-                }
-              } catch (parseError) {
-                console.error(`   Error parsing scoreJson for match ${m.matchNumber}:`, parseError);
-              }
-            }
-
-            // Calculate wins/losses and ranking points
-            if (m.winnerId === m.player1Id) {
-              player1.wins++;
-              player1.points += 2;
-              player2.losses++;
-              console.log(`   ${player1.name} wins! Now has ${player1.points} ranking points`);
-            } else if (m.winnerId === m.player2Id) {
-              player2.wins++;
-              player2.points += 2;
-              player1.losses++;
-              console.log(`   ${player2.name} wins! Now has ${player2.points} ranking points`);
-            }
-          }
-        });
-
-        // Log final standings
-        console.log(`   Final standings for group ${groupIndex}:`);
-        group.participants.forEach(p => {
-          console.log(`   - ${p.name}: ${p.points}pts (${p.wins}W-${p.losses}L, TP:${p.totalPoints || 0}, TPA:${p.totalPointsAgainst || 0})`);
-        });
-
-        // Sort: points DESC → net point diff DESC → total points FOR DESC
-        if (group.participants && Array.isArray(group.participants)) {
-          group.participants.sort((a, b) => {
-            if (b.points !== a.points) return b.points - a.points;
-            const aTp = a.totalPoints || 0, bTp = b.totalPoints || 0;
-            if (bTp !== aTp) return bTp - aTp;
-            const aDiff = (a.totalPoints || 0) - (a.totalPointsAgainst || 0);
-            const bDiff = (b.totalPoints || 0) - (b.totalPointsAgainst || 0);
-            return bDiff - aDiff;
-          });
-        }
+        // Tally + rank via the shared standings service. Racket sports keep
+        // 2 points a win / 0 a loss and the points -> points-for -> difference
+        // order; basketball uses the FIBA scheme (2/1) with head-to-head
+        // tie-breaks. One implementation, so every endpoint agrees.
+        recalcGroupStandings(group.participants, groupMatches, draw.tournament?.sport);
       });
     } else if (bracketData.format === 'ROUND_ROBIN_KNOCKOUT') {
       // Update round robin groups in mixed format
@@ -830,80 +763,11 @@ const getDraw = async (req, res) => {
           
           console.log(`   Final: Using ${groupMatches.length} completed matches for standings`);
           
-          // Calculate standings from completed matches
-          groupMatches.forEach(m => {
-            const player1 = group.participants.find(p => p.id === m.player1Id);
-            const player2 = group.participants.find(p => p.id === m.player2Id);
-            
-            console.log(`   Match ${m.matchNumber}: ${m.player1Id} vs ${m.player2Id}, winner: ${m.winnerId}`);
-            console.log(`   Found player1: ${!!player1}, Found player2: ${!!player2}`);
-            
-            if (player1 && player2) {
-              player1.played++;
-              player2.played++;
-              
-              // Calculate TP (Total Points Scored) from scoreJson
-              if (m.scoreJson) {
-                try {
-                  const scoreData = typeof m.scoreJson === 'string' ? JSON.parse(m.scoreJson) : m.scoreJson;
-                  console.log(`   Score data:`, scoreData);
-                  
-                  if (scoreData && scoreData.sets && Array.isArray(scoreData.sets)) {
-                    let player1TotalPoints = 0;
-                    let player2TotalPoints = 0;
-
-                    scoreData.sets.forEach(set => {
-                      const p1Score = set.player1 ?? set.p1 ?? set.score1 ?? set.score?.player1 ?? 0;
-                      const p2Score = set.player2 ?? set.p2 ?? set.score2 ?? set.score?.player2 ?? 0;
-                      player1TotalPoints += p1Score;
-                      player2TotalPoints += p2Score;
-                    });
-
-                    player1.totalPoints = (player1.totalPoints || 0) + player1TotalPoints;
-                    player2.totalPoints = (player2.totalPoints || 0) + player2TotalPoints;
-                    player1.totalPointsAgainst = (player1.totalPointsAgainst || 0) + player2TotalPoints;
-                    player2.totalPointsAgainst = (player2.totalPointsAgainst || 0) + player1TotalPoints;
-
-                    console.log(`   ${player1.name} scored ${player1TotalPoints} pts (total: ${player1.totalPoints}, against: ${player1.totalPointsAgainst})`);
-                    console.log(`   ${player2.name} scored ${player2TotalPoints} pts (total: ${player2.totalPoints}, against: ${player2.totalPointsAgainst})`);
-                  }
-                } catch (parseError) {
-                  console.error(`   Error parsing scoreJson for match ${m.matchNumber}:`, parseError);
-                }
-              }
-
-              // Calculate wins/losses and ranking points
-              if (m.winnerId === m.player1Id) {
-                player1.wins++;
-                player1.points += 2;
-                player2.losses++;
-                console.log(`   ${player1.name} wins! Now has ${player1.points} ranking points`);
-              } else if (m.winnerId === m.player2Id) {
-                player2.wins++;
-                player2.points += 2;
-                player1.losses++;
-                console.log(`   ${player2.name} wins! Now has ${player2.points} ranking points`);
-              }
-            }
-          });
-
-          // Log final standings
-          console.log(`   Final standings for group ${groupIndex}:`);
-          group.participants.forEach(p => {
-            console.log(`   - ${p.name}: ${p.points}pts (${p.wins}W-${p.losses}L, TP:${p.totalPoints || 0}, TPA:${p.totalPointsAgainst || 0})`);
-          });
-          
-          // Sort: points DESC → net point diff DESC → total points FOR DESC
-          if (group.participants && Array.isArray(group.participants)) {
-            group.participants.sort((a, b) => {
-              if (b.points !== a.points) return b.points - a.points;
-              const aTp = a.totalPoints || 0, bTp = b.totalPoints || 0;
-              if (bTp !== aTp) return bTp - aTp;
-              const aDiff = (a.totalPoints || 0) - (a.totalPointsAgainst || 0);
-              const bDiff = (b.totalPoints || 0) - (b.totalPointsAgainst || 0);
-              return bDiff - aDiff;
-            });
-          }
+          // Tally + rank via the shared standings service. Racket sports keep
+          // 2 points a win / 0 a loss and the points -> points-for -> difference
+          // order; basketball uses the FIBA scheme (2/1) with head-to-head
+          // tie-breaks. One implementation, so every endpoint agrees.
+          recalcGroupStandings(group.participants, groupMatches, draw.tournament?.sport);
         });
       }
 

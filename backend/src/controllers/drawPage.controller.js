@@ -11,6 +11,7 @@
 import prisma from '../lib/prisma.js';
 import { cacheGet, cacheSet } from '../services/redisService.js';
 import { isTeamSport } from '../config/sports.js';
+import { recalcGroupStandings } from '../services/standings.service.js';
 
 // Cache TTL for draw page — 10s is short enough for near-live scores,
 // but collapses 300 concurrent pollers into 1 DB hit per 10s.
@@ -234,42 +235,10 @@ export const getDrawPage = async (req, res) => {
         );
       }
 
-      groupMatches.forEach(m => {
-        const p1 = group.participants.find(p => p.id === m.player1Id);
-        const p2 = group.participants.find(p => p.id === m.player2Id);
-        if (!p1 || !p2) return;
-        p1.played++; p2.played++;
-
-        if (m.scoreJson) {
-          try {
-            const sd = typeof m.scoreJson === 'string' ? JSON.parse(m.scoreJson) : m.scoreJson;
-            if (sd?.sets && Array.isArray(sd.sets)) {
-              let t1 = 0, t2 = 0;
-              sd.sets.forEach(s => {
-                t1 += s.player1 ?? s.p1 ?? s.score1 ?? s.score?.player1 ?? 0;
-                t2 += s.player2 ?? s.p2 ?? s.score2 ?? s.score?.player2 ?? 0;
-              });
-              p1.totalPoints = (p1.totalPoints || 0) + t1;
-              p2.totalPoints = (p2.totalPoints || 0) + t2;
-              p1.totalPointsAgainst = (p1.totalPointsAgainst || 0) + t2;
-              p2.totalPointsAgainst = (p2.totalPointsAgainst || 0) + t1;
-            }
-          } catch (_) {}
-        }
-
-        if (m.winnerId === m.player1Id)      { p1.wins++; p1.points += 2; p2.losses++; }
-        else if (m.winnerId === m.player2Id) { p2.wins++; p2.points += 2; p1.losses++; }
-      });
-
-      // Sort: match points DESC → total points FOR (TP) DESC → net point diff (PD) DESC
-      group.participants.sort((a, b) => {
-        if (b.points !== a.points) return b.points - a.points;
-        const aTp = a.totalPoints || 0, bTp = b.totalPoints || 0;
-        if (bTp !== aTp) return bTp - aTp;
-        const aDiff = (a.totalPoints || 0) - (a.totalPointsAgainst || 0);
-        const bDiff = (b.totalPoints || 0) - (b.totalPointsAgainst || 0);
-        return bDiff - aDiff;
-      });
+      // Tally + rank via the shared service: racket sports keep 2/0 scoring and
+      // the points → points-for → difference order; basketball gets FIBA 2/1
+      // scoring with head-to-head tie-breaks.
+      recalcGroupStandings(group.participants, groupMatches, tournament.sport);
     };
 
     // ─── Inject live data into bracket ────────────────────────────────────────

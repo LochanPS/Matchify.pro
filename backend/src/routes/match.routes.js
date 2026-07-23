@@ -5,6 +5,7 @@ import { assignUmpire, getUmpireMatches, saveUmpireQueue } from '../controllers/
 import { broadcastScoreUpdate, broadcastMatchStatus, broadcastMatchComplete, broadcastToTournament } from '../services/socketService.js';
 import { cacheDel } from '../services/redisService.js';
 import { getDrawPageCacheKey } from '../controllers/drawPage.controller.js';
+import { recalcGroupStandings, sortStandings, pointsScheme, matchPointTotals } from '../services/standings.service.js';
 
 // Invalidate draw cache silently after any score/status change
 async function invalidateDrawCache(match) {
@@ -717,7 +718,7 @@ const endMatchHandler = async (req, res) => {
     const match = await prisma.match.findUnique({
       where: { id: matchId },
       include: {
-        tournament: { select: { organizerId: true } },
+        tournament: { select: { organizerId: true, sport: true } }, // sport drives the standings scheme
         category: { select: { tournamentFormat: true } },
       }
     });
@@ -881,33 +882,41 @@ const endMatchHandler = async (req, res) => {
               standings[pid] = { id: pid, points: 0, wins: 0, totalPoints: 0, totalPointsAgainst: 0 };
             }
           };
+          // Points scheme by sport: racket keeps 2 for a win and nothing for a
+          // loss, basketball follows FIBA (2 win / 1 loss). The per-entry loop
+          // is kept rather than delegated wholesale because this table tolerates
+          // guest opponents — a match against a guest must still count for the
+          // registered player, which a participants-must-both-exist tally would
+          // silently drop.
+          const sportForStandings = (await tx.tournament.findUnique({
+            where: { id: match.tournamentId }, select: { sport: true }
+          }))?.sport;
+          const scheme = pointsScheme(sportForStandings);
+
           allMatches.forEach(m => {
             ensure(m.player1Id); ensure(m.player2Id);
-            if (m.scoreJson) {
-              try {
-                const sd = typeof m.scoreJson === 'string' ? JSON.parse(m.scoreJson) : m.scoreJson;
-                if (sd?.sets && Array.isArray(sd.sets)) {
-                  let t1 = 0, t2 = 0;
-                  sd.sets.forEach(s => { t1 += s.player1 ?? s.p1 ?? s.score1 ?? 0; t2 += s.player2 ?? s.p2 ?? s.score2 ?? 0; });
-                  if (standings[m.player1Id]) { standings[m.player1Id].totalPoints += t1; standings[m.player1Id].totalPointsAgainst += t2; }
-                  if (standings[m.player2Id]) { standings[m.player2Id].totalPoints += t2; standings[m.player2Id].totalPointsAgainst += t1; }
-                }
-              } catch (_) { /* ignore malformed score */ }
+            const totals = matchPointTotals(m.scoreJson);
+            if (totals) {
+              if (standings[m.player1Id]) { standings[m.player1Id].totalPoints += totals.t1; standings[m.player1Id].totalPointsAgainst += totals.t2; }
+              if (standings[m.player2Id]) { standings[m.player2Id].totalPoints += totals.t2; standings[m.player2Id].totalPointsAgainst += totals.t1; }
             }
             if (m.winnerId && !isGuestId(m.winnerId) && standings[m.winnerId]) {
-              standings[m.winnerId].points += 2;
+              standings[m.winnerId].points += scheme.win;
               standings[m.winnerId].wins += 1;
+            }
+            // Losing side. scheme.loss is 0 for racket sports, so this is a
+            // no-op there and their standings are unchanged.
+            if (scheme.loss && m.winnerId) {
+              const loserId = m.winnerId === m.player1Id ? m.player2Id : m.player1Id;
+              if (loserId && !isGuestId(loserId) && standings[loserId]) {
+                standings[loserId].points += scheme.loss;
+              }
             }
           });
 
-          // Rank: PTS → TP (total points scored) → PD (point difference)
-          const sorted = Object.values(standings).sort((a, b) => {
-            if (b.points !== a.points) return b.points - a.points;
-            if (b.totalPoints !== a.totalPoints) return b.totalPoints - a.totalPoints;
-            const aDiff = a.totalPoints - a.totalPointsAgainst;
-            const bDiff = b.totalPoints - b.totalPointsAgainst;
-            return bDiff - aDiff;
-          });
+          // Rank: PTS → TP → PD for racket sports; FIBA head-to-head first for
+          // basketball.
+          const sorted = sortStandings(Object.values(standings), sportForStandings, allMatches);
 
           await tx.category.update({
             where: { id: match.categoryId },
@@ -944,36 +953,10 @@ const endMatchHandler = async (req, res) => {
             if (targetGroup) {
               const allMatches = await prisma.match.findMany({ where: { tournamentId: match.tournamentId, categoryId: match.categoryId, status: 'COMPLETED' } });
               const groupMatches = allMatches.filter(m => targetGroup.participants.some(p => p.id === m.player1Id) && targetGroup.participants.some(p => p.id === m.player2Id));
-              targetGroup.participants.forEach(p => { p.played = 0; p.wins = 0; p.losses = 0; p.points = 0; p.totalPoints = 0; p.totalPointsAgainst = 0; });
-              groupMatches.forEach(m => {
-                const p1 = targetGroup.participants.find(p => p.id === m.player1Id);
-                const p2 = targetGroup.participants.find(p => p.id === m.player2Id);
-                if (!p1 || !p2) return;
-                p1.played++; p2.played++;
-                if (m.scoreJson) {
-                  try {
-                    const sd = typeof m.scoreJson === 'string' ? JSON.parse(m.scoreJson) : m.scoreJson;
-                    if (sd?.sets && Array.isArray(sd.sets)) {
-                      let t1 = 0, t2 = 0;
-                      sd.sets.forEach(s => { t1 += s.player1 ?? s.p1 ?? s.score1 ?? s.score?.player1 ?? 0; t2 += s.player2 ?? s.p2 ?? s.score2 ?? s.score?.player2 ?? 0; });
-                      p1.totalPoints = (p1.totalPoints || 0) + t1;
-                      p2.totalPoints = (p2.totalPoints || 0) + t2;
-                      p1.totalPointsAgainst = (p1.totalPointsAgainst || 0) + t2;
-                      p2.totalPointsAgainst = (p2.totalPointsAgainst || 0) + t1;
-                    }
-                  } catch (_) {}
-                }
-                if (m.winnerId === m.player1Id) { p1.wins++; p1.points += 2; p2.losses++; }
-                else if (m.winnerId === m.player2Id) { p2.wins++; p2.points += 2; p1.losses++; }
-              });
-              targetGroup.participants.sort((a, b) => {
-                if (b.points !== a.points) return b.points - a.points;
-                const aTp = a.totalPoints || 0, bTp = b.totalPoints || 0;
-                if (bTp !== aTp) return bTp - aTp;
-                const aDiff = (a.totalPoints || 0) - (a.totalPointsAgainst || 0);
-                const bDiff = (b.totalPoints || 0) - (b.totalPointsAgainst || 0);
-                return bDiff - aDiff;
-              });
+              // Tally + rank via the shared standings service. Racket sports are
+              // unchanged (2 a win, 0 a loss, points → points-for → difference);
+              // basketball uses FIBA scoring (2/1) with head-to-head tie-breaks.
+              recalcGroupStandings(targetGroup.participants, groupMatches, match.tournament?.sport);
               const mib = targetGroup.matches?.find(m => m.matchNumber === match.matchNumber);
               if (mib) { mib.status = 'completed'; mib.winner = winnerId === match.player1Id ? 1 : 2; mib.winnerId = winnerId; mib.score = finalScore; }
               await prisma.draw.update({ where: { tournamentId_categoryId: { tournamentId: match.tournamentId, categoryId: match.categoryId } }, data: { bracketJson: JSON.stringify(bracketJson), updatedAt: new Date() } });
@@ -1288,34 +1271,12 @@ router.put('/:matchId/change-winner', authenticate, async (req, res) => {
               targetGroup.participants.some(p => p.id === m.player1Id) &&
               targetGroup.participants.some(p => p.id === m.player2Id)
             );
-            targetGroup.participants.forEach(p => { p.played = 0; p.wins = 0; p.losses = 0; p.points = 0; p.totalPoints = 0; p.totalPointsAgainst = 0; });
-            groupMatches.forEach(m => {
-              const p1 = targetGroup.participants.find(p => p.id === m.player1Id);
-              const p2 = targetGroup.participants.find(p => p.id === m.player2Id);
-              if (!p1 || !p2) return;
-              p1.played++; p2.played++;
-              if (m.scoreJson) {
-                try {
-                  const sd = typeof m.scoreJson === 'string' ? JSON.parse(m.scoreJson) : m.scoreJson;
-                  if (sd?.sets && Array.isArray(sd.sets)) {
-                    let t1 = 0, t2 = 0;
-                    sd.sets.forEach(s => { t1 += s.player1 ?? s.p1 ?? s.score1 ?? 0; t2 += s.player2 ?? s.p2 ?? s.score2 ?? 0; });
-                    p1.totalPoints += t1; p1.totalPointsAgainst += t2;
-                    p2.totalPoints += t2; p2.totalPointsAgainst += t1;
-                  }
-                } catch (_) { /* ignore malformed score */ }
-              }
-              if (m.winnerId === m.player1Id) { p1.wins++; p1.points += 2; p2.losses++; }
-              else if (m.winnerId === m.player2Id) { p2.wins++; p2.points += 2; p1.losses++; }
-            });
-            targetGroup.participants.sort((a, b) => {
-              if (b.points !== a.points) return b.points - a.points;
-              const aTp = a.totalPoints || 0, bTp = b.totalPoints || 0;
-              if (bTp !== aTp) return bTp - aTp;
-              const aDiff = (a.totalPoints || 0) - (a.totalPointsAgainst || 0);
-              const bDiff = (b.totalPoints || 0) - (b.totalPointsAgainst || 0);
-              return bDiff - aDiff;
-            });
+            // Shared service: racket sports unchanged (2/0), basketball on the
+            // FIBA scheme (2/1) with head-to-head tie-breaks.
+            const sportForStandings = (await prisma.tournament.findUnique({
+              where: { id: match.tournamentId }, select: { sport: true }
+            }))?.sport;
+            recalcGroupStandings(targetGroup.participants, groupMatches, sportForStandings);
             // Update the match result in bracketJson too
             const mib = targetGroup.matches?.find(m => m.matchNumber === match.matchNumber);
             if (mib) { mib.winnerId = winnerId; mib.winner = winnerId === match.player1Id ? 1 : 2; }

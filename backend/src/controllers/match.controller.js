@@ -1,6 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 import prisma from '../lib/prisma.js';
 import matchService from '../services/match.service.js';
+import { recalcGroupStandings, sortStandings, pointsScheme, matchPointTotals } from '../services/standings.service.js';
+import { isTeamSport } from '../config/sports.js';
 
 // Helper function to format duration in milliseconds to readable string
 const formatDuration = (ms) => {
@@ -992,64 +994,14 @@ async function updateRoundRobinStandings(tournamentId, categoryId, matchId) {
       return hasPlayer1 && hasPlayer2;
     });
 
-    // Reset all participant stats
-    targetGroup.participants.forEach(p => {
-      p.played = 0;
-      p.wins = 0;
-      p.losses = 0;
-      p.points = 0;
-      p.totalPoints = 0;
-      p.totalPointsAgainst = 0;
-    });
-
-    // Calculate new standings
-    groupMatches.forEach(match => {
-      const player1 = targetGroup.participants.find(p => p.id === match.player1Id);
-      const player2 = targetGroup.participants.find(p => p.id === match.player2Id);
-
-      if (player1 && player2) {
-        player1.played++;
-        player2.played++;
-
-        // Parse shuttle points for tiebreaking
-        if (match.scoreJson) {
-          try {
-            const sd = typeof match.scoreJson === 'string' ? JSON.parse(match.scoreJson) : match.scoreJson;
-            if (sd?.sets && Array.isArray(sd.sets)) {
-              let t1 = 0, t2 = 0;
-              sd.sets.forEach(s => {
-                t1 += s.player1 ?? s.p1 ?? s.score1 ?? 0;
-                t2 += s.player2 ?? s.p2 ?? s.score2 ?? 0;
-              });
-              player1.totalPoints = (player1.totalPoints || 0) + t1;
-              player2.totalPoints = (player2.totalPoints || 0) + t2;
-              player1.totalPointsAgainst = (player1.totalPointsAgainst || 0) + t2;
-              player2.totalPointsAgainst = (player2.totalPointsAgainst || 0) + t1;
-            }
-          } catch (_) {}
-        }
-
-        if (match.winnerId === match.player1Id) {
-          player1.wins++;
-          player1.points += 2; // Win = 2 points
-          player2.losses++;
-        } else if (match.winnerId === match.player2Id) {
-          player2.wins++;
-          player2.points += 2; // Win = 2 points
-          player1.losses++;
-        }
-      }
-    });
-
-    // Sort: match points DESC → total points FOR (TP) DESC → net point diff (PD) DESC
-    targetGroup.participants.sort((a, b) => {
-      if (b.points !== a.points) return b.points - a.points;
-      const aTp = a.totalPoints || 0, bTp = b.totalPoints || 0;
-      if (bTp !== aTp) return bTp - aTp;
-      const aDiff = (a.totalPoints || 0) - (a.totalPointsAgainst || 0);
-      const bDiff = (b.totalPoints || 0) - (b.totalPointsAgainst || 0);
-      return bDiff - aDiff;
-    });
+    // Tally + rank via the shared service. Racket sports keep 2 points a win,
+    // 0 a loss and the points → points-for → difference order; basketball uses
+    // the FIBA scheme (2/1) with head-to-head tie-breaks.
+    const sportForStandings = await prisma.tournament
+      .findUnique({ where: { id: tournamentId }, select: { sport: true } })
+      .then(t => t?.sport)
+      .catch(() => undefined);
+    recalcGroupStandings(targetGroup.participants, groupMatches, sportForStandings);
 
     // Update the draw
     await prisma.draw.update({
@@ -1255,26 +1207,52 @@ const endMatch = async (req, res) => {
             // All group matches done — determine winner from final standings
             const allMatches = await prisma.match.findMany({
               where: { categoryId: match.categoryId },
-              select: { player1Id: true, player2Id: true, winnerId: true }
+              select: { player1Id: true, player2Id: true, winnerId: true, scoreJson: true }
             });
+
+            // Sport decides the points scheme. Racket sports keep 2 for a win,
+            // nothing for a loss, ranked points → wins, exactly as before.
+            const sportForStandings = (await prisma.tournament.findUnique({
+              where: { id: match.tournamentId }, select: { sport: true }
+            }))?.sport;
+            const scheme = pointsScheme(sportForStandings);
+            const teamSport = isTeamSport(sportForStandings);
 
             const isGuestId = (id) => !id || id.startsWith('guest-');
             const standings = {};
             allMatches.forEach(m => {
               [m.player1Id, m.player2Id].forEach(pid => {
                 if (pid && !isGuestId(pid) && !standings[pid]) {
-                  standings[pid] = { id: pid, points: 0, wins: 0 };
+                  standings[pid] = { id: pid, points: 0, wins: 0, totalPoints: 0, totalPointsAgainst: 0 };
                 }
               });
               if (m.winnerId && !isGuestId(m.winnerId)) {
-                standings[m.winnerId].points += 2;
+                standings[m.winnerId].points += scheme.win;
                 standings[m.winnerId].wins += 1;
+              }
+              // Loss points (FIBA). scheme.loss is 0 for racket sports, so this
+              // whole branch is inert there.
+              if (scheme.loss && m.winnerId) {
+                const loserId = m.winnerId === m.player1Id ? m.player2Id : m.player1Id;
+                if (loserId && !isGuestId(loserId) && standings[loserId]) {
+                  standings[loserId].points += scheme.loss;
+                }
+              }
+              // Points for/against, needed only for the basketball tie-breaks.
+              if (teamSport) {
+                const totals = matchPointTotals(m.scoreJson);
+                if (totals) {
+                  if (standings[m.player1Id]) { standings[m.player1Id].totalPoints += totals.t1; standings[m.player1Id].totalPointsAgainst += totals.t2; }
+                  if (standings[m.player2Id]) { standings[m.player2Id].totalPoints += totals.t2; standings[m.player2Id].totalPointsAgainst += totals.t1; }
+                }
               }
             });
 
-            const sorted = Object.values(standings).sort((a, b) =>
-              b.points !== a.points ? b.points - a.points : b.wins - a.wins
-            );
+            const sorted = teamSport
+              ? sortStandings(Object.values(standings), sportForStandings, allMatches)
+              : Object.values(standings).sort((a, b) =>
+                  b.points !== a.points ? b.points - a.points : b.wins - a.wins
+                );
 
             await prisma.category.update({
               where: { id: match.categoryId },

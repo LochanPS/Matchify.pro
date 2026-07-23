@@ -17,6 +17,7 @@ export const SPORTS = [
   { id: 'Pickleball',   label: 'Pickleball',   emoji: '🥒', defaultScoring: '11x3', doubles: true,  ballTerm: 'ball' },
   { id: 'Squash',       label: 'Squash',       emoji: '🎾', defaultScoring: '11x5', doubles: false, ballTerm: 'ball' },
   { id: 'Padel',        label: 'Padel',        emoji: '🎾', defaultScoring: '6x3',  doubles: true,  ballTerm: 'ball' },
+  { id: 'Basketball',   label: 'Basketball',   emoji: '🏀', defaultScoring: '',     doubles: false, ballTerm: 'ball', teamSport: true },
 ];
 
 export const DEFAULT_SPORT = 'Badminton';
@@ -25,3 +26,8 @@ export const RACKET_SPORTS = SPORTS.map((s) => s.id);
 export const getSport = (id) => SPORTS.find((s) => s.id === id) || SPORTS[0];
 export const sportEmoji = (id) => getSport(id).emoji;
 export const sportLabel = (id) => getSport(id).label;
+
+// Team sports register a NAMED TEAM + a roster of players (not one/two people).
+// Anything not flagged teamSport is an individual/pairs racket sport.
+export const isTeamSport = (id) => !!SPORTS.find((s) => s.id === id)?.teamSport;
+export const MIN_ROSTER = 5; // FIBA: five players on court, so a team needs ≥5.

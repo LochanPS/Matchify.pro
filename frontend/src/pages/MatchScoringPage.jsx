@@ -12,6 +12,7 @@ import SlideToConfirm from '../components/SlideToConfirm';
 import LoadingScreen from '../components/LoadingScreen';
 import { defaultTennisConfig, newTennisState, deriveTennisState, pointLabel, tennisSetSummary } from '../utils/tennisScoring';
 import { getScoringModel, getPointEngine } from '../sports/registry';
+import { isTeamSport } from '../config/sports';
 
 const B = {
   bg: '#040810',
@@ -501,6 +502,34 @@ const MatchScoringPage = () => {
         <div className="text-center">
           <AlertTriangle className="w-10 h-10 mx-auto mb-3" style={{ color: B.red }} />
           <h2 className="text-lg font-bold text-white">Match not found</h2>
+        </div>
+      </div>
+    );
+  }
+
+  // Team sports (Basketball) have their OWN scoring console (running total,
+  // quarters/OT, fouls, per-player points) that is not built yet. Until then we
+  // must NOT fall through to the rally scoreboard — that would score a
+  // basketball game with badminton's 21-point set logic. Show a clear
+  // placeholder instead so the match/draw/registration flow stays usable.
+  if (isTeamSport(sportName)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-6" style={{ background: B.bg }}>
+        <div className="text-center max-w-sm">
+          <div className="text-5xl mb-4">🏀</div>
+          <h2 className="text-lg font-black text-white mb-2">Basketball scoring is coming soon</h2>
+          <p className="text-sm mb-6" style={{ color: 'rgba(255,255,255,0.55)' }}>
+            {sportName} matches use a dedicated FIBA scoring console (running score,
+            quarters & overtime, fouls and per-player points). It isn't live yet —
+            everything else for this tournament works normally.
+          </p>
+          <button
+            onClick={() => navigate(-1)}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm"
+            style={{ background: 'rgba(255,255,255,0.08)', color: '#fff', border: '1px solid rgba(255,255,255,0.15)' }}
+          >
+            <ArrowLeft className="w-4 h-4" /> Back
+          </button>
         </div>
       </div>
     );

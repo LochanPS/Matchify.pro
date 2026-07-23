@@ -6,8 +6,9 @@ import { tournamentAPI } from '../api/tournament';
 import { registrationAPI } from '../api/registration';
 import { getPublicPaymentSettings } from '../api/payment';
 import CategorySelector from '../components/registration/CategorySelector';
+import { isTeamSport, MIN_ROSTER } from '../config/sports';
 import { ArrowLeftIcon, UserGroupIcon, CameraIcon, CheckCircleIcon, XMarkIcon, ClockIcon } from '@heroicons/react/24/outline';
-import { Loader, Upload, QrCode, AlertCircle, Search } from 'lucide-react';
+import { Loader, Upload, QrCode, AlertCircle, Search, Plus, Trash2 } from 'lucide-react';
 import LoadingScreen from '../components/LoadingScreen';
 import Spinner from '../components/Spinner';
 
@@ -105,6 +106,8 @@ export default function TournamentRegistrationPage() {
   const [partnerInfo, setPartnerInfo] = useState({});
   const [partnerMode, setPartnerMode] = useState({}); // catId -> 'id' | 'name'
   const [partnerNames, setPartnerNames] = useState({}); // catId -> string (name-only mode)
+  const [teamNames, setTeamNames] = useState({}); // catId -> team name (team sports only)
+  const [rosters, setRosters] = useState({});     // catId -> [{ name, jersey, starter }] (team sports only)
   const [paymentScreenshot, setPaymentScreenshot] = useState(null);
   const [paymentPreview, setPaymentPreview] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -134,6 +137,8 @@ export default function TournamentRegistrationPage() {
           if (draft.partnerInfo) setPartnerInfo(draft.partnerInfo);
           if (draft.partnerMode) setPartnerMode(draft.partnerMode);
           if (draft.partnerNames) setPartnerNames(draft.partnerNames);
+          if (draft.teamNames) setTeamNames(draft.teamNames);
+          if (draft.rosters) setRosters(draft.rosters);
         }
       }
     } catch {}
@@ -154,10 +159,12 @@ export default function TournamentRegistrationPage() {
         partnerInfo,
         partnerMode,
         partnerNames,
+        teamNames,
+        rosters,
         timestamp: Date.now(),
       }));
     } catch {}
-  }, [selectedCategories, partnerCodes, partnerInfo, partnerMode, partnerNames, DRAFT_KEY]);
+  }, [selectedCategories, partnerCodes, partnerInfo, partnerMode, partnerNames, teamNames, rosters, DRAFT_KEY]);
 
   const clearDraft = () => {
     try { safeStorage.removeItem(DRAFT_KEY); } catch {}
@@ -211,6 +218,46 @@ export default function TournamentRegistrationPage() {
     categories.find(c => c.id === catId)?.format === 'doubles'
   );
 
+  // ── Team sports (Basketball) ───────────────────────────────────────────────
+  // A team sport registers a NAMED TEAM + a roster instead of one/two players.
+  // This block is inert for racket sports (teamSport === false).
+  const teamSport = !!tournament && isTeamSport(tournament.sport);
+
+  // Count only players that actually have a name typed in.
+  const namedCount = (catId) => (rosters[catId] || []).filter(p => p.name?.trim()).length;
+
+  const addPlayer = (catId, starter) => {
+    setRosters(r => ({ ...r, [catId]: [...(r[catId] || []), { name: '', jersey: '', starter }] }));
+  };
+  const updatePlayer = (catId, idx, field, value) => {
+    setRosters(r => {
+      const list = [...(r[catId] || [])];
+      list[idx] = { ...list[idx], [field]: value };
+      return { ...r, [catId]: list };
+    });
+  };
+  const removePlayer = (catId, idx) => {
+    setRosters(r => ({ ...r, [catId]: (r[catId] || []).filter((_, i) => i !== idx) }));
+  };
+
+  // Seed each newly-selected team category with 5 empty starter rows (the FIBA
+  // five on court) so the organizer/captain just fills names. Runs only for
+  // team sports and never wipes rows the user already added.
+  useEffect(() => {
+    if (!teamSport) return;
+    setRosters(prev => {
+      let changed = false;
+      const next = { ...prev };
+      for (const catId of selectedCategories) {
+        if (!next[catId] || next[catId].length === 0) {
+          next[catId] = Array.from({ length: MIN_ROSTER }, () => ({ name: '', jersey: '', starter: true }));
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [teamSport, selectedCategories]);
+
   // ── Step 1: proceed to payment ───────────────────────────────────────────
   const handleProceedToPayment = () => {
     setError('');
@@ -225,21 +272,35 @@ export default function TournamentRegistrationPage() {
       setError('You are already registered for the selected category. Choose a different category.');
       return;
     }
-    for (const catId of selectedDoublesCategories) {
-      const cat = categories.find(c => c.id === catId);
-      const mode = partnerMode[catId] || 'id';
-      if (mode === 'id') {
-        const code = partnerCodes[catId];
-        if (!code || code === '#') { setError(`Enter partner Matchify.pro ID for ${cat?.name}`); return; }
-        if (!/^#\d+$/.test(code) && !/^#[A-Z]\d{5}$/i.test(code)) {
-          setError(`Invalid Matchify.pro ID for ${cat?.name} — format: #1, #12`);
+    if (teamSport) {
+      // Team sports: each selected category needs a team name + a full roster.
+      for (const catId of selectedCategories) {
+        if (alreadyRegisteredCategories.includes(catId)) continue;
+        const cat = categories.find(c => c.id === catId);
+        if (!teamNames[catId]?.trim()) { setError(`Enter a team name for ${cat?.name}`); return; }
+        if (teamNames[catId].trim().length < 2) { setError(`Team name too short for ${cat?.name}`); return; }
+        if (namedCount(catId) < MIN_ROSTER) {
+          setError(`Add at least ${MIN_ROSTER} players to your roster for ${cat?.name}`);
           return;
         }
-        if (!partnerInfo[catId]) { setError(`Tap Find to verify partner ID for ${cat?.name}`); return; }
-      } else {
-        const name = partnerNames[catId]?.trim();
-        if (!name) { setError(`Enter partner name for ${cat?.name}`); return; }
-        if (name.length < 2) { setError(`Partner name too short for ${cat?.name}`); return; }
+      }
+    } else {
+      for (const catId of selectedDoublesCategories) {
+        const cat = categories.find(c => c.id === catId);
+        const mode = partnerMode[catId] || 'id';
+        if (mode === 'id') {
+          const code = partnerCodes[catId];
+          if (!code || code === '#') { setError(`Enter partner Matchify.pro ID for ${cat?.name}`); return; }
+          if (!/^#\d+$/.test(code) && !/^#[A-Z]\d{5}$/i.test(code)) {
+            setError(`Invalid Matchify.pro ID for ${cat?.name} — format: #1, #12`);
+            return;
+          }
+          if (!partnerInfo[catId]) { setError(`Tap Find to verify partner ID for ${cat?.name}`); return; }
+        } else {
+          const name = partnerNames[catId]?.trim();
+          if (!name) { setError(`Enter partner name for ${cat?.name}`); return; }
+          if (name.length < 2) { setError(`Partner name too short for ${cat?.name}`); return; }
+        }
       }
     }
     saveDraft();
@@ -299,15 +360,28 @@ export default function TournamentRegistrationPage() {
     if (!trimmedUtr && !paymentScreenshot) {
       setError('Provide UTR / Transaction ID or upload payment screenshot (or both)'); return;
     }
-    // Safety: re-validate doubles partner before submit (guards against mode-switching edge cases)
-    for (const catId of selectedDoublesCategories) {
-      const cat = categories.find(c => c.id === catId);
-      const mode = partnerMode[catId] || 'id';
-      if (mode === 'id' && !partnerInfo[catId]) {
-        setError(`Partner not verified for ${cat?.name}. Go back and verify partner ID.`); return;
+    // Safety: re-validate before submit (guards against mode-switching / draft edge cases)
+    if (teamSport) {
+      for (const catId of selectedCategories) {
+        if (alreadyRegisteredCategories.includes(catId)) continue;
+        const cat = categories.find(c => c.id === catId);
+        if (!teamNames[catId]?.trim()) {
+          setError(`Team name missing for ${cat?.name}. Go back and enter your team name.`); return;
+        }
+        if (namedCount(catId) < MIN_ROSTER) {
+          setError(`Roster for ${cat?.name} needs at least ${MIN_ROSTER} players. Go back and add them.`); return;
+        }
       }
-      if (mode === 'name' && !partnerNames[catId]?.trim()) {
-        setError(`Partner name missing for ${cat?.name}. Go back and enter partner name.`); return;
+    } else {
+      for (const catId of selectedDoublesCategories) {
+        const cat = categories.find(c => c.id === catId);
+        const mode = partnerMode[catId] || 'id';
+        if (mode === 'id' && !partnerInfo[catId]) {
+          setError(`Partner not verified for ${cat?.name}. Go back and verify partner ID.`); return;
+        }
+        if (mode === 'name' && !partnerNames[catId]?.trim()) {
+          setError(`Partner name missing for ${cat?.name}. Go back and enter partner name.`); return;
+        }
       }
     }
     setSubmitting(true);
@@ -330,6 +404,21 @@ export default function TournamentRegistrationPage() {
       });
       formData.append('partnerEmails', JSON.stringify(partnerEmails));
       formData.append('partnerNames', JSON.stringify(partnerNamesPayload));
+      // Team sports: send team name + cleaned roster per category. Only players
+      // with a typed name are sent; jersey is optional and kept as-is.
+      if (teamSport) {
+        const teamNamesPayload = {};
+        const rostersPayload = {};
+        selectedCategories.forEach(catId => {
+          if (teamNames[catId]?.trim()) teamNamesPayload[catId] = teamNames[catId].trim();
+          const cleaned = (rosters[catId] || [])
+            .filter(p => p.name?.trim())
+            .map(p => ({ name: p.name.trim(), jersey: (p.jersey || '').trim(), starter: !!p.starter }));
+          if (cleaned.length) rostersPayload[catId] = cleaned;
+        });
+        formData.append('teamNames', JSON.stringify(teamNamesPayload));
+        formData.append('rosters', JSON.stringify(rostersPayload));
+      }
       if (trimmedUtr) formData.append('utrId', trimmedUtr);
       if (paymentScreenshot) formData.append('paymentScreenshot', paymentScreenshot);
       await registrationAPI.createRegistrationWithScreenshot(formData);
@@ -521,8 +610,8 @@ export default function TournamentRegistrationPage() {
               />
             </div>
 
-            {/* Partner details for doubles */}
-            {selectedDoublesCategories.length > 0 && (
+            {/* Partner details for doubles (racket sports only) */}
+            {!teamSport && selectedDoublesCategories.length > 0 && (
               <div className="rounded-2xl p-4" style={{ background: 'rgba(245,158,11,0.05)', border: '1px solid rgba(245,158,11,0.18)' }}>
                 <div className="flex items-center gap-2 mb-4">
                   <UserGroupIcon className="h-5 w-5" style={{ color: BRAND.green }} />
@@ -654,6 +743,114 @@ export default function TournamentRegistrationPage() {
                             </p>
                           </>
                         )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Team details for team sports (Basketball) — team name + roster */}
+            {teamSport && selectedCategories.length > 0 && (
+              <div className="rounded-2xl p-4" style={{ background: 'rgba(245,158,11,0.05)', border: '1px solid rgba(245,158,11,0.18)' }}>
+                <div className="flex items-center gap-2 mb-1">
+                  <UserGroupIcon className="h-5 w-5" style={{ color: BRAND.green }} />
+                  <h3 className="text-sm font-black text-white">Team Details</h3>
+                </div>
+                <p className="text-xs mb-4" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                  Enter your team name and roster. At least {MIN_ROSTER} players are required
+                  ({MIN_ROSTER} on court); add substitutes below. Jersey numbers are optional.
+                </p>
+                <div className="space-y-6">
+                  {selectedCategories.filter(catId => !alreadyRegisteredCategories.includes(catId)).map(catId => {
+                    const category = categories.find(c => c.id === catId);
+                    const roster = rosters[catId] || [];
+                    const named = namedCount(catId);
+                    const enough = named >= MIN_ROSTER;
+                    return (
+                      <div key={catId} className="space-y-3">
+                        <label className="block text-xs font-bold" style={{ color: BRAND.green }}>
+                          Team for <span className="text-white">{category?.name}</span>
+                          <span style={{ color: '#f87171' }}> *</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={teamNames[catId] || ''}
+                          onChange={e => setTeamNames(t => ({ ...t, [catId]: e.target.value }))}
+                          placeholder="Team name (e.g. Thunderbolts)"
+                          className="w-full px-3 py-3 rounded-xl text-white text-sm font-bold"
+                          style={{ background: 'rgba(0,0,0,0.3)', border: '1.5px solid rgba(245,158,11,0.25)', outline: 'none' }}
+                        />
+
+                        {/* Roster rows */}
+                        <div className="space-y-2">
+                          {roster.map((p, idx) => (
+                            <div key={idx} className="flex items-center gap-2">
+                              <span className="text-xs font-mono w-5 text-center flex-shrink-0" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                                {idx + 1}
+                              </span>
+                              <input
+                                type="text"
+                                value={p.name}
+                                onChange={e => updatePlayer(catId, idx, 'name', e.target.value)}
+                                placeholder={`Player ${idx + 1} name`}
+                                className="flex-1 min-w-0 px-3 py-2.5 rounded-xl text-white text-sm"
+                                style={{ background: 'rgba(0,0,0,0.3)', border: '1.5px solid rgba(255,255,255,0.1)', outline: 'none' }}
+                              />
+                              <input
+                                type="text"
+                                inputMode="numeric"
+                                value={p.jersey}
+                                onChange={e => updatePlayer(catId, idx, 'jersey', e.target.value.replace(/[^\d]/g, '').slice(0, 3))}
+                                placeholder="#"
+                                className="w-12 px-2 py-2.5 rounded-xl text-white text-sm text-center font-mono flex-shrink-0"
+                                style={{ background: 'rgba(0,0,0,0.3)', border: '1.5px solid rgba(255,255,255,0.1)', outline: 'none' }}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => updatePlayer(catId, idx, 'starter', !p.starter)}
+                                title={p.starter ? 'Starter (on court)' : 'Substitute'}
+                                className="px-2 py-1.5 rounded-lg text-[10px] font-black flex-shrink-0 transition-all"
+                                style={p.starter
+                                  ? { background: BRAND.green, color: '#050810' }
+                                  : { background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.12)' }}
+                              >
+                                {p.starter ? 'START' : 'SUB'}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => removePlayer(catId, idx)}
+                                disabled={roster.length <= MIN_ROSTER}
+                                className="p-1.5 rounded-lg flex-shrink-0 transition-all disabled:opacity-25 disabled:cursor-not-allowed"
+                                style={{ background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.25)' }}
+                                title={roster.length <= MIN_ROSTER ? `Keep at least ${MIN_ROSTER} rows` : 'Remove player'}
+                              >
+                                <Trash2 className="w-3.5 h-3.5" style={{ color: '#f87171' }} />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => addPlayer(catId, false)}
+                          className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-black transition-all active:scale-95"
+                          style={{ background: 'rgba(245,158,11,0.1)', color: BRAND.green, border: '1px dashed rgba(245,158,11,0.4)' }}
+                        >
+                          <Plus className="w-4 h-4" /> Add substitute
+                        </button>
+
+                        <div className="flex items-center gap-2 px-3 py-2 rounded-xl"
+                          style={enough
+                            ? { background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)' }
+                            : { background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.25)' }}>
+                          {enough
+                            ? <CheckCircleIcon className="w-4 h-4 flex-shrink-0" style={{ color: BRAND.green }} />
+                            : <AlertCircle className="w-4 h-4 flex-shrink-0" style={{ color: '#fbbf24' }} />}
+                          <p className="text-xs font-bold" style={{ color: enough ? BRAND.green : '#fbbf24' }}>
+                            {named} player{named === 1 ? '' : 's'} added{enough ? '' : ` — need at least ${MIN_ROSTER}`}
+                          </p>
+                        </div>
                       </div>
                     );
                   })}

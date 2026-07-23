@@ -1,8 +1,13 @@
 ﻿import { useState, useEffect } from 'react';
+import { isTeamSport } from '../../config/sports';
 
-const CategoryForm = ({ initialData, onSave, onCancel }) => {
+const CategoryForm = ({ sport, initialData, onSave, onCancel }) => {
   // Check if this category has registrations (fee is locked)
   const isFeeLocked = initialData && initialData.registrationCount > 0;
+  // Team sports have no singles/doubles split, and their scoring is owned by
+  // the sport's own engine — so neither question is asked. The stored values
+  // keep their defaults so anything downstream reading them stays valid.
+  const teamSport = isTeamSport(sport);
   // Parse scoring format from string like "3 games to 21 pts" or "21x3"
   const parseScoringFormat = (scoringFormat) => {
     if (!scoringFormat) return { numberOfGames: 3, pointsPerGame: 21 };
@@ -153,7 +158,8 @@ const CategoryForm = ({ initialData, onSave, onCancel }) => {
         {errors.name && <p className="text-red-400 text-sm mt-1">{errors.name}</p>}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className={teamSport ? '' : 'grid grid-cols-1 md:grid-cols-2 gap-4'}>
+        {!teamSport && (
         <div>
           <label className="block text-sm font-medium text-gray-300 mb-2">Format *</label>
           <select
@@ -165,6 +171,7 @@ const CategoryForm = ({ initialData, onSave, onCancel }) => {
             <option value="doubles">Doubles</option>
           </select>
         </div>
+        )}
         <div>
           <label className="block text-sm font-medium text-gray-300 mb-2">Gender *</label>
           <select
@@ -315,6 +322,20 @@ const CategoryForm = ({ initialData, onSave, onCancel }) => {
         </div>
       </div>
 
+      {teamSport ? (
+      <div className="border-t border-white/10 pt-6">
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-xl">🏀</span>
+          <h4 className="text-md font-bold text-emerald-400">Scoring</h4>
+        </div>
+        <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3">
+          <p className="text-sm text-emerald-300">
+            {sport} uses official FIBA scoring — four quarters, running score, and
+            overtime to break a tie. Nothing to configure here.
+          </p>
+        </div>
+      </div>
+      ) : (
       <div className="border-t border-white/10 pt-6">
         <div className="flex items-center gap-2 mb-4">
           <span className="text-xl">🏸</span>
@@ -345,6 +366,7 @@ const CategoryForm = ({ initialData, onSave, onCancel }) => {
           </p>
         </div>
       </div>
+      )}
 
       <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
         <button type="button" onClick={onCancel} className="px-6 py-2 border border-white/10 text-gray-300 rounded-xl hover:bg-slate-700/50 transition-colors font-medium">Cancel</button>

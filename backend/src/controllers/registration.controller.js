@@ -3,6 +3,7 @@ import prisma from '../lib/prisma.js';
 import Razorpay from 'razorpay';
 import crypto from 'crypto';
 import { notifyPartnerInvitation } from '../services/notification.service.js';
+import { isTeamSport as isTeamSportFn, MIN_ROSTER } from '../config/sports.js';
 
 // Initialize Razorpay (will be null if keys not provided)
 let razorpay = null;
@@ -585,8 +586,7 @@ const createRegistrationWithScreenshot = async (req, res) => {
 
     // Team sports register a TEAM (name + roster ≥5), not an individual/pair.
     // Validate every category up front so nothing is created if any is invalid.
-    const TEAM_SPORTS = ['Basketball']; // Football to follow
-    const isTeamSport = TEAM_SPORTS.includes(tournament.sport);
+    const isTeamSport = isTeamSportFn(tournament.sport);
     if (isTeamSport) {
       for (const catId of parsedCategoryIds) {
         const tName = (parsedTeamNames[catId] || '').trim();
@@ -594,7 +594,9 @@ const createRegistrationWithScreenshot = async (req, res) => {
           ? parsedRosters[catId].filter(p => (p?.name || '').trim())
           : [];
         if (!tName) return res.status(400).json({ success: false, error: 'Team name is required to register a team.' });
-        if (players.length < 5) return res.status(400).json({ success: false, error: 'A team needs at least 5 players in the roster.' });
+        if (players.length < MIN_ROSTER) {
+          return res.status(400).json({ success: false, error: `A team needs at least ${MIN_ROSTER} players in the roster.` });
+        }
       }
     }
 

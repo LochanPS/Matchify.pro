@@ -1,5 +1,5 @@
 ﻿import { useState, useRef, useEffect } from 'react';
-import { SPORTS } from '../../../config/sports';
+import { SPORTS, isTeamSport } from '../../../config/sports';
 import LocationPicker from '../../LocationPicker';
 
 // Indian States
@@ -32,6 +32,11 @@ const BasicInfoStep = ({ formData, updateFormData, onNext }) => {
   const [showStateSuggestions, setShowStateSuggestions] = useState(false);
   const [citySuggestions, setCitySuggestions] = useState([]);
   const [stateSuggestions, setStateSuggestions] = useState([]);
+
+  // Team sports (Basketball) have no singles/doubles distinction — a team is a
+  // team — so we don't ask. The field is pinned to 'singles' when the sport is
+  // picked, purely so downstream code that reads format keeps a valid value.
+  const teamSport = isTeamSport(formData.sport);
   
   const cityRef = useRef(null);
   const stateRef = useRef(null);
@@ -210,7 +215,11 @@ const BasicInfoStep = ({ formData, updateFormData, onNext }) => {
               <button
                 key={s.id}
                 type="button"
-                onClick={() => updateFormData('sport', s.id)}
+                onClick={() => {
+                  updateFormData('sport', s.id);
+                  // Team sports don't ask singles/doubles — keep a valid value.
+                  if (s.teamSport) updateFormData('format', 'singles');
+                }}
                 className="flex flex-col items-center justify-center gap-0.5 py-2.5 rounded-xl text-xs font-bold transition-all"
                 style={{
                   background: active ? 'rgba(168,85,247,0.22)' : 'rgba(0,0,0,0.3)',
@@ -226,8 +235,9 @@ const BasicInfoStep = ({ formData, updateFormData, onNext }) => {
         </div>
       </div>
 
-      {/* Format & Privacy */}
-      <div className="grid grid-cols-2 gap-3">
+      {/* Format & Privacy — Format is not asked for team sports */}
+      <div className={teamSport ? '' : 'grid grid-cols-2 gap-3'}>
+        {!teamSport && (
         <div>
           <label className="block text-xs font-bold text-purple-400 mb-1.5">Format</label>
           <select
@@ -244,6 +254,7 @@ const BasicInfoStep = ({ formData, updateFormData, onNext }) => {
             <option value="both">Both</option>
           </select>
         </div>
+        )}
         <div>
           <label className="block text-xs font-bold text-purple-400 mb-1.5">Privacy</label>
           <select

@@ -29,6 +29,13 @@ const getPlayerName = (registration) => {
     hasUser: !!registration.user
   });
   
+  // Team sports enter the draw as a TEAM, so the team name wins over the name
+  // of the captain who submitted the registration. teamName is only ever set
+  // for team sports, so this needs no sport check and cannot affect racket
+  // sports (where it is always null).
+  if (registration.teamName && registration.teamName.trim()) {
+    return registration.teamName.trim();
+  }
   // If userId exists, use user.name
   if (registration.userId && registration.user) {
     return registration.user.name;
@@ -376,8 +383,10 @@ const getDraw = async (req, res) => {
     const regWithPartners = await prisma.registration.findMany({
       where: { tournamentId: tournamentId, categoryId: categoryId },
       select: {
+        id: true,
         userId: true,
         guestPartnerName: true,
+        teamName: true,
         partner: { select: { id: true, name: true } }
       }
     });
@@ -386,6 +395,16 @@ const getDraw = async (req, res) => {
         const name = reg.partner?.name || reg.guestPartnerName || null;
         if (name) partnerMap[reg.userId] = name;
       }
+    });
+
+    // Team sports show the TEAM name in the bracket, not the captain who
+    // registered. teamName is only ever set for team sports, so racket sports
+    // are untouched. Reuses the query above — no extra DB call.
+    regWithPartners.forEach(reg => {
+      const teamName = (reg.teamName || '').trim();
+      if (!teamName) return;
+      const pid = reg.userId || `guest-${reg.id}`;
+      playerMap[pid] = { ...(playerMap[pid] || { id: pid }), id: pid, name: teamName };
     });
 
     // Parse the stored bracket JSON

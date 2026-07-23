@@ -10,6 +10,7 @@
 
 import prisma from '../lib/prisma.js';
 import { cacheGet, cacheSet } from '../services/redisService.js';
+import { isTeamSport } from '../config/sports.js';
 
 // Cache TTL for draw page — 10s is short enough for near-live scores,
 // but collapses 300 concurrent pollers into 1 DB hit per 10s.
@@ -69,6 +70,7 @@ export const getDrawPage = async (req, res) => {
           guestName: true,
           guestEmail: true,
           guestPartnerName: true,
+          teamName: true,
           partner: { select: { id: true, name: true } },
           user:    { select: { id: true, name: true } }
         }
@@ -138,6 +140,19 @@ export const getDrawPage = async (req, res) => {
         name: reg.userId && reg.user ? reg.user.name : (reg.guestName || 'Unknown')
       };
     });
+
+    // Team sports enter the draw as a TEAM, so the bracket must show the team
+    // name — not the captain who happened to submit the registration. The
+    // participant id is still the captain's userId (or guest-{regId}); only the
+    // display name is overridden. Inert for every racket sport.
+    if (isTeamSport(tournament.sport)) {
+      registrations.forEach(reg => {
+        const teamName = (reg.teamName || '').trim();
+        if (!teamName) return;
+        const pid = reg.userId || `guest-${reg.id}`;
+        playerMap[pid] = { ...(playerMap[pid] || { id: pid }), id: pid, name: teamName };
+      });
+    }
 
     // Partner map built from Phase 1 registrations (no extra DB call needed)
     // Key by userId for real users OR by guest-{regId} for guest registrations

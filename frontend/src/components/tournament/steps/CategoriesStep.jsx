@@ -207,6 +207,7 @@ const CategoriesStep = ({ formData, updateFormData, onNext, onPrev }) => {
         </>
       ) : (
         <CategoryForm
+          sport={formData.sport}
           initialData={editingIndex !== null ? formData.categories[editingIndex] : null}
           onSave={handleAddCategory}
           onCancel={handleCancelForm}

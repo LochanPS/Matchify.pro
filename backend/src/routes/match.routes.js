@@ -704,7 +704,12 @@ const endMatchHandler = async (req, res) => {
     const { winnerId, finalScore } = req.body;
     const userId = req.user.userId || req.user.id;
 
-    if (!finalScore?.sets?.length) {
+    // Guard against completing a match with no score data. Set-based sports
+    // (badminton/tennis/…) carry `sets`; running-total sports (basketball)
+    // carry an event log instead, so both shapes are accepted.
+    const hasSetScore = !!finalScore?.sets?.length;
+    const hasEventScore = !!finalScore?.model && Array.isArray(finalScore?.events);
+    if (!hasSetScore && !hasEventScore) {
       return res.status(400).json({ success: false, error: 'Cannot complete match without score data.' });
     }
 

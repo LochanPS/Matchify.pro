@@ -11,6 +11,7 @@ import badminton from './badminton.js';
 import pickleball from './pickleball.js';
 import tableTennis from './tableTennis.js';
 import squash from './squash.js';
+import basketball from './basketball.js';
 
 const POINT_ENGINES = {
   'Badminton': badminton,
@@ -22,9 +23,18 @@ const POINT_ENGINES = {
 // Sports scored by the tennis engine (15/30/40, games, sets, tiebreak).
 const TENNIS_SPORTS = new Set(['Tennis', 'Padel']);
 
-// Returns { model: 'tennis' } OR { model: 'points', engine }.
+// Sports with a running total and quarters rather than sets/games. Each has
+// its own engine and its own scoring console.
+const RUNNING_TOTAL_ENGINES = {
+  'Basketball': basketball,
+};
+
+// Returns { model: 'tennis' } OR { model: 'basketball', engine }
+// OR { model: 'points', engine }.
 export function getScoringModel(sportId) {
   if (TENNIS_SPORTS.has(sportId)) return { model: 'tennis' };
+  const running = RUNNING_TOTAL_ENGINES[sportId];
+  if (running) return { model: running.model, engine: running };
   const engine = POINT_ENGINES[sportId] || POINT_ENGINES['Badminton'];
   return { model: 'points', engine };
 }

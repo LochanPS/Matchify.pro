@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import prisma from '../lib/prisma.js';
+import { isTeamSport } from '../config/sports.js';
 
 class MatchService {
   /**
@@ -175,6 +176,10 @@ class MatchService {
     if (!match) return null;
 
     const isDoubles = match.category?.format === 'doubles';
+    // Team sports: the "player" in a match slot is really a TEAM. The scoring
+    // console needs the team name and the roster so it can attribute points to
+    // individual players, so both are attached below.
+    const isTeam = isTeamSport(match.tournament?.sport);
 
     // Helper function to get player data with partner name for doubles
     const getPlayerData = async (playerId) => {
@@ -190,18 +195,22 @@ class MatchService {
             guestName: true,
             guestEmail: true,
             userId: true,
+            teamName: true,
+            roster: true,
             // For guest doubles pairs stored as "Name1 & Name2" in guestName,
             // partnerName is already embedded; expose as-is.
           }
         });
 
         if (registration) {
+          const teamName = (registration.teamName || '').trim();
           return {
             id: playerId,
-            name: registration.guestName || 'Guest Player',
+            name: teamName || registration.guestName || 'Guest Player',
             email: registration.guestEmail || null,
             profilePhoto: null,
-            isGuest: true
+            isGuest: true,
+            ...(teamName ? { teamName, roster: registration.roster || [] } : {})
           };
         }
         return null;
@@ -214,6 +223,21 @@ class MatchService {
       });
 
       if (!user) return null;
+
+      // For team sports, the slot shows the TEAM, and the roster rides along so
+      // the console can record who scored. Falls back to the user's own name if
+      // no team name was captured, so a slot is never blank.
+      if (isTeam) {
+        const reg = await prisma.registration.findFirst({
+          where: { categoryId: match.categoryId, userId: playerId },
+          select: { teamName: true, roster: true }
+        });
+        const teamName = (reg?.teamName || '').trim();
+        if (teamName) {
+          return { ...user, name: teamName, teamName, roster: reg.roster || [] };
+        }
+        return user;
+      }
 
       // For doubles categories, look up partner name from registration
       if (isDoubles) {

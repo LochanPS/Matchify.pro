@@ -12,7 +12,8 @@ import SlideToConfirm from '../components/SlideToConfirm';
 import LoadingScreen from '../components/LoadingScreen';
 import { defaultTennisConfig, newTennisState, deriveTennisState, pointLabel, tennisSetSummary } from '../utils/tennisScoring';
 import { getScoringModel, getPointEngine } from '../sports/registry';
-import { isTeamSport } from '../config/sports';
+import basketball from '../sports/basketball';
+import BasketballScoringConsole from '../components/scoring/BasketballScoringConsole';
 
 const B = {
   bg: '#040810',
@@ -112,6 +113,9 @@ const MatchScoringPage = () => {
   // each of which OWNS its rules, so no sport can affect another.
   const scoreModel = getScoringModel(sportName);
   const isTennis = scoreModel.model === 'tennis';
+  // Basketball has a running total and quarters, so it uses its own engine and
+  // its own console instead of the set/game scoreboard below.
+  const isBasketball = scoreModel.model === 'basketball';
   const pointEngine = getPointEngine(sportName);      // the sport's own engine (badminton fallback for tennis, unused there)
   const pointUnit = pointEngine.unit;                 // "Set" (badminton) or "Game" (pickleball/TT/squash)
   const pointCap = pointEngine.defaults.cap;          // per-sport deuce cap (badminton 30; others none)
@@ -191,19 +195,33 @@ const MatchScoringPage = () => {
     try {
       setSaving(true);
       setError(null);
-      // Save config first (same as ConductMatchPage), then start the match
-      try {
-        await api.put(`/matches/${matchId}/config`, {
-          pointsPerSet,
-          maxSets,
-          setsToWin: Math.ceil(maxSets / 2),
-          extension: true,
-        });
-      } catch (_) { /* match may already be configured */ }
+      // Save config first (same as ConductMatchPage), then start the match.
+      // Basketball has no points-per-set/sets config — its engine owns the
+      // quarter structure — so that call is skipped entirely.
+      if (!isBasketball) {
+        try {
+          await api.put(`/matches/${matchId}/config`, {
+            pointsPerSet,
+            maxSets,
+            setsToWin: Math.ceil(maxSets / 2),
+            extension: true,
+          });
+        } catch (_) { /* match may already be configured */ }
+      }
       // 45s timeout — Vercel cold start + DB queries can take up to 30s on first hit
       const response = await api.post(`/matches/${matchId}/start`, {}, { timeout: 45000 });
       const matchData = response.data.match;
       setMatch(matchData);
+
+      // Basketball: seed a basketball-shaped score (event log), ignoring any
+      // default set-based score the backend created.
+      if (isBasketball) {
+        const seeded = basketball.newState();
+        setScore(seeded);
+        setTimerData(matchData?.score?.timer);
+        saveScoreToApi(seeded);
+        return;
+      }
 
       // Tennis: seed a tennis-shaped score (point log + derived state), ignoring
       // any default badminton score the backend created.
@@ -507,34 +525,6 @@ const MatchScoringPage = () => {
     );
   }
 
-  // Team sports (Basketball) have their OWN scoring console (running total,
-  // quarters/OT, fouls, per-player points) that is not built yet. Until then we
-  // must NOT fall through to the rally scoreboard — that would score a
-  // basketball game with badminton's 21-point set logic. Show a clear
-  // placeholder instead so the match/draw/registration flow stays usable.
-  if (isTeamSport(sportName)) {
-    return (
-      <div className="min-h-screen flex items-center justify-center px-6" style={{ background: B.bg }}>
-        <div className="text-center max-w-sm">
-          <div className="text-5xl mb-4">🏀</div>
-          <h2 className="text-lg font-black text-white mb-2">Basketball scoring is coming soon</h2>
-          <p className="text-sm mb-6" style={{ color: 'rgba(255,255,255,0.55)' }}>
-            {sportName} matches use a dedicated FIBA scoring console (running score,
-            quarters & overtime, fouls and per-player points). It isn't live yet —
-            everything else for this tournament works normally.
-          </p>
-          <button
-            onClick={() => navigate(-1)}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm"
-            style={{ background: 'rgba(255,255,255,0.08)', color: '#fff', border: '1px solid rgba(255,255,255,0.15)' }}
-          >
-            <ArrowLeft className="w-4 h-4" /> Back
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   // Sets won. Tennis counts set winners directly; other sports use the points engine.
   const tennisSetsWon = () => {
     let a = 0, b = 0;
@@ -549,6 +539,34 @@ const MatchScoringPage = () => {
   const isCompleted = match.status === 'COMPLETED';
   const canStart = match.status === 'PENDING' || match.status === 'SCHEDULED' || match.status === 'READY';
   const canScore = !isCompleted && !isPaused;
+
+  // Basketball renders its OWN console — a running total with quarters, fouls
+  // and per-player points — and returns before any set/game scoreboard code
+  // runs. Nothing below this point executes for a basketball match, so the
+  // rally and tennis scoreboards can never be reached with basketball state.
+  if (isBasketball) {
+    return (
+      <BasketballScoringConsole
+        match={match}
+        score={score}
+        canScore={canScore}
+        canStart={canStart}
+        isInProgress={isInProgress}
+        saving={saving}
+        onBack={handleBack}
+        onStart={handleStartMatch}
+        onScoreChange={(next) => {
+          updateScore(next);
+          if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+          autoSaveTimerRef.current = setTimeout(() => saveScoreToApi(next), 1200);
+        }}
+        onEndMatch={(winningTeam) => {
+          const winnerId = winningTeam === 1 ? match.player1?.id : match.player2?.id;
+          handleEndMatch(winnerId);
+        }}
+      />
+    );
+  }
 
   // Split a player/pair into two display lines so doubles partners always show
   // fully instead of being truncated. Handles both data shapes: separate

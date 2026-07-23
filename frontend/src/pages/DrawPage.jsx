@@ -3065,6 +3065,7 @@ const DrawDisplay = ({
   }
   if (format === 'ROUND_ROBIN_KNOCKOUT') {
     return <GroupsKnockoutDisplay 
+      sport={sport}
       data={bracket} 
       matches={matches} 
       user={user} 
@@ -3894,6 +3895,8 @@ const RoundRobinDisplay = ({ sport, data, matches, user, isOrganizer, onAssignUm
   // Team sports use the FIBA standings layout (points for and against as
   // separate columns) and are ranked server-side by the FIBA tie-breaks.
   const isTeamStandings = isTeamSport(sport);
+  // The team whose squad is being viewed (null = closed).
+  const [teamDetail, setTeamDetail] = React.useState(null);
   const navigate = useNavigate();
   const [activeGroupIdx, setActiveGroupIdx] = React.useState(null); // null = all hidden, number = show that group's matches
   if (!data?.groups || !Array.isArray(data.groups)) return <p className="text-gray-400 text-center p-8">No group data</p>;
@@ -4020,12 +4023,17 @@ const RoundRobinDisplay = ({ sport, data, matches, user, isOrganizer, onAssignUm
                     <div
                       key={pi}
                       className="flex rounded-xl transition-colors"
+                      // Team sports list ONLY the team name here; tapping the row
+                      // opens the squad with jersey numbers and starters/subs.
+                      onClick={isTeamStandings ? () => setTeamDetail(p) : undefined}
+                      role={isTeamStandings ? 'button' : undefined}
                       style={{
                         alignItems: 'center',
                         padding: '9px 4px',
                         gap: '3px',
                         marginBottom: '3px',
                         minHeight: isDoubles ? '62px' : '44px',
+                        cursor: isTeamStandings ? 'pointer' : 'default',
                         background: pi === 0 ? 'rgba(245,158,11,0.07)' : 'rgba(15,22,36,0.65)',
                         borderLeft: pi === 0 ? '3px solid #F59E0B' : '3px solid transparent',
                       }}
@@ -4376,13 +4384,80 @@ const RoundRobinDisplay = ({ sport, data, matches, user, isOrganizer, onAssignUm
           </div>
         );
       })()}
+
+      {/* Team squad — opened by tapping a team in the standings. The draw shows
+          only the team name; the players live here. */}
+      {teamDetail && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center" style={{ background: 'rgba(0,0,0,0.7)' }}
+          onClick={() => setTeamDetail(null)}>
+          <div className="w-full max-w-lg rounded-t-3xl p-5 max-h-[80vh] overflow-y-auto"
+            style={{ background: '#0d1025', border: '1px solid rgba(255,255,255,0.1)' }}
+            onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-start justify-between mb-4">
+              <div className="min-w-0">
+                <p className="text-lg font-black text-white truncate">{teamDetail.name}</p>
+                <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                  {(teamDetail.played || 0)} played · {(teamDetail.wins || 0)}W {(teamDetail.losses || 0)}L ·{' '}
+                  {(teamDetail.points || 0)} pts
+                </p>
+              </div>
+              <button onClick={() => setTeamDetail(null)}
+                className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{ background: 'rgba(255,255,255,0.08)', color: '#fff' }}>×</button>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2 mb-4">
+              {[
+                { l: 'Points for', v: teamDetail.totalPoints || 0 },
+                { l: 'Points against', v: teamDetail.totalPointsAgainst || 0 },
+                { l: 'Difference', v: (() => { const d = (teamDetail.totalPoints || 0) - (teamDetail.totalPointsAgainst || 0); return d > 0 ? `+${d}` : `${d}`; })() },
+              ].map(({ l, v }) => (
+                <div key={l} className="rounded-xl p-2.5 text-center" style={{ background: 'rgba(255,255,255,0.04)' }}>
+                  <p className="text-[10px] mb-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>{l}</p>
+                  <p className="text-base font-black text-white">{v}</p>
+                </div>
+              ))}
+            </div>
+
+            <p className="text-xs font-black mb-2" style={{ color: '#FCD34D' }}>SQUAD</p>
+            {Array.isArray(teamDetail.roster) && teamDetail.roster.length > 0 ? (
+              <div className="space-y-1.5">
+                {[...teamDetail.roster]
+                  .sort((a, b) => (b.starter ? 1 : 0) - (a.starter ? 1 : 0))
+                  .map((pl, i) => (
+                    <div key={i} className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl"
+                      style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                      <span className="w-8 text-center font-mono text-xs flex-shrink-0"
+                        style={{ color: pl.jersey ? '#FCD34D' : 'rgba(255,255,255,0.25)' }}>
+                        {pl.jersey ? `#${pl.jersey}` : '—'}
+                      </span>
+                      <span className="flex-1 min-w-0 truncate text-sm font-bold text-white">{pl.name}</span>
+                      <span className="text-[10px] font-black px-2 py-1 rounded-lg flex-shrink-0"
+                        style={pl.starter
+                          ? { background: 'rgba(245,158,11,0.15)', color: '#F59E0B' }
+                          : { background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.45)' }}>
+                        {pl.starter ? 'STARTER' : 'SUB'}
+                      </span>
+                    </div>
+                  ))}
+              </div>
+            ) : (
+              <p className="text-sm py-3" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                No players were added for this team. The team can still play and be scored — points
+                are recorded for the team as a whole.
+              </p>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
 // Groups + Knockout Display
 // Stage 1: Round Robin groups, Stage 2: Knockout bracket (horizontal left-to-right)
-const GroupsKnockoutDisplay = ({ 
+const GroupsKnockoutDisplay = ({
+  sport,
   data, 
   matches, 
   user, 

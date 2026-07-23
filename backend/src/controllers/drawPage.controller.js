@@ -72,6 +72,7 @@ export const getDrawPage = async (req, res) => {
           guestEmail: true,
           guestPartnerName: true,
           teamName: true,
+          roster: true,
           partner: { select: { id: true, name: true } },
           user:    { select: { id: true, name: true } }
         }
@@ -146,11 +147,15 @@ export const getDrawPage = async (req, res) => {
     // name — not the captain who happened to submit the registration. The
     // participant id is still the captain's userId (or guest-{regId}); only the
     // display name is overridden. Inert for every racket sport.
+    // Roster by participant id, so the draw can reveal a team's players when it
+    // is tapped. Empty for racket sports.
+    const rosterById = {};
     if (isTeamSport(tournament.sport)) {
       registrations.forEach(reg => {
         const teamName = (reg.teamName || '').trim();
-        if (!teamName) return;
         const pid = reg.userId || `guest-${reg.id}`;
+        if (Array.isArray(reg.roster) && reg.roster.length) rosterById[pid] = reg.roster;
+        if (!teamName) return;
         playerMap[pid] = { ...(playerMap[pid] || { id: pid }), id: pid, name: teamName };
       });
     }
@@ -239,6 +244,16 @@ export const getDrawPage = async (req, res) => {
       // the points → points-for → difference order; basketball gets FIBA 2/1
       // scoring with head-to-head tie-breaks.
       recalcGroupStandings(group.participants, groupMatches, tournament.sport);
+
+      // Attach each team's roster + display name so the draw can list only the
+      // team, and reveal its players when the organiser taps it. The bracket
+      // JSON was written when the draw was generated, so this also repairs a
+      // team whose name was set after that point.
+      group.participants.forEach(p => {
+        const pm = playerMap[p.id];
+        if (pm?.name) p.name = pm.name;
+        if (rosterById[p.id]) p.roster = rosterById[p.id];
+      });
     };
 
     // ─── Inject live data into bracket ────────────────────────────────────────

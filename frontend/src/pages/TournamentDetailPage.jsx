@@ -1938,8 +1938,11 @@ const TournamentDetailPage = () => {
       {/* Quick Add Player Modal (admin or this tournament's organizer) */}
       {showQuickAddModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border" style={{ background: '#0d1025', borderColor: 'rgba(255,255,255,0.1)' }}>
-            <div className="relative p-6 text-white overflow-hidden border-b" style={{ background: 'linear-gradient(135deg,rgba(245,158,11,0.12),rgba(245,158,11,0.06))', borderColor: 'rgba(245,158,11,0.15)' }}>
+          {/* max-h + flex column so a long roster scrolls instead of being
+              clipped off the bottom of the screen with no way to reach the
+              category picker and the Add button. */}
+          <div className="rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border max-h-[90vh] flex flex-col" style={{ background: '#0d1025', borderColor: 'rgba(255,255,255,0.1)' }}>
+            <div className="relative p-6 text-white overflow-hidden border-b flex-shrink-0" style={{ background: 'linear-gradient(135deg,rgba(245,158,11,0.12),rgba(245,158,11,0.06))', borderColor: 'rgba(245,158,11,0.15)' }}>
               <div className="relative flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
@@ -1960,7 +1963,7 @@ const TournamentDetailPage = () => {
                 </button>
               </div>
             </div>
-            <form onSubmit={handleQuickAddPlayer} className="p-6 space-y-4">
+            <form onSubmit={handleQuickAddPlayer} className="p-6 space-y-4 overflow-y-auto flex-1">
               {quickAddSuccess && (
                 <div className="rounded-xl p-4 text-sm border" style={{ background: 'rgba(245,158,11,0.08)', borderColor: 'rgba(245,158,11,0.25)', color: '#F59E0B' }}>
                   {quickAddSuccess}

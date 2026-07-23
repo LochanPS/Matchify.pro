@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { getPaymentVerifications, getPaymentVerificationStats, approvePayment, rejectPayment } from '../../api/payment';
 import { toast } from 'react-hot-toast';
 import Spinner from '../../components/Spinner';
+import { isTeamSport } from '../../config/sports';
 
 const PaymentVerificationPage = () => {
   const [verifications, setVerifications] = useState([]);
@@ -161,7 +162,11 @@ const PaymentVerificationPage = () => {
             <p className="text-gray-400 text-lg">No {filter} payments found</p>
           </div>
         ) : (
-          verifications.filter(v => v.registration && v.registration.user).map((verification) => (
+          verifications.filter(v => v.registration).map((verification) => {
+            const reg = verification.registration;
+            const teamSport = isTeamSport(reg?.tournament?.sport);
+            const roster = Array.isArray(reg?.roster) ? reg.roster : [];
+            return (
             <div
               key={verification.id}
               className="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-lg hover:shadow-teal-500/20 transition"
@@ -192,28 +197,74 @@ const PaymentVerificationPage = () => {
 
                 {/* Payment Details */}
                 <div className="lg:col-span-2 space-y-4">
-                  {/* Player Info */}
-                  <div>
-                    <h3 className="text-xl font-bold text-white mb-2">Player Information</h3>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-gray-400 text-sm">Name</p>
-                        <p className="text-white font-medium">{verification.registration.user.name}</p>
+                  {/* Registrant info — a TEAM for team sports, a player otherwise */}
+                  {teamSport ? (
+                    <div>
+                      <h3 className="text-xl font-bold text-white mb-2">Team Information</h3>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="col-span-2">
+                          <p className="text-gray-400 text-sm">Team</p>
+                          <p className="text-white font-bold text-lg">{reg.teamName || reg.guestName || '—'}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-400 text-sm">Submitted by</p>
+                          <p className="text-white font-medium">{reg.user?.name || '—'}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-400 text-sm">Amount</p>
+                          <p className="text-teal-400 font-bold text-xl">₹{verification.amount}</p>
+                        </div>
+                        {reg.user?.email && (
+                          <div>
+                            <p className="text-gray-400 text-sm">Email</p>
+                            <p className="text-white font-medium">{reg.user.email}</p>
+                          </div>
+                        )}
+                        {reg.user?.phone && (
+                          <div>
+                            <p className="text-gray-400 text-sm">Phone</p>
+                            <p className="text-white font-medium">{reg.user.phone}</p>
+                          </div>
+                        )}
                       </div>
-                      <div>
-                        <p className="text-gray-400 text-sm">Email</p>
-                        <p className="text-white font-medium">{verification.registration.user.email}</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-400 text-sm">Phone</p>
-                        <p className="text-white font-medium">{verification.registration.user.phone}</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-400 text-sm">Amount</p>
-                        <p className="text-teal-400 font-bold text-xl">₹{verification.amount}</p>
+                      {/* Roster is optional — show it when present. */}
+                      {roster.length > 0 && (
+                        <div className="mt-3">
+                          <p className="text-gray-400 text-sm mb-1.5">Roster ({roster.length})</p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {roster.map((p, i) => (
+                              <span key={i} className="text-xs font-medium px-2 py-1 rounded-lg bg-slate-900 border border-slate-700 text-gray-200">
+                                {p.jersey ? `#${p.jersey} ` : ''}{p.name}
+                                {p.starter ? '' : <span className="text-gray-500"> · sub</span>}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div>
+                      <h3 className="text-xl font-bold text-white mb-2">Player Information</h3>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-gray-400 text-sm">Name</p>
+                          <p className="text-white font-medium">{reg.user?.name || '—'}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-400 text-sm">Email</p>
+                          <p className="text-white font-medium">{reg.user?.email || '—'}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-400 text-sm">Phone</p>
+                          <p className="text-white font-medium">{reg.user?.phone || '—'}</p>
+                        </div>
+                        <div>
+                          <p className="text-gray-400 text-sm">Amount</p>
+                          <p className="text-teal-400 font-bold text-xl">₹{verification.amount}</p>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
 
                   {/* Tournament Info */}
                   <div>
@@ -227,11 +278,15 @@ const PaymentVerificationPage = () => {
                         <p className="text-gray-400 text-sm">Category</p>
                         <p className="text-white font-medium">{verification.registration.category.name}</p>
                       </div>
-                      <div>
-                        <p className="text-gray-400 text-sm">Format</p>
-                        <p className="text-white font-medium">{verification.registration.category.format}</p>
-                      </div>
-                      {verification.registration.category.format === 'doubles' && (
+                      {/* Format (singles/doubles) is meaningless for a team
+                          sport, so it is only shown for racket sports. */}
+                      {!teamSport && (
+                        <div>
+                          <p className="text-gray-400 text-sm">Format</p>
+                          <p className="text-white font-medium">{verification.registration.category.format}</p>
+                        </div>
+                      )}
+                      {!teamSport && verification.registration.category.format === 'doubles' && (
                         <div className="col-span-2">
                           <p className="text-gray-400 text-sm">Doubles Partner</p>
                           {verification.registration.partner ? (
@@ -328,7 +383,8 @@ const PaymentVerificationPage = () => {
                 </div>
               </div>
             </div>
-          ))
+            );
+          })
         )}
       </div>
 

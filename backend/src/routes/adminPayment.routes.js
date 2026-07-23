@@ -177,8 +177,11 @@ router.get('/schedule', authenticate, requireAdmin, async (req, res) => {
 // GET /api/admin/payment/pending-verifications - Get pending payment verifications
 router.get('/pending-verifications', authenticate, requireAdmin, async (req, res) => {
   try {
+    // The screenshot registration flow writes paymentStatus 'submitted' (and
+    // creates a pending PaymentVerification). Filtering on 'pending' alone made
+    // this endpoint return nothing for anyone, so both states are matched.
     const pendingPayments = await prisma.registration.findMany({
-      where: { paymentStatus: 'pending' },
+      where: { paymentStatus: { in: ['submitted', 'pending'] } },
       include: {
         user: true,
         tournament: true,

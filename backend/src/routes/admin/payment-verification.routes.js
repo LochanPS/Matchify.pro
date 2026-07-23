@@ -34,7 +34,9 @@ router.get('/', authenticate, requireAdmin, async (req, res) => {
         user: { select: { id: true, name: true, email: true, phone: true } },
         partner: { select: { id: true, name: true, email: true, matchifyCode: true } },
         category: { select: { id: true, name: true, format: true } },
-        tournament: { select: { id: true, name: true, startDate: true } }
+        // teamName + roster so the admin can see WHICH TEAM paid for a team
+        // sport, not just the captain who submitted. Null for racket sports.
+        tournament: { select: { id: true, name: true, startDate: true, sport: true } }
       }
     });
     const registrationMap = Object.fromEntries(registrations.map(r => [r.id, r]));

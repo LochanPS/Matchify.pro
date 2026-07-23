@@ -1,5 +1,17 @@
 ﻿import { getErrorMessage } from '../utils/errorMessage';
 import { clearDrawCache } from '../utils/drawCache';
+import { derive as deriveBasketball, periodLabel as basketballPeriodLabel } from '../sports/basketball';
+
+// A stored score is either set-based (badminton/tennis/…) or event-based
+// (basketball's running total). Totals for event scores come from the sport's
+// own engine so the display can never disagree with the scoring console.
+const isEventScore = (score) => {
+  if (!score) return false;
+  const s = typeof score === 'string'
+    ? (() => { try { return JSON.parse(score); } catch { return null; } })()
+    : score;
+  return !!s && s.model === 'basketball' && Array.isArray(s.events);
+};
 /**
  * DrawPage - Tournament Bracket Display
  * 
@@ -2456,6 +2468,12 @@ const DrawPage = () => {
                       const scoreData = typeof selectedMatchDetails.score === 'string'
                         ? JSON.parse(selectedMatchDetails.score)
                         : selectedMatchDetails.score;
+                      // Running-total sports (basketball) have no sets — the
+                      // headline figure is the final score itself.
+                      if (isEventScore(scoreData)) {
+                        const d = deriveBasketball(scoreData);
+                        return `${d.p1Total}-${d.p2Total}`;
+                      }
                       let p1SetsWon = 0;
                       let p2SetsWon = 0;
                       scoreData?.sets?.forEach((set) => {
@@ -2466,17 +2484,36 @@ const DrawPage = () => {
                     })()}
                   </span>
                 </div>
-                <p className="text-gray-400 text-xs uppercase tracking-wider mt-2">Sets Won</p>
+                <p className="text-gray-400 text-xs uppercase tracking-wider mt-2">
+                  {isEventScore(selectedMatchDetails.score) ? 'Points' : 'Sets Won'}
+                </p>
               </div>
 
               {/* Set-by-Set Breakdown */}
               <div className="text-center mb-4">
-                <p className="text-gray-400 text-xs uppercase tracking-wider mb-2">Set Breakdown</p>
+                <p className="text-gray-400 text-xs uppercase tracking-wider mb-2">
+                  {isEventScore(selectedMatchDetails.score) ? 'Quarter Breakdown' : 'Set Breakdown'}
+                </p>
                 <div className="flex items-center justify-center gap-2 flex-wrap">
                   {selectedMatchDetails.score && (() => {
                     const scoreData = typeof selectedMatchDetails.score === 'string'
                       ? JSON.parse(selectedMatchDetails.score)
                       : selectedMatchDetails.score;
+                    // Basketball: show the per-quarter line instead of sets.
+                    if (isEventScore(scoreData)) {
+                      const d = deriveBasketball(scoreData);
+                      return d.byPeriod.map((q, idx) => (
+                        <div key={idx} className="px-3 py-1.5 rounded-lg" style={{
+                          border: '2px solid rgba(245,158,11,0.4)',
+                          background: 'rgba(245,158,11,0.08)',
+                        }}>
+                          <span className="text-gray-400 text-[10px] font-bold block leading-none mb-0.5">
+                            {basketballPeriodLabel(idx, scoreData.config)}
+                          </span>
+                          <span className="text-white font-bold text-sm">{q[1]}-{q[2]}</span>
+                        </div>
+                      ));
+                    }
                     return scoreData?.sets?.map((set, idx) => {
                       const p1Score = set.player1Score !== undefined ? set.player1Score : set.player1;
                       const p2Score = set.player2Score !== undefined ? set.player2Score : set.player2;
@@ -3061,8 +3098,14 @@ const DrawDisplay = ({
 
 // Helper function to format player score for display
 const getPlayerScore = (scoreData, playerNumber) => {
+  // Running-total sports (basketball) have no sets — a team's "score" is its
+  // final points total, taken from the sport's own engine.
+  if (isEventScore(scoreData)) {
+    const d = deriveBasketball(scoreData);
+    return String(playerNumber === 1 ? d.p1Total : d.p2Total);
+  }
   if (!scoreData || !scoreData.sets) return '';
-  
+
   try {
     // Count sets won by this player
     let setsWon = 0;

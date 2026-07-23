@@ -164,21 +164,27 @@ const MatchScoringPage = () => {
         }
       }
 
-      if (matchData.score && matchData.score.sets) {
-        setScore(matchData.score);
-        setTimerData(matchData.score.timer);
-        setIsPaused(matchData.score.timer?.isPaused || false);
-        setSwapped(!!matchData.score.swapped);
+      // A saved score is restorable if it is set-based (`sets`) OR event-based
+      // (`events`, used by basketball). Checking only for `sets` would silently
+      // drop a basketball game on reload and the next action would overwrite
+      // the whole match, so both shapes are accepted here.
+      // `!!s.sets` is the original set-based condition, preserved exactly so
+      // racket sports behave identically; `events` is the additional case.
+      const isRestorable = (s) => !!s && (!!s.sets || Array.isArray(s.events));
+      const restore = (s) => {
+        setScore(s);
+        setTimerData(s.timer);
+        setIsPaused(s.timer?.isPaused || false);
+        setSwapped(!!s.swapped);
+      };
+
+      if (isRestorable(matchData.score)) {
+        restore(matchData.score);
       } else if (matchData.scoreJson) {
         const parsed = typeof matchData.scoreJson === 'string'
           ? JSON.parse(matchData.scoreJson)
           : matchData.scoreJson;
-        if (parsed && parsed.sets) {
-          setScore(parsed);
-          setTimerData(parsed.timer);
-          setIsPaused(parsed.timer?.isPaused || false);
-          setSwapped(!!parsed.swapped);
-        }
+        if (isRestorable(parsed)) restore(parsed);
       }
     } catch (err) {
       setError('Failed to load match');

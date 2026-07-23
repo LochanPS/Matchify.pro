@@ -139,6 +139,13 @@ async function runStartupMigrations() {
       `ALTER TABLE "Tournament" ADD COLUMN IF NOT EXISTS "latitude" DOUBLE PRECISION`,
       `ALTER TABLE "Tournament" ADD COLUMN IF NOT EXISTS "longitude" DOUBLE PRECISION`,
       `ALTER TABLE "Tournament" ADD COLUMN IF NOT EXISTS "locationName" TEXT`,
+      // Team-sport registrations (added Jul 2026 — basketball).
+      // CRITICAL, same reason as queueOrder above: the draw page and match
+      // service now SELECT teamName for every sport, so if these columns are
+      // missing every draw query throws "column does not exist" — including
+      // badminton. Idempotent, so it is safe even when db push already ran.
+      `ALTER TABLE "Registration" ADD COLUMN IF NOT EXISTS "teamName" TEXT`,
+      `ALTER TABLE "Registration" ADD COLUMN IF NOT EXISTS "roster" JSONB`,
     ];
 
     for (const sql of migrations) {

@@ -2,21 +2,24 @@ import { PrismaClient } from '@prisma/client';
 import prisma from '../lib/prisma.js';
 import { createNotification } from '../services/notification.service.js';
 import { createOrUpdateTournamentPayment } from '../services/paymentTrackingService.js';
+import { isTeamSport } from '../config/sports.js';
 
 // POST /api/admin/tournaments/:tournamentId/quick-add-player
 export const quickAddPlayer = async (req, res) => {
   try {
     const { tournamentId } = req.params;
-    const { name, player2Name, categoryId } = req.body;
+    const { name, player2Name, categoryId, teamName, roster } = req.body;
     const userId = req.user.userId || req.user.id;
 
-    console.log('🎯 Quick Add Player Request:', { tournamentId, name, player2Name, categoryId });
+    console.log('🎯 Quick Add Player Request:', { tournamentId, name, player2Name, teamName, categoryId });
 
-    // Validate required fields - ONLY name and category
-    if (!name || !categoryId) {
+    // Category is always required. The NAME requirement differs by sport, so it
+    // is checked below once the tournament (and therefore the sport) is known:
+    // racket sports need a player name, team sports need a team name.
+    if (!categoryId) {
       return res.status(400).json({
         success: false,
-        error: 'Name and category are required'
+        error: 'Category is required'
       });
     }
 
@@ -59,18 +62,55 @@ export const quickAddPlayer = async (req, res) => {
     console.log(`✅ Category found: ${category.name}, Current registrations: ${category.registrationCount || 0}, Max: ${category.maxParticipants || 'Unlimited'}`);
     console.log('✅ Admin Quick Add - Bypassing all limits');
 
-    // For doubles, validate that player2Name is provided
-    if (category.format === 'doubles' && !player2Name) {
-      return res.status(400).json({
-        success: false,
-        error: 'Player 2 name is required for doubles category'
-      });
-    }
+    // Team sports (basketball) add a TEAM, not a player. The team name is
+    // required — it is what appears in the draw, the scoreboard and the
+    // standings. The roster is optional here: an organizer adding eight teams
+    // at the desk needs to be fast, and a match can still be scored team-only.
+    // When a roster IS given it is cleaned to the same shape the public
+    // registration form produces, so both paths are identical downstream.
+    const teamSport = isTeamSport(tournament.sport);
+    let cleanRoster = null;
+    let displayName;
 
-    // Construct the display name based on category format
-    const displayName = category.format === 'doubles' 
-      ? `${name} / ${player2Name}` 
-      : name;
+    if (teamSport) {
+      const tName = (teamName || '').trim();
+      if (!tName) {
+        return res.status(400).json({
+          success: false,
+          error: 'Team name is required'
+        });
+      }
+      if (Array.isArray(roster)) {
+        const cleaned = roster
+          .filter(p => (p?.name || '').trim())
+          .map(p => ({
+            name: String(p.name).trim(),
+            jersey: (p.jersey == null ? '' : String(p.jersey)).trim(),
+            starter: !!p.starter,
+          }));
+        if (cleaned.length) cleanRoster = cleaned;
+      }
+      displayName = tName;
+    } else {
+      // Racket sports: unchanged behaviour.
+      if (!name) {
+        return res.status(400).json({
+          success: false,
+          error: 'Name and category are required'
+        });
+      }
+      // For doubles, validate that player2Name is provided
+      if (category.format === 'doubles' && !player2Name) {
+        return res.status(400).json({
+          success: false,
+          error: 'Player 2 name is required for doubles category'
+        });
+      }
+      // Construct the display name based on category format
+      displayName = category.format === 'doubles'
+        ? `${name} / ${player2Name}`
+        : name;
+    }
 
     console.log(`📝 Creating guest registration: ${displayName}...`);
     
@@ -82,10 +122,13 @@ export const quickAddPlayer = async (req, res) => {
           userId: null, // No user account
           tournamentId: tournamentId,
           categoryId: categoryId,
-          guestName: displayName, // Store combined name for doubles, single name for singles
+          guestName: displayName, // Combined name for doubles, single name for singles, team name for team sports
           guestEmail: null, // No email
           guestPhone: null, // No phone
           guestGender: null, // No gender
+          // Team sports only — null for racket sports, exactly as before.
+          teamName: teamSport ? displayName : null,
+          roster: teamSport ? cleanRoster : null,
           amountTotal: category.entryFee, // Include entry fee for revenue calculation
           amountWallet: 0,
           amountRazorpay: category.entryFee, // Assume admin payment method
@@ -129,8 +172,8 @@ export const quickAddPlayer = async (req, res) => {
     console.log('🎉 Quick Add completed successfully!');
     res.json({
       success: true,
-      message: category.format === 'doubles' 
-        ? 'Team added successfully' 
+      message: (teamSport || category.format === 'doubles')
+        ? 'Team added successfully'
         : 'Player added successfully',
       registration: {
         ...result,

@@ -1,7 +1,7 @@
 ﻿import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import useSEO from '../utils/useSEO';
-import { sportEmoji, sportLabel } from '../config/sports';
+import { sportEmoji, sportLabel, isTeamSport } from '../config/sports';
 import { tournamentAPI } from '../api/tournament';
 import { useAuth } from '../contexts/AuthContext';
 import { formatDateLongIndian, formatDateTimeIndian } from '../utils/dateFormat';
@@ -173,11 +173,27 @@ const TournamentDetailPage = () => {
   const [quickAddData, setQuickAddData] = useState({
     name: '',
     player2Name: '',
+    teamName: '',
+    roster: [],
     categoryId: ''
   });
   const [quickAddLoading, setQuickAddLoading] = useState(false);
   const [quickAddError, setQuickAddError] = useState('');
   const [quickAddSuccess, setQuickAddSuccess] = useState('');
+
+  // Team sports quick-add a TEAM (name + optional roster) rather than a player.
+  const quickAddTeamSport = isTeamSport(tournament?.sport);
+  const quickAddRoster = quickAddData.roster || [];
+  const addQuickPlayer = () =>
+    setQuickAddData(d => ({ ...d, roster: [...(d.roster || []), { name: '', jersey: '', starter: (d.roster || []).length < 5 }] }));
+  const updateQuickPlayer = (idx, field, value) =>
+    setQuickAddData(d => {
+      const list = [...(d.roster || [])];
+      list[idx] = { ...list[idx], [field]: value };
+      return { ...d, roster: list };
+    });
+  const removeQuickPlayer = (idx) =>
+    setQuickAddData(d => ({ ...d, roster: (d.roster || []).filter((_, i) => i !== idx) }));
 
   const [shareState, setShareState] = useState('idle'); // idle | copied
 
@@ -422,15 +438,29 @@ const TournamentDetailPage = () => {
     // Get selected category to check format
     const selectedCategory = tournament?.categories?.find(c => c.id === quickAddData.categoryId);
     
-    // Validation - name and category required, player2Name required for doubles
-    if (!quickAddData.name || !quickAddData.categoryId) {
-      setQuickAddError('Name and category are required');
-      return;
-    }
+    // Team sports add a TEAM: the team name is required, the roster is not —
+    // an organizer adding teams at the desk should be able to move fast, and a
+    // match can still be scored without per-player attribution.
+    if (quickAddTeamSport) {
+      if (!quickAddData.teamName?.trim()) {
+        setQuickAddError('Team name is required');
+        return;
+      }
+      if (!quickAddData.categoryId) {
+        setQuickAddError('Category is required');
+        return;
+      }
+    } else {
+      // Validation - name and category required, player2Name required for doubles
+      if (!quickAddData.name || !quickAddData.categoryId) {
+        setQuickAddError('Name and category are required');
+        return;
+      }
 
-    if (selectedCategory?.format === 'doubles' && !quickAddData.player2Name) {
-      setQuickAddError('Both player names are required for doubles category');
-      return;
+      if (selectedCategory?.format === 'doubles' && !quickAddData.player2Name) {
+        setQuickAddError('Both player names are required for doubles category');
+        return;
+      }
     }
 
     try {
@@ -439,15 +469,21 @@ const TournamentDetailPage = () => {
       const response = await api.post(`/tournaments/${id}/quick-add-player`, quickAddData);
       
       if (response.data.success) {
-        const displayName = selectedCategory?.format === 'doubles'
-          ? `${quickAddData.name} / ${quickAddData.player2Name}`
-          : quickAddData.name;
-        setQuickAddSuccess(`${selectedCategory?.format === 'doubles' ? 'Team' : 'Player'} "${displayName}" added successfully!`);
-        // Reset form
+        const displayName = quickAddTeamSport
+          ? quickAddData.teamName.trim()
+          : selectedCategory?.format === 'doubles'
+            ? `${quickAddData.name} / ${quickAddData.player2Name}`
+            : quickAddData.name;
+        const noun = (quickAddTeamSport || selectedCategory?.format === 'doubles') ? 'Team' : 'Player';
+        setQuickAddSuccess(`${noun} "${displayName}" added successfully!`);
+        // Reset form — keep the category selected so adding several teams in a
+        // row does not mean re-picking it every time.
         setQuickAddData({
           name: '',
           player2Name: '',
-          categoryId: ''
+          teamName: '',
+          roster: [],
+          categoryId: quickAddTeamSport ? quickAddData.categoryId : ''
         });
         // Refresh tournament data to update registration count
         setTimeout(() => {
@@ -1440,7 +1476,7 @@ const TournamentDetailPage = () => {
                     style={{ background: 'linear-gradient(135deg,#F59E0B,#F59E0B)', color: '#050810' }}
                   >
                     <UserPlusIcon className="h-4 w-4" />
-                    Quick Add Player
+                    {quickAddTeamSport ? 'Quick Add Team' : 'Quick Add Player'}
                   </button>
                   <button
                     onClick={() => setShowAdminDeleteModal(true)}
@@ -1469,7 +1505,7 @@ const TournamentDetailPage = () => {
                   style={{ background: 'linear-gradient(135deg,#F59E0B,#F59E0B)', color: '#050810' }}
                 >
                   <UserPlusIcon className="h-4 w-4" />
-                  Quick Add Player
+                  {quickAddTeamSport ? 'Quick Add Team' : 'Quick Add Player'}
                 </button>
               </div>
             )}
@@ -1910,8 +1946,10 @@ const TournamentDetailPage = () => {
                     <UserPlusIcon className="h-6 w-6" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold">Quick Add Player</h2>
-                    <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.65)' }}>Add player without payment</p>
+                    <h2 className="text-xl font-bold">{quickAddTeamSport ? 'Quick Add Team' : 'Quick Add Player'}</h2>
+                    <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.65)' }}>
+                      {quickAddTeamSport ? 'Add team without payment' : 'Add player without payment'}
+                    </p>
                   </div>
                 </div>
                 <button
@@ -1933,6 +1971,90 @@ const TournamentDetailPage = () => {
                   {quickAddError}
                 </div>
               )}
+              {quickAddTeamSport ? (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium mb-2" style={{ color: 'rgba(255,255,255,0.7)' }}>
+                      Team Name <span className="text-red-400">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={quickAddData.teamName}
+                      onChange={(e) => setQuickAddData({ ...quickAddData, teamName: e.target.value })}
+                      placeholder="Enter team name"
+                      className="w-full px-4 py-3 rounded-xl text-white transition-all"
+                      style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)' }}
+                      required
+                    />
+                  </div>
+
+                  {/* Roster is optional here — the team can be added on the name
+                      alone and still enter the draw and be scored. */}
+                  <div>
+                    <div className="flex items-baseline justify-between mb-2">
+                      <label className="block text-sm font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>
+                        Roster
+                      </label>
+                      <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>Optional</span>
+                    </div>
+                    {quickAddRoster.length === 0 && (
+                      <p className="text-xs mb-2" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                        Add players to record who scores during matches. You can leave this empty.
+                      </p>
+                    )}
+                    <div className="space-y-2">
+                      {quickAddRoster.map((p, idx) => (
+                        <div key={idx} className="flex items-center gap-2">
+                          <span className="text-xs font-mono w-4 text-center flex-shrink-0" style={{ color: 'rgba(255,255,255,0.3)' }}>{idx + 1}</span>
+                          <input
+                            type="text"
+                            value={p.name}
+                            onChange={(e) => updateQuickPlayer(idx, 'name', e.target.value)}
+                            placeholder={`Player ${idx + 1} name`}
+                            className="flex-1 min-w-0 px-3 py-2 rounded-lg text-white text-sm"
+                            style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)' }}
+                          />
+                          <input
+                            type="text"
+                            inputMode="numeric"
+                            value={p.jersey}
+                            onChange={(e) => updateQuickPlayer(idx, 'jersey', e.target.value.replace(/[^\d]/g, '').slice(0, 3))}
+                            placeholder="#"
+                            className="w-12 px-2 py-2 rounded-lg text-white text-sm text-center font-mono flex-shrink-0"
+                            style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)' }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => updateQuickPlayer(idx, 'starter', !p.starter)}
+                            className="px-2 py-1.5 rounded-lg text-[10px] font-bold flex-shrink-0"
+                            style={p.starter
+                              ? { background: '#F59E0B', color: '#050810' }
+                              : { background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.12)' }}
+                          >
+                            {p.starter ? 'START' : 'SUB'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => removeQuickPlayer(idx)}
+                            className="px-2 py-1.5 rounded-lg flex-shrink-0 text-sm"
+                            style={{ background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.25)', color: '#f87171' }}
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={addQuickPlayer}
+                      className="w-full mt-2 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95"
+                      style={{ background: 'rgba(245,158,11,0.1)', color: '#F59E0B', border: '1px dashed rgba(245,158,11,0.4)' }}
+                    >
+                      + Add player
+                    </button>
+                  </div>
+                </>
+              ) : (
               <div>
                 <label className="block text-sm font-medium mb-2" style={{ color: 'rgba(255,255,255,0.7)' }}>
                   {tournament?.categories?.find(c => c.id === quickAddData.categoryId)?.format === 'doubles' ? 'Player 1 Name' : 'Player Name'} <span className="text-red-400">*</span>
@@ -1947,7 +2069,8 @@ const TournamentDetailPage = () => {
                   required
                 />
               </div>
-              {tournament?.categories?.find(c => c.id === quickAddData.categoryId)?.format === 'doubles' && (
+              )}
+              {!quickAddTeamSport && tournament?.categories?.find(c => c.id === quickAddData.categoryId)?.format === 'doubles' && (
                 <div>
                   <label className="block text-sm font-medium mb-2" style={{ color: 'rgba(255,255,255,0.7)' }}>
                     Player 2 Name <span className="text-red-400">*</span>
@@ -2006,7 +2129,7 @@ const TournamentDetailPage = () => {
                   ) : (
                     <>
                       <UserPlusIcon className="h-4 w-4" />
-                      {tournament?.categories?.find(c => c.id === quickAddData.categoryId)?.format === 'doubles' ? 'Add Team' : 'Add Player'}
+                      {(quickAddTeamSport || tournament?.categories?.find(c => c.id === quickAddData.categoryId)?.format === 'doubles') ? 'Add Team' : 'Add Player'}
                     </>
                   )}
                 </button>

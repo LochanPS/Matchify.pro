@@ -1030,11 +1030,14 @@ const TournamentDetailPage = () => {
 
                       {/* Card body — tags + format + scoring */}
                       <div className="px-5 py-4 flex-1 space-y-3">
-                        {/* Type + gender badges */}
+                        {/* Type + gender badges. Singles/doubles is meaningless
+                            for a team sport, so that tag is hidden there. */}
                         <div className="flex flex-wrap gap-2">
-                          <span className="px-2.5 py-1 rounded-full text-xs font-semibold" style={{ background: 'rgba(245,158,11,0.15)', color: '#F59E0B' }}>
-                            {category.format}
-                          </span>
+                          {!isTeamSport(tournament?.sport) && (
+                            <span className="px-2.5 py-1 rounded-full text-xs font-semibold" style={{ background: 'rgba(245,158,11,0.15)', color: '#F59E0B' }}>
+                              {category.format}
+                            </span>
+                          )}
                           <span className="px-2.5 py-1 rounded-full text-xs font-semibold" style={{ background: 'rgba(139,92,246,0.15)', color: '#C4B5FD' }}>
                             {getGenderLabel(category.gender)}
                           </span>
@@ -1055,11 +1058,15 @@ const TournamentDetailPage = () => {
                           </span>
                         </div>
 
-                        {/* Scoring */}
-                        <div className="flex items-center gap-2" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                          <span className="text-sm">🎯</span>
-                          <span className="text-sm">{scoring.points} pts × {scoring.sets} {parseInt(scoring.sets) === 1 ? 'set' : 'sets'}</span>
-                        </div>
+                        {/* Scoring — set/point config is a racket-sport concept.
+                            Basketball is scored on a running total, so this line
+                            is hidden for team sports. */}
+                        {!isTeamSport(tournament?.sport) && (
+                          <div className="flex items-center gap-2" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                            <span className="text-sm">🎯</span>
+                            <span className="text-sm">{scoring.points} pts × {scoring.sets} {parseInt(scoring.sets) === 1 ? 'set' : 'sets'}</span>
+                          </div>
+                        )}
 
                         {/* Prize */}
                         {(category.prizeWinner || category.prizeRunnerUp) && (

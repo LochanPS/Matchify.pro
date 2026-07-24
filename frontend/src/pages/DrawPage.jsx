@@ -3940,7 +3940,7 @@ const RoundRobinDisplay = ({ sport, data, matches, user, isOrganizer, onAssignUm
             <div>
               <h4 className="font-bold text-white" style={{ fontSize: '15px', lineHeight: 1.2 }}>Group {String.fromCharCode(65 + gi)}</h4>
               <p style={{ color: '#94a3b8', fontSize: '12px', marginTop: '2px' }}>
-                {group.participants.filter(p => p.id).length} players • {group.matches?.length || 0} matches
+                {(() => { const n = group.participants.filter(p => p.id).length; const noun = isTeamStandings ? 'team' : 'player'; return `${n} ${n === 1 ? noun : noun + 's'}`; })()} • {group.matches?.length || 0} matches
               </p>
             </div>
           </div>
@@ -3957,7 +3957,7 @@ const RoundRobinDisplay = ({ sport, data, matches, user, isOrganizer, onAssignUm
             <div className="flex items-center px-1 mb-1" style={{ gap: '3px' }}>
               <div style={{ width: '26px', flexShrink: 0 }} />
               <div className="flex-1 min-w-0">
-                <span style={{ fontSize: '9px', color: 'rgba(255,255,255,0.35)', fontWeight: 700, letterSpacing: '0.07em' }}>PLAYER</span>
+                <span style={{ fontSize: '9px', color: 'rgba(255,255,255,0.35)', fontWeight: 700, letterSpacing: '0.07em' }}>{isTeamStandings ? 'TEAM' : 'PLAYER'}</span>
               </div>
               {/* gap:0 here — mirrors data cell container which also has gap:0 */}
               <div className="flex-shrink-0 flex items-center" style={{ gap: '0px' }}>
@@ -4127,13 +4127,29 @@ const RoundRobinDisplay = ({ sport, data, matches, user, isOrganizer, onAssignUm
               <div className="flex items-center gap-1.5">
                 <span className="w-5 h-5 rounded flex items-center justify-center text-[9px] font-bold"
                   style={{ background: 'rgba(248,113,113,0.15)', color: '#f87171' }}>L</span>
-                <span style={{ fontSize: '11px', color: '#f87171', fontWeight: 600 }}>+0 pts</span>
+                {/* Team sports (FIBA) award a point for a loss; racket sports don't. */}
+                <span style={{ fontSize: '11px', color: '#f87171', fontWeight: 600 }}>{isTeamStandings ? '+1 pt' : '+0 pts'}</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-5 h-5 rounded flex items-center justify-center text-[9px] font-bold"
-                  style={{ background: 'rgba(167,139,250,0.15)', color: '#a78bfa' }}>TP</span>
-                <span style={{ fontSize: '11px', color: '#a78bfa', fontWeight: 600 }}>Game pts</span>
-              </div>
+              {isTeamStandings ? (
+                <>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-5 h-5 rounded flex items-center justify-center text-[9px] font-bold"
+                      style={{ background: 'rgba(167,139,250,0.15)', color: '#a78bfa' }}>PF</span>
+                    <span style={{ fontSize: '11px', color: '#a78bfa', fontWeight: 600 }}>Points for</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-5 h-5 rounded flex items-center justify-center text-[9px] font-bold"
+                      style={{ background: 'rgba(167,139,250,0.12)', color: '#a5a0c9' }}>PA</span>
+                    <span style={{ fontSize: '11px', color: '#a5a0c9', fontWeight: 600 }}>Points against</span>
+                  </div>
+                </>
+              ) : (
+                <div className="flex items-center gap-1.5">
+                  <span className="w-5 h-5 rounded flex items-center justify-center text-[9px] font-bold"
+                    style={{ background: 'rgba(167,139,250,0.15)', color: '#a78bfa' }}>TP</span>
+                  <span style={{ fontSize: '11px', color: '#a78bfa', fontWeight: 600 }}>Game pts</span>
+                </div>
+              )}
             </div>
             <p style={{ fontSize: '9px', color: 'rgba(255,255,255,0.22)', textAlign: 'center' }}>
               {isTeamStandings

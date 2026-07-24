@@ -192,6 +192,79 @@ export const quickAddPlayer = async (req, res) => {
   }
 };
 
+// PUT /api/tournaments/:tournamentId/categories/:categoryId/team-roster
+// Add or edit a team's roster after the team already exists. Solves the case
+// where a team was added (e.g. quick-added) without players, so its squad shows
+// up empty in the draw. Organizer-who-owns-this-tournament or admin only.
+export const updateTeamRoster = async (req, res) => {
+  try {
+    const { tournamentId, categoryId } = req.params;
+    const { participantId, roster, teamName } = req.body;
+    const userId = req.user.userId || req.user.id;
+
+    const tournament = await prisma.tournament.findUnique({
+      where: { id: tournamentId },
+      select: { organizerId: true, sport: true },
+    });
+    if (!tournament) {
+      return res.status(404).json({ success: false, error: 'Tournament not found' });
+    }
+
+    const roles = req.user.roles || (req.user.role ? [req.user.role] : []);
+    const isAdmin = roles.includes('ADMIN');
+    if (tournament.organizerId !== userId && !isAdmin) {
+      return res.status(403).json({ success: false, error: "Only an admin or this tournament's organizer can edit a roster" });
+    }
+    if (!isTeamSport(tournament.sport)) {
+      return res.status(400).json({ success: false, error: 'Rosters apply to team sports only' });
+    }
+
+    // Resolve the registration from the bracket participant id: guest teams use
+    // "guest-<registrationId>", real users are keyed by their userId.
+    let registration = null;
+    if (typeof participantId === 'string' && participantId.startsWith('guest-')) {
+      registration = await prisma.registration.findUnique({ where: { id: participantId.replace('guest-', '') } });
+    } else if (participantId) {
+      registration = await prisma.registration.findFirst({ where: { tournamentId, categoryId, userId: participantId } });
+    }
+    if (!registration) {
+      return res.status(404).json({ success: false, error: 'Team registration not found' });
+    }
+
+    // Clean to the same shape the registration form and quick-add produce.
+    const cleaned = Array.isArray(roster)
+      ? roster
+          .filter(p => (p?.name || '').trim())
+          .map(p => ({
+            name: String(p.name).trim(),
+            jersey: (p.jersey == null ? '' : String(p.jersey)).trim(),
+            starter: !!p.starter,
+          }))
+      : [];
+
+    const data = { roster: cleaned.length ? cleaned : null };
+    if (typeof teamName === 'string' && teamName.trim()) data.teamName = teamName.trim();
+
+    const updated = await prisma.registration.update({
+      where: { id: registration.id },
+      data,
+      select: { roster: true, teamName: true },
+    });
+
+    // Drop the cached draw-page payload so the next load shows the new squad.
+    try {
+      const { cacheDel } = await import('../services/redisService.js');
+      const { getDrawPageCacheKey } = await import('./drawPage.controller.js');
+      await cacheDel(getDrawPageCacheKey(tournamentId, categoryId));
+    } catch (_) { /* cache is best-effort */ }
+
+    res.json({ success: true, roster: updated.roster || [], teamName: updated.teamName });
+  } catch (error) {
+    console.error('❌ Update team roster error:', error);
+    res.status(500).json({ success: false, error: 'Failed to update roster: ' + error.message });
+  }
+};
+
 // GET /api/admin/tournaments/:tournamentId/quick-added-players
 export const getQuickAddedPlayers = async (req, res) => {
   try {

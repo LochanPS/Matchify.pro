@@ -3052,6 +3052,8 @@ const DrawDisplay = ({
 
   if (format === 'ROUND_ROBIN') {
     return <RoundRobinDisplay 
+      tournamentId={tournamentId}
+      categoryId={activeCategory?.id}
       sport={sport}
       data={bracket} 
       matches={matches} 
@@ -3065,6 +3067,8 @@ const DrawDisplay = ({
   }
   if (format === 'ROUND_ROBIN_KNOCKOUT') {
     return <GroupsKnockoutDisplay 
+      tournamentId={tournamentId}
+      categoryId={activeCategory?.id}
       sport={sport}
       data={bracket} 
       matches={matches} 
@@ -3891,12 +3895,41 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
 };
 
 // Round Robin Display with Match Schedule
-const RoundRobinDisplay = ({ sport, data, matches, user, isOrganizer, onAssignUmpire, onChangeResult, onViewMatchDetails, categoryFormat }) => {
+const RoundRobinDisplay = ({ tournamentId, categoryId, sport, data, matches, user, isOrganizer, onAssignUmpire, onChangeResult, onViewMatchDetails, categoryFormat }) => {
   // Team sports use the FIBA standings layout (points for and against as
   // separate columns) and are ranked server-side by the FIBA tie-breaks.
   const isTeamStandings = isTeamSport(sport);
   // The team whose squad is being viewed (null = closed).
   const [teamDetail, setTeamDetail] = React.useState(null);
+  // Roster editing (organizer/admin) — lets a team that was added without
+  // players get its squad filled in so names show here and in scoring.
+  const canManageRoster = isTeamStandings && (isOrganizer || (user?.roles || []).includes('ADMIN'));
+  const [editRows, setEditRows] = React.useState(null); // null = not editing
+  const [savingRoster, setSavingRoster] = React.useState(false);
+  const [rosterError, setRosterError] = React.useState('');
+  const startEditRoster = () => {
+    const base = Array.isArray(teamDetail?.roster) && teamDetail.roster.length
+      ? teamDetail.roster.map(p => ({ name: p.name || '', jersey: p.jersey || '', starter: p.starter !== false }))
+      : Array.from({ length: 5 }, () => ({ name: '', jersey: '', starter: true }));
+    setRosterError('');
+    setEditRows(base);
+  };
+  const setRow = (i, field, val) => setEditRows(rows => rows.map((r, idx) => idx === i ? { ...r, [field]: val } : r));
+  const addRow = () => setEditRows(rows => [...rows, { name: '', jersey: '', starter: false }]);
+  const removeRow = (i) => setEditRows(rows => rows.filter((_, idx) => idx !== i));
+  const saveRoster = async () => {
+    const cleaned = editRows.filter(r => r.name.trim());
+    setSavingRoster(true); setRosterError('');
+    try {
+      const res = await drawAPI.updateTeamRoster(tournamentId, categoryId, teamDetail.id, cleaned, teamDetail.name);
+      setTeamDetail(td => ({ ...td, roster: res.roster || [] }));
+      setEditRows(null);
+    } catch (err) {
+      setRosterError(getErrorMessage(err, 'Could not save roster. Try again.'));
+    } finally {
+      setSavingRoster(false);
+    }
+  };
   const navigate = useNavigate();
   const [activeGroupIdx, setActiveGroupIdx] = React.useState(null); // null = all hidden, number = show that group's matches
   if (!data?.groups || !Array.isArray(data.groups)) return <p className="text-gray-400 text-center p-8">No group data</p>;
@@ -4405,7 +4438,7 @@ const RoundRobinDisplay = ({ sport, data, matches, user, isOrganizer, onAssignUm
           only the team name; the players live here. */}
       {teamDetail && (
         <div className="fixed inset-0 z-50 flex items-end justify-center" style={{ background: 'rgba(0,0,0,0.7)' }}
-          onClick={() => setTeamDetail(null)}>
+          onClick={() => { setTeamDetail(null); setEditRows(null); }}>
           <div className="w-full max-w-lg rounded-t-3xl p-5 max-h-[80vh] overflow-y-auto"
             style={{ background: '#0d1025', border: '1px solid rgba(255,255,255,0.1)' }}
             onClick={(e) => e.stopPropagation()}>
@@ -4417,7 +4450,7 @@ const RoundRobinDisplay = ({ sport, data, matches, user, isOrganizer, onAssignUm
                   {(teamDetail.points || 0)} pts
                 </p>
               </div>
-              <button onClick={() => setTeamDetail(null)}
+              <button onClick={() => { setTeamDetail(null); setEditRows(null); }}
                 className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
                 style={{ background: 'rgba(255,255,255,0.08)', color: '#fff' }}>×</button>
             </div>
@@ -4435,8 +4468,59 @@ const RoundRobinDisplay = ({ sport, data, matches, user, isOrganizer, onAssignUm
               ))}
             </div>
 
-            <p className="text-xs font-black mb-2" style={{ color: '#FCD34D' }}>SQUAD</p>
-            {Array.isArray(teamDetail.roster) && teamDetail.roster.length > 0 ? (
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs font-black" style={{ color: '#FCD34D' }}>SQUAD</p>
+              {canManageRoster && editRows === null && (
+                <button onClick={startEditRoster} className="text-xs font-bold px-2.5 py-1 rounded-lg"
+                  style={{ background: 'rgba(245,158,11,0.12)', color: '#F59E0B', border: '1px solid rgba(245,158,11,0.35)' }}>
+                  {Array.isArray(teamDetail.roster) && teamDetail.roster.length ? 'Edit players' : 'Add players'}
+                </button>
+              )}
+            </div>
+
+            {editRows !== null ? (
+              // ── Roster editor (organizer / admin) ──────────────────────────
+              <div>
+                {rosterError && (
+                  <p className="text-xs mb-2 px-3 py-2 rounded-lg" style={{ background: 'rgba(248,113,113,0.1)', color: '#f87171' }}>{rosterError}</p>
+                )}
+                <div className="space-y-1.5">
+                  {editRows.map((r, i) => (
+                    <div key={i} className="flex items-center gap-1.5">
+                      <input value={r.name} onChange={e => setRow(i, 'name', e.target.value)} placeholder={`Player ${i + 1} name`}
+                        className="flex-1 min-w-0 px-3 py-2 rounded-lg text-white text-sm"
+                        style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', outline: 'none' }} />
+                      <input value={r.jersey} inputMode="numeric" onChange={e => setRow(i, 'jersey', e.target.value.replace(/[^\d]/g, '').slice(0, 3))} placeholder="#"
+                        className="w-11 px-2 py-2 rounded-lg text-white text-sm text-center font-mono flex-shrink-0"
+                        style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', outline: 'none' }} />
+                      <button type="button" onClick={() => setRow(i, 'starter', !r.starter)}
+                        className="px-2 py-1.5 rounded-lg text-[10px] font-black flex-shrink-0"
+                        style={r.starter ? { background: '#F59E0B', color: '#050810' } : { background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.12)' }}>
+                        {r.starter ? 'START' : 'SUB'}
+                      </button>
+                      <button type="button" onClick={() => removeRow(i)}
+                        className="px-2 py-1.5 rounded-lg flex-shrink-0 text-sm"
+                        style={{ background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.25)', color: '#f87171' }}>×</button>
+                    </div>
+                  ))}
+                </div>
+                <button type="button" onClick={addRow} className="w-full mt-2 py-2 rounded-lg text-xs font-bold"
+                  style={{ background: 'rgba(245,158,11,0.1)', color: '#F59E0B', border: '1px dashed rgba(245,158,11,0.4)' }}>
+                  + Add player
+                </button>
+                <p className="text-[10px] mt-2" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                  Empty rows are ignored. A team can be saved with no players — points still count for the team.
+                </p>
+                <div className="flex gap-2 mt-3">
+                  <button onClick={() => setEditRows(null)} disabled={savingRoster}
+                    className="flex-1 py-2.5 rounded-xl font-bold text-sm disabled:opacity-50"
+                    style={{ background: 'rgba(255,255,255,0.07)', color: '#fff', border: '1px solid rgba(255,255,255,0.12)' }}>Cancel</button>
+                  <button onClick={saveRoster} disabled={savingRoster}
+                    className="flex-1 py-2.5 rounded-xl font-black text-sm disabled:opacity-50"
+                    style={{ background: '#F59E0B', color: '#050810' }}>{savingRoster ? 'Saving…' : 'Save squad'}</button>
+                </div>
+              </div>
+            ) : Array.isArray(teamDetail.roster) && teamDetail.roster.length > 0 ? (
               <div className="space-y-1.5">
                 {[...teamDetail.roster]
                   .sort((a, b) => (b.starter ? 1 : 0) - (a.starter ? 1 : 0))
@@ -4459,8 +4543,7 @@ const RoundRobinDisplay = ({ sport, data, matches, user, isOrganizer, onAssignUm
               </div>
             ) : (
               <p className="text-sm py-3" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                No players were added for this team. The team can still play and be scored — points
-                are recorded for the team as a whole.
+                No players were added for this team yet.{canManageRoster ? ' Tap “Add players” above to enter the squad.' : ' The team can still play and be scored — points are recorded for the team as a whole.'}
               </p>
             )}
           </div>
@@ -4473,13 +4556,14 @@ const RoundRobinDisplay = ({ sport, data, matches, user, isOrganizer, onAssignUm
 // Groups + Knockout Display
 // Stage 1: Round Robin groups, Stage 2: Knockout bracket (horizontal left-to-right)
 const GroupsKnockoutDisplay = ({
+  categoryId,
   sport,
-  data, 
-  matches, 
-  user, 
-  isOrganizer, 
-  onAssignUmpire, 
-  onChangeResult, 
+  data,
+  matches,
+  user,
+  isOrganizer,
+  onAssignUmpire,
+  onChangeResult,
   onViewMatchDetails,
   isRoundRobinComplete,
   activeCategory,
@@ -4530,6 +4614,8 @@ const GroupsKnockoutDisplay = ({
       {activeStage === 'roundrobin' && (
         <div>
           <RoundRobinDisplay 
+            tournamentId={tournamentId}
+            categoryId={categoryId}
             sport={sport}
             data={data} 
             matches={matches} 

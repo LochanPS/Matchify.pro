@@ -3,6 +3,15 @@ import api from '../utils/api';
 const API_URL = import.meta.env.VITE_API_URL || 'https://matchify-backend-production-cb58.up.railway.app/api';
 
 export const drawAPI = {
+  // Add or edit a team's roster after the team exists (organizer/admin only).
+  updateTeamRoster: async (tournamentId, categoryId, participantId, roster, teamName) => {
+    const response = await api.put(
+      `/tournaments/${tournamentId}/categories/${categoryId}/team-roster`,
+      { participantId, roster, teamName }
+    );
+    return response.data;
+  },
+
   // Fetch bracket structure for a category
   getBracket: async (tournamentId, categoryId) => {
     const response = await api.get(

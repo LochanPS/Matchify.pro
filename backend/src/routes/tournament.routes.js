@@ -25,7 +25,7 @@ import {
 } from '../controllers/tournament.controller.js';
 import { getMatches, createMatch, assignUmpire } from '../controllers/match.controller.js';
 import { restartDraw } from '../controllers/restartDraw.controller.js';
-import { quickAddPlayer } from '../controllers/quickAdd.controller.js';
+import { quickAddPlayer, updateTeamRoster } from '../controllers/quickAdd.controller.js';
 import { authenticate, preventAdminAccess, optionalAuth } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -148,6 +148,7 @@ router.put('/:id/end', endTournament);
 // Mirrors the admin quick-add: creates a confirmed guest registration with entry fee,
 // which flows into tournament revenue + organizer payout via createOrUpdateTournamentPayment.
 router.post('/:tournamentId/quick-add-player', quickAddPlayer);
+router.put('/:tournamentId/categories/:categoryId/team-roster', updateTeamRoster);
 
 // Category routes (organizer only)
 router.post('/:id/categories', createCategory);

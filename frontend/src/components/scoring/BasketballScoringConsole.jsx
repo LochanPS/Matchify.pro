@@ -15,7 +15,7 @@
 // state and forwards actions. Fouls still exist in the engine but are never
 // surfaced here.
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Play, Trophy, RotateCcw, ChevronDown, ChevronUp, RefreshCw, Smartphone } from 'lucide-react';
 import bb, { addScore, undoLast, nextPeriod, derive, periodLabel } from '../../sports/basketball';
 
@@ -79,19 +79,36 @@ export default function BasketballScoringConsole({
     2: state.onCourt?.[2] || defaultLineup(rosterOf(p2)),
   };
 
-  const apply = (next) => onScoreChange(next);
+  // Every action is applied against the LATEST state via a ref, not the state
+  // captured by this render. Without it, two taps landing in the same frame
+  // both build off the stale render state and the second silently overwrites
+  // the first — a real hazard for an umpire scoring quickly.
+  const stateRef = useRef(state);
+  stateRef.current = state;
+  const apply = (mutate) => {
+    const next = mutate(stateRef.current);
+    stateRef.current = next;      // so a second synchronous tap sees this one
+    onScoreChange(next);
+  };
+
   const doScore = (team, points, playerIdx) => {
     if (!canScore) return;
-    apply(addScore(state, { team, points, playerId: playerIdx == null ? null : playerKey(team, playerIdx) }));
+    apply(prev => addScore(prev, { team, points, playerId: playerIdx == null ? null : playerKey(team, playerIdx) }));
   };
-  const doUndo = () => { if (canScore && state.events.length) apply(undoLast(state)); };
-  const doNextPeriod = () => { if (canScore) apply(nextPeriod(state)); };
+  const doUndo = () => { if (canScore && stateRef.current.events.length) apply(prev => undoLast(prev)); };
+  const doNextPeriod = () => { if (canScore) apply(prev => nextPeriod(prev)); };
 
   // Swap a bench player onto the court in place of an on-court player.
   const doSwap = (team, onCourtIdx, benchIdx) => {
     if (!canScore) return;
-    const next = lineups[team].map(i => (i === onCourtIdx ? benchIdx : i));
-    apply({ ...state, onCourt: { ...lineups, [team]: next } });
+    apply(prev => {
+      const base = {
+        1: prev.onCourt?.[1] || defaultLineup(rosterOf(p1)),
+        2: prev.onCourt?.[2] || defaultLineup(rosterOf(p2)),
+      };
+      base[team] = base[team].map(i => (i === onCourtIdx ? benchIdx : i));
+      return { ...prev, onCourt: base };
+    });
     setPendingSub(null);
   };
 

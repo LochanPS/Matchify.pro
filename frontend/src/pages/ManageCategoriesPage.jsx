@@ -360,6 +360,7 @@ const ManageCategoriesPage = () => {
             </div>
             <div className="p-4">
               <CategoryForm
+                sport={tournament?.sport}
                 initialData={editingCategory}
                 onSave={handleSaveCategory}
                 onCancel={() => { setShowForm(false); setEditingCategory(null); }}

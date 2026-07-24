@@ -6,6 +6,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { tournamentAPI } from '../api/tournament';
 import { useAuth } from '../contexts/AuthContext';
 import { getImageUrl } from '../utils/imageUrl';
+import { SPORTS, isTeamSport } from '../config/sports';
 import {
   ArrowLeft,
   Layers,
@@ -108,6 +109,7 @@ const EditTournament = () => {
     longitude: null,
     locationName: '',
     zone: '',
+    sport: 'Badminton',
     format: '',
     privacy: '',
     contactPhone: '',
@@ -183,6 +185,7 @@ const EditTournament = () => {
         longitude: t.longitude ?? null,
         locationName: t.locationName || '',
         zone: t.zone || '',
+        sport: t.sport || 'Badminton',
         format: t.format || '',
         privacy: t.privacy || 'public',
         contactPhone: t.contactPhone || '',
@@ -556,8 +559,28 @@ const EditTournament = () => {
                   </select>
                 </div>
               </div>
+              {/* Sport */}
+              <div>
+                <label className="block text-xs font-black mb-1.5" style={{ color: 'rgba(255,255,255,0.6)' }}>Sport</label>
+                <select value={infoData.sport}
+                  onChange={e => {
+                    const s = e.target.value;
+                    // Team sports have no singles/doubles; keep format valid.
+                    setInfoData(p => ({ ...p, sport: s, format: isTeamSport(s) ? 'singles' : p.format }));
+                  }}
+                  className="w-full px-3 py-3 rounded-xl text-white text-sm" style={selectStyle}>
+                  {SPORTS.map(s => <option key={s.id} value={s.id} style={{ background: '#1a1a2e' }}>{s.emoji} {s.label}</option>)}
+                </select>
+                <p className="text-[11px] mt-1.5" style={{ color: 'rgba(251,191,36,0.85)' }}>
+                  Changing the sport switches scoring, standings and registration for the whole
+                  tournament. Best done before players register — existing individual registrations
+                  are not converted into teams.
+                </p>
+              </div>
+
               {/* Format + Privacy */}
               <div className="grid grid-cols-2 gap-3">
+                {!isTeamSport(infoData.sport) && (
                 <div>
                   <label className="block text-xs font-black mb-1.5" style={{ color: 'rgba(255,255,255,0.6)' }}>Format</label>
                   <select value={infoData.format}
@@ -566,6 +589,7 @@ const EditTournament = () => {
                     {FORMATS.map(f => <option key={f} value={f} style={{ background: '#1a1a2e' }} className="capitalize">{f}</option>)}
                   </select>
                 </div>
+                )}
                 <div>
                   <label className="block text-xs font-black mb-1.5" style={{ color: 'rgba(255,255,255,0.6)' }}>Visibility</label>
                   <select value={infoData.privacy}

@@ -5,6 +5,7 @@ import { EyeIcon, EyeSlashIcon, LockClosedIcon, EnvelopeIcon } from '@heroicons/
 import { getErrorMessage } from '../utils/errorMessage';
 import MatchifyLogo from '../components/MatchifyLogo';
 import Spinner from '../components/Spinner';
+import GoogleSignInButton from '../components/auth/GoogleSignInButton';
 import { usePageTransition } from "../contexts/TransitionContext";
 
 const LoginPageMobile = () => {
@@ -15,7 +16,7 @@ const LoginPageMobile = () => {
   const [showPassword, setShowPassword] = useState(false);
   const { triggerTransition } = usePageTransition();
 
-  const { login } = useAuth();
+  const { login, socialLogin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
@@ -59,21 +60,37 @@ const LoginPageMobile = () => {
     setError('');
     try {
       const user = await login(formData.credential, formData.password);
-      // Determine destination
-      let dest = redirectUrl;
-      if (!dest) {
-        const isAdmin = user.isAdmin ||
-          (Array.isArray(user.roles) && user.roles.includes('ADMIN')) ||
-          (typeof user.roles === 'string' && user.roles.includes('ADMIN')) ||
-          user.currentRole === 'ADMIN';
-        dest = isAdmin
-          ? '/admin-dashboard'
-          : `/dashboard?role=${Array.isArray(user.roles) ? user.roles[0] : (user.currentRole || user.role || 'PLAYER')}`;
-      }
-      // Trigger App-level transition — splash renders above router, no flash
-      triggerTransition(dest);
+      goAfterAuth(user);
     } catch (err) {
       setError(getErrorMessage(err, 'Login failed. Please try again.'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Shared post-auth navigation, used by email login and Google sign-in.
+  const goAfterAuth = (user) => {
+    let dest = redirectUrl;
+    if (!dest) {
+      const isAdmin = user.isAdmin ||
+        (Array.isArray(user.roles) && user.roles.includes('ADMIN')) ||
+        (typeof user.roles === 'string' && user.roles.includes('ADMIN')) ||
+        user.currentRole === 'ADMIN';
+      dest = isAdmin
+        ? '/admin-dashboard'
+        : `/dashboard?role=${Array.isArray(user.roles) ? user.roles[0] : (user.currentRole || user.role || 'PLAYER')}`;
+    }
+    triggerTransition(dest);
+  };
+
+  const handleGoogle = async (credential) => {
+    setLoading(true);
+    setError('');
+    try {
+      const user = await socialLogin('google', { credential });
+      goAfterAuth(user);
+    } catch (err) {
+      setError(getErrorMessage(err, 'Google sign-in failed. Please try again.'));
     } finally {
       setLoading(false);
     }
@@ -330,6 +347,11 @@ const LoginPageMobile = () => {
               ) : '⚡ Let\'s Go!'}
             </button>
           </form>
+
+          {/* Google sign-in — appears once VITE_GOOGLE_CLIENT_ID is configured */}
+          <div style={{ marginTop: 18 }}>
+            <GoogleSignInButton text="signin_with" onCredential={handleGoogle} disabled={loading} />
+          </div>
 
           {/* Divider + sign up link */}
           <div style={{ marginTop: 22, textAlign: 'center' }}>

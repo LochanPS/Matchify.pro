@@ -8,6 +8,7 @@ import {
 import { getErrorMessage } from '../utils/errorMessage';
 import MatchifyLogo from '../components/MatchifyLogo';
 import Spinner from '../components/Spinner';
+import GoogleSignInButton from '../components/auth/GoogleSignInButton';
 import { usePageTransition } from "../contexts/TransitionContext";
 
 const RegisterPageMobile = () => {
@@ -20,7 +21,7 @@ const RegisterPageMobile = () => {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const { triggerTransition } = usePageTransition();
 
-  const { register } = useAuth();
+  const { register, socialLogin } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const redirectUrl = searchParams.get('redirect');
@@ -58,6 +59,21 @@ const RegisterPageMobile = () => {
     } catch (err) {
       if (err?.response?.status === 409) { setConflictError(true); setError(''); }
       else setError(getErrorMessage(err, 'Registration failed. Please try again.'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Google sign-up: name + email come from Google, the account is created, and
+  // the app's normal onboarding (photo, city, state, gender) runs afterward.
+  const handleGoogle = async (credential) => {
+    setLoading(true);
+    setError('');
+    try {
+      await socialLogin('google', { credential });
+      triggerTransition(redirectUrl || '/dashboard?role=PLAYER');
+    } catch (err) {
+      setError(getErrorMessage(err, 'Google sign-up failed. Please try again.'));
     } finally {
       setLoading(false);
     }
@@ -286,6 +302,11 @@ const RegisterPageMobile = () => {
                 : '🏸 Create Account'}
             </button>
           </form>
+
+          {/* Google sign-up — appears once VITE_GOOGLE_CLIENT_ID is configured */}
+          <div style={{ marginTop: 16 }}>
+            <GoogleSignInButton text="signup_with" onCredential={handleGoogle} disabled={loading} />
+          </div>
 
           {/* Divider + login link */}
           <div style={{ marginTop: 20, textAlign: 'center' }}>

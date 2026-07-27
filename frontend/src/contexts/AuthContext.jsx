@@ -241,6 +241,43 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Social sign-in (Google / Apple). Posts the provider token to the matching
+  // endpoint, then does the SAME post-login handling as email login — so a new
+  // social user still gets the mandatory photo + profile-completion prompts.
+  const socialLogin = async (provider, payload) => {
+    try {
+      const response = await api.post(`/auth/${provider}`, payload);
+      const { user: userData, accessToken, token, refreshToken } = response.data;
+      const authToken = accessToken || token;
+      if (!authToken) throw new Error('No token received from server');
+
+      if (userData.roles && typeof userData.roles === 'string') {
+        userData.roles = userData.roles.split(',').map(r => r.trim());
+      }
+      if (!userData.isAdmin && userData.roles) {
+        userData.isAdmin = Array.isArray(userData.roles)
+          ? userData.roles.includes('ADMIN')
+          : userData.roles === 'ADMIN';
+      }
+      if (!userData.currentRole) {
+        userData.currentRole = userData.roles && userData.roles[0] ? userData.roles[0] : 'PLAYER';
+      }
+
+      safeStorage.setItem('token', authToken);
+      if (refreshToken) safeStorage.setItem('refreshToken', refreshToken);
+      safeStorage.setItem('user', JSON.stringify(userData));
+      setUser(userData);
+
+      if (userData.isAdmin) return userData;
+      if (!userData.profilePhoto) setShowProfilePhotoModal(true);
+      if (!isProfileComplete(userData)) setShowProfileCompletion(true);
+      return userData;
+    } catch (error) {
+      console.error('Social login error:', error);
+      throw error;
+    }
+  };
+
   const logout = async () => {
     try {
       // Invalidate refresh token in DB so stolen tokens can't be reused
@@ -303,9 +340,10 @@ export const AuthProvider = ({ children }) => {
   return (
     <AuthContext.Provider value={{ 
       user, 
-      login, 
-      register, 
-      logout, 
+      login,
+      register,
+      socialLogin,
+      logout,
       updateUser,
       switchRole,
       currentRole,

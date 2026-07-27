@@ -379,6 +379,112 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// ── Social sign-in (Google) ─────────────────────────────────────────────────
+// The frontend gets a Google ID token from Google Identity Services and posts
+// it here. We verify it with Google, then find-or-create the user by their
+// verified email and issue the SAME tokens as a normal login. New users get no
+// profile photo / city / gender, so the app's normal onboarding still runs.
+router.post('/google', async (req, res) => {
+  try {
+    const { credential } = req.body;
+    if (!credential) {
+      return res.status(400).json({ error: 'Missing Google credential' });
+    }
+    if (!process.env.GOOGLE_CLIENT_ID) {
+      console.error('❌ GOOGLE_CLIENT_ID not configured');
+      return res.status(503).json({ error: 'Google sign-in is not configured yet.', code: 'GOOGLE_NOT_CONFIGURED' });
+    }
+    if (!process.env.JWT_SECRET || !process.env.JWT_REFRESH_SECRET) {
+      return res.status(503).json({ error: 'Authentication system not configured.', code: 'JWT_NOT_CONFIGURED' });
+    }
+
+    // Verify the ID token directly with Google (no extra dependency needed).
+    let payload;
+    try {
+      const r = await fetch('https://oauth2.googleapis.com/tokeninfo?id_token=' + encodeURIComponent(credential));
+      if (!r.ok) throw new Error('tokeninfo ' + r.status);
+      payload = await r.json();
+    } catch (e) {
+      console.error('Google token verify failed:', e.message);
+      return res.status(401).json({ error: 'Could not verify Google sign-in. Please try again.' });
+    }
+
+    // The token MUST have been issued for THIS app, and the email confirmed.
+    if (payload.aud !== process.env.GOOGLE_CLIENT_ID) {
+      return res.status(401).json({ error: 'Google sign-in token was not issued for this app.' });
+    }
+    const emailVerified = payload.email_verified === true || payload.email_verified === 'true';
+    const email = (payload.email || '').trim().toLowerCase();
+    if (!email || !emailVerified) {
+      return res.status(401).json({ error: 'Your Google account has no verified email.' });
+    }
+
+    let user = await prisma.user.findFirst({ where: { email: { equals: email, mode: 'insensitive' } } });
+    let isNewUser = false;
+
+    if (!user) {
+      // New account from Google. Password is required by the schema, so we store
+      // a random unusable one — the user signs in with Google, never this.
+      isNewUser = true;
+      const { randomBytes } = await import('crypto');
+      const [hashedPassword, matchifyCode] = await Promise.all([
+        bcrypt.hash(randomBytes(32).toString('hex'), 10),
+        generateMatchifyCode(),
+      ]);
+      user = await prisma.user.create({
+        data: {
+          email,
+          password: hashedPassword,
+          name: (payload.name || email.split('@')[0]).trim(),
+          roles: 'PLAYER,ORGANIZER,UMPIRE',
+          matchifyCode,
+          walletBalance: 25, // organizer starter credits, same as register
+        },
+      });
+      prisma.notification.create({
+        data: { userId: user.id, type: 'WELCOME', title: '👋 Welcome to Matchify.pro!', message: WELCOME_MESSAGE },
+      }).catch(err => console.error('Welcome notification error:', err));
+    }
+
+    if (!user.isActive) return res.status(403).json({ error: 'Account is deactivated. Please contact support.' });
+    if (user.isSuspended) {
+      return res.status(403).json({ error: user.suspendedUntil ? `Account suspended until ${user.suspendedUntil.toISOString()}` : 'Account is permanently suspended' });
+    }
+
+    // Ensure a matchifyCode exists (parity with login).
+    if (!user.matchifyCode) {
+      const matchifyCode = await generateMatchifyCode();
+      await prisma.user.update({ where: { id: user.id }, data: { matchifyCode } });
+      user.matchifyCode = matchifyCode;
+    }
+
+    const userRoles = user.roles ? user.roles.split(',').map(r => r.trim()) : ['PLAYER'];
+    const primaryRole = userRoles[0];
+    const isAdmin = userRoles.includes('ADMIN');
+
+    const accessToken = generateAccessToken(user.id, userRoles);
+    const refreshToken = generateRefreshToken(user.id);
+    await prisma.user.update({ where: { id: user.id }, data: { refreshToken } });
+
+    const { password: _p, refreshToken: _r, roles: _roles, ...safeUser } = user;
+    if (safeUser.email?.endsWith('@noemail.matchify.internal')) safeUser.email = null;
+
+    res.status(isNewUser ? 201 : 200).json({
+      message: isNewUser ? 'Account created with Google' : 'Login successful',
+      user: { ...safeUser, roles: userRoles, currentRole: primaryRole, isAdmin },
+      accessToken,
+      refreshToken,
+      isNewUser,
+    });
+  } catch (error) {
+    console.error('Google sign-in error:', error);
+    if (error.code === 'P2002') {
+      return res.status(409).json({ error: 'An account with this email already exists.' });
+    }
+    res.status(500).json({ error: 'Google sign-in failed. Please try again.' });
+  }
+});
+
 // ── P2024 helpers (local to this file) ────────────────────────────────────
 const _rtSleep = ms => new Promise(r => setTimeout(r, ms));
 function _rtIsP2024(err) {

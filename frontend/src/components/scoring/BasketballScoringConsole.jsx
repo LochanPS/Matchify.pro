@@ -56,6 +56,33 @@ const usePortraitPhone = () => {
   return portrait;
 };
 
+// Force the screen into landscape: go fullscreen, then lock the orientation.
+// Lock only works from a user gesture and (on most browsers) while fullscreen,
+// which is why both happen together on the button tap. Fails silently on
+// browsers that don't support it (e.g. iOS Safari) — the manual-rotate prompt
+// still stands there.
+const enterLandscape = async () => {
+  try {
+    const el = document.documentElement;
+    const req = el.requestFullscreen || el.webkitRequestFullscreen || el.webkitRequestFullScreen;
+    if (req) await req.call(el);
+  } catch { /* fullscreen refused — try lock anyway */ }
+  try {
+    if (screen.orientation?.lock) await screen.orientation.lock('landscape');
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+const exitLandscape = () => {
+  try { screen.orientation?.unlock?.(); } catch {}
+  try {
+    if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen();
+    else if (document.webkitFullscreenElement && document.webkitExitFullscreen) document.webkitExitFullscreen();
+  } catch {}
+};
+
 export default function BasketballScoringConsole({
   match, score, onScoreChange, onEndMatch, onStart, onBack,
   canScore, canStart, saving,
@@ -63,7 +90,17 @@ export default function BasketballScoringConsole({
   const [openTeam, setOpenTeam] = useState(null);   // which team's bench is open
   const [pendingSub, setPendingSub] = useState(null); // { team, benchIdx } waiting to be swapped in
   const [confirmEnd, setConfirmEnd] = useState(false);
+  const [lockFailed, setLockFailed] = useState(false);
   const portrait = usePortraitPhone();
+
+  // Leaving the console (unmount) releases any forced landscape lock so the
+  // rest of the app isn't stuck sideways.
+  useEffect(() => () => exitLandscape(), []);
+  const handleBack = () => { exitLandscape(); onBack?.(); };
+  const goLandscape = async () => {
+    const ok = await enterLandscape();
+    setLockFailed(!ok);
+  };
 
   const state = score && score.model === 'basketball' ? score : bb.newState();
   const d = derive(state);
@@ -130,7 +167,7 @@ export default function BasketballScoringConsole({
             style={{ background: B.green, color: '#050810' }}>
             <Play className="w-5 h-5" /> {saving ? 'Starting…' : 'Start match'}
           </button>
-          <button onClick={onBack} className="text-sm font-bold" style={{ color: 'rgba(255,255,255,0.5)' }}>
+          <button onClick={handleBack} className="text-sm font-bold" style={{ color: 'rgba(255,255,255,0.5)' }}>
             Back
           </button>
         </div>
@@ -142,14 +179,24 @@ export default function BasketballScoringConsole({
   if (portrait) {
     return (
       <div className="min-h-screen flex items-center justify-center px-8 text-center" style={{ background: B.bg }}>
-        <div>
+        <div style={{ maxWidth: 360 }}>
           <Smartphone className="w-12 h-12 mx-auto mb-4" style={{ color: B.green, transform: 'rotate(90deg)' }} />
-          <h2 className="text-lg font-black text-white mb-2">Turn your phone sideways</h2>
+          <h2 className="text-lg font-black text-white mb-2">Score in landscape</h2>
           <p className="text-sm" style={{ color: 'rgba(255,255,255,0.55)' }}>
-            Basketball is scored in landscape so both teams and all players fit on screen.
-            Rotate your device to continue.
+            Basketball is scored sideways so both teams and all players fit on screen.
+            Tap below to switch — no need to rotate your phone.
           </p>
-          <button onClick={onBack} className="mt-6 text-sm font-bold" style={{ color: 'rgba(255,255,255,0.4)' }}>
+          <button onClick={goLandscape}
+            className="mt-6 w-full py-3.5 rounded-2xl font-black text-base"
+            style={{ background: B.green, color: '#050810' }}>
+            Go landscape
+          </button>
+          {lockFailed && (
+            <p className="mt-3 text-xs" style={{ color: B.amber }}>
+              Couldn't rotate automatically — turn on auto-rotate and turn your phone sideways.
+            </p>
+          )}
+          <button onClick={handleBack} className="mt-4 text-sm font-bold" style={{ color: 'rgba(255,255,255,0.4)' }}>
             Back
           </button>
         </div>
@@ -280,7 +327,7 @@ export default function BasketballScoringConsole({
     <div className="fixed inset-0 flex flex-col" style={{ background: B.bg }}>
       {/* Top strip */}
       <div className="flex items-center justify-between px-3 py-1.5 flex-shrink-0" style={{ borderBottom: `1px solid ${B.border}` }}>
-        <button onClick={onBack} className="flex items-center gap-1 text-xs font-bold" style={{ color: 'rgba(255,255,255,0.5)' }}>
+        <button onClick={handleBack} className="flex items-center gap-1 text-xs font-bold" style={{ color: 'rgba(255,255,255,0.5)' }}>
           <ArrowLeft className="w-4 h-4" /> Back
         </button>
         <div className="text-center">

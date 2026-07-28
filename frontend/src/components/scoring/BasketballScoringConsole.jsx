@@ -155,7 +155,7 @@ export default function BasketballScoringConsole({
   // ── Pre-start ─────────────────────────────────────────────────────────────
   if (canStart) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-6" style={{ background: B.bg }}>
+      <div className="fixed inset-0 flex items-center justify-center px-6 overflow-y-auto" style={{ background: B.bg, zIndex: 2147483000 }}>
         <div className="text-center max-w-sm">
           <div className="text-5xl mb-4">🏀</div>
           <h2 className="text-lg font-black text-white mb-1">{teamName(1)} vs {teamName(2)}</h2>
@@ -178,7 +178,7 @@ export default function BasketballScoringConsole({
   // ── Portrait: ask the umpire to rotate ──────────────────────────────────────
   if (portrait) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-8 text-center" style={{ background: B.bg }}>
+      <div className="fixed inset-0 flex items-center justify-center px-8 text-center overflow-y-auto" style={{ background: B.bg, zIndex: 2147483000 }}>
         <div style={{ maxWidth: 360 }}>
           <Smartphone className="w-12 h-12 mx-auto mb-4" style={{ color: B.green, transform: 'rotate(90deg)' }} />
           <h2 className="text-lg font-black text-white mb-2">Score in landscape</h2>
@@ -324,7 +324,7 @@ export default function BasketballScoringConsole({
 
   // ── Center column: score + controls ─────────────────────────────────────────
   return (
-    <div className="fixed inset-0 flex flex-col" style={{ background: B.bg }}>
+    <div className="fixed inset-0 flex flex-col" style={{ background: B.bg, zIndex: 2147483000 }}>
       {/* Top strip */}
       <div className="flex items-center justify-between px-3 py-1.5 flex-shrink-0" style={{ borderBottom: `1px solid ${B.border}` }}>
         <button onClick={handleBack} className="flex items-center gap-1 text-xs font-bold" style={{ color: 'rgba(255,255,255,0.5)' }}>

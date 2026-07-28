@@ -6,6 +6,7 @@ import { broadcastScoreUpdate, broadcastMatchStatus, broadcastMatchComplete, bro
 import { cacheDel } from '../services/redisService.js';
 import { getDrawPageCacheKey } from '../controllers/drawPage.controller.js';
 import { recalcGroupStandings, sortStandings, pointsScheme, matchPointTotals } from '../services/standings.service.js';
+import { isTeamSport } from '../config/sports.js';
 
 // Invalidate draw cache silently after any score/status change
 async function invalidateDrawCache(match) {
@@ -225,7 +226,8 @@ router.get('/:matchId', authenticate, async (req, res) => {
           select: {
             id: true,
             name: true,
-            status: true
+            status: true,
+            sport: true   // scoring screen picks basketball vs racket from this
           }
         },
         category: {
@@ -253,6 +255,9 @@ router.get('/:matchId', authenticate, async (req, res) => {
       });
     }
 
+    // Team sports show a TEAM (name + roster) in each slot, not a player.
+    const teamSport = isTeamSport(match.tournament?.sport);
+
     // Get player details
     let player1 = null;
     let player2 = null;
@@ -275,12 +280,20 @@ router.get('/:matchId', authenticate, async (req, res) => {
             guestEmail: true,
             guestPartnerName: true,
             userId: true,
+            teamName: true,
+            roster: true,
             user: { select: { name: true } },
             partner: { select: { name: true } }
           }
         });
 
         if (registration) {
+          // Team sport: the slot is a TEAM. Show its name + roster so the
+          // console can list players and credit their points.
+          const teamName = (registration.teamName || '').trim();
+          if (teamSport && teamName) {
+            return { id: playerId, name: teamName, teamName, roster: registration.roster || [], isGuest: true };
+          }
           const baseName = registration.user?.name || registration.guestName || 'Guest Player';
           const partnerName = registration.partner?.name || registration.guestPartnerName || null;
           return {
@@ -296,6 +309,7 @@ router.get('/:matchId', authenticate, async (req, res) => {
       }
 
       // Regular user — also look up their registration for partner name (doubles)
+      // or, for team sports, the team name + roster.
       const [user, reg] = await Promise.all([
         prisma.user.findUnique({
           where: { id: playerId },
@@ -305,12 +319,18 @@ router.get('/:matchId', authenticate, async (req, res) => {
           where: { userId: playerId, tournamentId: match.tournamentId, categoryId: match.categoryId },
           select: {
             guestPartnerName: true,
+            teamName: true,
+            roster: true,
             partner: { select: { name: true } }
           }
         })
       ]);
 
       if (!user) return null;
+      const teamName = (reg?.teamName || '').trim();
+      if (teamSport && teamName) {
+        return { ...user, name: teamName, teamName, roster: reg.roster || [] };
+      }
       const partnerName = reg?.partner?.name || reg?.guestPartnerName || null;
       return { ...user, partnerName };
     };
@@ -434,19 +454,37 @@ router.put('/:matchId/score', authenticate, async (req, res) => {
 
 // Start match handler — shared by POST (primary) and PUT (legacy alias)
 // ── Player data helper (guest-safe) ───────────────────────────────────────
-const _getPlayerData = async (playerId) => {
+// ctx (optional): { teamSport, tournamentId, categoryId } — when the sport is a
+// team sport, each slot resolves to its TEAM name + roster so the scoring
+// console can list players. Racket sports pass no ctx and behave as before.
+const _getPlayerData = async (playerId, ctx = {}) => {
   if (!playerId) return null;
   if (playerId.startsWith('guest-')) {
     const reg = await prisma.registration.findUnique({
       where: { id: playerId.replace('guest-', '') },
-      select: { id: true, guestName: true, guestEmail: true }
+      select: { id: true, guestName: true, guestEmail: true, teamName: true, roster: true }
     });
-    return reg ? { id: playerId, name: reg.guestName || 'Guest Player', email: reg.guestEmail || null, profilePhoto: null, isGuest: true } : null;
+    if (!reg) return null;
+    const teamName = (reg.teamName || '').trim();
+    if (ctx.teamSport && teamName) {
+      return { id: playerId, name: teamName, teamName, roster: reg.roster || [], isGuest: true };
+    }
+    return { id: playerId, name: reg.guestName || 'Guest Player', email: reg.guestEmail || null, profilePhoto: null, isGuest: true };
   }
-  return prisma.user.findUnique({
+  const user = await prisma.user.findUnique({
     where: { id: playerId },
     select: { id: true, name: true, email: true, profilePhoto: true }
   });
+  if (!user) return null;
+  if (ctx.teamSport && ctx.tournamentId && ctx.categoryId) {
+    const reg = await prisma.registration.findFirst({
+      where: { userId: playerId, tournamentId: ctx.tournamentId, categoryId: ctx.categoryId },
+      select: { teamName: true, roster: true }
+    });
+    const teamName = (reg?.teamName || '').trim();
+    if (teamName) return { ...user, name: teamName, teamName, roster: reg.roster || [] };
+  }
+  return user;
 };
 
 const startMatchHandler = async (req, res) => {
@@ -458,7 +496,7 @@ const startMatchHandler = async (req, res) => {
     const match = await prisma.match.findUnique({
       where: { id: matchId },
       include: {
-        tournament: { select: { organizerId: true, id: true, name: true } },
+        tournament: { select: { organizerId: true, id: true, name: true, sport: true } },
         category:   { select: { id: true, name: true } },
         umpire:     { select: { id: true, name: true, email: true } }
       }
@@ -467,6 +505,8 @@ const startMatchHandler = async (req, res) => {
     if (!match) {
       return res.status(404).json({ success: false, message: 'Match not found' });
     }
+    // Team sports resolve each slot to a TEAM (name + roster), not a player.
+    const _teamSport = isTeamSport(match.tournament?.sport);
 
     // Authorization check
     const userRoles = req.user.roles || [];
@@ -519,9 +559,10 @@ const startMatchHandler = async (req, res) => {
       }
     }
 
+    const _ctx = { teamSport: _teamSport, tournamentId: match.tournamentId, categoryId: match.categoryId };
     const [player1, player2] = await Promise.all([
-      _getPlayerData(match.player1Id),
-      _getPlayerData(match.player2Id)
+      _getPlayerData(match.player1Id, _ctx),
+      _getPlayerData(match.player2Id, _ctx)
     ]);
 
     // ── Step 3: single update — status + scoreJson together (1 query) ─────
@@ -534,7 +575,7 @@ const startMatchHandler = async (req, res) => {
         scoreJson: JSON.stringify(scoreData)
       },
       include: {
-        tournament: { select: { id: true, name: true } },
+        tournament: { select: { id: true, name: true, sport: true } }, // scoring screen needs the sport
         category:   { select: { id: true, name: true } },
         umpire:     { select: { id: true, name: true, email: true } }
       }

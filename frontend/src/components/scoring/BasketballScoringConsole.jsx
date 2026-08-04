@@ -16,8 +16,17 @@
 // surfaced here.
 
 import { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Play, Trophy, RotateCcw, ChevronDown, ChevronUp, RefreshCw, Smartphone } from 'lucide-react';
-import bb, { addScore, undoLast, nextPeriod, derive, periodLabel } from '../../sports/basketball';
+import { ArrowLeft, Play, Pause, Trophy, RotateCcw, ChevronDown, ChevronUp, RefreshCw, Smartphone } from 'lucide-react';
+import bb, { addScore, undoLast, nextPeriod, derive, periodLabel,
+  clockRemainingMs, startClock, pauseClock, resetClock } from '../../sports/basketball';
+
+// mm:ss for the game clock.
+const fmtClock = (ms) => {
+  const total = Math.ceil(Math.max(0, ms) / 1000);
+  const m = Math.floor(total / 60);
+  const s = total % 60;
+  return `${m}:${String(s).padStart(2, '0')}`;
+};
 
 const B = {
   bg: '#040810',
@@ -135,6 +144,28 @@ export default function BasketballScoringConsole({
   const doUndo = () => { if (canScore && stateRef.current.events.length) apply(prev => undoLast(prev)); };
   const doNextPeriod = () => { if (canScore) apply(prev => nextPeriod(prev)); };
 
+  // ── Game clock ──────────────────────────────────────────────────────────────
+  // A running clock is state (running + remaining + startedAt) so it survives a
+  // reload; the live figure is derived from the wall clock. A 250ms tick just
+  // re-renders the display — it does not change persisted state. When the clock
+  // reaches 0 it auto-pauses (one state write), which is the end-of-quarter cue.
+  const [, setTick] = useState(0);
+  const clockRunning = !!state.clock?.running && clockRemainingMs(state) > 0;
+  useEffect(() => {
+    if (!state.clock?.running) return;
+    const iv = setInterval(() => {
+      if (clockRemainingMs(stateRef.current) <= 0) apply(prev => pauseClock(prev));
+      else setTick(t => t + 1);
+    }, 250);
+    return () => clearInterval(iv);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.clock?.running]);
+  const toggleClock = () => {
+    if (!canScore) return;
+    apply(prev => (prev.clock?.running ? pauseClock(prev) : startClock(prev)));
+  };
+  const doResetClock = () => { if (canScore) apply(prev => resetClock(prev)); };
+
   // Swap a bench player onto the court in place of an on-court player.
   const doSwap = (team, onCourtIdx, benchIdx) => {
     if (!canScore) return;
@@ -151,6 +182,8 @@ export default function BasketballScoringConsole({
 
   const label = periodLabel(state.currentPeriod, cfg);
   const isRegulation = state.currentPeriod < cfg.periods;
+  const remaining = clockRemainingMs(state);
+  const timeUp = remaining === 0;
 
   // ── Pre-start ─────────────────────────────────────────────────────────────
   if (canStart) {
@@ -330,11 +363,24 @@ export default function BasketballScoringConsole({
         <button onClick={handleBack} className="flex items-center gap-1 text-xs font-bold" style={{ color: 'rgba(255,255,255,0.5)' }}>
           <ArrowLeft className="w-4 h-4" /> Back
         </button>
-        <div className="text-center">
+        {/* Quarter + game clock + start/pause + reset */}
+        <div className="flex items-center gap-2.5">
           <span className="text-sm font-black" style={{ color: B.cyan }}>{label}</span>
-          <span className="text-[10px] ml-1.5" style={{ color: 'rgba(255,255,255,0.35)' }}>
-            {isRegulation ? `${cfg.minutesPerPeriod} min` : `${cfg.otMinutes} min OT`}
+          <span className="text-2xl font-black" style={{ fontVariantNumeric: 'tabular-nums', color: timeUp ? B.red : (clockRunning ? '#fff' : 'rgba(255,255,255,0.85)') }}>
+            {fmtClock(remaining)}
           </span>
+          <button onClick={toggleClock} disabled={!canScore || timeUp}
+            className="w-9 h-9 rounded-lg flex items-center justify-center disabled:opacity-30"
+            style={clockRunning
+              ? { background: 'rgba(251,191,36,0.15)', color: B.amber, border: '1px solid rgba(251,191,36,0.4)' }
+              : { background: B.green, color: '#050810' }}>
+            {clockRunning ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+          </button>
+          <button onClick={doResetClock} disabled={!canScore} title="Reset clock"
+            className="w-8 h-8 rounded-lg flex items-center justify-center disabled:opacity-30"
+            style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.5)', border: `1px solid ${B.border}` }}>
+            <RotateCcw className="w-3.5 h-3.5" />
+          </button>
         </div>
         <button onClick={doUndo} disabled={!canScore || !state.events.length}
           className="flex items-center gap-1 text-xs font-bold disabled:opacity-30" style={{ color: B.amber }}>
@@ -353,6 +399,9 @@ export default function BasketballScoringConsole({
             <span className="text-3xl font-black" style={{ color: d.p2Total >= d.p1Total ? '#fff' : 'rgba(255,255,255,0.6)' }}>{d.p2Total}</span>
           </div>
 
+          {timeUp && !d.canEnd && (
+            <p className="text-[9px] text-center mt-1.5 font-black" style={{ color: B.red }}>{label} time up</p>
+          )}
           {d.needsOvertime && (
             <p className="text-[9px] text-center mt-2 font-bold" style={{ color: B.amber }}>Tied — play overtime</p>
           )}
@@ -360,7 +409,10 @@ export default function BasketballScoringConsole({
           {(!d.canEnd || d.needsOvertime) && canScore && (
             <button onClick={doNextPeriod}
               className="mt-3 w-full py-2 rounded-lg text-[11px] font-black"
-              style={{ background: 'rgba(255,255,255,0.07)', color: '#fff', border: `1px solid ${B.border}` }}>
+              // When the clock is out, this is the cue to advance — highlight it.
+              style={timeUp && !d.needsOvertime
+                ? { background: B.green, color: '#050810' }
+                : { background: 'rgba(255,255,255,0.07)', color: '#fff', border: `1px solid ${B.border}` }}>
               {d.needsOvertime ? `Start ${periodLabel(state.currentPeriod + 1, cfg)}` : `End ${label}`}
             </button>
           )}

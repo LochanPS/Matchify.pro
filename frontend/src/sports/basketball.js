@@ -41,14 +41,53 @@ export const periodLabel = (period, cfg = {}) => {
   return period < periods ? `Q${period + 1}` : `OT${period - periods + 1}`;
 };
 
+// ── Game clock ───────────────────────────────────────────────────────────────
+// Each period counts down (10:00 in regulation, 5:00 in overtime). The umpire
+// starts and stops it; it ends the period at 0:00. Stored as { running,
+// remainingMs, startedAt } so a running clock survives a reload — the live
+// figure is derived from the wall clock, so the state only changes on
+// start/pause/reset, never every tick.
+export function periodDurationMs(state) {
+  const cfg = cfgWith(state.config);
+  const mins = state.currentPeriod < cfg.periods ? cfg.minutesPerPeriod : cfg.otMinutes;
+  return mins * 60 * 1000;
+}
+
+const freshClock = (state) => ({ running: false, remainingMs: periodDurationMs(state), startedAt: null });
+
+export function clockRemainingMs(state, now = Date.now()) {
+  const c = state.clock;
+  if (!c) return periodDurationMs(state);
+  if (!c.running || !c.startedAt) return Math.max(0, c.remainingMs);
+  return Math.max(0, c.remainingMs - (now - c.startedAt));
+}
+
+export function startClock(state, now = Date.now()) {
+  const c = state.clock || freshClock(state);
+  if (c.running) return state;
+  if (clockRemainingMs(state, now) <= 0) return state; // nothing to run at 0:00
+  return { ...state, clock: { ...c, running: true, startedAt: now } };
+}
+
+export function pauseClock(state, now = Date.now()) {
+  const c = state.clock;
+  if (!c || !c.running) return state;
+  return { ...state, clock: { running: false, startedAt: null, remainingMs: clockRemainingMs(state, now) } };
+}
+
+export function resetClock(state) {
+  return { ...state, clock: freshClock(state) };
+}
+
 export function newBasketballState(cfg = {}) {
-  return {
+  const base = {
     model: 'basketball',
     config: cfgWith(cfg),
     currentPeriod: 0,
     events: [],
     nextEventId: 1,
   };
+  return { ...base, clock: freshClock(base) };
 }
 
 // ── Mutations (all pure: return a new state, never mutate the argument) ──────
@@ -87,9 +126,11 @@ export function removeEvent(state, eventId) {
 }
 
 // Advance to the next period. Guarded so a tied game cannot be left unfinished
-// and a decided game cannot roll into a pointless overtime.
+// and a decided game cannot roll into a pointless overtime. The clock resets to
+// the new period's full duration (10:00 regulation, 5:00 overtime).
 export function nextPeriod(state) {
-  return { ...state, currentPeriod: state.currentPeriod + 1 };
+  const next = { ...state, currentPeriod: state.currentPeriod + 1 };
+  return { ...next, clock: freshClock(next) };
 }
 
 // ── Derivation ──────────────────────────────────────────────────────────────
@@ -173,4 +214,9 @@ export default {
   derive,
   matchWinner,
   periodLabel,
+  clockRemainingMs,
+  startClock,
+  pauseClock,
+  resetClock,
+  periodDurationMs,
 };

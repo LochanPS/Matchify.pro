@@ -1,18 +1,8 @@
 import { useEffect, useState, useRef } from 'react';
 
-// Phase-based progress: { target: 0-100, duration: ms }
-// Bar runs to target over duration, then next phase begins.
-// Duplicate target = pause (bar stays still for that duration).
-const PHASES = [
-  { target: 28,  duration: 1100 }, // run  0 → 28%
-  { target: 28,  duration: 1400 }, // pause at 28%
-  { target: 61,  duration: 1000 }, // run  28 → 61%
-  { target: 61,  duration: 900  }, // pause at 61%
-  { target: 85,  duration: 900  }, // run  61 → 85%
-  { target: 85,  duration: 1200 }, // pause at 85%
-  { target: 100, duration: 700  }, // run  85 → 100%
-];
-// Total ≈ 7200ms (7.2s) — within 5–7s window
+// Progress fills in ONE continuous, smooth motion from 0 → 100 over this
+// duration — no run/pause steps, so the bar glides instead of striking forward.
+const FILL_DURATION = 7000; // ms — keeps the previous ~7s total load feel
 
 const SplashScreen = ({ onComplete, duration: _duration = 5300 }) => {
   const [pct, setPct]         = useState(0);
@@ -45,9 +35,7 @@ const SplashScreen = ({ onComplete, duration: _duration = 5300 }) => {
   }, []);
 
   useEffect(() => {
-    let phaseIndex  = 0;
-    let phaseStart  = performance.now();
-    let fromPct     = 0;
+    const start = performance.now();
 
     const finish = () => {
       if (completedRef.current) return;
@@ -62,28 +50,12 @@ const SplashScreen = ({ onComplete, duration: _duration = 5300 }) => {
     const tick = (now) => {
       if (completedRef.current) return;
 
-      if (phaseIndex >= PHASES.length) { finish(); return; }
+      const t = Math.min((now - start) / FILL_DURATION, 1);
+      // Linear fill: one steady, continuous glide from 0 → 100 at a constant
+      // rate — it starts moving immediately and never pauses.
+      setPct(Math.min(Math.round(t * 1000) / 10, 100));
 
-      const phase    = PHASES[phaseIndex];
-      const elapsed  = now - phaseStart;
-      const t        = Math.min(elapsed / phase.duration, 1);
-      // ease-in-out cubic for smooth motion, linear during pauses
-      const eased    = phase.target === fromPct
-        ? 0                              // pause — no movement
-        : t < 0.5
-          ? 4 * t * t * t
-          : 1 - Math.pow(-2 * t + 2, 3) / 2;
-
-      const current = fromPct + (phase.target - fromPct) * eased;
-      setPct(Math.min(Math.round(current * 10) / 10, 100));
-
-      if (t >= 1) {
-        fromPct     = phase.target;
-        phaseIndex += 1;
-        phaseStart  = now;
-      }
-
-      if (phaseIndex >= PHASES.length) { finish(); return; }
+      if (t >= 1) { finish(); return; }
       rafRef.current = requestAnimationFrame(tick);
     };
 

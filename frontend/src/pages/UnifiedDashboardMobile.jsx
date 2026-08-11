@@ -209,7 +209,7 @@ const UnifiedDashboardMobile = () => {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden pt-16" style={{
+    <div className="min-h-screen relative overflow-hidden" style={{
       background: '#050810',
       backgroundImage: 'url(/bg-galaxy.png)',
       backgroundSize: 'cover',

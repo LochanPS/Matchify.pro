@@ -225,8 +225,8 @@ export default function TournamentDiscoveryPage() {
       `}</style>
 
       {/* Hero Header - Compact Mobile-First with Back Button */}
-      <div className="relative z-10 pt-4">
-        <div className="relative max-w-7xl mx-auto px-4 py-3">
+      <div className="relative z-10 pt-1">
+        <div className="relative max-w-7xl mx-auto px-4 py-2">
           {/* Back Button */}
           <button
             onClick={() => navigate('/')}

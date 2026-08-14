@@ -4,6 +4,14 @@ import { useWebSocket } from '../contexts/WebSocketContext';
 import { matchService } from '../services/matchService';
 import { CheckCircle, ArrowLeft, Share2 } from 'lucide-react';
 import LoadingScreen from '../components/LoadingScreen';
+import { derive as bbDerive, periodLabel as bbPeriodLabel } from '../sports/basketball';
+
+// A basketball score is an event log (model 'basketball'); everything else is
+// set-based (badminton/tennis/…). Team sports get the FIBA live scoreboard.
+const isBasketballScore = (match) =>
+  match?.tournament?.sport === 'Basketball' ||
+  (match?.score && match.score.model === 'basketball' && Array.isArray(match.score.events));
+const rosterOf = (p) => (Array.isArray(p?.roster) ? p.roster : []);
 
 const LiveMatchDetail = () => {
   const { matchId } = useParams();
@@ -183,6 +191,7 @@ const MatchInfo = ({ match, duration }) => {
 };
 
 const Scoreboard = ({ match }) => {
+  if (isBasketballScore(match)) return <BasketballScoreboard match={match} />;
   const score = match.score || { sets: [], currentSet: 0 };
   // MatchScoringPage stores score in sets[currentSet].player1/player2 — no top-level currentScore
   const currentSetIdx = score.currentSet || 0;
@@ -240,6 +249,7 @@ const SetScores = ({ score }) => {
 };
 
 const MatchTimeline = ({ match }) => {
+  if (isBasketballScore(match)) return <BasketballBreakdown match={match} />;
   const score = match.score || { sets: [], history: [] };
 
   const cardStyle = { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '16px' };
@@ -302,6 +312,110 @@ const MatchTimeline = ({ match }) => {
                 <span className="text-xs" style={{ color: 'rgba(255,255,255,0.35)' }}>
                   {event.timestamp ? new Date(event.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : 'Now'}
                 </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ── Basketball live scoreboard (FIBA) ────────────────────────────────────────
+const bbState = (match) =>
+  (match?.score && match.score.model === 'basketball' && Array.isArray(match.score.events)) ? match.score : null;
+
+const BasketballScoreboard = ({ match }) => {
+  const s = bbState(match);
+  const d = s ? bbDerive(s) : { p1Total: 0, p2Total: 0, needsOvertime: false };
+  const quarter = s ? bbPeriodLabel(s.currentPeriod, s.config) : 'Q1';
+  const t1 = match.player1?.name || 'Team 1';
+  const t2 = match.player2?.name || 'Team 2';
+  const lead = d.p1Total === d.p2Total ? 0 : (d.p1Total > d.p2Total ? 1 : 2);
+
+  return (
+    <div className="rounded-2xl p-5 relative overflow-hidden" style={{ background: 'linear-gradient(135deg,rgba(245,158,11,0.15),rgba(245,158,11,0.1))', border: '1px solid rgba(245,158,11,0.3)' }}>
+      {/* Quarter pill */}
+      <div className="flex justify-center mb-4">
+        <span className="px-3 py-1 rounded-full text-xs font-black" style={{ background: 'rgba(7,7,26,0.6)', border: '1px solid rgba(245,158,11,0.35)', color: '#FCD34D' }}>
+          🏀 {quarter}{d.needsOvertime ? ' · Tied' : ''}
+        </span>
+      </div>
+      {/* Teams + running score */}
+      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+        <div className="text-center min-w-0">
+          <p className="text-sm font-bold text-white truncate px-1 mb-2">{t1}</p>
+          <div className="text-5xl font-black" style={{ color: lead === 1 ? '#F59E0B' : 'rgba(255,255,255,0.85)' }}>{d.p1Total}</div>
+        </div>
+        <div className="w-11 h-11 rounded-full flex items-center justify-center font-black text-xs flex-shrink-0" style={{ background: 'rgba(7,7,26,0.9)', border: '2px solid rgba(245,158,11,0.4)', color: '#FCD34D' }}>VS</div>
+        <div className="text-center min-w-0">
+          <p className="text-sm font-bold text-white truncate px-1 mb-2">{t2}</p>
+          <div className="text-5xl font-black" style={{ color: lead === 2 ? '#F59E0B' : 'rgba(255,255,255,0.85)' }}>{d.p2Total}</div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const BasketballBreakdown = ({ match }) => {
+  const s = bbState(match);
+  const d = s ? bbDerive(s) : null;
+  const cardStyle = { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '16px' };
+  const t1 = match.player1?.name || 'Team 1';
+  const t2 = match.player2?.name || 'Team 2';
+  const r1 = rosterOf(match.player1), r2 = rosterOf(match.player2);
+
+  if (!d) {
+    return (
+      <div style={cardStyle}>
+        <p className="text-center py-6 text-sm" style={{ color: 'rgba(255,255,255,0.35)' }}>Match hasn't started yet</p>
+      </div>
+    );
+  }
+
+  const byPeriod = d.byPeriod || [];
+  const topScorers = Object.entries(d.playerPoints || {})
+    .map(([key, pts]) => { const [t, i] = key.split('-'); const nm = (t === '1' ? r1 : r2)[Number(i)]?.name; return nm ? { team: Number(t), name: nm, pts } : null; })
+    .filter(Boolean).sort((a, b) => b.pts - a.pts).slice(0, 6);
+
+  return (
+    <div className="grid grid-cols-1 gap-4">
+      {/* Quarter-by-quarter (FIBA) */}
+      <div style={cardStyle}>
+        <h3 className="text-sm font-black text-white mb-3">Quarter by quarter</h3>
+        <div className="overflow-x-auto">
+          <div className="grid text-center" style={{ gridTemplateColumns: `1.6fr repeat(${byPeriod.length}, 1fr) 0.9fr`, minWidth: 260 }}>
+            <div className="text-[10px] font-black py-1.5 text-left" style={{ color: 'rgba(255,255,255,0.35)' }}>TEAM</div>
+            {byPeriod.map((_, i) => (
+              <div key={i} className="text-[10px] font-black py-1.5" style={{ color: i === (s.currentPeriod) ? '#FCD34D' : 'rgba(255,255,255,0.35)' }}>{bbPeriodLabel(i, s.config)}</div>
+            ))}
+            <div className="text-[10px] font-black py-1.5" style={{ color: '#F59E0B' }}>TOT</div>
+            {[[1, t1, d.p1Total], [2, t2, d.p2Total]].map(([team, name, total]) => (
+              <div key={team} className="contents">
+                <div className="text-xs font-bold text-white py-1.5 text-left truncate" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>{name}</div>
+                {byPeriod.map((q, i) => (
+                  <div key={i} className="text-xs font-bold py-1.5" style={{ color: 'rgba(255,255,255,0.75)', borderTop: '1px solid rgba(255,255,255,0.08)' }}>{q[team]}</div>
+                ))}
+                <div className="text-sm font-black py-1.5" style={{ color: '#F59E0B', borderTop: '1px solid rgba(255,255,255,0.08)' }}>{total}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Top scorers */}
+      <div style={cardStyle}>
+        <h3 className="text-sm font-black text-white mb-3">Top scorers</h3>
+        {topScorers.length === 0 ? (
+          <p className="text-center py-4 text-sm" style={{ color: 'rgba(255,255,255,0.35)' }}>No points recorded yet</p>
+        ) : (
+          <div className="space-y-1.5">
+            {topScorers.map((p, i) => (
+              <div key={i} className="flex items-center gap-2.5 px-3 py-2 rounded-xl" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                <span className="text-xs font-black w-4 text-center flex-shrink-0" style={{ color: 'rgba(255,255,255,0.3)' }}>{i + 1}</span>
+                <span className="flex-1 min-w-0 truncate text-sm font-bold text-white">{p.name}</span>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-lg flex-shrink-0 truncate" style={{ maxWidth: 120, background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.5)' }}>{p.team === 1 ? t1 : t2}</span>
+                <span className="text-base font-black flex-shrink-0" style={{ color: '#F59E0B' }}>{p.pts}</span>
               </div>
             ))}
           </div>

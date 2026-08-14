@@ -4,6 +4,7 @@ import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { Radio, Trophy, Clock, Users, Wifi, WifiOff, RefreshCw } from 'lucide-react';
 import { getTournamentAllMatches } from '../api/matches';
 import { useWebSocket } from '../contexts/WebSocketContext';
+import { derive as bbDerive, periodLabel as bbPeriodLabel } from '../sports/basketball';
 
 /* ─── colour tokens ─────────────────────────────────────────── */
 const C = {
@@ -40,6 +41,38 @@ function getPlayerInfo(match, side) {
   return { name: 'TBD', partnerName: null };
 }
 
+/* ─── basketball match card — running score + quarter ─────── */
+function BasketballMatchCard({ match, score, p1Name, p2Name, isCompleted }) {
+  const d = (score && Array.isArray(score.events)) ? bbDerive(score) : { p1Total: 0, p2Total: 0 };
+  const quarter = bbPeriodLabel(score.currentPeriod || 0, score.config);
+  const lead = d.p1Total === d.p2Total ? 0 : (d.p1Total > d.p2Total ? 1 : 2);
+  const isP1Winner = isCompleted && match.winnerId && match.winnerId === (match.player1Id || match.team1Player1Id);
+  const isP2Winner = isCompleted && match.winnerId && !isP1Winner;
+
+  const teamRow = (name, total, winner, leading) => (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '10px 14px' }}>
+      <span style={{ fontSize: 14, fontWeight: 800, color: winner ? C.gold : C.white, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        {name}{winner ? ' 🏆' : ''}
+      </span>
+      <span style={{ fontSize: 26, fontWeight: 900, color: (leading || winner) ? C.green : C.sub, flexShrink: 0 }}>{total}</span>
+    </div>
+  );
+
+  return (
+    <div style={{ background: C.card, border: `1px solid ${isCompleted ? 'rgba(255,215,0,0.15)' : 'rgba(245,158,11,0.2)'}`, borderRadius: 20, overflow: 'hidden' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 14px', borderBottom: `1px solid ${C.border}` }}>
+        <span style={{ fontSize: 11, fontWeight: 900, color: C.cyan }}>🏀 {isCompleted ? 'Final' : quarter}</span>
+        <span style={{ fontSize: 10, fontWeight: 800, color: isCompleted ? C.dim : C.green }}>
+          {isCompleted ? 'COMPLETED' : '● LIVE'}
+        </span>
+      </div>
+      {teamRow(p1Name, d.p1Total, isP1Winner, lead === 1)}
+      <div style={{ height: 1, background: C.border }} />
+      {teamRow(p2Name, d.p2Total, isP2Winner, lead === 2)}
+    </div>
+  );
+}
+
 /* ─── single match card — scoreboard layout ─────────────── */
 function MatchCard({ match, isCompleted }) {
   const p1Info = getPlayerInfo(match, 1);
@@ -47,6 +80,10 @@ function MatchCard({ match, isCompleted }) {
   const p1Name = p1Info.name;
   const p2Name = p2Info.name;
   const score  = match.scoreData || match.score;
+  // Basketball is scored on a running total, not sets — show the FIBA card.
+  if (score && score.model === 'basketball' && Array.isArray(score.events)) {
+    return <BasketballMatchCard match={match} score={score} p1Name={p1Name} p2Name={p2Name} isCompleted={isCompleted} />;
+  }
   const sets   = score?.sets || [];
   const currentIdx = isCompleted
     ? sets.length - 1

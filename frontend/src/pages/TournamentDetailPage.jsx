@@ -1243,8 +1243,11 @@ const TournamentDetailPage = () => {
                   </span>
                 </div>
 
-                {/* Registrations - Blue */}
-                <div 
+                {/* Registrations - Blue. Registration numbers are private to the
+                    tournament's own organizer (and admins) — other users and
+                    other organizers don't see this row at all. */}
+                {(isAdmin() || (user && user.id === tournament.organizerId)) && (
+                <div
                   className="flex items-center justify-between p-4 rounded-xl transition-all hover:scale-[1.02]"
                   style={{
                     background: 'linear-gradient(135deg, rgba(139,92,246,0.25) 0%, rgba(124,58,237,0.15) 100%)',
@@ -1253,13 +1256,14 @@ const TournamentDetailPage = () => {
                   }}
                 >
                   <span className="text-white/90 font-bold text-base">Registrations</span>
-                  <span 
+                  <span
                     className="font-black text-2xl"
                     style={{ color: '#93c5fd' }}
                   >
                     {tournament._count?.registrations || 0}
                   </span>
                 </div>
+                )}
 
                 {/* Zone - Brand Green */}
                 <div

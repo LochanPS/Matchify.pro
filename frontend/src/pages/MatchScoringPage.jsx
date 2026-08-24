@@ -5,7 +5,7 @@ import api from '../utils/api';
 import { useAuth } from '../contexts/AuthContext';
 import {
   Play, Pause, Trophy, Plus, Minus,
-  AlertTriangle, X, Clock, Calendar, ArrowLeft, ArrowLeftRight, User
+  AlertTriangle, X, Clock, Calendar, ArrowLeft, ArrowLeftRight, User, Pencil
 } from 'lucide-react';
 import { pauseTimer, resumeTimer } from '../api/matches';
 import SlideToConfirm from '../components/SlideToConfirm';
@@ -421,9 +421,24 @@ const MatchScoringPage = () => {
     const currentSet = { ...newScore.sets[idx] };
     if (player === 1 && currentSet.player1 > 0) currentSet.player1 -= 1;
     else if (player === 2 && currentSet.player2 > 0) currentSet.player2 -= 1;
+    // Re-evaluate this set's winner from the NEW scores. An undo that drops
+    // below the win line must clear a stale winner flag — setsWon() trusts
+    // s.winner first, so without this the match would still look decided after
+    // an edit. This path is now reachable because the "Edit" button lets the
+    // umpire undo after a set/match win (previously the modal blocked it).
+    const cfg = newScore.matchConfig || { pointsPerSet: 21, extension: true, setsToWin: 2, maxSets: 3 };
+    // Mirror addPoint's win rule EXACTLY (same truthiness on `extension`) so the
+    // recomputed winner can never disagree with how the point was awarded.
+    const w = cfg.extension
+      ? pointEngine.setWinner(currentSet.player1, currentSet.player2, { pointsPerSet: cfg.pointsPerSet, cap: pointCap })
+      : (currentSet.player1 >= cfg.pointsPerSet ? 1 : currentSet.player2 >= cfg.pointsPerSet ? 2 : 0);
+    currentSet.winner = w || undefined;
     newScore.sets[idx] = currentSet;
     updateScore(newScore);
-    // No API call on undo — only set completion triggers save
+    // Persist the correction — the deciding point was already saved to the DB,
+    // so an undo must be saved too, or a refresh would show the match decided.
+    if (autoSaveTimerRef.current) { clearTimeout(autoSaveTimerRef.current); autoSaveTimerRef.current = null; }
+    autoSaveTimerRef.current = setTimeout(() => saveScoreToApi(newScore), 1200);
   };
 
   // Swap which player is shown on the left vs right. Purely visual — the
@@ -595,6 +610,50 @@ const MatchScoringPage = () => {
   const p2Display = p2l2 ? `${p2l1} / ${p2l2}` : p2l1;
 
   const setsToWin = Math.ceil(maxSets / 2);
+
+  // Whether the CURRENT score already decides the match, and which side wins.
+  // Tennis derives status from its point log; rally sports read sets won — which,
+  // after an undo, reflects the corrected score because removePoint now clears a
+  // stale set winner. Drives the "Finish match" button that re-opens the
+  // finalise slide after the umpire edits.
+  const decidedWinnerTeam = isTennis
+    ? (score.matchWinner || 0)
+    : (p1Sets >= setsToWin ? 1 : p2Sets >= setsToWin ? 2 : 0);
+  const matchDecided = isTennis
+    ? (score.status === 'completed')
+    : (p1Sets >= setsToWin || p2Sets >= setsToWin);
+
+  // "Edit" from the finalise prompt: dismiss it and return to live scoring so the
+  // umpire can undo/adjust points — correcting the score, per-player points and
+  // therefore the winner. Nothing is finalised until they slide to confirm.
+  const handleEditResult = () => {
+    setShowSetCompleteModal(false);
+    setCompletedSetData(null);
+  };
+
+  // Re-open the finalise slide after editing, rebuilt from the CURRENT score so
+  // the winner and score shown are always the corrected ones.
+  const reopenFinalize = () => {
+    const team = decidedWinnerTeam;
+    if (!team) return;
+    const matchWinnerId = team === 1 ? match.player1?.id : match.player2?.id;
+    if (!matchWinnerId) {
+      setError('Could not determine the winner — please end the match manually.');
+      setShowEndModal(true);
+      return;
+    }
+    const matchWinnerName = team === 1 ? p1Display : p2Display;
+    const cs = score.sets?.[score.currentSet] || { player1: 0, player2: 0 };
+    setCompletedSetData({
+      isMatchComplete: true,
+      matchWinnerId,
+      matchWinnerName,
+      winner: matchWinnerName,
+      score: isTennis ? tennisSetSummary(score) : `${cs.player1}-${cs.player2}`,
+      ...(isTennis ? {} : { setNumber: score.currentSet + 1 }),
+    });
+    setShowSetCompleteModal(true);
+  };
 
   // Map physical left/right sides to underlying players. When `swapped`, the
   // left column renders player 2 and the right renders player 1 — including
@@ -818,6 +877,19 @@ const MatchScoringPage = () => {
           )}
         </div>
 
+        {/* ── Match decided → re-open finalise ─────────────────────────────── */}
+        {/* Shown after the umpire taps "Edit" (which dismissed the finalise
+            slide) while the score still decides the match. Lets them re-open the
+            slide once the score is correct. Hides automatically if an undo drops
+            the score back below the win line. */}
+        {matchDecided && !showSetCompleteModal && !isCompleted && isInProgress && !isPaused && (
+          <button onClick={reopenFinalize} disabled={saving}
+            className="w-full mb-4 py-4 rounded-2xl font-black text-base transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+            style={{ background: 'linear-gradient(135deg,#F59E0B,#D97706)', color: '#050810', boxShadow: '0 4px 20px rgba(245,158,11,0.4)' }}>
+            <Trophy className="w-5 h-5" /> Match decided — Finish &amp; confirm winner
+          </button>
+        )}
+
         {/* ── Scoring Controls ─────────────────────────────────────────────── */}
         {!isCompleted && (
           <div className="grid grid-cols-2 gap-3">
@@ -925,6 +997,16 @@ const MatchScoringPage = () => {
                   />
                   <p className="text-center text-xs mt-2" style={{ color: 'rgba(255,255,255,0.3)' }}>
                     Slide right to confirm
+                  </p>
+                  {/* Edit before finalising — returns to live scoring so the umpire
+                      can undo/adjust points and fix the score or the winner. */}
+                  <button onClick={handleEditResult} disabled={saving}
+                    className="w-full mt-4 py-3 rounded-xl text-sm font-bold transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+                    style={{ background: 'rgba(255,255,255,0.06)', border: `1px solid ${B.border}`, color: '#fff' }}>
+                    <Pencil className="w-4 h-4" style={{ color: '#67e8f9' }} /> Edit score / result
+                  </button>
+                  <p className="text-center text-xs mt-2 leading-snug" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                    Not finalised yet — tap Edit to correct points before you slide.
                   </p>
                 </div>
               </>

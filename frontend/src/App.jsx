@@ -68,6 +68,7 @@ const NotificationDetailPage    = lazy(() => import('./pages/NotificationDetailP
 const CancellationRequestPage   = lazy(() => import('./pages/CancellationRequestPage'))
 const RefundIssuePage           = lazy(() => import('./pages/RefundIssuePage'))
 const SearchAcademiesPage       = lazy(() => import('./pages/SearchAcademiesPage'))
+const ShopPage                  = lazy(() => import('./pages/ShopPage'))
 const AcademyDetailPage         = lazy(() => import('./pages/AcademyDetailPage'))
 const AddAcademyPage            = lazy(() => import('./pages/AddAcademyPage'))
 const EditAcademyPage           = lazy(() => import('./pages/EditAcademyPage'))
@@ -295,6 +296,7 @@ function AppContent() {
           <Route path="/terms" element={<TermsOfService />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/tournaments" element={<TournamentDiscoveryPage />} />
+          <Route path="/shop" element={<ShopPage />} />
           <Route path="/academies" element={<SearchAcademiesPage />} />
           <Route path="/academies/add" element={<AddAcademyPage />} />
           <Route path="/academies/:id" element={<AcademyDetailPage />} />

@@ -1,4 +1,4 @@
-import { Trophy, LayoutDashboard, GraduationCap, User } from 'lucide-react';
+import { Trophy, LayoutDashboard, ShoppingBag, GraduationCap, User } from 'lucide-react';
 
 // ── Tab definitions ───────────────────────────────────────────────────────────
 // To add a new tab: push an entry here. No other file needs to change.
@@ -19,6 +19,14 @@ export const NAV_ITEMS = [
     path: '/dashboard',
     matchPaths: ['/dashboard', '/organizer'],
     requiresAuth: true,
+  },
+  {
+    id: 'shop',
+    label: 'Shop',
+    icon: ShoppingBag,
+    path: '/shop',
+    matchPaths: ['/shop'],
+    requiresAuth: false,
   },
   {
     id: 'academies',
@@ -45,6 +53,7 @@ const NAV_PAGES = new Set([
   '/tournaments',
   '/leaderboard',
   '/dashboard',
+  '/shop',
   '/academies',
   '/profile',
   '/registrations',

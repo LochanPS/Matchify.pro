@@ -1,6 +1,6 @@
 ﻿import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCheck, ChevronRight, ArrowLeft, CheckCircle, Play } from 'lucide-react';
+import { CheckCheck, ChevronRight, ArrowLeft, CheckCircle, Play, Gavel } from 'lucide-react';
 import { useNotifications } from '../contexts/NotificationContext';
 import { formatDistanceToNow, format } from 'date-fns';
 import MatchifyLogo from '../components/MatchifyLogo';
@@ -572,11 +572,36 @@ const NotificationsPage = () => {
                         // Extract WhatsApp URL if present
                         const waMatch = (notification.message || '').match(/https?:\/\/chat\.whatsapp\.com\/[^\s]+/);
 
+                        // Umpire-registered notifications carry a direct CTA to the
+                        // universal umpire page (list of matches the organizer posted).
+                        let umpireTid = null;
+                        if (notification.type === 'UMPIRE_ADDED') {
+                          try { umpireTid = (notification.data ? JSON.parse(notification.data) : {}).tournamentId || null; } catch {}
+                        }
+
                         return (
                           <div>
                             <p className="text-sm mb-3 leading-relaxed" style={{ color: 'rgba(255,255,255,0.65)' }}>
                               {truncated}
                             </p>
+                            {umpireTid && (
+                              <button
+                                onClick={e => {
+                                  e.stopPropagation();
+                                  if (!notification.read) markAsRead(notification.id);
+                                  navigate(`/tournament/${umpireTid}/umpire`);
+                                }}
+                                className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl font-black text-xs mb-2 transition-all active:scale-[0.98]"
+                                style={{
+                                  background: 'linear-gradient(135deg, #F59E0B, #FCD34D)',
+                                  color: '#07071a',
+                                  boxShadow: '0 3px 12px rgba(245,158,11,0.35)',
+                                }}
+                              >
+                                <Gavel className="w-3.5 h-3.5" />
+                                See Matches to Umpire
+                              </button>
+                            )}
                             {waMatch && (
                               <a
                                 href={waMatch[0]}

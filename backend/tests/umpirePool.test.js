@@ -47,7 +47,7 @@ jest.unstable_mockModule('../src/middleware/auth.js', () => ({
 }));
 
 // Dynamic imports AFTER mocks are registered
-const { getUmpirePostedMatches, setUmpirePostedMatches } = await import('../src/controllers/tournament.controller.js');
+const { getUmpirePostedMatches, setUmpirePostedMatches, getPostableMatches } = await import('../src/controllers/tournament.controller.js');
 const { startMatchHandler } = await import('../src/routes/match.routes.js');
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -186,6 +186,53 @@ describe('getUmpirePostedMatches (universal page access + shape)', () => {
     expect(res.body.isOrganizer).toBe(true);
     expect(prismaMock.tournamentUmpire.findUnique).not.toHaveBeenCalled();
     expect(res.body.matches[0]).toMatchObject({ umpireId: 'ump9', umpireName: 'Zoe' });
+  });
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+describe('getPostableMatches (resolved names for the Post Matches selector)', () => {
+  it('rejects a non-organizer with 403', async () => {
+    prismaMock.tournament.findUnique.mockResolvedValue({ id: 't1', organizerId: 'org1' });
+    const req = { params: { id: 't1' }, user: { id: 'notOrg' } };
+    const res = makeRes();
+    await getPostableMatches(req, res);
+    expect(res.statusCode).toBe(403);
+    expect(prismaMock.match.findMany).not.toHaveBeenCalled();
+  });
+
+  it('resolves singles (one name), regular doubles (A & B), and guest doubles', async () => {
+    prismaMock.tournament.findUnique.mockResolvedValue({ id: 't1', organizerId: 'org1' });
+    prismaMock.match.findMany.mockResolvedValue([
+      { id: 'ms', tournamentId: 't1', categoryId: 'c1', player1Id: 'u1', player2Id: 'u2', status: 'PENDING', round: 1, matchNumber: 1, umpirePosted: false, category: { name: 'MS' } },
+      { id: 'md', tournamentId: 't1', categoryId: 'c2', player1Id: 'u3', player2Id: 'u4', status: 'READY', round: 1, matchNumber: 2, umpirePosted: true, category: { name: 'MD' } },
+      { id: 'mg', tournamentId: 't1', categoryId: 'c3', player1Id: 'guest-r1', player2Id: 'guest-r2', status: 'PENDING', round: 1, matchNumber: 3, umpirePosted: false, category: { name: 'XD' } },
+    ]);
+    // _resolveMatchPlayerNames issues: user.findMany, then registration.findMany (guest), then registration.findMany (partner)
+    prismaMock.user.findMany.mockResolvedValue([
+      { id: 'u1', name: 'Alice' }, { id: 'u2', name: 'Bob' }, { id: 'u3', name: 'Carol' }, { id: 'u4', name: 'Dan' },
+    ]);
+    prismaMock.registration.findMany
+      .mockResolvedValueOnce([ // guest registrations
+        { id: 'r1', guestName: 'Zoe', guestPartnerName: 'Ivy', user: null, partner: null },
+        { id: 'r2', guestName: 'Ravi', guestPartnerName: 'Karan', user: null, partner: null },
+      ])
+      .mockResolvedValueOnce([ // partner registrations (regular doubles)
+        { userId: 'u3', tournamentId: 't1', categoryId: 'c2', guestPartnerName: null, partner: { name: 'Meera' } },
+        { userId: 'u4', tournamentId: 't1', categoryId: 'c2', guestPartnerName: null, partner: { name: 'Karan' } },
+      ]);
+
+    const req = { params: { id: 't1' }, user: { id: 'org1' } };
+    const res = makeRes();
+    await getPostableMatches(req, res);
+
+    expect(res.statusCode).toBe(200);
+    const byId = Object.fromEntries(res.body.matches.map(m => [m.id, m]));
+    // Singles — a single name each side, no "&"
+    expect(byId.ms).toMatchObject({ player1Name: 'Alice', player2Name: 'Bob' });
+    // Regular doubles — both partners on each side
+    expect(byId.md).toMatchObject({ player1Name: 'Carol & Meera', player2Name: 'Dan & Karan', umpirePosted: true });
+    // Guest doubles — both guest partners on each side
+    expect(byId.mg).toMatchObject({ player1Name: 'Zoe & Ivy', player2Name: 'Ravi & Karan' });
   });
 });
 

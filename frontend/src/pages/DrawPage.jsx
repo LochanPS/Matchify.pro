@@ -5703,9 +5703,11 @@ const PostMatchesModal = ({ tournamentId, onClose, setSuccess }) => {
     (async () => {
       try {
         setLoading(true);
-        const res = await api.get(`/tournaments/${tournamentId}/matches`);
+        // Dedicated endpoint returns matches with fully resolved names
+        // (singles → one name; doubles → "A & B" per side).
+        const res = await tournamentAPI.getPostableMatches(tournamentId);
         if (cancelled) return;
-        const all = (res.data?.matches || []).filter(isPostable);
+        const all = (res.matches || []).filter(isPostable);
         setMatches(all);
         const posted = new Set(all.filter(m => m.umpirePosted).map(m => m.id));
         setPostedInitially(posted);
@@ -5824,8 +5826,9 @@ const PostMatchesModal = ({ tournamentId, onClose, setSuccess }) => {
                   <div className="space-y-2">
                     {ms.map(m => {
                       const checked = selected.has(m.id);
-                      const p1 = m.player1?.name || 'Player 1';
-                      const p2 = m.player2?.name || 'Player 2';
+                      // Resolved by the backend: singles → one name; doubles → "A & B".
+                      const p1 = m.player1Name || 'TBD';
+                      const p2 = m.player2Name || 'TBD';
                       const live = m.status === 'IN_PROGRESS';
                       return (
                         <button key={m.id} onClick={() => toggle(m.id)}
@@ -5842,7 +5845,7 @@ const PostMatchesModal = ({ tournamentId, onClose, setSuccess }) => {
                             <p className="text-xs font-bold" style={{ color: 'rgba(255,255,255,0.5)' }}>
                               {roundLabel(m)}{live ? ' · In progress' : ''}
                             </p>
-                            <p className="text-sm font-bold text-white truncate">{p1} <span style={{ color: 'rgba(245,158,11,0.6)' }}>vs</span> {p2}</p>
+                            <p className="text-sm font-bold text-white leading-snug" style={{ overflowWrap: 'anywhere' }}>{p1} <span style={{ color: 'rgba(245,158,11,0.6)' }}>vs</span> {p2}</p>
                           </div>
                         </button>
                       );

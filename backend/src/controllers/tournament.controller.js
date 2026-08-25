@@ -1924,6 +1924,54 @@ const setUmpirePostedMatches = async (req, res) => {
   }
 };
 
+// GET /api/tournaments/:id/postable-matches
+// Organizer-only. Every match in the tournament with fully resolved display
+// names (singles → one name; doubles → "A & B" for each side) plus its posted
+// state — powers the "Post Matches to Umpires" selector.
+const getPostableMatches = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.userId || req.user.id;
+
+    const tournament = await prisma.tournament.findUnique({
+      where: { id },
+      select: { id: true, organizerId: true },
+    });
+    if (!tournament) {
+      return res.status(404).json({ success: false, error: 'Tournament not found' });
+    }
+    if (tournament.organizerId !== userId) {
+      return res.status(403).json({ success: false, error: 'Only the tournament organizer can post matches to umpires' });
+    }
+
+    const matches = await prisma.match.findMany({
+      where: { tournamentId: id },
+      include: { category: { select: { id: true, name: true } } },
+      orderBy: [{ round: 'asc' }, { matchNumber: 'asc' }],
+    });
+
+    const nameFor = await _resolveMatchPlayerNames(matches);
+
+    const result = matches.map(m => ({
+      id: m.id,
+      round: m.round,
+      matchNumber: m.matchNumber,
+      status: m.status,
+      categoryName: m.category?.name || '',
+      umpirePosted: !!m.umpirePosted,
+      player1Id: m.player1Id,
+      player2Id: m.player2Id,
+      player1Name: nameFor(m.player1Id, m.tournamentId, m.categoryId),
+      player2Name: nameFor(m.player2Id, m.tournamentId, m.categoryId),
+    }));
+
+    res.json({ success: true, matches: result });
+  } catch (error) {
+    console.error('Get postable matches error:', error);
+    res.status(500).json({ success: false, error: 'Failed to load matches' });
+  }
+};
+
 /**
  * Get registrations for a specific category
  * GET /api/tournaments/:tournamentId/categories/:categoryId/registrations
@@ -1995,6 +2043,7 @@ export {
   removeUmpire,
   getUmpirePostedMatches,
   setUmpirePostedMatches,
+  getPostableMatches,
   // Registration endpoints
   getCategoryRegistrations,
 };

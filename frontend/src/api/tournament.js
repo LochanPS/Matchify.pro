@@ -137,4 +137,10 @@ export const tournamentAPI = {
     );
     return response.data;
   },
+
+  // Organizer: all matches with resolved player names (for the Post Matches selector)
+  getPostableMatches: async (tournamentId) => {
+    const response = await api.get(`/tournaments/${tournamentId}/postable-matches`);
+    return response.data;
+  },
 };

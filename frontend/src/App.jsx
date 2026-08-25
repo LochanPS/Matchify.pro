@@ -56,6 +56,7 @@ const MatchListPage             = lazy(() => import('./pages/MatchListPage'))
 const SpectatorViewPage         = lazy(() => import('./pages/SpectatorViewPage'))
 const ShareRedirect             = lazy(() => import('./pages/ShareRedirect'))
 const ConductMatchPage          = lazy(() => import('./pages/ConductMatchPage'))
+const UmpirePoolPage            = lazy(() => import('./pages/UmpirePoolPage'))
 const QuickMatchPage            = lazy(() => import('./pages/QuickMatchPage'))
 const LiveTournamentDashboard   = lazy(() => import('./pages/LiveTournamentDashboard'))
 const LiveMatches               = lazy(() => import('./pages/LiveMatches'))
@@ -358,6 +359,16 @@ function AppContent() {
             <ProtectedRoute>
               <RoleRoute allowedRoles={['ORGANIZER', 'UMPIRE']}>
                 <ConductMatchPage />
+              </RoleRoute>
+            </ProtectedRoute>
+          } />
+
+          {/* Universal umpire page — shared pool of matches the organizer posted for this
+              tournament. Backend restricts data to the organizer, admins, or registered umpires. */}
+          <Route path="/tournament/:tournamentId/umpire" element={
+            <ProtectedRoute>
+              <RoleRoute allowedRoles={['ORGANIZER', 'UMPIRE']}>
+                <UmpirePoolPage />
               </RoleRoute>
             </ProtectedRoute>
           } />

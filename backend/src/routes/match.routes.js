@@ -508,15 +508,29 @@ const startMatchHandler = async (req, res) => {
     // Team sports resolve each slot to a TEAM (name + roster), not a player.
     const _teamSport = isTeamSport(match.tournament?.sport);
 
-    // Authorization check
+    // ── Authorization + claim model ───────────────────────────────────────
+    // Organizer / admin / the umpire who already owns this match may start it
+    // directly. Any OTHER registered umpire may CLAIM a posted, still-unclaimed
+    // match (first-come lock). Nobody else can start it.
     const userRoles = req.user.roles || [];
-    const isAuthorized =
-      match.umpireId === userId ||
-      match.tournament.organizerId === userId ||
-      userRoles.includes('ADMIN');
+    const isAdmin = userRoles.includes('ADMIN');
+    const isOrganizer = match.tournament.organizerId === userId;
+    const isOwnerUmpire = match.umpireId === userId;
+    const isPrivilegedStarter = isOrganizer || isAdmin || isOwnerUmpire;
 
-    if (!isAuthorized) {
-      return res.status(403).json({ success: false, message: 'Not authorized to start this match' });
+    let isClaimingUmpire = false;
+    if (!isPrivilegedStarter) {
+      const registered = await prisma.tournamentUmpire.findUnique({
+        where: { tournamentId_umpireId: { tournamentId: match.tournamentId, umpireId: userId } },
+        select: { id: true },
+      });
+      if (!registered) {
+        return res.status(403).json({ success: false, message: 'Not authorized to start this match' });
+      }
+      if (!match.umpirePosted) {
+        return res.status(403).json({ success: false, message: 'This match is not open for umpires yet.' });
+      }
+      isClaimingUmpire = true;
     }
 
     // Guard: prevent re-starting a match already in progress or completed
@@ -565,21 +579,49 @@ const startMatchHandler = async (req, res) => {
       _getPlayerData(match.player2Id, _ctx)
     ]);
 
-    // ── Step 3: single update — status + scoreJson together (1 query) ─────
-    const finalMatch = await prisma.match.update({
-      where: { id: matchId },
-      data: {
-        status: 'IN_PROGRESS',
-        startedAt: now,
-        updatedAt: now,
-        scoreJson: JSON.stringify(scoreData)
-      },
-      include: {
-        tournament: { select: { id: true, name: true, sport: true } }, // scoring screen needs the sport
-        category:   { select: { id: true, name: true } },
-        umpire:     { select: { id: true, name: true, email: true } }
+    // ── Step 3: transition to IN_PROGRESS ─────────────────────────────────
+    const startInclude = {
+      tournament: { select: { id: true, name: true, sport: true } }, // scoring screen needs the sport
+      category:   { select: { id: true, name: true } },
+      umpire:     { select: { id: true, name: true, email: true } }
+    };
+
+    let finalMatch;
+    if (isClaimingUmpire) {
+      // Atomic first-come claim: only succeeds if the match is still unclaimed,
+      // still posted, and not yet started. A second umpire racing for the same
+      // match matches 0 rows and is told it has been taken.
+      const claim = await prisma.match.updateMany({
+        where: {
+          id: matchId,
+          umpireId: null,
+          umpirePosted: true,
+          status: { in: ['PENDING', 'READY', 'SCHEDULED'] }
+        },
+        data: {
+          umpireId: userId,
+          status: 'IN_PROGRESS',
+          startedAt: now,
+          updatedAt: now,
+          scoreJson: JSON.stringify(scoreData)
+        }
+      });
+      if (claim.count === 0) {
+        return res.status(409).json({ success: false, message: 'This match has already been taken by another umpire.' });
       }
-    });
+      finalMatch = await prisma.match.findUnique({ where: { id: matchId }, include: startInclude });
+    } else {
+      finalMatch = await prisma.match.update({
+        where: { id: matchId },
+        data: {
+          status: 'IN_PROGRESS',
+          startedAt: now,
+          updatedAt: now,
+          scoreJson: JSON.stringify(scoreData)
+        },
+        include: startInclude
+      });
+    }
 
     finalMatch.player1 = player1;
     finalMatch.player2 = player2;
@@ -1566,12 +1608,22 @@ router.put('/:matchId/config', authenticate, async (req, res) => {
       return res.status(404).json({ success: false, error: 'Match not found' });
     }
 
-    // Check authorization — only organizer, assigned umpire, or admin
+    // Check authorization — organizer, assigned umpire, admin, or a registered
+    // umpire configuring a posted match they are about to claim (umpire not yet set).
     const isOrganizer = match.tournament.organizerId === userId;
     const isAssignedUmpire = match.umpireId === userId;
     const isAdmin = (req.user.roles || []).includes('ADMIN');
 
-    if (!isOrganizer && !isAssignedUmpire && !isAdmin) {
+    let canConfigureAsPoolUmpire = false;
+    if (!isOrganizer && !isAssignedUmpire && !isAdmin && match.umpirePosted && !match.umpireId) {
+      const registered = await prisma.tournamentUmpire.findUnique({
+        where: { tournamentId_umpireId: { tournamentId: match.tournamentId, umpireId: userId } },
+        select: { id: true },
+      });
+      canConfigureAsPoolUmpire = !!registered;
+    }
+
+    if (!isOrganizer && !isAssignedUmpire && !isAdmin && !canConfigureAsPoolUmpire) {
       return res.status(403).json({ success: false, error: 'Not authorized to set match config' });
     }
 

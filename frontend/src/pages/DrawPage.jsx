@@ -104,11 +104,7 @@ const DrawPage = () => {
   const [matches, setMatches] = useState([]);
   const [success, setSuccess] = useState(null);
   const [tournamentUmpires, setTournamentUmpires] = useState([]);
-  const [loadingUmpires, setLoadingUmpires] = useState(false);
-  const [umpiresError, setUmpiresError] = useState(null);
-  const [showUmpireModal, setShowUmpireModal] = useState(false);
-  const [selectedMatchForUmpire, setSelectedMatchForUmpire] = useState(null);
-  const [showUmpireQueueModal, setShowUmpireQueueModal] = useState(false);
+  const [showPostMatchesModal, setShowPostMatchesModal] = useState(false);
   const [showManageUmpiresModal, setShowManageUmpiresModal] = useState(false);
   const pollIntervalRef = React.useRef(null);
   const activeCategoryIdRef = React.useRef(null); // stable ref for polling closure
@@ -746,81 +742,6 @@ const DrawPage = () => {
     setShowAssignModal(true);
   };
 
-  // Fetch tournament umpires — always fresh, shows errors, supports retry
-  const loadUmpires = async () => {
-    setLoadingUmpires(true);
-    setUmpiresError(null);
-    try {
-      const response = await tournamentAPI.getTournamentUmpires(tournamentId);
-      setTournamentUmpires(response.umpires || []);
-    } catch (err) {
-      console.error('Error fetching umpires:', err?.response?.status, err?.message);
-      setUmpiresError(err?.response?.data?.error || 'Failed to load umpires');
-    } finally {
-      setLoadingUmpires(false);
-    }
-  };
-
-  // Keep for backward compat (used nowhere else now)
-  const fetchTournamentUmpires = loadUmpires;
-
-  // Open umpire assignment modal - create match if needed
-  const openUmpireModal = async (matchData, bracketMatch) => {
-    let matchRecord = null;
-
-    if (matchData && matchData.id) {
-      // DB match already exists — use it directly
-      matchRecord = matchData;
-    } else if (bracketMatch && activeCategory) {
-      // No DB match yet — create it first
-      try {
-        setError(null);
-        const response = await api.post(`/tournaments/${tournamentId}/categories/${activeCategory.id}/matches`, {
-          matchNumber: bracketMatch.matchNumber,
-          round: bracketMatch.round || 1,
-          player1Id: bracketMatch.player1?.id,
-          player2Id: bracketMatch.player2?.id
-        });
-        matchRecord = response.data.match;
-        // Use the reliable draw-page refresh (same reason as the auto-repair
-        // effect — fetchBracket/getDraw can blank a ROUND_ROBIN_KNOCKOUT bracket).
-        fetchDrawPageFull(activeCategory.id, 0, true);
-      } catch (err) {
-        console.error('Error creating match:', err);
-        setError(getErrorMessage(err, 'Failed to create match. Please try again.'));
-        return;
-      }
-    }
-
-    if (!matchRecord) return;
-
-    // Open modal immediately with spinner, then load umpires
-    setSelectedMatchForUmpire(matchRecord);
-    setShowUmpireModal(true);
-    await loadUmpires();
-  };
-
-  // Assign umpire to match
-  const assignUmpireToMatch = async (umpireId) => {
-    if (!selectedMatchForUmpire) return;
-
-    const matchId = selectedMatchForUmpire.id;
-    try {
-      await api.put(`/matches/${matchId}/umpire`, { umpireId });
-
-      // Optimistic patch — store umpireId + full umpire object so name shows on card.
-      const umpireObj = tournamentUmpires.find(u => u.id === umpireId);
-      setMatches(prev => prev.map(m => m.id === matchId ? { ...m, umpireId, umpire: umpireObj || { id: umpireId } } : m));
-
-      setSuccess('Umpire assigned successfully!');
-      setShowUmpireModal(false);
-      setSelectedMatchForUmpire(null);
-      setTimeout(() => setSuccess(null), 3000);
-    } catch (err) {
-      console.error('Error assigning umpire:', err);
-      setError(getErrorMessage(err, 'Failed to assign umpire'));
-    }
-  };
 
   // ── Edit Result / Complete Match modal ─────────────────────────────────────
   // One modal serves both: a COMPLETED match opens in 'edit' mode (change score +
@@ -1177,9 +1098,9 @@ const DrawPage = () => {
 
             {isOrganizer && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
-                {/* Assign Matches — prominent button */}
+                {/* Post Matches to Umpires — prominent button */}
                 <button
-                  onClick={() => setShowUmpireQueueModal(true)}
+                  onClick={() => setShowPostMatchesModal(true)}
                   style={{
                     height: 44, padding: '0 16px', borderRadius: 22, flexShrink: 0,
                     background: 'linear-gradient(135deg,#F59E0B,#FCD34D)',
@@ -1191,10 +1112,10 @@ const DrawPage = () => {
                     WebkitTapHighlightColor: 'transparent',
                     whiteSpace: 'nowrap',
                   }}
-                  title="Assign matches to umpires"
+                  title="Post matches to your umpires"
                 >
                   <ListOrdered className="w-4 h-4" />
-                  Assign Matches
+                  Post to Umpires
                 </button>
 
                 {/* Settings gear */}
@@ -1525,7 +1446,7 @@ const DrawPage = () => {
             id: 'umpires',
             icon: <Users style={{ width: 20, height: 20 }} />,
             label: tournamentUmpires.length > 0 ? `Manage Umpires (${tournamentUmpires.length})` : 'Add Umpires',
-            detail: 'Add umpires to this tournament by entering their Matchify.pro ID (e.g. #42). Once added, you can assign them to specific matches for live court-side scoring.',
+            detail: 'Add umpires to this tournament by entering their Matchify.pro ID (e.g. #42). Once added, they can see the matches you post and take any one to score it court-side.',
             buttonLabel: 'Manage Umpires',
             accent: 'purple',
             disabled: false,
@@ -1534,13 +1455,13 @@ const DrawPage = () => {
           {
             id: 'assignmatches',
             icon: <ListOrdered style={{ width: 20, height: 20 }} />,
-            label: 'Assign Matches',
-            detail: 'Distribute matches to your umpires so each umpire knows exactly which matches they are responsible for scoring. Umpires must be added first before you can assign matches.',
-            buttonLabel: 'Assign Matches',
+            label: 'Post Matches to Umpires',
+            detail: 'Select the matches you want umpired and post them to the shared umpire pool. Every umpire added to this tournament sees the posted matches on their umpire page and can take any one to score it. Add umpires first.',
+            buttonLabel: 'Post Matches',
             accent: 'purple',
             disabled: tournamentUmpires.length === 0 || isCategoryCompleted,
-            disabledReason: tournamentUmpires.length === 0 ? 'Add umpires first before assigning matches.' : undefined,
-            action: () => { setShowActionsSheet(false); setSelectedAction(null); setShowUmpireQueueModal(true); },
+            disabledReason: tournamentUmpires.length === 0 ? 'Add umpires first before posting matches.' : undefined,
+            action: () => { setShowActionsSheet(false); setSelectedAction(null); setShowPostMatchesModal(true); },
           },
           {
             id: 'endcategory',
@@ -1706,13 +1627,13 @@ const DrawPage = () => {
               { id: 'assign',        label: 'Assign Players' },
               { id: 'groupstage',    label: 'Group Stage'    },
               { id: 'arrangeko',     label: 'Arrange KO'     },
-              { id: 'assignmatches', label: 'Assign Matches' },
+              { id: 'assignmatches', label: 'Post Matches'  },
               { id: 'endcategory',   label: 'End Category'   },
             ]
           : [
               { id: 'create',        label: 'Create Draw'    },
               { id: 'assign',        label: 'Assign Players' },
-              { id: 'assignmatches', label: 'Assign Matches' },
+              { id: 'assignmatches', label: 'Post Matches'  },
               { id: 'endcategory',   label: 'End Category'   },
             ];
 
@@ -1733,10 +1654,10 @@ const DrawPage = () => {
           groupstage: {
             title: 'Step 3 — Group Stage',
             desc: 'Umpires score all group matches on court. Complete every group match before moving to Arrange KO.',
-            btnLabel: tournamentUmpires.length > 0 ? 'Assign Matches' : 'Add Umpires First',
+            btnLabel: tournamentUmpires.length > 0 ? 'Post Matches' : 'Add Umpires First',
             action: () => {
               setActiveStepPopup(null);
-              if (tournamentUmpires.length > 0) setShowUmpireQueueModal(true);
+              if (tournamentUmpires.length > 0) setShowPostMatchesModal(true);
               else setShowManageUmpiresModal(true);
             },
           },
@@ -1752,12 +1673,12 @@ const DrawPage = () => {
             },
           },
           assignmatches: {
-            title: fmt === 'ROUND_ROBIN_KNOCKOUT' ? 'Step 5 — Assign Matches' : 'Step 3 — Assign Matches',
-            desc: 'Assign matches to umpires for scoring. Add umpires via ⚙ settings first, then distribute matches here.',
-            btnLabel: tournamentUmpires.length > 0 ? 'Assign Matches' : 'Add Umpires First',
+            title: fmt === 'ROUND_ROBIN_KNOCKOUT' ? 'Step 5 — Post Matches' : 'Step 3 — Post Matches',
+            desc: 'Post matches to your umpires. Add umpires via ⚙ settings first, then select the matches to post — any umpire can then take one to score.',
+            btnLabel: tournamentUmpires.length > 0 ? 'Post Matches' : 'Add Umpires First',
             action: () => {
               setActiveStepPopup(null);
-              if (tournamentUmpires.length > 0) setShowUmpireQueueModal(true);
+              if (tournamentUmpires.length > 0) setShowPostMatchesModal(true);
               else setShowManageUmpiresModal(true);
             },
           },
@@ -1970,8 +1891,7 @@ const DrawPage = () => {
               bracket={bracket} 
               matches={matches} 
               user={user} 
-              isOrganizer={isOrganizer} 
-              onAssignUmpire={openUmpireModal}
+              isOrganizer={isOrganizer}
               onChangeResult={onChangeResult}
               onViewMatchDetails={onViewMatchDetails}
               activeCategory={activeCategory}
@@ -2315,32 +2235,12 @@ const DrawPage = () => {
         />
       )}
 
-      {/* Umpire Queue Modal — bulk assign matches to umpires in sequential order */}
-      {showUmpireQueueModal && (
-        <UmpireQueueModal
+      {/* Post Matches to Umpires — organizer bulk-selects matches for the shared umpire pool */}
+      {showPostMatchesModal && (
+        <PostMatchesModal
           tournamentId={tournamentId}
-          umpires={tournamentUmpires}
-          onClose={() => setShowUmpireQueueModal(false)}
-          onUmpireAdded={(u) => setTournamentUmpires(prev => [...prev, u])}
-        />
-      )}
-
-      {/* Assign Umpire Modal */}
-      {showUmpireModal && selectedMatchForUmpire && (
-        <AssignUmpireModal
-          match={selectedMatchForUmpire}
-          category={activeCategory}
-          umpires={tournamentUmpires}
-          loadingUmpires={loadingUmpires}
-          umpiresError={umpiresError}
-          onRetryUmpires={loadUmpires}
-          tournamentId={tournamentId}
-          onUmpireAdded={(newUmpire) => setTournamentUmpires(prev => [...prev, newUmpire])}
-          onClose={() => {
-            setShowUmpireModal(false);
-            setSelectedMatchForUmpire(null);
-          }}
-          onAssign={assignUmpireToMatch}
+          onClose={() => setShowPostMatchesModal(false)}
+          setSuccess={setSuccess}
         />
       )}
 
@@ -3079,7 +2979,6 @@ const DrawDisplay = ({
       onViewMatchDetails={onViewMatchDetails}
       isRoundRobinComplete={isRoundRobinComplete}
       activeCategory={activeCategory}
-      tournamentId={tournamentId}
       assigning={assigning}
       setAssigning={setAssigning}
       setSuccess={setSuccess}
@@ -3784,23 +3683,13 @@ const KnockoutDisplay = ({ data, matches, user, isOrganizer, onAssignUmpire, onV
                                     <>
                                       {!isTbd1 && !isTbd2 ? (
                                         <>
+                                        {/* Organizer override — start/conduct any match directly, regardless of umpire lock */}
                                         <button
-                                          onClick={() => {
-                                            if (hasUmpire && dbMatch?.umpireId) {
-                                              navigate(`/match/${dbMatch.id}/conduct?umpireId=${dbMatch.umpireId}`);
-                                            } else {
-                                              const bracketMatchData = { matchNumber: match.matchNumber, round: ri + 1, player1, player2 };
-                                              onAssignUmpire(dbMatch, bracketMatchData);
-                                            }
-                                          }}
-                                          style={
-                                            hasUmpire
-                                              ? { flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', padding: '6px 8px', background: 'rgba(245,158,11,0.1)', color: '#FCD34D', border: '1px solid rgba(245,158,11,0.25)', borderRadius: '9px', fontSize: '10px', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }
-                                              : { flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', padding: '6px 8px', background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '9px', fontSize: '10px', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }
-                                          }
+                                          onClick={() => navigate(`/match/${dbMatch.id}/conduct`)}
+                                          style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', padding: '6px 8px', background: 'rgba(245,158,11,0.1)', color: '#FCD34D', border: '1px solid rgba(245,158,11,0.25)', borderRadius: '9px', fontSize: '10px', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}
                                         >
                                           <Gavel className="w-3 h-3 flex-shrink-0" />
-                                          {hasUmpire ? '✓ Conduct' : 'Assign Umpire'}
+                                          {hasUmpire ? '✓ Conduct' : 'Conduct'}
                                         </button>
                                         <button
                                           onClick={() => {
@@ -4388,24 +4277,14 @@ const RoundRobinDisplay = ({ tournamentId, categoryId, sport, data, matches, use
                       {/* Organizer pre-completion actions */}
                       {isOrganizer && hasPlayers && !isCompleted && (
                         <div className="px-2.5 pb-2.5 flex gap-2">
+                          {/* Organizer override — start/conduct any match directly, regardless of umpire lock */}
                           <button
-                            onClick={() => {
-                              if (hasUmpire && dbMatch?.umpireId) {
-                                navigate(`/match/${dbMatch.id}/conduct?umpireId=${dbMatch.umpireId}`);
-                              } else {
-                                const bracketMatchData = { matchNumber: match.matchNumber, round: 1, player1: match.player1, player2: match.player2, groupName: group.groupName };
-                                onAssignUmpire(dbMatch, bracketMatchData);
-                              }
-                            }}
+                            onClick={() => navigate(`/match/${dbMatch.id}/conduct`)}
                             className="flex-1 py-2.5 rounded-lg transition-all flex items-center justify-center gap-2 text-xs font-black border-2"
-                            style={
-                              hasUmpire
-                                ? { background: 'rgba(245,158,11,0.1)', color: '#FCD34D', borderColor: 'rgba(245,158,11,0.28)' }
-                                : { background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.65)', borderColor: 'rgba(255,255,255,0.12)' }
-                            }
+                            style={{ background: 'rgba(245,158,11,0.1)', color: '#FCD34D', borderColor: 'rgba(245,158,11,0.28)' }}
                           >
                             <Gavel className="w-4 h-4" />
-                            {hasUmpire ? '✓ CONDUCT' : 'ASSIGN'}
+                            CONDUCT
                           </button>
                           <button
                             onClick={() => {
@@ -5801,1119 +5680,194 @@ const AssignPlayersModal = ({ bracket, players, matches, loading, onClose, onSav
   );
 };
 
-// Assign Umpire Modal
-const AssignUmpireModal = ({ match, category, umpires, loadingUmpires, umpiresError, onRetryUmpires, onClose, onAssign, tournamentId, onUmpireAdded }) => {
-  const navigate = useNavigate();
-  const [selectedUmpire, setSelectedUmpire] = useState(match?.umpireId || null);
-  const [assigning, setAssigning] = useState(false);
-
-  const handleAssignOnly = async () => {
-    if (!selectedUmpire) return;
-    setAssigning(true);
-    await onAssign(selectedUmpire);
-    setAssigning(false);
-    onClose();
-  };
-
-  const handleStartMatch = async () => {
-    if (!selectedUmpire) return;
-    setAssigning(true);
-    await onAssign(selectedUmpire);
-    setAssigning(false);
-    // Pass umpireId in URL so ConductMatchPage can unlock the Start Match button
-    navigate(`/match/${match.id}/conduct?umpireId=${selectedUmpire}`);
-  };
-
-  const selectedUmpireData = umpires.find(u => u.id === selectedUmpire);
-
-  return (
-    <div
-      className="fixed inset-0 flex items-end sm:items-center justify-center z-50 p-4"
-      style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)' }}
-      onClick={onClose}
-    >
-      <div
-        className="w-full max-w-sm rounded-2xl overflow-hidden"
-        style={{ background: '#0d1025', border: '1px solid rgba(245,158,11,0.18)' }}
-        onClick={e => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="px-5 pt-5 pb-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
-                style={{ background: 'linear-gradient(135deg,rgba(245,158,11,0.25),rgba(245,158,11,0.2))', border: '1px solid rgba(245,158,11,0.3)' }}>
-                <Gavel className="w-5 h-5" style={{ color: '#F59E0B' }} />
-              </div>
-              <div>
-                <h2 className="text-base font-black text-white">Assign Umpire & Start Match</h2>
-                <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                  Match {match?.matchNumber} • {getPlayerDisplay(match?.player1)} vs {getPlayerDisplay(match?.player2)}
-                </p>
-                {/* Category + group differentiation — which category, and (for
-                    round-robin) which group this match belongs to. */}
-                {(category?.name || match?.groupName) && (
-                  <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
-                    {category?.name && (
-                      <span style={{ fontSize: 9, fontWeight: 800, color: '#FCD34D', background: 'rgba(245,158,11,0.14)', padding: '2px 8px', borderRadius: 8, letterSpacing: '0.02em' }}>
-                        {category.name}
-                      </span>
-                    )}
-                    {match?.groupName && (
-                      <span style={{ fontSize: 9, fontWeight: 800, color: '#c4b5fd', background: 'rgba(168,85,247,0.16)', padding: '2px 8px', borderRadius: 8, letterSpacing: '0.02em' }}>
-                        {/^group/i.test(match.groupName) ? match.groupName : `Group ${match.groupName}`}
-                      </span>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-            <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-xl flex-shrink-0 transition-all"
-              style={{ background: 'rgba(255,255,255,0.06)' }}>
-              <X className="w-4 h-4" style={{ color: 'rgba(255,255,255,0.5)' }} />
-            </button>
-          </div>
-        </div>
-
-        {/* Umpire list */}
-        <div className="px-5 py-4">
-          {loadingUmpires ? (
-            <div className="text-center py-8">
-              <Spinner size="md" className="mx-auto mb-3" />
-              <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>Loading umpires…</p>
-            </div>
-          ) : umpiresError ? (
-            <div className="text-center py-8">
-              <AlertTriangle className="w-10 h-10 mx-auto mb-3" style={{ color: '#f87171' }} />
-              <p className="text-sm font-bold text-white mb-1">Failed to load umpires</p>
-              <p className="text-xs mb-4" style={{ color: 'rgba(255,255,255,0.4)' }}>{umpiresError}</p>
-              <button
-                onClick={onRetryUmpires}
-                className="px-4 py-2 rounded-xl text-xs font-bold"
-                style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)', color: '#F59E0B' }}
-              >
-                Retry
-              </button>
-            </div>
-          ) : umpires.length === 0 ? (
-            <InlineAddUmpire
-              tournamentId={tournamentId}
-              onUmpireAdded={onUmpireAdded}
-            />
-          ) : (
-            <div className="space-y-2 max-h-56 overflow-y-auto" style={{ scrollbarWidth: 'none' }}>
-              {umpires.map((umpire) => {
-                const isSelected = selectedUmpire === umpire.id;
-                return (
-                  <div
-                    key={umpire.id}
-                    onClick={() => setSelectedUmpire(umpire.id)}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-all"
-                    style={isSelected
-                      ? { background: 'rgba(245,158,11,0.1)', border: '1.5px solid rgba(245,158,11,0.4)' }
-                      : { background: 'rgba(255,255,255,0.04)', border: '1.5px solid rgba(255,255,255,0.07)' }}
-                  >
-                    <div className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm flex-shrink-0"
-                      style={isSelected
-                        ? { background: 'linear-gradient(135deg,#F59E0B,#F59E0B)', color: '#050810' }
-                        : { background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)' }}>
-                      {umpire.name?.charAt(0)?.toUpperCase() || 'U'}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-white truncate">{umpire.name}</p>
-                      <p className="text-xs truncate" style={{ color: 'rgba(255,255,255,0.4)' }}>{umpire.email}</p>
-                    </div>
-                    {isSelected && <CheckCircle className="w-4 h-4 flex-shrink-0" style={{ color: '#F59E0B' }} />}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Selected umpire confirmation */}
-          {selectedUmpireData && (
-            <div className="mt-3 px-3 py-2.5 rounded-xl flex items-center gap-2"
-              style={{ background: 'rgba(245,158,11,0.07)', border: '1px solid rgba(245,158,11,0.2)' }}>
-              <CheckCircle className="w-4 h-4 flex-shrink-0" style={{ color: '#F59E0B' }} />
-              <p className="text-xs font-bold" style={{ color: '#F59E0B' }}>
-                {selectedUmpireData.name} will conduct this match
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* Actions */}
-        <div className="px-5 pb-5 space-y-2.5" style={{ borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: '1rem' }}>
-          {/* Start Match — primary */}
-          <button
-            onClick={handleStartMatch}
-            disabled={!selectedUmpire || assigning || umpires.length === 0}
-            className="w-full py-3.5 rounded-xl font-black text-sm transition-all disabled:opacity-40 flex items-center justify-center gap-2"
-            style={{ background: 'linear-gradient(135deg,#F59E0B,#F59E0B)', color: '#050810', boxShadow: '0 4px 16px rgba(245,158,11,0.35)' }}
-          >
-            {assigning
-              ? <><Spinner size="sm" />Starting…</>
-              : <><Gavel className="w-4 h-4" />Start Match</>}
-          </button>
-
-          {/* Cancel + Assign Only */}
-          <div className="flex gap-2">
-            <button
-              onClick={onClose}
-              className="flex-1 py-2.5 rounded-xl text-sm font-bold transition-all"
-              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.7)' }}
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleAssignOnly}
-              disabled={!selectedUmpire || assigning || umpires.length === 0}
-              className="flex-1 py-2.5 rounded-xl text-sm font-bold transition-all disabled:opacity-40 flex items-center justify-center gap-1.5"
-              style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)', color: '#FCD34D' }}
-            >
-              {assigning
-                ? <Spinner size="xs" />
-                : <CheckCircle className="w-3.5 h-3.5" />}
-              Assign Only
-            </button>
-          </div>
-
-          {/* Hint */}
-          <p className="text-center text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>
-            Press "Start Match" to assign <span style={{ color: '#F59E0B' }}>{selectedUmpireData?.name || 'umpire'}</span> and begin scoring
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Arrange Knockout Draw Modal — position-based seeding
-// Organiser taps a player chip, then taps a bracket slot to place them.
-// Empty slots = BYE (auto-advance). Backend receives same knockoutSlots format.
-const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
-  const [positions, setPositions] = useState([]);       // length=bracketSize, each null|player
-  const [advancingPlayers, setAdvancingPlayers] = useState([]);
-  const [bracketSize, setBracketSize] = useState(null);
-  const [pickedPlayer, setPickedPlayer] = useState(null); // player currently "in hand"
-
-  const nextPow2 = (n) => { let p = 2; while (p < n) p *= 2; return p; };
-
-  // Rebuild positions array when organiser changes bracket size
-  const handleBracketSizeChange = (newSize) => {
-    setBracketSize(newSize);
-    setPositions(prev => {
-      const pos = Array(newSize).fill(null);
-      prev.forEach((p, i) => { if (i < newSize) pos[i] = p; });
-      return pos;
-    });
-    setPickedPlayer(null);
-  };
-
-  useEffect(() => {
-    if (!bracket?.groups) return;
-    // allPlayers = everyone who played the round robin in this category. The organiser
-    // places them manually — NO auto-fill. Each carries full display info: name,
-    // partner name, team name, pool and seed/rank number.
-    const allPlayers = [];
-
-    const sortByStanding = (a, b) => {
-      // Rank: PTS (match points) → TP (total points scored) → PD (point difference)
-      if ((b.points || 0) !== (a.points || 0)) return (b.points || 0) - (a.points || 0);
-      const aTp = a.totalPoints || 0, bTp = b.totalPoints || 0;
-      if (bTp !== aTp) return bTp - aTp;
-      const aDiff = (a.totalPoints || 0) - (a.totalPointsAgainst || 0);
-      const bDiff = (b.totalPoints || 0) - (b.totalPointsAgainst || 0);
-      return bDiff - aDiff;
-    };
-
-    bracket.groups.forEach((group, groupIndex) => {
-      const groupLetter = String.fromCharCode(65 + groupIndex);
-      const standings = group.standings || [];
-      if (standings.length > 0) {
-        standings
-          .filter(s => s.playerId)
-          .sort(sortByStanding)
-          .forEach((s, rank) => {
-            allPlayers.push({
-              id: s.playerId, name: s.playerName,
-              partnerName: s.partnerName || null,
-              teamName: s.teamName || null,
-              group: groupLetter, rank: rank + 1, points: s.points
-            });
-          });
-      } else {
-        // Sort participants by points → diff → totalPoints
-        [...(group.participants || [])]
-          .sort(sortByStanding)
-          .forEach((p, i) => {
-            if (!p?.id) return;
-            allPlayers.push({
-              id: p.id, name: p.name,
-              partnerName: p.partnerName || null,
-              teamName: p.teamName || null,
-              group: groupLetter, rank: i + 1, points: p.points || 0
-            });
-          });
-      }
-    });
-
-    setAdvancingPlayers(allPlayers);
-
-    // If a knockout draw already exists, restore the organiser's EXACT placement and size.
-    const existingFirstRound = bracket.knockout?.rounds?.[0]?.matches;
-    if (existingFirstRound && existingFirstRound.length > 0) {
-      const size = existingFirstRound.length * 2;
-      const pos = Array(size).fill(null);
-      existingFirstRound.forEach((match, mi) => {
-        const p1 = allPlayers.find(p => p.id === match.player1?.id);
-        const p2 = allPlayers.find(p => p.id === match.player2?.id);
-        if (p1) pos[mi * 2] = p1;
-        if (p2) pos[mi * 2 + 1] = p2;
-      });
-      if (pos.some(p => p !== null)) {
-        setBracketSize(size);
-        setPositions(pos);
-        return;
-      }
-    }
-
-    // No existing draw → start EMPTY. Organiser picks the size (Round of 2…128) and
-    // places every player by hand. Default to the smallest bracket that holds everyone.
-    const defaultSize = nextPow2(allPlayers.length || 2);
-    setBracketSize(defaultSize);
-    setPositions(Array(defaultSize).fill(null));
-  }, [bracket]);
-
-  // Tap a position slot
-  const handlePositionClick = (posIdx) => {
-    const occupant = positions[posIdx];
-
-    if (pickedPlayer) {
-      // A player is in hand — place them here
-      const newPos = [...positions];
-      // If this slot is occupied, put that player back in hand (swap)
-      const displaced = newPos[posIdx];
-      // Remove picked player from their old slot if they were already placed
-      const oldIdx = newPos.findIndex(p => p?.id === pickedPlayer.id);
-      if (oldIdx !== -1) newPos[oldIdx] = displaced || null;
-      else if (displaced) {/* displaced goes back to pool — setPickedPlayer below handles it */}
-      newPos[posIdx] = pickedPlayer;
-      setPositions(newPos);
-      // If we displaced someone, put them in hand; otherwise clear hand
-      setPickedPlayer(displaced && displaced.id !== pickedPlayer.id ? displaced : null);
-    } else if (occupant) {
-      // No player in hand — pick up the occupant
-      const newPos = [...positions];
-      newPos[posIdx] = null;
-      setPositions(newPos);
-      setPickedPlayer(occupant);
-    }
-    // else: empty slot, no player in hand → ignore
-  };
-
-  // Tap a player chip in the pool
-  const handlePoolPlayerClick = (player) => {
-    if (pickedPlayer?.id === player.id) {
-      setPickedPlayer(null); // deselect
-    } else {
-      setPickedPlayer(player);
-    }
-  };
-
-  const handleSave = () => {
-    const slots = [];
-    for (let i = 0; i < positions.length; i += 2) {
-      let p1 = positions[i];
-      let p2 = positions[i + 1] || null;
-      // If only p2 set (organiser placed in bottom of pair), treat as p1 (BYE logic needs p1)
-      if (!p1 && p2) { p1 = p2; p2 = null; }
-      if (!p1) {
-        alert(`Match ${i / 2 + 1} is empty. Place at least one player in every match, or pick a smaller knockout size.`);
-        return;
-      }
-      slots.push({ matchNumber: i / 2 + 1, player1: p1, player2: p2 });
-    }
-    onSave(slots);
-  };
-
-  const assignedIds = new Set(positions.filter(Boolean).map(p => p.id));
-  const poolPlayers = advancingPlayers.filter(p => !assignedIds.has(p.id));
-  const filledCount = positions.filter(Boolean).length;
-  const byeCount = (bracketSize || 0) - filledCount;
-
-  return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      {/* Animated Background */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-10 right-10 w-96 h-96 rounded-full blur-3xl"
-          style={{ background: 'radial-gradient(circle, rgba(245,158,11,0.5) 0%, rgba(245,158,11,0.3) 50%, transparent 70%)', animation: 'float 8s ease-in-out infinite, pulse 4s ease-in-out infinite' }} />
-        <div className="absolute bottom-10 left-10 w-80 h-80 rounded-full blur-3xl"
-          style={{ background: 'radial-gradient(circle, rgba(20,184,166,0.5) 0%, rgba(13,148,136,0.3) 50%, transparent 70%)', animation: 'float 10s ease-in-out infinite reverse, pulse 5s ease-in-out infinite', animationDelay: '2s' }} />
-        {ARRANGE_PARTICLES.map((p, i) => (
-          <div key={i} className="absolute rounded-full"
-            style={{ width: `${p.w}px`, height: `${p.h}px`, left: `${p.x}%`, top: `${p.y}%`, background: p.c, opacity: p.o, animation: `float ${p.dur}s ease-in-out infinite`, animationDelay: `${p.delay}s`, boxShadow: `0 0 ${p.glow}px ${p.c}` }} />
-        ))}
-      </div>
-
-      <div className="relative backdrop-blur-xl rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl" style={{ background: '#0d1025', border: '2px solid rgba(245,158,11,0.2)' }}>
-        {/* Header */}
-        <div className="p-3 border-b border-emerald-500/20 bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-emerald-500/10">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-[15px] font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 leading-tight">
-                Arrange Knockout Draw
-              </h2>
-              <p className="text-gray-400 text-[10px] leading-tight mt-0.5">
-                Pick the size, then tap a player → tap a slot to place them. A player with no opponent gets a BYE (auto-advances).
-              </p>
-            </div>
-            <button onClick={onClose} className="text-gray-400 hover:text-white p-1.5 hover:bg-emerald-500/20 rounded-lg transition-all hover:scale-110">
-              <X className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
-
-        <div className="p-3 space-y-3">
-
-          {/* Bracket Size Selector — single button that opens a dropdown (Round of 2 … 128) */}
-          {bracketSize && (
-            <div className="p-2 rounded-xl" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
-              <div className="flex items-center justify-between flex-wrap gap-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-bold" style={{ color: 'rgba(255,255,255,0.5)' }}>Knockout size</span>
-                  <select
-                    value={bracketSize}
-                    onChange={(e) => handleBracketSizeChange(Number(e.target.value))}
-                    className="px-3 py-1.5 rounded-lg text-[11px] font-bold cursor-pointer outline-none"
-                    style={{ background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.5)', color: '#F59E0B', appearance: 'auto' }}>
-                    {[2, 4, 8, 16, 32, 64, 128].map(s => (
-                      <option key={s} value={s} style={{ background: '#0d1025', color: '#fff' }}>Round of {s}</option>
-                    ))}
-                  </select>
-                </div>
-                <span className="text-[9px]" style={{ color: 'rgba(255,255,255,0.35)' }}>
-                  {filledCount}/{bracketSize} placed · {byeCount > 0 ? `${byeCount} BYE${byeCount > 1 ? 's' : ''}` : 'no byes'}
-                </span>
-              </div>
-            </div>
-          )}
-
-          {/* Player in hand banner */}
-          {pickedPlayer && (
-            <div className="p-2 rounded-xl flex items-center gap-2 animate-pulse"
-              style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.4)' }}>
-              <div className="w-2 h-2 rounded-full bg-[#F59E0B] flex-shrink-0" />
-              <span className="text-[11px] font-bold text-white flex-1">
-                {pickedPlayer.name}
-                {pickedPlayer.partnerName ? ` / ${pickedPlayer.partnerName}` : ''}
-                <span className="text-[#F59E0B] ml-1">(Pool {pickedPlayer.group} #{pickedPlayer.rank})</span>
-              </span>
-              <span className="text-[9px]" style={{ color: 'rgba(255,255,255,0.5)' }}>tap a slot →</span>
-              <button onClick={() => setPickedPlayer(null)}
-                className="text-gray-400 hover:text-white p-0.5 rounded transition-all flex-shrink-0">
-                <X className="w-3 h-3" />
-              </button>
-            </div>
-          )}
-
-          {/* Qualifying Players Pool */}
-          <div>
-            <h3 className="text-[10px] font-black icon-green mb-2 uppercase tracking-wider flex items-center gap-1.5">
-              <Trophy className="w-3 h-3" />
-              Round Robin Players ({advancingPlayers.length})
-              {poolPlayers.length > 0 && (
-                <span className="ml-1 text-[9px] font-normal" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                  — {poolPlayers.length} not yet placed
-                </span>
-              )}
-            </h3>
-            <div className="flex flex-wrap gap-1.5">
-              {advancingPlayers.map(player => {
-                const isPlaced = assignedIds.has(player.id);
-                const isPicked = pickedPlayer?.id === player.id;
-                return (
-                  <button
-                    key={player.id}
-                    onClick={() => !isPlaced && handlePoolPlayerClick(player)}
-                    disabled={isPlaced}
-                    className="px-2 py-1.5 rounded-lg text-left transition-all"
-                    style={{
-                      background: isPicked
-                        ? 'rgba(245,158,11,0.2)'
-                        : isPlaced
-                          ? 'rgba(255,255,255,0.03)'
-                          : 'rgba(255,255,255,0.07)',
-                      border: `1px solid ${isPicked ? 'rgba(245,158,11,0.7)' : isPlaced ? 'rgba(255,255,255,0.06)' : 'rgba(245,158,11,0.25)'}`,
-                      opacity: isPlaced ? 0.35 : 1,
-                      cursor: isPlaced ? 'default' : 'pointer',
-                      transform: isPicked ? 'scale(1.04)' : 'scale(1)',
-                      boxShadow: isPicked ? '0 0 10px rgba(245,158,11,0.3)' : 'none'
-                    }}>
-                    <div className="text-[10px] font-bold text-white leading-tight">
-                      {player.name}{player.partnerName ? ` / ${player.partnerName}` : ''}
-                    </div>
-                    {player.teamName && (
-                      <div className="text-[8px] font-semibold leading-tight mt-0.5" style={{ color: 'rgba(255,255,255,0.55)' }}>
-                        {player.teamName}
-                      </div>
-                    )}
-                    <div className="text-[8px] flex items-center gap-1 mt-0.5">
-                      <span className="px-1 rounded font-bold" style={{ background: 'rgba(245,158,11,0.15)', color: '#F59E0B' }}>
-                        Pool {player.group}
-                      </span>
-                      <span style={{ color: 'rgba(255,255,255,0.5)' }}>Seed #{player.rank}</span>
-                      {isPlaced && <span style={{ color: 'rgba(245,158,11,0.6)' }}>✓</span>}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Bracket Positions — pairs = first-round matches */}
-          <div>
-            <h3 className="text-[10px] font-black icon-green mb-2 uppercase tracking-wider flex items-center gap-1.5">
-              <Zap className="w-3 h-3" />
-              Bracket Positions
-              <span className="text-[9px] font-normal ml-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                each pair is one first-round match
-              </span>
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              {positions.length > 0 && Array.from({ length: positions.length / 2 }, (_, mi) => {
-                const p1 = positions[mi * 2];
-                const p2 = positions[mi * 2 + 1];
-                const isBye = p1 && !p2;
-                return (
-                  <div key={mi}
-                    className="rounded-xl overflow-hidden"
-                    style={{ border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.02)' }}>
-                    {/* Match label */}
-                    <div className="px-2 py-1 flex items-center justify-between"
-                      style={{ background: 'rgba(255,255,255,0.04)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                      <span className="text-[9px] font-black uppercase tracking-wider" style={{ color: 'rgba(245,158,11,0.7)' }}>
-                        Match {mi + 1}
-                      </span>
-                      {isBye && (
-                        <span className="text-[8px] font-bold px-1.5 py-0.5 rounded"
-                          style={{ background: 'rgba(255,193,7,0.15)', color: 'rgba(255,193,7,0.8)', border: '1px solid rgba(255,193,7,0.3)' }}>
-                          BYE
-                        </span>
-                      )}
-                    </div>
-                    {/* Two position slots */}
-                    <div className="p-1.5 space-y-1">
-                      {[0, 1].map(offset => {
-                        const posIdx = mi * 2 + offset;
-                        const player = positions[posIdx];
-                        const isPicked = pickedPlayer?.id === player?.id;
-                        const isTargetable = !!pickedPlayer && !isPicked;
-                        return (
-                          <button
-                            key={offset}
-                            onClick={() => handlePositionClick(posIdx)}
-                            className="w-full rounded-lg p-2 text-left transition-all"
-                            style={{
-                              background: player
-                                ? isPicked
-                                  ? 'rgba(245,158,11,0.15)'
-                                  : 'linear-gradient(135deg, rgba(245,158,11,0.15), rgba(245,158,11,0.1))'
-                                : isTargetable
-                                  ? 'rgba(245,158,11,0.06)'
-                                  : 'rgba(255,255,255,0.03)',
-                              border: `1px solid ${
-                                player
-                                  ? isPicked ? 'rgba(245,158,11,0.6)' : 'rgba(245,158,11,0.3)'
-                                  : isTargetable ? 'rgba(245,158,11,0.35)' : 'rgba(255,255,255,0.08)'
-                              }`,
-                              cursor: 'pointer'
-                            }}>
-                            {player ? (
-                              <div className="flex items-center gap-1.5">
-                                <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-[9px] font-black"
-                                  style={{ background: 'rgba(245,158,11,0.2)', color: '#F59E0B', border: '1px solid rgba(245,158,11,0.4)' }}>
-                                  {posIdx + 1}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <div className="text-[11px] font-bold text-white leading-tight truncate">
-                                    {player.name}{player.partnerName ? ` / ${player.partnerName}` : ''}
-                                  </div>
-                                  <div className="text-[8px] flex items-center gap-1 mt-0.5">
-                                    <span style={{ color: 'rgba(245,158,11,0.7)' }}>Pool {player.group}</span>
-                                    <span style={{ color: 'rgba(255,255,255,0.4)' }}>#{player.rank} · {player.points}pts</span>
-                                  </div>
-                                </div>
-                                <X className="w-3 h-3 flex-shrink-0" style={{ color: 'rgba(255,255,255,0.3)' }} />
-                              </div>
-                            ) : (
-                              <div className="flex items-center gap-1.5">
-                                <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-[9px] font-bold"
-                                  style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.3)', border: '1px dashed rgba(255,255,255,0.15)' }}>
-                                  {posIdx + 1}
-                                </div>
-                                <span className="text-[10px]"
-                                  style={{ color: isTargetable ? 'rgba(245,158,11,0.6)' : 'rgba(255,255,255,0.2)' }}>
-                                  {isTargetable ? `Place ${pickedPlayer.name.split('/')[0].trim()} here` : 'Empty — BYE'}
-                                </span>
-                              </div>
-                            )}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-        </div>
-
-        {/* Footer */}
-        <div className="p-3 border-t border-emerald-500/20 flex gap-2 bg-gradient-to-r from-emerald-500/5 via-teal-500/5 to-emerald-500/5">
-          <button onClick={onClose}
-            className="flex-1 px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-600 transition-all text-[11px] font-bold shadow-lg">
-            Cancel
-          </button>
-          <button onClick={handleSave} disabled={saving}
-            className="flex-1 px-4 py-2 btn-brand rounded-lg transition-all disabled:opacity-50 text-[11px] font-bold">
-            {saving ? 'Saving...' : `Save Draw${byeCount > 0 ? ` (${byeCount} BYE${byeCount > 1 ? 's' : ''})` : ''}`}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
 // ─────────────────────────────────────────────────────────────────────────────
-// UmpireQueueModal
-// Organizer picks umpire → adds matches in play order → saves queue.
-// Calls PUT /api/matches/tournament/:tournamentId/umpire-queue (no new API).
+// PostMatchesModal
+// Organizer bulk-selects matches and posts them to the shared umpire pool.
+// Every registered umpire then sees the posted matches on their umpire page and
+// can take any one to score it. Unchecking a posted match removes it from the pool.
 // ─────────────────────────────────────────────────────────────────────────────
-const UmpireQueueModal = ({ tournamentId, umpires: initialUmpires, onClose, onUmpireAdded }) => {
-  const [allMatches, setAllMatches] = useState([]);
-  const [loadingMatches, setLoadingMatches] = useState(true);
-  const [localUmpires, setLocalUmpires] = useState(initialUmpires);
-  const [selectedUmpireId, setSelectedUmpireId] = useState(initialUmpires[0]?.id || null);
-  const [queues, setQueues] = useState({}); // { [umpireId]: string[] }
+const PostMatchesModal = ({ tournamentId, onClose, setSuccess }) => {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [matches, setMatches] = useState([]);
+  const [postedInitially, setPostedInitially] = useState(() => new Set());
+  const [selected, setSelected] = useState(() => new Set());
   const [saving, setSaving] = useState(false);
-  const [saveMsg, setSaveMsg] = useState(null); // { type:'success'|'error', text:string }
-  const [showAddUmpire, setShowAddUmpire] = useState(false);
-  const [addCode, setAddCode] = useState('');
-  const [addingUmpire, setAddingUmpire] = useState(false);
-  const [addUmpireErr, setAddUmpireErr] = useState(null);
+
+  // Only matches with both players present and not already finished can be posted.
+  const isPostable = (m) =>
+    m.player1Id && m.player2Id && !['COMPLETED', 'BYE'].includes(m.status);
 
   useEffect(() => {
+    let cancelled = false;
     (async () => {
       try {
-        const data = await getTournamentAllMatches(tournamentId);
-        const matches = data.matches || [];
-        setAllMatches(matches);
-        // Pre-populate from existing queueOrder in DB
-        const initial = {};
-        initialUmpires.forEach(u => {
-          const assigned = matches
-            .filter(m => m.umpireId === u.id && m.queueOrder != null && m.status !== 'COMPLETED')
-            .sort((a, b) => (a.queueOrder || 0) - (b.queueOrder || 0));
-          initial[u.id] = assigned.map(m => m.id);
-        });
-        setQueues(initial);
+        setLoading(true);
+        const res = await api.get(`/tournaments/${tournamentId}/matches`);
+        if (cancelled) return;
+        const all = (res.data?.matches || []).filter(isPostable);
+        setMatches(all);
+        const posted = new Set(all.filter(m => m.umpirePosted).map(m => m.id));
+        setPostedInitially(posted);
+        setSelected(new Set(posted));
+        setError(null);
       } catch (err) {
-        console.error('UmpireQueueModal load error:', err);
+        if (!cancelled) setError(getErrorMessage(err, 'Failed to load matches'));
       } finally {
-        setLoadingMatches(false);
+        if (!cancelled) setLoading(false);
       }
     })();
+    return () => { cancelled = true; };
   }, [tournamentId]);
 
-  const currentQueue = queues[selectedUmpireId] || [];
-  const allQueuedIds = new Set(Object.values(queues).flat());
-  // A match is assignable only when BOTH sides have a real player. Works for
-  // singles (player1/player2) and doubles/team slots (team1…/team2…). This hides
-  // future "TBD vs TBD" and bye matches so the list shows only real, playable
-  // matches with proper names — across every category and format.
-  const bothPlayersReady = (m) => {
-    const side1 = m.player1?.name || m.team1Player1?.name || m.team1Player2?.name;
-    const side2 = m.player2?.name || m.team2Player1?.name || m.team2Player2?.name;
-    return !!side1 && !!side2;
-  };
-  const available = allMatches.filter(m => m.status !== 'COMPLETED' && !allQueuedIds.has(m.id) && bothPlayersReady(m));
-
-  // Group the available matches by category so each category is a clearly
-  // separated section (e.g. "Test doubles", then "Test singles").
-  const availableByCategory = (() => {
-    const groups = new Map();
-    available.forEach(m => {
-      const cat = m.category?.name || 'Matches';
-      if (!groups.has(cat)) groups.set(cat, []);
-      groups.get(cat).push(m);
-    });
-    return Array.from(groups.entries()); // [ [catName, matches[]], ... ]
-  })();
-
-  // Within a round-robin category, split matches by their group (A, B, C…) so
-  // each group is clearly separated. Returns null for knockout-only categories
-  // (no groupName) → they stay a flat list. Knockout-stage matches inside a RR
-  // category are collected under a trailing "Knockout" section.
-  const subGroupsFor = (catMatches) => {
-    if (!catMatches.some(m => m.groupName)) return null;
-    const map = new Map();
-    catMatches.forEach(m => {
-      const key = m.groupName
-        ? (/^group/i.test(m.groupName) ? m.groupName : `Group ${m.groupName}`)
-        : 'Knockout';
-      if (!map.has(key)) map.set(key, []);
-      map.get(key).push(m);
-    });
-    return Array.from(map.entries()).sort((a, b) => {
-      if (a[0] === 'Knockout') return 1;
-      if (b[0] === 'Knockout') return -1;
-      return a[0].localeCompare(b[0], undefined, { numeric: true });
+  const toggle = (id) => {
+    setSelected(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
     });
   };
 
-  const addToQueue   = (id) => setQueues(p => ({ ...p, [selectedUmpireId]: [...(p[selectedUmpireId] || []), id] }));
-  const removeFromQueue = (id) => setQueues(p => ({ ...p, [selectedUmpireId]: (p[selectedUmpireId] || []).filter(x => x !== id) }));
-
-  const moveUp = (i) => {
-    if (i === 0) return;
-    const q = [...currentQueue]; [q[i - 1], q[i]] = [q[i], q[i - 1]];
-    setQueues(p => ({ ...p, [selectedUmpireId]: q }));
-  };
-  const moveDown = (i) => {
-    if (i === currentQueue.length - 1) return;
-    const q = [...currentQueue]; [q[i], q[i + 1]] = [q[i + 1], q[i]];
-    setQueues(p => ({ ...p, [selectedUmpireId]: q }));
+  const allIds = matches.map(m => m.id);
+  const allSelected = allIds.length > 0 && allIds.every(id => selected.has(id));
+  const toggleAll = () => {
+    setSelected(allSelected ? new Set() : new Set(allIds));
   };
 
-  const getMatchInfo = (matchId) => {
-    const m = allMatches.find(x => x.id === matchId);
-    if (!m) return { matchNumber: '?', p1: 'TBD', p2: 'TBD', cat: '' };
-    // Singles: player1Id / player2Id (with optional partnerName for doubles registered as pair)
-    let p1 = m.player1?.name || null;
-    if (p1 && m.player1?.partnerName) p1 += ` / ${m.player1.partnerName}`;
-    let p2 = m.player2?.name || null;
-    if (p2 && m.player2?.partnerName) p2 += ` / ${m.player2.partnerName}`;
-    // Team slots (doubles with team1Player1Id etc.)
-    if (!p1 && (m.team1Player1 || m.team1Player2)) {
-      const n1 = m.team1Player1?.name; const n2 = m.team1Player2?.name;
-      p1 = n1 && n2 ? `${n1} / ${n2}` : n1 || n2 || null;
-    }
-    if (!p2 && (m.team2Player1 || m.team2Player2)) {
-      const n1 = m.team2Player1?.name; const n2 = m.team2Player2?.name;
-      p2 = n1 && n2 ? `${n1} / ${n2}` : n1 || n2 || null;
-    }
-    return { matchNumber: m.matchNumber, p1: p1 || 'TBD', p2: p2 || 'TBD', cat: m.category?.name || '' };
+  const roundLabel = (m) => {
+    const r = m.round;
+    const name = r === 1 ? 'Final' : r === 2 ? 'Semi Final' : r === 3 ? 'Quarter Final' : r != null ? `Round ${r}` : '';
+    return [name, m.matchNumber != null ? `Match #${m.matchNumber}` : ''].filter(Boolean).join(' · ') || 'Match';
   };
 
-  // Single source of truth for an available-match card — used by both the flat
-  // (knockout) list and the per-group (round-robin) list so styling stays identical.
-  const renderAvailableMatch = (m) => {
-    const info = getMatchInfo(m.id);
-    const p1parts = info.p1.split(' / ');
-    const p2parts = info.p2.split(' / ');
-    return (
-      <button key={m.id} onClick={() => addToQueue(m.id)}
-        className="w-full flex items-center gap-2 rounded-xl px-3 py-2.5 text-left transition-all hover:scale-[1.01]"
-        style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
-        <Plus className="w-3.5 h-3.5 flex-shrink-0" style={{ color: '#60a5fa' }} />
-        <div className="flex-1 min-w-0">
-          <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.38)', fontWeight: 700, marginBottom: 3 }}>
-            M{info.matchNumber}
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: 3 }}>
-            <div>
-              <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,0.9)', lineHeight: 1.2 }}>{p1parts[0]}</div>
-              {p1parts[1] && <div style={{ fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.4)', lineHeight: 1.2 }}>/ {p1parts[1]}</div>}
-            </div>
-            <span style={{ fontSize: 8, fontWeight: 800, color: 'rgba(245,158,11,0.6)', padding: '1px 4px', background: 'rgba(245,158,11,0.08)', borderRadius: 3 }}>vs</span>
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: 11, fontWeight: 800, color: 'rgba(255,255,255,0.9)', lineHeight: 1.2 }}>{p2parts[0]}</div>
-              {p2parts[1] && <div style={{ fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.4)', lineHeight: 1.2 }}>/ {p2parts[1]}</div>}
-            </div>
-          </div>
-        </div>
-        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded flex-shrink-0"
-          style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.35)' }}>
-          {m.status}
-        </span>
-      </button>
-    );
-  };
+  // Group by category name for readability
+  const groups = matches.reduce((acc, m) => {
+    const key = m.category?.name || 'Matches';
+    (acc[key] = acc[key] || []).push(m);
+    return acc;
+  }, {});
 
-  const saveQueue = async () => {
-    if (!selectedUmpireId) return;
-    setSaving(true); setSaveMsg(null);
+  const toPost = [...selected].filter(id => !postedInitially.has(id));
+  const toUnpost = [...postedInitially].filter(id => !selected.has(id));
+  const dirty = toPost.length > 0 || toUnpost.length > 0;
+
+  const handleSave = async () => {
+    if (!dirty) { onClose(); return; }
     try {
-      await api.put(`/matches/tournament/${tournamentId}/umpire-queue`, {
-        umpireId: selectedUmpireId,
-        matchIds: currentQueue
-      });
-      setSaveMsg({ type: 'success', text: `Saved — ${currentQueue.length} match${currentQueue.length !== 1 ? 'es' : ''} queued` });
-      setTimeout(() => setSaveMsg(null), 4000);
+      setSaving(true);
+      setError(null);
+      if (toPost.length > 0) await tournamentAPI.setUmpirePostedMatches(tournamentId, toPost, true);
+      if (toUnpost.length > 0) await tournamentAPI.setUmpirePostedMatches(tournamentId, toUnpost, false);
+      const parts = [];
+      if (toPost.length) parts.push(`Posted ${toPost.length} match${toPost.length !== 1 ? 'es' : ''}`);
+      if (toUnpost.length) parts.push(`removed ${toUnpost.length}`);
+      setSuccess?.(`${parts.join(', ')} — umpires can now see the posted matches.`);
+      setTimeout(() => setSuccess?.(null), 3500);
+      onClose();
     } catch (err) {
-      setSaveMsg({ type: 'error', text: err.response?.data?.error || 'Failed to save queue' });
-    } finally {
+      setError(getErrorMessage(err, 'Failed to update posted matches'));
       setSaving(false);
     }
   };
 
-  const selectedUmpire = localUmpires.find(u => u.id === selectedUmpireId);
-
-  const handleAddUmpire = async () => {
-    const trimmed = addCode.trim().replace(/^#+/, '');
-    if (!trimmed) return;
-    setAddingUmpire(true); setAddUmpireErr(null);
-    try {
-      const res = await tournamentAPI.addUmpireByCode(tournamentId, `#${trimmed}`);
-      const newUmpire = res.umpire || res;
-      setLocalUmpires(prev => [...prev, newUmpire]);
-      setQueues(p => ({ ...p, [newUmpire.id]: [] }));
-      setSelectedUmpireId(newUmpire.id);
-      setAddCode('');
-      setShowAddUmpire(false);
-      onUmpireAdded?.(newUmpire);
-    } catch (err) {
-      setAddUmpireErr(err.response?.data?.error || 'Umpire not found');
-    } finally {
-      setAddingUmpire(false);
-    }
-  };
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3"
-      style={{ background: 'rgba(0,0,0,0.78)', backdropFilter: 'blur(8px)' }}>
-      <div className="w-full max-w-lg rounded-2xl overflow-hidden flex flex-col"
-        style={{ background: '#0a0f1e', border: '1.5px solid rgba(96,165,250,0.3)', maxHeight: '90vh' }}>
-
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="rounded-3xl w-full max-w-md shadow-2xl max-h-[92vh] flex flex-col" style={{ background: '#0d1025', border: '2px solid rgba(245,158,11,0.35)' }}>
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4"
-          style={{ background: 'rgba(96,165,250,0.08)', borderBottom: '1px solid rgba(96,165,250,0.18)' }}>
-          <div className="flex items-center gap-3">
-            <ListOrdered className="w-5 h-5" style={{ color: '#60a5fa' }} />
-            <div>
-              <h2 className="text-base font-black text-white">Umpire Queues</h2>
-              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Assign matches in play order per umpire</p>
+        <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.3)' }}>
+              <ListOrdered className="w-4.5 h-4.5" style={{ color: '#F59E0B' }} />
+            </div>
+            <div className="min-w-0">
+              <h2 className="text-base font-black text-white leading-tight">Post Matches to Umpires</h2>
+              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.45)' }}>Select the matches umpires can take</p>
             </div>
           </div>
-          <button onClick={onClose}
-            className="w-8 h-8 rounded-full flex items-center justify-center transition-all hover:bg-white/10">
-            <X className="w-4 h-4 text-white" />
+          <button onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <X className="w-4 h-4" style={{ color: 'rgba(255,255,255,0.6)' }} />
           </button>
         </div>
 
-        {/* Umpire selector tabs + Add Umpire */}
-        <div className="px-4 pt-3 pb-2" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-          <div className="flex gap-2 flex-wrap items-center">
-            {localUmpires.map(u => {
-              const qLen = (queues[u.id] || []).length;
-              return (
-                <button key={u.id} onClick={() => { setSelectedUmpireId(u.id); setShowAddUmpire(false); }}
-                  className="px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5"
-                  style={selectedUmpireId === u.id
-                    ? { background: 'rgba(96,165,250,0.2)', border: '1.5px solid rgba(96,165,250,0.5)', color: '#60a5fa' }
-                    : { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.55)' }}>
-                  {u.name}
-                  {qLen > 0 && (
-                    <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black"
-                      style={{ background: 'rgba(96,165,250,0.3)', color: '#93c5fd' }}>{qLen}</span>
-                  )}
-                </button>
-              );
-            })}
-            {/* Add Umpire toggle */}
-            <button
-              onClick={() => { setShowAddUmpire(v => !v); setAddCode(''); setAddUmpireErr(null); }}
-              style={{
-                padding: '5px 10px', borderRadius: 8,
-                background: showAddUmpire ? 'rgba(245,158,11,0.15)' : 'rgba(255,255,255,0.04)',
-                border: showAddUmpire ? '1.5px solid rgba(245,158,11,0.4)' : '1px dashed rgba(255,255,255,0.2)',
-                color: showAddUmpire ? '#F59E0B' : 'rgba(255,255,255,0.4)',
-                fontSize: 11, fontWeight: 700, cursor: 'pointer',
-                display: 'flex', alignItems: 'center', gap: 4,
-                WebkitTapHighlightColor: 'transparent',
-              }}
-            >
-              <Plus style={{ width: 12, height: 12 }} />
-              Add Umpire
-            </button>
-          </div>
-
-          {/* Inline add umpire form */}
-          {showAddUmpire && (
-            <div style={{ marginTop: 10 }}>
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                <div style={{
-                  flex: 1, display: 'flex', alignItems: 'center',
-                  background: 'rgba(255,255,255,0.06)',
-                  border: '1px solid rgba(255,255,255,0.15)',
-                  borderRadius: 10, overflow: 'hidden',
-                }}>
-                  <span style={{ padding: '0 6px 0 12px', color: '#FCD34D', fontWeight: 900, fontSize: 14, userSelect: 'none' }}>#</span>
-                  <input
-                    value={addCode}
-                    onChange={e => { setAddCode(e.target.value.replace(/^#+/, '')); setAddUmpireErr(null); }}
-                    onKeyDown={e => e.key === 'Enter' && handleAddUmpire()}
-                    placeholder="Umpire ID or code"
-                    autoFocus
-                    style={{
-                      flex: 1, background: 'none', border: 'none', outline: 'none',
-                      color: '#fff', fontSize: 13, padding: '9px 12px 9px 0',
-                    }}
-                  />
-                </div>
-                <button
-                  onClick={handleAddUmpire}
-                  disabled={addingUmpire || !addCode.trim()}
-                  style={{
-                    padding: '9px 16px', borderRadius: 10, border: 'none',
-                    background: addCode.trim() ? 'linear-gradient(135deg,#F59E0B,#FCD34D)' : 'rgba(255,255,255,0.07)',
-                    color: addCode.trim() ? '#07071a' : 'rgba(255,255,255,0.3)',
-                    fontWeight: 700, fontSize: 13, cursor: addCode.trim() ? 'pointer' : 'not-allowed',
-                    WebkitTapHighlightColor: 'transparent',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {addingUmpire ? '…' : 'Add'}
-                </button>
-              </div>
-              {addUmpireErr && (
-                <p style={{ marginTop: 6, fontSize: 12, color: '#f87171', fontWeight: 600 }}>{addUmpireErr}</p>
-              )}
-            </div>
-          )}
-        </div>
-
         {/* Body */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {loadingMatches ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader className="w-6 h-6 animate-spin" style={{ color: '#60a5fa' }} />
+        <div className="flex-1 overflow-y-auto px-5 py-4">
+          {loading ? (
+            <div className="flex items-center justify-center gap-2.5 py-10">
+              <Loader className="w-5 h-5 animate-spin" style={{ color: '#F59E0B' }} />
+              <span className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>Loading matches…</span>
+            </div>
+          ) : error && matches.length === 0 ? (
+            <div className="flex flex-col items-center gap-3 py-8 text-center">
+              <AlertTriangle className="w-8 h-8" style={{ color: '#F87171' }} />
+              <p className="text-sm text-white font-semibold">{error}</p>
+            </div>
+          ) : matches.length === 0 ? (
+            <div className="flex flex-col items-center gap-2 py-8 text-center">
+              <Gavel className="w-8 h-8" style={{ color: 'rgba(255,255,255,0.2)' }} />
+              <p className="text-sm font-bold text-white">No postable matches yet</p>
+              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Matches need both players assigned and must not be completed.</p>
             </div>
           ) : (
             <>
-              {/* Queue for selected umpire */}
-              <div>
-                <p className="text-xs font-black mb-2"
-                  style={{ color: 'rgba(255,255,255,0.5)', letterSpacing: '0.08em' }}>
-                  {selectedUmpire?.name?.toUpperCase()}'S QUEUE ({currentQueue.length})
-                </p>
-                {currentQueue.length === 0 ? (
-                  <div className="rounded-xl py-6 text-center text-xs"
-                    style={{ background: 'rgba(255,255,255,0.03)', border: '1px dashed rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.35)' }}>
-                    Empty — tap matches below to add
-                  </div>
-                ) : (
+              <button onClick={toggleAll} className="w-full mb-3 py-2 rounded-lg text-xs font-bold" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.75)' }}>
+                {allSelected ? 'Clear all' : 'Select all'}
+              </button>
+              {error && (
+                <div className="mb-3 flex items-start gap-2 px-3 py-2 rounded-lg" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)' }}>
+                  <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: '#F87171' }} />
+                  <p className="text-xs" style={{ color: '#F87171' }}>{error}</p>
+                </div>
+              )}
+              {Object.entries(groups).map(([cat, ms]) => (
+                <div key={cat} className="mb-4">
+                  <p className="text-xs font-black uppercase tracking-wider mb-2" style={{ color: 'rgba(168,85,247,0.85)' }}>{cat}</p>
                   <div className="space-y-2">
-                    {currentQueue.filter(matchId => {
-                      const m = allMatches.find(x => x.id === matchId);
-                      return !m || m.status !== 'COMPLETED';
-                    }).map((matchId, index) => {
-                      const info = getMatchInfo(matchId);
-                      const p1parts = info.p1.split(' / ');
-                      const p2parts = info.p2.split(' / ');
+                    {ms.map(m => {
+                      const checked = selected.has(m.id);
+                      const p1 = m.player1?.name || 'Player 1';
+                      const p2 = m.player2?.name || 'Player 2';
+                      const live = m.status === 'IN_PROGRESS';
                       return (
-                        <div key={matchId}
-                          className="flex items-center gap-2 rounded-xl px-3 py-2.5"
-                          style={{ background: 'rgba(96,165,250,0.07)', border: '1px solid rgba(96,165,250,0.2)' }}>
-                          <span className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black flex-shrink-0"
-                            style={{ background: 'rgba(96,165,250,0.25)', color: '#93c5fd' }}>{index + 1}</span>
-                          {/* Match info - multi-line */}
+                        <button key={m.id} onClick={() => toggle(m.id)}
+                          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all"
+                          style={{
+                            background: checked ? 'rgba(245,158,11,0.1)' : 'rgba(255,255,255,0.03)',
+                            border: checked ? '1px solid rgba(245,158,11,0.4)' : '1px solid rgba(255,255,255,0.08)',
+                          }}>
+                          <div className="w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0"
+                            style={{ background: checked ? '#F59E0B' : 'transparent', border: checked ? 'none' : '1.5px solid rgba(255,255,255,0.25)' }}>
+                            {checked && <CheckCircle className="w-4 h-4" style={{ color: '#07071a' }} />}
+                          </div>
                           <div className="flex-1 min-w-0">
-                            <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.38)', fontWeight: 700, letterSpacing: '0.04em', marginBottom: 3 }}>
-                              M{info.matchNumber}{info.cat ? ` · ${info.cat}` : ''}
-                            </div>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', alignItems: 'center', gap: 3 }}>
-                              <div>
-                                <div style={{ fontSize: 11, fontWeight: 800, color: '#fff', lineHeight: 1.2 }}>{p1parts[0]}</div>
-                                {p1parts[1] && <div style={{ fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.45)', lineHeight: 1.2 }}>/ {p1parts[1]}</div>}
-                              </div>
-                              <span style={{ fontSize: 8, fontWeight: 800, color: 'rgba(245,158,11,0.6)', padding: '1px 4px', background: 'rgba(245,158,11,0.08)', borderRadius: 3 }}>vs</span>
-                              <div style={{ textAlign: 'right' }}>
-                                <div style={{ fontSize: 11, fontWeight: 800, color: '#fff', lineHeight: 1.2 }}>{p2parts[0]}</div>
-                                {p2parts[1] && <div style={{ fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.45)', lineHeight: 1.2 }}>/ {p2parts[1]}</div>}
-                              </div>
-                            </div>
+                            <p className="text-xs font-bold" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                              {roundLabel(m)}{live ? ' · In progress' : ''}
+                            </p>
+                            <p className="text-sm font-bold text-white truncate">{p1} <span style={{ color: 'rgba(245,158,11,0.6)' }}>vs</span> {p2}</p>
                           </div>
-                          <div className="flex items-center gap-1 flex-shrink-0">
-                            <button onClick={() => moveUp(index)} disabled={index === 0}
-                              className="w-6 h-6 rounded flex items-center justify-center disabled:opacity-30"
-                              style={{ background: 'rgba(255,255,255,0.07)' }}>
-                              <ChevronUp className="w-3.5 h-3.5 text-white" />
-                            </button>
-                            <button onClick={() => moveDown(index)} disabled={index === currentQueue.length - 1}
-                              className="w-6 h-6 rounded flex items-center justify-center disabled:opacity-30"
-                              style={{ background: 'rgba(255,255,255,0.07)' }}>
-                              <ChevronDown className="w-3.5 h-3.5 text-white" />
-                            </button>
-                            <button onClick={() => removeFromQueue(matchId)}
-                              className="w-6 h-6 rounded flex items-center justify-center hover:bg-red-500/20"
-                              style={{ background: 'rgba(255,255,255,0.07)' }}>
-                              <X className="w-3 h-3" style={{ color: '#f87171' }} />
-                            </button>
-                          </div>
-                        </div>
+                        </button>
                       );
                     })}
                   </div>
-                )}
-              </div>
-
-              {/* Available matches */}
-              <div>
-                <p className="text-xs font-black mb-2"
-                  style={{ color: 'rgba(255,255,255,0.5)', letterSpacing: '0.08em' }}>
-                  AVAILABLE MATCHES ({available.length})
-                </p>
-                {available.length === 0 ? (
-                  <div className="rounded-xl py-4 text-center text-xs"
-                    style={{ background: 'rgba(255,255,255,0.03)', border: '1px dashed rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.3)' }}>
-                    All matches assigned
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {availableByCategory.map(([catName, catMatches]) => {
-                      const subGroups = subGroupsFor(catMatches);
-                      return (
-                        <div key={catName}>
-                          {/* Category header — clear separator between categories */}
-                          <div className="flex items-center gap-2 mb-1.5">
-                            <span style={{ fontSize: 11, fontWeight: 900, color: '#FCD34D', letterSpacing: '0.03em' }}>{catName}</span>
-                            <span style={{ fontSize: 9, fontWeight: 800, color: '#FCD34D', background: 'rgba(245,158,11,0.14)', padding: '1px 7px', borderRadius: 10 }}>{catMatches.length}</span>
-                            <div style={{ flex: 1, height: 1, background: 'rgba(245,158,11,0.2)' }} />
-                          </div>
-                          {subGroups ? (
-                            /* Round-robin — split by group (A, B, C…) with clear sub-headers */
-                            <div className="space-y-2.5">
-                              {subGroups.map(([groupLabel, groupMatches]) => (
-                                <div key={groupLabel}>
-                                  <div className="flex items-center gap-2 mb-1" style={{ paddingLeft: 2 }}>
-                                    <span style={{ fontSize: 10, fontWeight: 900, color: '#c4b5fd', letterSpacing: '0.03em' }}>{groupLabel}</span>
-                                    <span style={{ fontSize: 8, fontWeight: 800, color: '#c4b5fd', background: 'rgba(168,85,247,0.16)', padding: '1px 6px', borderRadius: 10 }}>{groupMatches.length}</span>
-                                    <div style={{ flex: 1, height: 1, background: 'rgba(168,85,247,0.18)' }} />
-                                  </div>
-                                  <div className="space-y-1.5">
-                                    {groupMatches.map(renderAvailableMatch)}
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          ) : (
-                            /* Knockout-only category — flat list */
-                            <div className="space-y-1.5">
-                              {catMatches.map(renderAvailableMatch)}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
+                </div>
+              ))}
             </>
           )}
         </div>
 
-        {/* Save feedback */}
-        {saveMsg && (
-          <div className="mx-4 mb-2 px-3 py-2 rounded-lg text-xs font-bold"
-            style={saveMsg.type === 'success'
-              ? { background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.25)', color: '#4ade80' }
-              : { background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.25)', color: '#f87171' }}>
-            {saveMsg.text}
+        {/* Footer */}
+        {!loading && matches.length > 0 && (
+          <div className="px-5 py-4" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+            <button onClick={handleSave} disabled={saving || !dirty}
+              className="w-full py-3.5 rounded-xl font-black text-sm flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+              style={{ background: 'linear-gradient(135deg,#F59E0B,#FCD34D)', color: '#07071a', boxShadow: '0 4px 16px rgba(245,158,11,0.3)' }}>
+              {saving ? <><Loader className="w-4 h-4 animate-spin" /> Saving…</>
+                : dirty
+                  ? <><ListOrdered className="w-4 h-4" /> Post {selected.size} match{selected.size !== 1 ? 'es' : ''}</>
+                  : <>No changes</>}
+            </button>
           </div>
         )}
-
-        {/* Footer */}
-        <div className="flex gap-2 p-4" style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
-          <button onClick={onClose}
-            className="flex-1 py-2.5 rounded-xl text-xs font-black transition-all"
-            style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.6)', border: '1px solid rgba(255,255,255,0.1)' }}>
-            Close
-          </button>
-          <button onClick={saveQueue} disabled={saving || !selectedUmpireId}
-            className="flex-1 py-2.5 rounded-xl text-xs font-black transition-all disabled:opacity-50"
-            style={{ background: 'rgba(96,165,250,0.2)', color: '#60a5fa', border: '1.5px solid rgba(96,165,250,0.4)' }}>
-            {saving ? 'Saving...' : `Save ${selectedUmpire?.name?.split(' ')[0] || ''}'s Queue`}
-          </button>
-        </div>
       </div>
-    </div>
-  );
-};
-
-// ─────────────────────────────────────────────────────────────────────────────
-// InlineAddUmpire
-// Shown inside AssignUmpireModal when no umpires exist yet.
-// Lets organizer add an umpire by code without leaving the modal.
-// ─────────────────────────────────────────────────────────────────────────────
-const InlineAddUmpire = ({ tournamentId, onUmpireAdded }) => {
-  const [code, setCode] = useState('');
-  const [adding, setAdding] = useState(false);
-  const [msg, setMsg] = useState(null); // { type:'success'|'error', text }
-
-  const handleAdd = async () => {
-    const trimmed = code.trim();
-    if (!trimmed || trimmed === '#') return;
-    setAdding(true);
-    setMsg(null);
-    try {
-      const res = await tournamentAPI.addUmpireByCode(tournamentId, trimmed);
-      const newUmpire = res.umpire;
-      setMsg({ type: 'success', text: `${newUmpire.name} added!` });
-      setCode('');
-      onUmpireAdded?.(newUmpire);
-    } catch (err) {
-      setMsg({ type: 'error', text: err.response?.data?.error || 'Failed to add umpire' });
-    } finally {
-      setAdding(false);
-    }
-  };
-
-  return (
-    <div className="py-4 space-y-3">
-      <div className="text-center mb-2">
-        <Gavel className="w-8 h-8 mx-auto mb-2" style={{ color: 'rgba(255,255,255,0.2)' }} />
-        <p className="text-sm font-black text-white">No umpires added yet</p>
-        <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>
-          Enter an umpire's Matchify.pro ID to add them
-        </p>
-      </div>
-
-      {/* Code hint */}
-      <div className="px-3 py-2 rounded-xl text-xs"
-        style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.15)', color: 'rgba(245,158,11,0.8)' }}>
-        Umpire shares their code: <span className="font-mono font-black" style={{ color: '#FCD34D' }}>#42</span> or <span className="font-mono font-black" style={{ color: '#FCD34D' }}>#100</span>
-      </div>
-
-      {/* Input + button */}
-      <div className="flex gap-2">
-        <input
-          type="text"
-          value={code}
-          onChange={e => setCode(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && handleAdd()}
-          placeholder="#ID or code"
-          className="flex-1 px-3 py-2.5 rounded-xl text-sm font-bold outline-none"
-          style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff' }}
-        />
-        <button
-          onClick={handleAdd}
-          disabled={adding || !code.trim() || code.trim() === '#'}
-          className="px-4 py-2.5 rounded-xl text-xs font-black transition-all disabled:opacity-40"
-          style={{ background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.35)', color: '#FCD34D' }}>
-          {adding ? <Loader className="w-4 h-4 animate-spin" /> : 'Add'}
-        </button>
-      </div>
-
-      {/* Feedback */}
-      {msg && (
-        <p className="text-xs font-bold px-1"
-          style={{ color: msg.type === 'success' ? '#4ade80' : '#f87171' }}>
-          {msg.text}
-        </p>
-      )}
     </div>
   );
 };

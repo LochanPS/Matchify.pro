@@ -18,6 +18,8 @@ import {
   addUmpireByCode,
   getTournamentUmpires,
   removeUmpire,
+  getUmpirePostedMatches,
+  setUmpirePostedMatches,
   getCategoryRegistrations,
   endTournament,
   endCategory,
@@ -159,6 +161,12 @@ router.delete('/:id/categories/:categoryId', deleteCategory);
 router.get('/:id/umpires', getTournamentUmpires);
 router.post('/:id/umpires', addUmpireByCode);
 router.delete('/:id/umpires/:umpireId', removeUmpire);
+
+// Shared umpire pool
+// GET — universal umpire page data (organizer, admin, or a registered umpire)
+// POST — organizer bulk-posts/unposts matches to the pool
+router.get('/:id/umpire-posted-matches', getUmpirePostedMatches);
+router.post('/:id/umpire-posted-matches', setUmpirePostedMatches);
 
 // DELETE /api/tournaments/:tournamentId/categories/:categoryId/registrations/:registrationId/remove
 // Admin or organiser only — removes player from tournament + clears their match slots

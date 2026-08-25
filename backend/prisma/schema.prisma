@@ -368,6 +368,7 @@ model Match {
   childPosition  Int?       // Added for tournament-system-reliability spec: 1 or 2 to indicate position in parent match
   winnerPosition String?
   umpireId       String?
+  umpirePosted   Boolean    @default(false) // Organizer posted this match to the shared umpire pool (any registered umpire may claim it)
   queueOrder     Int?       // Position in umpire's match queue (1, 2, 3...). Null = not queued.
   scheduledTime  DateTime?
   status         String     @default("PENDING")
@@ -390,6 +391,7 @@ model Match {
   @@index([status])
   @@index([round])
   @@index([umpireId])
+  @@index([tournamentId, umpirePosted])
   @@index([queueOrder])
   @@index([stage])
   @@index([matchIndex])

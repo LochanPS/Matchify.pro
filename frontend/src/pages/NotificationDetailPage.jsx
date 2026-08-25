@@ -320,7 +320,7 @@ const NotificationDetailPage = () => {
       DRAW_PUBLISHED: '📊', MATCH_ASSIGNED: '⚖️', MATCH_STARTING_SOON: '⏰',
       TOURNAMENT_CANCELLED: '❌', REFUND_PROCESSED: '💰', REFUND_APPROVED: '💰',
       REFUND_REJECTED: '❌', TOURNAMENT_REMINDER: '📅', POINTS_AWARDED: '🏆',
-      ACCOUNT_SUSPENDED: '⚠️', CANCELLATION_REQUEST: '🔴',
+      ACCOUNT_SUSPENDED: '⚠️', CANCELLATION_REQUEST: '🔴', UMPIRE_ADDED: '⚖️',
     };
     return icons[type] || '🔔';
   };
@@ -368,6 +368,8 @@ const NotificationDetailPage = () => {
         return data.tournamentId ? `/tournaments/${data.tournamentId}/draws` : '/tournaments';
       case 'TOURNAMENT_CANCELLED': case 'TOURNAMENT_REMINDER':
         return data.tournamentId ? `/tournaments/${data.tournamentId}` : '/tournaments';
+      case 'UMPIRE_ADDED':
+        return data.tournamentId ? `/tournament/${data.tournamentId}/umpire` : null;
       case 'REFUND_PROCESSED': return '/registrations';
       case 'POINTS_AWARDED': return '/leaderboard';
       default: return null;
@@ -387,6 +389,7 @@ const NotificationDetailPage = () => {
       case 'DRAW_PUBLISHED': return 'View Tournament Draws';
       case 'MATCH_STARTING_SOON': return 'Go to Match → Start Now';
       case 'TOURNAMENT_CANCELLED': case 'TOURNAMENT_REMINDER': return 'View Tournament Details';
+      case 'UMPIRE_ADDED': return 'Open Umpire Page → See Matches';
       case 'PAYMENT_VERIFICATION_REQUIRED': case 'REGISTRATION_PENDING': return 'View Tournament Dashboard';
       case 'CANCELLATION_REQUEST': return 'Review Cancellation Request';
       case 'REFUND_PROCESSED': return 'View My Registrations';

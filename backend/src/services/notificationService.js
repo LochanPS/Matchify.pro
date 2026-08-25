@@ -171,8 +171,8 @@ class NotificationService {
         case NotificationType.UMPIRE_ADDED:
           await emailService.sendQuickNotification(
             user,
-            `🎾 Exciting news! You've been selected as an official umpire for "${data.tournamentName}" by ${data.organizerName || 'the tournament organizer'}. Your expertise in officiating will help ensure fair play and smooth matches. Log in to Matchify.pro to view the tournament details and prepare for your upcoming assignments. Thank you for being part of our officiating team!`,
-            data.tournamentId ? `/tournaments/${data.tournamentId}` : null
+            `🎾 You've been registered as an official umpire for "${data.tournamentName}" by ${data.organizerName || 'the tournament organizer'}. Open your umpire page on Matchify.pro to see the matches posted for you to conduct and take the ones you want to officiate.`,
+            data.actionUrl || (data.tournamentId ? `/tournament/${data.tournamentId}/umpire` : null)
           );
           break;
 

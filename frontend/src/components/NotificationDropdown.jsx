@@ -19,7 +19,7 @@ const NotificationDropdown = ({ onClose }) => {
       DRAW_PUBLISHED: '📊', MATCH_ASSIGNED: '⚖️', MATCH_STARTING_SOON: '⏰',
       TOURNAMENT_CANCELLED: '❌', REFUND_PROCESSED: '💰', REFUND_APPROVED: '💰',
       REFUND_REJECTED: '❌', TOURNAMENT_REMINDER: '📅', POINTS_AWARDED: '🏆',
-      ACCOUNT_SUSPENDED: '⚠️', CANCELLATION_REQUEST: '🔴',
+      ACCOUNT_SUSPENDED: '⚠️', CANCELLATION_REQUEST: '🔴', UMPIRE_ADDED: '⚖️',
     };
     return icons[type] || '🔔';
   };
@@ -50,6 +50,9 @@ const NotificationDropdown = ({ onClose }) => {
         return '/tournaments';
       case 'TOURNAMENT_CANCELLED': case 'TOURNAMENT_REMINDER':
         if (data.tournamentId) return `/tournaments/${data.tournamentId}`;
+        return '/tournaments';
+      case 'UMPIRE_ADDED':
+        if (data.tournamentId) return `/tournament/${data.tournamentId}/umpire`;
         return '/tournaments';
       case 'REFUND_PROCESSED': return '/registrations';
       case 'POINTS_AWARDED': return '/points';

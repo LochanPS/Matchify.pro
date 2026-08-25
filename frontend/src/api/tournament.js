@@ -121,4 +121,20 @@ export const tournamentAPI = {
     );
     return response.data;
   },
+
+  // Shared umpire pool
+  // Universal umpire page data (organizer, admin, or a registered umpire)
+  getUmpirePostedMatches: async (tournamentId) => {
+    const response = await api.get(`/tournaments/${tournamentId}/umpire-posted-matches`);
+    return response.data;
+  },
+
+  // Organizer bulk-posts (posted=true) or unposts (posted=false) matches to the pool
+  setUmpirePostedMatches: async (tournamentId, matchIds, posted = true) => {
+    const response = await api.post(
+      `/tournaments/${tournamentId}/umpire-posted-matches`,
+      { matchIds, posted }
+    );
+    return response.data;
+  },
 };

@@ -1588,17 +1588,18 @@ const addUmpireByCode = async (req, res) => {
       select: { name: true }
     });
 
-    // Send elaborate notification to umpire
+    // Send notification to umpire — its action button opens the universal umpire
+    // page for this tournament, where the umpire sees and takes posted matches.
     await notificationService.createNotification({
       userId: umpire.id,
       type: 'UMPIRE_ADDED',
-      title: '🎾 You\'ve Been Selected as an Umpire!',
-      message: `Great news! ${organizer?.name || 'The tournament organizer'} has added you as an official umpire for "${tournament.name}". You'll be responsible for officiating matches, keeping scores, and ensuring fair play. Head over to the tournament page to view match schedules and prepare for your assignments. We're counting on you to make this tournament a success!`,
+      title: '🎾 You\'ve Been Registered as an Umpire!',
+      message: `${organizer?.name || 'The tournament organizer'} has registered you as an umpire for "${tournament.name}". Open your umpire page to see the matches posted for you to conduct and take the ones you want to officiate.`,
       data: {
         tournamentId: id,
         tournamentName: tournament.name,
         organizerName: organizer?.name,
-        actionUrl: `/tournaments/${id}`
+        actionUrl: `/tournament/${id}/umpire`
       },
       sendEmail: true
     });
@@ -1754,6 +1755,175 @@ const removeUmpire = async (req, res) => {
   }
 };
 
+// ── Shared umpire pool ──────────────────────────────────────────────────────
+// Organizer posts matches to a shared pool; any registered umpire of the
+// tournament can then see them on the universal umpire page and take one.
+
+// Batch-resolve guest-safe, doubles-aware display names for a set of matches.
+// Returns nameFor(playerId, tournamentId, categoryId) → string.
+const _resolveMatchPlayerNames = async (matches) => {
+  const regularIds = new Set();
+  const guestRegIds = new Set();
+  for (const m of matches) {
+    for (const pid of [m.player1Id, m.player2Id]) {
+      if (!pid) continue;
+      if (pid.startsWith('guest-')) guestRegIds.add(pid.replace('guest-', ''));
+      else regularIds.add(pid);
+    }
+  }
+
+  const [users, guestRegs, partnerRegs] = await Promise.all([
+    regularIds.size
+      ? prisma.user.findMany({ where: { id: { in: [...regularIds] } }, select: { id: true, name: true } })
+      : [],
+    guestRegIds.size
+      ? prisma.registration.findMany({
+          where: { id: { in: [...guestRegIds] } },
+          select: { id: true, guestName: true, guestPartnerName: true, user: { select: { name: true } }, partner: { select: { name: true } } },
+        })
+      : [],
+    regularIds.size
+      ? prisma.registration.findMany({
+          where: { userId: { in: [...regularIds] } },
+          select: { userId: true, tournamentId: true, categoryId: true, guestPartnerName: true, partner: { select: { name: true } } },
+        })
+      : [],
+  ]);
+
+  const userMap = Object.fromEntries(users.map(u => [u.id, u.name]));
+  const guestMap = {};
+  for (const r of guestRegs) {
+    const base = r.user?.name || r.guestName || 'Guest';
+    const partner = r.partner?.name || r.guestPartnerName || null;
+    guestMap[`guest-${r.id}`] = partner ? `${base} & ${partner}` : base;
+  }
+  const partnerMap = {};
+  for (const r of partnerRegs) {
+    const key = `${r.userId}:${r.tournamentId}:${r.categoryId}`;
+    const pn = r.partner?.name || r.guestPartnerName || null;
+    if (pn && !partnerMap[key]) partnerMap[key] = pn;
+  }
+
+  return (pid, tournamentId, categoryId) => {
+    if (!pid) return 'TBD';
+    if (pid.startsWith('guest-')) return guestMap[pid] || 'Guest';
+    const base = userMap[pid] || 'Unknown';
+    const pn = partnerMap[`${pid}:${tournamentId}:${categoryId}`];
+    return pn ? `${base} & ${pn}` : base;
+  };
+};
+
+// GET /api/tournaments/:id/umpire-posted-matches
+// Universal umpire page data. Visible to the organizer, admins, and any umpire
+// registered for this tournament. Returns only matches the organizer has posted.
+const getUmpirePostedMatches = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.userId || req.user.id;
+    const roles = req.user.roles || [];
+
+    const tournament = await prisma.tournament.findUnique({
+      where: { id },
+      select: { id: true, name: true, organizerId: true },
+    });
+    if (!tournament) {
+      return res.status(404).json({ success: false, error: 'Tournament not found' });
+    }
+
+    const isOrganizer = tournament.organizerId === userId;
+    const isAdmin = roles.includes('ADMIN');
+    let isRegisteredUmpire = false;
+    if (!isOrganizer && !isAdmin) {
+      const tu = await prisma.tournamentUmpire.findUnique({
+        where: { tournamentId_umpireId: { tournamentId: id, umpireId: userId } },
+        select: { id: true },
+      });
+      isRegisteredUmpire = !!tu;
+    }
+    if (!isOrganizer && !isAdmin && !isRegisteredUmpire) {
+      return res.status(403).json({ success: false, error: 'You are not registered as an umpire for this tournament' });
+    }
+
+    const matches = await prisma.match.findMany({
+      where: { tournamentId: id, umpirePosted: true },
+      include: {
+        category: { select: { id: true, name: true } },
+        umpire: { select: { id: true, name: true } },
+      },
+      orderBy: [{ round: 'asc' }, { matchNumber: 'asc' }],
+    });
+
+    const nameFor = await _resolveMatchPlayerNames(matches);
+
+    const result = matches.map(m => ({
+      id: m.id,
+      round: m.round,
+      matchNumber: m.matchNumber,
+      status: m.status,
+      courtNumber: m.courtNumber,
+      categoryName: m.category?.name || '',
+      player1Name: nameFor(m.player1Id, m.tournamentId, m.categoryId),
+      player2Name: nameFor(m.player2Id, m.tournamentId, m.categoryId),
+      umpireId: m.umpireId || null,
+      umpireName: m.umpire?.name || null,
+    }));
+
+    res.json({
+      success: true,
+      tournament: { id: tournament.id, name: tournament.name },
+      viewerId: userId,
+      isOrganizer,
+      matches: result,
+    });
+  } catch (error) {
+    console.error('Get umpire posted matches error:', error);
+    res.status(500).json({ success: false, error: 'Failed to load matches' });
+  }
+};
+
+// POST /api/tournaments/:id/umpire-posted-matches
+// Organizer bulk-posts (or unposts) matches to the shared umpire pool.
+// Body: { matchIds: string[], posted?: boolean (default true) }
+const setUmpirePostedMatches = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.userId || req.user.id;
+    let { matchIds, posted } = req.body;
+
+    if (!Array.isArray(matchIds) || matchIds.length === 0) {
+      return res.status(400).json({ success: false, error: 'matchIds must be a non-empty array' });
+    }
+    posted = posted !== false; // default to posting
+
+    const tournament = await prisma.tournament.findUnique({
+      where: { id },
+      select: { id: true, organizerId: true },
+    });
+    if (!tournament) {
+      return res.status(404).json({ success: false, error: 'Tournament not found' });
+    }
+    if (tournament.organizerId !== userId) {
+      return res.status(403).json({ success: false, error: 'Only the tournament organizer can post matches to umpires' });
+    }
+
+    const where = { id: { in: matchIds }, tournamentId: id };
+    if (posted) {
+      // Only genuinely playable matches can be posted — both players present and
+      // the match not already finished/byed.
+      where.player1Id = { not: null };
+      where.player2Id = { not: null };
+      where.status = { notIn: ['COMPLETED', 'BYE'] };
+    }
+
+    const result = await prisma.match.updateMany({ where, data: { umpirePosted: posted } });
+
+    res.json({ success: true, updated: result.count, posted });
+  } catch (error) {
+    console.error('Set umpire posted matches error:', error);
+    res.status(500).json({ success: false, error: 'Failed to update posted matches' });
+  }
+};
+
 /**
  * Get registrations for a specific category
  * GET /api/tournaments/:tournamentId/categories/:categoryId/registrations
@@ -1823,6 +1993,8 @@ export {
   addUmpireByCode,
   getTournamentUmpires,
   removeUmpire,
+  getUmpirePostedMatches,
+  setUmpirePostedMatches,
   // Registration endpoints
   getCategoryRegistrations,
 };

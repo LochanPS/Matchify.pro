@@ -128,6 +128,12 @@ async function runStartupMigrations() {
       // without it ALL match.findMany() queries throw "column does not exist".
       `ALTER TABLE "Match" ADD COLUMN IF NOT EXISTS "queueOrder" INTEGER`,
       `CREATE INDEX IF NOT EXISTS "Match_queueOrder_idx" ON "Match"("queueOrder")`,
+      // Shared umpire pool (added Aug 2026 — umpirePosted). Same CRITICAL reason
+      // as queueOrder: the client now SELECTs umpirePosted on every match query,
+      // so a missing column throws "column does not exist" on the draw page and
+      // everywhere matches are read. Idempotent — safe even if db push ran.
+      `ALTER TABLE "Match" ADD COLUMN IF NOT EXISTS "umpirePosted" BOOLEAN NOT NULL DEFAULT false`,
+      `CREATE INDEX IF NOT EXISTS "Match_tournamentId_umpirePosted_idx" ON "Match"("tournamentId", "umpirePosted")`,
       // Multi-sport support (added Jun 2026 — sport). Existing tournaments → Badminton.
       `ALTER TABLE "Tournament" ADD COLUMN IF NOT EXISTS "sport" TEXT NOT NULL DEFAULT 'Badminton'`,
       `CREATE INDEX IF NOT EXISTS "Tournament_sport_idx" ON "Tournament"("sport")`,

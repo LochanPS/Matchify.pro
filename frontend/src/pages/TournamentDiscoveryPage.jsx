@@ -238,62 +238,26 @@ export default function TournamentDiscoveryPage() {
             <span className="text-sm font-semibold">Back</span>
           </button>
 
-          <div className="text-center">
-            <div 
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold mb-2 relative overflow-hidden"
-              style={{
-                background: 'rgba(245,158,11,0.1)',
-                border: '1px solid rgba(245,158,11,0.35)',
-                color: '#fbbf24'
-              }}
-            >
-              <SparklesIcon className="w-3.5 h-3.5" />
-              Find Your Next Competition
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-black mb-2 text-white">
-              Discover Tournaments
-            </h1>
-            <p className="text-xs sm:text-sm text-white/70 max-w-2xl mx-auto font-medium mb-3">
-              Find and register for sports tournaments near you
-            </p>
-
-            {/* Quick Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-              <button
-                onClick={() => navigate('/tournaments/create')}
-                className="flex-1 flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl font-bold text-sm transition-all relative overflow-hidden group"
-                style={{
-                  background: 'linear-gradient(135deg, #F59E0B, #D97706)',
-                  color: '#ffffff',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
-                }}
-              >
-                <div 
-                  className="absolute inset-0 opacity-0 group-active:opacity-100 transition-opacity"
-                  style={{ background: 'radial-gradient(circle at center, rgba(255,255,255,0.3), transparent)' }}
-                />
-                <svg className="w-5 h-5 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-                <span className="relative z-10">Create Tournament</span>
-              </button>
-              
-              <button
-                onClick={() => navigate('/dashboard')}
-                className="flex-1 flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl font-bold text-sm transition-all"
-                style={{
-                  background: 'rgba(168,85,247,0.1)',
-                  border: '1px solid rgba(168,85,247,0.35)',
-                  color: '#c4b5fd',
-                }}
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                </svg>
-                <span>My Dashboard</span>
-              </button>
-            </div>
-          </div>
+          {/* Create Tournament — the single primary action; heading, subtitle
+              and secondary buttons removed to reclaim top space. */}
+          <button
+            onClick={() => navigate('/tournaments/create')}
+            className="w-full flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl font-bold text-sm transition-all relative overflow-hidden group"
+            style={{
+              background: 'linear-gradient(135deg, #F59E0B, #D97706)',
+              color: '#ffffff',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
+            }}
+          >
+            <div
+              className="absolute inset-0 opacity-0 group-active:opacity-100 transition-opacity"
+              style={{ background: 'radial-gradient(circle at center, rgba(255,255,255,0.3), transparent)' }}
+            />
+            <svg className="w-5 h-5 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            <span className="relative z-10">Create Tournament</span>
+          </button>
         </div>
       </div>
 

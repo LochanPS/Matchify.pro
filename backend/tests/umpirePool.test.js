@@ -15,6 +15,7 @@ const prismaMock = {
   match:            { findUnique: jest.fn(), findMany: jest.fn(), update: jest.fn(), updateMany: jest.fn() },
   user:             { findUnique: jest.fn(), findMany: jest.fn() },
   registration:     { findMany: jest.fn(), findUnique: jest.fn() },
+  category:         { findFirst: jest.fn(), findUnique: jest.fn(), create: jest.fn(), update: jest.fn(), findMany: jest.fn() },
 };
 
 jest.unstable_mockModule('../src/lib/prisma.js', () => ({ default: prismaMock }));
@@ -47,7 +48,7 @@ jest.unstable_mockModule('../src/middleware/auth.js', () => ({
 }));
 
 // Dynamic imports AFTER mocks are registered
-const { getUmpirePostedMatches, setUmpirePostedMatches, getPostableMatches } = await import('../src/controllers/tournament.controller.js');
+const { getUmpirePostedMatches, setUmpirePostedMatches, getPostableMatches, createCategory, updateCategory } = await import('../src/controllers/tournament.controller.js');
 const { startMatchHandler } = await import('../src/routes/match.routes.js');
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -72,6 +73,10 @@ beforeEach(() => {
   prismaMock.user.findMany.mockReset();
   prismaMock.registration.findMany.mockReset();
   prismaMock.registration.findUnique.mockReset();
+  prismaMock.category.findFirst.mockReset();
+  prismaMock.category.findUnique.mockReset();
+  prismaMock.category.create.mockReset();
+  prismaMock.category.update.mockReset();
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -233,6 +238,52 @@ describe('getPostableMatches (resolved names for the Post Matches selector)', ()
     expect(byId.md).toMatchObject({ player1Name: 'Carol & Meera', player2Name: 'Dan & Karan', umpirePosted: true });
     // Guest doubles — both guest partners on each side
     expect(byId.mg).toMatchObject({ player1Name: 'Zoe & Ivy', player2Name: 'Ravi & Karan' });
+  });
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+describe('per-category startDateTime persists through create + update', () => {
+  it('createCategory saves the provided startDateTime', async () => {
+    prismaMock.tournament.findUnique.mockResolvedValue({ id: 't1', organizerId: 'org1', name: 'T' });
+    prismaMock.category.findFirst.mockResolvedValue(null); // slug is free on first try
+    prismaMock.category.create.mockImplementation(({ data }) => Promise.resolve({ id: 'cat1', ...data }));
+
+    const req = {
+      params: { id: 't1' }, user: { id: 'org1' },
+      body: { name: 'Boys U11', format: 'singles', gender: 'men', entryFee: 0, startDateTime: '2026-08-29T14:30' },
+    };
+    const res = makeRes();
+    await createCategory(req, res);
+
+    expect(res.statusCode).toBe(201);
+    expect(prismaMock.category.create.mock.calls[0][0].data.startDateTime).toBe('2026-08-29T14:30');
+    expect(res.body.category.startDateTime).toBe('2026-08-29T14:30');
+  });
+
+  it('createCategory stores null when no startDateTime is given', async () => {
+    prismaMock.tournament.findUnique.mockResolvedValue({ id: 't1', organizerId: 'org1', name: 'T' });
+    prismaMock.category.findFirst.mockResolvedValue(null);
+    prismaMock.category.create.mockImplementation(({ data }) => Promise.resolve({ id: 'cat1', ...data }));
+
+    const req = { params: { id: 't1' }, user: { id: 'org1' }, body: { name: 'Boys U11', format: 'singles', gender: 'men', entryFee: 0 } };
+    const res = makeRes();
+    await createCategory(req, res);
+
+    expect(res.statusCode).toBe(201);
+    expect(prismaMock.category.create.mock.calls[0][0].data.startDateTime).toBeNull();
+  });
+
+  it('updateCategory updates startDateTime', async () => {
+    prismaMock.tournament.findUnique.mockResolvedValue({ id: 't1', organizerId: 'org1' });
+    prismaMock.category.findUnique.mockResolvedValue({ id: 'cat1', tournamentId: 't1', entryFee: 0, registrations: [] });
+    prismaMock.category.update.mockImplementation(({ data }) => Promise.resolve({ id: 'cat1', ...data }));
+
+    const req = { params: { id: 't1', categoryId: 'cat1' }, user: { id: 'org1' }, body: { startDateTime: '2026-09-01T09:00' } };
+    const res = makeRes();
+    await updateCategory(req, res);
+
+    expect(res.statusCode).toBe(200);
+    expect(prismaMock.category.update.mock.calls[0][0].data.startDateTime).toBe('2026-09-01T09:00');
   });
 });
 

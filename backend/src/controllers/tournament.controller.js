@@ -1030,6 +1030,7 @@ const createCategory = async (req, res) => {
       name,
       format,
       ageGroup,
+      startDateTime,
       gender,
       entryFee,
       maxParticipants,
@@ -1083,6 +1084,7 @@ const createCategory = async (req, res) => {
         slug,
         format,
         ageGroup: ageGroup || null,
+        startDateTime: startDateTime || null,
         gender: normalizedGender,
         entryFee: parseFloat(entryFee),
         maxParticipants: maxParticipants ? parseInt(maxParticipants) : null,
@@ -1180,6 +1182,7 @@ const updateCategory = async (req, res) => {
       name,
       format,
       ageGroup,
+      startDateTime,
       gender,
       entryFee,
       maxParticipants,
@@ -1212,6 +1215,7 @@ const updateCategory = async (req, res) => {
     if (name !== undefined) updateData.name = name.trim();
     if (format !== undefined) updateData.format = format;
     if (ageGroup !== undefined) updateData.ageGroup = ageGroup || null;
+    if (startDateTime !== undefined) updateData.startDateTime = startDateTime || null;
     if (prizeWinner !== undefined) updateData.prizeWinner = prizeWinner ? parseFloat(prizeWinner) : null;
     if (prizeRunnerUp !== undefined) updateData.prizeRunnerUp = prizeRunnerUp ? parseFloat(prizeRunnerUp) : null;
     if (prizeSemiFinalist !== undefined) updateData.prizeSemiFinalist = prizeSemiFinalist ? parseFloat(prizeSemiFinalist) : null;

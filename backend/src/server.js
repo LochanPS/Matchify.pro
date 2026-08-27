@@ -141,6 +141,10 @@ async function runStartupMigrations() {
       `ALTER TABLE "Tournament" ADD COLUMN IF NOT EXISTS "slug" TEXT`,
       `CREATE UNIQUE INDEX IF NOT EXISTS "Tournament_slug_key" ON "Tournament"("slug")`,
       `ALTER TABLE "Category" ADD COLUMN IF NOT EXISTS "slug" TEXT`,
+      // Per-category start date+time (added Aug 2026 — startDateTime). Same
+      // CRITICAL reason as the others: the client now SELECTs it on every
+      // category query, so a missing column 500s category/tournament reads.
+      `ALTER TABLE "Category" ADD COLUMN IF NOT EXISTS "startDateTime" TEXT`,
       // Venue map location (added Jul 2026) — optional lat/lng pin + label.
       `ALTER TABLE "Tournament" ADD COLUMN IF NOT EXISTS "latitude" DOUBLE PRECISION`,
       `ALTER TABLE "Tournament" ADD COLUMN IF NOT EXISTS "longitude" DOUBLE PRECISION`,

@@ -226,6 +226,7 @@ model Category {
   slug              String?        // readable share URL, e.g. "mixed-doubles" (unique per tournament)
   format            String
   ageGroup          String?
+  startDateTime     String?        // Optional per-category start date+time (ISO-ish "YYYY-MM-DDTHH:mm"); null = follow tournament schedule
   gender            String
   entryFee          Float
   maxParticipants   Int?

@@ -1058,6 +1058,19 @@ const TournamentDetailPage = () => {
                           </span>
                         </div>
 
+                        {/* Per-category start date & time (only when the organizer set one) */}
+                        {category.startDateTime && (() => {
+                          const d = new Date(category.startDateTime);
+                          if (isNaN(d.getTime())) return null;
+                          const label = d.toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true });
+                          return (
+                            <div className="flex items-center gap-2" style={{ color: '#c4b5fd' }}>
+                              <span className="text-sm">🗓️</span>
+                              <span className="text-sm font-semibold">Starts {label}</span>
+                            </div>
+                          );
+                        })()}
+
                         {/* Scoring — set/point config is a racket-sport concept.
                             Basketball is scored on a running total, so this line
                             is hidden for team sports. */}

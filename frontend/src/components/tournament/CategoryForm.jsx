@@ -44,6 +44,7 @@ const CategoryForm = ({ sport, initialData, onSave, onCancel }) => {
         format: 'singles',
         gender: 'OPEN',
         ageGroup: '',
+        startDateTime: '',
         entryFee: 0,
         maxParticipants: '',
         tournamentFormat: 'KNOCKOUT',
@@ -65,6 +66,7 @@ const CategoryForm = ({ sport, initialData, onSave, onCancel }) => {
       format: initialData.format || 'singles',
       gender: convertGenderToForm(initialData.gender),
       ageGroup: initialData.ageGroup || '',
+      startDateTime: initialData.startDateTime || '',
       entryFee: initialData.entryFee || 0,
       maxParticipants: initialData.maxParticipants || '',
       tournamentFormat: initialData.tournamentFormat || 'KNOCKOUT',
@@ -125,6 +127,7 @@ const CategoryForm = ({ sport, initialData, onSave, onCancel }) => {
       entryFee: Number(formData.entryFee),
       maxParticipants: formData.maxParticipants ? Number(formData.maxParticipants) : null,
       ageGroup: formData.ageGroup.trim() || null,
+      startDateTime: formData.startDateTime || null,
       tournamentFormat: formData.tournamentFormat,
       scoringFormat: scoringFormatString,
       pointsPerGame: Number(formData.pointsPerGame),
@@ -230,6 +233,18 @@ const CategoryForm = ({ sport, initialData, onSave, onCancel }) => {
             </p>
           )}
         </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-300 mb-2">Category Start Date &amp; Time</label>
+        <input
+          type="datetime-local"
+          value={formData.startDateTime}
+          onChange={(e) => handleChange('startDateTime', e.target.value)}
+          className="w-full px-4 py-3 bg-slate-700/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 transition-all"
+          style={{ colorScheme: 'dark' }}
+        />
+        <p className="text-xs text-gray-500 mt-1">Optional - when this category's matches begin. Leave empty to use the tournament schedule.</p>
       </div>
 
       <div>

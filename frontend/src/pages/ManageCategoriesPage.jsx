@@ -14,7 +14,19 @@ import {
   X,
   CheckCircle,
   Layers,
+  CalendarClock,
 } from 'lucide-react';
+
+// "2026-08-29T14:30" → "29 Aug 2026, 2:30 PM" (parsed as local time; no TZ shift)
+const formatCategoryStart = (s) => {
+  if (!s) return null;
+  const d = new Date(s);
+  if (isNaN(d.getTime())) return null;
+  return d.toLocaleString('en-IN', {
+    day: 'numeric', month: 'short', year: 'numeric',
+    hour: 'numeric', minute: '2-digit', hour12: true,
+  });
+};
 import { tournamentAPI } from '../api/tournament';
 import api from '../utils/api';
 import CategoryForm from '../components/tournament/CategoryForm';
@@ -293,6 +305,18 @@ const ManageCategoriesPage = () => {
                             </div>
                           )}
                         </div>
+
+                        {/* Category start date & time — full width, only when set */}
+                        {formatCategoryStart(category.startDateTime) && (
+                          <div className="col-span-2 rounded-xl px-3 py-2.5 flex items-center gap-2.5"
+                            style={{ background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.2)' }}>
+                            <CalendarClock className="h-4 w-4 flex-shrink-0" style={{ color: B.purple }} />
+                            <div>
+                              <p className="text-xs mb-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>Starts</p>
+                              <p className="text-sm font-bold text-white">{formatCategoryStart(category.startDateTime)}</p>
+                            </div>
+                          </div>
+                        )}
 
                         {category.maxParticipants && (
                           <div className="rounded-xl px-3 py-2.5"

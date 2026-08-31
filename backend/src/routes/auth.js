@@ -390,7 +390,10 @@ router.post('/google', async (req, res) => {
     if (!credential) {
       return res.status(400).json({ error: 'Missing Google credential' });
     }
-    if (!process.env.GOOGLE_CLIENT_ID) {
+    // Trim to tolerate a stray space/newline in the env var — otherwise the
+    // audience comparison below fails even when the value is otherwise correct.
+    const GOOGLE_CLIENT_ID = (process.env.GOOGLE_CLIENT_ID || '').trim();
+    if (!GOOGLE_CLIENT_ID) {
       console.error('❌ GOOGLE_CLIENT_ID not configured');
       return res.status(503).json({ error: 'Google sign-in is not configured yet.', code: 'GOOGLE_NOT_CONFIGURED' });
     }
@@ -410,7 +413,10 @@ router.post('/google', async (req, res) => {
     }
 
     // The token MUST have been issued for THIS app, and the email confirmed.
-    if (payload.aud !== process.env.GOOGLE_CLIENT_ID) {
+    const tokenAud = (payload.aud || '').trim();
+    if (tokenAud !== GOOGLE_CLIENT_ID) {
+      // Non-sensitive diagnostic (client IDs are public): helps confirm a value mismatch vs a whitespace one.
+      console.error(`Google aud mismatch: token.aud="${tokenAud}" backend.GOOGLE_CLIENT_ID="${GOOGLE_CLIENT_ID}"`);
       return res.status(401).json({ error: 'Google sign-in token was not issued for this app.' });
     }
     const emailVerified = payload.email_verified === true || payload.email_verified === 'true';

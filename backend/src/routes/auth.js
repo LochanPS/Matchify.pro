@@ -390,9 +390,13 @@ router.post('/google', async (req, res) => {
     if (!credential) {
       return res.status(400).json({ error: 'Missing Google credential' });
     }
-    // Trim to tolerate a stray space/newline in the env var — otherwise the
-    // audience comparison below fails even when the value is otherwise correct.
-    const GOOGLE_CLIENT_ID = (process.env.GOOGLE_CLIENT_ID || '').trim();
+    // Normalize the configured Client ID defensively:
+    //  • trim stray spaces/newlines
+    //  • if the value was pasted as "GOOGLE_CLIENT_ID=<id>" (a common env-var
+    //    entry mistake), keep only the part after the last "=".
+    // A real Google Client ID never contains "=", so this is always safe and
+    // makes the audience check tolerant of how the env value was entered.
+    const GOOGLE_CLIENT_ID = (process.env.GOOGLE_CLIENT_ID || '').trim().split('=').pop().trim();
     if (!GOOGLE_CLIENT_ID) {
       console.error('❌ GOOGLE_CLIENT_ID not configured');
       return res.status(503).json({ error: 'Google sign-in is not configured yet.', code: 'GOOGLE_NOT_CONFIGURED' });

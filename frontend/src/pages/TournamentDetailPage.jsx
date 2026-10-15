@@ -585,12 +585,12 @@ const TournamentDetailPage = () => {
 
   return (
     <div className="min-h-screen relative overflow-hidden" style={{ background: '#050810' }}>
-      {/* Background orbs */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-80 h-80 rounded-full blur-3xl opacity-[0.06]" style={{ background: '#a855f7' }} />
-        <div className="absolute bottom-1/4 right-1/4 w-72 h-72 rounded-full blur-3xl opacity-[0.05]" style={{ background: '#F59E0B' }} />
-        <div className="absolute top-3/4 left-3/4 w-64 h-64 rounded-full blur-3xl opacity-[0.04]" style={{ background: '#FCD34D' }} />
-      </div>
+      {/* Ambient glow — static radial gradients instead of large blur-3xl orbs.
+          Many GPU blur filters composited at once crash iOS Safari; gradients
+          paint once and are far cheaper, with the same subtle look. */}
+      <div className="fixed inset-0 pointer-events-none" style={{
+        background: `radial-gradient(circle at 25% 25%, rgba(168,85,247,0.06), transparent 40%), radial-gradient(circle at 75% 75%, rgba(245,158,11,0.05), transparent 40%), radial-gradient(circle at 78% 22%, rgba(252,211,77,0.04), transparent 35%)`,
+      }} />
 
       {/* ── HERO SECTION ── Cinematic poster + info */}
       <div className="relative">

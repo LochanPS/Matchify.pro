@@ -257,7 +257,7 @@ export default function SearchAcademiesPage() {
       backgroundSize: 'cover',
       backgroundPosition: 'center top',
       backgroundRepeat: 'no-repeat',
-      backgroundAttachment: 'fixed',
+      backgroundAttachment: 'scroll',
     }}>
       {/* Dark overlay */}
       <div className="fixed inset-0 pointer-events-none" style={{ background: 'rgba(5,8,16,0.75)', zIndex: 0 }} />

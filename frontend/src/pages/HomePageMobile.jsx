@@ -146,7 +146,7 @@ const HomePageMobile = () => {
         backgroundSize: 'cover',
         backgroundPosition: 'center top',
         backgroundRepeat: 'no-repeat',
-        backgroundAttachment: 'fixed',
+        backgroundAttachment: 'scroll',
       }}>
 
       {/* ── Dark overlay so content stays readable over galaxy bg ── */}

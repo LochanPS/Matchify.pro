@@ -216,7 +216,7 @@ const UnifiedDashboardMobile = () => {
       backgroundSize: 'cover',
       backgroundPosition: 'center top',
       backgroundRepeat: 'no-repeat',
-      backgroundAttachment: 'fixed',
+      backgroundAttachment: 'scroll',
     }}>
 
       {/* ── Dark overlay ── */}

@@ -903,7 +903,7 @@ const DrawPage = () => {
         backgroundSize: 'cover',
         backgroundPosition: 'center top',
         backgroundRepeat: 'no-repeat',
-        backgroundAttachment: 'fixed',
+        backgroundAttachment: 'scroll',
       }}>
         <div className="fixed inset-0 pointer-events-none" style={{ background: 'rgba(5,8,16,0.72)', zIndex: 0 }} />
         <style>{`
@@ -1026,7 +1026,7 @@ const DrawPage = () => {
       backgroundSize: 'cover',
       backgroundPosition: 'center top',
       backgroundRepeat: 'no-repeat',
-      backgroundAttachment: 'fixed',
+      backgroundAttachment: 'scroll',
     }}>
       {/* Dark overlay — same app-wide background as every other page */}
       <div className="fixed inset-0 pointer-events-none" style={{ background: 'rgba(5,8,16,0.72)', zIndex: 0 }} />

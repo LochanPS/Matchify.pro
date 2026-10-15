@@ -237,7 +237,7 @@ export default function AcademyDetailPage() {
       backgroundSize: 'cover',
       backgroundPosition: 'center top',
       backgroundRepeat: 'no-repeat',
-      backgroundAttachment: 'fixed',
+      backgroundAttachment: 'scroll',
       paddingBottom: bottomBarH + 16,
     }}>
       {/* Dark overlay */}

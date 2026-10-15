@@ -11,9 +11,31 @@ export function slugify(name) {
     .slice(0, 60) || 'tournament';
 }
 
+// Filler words dropped from tournament slugs to keep them short and readable.
+// e.g. "Lynore Club Badminton Tournament" -> "lynore-badminton".
+const SLUG_FILLER_WORDS = new Set([
+  'the', 'a', 'an', 'and', 'of', 'for', 'to', 'in', 'on', 'at', 'by', 'with',
+  'tournament', 'tournaments', 'championship', 'championships', 'champ',
+  'club', 'academy', 'sports', 'sport', 'trophy', 'event', 'events',
+  'edition', 'season', 'series', 'fixture', 'fixtures',
+]);
+
+// A short, readable tournament slug: drop filler words and keep the first few
+// distinctive words (e.g. "lynore-badminton"). Falls back to the full slug if
+// everything was filler, so we never produce an empty slug.
+export function shortTournamentSlug(name) {
+  const words = slugify(name).split('-').filter(Boolean);
+  let kept = words.filter(w => !SLUG_FILLER_WORDS.has(w));
+  if (kept.length === 0) kept = words;        // all filler → keep original words
+  let slug = kept.slice(0, 3).join('-').slice(0, 32).replace(/-+$/, '');
+  if (!slug) slug = 'tournament';
+  if (RESERVED_SLUGS.has(slug)) slug = `${slug}-t`;   // never shadow /t/:slug/live etc.
+  return slug;
+}
+
 // Globally-unique tournament slug (append -2, -3… on collision).
 export async function generateUniqueTournamentSlug(name, excludeId = null) {
-  const base = slugify(name);
+  const base = shortTournamentSlug(name);
   let slug = base;
   let n = 1;
   // eslint-disable-next-line no-constant-condition

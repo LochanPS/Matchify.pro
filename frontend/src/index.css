@@ -599,3 +599,20 @@
 .page-enter {
   animation: fadeIn 0.3s ease-out, translateY(8px) to translateY(0);
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   iOS Safari stability — disable backdrop-filter globally
+   ═══════════════════════════════════════════════════════════════════════════
+   The app used ~218 backdrop-filter:blur effects (frosted-glass badges, modal
+   overlays, pills). On iPhones each one forces the compositor to continuously
+   re-sample and blur the backdrop; together they exhaust the device GPU/memory
+   budget and Safari kills the tab ("A problem repeatedly occurred").
+   Removing the blur keeps every element's semi-opaque background — so contrast
+   and readability are unchanged — it just drops the expensive live blur.
+   !important so it also overrides inline style="backdrop-filter:…" usages. */
+*,
+*::before,
+*::after {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}

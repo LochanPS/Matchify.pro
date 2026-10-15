@@ -663,11 +663,20 @@ function TournamentCard({ tournament, navigate, index }) {
       <div className="absolute top-0 right-0 w-28 h-28 rounded-full blur-2xl opacity-20 pointer-events-none"
         style={{ background: `radial-gradient(circle,${accentColor} 0%,transparent 70%)`, zIndex: 1 }} />
 
-      {/* ── POSTER IMAGE ── */}
-      <div className="h-52 relative overflow-hidden">
+      {/* ── POSTER IMAGE ── full poster shown (object-contain) over a blurred
+           fill of itself, so nothing is cropped and there are no empty bars. ── */}
+      <div className="h-64 relative overflow-hidden" style={{ background: '#070719' }}>
         {posterUrl ? (
-          <img src={posterUrl} alt={tournament.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+          <>
+            {/* Blurred backdrop — the same poster, enlarged and dimmed, fills
+                the frame behind the sharp one (no letterbox gaps). */}
+            <img src={posterUrl} alt="" aria-hidden="true"
+              className="absolute inset-0 w-full h-full object-cover scale-110"
+              style={{ filter: 'blur(18px) brightness(0.45)' }} />
+            {/* The actual poster — fully visible, never cropped. */}
+            <img src={posterUrl} alt={tournament.name}
+              className="relative w-full h-full object-contain group-hover:scale-[1.02] transition-transform duration-500" />
+          </>
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center relative"
             style={{ background: `linear-gradient(135deg,#0d0d2b,#050810)` }}>
@@ -677,9 +686,12 @@ function TournamentCard({ tournament, navigate, index }) {
           </div>
         )}
 
-        {/* Bottom dark gradient */}
-        <div className="absolute inset-0"
-          style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.3) 50%, rgba(7,7,26,0.92) 100%)' }} />
+        {/* Soft gradients — top for the Share/status chips, bottom for city +
+            countdown — kept light so the poster stays bright and clear. */}
+        <div className="absolute inset-x-0 top-0 h-16 pointer-events-none"
+          style={{ background: 'linear-gradient(to bottom, rgba(7,7,26,0.55), transparent)' }} />
+        <div className="absolute inset-x-0 bottom-0 h-20 pointer-events-none"
+          style={{ background: 'linear-gradient(to top, rgba(7,7,26,0.9), transparent)' }} />
 
         {/* Status badge top-right */}
         <div className="absolute top-2.5 right-2.5">

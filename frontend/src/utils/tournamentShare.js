@@ -23,7 +23,27 @@ function formatPrize(n) {
   return Number(n).toLocaleString('en-IN');
 }
 
-/** Build slim WhatsApp message */
+/** Parse a stored date string safely → Date, or null if unparseable. */
+function parseDate(str) {
+  if (!str) return null;
+  const d = new Date(str);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+/** "2026-11-01" → "1 November 2026" */
+function formatDate(d) {
+  return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+/**
+ * Build a polished, professional WhatsApp share message.
+ *
+ * Design goals: reads like a clean event poster in plain text — a strong
+ * header, a crisp info subtitle built from real data, and clearly labelled
+ * sections (DATE & VENUE, EVENTS, PRIZES, REGISTER, FOLLOW LIVE). Every block
+ * is conditional, so the message stays tight when a field is missing. No
+ * emojis — only WhatsApp *bold* and divider rules carry the styling.
+ */
 export function buildShareMessage(tournament) {
   // Short, readable share links via the /t/ resolver. Uses the slug when present
   // (e.g. /t/vras-djs); falls back to the id, which the resolver also accepts.
@@ -32,25 +52,38 @@ export function buildShareMessage(tournament) {
   const urlText = `${DISPLAY_BASE}/t/${tRef}`;  // clean, no-protocol link shown in the message
   const cats = tournament.categories || [];
 
-  // Date
-  const startDate = new Date(tournament.startDate);
-  const dateStr = startDate.toLocaleDateString('en-IN', {
-    day: 'numeric', month: 'long', year: 'numeric',
-  });
-  const dayStr = startDate.toLocaleDateString('en-IN', { weekday: 'long' });
+  // Dates
+  const startDate = parseDate(tournament.startDate);
+  const dateStr = startDate ? formatDate(startDate) : null;
+  const dayStr = startDate ? startDate.toLocaleDateString('en-IN', { weekday: 'long' }) : null;
   const timeStr = formatTime(tournament.matchStartTime);
+  const closeDate = parseDate(tournament.registrationCloseDate);
 
   // Venue
   const venueStr = [tournament.venue, tournament.city].filter(Boolean).join(', ');
 
-  // Categories — plain "name — ₹fee", one clean line each (no icon, no "Per Team"
-  // suffix that pushed the line to wrap on mobile).
-  const catBlocks = cats.map(c => {
+  // Entry fees — min fee drives the "Entry from ₹X" subtitle hook.
+  const fees = cats.map(c => c.entryFee).filter(v => v != null && !isNaN(v));
+  const minFee = fees.length ? Math.min(...fees) : null;
+
+  // Subtitle: a crisp, poster-style info line from real data —
+  // e.g. "Badminton · 8 events · Entry from ₹700". Skips any piece that's absent.
+  const sport = tournament.sport || 'Badminton';
+  // Skip the sport in the subtitle when the name already says it (avoids
+  // "...Badminton tournament" followed by "Badminton · ...").
+  const nameHasSport = (tournament.name || '').toLowerCase().includes(sport.toLowerCase());
+  const subtitleParts = nameHasSport ? [] : [sport];
+  if (cats.length) subtitleParts.push(`${cats.length} ${cats.length === 1 ? 'event' : 'events'}`);
+  if (minFee != null) subtitleParts.push(`Entry from ₹${formatPrize(minFee)}`);
+  const subtitle = subtitleParts.join(' · ');
+
+  // Categories — plain "name — ₹fee", one clean line each.
+  const catLines = cats.map(c => {
     const fee = c.entryFee != null ? ` — ₹${formatPrize(c.entryFee)}` : '';
-    return { title: `${c.name}${fee}` };
+    return `${c.name}${fee}`;
   });
 
-  // Awards — use prizeDescription text first, else numeric
+  // Awards — use prizeDescription text first, else numeric totals.
   const descLines = cats.map(c => c.prizeDescription).filter(Boolean).join('\n');
   let awardsLines = [];
   if (descLines) {
@@ -59,9 +92,9 @@ export function buildShareMessage(tournament) {
     const w = cats.reduce((s, c) => s + (c.prizeWinner || 0), 0);
     const r = cats.reduce((s, c) => s + (c.prizeRunnerUp || 0), 0);
     const s = cats.reduce((s, c) => s + (c.prizeSemiFinalist || 0), 0);
-    if (w > 0) awardsLines.push(`Winner: ₹${formatPrize(w)}`);
-    if (r > 0) awardsLines.push(`Runner up: ₹${formatPrize(r)}`);
-    if (s > 0) awardsLines.push(`Semi Finalist: ₹${formatPrize(s)}`);
+    if (w > 0) awardsLines.push(`Winner — ₹${formatPrize(w)}`);
+    if (r > 0) awardsLines.push(`Runner-up — ₹${formatPrize(r)}`);
+    if (s > 0) awardsLines.push(`Semi-finalist — ₹${formatPrize(s)}`);
   }
 
   // Contact
@@ -69,59 +102,58 @@ export function buildShareMessage(tournament) {
     tournament.contactPhone || tournament.whatsappNumber || tournament.organizer?.phone;
   const contactName = tournament.organizer?.name || tournament.organizer?.username || '';
 
-  // Plain, icon-free layout — clean and simple on mobile. Dividers separate the
-  // main sections; each link sits under a clear text label.
   const lines = [];
   const D = '━━━━━━━━━━━━━';
   const div = () => lines.push(D);
 
-  // Header — brand line, blank line, then the tournament name on its own.
+  // Header — brand, tournament name, then the info subtitle.
   lines.push('*MATCHIFY.PRO PRESENTS*');
   lines.push('');
   lines.push(`*${tournament.name}*`);
+  if (subtitle) lines.push(subtitle);
   div();
 
-  // Venue / date, then the map link under a label.
-  if (venueStr)  lines.push(venueStr);
-  lines.push(`${dateStr} (${dayStr})`);
-  if (timeStr)   lines.push(timeStr);
+  // Date & venue.
+  lines.push('*DATE & VENUE*');
+  if (dateStr) lines.push(dayStr ? `${dateStr} (${dayStr})` : dateStr);
+  if (timeStr) lines.push(`Matches from ${timeStr}`);
+  if (venueStr) lines.push(venueStr);
   if (tournament.latitude != null && tournament.longitude != null) {
-    lines.push('');
-    lines.push('Location');
-    lines.push(`${DISPLAY_BASE}/t/${tRef}/location`);
+    lines.push(`Location — ${DISPLAY_BASE}/t/${tRef}/location`);
   }
   div();
 
-  // Categories — plain list of names + fees, one line each — then the Register
-  // link right below (the main call to action).
-  if (catBlocks.length) {
-    catBlocks.forEach(({ title }) => lines.push(title));
+  // Events & entry fees.
+  if (catLines.length) {
+    lines.push('*EVENTS & ENTRY FEES*');
+    catLines.forEach(l => lines.push(l));
+    div();
   }
-  lines.push('');
-  lines.push('Register');
-  lines.push(`${DISPLAY_BASE}/t/${tRef}/register`);
-  div();
 
-  // Awards (if the organizer set prizes).
+  // Prizes & awards (if the organizer set any).
   if (awardsLines.length) {
-    lines.push('*Awards*');
+    lines.push('*PRIZES & AWARDS*');
     awardsLines.forEach(l => lines.push(l));
     div();
   }
 
-  // Live scores, then the tournament (draws) link right below it — each labelled.
-  lines.push('Live scores');
-  lines.push(`${DISPLAY_BASE}/t/${tRef}/live`);
-  lines.push('');
-  lines.push('Draws');
-  lines.push(urlText);
+  // Register — the primary call to action, with a gentle deadline nudge.
+  lines.push('*REGISTER NOW*');
+  if (closeDate) lines.push(`Registration closes ${formatDate(closeDate)}`);
+  lines.push(`${DISPLAY_BASE}/t/${tRef}/register`);
   div();
 
-  // Contact + website.
+  // Follow the action — live scores and draws.
+  lines.push('*FOLLOW LIVE*');
+  lines.push(`Live scores — ${DISPLAY_BASE}/t/${tRef}/live`);
+  lines.push(`Draws & fixtures — ${urlText}`);
+  div();
+
+  // Organiser credit + brand sign-off.
   if (contactName || contactPhone) {
-    lines.push([contactName, contactPhone].filter(Boolean).join(' · '));
+    lines.push(`Organised by ${[contactName, contactPhone].filter(Boolean).join(' · ')}`);
   }
-  lines.push('matchify.pro');
+  lines.push('Powered by Matchify.pro');
 
   const text = lines.join('\n');
 

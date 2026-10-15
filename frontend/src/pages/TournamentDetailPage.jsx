@@ -605,8 +605,10 @@ const TournamentDetailPage = () => {
               onClick={() => setShowPosterModal(true)}
             >
               <img
-                src={getImageUrl(tournament.posters?.[selectedPoster]?.imageUrl)}
+                src={getImageUrl(tournament.posters?.[selectedPoster]?.imageUrl, { w: 700 })}
                 alt={tournament.name}
+                loading="lazy"
+                decoding="async"
                 className="w-full h-full object-cover"
                 style={{ objectPosition: 'center top' }}
               />
@@ -671,7 +673,7 @@ const TournamentDetailPage = () => {
                       opacity: selectedPoster === index ? 1 : 0.6,
                     }}
                   >
-                    <img src={getImageUrl(poster.imageUrl)} alt={`P${index + 1}`} className="w-full h-full object-cover" />
+                    <img src={getImageUrl(poster.imageUrl, { w: 120 })} alt={`P${index + 1}`} loading="lazy" decoding="async" className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>
@@ -2185,8 +2187,9 @@ const TournamentDetailPage = () => {
 
             {/* Full Size Poster */}
             <img
-              src={getImageUrl(tournament.posters?.[selectedPoster]?.imageUrl)}
+              src={getImageUrl(tournament.posters?.[selectedPoster]?.imageUrl, { w: 1000 })}
               alt={tournament.name}
+              decoding="async"
               className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             />

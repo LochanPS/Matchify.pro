@@ -663,23 +663,15 @@ function TournamentCard({ tournament, navigate, index }) {
       <div className="absolute top-0 right-0 w-28 h-28 rounded-full blur-2xl opacity-20 pointer-events-none"
         style={{ background: `radial-gradient(circle,${accentColor} 0%,transparent 70%)`, zIndex: 1 }} />
 
-      {/* ── POSTER IMAGE ── full poster shown (object-contain) over a blurred
-           fill of itself, so nothing is cropped and there are no empty bars. ── */}
-      <div className="h-64 relative overflow-hidden" style={{ background: '#070719' }}>
+      {/* ── POSTER IMAGE ── full-bleed: the poster fills the card width edge to
+           edge at its natural aspect ratio — no cropping, no side gaps. ── */}
+      <div className="relative overflow-hidden" style={{ background: '#070719' }}>
         {posterUrl ? (
-          <>
-            {/* Blurred backdrop — the same poster, enlarged and dimmed, fills
-                the frame behind the sharp one (no letterbox gaps). */}
-            <img src={posterUrl} alt="" aria-hidden="true"
-              className="absolute inset-0 w-full h-full object-cover scale-110"
-              style={{ filter: 'blur(18px) brightness(0.45)' }} />
-            {/* The actual poster — fully visible, never cropped. */}
-            <img src={posterUrl} alt={tournament.name}
-              className="relative w-full h-full object-contain group-hover:scale-[1.02] transition-transform duration-500" />
-          </>
+          <img src={posterUrl} alt={tournament.name}
+            className="block w-full h-auto group-hover:scale-[1.02] transition-transform duration-500" />
         ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center relative"
-            style={{ background: `linear-gradient(135deg,#0d0d2b,#050810)` }}>
+          <div className="w-full flex flex-col items-center justify-center relative"
+            style={{ height: '224px', background: `linear-gradient(135deg,#0d0d2b,#050810)` }}>
             <div className="absolute inset-0 opacity-8"
               style={{ backgroundImage: `radial-gradient(circle, ${accentGlow} 1px, transparent 1px)`, backgroundSize: '20px 20px' }} />
             <span className="text-6xl opacity-15">🏸</span>

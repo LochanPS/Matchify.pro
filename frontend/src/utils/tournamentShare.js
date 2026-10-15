@@ -77,11 +77,26 @@ export function buildShareMessage(tournament) {
   if (minFee != null) subtitleParts.push(`Entry from ₹${formatPrize(minFee)}`);
   const subtitle = subtitleParts.join(' · ');
 
-  // Categories — plain "name — ₹fee", one clean line each.
-  const catLines = cats.map(c => {
-    const fee = c.entryFee != null ? ` — ₹${formatPrize(c.entryFee)}` : '';
-    return `${c.name}${fee}`;
-  });
+  // Categories grouped by name — one *HEADING* per event, with each level
+  // (ageGroup) + fee listed under it. Collapses the repeated "Men's Doubles"
+  // rows into a single heading with "Open / Intermediate / 60+" lines.
+  const catGroups = [];
+  const catGroupIndex = {};
+  for (const c of cats) {
+    const name = (c.name || '').trim();
+    if (!name) continue;
+    if (!(name in catGroupIndex)) {
+      catGroupIndex[name] = catGroups.length;
+      catGroups.push({ name, items: [] });
+    }
+    // Tidy the level label: single spaces, " (" before brackets, no space before "+".
+    const level = (c.ageGroup || '')
+      .replace(/\s+/g, ' ').trim()
+      .replace(/\s*\(\s*/g, ' (').replace(/\s*\)\s*/g, ')')
+      .replace(/\s+\+/g, '+');
+    const fee = c.entryFee != null ? `₹${formatPrize(c.entryFee)}` : '';
+    catGroups[catGroupIndex[name]].items.push({ level, fee });
+  }
 
   // Awards — use prizeDescription text first, else numeric totals.
   const descLines = cats.map(c => c.prizeDescription).filter(Boolean).join('\n');
@@ -123,10 +138,18 @@ export function buildShareMessage(tournament) {
   }
   div();
 
-  // Events & entry fees.
-  if (catLines.length) {
+  // Events & entry fees — a bold heading per event, each level + fee beneath it.
+  if (catGroups.length) {
     lines.push('*EVENTS & ENTRY FEES*');
-    catLines.forEach(l => lines.push(l));
+    catGroups.forEach((g, gi) => {
+      if (gi > 0) lines.push('');            // blank line between events
+      lines.push(`*${g.name}*`);
+      g.items.forEach(it => {
+        if (it.level && it.fee) lines.push(`${it.level} — ${it.fee}`);
+        else if (it.level)      lines.push(it.level);
+        else if (it.fee)        lines.push(it.fee);
+      });
+    });
     div();
   }
 

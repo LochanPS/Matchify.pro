@@ -6,6 +6,7 @@ const displayEmail = (email) =>
   email && !email.endsWith('@noemail.matchify.internal') ? email : null;
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import api from '../utils/api';
+import { getImageUrl } from '../utils/imageUrl';
 import MatchifyLogo from '../components/MatchifyLogo';
 import PhotoViewer from '../components/PhotoViewer';
 import Spinner from '../components/Spinner';
@@ -333,7 +334,7 @@ const UnifiedDashboardMobile = () => {
                     }}
                   >
                     {user?.profilePhoto ? (
-                      <img src={user.profilePhoto} alt={user.name} className="w-full h-full object-cover rounded-full" />
+                      <img src={getImageUrl(user.profilePhoto, { w: 200 })} alt={user.name} loading="lazy" decoding="async" className="w-full h-full object-cover rounded-full" />
                     ) : (
                       user?.name?.charAt(0)?.toUpperCase() || 'P'
                     )}
@@ -571,7 +572,7 @@ const UnifiedDashboardMobile = () => {
                   <div className="w-full h-full rounded-full overflow-hidden flex items-center justify-center font-black text-3xl text-white"
                     style={{ background:'linear-gradient(135deg, #0e7490, #0c4a6e)' }}>
                     {user?.profilePhoto
-                      ? <img src={user.profilePhoto} alt={user.name} className="w-full h-full object-cover" />
+                      ? <img src={getImageUrl(user.profilePhoto, { w: 400 })} alt={user.name} loading="lazy" decoding="async" className="w-full h-full object-cover" />
                       : <span>{user?.name?.charAt(0)?.toUpperCase() || 'P'}</span>}
                   </div>
                 </div>

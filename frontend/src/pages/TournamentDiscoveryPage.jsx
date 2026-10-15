@@ -19,6 +19,7 @@ import {
 import { Loader, GitBranch } from 'lucide-react';
 import { tournamentAPI } from '../api/tournament';
 import { formatDateIndian } from '../utils/dateFormat';
+import { cldOptimize } from '../utils/cloudinary';
 import { buildShareMessage, shareTournament as doShareTournament } from '../utils/tournamentShare';
 import Spinner from '../components/Spinner';
 
@@ -633,7 +634,9 @@ function TournamentCard({ tournament, navigate, index }) {
       const base = import.meta.env.VITE_API_URL?.replace('/api', '') || 'https://matchify-backend-production-cb58.up.railway.app';
       return `${base}${url}`;
     }
-    return url;
+    // Serve a resized, auto-format copy so the list doesn't pile up full-size
+    // bitmaps in memory (iOS Safari crash on long scrolls).
+    return cldOptimize(url, { w: 800 });
   };
   const posterUrl = getPosterUrl();
 
@@ -667,7 +670,7 @@ function TournamentCard({ tournament, navigate, index }) {
            edge at its natural aspect ratio — no cropping, no side gaps. ── */}
       <div className="relative overflow-hidden" style={{ background: '#070719', borderBottom: `2px solid ${accentColor}66` }}>
         {posterUrl ? (
-          <img src={posterUrl} alt={tournament.name}
+          <img src={posterUrl} alt={tournament.name} loading="lazy" decoding="async"
             className="block w-full h-auto group-hover:scale-[1.02] transition-transform duration-500" />
         ) : (
           <div className="w-full flex flex-col items-center justify-center relative"

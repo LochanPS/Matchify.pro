@@ -650,8 +650,8 @@ function TournamentCard({ tournament, navigate, index }) {
       onClick={() => navigate(`/tournaments/${tournament.id}`)}
       style={{
         background: 'linear-gradient(145deg, #0D1420 0%, #0A0F1A 100%)',
-        border: `1px solid rgba(255,255,255,0.08)`,
-        boxShadow: `0 4px 24px rgba(0,0,0,0.5)`,
+        border: `1.5px solid ${accentColor}55`,
+        boxShadow: `0 8px 30px rgba(0,0,0,0.55), 0 0 22px ${accentGlow}`,
         transition: 'all 0.25s ease',
       }}
     >
@@ -665,7 +665,7 @@ function TournamentCard({ tournament, navigate, index }) {
 
       {/* ── POSTER IMAGE ── full-bleed: the poster fills the card width edge to
            edge at its natural aspect ratio — no cropping, no side gaps. ── */}
-      <div className="relative overflow-hidden" style={{ background: '#070719' }}>
+      <div className="relative overflow-hidden" style={{ background: '#070719', borderBottom: `2px solid ${accentColor}66` }}>
         {posterUrl ? (
           <img src={posterUrl} alt={tournament.name}
             className="block w-full h-auto group-hover:scale-[1.02] transition-transform duration-500" />

@@ -479,6 +479,7 @@ const getTournaments = async (req, res) => {
               name: true,
               format: true,
               gender: true,
+              ageGroup: true,   // level/division (Open, Intermediate, 60+) — used in share message grouping
               entryFee: true,
               maxParticipants: true,
               registrationCount: true,

@@ -24,7 +24,7 @@ import {
   ShareIcon,
 } from '@heroicons/react/24/outline';
 import { Edit, Users, Eye, Layers, GitBranch, Radio } from 'lucide-react';
-import { shareTournament as doShareTournament } from '../utils/tournamentShare';
+import { shareTournament as doShareTournament, shareCategories } from '../utils/tournamentShare';
 import LoadingScreen from '../components/LoadingScreen';
 import Spinner from '../components/Spinner';
 
@@ -955,7 +955,18 @@ const TournamentDetailPage = () => {
                   <TrophyIcon className="w-4 h-4 text-white" />
                 </div>
                 <h2 className="text-base font-bold text-white">Categories</h2>
-                <span className="ml-auto text-xs font-medium px-2 py-0.5 rounded-full" style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)' }}>
+                {tournament.categories && tournament.categories.length > 0 && (
+                  <button
+                    onClick={() => shareCategories(tournament)}
+                    title="Share all category draw & live links"
+                    className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
+                    style={{ background: 'rgba(245,158,11,0.12)', color: '#FCD34D', border: '1px solid rgba(245,158,11,0.3)' }}
+                  >
+                    <ShareIcon className="w-3.5 h-3.5" />
+                    Share
+                  </button>
+                )}
+                <span className={`${tournament.categories?.length ? 'ml-2' : 'ml-auto'} text-xs font-medium px-2 py-0.5 rounded-full`} style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)' }}>
                   {tournament.categories?.length || 0}
                 </span>
               </div>

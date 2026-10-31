@@ -6,7 +6,7 @@ import api from '../utils/api';
 // Resolves the readable slug to the real tournament (category / live page / Google
 // Maps) and opens it. Nothing else in the app changes — this is a thin entry point.
 export default function ShareRedirect() {
-  const { tSlug, cSlug } = useParams();
+  const { tSlug, cSlug, sub } = useParams();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -33,7 +33,15 @@ export default function ShareRedirect() {
         }
         if (cSlug) {
           const cat = (categories || []).find((c) => c.slug === cSlug || c.id === cSlug);
-          if (cat) { navigate(`/tournaments/${id}/draws/${cat.id}`, { replace: true }); return; }
+          if (cat) {
+            // /t/:slug/:cSlug/live → that category's live matches; else its draw.
+            if (sub === 'live') {
+              navigate(`/tournaments/${id}/live?categoryId=${cat.id}`, { replace: true });
+            } else {
+              navigate(`/tournaments/${id}/draws/${cat.id}`, { replace: true });
+            }
+            return;
+          }
         }
         // Bare /t/:slug → the draws list (single share link opens all draws).
         navigate(`/tournaments/${id}/draws`, { replace: true });
@@ -42,7 +50,7 @@ export default function ShareRedirect() {
       }
     })();
     return () => { active = false; };
-  }, [tSlug, cSlug, navigate]);
+  }, [tSlug, cSlug, sub, navigate]);
 
   return (
     <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.6)', fontWeight: 600 }}>

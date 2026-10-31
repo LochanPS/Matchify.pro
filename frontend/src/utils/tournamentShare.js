@@ -207,3 +207,63 @@ export async function shareTournament(tournament) {
   window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
   return 'whatsapp';
 }
+
+/**
+ * Build a "draws & live" message listing every category with its own draw link
+ * and live-matches link. Each category heading is followed by its two links on
+ * the next lines, with a blank line between events. Clean and professional —
+ * bold headings + divider rules only, no emojis.
+ *
+ *   *MEN'S DOUBLES — Intermediate*
+ *   Draw: matchify.pro/t/lynore-badminton/mens-doubles-3
+ *   Live: matchify.pro/t/lynore-badminton/mens-doubles-3/live
+ */
+export function buildCategoriesShareMessage(tournament) {
+  const tRef = tournament.slug || tournament.id;
+  const cats = tournament.categories || [];
+
+  const lines = [];
+  const D = '━━━━━━━━━━━━━';
+
+  lines.push(`*${tournament.name}*`);
+  lines.push('Draws & live scores');
+  lines.push(D);
+
+  cats.forEach((c, i) => {
+    if (i > 0) lines.push('');
+    const level = (c.ageGroup || '')
+      .replace(/\s+/g, ' ').trim()
+      .replace(/\s*\(\s*/g, ' (').replace(/\s*\)\s*/g, ')')
+      .replace(/\s+\+/g, '+');
+    const cRef = c.slug || c.id;
+    lines.push(`*${c.name}${level ? ` — ${level}` : ''}*`);
+    lines.push(`Draw: ${DISPLAY_BASE}/t/${tRef}/${cRef}`);
+    lines.push(`Live: ${DISPLAY_BASE}/t/${tRef}/${cRef}/live`);
+  });
+
+  lines.push(D);
+  lines.push(DISPLAY_BASE);
+
+  return {
+    title: `${tournament.name} — Draws & Live`,
+    text: lines.join('\n'),
+    url: `${SHARE_BASE}/t/${tRef}`,
+  };
+}
+
+/** Share the per-category draw + live links. Web Share API → wa.me fallback. */
+export async function shareCategories(tournament) {
+  const { title, text } = buildCategoriesShareMessage(tournament);
+
+  if (navigator.share) {
+    try {
+      await navigator.share({ title, text });
+      return 'shared';
+    } catch (err) {
+      if (err?.name === 'AbortError') return 'shared';
+    }
+  }
+
+  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+  return 'whatsapp';
+}

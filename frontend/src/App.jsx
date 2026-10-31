@@ -290,6 +290,7 @@ function AppContent() {
           {/* Short share links: /t/:slug and /t/:slug/:categorySlug → resolve + open real page */}
           <Route path="/t/:tSlug" element={<ShareRedirect />} />
           <Route path="/t/:tSlug/:cSlug" element={<ShareRedirect />} />
+          <Route path="/t/:tSlug/:cSlug/:sub" element={<ShareRedirect />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />

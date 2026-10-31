@@ -223,26 +223,23 @@ export function buildCategoriesShareMessage(tournament) {
   const cats = tournament.categories || [];
 
   const lines = [];
-  const D = '━━━━━━━━━━━━━';
+  const D = '──────────';
 
   lines.push(`*${tournament.name}*`);
-  lines.push('Draws & live scores');
+  lines.push('_Draws & live scores_');
   lines.push(D);
 
-  cats.forEach((c, i) => {
-    if (i > 0) lines.push('');
+  cats.forEach((c) => {
     const level = (c.ageGroup || '')
       .replace(/\s+/g, ' ').trim()
       .replace(/\s*\(\s*/g, ' (').replace(/\s*\)\s*/g, ')')
       .replace(/\s+\+/g, '+');
     const cRef = c.slug || c.id;
-    lines.push(`*${c.name}${level ? ` — ${level}` : ''}*`);
+    lines.push(`*${c.name}${level ? ` · ${level}` : ''}*`);
     lines.push(`Draw: ${DISPLAY_BASE}/t/${tRef}/${cRef}`);
     lines.push(`Live: ${DISPLAY_BASE}/t/${tRef}/${cRef}/live`);
+    lines.push(D);
   });
-
-  lines.push(D);
-  lines.push(DISPLAY_BASE);
 
   return {
     title: `${tournament.name} — Draws & Live`,

@@ -899,13 +899,12 @@ const DrawPage = () => {
     return (
       <div className="min-h-screen relative overflow-hidden" style={{
         background: '#050810',
-        backgroundImage: 'url(/bg-galaxy.png)',
+        backgroundImage: 'linear-gradient(rgba(5,8,16,0.82), rgba(5,8,16,0.82)), url(/bg-galaxy.png)',
         backgroundSize: 'cover',
         backgroundPosition: 'center top',
         backgroundRepeat: 'no-repeat',
         backgroundAttachment: 'scroll',
       }}>
-        <div className="fixed inset-0 pointer-events-none" style={{ background: 'rgba(5,8,16,0.72)', zIndex: 0 }} />
         <style>{`
           @keyframes draw-float {
             0%, 100% { transform: translate(0, 0) scale(1); }
@@ -1022,14 +1021,15 @@ const DrawPage = () => {
   return (
     <div className="min-h-screen relative overflow-hidden" style={{
       background: '#050810',
-      backgroundImage: 'url(/bg-galaxy.png)',
+      // Dim the galaxy via a background tint (not a fixed overlay on top of the
+      // content). The old overlay sat ABOVE the page's non-positioned content and
+      // washed the whole draw/standings view out ("dull, can't see things").
+      backgroundImage: 'linear-gradient(rgba(5,8,16,0.82), rgba(5,8,16,0.82)), url(/bg-galaxy.png)',
       backgroundSize: 'cover',
       backgroundPosition: 'center top',
       backgroundRepeat: 'no-repeat',
       backgroundAttachment: 'scroll',
     }}>
-      {/* Dark overlay — same app-wide background as every other page */}
-      <div className="fixed inset-0 pointer-events-none" style={{ background: 'rgba(5,8,16,0.72)', zIndex: 0 }} />
 
       {/* Add keyframes for animations */}
       <style>{`

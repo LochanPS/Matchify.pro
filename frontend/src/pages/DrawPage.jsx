@@ -1390,7 +1390,7 @@ const DrawPage = () => {
                       : 'text-gray-400 hover:text-white hover:bg-slate-700/50'
                   }`}
                 >
-                  {category.name}
+                  {category.name}{category.ageGroup ? ` · ${category.ageGroup}` : ''}
                 </button>
               ))}
             </div>

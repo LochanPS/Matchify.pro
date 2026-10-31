@@ -2127,11 +2127,20 @@ const TournamentDetailPage = () => {
                   required
                 >
                   <option value="" style={{ background: '#0d1025' }}>Select a category</option>
-                  {tournament?.categories?.map((category) => (
-                    <option key={category.id} value={category.id} style={{ background: '#0d1025' }}>
-                      {category.name} - {category.format} ({getGenderLabel(category.gender)})
-                    </option>
-                  ))}
+                  {tournament?.categories?.map((category) => {
+                    // Show the level/restriction (ageGroup) + fee so organizers can
+                    // tell apart the multiple same-named events (e.g. three MEN'S
+                    // DOUBLES differing only by Open / Intermediate / 60+).
+                    const level = (category.ageGroup || '').trim();
+                    const fee = category.entryFee != null
+                      ? ` · ₹${Number(category.entryFee).toLocaleString('en-IN')}`
+                      : '';
+                    return (
+                      <option key={category.id} value={category.id} style={{ background: '#0d1025' }}>
+                        {category.name}{level ? ` — ${level}` : ''}{fee}
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
               <div className="flex gap-3 pt-2">

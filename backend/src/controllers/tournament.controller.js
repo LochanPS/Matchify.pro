@@ -1852,7 +1852,7 @@ const getUmpirePostedMatches = async (req, res) => {
     const matches = await prisma.match.findMany({
       where: { tournamentId: id, umpirePosted: true },
       include: {
-        category: { select: { id: true, name: true } },
+        category: { select: { id: true, name: true, ageGroup: true } },
         umpire: { select: { id: true, name: true } },
       },
       orderBy: [{ round: 'asc' }, { matchNumber: 'asc' }],
@@ -1864,9 +1864,16 @@ const getUmpirePostedMatches = async (req, res) => {
       id: m.id,
       round: m.round,
       matchNumber: m.matchNumber,
+      // stage/group info lets the umpire page label group matches correctly
+      // (round-robin matches are all stored as round 1, so they must not be
+      // labelled "Final" like a knockout round).
+      stage: m.stage || null,
+      groupName: m.groupName || null,
+      groupIndex: m.groupIndex != null ? m.groupIndex : null,
       status: m.status,
       courtNumber: m.courtNumber,
       categoryName: m.category?.name || '',
+      categoryLevel: m.category?.ageGroup || '',
       player1Name: nameFor(m.player1Id, m.tournamentId, m.categoryId),
       player2Name: nameFor(m.player2Id, m.tournamentId, m.categoryId),
       umpireId: m.umpireId || null,

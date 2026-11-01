@@ -24,6 +24,20 @@ const roundName = (r) => {
   return `Round ${r}`;
 };
 
+// Build the small header label for a match. Round-robin (group) matches are all
+// stored as round 1, so they must NOT fall through to roundName — that would
+// mislabel every group match as "Final". Group matches read "Group A" (or just
+// "Group Stage" when no group letter is available); knockout matches keep their
+// round name.
+const matchLabel = (m) => {
+  const num = m.matchNumber != null ? `Match #${m.matchNumber}` : '';
+  if (m.stage === 'GROUP') {
+    const letter = m.groupName || (m.groupIndex != null ? String.fromCharCode(65 + m.groupIndex) : '');
+    return [letter ? `Group ${letter}` : 'Group Stage', num].filter(Boolean).join(' · ');
+  }
+  return [roundName(m.round), num].filter(Boolean).join(' · ') || 'Match';
+};
+
 // Split "A & B" (doubles) into two lines for a compact card.
 const NameBlock = ({ name, align }) => {
   const parts = (name || 'TBD').split(' & ');
@@ -200,10 +214,12 @@ const UmpirePoolPage = () => {
                 <div className="flex items-center justify-between px-4 py-2.5"
                   style={{ borderBottom: `1px solid ${B.border}`, background: 'rgba(255,255,255,0.03)' }}>
                   <span className="text-xs font-bold" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                    {[roundName(m.round), m.matchNumber != null ? `Match #${m.matchNumber}` : ''].filter(Boolean).join(' · ') || 'Match'}
+                    {matchLabel(m)}
                   </span>
                   {m.categoryName && (
-                    <span className="text-xs font-bold" style={{ color: '#c4b5fd' }}>{m.categoryName}</span>
+                    <span className="text-xs font-bold" style={{ color: '#c4b5fd' }}>
+                      {m.categoryName}{m.categoryLevel ? ` · ${m.categoryLevel}` : ''}
+                    </span>
                   )}
                 </div>
 

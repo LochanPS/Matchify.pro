@@ -2926,6 +2926,406 @@ const DrawPage = () => {
   );
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
+// ArrangeMatchupsModal
+// Organiser manually seeds round-robin players into the knockout bracket:
+// pick the size, tap a player, then tap a slot. Restores an existing draw exactly.
+// ─────────────────────────────────────────────────────────────────────────────
+const ArrangeMatchupsModal = ({ bracket, onClose, onSave, saving }) => {
+  const [positions, setPositions] = useState([]);       // length=bracketSize, each null|player
+  const [advancingPlayers, setAdvancingPlayers] = useState([]);
+  const [bracketSize, setBracketSize] = useState(null);
+  const [pickedPlayer, setPickedPlayer] = useState(null); // player currently "in hand"
+
+  const nextPow2 = (n) => { let p = 2; while (p < n) p *= 2; return p; };
+
+  // Rebuild positions array when organiser changes bracket size
+  const handleBracketSizeChange = (newSize) => {
+    setBracketSize(newSize);
+    setPositions(prev => {
+      const pos = Array(newSize).fill(null);
+      prev.forEach((p, i) => { if (i < newSize) pos[i] = p; });
+      return pos;
+    });
+    setPickedPlayer(null);
+  };
+
+  useEffect(() => {
+    if (!bracket?.groups) return;
+    // allPlayers = everyone who played the round robin in this category. The organiser
+    // places them manually — NO auto-fill. Each carries full display info: name,
+    // partner name, team name, pool and seed/rank number.
+    const allPlayers = [];
+
+    const sortByStanding = (a, b) => {
+      // Rank: PTS (match points) → TP (total points scored) → PD (point difference)
+      if ((b.points || 0) !== (a.points || 0)) return (b.points || 0) - (a.points || 0);
+      const aTp = a.totalPoints || 0, bTp = b.totalPoints || 0;
+      if (bTp !== aTp) return bTp - aTp;
+      const aDiff = (a.totalPoints || 0) - (a.totalPointsAgainst || 0);
+      const bDiff = (b.totalPoints || 0) - (b.totalPointsAgainst || 0);
+      return bDiff - aDiff;
+    };
+
+    bracket.groups.forEach((group, groupIndex) => {
+      const groupLetter = String.fromCharCode(65 + groupIndex);
+      const standings = group.standings || [];
+      if (standings.length > 0) {
+        standings
+          .filter(s => s.playerId)
+          .sort(sortByStanding)
+          .forEach((s, rank) => {
+            allPlayers.push({
+              id: s.playerId, name: s.playerName,
+              partnerName: s.partnerName || null,
+              teamName: s.teamName || null,
+              group: groupLetter, rank: rank + 1, points: s.points
+            });
+          });
+      } else {
+        // Sort participants by points → diff → totalPoints
+        [...(group.participants || [])]
+          .sort(sortByStanding)
+          .forEach((p, i) => {
+            if (!p?.id) return;
+            allPlayers.push({
+              id: p.id, name: p.name,
+              partnerName: p.partnerName || null,
+              teamName: p.teamName || null,
+              group: groupLetter, rank: i + 1, points: p.points || 0
+            });
+          });
+      }
+    });
+
+    setAdvancingPlayers(allPlayers);
+
+    // If a knockout draw already exists, restore the organiser's EXACT placement and size.
+    const existingFirstRound = bracket.knockout?.rounds?.[0]?.matches;
+    if (existingFirstRound && existingFirstRound.length > 0) {
+      const size = existingFirstRound.length * 2;
+      const pos = Array(size).fill(null);
+      existingFirstRound.forEach((match, mi) => {
+        const p1 = allPlayers.find(p => p.id === match.player1?.id);
+        const p2 = allPlayers.find(p => p.id === match.player2?.id);
+        if (p1) pos[mi * 2] = p1;
+        if (p2) pos[mi * 2 + 1] = p2;
+      });
+      if (pos.some(p => p !== null)) {
+        setBracketSize(size);
+        setPositions(pos);
+        return;
+      }
+    }
+
+    // No existing draw → start EMPTY. Organiser picks the size (Round of 2…128) and
+    // places every player by hand. Default to the smallest bracket that holds everyone.
+    const defaultSize = nextPow2(allPlayers.length || 2);
+    setBracketSize(defaultSize);
+    setPositions(Array(defaultSize).fill(null));
+  }, [bracket]);
+
+  // Tap a position slot
+  const handlePositionClick = (posIdx) => {
+    const occupant = positions[posIdx];
+
+    if (pickedPlayer) {
+      // A player is in hand — place them here
+      const newPos = [...positions];
+      // If this slot is occupied, put that player back in hand (swap)
+      const displaced = newPos[posIdx];
+      // Remove picked player from their old slot if they were already placed
+      const oldIdx = newPos.findIndex(p => p?.id === pickedPlayer.id);
+      if (oldIdx !== -1) newPos[oldIdx] = displaced || null;
+      else if (displaced) {/* displaced goes back to pool — setPickedPlayer below handles it */}
+      newPos[posIdx] = pickedPlayer;
+      setPositions(newPos);
+      // If we displaced someone, put them in hand; otherwise clear hand
+      setPickedPlayer(displaced && displaced.id !== pickedPlayer.id ? displaced : null);
+    } else if (occupant) {
+      // No player in hand — pick up the occupant
+      const newPos = [...positions];
+      newPos[posIdx] = null;
+      setPositions(newPos);
+      setPickedPlayer(occupant);
+    }
+    // else: empty slot, no player in hand → ignore
+  };
+
+  // Tap a player chip in the pool
+  const handlePoolPlayerClick = (player) => {
+    if (pickedPlayer?.id === player.id) {
+      setPickedPlayer(null); // deselect
+    } else {
+      setPickedPlayer(player);
+    }
+  };
+
+  const handleSave = () => {
+    const slots = [];
+    for (let i = 0; i < positions.length; i += 2) {
+      let p1 = positions[i];
+      let p2 = positions[i + 1] || null;
+      // If only p2 set (organiser placed in bottom of pair), treat as p1 (BYE logic needs p1)
+      if (!p1 && p2) { p1 = p2; p2 = null; }
+      if (!p1) {
+        alert(`Match ${i / 2 + 1} is empty. Place at least one player in every match, or pick a smaller knockout size.`);
+        return;
+      }
+      slots.push({ matchNumber: i / 2 + 1, player1: p1, player2: p2 });
+    }
+    onSave(slots);
+  };
+
+  const assignedIds = new Set(positions.filter(Boolean).map(p => p.id));
+  const poolPlayers = advancingPlayers.filter(p => !assignedIds.has(p.id));
+  const filledCount = positions.filter(Boolean).length;
+  const byeCount = (bracketSize || 0) - filledCount;
+
+  return (
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      {/* Animated Background */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-10 right-10 w-96 h-96 rounded-full blur-3xl"
+          style={{ background: 'radial-gradient(circle, rgba(245,158,11,0.5) 0%, rgba(245,158,11,0.3) 50%, transparent 70%)', animation: 'float 8s ease-in-out infinite, pulse 4s ease-in-out infinite' }} />
+        <div className="absolute bottom-10 left-10 w-80 h-80 rounded-full blur-3xl"
+          style={{ background: 'radial-gradient(circle, rgba(20,184,166,0.5) 0%, rgba(13,148,136,0.3) 50%, transparent 70%)', animation: 'float 10s ease-in-out infinite reverse, pulse 5s ease-in-out infinite', animationDelay: '2s' }} />
+        {ARRANGE_PARTICLES.map((p, i) => (
+          <div key={i} className="absolute rounded-full"
+            style={{ width: `${p.w}px`, height: `${p.h}px`, left: `${p.x}%`, top: `${p.y}%`, background: p.c, opacity: p.o, animation: `float ${p.dur}s ease-in-out infinite`, animationDelay: `${p.delay}s`, boxShadow: `0 0 ${p.glow}px ${p.c}` }} />
+        ))}
+      </div>
+
+      <div className="relative backdrop-blur-xl rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl" style={{ background: '#0d1025', border: '2px solid rgba(245,158,11,0.2)' }}>
+        {/* Header */}
+        <div className="p-3 border-b border-emerald-500/20 bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-emerald-500/10">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-[15px] font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400 leading-tight">
+                Arrange Knockout Draw
+              </h2>
+              <p className="text-gray-400 text-[10px] leading-tight mt-0.5">
+                Pick the size, then tap a player → tap a slot to place them. A player with no opponent gets a BYE (auto-advances).
+              </p>
+            </div>
+            <button onClick={onClose} className="text-gray-400 hover:text-white p-1.5 hover:bg-emerald-500/20 rounded-lg transition-all hover:scale-110">
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+
+        <div className="p-3 space-y-3">
+
+          {/* Bracket Size Selector — single button that opens a dropdown (Round of 2 … 128) */}
+          {bracketSize && (
+            <div className="p-2 rounded-xl" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-bold" style={{ color: 'rgba(255,255,255,0.5)' }}>Knockout size</span>
+                  <select
+                    value={bracketSize}
+                    onChange={(e) => handleBracketSizeChange(Number(e.target.value))}
+                    className="px-3 py-1.5 rounded-lg text-[11px] font-bold cursor-pointer outline-none"
+                    style={{ background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.5)', color: '#F59E0B', appearance: 'auto' }}>
+                    {[2, 4, 8, 16, 32, 64, 128].map(s => (
+                      <option key={s} value={s} style={{ background: '#0d1025', color: '#fff' }}>Round of {s}</option>
+                    ))}
+                  </select>
+                </div>
+                <span className="text-[9px]" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                  {filledCount}/{bracketSize} placed · {byeCount > 0 ? `${byeCount} BYE${byeCount > 1 ? 's' : ''}` : 'no byes'}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Player in hand banner */}
+          {pickedPlayer && (
+            <div className="p-2 rounded-xl flex items-center gap-2 animate-pulse"
+              style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.4)' }}>
+              <div className="w-2 h-2 rounded-full bg-[#F59E0B] flex-shrink-0" />
+              <span className="text-[11px] font-bold text-white flex-1">
+                {pickedPlayer.name}
+                {pickedPlayer.partnerName ? ` / ${pickedPlayer.partnerName}` : ''}
+                <span className="text-[#F59E0B] ml-1">(Pool {pickedPlayer.group} #{pickedPlayer.rank})</span>
+              </span>
+              <span className="text-[9px]" style={{ color: 'rgba(255,255,255,0.5)' }}>tap a slot →</span>
+              <button onClick={() => setPickedPlayer(null)}
+                className="text-gray-400 hover:text-white p-0.5 rounded transition-all flex-shrink-0">
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+          )}
+
+          {/* Qualifying Players Pool */}
+          <div>
+            <h3 className="text-[10px] font-black icon-green mb-2 uppercase tracking-wider flex items-center gap-1.5">
+              <Trophy className="w-3 h-3" />
+              Round Robin Players ({advancingPlayers.length})
+              {poolPlayers.length > 0 && (
+                <span className="ml-1 text-[9px] font-normal" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                  — {poolPlayers.length} not yet placed
+                </span>
+              )}
+            </h3>
+            <div className="flex flex-wrap gap-1.5">
+              {advancingPlayers.map(player => {
+                const isPlaced = assignedIds.has(player.id);
+                const isPicked = pickedPlayer?.id === player.id;
+                return (
+                  <button
+                    key={player.id}
+                    onClick={() => !isPlaced && handlePoolPlayerClick(player)}
+                    disabled={isPlaced}
+                    className="px-2 py-1.5 rounded-lg text-left transition-all"
+                    style={{
+                      background: isPicked
+                        ? 'rgba(245,158,11,0.2)'
+                        : isPlaced
+                          ? 'rgba(255,255,255,0.03)'
+                          : 'rgba(255,255,255,0.07)',
+                      border: `1px solid ${isPicked ? 'rgba(245,158,11,0.7)' : isPlaced ? 'rgba(255,255,255,0.06)' : 'rgba(245,158,11,0.25)'}`,
+                      opacity: isPlaced ? 0.35 : 1,
+                      cursor: isPlaced ? 'default' : 'pointer',
+                      transform: isPicked ? 'scale(1.04)' : 'scale(1)',
+                      boxShadow: isPicked ? '0 0 10px rgba(245,158,11,0.3)' : 'none'
+                    }}>
+                    <div className="text-[10px] font-bold text-white leading-tight">
+                      {player.name}{player.partnerName ? ` / ${player.partnerName}` : ''}
+                    </div>
+                    {player.teamName && (
+                      <div className="text-[8px] font-semibold leading-tight mt-0.5" style={{ color: 'rgba(255,255,255,0.55)' }}>
+                        {player.teamName}
+                      </div>
+                    )}
+                    <div className="text-[8px] flex items-center gap-1 mt-0.5">
+                      <span className="px-1 rounded font-bold" style={{ background: 'rgba(245,158,11,0.15)', color: '#F59E0B' }}>
+                        Pool {player.group}
+                      </span>
+                      <span style={{ color: 'rgba(255,255,255,0.5)' }}>Seed #{player.rank}</span>
+                      {isPlaced && <span style={{ color: 'rgba(245,158,11,0.6)' }}>✓</span>}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Bracket Positions — pairs = first-round matches */}
+          <div>
+            <h3 className="text-[10px] font-black icon-green mb-2 uppercase tracking-wider flex items-center gap-1.5">
+              <Zap className="w-3 h-3" />
+              Bracket Positions
+              <span className="text-[9px] font-normal ml-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                each pair is one first-round match
+              </span>
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              {positions.length > 0 && Array.from({ length: positions.length / 2 }, (_, mi) => {
+                const p1 = positions[mi * 2];
+                const p2 = positions[mi * 2 + 1];
+                const isBye = p1 && !p2;
+                return (
+                  <div key={mi}
+                    className="rounded-xl overflow-hidden"
+                    style={{ border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.02)' }}>
+                    {/* Match label */}
+                    <div className="px-2 py-1 flex items-center justify-between"
+                      style={{ background: 'rgba(255,255,255,0.04)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                      <span className="text-[9px] font-black uppercase tracking-wider" style={{ color: 'rgba(245,158,11,0.7)' }}>
+                        Match {mi + 1}
+                      </span>
+                      {isBye && (
+                        <span className="text-[8px] font-bold px-1.5 py-0.5 rounded"
+                          style={{ background: 'rgba(255,193,7,0.15)', color: 'rgba(255,193,7,0.8)', border: '1px solid rgba(255,193,7,0.3)' }}>
+                          BYE
+                        </span>
+                      )}
+                    </div>
+                    {/* Two position slots */}
+                    <div className="p-1.5 space-y-1">
+                      {[0, 1].map(offset => {
+                        const posIdx = mi * 2 + offset;
+                        const player = positions[posIdx];
+                        const isPicked = pickedPlayer?.id === player?.id;
+                        const isTargetable = !!pickedPlayer && !isPicked;
+                        return (
+                          <button
+                            key={offset}
+                            onClick={() => handlePositionClick(posIdx)}
+                            className="w-full rounded-lg p-2 text-left transition-all"
+                            style={{
+                              background: player
+                                ? isPicked
+                                  ? 'rgba(245,158,11,0.15)'
+                                  : 'linear-gradient(135deg, rgba(245,158,11,0.15), rgba(245,158,11,0.1))'
+                                : isTargetable
+                                  ? 'rgba(245,158,11,0.06)'
+                                  : 'rgba(255,255,255,0.03)',
+                              border: `1px solid ${
+                                player
+                                  ? isPicked ? 'rgba(245,158,11,0.6)' : 'rgba(245,158,11,0.3)'
+                                  : isTargetable ? 'rgba(245,158,11,0.35)' : 'rgba(255,255,255,0.08)'
+                              }`,
+                              cursor: 'pointer'
+                            }}>
+                            {player ? (
+                              <div className="flex items-center gap-1.5">
+                                <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-[9px] font-black"
+                                  style={{ background: 'rgba(245,158,11,0.2)', color: '#F59E0B', border: '1px solid rgba(245,158,11,0.4)' }}>
+                                  {posIdx + 1}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="text-[11px] font-bold text-white leading-tight truncate">
+                                    {player.name}{player.partnerName ? ` / ${player.partnerName}` : ''}
+                                  </div>
+                                  <div className="text-[8px] flex items-center gap-1 mt-0.5">
+                                    <span style={{ color: 'rgba(245,158,11,0.7)' }}>Pool {player.group}</span>
+                                    <span style={{ color: 'rgba(255,255,255,0.4)' }}>#{player.rank} · {player.points}pts</span>
+                                  </div>
+                                </div>
+                                <X className="w-3 h-3 flex-shrink-0" style={{ color: 'rgba(255,255,255,0.3)' }} />
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-1.5">
+                                <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-[9px] font-bold"
+                                  style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.3)', border: '1px dashed rgba(255,255,255,0.15)' }}>
+                                  {posIdx + 1}
+                                </div>
+                                <span className="text-[10px]"
+                                  style={{ color: isTargetable ? 'rgba(245,158,11,0.6)' : 'rgba(255,255,255,0.2)' }}>
+                                  {isTargetable ? `Place ${pickedPlayer.name.split('/')[0].trim()} here` : 'Empty — BYE'}
+                                </span>
+                              </div>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+        </div>
+
+        {/* Footer */}
+        <div className="p-3 border-t border-emerald-500/20 flex gap-2 bg-gradient-to-r from-emerald-500/5 via-teal-500/5 to-emerald-500/5">
+          <button onClick={onClose}
+            className="flex-1 px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-600 transition-all text-[11px] font-bold shadow-lg">
+            Cancel
+          </button>
+          <button onClick={handleSave} disabled={saving}
+            className="flex-1 px-4 py-2 btn-brand rounded-lg transition-all disabled:opacity-50 text-[11px] font-bold">
+            {saving ? 'Saving...' : `Save Draw${byeCount > 0 ? ` (${byeCount} BYE${byeCount > 1 ? 's' : ''})` : ''}`}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Draw Display Component - handles all formats
 const DrawDisplay = ({ 
   sport,

@@ -38,6 +38,21 @@ const matchLabel = (m) => {
   return [roundName(m.round), num].filter(Boolean).join(' · ') || 'Match';
 };
 
+// Keep each category's matches together under its own heading (name + level),
+// so matches from different categories are never mixed into one flat list.
+// First-seen order is preserved (matches arrive sorted by round then number).
+const groupMatchesByCategory = (list) => {
+  const byKey = new Map();
+  for (const m of list) {
+    const name = m.categoryName || 'Matches';
+    const level = m.categoryLevel || '';
+    const key = `${name} · ${level}`;
+    if (!byKey.has(key)) byKey.set(key, { key, name, level, items: [] });
+    byKey.get(key).items.push(m);
+  }
+  return [...byKey.values()];
+};
+
 // Split "A & B" (doubles) into two lines for a compact card.
 const NameBlock = ({ name, align }) => {
   const parts = (name || 'TBD').split(' & ');
@@ -207,41 +222,51 @@ const UmpirePoolPage = () => {
             </p>
           </div>
         ) : (
-          <div className="space-y-3">
-            {matches.map((m) => (
-              <div key={m.id} className="rounded-2xl overflow-hidden" style={{ background: B.card, border: `1px solid ${B.border}` }}>
-                {/* Card header */}
-                <div className="flex items-center justify-between px-4 py-2.5"
-                  style={{ borderBottom: `1px solid ${B.border}`, background: 'rgba(255,255,255,0.03)' }}>
-                  <span className="text-xs font-bold" style={{ color: 'rgba(255,255,255,0.5)' }}>
-                    {matchLabel(m)}
+          <div className="space-y-6">
+            {groupMatchesByCategory(matches).map((cat) => (
+              <div key={cat.key} className="space-y-3">
+                {/* Category section header — keeps each category's matches separate */}
+                <div className="flex items-center gap-2 px-1">
+                  <span className="text-sm font-black" style={{ color: '#c4b5fd' }}>
+                    {cat.name}{cat.level ? ` · ${cat.level}` : ''}
                   </span>
-                  {m.categoryName && (
-                    <span className="text-xs font-bold" style={{ color: '#c4b5fd' }}>
-                      {m.categoryName}{m.categoryLevel ? ` · ${m.categoryLevel}` : ''}
-                    </span>
-                  )}
+                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-full"
+                    style={{ background: 'rgba(196,181,253,0.12)', border: '1px solid rgba(196,181,253,0.25)', color: 'rgba(196,181,253,0.9)' }}>
+                    {cat.items.length}
+                  </span>
                 </div>
 
-                {/* Players */}
-                <div className="px-4 py-3">
-                  <div className="grid items-center gap-2" style={{ gridTemplateColumns: '1fr 40px 1fr' }}>
-                    <NameBlock name={m.player1Name} align="left" />
-                    <div className="flex items-center justify-center">
-                      <span className="text-xs font-black px-2 py-1 rounded"
-                        style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)', color: 'rgba(245,158,11,0.75)' }}>VS</span>
+                {cat.items.map((m) => (
+                  <div key={m.id} className="rounded-2xl overflow-hidden" style={{ background: B.card, border: `1px solid ${B.border}` }}>
+                    {/* Card header */}
+                    <div className="flex items-center justify-between px-4 py-2.5"
+                      style={{ borderBottom: `1px solid ${B.border}`, background: 'rgba(255,255,255,0.03)' }}>
+                      <span className="text-xs font-bold" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                        {matchLabel(m)}
+                      </span>
                     </div>
-                    <NameBlock name={m.player2Name} align="right" />
+
+                    {/* Players */}
+                    <div className="px-4 py-3">
+                      <div className="grid items-center gap-2" style={{ gridTemplateColumns: '1fr 40px 1fr' }}>
+                        <NameBlock name={m.player1Name} align="left" />
+                        <div className="flex items-center justify-center">
+                          <span className="text-xs font-black px-2 py-1 rounded"
+                            style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)', color: 'rgba(245,158,11,0.75)' }}>VS</span>
+                        </div>
+                        <NameBlock name={m.player2Name} align="right" />
+                      </div>
+
+                      {m.courtNumber != null && (
+                        <p className="text-center text-xs mt-2 font-semibold" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                          Court {m.courtNumber}
+                        </p>
+                      )}
+
+                      <div className="mt-3">{renderAction(m)}</div>
+                    </div>
                   </div>
-
-                  {m.courtNumber != null && (
-                    <p className="text-center text-xs mt-2 font-semibold" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                      Court {m.courtNumber}
-                    </p>
-                  )}
-
-                  <div className="mt-3">{renderAction(m)}</div>
-                </div>
+                ))}
               </div>
             ))}
           </div>

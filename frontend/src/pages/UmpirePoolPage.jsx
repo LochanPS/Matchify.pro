@@ -80,6 +80,7 @@ const UmpirePoolPage = () => {
   const [error, setError] = useState(null);
   const [tournament, setTournament] = useState(null);
   const [matches, setMatches] = useState([]);
+  const [allCategories, setAllCategories] = useState([]);
   const [query, setQuery] = useState('');
   const [viewerId, setViewerId] = useState(null);
   const [isOrganizer, setIsOrganizer] = useState(false);
@@ -89,9 +90,13 @@ const UmpirePoolPage = () => {
     if (!tournamentId) return;
     try {
       if (silent) setRefreshing(true); else setLoading(true);
-      const res = await tournamentAPI.getUmpirePostedMatches(tournamentId);
+      const [res, catRes] = await Promise.all([
+        tournamentAPI.getUmpirePostedMatches(tournamentId),
+        tournamentAPI.getCategories(tournamentId).catch(() => null),
+      ]);
       setTournament(res.tournament || null);
       setMatches(Array.isArray(res.matches) ? res.matches : []);
+      if (catRes && Array.isArray(catRes.categories)) setAllCategories(catRes.categories);
       setViewerId(res.viewerId || null);
       setIsOrganizer(!!res.isOrganizer);
       setError(null);
@@ -188,7 +193,30 @@ const UmpirePoolPage = () => {
           .filter(Boolean)
           .some((v) => String(v).toLowerCase().includes(q)))
     : matches;
-  const categories = filteredMatches.length ? groupMatchesByCategory(filteredMatches) : [];
+  // Build one section per tournament category so EVERY category shows up — even
+  // ones with no matches posted yet (e.g. a singles category before its matches
+  // are posted). Matches attach to their category by id, falling back to
+  // name+level for older payloads that don't carry categoryId.
+  const nlKey = (name, level) => `${name || ''}\u0001${level || ''}`;
+  const nlToCatId = new Map(allCategories.map((c) => [nlKey(c.name, c.ageGroup), c.id]));
+  const matchesByCat = new Map();
+  for (const m of filteredMatches) {
+    const key = m.categoryId || nlToCatId.get(nlKey(m.categoryName, m.categoryLevel)) || `name:${nlKey(m.categoryName, m.categoryLevel)}`;
+    if (!matchesByCat.has(key)) matchesByCat.set(key, []);
+    matchesByCat.get(key).push(m);
+  }
+  const allSections = [];
+  const seenKeys = new Set();
+  for (const c of allCategories) {
+    allSections.push({ key: c.id, name: c.name, level: c.ageGroup || '', items: matchesByCat.get(c.id) || [] });
+    seenKeys.add(c.id);
+  }
+  for (const [key, items] of matchesByCat) {
+    if (seenKeys.has(key)) continue;
+    allSections.push({ key, name: items[0].categoryName || 'Matches', level: items[0].categoryLevel || '', items });
+  }
+  // When searching, hide categories with no matching matches; otherwise show them all.
+  const categories = q ? allSections.filter((s) => s.items.length > 0) : allSections;
   const jumpToCategory = (key) => {
     const el = document.getElementById(sectionId(key));
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -265,22 +293,24 @@ const UmpirePoolPage = () => {
         )}
 
         {/* Empty state */}
-        {matches.length === 0 ? (
-          <div className="rounded-2xl p-8 text-center" style={{ background: B.card, border: `1px solid ${B.border}` }}>
-            <Swords className="w-9 h-9 mx-auto mb-3" style={{ color: 'rgba(255,255,255,0.2)' }} />
-            <p className="text-sm font-bold text-white mb-1">No matches posted yet</p>
-            <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
-              When the organizer posts matches for umpiring, they'll show up here.
-            </p>
-          </div>
-        ) : categories.length === 0 ? (
-          <div className="rounded-2xl p-8 text-center" style={{ background: B.card, border: `1px solid ${B.border}` }}>
-            <Search className="w-9 h-9 mx-auto mb-3" style={{ color: 'rgba(255,255,255,0.2)' }} />
-            <p className="text-sm font-bold text-white mb-1">No matches found</p>
-            <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
-              Nothing matches “{query.trim()}”. Try a different player or category.
-            </p>
-          </div>
+        {categories.length === 0 ? (
+          q ? (
+            <div className="rounded-2xl p-8 text-center" style={{ background: B.card, border: `1px solid ${B.border}` }}>
+              <Search className="w-9 h-9 mx-auto mb-3" style={{ color: 'rgba(255,255,255,0.2)' }} />
+              <p className="text-sm font-bold text-white mb-1">No matches found</p>
+              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                Nothing matches “{query.trim()}”. Try a different player or category.
+              </p>
+            </div>
+          ) : (
+            <div className="rounded-2xl p-8 text-center" style={{ background: B.card, border: `1px solid ${B.border}` }}>
+              <Swords className="w-9 h-9 mx-auto mb-3" style={{ color: 'rgba(255,255,255,0.2)' }} />
+              <p className="text-sm font-bold text-white mb-1">No matches posted yet</p>
+              <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                When the organizer posts matches for umpiring, they'll show up here.
+              </p>
+            </div>
+          )
         ) : (
           <div className="space-y-6">
             {categories.map((cat) => (
@@ -296,7 +326,12 @@ const UmpirePoolPage = () => {
                   </span>
                 </div>
 
-                {cat.items.map((m) => (
+                {cat.items.length === 0 ? (
+                  <div className="rounded-xl px-4 py-3 text-xs font-semibold text-center"
+                    style={{ background: 'rgba(255,255,255,0.02)', border: `1px dashed ${B.border}`, color: 'rgba(255,255,255,0.35)' }}>
+                    No matches posted for this category yet.
+                  </div>
+                ) : cat.items.map((m) => (
                   <div key={m.id} className="rounded-2xl overflow-hidden" style={{ background: B.card, border: `1px solid ${B.border}` }}>
                     {/* Card header */}
                     <div className="flex items-center justify-between px-4 py-2.5"

@@ -1862,6 +1862,7 @@ const getUmpirePostedMatches = async (req, res) => {
 
     const result = matches.map(m => ({
       id: m.id,
+      categoryId: m.categoryId,
       round: m.round,
       matchNumber: m.matchNumber,
       // stage/group info lets the umpire page label group matches correctly

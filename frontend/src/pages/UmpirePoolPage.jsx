@@ -53,6 +53,9 @@ const groupMatchesByCategory = (list) => {
   return [...byKey.values()];
 };
 
+// Stable DOM id for a category section, so the top quick-jump chips can scroll to it.
+const sectionId = (key) => 'umpcat-' + key.replace(/[^a-zA-Z0-9]+/g, '-');
+
 // Split "A & B" (doubles) into two lines for a compact card.
 const NameBlock = ({ name, align }) => {
   const parts = (name || 'TBD').split(' & ');
@@ -176,6 +179,12 @@ const UmpirePoolPage = () => {
     );
   };
 
+  const categories = matches.length ? groupMatchesByCategory(matches) : [];
+  const jumpToCategory = (key) => {
+    const el = document.getElementById(sectionId(key));
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   return (
     <div className="min-h-screen pb-12" style={{ background: B.bg }}>
       <div className="max-w-lg mx-auto px-4 pt-6">
@@ -212,6 +221,25 @@ const UmpirePoolPage = () => {
           </button>
         </div>
 
+        {/* Quick jump — tap a category to scroll straight to it */}
+        {categories.length > 1 && (
+          <div className="flex gap-2 overflow-x-auto pb-1 mb-4 -mx-1 px-1"
+            style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
+            {categories.map((cat) => (
+              <button
+                key={cat.key}
+                onClick={() => jumpToCategory(cat.key)}
+                className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all"
+                style={{ background: 'rgba(196,181,253,0.1)', border: '1px solid rgba(196,181,253,0.3)', color: '#c4b5fd' }}>
+                {cat.name}{cat.level ? ` · ${cat.level}` : ''}
+                <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: 'rgba(196,181,253,0.18)' }}>
+                  {cat.items.length}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
+
         {/* Empty state */}
         {matches.length === 0 ? (
           <div className="rounded-2xl p-8 text-center" style={{ background: B.card, border: `1px solid ${B.border}` }}>
@@ -223,8 +251,8 @@ const UmpirePoolPage = () => {
           </div>
         ) : (
           <div className="space-y-6">
-            {groupMatchesByCategory(matches).map((cat) => (
-              <div key={cat.key} className="space-y-3">
+            {categories.map((cat) => (
+              <div key={cat.key} id={sectionId(cat.key)} className="space-y-3" style={{ scrollMarginTop: 12 }}>
                 {/* Category section header — keeps each category's matches separate */}
                 <div className="flex items-center gap-2 px-1">
                   <span className="text-sm font-black" style={{ color: '#c4b5fd' }}>

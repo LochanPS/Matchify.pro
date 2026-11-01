@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Gavel, Play, RefreshCw, Lock, CheckCircle, AlertTriangle, Swords } from 'lucide-react';
+import { ArrowLeft, Gavel, Play, RefreshCw, Lock, CheckCircle, AlertTriangle, Swords, Search } from 'lucide-react';
 import { tournamentAPI } from '../api/tournament';
 import LoadingScreen from '../components/LoadingScreen';
 import Spinner from '../components/Spinner';
@@ -80,6 +80,7 @@ const UmpirePoolPage = () => {
   const [error, setError] = useState(null);
   const [tournament, setTournament] = useState(null);
   const [matches, setMatches] = useState([]);
+  const [query, setQuery] = useState('');
   const [viewerId, setViewerId] = useState(null);
   const [isOrganizer, setIsOrganizer] = useState(false);
   const pollRef = useRef(null);
@@ -179,7 +180,15 @@ const UmpirePoolPage = () => {
     );
   };
 
-  const categories = matches.length ? groupMatchesByCategory(matches) : [];
+  // Search filters across player names, category name and level, and the match label.
+  const q = query.trim().toLowerCase();
+  const filteredMatches = q
+    ? matches.filter((m) =>
+        [m.player1Name, m.player2Name, m.categoryName, m.categoryLevel, matchLabel(m)]
+          .filter(Boolean)
+          .some((v) => String(v).toLowerCase().includes(q)))
+    : matches;
+  const categories = filteredMatches.length ? groupMatchesByCategory(filteredMatches) : [];
   const jumpToCategory = (key) => {
     const el = document.getElementById(sectionId(key));
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -221,8 +230,23 @@ const UmpirePoolPage = () => {
           </button>
         </div>
 
+        {/* Search bar — filter by player or category */}
+        {matches.length > 0 && (
+          <div className="relative mb-3">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: 'rgba(255,255,255,0.35)' }} />
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search player or category…"
+              className="w-full pl-9 pr-3 py-2.5 rounded-xl text-sm font-semibold outline-none"
+              style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff' }}
+            />
+          </div>
+        )}
+
         {/* Quick jump — tap a category to scroll straight to it */}
-        {categories.length > 1 && (
+        {categories.length > 0 && (
           <div className="flex gap-2 overflow-x-auto pb-1 mb-4 -mx-1 px-1"
             style={{ scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
             {categories.map((cat) => (
@@ -247,6 +271,14 @@ const UmpirePoolPage = () => {
             <p className="text-sm font-bold text-white mb-1">No matches posted yet</p>
             <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
               When the organizer posts matches for umpiring, they'll show up here.
+            </p>
+          </div>
+        ) : categories.length === 0 ? (
+          <div className="rounded-2xl p-8 text-center" style={{ background: B.card, border: `1px solid ${B.border}` }}>
+            <Search className="w-9 h-9 mx-auto mb-3" style={{ color: 'rgba(255,255,255,0.2)' }} />
+            <p className="text-sm font-bold text-white mb-1">No matches found</p>
+            <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
+              Nothing matches “{query.trim()}”. Try a different player or category.
             </p>
           </div>
         ) : (
